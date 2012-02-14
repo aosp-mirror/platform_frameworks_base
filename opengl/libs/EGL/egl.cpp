@@ -187,15 +187,12 @@ egl_display_t* validate_display(EGLDisplay dpy) {
     return dp;
 }
 
-egl_connection_t* validate_display_config(EGLDisplay dpy, EGLConfig config,
+egl_connection_t* validate_display_config(EGLDisplay dpy, EGLConfig,
         egl_display_t const*& dp) {
     dp = validate_display(dpy);
     if (!dp)
         return (egl_connection_t*) NULL;
 
-    if (intptr_t(config) >= dp->numTotalConfigs) {
-        return setError(EGL_BAD_CONFIG, (egl_connection_t*)NULL);
-    }
     egl_connection_t* const cnx = &gEGLImpl;
     if (cnx->dso == 0) {
         return setError(EGL_BAD_CONFIG, (egl_connection_t*)NULL);
@@ -269,8 +266,10 @@ static EGLBoolean egl_init_drivers_locked() {
     // dynamically load our EGL implementation
     egl_connection_t* cnx = &gEGLImpl;
     if (cnx->dso == 0) {
-        cnx->hooks[GLESv1_INDEX] = &gHooks[GLESv1_INDEX];
-        cnx->hooks[GLESv2_INDEX] = &gHooks[GLESv2_INDEX];
+        cnx->hooks[egl_connection_t::GLESv1_INDEX] =
+                &gHooks[egl_connection_t::GLESv1_INDEX];
+        cnx->hooks[egl_connection_t::GLESv2_INDEX] =
+                &gHooks[egl_connection_t::GLESv2_INDEX];
         cnx->dso = loader.open(cnx);
     }
 

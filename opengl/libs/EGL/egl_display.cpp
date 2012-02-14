@@ -60,18 +60,12 @@ static char const * const sExtensionString  =
 extern void initEglTraceLevel();
 extern void setGLHooksThreadSpecific(gl_hooks_t const *value);
 
-static int cmp_configs(const void* a, const void *b) {
-    const egl_config_t& c0 = *(egl_config_t const *)a;
-    const egl_config_t& c1 = *(egl_config_t const *)b;
-    return c0<c1 ? -1 : (c1<c0 ? 1 : 0);
-}
-
 // ----------------------------------------------------------------------------
 
 egl_display_t egl_display_t::sDisplay[NUM_DISPLAYS];
 
 egl_display_t::egl_display_t() :
-    magic('_dpy'), numTotalConfigs(0), configs(0), refs(0) {
+    magic('_dpy'), refs(0) {
 }
 
 egl_display_t::~egl_display_t() {
@@ -207,7 +201,7 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
     mVersionString.setTo(sVersionString);
     mClientApiString.setTo(sClientApiString);
 
-    // we only add extensions that exist in at least one implementation
+    // we only add extensions that exist in the implementation
     char const* start = sExtensionString;
     char const* end;
     do {
@@ -236,47 +230,12 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
 
     egl_cache_t::get()->initialize(this);
 
-    EGLBoolean res = EGL_FALSE;
-    if (cnx->dso && cnx->major >= 0 && cnx->minor >= 0) {
-        EGLint n;
-        if (cnx->egl.eglGetConfigs(disp.dpy, 0, 0, &n)) {
-            disp.config = (EGLConfig*) malloc(sizeof(EGLConfig) * n);
-            if (disp.config) {
-                if (cnx->egl.eglGetConfigs(disp.dpy, disp.config, n,
-                        &disp.numConfigs)) {
-                    numTotalConfigs += n;
-                    res = EGL_TRUE;
-                }
-            }
-        }
-    }
-
-    if (res == EGL_TRUE) {
-        configs = new egl_config_t[numTotalConfigs];
-        int k = 0;
-        egl_connection_t* const cnx = &gEGLImpl;
-        if (cnx->dso && cnx->major >= 0 && cnx->minor >= 0) {
-            for (int j = 0; j < disp.numConfigs; j++) {
-                configs[k].config = disp.config[j];
-                configs[k].configId = k + 1; // CONFIG_ID start at 1
-                // store the implementation's CONFIG_ID
-                cnx->egl.eglGetConfigAttrib(disp.dpy, disp.config[j],
-                        EGL_CONFIG_ID, &configs[k].implConfigId);
-                k++;
-            }
-        }
-
-        // sort our configurations so we can do binary-searches
-        qsort(configs, numTotalConfigs, sizeof(egl_config_t), cmp_configs);
-
-        refs++;
-        if (major != NULL)
-            *major = VERSION_MAJOR;
-        if (minor != NULL)
-            *minor = VERSION_MINOR;
-        return EGL_TRUE;
-    }
-    return setError(EGL_NOT_INITIALIZED, EGL_FALSE);
+    refs++;
+    if (major != NULL)
+        *major = VERSION_MAJOR;
+    if (minor != NULL)
+        *minor = VERSION_MINOR;
+    return EGL_TRUE;
 }
 
 EGLBoolean egl_display_t::terminate() {
@@ -301,12 +260,7 @@ EGLBoolean egl_display_t::terminate() {
                     egl_tls_t::egl_strerror(cnx->egl.eglGetError()));
         }
         // REVISIT: it's unclear what to do if eglTerminate() fails
-        free(disp.config);
-
-        disp.numConfigs = 0;
-        disp.config = 0;
         disp.state = egl_display_t::TERMINATED;
-
         res = EGL_TRUE;
     }
 
@@ -324,8 +278,6 @@ EGLBoolean egl_display_t::terminate() {
     objects.clear();
 
     refs--;
-    numTotalConfigs = 0;
-    delete[] configs;
     return res;
 }
 

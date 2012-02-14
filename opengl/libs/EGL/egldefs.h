@@ -19,25 +19,24 @@
 
 #include "hooks.h"
 
+#define VERSION_MAJOR 1
+#define VERSION_MINOR 4
+
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
 
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 4
-
 //  EGLDisplay are global, not attached to a given thread
 const unsigned int NUM_DISPLAYS = 1;
 
-enum {
-    GLESv1_INDEX = 0,
-    GLESv2_INDEX = 1
-};
-
 // ----------------------------------------------------------------------------
 
-struct egl_connection_t
-{
+struct egl_connection_t {
+    enum {
+        GLESv1_INDEX = 0,
+        GLESv2_INDEX = 1
+    };
+
     inline egl_connection_t() : dso(0) { }
     void *              dso;
     gl_hooks_t *        hooks[2];

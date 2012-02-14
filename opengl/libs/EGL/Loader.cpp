@@ -198,7 +198,7 @@ void Loader::init_api(void* dso,
         __eglMustCastToProperFunctionPointerType* curr, 
         getProcAddressType getProcAddress) 
 {
-    const size_t SIZE = 256;
+    const ssize_t SIZE = 256;
     char scrap[SIZE];
     while (*api) {
         char const * name = *api;
@@ -303,14 +303,14 @@ void *Loader::load_driver(const char* kind, const char *tag,
     if (mask & GLESv1_CM) {
         init_api(dso, gl_names,
             (__eglMustCastToProperFunctionPointerType*)
-                &cnx->hooks[GLESv1_INDEX]->gl,
+                &cnx->hooks[egl_connection_t::GLESv1_INDEX]->gl,
             getProcAddress);
     }
 
     if (mask & GLESv2) {
       init_api(dso, gl_names,
             (__eglMustCastToProperFunctionPointerType*)
-                &cnx->hooks[GLESv2_INDEX]->gl,
+                &cnx->hooks[egl_connection_t::GLESv2_INDEX]->gl,
             getProcAddress);
     }
     

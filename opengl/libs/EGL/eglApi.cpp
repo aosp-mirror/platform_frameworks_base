@@ -89,24 +89,6 @@ static void(*findProcAddress(const char* name,
 
 // ----------------------------------------------------------------------------
 
-template<typename T>
-static __attribute__((noinline))
-int binarySearch(T const sortedArray[], int first, int last, T key) {
-    while (first <= last) {
-        int mid = (first + last) / 2;
-        if (sortedArray[mid] < key) {
-            first = mid + 1;
-        } else if (key < sortedArray[mid]) {
-            last = mid - 1;
-        } else {
-            return mid;
-        }
-    }
-    return -1;
-}
-
-// ----------------------------------------------------------------------------
-
 namespace android {
 extern void setGLHooksThreadSpecific(gl_hooks_t const *value);
 extern EGLBoolean egl_init_drivers();
@@ -184,21 +166,20 @@ EGLBoolean eglGetConfigs(   EGLDisplay dpy,
     egl_display_t const * const dp = validate_display(dpy);
     if (!dp) return EGL_FALSE;
 
-    GLint numConfigs = dp->numTotalConfigs;
-    if (!configs) {
-        *num_config = numConfigs;
-        return EGL_TRUE;
+    if (num_config==0) {
+        return setError(EGL_BAD_PARAMETER, EGL_FALSE);
     }
 
-    GLint n = 0;
-    for (intptr_t i=0 ; i<dp->numTotalConfigs && config_size ; i++) {
-        *configs++ = EGLConfig(i);
-        config_size--;
-        n++;
+    EGLBoolean res = EGL_FALSE;
+    *num_config = 0;
+
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso) {
+        res = cnx->egl.eglGetConfigs(
+                dp->disp.dpy, configs, config_size, num_config);
     }
-    
-    *num_config = n;
-    return EGL_TRUE;
+
+    return res;
 }
 
 EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
@@ -214,105 +195,14 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
         return setError(EGL_BAD_PARAMETER, EGL_FALSE);
     }
 
-    EGLint n;
     EGLBoolean res = EGL_FALSE;
     *num_config = 0;
 
-    
-    // It is unfortunate, but we need to remap the EGL_CONFIG_IDs, 
-    // to do this, we have to go through the attrib_list array once
-    // to figure out both its size and if it contains an EGL_CONFIG_ID
-    // key. If so, the full array is copied and patched.
-    // NOTE: we assume that there can be only one occurrence
-    // of EGL_CONFIG_ID.
-    
-    EGLint patch_index = -1;
-    GLint attr;
-    size_t size = 0;
-    if (attrib_list) {
-        while ((attr=attrib_list[size]) != EGL_NONE) {
-            if (attr == EGL_CONFIG_ID)
-                patch_index = size;
-            size += 2;
-        }
-    }
-    if (patch_index >= 0) {
-        size += 2; // we need copy the sentinel as well
-        EGLint* new_list = (EGLint*)malloc(size*sizeof(EGLint));
-        if (new_list == 0)
-            return setError(EGL_BAD_ALLOC, EGL_FALSE);
-        memcpy(new_list, attrib_list, size*sizeof(EGLint));
-
-        // patch the requested EGL_CONFIG_ID
-        bool found = false;
-        EGLConfig ourConfig(0);
-        EGLint& configId(new_list[patch_index+1]);
-        for (intptr_t i=0 ; i<dp->numTotalConfigs ; i++) {
-            if (dp->configs[i].configId == configId) {
-                ourConfig = EGLConfig(i);
-                configId = dp->configs[i].implConfigId;
-                found = true;
-                break;
-            }
-        }
-
-        egl_connection_t* const cnx = &gEGLImpl;
-        if (found && cnx->dso) {
-            // and switch to the new list
-            attrib_list = const_cast<const EGLint *>(new_list);
-
-            // At this point, the only configuration that can match is
-            // dp->configs[i][index], however, we don't know if it would be
-            // rejected because of the other attributes, so we do have to call
-            // cnx->egl.eglChooseConfig() -- but we don't have to loop
-            // through all the EGLimpl[].
-            // We also know we can only get a single config back, and we know
-            // which one.
-
-            res = cnx->egl.eglChooseConfig(
-                    dp->disp.dpy,
-                    attrib_list, configs, config_size, &n);
-            if (res && n>0) {
-                // n has to be 0 or 1, by construction, and we already know
-                // which config it will return (since there can be only one).
-                if (configs) {
-                    configs[0] = ourConfig;
-                }
-                *num_config = 1;
-            }
-        }
-
-        free(const_cast<EGLint *>(attrib_list));
-        return res;
-    }
-
-
     egl_connection_t* const cnx = &gEGLImpl;
     if (cnx->dso) {
-        if (cnx->egl.eglChooseConfig(
-                dp->disp.dpy, attrib_list, configs, config_size, &n)) {
-            if (configs) {
-                // now we need to convert these client EGLConfig to our
-                // internal EGLConfig format.
-                // This is done in O(n Log(n)) time.
-                for (int j=0 ; j<n ; j++) {
-                    egl_config_t key(configs[j]);
-                    intptr_t index = binarySearch<egl_config_t>(
-                            dp->configs, 0, dp->numTotalConfigs, key);
-                    if (index >= 0) {
-                        configs[j] = EGLConfig(index);
-                    } else {
-                        return setError(EGL_BAD_CONFIG, EGL_FALSE);
-                    }
-                }
-                configs += n;
-                config_size -= n;
-            }
-            *num_config += n;
-            res = EGL_TRUE;
-        }
+        res = cnx->egl.eglChooseConfig(
+                dp->disp.dpy, attrib_list, configs, config_size, num_config);
     }
-
     return res;
 }
 
@@ -325,13 +215,8 @@ EGLBoolean eglGetConfigAttrib(EGLDisplay dpy, EGLConfig config,
     egl_connection_t* cnx = validate_display_config(dpy, config, dp);
     if (!cnx) return EGL_FALSE;
     
-    if (attribute == EGL_CONFIG_ID) {
-        *value = dp->configs[intptr_t(config)].configId;
-        return EGL_TRUE;
-    }
     return cnx->egl.eglGetConfigAttrib(
-            dp->disp.dpy,
-            dp->configs[intptr_t(config)].config, attribute, value);
+            dp->disp.dpy, config, attribute, value);
 }
 
 // ----------------------------------------------------------------------------
@@ -348,7 +233,6 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
     egl_connection_t* cnx = validate_display_config(dpy, config, dp);
     if (cnx) {
         EGLDisplay iDpy = dp->disp.dpy;
-        EGLConfig iConfig = dp->configs[intptr_t(config)].config;
         EGLint format;
 
         if (native_window_api_connect(window, NATIVE_WINDOW_API_EGL) != OK) {
@@ -359,7 +243,7 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
 
         // set the native window's buffers format to match this config
         if (cnx->egl.eglGetConfigAttrib(iDpy,
-                iConfig, EGL_NATIVE_VISUAL_ID, &format)) {
+                config, EGL_NATIVE_VISUAL_ID, &format)) {
             if (format != 0) {
                 int err = native_window_set_buffers_format(window, format);
                 if (err != 0) {
@@ -377,7 +261,7 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
         anw->setSwapInterval(anw, 1);
 
         EGLSurface surface = cnx->egl.eglCreateWindowSurface(
-                iDpy, iConfig, window, attrib_list);
+                iDpy, config, window, attrib_list);
         if (surface != EGL_NO_SURFACE) {
             egl_surface_t* s = new egl_surface_t(dpy, config, window, surface, cnx);
             return s;
@@ -400,8 +284,7 @@ EGLSurface eglCreatePixmapSurface(  EGLDisplay dpy, EGLConfig config,
     egl_connection_t* cnx = validate_display_config(dpy, config, dp);
     if (cnx) {
         EGLSurface surface = cnx->egl.eglCreatePixmapSurface(
-                dp->disp.dpy,
-                dp->configs[intptr_t(config)].config, pixmap, attrib_list);
+                dp->disp.dpy, config, pixmap, attrib_list);
         if (surface != EGL_NO_SURFACE) {
             egl_surface_t* s = new egl_surface_t(dpy, config, NULL, surface, cnx);
             return s;
@@ -419,8 +302,7 @@ EGLSurface eglCreatePbufferSurface( EGLDisplay dpy, EGLConfig config,
     egl_connection_t* cnx = validate_display_config(dpy, config, dp);
     if (cnx) {
         EGLSurface surface = cnx->egl.eglCreatePbufferSurface(
-                dp->disp.dpy,
-                dp->configs[intptr_t(config)].config, attrib_list);
+                dp->disp.dpy, config, attrib_list);
         if (surface != EGL_NO_SURFACE) {
             egl_surface_t* s = new egl_surface_t(dpy, config, NULL, surface, cnx);
             return s;
@@ -461,16 +343,8 @@ EGLBoolean eglQuerySurface( EGLDisplay dpy, EGLSurface surface,
         return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
     egl_surface_t const * const s = get_surface(surface);
-    EGLBoolean result(EGL_TRUE);
-    if (attribute == EGL_CONFIG_ID) {
-        // We need to remap EGL_CONFIG_IDs
-        *value = dp->configs[intptr_t(s->config)].configId;
-    } else {
-        result = s->cnx->egl.eglQuerySurface(
-                dp->disp.dpy, s->surface, attribute, value);
-    }
-
-    return result;
+    return s->cnx->egl.eglQuerySurface(
+            dp->disp.dpy, s->surface, attribute, value);
 }
 
 void EGLAPI eglBeginFrame(EGLDisplay dpy, EGLSurface surface) {
@@ -510,9 +384,7 @@ EGLContext eglCreateContext(EGLDisplay dpy, EGLConfig config,
             share_list = c->context;
         }
         EGLContext context = cnx->egl.eglCreateContext(
-                dp->disp.dpy,
-                dp->configs[intptr_t(config)].config,
-                share_list, attrib_list);
+                dp->disp.dpy, config, share_list, attrib_list);
         if (context != EGL_NO_CONTEXT) {
             // figure out if it's a GLESv1 or GLESv2
             int version = 0;
@@ -522,9 +394,9 @@ EGLContext eglCreateContext(EGLDisplay dpy, EGLConfig config,
                     GLint value = *attrib_list++;
                     if (attr == EGL_CONTEXT_CLIENT_VERSION) {
                         if (value == 1) {
-                            version = GLESv1_INDEX;
+                            version = egl_connection_t::GLESv1_INDEX;
                         } else if (value == 2) {
-                            version = GLESv2_INDEX;
+                            version = egl_connection_t::GLESv2_INDEX;
                         }
                     }
                 };
@@ -668,17 +540,9 @@ EGLBoolean eglQueryContext( EGLDisplay dpy, EGLContext ctx,
     if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_FALSE);
 
     egl_context_t * const c = get_context(ctx);
+    return c->cnx->egl.eglQueryContext(
+            dp->disp.dpy, c->context, attribute, value);
 
-    EGLBoolean result(EGL_TRUE);
-    if (attribute == EGL_CONFIG_ID) {
-        *value = dp->configs[intptr_t(c->config)].configId;
-    } else {
-        // We need to remap EGL_CONFIG_IDs
-        result = c->cnx->egl.eglQueryContext(
-                dp->disp.dpy, c->context, attribute, value);
-    }
-
-    return result;
 }
 
 EGLContext eglGetCurrentContext(void)
@@ -849,8 +713,8 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
             if (cnx->dso && cnx->egl.eglGetProcAddress) {
                 found = true;
                 // Extensions are independent of the bound context
-                cnx->hooks[GLESv1_INDEX]->ext.extensions[slot] =
-                cnx->hooks[GLESv2_INDEX]->ext.extensions[slot] =
+                cnx->hooks[egl_connection_t::GLESv1_INDEX]->ext.extensions[slot] =
+                cnx->hooks[egl_connection_t::GLESv2_INDEX]->ext.extensions[slot] =
 #if EGL_TRACE
                 debugHooks->ext.extensions[slot] =
                 gHooksTrace.ext.extensions[slot] =
@@ -1105,9 +969,7 @@ EGLSurface eglCreatePbufferFromClientBuffer(
     if (!cnx) return EGL_FALSE;
     if (cnx->egl.eglCreatePbufferFromClientBuffer) {
         return cnx->egl.eglCreatePbufferFromClientBuffer(
-                dp->disp.dpy,
-                buftype, buffer,
-                dp->configs[intptr_t(config)].config, attrib_list);
+                dp->disp.dpy, buftype, buffer, config, attrib_list);
     }
     return setError(EGL_BAD_CONFIG, EGL_NO_SURFACE);
 }
