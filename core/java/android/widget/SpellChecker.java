@@ -426,7 +426,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     }
 
                     // A new word has been created across the interval boundaries with this edit.
-                    // Previous spans (ended on start / started on end) removed, not valid anymore
+                    // The previous spans (that ended on start / started on end) are not valid
+                    // anymore and must be removed.
                     if (wordStart < start && wordEnd > start) {
                         removeSpansAt(editable, start, spellCheckSpans);
                         removeSpansAt(editable, start, suggestionSpans);
