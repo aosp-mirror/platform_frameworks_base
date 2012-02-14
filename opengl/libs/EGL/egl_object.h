@@ -125,7 +125,7 @@ void egl_object_t::LocalRef<N,T>::terminate() {
 
 // ----------------------------------------------------------------------------
 
-class egl_surface_t: public egl_object_t {
+class egl_surface_t : public egl_object_t {
 protected:
     ~egl_surface_t() {
         ANativeWindow* const window = win.get();
@@ -140,15 +140,14 @@ public:
     typedef egl_object_t::LocalRef<egl_surface_t, EGLSurface> Ref;
 
     egl_surface_t(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win,
-            EGLSurface surface, int impl, egl_connection_t const* cnx) :
+            EGLSurface surface, egl_connection_t const* cnx) :
         egl_object_t(get_display(dpy)), dpy(dpy), surface(surface),
-                config(config), win(win), impl(impl), cnx(cnx) {
+                config(config), win(win), cnx(cnx) {
     }
     EGLDisplay dpy;
     EGLSurface surface;
     EGLConfig config;
     sp<ANativeWindow> win;
-    int impl;
     egl_connection_t const* cnx;
 };
 
@@ -159,7 +158,7 @@ public:
     typedef egl_object_t::LocalRef<egl_context_t, EGLContext> Ref;
 
     egl_context_t(EGLDisplay dpy, EGLContext context, EGLConfig config,
-            int impl, egl_connection_t const* cnx, int version);
+            egl_connection_t const* cnx, int version);
 
     void onLooseCurrent();
     void onMakeCurrent(EGLSurface draw, EGLSurface read);
@@ -169,7 +168,6 @@ public:
     EGLConfig config;
     EGLSurface read;
     EGLSurface draw;
-    int impl;
     egl_connection_t const* cnx;
     int version;
     String8 gl_extensions;
@@ -182,12 +180,11 @@ public:
     typedef egl_object_t::LocalRef<egl_image_t, EGLImageKHR> Ref;
 
     egl_image_t(EGLDisplay dpy, EGLContext context) :
-        egl_object_t(get_display(dpy)), dpy(dpy), context(context) {
-        memset(images, 0, sizeof(images));
-    }
+        egl_object_t(get_display(dpy)),
+        dpy(dpy), context(context), image(EGL_NO_IMAGE_KHR) { }
     EGLDisplay dpy;
     EGLContext context;
-    EGLImageKHR images[IMPL_NUM_IMPLEMENTATIONS];
+    EGLImageKHR image;
 };
 
 class egl_sync_t: public egl_object_t {

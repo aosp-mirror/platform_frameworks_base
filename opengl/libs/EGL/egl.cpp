@@ -48,8 +48,8 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
-egl_connection_t gEGLImpl[IMPL_NUM_IMPLEMENTATIONS];
-gl_hooks_t gHooks[2][IMPL_NUM_IMPLEMENTATIONS];
+egl_connection_t gEGLImpl;
+gl_hooks_t gHooks[2];
 gl_hooks_t gHooksNoContext;
 pthread_key_t gGLWrapperKey = -1;
 
@@ -196,7 +196,7 @@ egl_connection_t* validate_display_config(EGLDisplay dpy, EGLConfig config,
     if (intptr_t(config) >= dp->numTotalConfigs) {
         return setError(EGL_BAD_CONFIG, (egl_connection_t*)NULL);
     }
-    egl_connection_t* const cnx = &gEGLImpl[dp->configs[intptr_t(config)].impl];
+    egl_connection_t* const cnx = &gEGLImpl;
     if (cnx->dso == 0) {
         return setError(EGL_BAD_CONFIG, (egl_connection_t*)NULL);
     }
@@ -228,7 +228,7 @@ EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image)
     // EGL.
 
     egl_image_t const * const i = get_image(image);
-    return i->images[c->impl];
+    return i->image;
 }
 
 // ----------------------------------------------------------------------------
@@ -266,34 +266,15 @@ static EGLBoolean egl_init_drivers_locked() {
     // get our driver loader
     Loader& loader(Loader::getInstance());
 
-    // dynamically load all our EGL implementations
-    egl_connection_t* cnx;
-
-    cnx = &gEGLImpl[IMPL_SOFTWARE];
+    // dynamically load our EGL implementation
+    egl_connection_t* cnx = &gEGLImpl;
     if (cnx->dso == 0) {
-        cnx->hooks[GLESv1_INDEX] = &gHooks[GLESv1_INDEX][IMPL_SOFTWARE];
-        cnx->hooks[GLESv2_INDEX] = &gHooks[GLESv2_INDEX][IMPL_SOFTWARE];
-        cnx->dso = loader.open(EGL_DEFAULT_DISPLAY, 0, cnx);
+        cnx->hooks[GLESv1_INDEX] = &gHooks[GLESv1_INDEX];
+        cnx->hooks[GLESv2_INDEX] = &gHooks[GLESv2_INDEX];
+        cnx->dso = loader.open(cnx);
     }
 
-    cnx = &gEGLImpl[IMPL_HARDWARE];
-    if (cnx->dso == 0) {
-        char value[PROPERTY_VALUE_MAX];
-        property_get("debug.egl.hw", value, "1");
-        if (atoi(value) != 0) {
-            cnx->hooks[GLESv1_INDEX] = &gHooks[GLESv1_INDEX][IMPL_HARDWARE];
-            cnx->hooks[GLESv2_INDEX] = &gHooks[GLESv2_INDEX][IMPL_HARDWARE];
-            cnx->dso = loader.open(EGL_DEFAULT_DISPLAY, 1, cnx);
-        } else {
-            ALOGD("3D hardware acceleration is disabled");
-        }
-    }
-
-    if (!gEGLImpl[IMPL_SOFTWARE].dso && !gEGLImpl[IMPL_HARDWARE].dso) {
-        return EGL_FALSE;
-    }
-
-    return EGL_TRUE;
+    return cnx->dso ? EGL_TRUE : EGL_FALSE;
 }
 
 static pthread_mutex_t sInitDriverMutex = PTHREAD_MUTEX_INITIALIZER;

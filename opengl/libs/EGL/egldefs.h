@@ -30,14 +30,8 @@ namespace android {
 const unsigned int NUM_DISPLAYS = 1;
 
 enum {
-    IMPL_HARDWARE = 0,
-    IMPL_SOFTWARE,
-    IMPL_NUM_IMPLEMENTATIONS
-};
-
-enum {
     GLESv1_INDEX = 0,
-    GLESv2_INDEX = 1,
+    GLESv2_INDEX = 1
 };
 
 // ----------------------------------------------------------------------------
@@ -54,7 +48,7 @@ struct egl_connection_t
 
 // ----------------------------------------------------------------------------
 
-extern gl_hooks_t gHooks[2][IMPL_NUM_IMPLEMENTATIONS];
+extern gl_hooks_t gHooks[2];
 extern gl_hooks_t gHooksNoContext;
 extern pthread_key_t gGLWrapperKey;
 extern "C" void gl_unimplemented();
@@ -63,7 +57,7 @@ extern "C" void gl_noop();
 extern char const * const gl_names[];
 extern char const * const egl_names[];
 
-extern egl_connection_t gEGLImpl[IMPL_NUM_IMPLEMENTATIONS];
+extern egl_connection_t gEGLImpl;
 
 // ----------------------------------------------------------------------------
 }; // namespace android

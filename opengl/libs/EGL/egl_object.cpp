@@ -64,9 +64,9 @@ bool egl_object_t::get(egl_display_t const* display, egl_object_t* object) {
 // ----------------------------------------------------------------------------
 
 egl_context_t::egl_context_t(EGLDisplay dpy, EGLContext context, EGLConfig config,
-        int impl, egl_connection_t const* cnx, int version) :
+        egl_connection_t const* cnx, int version) :
     egl_object_t(get_display(dpy)), dpy(dpy), context(context),
-            config(config), read(0), draw(0), impl(impl), cnx(cnx),
+            config(config), read(0), draw(0), cnx(cnx),
             version(version)
 {
 }
@@ -87,7 +87,7 @@ void egl_context_t::onMakeCurrent(EGLSurface draw, EGLSurface read) {
 
     if (gl_extensions.isEmpty()) {
         // call the implementation's glGetString(GL_EXTENSIONS)
-        const char* exts = (const char *)gEGLImpl[impl].hooks[version]->gl.glGetString(GL_EXTENSIONS);
+        const char* exts = (const char *)gEGLImpl.hooks[version]->gl.glGetString(GL_EXTENSIONS);
         gl_extensions.setTo(exts);
         if (gl_extensions.find("GL_EXT_debug_marker") < 0) {
             String8 temp("GL_EXT_debug_marker ");

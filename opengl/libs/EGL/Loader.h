@@ -24,7 +24,6 @@
 #include <utils/Errors.h>
 #include <utils/Singleton.h>
 #include <utils/String8.h>
-#include <utils/Vector.h>
 
 #include <EGL/egl.h>
 
@@ -53,23 +52,13 @@ class Loader : public Singleton<Loader>
         void* dso[3];
     };
     
-    struct entry_t {
-        entry_t() { }
-        entry_t(int dpy, int impl, const char* tag);
-        int dpy;
-        int impl;
-        String8 tag;
-    };
-
-    Vector<entry_t> gConfig;    
+    String8 mDriverTag;
     getProcAddressType getProcAddress;
     
-    const char* getTag(int dpy, int impl);
-
 public:
     ~Loader();
     
-    void* open(EGLNativeDisplayType display, int impl, egl_connection_t* cnx);
+    void* open(egl_connection_t* cnx);
     status_t close(void* driver);
     
 private:
