@@ -104,9 +104,10 @@ AudioTrack::AudioTrack(
 {
     mStatus = set(streamType, sampleRate, format, channelMask,
             frameCount, flags, cbf, user, notificationFrames,
-            0, false, sessionId);
+            0 /*sharedBuffer*/, false /*threadCanCallJava*/, sessionId);
 }
 
+// DEPRECATED
 AudioTrack::AudioTrack(
         int streamType,
         uint32_t sampleRate,
@@ -124,7 +125,7 @@ AudioTrack::AudioTrack(
 {
     mStatus = set((audio_stream_type_t)streamType, sampleRate, (audio_format_t)format, channelMask,
             frameCount, (audio_policy_output_flags_t)flags, cbf, user, notificationFrames,
-            0, false, sessionId);
+            0 /*sharedBuffer*/, false /*threadCanCallJava*/, sessionId);
 }
 
 AudioTrack::AudioTrack(
@@ -144,8 +145,8 @@ AudioTrack::AudioTrack(
       mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
     mStatus = set(streamType, sampleRate, format, channelMask,
-            0, flags, cbf, user, notificationFrames,
-            sharedBuffer, false, sessionId);
+            0 /*frameCount*/, flags, cbf, user, notificationFrames,
+            sharedBuffer, false /*threadCanCallJava*/, sessionId);
 }
 
 AudioTrack::~AudioTrack()

@@ -1571,7 +1571,7 @@ status_t MediaPlayerService::AudioOutput::open(
                 AUDIO_POLICY_OUTPUT_FLAG_NONE,
                 CallbackWrapper,
                 mCallbackData,
-                0,
+                0,  // notification frames
                 mSessionId);
     } else {
         t = new AudioTrack(

@@ -1493,7 +1493,7 @@ int VolumeSetVolumeLevel(EffectContext *pContext, int16_t level){
         pContext->pBundledContext->firstVolume = LVM_FALSE;
     }
     return 0;
-}    /* end setVolumeLevel */
+}    /* end VolumeSetVolumeLevel */
 
 //----------------------------------------------------------------------------
 // VolumeGetVolumeLevel()

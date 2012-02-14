@@ -4261,7 +4261,7 @@ void AudioFlinger::RecordThread::RecordTrack::stop()
         RecordThread *recordThread = (RecordThread *)thread.get();
         recordThread->stop(this);
         TrackBase::reset();
-        // Force overerrun condition to avoid false overrun callback until first data is
+        // Force overrun condition to avoid false overrun callback until first data is
         // read from buffer
         android_atomic_or(CBLK_UNDERRUN_ON, &mCblk->flags);
     }
