@@ -31,11 +31,19 @@ import android.util.Log;
  * This object is thread-safe.  Other threads can add and remove listeners
  * or schedule work to occur at a later time on the UI thread.
  *
+ * Ensuring thread-safety is a little tricky because the {@link DisplayEventReceiver}
+ * can only be accessed from the UI thread so operations that touch the event receiver
+ * are posted to the UI thread if needed.
+ *
  * @hide
  */
 public final class Choreographer extends Handler {
     private static final String TAG = "Choreographer";
     private static final boolean DEBUG = false;
+
+    // Amount of time in ms to wait before actually disposing of the display event
+    // receiver after all listeners have been removed.
+    private static final long DISPOSE_RECEIVER_DELAY = 200;
 
     // The default amount of time in ms between animation frames.
     // When vsync is not enabled, we want to have some idea of how long we should
@@ -78,6 +86,8 @@ public final class Choreographer extends Handler {
 
     private static final int MSG_DO_ANIMATION = 0;
     private static final int MSG_DO_DRAW = 1;
+    private static final int MSG_DO_SCHEDULE_VSYNC = 2;
+    private static final int MSG_DO_DISPOSE_RECEIVER = 3;
 
     private final Object mLock = new Object();
 
@@ -88,6 +98,7 @@ public final class Choreographer extends Handler {
 
     private boolean mAnimationScheduled;
     private boolean mDrawScheduled;
+    private boolean mFrameDisplayEventReceiverNeeded;
     private FrameDisplayEventReceiver mFrameDisplayEventReceiver;
     private long mLastAnimationTime;
     private long mLastDrawTime;
@@ -158,10 +169,21 @@ public final class Choreographer extends Handler {
                 if (DEBUG) {
                     Log.d(TAG, "Scheduling vsync for animation.");
                 }
-                if (mFrameDisplayEventReceiver == null) {
-                    mFrameDisplayEventReceiver = new FrameDisplayEventReceiver(mLooper);
+
+                // If running on the Looper thread, then schedule the vsync immediately,
+                // otherwise post a message to schedule the vsync from the UI thread
+                // as soon as possible.
+                if (!mFrameDisplayEventReceiverNeeded) {
+                    mFrameDisplayEventReceiverNeeded = true;
+                    if (mFrameDisplayEventReceiver != null) {
+                        removeMessages(MSG_DO_DISPOSE_RECEIVER);
+                    }
                 }
-                mFrameDisplayEventReceiver.scheduleVsync();
+                if (isRunningOnLooperThreadLocked()) {
+                    doScheduleVsyncLocked();
+                } else {
+                    sendMessageAtFrontOfQueue(obtainMessage(MSG_DO_SCHEDULE_VSYNC));
+                }
             } else {
                 final long now = SystemClock.uptimeMillis();
                 final long nextAnimationTime = Math.max(mLastAnimationTime + sFrameDelay, now);
@@ -223,6 +245,12 @@ public final class Choreographer extends Handler {
                 break;
             case MSG_DO_DRAW:
                 doDraw();
+                break;
+            case MSG_DO_SCHEDULE_VSYNC:
+                doScheduleVsync();
+                break;
+            case MSG_DO_DISPOSE_RECEIVER:
+                doDisposeReceiver();
                 break;
         }
     }
@@ -292,6 +320,30 @@ public final class Choreographer extends Handler {
 
         if (DEBUG) {
             Log.d(TAG, "Draw took " + (SystemClock.uptimeMillis() - start) + " ms.");
+        }
+    }
+
+    private void doScheduleVsync() {
+        synchronized (mLock) {
+            doScheduleVsyncLocked();
+        }
+    }
+
+    private void doScheduleVsyncLocked() {
+        if (mFrameDisplayEventReceiverNeeded && mAnimationScheduled) {
+            if (mFrameDisplayEventReceiver == null) {
+                mFrameDisplayEventReceiver = new FrameDisplayEventReceiver(mLooper);
+            }
+            mFrameDisplayEventReceiver.scheduleVsync();
+        }
+    }
+
+    private void doDisposeReceiver() {
+        synchronized (mLock) {
+            if (!mFrameDisplayEventReceiverNeeded && mFrameDisplayEventReceiver != null) {
+                mFrameDisplayEventReceiver.dispose();
+                mFrameDisplayEventReceiver = null;
+            }
         }
     }
 
@@ -386,7 +438,9 @@ public final class Choreographer extends Handler {
 
             if (mAnimationScheduled) {
                 mAnimationScheduled = false;
-                if (!USE_VSYNC) {
+                if (USE_VSYNC) {
+                    removeMessages(MSG_DO_SCHEDULE_VSYNC);
+                } else {
                     removeMessages(MSG_DO_ANIMATION);
                 }
             }
@@ -398,11 +452,22 @@ public final class Choreographer extends Handler {
                 }
             }
 
-            if (mFrameDisplayEventReceiver != null) {
-                mFrameDisplayEventReceiver.dispose();
-                mFrameDisplayEventReceiver = null;
+            // Post a message to dispose the display event receiver if we haven't needed
+            // it again after a certain amount of time has elapsed.  Another reason to
+            // defer disposal is that it is possible for use to attempt to dispose the
+            // receiver while handling a vsync event that it dispatched, which might
+            // cause a few problems...
+            if (mFrameDisplayEventReceiverNeeded) {
+                mFrameDisplayEventReceiverNeeded = false;
+                if (mFrameDisplayEventReceiver != null) {
+                    sendEmptyMessageDelayed(MSG_DO_DISPOSE_RECEIVER, DISPOSE_RECEIVER_DELAY);
+                }
             }
         }
+    }
+
+    private boolean isRunningOnLooperThreadLocked() {
+        return Looper.myLooper() == mLooper;
     }
 
     /**
