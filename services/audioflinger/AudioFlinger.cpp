@@ -540,7 +540,7 @@ status_t AudioFlinger::setMasterVolume(float value)
 
     Mutex::Autolock _l(mLock);
     mMasterVolume = value;
-    for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
+    for (size_t i = 0; i < mPlaybackThreads.size(); i++)
        mPlaybackThreads.valueAt(i)->setMasterVolume(value);
 
     return NO_ERROR;
@@ -572,7 +572,7 @@ status_t AudioFlinger::setMode(audio_mode_t mode)
     if (NO_ERROR == ret) {
         Mutex::Autolock _l(mLock);
         mMode = mode;
-        for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
+        for (size_t i = 0; i < mPlaybackThreads.size(); i++)
            mPlaybackThreads.valueAt(i)->setMode(mode);
     }
 
@@ -622,7 +622,7 @@ status_t AudioFlinger::setMasterMute(bool muted)
 
     Mutex::Autolock _l(mLock);
     mMasterMute = muted;
-    for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
+    for (size_t i = 0; i < mPlaybackThreads.size(); i++)
        mPlaybackThreads.valueAt(i)->setMasterMute(muted);
 
     return NO_ERROR;
@@ -665,7 +665,7 @@ status_t AudioFlinger::setStreamVolume(audio_stream_type_t stream, float value,
     mStreamTypes[stream].volume = value;
 
     if (thread == NULL) {
-        for (uint32_t i = 0; i < mPlaybackThreads.size(); i++) {
+        for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
            mPlaybackThreads.valueAt(i)->setStreamVolume(stream, value);
         }
     } else {
@@ -928,7 +928,7 @@ void AudioFlinger::removeNotificationClient(pid_t pid)
 {
     Mutex::Autolock _l(mLock);
 
-    int index = mNotificationClients.indexOfKey(pid);
+    ssize_t index = mNotificationClients.indexOfKey(pid);
     if (index >= 0) {
         sp <NotificationClient> client = mNotificationClients.valueFor(pid);
         ALOGV("removeNotificationClient() %p, pid %d", client.get(), pid);
@@ -936,9 +936,9 @@ void AudioFlinger::removeNotificationClient(pid_t pid)
     }
 
     ALOGV("%d died, releasing its sessions", pid);
-    int num = mAudioSessionRefs.size();
+    size_t num = mAudioSessionRefs.size();
     bool removed = false;
-    for (int i = 0; i< num; i++) {
+    for (size_t i = 0; i< num; ) {
         AudioSessionRef *ref = mAudioSessionRefs.itemAt(i);
         ALOGV(" pid %d @ %d", ref->pid, i);
         if (ref->pid == pid) {
@@ -946,8 +946,9 @@ void AudioFlinger::removeNotificationClient(pid_t pid)
             mAudioSessionRefs.removeAt(i);
             delete ref;
             removed = true;
-            i--;
             num--;
+        } else {
+            i++;
         }
     }
     if (removed) {
@@ -1238,7 +1239,7 @@ void AudioFlinger::ThreadBase::setEffectSuspended_l(
 
 void AudioFlinger::ThreadBase::checkSuspendOnAddEffectChain_l(const sp<EffectChain>& chain)
 {
-    int index = mSuspendedSessions.indexOfKey(chain->sessionId());
+    ssize_t index = mSuspendedSessions.indexOfKey(chain->sessionId());
     if (index < 0) {
         return;
     }
@@ -1264,7 +1265,7 @@ void AudioFlinger::ThreadBase::updateSuspendedSessions_l(const effect_uuid_t *ty
                                                          bool suspend,
                                                          int sessionId)
 {
-    int index = mSuspendedSessions.indexOfKey(sessionId);
+    ssize_t index = mSuspendedSessions.indexOfKey(sessionId);
 
     KeyedVector <int, sp<SuspendedSessionDesc> > sessionEffects;
 
@@ -5176,8 +5177,8 @@ void AudioFlinger::acquireAudioSessionId(int audioSession)
     Mutex::Autolock _l(mLock);
     pid_t caller = IPCThreadState::self()->getCallingPid();
     ALOGV("acquiring %d from %d", audioSession, caller);
-    int num = mAudioSessionRefs.size();
-    for (int i = 0; i< num; i++) {
+    size_t num = mAudioSessionRefs.size();
+    for (size_t i = 0; i< num; i++) {
         AudioSessionRef *ref = mAudioSessionRefs.editItemAt(i);
         if (ref->sessionid == audioSession && ref->pid == caller) {
             ref->cnt++;
@@ -5194,8 +5195,8 @@ void AudioFlinger::releaseAudioSessionId(int audioSession)
     Mutex::Autolock _l(mLock);
     pid_t caller = IPCThreadState::self()->getCallingPid();
     ALOGV("releasing %d from %d", audioSession, caller);
-    int num = mAudioSessionRefs.size();
-    for (int i = 0; i< num; i++) {
+    size_t num = mAudioSessionRefs.size();
+    for (size_t i = 0; i< num; i++) {
         AudioSessionRef *ref = mAudioSessionRefs.itemAt(i);
         if (ref->sessionid == audioSession && ref->pid == caller) {
             ref->cnt--;
@@ -7177,12 +7178,12 @@ status_t AudioFlinger::EffectChain::addEffect_l(const sp<EffectModule>& effect)
         // Reject insertion if an effect with EFFECT_FLAG_INSERT_EXCLUSIVE is
         // already present
 
-        int size = (int)mEffects.size();
-        int idx_insert = size;
-        int idx_insert_first = -1;
-        int idx_insert_last = -1;
+        size_t size = mEffects.size();
+        size_t idx_insert = size;
+        ssize_t idx_insert_first = -1;
+        ssize_t idx_insert_last = -1;
 
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             effect_descriptor_t d = mEffects[i]->desc();
             uint32_t iMode = d.flags & EFFECT_FLAG_TYPE_MASK;
             uint32_t iPref = d.flags & EFFECT_FLAG_INSERT_MASK;
@@ -7251,11 +7252,10 @@ status_t AudioFlinger::EffectChain::addEffect_l(const sp<EffectModule>& effect)
 size_t AudioFlinger::EffectChain::removeEffect_l(const sp<EffectModule>& effect)
 {
     Mutex::Autolock _l(mLock);
-    int size = (int)mEffects.size();
-    int i;
+    size_t size = mEffects.size();
     uint32_t type = effect->desc().flags & EFFECT_FLAG_TYPE_MASK;
 
-    for (i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         if (effect == mEffects[i]) {
             // calling stop here will remove pre-processing effect from the audio HAL.
             // This is safe as we hold the EffectChain mutex which guarantees that we are not in
@@ -7402,7 +7402,7 @@ void AudioFlinger::EffectChain::setEffectSuspended_l(
     sp<SuspendedEffectDesc> desc;
     // use effect type UUID timelow as key as there is no real risk of identical
     // timeLow fields among effect type UUIDs.
-    int index = mSuspendedEffects.indexOfKey(type->timeLow);
+    ssize_t index = mSuspendedEffects.indexOfKey(type->timeLow);
     if (suspend) {
         if (index >= 0) {
             desc = mSuspendedEffects.valueAt(index);
@@ -7452,7 +7452,7 @@ void AudioFlinger::EffectChain::setEffectSuspendedAll_l(bool suspend)
 {
     sp<SuspendedEffectDesc> desc;
 
-    int index = mSuspendedEffects.indexOfKey((int)kKeyForSuspendAll);
+    ssize_t index = mSuspendedEffects.indexOfKey((int)kKeyForSuspendAll);
     if (suspend) {
         if (index >= 0) {
             desc = mSuspendedEffects.valueAt(index);
@@ -7534,7 +7534,7 @@ sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectIfEnabled(
 void AudioFlinger::EffectChain::checkSuspendOnEffectEnabled(const sp<EffectModule>& effect,
                                                             bool enabled)
 {
-    int index = mSuspendedEffects.indexOfKey(effect->desc().type.timeLow);
+    ssize_t index = mSuspendedEffects.indexOfKey(effect->desc().type.timeLow);
     if (enabled) {
         if (index < 0) {
             // if the effect is not suspend check if all effects are suspended

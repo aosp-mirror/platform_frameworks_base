@@ -768,7 +768,7 @@ status_t AudioPolicyService::AudioCommandThread::dump(int fd)
     snprintf(buffer, SIZE, "- Commands:\n");
     result = String8(buffer);
     result.append("   Command Time        Wait pParam\n");
-    for (int i = 0; i < (int)mAudioCommands.size(); i++) {
+    for (size_t i = 0; i < mAudioCommands.size(); i++) {
         mAudioCommands[i]->dump(buffer, SIZE);
         result.append(buffer);
     }
@@ -902,7 +902,7 @@ status_t AudioPolicyService::AudioCommandThread::voiceVolumeCommand(float volume
 // insertCommand_l() must be called with mLock held
 void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *command, int delayMs)
 {
-    ssize_t i;
+    ssize_t i;  // not size_t because i will count down to -1
     Vector <AudioCommand *> removedCommands;
 
     command->mTime = systemTime() + milliseconds(delayMs);
