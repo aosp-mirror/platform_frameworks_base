@@ -59,21 +59,20 @@ private:
     sp<Looper> mLooper;
     DisplayEventReceiver mReceiver;
     bool mWaitingForVsync;
-    bool mFdCallbackRegistered;
 };
 
 
 NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env,
         jobject receiverObj, const sp<Looper>& looper) :
         mReceiverObjGlobal(env->NewGlobalRef(receiverObj)),
-        mLooper(looper), mWaitingForVsync(false), mFdCallbackRegistered(false) {
+        mLooper(looper), mWaitingForVsync(false) {
     ALOGV("receiver %p ~ Initializing input event receiver.", this);
 }
 
 NativeDisplayEventReceiver::~NativeDisplayEventReceiver() {
     ALOGV("receiver %p ~ Disposing display event receiver.", this);
 
-    if (mFdCallbackRegistered) {
+    if (!mReceiver.initCheck()) {
         mLooper->removeFd(mReceiver.getFd());
     }
 
@@ -88,6 +87,11 @@ status_t NativeDisplayEventReceiver::initialize() {
         return result;
     }
 
+    int rc = mLooper->addFd(mReceiver.getFd(), 0, ALOOPER_EVENT_INPUT,
+            handleReceiveCallback, this);
+    if (rc < 0) {
+        return UNKNOWN_ERROR;
+    }
     return OK;
 }
 
@@ -113,15 +117,6 @@ status_t NativeDisplayEventReceiver::scheduleVsync() {
             return status;
         }
 
-        if (!mFdCallbackRegistered) {
-            int rc = mLooper->addFd(mReceiver.getFd(), 0, ALOOPER_EVENT_INPUT,
-                    handleReceiveCallback, this);
-            if (rc < 0) {
-                return UNKNOWN_ERROR;
-            }
-            mFdCallbackRegistered = true;
-        }
-
         mWaitingForVsync = true;
     }
     return OK;
@@ -133,7 +128,6 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
         ALOGE("Display event receiver pipe was closed or an error occurred.  "
                 "events=0x%x", events);
-        r->mFdCallbackRegistered = false;
         return 0; // remove the callback
     }
 
@@ -150,7 +144,7 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
     DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
     ssize_t n;
     while ((n = r->mReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
-        ALOGV("receiver %p ~ Read %d events.", this, int(n));
+        ALOGV("receiver %p ~ Read %d events.", data, int(n));
         while (n-- > 0) {
             if (buf[n].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
                 vsyncTimestamp = buf[n].header.timestamp;
@@ -161,20 +155,20 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
     }
 
     if (vsyncTimestamp < 0) {
-        ALOGV("receiver %p ~ Woke up but there was no vsync pulse!", this);
+        ALOGV("receiver %p ~ Woke up but there was no vsync pulse!", data);
         return 1; // keep the callback, did not obtain a vsync pulse
     }
 
     ALOGV("receiver %p ~ Vsync pulse: timestamp=%lld, count=%d",
-            this, vsyncTimestamp, vsyncCount);
+            data, vsyncTimestamp, vsyncCount);
     r->mWaitingForVsync = false;
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ALOGV("receiver %p ~ Invoking vsync handler.", this);
+    ALOGV("receiver %p ~ Invoking vsync handler.", data);
     env->CallVoidMethod(r->mReceiverObjGlobal,
             gDisplayEventReceiverClassInfo.dispatchVsync, vsyncTimestamp, vsyncCount);
-    ALOGV("receiver %p ~ Returned from vsync handler.", this);
+    ALOGV("receiver %p ~ Returned from vsync handler.", data);
 
     if (env->ExceptionCheck()) {
         ALOGE("An exception occurred while dispatching a vsync event.");
@@ -182,13 +176,7 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
         env->ExceptionClear();
     }
 
-    // Check whether dispatchVsync called scheduleVsync reentrantly and set mWaitingForVsync.
-    // If so, keep the callback, otherwise remove it.
-    if (r->mWaitingForVsync) {
-        return 1; // keep the callback
-    }
-    r->mFdCallbackRegistered = false;
-    return 0; // remove the callback
+    return 1; // keep the callback
 }
 
 

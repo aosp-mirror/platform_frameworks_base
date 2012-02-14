@@ -25,6 +25,10 @@ import android.util.Log;
 /**
  * Provides a low-level mechanism for an application to receive display events
  * such as vertical sync.
+ *
+ * The display event receive is NOT thread safe.  Moreover, its methods must only
+ * be called on the Looper thread to which it is attached.
+ *
  * @hide
  */
 public abstract class DisplayEventReceiver {
