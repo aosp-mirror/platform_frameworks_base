@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class Allocation extends BaseObj {
     public static final int USAGE_GRAPHICS_RENDER_TARGET = 0x0010;
 
     /**
-     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT The allcation will be
+     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT The allocation will be
      * used with a SurfaceTexture object.  This usage will cause the
      * allocation to be created read only.
      *
@@ -140,18 +140,18 @@ public class Allocation extends BaseObj {
     public static final int USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE = 0x0020;
 
     /**
-     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT The allcation will be
+     * USAGE_IO_INPUT The allocation will be
      * used with a SurfaceTexture object.  This usage will cause the
      * allocation to be created read only.
      *
      * @hide
      */
-
     public static final int USAGE_IO_INPUT = 0x0040;
+
     /**
-     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT The allcation will be
+     * USAGE_IO_OUTPUT The allocation will be
      * used with a SurfaceTexture object.  This usage will cause the
-     * allocation to be created read only.
+     * allocation to be created write only.
      *
      * @hide
      */
