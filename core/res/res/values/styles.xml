@@ -198,8 +198,10 @@ please see styles_device_defaults.xml.
     <!-- A special animation we can use for recent applications,
          for devices that can support it (do alpha transformations). -->
     <style name="Animation.RecentApplications">
-        <item name="windowEnterAnimation">@anim/fade_in</item>
-        <item name="windowExitAnimation">@anim/fade_out</item>
+        <item name="windowEnterAnimation">@anim/recents_fade_in</item>
+        <item name="windowShowAnimation">@anim/recents_fade_in</item>
+        <item name="windowExitAnimation">@anim/recents_fade_out</item>
+        <item name="windowHideAnimation">@anim/recents_fade_out</item>
     </style>
 
     <!-- A special animation value used internally for popup windows. -->

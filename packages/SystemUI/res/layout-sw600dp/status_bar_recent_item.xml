@@ -65,6 +65,7 @@
         android:maxHeight="@dimen/status_bar_recents_app_icon_max_height"
         android:scaleType="centerInside"
         android:adjustViewBounds="true"
+        android:visibility="invisible"
     />
 
 

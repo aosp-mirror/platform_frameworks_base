@@ -393,7 +393,7 @@ public class PhoneStatusBar extends StatusBar {
         }
         lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
         lp.setTitle("RecentsPanel");
-        lp.windowAnimations = R.style.Animation_RecentPanel;
+        lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
         | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
         return lp;
@@ -403,11 +403,13 @@ public class PhoneStatusBar extends StatusBar {
         // Recents Panel
         boolean visible = false;
         ArrayList<TaskDescription> recentTasksList = null;
+        boolean firstScreenful = false;
         if (mRecentsPanel != null) {
             visible = mRecentsPanel.isShowing();
             WindowManagerImpl.getDefault().removeView(mRecentsPanel);
             if (visible) {
                 recentTasksList = mRecentsPanel.getRecentTasksList();
+                firstScreenful = mRecentsPanel.getFirstScreenful();
             }
         }
 
@@ -425,7 +427,7 @@ public class PhoneStatusBar extends StatusBar {
         WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
         mRecentsPanel.setBar(this);
         if (visible) {
-            mRecentsPanel.show(true, false, recentTasksList);
+            mRecentsPanel.show(true, false, recentTasksList, firstScreenful);
         }
 
     }

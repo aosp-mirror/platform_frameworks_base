@@ -1083,6 +1083,7 @@
   <java-symbol type="style" name="ActiveWallpaperSettings" />
   <java-symbol type="style" name="Animation.InputMethodFancy" />
   <java-symbol type="style" name="Animation.Wallpaper" />
+  <java-symbol type="style" name="Animation.RecentApplications" />
   <java-symbol type="style" name="Animation.ZoomButtons" />
   <java-symbol type="style" name="PreviewWallpaperSettings" />
   <java-symbol type="style" name="TextAppearance.SlidingTabActive" />

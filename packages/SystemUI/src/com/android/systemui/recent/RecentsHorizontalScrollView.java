@@ -22,17 +22,26 @@ import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
+import android.view.View.MeasureSpec;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.recent.RecentsPanelView.TaskDescriptionAdapter;
+
+import java.util.ArrayList;
 
 public class RecentsHorizontalScrollView extends HorizontalScrollView
     implements SwipeHelper.Callback {
@@ -44,6 +53,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     protected int mLastScrollPosition;
     private SwipeHelper mSwipeHelper;
     private RecentsScrollViewPerformanceHelper mPerformanceHelper;
+    private ArrayList<View> mRecycledViews;
+    private int mNumItemsInOneScreenful;
 
     public RecentsHorizontalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
@@ -51,6 +62,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.Y, this, densityScale, pagingTouchSlop);
         mPerformanceHelper = RecentsScrollViewPerformanceHelper.create(context, attrs, this, false);
+        mRecycledViews = new ArrayList<View>();
     }
 
     private int scrollPositionOfMostRecent() {
@@ -58,9 +70,23 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     }
 
     private void update() {
+        for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
+            View v = mLinearLayout.getChildAt(i);
+            mRecycledViews.add(v);
+            mAdapter.recycleView(v);
+        }
+        LayoutTransition transitioner = getLayoutTransition();
+        setLayoutTransition(null);
+
         mLinearLayout.removeAllViews();
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            final View view = mAdapter.getView(i, null, mLinearLayout);
+            View old = null;
+            if (mRecycledViews.size() != 0) {
+                old = mRecycledViews.remove(mRecycledViews.size() - 1);
+                old.setVisibility(VISIBLE);
+            }
+
+            final View view = mAdapter.getView(i, old, mLinearLayout);
 
             if (mPerformanceHelper != null) {
                 mPerformanceHelper.addViewCallback(view);
@@ -87,7 +113,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                 }
             };
 
-            final View thumbnailView = view.findViewById(R.id.app_thumbnail);
+            RecentsPanelView.ViewHolder holder = (RecentsPanelView.ViewHolder) view.getTag();
+            final View thumbnailView = holder.thumbnailView;
             OnLongClickListener longClickListener = new OnLongClickListener() {
                 public boolean onLongClick(View v) {
                     final View anchorView = view.findViewById(R.id.app_description);
@@ -107,13 +134,21 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
             appTitle.setOnTouchListener(noOpListener);
             mLinearLayout.addView(view);
         }
+        setLayoutTransition(transitioner);
+
         // Scroll to end after layout.
-        post(new Runnable() {
-            public void run() {
-                mLastScrollPosition = scrollPositionOfMostRecent();
-                scrollTo(mLastScrollPosition, 0);
-            }
-        });
+        final ViewTreeObserver observer = getViewTreeObserver();
+
+        final OnGlobalLayoutListener updateScroll = new OnGlobalLayoutListener() {
+                public void onGlobalLayout() {
+                    mLastScrollPosition = scrollPositionOfMostRecent();
+                    scrollTo(mLastScrollPosition, 0);
+                    if (observer.isAlive()) {
+                        observer.removeOnGlobalLayoutListener(this);
+                    }
+                }
+            };
+        observer.addOnGlobalLayoutListener(updateScroll);
     }
 
     @Override
@@ -142,8 +177,10 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     }
 
     public void onChildDismissed(View v) {
+        mRecycledViews.add(v);
         mLinearLayout.removeView(v);
         mCallback.handleSwipe(v);
+        v.setActivated(false);
     }
 
     public void onBeginDrag(View v) {
@@ -315,6 +352,24 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                 update();
             }
         });
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        int childWidthMeasureSpec =
+                MeasureSpec.makeMeasureSpec(dm.widthPixels, MeasureSpec.AT_MOST);
+        int childheightMeasureSpec =
+                MeasureSpec.makeMeasureSpec(dm.heightPixels, MeasureSpec.AT_MOST);
+        View child = mAdapter.createView(mLinearLayout);
+        child.measure(childWidthMeasureSpec, childheightMeasureSpec);
+        mNumItemsInOneScreenful =
+                (int) FloatMath.ceil(dm.widthPixels / (float) child.getMeasuredWidth());
+        mRecycledViews.add(child);
+
+        for (int i = 0; i < mNumItemsInOneScreenful - 1; i++) {
+            mRecycledViews.add(mAdapter.createView(mLinearLayout));
+        }
+    }
+
+    public int numItemsInOneScreenful() {
+        return mNumItemsInOneScreenful;
     }
 
     @Override
