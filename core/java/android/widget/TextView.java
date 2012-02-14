@@ -3472,6 +3472,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mText.length() == 0) {
             invalidate();
         }
+
+        // Invalidate display list if hint will be used
+        if (mText.length() == 0 && mHint != null) mTextDisplayListIsValid = false;
     }
 
     /**
