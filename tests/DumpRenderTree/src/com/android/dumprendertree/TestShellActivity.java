@@ -16,7 +16,6 @@
 
 package com.android.dumprendertree;
 
-import com.android.browser.WebViewProperties;
 import com.android.dumprendertree.forwarder.ForwardService;
 
 import android.app.Activity;
