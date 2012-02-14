@@ -58,10 +58,11 @@ public:
         return cblk;
     }
 
-    virtual status_t start()
+    virtual status_t start(pid_t tid)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioTrack::getInterfaceDescriptor());
+        data.writeInt32(tid);
         status_t status = remote()->transact(START, data, &reply);
         if (status == NO_ERROR) {
             status = reply.readInt32();
@@ -130,7 +131,7 @@ status_t BnAudioTrack::onTransact(
         } break;
         case START: {
             CHECK_INTERFACE(IAudioTrack, data, reply);
-            reply->writeInt32(start());
+            reply->writeInt32(start(data.readInt32()));
             return NO_ERROR;
         } break;
         case STOP: {
