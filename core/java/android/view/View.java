@@ -10951,20 +10951,70 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Utility function, called by draw(canvas, parent, drawingTime) to handle the less common
+     * case of an active Animation being run on the view.
+     */
+    private boolean drawAnimation(ViewGroup parent, long drawingTime,
+            Animation a, boolean scalingRequired) {
+        Transformation invalidationTransform;
+        final int flags = parent.mGroupFlags;
+        final boolean initialized = a.isInitialized();
+        if (!initialized) {
+            a.initialize(mRight - mLeft, mBottom - mTop, getWidth(), getHeight());
+            a.initializeInvalidateRegion(0, 0, mRight - mLeft, mBottom - mTop);
+            onAnimationStart();
+        }
+
+        boolean more = a.getTransformation(drawingTime, parent.mChildTransformation, 1f);
+        if (scalingRequired && mAttachInfo.mApplicationScale != 1f) {
+            if (parent.mInvalidationTransformation == null) {
+                parent.mInvalidationTransformation = new Transformation();
+            }
+            invalidationTransform = parent.mInvalidationTransformation;
+            a.getTransformation(drawingTime, invalidationTransform, 1f);
+        } else {
+            invalidationTransform = parent.mChildTransformation;
+        }
+        if (more) {
+            if (!a.willChangeBounds()) {
+                if ((flags & (parent.FLAG_OPTIMIZE_INVALIDATE | parent.FLAG_ANIMATION_DONE)) ==
+                        parent.FLAG_OPTIMIZE_INVALIDATE) {
+                    parent.mGroupFlags |= parent.FLAG_INVALIDATE_REQUIRED;
+                } else if ((flags & parent.FLAG_INVALIDATE_REQUIRED) == 0) {
+                    // The child need to draw an animation, potentially offscreen, so
+                    // make sure we do not cancel invalidate requests
+                    parent.mPrivateFlags |= DRAW_ANIMATION;
+                    parent.invalidate(mLeft, mTop, mRight, mBottom);
+                }
+            } else {
+                if (parent.mInvalidateRegion == null) {
+                    parent.mInvalidateRegion = new RectF();
+                }
+                final RectF region = parent.mInvalidateRegion;
+                a.getInvalidateRegion(0, 0, mRight - mLeft, mBottom - mTop, region,
+                        invalidationTransform);
+
+                // The child need to draw an animation, potentially offscreen, so
+                // make sure we do not cancel invalidate requests
+                parent.mPrivateFlags |= DRAW_ANIMATION;
+
+                final int left = mLeft + (int) region.left;
+                final int top = mTop + (int) region.top;
+                parent.invalidate(left, top, left + (int) (region.width() + .5f),
+                        top + (int) (region.height() + .5f));
+            }
+        }
+        return more;
+    }
+
+    /**
      * This method is called by ViewGroup.drawChild() to have each child view draw itself.
      * This draw() method is an implementation detail and is not intended to be overridden or
      * to be called from anywhere else other than ViewGroup.drawChild().
      */
     boolean draw(Canvas canvas, ViewGroup parent, long drawingTime) {
         boolean more = false;
-
-        final int cl = mLeft;
-        final int ct = mTop;
-        final int cr = mRight;
-        final int cb = mBottom;
-
         final boolean childHasIdentityMatrix = hasIdentityMatrix();
-
         final int flags = parent.mGroupFlags;
 
         if ((flags & parent.FLAG_CLEAR_TRANSFORMATION) == parent.FLAG_CLEAR_TRANSFORMATION) {
@@ -10973,8 +11023,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         Transformation transformToApply = null;
-        Transformation invalidationTransform;
-        final Animation a = getAnimation();
         boolean concatMatrix = false;
 
         boolean scalingRequired = false;
@@ -10990,59 +11038,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             caching = (layerType != LAYER_TYPE_NONE) || hardwareAccelerated;
         }
 
+        final Animation a = getAnimation();
         if (a != null) {
-            final boolean initialized = a.isInitialized();
-            if (!initialized) {
-                a.initialize(cr - cl, cb - ct, getWidth(), getHeight());
-                a.initializeInvalidateRegion(0, 0, cr - cl, cb - ct);
-                onAnimationStart();
-            }
-
-            more = a.getTransformation(drawingTime, parent.mChildTransformation, 1f);
-            if (scalingRequired && mAttachInfo.mApplicationScale != 1f) {
-                if (parent.mInvalidationTransformation == null) {
-                    parent.mInvalidationTransformation = new Transformation();
-                }
-                invalidationTransform = parent.mInvalidationTransformation;
-                a.getTransformation(drawingTime, invalidationTransform, 1f);
-            } else {
-                invalidationTransform = parent.mChildTransformation;
-            }
-            transformToApply = parent.mChildTransformation;
-
+            more = drawAnimation(parent, drawingTime, a, scalingRequired);
             concatMatrix = a.willChangeTransformationMatrix();
-
-            if (more) {
-                if (!a.willChangeBounds()) {
-                    if ((flags & (parent.FLAG_OPTIMIZE_INVALIDATE | parent.FLAG_ANIMATION_DONE)) ==
-                            parent.FLAG_OPTIMIZE_INVALIDATE) {
-                        parent.mGroupFlags |= parent.FLAG_INVALIDATE_REQUIRED;
-                    } else if ((flags & parent.FLAG_INVALIDATE_REQUIRED) == 0) {
-                        // The child need to draw an animation, potentially offscreen, so
-                        // make sure we do not cancel invalidate requests
-                        parent.mPrivateFlags |= DRAW_ANIMATION;
-                        invalidate(cl, ct, cr, cb);
-                    }
-                } else {
-                    if (parent.mInvalidateRegion == null) {
-                        parent.mInvalidateRegion = new RectF();
-                    }
-                    final RectF region = parent.mInvalidateRegion;
-                    a.getInvalidateRegion(0, 0, cr - cl, cb - ct, region, invalidationTransform);
-
-                    // The child need to draw an animation, potentially offscreen, so
-                    // make sure we do not cancel invalidate requests
-                    parent.mPrivateFlags |= DRAW_ANIMATION;
-
-                    final int left = cl + (int) region.left;
-                    final int top = ct + (int) region.top;
-                    invalidate(left, top, left + (int) (region.width() + .5f),
-                            top + (int) (region.height() + .5f));
-                }
-            }
+            transformToApply = parent.mChildTransformation;
         } else if ((flags & parent.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
                 parent.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) {
-            final boolean hasTransform = parent.getChildStaticTransformation(this, parent.mChildTransformation);
+            final boolean hasTransform =
+                    parent.getChildStaticTransformation(this, parent.mChildTransformation);
             if (hasTransform) {
                 final int transformType = parent.mChildTransformation.getTransformationType();
                 transformToApply = transformType != Transformation.TYPE_IDENTITY ?
@@ -11057,7 +11061,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         // to call invalidate() successfully when doing animations
         mPrivateFlags |= DRAWN;
 
-        if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW) &&
+        if (!concatMatrix && canvas.quickReject(mLeft, mTop, mRight, mBottom, Canvas.EdgeType.BW) &&
                 (mPrivateFlags & DRAW_ANIMATION) == 0) {
             return more;
         }
@@ -11105,9 +11109,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         final int restoreTo = canvas.save();
         if (offsetForScroll) {
-            canvas.translate(cl - sx, ct - sy);
+            canvas.translate(mLeft - sx, mTop - sy);
         } else {
-            canvas.translate(cl, ct);
+            canvas.translate(mLeft, mTop);
             if (scalingRequired) {
                 // mAttachInfo cannot be null, otherwise scalingRequired == false
                 final float scale = 1.0f / mAttachInfo.mApplicationScale;
@@ -11163,8 +11167,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                         if (layerType == LAYER_TYPE_NONE) {
                             final int scrollX = hasDisplayList ? 0 : sx;
                             final int scrollY = hasDisplayList ? 0 : sy;
-                            canvas.saveLayerAlpha(scrollX, scrollY, scrollX + cr - cl,
-                                    scrollY + cb - ct, multipliedAlpha, layerFlags);
+                            canvas.saveLayerAlpha(scrollX, scrollY, scrollX + mRight - mLeft,
+                                    scrollY + mBottom - mTop, multipliedAlpha, layerFlags);
                         }
                     } else {
                         // Alpha is handled by the child directly, clobber the layer's alpha
@@ -11179,10 +11183,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         if ((flags & parent.FLAG_CLIP_CHILDREN) == parent.FLAG_CLIP_CHILDREN) {
             if (offsetForScroll) {
-                canvas.clipRect(sx, sy, sx + (cr - cl), sy + (cb - ct));
+                canvas.clipRect(sx, sy, sx + (mRight - mLeft), sy + (mBottom - mTop));
             } else {
                 if (!scalingRequired || cache == null) {
-                    canvas.clipRect(0, 0, cr - cl, cb - ct);
+                    canvas.clipRect(0, 0, mRight - mLeft, mBottom - mTop);
                 } else {
                     canvas.clipRect(0, 0, cache.getWidth(), cache.getHeight());
                 }
@@ -11212,7 +11216,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     final int scrollX = hasDisplayList ? 0 : sx;
                     final int scrollY = hasDisplayList ? 0 : sy;
                     canvas.saveLayer(scrollX, scrollY,
-                            scrollX + cr - cl, scrollY + cb - ct, mLayerPaint,
+                            scrollX + mRight - mLeft, scrollY + mBottom - mTop, mLayerPaint,
                             Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
                 }
             }
@@ -11231,7 +11235,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     }
                 } else {
                     mPrivateFlags &= ~DIRTY_MASK;
-                    ((HardwareCanvas) canvas).drawDisplayList(displayList, cr - cl, cb - ct, null);
+                    ((HardwareCanvas) canvas).drawDisplayList(displayList,
+                            mRight - mLeft, mBottom - mTop, null);
                 }
             }
         } else if (cache != null) {
@@ -11248,7 +11253,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 if (alpha < 1.0f) {
                     cachePaint.setAlpha((int) (alpha * 255));
                     parent.mGroupFlags |= parent.FLAG_ALPHA_LOWER_THAN_ONE;
-                } else if  ((flags & parent.FLAG_ALPHA_LOWER_THAN_ONE) == parent.FLAG_ALPHA_LOWER_THAN_ONE) {
+                } else if  ((flags & parent.FLAG_ALPHA_LOWER_THAN_ONE) ==
+                        parent.FLAG_ALPHA_LOWER_THAN_ONE) {
                     cachePaint.setAlpha(255);
                     parent.mGroupFlags &= ~parent.FLAG_ALPHA_LOWER_THAN_ONE;
                 }
