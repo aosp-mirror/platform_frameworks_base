@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r7-windows.zip
-ndk.win_bytes=81270552
-ndk.win_checksum=55483482cf2b75e8dd1a5d9a7caeb6e5
+ndk.win_download=android-ndk-r7b-windows.zip
+ndk.win_bytes=80346206
+ndk.win_checksum=c42b0c9c14428397337421d5e4999380
 
-ndk.mac_download=android-ndk-r7-darwin-x86.tar.bz2
-ndk.mac_bytes=71262092
-ndk.mac_checksum=817ca5675a1dd44078098e43070f19b6
+ndk.mac_download=android-ndk-r7b-darwin-x86.tar.bz2
+ndk.mac_bytes=73817184
+ndk.mac_checksum=6daa82ca6b73bc0614c9997430079c7a
 
-ndk.linux_download=android-ndk-r7-linux-x86.tar.bz2
-ndk.linux_bytes=64884365
-ndk.linux_checksum=bf15e6b47bf50824c4b96849bf003ca3
+ndk.linux_download=android-ndk-r7b-linux-x86.tar.bz2
+ndk.linux_bytes=64349733
+ndk.linux_checksum=0eb8af18796cdaa082df8f7c54ad7f9a
 
 page.title=Android NDK
 
@@ -62,6 +62,116 @@ padding: .25em 1em;
 <div class="toggleable open">
   <a href="#" onclick="return toggleDiv(this)"><img src=
   "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
+  Android NDK, Revision 7b</a> <em>(February 2012)</em>
+
+  <div class="toggleme">
+    <p>This release of the NDK includes fixes for native Windows builds, Cygwin and many other
+      improvements:</p>
+
+    <dl>
+      <dt>Important bug fixes:</dt>
+
+      <dd>
+        <ul>
+          <li>Updated {@code sys/atomics.h} to avoid correctness issues
+            on some multi-core ARM-based devices. Rebuild your unmodified sources with this
+            version of the NDK and this problem should be completely eliminated.
+            For more details, read {@code docs/ANDROID-ATOMICS.html}.</li>
+          <li>Reverted to {@code binutils} 2.19 to fix debugging issues that
+            appeared in NDK r7 (which switched to {@code binutils} 2.20.1).</li>
+          <li>Fixed {@code ndk-build} on 32-bit Linux. A packaging error put a 64-bit version
+            of the {@code awk} executable under {@code prebuilt/linux-x86/bin} in NDK r7.</li>
+          <li>Fixed native Windows build ({@code ndk-build.cmd}). Other build modes were not
+            affected. The fixes include:
+            <ul>
+              <li>Removed an infinite loop / stack overflow bug that happened when trying
+                to call {@code ndk-build.cmd} from a directory that was <em>not</em> the top of
+                your project path (e.g., in any sub-directory of it).</li>
+              <li>Fixed a problem where the auto-generated dependency files were ignored. This
+                meant that updating a header didn't trigger recompilation of sources that included
+                it.</li>
+              <li>Fixed a problem where special characters in files or paths, other than spaces and
+                quotes, were not correctly handled.</li>
+            </ul>
+          </li>
+          <li>Fixed the standalone toolchain to generate proper binaries when using
+            {@code -lstdc++} (i.e., linking against the GNU {@code libstdc++} C++ runtime). You
+            should use {@code -lgnustl_shared} if you want to link against the shared library
+            version or {@code -lstdc++} for the static version.
+
+            <p>See {@code docs/STANDALONE-TOOLCHAIN.html} for more details about this fix.</p>
+          </li>
+          <li>Fixed {@code gnustl_shared} on Cygwin. The linker complained that it couldn't find
+            {@code libsupc++.a} even though the file was at the right location.</li>
+          <li>Fixed Cygwin C++ link when not using any specific C++ runtime through
+            {@code APP_STL}.</li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Other changes:</dt>
+
+      <dd>
+        <ul>
+          <li>When your application uses the GNU {@code libstdc++} runtime, the compiler will
+            no longer forcibly enable exceptions and RTTI. This change results in smaller code.
+            <p>If you need these features, you must do one of the following:</p>
+            <ul>
+              <li>Enable exceptions and/or RTTI explicitly in your modules or
+                {@code Application.mk}. (recommended)</li>
+              <li>Define {@code APP_GNUSTL_FORCE_CPP_FEATURES} to {@code 'exceptions'},
+                {@code 'rtti'} or both in your {@code Application.mk}. See
+                {@code docs/APPLICATION-MK.html} for more details.</li>
+            </ul>
+          </li>
+          <li>{@code ndk-gdb} now works properly when your application has private services
+            running in independent processes. It debugs the main application process, instead of the
+            first process listed by {@code ps}, which is usually a service process.</li>
+          <li>Fixed a rare bug where NDK r7 would fail to honor the {@code LOCAL_ARM_MODE} value
+            and always compile certain source files (but not all) to 32-bit instructions.</li>
+          <li>{@code stlport}: Refresh the sources to match the Android platform version. This
+            update fixes a few minor bugs:
+            <ul>
+               <li>Fixed instantiation of an incomplete type</li>
+               <li>Fixed minor "==" versus "=" typo</li>
+               <li>Used {@code memmove} instead of {@code memcpy} in {@code string::assign}</li>
+               <li>Added better handling of {@code IsNANorINF}, {@code IsINF}, {@code IsNegNAN},
+                 etc.</li>
+             </ul>
+             <p>For complete details, see the commit log.</p>
+          </li>
+          <li>{@code stlport}: Removed 5 unnecessary static initializers from the library.</li>
+          <li>The GNU libstdc++ libraries for armeabi-v7a were mistakenly compiled for
+            armeabi instead. This change had no impact on correctness, but using the right
+            ABI should provide slightly better performance.</li>
+          <li>The {@code cpu-features} helper library was updated to report three optional
+            x86 CPU features ({@code SSSE3}, {@code MOVBE} and {@code POPCNT}). See
+            {@code docs/CPU-FEATURES.html} for more details.</li>
+          <li>{@code docs/NDK-BUILD.html} was updated to mention {@code NDK_APPLICATION_MK} instead
+            of {@code NDK_APP_APPLICATION_MK} to select a custom {@code Application.mk} file.</li>
+          <li>Cygwin: {@code ndk-build} no longer creates an empty "NUL" file in the current
+            directory when invoked.</li>
+          <li>Cygwin: Added better automatic dependency detection. In the previous version, it
+            didn't work properly in the following cases:
+            <ul>
+              <li>When the Cygwin drive prefix was not {@code /cygdrive}.</li>
+              <li>When using drive-less mounts, for example, when Cygwin would translate
+                {@code /home} to {@code \\server\subdir} instead of {@code C:\Some\Dir}.</li>
+            </ul>
+          </li>
+          <li>Cygwin: {@code ndk-build} does not try to use the native Windows tools under
+            {@code $NDK/prebuilt/windows/bin} with certain versions of Cygwin and/or GNU Make.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)"><img src=
+  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
   Android NDK, Revision 7</a> <em>(November 2011)</em>
 
   <div class="toggleme">
