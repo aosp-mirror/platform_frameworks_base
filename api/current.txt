@@ -593,6 +593,7 @@ package android {
     field public static final int layerType = 16843604; // 0x1010354
     field public static final int layout = 16842994; // 0x10100f2
     field public static final int layoutAnimation = 16842988; // 0x10100ec
+    field public static final int layoutDirection = 16843689; // 0x10103a9
     field public static final int layout_above = 16843140; // 0x1010184
     field public static final int layout_alignBaseline = 16843142; // 0x1010186
     field public static final int layout_alignBottom = 16843146; // 0x101018a
@@ -614,10 +615,10 @@ package android {
     field public static final int layout_height = 16842997; // 0x10100f5
     field public static final int layout_margin = 16842998; // 0x10100f6
     field public static final int layout_marginBottom = 16843002; // 0x10100fa
-    field public static final int layout_marginEnd = 16843692; // 0x10103ac
+    field public static final int layout_marginEnd = 16843693; // 0x10103ad
     field public static final int layout_marginLeft = 16842999; // 0x10100f7
     field public static final int layout_marginRight = 16843001; // 0x10100f9
-    field public static final int layout_marginStart = 16843691; // 0x10103ab
+    field public static final int layout_marginStart = 16843692; // 0x10103ac
     field public static final int layout_marginTop = 16843000; // 0x10100f8
     field public static final int layout_row = 16843643; // 0x101037b
     field public static final int layout_rowSpan = 16843644; // 0x101037c
@@ -713,10 +714,10 @@ package android {
     field public static final int packageNames = 16843649; // 0x1010381
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
-    field public static final int paddingEnd = 16843690; // 0x10103aa
+    field public static final int paddingEnd = 16843691; // 0x10103ab
     field public static final int paddingLeft = 16842966; // 0x10100d6
     field public static final int paddingRight = 16842968; // 0x10100d8
-    field public static final int paddingStart = 16843689; // 0x10103a9
+    field public static final int paddingStart = 16843690; // 0x10103aa
     field public static final int paddingTop = 16842967; // 0x10100d7
     field public static final int panelBackground = 16842846; // 0x101005e
     field public static final int panelColorBackground = 16842849; // 0x1010061
@@ -7392,8 +7393,8 @@ package android.database.sqlite {
     ctor public SQLiteOpenHelper(android.content.Context, java.lang.String, android.database.sqlite.SQLiteDatabase.CursorFactory, int, android.database.DatabaseErrorHandler);
     method public synchronized void close();
     method public java.lang.String getDatabaseName();
-    method public synchronized android.database.sqlite.SQLiteDatabase getReadableDatabase();
-    method public synchronized android.database.sqlite.SQLiteDatabase getWritableDatabase();
+    method public android.database.sqlite.SQLiteDatabase getReadableDatabase();
+    method public android.database.sqlite.SQLiteDatabase getWritableDatabase();
     method public abstract void onCreate(android.database.sqlite.SQLiteDatabase);
     method public void onDowngrade(android.database.sqlite.SQLiteDatabase, int, int);
     method public void onOpen(android.database.sqlite.SQLiteDatabase);
@@ -23104,6 +23105,7 @@ package android.view {
     method public void buildDrawingCache(boolean);
     method public void buildLayer();
     method public boolean callOnClick();
+    method public boolean canResolveLayoutDirection();
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
     method public void cancelLongPress();
@@ -23189,6 +23191,7 @@ package android.view {
     method public boolean getKeepScreenOn();
     method public android.view.KeyEvent.DispatcherState getKeyDispatcherState();
     method public int getLayerType();
+    method public int getLayoutDirection();
     method public android.view.ViewGroup.LayoutParams getLayoutParams();
     method public final int getLeft();
     method protected float getLeftFadingEdgeStrength();
@@ -23218,6 +23221,8 @@ package android.view {
     method public final android.view.ViewParent getParent();
     method public float getPivotX();
     method public float getPivotY();
+    method public int getResolvedLayoutDirection();
+    method public int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
     method public int getResolvedTextDirection();
     method public android.content.res.Resources getResources();
     method public final int getRight();
@@ -23285,7 +23290,9 @@ package android.view {
     method public boolean isHovered();
     method public boolean isInEditMode();
     method public boolean isInTouchMode();
+    method protected static boolean isLayoutDirectionRtl(java.util.Locale);
     method public boolean isLayoutRequested();
+    method public boolean isLayoutRtl();
     method public boolean isLongClickable();
     method public boolean isOpaque();
     method protected boolean isPaddingOffsetRequired();
@@ -23374,6 +23381,7 @@ package android.view {
     method public void requestLayout();
     method public boolean requestRectangleOnScreen(android.graphics.Rect);
     method public boolean requestRectangleOnScreen(android.graphics.Rect, boolean);
+    method public void resetResolvedLayoutDirection();
     method public void resetResolvedTextDirection();
     method public void resolvePadding();
     method public static int resolveSize(int, int);
@@ -23414,6 +23422,7 @@ package android.view {
     method public void setId(int);
     method public void setKeepScreenOn(boolean);
     method public void setLayerType(int, android.graphics.Paint);
+    method public void setLayoutDirection(int);
     method public void setLayoutParams(android.view.ViewGroup.LayoutParams);
     method public final void setLeft(int);
     method public void setLongClickable(boolean);
@@ -23516,6 +23525,10 @@ package android.view {
     field public static final int LAYER_TYPE_HARDWARE = 2; // 0x2
     field public static final int LAYER_TYPE_NONE = 0; // 0x0
     field public static final int LAYER_TYPE_SOFTWARE = 1; // 0x1
+    field public static final int LAYOUT_DIRECTION_INHERIT = -2147483648; // 0x80000000
+    field public static final int LAYOUT_DIRECTION_LOCALE = -1073741824; // 0xc0000000
+    field public static final int LAYOUT_DIRECTION_LTR = 0; // 0x0
+    field public static final int LAYOUT_DIRECTION_RTL = 1073741824; // 0x40000000
     field public static final int MEASURED_HEIGHT_STATE_SHIFT = 16; // 0x10
     field public static final int MEASURED_SIZE_MASK = 16777215; // 0xffffff
     field public static final int MEASURED_STATE_MASK = -16777216; // 0xff000000
@@ -23830,7 +23843,6 @@ package android.view {
     method public void requestDisallowInterceptTouchEvent(boolean);
     method public boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void requestTransparentRegion(android.view.View);
-    method protected void resetResolvedLayoutDirection();
     method public void scheduleLayoutAnimation();
     method public void setAddStatesFromChildren(boolean);
     method public void setAlwaysDrawnWithCacheEnabled(boolean);
@@ -23868,6 +23880,7 @@ package android.view {
     ctor public ViewGroup.LayoutParams(android.content.Context, android.util.AttributeSet);
     ctor public ViewGroup.LayoutParams(int, int);
     ctor public ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams);
+    method public void onResolveLayoutDirection(int);
     method protected void setBaseAttributes(android.content.res.TypedArray, int, int);
     field public static final deprecated int FILL_PARENT = -1; // 0xffffffff
     field public static final int MATCH_PARENT = -1; // 0xffffffff

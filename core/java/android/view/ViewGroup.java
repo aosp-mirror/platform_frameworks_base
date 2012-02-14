@@ -4920,7 +4920,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    protected void resetResolvedLayoutDirection() {
+    public void resetResolvedLayoutDirection() {
         super.resetResolvedLayoutDirection();
 
         // Take care of resetting the children resolution too
@@ -5123,10 +5123,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          *
          * {@link View#LAYOUT_DIRECTION_LTR}
          * {@link View#LAYOUT_DIRECTION_RTL}
-         *
-         * @hide
          */
-        protected void resolveWithDirection(int layoutDirection) {
+        public void onResolveLayoutDirection(int layoutDirection) {
         }
 
         /**
@@ -5377,12 +5375,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         /**
          * This will be called by {@link android.view.View#requestLayout()}. Left and Right margins
-         * maybe overriden depending on layout direction.
-         *
-         * @hide
+         * may be overridden depending on layout direction.
          */
         @Override
-        protected void resolveWithDirection(int layoutDirection) {
+        public void onResolveLayoutDirection(int layoutDirection) {
             switch(layoutDirection) {
                 case View.LAYOUT_DIRECTION_RTL:
                     leftMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : leftMargin;
