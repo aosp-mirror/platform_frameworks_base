@@ -711,8 +711,10 @@ package android {
     field public static final int packageNames = 16843649; // 0x1010381
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
+    field public static final int paddingEnd = 16843690; // 0x10103aa
     field public static final int paddingLeft = 16842966; // 0x10100d6
     field public static final int paddingRight = 16842968; // 0x10100d8
+    field public static final int paddingStart = 16843689; // 0x10103a9
     field public static final int paddingTop = 16842967; // 0x10100d7
     field public static final int panelBackground = 16842846; // 0x101005e
     field public static final int panelColorBackground = 16842849; // 0x1010061
@@ -23179,8 +23181,10 @@ package android.view {
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
     method public int getOverScrollMode();
     method public int getPaddingBottom();
+    method public int getPaddingEnd();
     method public int getPaddingLeft();
     method public int getPaddingRight();
+    method public int getPaddingStart();
     method public int getPaddingTop();
     method public final android.view.ViewParent getParent();
     method public float getPivotX();
@@ -23256,6 +23260,7 @@ package android.view {
     method public boolean isLongClickable();
     method public boolean isOpaque();
     method protected boolean isPaddingOffsetRequired();
+    method public boolean isPaddingRelative();
     method public boolean isPressed();
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
@@ -23399,6 +23404,7 @@ package android.view {
     method public void setOnTouchListener(android.view.View.OnTouchListener);
     method public void setOverScrollMode(int);
     method public void setPadding(int, int, int, int);
+    method public void setPaddingRelative(int, int, int, int);
     method public void setPivotX(float);
     method public void setPivotY(float);
     method public void setPressed(boolean);
