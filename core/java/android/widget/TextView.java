@@ -4637,19 +4637,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Alpha is supported if and only if the drawing can be done in one pass.
         // TODO text with spans with a background color currently do not respect this alpha.
         if (getBackground() == null) {
-            mCurrentAlpha = alpha;
-            final Drawables dr = mDrawables;
-            if (dr != null) {
-                if (dr.mDrawableLeft != null) dr.mDrawableLeft.mutate().setAlpha(alpha);
-                if (dr.mDrawableTop != null) dr.mDrawableTop.mutate().setAlpha(alpha);
-                if (dr.mDrawableRight != null) dr.mDrawableRight.mutate().setAlpha(alpha);
-                if (dr.mDrawableBottom != null) dr.mDrawableBottom.mutate().setAlpha(alpha);
-                if (dr.mDrawableStart != null) dr.mDrawableStart.mutate().setAlpha(alpha);
-                if (dr.mDrawableEnd != null) dr.mDrawableEnd.mutate().setAlpha(alpha);
+            if (mCurrentAlpha != alpha) {
+                mCurrentAlpha = alpha;
+                final Drawables dr = mDrawables;
+                if (dr != null) {
+                    if (dr.mDrawableLeft != null) dr.mDrawableLeft.mutate().setAlpha(alpha);
+                    if (dr.mDrawableTop != null) dr.mDrawableTop.mutate().setAlpha(alpha);
+                    if (dr.mDrawableRight != null) dr.mDrawableRight.mutate().setAlpha(alpha);
+                    if (dr.mDrawableBottom != null) dr.mDrawableBottom.mutate().setAlpha(alpha);
+                    if (dr.mDrawableStart != null) dr.mDrawableStart.mutate().setAlpha(alpha);
+                    if (dr.mDrawableEnd != null) dr.mDrawableEnd.mutate().setAlpha(alpha);
+                }
+                mTextDisplayListIsValid = false;
             }
             return true;
         }
 
+        if (mCurrentAlpha != 255) {
+            mTextDisplayListIsValid = false;
+        }
         mCurrentAlpha = 255;
         return false;
     }
