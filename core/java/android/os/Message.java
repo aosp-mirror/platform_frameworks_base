@@ -75,13 +75,13 @@ public final class Message implements Parcelable {
     public Messenger replyTo;
 
     /** If set message is in use */
-    /*package*/ static final int FLAG_IN_USE = 1;
+    /*package*/ static final int FLAG_IN_USE = 1 << 0;
 
-    /** Flags reserved for future use (All are reserved for now) */
-    /*package*/ static final int FLAGS_RESERVED = ~FLAG_IN_USE;
+    /** If set message is asynchronous */
+    /*package*/ static final int FLAG_ASYNCHRONOUS = 1 << 1;
 
     /** Flags to clear in the copyFrom method */
-    /*package*/ static final int FLAGS_TO_CLEAR_ON_COPY_FROM = FLAGS_RESERVED | FLAG_IN_USE;
+    /*package*/ static final int FLAGS_TO_CLEAR_ON_COPY_FROM = FLAG_IN_USE;
 
     /*package*/ int flags;
 
@@ -361,6 +361,48 @@ public final class Message implements Parcelable {
      */
     public void sendToTarget() {
         target.sendMessage(this);
+    }
+
+    /**
+     * Returns true if the message is asynchronous.
+     *
+     * Asynchronous messages represent interrupts or events that do not require global ordering
+     * with represent to synchronous messages.  Asynchronous messages are not subject to
+     * the synchronization barriers introduced by {@link MessageQueue#acquireSyncBarrier()}.
+     *
+     * @return True if the message is asynchronous.
+     *
+     * @see #setAsynchronous(boolean)
+     * @see MessageQueue#acquireSyncBarrier()
+     * @see MessageQueue#releaseSyncBarrier()
+     *
+     * @hide
+     */
+    public boolean isAsynchronous() {
+        return (flags & FLAG_ASYNCHRONOUS) != 0;
+    }
+
+    /**
+     * Sets whether the message is asynchronous.
+     *
+     * Asynchronous messages represent interrupts or events that do not require global ordering
+     * with represent to synchronous messages.  Asynchronous messages are not subject to
+     * the synchronization barriers introduced by {@link MessageQueue#acquireSyncBarrier()}.
+     *
+     * @param async True if the message is asynchronous.
+     *
+     * @see #isAsynchronous()
+     * @see MessageQueue#acquireSyncBarrier()
+     * @see MessageQueue#releaseSyncBarrier()
+     *
+     * @hide
+     */
+    public void setAsynchronous(boolean async) {
+        if (async) {
+            flags |= FLAG_ASYNCHRONOUS;
+        } else {
+            flags &= ~FLAG_ASYNCHRONOUS;
+        }
     }
 
     /*package*/ void clearForRecycle() {

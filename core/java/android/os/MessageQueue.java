@@ -39,6 +39,9 @@ public class MessageQueue {
     // Indicates whether next() is blocked waiting in pollOnce() with a non-zero timeout.
     private boolean mBlocked;
 
+    // Indicates the barrier nesting level.
+    private int mBarrierNestCount;
+
     @SuppressWarnings("unused")
     private int mPtr; // used by native code
     
@@ -93,7 +96,53 @@ public class MessageQueue {
             mIdleHandlers.remove(handler);
         }
     }
-    
+
+    /**
+     * Acquires a synchronization barrier.
+     *
+     * While a synchronization barrier is active, only asynchronous messages are
+     * permitted to execute.  Synchronous messages are retained but are not executed
+     * until the synchronization barrier is released.
+     *
+     * This method is used to immediately postpone execution of all synchronous messages
+     * until a condition is met that releases the barrier.  Asynchronous messages are
+     * exempt from the barrier and continue to be executed as usual.
+     *
+     * This call nests and must be matched by an equal number of calls to
+     * {@link #releaseSyncBarrier}.
+     *
+     * @hide
+     */
+    public final void acquireSyncBarrier() {
+        synchronized (this) {
+            mBarrierNestCount += 1;
+        }
+    }
+
+    /**
+     * Releases a synchronization barrier.
+     *
+     * This class undoes one invocation of {@link #acquireSyncBarrier}.
+     *
+     * @throws IllegalStateException if the barrier is not acquired.
+     *
+     * @hide
+     */
+    public final void releaseSyncBarrier() {
+        synchronized (this) {
+            if (mBarrierNestCount == 0) {
+                throw new IllegalStateException("The message queue synchronization barrier "
+                        + "has not been acquired.");
+            }
+
+            mBarrierNestCount -= 1;
+            if (!mBlocked || mMessages == null) {
+                return;
+            }
+        }
+        nativeWake(mPtr);
+    }
+
     MessageQueue() {
         nativeInit();
     }
@@ -120,28 +169,49 @@ public class MessageQueue {
             synchronized (this) {
                 // Try to retrieve the next message.  Return if found.
                 final long now = SystemClock.uptimeMillis();
-                final Message msg = mMessages;
-                if (msg != null) {
+
+                Message prevMsg = null;
+                Message msg = mMessages;
+                for (;;) {
+                    if (msg == null) {
+                        // No more messages.
+                        nextPollTimeoutMillis = -1;
+                        break;
+                    }
+
                     final long when = msg.when;
-                    if (now >= when) {
+                    if (now < when) {
+                        // Next message is not ready.  Set a timeout to wake up when it is ready.
+                        nextPollTimeoutMillis = (int) Math.min(when - now, Integer.MAX_VALUE);
+                        break;
+                    }
+
+                    if (mBarrierNestCount == 0 || msg.isAsynchronous()) {
+                        // Got a message.
                         mBlocked = false;
-                        mMessages = msg.next;
+                        if (prevMsg != null) {
+                            prevMsg.next = msg.next;
+                        } else {
+                            mMessages = msg.next;
+                        }
                         msg.next = null;
                         if (false) Log.v("MessageQueue", "Returning message: " + msg);
                         msg.markInUse();
                         return msg;
-                    } else {
-                        nextPollTimeoutMillis = (int) Math.min(when - now, Integer.MAX_VALUE);
                     }
-                } else {
-                    nextPollTimeoutMillis = -1;
+
+                    // We have a message that we could return except that it is
+                    // blocked by the sync barrier.  In particular, this means that
+                    // we are not idle yet, so we do not want to run the idle handlers.
+                    prevMsg = msg;
+                    msg = msg.next;
                 }
 
-                // If first time, then get the number of idlers to run.
-                if (pendingIdleHandlerCount < 0) {
+                // If first time idle, then get the number of idlers to run.
+                if (pendingIdleHandlerCount < 0 && msg == mMessages) {
                     pendingIdleHandlerCount = mIdleHandlers.size();
                 }
-                if (pendingIdleHandlerCount == 0) {
+                if (pendingIdleHandlerCount <= 0) {
                     // No idle handlers to run.  Loop and wait some more.
                     mBlocked = true;
                     continue;
@@ -205,10 +275,15 @@ public class MessageQueue {
             //Log.d("MessageQueue", "Enqueing: " + msg);
             Message p = mMessages;
             if (p == null || when == 0 || when < p.when) {
+                // New head, wake up the event queue if blocked.
                 msg.next = p;
                 mMessages = msg;
-                needWake = mBlocked; // new head, might need to wake up
+                needWake = mBlocked;
             } else {
+                // Inserted within the middle of the queue.  Usually we don't have to wake
+                // up the event queue unless the message is asynchronous and it might be
+                // possible for it to be returned out of sequence relative to an earlier
+                // synchronous message at the head of the queue.
                 Message prev = null;
                 while (p != null && p.when <= when) {
                     prev = p;
@@ -216,7 +291,8 @@ public class MessageQueue {
                 }
                 msg.next = prev.next;
                 prev.next = msg;
-                needWake = false; // still waiting on head, no need to wake up
+                needWake = mBlocked && mBarrierNestCount != 0 && msg.isAsynchronous()
+                        && !mMessages.isAsynchronous();
             }
         }
         if (needWake) {
