@@ -98,6 +98,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebTextView.AutoCompleteAdapter;
 import android.webkit.WebViewCore.DrawData;
 import android.webkit.WebViewCore.EventHub;
+import android.webkit.WebViewCore.TextFieldInitData;
 import android.webkit.WebViewCore.TouchEventData;
 import android.webkit.WebViewCore.TouchHighlightData;
 import android.webkit.WebViewCore.WebKitHitTest;
@@ -371,6 +372,9 @@ public class WebView extends AbsoluteLayout
         // Used for mapping characters to keys typed.
         private KeyCharacterMap mKeyCharacterMap;
         private boolean mIsKeySentByMe;
+        private int mInputType;
+        private int mImeOptions;
+        private String mHint;
 
         public WebViewInputConnection() {
             super(WebView.this, true);
@@ -450,6 +454,77 @@ public class WebView extends AbsoluteLayout
                     cursorPosition + rightLength);
             setNewText(startDelete, endDelete, "");
             return super.deleteSurroundingText(leftLength, rightLength);
+        }
+
+        public void initEditorInfo(WebViewCore.TextFieldInitData initData) {
+            int type = initData.mType;
+            int inputType = InputType.TYPE_CLASS_TEXT
+                    | InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
+            int imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
+                    | EditorInfo.IME_FLAG_NO_FULLSCREEN;
+            if (!initData.mIsSpellCheckEnabled) {
+                inputType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+            }
+            if (WebTextView.TEXT_AREA != type
+                    && initData.mIsTextFieldNext) {
+                imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
+            }
+            switch (type) {
+                case WebTextView.NORMAL_TEXT_FIELD:
+                    imeOptions |= EditorInfo.IME_ACTION_GO;
+                    break;
+                case WebTextView.TEXT_AREA:
+                    inputType |= InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                            | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                            | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+                    imeOptions |= EditorInfo.IME_ACTION_NONE;
+                    break;
+                case WebTextView.PASSWORD:
+                    inputType |= EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD;
+                    imeOptions |= EditorInfo.IME_ACTION_GO;
+                    break;
+                case WebTextView.SEARCH:
+                    imeOptions |= EditorInfo.IME_ACTION_SEARCH;
+                    break;
+                case WebTextView.EMAIL:
+                    // inputType needs to be overwritten because of the different text variation.
+                    inputType = InputType.TYPE_CLASS_TEXT
+                            | InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS;
+                    imeOptions |= EditorInfo.IME_ACTION_GO;
+                    break;
+                case WebTextView.NUMBER:
+                    // inputType needs to be overwritten because of the different class.
+                    inputType = InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL
+                            | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL;
+                    // Number and telephone do not have both a Tab key and an
+                    // action, so set the action to NEXT
+                    imeOptions |= EditorInfo.IME_ACTION_NEXT;
+                    break;
+                case WebTextView.TELEPHONE:
+                    // inputType needs to be overwritten because of the different class.
+                    inputType = InputType.TYPE_CLASS_PHONE;
+                    imeOptions |= EditorInfo.IME_ACTION_NEXT;
+                    break;
+                case WebTextView.URL:
+                    // TYPE_TEXT_VARIATION_URI prevents Tab key from showing, so
+                    // exclude it for now.
+                    imeOptions |= EditorInfo.IME_ACTION_GO;
+                    inputType |= InputType.TYPE_TEXT_VARIATION_URI;
+                    break;
+                default:
+                    imeOptions |= EditorInfo.IME_ACTION_GO;
+                    break;
+            }
+            mHint = initData.mLabel;
+            mInputType = inputType;
+            mImeOptions = imeOptions;
+        }
+
+        public void setupEditorInfo(EditorInfo outAttrs) {
+            outAttrs.inputType = mInputType;
+            outAttrs.imeOptions = mImeOptions;
+            outAttrs.hintText = mHint;
+            outAttrs.initialCapsMode = getCursorCapsMode(InputType.TYPE_CLASS_TEXT);
         }
 
         /**
@@ -5159,18 +5234,10 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        outAttrs.inputType = EditorInfo.IME_FLAG_NO_FULLSCREEN
-                | EditorInfo.TYPE_CLASS_TEXT
-                | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
-                | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
-                | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT
-                | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES;
-        outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
-
         if (mInputConnection == null) {
             mInputConnection = new WebViewInputConnection();
         }
-        outAttrs.initialCapsMode = mInputConnection.getCursorCapsMode(InputType.TYPE_CLASS_TEXT);
+        mInputConnection.setupEditorInfo(outAttrs);
         return mInputConnection;
     }
 
@@ -9081,9 +9148,11 @@ public class WebView extends AbsoluteLayout
 
                 case INIT_EDIT_FIELD:
                     if (mInputConnection != null) {
+                        TextFieldInitData initData = (TextFieldInitData) msg.obj;
                         mTextGeneration = 0;
-                        mFieldPointer = msg.arg1;
-                        mInputConnection.setTextAndKeepSelection((String) msg.obj);
+                        mFieldPointer = initData.mFieldPointer;
+                        mInputConnection.initEditorInfo(initData);
+                        mInputConnection.setTextAndKeepSelection(initData.mText);
                     }
                     break;
 

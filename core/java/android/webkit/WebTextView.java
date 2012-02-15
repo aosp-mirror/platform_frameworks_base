@@ -160,14 +160,14 @@ import java.util.ArrayList;
     private MyResultReceiver mReceiver;
 
     // Types used with setType.  Keep in sync with CachedInput.h
-    private static final int NORMAL_TEXT_FIELD = 0;
-    private static final int TEXT_AREA = 1;
-    private static final int PASSWORD = 2;
-    private static final int SEARCH = 3;
-    private static final int EMAIL = 4;
-    private static final int NUMBER = 5;
-    private static final int TELEPHONE = 6;
-    private static final int URL = 7;
+    static final int NORMAL_TEXT_FIELD = 0;
+    static final int TEXT_AREA = 1;
+    static final int PASSWORD = 2;
+    static final int SEARCH = 3;
+    static final int EMAIL = 4;
+    static final int NUMBER = 5;
+    static final int TELEPHONE = 6;
+    static final int URL = 7;
 
     private static final int AUTOFILL_FORM = 100;
     private Handler mHandler;

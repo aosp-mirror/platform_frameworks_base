@@ -919,6 +919,25 @@ public final class WebViewCore {
         private String mPreview;
     }
 
+    static class TextFieldInitData {
+        public TextFieldInitData(int fieldPointer,
+                String text, int type, boolean isSpellCheckEnabled,
+                boolean isTextFieldNext, String label) {
+            mFieldPointer = fieldPointer;
+            mText = text;
+            mType = type;
+            mIsSpellCheckEnabled = isSpellCheckEnabled;
+            mIsTextFieldNext = isTextFieldNext;
+            mLabel = label;
+        }
+        int mFieldPointer;
+        String mText;
+        int mType;
+        boolean mIsSpellCheckEnabled;
+        boolean mIsTextFieldNext;
+        String mLabel;
+    }
+
     // mAction of TouchEventData can be MotionEvent.getAction() which uses the
     // last two bytes or one of the following values
     static final int ACTION_LONGPRESS = 0x100;
@@ -2813,12 +2832,16 @@ public final class WebViewCore {
     }
 
     // called by JNI
-    private void initEditField(int pointer, String text, int start, int end) {
+    private void initEditField(int pointer, String text, int inputType,
+            boolean isSpellCheckEnabled, boolean nextFieldIsText,
+            String label, int start, int end) {
         if (mWebView == null) {
             return;
         }
+        TextFieldInitData initData = new TextFieldInitData(pointer,
+                text, inputType, isSpellCheckEnabled, nextFieldIsText, label);
         Message.obtain(mWebView.mPrivateHandler,
-                WebView.INIT_EDIT_FIELD, pointer, 0, text).sendToTarget();
+                WebView.INIT_EDIT_FIELD, initData).sendToTarget();
         Message.obtain(mWebView.mPrivateHandler,
                 WebView.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
                 0, new TextSelectionData(start, end, 0))
