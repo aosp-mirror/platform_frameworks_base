@@ -31,10 +31,10 @@ void API_ENTRY(glDrawTexfOES)(GLfloat x, GLfloat y, GLfloat z, GLfloat width, GL
 void API_ENTRY(glDrawTexfvOES)(const GLfloat *coords) {
     CALL_GL_API(glDrawTexfvOES, coords);
 }
-void API_ENTRY(__glEGLImageTargetTexture2DOES)(GLenum target, GLeglImageOES image) {
+void API_ENTRY(glEGLImageTargetTexture2DOES)(GLenum target, GLeglImageOES image) {
     CALL_GL_API(glEGLImageTargetTexture2DOES, target, image);
 }
-void API_ENTRY(__glEGLImageTargetRenderbufferStorageOES)(GLenum target, GLeglImageOES image) {
+void API_ENTRY(glEGLImageTargetRenderbufferStorageOES)(GLenum target, GLeglImageOES image) {
     CALL_GL_API(glEGLImageTargetRenderbufferStorageOES, target, image);
 }
 void API_ENTRY(glAlphaFuncxOES)(GLenum func, GLclampx ref) {

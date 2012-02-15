@@ -627,29 +627,6 @@ EGLint eglGetError(void)
     return err;
 }
 
-// Note: Similar implementations of these functions also exist in
-// gl2.cpp and gl.cpp, and are used by applications that call the
-// exported entry points directly.
-typedef void (GL_APIENTRYP PFNGLEGLIMAGETARGETTEXTURE2DOESPROC) (GLenum target, GLeglImageOES image);
-typedef void (GL_APIENTRYP PFNGLEGLIMAGETARGETRENDERBUFFERSTORAGEOESPROC) (GLenum target, GLeglImageOES image);
-
-static PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES_impl = NULL;
-static PFNGLEGLIMAGETARGETRENDERBUFFERSTORAGEOESPROC glEGLImageTargetRenderbufferStorageOES_impl = NULL;
-
-static void glEGLImageTargetTexture2DOES_wrapper(GLenum target, GLeglImageOES image)
-{
-    GLeglImageOES implImage =
-        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
-    glEGLImageTargetTexture2DOES_impl(target, implImage);
-}
-
-static void glEGLImageTargetRenderbufferStorageOES_wrapper(GLenum target, GLeglImageOES image)
-{
-    GLeglImageOES implImage =
-        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
-    glEGLImageTargetRenderbufferStorageOES_impl(target, implImage);
-}
-
 __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
 {
     // eglGetProcAddress() could be the very first function called
@@ -724,16 +701,6 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
 
             if (found) {
                 addr = gExtensionForwarders[slot];
-
-                if (!strcmp(procname, "glEGLImageTargetTexture2DOES")) {
-                    glEGLImageTargetTexture2DOES_impl = (PFNGLEGLIMAGETARGETTEXTURE2DOESPROC)addr;
-                    addr = (__eglMustCastToProperFunctionPointerType)glEGLImageTargetTexture2DOES_wrapper;
-                }
-                if (!strcmp(procname, "glEGLImageTargetRenderbufferStorageOES")) {
-                    glEGLImageTargetRenderbufferStorageOES_impl = (PFNGLEGLIMAGETARGETRENDERBUFFERSTORAGEOESPROC)addr;
-                    addr = (__eglMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES_wrapper;
-                }
-
                 sGLExtentionMap.add(name, addr);
                 sGLExtentionSlot++;
             }
@@ -1024,57 +991,18 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
     egl_display_t const * const dp = validate_display(dpy);
     if (!dp) return EGL_NO_IMAGE_KHR;
 
-    if (ctx != EGL_NO_CONTEXT) {
-        ContextRef _c(dp, ctx);
-        if (!_c.get())
-            return setError(EGL_BAD_CONTEXT, EGL_NO_IMAGE_KHR);
-        egl_context_t * const c = get_context(ctx);
-        // since we have an EGLContext, we know which implementation to use
-        EGLImageKHR image = c->cnx->egl.eglCreateImageKHR(
-                dp->disp.dpy, c->context, target, buffer, attrib_list);
-        if (image == EGL_NO_IMAGE_KHR)
-            return image;
-            
-        egl_image_t* result = new egl_image_t(dpy, ctx);
-        result->image = image;
-        return (EGLImageKHR)result;
-    } else {
-        // EGL_NO_CONTEXT is a valid parameter
+    ContextRef _c(dp, ctx);
+    egl_context_t * const c = _c.get();
 
-        /* Since we don't have a way to know which implementation to call,
-         * we're calling all of them. If at least one of the implementation
-         * succeeded, this is a success.
-         */
-
-        EGLint currentError = eglGetError();
-
-        EGLImageKHR implImage = EGL_NO_IMAGE_KHR;
-        egl_connection_t* const cnx = &gEGLImpl;
-        if (cnx->dso && cnx->egl.eglCreateImageKHR) {
-            implImage = cnx->egl.eglCreateImageKHR(
-                    dp->disp.dpy, ctx, target, buffer, attrib_list);
-        }
-
-        if (implImage == EGL_NO_IMAGE_KHR) {
-            // failure, if there was an error when we entered this function,
-            // the error flag must not be updated.
-            // Otherwise, the error is whatever happened in the implementation
-            // that faulted.
-            if (currentError != EGL_SUCCESS) {
-                setError(currentError, EGL_NO_IMAGE_KHR);
-            }
-            return EGL_NO_IMAGE_KHR;
-        } else {
-            // In case of success, we need to clear all error flags
-            // (especially those caused by the implementation that didn't
-            // succeed).
-            eglGetError();
-        }
-
-        egl_image_t* result = new egl_image_t(dpy, ctx);
-        result->image = implImage;
-        return (EGLImageKHR)result;
+    EGLImageKHR result = EGL_NO_IMAGE_KHR;
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso && cnx->egl.eglCreateImageKHR) {
+        result = cnx->egl.eglCreateImageKHR(
+                dp->disp.dpy,
+                c ? c->context : EGL_NO_CONTEXT,
+                target, buffer, attrib_list);
     }
+    return result;
 }
 
 EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
@@ -1084,27 +1012,10 @@ EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
     egl_display_t const * const dp = validate_display(dpy);
     if (!dp) return EGL_FALSE;
 
-    ImageRef _i(dp, img);
-    if (!_i.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
-
-    egl_image_t* image = get_image(img);
-    bool success = false;
-
     egl_connection_t* const cnx = &gEGLImpl;
-    if (image->image != EGL_NO_IMAGE_KHR) {
-        if (cnx->dso && cnx->egl.eglDestroyImageKHR) {
-            if (cnx->egl.eglDestroyImageKHR(
-                    dp->disp.dpy, image->image)) {
-                success = true;
-            }
-        }
+    if (cnx->dso && cnx->egl.eglDestroyImageKHR) {
+        cnx->egl.eglDestroyImageKHR(dp->disp.dpy, img);
     }
-
-    if (!success)
-        return EGL_FALSE;
-
-    _i.terminate();
-
     return EGL_TRUE;
 }
 
@@ -1120,21 +1031,12 @@ EGLSyncKHR eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_l
     egl_display_t const * const dp = validate_display(dpy);
     if (!dp) return EGL_NO_SYNC_KHR;
 
-    EGLContext ctx = eglGetCurrentContext();
-    ContextRef _c(dp, ctx);
-    if (!_c.get())
-        return setError(EGL_BAD_CONTEXT, EGL_NO_SYNC_KHR);
-
-    egl_context_t * const c = get_context(ctx);
     EGLSyncKHR result = EGL_NO_SYNC_KHR;
-    if (c->cnx->egl.eglCreateSyncKHR) {
-        EGLSyncKHR sync = c->cnx->egl.eglCreateSyncKHR(
-                dp->disp.dpy, type, attrib_list);
-        if (sync == EGL_NO_SYNC_KHR)
-            return sync;
-        result = (egl_sync_t*)new egl_sync_t(dpy, ctx, sync);
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso && cnx->egl.eglCreateSyncKHR) {
+        result = cnx->egl.eglCreateSyncKHR(dp->disp.dpy, type, attrib_list);
     }
-    return (EGLSyncKHR)result;
+    return result;
 }
 
 EGLBoolean eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
@@ -1144,75 +1046,46 @@ EGLBoolean eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
     egl_display_t const * const dp = validate_display(dpy);
     if (!dp) return EGL_FALSE;
 
-    SyncRef _s(dp, sync);
-    if (!_s.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
-    egl_sync_t* syncObject = get_sync(sync);
-
-    EGLContext ctx = syncObject->context;
-    ContextRef _c(dp, ctx);
-    if (!_c.get())
-        return setError(EGL_BAD_CONTEXT, EGL_FALSE);
-
     EGLBoolean result = EGL_FALSE;
-    egl_context_t * const c = get_context(ctx);
-    if (c->cnx->egl.eglDestroySyncKHR) {
-        result = c->cnx->egl.eglDestroySyncKHR(
-                dp->disp.dpy, syncObject->sync);
-        if (result)
-            _s.terminate();
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso && cnx->egl.eglDestroySyncKHR) {
+        result = cnx->egl.eglDestroySyncKHR(dp->disp.dpy, sync);
     }
     return result;
 }
 
-EGLint eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)
+EGLint eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync,
+        EGLint flags, EGLTimeKHR timeout)
 {
     clearError();
 
     egl_display_t const * const dp = validate_display(dpy);
     if (!dp) return EGL_FALSE;
 
-    SyncRef _s(dp, sync);
-    if (!_s.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
-    egl_sync_t* syncObject = get_sync(sync);
-
-    EGLContext ctx = syncObject->context;
-    ContextRef _c(dp, ctx);
-    if (!_c.get())
-        return setError(EGL_BAD_CONTEXT, EGL_FALSE);
-
-    egl_context_t * const c = get_context(ctx);
-    if (c->cnx->egl.eglClientWaitSyncKHR) {
-        return c->cnx->egl.eglClientWaitSyncKHR(
-                dp->disp.dpy, syncObject->sync, flags, timeout);
+    EGLBoolean result = EGL_FALSE;
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso && cnx->egl.eglClientWaitSyncKHR) {
+        result = cnx->egl.eglClientWaitSyncKHR(
+                dp->disp.dpy, sync, flags, timeout);
     }
-
-    return EGL_FALSE;
+    return result;
 }
 
-EGLBoolean eglGetSyncAttribKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint attribute, EGLint *value)
+EGLBoolean eglGetSyncAttribKHR(EGLDisplay dpy, EGLSyncKHR sync,
+        EGLint attribute, EGLint *value)
 {
     clearError();
 
     egl_display_t const * const dp = validate_display(dpy);
     if (!dp) return EGL_FALSE;
 
-    SyncRef _s(dp, sync);
-    if (!_s.get())
-        return setError(EGL_BAD_PARAMETER, EGL_FALSE);
-
-    egl_sync_t* syncObject = get_sync(sync);
-    EGLContext ctx = syncObject->context;
-    ContextRef _c(dp, ctx);
-    if (!_c.get())
-        return setError(EGL_BAD_CONTEXT, EGL_FALSE);
-
-    egl_context_t * const c = get_context(ctx);
-    if (c->cnx->egl.eglGetSyncAttribKHR) {
-        return c->cnx->egl.eglGetSyncAttribKHR(
-                dp->disp.dpy, syncObject->sync, attribute, value);
+    EGLBoolean result = EGL_FALSE;
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso && cnx->egl.eglGetSyncAttribKHR) {
+        result = cnx->egl.eglGetSyncAttribKHR(
+                dp->disp.dpy, sync, attribute, value);
     }
-
-    return EGL_FALSE;
+    return result;
 }
 
 // ----------------------------------------------------------------------------

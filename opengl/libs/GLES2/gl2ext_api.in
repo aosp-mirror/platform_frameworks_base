@@ -1,7 +1,7 @@
-void API_ENTRY(__glEGLImageTargetTexture2DOES)(GLenum target, GLeglImageOES image) {
+void API_ENTRY(glEGLImageTargetTexture2DOES)(GLenum target, GLeglImageOES image) {
     CALL_GL_API(glEGLImageTargetTexture2DOES, target, image);
 }
-void API_ENTRY(__glEGLImageTargetRenderbufferStorageOES)(GLenum target, GLeglImageOES image) {
+void API_ENTRY(glEGLImageTargetRenderbufferStorageOES)(GLenum target, GLeglImageOES image) {
     CALL_GL_API(glEGLImageTargetRenderbufferStorageOES, target, image);
 }
 void API_ENTRY(glGetProgramBinaryOES)(GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, GLvoid *binary) {

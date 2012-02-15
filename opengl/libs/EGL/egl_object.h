@@ -173,40 +173,10 @@ public:
     String8 gl_extensions;
 };
 
-class egl_image_t: public egl_object_t {
-protected:
-    ~egl_image_t() {}
-public:
-    typedef egl_object_t::LocalRef<egl_image_t, EGLImageKHR> Ref;
-
-    egl_image_t(EGLDisplay dpy, EGLContext context) :
-        egl_object_t(get_display(dpy)),
-        dpy(dpy), context(context), image(EGL_NO_IMAGE_KHR) { }
-    EGLDisplay dpy;
-    EGLContext context;
-    EGLImageKHR image;
-};
-
-class egl_sync_t: public egl_object_t {
-protected:
-    ~egl_sync_t() {}
-public:
-    typedef egl_object_t::LocalRef<egl_sync_t, EGLSyncKHR> Ref;
-
-    egl_sync_t(EGLDisplay dpy, EGLContext context, EGLSyncKHR sync) :
-        egl_object_t(get_display(dpy)), dpy(dpy), context(context), sync(sync) {
-    }
-    EGLDisplay dpy;
-    EGLContext context;
-    EGLSyncKHR sync;
-};
-
 // ----------------------------------------------------------------------------
 
 typedef egl_surface_t::Ref  SurfaceRef;
 typedef egl_context_t::Ref  ContextRef;
-typedef egl_image_t::Ref    ImageRef;
-typedef egl_sync_t::Ref     SyncRef;
 
 // ----------------------------------------------------------------------------
 
@@ -223,16 +193,6 @@ egl_surface_t* get_surface(EGLSurface surface) {
 static inline
 egl_context_t* get_context(EGLContext context) {
     return egl_to_native_cast<egl_context_t>(context);
-}
-
-static inline
-egl_image_t* get_image(EGLImageKHR image) {
-    return egl_to_native_cast<egl_image_t>(image);
-}
-
-static inline
-egl_sync_t* get_sync(EGLSyncKHR sync) {
-    return egl_to_native_cast<egl_sync_t>(sync);
 }
 
 // ----------------------------------------------------------------------------

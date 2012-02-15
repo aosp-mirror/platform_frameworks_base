@@ -37,12 +37,6 @@ while (my $line = <>) {
   #printf("%s", $line);
   
   my $prefix = "";
-  if ($name eq "glEGLImageTargetTexture2DOES") {
-    $prefix = "__";
-  }
-  if ($name eq "glEGLImageTargetRenderbufferStorageOES") {
-    $prefix = "__";
-  }
   if ($name eq "glGetString") {
     $prefix = "__";
   }
