@@ -109,8 +109,12 @@ public abstract class HardwareRenderer {
 
     /**
      * Turn on to draw dirty regions every other frame.
+     *
+     * Possible values:
+     * "true", to enable dirty regions debugging
+     * "false", to disable dirty regions debugging
      */
-    private static final boolean DEBUG_DIRTY_REGION = false;
+    static final String DEBUG_DIRTY_REGIONS_PROPERTY = "hwui.debug_dirty_regions";
     
     /**
      * A process can set this flag to false to prevent the use of hardware
@@ -491,6 +495,8 @@ public abstract class HardwareRenderer {
         final boolean mProfileEnabled;
         final float[] mProfileData;
         int mProfileCurrentFrame = -PROFILE_FRAME_DATA_COUNT;
+        
+        final boolean mDebugDirtyRegions;
 
         final int mGlVersion;
         final boolean mTranslucent;
@@ -502,17 +508,19 @@ public abstract class HardwareRenderer {
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
             mTranslucent = translucent;
+            
+            String property;
 
-            final String vsyncProperty = SystemProperties.get(DISABLE_VSYNC_PROPERTY, "false");
-            mVsyncDisabled = "true".equalsIgnoreCase(vsyncProperty);
+            property = SystemProperties.get(DISABLE_VSYNC_PROPERTY, "false");
+            mVsyncDisabled = "true".equalsIgnoreCase(property);
             if (mVsyncDisabled) {
                 Log.d(LOG_TAG, "Disabling v-sync");
             }
 
             //noinspection PointlessBooleanExpression,ConstantConditions
             if (!ViewDebug.DEBUG_LATENCY) {
-                final String profileProperty = SystemProperties.get(PROFILE_PROPERTY, "false");
-                mProfileEnabled = "true".equalsIgnoreCase(profileProperty);
+                property = SystemProperties.get(PROFILE_PROPERTY, "false");
+                mProfileEnabled = "true".equalsIgnoreCase(property);
                 if (mProfileEnabled) {
                     Log.d(LOG_TAG, "Profiling hardware renderer");
                 }
@@ -524,6 +532,12 @@ public abstract class HardwareRenderer {
                 mProfileData = new float[PROFILE_MAX_FRAMES * PROFILE_FRAME_DATA_COUNT];
             } else {
                 mProfileData = null;
+            }
+
+            property = SystemProperties.get(DEBUG_DIRTY_REGIONS_PROPERTY, "false");
+            mDebugDirtyRegions = "true".equalsIgnoreCase(property);
+            if (mDebugDirtyRegions) {
+                Log.d(LOG_TAG, "Debugging dirty regions");
             }
         }
 
@@ -981,8 +995,12 @@ public abstract class HardwareRenderer {
                             // Shouldn't reach here
                             view.draw(canvas);
                         }
+                    } finally {
+                        callbacks.onHardwarePostDraw(canvas);
+                        canvas.restoreToCount(saveCount);
+                        view.mRecreateDisplayList = false;
 
-                        if (DEBUG_DIRTY_REGION) {
+                        if (mDebugDirtyRegions) {
                             if (mDebugPaint == null) {
                                 mDebugPaint = new Paint();
                                 mDebugPaint.setColor(0x7fff0000);
@@ -991,10 +1009,6 @@ public abstract class HardwareRenderer {
                                 canvas.drawRect(dirty, mDebugPaint);
                             }
                         }
-                    } finally {
-                        callbacks.onHardwarePostDraw(canvas);
-                        canvas.restoreToCount(saveCount);
-                        view.mRecreateDisplayList = false;
                     }
 
                     onPostDraw();
