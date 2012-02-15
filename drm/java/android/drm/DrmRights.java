@@ -103,6 +103,11 @@ public class DrmRights {
         }
 
         mMimeType = mimeType;
+        if (!isValid()) {
+            final String msg = "mimeType: " + mMimeType + "," +
+                               "data: " + mData;
+            throw new IllegalArgumentException(msg);
+        }
     }
 
     /**
@@ -117,17 +122,25 @@ public class DrmRights {
             mData = data.getData();
 
             String accountId = data.getAccountId();
-            if (null != accountId && !accountId.equals("")) {
-                mAccountId = accountId;
+            if (null == accountId || !accountId.equals("")) {
+                throw new IllegalArgumentException("accountId: " + accountId);
             }
+            mAccountId = accountId;
 
             String subscriptionId = data.getSubscriptionId();
-            if (null != subscriptionId && !subscriptionId.equals("")) {
-                mSubscriptionId = subscriptionId;
+            if (null == subscriptionId || !subscriptionId.equals("")) {
+                throw new IllegalArgumentException(
+                            "subscriptionId: " + subscriptionId);
             }
+            mSubscriptionId = subscriptionId;
         }
 
         mMimeType = mimeType;
+        if (!isValid()) {
+            final String msg = "mimeType: " + mMimeType + "," +
+                               "data: " + mData;
+            throw new IllegalArgumentException(msg);
+        }
     }
 
     /**

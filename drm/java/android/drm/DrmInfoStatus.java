@@ -56,6 +56,10 @@ public class DrmInfoStatus {
      * @param _mimeType The MIME type.
      */
     public DrmInfoStatus(int _statusCode, int _infoType, ProcessedData _data, String _mimeType) {
+        if (!DrmInfoRequest.isValidType(_infoType)) {
+            throw new IllegalArgumentException("infoType: " + _infoType);
+        }
+
         statusCode = _statusCode;
         infoType = _infoType;
         data = _data;

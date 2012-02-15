@@ -49,6 +49,13 @@ public class DrmInfo {
         mInfoType = infoType;
         mMimeType = mimeType;
         mData = data;
+        if (!isValid()) {
+            final String msg = "infoType: " + infoType + "," +
+                               "mimeType: " + mimeType + "," +
+                               "data: " + data;
+
+            throw new IllegalArgumentException(msg);
+        }
     }
 
     /**
@@ -68,6 +75,13 @@ public class DrmInfo {
             // set mData = null, so that further processDrmInfo()
             // call would fail with IllegalArgumentException because of mData = null
             mData = null;
+        }
+        if (!isValid()) {
+            final String msg = "infoType: " + infoType + "," +
+                               "mimeType: " + mimeType + "," +
+                               "data: " + mData;
+
+            throw new IllegalArgumentException();
         }
     }
 
