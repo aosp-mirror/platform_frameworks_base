@@ -3788,6 +3788,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             onFocusChanged(false, 0, null);
             refreshDrawableState();
+
+            // The view cleared focus and invoked the callbacks, so  now is the
+            // time to give focus to the the first focusable from the top to
+            // ensure that the gain focus is announced after clear focus.
+            getRootView().requestFocus(FOCUS_FORWARD);
         }
     }
 
