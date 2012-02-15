@@ -416,36 +416,7 @@ bool SurfaceTexture::isSynchronousMode() const {
     return mSynchronousMode;
 }
 
-int SurfaceTexture::query(int what, int* outValue)
-{
-    Mutex::Autolock lock(mMutex);
 
-    if (mAbandoned) {
-        ST_LOGE("query: SurfaceTexture has been abandoned!");
-        return NO_INIT;
-    }
-
-    int value;
-    switch (what) {
-    case NATIVE_WINDOW_WIDTH:
-        value = mDefaultWidth;
-        break;
-    case NATIVE_WINDOW_HEIGHT:
-        value = mDefaultHeight;
-        break;
-    case NATIVE_WINDOW_FORMAT:
-        value = mPixelFormat;
-        break;
-    case NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS:
-        value = mSynchronousMode ?
-                (MIN_UNDEQUEUED_BUFFERS-1) : MIN_UNDEQUEUED_BUFFERS;
-        break;
-    default:
-        return BAD_VALUE;
-    }
-    outValue[0] = value;
-    return NO_ERROR;
-}
 
 void SurfaceTexture::abandon() {
     Mutex::Autolock lock(mMutex);

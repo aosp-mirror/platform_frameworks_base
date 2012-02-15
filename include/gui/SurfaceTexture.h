@@ -55,7 +55,7 @@ public:
 
     virtual ~SurfaceTexture();
 
-    virtual int query(int what, int* value);
+
 
     // updateTexImage sets the image contents of the target texture to that of
     // the most recently queued buffer.

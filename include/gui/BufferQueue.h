@@ -60,6 +60,8 @@ public:
     BufferQueue(bool allowSynchronousMode = true);
     virtual ~BufferQueue();
 
+    virtual int query(int what, int* value);
+
     // setBufferCount updates the number of available buffer slots.  After
     // calling this all buffer slots are both unallocated and owned by the
     // BufferQueue object (i.e. they are not owned by the client).
