@@ -1418,12 +1418,6 @@
     <skip />
     <!-- no translation found for wifi_watchdog_network_disabled_detailed (5548780776418332675) -->
     <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2909250942299627244) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (3763669677935623084) -->
-    <skip />
     <!-- no translation found for accept (1645267259272829559) -->
     <skip />
     <!-- no translation found for decline (2112225451706137894) -->
@@ -1439,10 +1433,6 @@
     <!-- no translation found for wifi_p2p_enter_pin_message (5920929550367828970) -->
     <skip />
     <!-- no translation found for wifi_p2p_show_pin_message (8530563323880921094) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_title (2068321881673734886) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_enabled_notification_message (1638949953993894335) -->
     <skip />
     <string name="select_character" msgid="3365550120617701745">"Inserir in caracter"</string>
     <!-- no translation found for sms_control_default_app_name (3058577482636640465) -->

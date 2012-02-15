@@ -973,9 +973,6 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ወደ Wi-Fi ለማያያዝ አልተቻለም"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ደካማ የበይነመረብ ግንኙነት ኣለው።"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi ቀጥታ"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"የWi-Fi በቀጥታ  ጀምር።ይህ የWi-Fi ደንበኛ /ድረስ ነጥብ  ያጠፋል።"</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"በቀጥታ Wi-Fi ማስጀመር አልተቻለም።"</string>
     <string name="accept" msgid="1645267259272829559">"ተቀበል"</string>
     <string name="decline" msgid="2112225451706137894">"ውድቅ አድርግ"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"ግብዣ ተልኳል"</string>
@@ -984,8 +981,6 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"ለ፦"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"የሚፈለገውን ፒን ተይብ፦"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ፒን፦"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"የWi-Fi ቀጥታ በርቷል"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"ለቅንብሮች ንካ"</string>
     <string name="select_character" msgid="3365550120617701745">"ቁምፊ አስገባ"</string>
     <string name="sms_control_default_app_name" msgid="3058577482636640465">"ያልታወቀ መተግበሪያ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"የSMS መልዕክቶች መበላክ ላይ"</string>

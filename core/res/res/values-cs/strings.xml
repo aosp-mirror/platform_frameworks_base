@@ -973,9 +973,6 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Připojení k síti Wi-Fi se nezdařilo"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" má pomalé připojení k internetu."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Přímé připojení sítě Wi-Fi"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Spustit přímé připojení sítě Wi-Fi. Tato možnost vypne provoz sítě Wi-Fi v režimu klient/hotspot."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Přímé připojení sítě Wi-Fi se nepodařilo spustit."</string>
     <string name="accept" msgid="1645267259272829559">"Přijmout"</string>
     <string name="decline" msgid="2112225451706137894">"Odmítnout"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Pozvánka odeslána."</string>
@@ -984,8 +981,6 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Komu:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Zadejte požadovaný kód PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Přímé připojení sítě Wi-Fi je zapnuto"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Nastavení otevřete dotykem"</string>
     <string name="select_character" msgid="3365550120617701745">"Vkládání znaků"</string>
     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Neznámá aplikace"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Odesílání zpráv SMS"</string>
