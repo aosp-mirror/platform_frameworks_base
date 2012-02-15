@@ -3499,4 +3499,7 @@
 
   <public type="attr" name="textDirection"/>
 
+  <public type="attr" name="paddingStart"/>
+  <public type="attr" name="paddingEnd"/>
+
 </resources>

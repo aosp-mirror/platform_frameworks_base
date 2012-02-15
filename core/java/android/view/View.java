@@ -12249,8 +12249,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param top the top padding in pixels
      * @param end the end padding in pixels
      * @param bottom the bottom padding in pixels
-     *
-     * @hide
      */
     public void setPaddingRelative(int start, int top, int end, int bottom) {
         mUserPaddingRelative = true;
@@ -12305,8 +12303,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * scrollbars as well.
      *
      * @return the start padding in pixels
-     *
-     * @hide
      */
     public int getPaddingStart() {
         return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
@@ -12330,8 +12326,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * scrollbars as well.
      *
      * @return the end padding in pixels
-     *
-     * @hide
      */
     public int getPaddingEnd() {
         return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
@@ -12345,8 +12339,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_paddingEnd
      *
      * @return true if the padding is relative or false if it is not.
-     *
-     * @hide
      */
     public boolean isPaddingRelative() {
         return mUserPaddingRelative;
