@@ -522,8 +522,7 @@ public class ValueAnimator extends Animator {
      * animations possible.
      *
      */
-    private static class AnimationHandler extends Handler
-            implements Choreographer.OnAnimateListener {
+    private static class AnimationHandler extends Handler implements Runnable {
         // The per-thread list of all active animations
         private final ArrayList<ValueAnimator> mAnimations = new ArrayList<ValueAnimator>();
 
@@ -539,7 +538,7 @@ public class ValueAnimator extends Animator {
         private final ArrayList<ValueAnimator> mReadyAnims = new ArrayList<ValueAnimator>();
 
         private final Choreographer mChoreographer;
-        private boolean mIsChoreographed;
+        private boolean mAnimationScheduled;
 
         private AnimationHandler() {
             mChoreographer = Choreographer.getInstance();
@@ -644,22 +643,17 @@ public class ValueAnimator extends Animator {
 
             // If there are still active or delayed animations, schedule a future call to
             // onAnimate to process the next frame of the animations.
-            if (!mAnimations.isEmpty() || !mDelayedAnims.isEmpty()) {
-                if (!mIsChoreographed) {
-                    mIsChoreographed = true;
-                    mChoreographer.addOnAnimateListener(this);
-                }
-                mChoreographer.scheduleAnimation();
-            } else {
-                if (mIsChoreographed) {
-                    mIsChoreographed = false;
-                    mChoreographer.removeOnAnimateListener(this);
-                }
+            if (!mAnimationScheduled
+                    && (!mAnimations.isEmpty() || !mDelayedAnims.isEmpty())) {
+                mChoreographer.postAnimationCallback(this);
+                mAnimationScheduled = true;
             }
         }
 
+        // Called by the Choreographer.
         @Override
-        public void onAnimate() {
+        public void run() {
+            mAnimationScheduled = false;
             doAnimationFrame();
         }
     }

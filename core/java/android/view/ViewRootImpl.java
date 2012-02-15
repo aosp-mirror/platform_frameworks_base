@@ -97,8 +97,7 @@ import java.util.List;
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
 public final class ViewRootImpl extends Handler implements ViewParent,
-        View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks,
-        Choreographer.OnDrawListener {
+        View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks {
     private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
     private static final boolean LOCAL_LOGV = false;
@@ -463,8 +462,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView) {
         synchronized (this) {
             if (mView == null) {
-                mChoreographer.addOnDrawListener(this);
-
                 mView = view;
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
@@ -841,7 +838,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     public void scheduleTraversals() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
-            mChoreographer.scheduleDraw();
+            scheduleFrame();
         }
     }
 
@@ -849,8 +846,21 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         mTraversalScheduled = false;
     }
 
-    @Override
-    public void onDraw() {
+    void scheduleFrame() {
+        if (!mFrameScheduled) {
+            mChoreographer.postDrawCallback(mFrameRunnable);
+            mFrameScheduled = true;
+        }
+    }
+
+    void unscheduleFrame() {
+        if (mFrameScheduled) {
+            mFrameScheduled = false;
+            mChoreographer.removeDrawCallback(mFrameRunnable);
+        }
+    }
+
+    void doFrame() {
         if (mInputEventReceiver != null) {
             mInputEventReceiver.consumeBatchedInputEvents();
         }
@@ -2376,7 +2386,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             mInputChannel = null;
         }
 
-        mChoreographer.removeOnDrawListener(this);
+        unscheduleFrame();
     }
 
     void updateConfiguration(Configuration config, boolean force) {
@@ -3923,6 +3933,16 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
+    final class FrameRunnable implements Runnable {
+        @Override
+        public void run() {
+            mFrameScheduled = false;
+            doFrame();
+        }
+    }
+    final FrameRunnable mFrameRunnable = new FrameRunnable();
+    boolean mFrameScheduled;
+
     final class WindowInputEventReceiver extends InputEventReceiver {
         public WindowInputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
@@ -3935,7 +3955,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         @Override
         public void onBatchedInputEventPending() {
-            mChoreographer.scheduleDraw();
+            scheduleFrame();
         }
     }
     WindowInputEventReceiver mInputEventReceiver;
