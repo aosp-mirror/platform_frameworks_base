@@ -16,6 +16,8 @@
 
 package android.net.http;
 
+import com.google.mockwebserver.MockResponse;
+import com.google.mockwebserver.MockWebServer;
 import java.io.File;
 import java.net.CacheRequest;
 import java.net.CacheResponse;
@@ -30,6 +32,7 @@ import junit.framework.TestCase;
 public final class HttpResponseCacheTest extends TestCase {
 
     private File cacheDir;
+    private MockWebServer server = new MockWebServer();
 
     @Override public void setUp() throws Exception {
         super.setUp();
@@ -39,6 +42,7 @@ public final class HttpResponseCacheTest extends TestCase {
 
     @Override protected void tearDown() throws Exception {
         ResponseCache.setDefault(null);
+        server.shutdown();
         super.tearDown();
     }
 
@@ -99,5 +103,33 @@ public final class HttpResponseCacheTest extends TestCase {
         HttpResponseCache cache = HttpResponseCache.install(cacheDir, 10 * 1024 * 1024);
         cache.delete();
         assertNull(ResponseCache.getDefault());
+    }
+
+    /**
+     * Make sure that statistics tracking are wired all the way through the
+     * wrapper class. http://code.google.com/p/android/issues/detail?id=25418
+     */
+    public void testStatisticsTracking() throws Exception {
+        HttpResponseCache cache = HttpResponseCache.install(cacheDir, 10 * 1024 * 1024);
+
+        server.enqueue(new MockResponse()
+                .addHeader("Cache-Control: max-age=60")
+                .setBody("A"));
+        server.play();
+
+        URLConnection c1 = server.getUrl("/").openConnection();
+        assertEquals('A', c1.getInputStream().read());
+        assertEquals(1, cache.getRequestCount());
+        assertEquals(1, cache.getNetworkCount());
+        assertEquals(0, cache.getHitCount());
+
+        URLConnection c2 = server.getUrl("/").openConnection();
+        assertEquals('A', c2.getInputStream().read());
+
+        URLConnection c3 = server.getUrl("/").openConnection();
+        assertEquals('A', c3.getInputStream().read());
+        assertEquals(3, cache.getRequestCount());
+        assertEquals(1, cache.getNetworkCount());
+        assertEquals(2, cache.getHitCount());
     }
 }
