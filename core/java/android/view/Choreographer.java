@@ -39,10 +39,6 @@ public final class Choreographer {
     private static final String TAG = "Choreographer";
     private static final boolean DEBUG = false;
 
-    // Amount of time in ms to wait before actually disposing of the display event
-    // receiver when it has not been needed for some time.
-    private static final long DISPOSE_RECEIVER_DELAY = 30 * 1000;
-
     // The default amount of time in ms between animation frames.
     // When vsync is not enabled, we want to have some idea of how long we should
     // wait before posting the next animation message.  It is important that the
@@ -85,12 +81,12 @@ public final class Choreographer {
     private static final int MSG_DO_ANIMATION = 0;
     private static final int MSG_DO_DRAW = 1;
     private static final int MSG_DO_SCHEDULE_VSYNC = 2;
-    private static final int MSG_DO_DISPOSE_RECEIVER = 3;
 
     private final Object mLock = new Object();
 
     private final Looper mLooper;
     private final FrameHandler mHandler;
+    private final FrameDisplayEventReceiver mDisplayEventReceiver;
 
     private Callback mCallbackPool;
 
@@ -99,14 +95,13 @@ public final class Choreographer {
 
     private boolean mAnimationScheduled;
     private boolean mDrawScheduled;
-    private boolean mFrameDisplayEventReceiverNeeded;
-    private FrameDisplayEventReceiver mFrameDisplayEventReceiver;
     private long mLastAnimationTime;
     private long mLastDrawTime;
 
     private Choreographer(Looper looper) {
         mLooper = looper;
         mHandler = new FrameHandler(looper);
+        mDisplayEventReceiver = USE_VSYNC ? new FrameDisplayEventReceiver(looper) : null;
         mLastAnimationTime = Long.MIN_VALUE;
         mLastDrawTime = Long.MIN_VALUE;
     }
@@ -187,7 +182,6 @@ public final class Choreographer {
         }
         synchronized (mLock) {
             mAnimationCallbacks = removeCallbackLocked(mAnimationCallbacks, runnable);
-            stopTimingLoopIfNoCallbacksLocked();
         }
     }
 
@@ -224,7 +218,6 @@ public final class Choreographer {
         }
         synchronized (mLock) {
             mDrawCallbacks = removeCallbackLocked(mDrawCallbacks, runnable);
-            stopTimingLoopIfNoCallbacksLocked();
         }
     }
 
@@ -239,12 +232,6 @@ public final class Choreographer {
                 // If running on the Looper thread, then schedule the vsync immediately,
                 // otherwise post a message to schedule the vsync from the UI thread
                 // as soon as possible.
-                if (!mFrameDisplayEventReceiverNeeded) {
-                    mFrameDisplayEventReceiverNeeded = true;
-                    if (mFrameDisplayEventReceiver != null) {
-                        mHandler.removeMessages(MSG_DO_DISPOSE_RECEIVER);
-                    }
-                }
                 if (isRunningOnLooperThreadLocked()) {
                     doScheduleVsyncLocked();
                 } else {
@@ -355,57 +342,8 @@ public final class Choreographer {
     }
 
     private void doScheduleVsyncLocked() {
-        if (mFrameDisplayEventReceiverNeeded && mAnimationScheduled) {
-            if (mFrameDisplayEventReceiver == null) {
-                mFrameDisplayEventReceiver = new FrameDisplayEventReceiver(mLooper);
-            }
-            mFrameDisplayEventReceiver.scheduleVsync();
-        }
-    }
-
-    void doDisposeReceiver() {
-        synchronized (mLock) {
-            if (!mFrameDisplayEventReceiverNeeded && mFrameDisplayEventReceiver != null) {
-                mFrameDisplayEventReceiver.dispose();
-                mFrameDisplayEventReceiver = null;
-            }
-        }
-    }
-
-    private void stopTimingLoopIfNoCallbacksLocked() {
-        if (mAnimationCallbacks == null && mDrawCallbacks == null) {
-            if (DEBUG) {
-                Log.d(TAG, "Stopping timing loop.");
-            }
-
-            if (mAnimationScheduled) {
-                mAnimationScheduled = false;
-                if (USE_VSYNC) {
-                    mHandler.removeMessages(MSG_DO_SCHEDULE_VSYNC);
-                } else {
-                    mHandler.removeMessages(MSG_DO_ANIMATION);
-                }
-            }
-
-            if (mDrawScheduled) {
-                mDrawScheduled = false;
-                if (!USE_ANIMATION_TIMER_FOR_DRAW) {
-                    mHandler.removeMessages(MSG_DO_DRAW);
-                }
-            }
-
-            // Post a message to dispose the display event receiver if we haven't needed
-            // it again after a certain amount of time has elapsed.  Another reason to
-            // defer disposal is that it is possible for use to attempt to dispose the
-            // receiver while handling a vsync event that it dispatched, which might
-            // cause a few problems...
-            if (mFrameDisplayEventReceiverNeeded) {
-                mFrameDisplayEventReceiverNeeded = false;
-                if (mFrameDisplayEventReceiver != null) {
-                    mHandler.sendEmptyMessageDelayed(MSG_DO_DISPOSE_RECEIVER,
-                            DISPOSE_RECEIVER_DELAY);
-                }
-            }
+        if (mAnimationScheduled) {
+            mDisplayEventReceiver.scheduleVsync();
         }
     }
 
@@ -494,9 +432,6 @@ public final class Choreographer {
                     break;
                 case MSG_DO_SCHEDULE_VSYNC:
                     doScheduleVsync();
-                    break;
-                case MSG_DO_DISPOSE_RECEIVER:
-                    doDisposeReceiver();
                     break;
             }
         }
