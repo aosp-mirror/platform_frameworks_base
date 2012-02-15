@@ -154,7 +154,7 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
 + "href='https://plus.google.com/108967384991768947849'>+Android Developers</a>. "
 + "We'll use it to host Hangouts for developers, talk about the latest releases, "
 + "development and design tips, and much more.</p>"
-+ "<div style='margin:.7em 0 0 -1.2em'><g:plus href='https://plus.google.com/108967384991768947849' "
++ "<div style='margin:.7em 0 0 0'><g:plus href='https://plus.google.com/108967384991768947849' "
 + "size=\"smallbadge\" width=\"275\"></g:plus></div>"
     },
 
