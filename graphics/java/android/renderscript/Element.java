@@ -933,10 +933,10 @@ public class Element extends BaseObj {
 
         // Ignore mKind because it is allowed to be different (user vs. pixel).
         // We also ignore mNormalized because it can be different. The mType
-        // field must be non-null since we require name equivalence for
-        // user-created Elements.
+        // field must not be NONE since we require name equivalence for
+        // all user-created Elements.
         return ((mSize == e.mSize) &&
-                (mType != null) &&
+                (mType != DataType.NONE) &&
                 (mType == e.mType) &&
                 (mVectorSize == e.mVectorSize));
     }
