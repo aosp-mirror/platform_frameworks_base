@@ -7816,7 +7816,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         /* TODO: Send this to all users */
                         broadcastIntentLocked(null, null, intent, null, finisher,
                                 0, null, null, null, true, false, MY_PID, Process.SYSTEM_UID,
-                                Process.SYSTEM_UID);
+                                0 /* UserId zero */);
                         if (finisher != null) {
                             mWaitingUpdate = true;
                         }
