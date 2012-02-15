@@ -408,16 +408,19 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Creates a new bitmap, scaled from an existing bitmap.
+     * Creates a new bitmap, scaled from an existing bitmap, when possible. If the
+     * specified width and height are the same as the current width and height of 
+     * the source btimap, the source bitmap is returned and now new bitmap is
+     * created.
      *
      * @param src       The source bitmap.
      * @param dstWidth  The new bitmap's desired width.
      * @param dstHeight The new bitmap's desired height.
      * @param filter    true if the source should be filtered.
-     * @return the new scaled bitmap.
+     * @return The new scaled bitmap or the source bitmap if no scaling is required.
      */
-    public static Bitmap createScaledBitmap(Bitmap src, int dstWidth,
-            int dstHeight, boolean filter) {
+    public static Bitmap createScaledBitmap(Bitmap src, int dstWidth, int dstHeight,
+            boolean filter) {
         Matrix m;
         synchronized (Bitmap.class) {
             // small pool of just 1 matrix
@@ -458,14 +461,15 @@ public final class Bitmap implements Parcelable {
     /**
      * Returns an immutable bitmap from the specified subset of the source
      * bitmap. The new bitmap may be the same object as source, or a copy may
-     * have been made.  It is
-     * initialized with the same density as the original bitmap.
+     * have been made. It is initialized with the same density as the original
+     * bitmap.
      *
      * @param source   The bitmap we are subsetting
      * @param x        The x coordinate of the first pixel in source
      * @param y        The y coordinate of the first pixel in source
      * @param width    The number of pixels in each row
      * @param height   The number of rows
+     * @return A copy of a subset of the source bitmap or the source bitmap itself.
      */
     public static Bitmap createBitmap(Bitmap source, int x, int y, int width, int height) {
         return createBitmap(source, x, y, width, height, null, false);
@@ -473,8 +477,13 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Returns an immutable bitmap from subset of the source bitmap,
-     * transformed by the optional matrix.  It is
+     * transformed by the optional matrix. The new bitmap may be the
+     * same object as source, or a copy may have been made. It is
      * initialized with the same density as the original bitmap.
+     * 
+     * If the source bitmap is immutable and the requested subset is the
+     * same as the source bitmap itself, then the source bitmap is
+     * returned and no new bitmap is created.
      *
      * @param source   The bitmap we are subsetting
      * @param x        The x coordinate of the first pixel in source
