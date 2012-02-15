@@ -2708,6 +2708,12 @@
     <!-- Do not translate. Default access point SSID used for tethering -->
     <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
 
+    <string name="wifi_p2p_dialog_title">Wi-Fi Direct</string>
+    <string name="wifi_p2p_turnon_message">Start Wi-Fi Direct. This will turn off Wi-Fi client/hotspot.</string>
+    <string name="wifi_p2p_failed_message">Couldn\'t start Wi-Fi Direct.</string>
+    <string name="wifi_p2p_enabled_notification_title">Wi-Fi Direct is on</string>
+    <string name="wifi_p2p_enabled_notification_message">Touch for settings</string>
+
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
     <string name="wifi_p2p_invitation_sent_title">Invitation sent</string>
