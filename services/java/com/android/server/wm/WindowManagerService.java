@@ -142,8 +142,7 @@ import java.util.List;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
-        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs,
-        Choreographer.OnAnimateListener {
+        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean DEBUG_ADD_REMOVE = false;
@@ -603,6 +602,18 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     private LayoutAndSurfaceFields mInnerFields = new LayoutAndSurfaceFields();
 
+    private final class AnimationRunnable implements Runnable {
+        @Override
+        public void run() {
+            synchronized(mWindowMap) {
+                mAnimationScheduled = false;
+                performLayoutAndPlaceSurfacesLocked();
+            }
+        }
+    }
+    final AnimationRunnable mAnimationRunnable = new AnimationRunnable();
+    boolean mAnimationScheduled;
+
     final class DragInputEventReceiver extends InputEventReceiver {
         public DragInputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
@@ -724,7 +735,6 @@ public class WindowManagerService extends IWindowManager.Stub
             Looper.prepare();
             WindowManagerService s = new WindowManagerService(mContext, mPM,
                     mHaveInputMethods, mAllowBootMessages);
-            s.mChoreographer.addOnAnimateListener(s);
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_DISPLAY);
             android.os.Process.setCanSelfBackground(false);
@@ -5441,7 +5451,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mScreenRotationAnimation.setRotation(rotation, mFxSession,
                         MAX_ANIMATION_DURATION, mTransitionAnimationScale,
                         mCurDisplayWidth, mCurDisplayHeight)) {
-                    mChoreographer.scheduleAnimation();
+                    scheduleAnimationLocked();
                 }
             }
             Surface.setOrientation(0, rotation);
@@ -6882,7 +6892,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case FORCE_GC: {
                     synchronized(mWindowMap) {
-                        if (mChoreographer.isAnimationScheduled()) {
+                        if (mAnimationScheduled) {
                             // If we are animating, don't do the gc now but
                             // delay a bit so we don't interrupt the animation.
                             mH.sendMessageDelayed(mH.obtainMessage(H.FORCE_GC),
@@ -8980,7 +8990,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (needRelayout) {
             requestTraversalLocked();
         } else if (mInnerFields.mAnimating) {
-            mChoreographer.scheduleAnimation();
+            scheduleAnimationLocked();
         }
 
         // Finally update all input windows now that the window changes have stabilized.
@@ -9100,10 +9110,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
-    public void onAnimate() {
-        synchronized(mWindowMap) {
-            performLayoutAndPlaceSurfacesLocked();
+    void scheduleAnimationLocked() {
+        if (!mAnimationScheduled) {
+            mChoreographer.postAnimationCallback(mAnimationRunnable);
+            mAnimationScheduled = true;
         }
     }
 
@@ -9423,7 +9433,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.i(TAG, "**** Dismissing screen rotation animation");
             if (mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
                     mTransitionAnimationScale, mCurDisplayWidth, mCurDisplayHeight)) {
-                mChoreographer.scheduleAnimation();
+                scheduleAnimationLocked();
             } else {
                 mScreenRotationAnimation = null;
                 updateRotation = true;

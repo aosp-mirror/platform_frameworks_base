@@ -16,8 +16,6 @@
 
 package android.view;
 
-import com.android.internal.util.ArrayUtils;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -28,8 +26,8 @@ import android.util.Log;
 /**
  * Coordinates animations and drawing for UI on a particular thread.
  *
- * This object is thread-safe.  Other threads can add and remove listeners
- * or schedule work to occur at a later time on the UI thread.
+ * This object is thread-safe.  Other threads can post callbacks to run at a later time
+ * on the UI thread.
  *
  * Ensuring thread-safety is a little tricky because the {@link DisplayEventReceiver}
  * can only be accessed from the UI thread so operations that touch the event receiver
@@ -42,8 +40,8 @@ public final class Choreographer {
     private static final boolean DEBUG = false;
 
     // Amount of time in ms to wait before actually disposing of the display event
-    // receiver after all listeners have been removed.
-    private static final long DISPOSE_RECEIVER_DELAY = 200;
+    // receiver when it has not been needed for some time.
+    private static final long DISPOSE_RECEIVER_DELAY = 30 * 1000;
 
     // The default amount of time in ms between animation frames.
     // When vsync is not enabled, we want to have some idea of how long we should
@@ -96,11 +94,8 @@ public final class Choreographer {
 
     private Callback mCallbackPool;
 
-    private OnAnimateListener[] mOnAnimateListeners;
-    private OnDrawListener[] mOnDrawListeners;
-
-    private Callback mOnAnimateCallbacks;
-    private Callback mOnDrawCallbacks;
+    private Callback mAnimationCallbacks;
+    private Callback mDrawCallbacks;
 
     private boolean mAnimationScheduled;
     private boolean mDrawScheduled;
@@ -160,17 +155,81 @@ public final class Choreographer {
     }
 
     /**
-     * Schedules animation (and drawing) to occur on the next frame synchronization boundary.
+     * Posts a callback to run on the next animation cycle and schedules an animation cycle.
+     * The callback only runs once and then is automatically removed.
+     *
+     * @param runnable The callback to run during the next animation cycle.
+     *
+     * @see #removeAnimationCallback
      */
-    public void scheduleAnimation() {
+    public void postAnimationCallback(Runnable runnable) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
         synchronized (mLock) {
-            scheduleAnimationLocked(false);
+            mAnimationCallbacks = addCallbackLocked(mAnimationCallbacks, runnable);
+            scheduleAnimationLocked();
         }
     }
 
-    private void scheduleAnimationLocked(boolean force) {
-        if (!mAnimationScheduled
-                && (force || mOnAnimateListeners != null || mOnAnimateCallbacks != null)) {
+    /**
+     * Removes an animation callback.
+     * Does nothing if the specified animation callback has not been posted or has already
+     * been removed.
+     *
+     * @param runnable The animation callback to remove.
+     *
+     * @see #postAnimationCallback
+     */
+    public void removeAnimationCallback(Runnable runnable) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        synchronized (mLock) {
+            mAnimationCallbacks = removeCallbackLocked(mAnimationCallbacks, runnable);
+            stopTimingLoopIfNoCallbacksLocked();
+        }
+    }
+
+    /**
+     * Posts a callback to run on the next draw cycle and schedules a draw cycle.
+     * The callback only runs once and then is automatically removed.
+     *
+     * @param runnable The callback to run during the next draw cycle.
+     *
+     * @see #removeDrawCallback
+     */
+    public void postDrawCallback(Runnable runnable) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        synchronized (mLock) {
+            mDrawCallbacks = addCallbackLocked(mDrawCallbacks, runnable);
+            scheduleDrawLocked();
+        }
+    }
+
+    /**
+     * Removes a draw callback.
+     * Does nothing if the specified draw callback has not been posted or has already
+     * been removed.
+     *
+     * @param runnable The draw callback to remove.
+     *
+     * @see #postDrawCallback
+     */
+    public void removeDrawCallback(Runnable runnable) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        synchronized (mLock) {
+            mDrawCallbacks = removeCallbackLocked(mDrawCallbacks, runnable);
+            stopTimingLoopIfNoCallbacksLocked();
+        }
+    }
+
+    private void scheduleAnimationLocked() {
+        if (!mAnimationScheduled) {
             mAnimationScheduled = true;
             if (USE_VSYNC) {
                 if (DEBUG) {
@@ -203,208 +262,17 @@ public final class Choreographer {
         }
     }
 
-    /**
-     * Returns true if {@link #scheduleAnimation()} has been called but
-     * {@link OnAnimateListener#onAnimate() OnAnimateListener.onAnimate()} has
-     * not yet been called.
-     */
-    public boolean isAnimationScheduled() {
-        synchronized (mLock) {
-            return mAnimationScheduled;
-        }
-    }
-
-    /**
-     * Schedules drawing to occur on the next frame synchronization boundary.
-     * Must be called on the UI thread.
-     */
-    public void scheduleDraw() {
-        synchronized (mLock) {
-            scheduleDrawLocked();
-        }
-    }
-
     private void scheduleDrawLocked() {
-        if (!mDrawScheduled
-                && (mOnDrawListeners != null || mOnDrawCallbacks != null)) {
+        if (!mDrawScheduled) {
             mDrawScheduled = true;
             if (USE_ANIMATION_TIMER_FOR_DRAW) {
-                scheduleAnimationLocked(true);
+                scheduleAnimationLocked();
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "Scheduling draw immediately.");
                 }
                 mHandler.sendEmptyMessage(MSG_DO_DRAW);
             }
-        }
-    }
-
-    /**
-     * Returns true if {@link #scheduleDraw()} has been called but
-     * {@link OnDrawListener#onDraw() OnDrawListener.onDraw()} has
-     * not yet been called.
-     */
-    public boolean isDrawScheduled() {
-        synchronized (mLock) {
-            return mDrawScheduled;
-        }
-    }
-
-    /**
-     * Adds an animation listener.
-     *
-     * @param listener The listener to add.
-     */
-    public void addOnAnimateListener(OnAnimateListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        if (DEBUG) {
-            Log.d(TAG, "Adding onAnimate listener: " + listener);
-        }
-
-        synchronized (mLock) {
-            mOnAnimateListeners = ArrayUtils.appendElement(OnAnimateListener.class,
-                    mOnAnimateListeners, listener);
-        }
-    }
-
-    /**
-     * Removes an animation listener.
-     *
-     * @param listener The listener to remove.
-     */
-    public void removeOnAnimateListener(OnAnimateListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        if (DEBUG) {
-            Log.d(TAG, "Removing onAnimate listener: " + listener);
-        }
-
-        synchronized (mLock) {
-            mOnAnimateListeners = ArrayUtils.removeElement(OnAnimateListener.class,
-                    mOnAnimateListeners, listener);
-            stopTimingLoopIfNoListenersOrCallbacksLocked();
-        }
-    }
-
-    /**
-     * Adds a draw listener.
-     *
-     * @param listener The listener to add.
-     */
-    public void addOnDrawListener(OnDrawListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        if (DEBUG) {
-            Log.d(TAG, "Adding onDraw listener: " + listener);
-        }
-
-        synchronized (mLock) {
-            mOnDrawListeners = ArrayUtils.appendElement(OnDrawListener.class,
-                    mOnDrawListeners, listener);
-        }
-    }
-
-    /**
-     * Removes a draw listener.
-     * Must be called on the UI thread.
-     *
-     * @param listener The listener to remove.
-     */
-    public void removeOnDrawListener(OnDrawListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        if (DEBUG) {
-            Log.d(TAG, "Removing onDraw listener: " + listener);
-        }
-
-        synchronized (mLock) {
-            mOnDrawListeners = ArrayUtils.removeElement(OnDrawListener.class,
-                    mOnDrawListeners, listener);
-            stopTimingLoopIfNoListenersOrCallbacksLocked();
-        }
-    }
-
-
-    /**
-     * Posts a callback to run on the next animation cycle and schedules an animation cycle.
-     * The callback only runs once and then is automatically removed.
-     *
-     * @param runnable The callback to run during the next animation cycle.
-     *
-     * @see #removeOnAnimateCallback
-     */
-    public void postOnAnimateCallback(Runnable runnable) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
-        }
-        synchronized (mLock) {
-            mOnAnimateCallbacks = addCallbackLocked(mOnAnimateCallbacks, runnable);
-            scheduleAnimationLocked(false);
-        }
-    }
-
-    /**
-     * Removes an animation callback.
-     * Does nothing if the specified animation callback has not been posted or has already
-     * been removed.
-     *
-     * @param runnable The animation callback to remove.
-     *
-     * @see #postOnAnimateCallback
-     */
-    public void removeOnAnimateCallback(Runnable runnable) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
-        }
-        synchronized (mLock) {
-            mOnAnimateCallbacks = removeCallbackLocked(mOnAnimateCallbacks, runnable);
-            stopTimingLoopIfNoListenersOrCallbacksLocked();
-        }
-    }
-
-    /**
-     * Posts a callback to run on the next draw cycle and schedules a draw cycle.
-     * The callback only runs once and then is automatically removed.
-     *
-     * @param runnable The callback to run during the next draw cycle.
-     *
-     * @see #removeOnDrawCallback
-     */
-    public void postOnDrawCallback(Runnable runnable) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
-        }
-        synchronized (mLock) {
-            mOnDrawCallbacks = addCallbackLocked(mOnDrawCallbacks, runnable);
-            scheduleDrawLocked();
-        }
-    }
-
-    /**
-     * Removes a draw callback.
-     * Does nothing if the specified draw callback has not been posted or has already
-     * been removed.
-     *
-     * @param runnable The draw callback to remove.
-     *
-     * @see #postOnDrawCallback
-     */
-    public void removeOnDrawCallback(Runnable runnable) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
-        }
-        synchronized (mLock) {
-            mOnDrawCallbacks = removeCallbackLocked(mOnDrawCallbacks, runnable);
-            stopTimingLoopIfNoListenersOrCallbacksLocked();
         }
     }
 
@@ -418,7 +286,6 @@ public final class Choreographer {
 
     void doAnimationInner() {
         final long start;
-        final OnAnimateListener[] listeners;
         final Callback callbacks;
         synchronized (mLock) {
             if (!mAnimationScheduled) {
@@ -433,15 +300,8 @@ public final class Choreographer {
             }
             mLastAnimationTime = start;
 
-            listeners = mOnAnimateListeners;
-            callbacks = mOnAnimateCallbacks;
-            mOnAnimateCallbacks = null;
-        }
-
-        if (listeners != null) {
-            for (int i = 0; i < listeners.length; i++) {
-                listeners[i].onAnimate();
-            }
+            callbacks = mAnimationCallbacks;
+            mAnimationCallbacks = null;
         }
 
         if (callbacks != null) {
@@ -458,7 +318,6 @@ public final class Choreographer {
 
     void doDraw() {
         final long start;
-        final OnDrawListener[] listeners;
         final Callback callbacks;
         synchronized (mLock) {
             if (!mDrawScheduled) {
@@ -473,15 +332,8 @@ public final class Choreographer {
             }
             mLastDrawTime = start;
 
-            listeners = mOnDrawListeners;
-            callbacks = mOnDrawCallbacks;
-            mOnDrawCallbacks = null;
-        }
-
-        if (listeners != null) {
-            for (int i = 0; i < listeners.length; i++) {
-                listeners[i].onDraw();
-            }
+            callbacks = mDrawCallbacks;
+            mDrawCallbacks = null;
         }
 
         if (callbacks != null) {
@@ -520,9 +372,8 @@ public final class Choreographer {
         }
     }
 
-    private void stopTimingLoopIfNoListenersOrCallbacksLocked() {
-        if (mOnAnimateListeners == null && mOnDrawListeners == null
-                && mOnAnimateCallbacks == null && mOnDrawCallbacks == null) {
+    private void stopTimingLoopIfNoCallbacksLocked() {
+        if (mAnimationCallbacks == null && mDrawCallbacks == null) {
             if (DEBUG) {
                 Log.d(TAG, "Stopping timing loop.");
             }
@@ -625,26 +476,6 @@ public final class Choreographer {
         callback.runnable = null;
         callback.next = mCallbackPool;
         mCallbackPool = callback;
-    }
-
-    /**
-     * Listens for animation frame timing events.
-     */
-    public static interface OnAnimateListener {
-        /**
-         * Called to animate properties before drawing the frame.
-         */
-        public void onAnimate();
-    }
-
-    /**
-     * Listens for draw frame timing events.
-     */
-    public static interface OnDrawListener {
-        /**
-         * Called to draw the frame.
-         */
-        public void onDraw();
     }
 
     private final class FrameHandler extends Handler {
