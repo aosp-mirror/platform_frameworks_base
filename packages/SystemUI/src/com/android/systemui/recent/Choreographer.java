@@ -134,7 +134,9 @@ import android.view.View;
 
     void jumpTo(boolean appearing) {
         mContentView.setTranslationY(appearing ? 0 : mPanelHeight);
-        mScrimView.getBackground().setAlpha(appearing ? 255 : 0);
+        if (mScrimView.getBackground() != null) {
+            mScrimView.getBackground().setAlpha(appearing ? 255 : 0);
+        }
     }
 
     public void setPanelHeight(int h) {

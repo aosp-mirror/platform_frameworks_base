@@ -239,6 +239,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     public void show(boolean show, boolean animate) {
         if (show) {
+            refreshRecentTasksList(null, true);
             mWaitingToShow = true;
             mWaitingToShowAnimated = animate;
             showIfReady();
