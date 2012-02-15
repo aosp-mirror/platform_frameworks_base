@@ -857,11 +857,6 @@ public class LockPatternUtils {
      * @return Whether biometric weak lock is installed and that the front facing camera exists
      */
     public boolean isBiometricWeakInstalled() {
-        // Check that the system flag was set
-        if (!OPTION_ENABLE_FACELOCK.equals(getString(LOCKSCREEN_OPTIONS))) {
-            return false;
-        }
-
         // Check that it's installed
         PackageManager pm = mContext.getPackageManager();
         try {
