@@ -93,6 +93,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             Phone.APN_TYPE_MMS,
             Phone.APN_TYPE_HIPRI };
 
+    private String[] mDunApnTypes = {
+            Phone.APN_TYPE_DUN };
+
     private static final int mDefaultApnId = DataConnectionTracker.APN_DEFAULT_ID;
 
     /* Constructor */
@@ -118,6 +121,21 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
         createAllDataConnectionList();
         broadcastMessenger();
+
+        Context c = mCdmaPhone.getContext();
+        String[] t = c.getResources().getStringArray(
+                com.android.internal.R.array.config_cdma_dun_supported_types);
+        if (t != null && t.length > 0) {
+            ArrayList<String> temp = new ArrayList<String>();
+            for(int i=0; i< t.length; i++) {
+                if (!Phone.APN_TYPE_DUN.equalsIgnoreCase(t[i])) {
+                    temp.add(t[i]);
+                }
+            }
+            temp.add(0, Phone.APN_TYPE_DUN);
+            mDunApnTypes = temp.toArray(t);
+        }
+
     }
 
     @Override
@@ -343,8 +361,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         String[] types;
         int apnId;
         if (mRequestedApnType.equals(Phone.APN_TYPE_DUN)) {
-            types = new String[1];
-            types[0] = Phone.APN_TYPE_DUN;
+            types = mDunApnTypes;
             apnId = DataConnectionTracker.APN_DUN_ID;
         } else {
             types = mDefaultApnTypes;
