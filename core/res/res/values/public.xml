@@ -218,7 +218,6 @@
   <java-symbol type="bool" name="config_allowActionMenuItemTextWithIcon" />
   <java-symbol type="bool" name="config_bluetooth_adapter_quick_switch" />
   <java-symbol type="bool" name="config_bluetooth_sco_off_call" />
-  <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
   <java-symbol type="bool" name="config_duplicate_port_omadm_wappush" />
   <java-symbol type="bool" name="config_enable_emergency_call_while_sim_locked" />
   <java-symbol type="bool" name="config_enable_puk_unlock_screen" />
@@ -1085,7 +1084,6 @@
   <java-symbol type="style" name="ActiveWallpaperSettings" />
   <java-symbol type="style" name="Animation.InputMethodFancy" />
   <java-symbol type="style" name="Animation.Wallpaper" />
-  <java-symbol type="style" name="Animation.RecentApplications" />
   <java-symbol type="style" name="Animation.ZoomButtons" />
   <java-symbol type="style" name="PreviewWallpaperSettings" />
   <java-symbol type="style" name="TextAppearance.SlidingTabActive" />
@@ -1478,6 +1476,8 @@
   <java-symbol type="string" name="usb_storage_stop_notification_title" />
   <java-symbol type="string" name="usb_storage_stop_title" />
   <java-symbol type="string" name="usb_storage_title" />
+  <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
+  <java-symbol type="style" name="Animation.RecentApplications" />
 
   <!-- ImfTest -->
   <java-symbol type="layout" name="auto_complete_list" />
