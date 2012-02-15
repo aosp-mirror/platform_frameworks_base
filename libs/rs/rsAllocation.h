@@ -19,6 +19,8 @@
 
 #include "rsType.h"
 
+struct ANativeWindow;
+
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
@@ -57,6 +59,7 @@ public:
             bool hasReferences;
             void * usrPtr;
             int32_t surfaceTextureID;
+            ANativeWindow *wndSurface;
         };
         State state;
 
@@ -127,6 +130,9 @@ public:
     }
 
     int32_t getSurfaceTextureID(const Context *rsc);
+    void setSurface(const Context *rsc, RsNativeWindow sur);
+    void ioSend(const Context *rsc);
+    void ioReceive(const Context *rsc);
 
 protected:
     Vector<const Program *> mToDirtyList;

@@ -23,6 +23,11 @@
 
 #include "rsAllocation.h"
 
+#include "system/window.h"
+#include "hardware/gralloc.h"
+#include "ui/Rect.h"
+#include "ui/GraphicBufferMapper.h"
+
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES/glext.h>
@@ -220,7 +225,8 @@ bool rsdAllocationInit(const Context *rsc, Allocation *alloc, bool forceZero) {
     }
 
     void * ptr = alloc->mHal.state.usrPtr;
-    if (!ptr) {
+    if (alloc->mHal.state.usageFlags & RS_ALLOCATION_USAGE_IO_OUTPUT) {
+    } else {
         ptr = malloc(alloc->mHal.state.type->getSizeBytes());
         if (!ptr) {
             free(drv);
@@ -248,7 +254,7 @@ bool rsdAllocationInit(const Context *rsc, Allocation *alloc, bool forceZero) {
     alloc->mHal.drvState.mallocPtr = ptr;
     drv->mallocPtr = (uint8_t *)ptr;
     alloc->mHal.drv = drv;
-    if (forceZero) {
+    if (forceZero && ptr) {
         memset(ptr, 0, alloc->mHal.state.type->getSizeBytes());
     }
 
@@ -385,6 +391,93 @@ int32_t rsdAllocationInitSurfaceTexture(const Context *rsc, const Allocation *al
     UploadToTexture(rsc, alloc);
     return drv->textureID;
 }
+
+static bool IoGetBuffer(const Context *rsc, Allocation *alloc, ANativeWindow *nw) {
+    DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
+
+    int32_t r = nw->dequeueBuffer(nw, &drv->wndBuffer);
+    if (r) {
+        rsc->setError(RS_ERROR_DRIVER, "Error getting next IO output buffer.");
+        return false;
+    }
+
+    // This lock is implicitly released by the queue buffer in IoSend
+    r = nw->lockBuffer(nw, drv->wndBuffer);
+    if (r) {
+        rsc->setError(RS_ERROR_DRIVER, "Error locking next IO output buffer.");
+        return false;
+    }
+
+    // Must lock the whole surface
+    GraphicBufferMapper &mapper = GraphicBufferMapper::get();
+    Rect bounds(drv->wndBuffer->width, drv->wndBuffer->height);
+
+    void *dst = NULL;
+    mapper.lock(drv->wndBuffer->handle,
+            GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_OFTEN,
+            bounds, &dst);
+    alloc->mHal.drvState.mallocPtr = dst;
+    return true;
+}
+
+void rsdAllocationSetSurfaceTexture(const Context *rsc, Allocation *alloc, ANativeWindow *nw) {
+    DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
+
+    //ALOGE("rsdAllocationSetSurfaceTexture %p  %p", alloc, nw);
+
+    // Cleanup old surface if there is one.
+    if (alloc->mHal.state.wndSurface) {
+        ANativeWindow *old = alloc->mHal.state.wndSurface;
+        GraphicBufferMapper &mapper = GraphicBufferMapper::get();
+        mapper.unlock(drv->wndBuffer->handle);
+        old->queueBuffer(old, drv->wndBuffer);
+    }
+
+    if (nw != NULL) {
+        int32_t r;
+        r = native_window_set_usage(nw, GRALLOC_USAGE_SW_READ_RARELY |
+                                        GRALLOC_USAGE_SW_WRITE_OFTEN);
+        if (r) {
+            rsc->setError(RS_ERROR_DRIVER, "Error setting IO output buffer usage.");
+            return;
+        }
+
+        r = native_window_set_buffers_dimensions(nw, alloc->mHal.state.dimensionX,
+                                                 alloc->mHal.state.dimensionY);
+        if (r) {
+            rsc->setError(RS_ERROR_DRIVER, "Error setting IO output buffer dimensions.");
+            return;
+        }
+
+        r = native_window_set_buffer_count(nw, 3);
+        if (r) {
+            rsc->setError(RS_ERROR_DRIVER, "Error setting IO output buffer count.");
+            return;
+        }
+
+        IoGetBuffer(rsc, alloc, nw);
+    }
+}
+
+void rsdAllocationIoSend(const Context *rsc, Allocation *alloc) {
+    DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
+    ANativeWindow *nw = alloc->mHal.state.wndSurface;
+
+    GraphicBufferMapper &mapper = GraphicBufferMapper::get();
+    mapper.unlock(drv->wndBuffer->handle);
+    int32_t r = nw->queueBuffer(nw, drv->wndBuffer);
+    if (r) {
+        rsc->setError(RS_ERROR_DRIVER, "Error sending IO output buffer.");
+        return;
+    }
+
+    IoGetBuffer(rsc, alloc, nw);
+}
+
+void rsdAllocationIoReceive(const Context *rsc, Allocation *alloc) {
+    ALOGE("not implemented");
+}
+
 
 void rsdAllocationData1D(const Context *rsc, const Allocation *alloc,
                          uint32_t xoff, uint32_t lod, uint32_t count,

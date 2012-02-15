@@ -102,7 +102,7 @@ public class Allocation extends BaseObj {
     public static final int USAGE_SCRIPT = 0x0001;
 
     /**
-     * GRAPHICS_TEXTURE The allcation will be used as a texture
+     * GRAPHICS_TEXTURE The allocation will be used as a texture
      * source by one or more graphics programs.
      *
      */
@@ -124,34 +124,34 @@ public class Allocation extends BaseObj {
     public static final int USAGE_GRAPHICS_CONSTANTS = 0x0008;
 
     /**
-     * USAGE_GRAPHICS_RENDER_TARGET The allcation will be used as a
+     * USAGE_GRAPHICS_RENDER_TARGET The allocation will be used as a
      * target for offscreen rendering
      *
      */
     public static final int USAGE_GRAPHICS_RENDER_TARGET = 0x0010;
 
     /**
-     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT The allocation will be
-     * used with a SurfaceTexture object.  This usage will cause the
-     * allocation to be created read only.
+     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE The allocation
+     * will be used as a SurfaceTexture graphics consumer. This
+     * usage may only be used with USAGE_GRAPHICS_TEXTURE.
      *
      * @hide
      */
     public static final int USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE = 0x0020;
 
     /**
-     * USAGE_IO_INPUT The allocation will be
-     * used with a SurfaceTexture object.  This usage will cause the
-     * allocation to be created read only.
+     * USAGE_IO_INPUT The allocation will be used as SurfaceTexture
+     * consumer.  This usage will cause the allocation to be created
+     * read only.
      *
      * @hide
      */
     public static final int USAGE_IO_INPUT = 0x0040;
 
     /**
-     * USAGE_IO_OUTPUT The allocation will be
-     * used with a SurfaceTexture object.  This usage will cause the
-     * allocation to be created write only.
+     * USAGE_IO_OUTPUT The allocation will be used as a
+     * SurfaceTexture producer.  The dimensions and format of the
+     * SurfaceTexture will be forced to those of the allocation.
      *
      * @hide
      */
@@ -321,6 +321,37 @@ public class Allocation extends BaseObj {
         }
         mRS.validate();
         mRS.nAllocationSyncAll(getIDSafe(), srcLocation);
+    }
+
+    /**
+     * Send a buffer to the output stream.  The contents of the
+     * Allocation will be undefined after this operation.
+     *
+     * @hide
+     *
+     */
+    public void ioSendOutput() {
+        if ((mUsage & USAGE_IO_OUTPUT) == 0) {
+            throw new RSIllegalArgumentException(
+                "Can only send buffer if IO_OUTPUT usage specified.");
+        }
+        mRS.validate();
+        mRS.nAllocationIoSend(getID());
+    }
+
+    /**
+     * Receive the latest input into the Allocation.
+     *
+     * @hide
+     *
+     */
+    public void ioGetInput() {
+        if ((mUsage & USAGE_IO_INPUT) == 0) {
+            throw new RSIllegalArgumentException(
+                "Can only send buffer if IO_OUTPUT usage specified.");
+        }
+        mRS.validate();
+        mRS.nAllocationIoReceive(getID());
     }
 
     public void copyFrom(BaseObj[] d) {
@@ -887,17 +918,37 @@ public class Allocation extends BaseObj {
         updateCacheInfo(mType);
     }
 
-    /*
+    /**
+     * Resize a 2D allocation.  The contents of the allocation are
+     * preserved.  If new elements are allocated objects are created
+     * with null contents and the new region is otherwise undefined.
+     *
+     * If the new region is smaller the references of any objects
+     * outside the new region will be released.
+     *
+     * A new type will be created with the new dimension.
+     *
+     * @hide
+     * @param dimX The new size of the allocation.
+     * @param dimY The new size of the allocation.
+     */
     public void resize(int dimX, int dimY) {
-        if ((mType.getZ() > 0) || mType.getFaces() || mType.getLOD()) {
-            throw new RSIllegalStateException("Resize only support for 2D allocations at this time.");
+        if ((mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
+            throw new RSInvalidStateException(
+                "Resize only support for 2D allocations at this time.");
         }
         if (mType.getY() == 0) {
-            throw new RSIllegalStateException("Resize only support for 2D allocations at this time.");
+            throw new RSInvalidStateException(
+                "Resize only support for 2D allocations at this time.");
         }
         mRS.nAllocationResize2D(getID(), dimX, dimY);
+        mRS.finish();  // Necessary because resize is fifoed and update is async.
+
+        int typeID = mRS.nAllocationGetType(getID());
+        mType = new Type(typeID, mRS);
+        mType.updateFromNative();
+        updateCacheInfo(mType);
     }
-    */
 
 
 
@@ -1088,6 +1139,18 @@ public class Allocation extends BaseObj {
         int id = mRS.nAllocationGetSurfaceTextureID(getID());
         return new SurfaceTexture(id);
 
+    }
+
+    /**
+     * @hide
+     */
+    public void setSurfaceTexture(SurfaceTexture sur) {
+        if ((mUsage & USAGE_IO_OUTPUT) == 0) {
+            throw new RSInvalidStateException("Allocation is not USAGE_IO_OUTPUT.");
+        }
+
+        mRS.validate();
+        mRS.nAllocationSetSurfaceTexture(getID(), sur);
     }
 
 

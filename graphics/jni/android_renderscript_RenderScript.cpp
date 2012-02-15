@@ -451,6 +451,37 @@ nAllocationGetSurfaceTextureID(JNIEnv *_env, jobject _this, RsContext con, jint 
 }
 
 static void
+nAllocationSetSurfaceTexture(JNIEnv *_env, jobject _this, RsContext con,
+                             RsAllocation alloc, jobject sur)
+{
+    LOG_API("nAllocationSetSurfaceTexture, con(%p), alloc(%p), surface(%p)",
+            con, alloc, (Surface *)sur);
+
+    sp<ANativeWindow> window;
+    if (sur != 0) {
+        sp<SurfaceTexture> st = SurfaceTexture_getSurfaceTexture(_env, sur);
+        window = new SurfaceTextureClient(st);
+    }
+
+    rsAllocationSetSurface(con, alloc, window.get());
+}
+
+static void
+nAllocationIoSend(JNIEnv *_env, jobject _this, RsContext con, RsAllocation alloc)
+{
+    LOG_API("nAllocationIoSend, con(%p), alloc(%p)", con, alloc);
+    rsAllocationIoSend(con, alloc);
+}
+
+static void
+nAllocationIoReceive(JNIEnv *_env, jobject _this, RsContext con, RsAllocation alloc)
+{
+    LOG_API("nAllocationIoReceive, con(%p), alloc(%p)", con, alloc);
+    rsAllocationIoReceive(con, alloc);
+}
+
+
+static void
 nAllocationGenerateMipmaps(JNIEnv *_env, jobject _this, RsContext con, jint alloc)
 {
     LOG_API("nAllocationGenerateMipmaps, con(%p), a(%p)", con, (RsAllocation)alloc);
@@ -1277,6 +1308,9 @@ static JNINativeMethod methods[] = {
 
 {"rsnAllocationSyncAll",             "(III)V",                                (void*)nAllocationSyncAll },
 {"rsnAllocationGetSurfaceTextureID", "(II)I",                                 (void*)nAllocationGetSurfaceTextureID },
+{"rsnAllocationSetSurfaceTexture",   "(IILandroid/graphics/SurfaceTexture;)V", (void*)nAllocationSetSurfaceTexture },
+{"rsnAllocationIoSend",              "(II)V",                                 (void*)nAllocationIoSend },
+{"rsnAllocationIoReceive",           "(II)V",                                 (void*)nAllocationIoReceive },
 {"rsnAllocationData1D",              "(IIIII[II)V",                           (void*)nAllocationData1D_i },
 {"rsnAllocationData1D",              "(IIIII[SI)V",                           (void*)nAllocationData1D_s },
 {"rsnAllocationData1D",              "(IIIII[BI)V",                           (void*)nAllocationData1D_b },
