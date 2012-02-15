@@ -123,7 +123,7 @@ protected:
     virtual ~InputChannel();
 
 public:
-    InputChannel(const String8& name, int32_t fd);
+    InputChannel(const String8& name, int fd);
 
     /* Creates a pair of input channels.
      *
@@ -133,7 +133,7 @@ public:
             sp<InputChannel>& outServerChannel, sp<InputChannel>& outClientChannel);
 
     inline String8 getName() const { return mName; }
-    inline int32_t getFd() const { return mFd; }
+    inline int getFd() const { return mFd; }
 
     /* Sends a message to the other endpoint.
      *
@@ -162,7 +162,7 @@ public:
 
 private:
     String8 mName;
-    int32_t mFd;
+    int mFd;
 };
 
 /*

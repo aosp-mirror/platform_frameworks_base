@@ -3105,7 +3105,7 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
 
         sp<Connection> connection = new Connection(inputChannel, inputWindowHandle, monitor);
 
-        int32_t fd = inputChannel->getFd();
+        int fd = inputChannel->getFd();
         mConnectionsByFd.add(fd, connection);
 
         if (monitor) {
