@@ -5123,20 +5123,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         /**
          * The start margin in pixels of the child.
-         *
-         * @hide
-         *
+         * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
+         * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
-        protected int startMargin = DEFAULT_RELATIVE;
+        public int startMargin = DEFAULT_RELATIVE;
 
         /**
          * The end margin in pixels of the child.
-         *
-         * @hide
+         * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
+         * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
-        protected int endMargin = DEFAULT_RELATIVE;
+        public int endMargin = DEFAULT_RELATIVE;
 
         /**
          * The default start and end margin.
@@ -5268,8 +5267,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
          *
          * @return the start margin in pixels.
-         *
-         * @hide
          */
         public int getMarginStart() {
             return startMargin;
@@ -5281,8 +5278,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
          *
          * @return the end margin in pixels.
-         *
-         * @hide
          */
         public int getMarginEnd() {
             return endMargin;
@@ -5295,8 +5290,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
          *
          * @return true if either marginStart or marginEnd has been set
-         *
-         * @hide
          */
         public boolean isMarginRelative() {
             return (startMargin != DEFAULT_RELATIVE) || (endMargin != DEFAULT_RELATIVE);

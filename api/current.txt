@@ -614,8 +614,10 @@ package android {
     field public static final int layout_height = 16842997; // 0x10100f5
     field public static final int layout_margin = 16842998; // 0x10100f6
     field public static final int layout_marginBottom = 16843002; // 0x10100fa
+    field public static final int layout_marginEnd = 16843690; // 0x10103aa
     field public static final int layout_marginLeft = 16842999; // 0x10100f7
     field public static final int layout_marginRight = 16843001; // 0x10100f9
+    field public static final int layout_marginStart = 16843689; // 0x10103a9
     field public static final int layout_marginTop = 16843000; // 0x10100f8
     field public static final int layout_row = 16843643; // 0x101037b
     field public static final int layout_rowSpan = 16843644; // 0x101037c
@@ -23849,10 +23851,15 @@ package android.view {
     ctor public ViewGroup.MarginLayoutParams(int, int);
     ctor public ViewGroup.MarginLayoutParams(android.view.ViewGroup.MarginLayoutParams);
     ctor public ViewGroup.MarginLayoutParams(android.view.ViewGroup.LayoutParams);
+    method public int getMarginEnd();
+    method public int getMarginStart();
+    method public boolean isMarginRelative();
     method public void setMargins(int, int, int, int);
     field public int bottomMargin;
+    field public int endMargin;
     field public int leftMargin;
     field public int rightMargin;
+    field public int startMargin;
     field public int topMargin;
   }
 
