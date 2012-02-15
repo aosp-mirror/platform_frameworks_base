@@ -623,4 +623,35 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
         // Brazil.
         assertFalse(PhoneNumberUtils.isPotentialEmergencyNumber("91112345", "BR"));
     }
+
+    @SmallTest
+    public void testStripSeparators() {
+        // Smoke tests which should never fail.
+        assertEquals("1234567890", PhoneNumberUtils.stripSeparators("1234567890"));
+        assertEquals("911", PhoneNumberUtils.stripSeparators("911"));
+        assertEquals("112", PhoneNumberUtils.stripSeparators("112"));
+
+        // Separators should be removed, while '+' or any other digits should not.
+        assertEquals("+16502910000", PhoneNumberUtils.stripSeparators("+1 (650) 291-0000"));
+
+        // WAIT, PAUSE should *not* be stripped
+        assertEquals("+16502910000,300;",
+                PhoneNumberUtils.stripSeparators("+1 (650) 291-0000, 300;"));
+    }
+
+    @SmallTest
+    public void testConvertAndStrip() {
+        // Smoke tests which should never fail.
+        assertEquals("1234567890", PhoneNumberUtils.convertAndStrip("1234567890"));
+        assertEquals("911", PhoneNumberUtils.convertAndStrip("911"));
+        assertEquals("112", PhoneNumberUtils.convertAndStrip("112"));
+
+        // It should convert keypad characters into digits, and strip separators
+        assertEquals("22233344455566677778889999",
+                PhoneNumberUtils.convertAndStrip("ABC DEF GHI JKL MNO PQR STUV WXYZ"));
+
+        // Test real cases.
+        assertEquals("18004664411", PhoneNumberUtils.convertAndStrip("1-800-GOOG-411"));
+        assertEquals("8002223334", PhoneNumberUtils.convertAndStrip("(800) ABC-DEFG"));
+    }
 }

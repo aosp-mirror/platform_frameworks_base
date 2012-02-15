@@ -292,6 +292,20 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Translates keypad letters to actual digits (e.g. 1-800-GOOG-411 will
+     * become 1-800-4664-411), and then strips all separators (e.g. 1-800-4664-411 will become
+     * 18004664411).
+     *
+     * @see #convertKeypadLettersToDigits(String)
+     * @see #stripSeparators(String)
+     *
+     * @hide
+     */
+    public static String convertAndStrip(String phoneNumber) {
+        return stripSeparators(convertKeypadLettersToDigits(phoneNumber));
+    }
+
+    /**
      * Converts pause and tonewait pause characters
      * to Android representation.
      * RFC 3601 says pause is 'p' and tonewait is 'w'.
