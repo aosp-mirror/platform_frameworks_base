@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -832,10 +832,12 @@ public class Element extends BaseObj {
 
     /**
      * Create a custom vector element of the specified DataType and vector size.
-     *  DataKind will be set to USER.
+     * DataKind will be set to USER. Only primitive types (FLOAT_32, FLOAT_64,
+     * SIGNED_8, SIGNED_16, SIGNED_32, SIGNED_64, UNSIGNED_8, UNSIGNED_16,
+     * UNSIGNED_32, UNSIGNED_64, BOOLEAN) are supported.
      *
      * @param rs The context associated with the new Element.
-     * @param dt The DataType for the new element.
+     * @param dt The DataType for the new Element.
      * @param size Vector size for the new Element.  Range 2-4 inclusive
      *             supported.
      *
@@ -845,10 +847,31 @@ public class Element extends BaseObj {
         if (size < 2 || size > 4) {
             throw new RSIllegalArgumentException("Vector size out of range 2-4.");
         }
-        DataKind dk = DataKind.USER;
-        boolean norm = false;
-        int id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
-        return new Element(id, rs, dt, dk, norm, size);
+
+        switch (dt) {
+        // Support only primitive integer/float/boolean types as vectors.
+        case FLOAT_32:
+        case FLOAT_64:
+        case SIGNED_8:
+        case SIGNED_16:
+        case SIGNED_32:
+        case SIGNED_64:
+        case UNSIGNED_8:
+        case UNSIGNED_16:
+        case UNSIGNED_32:
+        case UNSIGNED_64:
+        case BOOLEAN: {
+            DataKind dk = DataKind.USER;
+            boolean norm = false;
+            int id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
+            return new Element(id, rs, dt, dk, norm, size);
+        }
+
+        default: {
+            throw new RSIllegalArgumentException("Cannot create vector of " +
+                "non-primitive type.");
+        }
+        }
     }
 
     /**
