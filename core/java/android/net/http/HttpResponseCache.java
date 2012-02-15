@@ -22,8 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.CacheRequest;
 import java.net.CacheResponse;
+import java.net.ExtendedResponseCache;
 import java.net.HttpURLConnection;
 import java.net.ResponseCache;
+import java.net.ResponseSource;
 import java.net.URI;
 import java.net.URLConnection;
 import java.util.List;
@@ -149,7 +151,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
  *       } catch (Exception httpResponseCacheNotAvailable) {
  *       }}</pre>
  */
-public final class HttpResponseCache extends ResponseCache implements Closeable {
+public final class HttpResponseCache extends ResponseCache
+        implements Closeable, ExtendedResponseCache {
 
     private final libcore.net.http.HttpResponseCache delegate;
 
@@ -258,6 +261,21 @@ public final class HttpResponseCache extends ResponseCache implements Closeable 
      */
     public int getRequestCount() {
         return delegate.getRequestCount();
+    }
+
+    /** @hide */
+    @Override public void trackResponse(ResponseSource source) {
+        delegate.trackResponse(source);
+    }
+
+    /** @hide */
+    @Override public void trackConditionalCacheHit() {
+        delegate.trackConditionalCacheHit();
+    }
+
+    /** @hide */
+    @Override public void update(CacheResponse conditionalCacheHit, HttpURLConnection connection) {
+        delegate.update(conditionalCacheHit, connection);
     }
 
     /**
