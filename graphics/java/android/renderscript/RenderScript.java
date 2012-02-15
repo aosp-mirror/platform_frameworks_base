@@ -274,6 +274,22 @@ public class RenderScript {
         validate();
         return rsnAllocationGetSurfaceTextureID(mContext, alloc);
     }
+    native void rsnAllocationSetSurfaceTexture(int con, int alloc, SurfaceTexture sur);
+    synchronized void nAllocationSetSurfaceTexture(int alloc, SurfaceTexture sur) {
+        validate();
+        rsnAllocationSetSurfaceTexture(mContext, alloc, sur);
+    }
+    native void rsnAllocationIoSend(int con, int alloc);
+    synchronized void nAllocationIoSend(int alloc) {
+        validate();
+        rsnAllocationIoSend(mContext, alloc);
+    }
+    native void rsnAllocationIoReceive(int con, int alloc);
+    synchronized void nAllocationIoReceive(int alloc) {
+        validate();
+        rsnAllocationIoReceive(mContext, alloc);
+    }
+
 
     native void rsnAllocationGenerateMipmaps(int con, int alloc);
     synchronized void nAllocationGenerateMipmaps(int alloc) {

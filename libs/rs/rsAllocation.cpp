@@ -17,6 +17,7 @@
 #include "rsContext.h"
 #include "rs_hal.h"
 
+#include "system/window.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -44,6 +45,7 @@ Allocation * Allocation::createAllocation(Context *rsc, const Type *type, uint32
         delete a;
         return NULL;
     }
+
     return a;
 }
 
@@ -420,6 +422,28 @@ int32_t Allocation::getSurfaceTextureID(const Context *rsc) {
     return id;
 }
 
+void Allocation::setSurface(const Context *rsc, RsNativeWindow sur) {
+    ANativeWindow *nw = (ANativeWindow *)sur;
+    ANativeWindow *old = mHal.state.wndSurface;
+    if (nw) {
+        nw->incStrong(NULL);
+    }
+    rsc->mHal.funcs.allocation.setSurfaceTexture(rsc, this, nw);
+    mHal.state.wndSurface = nw;
+    if (old) {
+        old->decStrong(NULL);
+    }
+}
+
+void Allocation::ioSend(const Context *rsc) {
+    rsc->mHal.funcs.allocation.ioSend(rsc, this);
+}
+
+void Allocation::ioReceive(const Context *rsc) {
+    rsc->mHal.funcs.allocation.ioReceive(rsc, this);
+}
+
+
 /////////////////
 //
 
@@ -668,6 +692,21 @@ void rsi_AllocationCopy2DRange(Context *rsc,
 int32_t rsi_AllocationGetSurfaceTextureID(Context *rsc, RsAllocation valloc) {
     Allocation *alloc = static_cast<Allocation *>(valloc);
     return alloc->getSurfaceTextureID(rsc);
+}
+
+void rsi_AllocationSetSurface(Context *rsc, RsAllocation valloc, RsNativeWindow sur) {
+    Allocation *alloc = static_cast<Allocation *>(valloc);
+    alloc->setSurface(rsc, sur);
+}
+
+void rsi_AllocationIoSend(Context *rsc, RsAllocation valloc) {
+    Allocation *alloc = static_cast<Allocation *>(valloc);
+    alloc->ioSend(rsc);
+}
+
+void rsi_AllocationIoReceive(Context *rsc, RsAllocation valloc) {
+    Allocation *alloc = static_cast<Allocation *>(valloc);
+    alloc->ioReceive(rsc);
 }
 
 }

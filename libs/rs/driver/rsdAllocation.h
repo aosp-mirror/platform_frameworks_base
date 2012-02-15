@@ -24,6 +24,7 @@
 #include <GLES2/gl2.h>
 
 class RsdFrameBufferObj;
+struct ANativeWindowBuffer;
 
 struct DrvAllocation {
     // Is this a legal structure to be used as a texture source.
@@ -47,6 +48,7 @@ struct DrvAllocation {
     bool uploadDeferred;
 
     RsdFrameBufferObj * readBackFBO;
+    ANativeWindowBuffer *wndBuffer;
 };
 
 GLenum rsdTypeToGLType(RsDataType t);
@@ -69,6 +71,12 @@ void rsdAllocationMarkDirty(const android::renderscript::Context *rsc,
                             const android::renderscript::Allocation *alloc);
 int32_t rsdAllocationInitSurfaceTexture(const android::renderscript::Context *rsc,
                                         const android::renderscript::Allocation *alloc);
+void rsdAllocationSetSurfaceTexture(const android::renderscript::Context *rsc,
+                                    android::renderscript::Allocation *alloc, ANativeWindow *nw);
+void rsdAllocationIoSend(const android::renderscript::Context *rsc,
+                         android::renderscript::Allocation *alloc);
+void rsdAllocationIoReceive(const android::renderscript::Context *rsc,
+                            android::renderscript::Allocation *alloc);
 
 void rsdAllocationData1D(const android::renderscript::Context *rsc,
                          const android::renderscript::Allocation *alloc,

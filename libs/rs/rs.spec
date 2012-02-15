@@ -69,6 +69,21 @@ AllocationGetSurfaceTextureID {
     ret int32_t
 }
 
+AllocationSetSurface {
+    param RsAllocation alloc
+    param RsNativeWindow sur
+    sync
+    }
+
+AllocationIoSend {
+    param RsAllocation alloc
+    }
+
+AllocationIoReceive {
+    param RsAllocation alloc
+    }
+
+
 ContextFinish {
 	sync
 	}
