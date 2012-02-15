@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Επιτρέπει στην εφαρμογή τη μετακίνηση εργασιών στο προσκήνιο και στο φόντο. Τυχόν κακόβουλες εφαρμογές μπορούν να προωθηθούν στο προσκήνιο χωρίς να μπορείτε να τις ελέγξετε."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"διακοπή εκτέλεσης εφαρμογών"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Επιτρέπει στην εφαρμογή την κατάργηση ενεργειών και την απομάκρυνση των εφαρμογών τους. Τυχόν κακόβουλες εφαρμογές ενδέχεται να διαταράξουν τη λειτουργία άλλων εφαρμογών."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"ρύθμιση συμβατότητας οθόνης"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Επιτρέπει στην εφαρμογή να ελέγξει τη λειτουργία συμβατότητας της οθόνης με άλλες εφαρμογές. Οι κακόβουλες εφαρμογές μπορεί να επηρεάσουν τη συμπεριφορά άλλων εφαρμογών."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"ενεργοποίηση εντοπισμού σφαλμάτων εφαρμογής"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Επιτρέπει στην εφαρμογή να ενεργοποιήσει τον εντοπισμό σφαλμάτων για μια άλλη εφαρμογή. Τυχόν κακόβουλες εφαρμογές ενδέχεται να χρησιμοποιήσουν αυτήν τη δυνατότητα για τον τερματισμό άλλων εφαρμογών."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"αλλαγή των ρυθμίσεων του UI"</string>
@@ -975,9 +973,6 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Δεν είναι δυνατή η σύνδεση στο Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" έχει κακή σύνδεση στο Διαδίκτυο."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Ξεκινήστε τη λειτουργία Wi-Fi Direct. Θα απενεργοποιηθεί η λειτουργία πελάτη/φορητού σημείου πρόσβασης Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Δεν ήταν δυνατή η εκκίνηση του Wi-Fi Direct."</string>
     <string name="accept" msgid="1645267259272829559">"Αποδοχή"</string>
     <string name="decline" msgid="2112225451706137894">"Απόρριψη"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Η πρόσκληση στάλθηκε"</string>
@@ -986,8 +981,6 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Προς:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Πληκτρολογήστε τον απαιτούμενο κωδικό PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Το Wi-Fi Direct έχει ενεργοποιηθεί"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Αγγίξτε για ρυθμίσεις"</string>
     <string name="select_character" msgid="3365550120617701745">"Εισαγωγή χαρακτήρα"</string>
     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Άγνωστη εφαρμογή"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Αποστολή μηνυμάτων SMS"</string>

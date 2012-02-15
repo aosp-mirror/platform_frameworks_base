@@ -975,9 +975,6 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kon nie aan Wi-Fikoppel nie"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" het \'n swak internetverbinding."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Begin Wi-Fi Direct. Dit sal die Wi-Fi-kliënt/warmkol afskakel."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Kon nie Wi-Fi Direct begin nie."</string>
     <string name="accept" msgid="1645267259272829559">"Aanvaar"</string>
     <string name="decline" msgid="2112225451706137894">"Weier"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Uitnodiging gestuur"</string>
@@ -986,8 +983,6 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Aan:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Voer die vereiste PIN in:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direk is aan"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Raak vir instellings"</string>
     <string name="select_character" msgid="3365550120617701745">"Voeg karakter in"</string>
     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Onbekend program"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Stuur SMS-boodskappe"</string>

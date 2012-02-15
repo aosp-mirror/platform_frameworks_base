@@ -215,8 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite que la aplicación mueva tareas al primero o segundo plano. Las aplicaciones maliciosas pueden forzar su paso al primer plano sin que tú las controles."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"detener las aplicaciones en ejecución"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite que la aplicación elimine tareas y cierre sus aplicaciones. Las aplicaciones malintencionadas pueden usar este permiso para interferir en el comportamiento de otras aplicaciones."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"Configurar el modo de la compatibilidad de otras pantalla"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permite a la aplicación controlar el modo de la compatibilidad de las pantallas de otras aplicaciones. Las aplicaciones malintencionadas pueden interrumpir el funcionamiento de otras aplicaciones."</string>
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"Definir compatibilidad de pantalla"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permite a la aplicación controlar el modo de compatibilidad de las pantallas de otras aplicaciones. Las aplicaciones malintencionadas pueden interrumpir el funcionamiento de otras aplicaciones."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activar depuración de aplicación"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permite que la aplicación active la depuración de otra aplicación. Las aplicaciones malintencionadas pueden usar este permiso para interrumpir la ejecución de otras aplicaciones."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"cambiar tu configuración de la interfaz de usuario"</string>
@@ -973,9 +973,6 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No se pudo conectar a la red Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" tiene una mala conexión a Internet."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Iniciar Wi-Fi Direct. Se desactivará el funcionamiento de la zona o del cliente Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"No se pudo iniciar Wi-Fi Direct."</string>
     <string name="accept" msgid="1645267259272829559">"Aceptar"</string>
     <string name="decline" msgid="2112225451706137894">"Rechazar"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Se envió la invitación."</string>
@@ -984,8 +981,6 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Para:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Escribe el PIN solicitado:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Se activó Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Tocar para ajustar los parámetros de configuración"</string>
     <string name="select_character" msgid="3365550120617701745">"Insertar caracteres"</string>
     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Aplicación desconocida"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Enviando mensajes SMS"</string>

@@ -973,9 +973,6 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan geen verbinding maken met Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" heeft een slechte internetverbinding."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wifi Direct starten. Hierdoor wordt de wifi-client/hotspot uitgeschakeld."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Kan Wifi Direct niet starten."</string>
     <string name="accept" msgid="1645267259272829559">"Accepteren"</string>
     <string name="decline" msgid="2112225451706137894">"Weigeren"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Uitnodiging verzonden"</string>
@@ -984,8 +981,6 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Naar:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Voer de gewenste pincode in:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Pincode"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct is actief"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Aanraken voor instellingen"</string>
     <string name="select_character" msgid="3365550120617701745">"Teken invoegen"</string>
     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Onbekende app"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-berichten verzenden"</string>

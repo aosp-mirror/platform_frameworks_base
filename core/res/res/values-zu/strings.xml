@@ -215,7 +215,7 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Ivumela insiza ukuthi ihambise izenzo ziye ngaphambili kanye nasemumva. Izinsiza ezinobungozi zingaziphoqelela ukuth iziye phambili ngaphandle kokulawula kwakho."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"misa izinsiza ezisebenzayo"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Vumela ukuthi insiza isuse okumele kwenziwe ibulale nezinsiza zakho. Izinsiza eziwubungozi zingaphazamisa ukusebenza kwezinye izinsiza."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"misa ukuhambelana kwesikrini"</string>
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"setha ukuhambelana kwesikrini"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Ivumela uhlelo lokusebenza ukulawula imodi yokuhambelana kwesikrini kwezinye izinhlelo zokusebenza. Izinhlelo zokusebenza ezinonya zingase zephule ukuziphatha kwezinye izinhlelo zokusebenza."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"vumela insiza ilungise inkinga"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Ivumela insiza ukuthi ivule uhlelo lokulungisa lwenye insiza. Izinsiza ezinobungozi zingasebenzisa lokhu ukubulala ezinye izinsiza."</string>
@@ -973,9 +973,6 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ayikwazanga ukuxhuma kwi-Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" inoxhumano oluphansi lwe-inthanethi."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"I-WiFi Eqondile"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Qala ukusebenza kwe-WiFi Okuqondile. Lokhu kuzocima ikhasimende le-WiFi/Ukusebenza okwe-hotspot"</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Yehlulekile ukuqala i-Wi-Fi Ngqo"</string>
     <string name="accept" msgid="1645267259272829559">"Yamukela"</string>
     <string name="decline" msgid="2112225451706137894">"Nqaba"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Isimemo sithunyelwe"</string>
@@ -984,8 +981,6 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Ku:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Faka i-PIN edingekayo:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"I-Wi-Fi Direct ivulekile"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Thinta ukuze uthole izilungiselelo"</string>
     <string name="select_character" msgid="3365550120617701745">"Faka uhlamvu"</string>
     <string name="sms_control_default_app_name" msgid="3058577482636640465">"insiza engaziwa"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Ithumela imiyalezo ye-SMS"</string>
