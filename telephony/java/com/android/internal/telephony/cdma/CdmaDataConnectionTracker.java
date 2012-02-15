@@ -143,7 +143,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     public void dispose() {
-        cleanUpConnection(false, null);
+        cleanUpConnection(false, null, false);
 
         super.dispose();
 
@@ -300,7 +300,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      * @param tearDown true if the underlying DataConnection should be disconnected.
      * @param reason for the clean up.
      */
-    private void cleanUpConnection(boolean tearDown, String reason) {
+    private void cleanUpConnection(boolean tearDown, String reason, boolean doAll) {
         if (DBG) log("cleanUpConnection: reason: " + reason);
 
         // Clear the reconnect alarm, if set.
@@ -320,9 +320,15 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 DataConnectionAc dcac =
                     mDataConnectionAsyncChannels.get(conn.getDataConnectionId());
                 if (tearDown) {
-                    if (DBG) log("cleanUpConnection: teardown, call conn.disconnect");
-                    conn.tearDown(reason, obtainMessage(EVENT_DISCONNECT_DONE,
-                            conn.getDataConnectionId(), 0, reason));
+                    if (doAll) {
+                        if (DBG) log("cleanUpConnection: teardown, conn.tearDownAll");
+                        conn.tearDownAll(reason, obtainMessage(EVENT_DISCONNECT_DONE,
+                                conn.getDataConnectionId(), 0, reason));
+                    } else {
+                        if (DBG) log("cleanUpConnection: teardown, conn.tearDown");
+                        conn.tearDown(reason, obtainMessage(EVENT_DISCONNECT_DONE,
+                                conn.getDataConnectionId(), 0, reason));
+                    }
                     notificationDeferred = true;
                 } else {
                     if (DBG) log("cleanUpConnection: !tearDown, call conn.resetSynchronously");
@@ -604,7 +610,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected void onEnableNewApn() {
         // No mRequestedApnType check; only one connection is supported
-        cleanUpConnection(true, Phone.REASON_APN_SWITCHED);
+        cleanUpConnection(true, Phone.REASON_APN_SWITCHED, false);
     }
 
     /**
@@ -786,13 +792,13 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected void onCleanUpConnection(boolean tearDown, int apnId, String reason) {
         // No apnId check; only one connection is supported
-        cleanUpConnection(tearDown, reason);
+        cleanUpConnection(tearDown, reason, (apnId == APN_DUN_ID));
     }
 
     @Override
     protected void onCleanUpAllConnections(String cause) {
         // Only one CDMA connection is supported
-        cleanUpConnection(true, cause);
+        cleanUpConnection(true, cause, false);
     }
 
     private void createAllDataConnectionList() {
@@ -838,7 +844,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             notifyDataConnection(Phone.REASON_CDMA_DATA_DETACHED);
         } else {
             if (mState == State.FAILED) {
-                cleanUpConnection(false, Phone.REASON_CDMA_DATA_DETACHED);
+                cleanUpConnection(false, Phone.REASON_CDMA_DATA_DETACHED, false);
                 mDataConnections.get(0).resetRetryCount();
 
                 CdmaCellLocation loc = (CdmaCellLocation)(mPhone.getCellLocation());
@@ -917,7 +923,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 log("onDataStateChanged: No active connection"
                         + "state is CONNECTED, disconnecting/cleanup");
                 writeEventLogCdmaDataDrop();
-                cleanUpConnection(true, null);
+                cleanUpConnection(true, null, false);
                 return;
             }
 
