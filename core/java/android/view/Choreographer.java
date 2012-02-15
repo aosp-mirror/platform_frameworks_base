@@ -37,7 +37,7 @@ import android.util.Log;
  *
  * @hide
  */
-public final class Choreographer extends Handler {
+public final class Choreographer {
     private static final String TAG = "Choreographer";
     private static final boolean DEBUG = false;
 
@@ -92,9 +92,15 @@ public final class Choreographer extends Handler {
     private final Object mLock = new Object();
 
     private final Looper mLooper;
+    private final FrameHandler mHandler;
+
+    private Callback mCallbackPool;
 
     private OnAnimateListener[] mOnAnimateListeners;
     private OnDrawListener[] mOnDrawListeners;
+
+    private Callback mOnAnimateCallbacks;
+    private Callback mOnDrawCallbacks;
 
     private boolean mAnimationScheduled;
     private boolean mDrawScheduled;
@@ -104,8 +110,8 @@ public final class Choreographer extends Handler {
     private long mLastDrawTime;
 
     private Choreographer(Looper looper) {
-        super(looper);
         mLooper = looper;
+        mHandler = new FrameHandler(looper);
         mLastAnimationTime = Long.MIN_VALUE;
         mLastDrawTime = Long.MIN_VALUE;
     }
@@ -158,12 +164,13 @@ public final class Choreographer extends Handler {
      */
     public void scheduleAnimation() {
         synchronized (mLock) {
-            scheduleAnimationLocked();
+            scheduleAnimationLocked(false);
         }
     }
 
-    private void scheduleAnimationLocked() {
-        if (!mAnimationScheduled) {
+    private void scheduleAnimationLocked(boolean force) {
+        if (!mAnimationScheduled
+                && (force || mOnAnimateListeners != null || mOnAnimateCallbacks != null)) {
             mAnimationScheduled = true;
             if (USE_VSYNC) {
                 if (DEBUG) {
@@ -176,13 +183,14 @@ public final class Choreographer extends Handler {
                 if (!mFrameDisplayEventReceiverNeeded) {
                     mFrameDisplayEventReceiverNeeded = true;
                     if (mFrameDisplayEventReceiver != null) {
-                        removeMessages(MSG_DO_DISPOSE_RECEIVER);
+                        mHandler.removeMessages(MSG_DO_DISPOSE_RECEIVER);
                     }
                 }
                 if (isRunningOnLooperThreadLocked()) {
                     doScheduleVsyncLocked();
                 } else {
-                    sendMessageAtFrontOfQueue(obtainMessage(MSG_DO_SCHEDULE_VSYNC));
+                    mHandler.sendMessageAtFrontOfQueue(
+                            mHandler.obtainMessage(MSG_DO_SCHEDULE_VSYNC));
                 }
             } else {
                 final long now = SystemClock.uptimeMillis();
@@ -190,7 +198,7 @@ public final class Choreographer extends Handler {
                 if (DEBUG) {
                     Log.d(TAG, "Scheduling animation in " + (nextAnimationTime - now) + " ms.");
                 }
-                sendEmptyMessageAtTime(MSG_DO_ANIMATION, nextAnimationTime);
+                mHandler.sendEmptyMessageAtTime(MSG_DO_ANIMATION, nextAnimationTime);
             }
         }
     }
@@ -212,16 +220,21 @@ public final class Choreographer extends Handler {
      */
     public void scheduleDraw() {
         synchronized (mLock) {
-            if (!mDrawScheduled) {
-                mDrawScheduled = true;
-                if (USE_ANIMATION_TIMER_FOR_DRAW) {
-                    scheduleAnimationLocked();
-                } else {
-                    if (DEBUG) {
-                        Log.d(TAG, "Scheduling draw immediately.");
-                    }
-                    sendEmptyMessage(MSG_DO_DRAW);
+            scheduleDrawLocked();
+        }
+    }
+
+    private void scheduleDrawLocked() {
+        if (!mDrawScheduled
+                && (mOnDrawListeners != null || mOnDrawCallbacks != null)) {
+            mDrawScheduled = true;
+            if (USE_ANIMATION_TIMER_FOR_DRAW) {
+                scheduleAnimationLocked(true);
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "Scheduling draw immediately.");
                 }
+                mHandler.sendEmptyMessage(MSG_DO_DRAW);
             }
         }
     }
@@ -234,116 +247,6 @@ public final class Choreographer extends Handler {
     public boolean isDrawScheduled() {
         synchronized (mLock) {
             return mDrawScheduled;
-        }
-    }
-
-    @Override
-    public void handleMessage(Message msg) {
-        switch (msg.what) {
-            case MSG_DO_ANIMATION:
-                doAnimation();
-                break;
-            case MSG_DO_DRAW:
-                doDraw();
-                break;
-            case MSG_DO_SCHEDULE_VSYNC:
-                doScheduleVsync();
-                break;
-            case MSG_DO_DISPOSE_RECEIVER:
-                doDisposeReceiver();
-                break;
-        }
-    }
-
-    private void doAnimation() {
-        doAnimationInner();
-
-        if (USE_ANIMATION_TIMER_FOR_DRAW) {
-            doDraw();
-        }
-    }
-
-    private void doAnimationInner() {
-        final long start;
-        final OnAnimateListener[] listeners;
-        synchronized (mLock) {
-            if (!mAnimationScheduled) {
-                return; // no work to do
-            }
-            mAnimationScheduled = false;
-
-            start = SystemClock.uptimeMillis();
-            if (DEBUG) {
-                Log.d(TAG, "Performing animation: " + Math.max(0, start - mLastAnimationTime)
-                        + " ms have elapsed since previous animation.");
-            }
-            mLastAnimationTime = start;
-
-            listeners = mOnAnimateListeners;
-        }
-
-        if (listeners != null) {
-            for (int i = 0; i < listeners.length; i++) {
-                listeners[i].onAnimate();
-            }
-        }
-
-        if (DEBUG) {
-            Log.d(TAG, "Animation took " + (SystemClock.uptimeMillis() - start) + " ms.");
-        }
-    }
-
-    private void doDraw() {
-        final long start;
-        final OnDrawListener[] listeners;
-        synchronized (mLock) {
-            if (!mDrawScheduled) {
-                return; // no work to do
-            }
-            mDrawScheduled = false;
-
-            start = SystemClock.uptimeMillis();
-            if (DEBUG) {
-                Log.d(TAG, "Performing draw: " + Math.max(0, start - mLastDrawTime)
-                        + " ms have elapsed since previous draw.");
-            }
-            mLastDrawTime = start;
-
-            listeners = mOnDrawListeners;
-        }
-
-        if (listeners != null) {
-            for (int i = 0; i < listeners.length; i++) {
-                listeners[i].onDraw();
-            }
-        }
-
-        if (DEBUG) {
-            Log.d(TAG, "Draw took " + (SystemClock.uptimeMillis() - start) + " ms.");
-        }
-    }
-
-    private void doScheduleVsync() {
-        synchronized (mLock) {
-            doScheduleVsyncLocked();
-        }
-    }
-
-    private void doScheduleVsyncLocked() {
-        if (mFrameDisplayEventReceiverNeeded && mAnimationScheduled) {
-            if (mFrameDisplayEventReceiver == null) {
-                mFrameDisplayEventReceiver = new FrameDisplayEventReceiver(mLooper);
-            }
-            mFrameDisplayEventReceiver.scheduleVsync();
-        }
-    }
-
-    private void doDisposeReceiver() {
-        synchronized (mLock) {
-            if (!mFrameDisplayEventReceiverNeeded && mFrameDisplayEventReceiver != null) {
-                mFrameDisplayEventReceiver.dispose();
-                mFrameDisplayEventReceiver = null;
-            }
         }
     }
 
@@ -384,7 +287,7 @@ public final class Choreographer extends Handler {
         synchronized (mLock) {
             mOnAnimateListeners = ArrayUtils.removeElement(OnAnimateListener.class,
                     mOnAnimateListeners, listener);
-            stopTimingLoopIfNoListenersLocked();
+            stopTimingLoopIfNoListenersOrCallbacksLocked();
         }
     }
 
@@ -426,12 +329,200 @@ public final class Choreographer extends Handler {
         synchronized (mLock) {
             mOnDrawListeners = ArrayUtils.removeElement(OnDrawListener.class,
                     mOnDrawListeners, listener);
-            stopTimingLoopIfNoListenersLocked();
+            stopTimingLoopIfNoListenersOrCallbacksLocked();
         }
     }
 
-    private void stopTimingLoopIfNoListenersLocked() {
-        if (mOnDrawListeners == null && mOnAnimateListeners == null) {
+
+    /**
+     * Posts a callback to run on the next animation cycle and schedules an animation cycle.
+     * The callback only runs once and then is automatically removed.
+     *
+     * @param runnable The callback to run during the next animation cycle.
+     *
+     * @see #removeOnAnimateCallback
+     */
+    public void postOnAnimateCallback(Runnable runnable) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        synchronized (mLock) {
+            mOnAnimateCallbacks = addCallbackLocked(mOnAnimateCallbacks, runnable);
+            scheduleAnimationLocked(false);
+        }
+    }
+
+    /**
+     * Removes an animation callback.
+     * Does nothing if the specified animation callback has not been posted or has already
+     * been removed.
+     *
+     * @param runnable The animation callback to remove.
+     *
+     * @see #postOnAnimateCallback
+     */
+    public void removeOnAnimateCallback(Runnable runnable) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        synchronized (mLock) {
+            mOnAnimateCallbacks = removeCallbackLocked(mOnAnimateCallbacks, runnable);
+            stopTimingLoopIfNoListenersOrCallbacksLocked();
+        }
+    }
+
+    /**
+     * Posts a callback to run on the next draw cycle and schedules a draw cycle.
+     * The callback only runs once and then is automatically removed.
+     *
+     * @param runnable The callback to run during the next draw cycle.
+     *
+     * @see #removeOnDrawCallback
+     */
+    public void postOnDrawCallback(Runnable runnable) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        synchronized (mLock) {
+            mOnDrawCallbacks = addCallbackLocked(mOnDrawCallbacks, runnable);
+            scheduleDrawLocked();
+        }
+    }
+
+    /**
+     * Removes a draw callback.
+     * Does nothing if the specified draw callback has not been posted or has already
+     * been removed.
+     *
+     * @param runnable The draw callback to remove.
+     *
+     * @see #postOnDrawCallback
+     */
+    public void removeOnDrawCallback(Runnable runnable) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        synchronized (mLock) {
+            mOnDrawCallbacks = removeCallbackLocked(mOnDrawCallbacks, runnable);
+            stopTimingLoopIfNoListenersOrCallbacksLocked();
+        }
+    }
+
+    void doAnimation() {
+        doAnimationInner();
+
+        if (USE_ANIMATION_TIMER_FOR_DRAW) {
+            doDraw();
+        }
+    }
+
+    void doAnimationInner() {
+        final long start;
+        final OnAnimateListener[] listeners;
+        final Callback callbacks;
+        synchronized (mLock) {
+            if (!mAnimationScheduled) {
+                return; // no work to do
+            }
+            mAnimationScheduled = false;
+
+            start = SystemClock.uptimeMillis();
+            if (DEBUG) {
+                Log.d(TAG, "Performing animation: " + Math.max(0, start - mLastAnimationTime)
+                        + " ms have elapsed since previous animation.");
+            }
+            mLastAnimationTime = start;
+
+            listeners = mOnAnimateListeners;
+            callbacks = mOnAnimateCallbacks;
+            mOnAnimateCallbacks = null;
+        }
+
+        if (listeners != null) {
+            for (int i = 0; i < listeners.length; i++) {
+                listeners[i].onAnimate();
+            }
+        }
+
+        if (callbacks != null) {
+            runCallbacks(callbacks);
+            synchronized (mLock) {
+                recycleCallbacksLocked(callbacks);
+            }
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "Animation took " + (SystemClock.uptimeMillis() - start) + " ms.");
+        }
+    }
+
+    void doDraw() {
+        final long start;
+        final OnDrawListener[] listeners;
+        final Callback callbacks;
+        synchronized (mLock) {
+            if (!mDrawScheduled) {
+                return; // no work to do
+            }
+            mDrawScheduled = false;
+
+            start = SystemClock.uptimeMillis();
+            if (DEBUG) {
+                Log.d(TAG, "Performing draw: " + Math.max(0, start - mLastDrawTime)
+                        + " ms have elapsed since previous draw.");
+            }
+            mLastDrawTime = start;
+
+            listeners = mOnDrawListeners;
+            callbacks = mOnDrawCallbacks;
+            mOnDrawCallbacks = null;
+        }
+
+        if (listeners != null) {
+            for (int i = 0; i < listeners.length; i++) {
+                listeners[i].onDraw();
+            }
+        }
+
+        if (callbacks != null) {
+            runCallbacks(callbacks);
+            synchronized (mLock) {
+                recycleCallbacksLocked(callbacks);
+            }
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "Draw took " + (SystemClock.uptimeMillis() - start) + " ms.");
+        }
+    }
+
+    void doScheduleVsync() {
+        synchronized (mLock) {
+            doScheduleVsyncLocked();
+        }
+    }
+
+    private void doScheduleVsyncLocked() {
+        if (mFrameDisplayEventReceiverNeeded && mAnimationScheduled) {
+            if (mFrameDisplayEventReceiver == null) {
+                mFrameDisplayEventReceiver = new FrameDisplayEventReceiver(mLooper);
+            }
+            mFrameDisplayEventReceiver.scheduleVsync();
+        }
+    }
+
+    void doDisposeReceiver() {
+        synchronized (mLock) {
+            if (!mFrameDisplayEventReceiverNeeded && mFrameDisplayEventReceiver != null) {
+                mFrameDisplayEventReceiver.dispose();
+                mFrameDisplayEventReceiver = null;
+            }
+        }
+    }
+
+    private void stopTimingLoopIfNoListenersOrCallbacksLocked() {
+        if (mOnAnimateListeners == null && mOnDrawListeners == null
+                && mOnAnimateCallbacks == null && mOnDrawCallbacks == null) {
             if (DEBUG) {
                 Log.d(TAG, "Stopping timing loop.");
             }
@@ -439,16 +530,16 @@ public final class Choreographer extends Handler {
             if (mAnimationScheduled) {
                 mAnimationScheduled = false;
                 if (USE_VSYNC) {
-                    removeMessages(MSG_DO_SCHEDULE_VSYNC);
+                    mHandler.removeMessages(MSG_DO_SCHEDULE_VSYNC);
                 } else {
-                    removeMessages(MSG_DO_ANIMATION);
+                    mHandler.removeMessages(MSG_DO_ANIMATION);
                 }
             }
 
             if (mDrawScheduled) {
                 mDrawScheduled = false;
                 if (!USE_ANIMATION_TIMER_FOR_DRAW) {
-                    removeMessages(MSG_DO_DRAW);
+                    mHandler.removeMessages(MSG_DO_DRAW);
                 }
             }
 
@@ -460,7 +551,8 @@ public final class Choreographer extends Handler {
             if (mFrameDisplayEventReceiverNeeded) {
                 mFrameDisplayEventReceiverNeeded = false;
                 if (mFrameDisplayEventReceiver != null) {
-                    sendEmptyMessageDelayed(MSG_DO_DISPOSE_RECEIVER, DISPOSE_RECEIVER_DELAY);
+                    mHandler.sendEmptyMessageDelayed(MSG_DO_DISPOSE_RECEIVER,
+                            DISPOSE_RECEIVER_DELAY);
                 }
             }
         }
@@ -468,6 +560,71 @@ public final class Choreographer extends Handler {
 
     private boolean isRunningOnLooperThreadLocked() {
         return Looper.myLooper() == mLooper;
+    }
+
+    private Callback addCallbackLocked(Callback head, Runnable runnable) {
+        Callback callback = obtainCallbackLocked(runnable);
+        if (head == null) {
+            return callback;
+        }
+        Callback tail = head;
+        while (tail.next != null) {
+            tail = tail.next;
+        }
+        tail.next = callback;
+        return head;
+    }
+
+    private Callback removeCallbackLocked(Callback head, Runnable runnable) {
+        Callback predecessor = null;
+        for (Callback callback = head; callback != null;) {
+            final Callback next = callback.next;
+            if (callback.runnable == runnable) {
+                if (predecessor != null) {
+                    predecessor.next = next;
+                } else {
+                    head = next;
+                }
+                recycleCallbackLocked(callback);
+            } else {
+                predecessor = callback;
+            }
+            callback = next;
+        }
+        return head;
+    }
+
+    private void runCallbacks(Callback head) {
+        while (head != null) {
+            head.runnable.run();
+            head = head.next;
+        }
+    }
+
+    private void recycleCallbacksLocked(Callback head) {
+        while (head != null) {
+            final Callback next = head.next;
+            recycleCallbackLocked(head);
+            head = next;
+        }
+    }
+
+    private Callback obtainCallbackLocked(Runnable runnable) {
+        Callback callback = mCallbackPool;
+        if (callback == null) {
+            callback = new Callback();
+        } else {
+            mCallbackPool = callback.next;
+            callback.next = null;
+        }
+        callback.runnable = runnable;
+        return callback;
+    }
+
+    private void recycleCallbackLocked(Callback callback) {
+        callback.runnable = null;
+        callback.next = mCallbackPool;
+        mCallbackPool = callback;
     }
 
     /**
@@ -490,6 +647,30 @@ public final class Choreographer extends Handler {
         public void onDraw();
     }
 
+    private final class FrameHandler extends Handler {
+        public FrameHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_DO_ANIMATION:
+                    doAnimation();
+                    break;
+                case MSG_DO_DRAW:
+                    doDraw();
+                    break;
+                case MSG_DO_SCHEDULE_VSYNC:
+                    doScheduleVsync();
+                    break;
+                case MSG_DO_DISPOSE_RECEIVER:
+                    doDisposeReceiver();
+                    break;
+            }
+        }
+    }
+
     private final class FrameDisplayEventReceiver extends DisplayEventReceiver {
         public FrameDisplayEventReceiver(Looper looper) {
             super(looper);
@@ -499,5 +680,10 @@ public final class Choreographer extends Handler {
         public void onVsync(long timestampNanos, int frame) {
             doAnimation();
         }
+    }
+
+    private static final class Callback {
+        public Callback next;
+        public Runnable runnable;
     }
 }
