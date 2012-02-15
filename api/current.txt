@@ -23310,6 +23310,7 @@ package android.view {
     method protected void onMeasure(int, int);
     method protected void onOverScrolled(int, int, boolean, boolean);
     method public void onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
+    method public void onResolvePadding(int);
     method protected void onRestoreInstanceState(android.os.Parcelable);
     method protected android.os.Parcelable onSaveInstanceState();
     method protected void onScrollChanged(int, int, int, int);
@@ -23345,6 +23346,7 @@ package android.view {
     method public boolean requestRectangleOnScreen(android.graphics.Rect);
     method public boolean requestRectangleOnScreen(android.graphics.Rect, boolean);
     method protected void resetResolvedTextDirection();
+    method public void resolvePadding();
     method public static int resolveSize(int, int);
     method public static int resolveSizeAndState(int, int, int);
     method protected void resolveTextDirection();
