@@ -481,7 +481,7 @@ void rsdAllocationIoReceive(const Context *rsc, Allocation *alloc) {
 
 void rsdAllocationData1D(const Context *rsc, const Allocation *alloc,
                          uint32_t xoff, uint32_t lod, uint32_t count,
-                         const void *data, uint32_t sizeBytes) {
+                         const void *data, size_t sizeBytes) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
     const uint32_t eSize = alloc->mHal.state.type->getElementSizeBytes();
@@ -500,7 +500,7 @@ void rsdAllocationData1D(const Context *rsc, const Allocation *alloc,
 
 void rsdAllocationData2D(const Context *rsc, const Allocation *alloc,
                          uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
-                         uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes) {
+                         uint32_t w, uint32_t h, const void *data, size_t sizeBytes) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
     uint32_t eSize = alloc->mHal.state.elementSizeBytes;
