@@ -2762,7 +2762,8 @@ final class ActivityStack {
                         // If the top activity in the task is the root
                         // activity, deliver this new intent to it if it
                         // desires.
-                        if ((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
+                        if (((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
+                                || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP)
                                 && taskTop.realActivity.equals(r.realActivity)) {
                             logStartActivity(EventLogTags.AM_NEW_INTENT, r, taskTop.task);
                             if (taskTop.frontOfTask) {
