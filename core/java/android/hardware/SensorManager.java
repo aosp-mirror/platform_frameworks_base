@@ -616,6 +616,7 @@ public class SensorManager
             Message msg = Message.obtain();
             msg.what = 0;
             msg.obj = t;
+            msg.setAsynchronous(true);
             mHandler.sendMessage(msg);
         }
     }

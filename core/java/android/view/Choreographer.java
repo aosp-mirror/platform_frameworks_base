@@ -235,8 +235,9 @@ public final class Choreographer {
                 if (isRunningOnLooperThreadLocked()) {
                     doScheduleVsyncLocked();
                 } else {
-                    mHandler.sendMessageAtFrontOfQueue(
-                            mHandler.obtainMessage(MSG_DO_SCHEDULE_VSYNC));
+                    Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_VSYNC);
+                    msg.setAsynchronous(true);
+                    mHandler.sendMessageAtFrontOfQueue(msg);
                 }
             } else {
                 final long now = SystemClock.uptimeMillis();
@@ -244,7 +245,9 @@ public final class Choreographer {
                 if (DEBUG) {
                     Log.d(TAG, "Scheduling animation in " + (nextAnimationTime - now) + " ms.");
                 }
-                mHandler.sendEmptyMessageAtTime(MSG_DO_ANIMATION, nextAnimationTime);
+                Message msg = mHandler.obtainMessage(MSG_DO_ANIMATION);
+                msg.setAsynchronous(true);
+                mHandler.sendMessageAtTime(msg, nextAnimationTime);
             }
         }
     }
@@ -258,7 +261,9 @@ public final class Choreographer {
                 if (DEBUG) {
                     Log.d(TAG, "Scheduling draw immediately.");
                 }
-                mHandler.sendEmptyMessage(MSG_DO_DRAW);
+                Message msg = mHandler.obtainMessage(MSG_DO_DRAW);
+                msg.setAsynchronous(true);
+                mHandler.sendMessage(msg);
             }
         }
     }

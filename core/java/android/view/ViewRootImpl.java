@@ -213,6 +213,7 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mVisRect; // used to retrieve visible rect of focused view.
 
     boolean mTraversalScheduled;
+    int mTraversalBarrier;
     long mLastTraversalFinishedTimeNanos;
     long mLastDrawFinishedTimeNanos;
     boolean mWillDrawSoon;
@@ -839,22 +840,28 @@ public final class ViewRootImpl implements ViewParent,
     public void scheduleTraversals() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
+            mTraversalBarrier = mHandler.getLooper().postSyncBarrier();
             scheduleFrame();
         }
     }
 
     public void unscheduleTraversals() {
-        mTraversalScheduled = false;
+        if (mTraversalScheduled) {
+            mTraversalScheduled = false;
+            mHandler.getLooper().removeSyncBarrier(mTraversalBarrier);
+        }
     }
 
     void scheduleFrame() {
         if (!mFrameScheduled) {
-            mChoreographer.postDrawCallback(mFrameRunnable);
             mFrameScheduled = true;
+            mChoreographer.postDrawCallback(mFrameRunnable);
         }
     }
 
     void unscheduleFrame() {
+        unscheduleTraversals();
+
         if (mFrameScheduled) {
             mFrameScheduled = false;
             mChoreographer.removeDrawCallback(mFrameRunnable);
@@ -869,6 +876,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mTraversalScheduled) {
             mTraversalScheduled = false;
+            mHandler.getLooper().removeSyncBarrier(mTraversalBarrier);
             doTraversal();
         }
     }
@@ -3989,11 +3997,13 @@ public final class ViewRootImpl implements ViewParent,
 
     public void dispatchKey(KeyEvent event) {
         Message msg = mHandler.obtainMessage(MSG_DISPATCH_KEY, event);
+        msg.setAsynchronous(true);
         mHandler.sendMessage(msg);
     }
 
     public void dispatchKeyFromIme(KeyEvent event) {
         Message msg = mHandler.obtainMessage(MSG_DISPATCH_KEY_FROM_IME, event);
+        msg.setAsynchronous(true);
         mHandler.sendMessage(msg);
     }
 
