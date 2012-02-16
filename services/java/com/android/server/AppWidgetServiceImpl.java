@@ -463,7 +463,7 @@ class AppWidgetServiceImpl {
                 Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_DELETED);
                 intent.setComponent(p.info.provider);
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id.appWidgetId);
-                mContext.sendBroadcast(intent);
+                mContext.sendBroadcast(intent, mUserId);
                 if (p.instances.size() == 0) {
                     // cancel the future updates
                     cancelBroadcasts(p);
@@ -471,7 +471,7 @@ class AppWidgetServiceImpl {
                     // send the broacast saying that the provider is not in use any more
                     intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_DISABLED);
                     intent.setComponent(p.info.provider);
-                    mContext.sendBroadcast(intent);
+                    mContext.sendBroadcast(intent, mUserId);
                 }
             }
         }
@@ -514,8 +514,6 @@ class AppWidgetServiceImpl {
                     throw new IllegalArgumentException("can't bind to a 3rd party provider in"
                             + " safe mode: " + provider);
                 }
-
-                Binder.restoreCallingIdentity(ident);
 
                 id.provider = p;
                 p.instances.add(id);
@@ -1066,7 +1064,7 @@ class AppWidgetServiceImpl {
     void sendEnableIntentLocked(Provider p) {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_ENABLED);
         intent.setComponent(p.info.provider);
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcast(intent, mUserId);
     }
 
     void sendUpdateIntentLocked(Provider p, int[] appWidgetIds) {
@@ -1074,7 +1072,7 @@ class AppWidgetServiceImpl {
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
             intent.setComponent(p.info.provider);
-            mContext.sendBroadcast(intent);
+            mContext.sendBroadcast(intent, mUserId);
         }
     }
 
@@ -1477,12 +1475,11 @@ class AppWidgetServiceImpl {
     }
 
     AtomicFile savedStateFile() {
-        int userId = UserId.getCallingUserId();
-        File dir = new File("/data/system/users/" + userId);
+        File dir = new File("/data/system/users/" + mUserId);
         File settingsFile = new File(dir, SETTINGS_FILENAME);
         if (!dir.exists()) {
             dir.mkdirs();
-            if (userId == 0) {
+            if (mUserId == 0) {
                 // Migrate old data
                 File oldFile = new File("/data/system/" + SETTINGS_FILENAME);
                 // Method doesn't throw an exception on failure. Ignore any errors

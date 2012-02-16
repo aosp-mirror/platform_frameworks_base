@@ -905,6 +905,16 @@ public abstract class Context {
     public abstract void sendBroadcast(Intent intent);
 
     /**
+     * Same as #sendBroadcast(Intent intent), but for a specific user. Used by the system only.
+     * @param intent the intent to broadcast
+     * @param userId user to send the intent to
+     * @hide
+     */
+    public void sendBroadcast(Intent intent, int userId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
      * an optional required permission to be enforced.  This
      * call is asynchronous; it returns immediately, and you will continue

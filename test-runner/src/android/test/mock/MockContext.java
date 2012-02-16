@@ -267,6 +267,12 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public void sendBroadcast(Intent intent, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public void sendBroadcast(Intent intent, String receiverPermission) {
         throw new UnsupportedOperationException();
