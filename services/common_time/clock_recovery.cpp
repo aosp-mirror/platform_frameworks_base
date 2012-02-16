@@ -33,6 +33,14 @@
 #include "diag_thread.h"
 #endif
 
+// Define log macro so we can make LOGV into LOGE when we are exclusively
+// debugging this code.
+#ifdef TIME_SERVICE_DEBUG
+#define LOG_TS LOGE
+#else
+#define LOG_TS LOGV
+#endif
+
 namespace android {
 
 ClockRecoveryLoop::ClockRecoveryLoop(LocalClock* local_clock,
@@ -46,7 +54,6 @@ ClockRecoveryLoop::ClockRecoveryLoop(LocalClock* local_clock,
     local_clock_can_slew_ = local_clock_->initCheck() &&
                            (local_clock_->setLocalSlew(0) == OK);
 
-    computePIDParams();
     reset(true, true);
 
 #ifdef TIME_SERVICE_DEBUG
@@ -65,6 +72,19 @@ ClockRecoveryLoop::~ClockRecoveryLoop() {
     diag_thread_->stopWorkThread();
 #endif
 }
+
+// Constants.
+const float ClockRecoveryLoop::dT = 1.0;
+const float ClockRecoveryLoop::Kc = 1.0f;
+const float ClockRecoveryLoop::Ti = 15.0f;
+const float ClockRecoveryLoop::Tf = 0.05;
+const float ClockRecoveryLoop::bias_Fc = 0.01;
+const float ClockRecoveryLoop::bias_RC = (dT / (2 * 3.14159f * bias_Fc));
+const float ClockRecoveryLoop::bias_Alpha = (dT / (bias_RC + dT));
+const int64_t ClockRecoveryLoop::panic_thresh_ = 50000;
+const int64_t ClockRecoveryLoop::control_thresh_ = 10000;
+const float ClockRecoveryLoop::COmin = -100.0f;
+const float ClockRecoveryLoop::COmax = 100.0f;
 
 void ClockRecoveryLoop::reset(bool position, bool frequency) {
     Mutex::Autolock lock(&lock_);
@@ -85,6 +105,16 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
                                             int64_t nominal_common_time,
                                             int64_t rtt) {
     Mutex::Autolock lock(&lock_);
+
+    int64_t local_common_time = 0;
+    common_clock_->localToCommon(local_time, &local_common_time);
+    int64_t raw_delta = nominal_common_time - local_common_time;
+
+#ifdef TIME_SERVICE_DEBUG
+    LOGE("local=%lld, common=%lld, delta=%lld, rtt=%lld\n",
+         local_common_time, nominal_common_time,
+         raw_delta, rtt);
+#endif
 
     // If we have not defined a basis for common time, then we need to use these
     // initial points to do so.  In order to avoid significant initial error
@@ -113,11 +143,8 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
 
     int64_t observed_common;
     int64_t delta;
-    int32_t delta32;
+    float delta_f, dCO;
     int32_t correction_cur;
-    int32_t correction_cur_P = 0;
-    int32_t correction_cur_I = 0;
-    int32_t correction_cur_D = 0;
 
     if (OK != common_clock_->localToCommon(local_time, &observed_common)) {
         // Since we just checked to make certain that this conversion was valid,
@@ -165,72 +192,69 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
     filter_data_[filter_wr_].nominal_common_time  = nominal_common_time;
     filter_data_[filter_wr_].rtt                  = rtt;
     filter_data_[filter_wr_].point_used           = false;
+    uint32_t current_point = filter_wr_;
     filter_wr_ = (filter_wr_ + 1) % kFilterSize;
     if (!filter_wr_)
         filter_full_ = true;
 
-    // Scan the accumulated data for the point with the minimum RTT.  If that
-    // point has never been used before, go ahead and use it now, otherwise just
-    // do nothing.
     uint32_t scan_end = filter_full_ ? kFilterSize : filter_wr_;
     uint32_t min_rtt = findMinRTTNdx(filter_data_, scan_end);
-    if (filter_data_[min_rtt].point_used)
-        return true;
+    // We only use packets with low RTTs for control. If the packet RTT
+    // is less than the panic threshold, we can probably eat the jitter with the
+    // control loop. Otherwise, take the packet only if it better than all
+    // of the packets we have in the history. That way we try to track
+    // something, even if it is noisy.
+    if (current_point == min_rtt || rtt < control_thresh_) {
+        delta_f = delta = nominal_common_time - observed_common;
 
-    local_time          = filter_data_[min_rtt].local_time;
-    observed_common     = filter_data_[min_rtt].observed_common_time;
-    nominal_common_time = filter_data_[min_rtt].nominal_common_time;
-    filter_data_[min_rtt].point_used = true;
+        // Compute the error then clamp to the panic threshold.  If we ever
+        // exceed this amt of error, its time to panic and reset the system.
+        // Given that the error in the measurement of the error could be as
+        // high as the RTT of the data point, we don't actually panic until
+        // the implied error (delta) is greater than the absolute panic
+        // threashold plus the RTT.  IOW - we don't panic until we are
+        // absoluely sure that our best case sync is worse than the absolute
+        // panic threshold.
+        int64_t effective_panic_thresh = panic_thresh_ + rtt;
+        if ((delta > effective_panic_thresh) ||
+            (delta < -effective_panic_thresh)) {
+            // PANIC!!!
+            reset_l(false, true);
+            return false;
+        }
 
-    // Compute the error then clamp to the panic threshold.  If we ever exceed
-    // this amt of error, its time to panic and reset the system.  Given that
-    // the error in the measurement of the error could be as high as the RTT of
-    // the data point, we don't actually panic until the implied error (delta)
-    // is greater than the absolute panic threashold plus the RTT.  IOW - we
-    // don't panic until we are absoluely sure that our best case sync is worse
-    // than the absolute panic threshold.
-    int64_t effective_panic_thresh = panic_thresh_ + filter_data_[min_rtt].rtt;
-    delta = nominal_common_time - observed_common;
-    if ((delta > effective_panic_thresh) || (delta < -effective_panic_thresh)) {
-        // PANIC!!!
-        //
-        // TODO(johngro) : need to report this to the upper levels of
-        // code.
-        reset_l(false, true);
-        return false;
-    } else
-        delta32 = delta;
+    } else {
+        // We do not have a good packet to look at, but we also do not want to
+        // free-run the clock at some crazy slew rate. So we guess the
+        // trajectory of the clock based on the last controller output and the
+        // estimated bias of our clock against the master.
+        // The net effect of this is that CO == CObias after some extended
+        // period of no feedback.
+        delta_f = last_delta_f_ - dT*(CO - CObias);
+        delta = delta_f;
+    }
 
-    // Accumulate error into the integrated error, then clamp.
-    integrated_error_ += delta32;
-    if (integrated_error_ > pid_params_.integrated_delta_max)
-        integrated_error_ = pid_params_.integrated_delta_max;
-    else if (integrated_error_ < pid_params_.integrated_delta_min)
-        integrated_error_ = pid_params_.integrated_delta_min;
+    // Velocity form PI control equation.
+    dCO = Kc * (1.0f + dT/Ti) * delta_f - Kc * last_delta_f_;
+    CO += dCO * Tf; // Filter CO by applying gain <1 here.
 
-    // Compute the difference in error between last time and this time, then
-    // update last_delta_
-    int32_t input_D = last_delta_valid_ ? delta32 - last_delta_ : 0;
-    last_delta_valid_ = true;
-    last_delta_ = delta32;
+    // Save error terms for later.
+    last_delta_f_ = delta_f;
+    last_delta_ = delta;
 
-    // Compute the various components of the correction value.
-    correction_cur_P = doGainScale(pid_params_.gain_P, delta32);
-    correction_cur_I = doGainScale(pid_params_.gain_I, integrated_error_);
+    // Clamp CO to +/- 100ppm.
+    if (CO < COmin)
+        CO = COmin;
+    else if (CO > COmax)
+        CO = COmax;
 
-    // TODO(johngro) : the differential portion of this code used to rely
-    // upon a completely homogeneous discipline frequency.  Now that the
-    // discipline frequency may not be homogeneous, its probably important
-    // to divide by the amt of time between discipline events during the
-    // gain calculation.
-    correction_cur_D = doGainScale(pid_params_.gain_D, input_D);
+    // Update the controller bias.
+    CObias = bias_Alpha * CO + (1.0f - bias_Alpha) * lastCObias;
+    lastCObias = CObias;
 
-    // Compute the final correction value and clamp.
-    correction_cur = correction_cur_P + correction_cur_I + correction_cur_D;
-    if (correction_cur < pid_params_.correction_min)
-        correction_cur = pid_params_.correction_min;
-    else if (correction_cur > pid_params_.correction_max)
-        correction_cur = pid_params_.correction_max;
+    // Convert PPM to 16-bit int range. Add some guard band (-0.01) so we
+    // don't get fp weirdness.
+    correction_cur = CO * 327.66;
 
     // If there was a change in the amt of correction to use, update the
     // system.
@@ -239,17 +263,7 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
         applySlew();
     }
 
-    LOGV("rtt %lld observed %lld nominal %lld delta = %5lld "
-          "int = %7d correction %5d (P %5d, I %5d, D %5d)\n",
-          filter_data_[min_rtt].rtt,
-          observed_common,
-          nominal_common_time,
-          nominal_common_time - observed_common,
-          integrated_error_,
-          correction_cur,
-          correction_cur_P,
-          correction_cur_I,
-          correction_cur_D);
+    LOG_TS("clock_loop %lld %f %f %f %d\n", raw_delta, delta_f, CO, CObias, correction_cur);
 
 #ifdef TIME_SERVICE_DEBUG
     diag_thread_->pushDisciplineEvent(
@@ -257,9 +271,7 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
             observed_common,
             nominal_common_time,
             correction_cur,
-            correction_cur_P,
-            correction_cur_I,
-            correction_cur_D);
+            rtt);
 #endif
 
     return true;
@@ -274,46 +286,6 @@ int32_t ClockRecoveryLoop::getLastErrorEstimate() {
         return ICommonClock::kErrorEstimateUnknown;
 }
 
-void ClockRecoveryLoop::computePIDParams() {
-    // TODO(johngro) : add the ability to fetch parameters from the driver/board
-    // level in case they have a HW clock discipline solution with parameters
-    // tuned specifically for it.
-
-    // Correction factor is limited to MIN/MAX_INT_16
-    pid_params_.correction_min = -0x8000;
-    pid_params_.correction_max =  0x7FFF;
-
-    // Default proportional gain to 2^15:1000.  (max proportional drive at 1mSec
-    // of instantaneous error)
-    memset(&pid_params_.gain_P, 0, sizeof(pid_params_.gain_P));
-    pid_params_.gain_P.a_to_b_numer = 0x8000;
-    pid_params_.gain_P.a_to_b_denom = 1000;
-
-    // Set the integral gain to 2^15:5000
-    memset(&pid_params_.gain_I, 0, sizeof(pid_params_.gain_I));
-    pid_params_.gain_I.a_to_b_numer = 0x8000;
-    pid_params_.gain_I.a_to_b_denom = 5000;
-
-    // Default controller is just a PI controller.  Right now, the network based
-    // measurements of the error are way to noisy to feed into the differential
-    // component of a PID controller.  Someday we might come back and add some
-    // filtering of the error channel, but until then leave the controller as a
-    // simple PI controller.
-    memset(&pid_params_.gain_D, 0, sizeof(pid_params_.gain_D));
-
-    // Don't let the integral component of the controller wind up to
-    // the point where it would want to drive the correction factor
-    // past saturation.
-    int64_t tmp;
-    pid_params_.gain_I.doReverseTransform(pid_params_.correction_min, &tmp);
-    pid_params_.integrated_delta_min = static_cast<int32_t>(tmp);
-    pid_params_.gain_I.doReverseTransform(pid_params_.correction_max, &tmp);
-    pid_params_.integrated_delta_max = static_cast<int32_t>(tmp);
-
-    // By default, panic when are certain that the sync error is > 20mSec;
-    panic_thresh_ = 20000;
-}
-
 void ClockRecoveryLoop::reset_l(bool position, bool frequency) {
     assert(NULL != common_clock_);
 
@@ -325,8 +297,10 @@ void ClockRecoveryLoop::reset_l(bool position, bool frequency) {
     if (frequency) {
         last_delta_valid_ = false;
         last_delta_ = 0;
-        integrated_error_ = 0;
-        correction_cur_ = 0;
+        last_delta_f_ = 0.0;
+        correction_cur_ = 0x0;
+        CO = 0.0f;
+        lastCObias = CObias = 0.0f;
         applySlew();
     }
 
@@ -334,47 +308,13 @@ void ClockRecoveryLoop::reset_l(bool position, bool frequency) {
     filter_full_ = false;
 }
 
-int32_t ClockRecoveryLoop::doGainScale(const LinearTransform& gain,
-                                       int32_t val) {
-    if (!gain.a_to_b_numer || !gain.a_to_b_denom || !val)
-        return 0;
-
-    int64_t tmp;
-    int64_t val64 = static_cast<int64_t>(val);
-    if (!gain.doForwardTransform(val64, &tmp)) {
-        LOGW("Overflow/Underflow while scaling %d in %s",
-             val, __PRETTY_FUNCTION__);
-        return (val < 0) ? INT32_MIN : INT32_MAX;
-    }
-
-    if (tmp > INT32_MAX) {
-        LOGW("Overflow while scaling %d in %s", val, __PRETTY_FUNCTION__);
-        return INT32_MAX;
-    }
-
-    if (tmp < INT32_MIN) {
-        LOGW("Underflow while scaling %d in %s", val, __PRETTY_FUNCTION__);
-        return INT32_MIN;
-    }
-
-    return static_cast<int32_t>(tmp);
-}
-
 void ClockRecoveryLoop::applySlew() {
     if (local_clock_can_slew_) {
         local_clock_->setLocalSlew(correction_cur_);
     } else {
         // The SW clock recovery implemented by the common clock class expects
-        // values expressed in PPM.  Map the MIN/MAX_INT_16 drive range to +/-
-        // 100ppm.
-        int sw_correction;
-        sw_correction  = correction_cur_ - pid_params_.correction_min;
-        sw_correction *= 200;
-        sw_correction /= (pid_params_.correction_max -
-                          pid_params_.correction_min);
-        sw_correction -= 100;
-
-        common_clock_->setSlew(local_clock_->getLocalTime(), sw_correction);
+        // values expressed in PPM. CO is in ppm.
+        common_clock_->setSlew(local_clock_->getLocalTime(), CO);
     }
 }
 
