@@ -25,7 +25,6 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <fcntl.h>
-#include <limits>
 #include <linux/if_ether.h>
 #include <net/if.h>
 #include <net/if_arp.h>
