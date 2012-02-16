@@ -1031,7 +1031,9 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     public void ensureImeVisible(boolean visible) {
         mPopup.setInputMethodMode(visible
                 ? ListPopupWindow.INPUT_METHOD_NEEDED : ListPopupWindow.INPUT_METHOD_NOT_NEEDED);
-        showDropDown();
+        if (mPopup.isDropDownAlwaysVisible() || (mFilter != null && enoughToFilter())) {
+            showDropDown();
+        }
     }
 
     /**
