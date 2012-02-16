@@ -5754,7 +5754,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ComponentName comp = new ComponentName(cpi.packageName, cpi.name);
                 ContentProviderRecord cpr = mProviderMap.getProviderByClass(comp, userId);
                 if (cpr == null) {
-                    cpr = new ContentProviderRecord(cpi, app.info, comp);
+                    cpr = new ContentProviderRecord(this, cpi, app.info, comp);
                     mProviderMap.putProviderByClass(comp, cpr);
                 }
                 if (DEBUG_MU)
@@ -5826,7 +5826,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         return msg;
     }
 
-    boolean incProviderCount(ProcessRecord r, ContentProviderRecord cpr) {
+    boolean incProviderCount(ProcessRecord r, final ContentProviderRecord cpr,
+            IBinder externalProcessToken) {
         if (r != null) {
             Integer cnt = r.conProviders.get(cpr);
             if (DEBUG_PROVIDER) Slog.v(TAG,
@@ -5842,12 +5843,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 r.conProviders.put(cpr, new Integer(cnt.intValue()+1));
             }
         } else {
-            cpr.externals++;
+            cpr.addExternalProcessHandleLocked(externalProcessToken);
         }
         return false;
     }
 
-    boolean decProviderCount(ProcessRecord r, ContentProviderRecord cpr) {
+    boolean decProviderCount(ProcessRecord r, final ContentProviderRecord cpr,
+            IBinder externalProcessToken) {
         if (r != null) {
             Integer cnt = r.conProviders.get(cpr);
             if (DEBUG_PROVIDER) Slog.v(TAG,
@@ -5863,13 +5865,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 r.conProviders.put(cpr, new Integer(cnt.intValue()-1));
             }
         } else {
-            cpr.externals++;
+            cpr.removeExternalProcessHandleLocked(externalProcessToken);
         }
         return false;
     }
 
     private final ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
-            String name) {
+            String name, IBinder token) {
         ContentProviderRecord cpr;
         ProviderInfo cpi = null;
 
@@ -5913,7 +5915,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 // In this case the provider instance already exists, so we can
                 // return it right away.
-                final boolean countChanged = incProviderCount(r, cpr);
+                final boolean countChanged = incProviderCount(r, cpr, token);
                 if (countChanged) {
                     if (cpr.proc != null && r.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
                         // If this is a perceptible app accessing the provider,
@@ -5947,7 +5949,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Slog.i(TAG,
                                 "Existing provider " + cpr.name.flattenToShortString()
                                 + " is crashing; detaching " + r);
-                        boolean lastRef = decProviderCount(r, cpr);
+                        boolean lastRef = decProviderCount(r, cpr, token);
                         appDiedLocked(cpr.proc, cpr.proc.pid, cpr.proc.thread);
                         if (!lastRef) {
                             // This wasn't the last ref our process had on
@@ -6005,7 +6007,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             return null;
                         }
                         ai = getAppInfoForUser(ai, Binder.getOrigCallingUser());
-                        cpr = new ContentProviderRecord(cpi, ai, comp);
+                        cpr = new ContentProviderRecord(this, cpi, ai, comp);
                     } catch (RemoteException ex) {
                         // pm is in same process, this will never happen.
                     }
@@ -6075,8 +6077,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (firstClass) {
                     mProviderMap.putProviderByClass(comp, cpr);
                 }
+
                 mProviderMap.putProviderByName(name, cpr);
-                incProviderCount(r, cpr);
+                incProviderCount(r, cpr, token);
             }
         }
 
@@ -6116,12 +6119,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
 
-        ContentProviderHolder contentProvider = getContentProviderImpl(caller, name);
-        return contentProvider;
+        return getContentProviderImpl(caller, name, null);
     }
 
-    private ContentProviderHolder getContentProviderExternal(String name) {
-        return getContentProviderImpl(null, name);
+    public ContentProviderHolder getContentProviderExternal(String name, IBinder token) {
+        enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
+            "Do not have permission in call getContentProviderExternal()");
+        return getContentProviderExternalUnchecked(name, token);
+    }
+
+    private ContentProviderHolder getContentProviderExternalUnchecked(String name,IBinder token) {
+        return getContentProviderImpl(null, name, token);
     }
 
     /**
@@ -6157,14 +6165,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + cpr.info.name + " in process " + r.processName);
                 return;
             } else {
-                if (decProviderCount(r, localCpr)) {
+                if (decProviderCount(r, localCpr, null)) {
                     updateOomAdjLocked();
                 }
             }
         }
     }
 
-    private void removeContentProviderExternal(String name) {
+    public void removeContentProviderExternal(String name, IBinder token) {
+        enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
+            "Do not have permission in call removeContentProviderExternal()");
+        removeContentProviderExternalUnchecked(name, token);
+    }
+
+    private void removeContentProviderExternalUnchecked(String name, IBinder token) {
         synchronized (this) {
             ContentProviderRecord cpr = mProviderMap.getProviderByName(name,
                     Binder.getOrigCallingUser());
@@ -6178,11 +6192,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             ComponentName comp = new ComponentName(cpr.info.packageName, cpr.info.name);
             ContentProviderRecord localCpr = mProviderMap.getProviderByClass(comp,
                     Binder.getOrigCallingUser());
-            localCpr.externals--;
-            if (localCpr.externals < 0) {
-                Slog.e(TAG, "Externals < 0 for content provider " + localCpr);
+            if (localCpr.hasExternalProcessHandles()) {
+                if (localCpr.removeExternalProcessHandleLocked(token)) {
+                    updateOomAdjLocked();
+                } else {
+                    Slog.e(TAG, "Attmpt to remove content provider " + localCpr
+                            + " with no external reference for token: "
+                            + token + ".");
+                }
+            } else {
+                Slog.e(TAG, "Attmpt to remove content provider: " + localCpr
+                        + " with no external references.");
             }
-            updateOomAdjLocked();
         }
     }
     
@@ -6286,7 +6307,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         ContentProviderHolder holder = null;
 
         try {
-            holder = getContentProviderExternal(name);
+            holder = getContentProviderExternalUnchecked(name, null);
             if (holder != null) {
                 return holder.provider.getType(uri);
             }
@@ -6295,7 +6316,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             return null;
         } finally {
             if (holder != null) {
-                removeContentProviderExternal(name);
+                removeContentProviderExternalUnchecked(name, null);
             }
             Binder.restoreCallingIdentity(ident);
         }
@@ -6400,7 +6421,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public ParcelFileDescriptor openContentUri(Uri uri) throws RemoteException {
         enforceNotIsolatedCaller("openContentUri");
         String name = uri.getAuthority();
-        ContentProviderHolder cph = getContentProviderExternal(name);
+        ContentProviderHolder cph = getContentProviderExternalUnchecked(name, null);
         ParcelFileDescriptor pfd = null;
         if (cph != null) {
             // We record the binder invoker's uid in thread-local storage before
@@ -6422,7 +6443,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             // We've got the fd now, so we're done with the provider.
-            removeContentProviderExternal(name);
+            removeContentProviderExternalUnchecked(name, null);
         } else {
             Slog.d(TAG, "Failed to get provider for authority '" + name + "'");
         }
@@ -10253,7 +10274,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<NL; i++) {
                 ContentProviderRecord cpr = (ContentProviderRecord)
                         mLaunchingProviders.get(i);
-                if (cpr.clients.size() <= 0 && cpr.externals <= 0) {
+                if (cpr.clients.size() <= 0 && !cpr.hasExternalProcessHandles()) {
                     synchronized (cpr) {
                         cpr.launchingApp = null;
                         cpr.notifyAll();
@@ -13455,7 +13476,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // If the provider has external (non-framework) process
                 // dependencies, ensure that its adjustment is at least
                 // FOREGROUND_APP_ADJ.
-                if (cpr.externals != 0) {
+                if (cpr.hasExternalProcessHandles()) {
                     if (adj > ProcessList.FOREGROUND_APP_ADJ) {
                         adj = ProcessList.FOREGROUND_APP_ADJ;
                         schedGroup = Process.THREAD_GROUP_DEFAULT;

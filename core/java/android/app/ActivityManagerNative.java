@@ -581,6 +581,21 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_CONTENT_PROVIDER_EXTERNAL_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String name = data.readString();
+            IBinder token = data.readStrongBinder();
+            ContentProviderHolder cph = getContentProviderExternal(name, token);
+            reply.writeNoException();
+            if (cph != null) {
+                reply.writeInt(1);
+                cph.writeToParcel(reply, 0);
+            } else {
+                reply.writeInt(0);
+            }
+            return true;
+        }
+
         case PUBLISH_CONTENT_PROVIDERS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
@@ -601,7 +616,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
-        
+
+        case REMOVE_CONTENT_PROVIDER_EXTERNAL_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String name = data.readString();
+            IBinder token = data.readStrongBinder();
+            removeContentProviderExternal(name, token);
+            reply.writeNoException();
+            return true;
+        }
+
         case GET_RUNNING_SERVICE_CONTROL_PANEL_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             ComponentName comp = ComponentName.CREATOR.createFromParcel(data);
@@ -2178,6 +2202,25 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return cph;
     }
+    public ContentProviderHolder getContentProviderExternal(String name, IBinder token)
+            throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(name);
+        data.writeStrongBinder(token);
+        mRemote.transact(GET_CONTENT_PROVIDER_EXTERNAL_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int res = reply.readInt();
+        ContentProviderHolder cph = null;
+        if (res != 0) {
+            cph = ContentProviderHolder.CREATOR.createFromParcel(reply);
+        }
+        data.recycle();
+        reply.recycle();
+        return cph;
+    }
     public void publishContentProviders(IApplicationThread caller,
                                         List<ContentProviderHolder> providers) throws RemoteException
     {
@@ -2204,7 +2247,19 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    
+
+    public void removeContentProviderExternal(String name, IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(name);
+        data.writeStrongBinder(token);
+        mRemote.transact(REMOVE_CONTENT_PROVIDER_EXTERNAL_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
     public PendingIntent getRunningServiceControlPanel(ComponentName service)
             throws RemoteException
     {
