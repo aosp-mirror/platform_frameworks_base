@@ -50,7 +50,7 @@
 #include "clock_recovery.h"
 #include "common_clock.h"
 
-using std::numeric_limits;
+#define MAX_INT ((int)0x7FFFFFFF)
 
 namespace android {
 
@@ -1335,8 +1335,8 @@ int CommonTimeServer::TimeoutHelper::msecTillTimeout() {
 
     uint64_t deltaMsec = (((mEndTime - now) + 999999) / 1000000);
 
-    if (deltaMsec > static_cast<uint64_t>(std::numeric_limits<int>::max()))
-        return std::numeric_limits<int>::max();
+    if (deltaMsec > static_cast<uint64_t>(MAX_INT))
+        return MAX_INT;
 
     return static_cast<int>(deltaMsec);
 }
