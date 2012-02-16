@@ -591,7 +591,7 @@ public class AudioService extends IAudioService.Stub {
                         // Post a persist volume msg
                         sendMsg(mAudioHandler,
                                 MSG_PERSIST_VOLUME,
-                                SENDMSG_REPLACE,
+                                SENDMSG_QUEUE,
                                 PERSIST_LAST_AUDIBLE,
                                 device,
                                 s,
@@ -606,7 +606,7 @@ public class AudioService extends IAudioService.Stub {
                 // to persist). Do not change volume if stream is muted.
                 sendMsg(mAudioHandler,
                         MSG_SET_DEVICE_VOLUME,
-                        SENDMSG_NOOP,
+                        SENDMSG_QUEUE,
                         device,
                         0,
                         streamState,
@@ -746,7 +746,7 @@ public class AudioService extends IAudioService.Stub {
                 // Post a persist volume msg
                 sendMsg(mAudioHandler,
                         MSG_PERSIST_VOLUME,
-                        SENDMSG_REPLACE,
+                        SENDMSG_QUEUE,
                         PERSIST_LAST_AUDIBLE,
                         device,
                         streamState,
@@ -758,7 +758,7 @@ public class AudioService extends IAudioService.Stub {
                 // to persist).
                 sendMsg(mAudioHandler,
                         MSG_SET_DEVICE_VOLUME,
-                        SENDMSG_NOOP,
+                        SENDMSG_QUEUE,
                         device,
                         0,
                         streamState,
@@ -2208,7 +2208,7 @@ public class AudioService extends IAudioService.Stub {
                                     }
                                     sendMsg(mAudioHandler,
                                             MSG_SET_ALL_VOLUMES,
-                                            SENDMSG_NOOP,
+                                            SENDMSG_QUEUE,
                                             0,
                                             0,
                                             VolumeStreamState.this, 0);
@@ -2252,7 +2252,7 @@ public class AudioService extends IAudioService.Stub {
                                         }
                                         sendMsg(mAudioHandler,
                                                 MSG_SET_ALL_VOLUMES,
-                                                SENDMSG_NOOP,
+                                                SENDMSG_QUEUE,
                                                 0,
                                                 0,
                                                 VolumeStreamState.this, 0);
@@ -2350,7 +2350,7 @@ public class AudioService extends IAudioService.Stub {
             // Post a persist volume msg
             sendMsg(mAudioHandler,
                     MSG_PERSIST_VOLUME,
-                    SENDMSG_REPLACE,
+                    SENDMSG_QUEUE,
                     PERSIST_CURRENT|PERSIST_LAST_AUDIBLE,
                     device,
                     streamState,
