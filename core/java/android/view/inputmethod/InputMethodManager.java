@@ -336,6 +336,7 @@ public final class InputMethodManager {
                 }
                 case MSG_UNBIND: {
                     final int sequence = msg.arg1;
+                    boolean startInput = false;
                     synchronized (mH) {
                         if (mBindSequence == sequence) {
                             if (false) {
@@ -356,9 +357,12 @@ public final class InputMethodManager {
                                 mServedConnecting = true;
                             }
                             if (mActive) {
-                                startInputInner();
+                                startInput = true;
                             }
                         }
+                    }
+                    if (startInput) {
+                        startInputInner();
                     }
                     return;
                 }
@@ -1217,11 +1221,12 @@ public final class InputMethodManager {
                 mService.windowGainedFocus(mClient, rootView.getWindowToken(),
                         focusedView != null, isTextEditor, softInputMode, first,
                         windowFlags);
-                if (startInput) {
-                    startInputInner();
-                }
             } catch (RemoteException e) {
             }
+        }
+
+        if (startInput) {
+            startInputInner();
         }
     }
     
