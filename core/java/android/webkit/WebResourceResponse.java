@@ -26,24 +26,6 @@ import java.io.InputStream;
  * response when the WebView requests a particular resource.
  */
 public class WebResourceResponse {
-
-    private class Loader extends StreamLoader {
-        Loader(LoadListener loadListener) {
-            super(loadListener);
-            mDataStream = mInputStream;
-        }
-        @Override
-        protected boolean setupStreamAndSendStatus() {
-            mLoadListener.status(1, 1, mDataStream != null ? 200 : 404, "");
-            return true;
-        }
-        @Override
-        protected void buildHeaders(Headers headers) {
-            headers.setContentType(mMimeType);
-            headers.setContentEncoding(mEncoding);
-        }
-    }
-
     // Accessed by jni, do not rename without modifying the jni code.
     private String mMimeType;
     private String mEncoding;
@@ -113,9 +95,5 @@ public class WebResourceResponse {
      */
     public InputStream getData() {
         return mInputStream;
-    }
-
-    StreamLoader loader(LoadListener listener) {
-        return new Loader(listener);
     }
 }

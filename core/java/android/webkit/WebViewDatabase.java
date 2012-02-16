@@ -31,9 +31,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
-import android.webkit.CookieManager.Cookie;
-import android.webkit.CacheManager.CacheResult;
-import android.webkit.JniUtil;
 
 public class WebViewDatabase {
     private static final String DATABASE_FILE = "webview.db";
@@ -55,39 +52,25 @@ public class WebViewDatabase {
     // 10 -> 11 Drop cookies and cache now managed by the chromium stack,
     //          and update the form data table to use the new format
     //          implemented for b/5265606.
-    private static final int CACHE_DATABASE_VERSION = 4;
-    // 1 -> 2 Add expires String
-    // 2 -> 3 Add content-disposition
-    // 3 -> 4 Add crossdomain (For x-permitted-cross-domain-policies header)
 
     private static WebViewDatabase mInstance = null;
 
     private static SQLiteDatabase mDatabase = null;
-    private static SQLiteDatabase mCacheDatabase = null;
 
     // synchronize locks
-    private final Object mCookieLock = new Object();
     private final Object mPasswordLock = new Object();
     private final Object mFormLock = new Object();
     private final Object mHttpAuthLock = new Object();
 
-    // TODO: The Chromium HTTP stack handles cookies independently.
-    // We should consider removing the cookies table if and when we switch to
-    // the Chromium HTTP stack for good.
     private static final String mTableNames[] = {
-        "cookies", "password", "formurl", "formdata", "httpauth"
+        "password", "formurl", "formdata", "httpauth"
     };
 
     // Table ids (they are index to mTableNames)
-    private static final int TABLE_COOKIES_ID = 0;
-
-    private static final int TABLE_PASSWORD_ID = 1;
-
-    private static final int TABLE_FORMURL_ID = 2;
-
-    private static final int TABLE_FORMDATA_ID = 3;
-
-    private static final int TABLE_HTTPAUTH_ID = 4;
+    private static final int TABLE_PASSWORD_ID = 0;
+    private static final int TABLE_FORMURL_ID = 1;
+    private static final int TABLE_FORMDATA_ID = 2;
+    private static final int TABLE_HTTPAUTH_ID = 3;
 
     // column id strings for "_id" which can be used by any table
     private static final String ID_COL = "_id";
@@ -96,51 +79,9 @@ public class WebViewDatabase {
         "_id"
     };
 
-    // column id strings for "cookies" table
-    private static final String COOKIES_NAME_COL = "name";
-
-    private static final String COOKIES_VALUE_COL = "value";
-
-    private static final String COOKIES_DOMAIN_COL = "domain";
-
-    private static final String COOKIES_PATH_COL = "path";
-
-    private static final String COOKIES_EXPIRES_COL = "expires";
-
-    private static final String COOKIES_SECURE_COL = "secure";
-
-    // column id strings for "cache" table
-    private static final String CACHE_URL_COL = "url";
-
-    private static final String CACHE_FILE_PATH_COL = "filepath";
-
-    private static final String CACHE_LAST_MODIFY_COL = "lastmodify";
-
-    private static final String CACHE_ETAG_COL = "etag";
-
-    private static final String CACHE_EXPIRES_COL = "expires";
-
-    private static final String CACHE_EXPIRES_STRING_COL = "expiresstring";
-
-    private static final String CACHE_MIMETYPE_COL = "mimetype";
-
-    private static final String CACHE_ENCODING_COL = "encoding";
-
-    private static final String CACHE_HTTP_STATUS_COL = "httpstatus";
-
-    private static final String CACHE_LOCATION_COL = "location";
-
-    private static final String CACHE_CONTENTLENGTH_COL = "contentlength";
-
-    private static final String CACHE_CONTENTDISPOSITION_COL = "contentdisposition";
-
-    private static final String CACHE_CROSSDOMAIN_COL = "crossdomain";
-
     // column id strings for "password" table
     private static final String PASSWORD_HOST_COL = "host";
-
     private static final String PASSWORD_USERNAME_COL = "username";
-
     private static final String PASSWORD_PASSWORD_COL = "password";
 
     // column id strings for "formurl" table
@@ -148,37 +89,14 @@ public class WebViewDatabase {
 
     // column id strings for "formdata" table
     private static final String FORMDATA_URLID_COL = "urlid";
-
     private static final String FORMDATA_NAME_COL = "name";
-
     private static final String FORMDATA_VALUE_COL = "value";
 
     // column id strings for "httpauth" table
     private static final String HTTPAUTH_HOST_COL = "host";
-
     private static final String HTTPAUTH_REALM_COL = "realm";
-
     private static final String HTTPAUTH_USERNAME_COL = "username";
-
     private static final String HTTPAUTH_PASSWORD_COL = "password";
-
-    // use InsertHelper to improve insert performance by 40%
-    private static DatabaseUtils.InsertHelper mCacheInserter;
-    private static int mCacheUrlColIndex;
-    private static int mCacheFilePathColIndex;
-    private static int mCacheLastModifyColIndex;
-    private static int mCacheETagColIndex;
-    private static int mCacheExpiresColIndex;
-    private static int mCacheExpiresStringColIndex;
-    private static int mCacheMimeTypeColIndex;
-    private static int mCacheEncodingColIndex;
-    private static int mCacheHttpStatusColIndex;
-    private static int mCacheLocationColIndex;
-    private static int mCacheContentLengthColIndex;
-    private static int mCacheContentDispositionColIndex;
-    private static int mCacheCrossDomainColIndex;
-
-    private static int mCacheTransactionRefcount;
 
     // Initially true until the background thread completes.
     private boolean mInitialized = false;
@@ -207,11 +125,9 @@ public class WebViewDatabase {
         }
 
         initDatabase(context);
-        if (JniUtil.useChromiumHttpStack()) {
-            context.deleteDatabase(CACHE_DATABASE_FILE);
-        } else {
-            initCacheDatabase(context);
-        }
+	// Before using the Chromium HTTP stack, we stored the WebKit cache in
+	// our own DB. Clean up the DB file if it's still around.
+        context.deleteDatabase(CACHE_DATABASE_FILE);
 
         // Thread done, notify.
         mInitialized = true;
@@ -254,83 +170,6 @@ public class WebViewDatabase {
         mDatabase.setLockingEnabled(false);
     }
 
-    private void initCacheDatabase(Context context) {
-        assert !JniUtil.useChromiumHttpStack();
-
-        try {
-            mCacheDatabase = context.openOrCreateDatabase(
-                    CACHE_DATABASE_FILE, 0, null);
-        } catch (SQLiteException e) {
-            // try again by deleting the old db and create a new one
-            if (context.deleteDatabase(CACHE_DATABASE_FILE)) {
-                mCacheDatabase = context.openOrCreateDatabase(
-                        CACHE_DATABASE_FILE, 0, null);
-            }
-        }
-        mCacheDatabase.enableWriteAheadLogging();
-
-        // mCacheDatabase should not be null,
-        // the only case is RequestAPI test has problem to create db
-        if (mCacheDatabase == null) {
-            mInitialized = true;
-            notify();
-            return;
-        }
-
-        if (mCacheDatabase.getVersion() != CACHE_DATABASE_VERSION) {
-            mCacheDatabase.beginTransactionNonExclusive();
-            try {
-                upgradeCacheDatabase();
-                bootstrapCacheDatabase();
-                mCacheDatabase.setTransactionSuccessful();
-            } finally {
-                mCacheDatabase.endTransaction();
-            }
-            // Erase the files from the file system in the
-            // case that the database was updated and the
-            // there were existing cache content
-            CacheManager.removeAllCacheFiles();
-        }
-
-        // use read_uncommitted to speed up READ
-        mCacheDatabase.execSQL("PRAGMA read_uncommitted = true;");
-        // as only READ can be called in the
-        // non-WebViewWorkerThread, and read_uncommitted is used,
-        // we can turn off database lock to use transaction.
-        mCacheDatabase.setLockingEnabled(false);
-
-        // use InsertHelper for faster insertion
-        mCacheInserter =
-                new DatabaseUtils.InsertHelper(mCacheDatabase,
-                        "cache");
-        mCacheUrlColIndex = mCacheInserter
-                            .getColumnIndex(CACHE_URL_COL);
-        mCacheFilePathColIndex = mCacheInserter
-                .getColumnIndex(CACHE_FILE_PATH_COL);
-        mCacheLastModifyColIndex = mCacheInserter
-                .getColumnIndex(CACHE_LAST_MODIFY_COL);
-        mCacheETagColIndex = mCacheInserter
-                .getColumnIndex(CACHE_ETAG_COL);
-        mCacheExpiresColIndex = mCacheInserter
-                .getColumnIndex(CACHE_EXPIRES_COL);
-        mCacheExpiresStringColIndex = mCacheInserter
-                .getColumnIndex(CACHE_EXPIRES_STRING_COL);
-        mCacheMimeTypeColIndex = mCacheInserter
-                .getColumnIndex(CACHE_MIMETYPE_COL);
-        mCacheEncodingColIndex = mCacheInserter
-                .getColumnIndex(CACHE_ENCODING_COL);
-        mCacheHttpStatusColIndex = mCacheInserter
-                .getColumnIndex(CACHE_HTTP_STATUS_COL);
-        mCacheLocationColIndex = mCacheInserter
-                .getColumnIndex(CACHE_LOCATION_COL);
-        mCacheContentLengthColIndex = mCacheInserter
-                .getColumnIndex(CACHE_CONTENTLENGTH_COL);
-        mCacheContentDispositionColIndex = mCacheInserter
-                .getColumnIndex(CACHE_CONTENTDISPOSITION_COL);
-        mCacheCrossDomainColIndex = mCacheInserter
-                .getColumnIndex(CACHE_CROSSDOMAIN_COL);
-    }
-
     private static void upgradeDatabase() {
         upgradeDatabaseToV10();
         upgradeDatabaseFromV10ToV11();
@@ -347,14 +186,12 @@ public class WebViewDatabase {
             return;
         }
 
-        if (JniUtil.useChromiumHttpStack()) {
-            // Clear out old java stack cookies - this data is now stored in
-            // a separate database managed by the Chrome stack.
-            mDatabase.execSQL("DROP TABLE IF EXISTS " + mTableNames[TABLE_COOKIES_ID]);
+        // Clear out old java stack cookies - this data is now stored in
+        // a separate database managed by the Chrome stack.
+        mDatabase.execSQL("DROP TABLE IF EXISTS cookies");
 
-            // Likewise for the old cache table.
-            mDatabase.execSQL("DROP TABLE IF EXISTS cache");
-        }
+        // Likewise for the old cache table.
+        mDatabase.execSQL("DROP TABLE IF EXISTS cache");
 
         // Update form autocomplete  URLs to match new ICS formatting.
         Cursor c = mDatabase.query(mTableNames[TABLE_FORMURL_ID], null, null,
@@ -397,8 +234,7 @@ public class WebViewDatabase {
             return;
         }
 
-        mDatabase.execSQL("DROP TABLE IF EXISTS "
-                + mTableNames[TABLE_COOKIES_ID]);
+        mDatabase.execSQL("DROP TABLE IF EXISTS cookies");
         mDatabase.execSQL("DROP TABLE IF EXISTS cache");
         mDatabase.execSQL("DROP TABLE IF EXISTS "
                 + mTableNames[TABLE_FORMURL_ID]);
@@ -408,16 +244,6 @@ public class WebViewDatabase {
                 + mTableNames[TABLE_HTTPAUTH_ID]);
         mDatabase.execSQL("DROP TABLE IF EXISTS "
                 + mTableNames[TABLE_PASSWORD_ID]);
-
-        // cookies
-        mDatabase.execSQL("CREATE TABLE " + mTableNames[TABLE_COOKIES_ID]
-                + " (" + ID_COL + " INTEGER PRIMARY KEY, "
-                + COOKIES_NAME_COL + " TEXT, " + COOKIES_VALUE_COL
-                + " TEXT, " + COOKIES_DOMAIN_COL + " TEXT, "
-                + COOKIES_PATH_COL + " TEXT, " + COOKIES_EXPIRES_COL
-                + " INTEGER, " + COOKIES_SECURE_COL + " INTEGER" + ");");
-        mDatabase.execSQL("CREATE INDEX cookiesIndex ON "
-                + mTableNames[TABLE_COOKIES_ID] + " (path)");
 
         // formurl
         mDatabase.execSQL("CREATE TABLE " + mTableNames[TABLE_FORMURL_ID]
@@ -447,36 +273,6 @@ public class WebViewDatabase {
                 + " TEXT, " + PASSWORD_PASSWORD_COL + " TEXT," + " UNIQUE ("
                 + PASSWORD_HOST_COL + ", " + PASSWORD_USERNAME_COL
                 + ") ON CONFLICT REPLACE);");
-    }
-
-    private static void upgradeCacheDatabase() {
-        int oldVersion = mCacheDatabase.getVersion();
-        if (oldVersion != 0) {
-            Log.i(LOGTAG, "Upgrading cache database from version "
-                    + oldVersion + " to "
-                    + CACHE_DATABASE_VERSION + ", which will destroy all old data");
-        }
-        mCacheDatabase.execSQL("DROP TABLE IF EXISTS cache");
-        mCacheDatabase.setVersion(CACHE_DATABASE_VERSION);
-    }
-
-    private static void bootstrapCacheDatabase() {
-        if (mCacheDatabase != null) {
-            mCacheDatabase.execSQL("CREATE TABLE cache"
-                    + " (" + ID_COL + " INTEGER PRIMARY KEY, " + CACHE_URL_COL
-                    + " TEXT, " + CACHE_FILE_PATH_COL + " TEXT, "
-                    + CACHE_LAST_MODIFY_COL + " TEXT, " + CACHE_ETAG_COL
-                    + " TEXT, " + CACHE_EXPIRES_COL + " INTEGER, "
-                    + CACHE_EXPIRES_STRING_COL + " TEXT, "
-                    + CACHE_MIMETYPE_COL + " TEXT, " + CACHE_ENCODING_COL
-                    + " TEXT," + CACHE_HTTP_STATUS_COL + " INTEGER, "
-                    + CACHE_LOCATION_COL + " TEXT, " + CACHE_CONTENTLENGTH_COL
-                    + " INTEGER, " + CACHE_CONTENTDISPOSITION_COL + " TEXT, "
-                    + CACHE_CROSSDOMAIN_COL + " TEXT,"
-                    + " UNIQUE (" + CACHE_URL_COL + ") ON CONFLICT REPLACE);");
-            mCacheDatabase.execSQL("CREATE INDEX cacheUrlIndex ON cache ("
-                    + CACHE_URL_COL + ")");
-        }
     }
 
     // Wait for the background initialization thread to complete and check the
@@ -513,422 +309,6 @@ public class WebViewDatabase {
             if (cursor != null) cursor.close();
         }
         return ret;
-    }
-
-    //
-    // cookies functions
-    //
-
-    /**
-     * Get cookies in the format of CookieManager.Cookie inside an ArrayList for
-     * a given domain
-     *
-     * @return ArrayList<Cookie> If nothing is found, return an empty list.
-     */
-    ArrayList<Cookie> getCookiesForDomain(String domain) {
-        ArrayList<Cookie> list = new ArrayList<Cookie>();
-        if (domain == null || !checkInitialized()) {
-            return list;
-        }
-
-        synchronized (mCookieLock) {
-            final String[] columns = new String[] {
-                    ID_COL, COOKIES_DOMAIN_COL, COOKIES_PATH_COL,
-                    COOKIES_NAME_COL, COOKIES_VALUE_COL, COOKIES_EXPIRES_COL,
-                    COOKIES_SECURE_COL
-            };
-            final String selection = "(" + COOKIES_DOMAIN_COL
-                    + " GLOB '*' || ?)";
-            Cursor cursor = null;
-            try {
-                cursor = mDatabase.query(mTableNames[TABLE_COOKIES_ID],
-                        columns, selection, new String[] { domain }, null, null,
-                        null);
-                if (cursor.moveToFirst()) {
-                    int domainCol = cursor.getColumnIndex(COOKIES_DOMAIN_COL);
-                    int pathCol = cursor.getColumnIndex(COOKIES_PATH_COL);
-                    int nameCol = cursor.getColumnIndex(COOKIES_NAME_COL);
-                    int valueCol = cursor.getColumnIndex(COOKIES_VALUE_COL);
-                    int expiresCol = cursor.getColumnIndex(COOKIES_EXPIRES_COL);
-                    int secureCol = cursor.getColumnIndex(COOKIES_SECURE_COL);
-                    do {
-                        Cookie cookie = new Cookie();
-                        cookie.domain = cursor.getString(domainCol);
-                        cookie.path = cursor.getString(pathCol);
-                        cookie.name = cursor.getString(nameCol);
-                        cookie.value = cursor.getString(valueCol);
-                        if (cursor.isNull(expiresCol)) {
-                            cookie.expires = -1;
-                        } else {
-                            cookie.expires = cursor.getLong(expiresCol);
-                        }
-                        cookie.secure = cursor.getShort(secureCol) != 0;
-                        cookie.mode = Cookie.MODE_NORMAL;
-                        list.add(cookie);
-                    } while (cursor.moveToNext());
-                }
-            } catch (IllegalStateException e) {
-                Log.e(LOGTAG, "getCookiesForDomain", e);
-            } finally {
-                if (cursor != null) cursor.close();
-            }
-            return list;
-        }
-    }
-
-    /**
-     * Delete cookies which matches (domain, path, name).
-     *
-     * @param domain If it is null, nothing happens.
-     * @param path If it is null, all the cookies match (domain) will be
-     *            deleted.
-     * @param name If it is null, all the cookies match (domain, path) will be
-     *            deleted.
-     */
-    void deleteCookies(String domain, String path, String name) {
-        if (domain == null || !checkInitialized()) {
-            return;
-        }
-
-        synchronized (mCookieLock) {
-            final String where = "(" + COOKIES_DOMAIN_COL + " == ?) AND ("
-                    + COOKIES_PATH_COL + " == ?) AND (" + COOKIES_NAME_COL
-                    + " == ?)";
-            mDatabase.delete(mTableNames[TABLE_COOKIES_ID], where,
-                    new String[] { domain, path, name });
-        }
-    }
-
-    /**
-     * Add a cookie to the database
-     *
-     * @param cookie
-     */
-    void addCookie(Cookie cookie) {
-        if (cookie.domain == null || cookie.path == null || cookie.name == null
-                || !checkInitialized()) {
-            return;
-        }
-
-        synchronized (mCookieLock) {
-            ContentValues cookieVal = new ContentValues();
-            cookieVal.put(COOKIES_DOMAIN_COL, cookie.domain);
-            cookieVal.put(COOKIES_PATH_COL, cookie.path);
-            cookieVal.put(COOKIES_NAME_COL, cookie.name);
-            cookieVal.put(COOKIES_VALUE_COL, cookie.value);
-            if (cookie.expires != -1) {
-                cookieVal.put(COOKIES_EXPIRES_COL, cookie.expires);
-            }
-            cookieVal.put(COOKIES_SECURE_COL, cookie.secure);
-            mDatabase.insert(mTableNames[TABLE_COOKIES_ID], null, cookieVal);
-        }
-    }
-
-    /**
-     * Whether there is any cookies in the database
-     *
-     * @return TRUE if there is cookie.
-     */
-    boolean hasCookies() {
-        synchronized (mCookieLock) {
-            return hasEntries(TABLE_COOKIES_ID);
-        }
-    }
-
-    /**
-     * Clear cookie database
-     */
-    void clearCookies() {
-        if (!checkInitialized()) {
-            return;
-        }
-
-        synchronized (mCookieLock) {
-            mDatabase.delete(mTableNames[TABLE_COOKIES_ID], null, null);
-        }
-    }
-
-    /**
-     * Clear session cookies, which means cookie doesn't have EXPIRES.
-     */
-    void clearSessionCookies() {
-        if (!checkInitialized()) {
-            return;
-        }
-
-        final String sessionExpired = COOKIES_EXPIRES_COL + " ISNULL";
-        synchronized (mCookieLock) {
-            mDatabase.delete(mTableNames[TABLE_COOKIES_ID], sessionExpired,
-                    null);
-        }
-    }
-
-    /**
-     * Clear expired cookies
-     *
-     * @param now Time for now
-     */
-    void clearExpiredCookies(long now) {
-        if (!checkInitialized()) {
-            return;
-        }
-
-        final String expires = COOKIES_EXPIRES_COL + " <= ?";
-        synchronized (mCookieLock) {
-            mDatabase.delete(mTableNames[TABLE_COOKIES_ID], expires,
-                    new String[] { Long.toString(now) });
-        }
-    }
-
-    //
-    // cache functions
-    //
-
-    // only called from WebViewWorkerThread
-    boolean startCacheTransaction() {
-        if (++mCacheTransactionRefcount == 1) {
-            if (!Thread.currentThread().equals(
-                    WebViewWorker.getHandler().getLooper().getThread())) {
-                Log.w(LOGTAG, "startCacheTransaction should be called from "
-                        + "WebViewWorkerThread instead of from "
-                        + Thread.currentThread().getName());
-            }
-            mCacheDatabase.beginTransactionNonExclusive();
-            return true;
-        }
-        return false;
-    }
-
-    // only called from WebViewWorkerThread
-    boolean endCacheTransaction() {
-        if (--mCacheTransactionRefcount == 0) {
-            if (!Thread.currentThread().equals(
-                    WebViewWorker.getHandler().getLooper().getThread())) {
-                Log.w(LOGTAG, "endCacheTransaction should be called from "
-                        + "WebViewWorkerThread instead of from "
-                        + Thread.currentThread().getName());
-            }
-            try {
-                mCacheDatabase.setTransactionSuccessful();
-            } finally {
-                mCacheDatabase.endTransaction();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Get a cache item.
-     * 
-     * @param url The url
-     * @return CacheResult The CacheManager.CacheResult
-     */
-    CacheResult getCache(String url) {
-        assert !JniUtil.useChromiumHttpStack();
-
-        if (url == null || !checkInitialized()) {
-            return null;
-        }
-
-        Cursor cursor = null;
-        final String query = "SELECT filepath, lastmodify, etag, expires, "
-                + "expiresstring, mimetype, encoding, httpstatus, location, contentlength, "
-                + "contentdisposition, crossdomain FROM cache WHERE url = ?";
-        try {
-            cursor = mCacheDatabase.rawQuery(query, new String[] { url });
-            if (cursor.moveToFirst()) {
-                CacheResult ret = new CacheResult();
-                ret.localPath = cursor.getString(0);
-                ret.lastModified = cursor.getString(1);
-                ret.etag = cursor.getString(2);
-                ret.expires = cursor.getLong(3);
-                ret.expiresString = cursor.getString(4);
-                ret.mimeType = cursor.getString(5);
-                ret.encoding = cursor.getString(6);
-                ret.httpStatusCode = cursor.getInt(7);
-                ret.location = cursor.getString(8);
-                ret.contentLength = cursor.getLong(9);
-                ret.contentdisposition = cursor.getString(10);
-                ret.crossDomain = cursor.getString(11);
-                return ret;
-            }
-        } catch (IllegalStateException e) {
-            Log.e(LOGTAG, "getCache", e);
-        } finally {
-            if (cursor != null) cursor.close();
-        }
-        return null;
-    }
-
-    /**
-     * Remove a cache item.
-     * 
-     * @param url The url
-     */
-    void removeCache(String url) {
-        assert !JniUtil.useChromiumHttpStack();
-
-        if (url == null || !checkInitialized()) {
-            return;
-        }
-
-        mCacheDatabase.execSQL("DELETE FROM cache WHERE url = ?", new String[] { url });
-    }
-
-    /**
-     * Add or update a cache. CACHE_URL_COL is unique in the table.
-     *
-     * @param url The url
-     * @param c The CacheManager.CacheResult
-     */
-    void addCache(String url, CacheResult c) {
-        assert !JniUtil.useChromiumHttpStack();
-
-        if (url == null || !checkInitialized()) {
-            return;
-        }
-
-        mCacheInserter.prepareForInsert();
-        mCacheInserter.bind(mCacheUrlColIndex, url);
-        mCacheInserter.bind(mCacheFilePathColIndex, c.localPath);
-        mCacheInserter.bind(mCacheLastModifyColIndex, c.lastModified);
-        mCacheInserter.bind(mCacheETagColIndex, c.etag);
-        mCacheInserter.bind(mCacheExpiresColIndex, c.expires);
-        mCacheInserter.bind(mCacheExpiresStringColIndex, c.expiresString);
-        mCacheInserter.bind(mCacheMimeTypeColIndex, c.mimeType);
-        mCacheInserter.bind(mCacheEncodingColIndex, c.encoding);
-        mCacheInserter.bind(mCacheHttpStatusColIndex, c.httpStatusCode);
-        mCacheInserter.bind(mCacheLocationColIndex, c.location);
-        mCacheInserter.bind(mCacheContentLengthColIndex, c.contentLength);
-        mCacheInserter.bind(mCacheContentDispositionColIndex,
-                c.contentdisposition);
-        mCacheInserter.bind(mCacheCrossDomainColIndex, c.crossDomain);
-        mCacheInserter.execute();
-    }
-
-    /**
-     * Clear cache database
-     */
-    void clearCache() {
-        if (!checkInitialized()) {
-            return;
-        }
-
-        mCacheDatabase.delete("cache", null, null);
-    }
-
-    boolean hasCache() {
-        if (!checkInitialized()) {
-            return false;
-        }
-
-        Cursor cursor = null;
-        boolean ret = false;
-        try {
-            cursor = mCacheDatabase.query("cache", ID_PROJECTION,
-                    null, null, null, null, null);
-            ret = cursor.moveToFirst() == true;
-        } catch (IllegalStateException e) {
-            Log.e(LOGTAG, "hasCache", e);
-        } finally {
-            if (cursor != null) cursor.close();
-        }
-        return ret;
-    }
-
-    long getCacheTotalSize() {
-        if (mCacheDatabase == null) {
-            return 0;
-        }
-        long size = 0;
-        Cursor cursor = null;
-        final String query = "SELECT SUM(contentlength) as sum FROM cache";
-        try {
-            cursor = mCacheDatabase.rawQuery(query, null);
-            if (cursor.moveToFirst()) {
-                size = cursor.getLong(0);
-            }
-        } catch (IllegalStateException e) {
-            Log.e(LOGTAG, "getCacheTotalSize", e);
-        } finally {
-            if (cursor != null) cursor.close();
-        }
-        return size;
-    }
-
-    List<String> trimCache(long amount) {
-        ArrayList<String> pathList = new ArrayList<String>(100);
-        Cursor cursor = null;
-        final String query = "SELECT contentlength, filepath FROM cache ORDER BY expires ASC";
-        try {
-            cursor = mCacheDatabase.rawQuery(query, null);
-            if (cursor.moveToFirst()) {
-                int batchSize = 100;
-                StringBuilder pathStr = new StringBuilder(20 + 16 * batchSize);
-                pathStr.append("DELETE FROM cache WHERE filepath IN (?");
-                for (int i = 1; i < batchSize; i++) {
-                    pathStr.append(", ?");
-                }
-                pathStr.append(")");
-                SQLiteStatement statement = null;
-                try {
-                    statement = mCacheDatabase.compileStatement(
-                            pathStr.toString());
-                    // as bindString() uses 1-based index, initialize index to 1
-                    int index = 1;
-                    do {
-                        long length = cursor.getLong(0);
-                        if (length == 0) {
-                            continue;
-                        }
-                        amount -= length;
-                        String filePath = cursor.getString(1);
-                        statement.bindString(index, filePath);
-                        pathList.add(filePath);
-                        if (index++ == batchSize) {
-                            statement.execute();
-                            statement.clearBindings();
-                            index = 1;
-                        }
-                    } while (cursor.moveToNext() && amount > 0);
-                    if (index > 1) {
-                        // there may be old bindings from the previous statement
-                        // if index is less than batchSize, which is Ok.
-                        statement.execute();
-                    }
-                } catch (IllegalStateException e) {
-                    Log.e(LOGTAG, "trimCache SQLiteStatement", e);
-                } finally {
-                    if (statement != null) statement.close();
-                }
-            }
-        } catch (IllegalStateException e) {
-            Log.e(LOGTAG, "trimCache Cursor", e);
-        } finally {
-            if (cursor != null) cursor.close();
-        }
-        return pathList;
-    }
-
-    List<String> getAllCacheFileNames() {
-        ArrayList<String> pathList = null;
-        Cursor cursor = null;
-        try {
-            cursor = mCacheDatabase.rawQuery("SELECT filepath FROM cache",
-                    null);
-            if (cursor != null && cursor.moveToFirst()) {
-                pathList = new ArrayList<String>(cursor.getCount());
-                do {
-                    pathList.add(cursor.getString(0));
-                } while (cursor.moveToNext());
-            }
-        } catch (IllegalStateException e) {
-            Log.e(LOGTAG, "getAllCacheFileNames", e);
-        } finally {
-            if (cursor != null) cursor.close();
-        }
-        return pathList;
     }
 
     //

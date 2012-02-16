@@ -1383,21 +1383,12 @@ public final class WebViewCore {
                             Process.setThreadPriority(mTid,
                                     Process.THREAD_PRIORITY_BACKGROUND);
                             pauseTimers();
-                            if (!JniUtil.useChromiumHttpStack()) {
-                                WebViewWorker.getHandler().sendEmptyMessage(
-                                        WebViewWorker.MSG_PAUSE_CACHE_TRANSACTION);
-                            } else {
-                                nativeCloseIdleConnections(mNativeClass);
-                            }
+                            nativeCloseIdleConnections(mNativeClass);
                             break;
 
                         case RESUME_TIMERS:
                             Process.setThreadPriority(mTid, mSavedPriority);
                             resumeTimers();
-                            if (!JniUtil.useChromiumHttpStack()) {
-                                WebViewWorker.getHandler().sendEmptyMessage(
-                                        WebViewWorker.MSG_RESUME_CACHE_TRANSACTION);
-                            }
                             break;
 
                         case ON_PAUSE:
@@ -1471,14 +1462,10 @@ public final class WebViewCore {
                         }
 
                         case CLEAR_SSL_PREF_TABLE:
-                            if (JniUtil.useChromiumHttpStack()) {
-                                // FIXME: This will not work for connections currently in use, as
-                                // they cache the certificate responses. See http://b/5324235.
-                                SslCertLookupTable.getInstance().clear();
-                                nativeCloseIdleConnections(mNativeClass);
-                            } else {
-                                Network.getInstance(mContext).clearUserSslPrefTable();
-                            }
+                            // FIXME: This will not work for connections currently in use, as
+                            // they cache the certificate responses. See http://b/5324235.
+                            SslCertLookupTable.getInstance().clear();
+                            nativeCloseIdleConnections(mNativeClass);
                             break;
 
                         case TOUCH_UP:
@@ -2426,14 +2413,6 @@ public final class WebViewCore {
     // called by JNI
     private void sendNotifyProgressFinished() {
         sendUpdateTextEntry();
-        if (!JniUtil.useChromiumHttpStack()) {
-            // as CacheManager can behave based on database transaction, we need to
-            // call tick() to trigger endTransaction
-            WebViewWorker.getHandler().removeMessages(
-                    WebViewWorker.MSG_CACHE_TRANSACTION_TICKER);
-            WebViewWorker.getHandler().sendEmptyMessage(
-                    WebViewWorker.MSG_CACHE_TRANSACTION_TICKER);
-        }
         contentDraw();
     }
 

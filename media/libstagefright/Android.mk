@@ -61,20 +61,26 @@ LOCAL_C_INCLUDES:= \
         $(TOP)/external/openssl/include \
 
 LOCAL_SHARED_LIBRARIES := \
-        libbinder         \
-        libmedia          \
-        libutils          \
-        libcutils         \
-        libui             \
-        libsonivox        \
-        libvorbisidec     \
+        libbinder \
+        libmedia \
+        libutils \
+        libcutils \
+        libui \
+        libsonivox \
+        libvorbisidec \
         libstagefright_yuv \
         libcamera_client \
-        libdrmframework  \
-        libcrypto        \
-        libssl           \
-        libgui           \
+        libdrmframework \
+        libcrypto \
+        libssl \
+        libgui \
         libstagefright_omx \
+        liblog \
+        libicuuc \
+        libicui18n \
+        libz \
+        libdl \
+        libchromium_net \
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \
@@ -88,50 +94,13 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_httplive \
         libstagefright_id3 \
         libFLAC \
+        libstagefright_chromium_http \
 
-################################################################################
-
-# The following was shamelessly copied from external/webkit/Android.mk and
-# currently must follow the same logic to determine how webkit was built and
-# if it's safe to link against libchromium_net
-
-# See if the user has specified a stack they want to use
-HTTP_STACK = $(HTTP)
-# We default to the Chrome HTTP stack.
-DEFAULT_HTTP = chrome
-ALT_HTTP = android
-
-ifneq ($(HTTP_STACK),chrome)
-  ifneq ($(HTTP_STACK),android)
-    # No HTTP stack is specified, pickup the one we want as default.
-    ifeq ($(USE_ALT_HTTP),true)
-      HTTP_STACK = $(ALT_HTTP)
-    else
-      HTTP_STACK = $(DEFAULT_HTTP)
-    endif
-  endif
-endif
-
-ifeq ($(HTTP_STACK),chrome)
-
-LOCAL_SHARED_LIBRARIES += \
-        liblog           \
-        libicuuc         \
-        libicui18n       \
-        libz             \
-        libdl            \
-
-LOCAL_STATIC_LIBRARIES += \
-        libstagefright_chromium_http
-
-LOCAL_SHARED_LIBRARIES += libstlport libchromium_net
+LOCAL_SHARED_LIBRARIES += libstlport
 include external/stlport/libstlport.mk
 
+# TODO: Chromium is always available, so this flag can be removed.
 LOCAL_CPPFLAGS += -DCHROMIUM_AVAILABLE=1
-
-endif  # ifeq ($(HTTP_STACK),chrome)
-
-################################################################################
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_enc_common \
