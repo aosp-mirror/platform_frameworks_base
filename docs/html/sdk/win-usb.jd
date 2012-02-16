@@ -7,19 +7,12 @@ page.title=Google USB Driver
   <ol>
     <li><a href="#notes">Revisions</a></li>
     <li><a href="#WinUsbDriver">Downloading the Google USB Driver</a></li>
-    <li><a href="#InstallingDriver">Installing the USB Driver</a>
-      <ol>
-        <li><a href="#Win7">Windows 7</a></li>
-        <li><a href="#WinXp">Windows XP</a></li>
-        <li><a href="#WinVista">Windows Vista</a></li>
-      </ol>
-    </li>
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/developing/device.html">Developing on a Device</a></li>
+    <li><a href="{@docRoot}sdk/oem-usb.html#InstallingDriver">Installing a USB Driver</a></li>
+    <li><a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a></li>
     <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></li>
-    <li><a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a></li>
   </ol>
 </div>
 </div>
@@ -43,9 +36,9 @@ href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZ
 (listed as model SCH-I515).</p>
 
 <p class="note"><strong>Note:</strong>
-If you're developing on Mac OS X or Linux, then you do not need to install a USB driver. Refer to <a
-href="{@docRoot}guide/developing/device.html#setting-up">Setting up a Device</a> to start
-development with a device.</p>
+If you're developing on Mac OS X or Linux, then you do not need to install a USB driver. To start
+developing with your device, also read <a href="{@docRoot}guide/developing/device.html">Using
+Hardware Devices</a>.</p>
 
 <p>The sections below provide instructions on how to download and install the Google USB Driver
 for Windows. </p>
@@ -170,174 +163,10 @@ included with the <a href="{@docRoot}sdk/index.html">Android SDK</a>:</p>
 <ol>
   <li>Launch the SDK and AVD Manager by double-clicking <code>SDK Manager.exe</code>,
   at the root of your SDK directory.</li>
-  <li>Expand the <em>Third party Add-ons</em> and <em>Google Inc. add-ons</em>.</li>
-  <li>Check <strong>Google Usb Driver package</strong> and click <strong>Install selected</strong>.</li>
+  <li>Expand <em>Extras</em>.</li>
+  <li>Check <strong>Google USB Driver package</strong> and click <strong>Install</strong>.</li>
   <li>Proceed to install the package. When done, the driver files are
 downloaded into the <code>&lt;sdk&gt;\extras\google\usb_driver\</code> directory.</li>
 </ol>
 
-
-
-<h2 id="InstallingDriver">Installing the USB Driver</h2>
-
-<p>Once you've downloaded your USB driver, follow the instructions below to install or upgrade the
-driver, based on your version of Windows and whether you're installing for the first time
-or upgrading an existing driver.</p>
-
-<p class="note"><strong>Tip:</strong> When you finish the USB driver installation,
-see <a
-href="{@docRoot}guide/developing/device.html">Developing on a Device</a> for
-other important information about using an Android-powered device for
-development.</p>
-
-<ol class="nolist">
-  <li><a href="#Win7">Windows 7</a></li>
-  <li><a href="#WinXp">Windows XP</a></li>
-  <li><a href="#WinVista">Windows Vista</a></li>
-</ol>
-
-
-<p class="caution"><strong>Caution:</strong>
-You may make changes to <code>android_winusb.inf</code> file found inside
-<code>usb_driver\</code> (for example, to add support for other devices),
-however, this will lead to security warnings when you install or upgrade the
-driver. Making any other changes to the driver files may break the installation
-process.</p>
-
-
-<h3 id="Win7">Windows 7</h3>
-
-
-<p>To install the Android USB driver on Windows 7 for the first time:</p>
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port.</li>
-  <li>Right-click on <em>Computer</em> from your desktop or Windows Explorer,
-    and select <strong>Manage</strong>.</li>
-  <li>Select <strong>Devices</strong> in the left pane.</li>
-  <li>Locate and expand <em>Other device</em> in the right pane.</li>
-  <li>Right-click the device name (such as <em>Nexus S</em>) and select <strong>Update
-  Driver Software</strong>.
-    This will launch the Hardware Update Wizard.</li>
-  <li>Select <strong>Browse my computer for driver software</strong> and click
-    <strong>Next</strong>.</li>
-  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
-  <li>Click <strong>Next</strong> to install the driver.</li>
-</ol>
-
-<p>Or, to <em>upgrade</em> an existing Android USB driver on Windows 7 with the new
-driver:</p>
-
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port.</li>
-  <li>Right-click on <em>Computer</em> from your desktop or Windows Explorer,
-    and select <strong>Manage</strong>.</li>
-  <li>Select <strong>Device Manager</strong> in the left pane of the Computer Management
-  window.</li>
-  <li>Locate and expand <em>Android Phone</em> in the right pane.</li>
-  <li>Right-click <em>Android Composite ADB Interface</em> and select <strong>Update
-  Driver</strong>.
-    This will launch the Hardware Update Wizard.</li>
-  <li>Select <strong>Install from a list or specific location</strong> and click
-    <strong>Next</strong>.</li>
-  <li>Select <strong>Search for the best driver in these locations</strong>; un-check
-<strong>Search removable media</strong>; and check <strong>Include this location in the
-search</strong>.</li>
-  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
-  <li>Click <strong>Next</strong> to upgrade the driver.</li>
-</ol>
-
-
-
-
-
-<h3 id="WinXp">Windows XP</h3>
-
-<p>To install the Android USB driver on Windows XP for the first time:</p>
-
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port. Windows 
-    will detect the device and launch the Hardware Update Wizard.</li>
-  <li>Select <strong>Install from a list or specific location</strong> and click
-    <strong>Next</strong>.</li>
-  <li>Select <strong>Search for the best driver in these locations</strong>; un-check
-<strong>Search
-    removable media</strong>; and check <strong>Include
-this location in the search</strong>.</li>
-  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
-  <li>Click <strong>Next</strong> to install the driver.</li>
-</ol>
-
-<p>Or, to <em>upgrade</em> an existing Android USB driver on Windows XP with the new
-driver:</p>
-
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port.</li>
-  <li>Right-click on <em>My Computer</em> from your desktop or Windows Explorer,
-    and select <strong>Manage</strong>.</li>
-  <li>Select <strong>Device Manager</strong> in the left pane.</li>
-  <li>Locate and expand <em>Android Phone</em> in the right pane.</li>
-  <li>Right-click <em>Android Composite ADB Interface</em> and select <strong>Update
-  Driver</strong>.
-    This will launch the Hardware Update Wizard.</li>
-  <li>Select <strong>Install from a list or specific location</strong> and click
-    <strong>Next</strong>.</li>
-  <li>Select <strong>Search for the best driver in these locations</strong>; un-check <strong>Search
-    removable media</strong>; and check <strong>Include
-this location in the search</strong>.</li>
-  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
-  <li>Click <strong>Next</strong> to upgrade the driver.</li>
-</ol>
-
-
-
-<h3 id="WinVista">Windows Vista</h3>
-
-<p>To install the Android USB driver on Windows Vista for the first time:</p>
-
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port. Windows
-  will detect the device and launch the Found New Hardware wizard.</li>
-  <li>Select <strong>Locate and install driver software</strong>.</li>
-  <li>Select <strong>Don't search online</strong>.</li>
-  <li>Select <strong>I don't have the disk. Show me other options</strong>.</li>
-  <li>Select <strong>Browse my computer for driver software</strong>.</li>
-  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.) As long as you specified the
-exact location of the 
-    installation package, you may leave <strong>Include subfolders</strong> checked or
-  unchecked&mdash;it doesn't matter.</li>
-  <li>Click <strong>Next</strong>. Vista may prompt you to confirm the privilege elevation
-  required for driver installation. Confirm it.</li>
-  <li>When Vista asks if you'd like to install the Google ADB Interface device,
-  click <strong>Install</strong> to install the driver.</li>
-</ol>
-
-<p>Or, to <em>upgrade</em> an existing Android USB driver on Windows Vista with the new
-driver:</p>
-
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port.</li>
-  <li>Right-click on <em>Computer</em> from your desktop or Windows Explorer,
-    and select <strong>Manage</strong>.</li>
-  <li>Select <strong>Device Manager</strong> in the left pane.</li>
-  <li>Locate and expand <em>ADB Interface</em> in the right pane.</li>
-  <li>Right-click on <em>HTC Dream Composite ADB Interface</em>, and select <strong>Update
-  Driver Software</strong>.</li>
-  <li>When Vista starts updating the driver, a prompt will ask how you want to
-  search for the driver
-    software. Select <strong>Browse my computer for driver software</strong>.</li>
-  <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.) As long as you specified the
-exact location of the 
-    installation package, you may leave <strong>Include subfolders</strong> checked or
-    unchecked&mdash;it doesn't matter.</li>
-  <li>Click <strong>Next</strong>. Vista might prompt you to confirm the privilege elevation
-  required for driver installation. Confirm it.</li>
-  <li>When Vista asks if you'd like to install the Google ADB Interface device,
-  click <strong>Install</strong> to upgrade the driver.</li>
-</ol>
-  
+<p>For installation information, read <a href="{@docRoot}sdk/oem-usb.html#InstallingDriver">Installing a USB Driver</a>.</p>
