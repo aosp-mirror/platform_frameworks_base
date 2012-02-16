@@ -1556,6 +1556,24 @@
              an absolute dimension or a fraction of the screen size in that
              dimension. -->
         <attr name="windowMinWidthMinor" format="dimension|fraction" />
+
+        <!-- A fixed width for the window along the major axis of the screen,
+             that is, when in landscape. Can be either an absolute dimension
+             or a fraction of the screen size in that dimension. -->
+        <attr name="windowFixedWidthMajor" format="dimension|fraction" />
+        <!-- A fixed height for the window along the minor axis of the screen,
+             that is, when in landscape. Can be either an absolute dimension
+             or a fraction of the screen size in that dimension. -->
+        <attr name="windowFixedHeightMinor" format="dimension|fraction" />
+
+        <!-- A fixed width for the window along the minor axis of the screen,
+             that is, when in portrait. Can be either an absolute dimension
+             or a fraction of the screen size in that dimension. -->
+        <attr name="windowFixedWidthMinor" format="dimension|fraction" />
+        <!-- A fixed height for the window along the major axis of the screen,
+             that is, when in portrait. Can be either an absolute dimension
+             or a fraction of the screen size in that dimension. -->
+        <attr name="windowFixedHeightMajor" format="dimension|fraction" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

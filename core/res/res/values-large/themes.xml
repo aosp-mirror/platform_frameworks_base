@@ -33,17 +33,17 @@ please see themes_device_defaults.xml.
  -->
 <resources>
     <style name="Theme.Holo.DialogWhenLarge"
-            parent="@android:style/Theme.Holo.Dialog.MinWidth">
+            parent="@android:style/Theme.Holo.Dialog.FixedSize">
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
     <style name="Theme.Holo.DialogWhenLarge.NoActionBar"
-            parent="@android:style/Theme.Holo.Dialog.NoActionBar.MinWidth">
+            parent="@android:style/Theme.Holo.Dialog.NoActionBar.FixedSize">
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
     <style name="Theme.Holo.Light.DialogWhenLarge"
-            parent="@android:style/Theme.Holo.Light.Dialog.MinWidth">
+            parent="@android:style/Theme.Holo.Light.Dialog.FixedSize">
     </style>
     <style name="Theme.Holo.Light.DialogWhenLarge.NoActionBar"
-            parent="@android:style/Theme.Holo.Light.Dialog.NoActionBar.MinWidth">
+            parent="@android:style/Theme.Holo.Light.Dialog.NoActionBar.FixedSize">
     </style>
 </resources>

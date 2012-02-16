@@ -212,6 +212,10 @@
   <java-symbol type="attr" name="textAppearanceMisspelledSuggestion" />
   <java-symbol type="attr" name="textColorSearchUrl" />
   <java-symbol type="attr" name="timePickerStyle" />
+  <java-symbol type="attr" name="windowFixedWidthMajor" />
+  <java-symbol type="attr" name="windowFixedWidthMinor" />
+  <java-symbol type="attr" name="windowFixedHeightMajor" />
+  <java-symbol type="attr" name="windowFixedHeightMinor" />
 
   <java-symbol type="bool" name="action_bar_embed_tabs" />
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
