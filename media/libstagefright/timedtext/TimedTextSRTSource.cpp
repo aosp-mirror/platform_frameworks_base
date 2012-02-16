@@ -21,8 +21,10 @@
 #include <binder/Parcel.h>
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaDefs.h>  // for MEDIA_MIMETYPE_xxx
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
+#include <media/stagefright/MetaData.h>
 
 #include "TimedTextSRTSource.h"
 #include "TextDescriptions.h"
@@ -31,6 +33,7 @@ namespace android {
 
 TimedTextSRTSource::TimedTextSRTSource(const sp<DataSource>& dataSource)
         : mSource(dataSource),
+          mMetaData(new MetaData),
           mIndex(0) {
 }
 
@@ -42,10 +45,14 @@ status_t TimedTextSRTSource::start() {
     if (err != OK) {
         reset();
     }
+    // TODO: Need to detect the language, because SRT doesn't give language
+    // information explicitly.
+    mMetaData->setCString(kKeyMediaLanguage, "");
     return err;
 }
 
 void TimedTextSRTSource::reset() {
+    mMetaData->clear();
     mTextVector.clear();
     mIndex = 0;
 }
@@ -270,6 +277,10 @@ status_t TimedTextSRTSource::extractAndAppendLocalDescriptions(
                 (const uint8_t *)data, size, flag, timeUs / 1000, parcel);
     }
     return OK;
+}
+
+sp<MetaData> TimedTextSRTSource::getFormat() {
+    return mMetaData;
 }
 
 }  // namespace android

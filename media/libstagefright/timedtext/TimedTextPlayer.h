@@ -40,7 +40,6 @@ public:
 
     void start();
     void pause();
-    void resume();
     void seekToAsync(int64_t timeUs);
     void setDataSource(sp<TimedTextSource> source);
 
@@ -68,7 +67,8 @@ private:
     void doRead(MediaSource::ReadOptions* options = NULL);
     void onTextEvent();
     void postTextEvent(const sp<ParcelEvent>& parcel = NULL, int64_t timeUs = -1);
-    void notifyListener(int msg, const Parcel *parcel = NULL);
+    void notifyError(int error = 0);
+    void notifyListener(const Parcel *parcel = NULL);
 
     DISALLOW_EVIL_CONSTRUCTORS(TimedTextPlayer);
 };

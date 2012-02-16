@@ -110,4 +110,8 @@ status_t TimedText3GPPSource::extractGlobalDescriptions(Parcel *parcel) {
     return OK;
 }
 
+sp<MetaData> TimedText3GPPSource::getFormat() {
+    return mSource->getFormat();
+}
+
 }  // namespace android

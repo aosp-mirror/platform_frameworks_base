@@ -1114,7 +1114,7 @@ status_t AwesomePlayer::pause_l(bool at_eos) {
         modifyFlags(AUDIO_RUNNING, CLEAR);
     }
 
-    if (mFlags & TEXTPLAYER_STARTED) {
+    if (mFlags & TEXTPLAYER_INITIALIZED) {
         mTextDriver->pause();
         modifyFlags(TEXT_RUNNING, CLEAR);
     }
@@ -1268,32 +1268,6 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
     return OK;
 }
 
-status_t AwesomePlayer::setTimedTextTrackIndex(int32_t index) {
-    if (mTextDriver != NULL) {
-        if (index >= 0) { // to turn on a text track
-            status_t err = mTextDriver->setTimedTextTrackIndex(index);
-            if (err != OK) {
-                return err;
-            }
-
-            modifyFlags(TEXT_RUNNING, SET);
-            modifyFlags(TEXTPLAYER_STARTED, SET);
-            return OK;
-        } else { // to turn off the text track display
-            if (mFlags  & TEXT_RUNNING) {
-                modifyFlags(TEXT_RUNNING, CLEAR);
-            }
-            if (mFlags  & TEXTPLAYER_STARTED) {
-                modifyFlags(TEXTPLAYER_STARTED, CLEAR);
-            }
-
-            return mTextDriver->setTimedTextTrackIndex(index);
-        }
-    } else {
-        return INVALID_OPERATION;
-    }
-}
-
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     if (mFlags & CACHE_UNDERRUN) {
         modifyFlags(CACHE_UNDERRUN, CLEAR);
@@ -1315,7 +1289,7 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
 
     seekAudioIfNecessary_l();
 
-    if (mFlags & TEXTPLAYER_STARTED) {
+    if (mFlags & TEXTPLAYER_INITIALIZED) {
         mTextDriver->seekToAsync(mSeekTimeUs);
     }
 
@@ -1691,8 +1665,8 @@ void AwesomePlayer::onVideoEvent() {
         }
     }
 
-    if ((mFlags & TEXTPLAYER_STARTED) && !(mFlags & (TEXT_RUNNING | SEEK_PREVIEW))) {
-        mTextDriver->resume();
+    if ((mFlags & TEXTPLAYER_INITIALIZED) && !(mFlags & (TEXT_RUNNING | SEEK_PREVIEW))) {
+        mTextDriver->start();
         modifyFlags(TEXT_RUNNING, SET);
     }
 
@@ -2232,20 +2206,6 @@ void AwesomePlayer::postAudioSeekComplete() {
 
 status_t AwesomePlayer::setParameter(int key, const Parcel &request) {
     switch (key) {
-        case KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX:
-        {
-            Mutex::Autolock autoLock(mTimedTextLock);
-            return setTimedTextTrackIndex(request.readInt32());
-        }
-        case KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE:
-        {
-            Mutex::Autolock autoLock(mTimedTextLock);
-            if (mTextDriver == NULL) {
-                mTextDriver = new TimedTextDriver(mListener);
-            }
-
-            return mTextDriver->addOutOfBandTextSource(request);
-        }
         case KEY_PARAMETER_CACHE_STAT_COLLECT_FREQ_MS:
         {
             return setCacheStatCollectFreq(request);
@@ -2292,6 +2252,103 @@ status_t AwesomePlayer::getParameter(int key, Parcel *reply) {
             return ERROR_UNSUPPORTED;
         }
     }
+}
+
+status_t AwesomePlayer::invoke(const Parcel &request, Parcel *reply) {
+    if (NULL == reply) {
+        return android::BAD_VALUE;
+    }
+    int32_t methodId;
+    status_t ret = request.readInt32(&methodId);
+    if (ret != android::OK) {
+        return ret;
+    }
+    switch(methodId) {
+        case INVOKE_ID_GET_TRACK_INFO:
+        {
+            Mutex::Autolock autoLock(mTimedTextLock);
+            if (mTextDriver == NULL) {
+                return INVALID_OPERATION;
+            }
+            mTextDriver->getTrackInfo(reply);
+            return OK;
+        }
+        case INVOKE_ID_ADD_EXTERNAL_SOURCE:
+        {
+            Mutex::Autolock autoLock(mTimedTextLock);
+            if (mTextDriver == NULL) {
+                mTextDriver = new TimedTextDriver(mListener);
+            }
+            // String values written in Parcel are UTF-16 values.
+            String16 uri16 = request.readString16();
+            const char *uri = NULL;
+            if (uri16 != NULL) {
+                uri = String8(uri16).string();
+            }
+            String16 mimeType16 = request.readString16();
+            const char *mimeType = NULL;
+            if (mimeType16 != NULL) {
+                mimeType = String8(mimeType16).string();
+            }
+            return mTextDriver->addOutOfBandTextSource(uri, mimeType);
+        }
+        case INVOKE_ID_ADD_EXTERNAL_SOURCE_FD:
+        {
+            Mutex::Autolock autoLock(mTimedTextLock);
+            if (mTextDriver == NULL) {
+                mTextDriver = new TimedTextDriver(mListener);
+            }
+            int fd         = request.readFileDescriptor();
+            off64_t offset = request.readInt64();
+            size_t length  = request.readInt64();
+            String16 mimeType16 = request.readString16();
+            const char *mimeType = NULL;
+            if (mimeType16 != NULL) {
+                mimeType = String8(mimeType16).string();
+            }
+
+            return mTextDriver->addOutOfBandTextSource(
+                    fd, offset, length, mimeType);
+        }
+        case INVOKE_ID_SELECT_TRACK:
+        {
+            Mutex::Autolock autoLock(mTimedTextLock);
+            if (mTextDriver == NULL) {
+                return INVALID_OPERATION;
+            }
+
+            status_t err = mTextDriver->selectTrack(
+                    request.readInt32());
+            if (err == OK) {
+                modifyFlags(TEXTPLAYER_INITIALIZED, SET);
+                if (mFlags & PLAYING && !(mFlags & TEXT_RUNNING)) {
+                    mTextDriver->start();
+                    modifyFlags(TEXT_RUNNING, SET);
+                }
+            }
+            return err;
+        }
+        case INVOKE_ID_UNSELECT_TRACK:
+        {
+            Mutex::Autolock autoLock(mTimedTextLock);
+            if (mTextDriver == NULL) {
+                return INVALID_OPERATION;
+            }
+            status_t err = mTextDriver->unselectTrack(
+                    request.readInt32());
+            if (err == OK) {
+                modifyFlags(TEXTPLAYER_INITIALIZED, CLEAR);
+                modifyFlags(TEXT_RUNNING, CLEAR);
+            }
+            return err;
+        }
+        default:
+        {
+            return ERROR_UNSUPPORTED;
+        }
+    }
+    // It will not reach here.
+    return OK;
 }
 
 bool AwesomePlayer::isStreamingHTTP() const {

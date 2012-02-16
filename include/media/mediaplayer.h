@@ -120,6 +120,9 @@ enum media_info_type {
     MEDIA_INFO_NOT_SEEKABLE = 801,
     // New media metadata is available.
     MEDIA_INFO_METADATA_UPDATE = 802,
+
+    //9xx
+    MEDIA_INFO_TIMED_TEXT_ERROR = 900,
 };
 
 
@@ -140,9 +143,6 @@ enum media_player_states {
 // The same enum space is used for both set and get, in case there are future keys that
 // can be both set and get.  But as of now, all parameters are either set only or get only.
 enum media_parameter_keys {
-    KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX = 1000,                // set only
-    KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE = 1001,     // set only
-
     // Streaming/buffering parameters
     KEY_PARAMETER_CACHE_STAT_COLLECT_FREQ_MS = 1100,            // set only
 
@@ -153,6 +153,23 @@ enum media_parameter_keys {
     // Playback rate expressed in permille (1000 is normal speed), saved as int32_t, with negative
     // values used for rewinding or reverse playback.
     KEY_PARAMETER_PLAYBACK_RATE_PERMILLE = 1300,                // set only
+};
+
+// Keep INVOKE_ID_* in sync with MediaPlayer.java.
+enum media_player_invoke_ids {
+    INVOKE_ID_GET_TRACK_INFO = 1,
+    INVOKE_ID_ADD_EXTERNAL_SOURCE = 2,
+    INVOKE_ID_ADD_EXTERNAL_SOURCE_FD = 3,
+    INVOKE_ID_SELECT_TRACK = 4,
+    INVOKE_ID_UNSELECT_TRACK = 5,
+};
+
+// Keep MEDIA_TRACK_TYPE_* in sync with MediaPlayer.java.
+enum media_track_type {
+    MEDIA_TRACK_TYPE_UNKNOWN = 0,
+    MEDIA_TRACK_TYPE_VIDEO = 1,
+    MEDIA_TRACK_TYPE_AUDIO = 2,
+    MEDIA_TRACK_TYPE_TIMEDTEXT = 3,
 };
 
 // ----------------------------------------------------------------------------

@@ -20,10 +20,13 @@
 
 #include <binder/IPCThreadState.h>
 
+#include <media/mediaplayer.h>
 #include <media/MediaPlayerInterface.h>
+#include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
-#include <media/stagefright/DataSource.h>
+#include <media/stagefright/MetaData.h>
 #include <media/stagefright/Utils.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/ALooper.h>
@@ -47,24 +50,22 @@ TimedTextDriver::TimedTextDriver(
 }
 
 TimedTextDriver::~TimedTextDriver() {
-    mTextInBandVector.clear();
-    mTextOutOfBandVector.clear();
+    mTextSourceVector.clear();
     mLooper->stop();
 }
 
-status_t TimedTextDriver::setTimedTextTrackIndex_l(int32_t index) {
-    if (index >=
-            (int)(mTextInBandVector.size() + mTextOutOfBandVector.size())) {
+status_t TimedTextDriver::selectTrack_l(int32_t index) {
+    if (index >= (int)(mTextSourceVector.size())) {
         return BAD_VALUE;
     }
 
     sp<TimedTextSource> source;
-    if (index < mTextInBandVector.size()) {
-        source = mTextInBandVector.itemAt(index);
-    } else {
-        source = mTextOutOfBandVector.itemAt(index - mTextInBandVector.size());
-    }
+    source = mTextSourceVector.itemAt(index);
     mPlayer->setDataSource(source);
+    if (mState == UNINITIALIZED) {
+        mState = PAUSED;
+    }
+    mCurrentTrackIndex = index;
     return OK;
 }
 
@@ -73,23 +74,16 @@ status_t TimedTextDriver::start() {
     switch (mState) {
         case UNINITIALIZED:
             return INVALID_OPERATION;
-        case STOPPED:
-            mPlayer->start();
-            break;
         case PLAYING:
             return OK;
         case PAUSED:
-            mPlayer->resume();
+            mPlayer->start();
             break;
         default:
             TRESPASS();
     }
     mState = PLAYING;
     return OK;
-}
-
-status_t TimedTextDriver::stop() {
-    return pause();
 }
 
 // TODO: Test if pause() works properly.
@@ -101,8 +95,6 @@ status_t TimedTextDriver::pause() {
     switch (mState) {
         case UNINITIALIZED:
             return INVALID_OPERATION;
-        case STOPPED:
-            return OK;
         case PLAYING:
             mPlayer->pause();
             break;
@@ -115,45 +107,17 @@ status_t TimedTextDriver::pause() {
     return OK;
 }
 
-status_t TimedTextDriver::resume() {
-    return start();
-}
-
-status_t TimedTextDriver::seekToAsync(int64_t timeUs) {
-    mPlayer->seekToAsync(timeUs);
-    return OK;
-}
-
-status_t TimedTextDriver::setTimedTextTrackIndex(int32_t index) {
-    // TODO: This is current implementation for MediaPlayer::disableTimedText().
-    // Find better way for readability.
-    if (index < 0) {
-        mPlayer->pause();
-        return OK;
-    }
-
+status_t TimedTextDriver::selectTrack(int32_t index) {
     status_t ret = OK;
     Mutex::Autolock autoLock(mLock);
     switch (mState) {
         case UNINITIALIZED:
-            ret = INVALID_OPERATION;
-            break;
         case PAUSED:
-            ret = setTimedTextTrackIndex_l(index);
+            ret = selectTrack_l(index);
             break;
         case PLAYING:
             mPlayer->pause();
-            ret = setTimedTextTrackIndex_l(index);
-            if (ret != OK) {
-                break;
-            }
-            mPlayer->start();
-            break;
-        case STOPPED:
-            // TODO: The only difference between STOPPED and PAUSED is this
-            // part. Revise the flow from "MediaPlayer::enableTimedText()" and
-            // remove one of the status, PAUSED and STOPPED, if possible.
-            ret = setTimedTextTrackIndex_l(index);
+            ret = selectTrack_l(index);
             if (ret != OK) {
                 break;
             }
@@ -165,6 +129,24 @@ status_t TimedTextDriver::setTimedTextTrackIndex(int32_t index) {
     return ret;
 }
 
+status_t TimedTextDriver::unselectTrack(int32_t index) {
+    if (mCurrentTrackIndex != index) {
+        return INVALID_OPERATION;
+    }
+    status_t err = pause();
+    if (err != OK) {
+        return err;
+    }
+    Mutex::Autolock autoLock(mLock);
+    mState = UNINITIALIZED;
+    return OK;
+}
+
+status_t TimedTextDriver::seekToAsync(int64_t timeUs) {
+    mPlayer->seekToAsync(timeUs);
+    return OK;
+}
+
 status_t TimedTextDriver::addInBandTextSource(
         const sp<MediaSource>& mediaSource) {
     sp<TimedTextSource> source =
@@ -173,25 +155,17 @@ status_t TimedTextDriver::addInBandTextSource(
         return ERROR_UNSUPPORTED;
     }
     Mutex::Autolock autoLock(mLock);
-    mTextInBandVector.add(source);
-    if (mState == UNINITIALIZED) {
-        mState = STOPPED;
-    }
+    mTextSourceVector.add(source);
     return OK;
 }
 
 status_t TimedTextDriver::addOutOfBandTextSource(
-        const Parcel &request) {
+        const char *uri, const char *mimeType) {
     // TODO: Define "TimedTextSource::CreateFromURI(uri)"
     // and move below lines there..?
 
-    // String values written in Parcel are UTF-16 values.
-    const String16 uri16 = request.readString16();
-    String8 uri = String8(request.readString16());
-
-    uri.toLower();
     // To support local subtitle file only for now
-    if (strncasecmp("file://", uri.string(), 7)) {
+    if (strncasecmp("file://", uri, 7)) {
         return ERROR_UNSUPPORTED;
     }
     sp<DataSource> dataSource =
@@ -201,7 +175,7 @@ status_t TimedTextDriver::addOutOfBandTextSource(
     }
 
     sp<TimedTextSource> source;
-    if (uri.getPathExtension() == String8(".srt")) {
+    if (strcasecmp(mimeType, MEDIA_MIMETYPE_TEXT_SUBRIP)) {
         source = TimedTextSource::CreateTimedTextSource(
                 dataSource, TimedTextSource::OUT_OF_BAND_FILE_SRT);
     }
@@ -211,12 +185,38 @@ status_t TimedTextDriver::addOutOfBandTextSource(
     }
 
     Mutex::Autolock autoLock(mLock);
-
-    mTextOutOfBandVector.add(source);
-    if (mState == UNINITIALIZED) {
-        mState = STOPPED;
-    }
+    mTextSourceVector.add(source);
     return OK;
+}
+
+status_t TimedTextDriver::addOutOfBandTextSource(
+        int fd, off64_t offset, size_t length, const char *mimeType) {
+    // Not supported yet. This requires DataSource::sniff to detect various text
+    // formats such as srt/smi/ttml.
+    return ERROR_UNSUPPORTED;
+}
+
+void TimedTextDriver::getTrackInfo(Parcel *parcel) {
+    Mutex::Autolock autoLock(mLock);
+    Vector<sp<TimedTextSource> >::const_iterator iter;
+    parcel->writeInt32(mTextSourceVector.size());
+    for (iter = mTextSourceVector.begin();
+         iter != mTextSourceVector.end(); ++iter) {
+        sp<MetaData> meta = (*iter)->getFormat();
+        if (meta != NULL) {
+            // There are two fields.
+            parcel->writeInt32(2);
+
+            // track type.
+            parcel->writeInt32(MEDIA_TRACK_TYPE_TIMEDTEXT);
+
+            const char *lang = "und";
+            meta->findCString(kKeyMediaLanguage, &lang);
+            parcel->writeString16(String16(lang));
+        } else {
+            parcel->writeInt32(0);
+        }
+    }
 }
 
 }  // namespace android

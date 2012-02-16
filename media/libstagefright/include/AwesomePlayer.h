@@ -90,6 +90,7 @@ struct AwesomePlayer {
 
     status_t setParameter(int key, const Parcel &request);
     status_t getParameter(int key, Parcel *reply);
+    status_t invoke(const Parcel &request, Parcel *reply);
     status_t setCacheStatCollectFreq(const Parcel &request);
 
     status_t seekTo(int64_t timeUs);
@@ -99,8 +100,6 @@ struct AwesomePlayer {
 
     void postAudioEOS(int64_t delayUs = 0ll);
     void postAudioSeekComplete();
-
-    status_t setTimedTextTrackIndex(int32_t index);
 
     status_t dump(int fd, const Vector<String16> &args) const;
 
@@ -136,7 +135,7 @@ private:
         INCOGNITO           = 0x8000,
 
         TEXT_RUNNING        = 0x10000,
-        TEXTPLAYER_STARTED  = 0x20000,
+        TEXTPLAYER_INITIALIZED  = 0x20000,
 
         SLOW_DECODER_HACK   = 0x40000,
     };
