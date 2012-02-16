@@ -3601,130 +3601,135 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // through
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
 
-            if (dirty == null) {
-                if (child.mLayerType != LAYER_TYPE_NONE) {
-                    mPrivateFlags |= INVALIDATED;
-                    mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                    child.mLocalDirtyRect.setEmpty();
-                }
-                do {
-                    View view = null;
-                    if (parent instanceof View) {
-                        view = (View) parent;
-                        if (view.mLayerType != LAYER_TYPE_NONE) {
-                            view.mLocalDirtyRect.setEmpty();
-                            if (view.getParent() instanceof View) {
-                                final View grandParent = (View) view.getParent();
-                                grandParent.mPrivateFlags |= INVALIDATED;
-                                grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
+            //noinspection PointlessBooleanExpression
+            if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
+                if (dirty == null) {
+                    if (child.mLayerType != LAYER_TYPE_NONE) {
+                        mPrivateFlags |= INVALIDATED;
+                        mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                        child.mLocalDirtyRect.setEmpty();
+                    }
+                    do {
+                        View view = null;
+                        if (parent instanceof View) {
+                            view = (View) parent;
+                            if (view.mLayerType != LAYER_TYPE_NONE) {
+                                view.mLocalDirtyRect.setEmpty();
+                                if (view.getParent() instanceof View) {
+                                    final View grandParent = (View) view.getParent();
+                                    grandParent.mPrivateFlags |= INVALIDATED;
+                                    grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                                }
+                            }
+                            if ((view.mPrivateFlags & DIRTY_MASK) != 0) {
+                                // already marked dirty - we're done
+                                break;
                             }
                         }
-                        if ((view.mPrivateFlags & DIRTY_MASK) != 0) {
-                            // already marked dirty - we're done
-                            break;
+    
+                        if (drawAnimation) {
+                            if (view != null) {
+                                view.mPrivateFlags |= DRAW_ANIMATION;
+                            } else if (parent instanceof ViewRootImpl) {
+                                ((ViewRootImpl) parent).mIsAnimating = true;
+                            }
                         }
-                    }
-
-                    if (drawAnimation) {
-                        if (view != null) {
-                            view.mPrivateFlags |= DRAW_ANIMATION;
-                        } else if (parent instanceof ViewRootImpl) {
-                            ((ViewRootImpl) parent).mIsAnimating = true;
-                        }
-                    }
-
-                    if (parent instanceof ViewRootImpl) {
-                        ((ViewRootImpl) parent).invalidate();
-                        parent = null;
-                    } else if (view != null) {
-                        if ((view.mPrivateFlags & DRAWN) == DRAWN ||
-                                (view.mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
-                            view.mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                            view.mPrivateFlags |= DIRTY;
-                            parent = view.mParent;
-                        } else {
+    
+                        if (parent instanceof ViewRootImpl) {
+                            ((ViewRootImpl) parent).invalidate();
                             parent = null;
+                        } else if (view != null) {
+                            if ((view.mPrivateFlags & DRAWN) == DRAWN ||
+                                    (view.mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
+                                view.mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                                view.mPrivateFlags |= DIRTY;
+                                parent = view.mParent;
+                            } else {
+                                parent = null;
+                            }
                         }
-                    }
-                } while (parent != null);
-            } else {
-                // Check whether the child that requests the invalidate is fully opaque
-                // Views being animated or transformed are not considered opaque because we may
-                // be invalidating their old position and need the parent to paint behind them.
-                Matrix childMatrix = child.getMatrix();
-                final boolean isOpaque = child.isOpaque() && !drawAnimation &&
-                        child.getAnimation() == null && childMatrix.isIdentity();
-                // Mark the child as dirty, using the appropriate flag
-                // Make sure we do not set both flags at the same time
-                int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
-
-                if (child.mLayerType != LAYER_TYPE_NONE) {
-                    mPrivateFlags |= INVALIDATED;
-                    mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                    child.mLocalDirtyRect.union(dirty);
+                    } while (parent != null);
                 }
 
-                final int[] location = attachInfo.mInvalidateChildLocation;
-                location[CHILD_LEFT_INDEX] = child.mLeft;
-                location[CHILD_TOP_INDEX] = child.mTop;
-                if (!childMatrix.isIdentity()) {
-                    RectF boundingRect = attachInfo.mTmpTransformRect;
-                    boundingRect.set(dirty);
-                    //boundingRect.inset(-0.5f, -0.5f);
-                    childMatrix.mapRect(boundingRect);
-                    dirty.set((int) (boundingRect.left - 0.5f),
-                            (int) (boundingRect.top - 0.5f),
-                            (int) (boundingRect.right + 0.5f),
-                            (int) (boundingRect.bottom + 0.5f));
-                }
-
-                do {
-                    View view = null;
-                    if (parent instanceof View) {
-                        view = (View) parent;
-                        if (view.mLayerType != LAYER_TYPE_NONE &&
-                                view.getParent() instanceof View) {
-                            final View grandParent = (View) view.getParent();
-                            grandParent.mPrivateFlags |= INVALIDATED;
-                            grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                        }
-                    }
-
-                    if (drawAnimation) {
-                        if (view != null) {
-                            view.mPrivateFlags |= DRAW_ANIMATION;
-                        } else if (parent instanceof ViewRootImpl) {
-                            ((ViewRootImpl) parent).mIsAnimating = true;
-                        }
-                    }
-
-                    // If the parent is dirty opaque or not dirty, mark it dirty with the opaque
-                    // flag coming from the child that initiated the invalidate
-                    if (view != null) {
-                        if ((view.mViewFlags & FADING_EDGE_MASK) != 0 &&
-                                view.getSolidColor() == 0) {
-                            opaqueFlag = DIRTY;
-                        }
-                        if ((view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
-                            view.mPrivateFlags = (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
-                        }
-                    }
-
-                    parent = parent.invalidateChildInParent(location, dirty);
-                    if (view != null) {
-                        // Account for transform on current parent
-                        Matrix m = view.getMatrix();
-                        if (!m.isIdentity()) {
-                            RectF boundingRect = attachInfo.mTmpTransformRect;
-                            boundingRect.set(dirty);
-                            m.mapRect(boundingRect);
-                            dirty.set((int) boundingRect.left, (int) boundingRect.top,
-                                    (int) (boundingRect.right + 0.5f),
-                                    (int) (boundingRect.bottom + 0.5f));
-                        }
-                    }
-                } while (parent != null);
+                return;
             }
+
+            // Check whether the child that requests the invalidate is fully opaque
+            // Views being animated or transformed are not considered opaque because we may
+            // be invalidating their old position and need the parent to paint behind them.
+            Matrix childMatrix = child.getMatrix();
+            final boolean isOpaque = child.isOpaque() && !drawAnimation &&
+                    child.getAnimation() == null && childMatrix.isIdentity();
+            // Mark the child as dirty, using the appropriate flag
+            // Make sure we do not set both flags at the same time
+            int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
+
+            if (child.mLayerType != LAYER_TYPE_NONE) {
+                mPrivateFlags |= INVALIDATED;
+                mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                child.mLocalDirtyRect.union(dirty);
+            }
+
+            final int[] location = attachInfo.mInvalidateChildLocation;
+            location[CHILD_LEFT_INDEX] = child.mLeft;
+            location[CHILD_TOP_INDEX] = child.mTop;
+            if (!childMatrix.isIdentity()) {
+                RectF boundingRect = attachInfo.mTmpTransformRect;
+                boundingRect.set(dirty);
+                //boundingRect.inset(-0.5f, -0.5f);
+                childMatrix.mapRect(boundingRect);
+                dirty.set((int) (boundingRect.left - 0.5f),
+                        (int) (boundingRect.top - 0.5f),
+                        (int) (boundingRect.right + 0.5f),
+                        (int) (boundingRect.bottom + 0.5f));
+            }
+
+            do {
+                View view = null;
+                if (parent instanceof View) {
+                    view = (View) parent;
+                    if (view.mLayerType != LAYER_TYPE_NONE &&
+                            view.getParent() instanceof View) {
+                        final View grandParent = (View) view.getParent();
+                        grandParent.mPrivateFlags |= INVALIDATED;
+                        grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                    }
+                }
+
+                if (drawAnimation) {
+                    if (view != null) {
+                        view.mPrivateFlags |= DRAW_ANIMATION;
+                    } else if (parent instanceof ViewRootImpl) {
+                        ((ViewRootImpl) parent).mIsAnimating = true;
+                    }
+                }
+
+                // If the parent is dirty opaque or not dirty, mark it dirty with the opaque
+                // flag coming from the child that initiated the invalidate
+                if (view != null) {
+                    if ((view.mViewFlags & FADING_EDGE_MASK) != 0 &&
+                            view.getSolidColor() == 0) {
+                        opaqueFlag = DIRTY;
+                    }
+                    if ((view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
+                        view.mPrivateFlags = (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
+                    }
+                }
+
+                parent = parent.invalidateChildInParent(location, dirty);
+                if (view != null) {
+                    // Account for transform on current parent
+                    Matrix m = view.getMatrix();
+                    if (!m.isIdentity()) {
+                        RectF boundingRect = attachInfo.mTmpTransformRect;
+                        boundingRect.set(dirty);
+                        m.mapRect(boundingRect);
+                        dirty.set((int) boundingRect.left, (int) boundingRect.top,
+                                (int) (boundingRect.right + 0.5f),
+                                (int) (boundingRect.bottom + 0.5f));
+                    }
+                }
+            } while (parent != null);
         }
     }
 
