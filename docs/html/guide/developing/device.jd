@@ -51,19 +51,13 @@ would on the emulator. Before you can start, there are just a few things to do:<
 
 <ol>
   <li>Declare your application as "debuggable" in your Android Manifest.
-    <p>In Eclipse, you can do this from the <b>Application</b> tab when viewing the Manifest
-    (on the right side, set <b>Debuggable</b> to <em>true</em>). Otherwise, in the
-<code>AndroidManifest.xml</code>
-    file, add <code>android:debuggable="true"</code> to the <code>&lt;application></code>
-element.</p>
-  </li>
-  <li>Set up your device to allow installation of non-Market applications. <p>On
-the device, go to <strong>Settings > Applications</strong> and enable 
-
-<strong>Unknown sources</strong> (on an Android 4.0 device, the setting is
-located in <strong>Settings > Security</strong>).</p>
-  
-  </li>
+    <p>When using Eclipse, you can skip this step, because running your app directly from
+the Eclipse IDE automatically enables debugging.</p>
+    <p>In the <code>AndroidManifest.xml</code> file, add <code>android:debuggable="true"</code> to
+the <code>&lt;application></code> element.</p>
+    <p class="note"><strong>Note:</strong> If you manually enable debugging in the manifest
+ file, be sure to disable it before you build for release (your published application
+should usually <em>not</em> be debuggable).</p></li>
   <li>Turn on "USB Debugging" on your device.
     <p>On the device, go to <strong>Settings > Applications > Development</strong> 
     and enable <strong>USB debugging</strong> 
@@ -72,13 +66,10 @@ located in <strong>Settings > Developer options</strong>).</p>
   </li>
   <li>Set up your system to detect your device.
     <ul>
-      <li>If you're developing on Windows, you need to install a USB driver
-      for adb. If you're using an Android Developer Phone (ADP), Nexus One, or Nexus S,
-      see the <a href="{@docRoot}sdk/win-usb.html">Google Windows USB
-      Driver</a>. Otherwise, you can find a link to the appropriate OEM driver in the
-  <a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a> document.</li>
+      <li>If you're developing on Windows, you need to install a USB driver for adb. For an
+installation guide and links to OEM drivers, see the <a href="{@docRoot}sdk/oem-usb.html">OEM USB
+Drivers</a> document.</li>
       <li>If you're developing on Mac OS X, it just works. Skip this step.</li>
-      
       <li>If you're developing on Ubuntu Linux, you need to add a
 <code>udev</code> rules file that contains a USB configuration for each type of device
 you want to use for development. In the rules file, each device manufacturer
@@ -114,7 +105,7 @@ rules</a>.</p>
   </li>
 </ol>
 
-<p>You can verify that your device is connected by executing <code>adb
+<p>When plugged in over USB, can verify that your device is connected by executing <code>adb
 devices</code> from your SDK {@code platform-tools/} directory. If connected,
 you'll see the device name listed as a "device."</p>
 
