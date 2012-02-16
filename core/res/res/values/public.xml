@@ -1439,6 +1439,7 @@
   <java-symbol type="anim" name="push_down_out" />
   <java-symbol type="anim" name="push_up_in" />
   <java-symbol type="anim" name="push_up_out" />
+  <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
   <java-symbol type="dimen" name="status_bar_icon_size" />
   <java-symbol type="dimen" name="system_bar_icon_size" />
   <java-symbol type="drawable" name="list_selector_pressed_holo_dark" />
@@ -1476,7 +1477,6 @@
   <java-symbol type="string" name="usb_storage_stop_notification_title" />
   <java-symbol type="string" name="usb_storage_stop_title" />
   <java-symbol type="string" name="usb_storage_title" />
-  <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
   <java-symbol type="style" name="Animation.RecentApplications" />
 
   <!-- ImfTest -->
