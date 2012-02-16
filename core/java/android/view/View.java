@@ -9580,14 +9580,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * @hide
+     * Force padding depending on layout direction.
      */
-    protected void resolvePadding() {
+    public void resolvePadding() {
         // If the user specified the absolute padding (either with android:padding or
         // android:paddingLeft/Top/Right/Bottom), use this padding, otherwise
         // use the default padding or the padding from the background drawable
         // (stored at this point in mPadding*)
-        switch (getResolvedLayoutDirection()) {
+        int resolvedLayoutDirection = getResolvedLayoutDirection();
+        switch (resolvedLayoutDirection) {
             case LAYOUT_DIRECTION_RTL:
                 // Start user padding override Right user padding. Otherwise, if Right user
                 // padding is not defined, use the default Right padding. If Right user padding
@@ -9623,6 +9624,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
 
         recomputePadding();
+        onResolvePadding(resolvedLayoutDirection);
+    }
+
+    /**
+     * Resolve padding depending on the layout direction. Subclasses that care about
+     * padding resolution should override this method. The default implementation does
+     * nothing.
+     *
+     * @param layoutDirection the direction of the layout
+     *
+     * {@link View#LAYOUT_DIRECTION_LTR}
+     * {@link View#LAYOUT_DIRECTION_RTL}
+     */
+    public void onResolvePadding(int layoutDirection) {
     }
 
     /**
