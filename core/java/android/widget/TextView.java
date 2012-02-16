@@ -3807,21 +3807,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        Handler h = getHandler();
-        if (h != null) {
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl != null) {
             long eventTime = SystemClock.uptimeMillis();
-            h.sendMessage(h.obtainMessage(ViewRootImpl.DISPATCH_KEY_FROM_IME,
+            viewRootImpl.dispatchKeyFromIme(
                     new KeyEvent(eventTime, eventTime,
                     KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER, 0, 0,
                     KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                     KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE
-                    | KeyEvent.FLAG_EDITOR_ACTION)));
-            h.sendMessage(h.obtainMessage(ViewRootImpl.DISPATCH_KEY_FROM_IME,
+                    | KeyEvent.FLAG_EDITOR_ACTION));
+            viewRootImpl.dispatchKeyFromIme(
                     new KeyEvent(SystemClock.uptimeMillis(), eventTime,
                     KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER, 0, 0,
                     KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                     KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE
-                    | KeyEvent.FLAG_EDITOR_ACTION)));
+                    | KeyEvent.FLAG_EDITOR_ACTION));
         }
     }
 

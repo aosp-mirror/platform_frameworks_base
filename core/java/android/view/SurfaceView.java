@@ -384,7 +384,7 @@ public class SurfaceView extends View {
         if (!mHaveFrame) {
             return;
         }
-        ViewRootImpl viewRoot = (ViewRootImpl) getRootView().getParent();
+        ViewRootImpl viewRoot = getViewRootImpl();
         if (viewRoot != null) {
             mTranslator = viewRoot.mTranslator;
         }

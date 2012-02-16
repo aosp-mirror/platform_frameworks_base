@@ -147,7 +147,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     }
 
     private void sendKeyEventsToTarget(int character) {
-        Handler handler = mTargetView.getHandler();
+        ViewRootImpl viewRootImpl = mTargetView.getViewRootImpl();
         KeyEvent[] events = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD).getEvents(
                 new char[] { (char) character });
         if (events != null) {
@@ -156,22 +156,22 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
                 KeyEvent event = events[i];
                 event = KeyEvent.changeFlags(event, event.getFlags()
                         | KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE);
-                handler.sendMessage(handler.obtainMessage(ViewRootImpl.DISPATCH_KEY, event));
+                viewRootImpl.dispatchKey(event);
             }
         }
     }
 
     public void sendDownUpKeyEvents(int keyEventCode) {
         long eventTime = SystemClock.uptimeMillis();
-        Handler handler = mTargetView.getHandler();
-        handler.sendMessage(handler.obtainMessage(ViewRootImpl.DISPATCH_KEY_FROM_IME,
+        ViewRootImpl viewRootImpl = mTargetView.getViewRootImpl();
+        viewRootImpl.dispatchKeyFromIme(
                 new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, keyEventCode, 0, 0,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
-                    KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));
-        handler.sendMessage(handler.obtainMessage(ViewRootImpl.DISPATCH_KEY_FROM_IME,
+                    KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
+        viewRootImpl.dispatchKeyFromIme(
                 new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, keyEventCode, 0, 0,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
-                        KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));
+                        KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
     }
 
     public void onKey(int primaryCode, int[] keyCodes) {

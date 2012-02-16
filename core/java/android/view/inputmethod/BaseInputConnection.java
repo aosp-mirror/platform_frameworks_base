@@ -497,15 +497,14 @@ public class BaseInputConnection implements InputConnection {
      */
     public boolean sendKeyEvent(KeyEvent event) {
         synchronized (mIMM.mH) {
-            Handler h = mTargetView != null ? mTargetView.getHandler() : null;
-            if (h == null) {
+            ViewRootImpl viewRootImpl = mTargetView != null ? mTargetView.getViewRootImpl() : null;
+            if (viewRootImpl == null) {
                 if (mIMM.mServedView != null) {
-                    h = mIMM.mServedView.getHandler();
+                    viewRootImpl = mIMM.mServedView.getViewRootImpl();
                 }
             }
-            if (h != null) {
-                h.sendMessage(h.obtainMessage(ViewRootImpl.DISPATCH_KEY_FROM_IME,
-                        event));
+            if (viewRootImpl != null) {
+                viewRootImpl.dispatchKeyFromIme(event);
             }
         }
         return false;

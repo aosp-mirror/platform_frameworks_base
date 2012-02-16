@@ -375,7 +375,7 @@ public class ViewDebug {
     }
 
     private static BufferedWriter sHierarchyTraces;
-    private static ViewRootImpl sHierarhcyRoot;
+    private static ViewRootImpl sHierarchyRoot;
     private static String sHierarchyTracePrefix;
 
     /**
@@ -855,7 +855,7 @@ public class ViewDebug {
             return;
         }
 
-        if (sHierarhcyRoot != null) {
+        if (sHierarchyRoot != null) {
             throw new IllegalStateException("You must call stopHierarchyTracing() before running" +
                 " a new trace!");
         }
@@ -874,7 +874,7 @@ public class ViewDebug {
             return;
         }
 
-        sHierarhcyRoot = (ViewRootImpl) view.getRootView().getParent();
+        sHierarchyRoot = view.getViewRootImpl();
     }
 
     /**
@@ -896,7 +896,7 @@ public class ViewDebug {
             return;
         }
 
-        if (sHierarhcyRoot == null || sHierarchyTraces == null) {
+        if (sHierarchyRoot == null || sHierarchyTraces == null) {
             throw new IllegalStateException("You must call startHierarchyTracing() before" +
                 " stopHierarchyTracing()!");
         }
@@ -921,7 +921,7 @@ public class ViewDebug {
             return;
         }
 
-        View view = sHierarhcyRoot.getView();
+        View view = sHierarchyRoot.getView();
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             dumpViewHierarchy(group, out, 0);
@@ -932,7 +932,7 @@ public class ViewDebug {
             }
         }
 
-        sHierarhcyRoot = null;
+        sHierarchyRoot = null;
     }
 
     static void dispatchCommand(View view, String command, String parameters,
