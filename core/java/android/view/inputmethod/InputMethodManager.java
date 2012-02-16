@@ -355,8 +355,10 @@ public final class InputMethodManager {
                             if (mServedView != null && mServedView.isFocused()) {
                                 mServedConnecting = true;
                             }
+                            if (mActive) {
+                                startInputInner();
+                            }
                         }
-                        startInputInner();
                     }
                     return;
                 }
@@ -1135,20 +1137,26 @@ public final class InputMethodManager {
      * @hide
      */
     public void checkFocus() {
+        if (checkFocusNoStartInput()) {
+            startInputInner();
+        }
+    }
+
+    private boolean checkFocusNoStartInput() {
         // This is called a lot, so short-circuit before locking.
         if (mServedView == mNextServedView && !mNextServedNeedsStart) {
-            return;
+            return false;
         }
 
         InputConnection ic = null;
         synchronized (mH) {
             if (mServedView == mNextServedView && !mNextServedNeedsStart) {
-                return;
+                return false;
             }
             if (DEBUG) Log.v(TAG, "checkFocus: view=" + mServedView
                     + " next=" + mNextServedView
                     + " restart=" + mNextServedNeedsStart);
-            
+
             mNextServedNeedsStart = false;
             if (mNextServedView == null) {
                 finishInputLocked();
@@ -1156,22 +1164,22 @@ public final class InputMethodManager {
                 // but no longer do.  We should make sure the input method is
                 // no longer shown, since it serves no purpose.
                 closeCurrentInput();
-                return;
+                return false;
             }
-            
+
             ic = mServedInputConnection;
-            
+
             mServedView = mNextServedView;
             mCurrentTextBoxAttribute = null;
             mCompletions = null;
             mServedConnecting = true;
         }
-        
+
         if (ic != null) {
             ic.finishComposingText();
         }
-        
-        startInputInner();
+
+        return true;
     }
     
     void closeCurrentInput() {
@@ -1200,7 +1208,7 @@ public final class InputMethodManager {
             focusInLocked(focusedView != null ? focusedView : rootView);
         }
         
-        checkFocus();
+        boolean startInput = checkFocusNoStartInput();
         
         synchronized (mH) {
             try {
@@ -1209,6 +1217,9 @@ public final class InputMethodManager {
                 mService.windowGainedFocus(mClient, rootView.getWindowToken(),
                         focusedView != null, isTextEditor, softInputMode, first,
                         windowFlags);
+                if (startInput) {
+                    startInputInner();
+                }
             } catch (RemoteException e) {
             }
         }
