@@ -21,11 +21,13 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramVertex::ProgramVertex(Context *rsc, const char * shaderText,
-                             uint32_t shaderLength, const uint32_t * params,
-                             uint32_t paramLength)
+ProgramVertex::ProgramVertex(Context *rsc, const char * shaderText, size_t shaderLength,
+                             const char** textureNames, size_t textureNamesCount, const size_t *textureNamesLength,
+
+                             const uint32_t * params, size_t paramLength)
     : Program(rsc, shaderText, shaderLength, params, paramLength) {
-    mRSC->mHal.funcs.vertex.init(mRSC, this, mUserShader.string(), mUserShader.length());
+    mRSC->mHal.funcs.vertex.init(mRSC, this, mUserShader.string(), mUserShader.length(),
+                                 textureNames, textureNamesCount, textureNamesLength);
 }
 
 ProgramVertex::~ProgramVertex() {
@@ -191,8 +193,8 @@ void ProgramVertexState::init(Context *rsc) {
     tmp[2] = RS_PROGRAM_PARAM_INPUT;
     tmp[3] = (uint32_t)attrElem.get();
 
-    ProgramVertex *pv = new ProgramVertex(rsc, shaderString.string(),
-                                          shaderString.length(), tmp, 4);
+    ProgramVertex *pv = new ProgramVertex(rsc, shaderString.string(), shaderString.length(),
+                                          NULL, 0, NULL, tmp, 4);
     Allocation *alloc = Allocation::createAllocation(rsc, inputType.get(),
                               RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS);
     pv->bindAllocation(rsc, alloc, 0);
@@ -229,10 +231,13 @@ void ProgramVertexState::deinit(Context *rsc) {
 namespace android {
 namespace renderscript {
 
-RsProgramVertex rsi_ProgramVertexCreate(Context *rsc, const char * shaderText,
-                             size_t shaderLength, const uint32_t * params,
-                             size_t paramLength) {
-    ProgramVertex *pv = new ProgramVertex(rsc, shaderText, shaderLength, params, paramLength);
+RsProgramVertex rsi_ProgramVertexCreate(Context *rsc, const char * shaderText, size_t shaderLength,
+                                        const char** textureNames, size_t textureNamesCount,
+                                        const size_t *textureNamesLength,
+                                        const uint32_t * params, size_t paramLength) {
+    ProgramVertex *pv = new ProgramVertex(rsc, shaderText, shaderLength,
+                                          textureNames, textureNamesCount, textureNamesLength,
+                                          params, paramLength);
     pv->incUserRef();
     return pv;
 }

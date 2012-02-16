@@ -178,14 +178,18 @@ typedef struct {
 
     struct {
         bool (*init)(const Context *rsc, const ProgramVertex *pv,
-                     const char* shader, size_t shaderLen);
+                     const char* shader, size_t shaderLen,
+                     const char** textureNames, size_t textureNamesCount,
+                     const size_t *textureNamesLength);
         void (*setActive)(const Context *rsc, const ProgramVertex *pv);
         void (*destroy)(const Context *rsc, const ProgramVertex *pv);
     } vertex;
 
     struct {
         bool (*init)(const Context *rsc, const ProgramFragment *pf,
-                     const char* shader, size_t shaderLen);
+                     const char* shader, size_t shaderLen,
+                     const char** textureNames, size_t textureNamesCount,
+                     const size_t *textureNamesLength);
         void (*setActive)(const Context *rsc, const ProgramFragment *pf);
         void (*destroy)(const Context *rsc, const ProgramFragment *pf);
     } fragment;

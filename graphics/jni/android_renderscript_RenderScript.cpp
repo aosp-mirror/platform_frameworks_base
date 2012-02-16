@@ -54,13 +54,11 @@ using namespace android;
 
 class AutoJavaStringToUTF8 {
 public:
-    AutoJavaStringToUTF8(JNIEnv* env, jstring str) : fEnv(env), fJStr(str)
-    {
+    AutoJavaStringToUTF8(JNIEnv* env, jstring str) : fEnv(env), fJStr(str) {
         fCStr = env->GetStringUTFChars(str, NULL);
         fLength = env->GetStringUTFLength(str);
     }
-    ~AutoJavaStringToUTF8()
-    {
+    ~AutoJavaStringToUTF8() {
         fEnv->ReleaseStringUTFChars(fJStr, fCStr);
     }
     const char* c_str() const { return fCStr; }
@@ -71,6 +69,42 @@ private:
     jstring     fJStr;
     const char* fCStr;
     jsize       fLength;
+};
+
+class AutoJavaStringArrayToUTF8 {
+public:
+    AutoJavaStringArrayToUTF8(JNIEnv* env, jobjectArray strings, jsize stringsLength)
+    : mEnv(env), mStrings(strings), mStringsLength(stringsLength) {
+        mCStrings = NULL;
+        mSizeArray = NULL;
+        if (stringsLength > 0) {
+            mCStrings = (const char **)calloc(stringsLength, sizeof(char *));
+            mSizeArray = (size_t*)calloc(stringsLength, sizeof(size_t));
+            for (jsize ct = 0; ct < stringsLength; ct ++) {
+                jstring s = (jstring)mEnv->GetObjectArrayElement(mStrings, ct);
+                mCStrings[ct] = mEnv->GetStringUTFChars(s, NULL);
+                mSizeArray[ct] = mEnv->GetStringUTFLength(s);
+            }
+        }
+    }
+    ~AutoJavaStringArrayToUTF8() {
+        for (jsize ct=0; ct < mStringsLength; ct++) {
+            jstring s = (jstring)mEnv->GetObjectArrayElement(mStrings, ct);
+            mEnv->ReleaseStringUTFChars(s, mCStrings[ct]);
+        }
+        free(mCStrings);
+        free(mSizeArray);
+    }
+    const char **c_str() const { return mCStrings; }
+    size_t *c_str_len() const { return mSizeArray; }
+    jsize length() const { return mStringsLength; }
+
+private:
+    JNIEnv      *mEnv;
+    jobjectArray mStrings;
+    const char **mCStrings;
+    size_t      *mSizeArray;
+    jsize        mStringsLength;
 };
 
 // ---------------------------------------------------------------------------
@@ -322,33 +356,27 @@ nElementCreate(JNIEnv *_env, jobject _this, RsContext con, jint type, jint kind,
 }
 
 static jint
-nElementCreate2(JNIEnv *_env, jobject _this, RsContext con, jintArray _ids, jobjectArray _names, jintArray _arraySizes)
+nElementCreate2(JNIEnv *_env, jobject _this, RsContext con,
+                jintArray _ids, jobjectArray _names, jintArray _arraySizes)
 {
     int fieldCount = _env->GetArrayLength(_ids);
     LOG_API("nElementCreate2, con(%p)", con);
 
     jint *ids = _env->GetIntArrayElements(_ids, NULL);
     jint *arraySizes = _env->GetIntArrayElements(_arraySizes, NULL);
-    const char ** nameArray = (const char **)calloc(fieldCount, sizeof(char *));
-    size_t* sizeArray = (size_t*)calloc(fieldCount, sizeof(size_t));
 
-    for (int ct=0; ct < fieldCount; ct++) {
-        jstring s = (jstring)_env->GetObjectArrayElement(_names, ct);
-        nameArray[ct] = _env->GetStringUTFChars(s, NULL);
-        sizeArray[ct] = _env->GetStringUTFLength(s);
-    }
+    AutoJavaStringArrayToUTF8 names(_env, _names, fieldCount);
+
+    const char **nameArray = names.c_str();
+    size_t *sizeArray = names.c_str_len();
+
     jint id = (jint)rsElementCreate2(con,
                                      (RsElement *)ids, fieldCount,
                                      nameArray, fieldCount * sizeof(size_t),  sizeArray,
                                      (const uint32_t *)arraySizes, fieldCount);
-    for (int ct=0; ct < fieldCount; ct++) {
-        jstring s = (jstring)_env->GetObjectArrayElement(_names, ct);
-        _env->ReleaseStringUTFChars(s, nameArray[ct]);
-    }
+
     _env->ReleaseIntArrayElements(_ids, ids, JNI_ABORT);
     _env->ReleaseIntArrayElements(_arraySizes, arraySizes, JNI_ABORT);
-    free(nameArray);
-    free(sizeArray);
     return (jint)id;
 }
 
@@ -1064,15 +1092,24 @@ nProgramBindSampler(JNIEnv *_env, jobject _this, RsContext con, jint vpf, jint s
 // ---------------------------------------------------------------------------
 
 static jint
-nProgramFragmentCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader, jintArray params)
+nProgramFragmentCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader,
+                       jobjectArray texNames, jintArray params)
 {
     AutoJavaStringToUTF8 shaderUTF(_env, shader);
     jint *paramPtr = _env->GetIntArrayElements(params, NULL);
     jint paramLen = _env->GetArrayLength(params);
 
+    int texCount = _env->GetArrayLength(texNames);
+    AutoJavaStringArrayToUTF8 names(_env, texNames, texCount);
+    const char ** nameArray = names.c_str();
+    size_t* sizeArray = names.c_str_len();
+
     LOG_API("nProgramFragmentCreate, con(%p), paramLen(%i)", con, paramLen);
 
-    jint ret = (jint)rsProgramFragmentCreate(con, shaderUTF.c_str(), shaderUTF.length(), (uint32_t *)paramPtr, paramLen);
+    jint ret = (jint)rsProgramFragmentCreate(con, shaderUTF.c_str(), shaderUTF.length(),
+                                             nameArray, texCount, sizeArray,
+                                             (uint32_t *)paramPtr, paramLen);
+
     _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
     return ret;
 }
@@ -1081,7 +1118,8 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shade
 // ---------------------------------------------------------------------------
 
 static jint
-nProgramVertexCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader, jintArray params)
+nProgramVertexCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader,
+                     jobjectArray texNames, jintArray params)
 {
     AutoJavaStringToUTF8 shaderUTF(_env, shader);
     jint *paramPtr = _env->GetIntArrayElements(params, NULL);
@@ -1089,7 +1127,15 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader,
 
     LOG_API("nProgramVertexCreate, con(%p), paramLen(%i)", con, paramLen);
 
-    jint ret = (jint)rsProgramVertexCreate(con, shaderUTF.c_str(), shaderUTF.length(), (uint32_t *)paramPtr, paramLen);
+    int texCount = _env->GetArrayLength(texNames);
+    AutoJavaStringArrayToUTF8 names(_env, texNames, texCount);
+    const char ** nameArray = names.c_str();
+    size_t* sizeArray = names.c_str_len();
+
+    jint ret = (jint)rsProgramVertexCreate(con, shaderUTF.c_str(), shaderUTF.length(),
+                                           nameArray, texCount, sizeArray,
+                                           (uint32_t *)paramPtr, paramLen);
+
     _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
     return ret;
 }
@@ -1351,9 +1397,9 @@ static JNINativeMethod methods[] = {
 {"rsnProgramBindTexture",            "(IIII)V",                               (void*)nProgramBindTexture },
 {"rsnProgramBindSampler",            "(IIII)V",                               (void*)nProgramBindSampler },
 
-{"rsnProgramFragmentCreate",         "(ILjava/lang/String;[I)I",              (void*)nProgramFragmentCreate },
+{"rsnProgramFragmentCreate",         "(ILjava/lang/String;[Ljava/lang/String;[I)I",              (void*)nProgramFragmentCreate },
 {"rsnProgramRasterCreate",           "(IZI)I",                                (void*)nProgramRasterCreate },
-{"rsnProgramVertexCreate",           "(ILjava/lang/String;[I)I",              (void*)nProgramVertexCreate },
+{"rsnProgramVertexCreate",           "(ILjava/lang/String;[Ljava/lang/String;[I)I",              (void*)nProgramVertexCreate },
 
 {"rsnContextBindRootScript",         "(II)V",                                 (void*)nContextBindRootScript },
 {"rsnContextBindProgramStore",       "(II)V",                                 (void*)nContextBindProgramStore },

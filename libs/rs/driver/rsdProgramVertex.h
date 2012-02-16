@@ -21,7 +21,9 @@
 
 bool rsdProgramVertexInit(const android::renderscript::Context *rsc,
                           const android::renderscript::ProgramVertex *,
-                          const char* shader, uint32_t shaderLen);
+                          const char* shader, size_t shaderLen,
+                          const char** textureNames, size_t textureNamesCount,
+                          const size_t *textureNamesLength);
 void rsdProgramVertexSetActive(const android::renderscript::Context *rsc,
                                const android::renderscript::ProgramVertex *);
 void rsdProgramVertexDestroy(const android::renderscript::Context *rsc,

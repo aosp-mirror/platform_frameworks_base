@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,16 @@ using namespace android;
 using namespace android::renderscript;
 
 RsdShader::RsdShader(const Program *p, uint32_t type,
-                       const char * shaderText, size_t shaderLength) {
-
+                     const char * shaderText, size_t shaderLength,
+                     const char** textureNames, size_t textureNamesCount,
+                     const size_t *textureNamesLength) {
     mUserShader.setTo(shaderText, shaderLength);
     mRSProgram = p;
     mType = type;
     initMemberVars();
     initAttribAndUniformArray();
-    init();
+    init(textureNames, textureNamesCount, textureNamesLength);
+    createTexturesString(textureNames, textureNamesCount, textureNamesLength);
 }
 
 RsdShader::~RsdShader() {
@@ -65,25 +67,26 @@ void RsdShader::initMemberVars() {
     mIsValid = false;
 }
 
-void RsdShader::init() {
+void RsdShader::init(const char** textureNames, size_t textureNamesCount,
+                     const size_t *textureNamesLength) {
     uint32_t attribCount = 0;
     uint32_t uniformCount = 0;
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.inputElementsCount; ct++) {
-        initAddUserElement(mRSProgram->mHal.state.inputElements[ct], mAttribNames, NULL, &attribCount, RS_SHADER_ATTR);
+        initAddUserElement(mRSProgram->mHal.state.inputElements[ct], mAttribNames,
+                           NULL, &attribCount, RS_SHADER_ATTR);
     }
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.constantsCount; ct++) {
-        initAddUserElement(mRSProgram->mHal.state.constantTypes[ct]->getElement(), mUniformNames, mUniformArraySizes, &uniformCount, RS_SHADER_UNI);
+        initAddUserElement(mRSProgram->mHal.state.constantTypes[ct]->getElement(),
+                           mUniformNames, mUniformArraySizes, &uniformCount, RS_SHADER_UNI);
     }
 
     mTextureUniformIndexStart = uniformCount;
-    char buf[256];
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.texturesCount; ct++) {
-        snprintf(buf, sizeof(buf), "UNI_Tex%i", ct);
-        mUniformNames[uniformCount].setTo(buf);
+        mUniformNames[uniformCount].setTo("UNI_");
+        mUniformNames[uniformCount].append(textureNames[ct], textureNamesLength[ct]);
         mUniformArraySizes[uniformCount] = 1;
         uniformCount++;
     }
-
 }
 
 String8 RsdShader::getGLSLInputString() const {
@@ -135,22 +138,25 @@ void RsdShader::appendAttributes() {
     }
 }
 
-void RsdShader::appendTextures() {
-    char buf[256];
-    for (uint32_t ct=0; ct < mRSProgram->mHal.state.texturesCount; ct++) {
+void RsdShader::createTexturesString(const char** textureNames, size_t textureNamesCount,
+                                     const size_t *textureNamesLength) {
+    mShaderTextures.setTo("");
+    for (uint32_t ct = 0; ct < mRSProgram->mHal.state.texturesCount; ct ++) {
         if (mRSProgram->mHal.state.textureTargets[ct] == RS_TEXTURE_2D) {
             Allocation *a = mRSProgram->mHal.state.textures[ct];
             if (a && a->mHal.state.surfaceTextureID) {
-                snprintf(buf, sizeof(buf), "uniform samplerExternalOES UNI_Tex%i;\n", ct);
+                mShaderTextures.append("uniform samplerExternalOES UNI_");
             } else {
-                snprintf(buf, sizeof(buf), "uniform sampler2D UNI_Tex%i;\n", ct);
+                mShaderTextures.append("uniform sampler2D UNI_");
             }
             mTextureTargets[ct] = GL_TEXTURE_2D;
         } else {
-            snprintf(buf, sizeof(buf), "uniform samplerCube UNI_Tex%i;\n", ct);
+            mShaderTextures.append("uniform samplerCube UNI_");
             mTextureTargets[ct] = GL_TEXTURE_CUBE_MAP;
         }
-        mShader.append(buf);
+
+        mShaderTextures.append(textureNames[ct], textureNamesLength[ct]);
+        mShaderTextures.append(";\n");
     }
 }
 
@@ -161,7 +167,7 @@ bool RsdShader::createShader() {
     }
     appendUserConstants();
     appendAttributes();
-    appendTextures();
+    mShader.append(mShaderTextures);
 
     mShader.append(mUserShader);
 
@@ -418,7 +424,8 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
 
         DrvAllocation *drvTex = (DrvAllocation *)mRSProgram->mHal.state.textures[ct]->mHal.drv;
         if (drvTex->glTarget != GL_TEXTURE_2D && drvTex->glTarget != GL_TEXTURE_CUBE_MAP) {
-            ALOGE("Attempting to bind unknown texture to shader id %u, texture unit %u", (uint)this, ct);
+            ALOGE("Attempting to bind unknown texture to shader id %u, texture unit %u",
+                  (uint)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "Non-texture allocation bound to a shader");
         }
         RSD_CALL_GL(glBindTexture, drvTex->glTarget, drvTex->textureID);

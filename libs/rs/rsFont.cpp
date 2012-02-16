@@ -490,8 +490,14 @@ void FontState::initRenderState() {
     shaderString.append("  gl_FragColor = col;\n");
     shaderString.append("}\n");
 
-    ObjectBaseRef<const Element> colorElem = Element::createRef(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
-    ObjectBaseRef<const Element> gammaElem = Element::createRef(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 1);
+    const char *textureNames[] = { "Tex0" };
+    const size_t textureNamesLengths[] = { 4 };
+    size_t numTextures = sizeof(textureNamesLengths)/sizeof(*textureNamesLengths);
+
+    ObjectBaseRef<const Element> colorElem = Element::createRef(mRSC, RS_TYPE_FLOAT_32,
+                                                                RS_KIND_USER, false, 4);
+    ObjectBaseRef<const Element> gammaElem = Element::createRef(mRSC, RS_TYPE_FLOAT_32,
+                                                                RS_KIND_USER, false, 1);
     Element::Builder builder;
     builder.add(colorElem.get(), "Color", 1);
     builder.add(gammaElem.get(), "Gamma", 1);
@@ -506,14 +512,17 @@ void FontState::initRenderState() {
     tmp[3] = RS_TEXTURE_2D;
 
     mFontShaderFConstant.set(Allocation::createAllocation(mRSC, inputType.get(),
-                                            RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS));
-    ProgramFragment *pf = new ProgramFragment(mRSC, shaderString.string(),
-                                              shaderString.length(), tmp, 4);
+                                                          RS_ALLOCATION_USAGE_SCRIPT |
+                                                          RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS));
+    ProgramFragment *pf = new ProgramFragment(mRSC, shaderString.string(), shaderString.length(),
+                                              textureNames, numTextures, textureNamesLengths,
+                                              tmp, 4);
     mFontShaderF.set(pf);
     mFontShaderF->bindAllocation(mRSC, mFontShaderFConstant.get(), 0);
 
     mFontSampler.set(Sampler::getSampler(mRSC, RS_SAMPLER_NEAREST, RS_SAMPLER_NEAREST,
-                                         RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP).get());
+                                         RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP,
+                                         RS_SAMPLER_CLAMP).get());
     mFontShaderF->bindSampler(mRSC, 0, mFontSampler.get());
 
     mFontProgramStore.set(ProgramStore::getProgramStore(mRSC, true, true, true, true,
@@ -525,10 +534,12 @@ void FontState::initRenderState() {
 }
 
 void FontState::initTextTexture() {
-    ObjectBaseRef<const Element> alphaElem = Element::createRef(mRSC, RS_TYPE_UNSIGNED_8, RS_KIND_PIXEL_A, true, 1);
+    ObjectBaseRef<const Element> alphaElem = Element::createRef(mRSC, RS_TYPE_UNSIGNED_8,
+                                                                RS_KIND_PIXEL_A, true, 1);
 
     // We will allocate a texture to initially hold 32 character bitmaps
-    ObjectBaseRef<Type> texType = Type::getTypeRef(mRSC, alphaElem.get(), 1024, 256, 0, false, false);
+    ObjectBaseRef<Type> texType = Type::getTypeRef(mRSC, alphaElem.get(),
+                                                   1024, 256, 0, false, false);
 
     Allocation *cacheAlloc = Allocation::createAllocation(mRSC, texType.get(),
                                 RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE);

@@ -20,16 +20,18 @@
 using namespace android;
 using namespace android::renderscript;
 
-ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
-                                 uint32_t shaderLength, const uint32_t * params,
-                                 uint32_t paramLength)
+ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText, size_t shaderLength,
+                                 const char** textureNames, size_t textureNamesCount, const size_t *textureNamesLength,
+
+                                 const uint32_t * params, size_t paramLength)
     : Program(rsc, shaderText, shaderLength, params, paramLength) {
     mConstantColor[0] = 1.f;
     mConstantColor[1] = 1.f;
     mConstantColor[2] = 1.f;
     mConstantColor[3] = 1.f;
 
-    mRSC->mHal.funcs.fragment.init(mRSC, this, mUserShader.string(), mUserShader.length());
+    mRSC->mHal.funcs.fragment.init(mRSC, this, mUserShader.string(), mUserShader.length(),
+                                   textureNames, textureNamesCount, textureNamesLength);
 }
 
 ProgramFragment::~ProgramFragment() {
@@ -110,8 +112,8 @@ void ProgramFragmentState::init(Context *rsc) {
 
     Allocation *constAlloc = Allocation::createAllocation(rsc, inputType.get(),
                               RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS);
-    ProgramFragment *pf = new ProgramFragment(rsc, shaderString.string(),
-                                              shaderString.length(), tmp, 2);
+    ProgramFragment *pf = new ProgramFragment(rsc, shaderString.string(), shaderString.length(),
+                                              NULL, 0, NULL, tmp, 2);
     pf->bindAllocation(rsc, constAlloc, 0);
     pf->setConstantColor(rsc, 1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -127,9 +129,14 @@ namespace android {
 namespace renderscript {
 
 RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc, const char * shaderText,
-                             size_t shaderLength, const uint32_t * params,
-                             size_t paramLength) {
-    ProgramFragment *pf = new ProgramFragment(rsc, shaderText, shaderLength, params, paramLength);
+                                            size_t shaderLength,
+                                            const char** textureNames,
+                                            size_t textureNamesCount,
+                                            const size_t *textureNamesLength,
+                                            const uint32_t * params, size_t paramLength) {
+    ProgramFragment *pf = new ProgramFragment(rsc, shaderText, shaderLength,
+                                              textureNames, textureNamesCount, textureNamesLength,
+                                              params, paramLength);
     pf->incUserRef();
     //ALOGE("rsi_ProgramFragmentCreate %p", pf);
     return pf;

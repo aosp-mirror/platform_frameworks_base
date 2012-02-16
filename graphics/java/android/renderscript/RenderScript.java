@@ -569,15 +569,15 @@ public class RenderScript {
         validate();
         rsnProgramBindSampler(mContext, vpf, slot, s);
     }
-    native int  rsnProgramFragmentCreate(int con, String shader, int[] params);
-    synchronized int nProgramFragmentCreate(String shader, int[] params) {
+    native int  rsnProgramFragmentCreate(int con, String shader, String[] texNames, int[] params);
+    synchronized int nProgramFragmentCreate(String shader, String[] texNames, int[] params) {
         validate();
-        return rsnProgramFragmentCreate(mContext, shader, params);
+        return rsnProgramFragmentCreate(mContext, shader, texNames, params);
     }
-    native int  rsnProgramVertexCreate(int con, String shader, int[] params);
-    synchronized int nProgramVertexCreate(String shader, int[] params) {
+    native int  rsnProgramVertexCreate(int con, String shader, String[] texNames, int[] params);
+    synchronized int nProgramVertexCreate(String shader, String[] texNames, int[] params) {
         validate();
-        return rsnProgramVertexCreate(mContext, shader, params);
+        return rsnProgramVertexCreate(mContext, shader, texNames, params);
     }
 
     native int  rsnMeshCreate(int con, int[] vtx, int[] idx, int[] prim);

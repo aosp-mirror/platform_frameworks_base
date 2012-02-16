@@ -39,7 +39,9 @@ class RsdShader {
 public:
 
     RsdShader(const android::renderscript::Program *p, uint32_t type,
-               const char * shaderText, uint32_t shaderLength);
+              const char * shaderText, uint32_t shaderLength,
+              const char** textureNames, size_t textureNamesCount,
+              const size_t *textureNamesLength);
     virtual ~RsdShader();
 
     bool createShader();
@@ -67,19 +69,27 @@ protected:
 
     // Applies to vertex and fragment shaders only
     void appendUserConstants();
-    void setupUserConstants(const android::renderscript::Context *rsc, RsdShaderCache *sc, bool isFragment);
-    void initAddUserElement(const android::renderscript::Element *e, android::String8 *names, uint32_t *arrayLengths, uint32_t *count, const char *prefix);
+    void setupUserConstants(const android::renderscript::Context *rsc,
+                            RsdShaderCache *sc, bool isFragment);
+    void initAddUserElement(const android::renderscript::Element *e,
+                            android::String8 *names, uint32_t *arrayLengths,
+                            uint32_t *count, const char *prefix);
     void setupTextures(const android::renderscript::Context *rsc, RsdShaderCache *sc);
-    void setupSampler(const android::renderscript::Context *rsc, const android::renderscript::Sampler *s, const android::renderscript::Allocation *tex);
+    void setupSampler(const android::renderscript::Context *rsc,
+                      const android::renderscript::Sampler *s,
+                      const android::renderscript::Allocation *tex);
 
     void appendAttributes();
     void appendTextures();
+    void createTexturesString(const char** textureNames, size_t textureNamesCount,
+                              const size_t *textureNamesLength);
 
     void initAttribAndUniformArray();
 
     mutable bool mDirty;
     android::String8 mShader;
     android::String8 mUserShader;
+    android::String8 mShaderTextures;
     uint32_t mShaderID;
     uint32_t mType;
 
@@ -93,10 +103,14 @@ protected:
 
     int32_t mTextureUniformIndexStart;
 
-    void logUniform(const android::renderscript::Element *field, const float *fd, uint32_t arraySize );
-    void setUniform(const android::renderscript::Context *rsc, const android::renderscript::Element *field, const float *fd, int32_t slot, uint32_t arraySize );
+    void logUniform(const android::renderscript::Element *field,
+                    const float *fd, uint32_t arraySize);
+    void setUniform(const android::renderscript::Context *rsc,
+                    const android::renderscript::Element *field,
+                    const float *fd, int32_t slot, uint32_t arraySize );
     void initMemberVars();
-    void init();
+    void init(const char** textureNames, size_t textureNamesCount,
+              const size_t *textureNamesLength);
 };
 
 #endif //ANDROID_RSD_SHADER_H
