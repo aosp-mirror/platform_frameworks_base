@@ -4857,9 +4857,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    protected void resetResolvedTextDirection() {
-        super.resetResolvedTextDirection();
-
+    public void onResetResolvedTextDirection() {
         // Take care of resetting the children resolution too
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {

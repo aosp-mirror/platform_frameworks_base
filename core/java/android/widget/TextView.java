@@ -11407,7 +11407,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    protected void resolveTextDirection() {
+    public void onResolveTextDirection() {
         if (hasPasswordTransformationMethod()) {
             mTextDir = TextDirectionHeuristics.LOCALE;
             return;
@@ -11415,9 +11415,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Always need to resolve layout direction first
         final boolean defaultIsRtl = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL);
-
-        // Then resolve text direction on the parent
-        super.resolveTextDirection();
 
         // Now, we can select the heuristic
         int textDir = getResolvedTextDirection();
@@ -11447,7 +11444,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * drawables depending on the layout direction.
      *
      * A call to the super method will be required from the subclasses implementation.
-     *
      */
     protected void resolveDrawables() {
         // No need to resolve twice

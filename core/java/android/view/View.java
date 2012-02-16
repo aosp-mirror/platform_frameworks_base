@@ -9540,10 +9540,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         // Clear any previous layout direction resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED_RTL;
 
-        // Reset also TextDirection as a change into LayoutDirection may impact the selected
-        // TextDirectionHeuristic
-        resetResolvedTextDirection();
-
         // Set resolved depending on layout direction
         switch (getLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
@@ -9664,8 +9660,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     protected void resetResolvedLayoutDirection() {
-        // Reset the current View resolution
+        // Reset the layout direction resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED;
+        // Reset also the text direction
+        resetResolvedTextDirection();
     }
 
     /**
@@ -9710,7 +9708,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mCurrentAnimation = null;
 
         resetResolvedLayoutDirection();
-        resetResolvedTextDirection();
     }
 
     /**
@@ -14085,7 +14082,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE},
-     *
      */
     public int getTextDirection() {
         return mTextDirection;
@@ -14102,7 +14098,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE},
-     *
      */
     public void setTextDirection(int textDirection) {
         if (textDirection != mTextDirection) {
@@ -14122,7 +14117,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE},
-     *
      */
     public int getResolvedTextDirection() {
         if (mResolvedTextDirection == TEXT_DIRECTION_INHERIT) {
@@ -14132,27 +14126,47 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Resolve the text direction.
-     *
+     * Resolve the text direction. Will call {@link View#onResolveTextDirection()} when resolution
+     * is done.
      */
-    protected void resolveTextDirection() {
+    public void resolveTextDirection() {
+        if (mResolvedTextDirection != TEXT_DIRECTION_INHERIT) {
+            // Resolution has already been done.
+            return;
+        }
         if (mTextDirection != TEXT_DIRECTION_INHERIT) {
             mResolvedTextDirection = mTextDirection;
-            return;
-        }
-        if (mParent != null && mParent instanceof ViewGroup) {
+        } else if (mParent != null && mParent instanceof ViewGroup) {
             mResolvedTextDirection = ((ViewGroup) mParent).getResolvedTextDirection();
-            return;
+        } else {
+            mResolvedTextDirection = TEXT_DIRECTION_FIRST_STRONG;
         }
-        mResolvedTextDirection = TEXT_DIRECTION_FIRST_STRONG;
+        onResolveTextDirection();
     }
 
     /**
-     * Reset resolved text direction. Will be resolved during a call to getResolvedTextDirection().
-     *
+     * Called when text direction has been resolved. Subclasses that care about text direction
+     * resolution should override this method. The default implementation does nothing.
      */
-    protected void resetResolvedTextDirection() {
+    public void onResolveTextDirection() {
+    }
+
+    /**
+     * Reset resolved text direction. Text direction can be resolved with a call to
+     * getResolvedTextDirection(). Will call {@link View#onResetResolvedTextDirection()} when
+     * reset is done.
+     */
+    public void resetResolvedTextDirection() {
         mResolvedTextDirection = TEXT_DIRECTION_INHERIT;
+        onResetResolvedTextDirection();
+    }
+
+    /**
+     * Called when text direction is reset. Subclasses that care about text direction reset should
+     * override this method and do a reset of the text direction of their children. The default
+     * implementation does nothing.
+     */
+    public void onResetResolvedTextDirection() {
     }
 
     //
