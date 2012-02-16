@@ -911,6 +911,19 @@ class ContextImpl extends Context {
         }
     }
 
+    /** @hide */
+    @Override
+    public void sendBroadcast(Intent intent, int userId) {
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.setAllowFds(false);
+            ActivityManagerNative.getDefault().broadcastIntent(mMainThread.getApplicationThread(),
+                    intent, resolvedType, null, Activity.RESULT_OK, null, null, null, false, false,
+                    userId);
+        } catch (RemoteException e) {
+        }
+    }
+
     @Override
     public void sendBroadcast(Intent intent, String receiverPermission) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
