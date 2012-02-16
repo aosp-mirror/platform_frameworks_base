@@ -216,7 +216,7 @@
     <string name="permlab_removeTasks" msgid="6821513401870377403">"実行中のアプリの停止"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"タスクの削除とアプリの終了をアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、他のアプリの動作が妨害される恐れがあります。"</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"画面互換性の設定"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"他のアプリケーションの画面互換性モードをコントロールすることをアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、他のアプリケーションの動作が中断される恐れがあります。"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"他のアプリの画面互換性モードをコントロールすることをアプリに許可します。この許可を悪意のあるアプリに利用されると、他のアプリの動作が中断される恐れがあります。"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"アプリのデバッグの有効化"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"別のアプリをデバッグモードにすることをアプリに許可します。この許可を悪意のあるアプリに利用されると、他のアプリが強制終了される恐れがあります。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI設定の変更"</string>
@@ -973,6 +973,11 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fiに接続できませんでした"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" はインターネット接続に問題があります。"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Directを開始します。これによりWi-Fiクライアント/アクセスポイントがOFFになります。"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Directを開始できませんでした。"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi DirectはONです"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"設定を表示するにはタップしてください"</string>
     <string name="accept" msgid="1645267259272829559">"同意する"</string>
     <string name="decline" msgid="2112225451706137894">"同意しない"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"招待状を送信しました"</string>

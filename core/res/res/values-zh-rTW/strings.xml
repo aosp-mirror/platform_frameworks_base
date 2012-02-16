@@ -973,6 +973,11 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"無法連線至 Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 的網際網路連線狀況不佳。"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"啟動 WiFi Direct 作業，這會關閉 WiFi 用戶端/無線基地台作業。"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"無法啟動 WiFi Direct。"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct 已開啟"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"輕觸即可設定"</string>
     <string name="accept" msgid="1645267259272829559">"接受"</string>
     <string name="decline" msgid="2112225451706137894">"拒絕"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"邀請函已傳送"</string>

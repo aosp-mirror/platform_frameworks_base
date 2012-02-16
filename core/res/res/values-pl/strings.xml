@@ -216,7 +216,7 @@
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zatrzymywanie uruchomionych aplikacji"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Umożliwia aplikacji usuwanie zadań i kończenie powiązanych z nimi aplikacji. Złośliwe aplikacje mogą zakłócić działanie innych aplikacji."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"ustaw zgodność ekranu"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Pozwala aplikacji na sterowanie trybem zgodności ekranu innych aplikacji. Złośliwe aplikacje mogą zmienić zachowanie innych aplikacji."</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Pozwala aplikacji na sterowanie trybem zgodności ekranu innych aplikacji. Złośliwe aplikacje mogą zmienić zachowanie innych programów."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"włączenie debugowania aplikacji"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Pozwala aplikacji na włączenie debugowania innej aplikacji. Złośliwe aplikacje mogą to wykorzystać do kończenia pracy innych programów."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"zmienianie ustawień interfejsu użytkownika"</string>
@@ -973,6 +973,11 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nie można połączyć się z siecią Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ma powolne połączenie internetowe."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Uruchom Wi-Fi Direct. Spowoduje to wyłączenie klienta lub punktu dostępu Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Nie można uruchomić Wi-Fi Direct."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct włączone"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Dotknij, aby zmienić ustawienia"</string>
     <string name="accept" msgid="1645267259272829559">"Akceptuj"</string>
     <string name="decline" msgid="2112225451706137894">"Odrzuć"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Wysłano zaproszenie"</string>

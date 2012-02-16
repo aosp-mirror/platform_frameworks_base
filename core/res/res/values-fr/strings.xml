@@ -973,6 +973,11 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Impossible de se connecter au Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" dispose d\'une mauvaise connexion Internet."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Lancer le Wi-Fi Direct. Cela désactive le fonctionnement du Wi-Fi client ou via un point d\'accès."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Impossible d\'activer le Wi-Fi Direct."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct activé"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Appuyez pour accéder aux paramètres."</string>
     <string name="accept" msgid="1645267259272829559">"Accepter"</string>
     <string name="decline" msgid="2112225451706137894">"Refuser"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Invitation envoyée"</string>
