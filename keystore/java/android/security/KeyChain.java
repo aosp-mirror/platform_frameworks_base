@@ -124,7 +124,7 @@ public final class KeyChain {
     public static final String EXTRA_SENDER = "sender";
 
     /**
-     * Action to bring up the CertInstaller
+     * Action to bring up the CertInstaller.
      */
     private static final String ACTION_INSTALL = "android.credentials.INSTALL";
 
@@ -166,6 +166,22 @@ public final class KeyChain {
      */
     // Compatible with old android.security.Credentials.PKCS12
     public static final String EXTRA_PKCS12 = "PKCS12";
+
+
+    /**
+     * @hide TODO This is temporary and will be removed
+     * Broadcast Action: Indicates the trusted storage has changed. Sent when
+     * one of this happens:
+     *
+     * <ul>
+     * <li>a new CA is added,
+     * <li>an existing CA is removed or disabled,
+     * <li>a disabled CA is enabled,
+     * <li>trusted storage is reset (all user certs are cleared),
+     * <li>when permission to access a private key is changed.
+     * </ul>
+     */
+    public static final String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
 
     /**
      * Returns an {@code Intent} that can be used for credential
