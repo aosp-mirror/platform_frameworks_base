@@ -27,9 +27,9 @@ class ProgramFragmentState;
 
 class ProgramFragment : public Program {
 public:
-    ProgramFragment(Context *rsc, const char * shaderText,
-                             uint32_t shaderLength, const uint32_t * params,
-                             uint32_t paramLength);
+    ProgramFragment(Context *rsc, const char * shaderText, size_t shaderLength,
+                    const char** textureNames, size_t textureNamesCount, const size_t *textureNamesLength,
+                     const uint32_t * params, size_t paramLength);
     virtual ~ProgramFragment();
 
     virtual void setup(Context *, ProgramFragmentState *);

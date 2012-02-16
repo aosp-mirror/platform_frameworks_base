@@ -69,6 +69,7 @@ public class Program extends BaseObj {
     Element mOutputs[];
     Type mConstants[];
     TextureType mTextures[];
+    String mTextureNames[];
     int mTextureCount;
     String mShader;
 
@@ -108,6 +109,16 @@ public class Program extends BaseObj {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
         return mTextures[slot];
+    }
+
+    /**
+     * @hide
+     */
+    public String getTextureName(int slot) {
+        if ((slot < 0) || (slot >= mTextureCount)) {
+            throw new IllegalArgumentException("Slot ID out of range.");
+        }
+        return mTextureNames[slot];
     }
 
     /**
@@ -180,6 +191,7 @@ public class Program extends BaseObj {
         Type mConstants[];
         Type mTextures[];
         TextureType mTextureTypes[];
+        String mTextureNames[];
         int mInputCount;
         int mOutputCount;
         int mConstantCount;
@@ -197,6 +209,7 @@ public class Program extends BaseObj {
             mConstantCount = 0;
             mTextureCount = 0;
             mTextureTypes = new TextureType[MAX_TEXTURE];
+            mTextureNames = new String[MAX_TEXTURE];
         }
 
         /**
@@ -300,10 +313,28 @@ public class Program extends BaseObj {
          * @return  self
          */
         public BaseProgramBuilder addTexture(TextureType texType) throws IllegalArgumentException {
+            addTexture(texType, "Tex" + mTextureCount);
+            return this;
+        }
+
+        /**
+         * @hide
+         * Adds a texture input to the Program
+         *
+         * @param texType describes that the texture to append it (2D,
+         *                Cubemap, etc.)
+         * @param texName what the texture should be called in the
+         *                shader
+         * @return  self
+         */
+        public BaseProgramBuilder addTexture(TextureType texType, String texName)
+            throws IllegalArgumentException {
             if(mTextureCount >= MAX_TEXTURE) {
                 throw new IllegalArgumentException("Max texture count exceeded.");
             }
-            mTextureTypes[mTextureCount ++] = texType;
+            mTextureTypes[mTextureCount] = texType;
+            mTextureNames[mTextureCount] = texName;
+            mTextureCount ++;
             return this;
         }
 
@@ -317,6 +348,8 @@ public class Program extends BaseObj {
             p.mTextureCount = mTextureCount;
             p.mTextures = new TextureType[mTextureCount];
             System.arraycopy(mTextureTypes, 0, p.mTextures, 0, mTextureCount);
+            p.mTextureNames = new String[mTextureCount];
+            System.arraycopy(mTextureNames, 0, p.mTextureNames, 0, mTextureCount);
         }
     }
 

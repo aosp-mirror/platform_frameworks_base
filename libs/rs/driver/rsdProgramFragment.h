@@ -22,7 +22,9 @@
 
 bool rsdProgramFragmentInit(const android::renderscript::Context *rsc,
                             const android::renderscript::ProgramFragment *,
-                            const char* shader, uint32_t shaderLen);
+                            const char* shader, size_t shaderLen,
+                            const char** textureNames, size_t textureNamesCount,
+                            const size_t *textureNamesLength);
 void rsdProgramFragmentSetActive(const android::renderscript::Context *rsc,
                                  const android::renderscript::ProgramFragment *);
 void rsdProgramFragmentDestroy(const android::renderscript::Context *rsc,

@@ -58,8 +58,8 @@ public:
     };
     Hal mHal;
 
-    Program(Context *, const char * shaderText, uint32_t shaderLength,
-                       const uint32_t * params, uint32_t paramLength);
+    Program(Context *, const char * shaderText, size_t shaderLength,
+            const uint32_t * params, size_t paramLength);
     virtual ~Program();
     virtual bool freeChildren();
 
