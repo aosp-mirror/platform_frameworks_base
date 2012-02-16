@@ -9634,8 +9634,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param layoutDirection the direction of the layout
      *
-     * {@link View#LAYOUT_DIRECTION_LTR}
-     * {@link View#LAYOUT_DIRECTION_RTL}
      */
     public void onResolvePadding(int layoutDirection) {
     }
