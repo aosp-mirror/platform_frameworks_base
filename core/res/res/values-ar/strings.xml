@@ -973,6 +973,11 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"تعذر الاتصال بـ Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" لديها اتصال إنترنت رديء."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"اتصال Wi-Fi مباشر"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ابدأ Wi-Fi Direct. يؤدي هذا إلى إيقاف عميل/نقطة اتصال Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"تعذر بدء Wi-Fi Direct."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"تم تشغيل اتصال Wi-Fi المباشر"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"المس للحصول على الإعدادات"</string>
     <string name="accept" msgid="1645267259272829559">"قبول"</string>
     <string name="decline" msgid="2112225451706137894">"رفض"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"تم إرسال الدعوة"</string>

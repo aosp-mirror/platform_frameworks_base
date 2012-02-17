@@ -757,7 +757,7 @@
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tilføj telefonsvarer"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Tillader, at appen kan tilføje beskeder på din telefonsvarer."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"skifte tilladelser til geografisk placering i Browser"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tillader, at appen kan ændre browserens tilladelser angående geografisk placering. Ondsindede apps kan benytte dette til at sende oplysninger om placering til vilkårlige websteder."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tillader, at appen kan ændre browserens tilladelser angående geografisk placering. Ondsindede apps kan benytte dette til at sende oplysninger om placering til vilkårlige websites."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"bekræft pakker"</string>
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Tillader, at appen kan bekræfte, at en pakke kan installeres."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"bind til en bekræftelse af pakker"</string>
@@ -973,6 +973,11 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kunne ikke oprette forbindelse til Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" har en dårlig internetforbindelse."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Start Wi-Fi Direct. Dette slår Wi-Fi-klient/hotspot fra."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct kunne ikke startes."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct er slået til"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Tryk for indstillinger"</string>
     <string name="accept" msgid="1645267259272829559">"Accepter"</string>
     <string name="decline" msgid="2112225451706137894">"Afvis"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Invitationen er sendt"</string>
