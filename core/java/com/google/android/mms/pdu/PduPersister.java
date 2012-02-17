@@ -765,7 +765,7 @@ public class PduPersister {
                         Log.v(TAG, "Saving data to: " + uri);
                     }
 
-                    byte[] buffer = new byte[256];
+                    byte[] buffer = new byte[8192];
                     for (int len = 0; (len = is.read(buffer)) != -1; ) {
                         os.write(buffer, 0, len);
                     }
