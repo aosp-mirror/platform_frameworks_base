@@ -1663,6 +1663,7 @@ const int GLMessage::kFunctionFieldNumber;
 const int GLMessage::kArgsFieldNumber;
 const int GLMessage::kReturnValueFieldNumber;
 const int GLMessage::kFbFieldNumber;
+const int GLMessage::kThreadtimeFieldNumber;
 #endif  // !_MSC_VER
 
 GLMessage::GLMessage()
@@ -1689,6 +1690,7 @@ void GLMessage::SharedCtor() {
   function_ = 3000;
   returnvalue_ = NULL;
   fb_ = NULL;
+  threadtime_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1730,6 +1732,7 @@ void GLMessage::Clear() {
     if (_has_bit(6)) {
       if (fb_ != NULL) fb_->::android::gltrace::GLMessage_FrameBuffer::Clear();
     }
+    threadtime_ = 0;
   }
   args_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1846,6 +1849,22 @@ bool GLMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(64)) goto parse_threadtime;
+        break;
+      }
+      
+      // optional int32 threadtime = 8;
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_threadtime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &threadtime_)));
+          _set_bit(7);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1906,6 +1925,11 @@ void GLMessage::SerializeWithCachedSizes(
       7, this->fb(), output);
   }
   
+  // optional int32 threadtime = 8;
+  if (_has_bit(7)) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(8, this->threadtime(), output);
+  }
+  
 }
 
 int GLMessage::ByteSize() const {
@@ -1953,6 +1977,13 @@ int GLMessage::ByteSize() const {
           this->fb());
     }
     
+    // optional int32 threadtime = 8;
+    if (has_threadtime()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->threadtime());
+    }
+    
   }
   // repeated .android.gltrace.GLMessage.DataType args = 5;
   total_size += 1 * this->args_size();
@@ -1995,6 +2026,9 @@ void GLMessage::MergeFrom(const GLMessage& from) {
     if (from._has_bit(6)) {
       mutable_fb()->::android::gltrace::GLMessage_FrameBuffer::MergeFrom(from.fb());
     }
+    if (from._has_bit(7)) {
+      set_threadtime(from.threadtime());
+    }
   }
 }
 
@@ -2028,6 +2062,7 @@ void GLMessage::Swap(GLMessage* other) {
     args_.Swap(&other->args_);
     std::swap(returnvalue_, other->returnvalue_);
     std::swap(fb_, other->fb_);
+    std::swap(threadtime_, other->threadtime_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_cached_size_, other->_cached_size_);
   }
