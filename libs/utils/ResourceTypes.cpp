@@ -379,8 +379,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         size_t charSize;
         if (mHeader->flags&ResStringPool_header::UTF8_FLAG) {
             charSize = sizeof(uint8_t);
-            mCache = (char16_t**)malloc(sizeof(char16_t**)*mHeader->stringCount);
-            memset(mCache, 0, sizeof(char16_t**)*mHeader->stringCount);
+            mCache = (char16_t**)calloc(mHeader->stringCount, sizeof(char16_t**));
         } else {
             charSize = sizeof(char16_t);
         }
@@ -3252,16 +3251,14 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
 
     // Bag not found, we need to compute it!
     if (!grp->bags) {
-        grp->bags = (bag_set***)malloc(sizeof(bag_set*)*grp->typeCount);
+        grp->bags = (bag_set***)calloc(grp->typeCount, sizeof(bag_set*));
         if (!grp->bags) return NO_MEMORY;
-        memset(grp->bags, 0, sizeof(bag_set*)*grp->typeCount);
     }
 
     bag_set** typeSet = grp->bags[t];
     if (!typeSet) {
-        typeSet = (bag_set**)malloc(sizeof(bag_set*)*NENTRY);
+        typeSet = (bag_set**)calloc(NENTRY, sizeof(bag_set*));
         if (!typeSet) return NO_MEMORY;
-        memset(typeSet, 0, sizeof(bag_set*)*NENTRY);
         grp->bags[t] = typeSet;
     }
 

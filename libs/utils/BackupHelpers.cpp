@@ -546,7 +546,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
 
     // read/write up to this much at a time.
     const size_t BUFSIZE = 32 * 1024;
-    char* buf = new char[BUFSIZE];
+    char* buf = (char *)calloc(1,BUFSIZE);
     char* paxHeader = buf + 512;    // use a different chunk of it as separate scratch
     char* paxData = buf + 1024;
 
@@ -555,9 +555,6 @@ int write_tarfile(const String8& packageName, const String8& domain,
         err = ENOMEM;
         goto cleanup;
     }
-
-    // Good to go -- first construct the standard tar header at the start of the buffer
-    memset(buf, 0, BUFSIZE);
 
     // Magic fields for the ustar file format
     strcat(buf + 257, "ustar");
