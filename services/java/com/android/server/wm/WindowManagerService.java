@@ -6377,7 +6377,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
-        return reportInjectionResult(result);
+        return reportInjectionResult(result, pid);
     }
 
     /**
@@ -6407,7 +6407,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
-        return reportInjectionResult(result);
+        return reportInjectionResult(result, pid);
     }
 
     /**
@@ -6437,7 +6437,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
-        return reportInjectionResult(result);
+        return reportInjectionResult(result, pid);
     }
     
     /**
@@ -6458,24 +6458,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
-        return reportInjectionResult(result);
+        return reportInjectionResult(result, pid);
     }
     
-    private boolean reportInjectionResult(int result) {
+    private boolean reportInjectionResult(int result, int pid) {
         switch (result) {
             case InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED:
-                Slog.w(TAG, "Input event injection permission denied.");
+                Slog.w(TAG, "Input event injection from pid " + pid + " permission denied.");
                 throw new SecurityException(
                         "Injecting to another application requires INJECT_EVENTS permission");
             case InputManager.INPUT_EVENT_INJECTION_SUCCEEDED:
-                //Slog.v(TAG, "Input event injection succeeded.");
                 return true;
             case InputManager.INPUT_EVENT_INJECTION_TIMED_OUT:
-                Slog.w(TAG, "Input event injection timed out.");
+                Slog.w(TAG, "Input event injection from pid " + pid + " timed out.");
                 return false;
             case InputManager.INPUT_EVENT_INJECTION_FAILED:
             default:
-                Slog.w(TAG, "Input event injection failed.");
+                Slog.w(TAG, "Input event injection from pid " + pid + " failed.");
                 return false;
         }
     }

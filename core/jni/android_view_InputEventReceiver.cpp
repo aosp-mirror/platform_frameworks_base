@@ -264,7 +264,7 @@ static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jint receiverPtr,
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
     status_t status = receiver->finishInputEvent(seq, handled);
-    if (status) {
+    if (status && status != DEAD_OBJECT) {
         String8 message;
         message.appendFormat("Failed to finish input event.  status=%d", status);
         jniThrowRuntimeException(env, message.string());
