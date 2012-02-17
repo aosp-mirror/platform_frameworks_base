@@ -45,7 +45,7 @@
 #include "InputDispatcher.h"
 
 #include <cutils/log.h>
-#include <ui/PowerManager.h>
+#include <androidfw/PowerManager.h>
 
 #include <stddef.h>
 #include <unistd.h>

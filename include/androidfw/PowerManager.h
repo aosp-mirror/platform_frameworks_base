@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _UI_POWER_MANAGER_H
-#define _UI_POWER_MANAGER_H
+#ifndef _ANDROIDFW_POWER_MANAGER_H
+#define _ANDROIDFW_POWER_MANAGER_H
 
 
 namespace android {
@@ -30,4 +30,4 @@ enum {
 
 } // namespace android
 
-#endif // _UI_POWER_MANAGER_H
+#endif // _ANDROIDFW_POWER_MANAGER_H

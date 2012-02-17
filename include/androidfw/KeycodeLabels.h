@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _UI_KEYCODE_LABELS_H
-#define _UI_KEYCODE_LABELS_H
+#ifndef _ANDROIDFW_KEYCODE_LABELS_H
+#define _ANDROIDFW_KEYCODE_LABELS_H
 
 #include <android/keycodes.h>
 
@@ -307,4 +307,4 @@ static const KeycodeLabel AXES[] = {
     { NULL, -1 }
 };
 
-#endif // _UI_KEYCODE_LABELS_H
+#endif // _ANDROIDFW_KEYCODE_LABELS_H

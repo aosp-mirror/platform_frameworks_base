@@ -17,8 +17,8 @@
 #ifndef _UI_INPUT_DISPATCHER_H
 #define _UI_INPUT_DISPATCHER_H
 
-#include <ui/Input.h>
-#include <ui/InputTransport.h>
+#include <androidfw/Input.h>
+#include <androidfw/InputTransport.h>
 #include <utils/KeyedVector.h>
 #include <utils/Vector.h>
 #include <utils/threads.h>

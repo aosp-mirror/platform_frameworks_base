@@ -18,7 +18,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ui/VirtualKeyMap.h>
+#include <androidfw/VirtualKeyMap.h>
 #include <utils/Log.h>
 #include <utils/Errors.h>
 #include <utils/Tokenizer.h>

@@ -20,7 +20,7 @@
 #include "JNIHelp.h"
 #include "jni.h"
 
-#include <ui/PowerManager.h>
+#include <androidfw/PowerManager.h>
 
 namespace android {
 

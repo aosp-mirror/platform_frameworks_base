@@ -20,10 +20,10 @@
 #include <unistd.h>
 #include <limits.h>
 
-#include <ui/Keyboard.h>
-#include <ui/KeycodeLabels.h>
-#include <ui/KeyLayoutMap.h>
-#include <ui/KeyCharacterMap.h>
+#include <androidfw/Keyboard.h>
+#include <androidfw/KeycodeLabels.h>
+#include <androidfw/KeyLayoutMap.h>
+#include <androidfw/KeyCharacterMap.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <cutils/properties.h>

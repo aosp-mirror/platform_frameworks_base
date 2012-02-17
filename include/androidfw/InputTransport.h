@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _UI_INPUT_TRANSPORT_H
-#define _UI_INPUT_TRANSPORT_H
+#ifndef _ANDROIDFW_INPUT_TRANSPORT_H
+#define _ANDROIDFW_INPUT_TRANSPORT_H
 
 /**
  * Native input transport.
@@ -27,11 +27,12 @@
  * The InputConsumer is used by the application to receive events from the input dispatcher.
  */
 
-#include <ui/Input.h>
+#include <androidfw/Input.h>
 #include <utils/Errors.h>
 #include <utils/Timers.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>
+#include <utils/Vector.h>
 
 namespace android {
 
@@ -332,4 +333,4 @@ private:
 
 } // namespace android
 
-#endif // _UI_INPUT_TRANSPORT_H
+#endif // _ANDROIDFW_INPUT_TRANSPORT_H

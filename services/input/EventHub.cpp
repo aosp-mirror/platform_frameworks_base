@@ -36,9 +36,9 @@
 #include <errno.h>
 #include <assert.h>
 
-#include <ui/KeyLayoutMap.h>
-#include <ui/KeyCharacterMap.h>
-#include <ui/VirtualKeyMap.h>
+#include <androidfw/KeyLayoutMap.h>
+#include <androidfw/KeyCharacterMap.h>
+#include <androidfw/VirtualKeyMap.h>
 
 #include <string.h>
 #include <stdint.h>

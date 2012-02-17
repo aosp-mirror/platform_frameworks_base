@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef _UI_VIRTUAL_KEY_MAP_H
-#define _UI_VIRTUAL_KEY_MAP_H
+#ifndef _ANDROIDFW_VIRTUAL_KEY_MAP_H
+#define _ANDROIDFW_VIRTUAL_KEY_MAP_H
 
 #include <stdint.h>
 
-#include <ui/Input.h>
+#include <androidfw/Input.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/Tokenizer.h>
@@ -76,4 +76,4 @@ private:
 
 } // namespace android
 
-#endif // _UI_KEY_CHARACTER_MAP_H
+#endif // _ANDROIDFW_KEY_CHARACTER_MAP_H

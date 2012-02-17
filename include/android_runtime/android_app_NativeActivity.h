@@ -17,7 +17,7 @@
 #ifndef _ANDROID_APP_NATIVEACTIVITY_H
 #define _ANDROID_APP_NATIVEACTIVITY_H
 
-#include <ui/InputTransport.h>
+#include <androidfw/InputTransport.h>
 #include <utils/Looper.h>
 
 #include <android/native_activity.h>

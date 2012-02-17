@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#include <ui/Input.h>
+#include <androidfw/Input.h>
 
 #include <math.h>
 #include <limits.h>
