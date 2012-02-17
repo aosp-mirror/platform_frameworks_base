@@ -2295,7 +2295,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
 
                 uint16_t sendLevel = cblk->getSendLevel_U4_12();
                 // send level comes from shared memory and so may be corrupt
-                if (sendLevel >= MAX_GAIN_INT) {
+                if (sendLevel > MAX_GAIN_INT) {
                     ALOGV("Track send level out of range: %04X", sendLevel);
                     sendLevel = MAX_GAIN_INT;
                 }
@@ -2316,25 +2316,21 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
             }
 
             // Convert volumes from 8.24 to 4.12 format
-            int16_t left, right, aux;
             // This additional clamping is needed in case chain->setVolume_l() overshot
-            uint32_t v_clamped = (vl + (1 << 11)) >> 12;
-            if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
-            left = int16_t(v_clamped);
-            v_clamped = (vr + (1 << 11)) >> 12;
-            if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
-            right = int16_t(v_clamped);
+            vl = (vl + (1 << 11)) >> 12;
+            if (vl > MAX_GAIN_INT) vl = MAX_GAIN_INT;
+            vr = (vr + (1 << 11)) >> 12;
+            if (vr > MAX_GAIN_INT) vr = MAX_GAIN_INT;
 
-            if (va > MAX_GAIN_INT) va = MAX_GAIN_INT;
-            aux = int16_t(va);
+            if (va > MAX_GAIN_INT) va = MAX_GAIN_INT;   // va is uint32_t, so no need to check for -
 
             // XXX: these things DON'T need to be done each time
             mAudioMixer->setBufferProvider(name, track);
             mAudioMixer->enable(name);
 
-            mAudioMixer->setParameter(name, param, AudioMixer::VOLUME0, (void *)left);
-            mAudioMixer->setParameter(name, param, AudioMixer::VOLUME1, (void *)right);
-            mAudioMixer->setParameter(name, param, AudioMixer::AUXLEVEL, (void *)aux);
+            mAudioMixer->setParameter(name, param, AudioMixer::VOLUME0, (void *)vl);
+            mAudioMixer->setParameter(name, param, AudioMixer::VOLUME1, (void *)vr);
+            mAudioMixer->setParameter(name, param, AudioMixer::AUXLEVEL, (void *)va);
             mAudioMixer->setParameter(
                 name,
                 AudioMixer::TRACK,

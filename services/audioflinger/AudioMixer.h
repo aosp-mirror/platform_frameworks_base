@@ -127,31 +127,45 @@ private:
 
         int32_t     prevVolume[MAX_NUM_CHANNELS];
 
+        // 16-byte boundary
+
         int32_t     volumeInc[MAX_NUM_CHANNELS];
-        int32_t     auxLevel;
         int32_t     auxInc;
         int32_t     prevAuxLevel;
 
+        // 16-byte boundary
+
+        int16_t     auxLevel;       // 0 <= auxLevel <= MAX_GAIN_INT, but signed for mul performance
         uint16_t    frameCount;
 
-        uint8_t     channelCount : 4;
-        uint8_t     enabled      : 1;
-        uint8_t     reserved0    : 3;
-        uint8_t     format;
-        uint32_t    channelMask;
+        uint8_t     channelCount;   // 1 or 2, redundant with (needs & NEEDS_CHANNEL_COUNT__MASK)
+        uint8_t     format;         // always 16
+        uint16_t    enabled;        // actually bool
+        uint32_t    channelMask;    // currently under-used
 
         AudioBufferProvider*                bufferProvider;
-        mutable AudioBufferProvider::Buffer buffer;
+
+        // 16-byte boundary
+
+        mutable AudioBufferProvider::Buffer buffer; // 8 bytes
 
         hook_t      hook;
         const void* in;             // current location in buffer
+
+        // 16-byte boundary
 
         AudioResampler*     resampler;
         uint32_t            sampleRate;
         int32_t*           mainBuffer;
         int32_t*           auxBuffer;
 
+        // 16-byte boundary
+
         uint64_t    localTimeFreq;
+
+        int64_t     padding;
+
+        // 16-byte boundary
 
         bool        setResampler(uint32_t sampleRate, uint32_t devSampleRate);
         bool        doesResample() const { return resampler != NULL; }
