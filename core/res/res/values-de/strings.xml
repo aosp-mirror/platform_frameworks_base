@@ -764,6 +764,10 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Ermöglicht dem Halter, Anfragen für die Paketprüfung zu senden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"Zugriff auf serielle Schnittstellen"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Ermöglicht dem Inhaber den Zugriff auf serielle Schnittstellen über das SerialManager-API"</string>
+    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
+    <skip />
+    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Möchten Sie, dass der Browser dieses Passwort speichert?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nicht jetzt"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Speichern"</string>

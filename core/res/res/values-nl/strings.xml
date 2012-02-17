@@ -764,6 +764,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Hiermee kan de houder verzoeken indienen voor pakketcontroles. Nooit vereist voor normale apps."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"toegang krijgen tot seriële poorten"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"De houder toestaan toegang tot seriële poorten te krijgen met de SerialManager API."</string>
+    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"externe toegang tot inhoudsproviders"</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Hiermee kan de houder toegang krijgen tot inhoudsproviders via de shell. Nooit vereist voor normale apps."</string>
     <string name="save_password_message" msgid="767344687139195790">"Wilt u dat de browser dit wachtwoord onthoudt?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Niet nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Onthouden"</string>
