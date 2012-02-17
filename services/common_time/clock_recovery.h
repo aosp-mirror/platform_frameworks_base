@@ -43,27 +43,38 @@ class ClockRecoveryLoop {
     int32_t getLastErrorEstimate();
 
   private:
-    typedef struct {
-        // Limits for the correction factor supplied to set_counter_slew_rate.
-        // The controller will always clamp its output to the range expressed by
-        // correction_(min|max)
-        int32_t correction_min;
-        int32_t correction_max;
 
-        // Limits for the internal integration accumulator in the PID
-        // controller.  The value of the accumulator is scaled by gain_I to
-        // produce the integral component of the PID controller output.
-        // Platforms can use these limits to prevent windup in the system
-        // if/when the correction factor needs to be driven to saturation for
-        // extended periods of time.
-        int32_t integrated_delta_min;
-        int32_t integrated_delta_max;
+    // Tuned using the "Good Gain" method.
+    // See:
+    // http://techteach.no/publications/books/dynamics_and_control/tuning_pid_controller.pdf
 
-        // Gain for the P, I and D components of the controller.
-        LinearTransform gain_P;
-        LinearTransform gain_I;
-        LinearTransform gain_D;
-    } PIDParams;
+    // Controller period (1Hz for now).
+    static const float dT;
+
+    // Controller gain, positive and unitless. Larger values converge faster,
+    // but can cause instability.
+    static const float Kc;
+
+    // Integral reset time. Smaller values cause loop to track faster, but can
+    // also cause instability.
+    static const float Ti;
+
+    // Controller output filter time constant. Range (0-1). Smaller values make
+    // output smoother, but slow convergence.
+    static const float Tf;
+
+    // Low-pass filter for bias tracker.
+    static const float bias_Fc; // HZ
+    static const float bias_RC; // Computed in constructor.
+    static const float bias_Alpha; // Computed inconstructor.
+
+    // The maximum allowed error (as indicated by a  pushDisciplineEvent) before
+    // we panic.
+    static const int64_t panic_thresh_;
+
+    // The maximum allowed error rtt time for packets to be used for control
+    // feedback, unless the packet is the best in recent memory.
+    static const int64_t control_thresh_;
 
     typedef struct {
         int64_t local_time;
@@ -75,9 +86,7 @@ class ClockRecoveryLoop {
 
     static uint32_t findMinRTTNdx(DisciplineDataPoint* data, uint32_t count);
 
-    void computePIDParams();
     void reset_l(bool position, bool frequency);
-    static int32_t doGainScale(const LinearTransform& gain, int32_t val);
     void applySlew();
 
     // The local clock HW abstraction we use as the basis for common time.
@@ -89,22 +98,28 @@ class ClockRecoveryLoop {
     CommonClock* common_clock_;
     Mutex lock_;
 
-    // The parameters computed to be used for the PID Controller.
-    PIDParams pid_params_;
-
-    // The maximum allowed error (as indicated by a  pushDisciplineEvent) before
-    // we panic.
-    int32_t panic_thresh_;
-
     // parameters maintained while running and reset during a reset
     // of the frequency correction.
     bool    last_delta_valid_;
     int32_t last_delta_;
+    float last_delta_f_;
     int32_t integrated_error_;
     int32_t correction_cur_;
 
+    // Contoller Output.
+    float CO;
+
+    // Bias tracking for trajectory estimation.
+    float CObias;
+    float lastCObias;
+
+    // Controller output bounds. The controller will not try to
+    // slew faster that +/-100ppm offset from center per interation.
+    static const float COmin;
+    static const float COmax;
+
     // State kept for filtering the discipline data.
-    static const uint32_t kFilterSize = 6;
+    static const uint32_t kFilterSize = 16;
     DisciplineDataPoint filter_data_[kFilterSize];
     uint32_t filter_wr_;
     bool filter_full_;
