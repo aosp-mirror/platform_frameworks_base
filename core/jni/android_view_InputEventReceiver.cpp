@@ -275,7 +275,7 @@ static void nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jint rece
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
     status_t status = receiver->consumeEvents(true /*consumeBatches*/);
-    if (status) {
+    if (status && status != DEAD_OBJECT) {
         String8 message;
         message.appendFormat("Failed to consume batched input event.  status=%d", status);
         jniThrowRuntimeException(env, message.string());
