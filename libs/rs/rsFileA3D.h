@@ -17,7 +17,7 @@
 #ifndef ANDROID_RS_FILE_A3D_H
 #define ANDROID_RS_FILE_A3D_H
 
-#include "RenderScript.h"
+#include "rs.h"
 #include "rsMesh.h"
 
 #include <utils/String8.h>

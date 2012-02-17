@@ -19,7 +19,7 @@
 
 #include "rsScript.h"
 
-#include "RenderScriptEnv.h"
+#include "rsEnv.h"
 
 #ifndef ANDROID_RS_SERIALIZE
 #include "bcinfo/BitcodeTranslator.h"

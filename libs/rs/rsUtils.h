@@ -34,7 +34,7 @@
 
 #include <math.h>
 
-#include "RenderScript.h"
+#include "rs.h"
 
 namespace android {
 namespace renderscript {

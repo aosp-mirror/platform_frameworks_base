@@ -17,7 +17,7 @@
 #ifndef RS_HAL_H
 #define RS_HAL_H
 
-#include <RenderScriptDefines.h>
+#include <rsDefines.h>
 
 struct ANativeWindow;
 
