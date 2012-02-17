@@ -164,7 +164,6 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
         ALOGE("%s: out of memory!", __FUNCTION__);
         return;
     }
-    memset(nat, 0, sizeof(native_data_t));
 
     pthread_mutex_init(&(nat->thread_mutex), NULL);
 
@@ -722,24 +721,20 @@ static jboolean startEventLoopNative(JNIEnv *env, jobject object) {
         return JNI_FALSE;
     }
 
-    nat->pollData = (struct pollfd *)malloc(sizeof(struct pollfd) *
-            DEFAULT_INITIAL_POLLFD_COUNT);
+    nat->pollData = (struct pollfd *)calloc(
+            DEFAULT_INITIAL_POLLFD_COUNT, sizeof(struct pollfd));
     if (!nat->pollData) {
         ALOGE("out of memory error starting EventLoop!");
         goto done;
     }
 
-    nat->watchData = (DBusWatch **)malloc(sizeof(DBusWatch *) *
-            DEFAULT_INITIAL_POLLFD_COUNT);
+    nat->watchData = (DBusWatch **)calloc(
+            DEFAULT_INITIAL_POLLFD_COUNT, sizeof(DBusWatch *));
     if (!nat->watchData) {
         ALOGE("out of memory error starting EventLoop!");
         goto done;
     }
 
-    memset(nat->pollData, 0, sizeof(struct pollfd) *
-            DEFAULT_INITIAL_POLLFD_COUNT);
-    memset(nat->watchData, 0, sizeof(DBusWatch *) *
-            DEFAULT_INITIAL_POLLFD_COUNT);
     nat->pollDataSize = DEFAULT_INITIAL_POLLFD_COUNT;
     nat->pollMemberCount = 1;
 
