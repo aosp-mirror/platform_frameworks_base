@@ -42,6 +42,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define MIN_WRITER_SIZE 4096
+#define OP_MAY_BE_SKIPPED_MASK 0xff000000
 
 // Debug
 #if DEBUG_DISPLAY_LIST
@@ -110,13 +111,18 @@ public:
         DrawGLFunction,
     };
 
+    // See flags defined in DisplayList.java
+    enum ReplayFlag {
+        kReplayFlag_ClipChildren = 0x1
+    };
+
     static const char* OP_NAMES[];
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
     ANDROID_API size_t getSize();
 
-    bool replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level = 0);
+    bool replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level = 0);
 
     void output(OpenGLRenderer& renderer, uint32_t level = 0);
 
@@ -167,11 +173,11 @@ private:
         return (SkiaColorFilter*) getInt();
     }
 
-    inline int getIndex() {
+    inline int32_t getIndex() {
         return mReader.readInt();
     }
 
-    inline int getInt() {
+    inline int32_t getInt() {
         return mReader.readInt();
     }
 
@@ -209,7 +215,7 @@ private:
         return (uint32_t*) mReader.skip(count * sizeof(uint32_t));
     }
 
-    float* getFloats(int& count) {
+    float* getFloats(int32_t& count) {
         count = getInt();
         return (float*) mReader.skip(count * sizeof(float));
     }
@@ -279,7 +285,7 @@ public:
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
     virtual bool drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
-            Rect& dirty, uint32_t level = 0);
+            Rect& dirty, int32_t flags, uint32_t level = 0);
     virtual void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
@@ -358,13 +364,45 @@ private:
         }
     }
 
-    inline void addOp(DisplayList::Op drawOp) {
+    void insertTranlate() {
+        if (mHasTranslate) {
+            if (mTranslateX != 0.0f || mTranslateY != 0.0f) {
+                mWriter.writeInt(DisplayList::Translate);
+                addPoint(mTranslateX, mTranslateY);
+                mTranslateX = mTranslateY = 0.0f;
+            }
+            mHasTranslate = false;
+        }
+    }
+
+    inline void addOp(const DisplayList::Op drawOp) {
         insertRestoreToCount();
+        insertTranlate();
         mWriter.writeInt(drawOp);
         mHasDrawOps = mHasDrawOps || drawOp >= DisplayList::DrawDisplayList;
     }
 
-    inline void addInt(int value) {
+    uint32_t* addOp(const DisplayList::Op drawOp, const bool reject) {
+        insertRestoreToCount();
+        insertTranlate();
+        mHasDrawOps = mHasDrawOps || drawOp >= DisplayList::DrawDisplayList;
+        if (reject) {
+            mWriter.writeInt(OP_MAY_BE_SKIPPED_MASK | drawOp);
+            mWriter.writeInt(0);
+            uint32_t* location = reject ? mWriter.peek32(mWriter.size() - 4) : NULL;
+            return location;
+        }
+        mWriter.writeInt(drawOp);
+        return NULL;
+    }
+
+    inline void addSkip(uint32_t* location) {
+        if (location) {
+            *location = (int32_t) (mWriter.peek32(mWriter.size() - 4) - location);
+        }
+    }
+
+    inline void addInt(int32_t value) {
         mWriter.writeInt(value);
     }
 
@@ -391,9 +429,9 @@ private:
         mWriter.writeScalar(value);
     }
 
-    void addFloats(const float* values, int count) {
+    void addFloats(const float* values, int32_t count) {
         mWriter.writeInt(count);
-        for (int i = 0; i < count; i++) {
+        for (int32_t i = 0; i < count; i++) {
             mWriter.writeScalar(values[i]);
         }
     }
@@ -513,6 +551,11 @@ private:
     SkWriter32 mWriter;
 
     int mRestoreSaveCount;
+
+    float mTranslateX;
+    float mTranslateY;
+    bool mHasTranslate;
+
     bool mHasDrawOps;
 
     friend class DisplayList;

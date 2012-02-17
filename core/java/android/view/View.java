@@ -11204,7 +11204,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 } else {
                     mPrivateFlags &= ~DIRTY_MASK;
                     ((HardwareCanvas) canvas).drawDisplayList(displayList,
-                            mRight - mLeft, mBottom - mTop, null);
+                            mRight - mLeft, mBottom - mTop, null, flags);
                 }
             }
         } else if (cache != null) {

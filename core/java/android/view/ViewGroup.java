@@ -168,6 +168,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected int mGroupFlags;
 
+    /**
+     * NOTE: If you change the flags below make sure to reflect the changes
+     *       the DisplayList class
+     */
+    
     // When set, ViewGroup invalidates only the child's rectangle
     // Set by default
     static final int FLAG_CLIP_CHILDREN = 0x1;

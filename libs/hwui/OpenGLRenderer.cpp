@@ -1321,7 +1321,7 @@ void OpenGLRenderer::finishDrawTexture() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
-        Rect& dirty, uint32_t level) {
+        Rect& dirty, int32_t flags, uint32_t level) {
     if (quickReject(0.0f, 0.0f, width, height)) {
         return false;
     }
@@ -1329,7 +1329,7 @@ bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, u
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
-        return displayList->replay(*this, dirty, level);
+        return displayList->replay(*this, dirty, flags, level);
     }
 
     return false;
@@ -2189,8 +2189,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     SkPaint::FontMetrics metrics;
     paint->getFontMetrics(&metrics, 0.0f);
     // If no length was specified, just perform the hit test on the Y axis
-    if (quickReject(x, y + metrics.fTop,
-            x + (length >= 0.0f ? length : INT_MAX / 2), y + metrics.fBottom)) {
+    if (quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom)) {
         return;
     }
 
@@ -2298,6 +2297,7 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
 
     mCaches.activeTexture(0);
 
+    // TODO: Perform early clip test before we rasterize the path
     const PathTexture* texture = mCaches.pathCache.get(path, paint);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);

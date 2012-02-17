@@ -652,9 +652,9 @@ static void android_view_GLES20Canvas_destroyDisplayList(JNIEnv* env,
 
 static bool android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
         jobject clazz, OpenGLRenderer* renderer, DisplayList* displayList,
-        jint width, jint height, jobject dirty) {
+        jint width, jint height, jobject dirty, jint flags) {
     android::uirenderer::Rect bounds;
-    bool redraw = renderer->drawDisplayList(displayList, width, height, bounds);
+    bool redraw = renderer->drawDisplayList(displayList, width, height, bounds, flags);
     if (redraw && dirty != NULL) {
         env->CallVoidMethod(dirty, gRectClassInfo.set,
                 int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
@@ -901,7 +901,7 @@ static JNINativeMethod gMethods[] = {
     { "nGetDisplayListSize",     "(I)I",       (void*) android_view_GLES20Canvas_getDisplayListSize },
     { "nSetDisplayListName",     "(ILjava/lang/String;)V",
                                                (void*) android_view_GLES20Canvas_setDisplayListName },
-    { "nDrawDisplayList",        "(IIIILandroid/graphics/Rect;)Z",
+    { "nDrawDisplayList",        "(IIIILandroid/graphics/Rect;I)Z",
                                                (void*) android_view_GLES20Canvas_drawDisplayList },
 
     { "nCreateDisplayListRenderer", "()I",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },

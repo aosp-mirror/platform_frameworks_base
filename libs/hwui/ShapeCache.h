@@ -489,18 +489,16 @@ void ShapeCache<Entry>::removeTexture(PathTexture* texture) {
     }
 }
 
+void computePathBounds(const SkPath *path, const SkPaint* paint,
+        float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
+
 template<class Entry>
 PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *path,
         const SkPaint* paint) {
-    const SkRect& bounds = path->getBounds();
 
-    const float pathWidth = fmax(bounds.width(), 1.0f);
-    const float pathHeight = fmax(bounds.height(), 1.0f);
-
-    const float offset = (int) floorf(fmax(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
-
-    const uint32_t width = uint32_t(pathWidth + offset * 2.0 + 0.5);
-    const uint32_t height = uint32_t(pathHeight + offset * 2.0 + 0.5);
+    float left, top, offset;
+    uint32_t width, height;
+    computePathBounds(path, paint, left, top, offset, width, height);
 
     if (width > mMaxTextureSize || height > mMaxTextureSize) {
         ALOGW("Shape %s too large to be rendered into a texture (%dx%d, max=%dx%d)",
@@ -517,8 +515,8 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
     }
 
     PathTexture* texture = new PathTexture;
-    texture->left = bounds.fLeft;
-    texture->top = bounds.fTop;
+    texture->left = left;
+    texture->top = top;
     texture->offset = offset;
     texture->width = width;
     texture->height = height;
@@ -542,7 +540,7 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
     SkSafeUnref(pathPaint.setXfermode(mode));
 
     SkCanvas canvas(bitmap);
-    canvas.translate(-bounds.fLeft + offset, -bounds.fTop + offset);
+    canvas.translate(-left + offset, -top + offset);
     canvas.drawPath(*path, pathPaint);
 
     generateTexture(bitmap, texture);
