@@ -162,13 +162,15 @@ TRACE_CALL_TEMPLATE = pyratemp.Template(
 <!--(end)-->
 
     // call function
-    nsecs_t start_time = systemTime();
+    nsecs_t wallStartTime = systemTime(SYSTEM_TIME_MONOTONIC);
+    nsecs_t threadStartTime = systemTime(SYSTEM_TIME_THREAD);
 <!--(if retType != "void")-->
     $!retType!$ retValue = glContext->hooks->gl.$!callsite!$;
 <!--(else)-->
     glContext->hooks->gl.$!callsite!$;
 <!--(end)-->
-    nsecs_t end_time = systemTime();
+    nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
+    nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 <!--(if retType != "void")-->
 
     // set return value
@@ -178,7 +180,9 @@ TRACE_CALL_TEMPLATE = pyratemp.Template(
     rt->$!retDataType.getProtobufCall()!$retValue);
 <!--(end)-->
 
-    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    fixupGLMessage(glContext, wallStartTime, wallEndTime,
+                              threadStartTime, threadEndTime,
+                              &glmsg);
     glContext->traceGLMessage(&glmsg);
 <!--(if retType != "void")-->
 

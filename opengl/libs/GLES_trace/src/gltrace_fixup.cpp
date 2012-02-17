@@ -379,13 +379,16 @@ void fixup_glGetActiveAttribOrUniform(GLMessage *glmsg, int location) {
     arg_location->add_intvalue(location);
 }
 
-void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessage *glmsg) {
+void fixupGLMessage(GLTraceContext *context, nsecs_t wallStart, nsecs_t wallEnd,
+                                             nsecs_t threadStart, nsecs_t threadEnd,
+                                             GLMessage *glmsg) {
     // for all messages, set the current context id
     glmsg->set_context_id(context->getId());
 
     // set start time and duration
-    glmsg->set_start_time(start);
-    glmsg->set_duration((unsigned)(end - start));
+    glmsg->set_start_time(wallStart);
+    glmsg->set_duration((unsigned)(wallEnd - wallStart));
+    glmsg->set_threadtime((unsigned)(threadEnd - threadStart));
 
     // do any custom message dependent processing
     switch (glmsg->function()) {

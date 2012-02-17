@@ -1418,6 +1418,13 @@ class GLMessage : public ::google::protobuf::MessageLite {
   inline const ::android::gltrace::GLMessage_FrameBuffer& fb() const;
   inline ::android::gltrace::GLMessage_FrameBuffer* mutable_fb();
   
+  // optional int32 threadtime = 8;
+  inline bool has_threadtime() const;
+  inline void clear_threadtime();
+  static const int kThreadtimeFieldNumber = 8;
+  inline ::google::protobuf::int32 threadtime() const;
+  inline void set_threadtime(::google::protobuf::int32 value);
+  
   // @@protoc_insertion_point(class_scope:android.gltrace.GLMessage)
  private:
   mutable int _cached_size_;
@@ -1429,11 +1436,12 @@ class GLMessage : public ::google::protobuf::MessageLite {
   ::google::protobuf::RepeatedPtrField< ::android::gltrace::GLMessage_DataType > args_;
   ::android::gltrace::GLMessage_DataType* returnvalue_;
   ::android::gltrace::GLMessage_FrameBuffer* fb_;
+  ::google::protobuf::int32 threadtime_;
   friend void  protobuf_AddDesc_gltrace_2eproto();
   friend void protobuf_AssignDesc_gltrace_2eproto();
   friend void protobuf_ShutdownFile_gltrace_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -1858,6 +1866,22 @@ inline ::android::gltrace::GLMessage_FrameBuffer* GLMessage::mutable_fb() {
   _set_bit(6);
   if (fb_ == NULL) fb_ = new ::android::gltrace::GLMessage_FrameBuffer;
   return fb_;
+}
+
+// optional int32 threadtime = 8;
+inline bool GLMessage::has_threadtime() const {
+  return _has_bit(7);
+}
+inline void GLMessage::clear_threadtime() {
+  threadtime_ = 0;
+  _clear_bit(7);
+}
+inline ::google::protobuf::int32 GLMessage::threadtime() const {
+  return threadtime_;
+}
+inline void GLMessage::set_threadtime(::google::protobuf::int32 value) {
+  _set_bit(7);
+  threadtime_ = value;
 }
 
 
