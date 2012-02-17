@@ -1325,7 +1325,11 @@ public class TextUtils {
                 sb.append("&amp;"); //$NON-NLS-1$
                 break;
             case '\'':
-                sb.append("&apos;"); //$NON-NLS-1$
+                //http://www.w3.org/TR/xhtml1
+                // The named character reference &apos; (the apostrophe, U+0027) was introduced in
+                // XML 1.0 but does not appear in HTML. Authors should therefore use &#39; instead
+                // of &apos; to work as expected in HTML 4 user agents.
+                sb.append("&#39;"); //$NON-NLS-1$
                 break;
             case '"':
                 sb.append("&quot;"); //$NON-NLS-1$
