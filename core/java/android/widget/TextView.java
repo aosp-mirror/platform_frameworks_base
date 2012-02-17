@@ -5022,15 +5022,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     hardwareCanvas.setViewport(width, height);
                     // The dirty rect should always be null for a display list
                     hardwareCanvas.onPreDraw(null);
+                    hardwareCanvas.translate(-mScrollX, -mScrollY);
                     layout.draw(hardwareCanvas, highlight, mHighlightPaint, cursorOffsetVertical);
+                    hardwareCanvas.translate(mScrollX, mScrollY);
                 } finally {
                     hardwareCanvas.onPostDraw();
                     mTextDisplayList.end();
                     mTextDisplayListIsValid = true;
                 }
             }
-            ((HardwareCanvas) canvas).drawDisplayList(mTextDisplayList,
-                    mScrollX + width, mScrollY + height, null);
+            canvas.translate(mScrollX, mScrollY);
+            ((HardwareCanvas) canvas).drawDisplayList(mTextDisplayList, width, height, null,
+                    DisplayList.FLAG_CLIP_CHILDREN);
+            canvas.translate(-mScrollX, -mScrollY);
         } else {
             layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
         }

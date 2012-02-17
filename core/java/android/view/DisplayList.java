@@ -27,6 +27,15 @@ package android.view;
  */
 public abstract class DisplayList {
     /**
+     * Flag used when calling
+     * {@link HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int)}.
+     * When this flag is set, draw operations lying outside of the bounds of the
+     * display list will be culled early. It is recommeneded to always set this
+     * flag.
+     */
+    public static final int FLAG_CLIP_CHILDREN = 0x1;
+
+    /**
      * Starts recording the display list. All operations performed on the
      * returned canvas are recorded and stored in this display list.
      * 

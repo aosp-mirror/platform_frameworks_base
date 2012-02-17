@@ -24,6 +24,23 @@
 namespace android {
 namespace uirenderer {
 
+// Defined in ShapeCache.h
+void computePathBounds(const SkPath *path, const SkPaint* paint,
+        float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
+    const SkRect& bounds = path->getBounds();
+
+    const float pathWidth = fmax(bounds.width(), 1.0f);
+    const float pathHeight = fmax(bounds.height(), 1.0f);
+
+    left = bounds.fLeft;
+    top = bounds.fTop;
+
+    offset = (int) floorf(fmax(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
+
+    width = uint32_t(pathWidth + offset * 2.0 + 0.5);
+    height = uint32_t(pathHeight + offset * 2.0 + 0.5);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Path cache
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,6 +85,9 @@ void PathCache::clearGarbage() {
 PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
     PathCacheEntry entry(path, paint);
     PathTexture* texture = mCache.get(entry);
+
+    float left, top, offset;
+    uint32_t width, height;
 
     if (!texture) {
         texture = addTexture(entry, path, paint);

@@ -57,11 +57,14 @@ public abstract class HardwareCanvas extends Canvas {
      * @param height The height of the display list.
      * @param dirty The dirty region to redraw in the next pass, matters only
      *        if this method returns true, can be null.
+     * @param flags Optional flags about drawing, see {@link DisplayList} for
+     *              the possible flags.
      * 
      * @return True if the content of the display list requires another
      *         drawing pass (invalidate()), false otherwise
      */
-    public abstract boolean drawDisplayList(DisplayList displayList, int width, int height, Rect dirty);
+    public abstract boolean drawDisplayList(DisplayList displayList, int width, int height,
+            Rect dirty, int flags);
 
     /**
      * Outputs the specified display list to the log. This method exists for use by

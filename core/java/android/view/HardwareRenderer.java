@@ -969,7 +969,8 @@ public abstract class HardwareRenderer {
                             }
 
                             boolean invalidateNeeded = canvas.drawDisplayList(displayList,
-                                    view.getWidth(), view.getHeight(), mRedrawClip);
+                                    view.getWidth(), view.getHeight(), mRedrawClip,
+                                    DisplayList.FLAG_CLIP_CHILDREN);
 
                             if (mProfileEnabled) {
                                 long now = System.nanoTime();
