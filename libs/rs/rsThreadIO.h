@@ -34,6 +34,13 @@ public:
     void init();
     void shutdown();
 
+    size_t getMaxInlineSize() {
+        return mMaxInlineSize;
+    }
+    bool isPureFifo() {
+        return mPureFifo;
+    }
+
     // Plays back commands from the client.
     // Returns true if any commands were processed.
     bool playCoreCommands(Context *con, int waitFd);
@@ -42,8 +49,16 @@ public:
 
     void * coreHeader(uint32_t, size_t dataLen);
     void coreCommit();
+
     void coreSetReturn(const void *data, size_t dataLen);
     void coreGetReturn(void *data, size_t dataLen);
+    void coreWrite(const void *data, size_t len);
+    void coreRead(void *data, size_t len);
+
+    void asyncSetReturn(const void *data, size_t dataLen);
+    void asyncGetReturn(void *data, size_t dataLen);
+    void asyncWrite(const void *data, size_t len);
+    void asyncRead(void *data, size_t len);
 
 
     RsMessageToClientType getClientHeader(size_t *receiveLen, uint32_t *usrID);
@@ -65,6 +80,8 @@ protected:
     ClientCmdHeader mLastClientHeader;
 
     bool mRunning;
+    bool mPureFifo;
+    size_t mMaxInlineSize;
 
     FifoSocket mToClient;
     FifoSocket mToCore;
