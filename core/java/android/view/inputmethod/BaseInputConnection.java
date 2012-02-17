@@ -19,7 +19,6 @@ package android.view.inputmethod;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.text.Editable;
 import android.text.NoCopySpan;
