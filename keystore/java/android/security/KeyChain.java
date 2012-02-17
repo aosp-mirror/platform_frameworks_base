@@ -169,7 +169,6 @@ public final class KeyChain {
 
 
     /**
-     * @hide TODO This is temporary and will be removed
      * Broadcast Action: Indicates the trusted storage has changed. Sent when
      * one of this happens:
      *

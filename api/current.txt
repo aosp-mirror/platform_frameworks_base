@@ -18780,6 +18780,7 @@ package android.security {
     method public static android.content.Intent createInstallIntent();
     method public static java.security.cert.X509Certificate[] getCertificateChain(android.content.Context, java.lang.String) throws java.lang.InterruptedException, android.security.KeyChainException;
     method public static java.security.PrivateKey getPrivateKey(android.content.Context, java.lang.String) throws java.lang.InterruptedException, android.security.KeyChainException;
+    field public static final java.lang.String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
     field public static final java.lang.String EXTRA_CERTIFICATE = "CERT";
     field public static final java.lang.String EXTRA_NAME = "name";
     field public static final java.lang.String EXTRA_PKCS12 = "PKCS12";
