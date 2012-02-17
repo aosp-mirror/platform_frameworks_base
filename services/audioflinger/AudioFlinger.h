@@ -766,7 +766,7 @@ private:
             virtual status_t    start(pid_t tid);
             virtual void        stop();
                     bool        write(int16_t* data, uint32_t frames);
-                    bool        bufferQueueEmpty() const { return (mBufferQueue.size() == 0) ? true : false; }
+                    bool        bufferQueueEmpty() const { return mBufferQueue.size() == 0; }
                     bool        isActive() const { return mActive; }
             const wp<ThreadBase>& thread() const { return mThread; }
 
@@ -994,8 +994,8 @@ private:
               uint32_t nextUniqueId();
 
               status_t moveEffectChain_l(int sessionId,
-                                     AudioFlinger::PlaybackThread *srcThread,
-                                     AudioFlinger::PlaybackThread *dstThread,
+                                     PlaybackThread *srcThread,
+                                     PlaybackThread *dstThread,
                                      bool reRegister);
               PlaybackThread *primaryPlaybackThread_l();
               uint32_t primaryOutputDevice_l();
