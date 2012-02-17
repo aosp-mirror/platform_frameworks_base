@@ -31,6 +31,8 @@ using namespace android::renderscript;
 
 ThreadIO::ThreadIO() {
     mRunning = true;
+    mPureFifo = false;
+    mMaxInlineSize = 1024;
 }
 
 ThreadIO::~ThreadIO() {
@@ -65,6 +67,16 @@ void ThreadIO::clientShutdown() {
     mToClient.shutdown();
 }
 
+void ThreadIO::coreWrite(const void *data, size_t len) {
+    //ALOGV("core write %p %i", data, (int)len);
+    mToCore.writeAsync(data, len, true);
+}
+
+void ThreadIO::coreRead(void *data, size_t len) {
+    //ALOGV("core read %p %i", data, (int)len);
+    mToCore.read(data, len);
+}
+
 void ThreadIO::coreSetReturn(const void *data, size_t dataLen) {
     uint32_t buf;
     if (data == NULL) {
@@ -91,6 +103,7 @@ void ThreadIO::setTimeoutCallback(void (*cb)(void *), void *dat, uint64_t timeou
 
 bool ThreadIO::playCoreCommands(Context *con, int waitFd) {
     bool ret = false;
+    const bool isLocal = !isPureFifo();
 
     uint8_t buf[2 * 1024];
     const CoreCmdHeader *cmd = (const CoreCmdHeader *)&buf[0];
@@ -120,13 +133,18 @@ bool ThreadIO::playCoreCommands(Context *con, int waitFd) {
         }
 
         if (p[0].revents) {
-            size_t r = mToCore.read(&buf[0], sizeof(CoreCmdHeader));
-            mToCore.read(&buf[sizeof(CoreCmdHeader)], cmd->bytes);
-
-            if (r != sizeof(CoreCmdHeader)) {
-                // exception or timeout occurred.
-                break;
+            size_t r = 0;
+            if (isLocal) {
+                r = mToCore.read(&buf[0], sizeof(CoreCmdHeader));
+                mToCore.read(&buf[sizeof(CoreCmdHeader)], cmd->bytes);
+                if (r != sizeof(CoreCmdHeader)) {
+                    // exception or timeout occurred.
+                    break;
+                }
+            } else {
+                r = mToCore.read((void *)&cmd->cmdID, sizeof(cmd->cmdID));
             }
+
 
             ret = true;
             if (con->props.mLogTimes) {
@@ -138,7 +156,12 @@ bool ThreadIO::playCoreCommands(Context *con, int waitFd) {
                 rsAssert(cmd->cmdID < (sizeof(gPlaybackFuncs) / sizeof(void *)));
                 ALOGE("playCoreCommands error con %p, cmd %i", con, cmd->cmdID);
             }
-            gPlaybackFuncs[cmd->cmdID](con, data, cmd->bytes);
+
+            if (isLocal) {
+                gPlaybackFuncs[cmd->cmdID](con, data, cmd->bytes);
+            } else {
+                gPlaybackRemoteFuncs[cmd->cmdID](con, this);
+            }
 
             if (con->props.mLogTimes) {
                 con->timerSet(Context::RS_TIMER_IDLE);

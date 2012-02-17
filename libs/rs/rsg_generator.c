@@ -238,7 +238,7 @@ void printApiCpp(FILE *f) {
             //fprintf(f, "    ALOGE(\"add command %s\\n\");\n", api->name);
             if (hasInlineDataPointers(api)) {
                 fprintf(f, "    RS_CMD_%s *cmd = NULL;\n", api->name);
-                fprintf(f, "    if (dataSize < 1024) {;\n");
+                fprintf(f, "    if (dataSize < io->getMaxInlineSize()) {;\n");
                 fprintf(f, "        cmd = static_cast<RS_CMD_%s *>(io->coreHeader(RS_CMD_ID_%s, dataSize + size));\n", api->name, api->name);
                 fprintf(f, "    } else {\n");
                 fprintf(f, "        cmd = static_cast<RS_CMD_%s *>(io->coreHeader(RS_CMD_ID_%s, size));\n", api->name, api->name);
@@ -252,7 +252,7 @@ void printApiCpp(FILE *f) {
                 const VarType *vt = &api->params[ct2];
                 needFlush += vt->ptrLevel;
                 if (vt->ptrLevel && hasInlineDataPointers(api)) {
-                    fprintf(f, "    if (dataSize < 1024) {\n");
+                    fprintf(f, "    if (dataSize < io->getMaxInlineSize()) {\n");
                     fprintf(f, "        memcpy(payload, %s, %s_length);\n", vt->name, vt->name);
                     fprintf(f, "        cmd->%s = (", vt->name);
                     printVarType(f, vt);
@@ -272,7 +272,7 @@ void printApiCpp(FILE *f) {
 
             fprintf(f, "    io->coreCommit();\n");
             if (hasInlineDataPointers(api)) {
-                fprintf(f, "    if (dataSize >= 1024) {\n");
+                fprintf(f, "    if (dataSize >= io->getMaxInlineSize()) {\n");
                 fprintf(f, "        io->coreGetReturn(NULL, 0);\n");
                 fprintf(f, "    }\n");
             } else if (api->ret.typeName[0]) {
@@ -288,81 +288,71 @@ void printApiCpp(FILE *f) {
         fprintf(f, "};\n\n");
 
 
+        // Generate a remote sender function
+        const char * str = "core";
+        if (api->direct) {
+            str = "async";
+        }
+
         fprintf(f, "static ");
         printFuncDecl(f, api, "RF_", 0, 0);
         fprintf(f, "\n{\n");
-        fprintf(f, "    Fifo *f = NULL;\n");
-        fprintf(f, "    RS_CMD_%s cmd;\n", api->name);
-        fprintf(f, "    const uint32_t cmdSize = sizeof(cmd);\n");
+        fprintf(f, "    ThreadIO *io = &((Context *)rsc)->mIO;\n");
         fprintf(f, "    const uint32_t cmdID = RS_CMD_ID_%s;\n", api->name);
-        fprintf(f, "    f->writeAsync(&cmdID, sizeof(cmdID));\n");
-        fprintf(f, "    intptr_t offset = cmdSize;\n");
-        fprintf(f, "    uint32_t dataSize = 0;\n");
+        fprintf(f, "    io->%sWrite(&cmdID, sizeof(cmdID));\n\n", str);
+
         for (ct2=0; ct2 < api->paramCount; ct2++) {
             const VarType *vt = &api->params[ct2];
-            if (vt->isConst && vt->ptrLevel) {
-                switch(vt->ptrLevel) {
-                case 1:
-                    fprintf(f, "    dataSize += %s_length;\n", vt->name);
-                    break;
-                case 2:
-                    fprintf(f, "    for (size_t ct = 0; ct < (%s_length_length / sizeof(%s_length)); ct++) {\n", vt->name, vt->name);
-                    fprintf(f, "        dataSize += %s_length[ct];\n", vt->name);
-                    fprintf(f, "    }\n");
-                    break;
-                default:
-                    printf("pointer level not handled!!");
-                }
+            if (vt->ptrLevel == 0) {
+                fprintf(f, "    io->%sWrite(& %s, sizeof(%s));\n", str, vt->name, vt->name);
             }
         }
         fprintf(f, "\n");
 
         for (ct2=0; ct2 < api->paramCount; ct2++) {
             const VarType *vt = &api->params[ct2];
-            switch(vt->ptrLevel) {
-            case 0:
-                fprintf(f, "    cmd.%s = %s;\n", vt->name, vt->name);
-                break;
-            case 1:
-                fprintf(f, "    cmd.%s = (", vt->name);
-                printVarType(f, vt);
-                fprintf(f, ")offset;\n");
-                fprintf(f, "    offset += %s_length;\n", vt->name);
-                break;
-            case 2:
-                fprintf(f, "    cmd.%s = (", vt->name);
-                printVarType(f, vt);
-                fprintf(f, ")offset;\n");
-                fprintf(f, "    for (size_t ct = 0; ct < (%s_length_length / sizeof(%s_length)); ct++) {\n", vt->name, vt->name);
-                fprintf(f, "        offset += %s_length[ct];\n", vt->name);
-                fprintf(f, "    }\n");
-                break;
-            default:
-                fprintf(stderr, "pointer level not handled!!");
+            if ((vt->ptrLevel == 1) && (vt->isConst)) {
+                fprintf(f, "    io->%sWrite(%s, %s_length);\n", str, vt->name, vt->name);
             }
         }
         fprintf(f, "\n");
 
-        fprintf(f, "    f->writeAsync(&cmd, cmdSize);\n");
         for (ct2=0; ct2 < api->paramCount; ct2++) {
             const VarType *vt = &api->params[ct2];
-            if (vt->ptrLevel == 1) {
-                fprintf(f, "    f->writeAsync(%s, %s_length);\n", vt->name, vt->name);
-            }
-            if (vt->ptrLevel == 2) {
+            if ((vt->ptrLevel == 2) && (vt->isConst)) {
                 fprintf(f, "    for (size_t ct = 0; ct < (%s_length_length / sizeof(%s_length)); ct++) {\n", vt->name, vt->name);
-                fprintf(f, "        f->writeAsync(%s, %s_length[ct]);\n", vt->name, vt->name);
-                fprintf(f, "        offset += %s_length[ct];\n", vt->name);
+                fprintf(f, "        io->%sWrite(%s[ct], %s_length[ct]);\n", str, vt->name, vt->name);
                 fprintf(f, "    }\n");
             }
         }
+        fprintf(f, "\n");
+
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
+            if ((vt->ptrLevel == 1) && (!vt->isConst)) {
+                fprintf(f, "    io->%sGetReturn(%s, %s_length);\n", str, vt->name, vt->name);
+            }
+        }
+        fprintf(f, "\n");
+
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
+            if ((vt->ptrLevel == 2) && (!vt->isConst)) {
+                fprintf(f, "    for (size_t ct = 0; ct < (%s_length_length / sizeof(%s_length)); ct++) {\n", vt->name, vt->name);
+                fprintf(f, "        io->%sGetReturn(%s[ct], %s_length[ct]);\n", str, vt->name, vt->name);
+                fprintf(f, "    }\n");
+            }
+        }
+        fprintf(f, "\n");
 
         if (api->ret.typeName[0]) {
             fprintf(f, "    ");
             printVarType(f, &api->ret);
             fprintf(f, " retValue;\n");
-            fprintf(f, "    f->writeWaitReturn(&retValue, sizeof(retValue));\n");
+            fprintf(f, "    io->%sGetReturn(&retValue, sizeof(retValue));\n", str);
             fprintf(f, "    return retValue;\n");
+        } else /*if (api->sync)*/ {
+            fprintf(f, "    io->%sGetReturn(NULL, 0);\n", str);
         }
         fprintf(f, "}\n\n");
     }
@@ -418,7 +408,6 @@ void printPlaybackCpp(FILE *f) {
     fprintf(f, "#include \"rsDevice.h\"\n");
     fprintf(f, "#include \"rsContext.h\"\n");
     fprintf(f, "#include \"rsThreadIO.h\"\n");
-    //fprintf(f, "#include \"rsgApiStructs.h\"\n");
     fprintf(f, "#include \"rsgApiFuncDecl.h\"\n");
     fprintf(f, "\n");
     fprintf(f, "namespace android {\n");
@@ -434,8 +423,6 @@ void printPlaybackCpp(FILE *f) {
         }
 
         fprintf(f, "void rsp_%s(Context *con, const void *vp, size_t cmdSizeBytes) {\n", api->name);
-
-        //fprintf(f, "    ALOGE(\"play command %s\\n\");\n", api->name);
         fprintf(f, "    const RS_CMD_%s *cmd = static_cast<const RS_CMD_%s *>(vp);\n", api->name, api->name);
 
         if (hasInlineDataPointers(api)) {
@@ -488,30 +475,40 @@ void printPlaybackCpp(FILE *f) {
         const ApiEntry * api = &apis[ct];
         int needFlush = 0;
 
-        fprintf(f, "void rspr_%s(Context *con, Fifo *f, uint8_t *scratch, size_t scratchSize) {\n", api->name);
-
-        //fprintf(f, "    ALOGE(\"play command %s\\n\");\n", api->name);
+        fprintf(f, "void rspr_%s(Context *con, ThreadIO *io) {\n", api->name);
         fprintf(f, "    RS_CMD_%s cmd;\n", api->name);
-        fprintf(f, "    f->read(&cmd, sizeof(cmd));\n");
 
         for (ct2=0; ct2 < api->paramCount; ct2++) {
             const VarType *vt = &api->params[ct2];
-            needFlush += vt->ptrLevel;
+            if (vt->ptrLevel == 0) {
+                fprintf(f, "    io->coreRead(&cmd.%s, sizeof(cmd.%s));\n", vt->name, vt->name);
+            }
+        }
+        fprintf(f, "\n");
+
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
             if (vt->ptrLevel == 1) {
                 fprintf(f, "    cmd.%s = (", vt->name);
                 printVarType(f, vt);
-                fprintf(f, ")scratch;\n");
-                fprintf(f, "    f->read(scratch, cmd.%s_length);\n", vt->name);
-                fprintf(f, "    scratch += cmd.%s_length;\n", vt->name);
+                fprintf(f, ")malloc(cmd.%s_length);\n", vt->name);
+
+                if (vt->isConst) {
+                    fprintf(f, "    if (cmd.%s_length) io->coreRead((void *)cmd.%s, cmd.%s_length);\n", vt->name, vt->name, vt->name);
+                }
             }
+        }
+        fprintf(f, "\n");
+
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
             if (vt->ptrLevel == 2) {
-                fprintf(f, "    size_t sum_%s = 0;\n", vt->name);
                 fprintf(f, "    for (size_t ct = 0; ct < (cmd.%s_length_length / sizeof(cmd.%s_length)); ct++) {\n", vt->name, vt->name);
-                fprintf(f, "        ((size_t *)scratch)[ct] = cmd.%s_length[ct];\n", vt->name);
-                fprintf(f, "        sum_%s += cmd.%s_length[ct];\n", vt->name, vt->name);
+                fprintf(f, "        cmd.%s = (", vt->name);
+                printVarType(f, vt);
+                fprintf(f, ")malloc(cmd.%s_length[ct]);\n", vt->name);
+                fprintf(f, "        io->coreRead(& cmd.%s, cmd.%s_length[ct]);\n", vt->name, vt->name);
                 fprintf(f, "    }\n");
-                fprintf(f, "    f->read(scratch, sum_%s);\n", vt->name);
-                fprintf(f, "    scratch += sum_%s;\n", vt->name);
             }
         }
         fprintf(f, "\n");
@@ -535,10 +532,42 @@ void printPlaybackCpp(FILE *f) {
         }
         fprintf(f, ");\n");
 
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
+            if ((vt->ptrLevel == 1) && (!vt->isConst)) {
+                fprintf(f, "    io->coreSetReturn((void *)cmd.%s, cmd.%s_length);\n", vt->name, vt->name);
+            }
+        }
+
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
+            if ((vt->ptrLevel == 2) && (!vt->isConst)) {
+                fprintf(f, "    for (size_t ct = 0; ct < (cmd.%s_length_length / sizeof(cmd.%s_length)); ct++) {\n", vt->name, vt->name);
+                fprintf(f, "        io->coreSetReturn((void *)cmd.%s[ct], cmd.%s_length[ct]);\n", vt->name, vt->name);
+                fprintf(f, "    }\n");
+            }
+        }
+        fprintf(f, "\n");
+
         if (api->ret.typeName[0]) {
-            fprintf(f, "    f->readReturn(&ret, sizeof(ret));\n");
-        } else if (needFlush) {
-            fprintf(f, "    f->readReturn(NULL, 0);\n");
+            fprintf(f, "    io->coreSetReturn(&ret, sizeof(ret));\n");
+        } else /*if (needFlush)*/ {
+            fprintf(f, "    io->coreSetReturn(NULL, 0);\n");
+        }
+
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
+            if (vt->ptrLevel == 1) {
+                fprintf(f, "    free((void *)cmd.%s);\n", vt->name);
+            }
+        }
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
+            if (vt->ptrLevel == 2) {
+                fprintf(f, "    for (size_t ct = 0; ct < (cmd.%s_length_length / sizeof(cmd.%s_length)); ct++) {\n", vt->name, vt->name);
+                fprintf(f, "        free((void *)cmd.%s);\n", vt->name);
+                fprintf(f, "    }\n");
+            }
         }
 
         fprintf(f, "};\n\n");
@@ -608,7 +637,7 @@ int main(int argc, char **argv) {
             fprintf(f, "    uint32_t size;\n");
             fprintf(f, "} RsPlaybackRemoteHeader;\n\n");
             fprintf(f, "typedef void (*RsPlaybackLocalFunc)(Context *, const void *, size_t sizeBytes);\n");
-            fprintf(f, "typedef void (*RsPlaybackRemoteFunc)(Context *, Fifo *, uint8_t *scratch, size_t scratchSize);\n");
+            fprintf(f, "typedef void (*RsPlaybackRemoteFunc)(Context *, ThreadIO *);\n");
             fprintf(f, "extern RsPlaybackLocalFunc gPlaybackFuncs[%i];\n", apiCount + 1);
             fprintf(f, "extern RsPlaybackRemoteFunc gPlaybackRemoteFuncs[%i];\n", apiCount + 1);
 
