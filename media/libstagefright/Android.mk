@@ -93,13 +93,7 @@ LOCAL_STATIC_LIBRARIES := \
 
 # The following was shamelessly copied from external/webkit/Android.mk and
 # currently must follow the same logic to determine how webkit was built and
-# if it's safe to link against libchromium.net
-
-# V8 also requires an ARMv7 CPU, and since we must use jsc, we cannot
-# use the Chrome http stack either.
-ifneq ($(strip $(ARCH_ARM_HAVE_ARMV7A)),true)
-  USE_ALT_HTTP := true
-endif
+# if it's safe to link against libchromium_net
 
 # See if the user has specified a stack they want to use
 HTTP_STACK = $(HTTP)
