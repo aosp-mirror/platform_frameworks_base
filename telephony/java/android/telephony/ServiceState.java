@@ -64,44 +64,47 @@ public class ServiceState implements Parcelable {
 
     /**
      * Available radio technologies for GSM, UMTS and CDMA.
+     * Duplicates the constants from hardware/radio/include/ril.h
+     * This should only be used by agents working with the ril.  Others
+     * should use the equivalent TelephonyManager.NETWORK_TYPE_*
      */
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_UNKNOWN = 0;
+    public static final int RIL_RADIO_TECHNOLOGY_UNKNOWN = 0;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_GPRS = 1;
+    public static final int RIL_RADIO_TECHNOLOGY_GPRS = 1;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_EDGE = 2;
+    public static final int RIL_RADIO_TECHNOLOGY_EDGE = 2;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_UMTS = 3;
+    public static final int RIL_RADIO_TECHNOLOGY_UMTS = 3;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_IS95A = 4;
+    public static final int RIL_RADIO_TECHNOLOGY_IS95A = 4;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_IS95B = 5;
+    public static final int RIL_RADIO_TECHNOLOGY_IS95B = 5;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_1xRTT = 6;
+    public static final int RIL_RADIO_TECHNOLOGY_1xRTT = 6;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_EVDO_0 = 7;
+    public static final int RIL_RADIO_TECHNOLOGY_EVDO_0 = 7;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_EVDO_A = 8;
+    public static final int RIL_RADIO_TECHNOLOGY_EVDO_A = 8;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_HSDPA = 9;
+    public static final int RIL_RADIO_TECHNOLOGY_HSDPA = 9;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_HSUPA = 10;
+    public static final int RIL_RADIO_TECHNOLOGY_HSUPA = 10;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_HSPA = 11;
+    public static final int RIL_RADIO_TECHNOLOGY_HSPA = 11;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_EVDO_B = 12;
+    public static final int RIL_RADIO_TECHNOLOGY_EVDO_B = 12;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_EHRPD = 13;
+    public static final int RIL_RADIO_TECHNOLOGY_EHRPD = 13;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_LTE = 14;
+    public static final int RIL_RADIO_TECHNOLOGY_LTE = 14;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_HSPAP = 15;
+    public static final int RIL_RADIO_TECHNOLOGY_HSPAP = 15;
     /**
      * GSM radio technology only supports voice. It does not support data.
      * @hide
      */
-    public static final int RADIO_TECHNOLOGY_GSM = 16;
+    public static final int RIL_RADIO_TECHNOLOGY_GSM = 16;
 
     /**
      * Available registration states for GSM, UMTS and CDMA.
@@ -400,59 +403,59 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    public static String radioTechnologyToString(int rt) {
+    public static String rilRadioTechnologyToString(int rt) {
         String rtString;
 
         switch(rt) {
-            case 0:
+            case RIL_RADIO_TECHNOLOGY_UNKNOWN:
                 rtString = "Unknown";
                 break;
-            case 1:
+            case RIL_RADIO_TECHNOLOGY_GPRS:
                 rtString = "GPRS";
                 break;
-            case 2:
+            case RIL_RADIO_TECHNOLOGY_EDGE:
                 rtString = "EDGE";
                 break;
-            case 3:
+            case RIL_RADIO_TECHNOLOGY_UMTS:
                 rtString = "UMTS";
                 break;
-            case 4:
+            case RIL_RADIO_TECHNOLOGY_IS95A:
                 rtString = "CDMA-IS95A";
                 break;
-            case 5:
+            case RIL_RADIO_TECHNOLOGY_IS95B:
                 rtString = "CDMA-IS95B";
                 break;
-            case 6:
+            case RIL_RADIO_TECHNOLOGY_1xRTT:
                 rtString = "1xRTT";
                 break;
-            case 7:
+            case RIL_RADIO_TECHNOLOGY_EVDO_0:
                 rtString = "EvDo-rev.0";
                 break;
-            case 8:
+            case RIL_RADIO_TECHNOLOGY_EVDO_A:
                 rtString = "EvDo-rev.A";
                 break;
-            case 9:
+            case RIL_RADIO_TECHNOLOGY_HSDPA:
                 rtString = "HSDPA";
                 break;
-            case 10:
+            case RIL_RADIO_TECHNOLOGY_HSUPA:
                 rtString = "HSUPA";
                 break;
-            case 11:
+            case RIL_RADIO_TECHNOLOGY_HSPA:
                 rtString = "HSPA";
                 break;
-            case 12:
+            case RIL_RADIO_TECHNOLOGY_EVDO_B:
                 rtString = "EvDo-rev.B";
                 break;
-            case 13:
+            case RIL_RADIO_TECHNOLOGY_EHRPD:
                 rtString = "eHRPD";
                 break;
-            case 14:
+            case RIL_RADIO_TECHNOLOGY_LTE:
                 rtString = "LTE";
                 break;
-            case 15:
+            case RIL_RADIO_TECHNOLOGY_HSPAP:
                 rtString = "HSPAP";
                 break;
-            case 16:
+            case RIL_RADIO_TECHNOLOGY_GSM:
                 rtString = "GSM";
                 break;
             default:
@@ -460,12 +463,12 @@ public class ServiceState implements Parcelable {
                 Log.w(LOG_TAG, "Unexpected radioTechnology=" + rt);
                 break;
         }
-        return rtString + ":" + rt;
+        return rtString;
     }
 
     @Override
     public String toString() {
-        String radioTechnology = radioTechnologyToString(mRadioTechnology);
+        String radioTechnology = rilRadioTechnologyToString(mRadioTechnology);
 
         return (mState + " " + (mRoaming ? "roaming" : "home")
                 + " " + mOperatorAlphaLong
@@ -644,8 +647,45 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    public int getRadioTechnology() {
+    public int getRilRadioTechnology() {
         return this.mRadioTechnology;
+    }
+
+    /** @hide */
+    public int getNetworkType() {
+        switch(mRadioTechnology) {
+        case ServiceState.RIL_RADIO_TECHNOLOGY_GPRS:
+            return TelephonyManager.NETWORK_TYPE_GPRS;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_EDGE:
+            return TelephonyManager.NETWORK_TYPE_EDGE;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_UMTS:
+            return TelephonyManager.NETWORK_TYPE_UMTS;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA:
+            return TelephonyManager.NETWORK_TYPE_HSDPA;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA:
+            return TelephonyManager.NETWORK_TYPE_HSUPA;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_HSPA:
+            return TelephonyManager.NETWORK_TYPE_HSPA;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_IS95A:
+        case ServiceState.RIL_RADIO_TECHNOLOGY_IS95B:
+            return TelephonyManager.NETWORK_TYPE_CDMA;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT:
+            return TelephonyManager.NETWORK_TYPE_1xRTT;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0:
+            return TelephonyManager.NETWORK_TYPE_EVDO_0;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A:
+            return TelephonyManager.NETWORK_TYPE_EVDO_A;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B:
+            return TelephonyManager.NETWORK_TYPE_EVDO_B;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD:
+            return TelephonyManager.NETWORK_TYPE_EHRPD;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_LTE:
+            return TelephonyManager.NETWORK_TYPE_LTE;
+        case ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP:
+            return TelephonyManager.NETWORK_TYPE_HSPAP;
+        default:
+            return TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        }
     }
 
     /** @hide */
@@ -665,25 +705,25 @@ public class ServiceState implements Parcelable {
 
     /** @hide */
     public static boolean isGsm(int radioTechnology) {
-        return radioTechnology == RADIO_TECHNOLOGY_GPRS
-                || radioTechnology == RADIO_TECHNOLOGY_EDGE
-                || radioTechnology == RADIO_TECHNOLOGY_UMTS
-                || radioTechnology == RADIO_TECHNOLOGY_HSDPA
-                || radioTechnology == RADIO_TECHNOLOGY_HSUPA
-                || radioTechnology == RADIO_TECHNOLOGY_HSPA
-                || radioTechnology == RADIO_TECHNOLOGY_LTE
-                || radioTechnology == RADIO_TECHNOLOGY_HSPAP
-                || radioTechnology == RADIO_TECHNOLOGY_GSM;
+        return radioTechnology == RIL_RADIO_TECHNOLOGY_GPRS
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_EDGE
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_UMTS
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_HSDPA
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_HSUPA
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_HSPA
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_HSPAP
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_GSM;
     }
 
     /** @hide */
     public static boolean isCdma(int radioTechnology) {
-        return radioTechnology == RADIO_TECHNOLOGY_IS95A
-                || radioTechnology == RADIO_TECHNOLOGY_IS95B
-                || radioTechnology == RADIO_TECHNOLOGY_1xRTT
-                || radioTechnology == RADIO_TECHNOLOGY_EVDO_0
-                || radioTechnology == RADIO_TECHNOLOGY_EVDO_A
-                || radioTechnology == RADIO_TECHNOLOGY_EVDO_B
-                || radioTechnology == RADIO_TECHNOLOGY_EHRPD;
+        return radioTechnology == RIL_RADIO_TECHNOLOGY_IS95A
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_IS95B
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_1xRTT
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_EVDO_0
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_EVDO_A
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_EVDO_B
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_EHRPD;
     }
 }

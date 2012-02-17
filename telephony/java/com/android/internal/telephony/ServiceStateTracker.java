@@ -54,10 +54,10 @@ public abstract class ServiceStateTracker extends Handler {
     protected boolean mDesiredPowerState;
 
     /**
-     *  Values correspond to ServiceState.RADIO_TECHNOLOGY_ definitions.
+     *  Values correspond to ServiceState.RIL_RADIO_TECHNOLOGY_ definitions.
      */
-    protected int mRadioTechnology = 0;
-    protected int mNewRadioTechnology = 0;
+    protected int mRilRadioTechnology = 0;
+    protected int mNewRilRadioTechnology = 0;
 
     /**
      * By default, strength polling is enabled.  However, if we're

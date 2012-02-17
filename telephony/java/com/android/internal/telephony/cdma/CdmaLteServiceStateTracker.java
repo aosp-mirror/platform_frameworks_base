@@ -185,19 +185,21 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
     @Override
     protected void pollStateDone() {
-        // determine data NetworkType from both LET and CDMA SS
+        // determine data RadioTechnology from both LET and CDMA SS
         if (mLteSS.getState() == ServiceState.STATE_IN_SERVICE) {
             //in LTE service
-            newNetworkType = mLteSS.getRadioTechnology();
+            mNewRilRadioTechnology = mLteSS.getRilRadioTechnology();
             mNewDataConnectionState = mLteSS.getState();
-            newSS.setRadioTechnology(newNetworkType);
-            log("pollStateDone LTE/eHRPD STATE_IN_SERVICE newNetworkType = " + newNetworkType);
+            newSS.setRadioTechnology(mNewRilRadioTechnology);
+            log("pollStateDone LTE/eHRPD STATE_IN_SERVICE mNewRilRadioTechnology = " +
+                    mNewRilRadioTechnology);
         } else {
             // LTE out of service, get CDMA Service State
-            newNetworkType = newSS.getRadioTechnology();
-            mNewDataConnectionState = radioTechnologyToDataServiceState(newNetworkType);
-            log("pollStateDone CDMA STATE_IN_SERVICE newNetworkType = " + newNetworkType +
-                " mNewDataConnectionState = " + mNewDataConnectionState);
+            mNewRilRadioTechnology = newSS.getRilRadioTechnology();
+            mNewDataConnectionState = radioTechnologyToDataServiceState(mNewRilRadioTechnology);
+            log("pollStateDone CDMA STATE_IN_SERVICE mNewRilRadioTechnology = " +
+                    mNewRilRadioTechnology + " mNewDataConnectionState = " +
+                    mNewDataConnectionState);
         }
 
         // TODO: Add proper support for LTE Only, we should be looking at
@@ -239,7 +241,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         boolean hasCdmaDataConnectionChanged =
             mDataConnectionState != mNewDataConnectionState;
 
-        boolean hasNetworkTypeChanged = networkType != newNetworkType;
+        boolean hasRadioTechnologyChanged = mRilRadioTechnology != mNewRilRadioTechnology;
 
         boolean hasChanged = !newSS.equals(ss);
 
@@ -251,20 +253,20 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
         boolean has4gHandoff =
                 mNewDataConnectionState == ServiceState.STATE_IN_SERVICE &&
-                (((networkType == ServiceState.RADIO_TECHNOLOGY_LTE) &&
-                  (newNetworkType == ServiceState.RADIO_TECHNOLOGY_EHRPD)) ||
-                 ((networkType == ServiceState.RADIO_TECHNOLOGY_EHRPD) &&
-                  (newNetworkType == ServiceState.RADIO_TECHNOLOGY_LTE)));
+                (((mRilRadioTechnology == ServiceState.RIL_RADIO_TECHNOLOGY_LTE) &&
+                  (mNewRilRadioTechnology == ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD)) ||
+                 ((mRilRadioTechnology == ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD) &&
+                  (mNewRilRadioTechnology == ServiceState.RIL_RADIO_TECHNOLOGY_LTE)));
 
         boolean hasMultiApnSupport =
-                (((newNetworkType == ServiceState.RADIO_TECHNOLOGY_LTE) ||
-                  (newNetworkType == ServiceState.RADIO_TECHNOLOGY_EHRPD)) &&
-                 ((networkType != ServiceState.RADIO_TECHNOLOGY_LTE) &&
-                  (networkType != ServiceState.RADIO_TECHNOLOGY_EHRPD)));
+                (((mNewRilRadioTechnology == ServiceState.RIL_RADIO_TECHNOLOGY_LTE) ||
+                  (mNewRilRadioTechnology == ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD)) &&
+                 ((mRilRadioTechnology != ServiceState.RIL_RADIO_TECHNOLOGY_LTE) &&
+                  (mRilRadioTechnology != ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD)));
 
         boolean hasLostMultiApnSupport =
-            ((newNetworkType >= ServiceState.RADIO_TECHNOLOGY_IS95A) &&
-             (newNetworkType <= ServiceState.RADIO_TECHNOLOGY_EVDO_A));
+            ((mNewRilRadioTechnology >= ServiceState.RIL_RADIO_TECHNOLOGY_IS95A) &&
+             (mNewRilRadioTechnology <= ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A));
 
         if (DBG) {
             log("pollStateDone:"
@@ -273,7 +275,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 + " hasCdmaDataConnectionAttached=" + hasCdmaDataConnectionAttached
                 + " hasCdmaDataConnectionDetached=" + hasCdmaDataConnectionDetached
                 + " hasCdmaDataConnectionChanged=" + hasCdmaDataConnectionChanged
-                + " hasNetworkTypeChanged = " + hasNetworkTypeChanged
+                + " hasRadioTechnologyChanged = " + hasRadioTechnologyChanged
                 + " hasChanged=" + hasChanged
                 + " hasRoamingOn=" + hasRoamingOn
                 + " hasRoamingOff=" + hasRoamingOff
@@ -316,13 +318,14 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         newCellLoc = tcl;
 
         mDataConnectionState = mNewDataConnectionState;
-        networkType = newNetworkType;
+        mRilRadioTechnology = mNewRilRadioTechnology;
+        mNewRilRadioTechnology = 0;
 
         newSS.setStateOutOfService(); // clean slate for next time
 
-        if (hasNetworkTypeChanged) {
+        if (hasRadioTechnologyChanged) {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
-                    ServiceState.radioTechnologyToString(networkType));
+                    ServiceState.rilRadioTechnologyToString(mRilRadioTechnology));
         }
 
         if (hasRegistered) {
@@ -404,7 +407,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             mDetachedRegistrants.notifyRegistrants();
         }
 
-        if ((hasCdmaDataConnectionChanged || hasNetworkTypeChanged)) {
+        if ((hasCdmaDataConnectionChanged || hasRadioTechnologyChanged)) {
             phone.notifyDataConnection(null);
         }
 
@@ -446,7 +449,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             int evdoSnr = ((ints[offset + 4] > 0) && (ints[offset + 4] <= 8)) ? ints[offset + 4]
                     : -1;
 
-            if (networkType == ServiceState.RADIO_TECHNOLOGY_LTE) {
+            if (mRilRadioTechnology == ServiceState.RIL_RADIO_TECHNOLOGY_LTE) {
                 lteRssi = ints[offset+5];
                 lteRsrp = ints[offset+6];
                 lteRsrq = ints[offset+7];
@@ -454,7 +457,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 lteCqi = ints[offset+9];
             }
 
-            if (networkType != ServiceState.RADIO_TECHNOLOGY_LTE) {
+            if (mRilRadioTechnology != ServiceState.RIL_RADIO_TECHNOLOGY_LTE) {
                 mSignalStrength = new SignalStrength(99, -1, cdmaDbm, cdmaEcio, evdoRssi, evdoEcio,
                         evdoSnr, false);
             } else {
@@ -476,7 +479,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         // Note: it needs to be confirmed which CDMA network types
         // can support voice and data calls concurrently.
         // For the time-being, the return value will be false.
-        return (networkType == ServiceState.RADIO_TECHNOLOGY_LTE);
+        return (mRilRadioTechnology == ServiceState.RIL_RADIO_TECHNOLOGY_LTE);
     }
 
     /**

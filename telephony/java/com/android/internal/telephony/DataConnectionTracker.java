@@ -40,6 +40,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -1165,15 +1166,14 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     protected String getReryConfig(boolean forDefault) {
-        int rt = mPhone.getServiceState().getRadioTechnology();
+        int nt = mPhone.getServiceState().getNetworkType();
 
-        if ((rt == ServiceState.RADIO_TECHNOLOGY_IS95A) ||
-            (rt == ServiceState.RADIO_TECHNOLOGY_IS95B) ||
-            (rt == ServiceState.RADIO_TECHNOLOGY_1xRTT) ||
-            (rt == ServiceState.RADIO_TECHNOLOGY_EVDO_0) ||
-            (rt == ServiceState.RADIO_TECHNOLOGY_EVDO_A) ||
-            (rt == ServiceState.RADIO_TECHNOLOGY_EVDO_B) ||
-            (rt == ServiceState.RADIO_TECHNOLOGY_EHRPD)) {
+        if ((nt == TelephonyManager.NETWORK_TYPE_CDMA) ||
+            (nt == TelephonyManager.NETWORK_TYPE_1xRTT) ||
+            (nt == TelephonyManager.NETWORK_TYPE_EVDO_0) ||
+            (nt == TelephonyManager.NETWORK_TYPE_EVDO_A) ||
+            (nt == TelephonyManager.NETWORK_TYPE_EVDO_B) ||
+            (nt == TelephonyManager.NETWORK_TYPE_EHRPD)) {
             // CDMA variant
             return SystemProperties.get("ro.cdma.data_retry_config");
         } else {

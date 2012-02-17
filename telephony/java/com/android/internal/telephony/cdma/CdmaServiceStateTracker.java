@@ -86,12 +86,6 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     private int mNitzUpdateDiff = SystemProperties.getInt("ro.nitz_update_diff",
             NITZ_UPDATE_DIFF_DEFAULT);
 
-    /**
-     *  Values correspond to ServiceState.RADIO_TECHNOLOGY_ definitions.
-     */
-    protected int networkType = 0;
-    protected int newNetworkType = 0;
-
     private boolean mCdmaRoaming = false;
     private int mRoamingIndicator;
     private boolean mIsInPrl;
@@ -556,10 +550,10 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     /**
     * Determine data network type based on radio technology.
     */
-    protected void setCdmaTechnology(int radioTechnology){
-        mNewDataConnectionState = radioTechnologyToDataServiceState(radioTechnology);
-        newSS.setRadioTechnology(radioTechnology);
-        newNetworkType = radioTechnology;
+    protected void setCdmaTechnology(int radioTech){
+        mNewDataConnectionState = radioTechnologyToDataServiceState(radioTech);
+        newSS.setRadioTechnology(radioTech);
+        mNewRilRadioTechnology = radioTech;
     }
 
     /**
@@ -925,7 +919,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         boolean hasCdmaDataConnectionChanged =
                        mDataConnectionState != mNewDataConnectionState;
 
-        boolean hasNetworkTypeChanged = networkType != newNetworkType;
+        boolean hasRadioTechnologyChanged = mRilRadioTechnology != mNewRilRadioTechnology;
 
         boolean hasChanged = !newSS.equals(ss);
 
@@ -955,15 +949,15 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         newCellLoc = tcl;
 
         mDataConnectionState = mNewDataConnectionState;
-        networkType = newNetworkType;
+        mRilRadioTechnology = mNewRilRadioTechnology;
         // this new state has been applied - forget it until we get a new new state
-        newNetworkType = 0;
+        mNewRilRadioTechnology = 0;
 
         newSS.setStateOutOfService(); // clean slate for next time
 
-        if (hasNetworkTypeChanged) {
+        if (hasRadioTechnologyChanged) {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
-                    ServiceState.radioTechnologyToString(networkType));
+                    ServiceState.rilRadioTechnologyToString(mRilRadioTechnology));
         }
 
         if (hasRegistered) {
@@ -1030,7 +1024,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             mDetachedRegistrants.notifyRegistrants();
         }
 
-        if (hasCdmaDataConnectionChanged || hasNetworkTypeChanged) {
+        if (hasCdmaDataConnectionChanged || hasRadioTechnologyChanged) {
             phone.notifyDataConnection(null);
         }
 

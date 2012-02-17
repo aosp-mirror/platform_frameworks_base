@@ -629,7 +629,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     }
                     newGPRSState = regCodeToServiceState(regState);
                     mDataRoaming = regCodeIsRoaming(regState);
-                    mNewRadioTechnology = type;
+                    mNewRilRadioTechnology = type;
                     newSS.setRadioTechnology(type);
                 break;
 
@@ -746,8 +746,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 " mNewMaxDataCalls=" + mNewMaxDataCalls +
                 " oldReasonDataDenied=" + mReasonDataDenied +
                 " mNewReasonDataDenied=" + mNewReasonDataDenied +
-                " oldType=" + ServiceState.radioTechnologyToString(mRadioTechnology) +
-                " newType=" + ServiceState.radioTechnologyToString(mNewRadioTechnology));
+                " oldType=" + ServiceState.rilRadioTechnologyToString(mRilRadioTechnology) +
+                " newType=" + ServiceState.rilRadioTechnologyToString(mNewRilRadioTechnology));
         }
 
         boolean hasRegistered =
@@ -766,7 +766,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 gprsState == ServiceState.STATE_IN_SERVICE
                 && newGPRSState != ServiceState.STATE_IN_SERVICE;
 
-        boolean hasRadioTechnologyChanged = mRadioTechnology != mNewRadioTechnology;
+        boolean hasRadioTechnologyChanged = mRilRadioTechnology != mNewRilRadioTechnology;
 
         boolean hasChanged = !newSS.equals(ss);
 
@@ -800,11 +800,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             int cid = -1;
             GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
             if (loc != null) cid = loc.getCid();
-            EventLog.writeEvent(EventLogTags.GSM_RAT_SWITCHED, cid, mRadioTechnology,
-                    mNewRadioTechnology);
+            EventLog.writeEvent(EventLogTags.GSM_RAT_SWITCHED, cid, mRilRadioTechnology,
+                    mNewRilRadioTechnology);
             if (DBG) {
-                log("RAT switched " + ServiceState.radioTechnologyToString(mRadioTechnology) +
-                        " -> " + ServiceState.radioTechnologyToString(mNewRadioTechnology) +
+                log("RAT switched " + ServiceState.rilRadioTechnologyToString(mRilRadioTechnology) +
+                        " -> " + ServiceState.rilRadioTechnologyToString(mNewRilRadioTechnology) +
                         " at cell " + cid);
             }
         }
@@ -812,16 +812,16 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         gprsState = newGPRSState;
         mReasonDataDenied = mNewReasonDataDenied;
         mMaxDataCalls = mNewMaxDataCalls;
-        mRadioTechnology = mNewRadioTechnology;
+        mRilRadioTechnology = mNewRilRadioTechnology;
         // this new state has been applied - forget it until we get a new new state
-        mNewRadioTechnology = 0;
+        mNewRilRadioTechnology = 0;
 
 
         newSS.setStateOutOfService(); // clean slate for next time
 
         if (hasRadioTechnologyChanged) {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
-                    ServiceState.radioTechnologyToString(mRadioTechnology));
+                    ServiceState.rilRadioTechnologyToString(mRilRadioTechnology));
         }
 
         if (hasRegistered) {
@@ -1246,7 +1246,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * that could support voice and data simultaneously.
      */
     public boolean isConcurrentVoiceAndDataAllowed() {
-        return (mRadioTechnology >= ServiceState.RADIO_TECHNOLOGY_UMTS);
+        return (mRilRadioTechnology >= ServiceState.RIL_RADIO_TECHNOLOGY_UMTS);
     }
 
     /**
