@@ -764,6 +764,10 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Дазваляе ўладальніку рабіць запыты верыфікатараў пакету. Не патрабуецца для звычайных прыкладанняў."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"атрымаць доступ да паслядоўных партоў"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Дазваляе ўладальніку атрымліваць доступ да паслядоўных партоў з дапамогай API SerialManager."</string>
+    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
+    <skip />
+    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Вы хочаце, каб браўзэр запомніў гэты пароль?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не цяпер"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запомніць"</string>

@@ -764,6 +764,10 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Cihazın sahibine, paket doğrulayıcıları için istek yapma izni verir. Normal uygulamalar için gerekli olmaz."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"seri bağlantı noktalarına eriş"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"İzin sahibinin, SerialManager API\'sını kullanarak seri bağlantı noktalarına erişmesine olanak sağlar."</string>
+    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
+    <skip />
+    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Tarayıcının bu şifreyi anımsamasını istiyor musunuz?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Şimdi değil"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Anımsa"</string>

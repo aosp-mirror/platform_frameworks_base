@@ -1155,6 +1155,10 @@
     <skip />
     <!-- no translation found for permdesc_serialPort (2991639985224598193) -->
     <skip />
+    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
+    <skip />
+    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Vulais Vus ch\'il navigatur memorisescha quest pled-clav?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Betg ussa"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Memorisar"</string>

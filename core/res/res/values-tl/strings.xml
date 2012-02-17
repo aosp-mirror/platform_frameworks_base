@@ -764,6 +764,10 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Pinapayagan ang may-ari na gumawa ng mga kahilingan ng mga taga-verify ng package. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"mag-access sa mga serial port"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Binibigyang-daan ang may-ari na mag-access ng mga serial port gamit ang SerialManager API."</string>
+    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
+    <skip />
+    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Gusto mo bang tandaan ng browser ang password na ito?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Hindi ngayon"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Tandaan"</string>

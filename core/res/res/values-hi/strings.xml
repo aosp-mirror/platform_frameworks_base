@@ -764,6 +764,10 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"धारक को पैकेज प्रमाणक के अनुरोध की अनुमति‍ देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"सीरियल पोर्ट पर पहुंचें"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API का उपयोग करके धारक को सीरियल पोर्ट पर पहुंच प्रदान करता है."</string>
+    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
+    <skip />
+    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"क्‍या आप चाहते हैं कि ब्राउज़र पासवर्ड को याद रखे?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"अभी नहीं"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"याद रखें"</string>
