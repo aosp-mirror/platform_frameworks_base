@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include "RenderScriptDefines.h"
+#include "rsDefines.h"
 
 //
 // A3D loading and object update code.

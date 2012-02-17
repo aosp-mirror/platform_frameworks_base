@@ -41,8 +41,8 @@
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_util_AssetManager.h"
 
-#include <RenderScript.h>
-#include <RenderScriptEnv.h>
+#include <rs.h>
+#include <rsEnv.h>
 #include <gui/SurfaceTexture.h>
 #include <gui/SurfaceTextureClient.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>

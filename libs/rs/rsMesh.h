@@ -18,7 +18,7 @@
 #define ANDROID_RS_MESH_H
 
 
-#include "RenderScript.h"
+#include "rs.h"
 
 // ---------------------------------------------------------------------------
 namespace android {
