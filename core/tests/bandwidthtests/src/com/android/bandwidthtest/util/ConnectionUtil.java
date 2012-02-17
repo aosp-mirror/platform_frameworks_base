@@ -44,6 +44,8 @@ import com.android.bandwidthtest.NetworkState;
 import com.android.bandwidthtest.NetworkState.StateTransitionDirection;
 import com.android.internal.util.AsyncChannel;
 
+import junit.framework.Assert;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -452,6 +454,11 @@ public class ConnectionUtil {
                     mConnectivityMonitor.wait(SHORT_TIMEOUT);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                }
+                if (mNetworkInfo == null) {
+                    Log.v(LOG_TAG, "Do not have networkInfo! Force fetch of network info.");
+                    mNetworkInfo = mCM.getActiveNetworkInfo();
+                    Assert.assertNotNull(mNetworkInfo);
                 }
                 if ((mNetworkInfo.getType() != networkType) ||
                         (mNetworkInfo.getState() != expectedState)) {
