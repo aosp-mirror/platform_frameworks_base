@@ -5442,12 +5442,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         return true;
     }
 
-    /** Gets the ViewAncestor, or null if not attached. */
-    /*package*/ ViewRootImpl getViewRootImpl() {
-        View root = getRootView();
-        return root != null ? (ViewRootImpl)root.getParent() : null;
-    }
-
     /**
      * Call this to try to give focus to a specific view or to one of its descendants. This is a
      * special variant of {@link #requestFocus() } that will allow views that are not focuable in
@@ -8685,6 +8679,18 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Gets the view root associated with the View.
+     * @return The view root, or null if none.
+     * @hide
+     */
+    public ViewRootImpl getViewRootImpl() {
+        if (mAttachInfo != null) {
+            return mAttachInfo.mViewRootImpl;
+        }
+        return null;
+    }
+
+    /**
      * <p>Causes the Runnable to be added to the message queue.
      * The runnable will be run on the user interface thread.</p>
      * 
@@ -8698,17 +8704,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         looper processing the message queue is exiting.
      */
     public boolean post(Runnable action) {
-        Handler handler;
-        AttachInfo attachInfo = mAttachInfo;
+        final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
-            handler = attachInfo.mHandler;
-        } else {
-            // Assume that post will succeed later
-            ViewRootImpl.getRunQueue().post(action);
-            return true;
+            return attachInfo.mHandler.post(action);
         }
-
-        return handler.post(action);
+        // Assume that post will succeed later
+        ViewRootImpl.getRunQueue().post(action);
+        return true;
     }
 
     /**
@@ -8731,17 +8733,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         occurs then the message will be dropped.
      */
     public boolean postDelayed(Runnable action, long delayMillis) {
-        Handler handler;
-        AttachInfo attachInfo = mAttachInfo;
+        final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
-            handler = attachInfo.mHandler;
-        } else {
-            // Assume that post will succeed later
-            ViewRootImpl.getRunQueue().postDelayed(action, delayMillis);
-            return true;
+            return attachInfo.mHandler.postDelayed(action, delayMillis);
         }
-
-        return handler.postDelayed(action, delayMillis);
+        // Assume that post will succeed later
+        ViewRootImpl.getRunQueue().postDelayed(action, delayMillis);
+        return true;
     }
 
     /**
@@ -8758,17 +8756,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         (for instance, if the Runnable was not in the queue already.)
      */
     public boolean removeCallbacks(Runnable action) {
-        Handler handler;
-        AttachInfo attachInfo = mAttachInfo;
+        final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
-            handler = attachInfo.mHandler;
+            attachInfo.mHandler.removeCallbacks(action);
         } else {
             // Assume that post will succeed later
             ViewRootImpl.getRunQueue().removeCallbacks(action);
-            return true;
         }
-
-        handler.removeCallbacks(action);
         return true;
     }
 
@@ -8817,12 +8811,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public void postInvalidateDelayed(long delayMilliseconds) {
         // We try only with the AttachInfo because there's no point in invalidating
         // if we are not attached to our window
-        AttachInfo attachInfo = mAttachInfo;
+        final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
-            Message msg = Message.obtain();
-            msg.what = AttachInfo.INVALIDATE_MSG;
-            msg.obj = this;
-            attachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
+            attachInfo.mViewRootImpl.dispatchInvalidateDelayed(this, delayMilliseconds);
         }
     }
 
@@ -8845,7 +8836,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         // We try only with the AttachInfo because there's no point in invalidating
         // if we are not attached to our window
-        AttachInfo attachInfo = mAttachInfo;
+        final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
             final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.acquire();
             info.target = this;
@@ -8854,10 +8845,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.right = right;
             info.bottom = bottom;
 
-            final Message msg = Message.obtain();
-            msg.what = AttachInfo.INVALIDATE_RECT_MSG;
-            msg.obj = info;
-            attachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
+            attachInfo.mViewRootImpl.dispatchInvalidateRectDelayed(info, delayMilliseconds);
         }
     }
 
@@ -9702,7 +9690,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         if (mAttachInfo != null) {
-            mAttachInfo.mHandler.removeMessages(AttachInfo.INVALIDATE_MSG, this);
+            mAttachInfo.mViewRootImpl.cancelInvalidate(this);
         }
 
         mCurrentAnimation = null;
@@ -14991,22 +14979,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         Canvas mCanvas;
 
         /**
+         * The view root impl.
+         */
+        final ViewRootImpl mViewRootImpl;
+
+        /**
          * A Handler supplied by a view's {@link android.view.ViewRootImpl}. This
          * handler can be used to pump events in the UI events queue.
          */
         final Handler mHandler;
-
-        /**
-         * Identifier for messages requesting the view to be invalidated.
-         * Such messages should be sent to {@link #mHandler}.
-         */
-        static final int INVALIDATE_MSG = 0x1;
-
-        /**
-         * Identifier for messages requesting the view to invalidate a region.
-         * Such messages should be sent to {@link #mHandler}.
-         */
-        static final int INVALIDATE_RECT_MSG = 0x2;
 
         /**
          * Temporary for use in computing invalidate rectangles while
@@ -15036,10 +15017,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * @param handler the events handler the view must use
          */
         AttachInfo(IWindowSession session, IWindow window,
-                Handler handler, Callbacks effectPlayer) {
+                ViewRootImpl viewRootImpl, Handler handler, Callbacks effectPlayer) {
             mSession = session;
             mWindow = window;
             mWindowToken = window.asBinder();
+            mViewRootImpl = viewRootImpl;
             mHandler = handler;
             mRootCallbacks = effectPlayer;
         }

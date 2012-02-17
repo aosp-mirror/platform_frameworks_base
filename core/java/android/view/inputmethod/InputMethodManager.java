@@ -675,11 +675,10 @@ public final class InputMethodManager {
             // longer the input target, so it can reset its state.  Schedule
             // this call on its window's Handler so it will be on the correct
             // thread and outside of our lock.
-            Handler vh = mServedView.getHandler();
-            if (vh != null) {
+            ViewRootImpl viewRootImpl = mServedView.getViewRootImpl();
+            if (viewRootImpl != null) {
                 // This will result in a call to reportFinishInputConnection() below.
-                vh.sendMessage(vh.obtainMessage(ViewRootImpl.FINISH_INPUT_CONNECTION,
-                        mServedInputConnection));
+                viewRootImpl.dispatchFinishInputConnection(mServedInputConnection);
             }
         }
     }
@@ -1130,13 +1129,12 @@ public final class InputMethodManager {
     }
 
     static void scheduleCheckFocusLocked(View view) {
-        Handler vh = view.getHandler();
-        if (vh != null && !vh.hasMessages(ViewRootImpl.CHECK_FOCUS)) {
-            // This will result in a call to checkFocus() below.
-            vh.sendMessage(vh.obtainMessage(ViewRootImpl.CHECK_FOCUS));
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        if (viewRootImpl != null) {
+            viewRootImpl.dispatchCheckFocus();
         }
     }
-    
+
     /**
      * @hide
      */

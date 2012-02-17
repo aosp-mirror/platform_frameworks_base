@@ -61,6 +61,7 @@ import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
@@ -96,7 +97,7 @@ import java.util.List;
  * {@hide}
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
-public final class ViewRootImpl extends Handler implements ViewParent,
+public final class ViewRootImpl implements ViewParent,
         View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks {
     private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
@@ -379,7 +380,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             new AccessibilityInteractionConnectionManager();
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityInteractionConnectionManager);
-        mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
+        mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, mHandler, this);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
@@ -1929,7 +1930,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 sFirstDrawComplete = true;
                 final int count = sFirstDrawHandlers.size();
                 for (int i = 0; i< count; i++) {
-                    post(sFirstDrawHandlers.get(i));
+                    mHandler.post(sFirstDrawHandlers.get(i));
                 }
             }
         }
@@ -2441,283 +2442,289 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
-    public final static int DIE = 1001;
-    public final static int RESIZED = 1002;
-    public final static int RESIZED_REPORT = 1003;
-    public final static int WINDOW_FOCUS_CHANGED = 1004;
-    public final static int DISPATCH_KEY = 1005;
-    public final static int DISPATCH_APP_VISIBILITY = 1008;
-    public final static int DISPATCH_GET_NEW_SURFACE = 1009;
-    public final static int IME_FINISHED_EVENT = 1010;
-    public final static int DISPATCH_KEY_FROM_IME = 1011;
-    public final static int FINISH_INPUT_CONNECTION = 1012;
-    public final static int CHECK_FOCUS = 1013;
-    public final static int CLOSE_SYSTEM_DIALOGS = 1014;
-    public final static int DISPATCH_DRAG_EVENT = 1015;
-    public final static int DISPATCH_DRAG_LOCATION_EVENT = 1016;
-    public final static int DISPATCH_SYSTEM_UI_VISIBILITY = 1017;
-    public final static int DISPATCH_GENERIC_MOTION = 1018;
-    public final static int UPDATE_CONFIGURATION = 1019;
-    public final static int DO_PERFORM_ACCESSIBILITY_ACTION = 1020;
-    public final static int DO_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID = 1021;
-    public final static int DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID = 1022;
-    public final static int DO_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT = 1023;
-    public final static int DO_PROCESS_INPUT_EVENTS = 1024;
+    private final static int MSG_INVALIDATE = 1;
+    private final static int MSG_INVALIDATE_RECT = 2;
+    private final static int MSG_DIE = 3;
+    private final static int MSG_RESIZED = 4;
+    private final static int MSG_RESIZED_REPORT = 5;
+    private final static int MSG_WINDOW_FOCUS_CHANGED = 6;
+    private final static int MSG_DISPATCH_KEY = 7;
+    private final static int MSG_DISPATCH_APP_VISIBILITY = 8;
+    private final static int MSG_DISPATCH_GET_NEW_SURFACE = 9;
+    private final static int MSG_IME_FINISHED_EVENT = 10;
+    private final static int MSG_DISPATCH_KEY_FROM_IME = 11;
+    private final static int MSG_FINISH_INPUT_CONNECTION = 12;
+    private final static int MSG_CHECK_FOCUS = 13;
+    private final static int MSG_CLOSE_SYSTEM_DIALOGS = 14;
+    private final static int MSG_DISPATCH_DRAG_EVENT = 15;
+    private final static int MSG_DISPATCH_DRAG_LOCATION_EVENT = 16;
+    private final static int MSG_DISPATCH_SYSTEM_UI_VISIBILITY = 17;
+    private final static int MSG_UPDATE_CONFIGURATION = 18;
+    private final static int MSG_PERFORM_ACCESSIBILITY_ACTION = 19;
+    private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID = 20;
+    private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID = 21;
+    private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT = 22;
+    private final static int MSG_PROCESS_INPUT_EVENTS = 23;
 
-    @Override
-    public String getMessageName(Message message) {
-        switch (message.what) {
-            case DIE:
-                return "DIE";
-            case RESIZED:
-                return "RESIZED";
-            case RESIZED_REPORT:
-                return "RESIZED_REPORT";
-            case WINDOW_FOCUS_CHANGED:
-                return "WINDOW_FOCUS_CHANGED";
-            case DISPATCH_KEY:
-                return "DISPATCH_KEY";
-            case DISPATCH_APP_VISIBILITY:
-                return "DISPATCH_APP_VISIBILITY";
-            case DISPATCH_GET_NEW_SURFACE:
-                return "DISPATCH_GET_NEW_SURFACE";
-            case IME_FINISHED_EVENT:
-                return "IME_FINISHED_EVENT";
-            case DISPATCH_KEY_FROM_IME:
-                return "DISPATCH_KEY_FROM_IME";
-            case FINISH_INPUT_CONNECTION:
-                return "FINISH_INPUT_CONNECTION";
-            case CHECK_FOCUS:
-                return "CHECK_FOCUS";
-            case CLOSE_SYSTEM_DIALOGS:
-                return "CLOSE_SYSTEM_DIALOGS";
-            case DISPATCH_DRAG_EVENT:
-                return "DISPATCH_DRAG_EVENT";
-            case DISPATCH_DRAG_LOCATION_EVENT:
-                return "DISPATCH_DRAG_LOCATION_EVENT";
-            case DISPATCH_SYSTEM_UI_VISIBILITY:
-                return "DISPATCH_SYSTEM_UI_VISIBILITY";
-            case DISPATCH_GENERIC_MOTION:
-                return "DISPATCH_GENERIC_MOTION";
-            case UPDATE_CONFIGURATION:
-                return "UPDATE_CONFIGURATION";
-            case DO_PERFORM_ACCESSIBILITY_ACTION:
-                return "DO_PERFORM_ACCESSIBILITY_ACTION";
-            case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID:
-                return "DO_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID";
-            case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID:
-                return "DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID";
-            case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT:
-                return "DO_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT";
-            case DO_PROCESS_INPUT_EVENTS:
-                return "DO_PROCESS_INPUT_EVENTS";
+    final class ViewRootHandler extends Handler {
+        @Override
+        public String getMessageName(Message message) {
+            switch (message.what) {
+                case MSG_INVALIDATE:
+                    return "MSG_INVALIDATE";
+                case MSG_INVALIDATE_RECT:
+                    return "MSG_INVALIDATE_RECT";
+                case MSG_DIE:
+                    return "MSG_DIE";
+                case MSG_RESIZED:
+                    return "MSG_RESIZED";
+                case MSG_RESIZED_REPORT:
+                    return "MSG_RESIZED_REPORT";
+                case MSG_WINDOW_FOCUS_CHANGED:
+                    return "MSG_WINDOW_FOCUS_CHANGED";
+                case MSG_DISPATCH_KEY:
+                    return "MSG_DISPATCH_KEY";
+                case MSG_DISPATCH_APP_VISIBILITY:
+                    return "MSG_DISPATCH_APP_VISIBILITY";
+                case MSG_DISPATCH_GET_NEW_SURFACE:
+                    return "MSG_DISPATCH_GET_NEW_SURFACE";
+                case MSG_IME_FINISHED_EVENT:
+                    return "MSG_IME_FINISHED_EVENT";
+                case MSG_DISPATCH_KEY_FROM_IME:
+                    return "MSG_DISPATCH_KEY_FROM_IME";
+                case MSG_FINISH_INPUT_CONNECTION:
+                    return "MSG_FINISH_INPUT_CONNECTION";
+                case MSG_CHECK_FOCUS:
+                    return "MSG_CHECK_FOCUS";
+                case MSG_CLOSE_SYSTEM_DIALOGS:
+                    return "MSG_CLOSE_SYSTEM_DIALOGS";
+                case MSG_DISPATCH_DRAG_EVENT:
+                    return "MSG_DISPATCH_DRAG_EVENT";
+                case MSG_DISPATCH_DRAG_LOCATION_EVENT:
+                    return "MSG_DISPATCH_DRAG_LOCATION_EVENT";
+                case MSG_DISPATCH_SYSTEM_UI_VISIBILITY:
+                    return "MSG_DISPATCH_SYSTEM_UI_VISIBILITY";
+                case MSG_UPDATE_CONFIGURATION:
+                    return "MSG_UPDATE_CONFIGURATION";
+                case MSG_PERFORM_ACCESSIBILITY_ACTION:
+                    return "MSG_PERFORM_ACCESSIBILITY_ACTION";
+                case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID:
+                    return "MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID";
+                case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID:
+                    return "MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID";
+                case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT:
+                    return "MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT";
+                case MSG_PROCESS_INPUT_EVENTS:
+                    return "MSG_PROCESS_INPUT_EVENTS";
+            }
+            return super.getMessageName(message);
         }
-        return super.getMessageName(message);
-    }
 
-    @Override
-    public void handleMessage(Message msg) {
-        switch (msg.what) {
-        case View.AttachInfo.INVALIDATE_MSG:
-            ((View) msg.obj).invalidate();
-            break;
-        case View.AttachInfo.INVALIDATE_RECT_MSG:
-            final View.AttachInfo.InvalidateInfo info = (View.AttachInfo.InvalidateInfo) msg.obj;
-            info.target.invalidate(info.left, info.top, info.right, info.bottom);
-            info.release();
-            break;
-        case IME_FINISHED_EVENT:
-            handleImeFinishedEvent(msg.arg1, msg.arg2 != 0);
-            break;
-        case DO_PROCESS_INPUT_EVENTS:
-            mProcessInputEventsScheduled = false;
-            doProcessInputEvents();
-            break;
-        case DISPATCH_APP_VISIBILITY:
-            handleAppVisibility(msg.arg1 != 0);
-            break;
-        case DISPATCH_GET_NEW_SURFACE:
-            handleGetNewSurface();
-            break;
-        case RESIZED:
-            ResizedInfo ri = (ResizedInfo)msg.obj;
-
-            if (mWinFrame.width() == msg.arg1 && mWinFrame.height() == msg.arg2
-                    && mPendingContentInsets.equals(ri.coveredInsets)
-                    && mPendingVisibleInsets.equals(ri.visibleInsets)
-                    && ((ResizedInfo)msg.obj).newConfig == null) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case MSG_INVALIDATE:
+                ((View) msg.obj).invalidate();
                 break;
-            }
-            // fall through...
-        case RESIZED_REPORT:
-            if (mAdded) {
-                Configuration config = ((ResizedInfo)msg.obj).newConfig;
-                if (config != null) {
-                    updateConfiguration(config, false);
-                }
-                mWinFrame.left = 0;
-                mWinFrame.right = msg.arg1;
-                mWinFrame.top = 0;
-                mWinFrame.bottom = msg.arg2;
-                mPendingContentInsets.set(((ResizedInfo)msg.obj).coveredInsets);
-                mPendingVisibleInsets.set(((ResizedInfo)msg.obj).visibleInsets);
-                if (msg.what == RESIZED_REPORT) {
-                    mReportNextDraw = true;
-                }
+            case MSG_INVALIDATE_RECT:
+                final View.AttachInfo.InvalidateInfo info = (View.AttachInfo.InvalidateInfo) msg.obj;
+                info.target.invalidate(info.left, info.top, info.right, info.bottom);
+                info.release();
+                break;
+            case MSG_IME_FINISHED_EVENT:
+                handleImeFinishedEvent(msg.arg1, msg.arg2 != 0);
+                break;
+            case MSG_PROCESS_INPUT_EVENTS:
+                mProcessInputEventsScheduled = false;
+                doProcessInputEvents();
+                break;
+            case MSG_DISPATCH_APP_VISIBILITY:
+                handleAppVisibility(msg.arg1 != 0);
+                break;
+            case MSG_DISPATCH_GET_NEW_SURFACE:
+                handleGetNewSurface();
+                break;
+            case MSG_RESIZED:
+                ResizedInfo ri = (ResizedInfo)msg.obj;
 
-                if (mView != null) {
-                    forceLayout(mView);
+                if (mWinFrame.width() == msg.arg1 && mWinFrame.height() == msg.arg2
+                        && mPendingContentInsets.equals(ri.coveredInsets)
+                        && mPendingVisibleInsets.equals(ri.visibleInsets)
+                        && ((ResizedInfo)msg.obj).newConfig == null) {
+                    break;
                 }
-                requestLayout();
-            }
-            break;
-        case WINDOW_FOCUS_CHANGED: {
-            if (mAdded) {
-                boolean hasWindowFocus = msg.arg1 != 0;
-                mAttachInfo.mHasWindowFocus = hasWindowFocus;
-                
-                profileRendering(hasWindowFocus);
+                // fall through...
+            case MSG_RESIZED_REPORT:
+                if (mAdded) {
+                    Configuration config = ((ResizedInfo)msg.obj).newConfig;
+                    if (config != null) {
+                        updateConfiguration(config, false);
+                    }
+                    mWinFrame.left = 0;
+                    mWinFrame.right = msg.arg1;
+                    mWinFrame.top = 0;
+                    mWinFrame.bottom = msg.arg2;
+                    mPendingContentInsets.set(((ResizedInfo)msg.obj).coveredInsets);
+                    mPendingVisibleInsets.set(((ResizedInfo)msg.obj).visibleInsets);
+                    if (msg.what == MSG_RESIZED_REPORT) {
+                        mReportNextDraw = true;
+                    }
 
-                if (hasWindowFocus) {
-                    boolean inTouchMode = msg.arg2 != 0;
-                    ensureTouchModeLocally(inTouchMode);
+                    if (mView != null) {
+                        forceLayout(mView);
+                    }
+                    requestLayout();
+                }
+                break;
+            case MSG_WINDOW_FOCUS_CHANGED: {
+                if (mAdded) {
+                    boolean hasWindowFocus = msg.arg1 != 0;
+                    mAttachInfo.mHasWindowFocus = hasWindowFocus;
 
-                    if (mAttachInfo.mHardwareRenderer != null &&
-                            mSurface != null && mSurface.isValid()) {
-                        mFullRedrawNeeded = true;
-                        try {
-                            mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
-                                    mHolder);
-                        } catch (Surface.OutOfResourcesException e) {
-                            Log.e(TAG, "OutOfResourcesException locking surface", e);
+                    profileRendering(hasWindowFocus);
+
+                    if (hasWindowFocus) {
+                        boolean inTouchMode = msg.arg2 != 0;
+                        ensureTouchModeLocally(inTouchMode);
+
+                        if (mAttachInfo.mHardwareRenderer != null &&
+                                mSurface != null && mSurface.isValid()) {
+                            mFullRedrawNeeded = true;
                             try {
-                                if (!sWindowSession.outOfMemory(mWindow)) {
-                                    Slog.w(TAG, "No processes killed for memory; killing self");
-                                    Process.killProcess(Process.myPid());
+                                mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
+                                        mHolder);
+                            } catch (Surface.OutOfResourcesException e) {
+                                Log.e(TAG, "OutOfResourcesException locking surface", e);
+                                try {
+                                    if (!sWindowSession.outOfMemory(mWindow)) {
+                                        Slog.w(TAG, "No processes killed for memory; killing self");
+                                        Process.killProcess(Process.myPid());
+                                    }
+                                } catch (RemoteException ex) {
                                 }
-                            } catch (RemoteException ex) {
+                                // Retry in a bit.
+                                sendMessageDelayed(obtainMessage(msg.what, msg.arg1, msg.arg2), 500);
+                                return;
                             }
-                            // Retry in a bit.
-                            sendMessageDelayed(obtainMessage(msg.what, msg.arg1, msg.arg2), 500);
-                            return;
                         }
                     }
-                }
 
-                mLastWasImTarget = WindowManager.LayoutParams
-                        .mayUseInputMethod(mWindowAttributes.flags);
+                    mLastWasImTarget = WindowManager.LayoutParams
+                            .mayUseInputMethod(mWindowAttributes.flags);
 
-                InputMethodManager imm = InputMethodManager.peekInstance();
-                if (mView != null) {
-                    if (hasWindowFocus && imm != null && mLastWasImTarget) {
-                        imm.startGettingWindowFocus(mView);
+                    InputMethodManager imm = InputMethodManager.peekInstance();
+                    if (mView != null) {
+                        if (hasWindowFocus && imm != null && mLastWasImTarget) {
+                            imm.startGettingWindowFocus(mView);
+                        }
+                        mAttachInfo.mKeyDispatchState.reset();
+                        mView.dispatchWindowFocusChanged(hasWindowFocus);
                     }
-                    mAttachInfo.mKeyDispatchState.reset();
-                    mView.dispatchWindowFocusChanged(hasWindowFocus);
-                }
 
-                // Note: must be done after the focus change callbacks,
-                // so all of the view state is set up correctly.
-                if (hasWindowFocus) {
-                    if (imm != null && mLastWasImTarget) {
-                        imm.onWindowFocus(mView, mView.findFocus(),
-                                mWindowAttributes.softInputMode,
-                                !mHasHadWindowFocus, mWindowAttributes.flags);
-                    }
-                    // Clear the forward bit.  We can just do this directly, since
-                    // the window manager doesn't care about it.
-                    mWindowAttributes.softInputMode &=
-                            ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
-                    ((WindowManager.LayoutParams)mView.getLayoutParams())
-                            .softInputMode &=
+                    // Note: must be done after the focus change callbacks,
+                    // so all of the view state is set up correctly.
+                    if (hasWindowFocus) {
+                        if (imm != null && mLastWasImTarget) {
+                            imm.onWindowFocus(mView, mView.findFocus(),
+                                    mWindowAttributes.softInputMode,
+                                    !mHasHadWindowFocus, mWindowAttributes.flags);
+                        }
+                        // Clear the forward bit.  We can just do this directly, since
+                        // the window manager doesn't care about it.
+                        mWindowAttributes.softInputMode &=
                                 ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
-                    mHasHadWindowFocus = true;
-                }
+                        ((WindowManager.LayoutParams)mView.getLayoutParams())
+                                .softInputMode &=
+                                    ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
+                        mHasHadWindowFocus = true;
+                    }
 
-                if (hasWindowFocus && mView != null) {
-                    sendAccessibilityEvents();
+                    if (hasWindowFocus && mView != null) {
+                        sendAccessibilityEvents();
+                    }
                 }
+            } break;
+            case MSG_DIE:
+                doDie();
+                break;
+            case MSG_DISPATCH_KEY: {
+                KeyEvent event = (KeyEvent)msg.obj;
+                enqueueInputEvent(event, null, 0, true);
+            } break;
+            case MSG_DISPATCH_KEY_FROM_IME: {
+                if (LOCAL_LOGV) Log.v(
+                    TAG, "Dispatching key "
+                    + msg.obj + " from IME to " + mView);
+                KeyEvent event = (KeyEvent)msg.obj;
+                if ((event.getFlags()&KeyEvent.FLAG_FROM_SYSTEM) != 0) {
+                    // The IME is trying to say this event is from the
+                    // system!  Bad bad bad!
+                    //noinspection UnusedAssignment
+                    event = KeyEvent.changeFlags(event, event.getFlags() & ~KeyEvent.FLAG_FROM_SYSTEM);
+                }
+                enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME, true);
+            } break;
+            case MSG_FINISH_INPUT_CONNECTION: {
+                InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null) {
+                    imm.reportFinishInputConnection((InputConnection)msg.obj);
+                }
+            } break;
+            case MSG_CHECK_FOCUS: {
+                InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null) {
+                    imm.checkFocus();
+                }
+            } break;
+            case MSG_CLOSE_SYSTEM_DIALOGS: {
+                if (mView != null) {
+                    mView.onCloseSystemDialogs((String)msg.obj);
+                }
+            } break;
+            case MSG_DISPATCH_DRAG_EVENT:
+            case MSG_DISPATCH_DRAG_LOCATION_EVENT: {
+                DragEvent event = (DragEvent)msg.obj;
+                event.mLocalState = mLocalDragState;    // only present when this app called startDrag()
+                handleDragEvent(event);
+            } break;
+            case MSG_DISPATCH_SYSTEM_UI_VISIBILITY: {
+                handleDispatchSystemUiVisibilityChanged((SystemUiVisibilityInfo)msg.obj);
+            } break;
+            case MSG_UPDATE_CONFIGURATION: {
+                Configuration config = (Configuration)msg.obj;
+                if (config.isOtherSeqNewer(mLastConfiguration)) {
+                    config = mLastConfiguration;
+                }
+                updateConfiguration(config, false);
+            } break;
+            case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID: {
+                if (mView != null) {
+                    getAccessibilityInteractionController()
+                        .findAccessibilityNodeInfoByAccessibilityIdUiThread(msg);
+                }
+            } break;
+            case MSG_PERFORM_ACCESSIBILITY_ACTION: {
+                if (mView != null) {
+                    getAccessibilityInteractionController()
+                        .perfromAccessibilityActionUiThread(msg);
+                }
+            } break;
+            case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID: {
+                if (mView != null) {
+                    getAccessibilityInteractionController()
+                        .findAccessibilityNodeInfoByViewIdUiThread(msg);
+                }
+            } break;
+            case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT: {
+                if (mView != null) {
+                    getAccessibilityInteractionController()
+                        .findAccessibilityNodeInfosByTextUiThread(msg);
+                }
+            } break;
             }
-        } break;
-        case DIE:
-            doDie();
-            break;
-        case DISPATCH_KEY: {
-            KeyEvent event = (KeyEvent)msg.obj;
-            enqueueInputEvent(event, null, 0, true);
-        } break;
-        case DISPATCH_KEY_FROM_IME: {
-            if (LOCAL_LOGV) Log.v(
-                TAG, "Dispatching key "
-                + msg.obj + " from IME to " + mView);
-            KeyEvent event = (KeyEvent)msg.obj;
-            if ((event.getFlags()&KeyEvent.FLAG_FROM_SYSTEM) != 0) {
-                // The IME is trying to say this event is from the
-                // system!  Bad bad bad!
-                //noinspection UnusedAssignment
-                event = KeyEvent.changeFlags(event, event.getFlags() & ~KeyEvent.FLAG_FROM_SYSTEM);
-            }
-            enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME, true);
-        } break;
-        case FINISH_INPUT_CONNECTION: {
-            InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) {
-                imm.reportFinishInputConnection((InputConnection)msg.obj);
-            }
-        } break;
-        case CHECK_FOCUS: {
-            InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) {
-                imm.checkFocus();
-            }
-        } break;
-        case CLOSE_SYSTEM_DIALOGS: {
-            if (mView != null) {
-                mView.onCloseSystemDialogs((String)msg.obj);
-            }
-        } break;
-        case DISPATCH_DRAG_EVENT:
-        case DISPATCH_DRAG_LOCATION_EVENT: {
-            DragEvent event = (DragEvent)msg.obj;
-            event.mLocalState = mLocalDragState;    // only present when this app called startDrag()
-            handleDragEvent(event);
-        } break;
-        case DISPATCH_SYSTEM_UI_VISIBILITY: {
-            handleDispatchSystemUiVisibilityChanged((SystemUiVisibilityInfo)msg.obj);
-        } break;
-        case UPDATE_CONFIGURATION: {
-            Configuration config = (Configuration)msg.obj;
-            if (config.isOtherSeqNewer(mLastConfiguration)) {
-                config = mLastConfiguration;
-            }
-            updateConfiguration(config, false);
-        } break;
-        case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID: {
-            if (mView != null) {
-                getAccessibilityInteractionController()
-                    .findAccessibilityNodeInfoByAccessibilityIdUiThread(msg);
-            }
-        } break;
-        case DO_PERFORM_ACCESSIBILITY_ACTION: {
-            if (mView != null) {
-                getAccessibilityInteractionController()
-                    .perfromAccessibilityActionUiThread(msg);
-            }
-        } break;
-        case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID: {
-            if (mView != null) {
-                getAccessibilityInteractionController()
-                    .findAccessibilityNodeInfoByViewIdUiThread(msg);
-            }
-        } break;
-        case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT: {
-            if (mView != null) {
-                getAccessibilityInteractionController()
-                    .findAccessibilityNodeInfosByTextUiThread(msg);
-            }
-        } break;
         }
     }
+    final ViewRootHandler mHandler = new ViewRootHandler();
 
     /**
      * Something in the current window tells us we need to change the touch mode.  For
@@ -3684,7 +3691,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         if (immediate) {
             doDie();
         } else {
-            sendEmptyMessage(DIE);
+            mHandler.sendEmptyMessage(MSG_DIE);
         }
     }
 
@@ -3721,8 +3728,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     }
 
     public void requestUpdateConfiguration(Configuration config) {
-        Message msg = obtainMessage(UPDATE_CONFIGURATION, config);
-        sendMessage(msg);
+        Message msg = mHandler.obtainMessage(MSG_UPDATE_CONFIGURATION, config);
+        mHandler.sendMessage(msg);
     }
 
     private void destroyHardwareRenderer() {
@@ -3734,10 +3741,15 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     }
 
     void dispatchImeFinishedEvent(int seq, boolean handled) {
-        Message msg = obtainMessage(IME_FINISHED_EVENT);
+        Message msg = mHandler.obtainMessage(MSG_IME_FINISHED_EVENT);
         msg.arg1 = seq;
         msg.arg2 = handled ? 1 : 0;
-        sendMessage(msg);
+        mHandler.sendMessage(msg);
+    }
+
+    public void dispatchFinishInputConnection(InputConnection connection) {
+        Message msg = mHandler.obtainMessage(MSG_FINISH_INPUT_CONNECTION, connection);
+        mHandler.sendMessage(msg);
     }
 
     public void dispatchResized(int w, int h, Rect coveredInsets,
@@ -3746,7 +3758,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 + " h=" + h + " coveredInsets=" + coveredInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
                 + " reportDraw=" + reportDraw);
-        Message msg = obtainMessage(reportDraw ? RESIZED_REPORT :RESIZED);
+        Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT :MSG_RESIZED);
         if (mTranslator != null) {
             mTranslator.translateRectInScreenToAppWindow(coveredInsets);
             mTranslator.translateRectInScreenToAppWindow(visibleInsets);
@@ -3760,7 +3772,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         ri.visibleInsets = new Rect(visibleInsets);
         ri.newConfig = newConfig;
         msg.obj = ri;
-        sendMessage(msg);
+        mHandler.sendMessage(msg);
     }
 
     /**
@@ -3857,7 +3869,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     private void scheduleProcessInputEvents() {
         if (!mProcessInputEventsScheduled) {
             mProcessInputEventsScheduled = true;
-            sendEmptyMessage(DO_PROCESS_INPUT_EVENTS);
+            mHandler.sendEmptyMessage(MSG_PROCESS_INPUT_EVENTS);
         }
     }
 
@@ -3874,7 +3886,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         // so we can clear the pending flag immediately.
         if (mProcessInputEventsScheduled) {
             mProcessInputEventsScheduled = false;
-            removeMessages(DO_PROCESS_INPUT_EVENTS);
+            mHandler.removeMessages(MSG_PROCESS_INPUT_EVENTS);
         }
     }
 
@@ -3960,47 +3972,67 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     }
     WindowInputEventReceiver mInputEventReceiver;
 
+    public void dispatchInvalidateDelayed(View view, long delayMilliseconds) {
+        Message msg = mHandler.obtainMessage(MSG_INVALIDATE, view);
+        mHandler.sendMessageDelayed(msg, delayMilliseconds);
+    }
+
+    public void cancelInvalidate(View view) {
+        mHandler.removeMessages(MSG_INVALIDATE, view);
+    }
+
+    public void dispatchInvalidateRectDelayed(AttachInfo.InvalidateInfo info,
+            long delayMilliseconds) {
+        final Message msg = mHandler.obtainMessage(MSG_INVALIDATE_RECT, info);
+        mHandler.sendMessageDelayed(msg, delayMilliseconds);
+    }
+
     public void dispatchKey(KeyEvent event) {
-        Message msg = obtainMessage(DISPATCH_KEY, event);
-        sendMessage(msg);
+        Message msg = mHandler.obtainMessage(MSG_DISPATCH_KEY, event);
+        mHandler.sendMessage(msg);
+    }
+
+    public void dispatchKeyFromIme(KeyEvent event) {
+        Message msg = mHandler.obtainMessage(MSG_DISPATCH_KEY_FROM_IME, event);
+        mHandler.sendMessage(msg);
     }
 
     public void dispatchAppVisibility(boolean visible) {
-        Message msg = obtainMessage(DISPATCH_APP_VISIBILITY);
+        Message msg = mHandler.obtainMessage(MSG_DISPATCH_APP_VISIBILITY);
         msg.arg1 = visible ? 1 : 0;
-        sendMessage(msg);
+        mHandler.sendMessage(msg);
     }
 
     public void dispatchGetNewSurface() {
-        Message msg = obtainMessage(DISPATCH_GET_NEW_SURFACE);
-        sendMessage(msg);
+        Message msg = mHandler.obtainMessage(MSG_DISPATCH_GET_NEW_SURFACE);
+        mHandler.sendMessage(msg);
     }
 
     public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
         Message msg = Message.obtain();
-        msg.what = WINDOW_FOCUS_CHANGED;
+        msg.what = MSG_WINDOW_FOCUS_CHANGED;
         msg.arg1 = hasFocus ? 1 : 0;
         msg.arg2 = inTouchMode ? 1 : 0;
-        sendMessage(msg);
+        mHandler.sendMessage(msg);
     }
 
     public void dispatchCloseSystemDialogs(String reason) {
         Message msg = Message.obtain();
-        msg.what = CLOSE_SYSTEM_DIALOGS;
+        msg.what = MSG_CLOSE_SYSTEM_DIALOGS;
         msg.obj = reason;
-        sendMessage(msg);
+        mHandler.sendMessage(msg);
     }
 
     public void dispatchDragEvent(DragEvent event) {
         final int what;
         if (event.getAction() == DragEvent.ACTION_DRAG_LOCATION) {
-            what = DISPATCH_DRAG_LOCATION_EVENT;
-            removeMessages(what);
+            what = MSG_DISPATCH_DRAG_LOCATION_EVENT;
+            mHandler.removeMessages(what);
         } else {
-            what = DISPATCH_DRAG_EVENT;
+            what = MSG_DISPATCH_DRAG_EVENT;
         }
-        Message msg = obtainMessage(what, event);
-        sendMessage(msg);
+        Message msg = mHandler.obtainMessage(what, event);
+        mHandler.sendMessage(msg);
     }
 
     public void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
@@ -4010,7 +4042,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         args.globalVisibility = globalVisibility;
         args.localValue = localValue;
         args.localChanges = localChanges;
-        sendMessage(obtainMessage(DISPATCH_SYSTEM_UI_VISIBILITY, args));
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_SYSTEM_UI_VISIBILITY, args));
+    }
+
+    public void dispatchCheckFocus() {
+        if (!mHandler.hasMessages(MSG_CHECK_FOCUS)) {
+            // This will result in a call to checkFocus() below.
+            mHandler.sendEmptyMessage(MSG_CHECK_FOCUS);
+        }
     }
 
     /**
@@ -4041,7 +4080,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
         if (!mSendWindowContentChangedAccessibilityEvent.mIsPending) {
             mSendWindowContentChangedAccessibilityEvent.mIsPending = true;
-            postDelayed(mSendWindowContentChangedAccessibilityEvent,
+            mHandler.postDelayed(mSendWindowContentChangedAccessibilityEvent,
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
         }
     }
@@ -4052,7 +4091,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
      */
     private void removeSendWindowContentChangedCallback() {
         if (mSendWindowContentChangedAccessibilityEvent != null) {
-            removeCallbacks(mSendWindowContentChangedAccessibilityEvent);
+            mHandler.removeCallbacks(mSendWindowContentChangedAccessibilityEvent);
         }
     }
 
@@ -4512,6 +4551,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     }
 
     /**
+     * The run queue is used to enqueue pending work from Views when no Handler is
+     * attached.  The work is executed during the next call to performTraversals on
+     * the thread.
      * @hide
      */
     static final class RunQueue {
@@ -4770,8 +4812,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 long accessibilityNodeId, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
                 long interrogatingTid) {
-            Message message = Message.obtain();
-            message.what = DO_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID;
+            Message message = mHandler.obtainMessage();
+            message.what = MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID;
             message.arg1 = interrogatingPid;
             SomeArgs args = mPool.acquire();
             args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
@@ -4785,11 +4827,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             // client can handle the message to generate the result.
             if (interrogatingPid == Process.myPid()
                     && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
-                message.setTarget(ViewRootImpl.this);
                 AccessibilityInteractionClient.getInstanceForThread(
                         interrogatingTid).setSameThreadMessage(message);
             } else {
-                sendMessage(message);
+                mHandler.sendMessage(message);
             }
         }
 
@@ -4828,8 +4869,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         public void findAccessibilityNodeInfoByViewIdClientThread(long accessibilityNodeId,
                 int viewId, int interactionId, IAccessibilityInteractionConnectionCallback callback,
                 int interrogatingPid, long interrogatingTid) {
-            Message message = Message.obtain();
-            message.what = DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID;
+            Message message = mHandler.obtainMessage();
+            message.what = MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID;
             message.arg1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
             SomeArgs args = mPool.acquire();
             args.argi1 = viewId;
@@ -4842,11 +4883,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             // client can handle the message to generate the result.
             if (interrogatingPid == Process.myPid()
                     && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
-                message.setTarget(ViewRootImpl.this);
                 AccessibilityInteractionClient.getInstanceForThread(
                         interrogatingTid).setSameThreadMessage(message);
             } else {
-                sendMessage(message);
+                mHandler.sendMessage(message);
             }
         }
 
@@ -4885,8 +4925,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 String text, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
                 long interrogatingTid) {
-            Message message = Message.obtain();
-            message.what = DO_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT;
+            Message message = mHandler.obtainMessage();
+            message.what = MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT;
             SomeArgs args = mPool.acquire();
             args.arg1 = text;
             args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
@@ -4900,11 +4940,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             // client can handle the message to generate the result.
             if (interrogatingPid == Process.myPid()
                     && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
-                message.setTarget(ViewRootImpl.this);
                 AccessibilityInteractionClient.getInstanceForThread(
                         interrogatingTid).setSameThreadMessage(message);
             } else {
-                sendMessage(message);
+                mHandler.sendMessage(message);
             }
         }
 
@@ -4971,8 +5010,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         public void performAccessibilityActionClientThread(long accessibilityNodeId, int action,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
                 int interogatingPid, long interrogatingTid) {
-            Message message = Message.obtain();
-            message.what = DO_PERFORM_ACCESSIBILITY_ACTION;
+            Message message = mHandler.obtainMessage();
+            message.what = MSG_PERFORM_ACCESSIBILITY_ACTION;
             message.arg1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
             message.arg2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
             SomeArgs args = mPool.acquire();
@@ -4986,11 +5025,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             // client can handle the message to generate the result.
             if (interogatingPid == Process.myPid()
                     && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
-                message.setTarget(ViewRootImpl.this);
                 AccessibilityInteractionClient.getInstanceForThread(
                         interrogatingTid).setSameThreadMessage(message);
             } else {
-                sendMessage(message);
+                mHandler.sendMessage(message);
             }
         }
 

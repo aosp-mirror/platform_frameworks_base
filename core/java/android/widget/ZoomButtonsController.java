@@ -501,7 +501,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
         } else {
 
-            ViewRootImpl viewRoot = getOwnerViewRootImpl();
+            ViewRootImpl viewRoot = mOwnerView.getViewRootImpl();
             if (viewRoot != null) {
                 viewRoot.dispatchKey(event);
             }
@@ -523,20 +523,6 @@ public class ZoomButtonsController implements View.OnTouchListener {
                 return true;
             default:
                 return false;
-        }
-    }
-
-    private ViewRootImpl getOwnerViewRootImpl() {
-        View rootViewOfOwner = mOwnerView.getRootView();
-        if (rootViewOfOwner == null) {
-            return null;
-        }
-
-        ViewParent parentOfRootView = rootViewOfOwner.getParent();
-        if (parentOfRootView instanceof ViewRootImpl) {
-            return (ViewRootImpl) parentOfRootView;
-        } else {
-            return null;
         }
     }
 
