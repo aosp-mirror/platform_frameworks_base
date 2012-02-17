@@ -405,8 +405,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
                     View child = mMenuView.getChildAt(i);
                     child.setScaleY(0);
                     ObjectAnimator a = ObjectAnimator.ofFloat(child, "scaleY", 0, 1);
-                    a.setDuration(100);
-                    a.setStartDelay(j * 70);
+                    a.setDuration(300);
                     b.with(a);
                 }
             }
@@ -432,8 +431,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
                     View child = mMenuView.getChildAt(i);
                     child.setScaleY(0);
                     ObjectAnimator a = ObjectAnimator.ofFloat(child, "scaleY", 0);
-                    a.setDuration(100);
-                    a.setStartDelay(i * 70);
+                    a.setDuration(300);
                     b.with(a);
                 }
             }
