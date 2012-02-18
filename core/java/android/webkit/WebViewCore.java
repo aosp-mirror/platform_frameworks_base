@@ -887,6 +887,7 @@ public final class WebViewCore {
         boolean mEditable;
         int mTapHighlightColor = WebView.HIGHLIGHT_COLOR;
         Rect[] mEnclosingParentRects;
+        boolean mHasFocus;
 
         // These are the input values that produced this hit test
         int mHitTestX;
