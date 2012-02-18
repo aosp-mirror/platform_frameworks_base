@@ -4122,7 +4122,7 @@ void AudioFlinger::PlaybackThread::TimedTrack::releaseBuffer(
         TimedBuffer& head = mTimedBufferQueue.editItemAt(0);
 
         void* start = head.buffer()->pointer();
-        void* end   = head.buffer()->pointer() + head.buffer()->size();
+        void* end   = (char *) head.buffer()->pointer() + head.buffer()->size();
 
         if ((buffer->raw >= start) && (buffer->raw <= end)) {
             head.setPosition(head.position() +
