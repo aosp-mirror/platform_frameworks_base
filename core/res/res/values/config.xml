@@ -754,11 +754,6 @@
          autodetected from the Configuration. -->
     <bool name="config_showNavigationBar">false</bool>
 
-    <!-- Whether to suppress tablet status/nav bar contents.  NOTE: this makes the
-         device essentially useless except for kiosk-type scenarios.  This
-         configuration parameter will also go away soon. -->
-    <bool name="config_emptyTabletStatusBar">false</bool>
-
     <!-- Whether action menu items should be displayed in ALLCAPS or not.
          Defaults to true. If this is not appropriate for specific locales
          it should be disabled in that locale's resources. -->
