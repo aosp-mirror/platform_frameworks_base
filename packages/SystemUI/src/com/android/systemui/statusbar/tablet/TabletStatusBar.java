@@ -199,17 +199,6 @@ public class TabletStatusBar extends StatusBar implements
         final Context context = mContext;
         final Resources res = mContext.getResources();
 
-        // Product definitions can force the system bar to be empty.  Note that
-        // this renders the device largely unusable except for kiosk-type
-        // scenarios.
-        try {
-            final boolean emptyBar = res.getBoolean(
-                    com.android.internal.R.bool.config_emptyTabletStatusBar);
-            if (emptyBar) return;
-        } catch (Resources.NotFoundException e) {
-            // no override; ignore and use the default behavior
-        }
-
         // Notification Panel
         mNotificationPanel = (NotificationPanel)View.inflate(context,
                 R.layout.status_bar_notification_panel, null);
