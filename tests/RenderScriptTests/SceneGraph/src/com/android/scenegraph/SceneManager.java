@@ -71,8 +71,8 @@ public class SceneManager extends SceneGraphBase {
     Scene mActiveScene;
     private static SceneManager sSceneManager;
 
-    private Allocation sDefault2D;
-    private Allocation sDefaultCube;
+    private Allocation mDefault2D;
+    private Allocation mDefaultCube;
 
     private static Allocation getDefault(boolean isCube) {
         final int dimension = 4;
@@ -101,20 +101,14 @@ public class SceneManager extends SceneGraphBase {
         if (sSceneManager == null) {
             return null;
         }
-        if (sSceneManager.sDefault2D == null) {
-            sSceneManager.sDefault2D = getDefault(false);
-        }
-        return sSceneManager.sDefault2D;
+        return sSceneManager.mDefault2D;
     }
 
     static Allocation getDefaultTexCube() {
         if (sSceneManager == null) {
             return null;
         }
-        if (sSceneManager.sDefaultCube == null) {
-            sSceneManager.sDefaultCube = getDefault(true);
-        }
-        return sSceneManager.sDefaultCube;
+        return sSceneManager.mDefaultCube;
     }
 
     public static boolean isSDCardPath(String path) {
@@ -320,6 +314,10 @@ public class SceneManager extends SceneGraphBase {
         mRS = rs;
         mRes = res;
         mAllocationMap = new HashMap<String, Allocation>();
+
+        mQuad = null;
+        mDefault2D = getDefault(false);
+        mDefaultCube = getDefault(true);
 
         mExportScript = new ScriptC_export(rs, res, R.raw.export);
 
