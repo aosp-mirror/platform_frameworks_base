@@ -1591,6 +1591,7 @@ public class ListView extends AbsListView {
 
             // Clear out old views
             detachAllViewsFromParent();
+            recycleBin.removeSkippedScrap();
 
             switch (mLayoutMode) {
             case LAYOUT_SET_SELECTION:

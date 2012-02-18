@@ -4144,6 +4144,10 @@ public final class ViewRootImpl implements ViewParent,
         return scrollToRectOrFocus(rectangle, immediate);
     }
 
+    public void childHasTransientStateChanged(View child, boolean hasTransientState) {
+        // Do nothing.
+    }
+
     class TakenSurfaceHolder extends BaseSurfaceHolder {
         @Override
         public boolean onAllowLockCanvas() {
