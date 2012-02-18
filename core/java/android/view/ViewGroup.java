@@ -3789,7 +3789,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         RectF boundingRect = attachInfo.mTmpTransformRect;
                         boundingRect.set(dirty);
                         m.mapRect(boundingRect);
-                        dirty.set((int) boundingRect.left, (int) boundingRect.top,
+                        dirty.set((int) (boundingRect.left - 0.5f),
+                                (int) (boundingRect.top - 0.5f),
                                 (int) (boundingRect.right + 0.5f),
                                 (int) (boundingRect.bottom + 0.5f));
                     }
