@@ -845,6 +845,17 @@ int Session_SetConfig(preproc_session_t *session, effect_config_t *config)
          config->inputCfg.samplingRate, config->inputCfg.channels);
     int status;
 
+    // if at least one process is enabled, do not accept configuration changes
+    if (session->enabledMsk) {
+        if (session->samplingRate != config->inputCfg.samplingRate ||
+                session->inChannelCount != inCnl ||
+                session->outChannelCount != outCnl) {
+            return -ENOSYS;
+        } else {
+            return 0;
+        }
+    }
+
     // AEC implementation is limited to 16kHz
     if (config->inputCfg.samplingRate >= 32000 && !(session->createdMsk & (1 << PREPROC_AEC))) {
         session->apmSamplingRate = 32000;
@@ -1287,7 +1298,9 @@ int PreProcessingFx_Command(effect_handle_t  self,
             if (*(int *)pReplyData != 0) {
                 break;
             }
-            *(int *)pReplyData = Effect_SetState(effect, PREPROC_EFFECT_STATE_CONFIG);
+            if (effect->state != PREPROC_EFFECT_STATE_ACTIVE) {
+                *(int *)pReplyData = Effect_SetState(effect, PREPROC_EFFECT_STATE_CONFIG);
+            }
             break;
 
         case EFFECT_CMD_GET_CONFIG:
