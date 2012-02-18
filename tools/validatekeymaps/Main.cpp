@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <ui/KeyCharacterMap.h>
-#include <ui/KeyLayoutMap.h>
-#include <ui/VirtualKeyMap.h>
+#include <androidfw/KeyCharacterMap.h>
+#include <androidfw/KeyLayoutMap.h>
+#include <androidfw/VirtualKeyMap.h>
 #include <utils/PropertyMap.h>
 #include <utils/String8.h>
 
