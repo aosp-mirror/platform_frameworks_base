@@ -263,6 +263,10 @@ void * Context::threadProc(void *vrsc) {
             rsc->timerSet(RS_TIMER_IDLE);
 
 #ifndef ANDROID_RS_SERIALIZE
+            if (!rsc->mRootScript.get() || !rsc->mHasSurface || rsc->mPaused) {
+                targetRate = 0;
+            }
+
             if (vsyncRate != targetRate) {
                 displayEvent.setVsyncRate(targetRate);
                 vsyncRate = targetRate;
