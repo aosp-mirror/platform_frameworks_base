@@ -18,8 +18,8 @@
 
 #include <stdlib.h>
 #include <android/keycodes.h>
-#include <ui/Keyboard.h>
-#include <ui/KeyLayoutMap.h>
+#include <androidfw/Keyboard.h>
+#include <androidfw/KeyLayoutMap.h>
 #include <utils/Log.h>
 #include <utils/Errors.h>
 #include <utils/Tokenizer.h>

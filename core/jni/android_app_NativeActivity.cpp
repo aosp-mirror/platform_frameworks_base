@@ -27,7 +27,7 @@
 #include <android_runtime/android_util_AssetManager.h>
 #include <surfaceflinger/Surface.h>
 #include <ui/egl/android_natives.h>
-#include <ui/InputTransport.h>
+#include <androidfw/InputTransport.h>
 #include <utils/Looper.h>
 
 #include "JNIHelp.h"

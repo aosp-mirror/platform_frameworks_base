@@ -21,7 +21,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <binder/Parcel.h>
 #include <utils/Log.h>
-#include <ui/InputTransport.h>
+#include <androidfw/InputTransport.h>
 #include "android_view_InputChannel.h"
 #include "android_util_Binder.h"
 

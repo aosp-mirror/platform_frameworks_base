@@ -20,7 +20,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
-#include <ui/Input.h>
+#include <androidfw/Input.h>
 #include "android_view_MotionEvent.h"
 
 

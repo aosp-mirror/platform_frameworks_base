@@ -21,7 +21,7 @@
 #include "PointerController.h"
 #include "InputListener.h"
 
-#include <ui/Input.h>
+#include <androidfw/Input.h>
 #include <ui/DisplayInfo.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>

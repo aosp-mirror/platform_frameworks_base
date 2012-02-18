@@ -18,11 +18,11 @@
 #ifndef _RUNTIME_EVENT_HUB_H
 #define _RUNTIME_EVENT_HUB_H
 
-#include <ui/Input.h>
-#include <ui/Keyboard.h>
-#include <ui/KeyLayoutMap.h>
-#include <ui/KeyCharacterMap.h>
-#include <ui/VirtualKeyMap.h>
+#include <androidfw/Input.h>
+#include <androidfw/Keyboard.h>
+#include <androidfw/KeyLayoutMap.h>
+#include <androidfw/KeyCharacterMap.h>
+#include <androidfw/VirtualKeyMap.h>
 #include <utils/String8.h>
 #include <utils/threads.h>
 #include <utils/Log.h>

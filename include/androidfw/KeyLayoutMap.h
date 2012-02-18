@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _UI_KEY_LAYOUT_MAP_H
-#define _UI_KEY_LAYOUT_MAP_H
+#ifndef _ANDROIDFW_KEY_LAYOUT_MAP_H
+#define _ANDROIDFW_KEY_LAYOUT_MAP_H
 
 #include <stdint.h>
 #include <utils/Errors.h>
@@ -96,4 +96,4 @@ private:
 
 } // namespace android
 
-#endif // _UI_KEY_LAYOUT_MAP_H
+#endif // _ANDROIDFW_KEY_LAYOUT_MAP_H

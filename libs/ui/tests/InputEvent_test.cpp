@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <ui/Input.h>
+#include <androidfw/Input.h>
 #include <gtest/gtest.h>
 #include <binder/Parcel.h>
 

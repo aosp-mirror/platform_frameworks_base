@@ -19,7 +19,7 @@
 
 #include "jni.h"
 
-#include <ui/InputTransport.h>
+#include <androidfw/InputTransport.h>
 
 namespace android {
 

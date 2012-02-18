@@ -14,8 +14,8 @@
  * limitations under the License.
 */
 
-#include <ui/KeyCharacterMap.h>
-#include <ui/Input.h>
+#include <androidfw/KeyCharacterMap.h>
+#include <androidfw/Input.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <nativehelper/jni.h>

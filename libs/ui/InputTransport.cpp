@@ -20,7 +20,7 @@
 #include <cutils/log.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <ui/InputTransport.h>
+#include <androidfw/InputTransport.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>

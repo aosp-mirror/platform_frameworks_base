@@ -18,8 +18,8 @@
 #include <utils/Log.h>
 
 #include <android/input.h>
-#include <ui/Input.h>
-#include <ui/InputTransport.h>
+#include <androidfw/Input.h>
+#include <androidfw/InputTransport.h>
 #include <utils/Looper.h>
 #include <utils/RefBase.h>
 #include <utils/Vector.h>

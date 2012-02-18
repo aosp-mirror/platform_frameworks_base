@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <ui/InputTransport.h>
+#include <androidfw/InputTransport.h>
 #include <utils/Timers.h>
 #include <utils/StopWatch.h>
 #include <gtest/gtest.h>

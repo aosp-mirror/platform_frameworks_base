@@ -19,8 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <android/keycodes.h>
-#include <ui/Keyboard.h>
-#include <ui/KeyCharacterMap.h>
+#include <androidfw/Keyboard.h>
+#include <androidfw/KeyCharacterMap.h>
 #include <utils/Log.h>
 #include <utils/Errors.h>
 #include <utils/Tokenizer.h>

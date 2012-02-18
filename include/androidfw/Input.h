@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _UI_INPUT_H
-#define _UI_INPUT_H
+#ifndef _ANDROIDFW_INPUT_H
+#define _ANDROIDFW_INPUT_H
 
 /**
  * Native input event structures.
@@ -894,4 +894,4 @@ extern String8 getInputDeviceConfigurationFilePathByName(
 
 } // namespace android
 
-#endif // _UI_INPUT_H
+#endif // _ANDROIDFW_INPUT_H
