@@ -23,7 +23,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
 
-#include <utils/ResourceTypes.h>
+#include <androidfw/ResourceTypes.h>
 
 #include <stdio.h>
 

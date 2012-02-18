@@ -17,7 +17,7 @@
 #ifndef android_util_AssetManager_H
 #define android_util_AssetManager_H
 
-#include <utils/AssetManager.h>
+#include <androidfw/AssetManager.h>
 
 #include "jni.h"
 

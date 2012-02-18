@@ -18,7 +18,7 @@
 #define LOG_TAG "NinePatch"
 #define LOG_NDEBUG 1
 
-#include <utils/ResourceTypes.h>
+#include <androidfw/ResourceTypes.h>
 #include <utils/Log.h>
 
 #include "SkBitmap.h"

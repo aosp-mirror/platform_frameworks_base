@@ -7,14 +7,14 @@
 #define __AAPT_ASSETS_H
 
 #include <stdlib.h>
-#include <utils/AssetManager.h>
+#include <androidfw/AssetManager.h>
+#include <androidfw/ResourceTypes.h>
 #include <utils/KeyedVector.h>
-#include <utils/String8.h>
-#include <utils/ResourceTypes.h>
+#include <utils/RefBase.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
+#include <utils/String8.h>
 #include <utils/Vector.h>
-#include <utils/RefBase.h>
 #include "ZipFile.h"
 
 #include "Bundle.h"

@@ -24,7 +24,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <cutils/properties.h>
-#include <utils/ResourceTypes.h>
+#include <androidfw/ResourceTypes.h>
 
 #include <gui/SurfaceTexture.h>
 

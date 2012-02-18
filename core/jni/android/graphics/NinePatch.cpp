@@ -18,7 +18,7 @@
 #define LOG_TAG "9patch"
 #define LOG_NDEBUG 1
 
-#include <utils/ResourceTypes.h>
+#include <androidfw/ResourceTypes.h>
 #include <utils/Log.h>
 
 #include "SkCanvas.h"

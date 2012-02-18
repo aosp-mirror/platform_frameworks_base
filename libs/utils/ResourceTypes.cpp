@@ -17,14 +17,14 @@
 #define LOG_TAG "ResourceType"
 //#define LOG_NDEBUG 0
 
+#include <androidfw/ResourceTypes.h>
 #include <utils/Atomic.h>
 #include <utils/ByteOrder.h>
 #include <utils/Debug.h>
-#include <utils/ResourceTypes.h>
+#include <utils/Log.h>
 #include <utils/String16.h>
 #include <utils/String8.h>
 #include <utils/TextOutput.h>
-#include <utils/Log.h>
 
 #include <stdlib.h>
 #include <string.h>

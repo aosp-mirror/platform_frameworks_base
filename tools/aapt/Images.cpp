@@ -8,7 +8,7 @@
 
 #include "Images.h"
 
-#include <utils/ResourceTypes.h>
+#include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
 
 #include <png.h>

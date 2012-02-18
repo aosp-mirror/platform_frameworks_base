@@ -19,7 +19,7 @@
 // implementation is in the header file or in friend functions in
 // AssetManager.
 //
-#include <utils/AssetDir.h>
+#include <androidfw/AssetDir.h>
 
 using namespace android;
 

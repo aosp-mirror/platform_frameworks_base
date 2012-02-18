@@ -21,23 +21,23 @@
 #define LOG_TAG "asset"
 //#define NDEBUG 0
 
-#include <utils/Asset.h>
+#include <androidfw/Asset.h>
+#include <androidfw/StreamingZipInflater.h>
+#include <androidfw/ZipFileRO.h>
+#include <androidfw/ZipUtils.h>
 #include <utils/Atomic.h>
 #include <utils/FileMap.h>
-#include <utils/StreamingZipInflater.h>
-#include <utils/ZipUtils.h>
-#include <utils/ZipFileRO.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
 
-#include <string.h>
-#include <memory.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <assert.h>
-#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <memory.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 using namespace android;
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <utils/ZipFileCRO.h>
-#include <utils/ZipFileRO.h>
+#include <androidfw/ZipFileCRO.h>
+#include <androidfw/ZipFileRO.h>
 
 using namespace android;
 

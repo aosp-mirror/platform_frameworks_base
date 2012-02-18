@@ -20,14 +20,15 @@
 #ifndef __LIBS_ASSETMANAGER_H
 #define __LIBS_ASSETMANAGER_H
 
-#include <utils/Asset.h>
-#include <utils/AssetDir.h>
+#include <androidfw/Asset.h>
+#include <androidfw/AssetDir.h>
+#include <androidfw/ZipFileRO.h>
 #include <utils/KeyedVector.h>
-#include <utils/String8.h>
-#include <utils/Vector.h>
+#include <utils/SortedVector.h>
 #include <utils/String16.h>
-#include <utils/ZipFileRO.h>
+#include <utils/String8.h>
 #include <utils/threads.h>
+#include <utils/Vector.h>
 
 /*
  * Native-app access is via the opaque typedef struct AAssetManager in the C namespace.

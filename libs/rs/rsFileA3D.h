@@ -20,8 +20,8 @@
 #include "rs.h"
 #include "rsMesh.h"
 
+#include <androidfw/Asset.h>
 #include <utils/String8.h>
-#include <utils/Asset.h>
 #include "rsStream.h"
 #include <stdio.h>
 

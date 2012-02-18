@@ -17,7 +17,7 @@
 #ifndef _ANDROID_CONTENT_RES_CONFIGURATION_H
 #define _ANDROID_CONTENT_RES_CONFIGURATION_H
 
-#include <utils/ResourceTypes.h>
+#include <androidfw/ResourceTypes.h>
 #include <android/configuration.h>
 
 #include "jni.h"

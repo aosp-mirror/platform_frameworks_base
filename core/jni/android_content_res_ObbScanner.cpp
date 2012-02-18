@@ -18,7 +18,7 @@
 
 #include <utils/Log.h>
 #include <utils/String8.h>
-#include <utils/ObbFile.h>
+#include <androidfw/ObbFile.h>
 
 #include "jni.h"
 #include "JNIHelp.h"

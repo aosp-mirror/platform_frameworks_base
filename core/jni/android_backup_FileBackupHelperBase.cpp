@@ -20,7 +20,7 @@
 #include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 
-#include <utils/BackupHelpers.h>
+#include <androidfw/BackupHelpers.h>
 
 namespace android
 {
