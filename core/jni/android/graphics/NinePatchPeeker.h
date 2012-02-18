@@ -18,7 +18,7 @@
 #define NinePatchPeeker_h
 
 #include "SkImageDecoder.h"
-#include <utils/ResourceTypes.h>
+#include <androidfw/ResourceTypes.h>
 
 using namespace android;
 

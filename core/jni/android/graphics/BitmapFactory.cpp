@@ -15,8 +15,8 @@
 #include "JNIHelp.h"
 
 #include <android_runtime/AndroidRuntime.h>
-#include <utils/Asset.h>
-#include <utils/ResourceTypes.h>
+#include <androidfw/Asset.h>
+#include <androidfw/ResourceTypes.h>
 #include <netinet/in.h>
 #include <sys/mman.h>
 #include <sys/stat.h>

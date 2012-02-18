@@ -31,9 +31,9 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
 
-#include <utils/Asset.h>
-#include <utils/AssetManager.h>
-#include <utils/ResourceTypes.h>
+#include <androidfw/Asset.h>
+#include <androidfw/AssetManager.h>
+#include <androidfw/ResourceTypes.h>
 
 #include <stdio.h>
 

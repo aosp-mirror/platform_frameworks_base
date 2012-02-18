@@ -15,8 +15,8 @@
  */
 
 #define LOG_TAG "ObbFile_test"
+#include <androidfw/ObbFile.h>
 #include <utils/Log.h>
-#include <utils/ObbFile.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>
 

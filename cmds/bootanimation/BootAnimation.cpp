@@ -25,12 +25,12 @@
 
 #include <cutils/properties.h>
 
+#include <androidfw/AssetManager.h>
 #include <binder/IPCThreadState.h>
-#include <utils/threads.h>
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
-#include <utils/AssetManager.h>
+#include <utils/threads.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>

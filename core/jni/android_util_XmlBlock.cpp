@@ -19,12 +19,11 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include <utils/misc.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <utils/AssetManager.h>
+#include <androidfw/AssetManager.h>
+#include <androidfw/ResourceTypes.h>
 #include <utils/Log.h>
-
-#include <utils/ResourceTypes.h>
+#include <utils/misc.h>
 
 #include <stdio.h>
 

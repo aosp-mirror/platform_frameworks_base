@@ -10,7 +10,7 @@
 #include "Main.h"
 #include "AaptAssets.h"
 
-#include <utils/ResourceTypes.h>
+#include <androidfw/ResourceTypes.h>
 #include <utils/String16.h>
 #include <utils/TextOutput.h>
 

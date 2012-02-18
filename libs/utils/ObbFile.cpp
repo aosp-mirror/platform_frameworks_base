@@ -23,9 +23,9 @@
 
 #define LOG_TAG "ObbFile"
 
+#include <androidfw/ObbFile.h>
 #include <utils/Compat.h>
 #include <utils/Log.h>
-#include <utils/ObbFile.h>
 
 //#define DEBUG 1
 

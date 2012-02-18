@@ -20,7 +20,7 @@
 #ifndef _LIBS_UTILS_RESOURCE_TYPES_H
 #define _LIBS_UTILS_RESOURCE_TYPES_H
 
-#include <utils/Asset.h>
+#include <androidfw/Asset.h>
 #include <utils/ByteOrder.h>
 #include <utils/Errors.h>
 #include <utils/String16.h>

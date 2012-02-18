@@ -18,8 +18,8 @@
 #define LOG_TAG "szipinf"
 #include <utils/Log.h>
 
+#include <androidfw/StreamingZipInflater.h>
 #include <utils/FileMap.h>
-#include <utils/StreamingZipInflater.h>
 #include <string.h>
 #include <stddef.h>
 #include <assert.h>

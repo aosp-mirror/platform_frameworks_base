@@ -37,7 +37,7 @@
 
 #include <binder/Parcel.h>
 #include <jni.h>
-#include <utils/Asset.h>
+#include <androidfw/Asset.h>
 #include <sys/stat.h>
 
 #if 0

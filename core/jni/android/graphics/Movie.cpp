@@ -5,8 +5,8 @@
 #include "SkUtils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 
-#include <utils/Asset.h>
-#include <utils/ResourceTypes.h>
+#include <androidfw/Asset.h>
+#include <androidfw/ResourceTypes.h>
 #include <netinet/in.h>
 
 #if 0

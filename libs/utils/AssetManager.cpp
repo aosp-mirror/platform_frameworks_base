@@ -21,23 +21,23 @@
 #define LOG_TAG "asset"
 //#define LOG_NDEBUG 0
 
-#include <utils/AssetManager.h>
-#include <utils/AssetDir.h>
-#include <utils/Asset.h>
+#include <androidfw/Asset.h>
+#include <androidfw/AssetDir.h>
+#include <androidfw/AssetManager.h>
+#include <androidfw/ResourceTypes.h>
+#include <androidfw/ZipFileRO.h>
 #include <utils/Atomic.h>
-#include <utils/String8.h>
-#include <utils/ResourceTypes.h>
-#include <utils/String8.h>
-#include <utils/ZipFileRO.h>
 #include <utils/Log.h>
-#include <utils/Timers.h>
+#include <utils/String8.h>
+#include <utils/String8.h>
 #include <utils/threads.h>
+#include <utils/Timers.h>
 
+#include <assert.h>
 #include <dirent.h>
 #include <errno.h>
-#include <assert.h>
-#include <strings.h>
 #include <fcntl.h>
+#include <strings.h>
 #include <sys/stat.h>
 #include <unistd.h>
 

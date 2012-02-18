@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <utils/BackupHelpers.h>
+#include <androidfw/BackupHelpers.h>
 #include <utils/String8.h>
 
 #include <fcntl.h>

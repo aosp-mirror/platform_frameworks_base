@@ -20,8 +20,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <androidfw/AssetManager.h>
 #include <utils/threads.h>
-#include <utils/AssetManager.h>
 
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>

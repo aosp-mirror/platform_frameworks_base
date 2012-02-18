@@ -16,7 +16,7 @@
 
 #define LOG_TAG "backup_data"
 
-#include <utils/BackupHelpers.h>
+#include <androidfw/BackupHelpers.h>
 #include <utils/ByteOrder.h>
 
 #include <stdio.h>

@@ -15,8 +15,8 @@
  */
 
 #define LOG_TAG "ZipFileRO_test"
+#include <androidfw/ZipFileRO.h>
 #include <utils/Log.h>
-#include <utils/ZipFileRO.h>
 
 #include <gtest/gtest.h>
 

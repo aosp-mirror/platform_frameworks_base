@@ -9,8 +9,8 @@
 #include "XMLNode.h"
 #include "ResourceFilter.h"
 
+#include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
-#include <utils/ResourceTypes.h>
 #include <stdarg.h>
 
 #define NOISY(x) //x

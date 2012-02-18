@@ -18,9 +18,9 @@
 #include <utils/Log.h>
 
 #include <android/asset_manager_jni.h>
-#include <utils/AssetManager.h>
-#include <utils/AssetDir.h>
-#include <utils/Asset.h>
+#include <androidfw/Asset.h>
+#include <androidfw/AssetDir.h>
+#include <androidfw/AssetManager.h>
 #include <utils/threads.h>
 
 #include "jni.h"

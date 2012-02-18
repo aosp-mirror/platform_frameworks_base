@@ -2,10 +2,10 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include "GraphicsJNI.h"
-#include <android_runtime/android_util_AssetManager.h>
 #include "SkStream.h"
 #include "SkTypeface.h"
-#include <utils/AssetManager.h>
+#include <android_runtime/android_util_AssetManager.h>
+#include <androidfw/AssetManager.h>
 
 using namespace android;
 
