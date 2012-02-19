@@ -217,14 +217,15 @@ class AAH_RXPlayer : public MediaPlayerInterface {
         status_t getStatus() const { return status_; }
 
       protected:
-        virtual ~Substream() {
-            shutdown();
-        }
+        virtual ~Substream();
 
       private:
         void                cleanupDecoder();
         bool                shouldAbort(const char* log_tag);
         void                processCompletedBuffer();
+        bool                setupSubstreamMeta();
+        bool                setupMP3SubstreamMeta();
+        bool                setupAACSubstreamMeta();
         bool                setupSubstreamType(uint8_t substream_type,
                                                uint8_t codec_type);
 
@@ -235,11 +236,15 @@ class AAH_RXPlayer : public MediaPlayerInterface {
         bool                substream_details_known_;
         uint8_t             substream_type_;
         uint8_t             codec_type_;
+        const char*         codec_mime_type_;
         sp<MetaData>        substream_meta_;
 
         MediaBuffer*        buffer_in_progress_;
         uint32_t            expected_buffer_size_;
         uint32_t            buffer_filled_;
+
+        Vector<uint8_t>     aux_data_in_progress_;
+        uint32_t            aux_data_expected_size_;
 
         sp<AAH_DecoderPump> decoder_;
 

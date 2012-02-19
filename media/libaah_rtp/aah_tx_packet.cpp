@@ -142,10 +142,16 @@ void TRTPAudioPacket::setVolume(uint8_t val) {
     mVolume = val;
 }
 
-void TRTPAudioPacket::setAccessUnitData(void* data, int len) {
+void TRTPAudioPacket::setAccessUnitData(const void* data, size_t len) {
     CHECK(!mIsPacked);
     mAccessUnitData = data;
     mAccessUnitLen = len;
+}
+
+void TRTPAudioPacket::setAuxData(const void* data, size_t len) {
+    CHECK(!mIsPacked);
+    mAuxData = data;
+    mAuxDataLen = len;
 }
 
 /*** TRTP control packet properties ***/
@@ -232,6 +238,7 @@ bool TRTPAudioPacket::pack() {
     }
 
     int packetLen = kRTPHeaderLen +
+                    mAuxDataLen +
                     mAccessUnitLen +
                     TRTPHeaderLen();
 
@@ -249,15 +256,23 @@ bool TRTPAudioPacket::pack() {
     mPacketLen = packetLen;
 
     uint8_t* cur = mPacket;
+    bool hasAux = mAuxData && mAuxDataLen;
+    uint8_t flags = (static_cast<int>(hasAux) << 4) |
+                    (static_cast<int>(mRandomAccessPoint) << 3) |
+                    (static_cast<int>(mDropable) << 2) |
+                    (static_cast<int>(mDiscontinuity) << 1) |
+                    (static_cast<int>(mEndOfStream));
 
     writeTRTPHeader(cur, true, packetLen);
     writeU8(cur, mCodecType);
-    writeU8(cur,
-            (static_cast<int>(mRandomAccessPoint) << 3) |
-            (static_cast<int>(mDropable) << 2) |
-            (static_cast<int>(mDiscontinuity) << 1) |
-            (static_cast<int>(mEndOfStream)));
+    writeU8(cur, flags);
     writeU8(cur, mVolume);
+
+    if (hasAux) {
+        writeU32(cur, mAuxDataLen);
+        memcpy(cur, mAuxData, mAuxDataLen);
+        cur += mAuxDataLen;
+    }
 
     memcpy(cur, mAccessUnitData, mAccessUnitLen);
 
@@ -293,12 +308,10 @@ int TRTPAudioPacket::TRTPHeaderLen() const {
     }
 
 
-    // TODO : properly compute aux data length.  Currently, nothing
-    // uses aux data, so its length is always 0.
-    int auxDataLength = 0;
+    int auxDataLenField = (NULL != mAuxData) ? sizeof(uint32_t) : 0;
     return TRTPPacket::TRTPHeaderLen() +
            3 +
-           auxDataLength +
+           auxDataLenField +
            pcmParamLength;
 }
 

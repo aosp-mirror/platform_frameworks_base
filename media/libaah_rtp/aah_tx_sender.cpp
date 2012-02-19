@@ -283,7 +283,8 @@ void AAH_TXSender::trimRetryBuffers() {
     // remove the state for any endpoints that are no longer in use
     for (size_t i = 0; i < endpointsToRemove.size(); i++) {
         Endpoint& e = endpointsToRemove.editItemAt(i);
-        ALOGD("*** %s removing endpoint addr=%08x", __PRETTY_FUNCTION__, e.addr);
+        ALOGD("*** %s removing endpoint addr=%08x",
+                __PRETTY_FUNCTION__, e.addr);
         size_t index = mEndpointMap.indexOfKey(e);
         delete mEndpointMap.valueAt(index);
         mEndpointMap.removeItemsAt(index);

@@ -431,8 +431,8 @@ bool AAH_RXPlayer::processRX(PacketBuffer* pb) {
         // Looks like a NAK packet; make sure its long enough.
 
         if (amt < static_cast<ssize_t>(sizeof(RetransRequest))) {
-            ALOGV("Dropping packet, too short to contain NAK payload (%u bytes)",
-                  static_cast<uint32_t>(amt));
+            ALOGV("Dropping packet, too short to contain NAK payload"
+                  " (%u bytes)", static_cast<uint32_t>(amt));
             goto drop_packet;
         }
 
@@ -441,7 +441,8 @@ bool AAH_RXPlayer::processRX(PacketBuffer* pb) {
         gap.start_seq_ = ntohs(rtr->start_seq_);
         gap.end_seq_   = ntohs(rtr->end_seq_);
 
-        ALOGV("Process NAK for gap at [%hu, %hu]", gap.start_seq_, gap.end_seq_);
+        ALOGV("Process NAK for gap at [%hu, %hu]",
+                gap.start_seq_, gap.end_seq_);
         ring_buffer_.processNAK(&gap);
 
         return true;
@@ -770,7 +771,8 @@ bool AAH_RXPlayer::processGaps() {
             ALOGE("Error when sending retransmit request (%d)", errno);
         } else {
             ALOGV("%s request for range [%hu, %hu] sent",
-                  (kGS_FastStartGap == gap_status) ? "Fast Start" : "Retransmit",
+                  (kGS_FastStartGap == gap_status) ? "Fast Start"
+                                                   : "Retransmit",
                   gap.start_seq_, gap.end_seq_);
         }
 

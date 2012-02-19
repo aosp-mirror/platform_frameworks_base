@@ -153,6 +153,11 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     sp<NuCachedSource2> mCachedSource;
 
     sp<MediaSource> mAudioSource;
+    TRTPAudioPacket::TRTPAudioCodecType mAudioCodec;
+    sp<MetaData> mAudioFormat;
+    uint8_t* mAudioCodecData;
+    size_t mAudioCodecDataSize;
+
     int64_t mDurationUs;
     int64_t mBitrate;
 

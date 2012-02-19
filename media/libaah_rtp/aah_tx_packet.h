@@ -25,7 +25,7 @@
 namespace android {
 
 class TRTPPacket : public RefBase {
-  protected:
+  public:
     enum TRTPHeaderType {
         kHeaderTypeAudio = 1,
         kHeaderTypeVideo = 2,
@@ -33,6 +33,12 @@ class TRTPPacket : public RefBase {
         kHeaderTypeControl = 4,
     };
 
+    enum TRTPPayloadFlags {
+        kFlag_TSTransformPresent = 0x02,
+        kFlag_TSValid = 0x01,
+    };
+
+  protected:
     TRTPPacket(TRTPHeaderType headerType)
         : mIsPacked(false)
         , mVersion(2)
@@ -121,6 +127,14 @@ class TRTPPacket : public RefBase {
 
 class TRTPAudioPacket : public TRTPPacket {
   public:
+    enum AudioPayloadFlags {
+        kFlag_AuxLengthPresent = 0x10,
+        kFlag_RandomAccessPoint = 0x08,
+        kFlag_Dropable = 0x04,
+        kFlag_Discontinuity = 0x02,
+        kFlag_EndOfStream = 0x01,
+    };
+
     TRTPAudioPacket()
         : TRTPPacket(kHeaderTypeAudio)
         , mCodecType(kCodecInvalid)
@@ -129,13 +143,17 @@ class TRTPAudioPacket : public TRTPPacket {
         , mDiscontinuity(false)
         , mEndOfStream(false)
         , mVolume(0)
-        , mAccessUnitData(NULL) { }
+        , mAccessUnitData(NULL)
+        , mAccessUnitLen(0)
+        , mAuxData(NULL)
+        , mAuxDataLen(0) { }
 
     enum TRTPAudioCodecType {
         kCodecInvalid = 0,
         kCodecPCMBigEndian = 1,
         kCodecPCMLittleEndian = 2,
         kCodecMPEG1Audio = 3,
+        kCodecAACAudio = 4,
     };
 
     void setCodecType(TRTPAudioCodecType val);
@@ -144,7 +162,8 @@ class TRTPAudioPacket : public TRTPPacket {
     void setDiscontinuity(bool val);
     void setEndOfStream(bool val);
     void setVolume(uint8_t val);
-    void setAccessUnitData(void* data, int len);
+    void setAccessUnitData(const void* data, size_t len);
+    void setAuxData(const void* data, size_t len);
 
     virtual bool pack();
 
@@ -158,8 +177,11 @@ class TRTPAudioPacket : public TRTPPacket {
     bool mDiscontinuity;
     bool mEndOfStream;
     uint8_t mVolume;
-    void* mAccessUnitData;
-    int mAccessUnitLen;
+
+    const void* mAccessUnitData;
+    size_t mAccessUnitLen;
+    const void* mAuxData;
+    size_t mAuxDataLen;
 
     DISALLOW_EVIL_CONSTRUCTORS(TRTPAudioPacket);
 };

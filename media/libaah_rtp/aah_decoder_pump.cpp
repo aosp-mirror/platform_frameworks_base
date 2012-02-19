@@ -159,8 +159,8 @@ void AAH_DecoderPump::queueToRenderer(MediaBuffer* decoded_sample) {
 
                 res = renderer_->queueTimedBuffer(pcm_payload, ts);
                 if (res != OK) {
-                    ALOGE("Failed to queue %d byte audio track buffer with media"
-                          " PTS %lld. (res = %d)", decoded_amt, ts, res);
+                    ALOGE("Failed to queue %d byte audio track buffer with"
+                          " media PTS %lld. (res = %d)", decoded_amt, ts, res);
                 } else {
                     last_queued_pts_valid_ = true;
                     last_queued_pts_ = ts;
@@ -291,8 +291,8 @@ void* AAH_DecoderPump::workThread() {
     // thread_status_.
     thread_status_ = decoder_->start(format_.get());
     if (OK != thread_status_) {
-        ALOGE("AAH_DecoderPump's work thread failed to start decoder (res = %d)",
-                thread_status_);
+        ALOGE("AAH_DecoderPump's work thread failed to start decoder"
+              " (res = %d)", thread_status_);
         return NULL;
     }
 

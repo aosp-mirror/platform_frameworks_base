@@ -116,8 +116,8 @@ bool AAH_RXPlayer::RXRingBuffer::pushBuffer(PacketBuffer* buf,
 
     // Check for overflow first.
     if ((!(norm_seq & 0x8000)) && (norm_seq >= (capacity_ - 1))) {
-        ALOGW("Ring buffer overflow; cap = %u, [rd, wr] = [%hu, %hu], seq = %hu",
-              capacity_, rd_seq_, norm_wr_seq + rd_seq_, seq);
+        ALOGW("Ring buffer overflow; cap = %u, [rd, wr] = [%hu, %hu],"
+              " seq = %hu", capacity_, rd_seq_, norm_wr_seq + rd_seq_, seq);
         PacketBuffer::destroy(buf);
         return false;
     }
