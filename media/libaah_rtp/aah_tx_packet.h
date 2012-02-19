@@ -126,13 +126,17 @@ class TRTPAudioPacket : public TRTPPacket {
         , mDiscontinuity(false)
         , mEndOfStream(false)
         , mVolume(0)
-        , mAccessUnitData(NULL) { }
+        , mAccessUnitData(NULL)
+        , mAccessUnitLen(0)
+        , mAuxData(NULL)
+        , mAuxDataLen(0) { }
 
     enum TRTPAudioCodecType {
         kCodecInvalid = 0,
         kCodecPCMBigEndian = 1,
         kCodecPCMLittleEndian = 2,
         kCodecMPEG1Audio = 3,
+        kCodecAACAudio = 4,
     };
 
     void setCodecType(TRTPAudioCodecType val);
@@ -141,7 +145,8 @@ class TRTPAudioPacket : public TRTPPacket {
     void setDiscontinuity(bool val);
     void setEndOfStream(bool val);
     void setVolume(uint8_t val);
-    void setAccessUnitData(void* data, int len);
+    void setAccessUnitData(const void* data, size_t len);
+    void setAuxData(const void* data, size_t len);
 
     virtual bool pack();
 
@@ -155,8 +160,10 @@ class TRTPAudioPacket : public TRTPPacket {
     bool mDiscontinuity;
     bool mEndOfStream;
     uint8_t mVolume;
-    void* mAccessUnitData;
-    int mAccessUnitLen;
+    const void* mAccessUnitData;
+    size_t mAccessUnitLen;
+    const void* mAuxData;
+    size_t mAuxDataLen;
 };
 
 class TRTPControlPacket : public TRTPPacket {

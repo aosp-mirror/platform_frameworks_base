@@ -27,6 +27,9 @@
 #include <media/stagefright/Utils.h>
 
 #include "aah_rx_player.h"
+#include "aah_tx_packet.h"
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 namespace android {
 
@@ -38,6 +41,7 @@ AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
     substream_details_known_ = false;
     buffer_in_progress_ = NULL;
     status_ = OK;
+    codec_mime_type_ = "";
 
     decoder_ = new AAH_DecoderPump(omx);
     if (decoder_ == NULL) {
@@ -52,6 +56,9 @@ AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
     cleanupBufferInProgress();
 }
 
+AAH_RXPlayer::Substream::~Substream() {
+    shutdown();
+}
 
 void AAH_RXPlayer::Substream::shutdown() {
     substream_meta_ = NULL;
@@ -69,6 +76,9 @@ void AAH_RXPlayer::Substream::cleanupBufferInProgress() {
     expected_buffer_size_ = 0;
     buffer_filled_ = 0;
     waiting_for_rap_ = true;
+
+    aux_data_in_progress_.clear();
+    aux_data_expected_size_ = 0;
 }
 
 void AAH_RXPlayer::Substream::cleanupDecoder() {
@@ -168,11 +178,7 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
     }
 
     // Extract the TRTP length field and sanity check it.
-    uint32_t trtp_len;
-    trtp_len = (static_cast<uint32_t>(buf[2]) << 24) |
-        (static_cast<uint32_t>(buf[3]) << 16) |
-        (static_cast<uint32_t>(buf[4]) <<  8) |
-        static_cast<uint32_t>(buf[5]);
+    uint32_t trtp_len = U32_AT(buf + 2);
     if (trtp_len < min_length) {
         LOGV("TRTP length (%u) is too short to be valid.  Must be at least %u"
                 " bytes.", trtp_len, min_length);
@@ -183,12 +189,9 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
     int64_t ts = 0;
     uint32_t parse_offset = 6;
     if (ts_valid) {
-        ts = (static_cast<int64_t>(buf[parse_offset    ]) << 56) |
-            (static_cast<int64_t>(buf[parse_offset + 1]) << 48) |
-            (static_cast<int64_t>(buf[parse_offset + 2]) << 40) |
-            (static_cast<int64_t>(buf[parse_offset + 3]) << 32);
-        ts |= ts_lower;
+        uint32_t ts_upper = U32_AT(buf + parse_offset);
         parse_offset += 4;
+        ts = (static_cast<int64_t>(ts_upper) << 32) | ts_lower;
     }
 
     // Check the flags to see if there is another 24 bytes of timestamp
@@ -245,9 +248,37 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
         return;
     }
 
+    // Check for the presence of codec aux data.
     if (flags & 0x10) {
-        LOGV("Dropping TRTP Audio Payload with aux codec data present (only"
-             " handle MP3 right now, and it has no aux data)");
+        min_length += 4;
+        trtp_header_len += 4;
+
+        if (trtp_len < min_length) {
+            LOGV("TRTP length (%u) is too short to be a valid audio payload.  "
+                 "Must be at least %u bytes.", trtp_len, min_length);
+            return;
+        }
+
+        if (amt < min_length) {
+            LOGV("TRTP porttion of RTP payload (%u bytes) too small to contain"
+                 " entire TRTP header.  TRTP does not currently support"
+                 " fragmenting TRTP headers across RTP payloads", amt);
+            return;
+        }
+
+        aux_data_expected_size_ = U32_AT(buf + parse_offset);
+        aux_data_in_progress_.clear();
+        if (aux_data_in_progress_.capacity() < aux_data_expected_size_) {
+            aux_data_in_progress_.setCapacity(aux_data_expected_size_);
+        }
+    } else {
+        aux_data_expected_size_ = 0;
+    }
+
+    if ((aux_data_expected_size_ + trtp_header_len) > trtp_len) {
+        LOGV("Expected codec aux data length (%u) and TRTP header overhead (%u)"
+             " too large for total TRTP payload length (%u).",
+             aux_data_expected_size_, trtp_header_len, trtp_len);
         return;
     }
 
@@ -255,7 +286,9 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
     // the buffer in progress and pack as much payload as we can into it.  If
     // the payload is finished once we are done, go ahead and send the payload
     // to the decoder.
-    expected_buffer_size_ = trtp_len - trtp_header_len;
+    expected_buffer_size_ = trtp_len
+                          - trtp_header_len
+                          - aux_data_expected_size_;
     if (!expected_buffer_size_) {
         LOGV("Dropping TRTP Audio Payload with 0 Access Unit length");
         return;
@@ -263,9 +296,10 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
 
     CHECK(amt >= trtp_header_len);
     uint32_t todo = amt - trtp_header_len;
-    if (expected_buffer_size_ < todo) {
+    if ((expected_buffer_size_ + aux_data_expected_size_) < todo) {
         LOGV("Extra data (%u > %u) present in initial TRTP Audio Payload;"
-             " dropping payload.", todo, expected_buffer_size_);
+             " dropping payload.", todo,
+             expected_buffer_size_ + aux_data_expected_size_);
         return;
     }
 
@@ -289,16 +323,32 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
 
     // TODO : set this based on the codec type indicated in the TRTP stream.
     // Right now, we only support MP3, so the choice is obvious.
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
+    meta->setCString(kKeyMIMEType, codec_mime_type_);
     if (ts_valid) {
         meta->setInt64(kKeyTime, ts);
     }
 
-    if (amt > 0) {
+    // Skip over the header we have already extracted.
+    amt -= trtp_header_len;
+    buf += trtp_header_len;
+
+    // Extract as much of the expected aux data as we can.
+    todo = MIN(aux_data_expected_size_, amt);
+    if (todo) {
+        aux_data_in_progress_.appendArray(buf, todo);
+        buf += todo;
+        amt -= todo;
+    }
+
+    // Extract as much of the expected payload as we can.
+    todo = MIN(expected_buffer_size_, amt);
+    if (todo > 0) {
         uint8_t* tgt =
             reinterpret_cast<uint8_t*>(buffer_in_progress_->data());
-        memcpy(tgt + buffer_filled_, buf + trtp_header_len, todo);
-        buffer_filled_ += amt;
+        memcpy(tgt, buf, todo);
+        buffer_filled_ = amt;
+        buf += todo;
+        amt -= todo;
     }
 
     if (buffer_filled_ >= expected_buffer_size_) {
@@ -316,6 +366,18 @@ void AAH_RXPlayer::Substream::processPayloadCont(uint8_t* buf,
         LOGV("TRTP Receiver skipping payload continuation; no buffer currently"
              " in progress.");
         return;
+    }
+
+    CHECK(aux_data_in_progress_.size() <= aux_data_expected_size_);
+    uint32_t aux_left = aux_data_expected_size_ - aux_data_in_progress_.size();
+    if (aux_left) {
+        uint32_t todo = MIN(aux_left, amt);
+        aux_data_in_progress_.appendArray(buf, todo);
+        amt -= todo;
+        buf += todo;
+
+        if (!amt)
+            return;
     }
 
     CHECK(buffer_filled_ < expected_buffer_size_);
@@ -340,10 +402,6 @@ void AAH_RXPlayer::Substream::processPayloadCont(uint8_t* buf,
 }
 
 void AAH_RXPlayer::Substream::processCompletedBuffer() {
-    const uint8_t* buffer_data = NULL;
-    int sample_rate;
-    int channel_count;
-    size_t frame_size;
     status_t res;
 
     CHECK(NULL != buffer_in_progress_);
@@ -353,56 +411,10 @@ void AAH_RXPlayer::Substream::processCompletedBuffer() {
         goto bailout;
     }
 
-    buffer_data = reinterpret_cast<const uint8_t*>(buffer_in_progress_->data());
-    if (buffer_in_progress_->size() < 4) {
-        LOGV("MP3 payload too short to contain header, dropping payload.");
+    // Make sure our metadata used to initialize the decoder has been properly
+    // set up.
+    if (!setupSubstreamMeta())
         goto bailout;
-    }
-
-    // Extract the channel count and the sample rate from the MP3 header.  The
-    // stagefright MP3 requires that these be delivered before decoing can
-    // begin.
-    if (!GetMPEGAudioFrameSize(U32_AT(buffer_data),
-                               &frame_size,
-                               &sample_rate,
-                               &channel_count,
-                               NULL,
-                               NULL)) {
-        LOGV("Failed to parse MP3 header in payload, droping payload.");
-        goto bailout;
-    }
-
-
-    // Make sure that our substream metadata is set up properly.  If there has
-    // been a format change, be sure to reset the underlying decoder.  In
-    // stagefright, it seems like the only way to do this is to destroy and
-    // recreate the decoder.
-    if (substream_meta_ == NULL) {
-        substream_meta_ = new MetaData();
-
-        if (substream_meta_ == NULL) {
-            LOGE("Failed to allocate MetaData structure for substream");
-            goto bailout;
-        }
-
-        substream_meta_->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
-        substream_meta_->setInt32  (kKeyChannelCount, channel_count);
-        substream_meta_->setInt32  (kKeySampleRate,   sample_rate);
-    } else {
-        int32_t prev_sample_rate;
-        int32_t prev_channel_count;
-        substream_meta_->findInt32(kKeySampleRate,   &prev_sample_rate);
-        substream_meta_->findInt32(kKeyChannelCount, &prev_channel_count);
-
-        if ((prev_channel_count != channel_count) ||
-            (prev_sample_rate   != sample_rate)) {
-            LOGW("Format change detected, forcing decoder reset.");
-            cleanupDecoder();
-
-            substream_meta_->setInt32(kKeyChannelCount, channel_count);
-            substream_meta_->setInt32(kKeySampleRate,   sample_rate);
-        }
-    }
 
     // If our decoder has not be set up, do so now.
     res = decoder_->init(substream_meta_);
@@ -454,6 +466,164 @@ bailout:
     cleanupBufferInProgress();
 }
 
+bool AAH_RXPlayer::Substream::setupSubstreamMeta() {
+    switch (codec_type_) {
+        case TRTPAudioPacket::kCodecMPEG1Audio:
+            codec_mime_type_ = MEDIA_MIMETYPE_AUDIO_MPEG;
+            return setupMP3SubstreamMeta();
+
+        case TRTPAudioPacket::kCodecAACAudio:
+            codec_mime_type_ = MEDIA_MIMETYPE_AUDIO_AAC;
+            return setupAACSubstreamMeta();
+
+        default:
+            LOGV("Failed to setup substream metadata for unsupported codec type"
+                 " (%u)", codec_type_);
+            break;
+    }
+
+    return false;
+}
+
+bool AAH_RXPlayer::Substream::setupMP3SubstreamMeta() {
+    const uint8_t* buffer_data = NULL;
+    int sample_rate;
+    int channel_count;
+    size_t frame_size;
+    status_t res;
+
+    buffer_data = reinterpret_cast<const uint8_t*>(buffer_in_progress_->data());
+    if (buffer_in_progress_->size() < 4) {
+        LOGV("MP3 payload too short to contain header, dropping payload.");
+        return false;
+    }
+
+    // Extract the channel count and the sample rate from the MP3 header.  The
+    // stagefright MP3 requires that these be delivered before decoing can
+    // begin.
+    if (!GetMPEGAudioFrameSize(U32_AT(buffer_data),
+                               &frame_size,
+                               &sample_rate,
+                               &channel_count,
+                               NULL,
+                               NULL)) {
+        LOGV("Failed to parse MP3 header in payload, droping payload.");
+        return false;
+    }
+
+
+    // Make sure that our substream metadata is set up properly.  If there has
+    // been a format change, be sure to reset the underlying decoder.  In
+    // stagefright, it seems like the only way to do this is to destroy and
+    // recreate the decoder.
+    if (substream_meta_ == NULL) {
+        substream_meta_ = new MetaData();
+
+        if (substream_meta_ == NULL) {
+            LOGE("Failed to allocate MetaData structure for MP3 substream");
+            return false;
+        }
+
+        substream_meta_->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
+        substream_meta_->setInt32  (kKeyChannelCount, channel_count);
+        substream_meta_->setInt32  (kKeySampleRate,   sample_rate);
+    } else {
+        int32_t prev_sample_rate;
+        int32_t prev_channel_count;
+        substream_meta_->findInt32(kKeySampleRate,   &prev_sample_rate);
+        substream_meta_->findInt32(kKeyChannelCount, &prev_channel_count);
+
+        if ((prev_channel_count != channel_count) ||
+            (prev_sample_rate   != sample_rate)) {
+            LOGW("MP3 format change detected, forcing decoder reset.");
+            cleanupDecoder();
+
+            substream_meta_->setInt32(kKeyChannelCount, channel_count);
+            substream_meta_->setInt32(kKeySampleRate,   sample_rate);
+        }
+    }
+
+    return true;
+}
+
+bool AAH_RXPlayer::Substream::setupAACSubstreamMeta() {
+    int32_t sample_rate, channel_cnt;
+    static const size_t overhead = sizeof(sample_rate)
+                                 + sizeof(channel_cnt);
+
+    if (aux_data_in_progress_.size() < overhead) {
+        LOGE("Not enough aux data (%u) to initialize AAC substream decoder",
+                aux_data_in_progress_.size());
+        return false;
+    }
+
+    const uint8_t* aux_data = aux_data_in_progress_.array();
+    size_t aux_data_size = aux_data_in_progress_.size();
+    sample_rate = U32_AT(aux_data);
+    channel_cnt = U32_AT(aux_data + sizeof(sample_rate));
+
+    const uint8_t* esds_data = NULL;
+    size_t esds_data_size = 0;
+    if (aux_data_size > overhead) {
+        esds_data = aux_data + overhead;
+        esds_data_size = aux_data_size - overhead;
+    }
+
+    // Do we already have metadata?  If so, has it changed at all?  If not, then
+    // there should be nothing else to do.  Otherwise, release our old stream
+    // metadata and make new metadata.
+    if (substream_meta_ != NULL) {
+        uint32_t type;
+        const void* data;
+        size_t size;
+        int32_t prev_sample_rate;
+        int32_t prev_channel_count;
+
+        substream_meta_->findInt32(kKeySampleRate,   &prev_sample_rate);
+        substream_meta_->findInt32(kKeyChannelCount, &prev_channel_count);
+
+        // If nothing has changed about the codec aux data (esds, sample rate,
+        // channel count), then we can just do nothing and get out.  Otherwise,
+        // we will need to reset the decoder and make a new metadata object to
+        // deal with the format change.
+        bool hasData = (esds_data != NULL);
+        bool hadData = substream_meta_->findData(kKeyESDS, &type, &data, &size);
+        bool esds_change = (hadData != hasData);
+
+        if (!esds_change && hasData)
+            esds_change = ((size != esds_data_size) ||
+                           memcmp(data, esds_data, size));
+
+        if (!esds_change &&
+            (prev_sample_rate   == sample_rate) &&
+            (prev_channel_count == channel_cnt)) {
+            return true;  // no change, just get out.
+        }
+
+        LOGW("AAC format change detected, forcing decoder reset.");
+        cleanupDecoder();
+        substream_meta_ = NULL;
+    }
+
+    CHECK(substream_meta_ == NULL);
+
+    substream_meta_ = new MetaData();
+    if (substream_meta_ == NULL) {
+        LOGE("Failed to allocate MetaData structure for AAC substream");
+        return false;
+    }
+
+    substream_meta_->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
+    substream_meta_->setInt32  (kKeySampleRate,   sample_rate);
+    substream_meta_->setInt32  (kKeyChannelCount, channel_cnt);
+
+    if (esds_data) {
+        substream_meta_->setData(kKeyESDS, kTypeESDS,
+                                 esds_data, esds_data_size);
+    }
+
+    return true;
+}
 
 void AAH_RXPlayer::Substream::processTSTransform(const LinearTransform& trans) {
     if (decoder_ != NULL) {
@@ -471,26 +641,34 @@ bool AAH_RXPlayer::Substream::isAboutToUnderflow() {
 
 bool AAH_RXPlayer::Substream::setupSubstreamType(uint8_t substream_type,
                                                  uint8_t codec_type) {
-    // Sanity check the codec type.  Right now we only support MP3.  Also check
-    // for conflicts with previously delivered codec types.
-    if (substream_details_known_ && (codec_type != codec_type_)) {
-        LOGV("RXed TRTP Payload for SSRC=0x%08x where codec type (%u) does not"
-                " match previously received codec type (%u)",
-                ssrc_, codec_type, codec_type_);
-        return false;
+    // Sanity check the codec type.  Right now we only support MP3 and AAC.
+    // Also check for conflicts with previously delivered codec types.
+    if (substream_details_known_) {
+        if (codec_type != codec_type_) {
+            LOGV("RXed TRTP Payload for SSRC=0x%08x where codec type (%u) does "
+                 "not match previously received codec type (%u)",
+                 ssrc_, codec_type, codec_type_);
+            return false;
+        }
+
+        return true;
     }
 
-    if (codec_type != 0x03) {
-        LOGV("RXed TRTP Audio Payload for SSRC=0x%08x with unsupported codec"
-             " type (%u)", ssrc_, codec_type);
-        return false;
+    switch (codec_type) {
+        // MP3 and AAC are all we support right now.
+        case TRTPAudioPacket::kCodecMPEG1Audio:
+        case TRTPAudioPacket::kCodecAACAudio:
+            break;
+
+        default:
+            LOGV("RXed TRTP Audio Payload for SSRC=0x%08x with unsupported"
+                 " codec type (%u)", ssrc_, codec_type);
+            return false;
     }
 
-    if (!substream_details_known_) {
-        substream_type_ = substream_type;
-        codec_type_ = codec_type;
-        substream_details_known_ = true;
-    }
+    substream_type_ = substream_type;
+    codec_type_ = codec_type;
+    substream_details_known_ = true;
 
     return true;
 }

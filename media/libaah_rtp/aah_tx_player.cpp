@@ -28,6 +28,7 @@
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <utils/Timers.h>
 
@@ -97,6 +98,8 @@ AAH_TXPlayer::AAH_TXPlayer()
 
     mPumpAudioEvent = new AAH_TXEvent(this, &AAH_TXPlayer::onPumpAudio);
     mPumpAudioEventPending = false;
+
+    mAudioCodecData = NULL;
 
     reset();
 }
@@ -398,7 +401,76 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
         }
     }
 
-    mAudioSource->getFormat()->findInt64(kKeyDuration, &mDurationUs);
+    mAudioFormat = mAudioSource->getFormat();
+    if (!mAudioFormat->findInt64(kKeyDuration, &mDurationUs))
+        mDurationUs = 1;
+
+    const char* mime_type = NULL;
+    if (!mAudioFormat->findCString(kKeyMIMEType, &mime_type)) {
+        LOGE("Failed to find audio substream MIME type during prepare.");
+        abortPrepare(BAD_VALUE);
+        return;
+    }
+
+    if (!strcmp(mime_type, MEDIA_MIMETYPE_AUDIO_MPEG)) {
+        mAudioCodec = TRTPAudioPacket::kCodecMPEG1Audio;
+    } else
+    if (!strcmp(mime_type, MEDIA_MIMETYPE_AUDIO_AAC)) {
+        mAudioCodec = TRTPAudioPacket::kCodecAACAudio;
+
+        uint32_t type;
+        int32_t  sample_rate;
+        int32_t  channel_count;
+        const void* esds_data;
+        size_t esds_len;
+
+        if (!mAudioFormat->findInt32(kKeySampleRate, &sample_rate)) {
+            LOGE("Failed to find sample rate for AAC substream.");
+            abortPrepare(BAD_VALUE);
+            return;
+        }
+
+        if (!mAudioFormat->findInt32(kKeyChannelCount, &channel_count)) {
+            LOGE("Failed to find channel count for AAC substream.");
+            abortPrepare(BAD_VALUE);
+            return;
+        }
+
+        if (!mAudioFormat->findData(kKeyESDS, &type, &esds_data, &esds_len)) {
+            LOGE("Failed to find codec init data for AAC substream.");
+            abortPrepare(BAD_VALUE);
+            return;
+        }
+
+        CHECK(NULL == mAudioCodecData);
+        mAudioCodecDataSize = esds_len
+                            + sizeof(sample_rate)
+                            + sizeof(channel_count);
+        mAudioCodecData = new uint8_t[mAudioCodecDataSize];
+        if (NULL == mAudioCodecData) {
+            LOGE("Failed to allocate %u bytes for AAC substream codec aux"
+                 " data.", mAudioCodecDataSize);
+            mAudioCodecDataSize = 0;
+            abortPrepare(BAD_VALUE);
+            return;
+        }
+
+        uint8_t* tmp = mAudioCodecData;
+        tmp[0] = static_cast<uint8_t>((sample_rate   >> 24) & 0xFF);
+        tmp[1] = static_cast<uint8_t>((sample_rate   >> 16) & 0xFF);
+        tmp[2] = static_cast<uint8_t>((sample_rate   >>  8) & 0xFF);
+        tmp[3] = static_cast<uint8_t>((sample_rate        ) & 0xFF);
+        tmp[4] = static_cast<uint8_t>((channel_count >> 24) & 0xFF);
+        tmp[5] = static_cast<uint8_t>((channel_count >> 16) & 0xFF);
+        tmp[6] = static_cast<uint8_t>((channel_count >>  8) & 0xFF);
+        tmp[7] = static_cast<uint8_t>((channel_count      ) & 0xFF);
+
+        memcpy(tmp + 8, esds_data, esds_len);
+    } else {
+        LOGE("Unsupported MIME type \"%s\" in audio substream", mime_type);
+        abortPrepare(BAD_VALUE);
+        return;
+    }
 
     status_t err = mAudioSource->start();
     if (err != OK) {
@@ -666,6 +738,11 @@ void AAH_TXPlayer::reset_l() {
         mAudioSource->stop();
     }
     mAudioSource.clear();
+    mAudioCodec = TRTPAudioPacket::kCodecInvalid;
+    mAudioFormat = NULL;
+    delete[] mAudioCodecData;
+    mAudioCodecData = NULL;
+    mAudioCodecDataSize = 0;
 
     mFlags = 0;
     mExtractorFlags = 0;
@@ -1078,13 +1155,23 @@ void AAH_TXPlayer::onPumpAudio() {
         packet->setPTS(mediaTimeUs);
         packet->setSubstreamID(1);
 
-        packet->setCodecType(TRTPAudioPacket::kCodecMPEG1Audio);
+        packet->setCodecType(mAudioCodec);
         packet->setVolume(mTRTPVolume);
         // TODO : introduce a throttle for this so we can control the
         // frequency with which transforms get sent.
         packet->setClockTransform(mCurrentClockTransform);
         packet->setAccessUnitData(data, mediaBuffer->range_length());
+
+        // TODO : while its pretty much universally true that audio ES payloads
+        // are all RAPs across all codecs, it might be a good idea to throttle
+        // the frequency with which we send codec out of band data to the RXers.
+        // If/when we do, we need to flag only those payloads which have
+        // required out of band data attached to them as RAPs.
         packet->setRandomAccessPoint(true);
+
+        if (mAudioCodecData && mAudioCodecDataSize) {
+            packet->setAuxData(mAudioCodecData, mAudioCodecDataSize);
+        }
 
         queuePacketToSender_l(packet);
         mediaBuffer->release();
