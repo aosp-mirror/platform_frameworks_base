@@ -437,7 +437,7 @@ static void correctThresh(PSY_OUT_CHANNEL  psyOutChannel[MAX_CHANNELS],
 	  for (sfb=0; sfb<psyOutChan->maxSfbPerGroup; sfb++) {
         Word32 redThrExp = thrExp[ch][sfbGrp+sfb] + redVal;
 
-        if (((*pahFlag < AH_ACTIVE) || (deltaPe > 0)) && (redThrExp > 0) ) {
+        if (((*pahFlag < AH_ACTIVE) || (deltaPe > 0)) && (redThrExp > 0) && (redThrExp >= *psfbNActiveLines)) {
 
           *psfbPeFactors = (*psfbNActiveLines) * (0x7fffffff / redThrExp);
           normFactor = L_add(normFactor, *psfbPeFactors);
