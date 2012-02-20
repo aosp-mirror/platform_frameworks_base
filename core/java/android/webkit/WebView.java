@@ -1703,7 +1703,7 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * returns the height of the titlebarview (if any). Does not care about
+     * Returns the height (in pixels) of the embedded title bar (if any). Does not care about
      * scrolling
      * @hide
      */
@@ -1712,12 +1712,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Return the amount of the titlebarview (if any) that is visible
+     * Return the visible height (in pixels) of the embedded title bar (if any).
      *
+     * @return This method is obsolete and always returns 0.
      * @deprecated This method is now obsolete.
      */
     @Deprecated
     public int getVisibleTitleHeight() {
+        // Actually, this method returns the height of the embedded title bar if one is set via the
+        // hidden setEmbeddedTitleBar method.
         checkThread();
         return getVisibleTitleHeightImpl();
     }
