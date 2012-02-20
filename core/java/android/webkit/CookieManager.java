@@ -34,7 +34,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * CookieManager manages cookies according to RFC2109 spec.
+ * Manages the cookies used by an application's {@link WebView} instances.
+ * Cookies are manipulated according to RFC2109.
  */
 public final class CookieManager {
 
@@ -99,7 +100,7 @@ public final class CookieManager {
 
     private boolean mAcceptCookie = true;
 
-    private int pendingCookieOperations = 0;
+    private int mPendingCookieOperations = 0;
 
     /**
      * This contains a list of 2nd-level domains that aren't allowed to have
@@ -246,12 +247,12 @@ public final class CookieManager {
     }
 
     /**
-     * Get a singleton CookieManager. If this is called before any
-     * {@link WebView} is created or outside of {@link WebView} context, the
-     * caller needs to call {@link CookieSyncManager#createInstance(Context)}
+     * Gets the singleton CookieManager instance. If this method is used
+     * before the application instantiates a {@link WebView} instance,
+     * {@link CookieSyncManager#createInstance(Context)} must be called
      * first.
      * 
-     * @return CookieManager
+     * @return The singleton CookieManager instance
      */
     public static synchronized CookieManager getInstance() {
         if (sRef == null) {
@@ -261,8 +262,10 @@ public final class CookieManager {
     }
 
     /**
-     * Control whether cookie is enabled or disabled
-     * @param accept TRUE if accept cookie
+     * Sets whether the application's {@link WebView} instances should send and
+     * accept cookies.
+     * @param accept Whether {@link WebView} instances should send and accept
+     *               cookies
      */
     public synchronized void setAcceptCookie(boolean accept) {
         if (JniUtil.useChromiumHttpStack()) {
@@ -274,8 +277,9 @@ public final class CookieManager {
     }
 
     /**
-     * Return whether cookie is enabled
-     * @return TRUE if accept cookie
+     * Gets whether the application's {@link WebView} instances send and accept
+     * cookies.
+     * @return True if {@link WebView} instances send and accept cookies
      */
     public synchronized boolean acceptCookie() {
         if (JniUtil.useChromiumHttpStack()) {
@@ -286,11 +290,13 @@ public final class CookieManager {
     }
 
     /**
-     * Set cookie for a given url. The old cookie with same host/path/name will
-     * be removed. The new cookie will be added if it is not expired or it does
-     * not have expiration which implies it is session cookie.
-     * @param url The url which cookie is set for
-     * @param value The value for set-cookie: in http response header
+     * Sets a cookie for the given URL. Any existing cookie with the same host,
+     * path and name will be replaced with the new cookie. The cookie being set
+     * must not have expired and must not be a session cookie, otherwise it
+     * will be ignored.
+     * @param url The URL for which the cookie is set
+     * @param value The cookie as a string, using the format of the
+     *              'Set-Cookie' HTTP response header
      */
     public void setCookie(String url, String value) {
         if (JniUtil.useChromiumHttpStack()) {
@@ -310,15 +316,13 @@ public final class CookieManager {
     }
 
     /**
-     * Set cookie for a given url. The old cookie with same host/path/name will
-     * be removed. The new cookie will be added if it is not expired or it does
-     * not have expiration which implies it is session cookie.
-     * @param url The url which cookie is set for
-     * @param value The value for set-cookie: in http response header
-     * @param privateBrowsing cookie jar to use
-     * @hide hiding private browsing
+     * See {@link setCookie(String, String)}
+     * @param url The URL for which the cookie is set
+     * @param value The value of the cookie, as a string, using the format of
+     *              the 'Set-Cookie' HTTP response header
+     * @param privateBrowsing Whether to use the private browsing cookie jar
      */
-    public void setCookie(String url, String value, boolean privateBrowsing) {
+    void setCookie(String url, String value, boolean privateBrowsing) {
         if (!JniUtil.useChromiumHttpStack()) {
             setCookie(url, value);
             return;
@@ -336,15 +340,12 @@ public final class CookieManager {
     }
 
     /**
-     * Set cookie for a given uri. The old cookie with same host/path/name will
-     * be removed. The new cookie will be added if it is not expired or it does
-     * not have expiration which implies it is session cookie.
-     * @param uri The uri which cookie is set for
-     * @param value The value for set-cookie: in http response header
-     * @hide - hide this because it takes in a parameter of type WebAddress,
-     * a system private class.
+     * See {@link setCookie(String, String)}
+     * @param uri The WebAddress for which the cookie is set
+     * @param value The value of the cookie, as a string, using the format of
+     *              the 'Set-Cookie' HTTP response header
      */
-    public synchronized void setCookie(WebAddress uri, String value) {
+    synchronized void setCookie(WebAddress uri, String value) {
         if (JniUtil.useChromiumHttpStack()) {
             nativeSetCookie(uri.toString(), value, false);
             return;
@@ -450,10 +451,10 @@ public final class CookieManager {
     }
 
     /**
-     * Get cookie(s) for a given url so that it can be set to "cookie:" in http
-     * request header.
-     * @param url The url needs cookie
-     * @return The cookies in the format of NAME=VALUE [; NAME=VALUE]
+     * Gets the cookies for the given URL.
+     * @param url The URL for which the cookies are requested
+     * @return value The cookies as a string, using the format of the 'Cookie'
+     *               HTTP request header
      */
     public String getCookie(String url) {
         if (JniUtil.useChromiumHttpStack()) {
@@ -472,12 +473,12 @@ public final class CookieManager {
     }
 
     /**
-     * Get cookie(s) for a given url so that it can be set to "cookie:" in http
-     * request header.
-     * @param url The url needs cookie
-     * @param privateBrowsing cookie jar to use
-     * @return The cookies in the format of NAME=VALUE [; NAME=VALUE]
-     * @hide Private mode is not very well exposed for now
+     * See {@link getCookie(String)}
+     * @param url The URL for which the cookies are requested
+     * @param privateBrowsing Whether to use the private browsing cookie jar
+     * @return value The cookies as a string, using the format of the 'Cookie'
+     *               HTTP request header
+     * @hide Used by Browser, no intention to publish.
      */
     public String getCookie(String url, boolean privateBrowsing) {
         if (!JniUtil.useChromiumHttpStack()) {
@@ -499,10 +500,10 @@ public final class CookieManager {
     /**
      * Get cookie(s) for a given uri so that it can be set to "cookie:" in http
      * request header.
-     * @param uri The uri needs cookie
-     * @return The cookies in the format of NAME=VALUE [; NAME=VALUE]
-     * @hide - hide this because it has a parameter of type WebAddress, which
-     * is a system private class.
+     * @param uri The WebAddress for which the cookies are requested
+     * @return value The cookies as a string, using the format of the 'Cookie'
+     *               HTTP request header
+     * @hide Used by RequestHandle, no intention to publish.
      */
     public synchronized String getCookie(WebAddress uri) {
         if (JniUtil.useChromiumHttpStack()) {
@@ -579,13 +580,12 @@ public final class CookieManager {
 
     /**
      * Waits for pending operations to completed.
-     * {@hide}  Too late to release publically.
      */
-    public void waitForCookieOperationsToComplete() {
+    void waitForCookieOperationsToComplete() {
         // Note that this function is applicable for both the java
         // and native http stacks, and works correctly with either.
         synchronized (this) {
-            while (pendingCookieOperations > 0) {
+            while (mPendingCookieOperations > 0) {
                 try {
                     wait();
                 } catch (InterruptedException e) { }
@@ -594,17 +594,18 @@ public final class CookieManager {
     }
 
     private synchronized void signalCookieOperationsComplete() {
-        pendingCookieOperations--;
-        assert pendingCookieOperations > -1;
+        mPendingCookieOperations--;
+        assert mPendingCookieOperations > -1;
         notify();
     }
 
     private synchronized void signalCookieOperationsStart() {
-        pendingCookieOperations++;
+        mPendingCookieOperations++;
     }
 
     /**
-     * Remove all session cookies, which are cookies without expiration date
+     * Removes all session cookies, which are cookies without an expiration
+     * date.
      */
     public void removeSessionCookie() {
         signalCookieOperationsStart();
@@ -643,7 +644,7 @@ public final class CookieManager {
     }
 
     /**
-     * Remove all cookies
+     * Removes all cookies.
      */
     public void removeAllCookie() {
         if (JniUtil.useChromiumHttpStack()) {
@@ -664,7 +665,8 @@ public final class CookieManager {
     }
 
     /**
-     *  Return true if there are stored cookies.
+     * Gets whether there are stored cookies.
+     * @return True if there are stored cookies.
      */
     public synchronized boolean hasCookies() {
         if (JniUtil.useChromiumHttpStack()) {
@@ -675,9 +677,9 @@ public final class CookieManager {
     }
 
     /**
-     *  Return true if there are stored cookies.
-     *  @param privateBrowsing cookie jar to use
-     *  @hide Hiding private mode
+     * See {@link hasCookies()}.
+     * @param privateBrowsing Whether to use the private browsing cookie jar
+     * @hide Used by Browser, no intention to publish.
      */
     public synchronized boolean hasCookies(boolean privateBrowsing) {
         if (!JniUtil.useChromiumHttpStack()) {
@@ -688,7 +690,7 @@ public final class CookieManager {
     }
 
     /**
-     * Remove all expired cookies
+     * Removes all expired cookies.
      */
     public void removeExpiredCookie() {
         if (JniUtil.useChromiumHttpStack()) {
@@ -733,7 +735,10 @@ public final class CookieManager {
     }
 
     /**
-     * Whether cookies are accepted for file scheme URLs.
+     * Gets whether the application's {@link WebView} instances send and accept
+     * cookies for file scheme URLs.
+     * @return True if {@link WebView} instances send and accept cookies for
+     *         file scheme URLs
      */
     public static boolean allowFileSchemeCookies() {
         if (JniUtil.useChromiumHttpStack()) {
@@ -744,13 +749,14 @@ public final class CookieManager {
     }
 
     /**
-     * Sets whether cookies are accepted for file scheme URLs.
-     *
-     * Use of cookies with file scheme URLs is potentially insecure. Do not use this feature unless
-     * you can be sure that no unintentional sharing of cookie data can take place.
+     * Sets whether the application's {@link WebView} instances should send and
+     * accept cookies for file scheme URLs.
+     * Use of cookies with file scheme URLs is potentially insecure. Do not use
+     * this feature unless you can be sure that no unintentional sharing of
+     * cookie data can take place.
      * <p>
-     * Note that calls to this method will have no effect if made after a WebView or CookieManager
-     * instance has been created.
+     * Note that calls to this method will have no effect if made after a
+     * {@link WebView} or CookieManager instance has been created.
      */
     public static void setAcceptFileSchemeCookies(boolean accept) {
         if (JniUtil.useChromiumHttpStack()) {
