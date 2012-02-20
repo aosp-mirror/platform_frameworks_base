@@ -37,18 +37,18 @@ import com.android.org.bouncycastle.crypto.Digest;
 import com.android.org.bouncycastle.crypto.digests.SHA1Digest;
 
 /**
- * The class CacheManager provides the persistent cache of content that is
- * received over the network. The component handles parsing of HTTP headers and
- * utilizes the relevant cache headers to determine if the content should be
- * stored and if so, how long it is valid for. Network requests are provided to
- * this component and if they can not be resolved by the cache, the HTTP headers
- * are attached, as appropriate, to the request for revalidation of content. The
- * class also manages the cache size.
- *
- * CacheManager may only be used if your activity contains a WebView.
- *
+ * Manages the HTTP cache used by an application's {@link WebView} instances.
  * @deprecated Access to the HTTP cache will be removed in a future release.
  */
+// The class CacheManager provides the persistent cache of content that is
+// received over the network. The component handles parsing of HTTP headers and
+// utilizes the relevant cache headers to determine if the content should be
+// stored and if so, how long it is valid for. Network requests are provided to
+// this component and if they can not be resolved by the cache, the HTTP headers
+// are attached, as appropriate, to the request for revalidation of content. The
+// class also manages the cache size.
+//
+// CacheManager may only be used if your activity contains a WebView.
 @Deprecated
 public final class CacheManager {
 
@@ -87,10 +87,9 @@ public final class CacheManager {
     private static boolean mClearCacheOnInit = false;
 
     /**
-     * This class represents a resource retrieved from the HTTP cache.
-     * Instances of this class can be obtained by invoking the
-     * CacheManager.getCacheFile() method.
-     *
+     * Represents a resource stored in the HTTP cache. Instances of this class
+     * can be obtained by calling
+     * {@link CacheManager#getCacheFile CacheManager.getCacheFile(String, Map<String, String>))}.
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
@@ -114,64 +113,136 @@ public final class CacheManager {
         OutputStream outStream;
         File outFile;
 
+        /**
+         * Gets the status code of this cache entry.
+         * @return The status code of this cache entry
+         */
         public int getHttpStatusCode() {
             return httpStatusCode;
         }
 
+        /**
+         * Gets the content length of this cache entry.
+         * @return The content length of this cache entry
+         */
         public long getContentLength() {
             return contentLength;
         }
 
+        /**
+         * Gets the path of the file used to store the content of this cache
+         * entry, relative to the base directory of the cache. See
+         * {@link CacheManager#getCacheFileBaseDir CacheManager.getCacheFileBaseDir()}.
+         * @return The path of the file used to store this cache entry
+         */
         public String getLocalPath() {
             return localPath;
         }
 
+        /**
+         * Gets the expiry date of this cache entry, expressed in milliseconds
+         * since midnight, January 1, 1970 UTC.
+         * @return The expiry date of this cache entry
+         */
         public long getExpires() {
             return expires;
         }
 
+        /**
+         * Gets the expiry date of this cache entry, expressed as a string.
+         * @return The expiry date of this cache entry
+         *
+         */
         public String getExpiresString() {
             return expiresString;
         }
 
+        /**
+         * Gets the date at which this cache entry was last modified, expressed
+         * as a string.
+         * @return The date at which this cache entry was last modified
+         */
         public String getLastModified() {
             return lastModified;
         }
 
+        /**
+         * Gets the entity tag of this cache entry.
+         * @return The entity tag of this cache entry
+         */
         public String getETag() {
             return etag;
         }
 
+        /**
+         * Gets the MIME type of this cache entry.
+         * @return The MIME type of this cache entry
+         */
         public String getMimeType() {
             return mimeType;
         }
 
+        /**
+         * Gets the value of the HTTP 'Location' header with which this cache
+         * entry was received.
+         * @return The HTTP 'Location' header for this cache entry
+         */
         public String getLocation() {
             return location;
         }
 
+        /**
+         * Gets the encoding of this cache entry.
+         * @return The encoding of this cache entry
+         */
         public String getEncoding() {
             return encoding;
         }
 
+        /**
+         * Gets the value of the HTTP 'Content-Disposition' header with which
+         * this cache entry was received.
+         * @return The HTTP 'Content-Disposition' header for this cache entry
+         *
+         */
         public String getContentDisposition() {
             return contentdisposition;
         }
 
-        // For out-of-package access to the underlying streams.
+        /**
+         * Gets the input stream to the content of this cache entry, to allow
+         * content to be read. See
+         * {@link CacheManager#getCacheFile CacheManager.getCacheFile(String, Map<String, String>)}.
+         * @return An input stream to the content of this cache entry
+         */
         public InputStream getInputStream() {
             return inStream;
         }
 
+        /**
+         * Gets an output stream to the content of this cache entry, to allow
+         * content to be written. See
+         * {@link CacheManager#saveCacheFile CacheManager.saveCacheFile(String, CacheResult)}.
+         * @return An output stream to the content of this cache entry
+         */
+        // Note that this is always null for objects returned by getCacheFile()!
         public OutputStream getOutputStream() {
             return outStream;
         }
 
-        // These fields can be set manually.
+
+        /**
+         * Sets an input stream to the content of this cache entry.
+         * @param stream An input stream to the content of this cache entry
+         */
         public void setInputStream(InputStream stream) {
             this.inStream = stream;
         }
 
+        /**
+         * Sets the encoding of this cache entry.
+         * @param encoding The encoding of this cache entry
+         */
         public void setEncoding(String encoding) {
             this.encoding = encoding;
         }
@@ -185,11 +256,10 @@ public final class CacheManager {
     }
 
     /**
-     * Initialize the CacheManager.
-     *
-     * Note that this is called automatically when a {@link android.webkit.WebView} is created.
-     *
-     * @param context The application context.
+     * Initializes the HTTP cache. This method must be called before any
+     * CacheManager methods are used. Note that this is called automatically
+     * when a {@link WebView} is created.
+     * @param context The application context
      */
     static void init(Context context) {
         if (JniUtil.useChromiumHttpStack()) {
@@ -240,15 +310,10 @@ public final class CacheManager {
     }
 
     /**
-     * Get the base directory of the cache. Together with the local path of the CacheResult,
-     * obtained from {@link android.webkit.CacheManager.CacheResult#getLocalPath}, this
-     * identifies the cache file.
-     *
-     * Cache files are not guaranteed to be in this directory before
-     * CacheManager#getCacheFile(String, Map<String, String>) is called.
-     *
-     * @return File The base directory of the cache.
-     *
+     * Gets the base directory in which the files used to store the contents of
+     * cache entries are placed. See
+     * {@link CacheManager.CacheResult#getLocalPath CacheManager.CacheResult.getLocalPath()}.
+     * @return The base directory of the cache
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
@@ -257,8 +322,7 @@ public final class CacheManager {
     }
 
     /**
-     * Sets whether the cache is disabled.
-     *
+     * Sets whether the HTTP cache should be disabled.
      * @param disabled Whether the cache should be disabled
      */
     static void setCacheDisabled(boolean disabled) {
@@ -274,10 +338,8 @@ public final class CacheManager {
     }
 
     /**
-     * Whether the cache is disabled.
-     *
-     * @return return Whether the cache is disabled
-     *
+     * Gets whether the HTTP cache is disabled.
+     * @return True if the HTTP cache is disabled
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
@@ -330,20 +392,23 @@ public final class CacheManager {
         return ret;
     }
 
-    // only called from WebCore Thread
-    // make sure to call startCacheTransaction/endCacheTransaction in pair
     /**
-     * @deprecated Always returns false.
+     * Starts a cache transaction. Returns true if this is the only running
+     * transaction. Otherwise, this transaction is nested inside currently
+     * running transactions and false is returned.
+     * @return True if this is the only running transaction
+     * @deprecated This method no longer has any effect and always returns false
      */
     @Deprecated
     public static boolean startCacheTransaction() {
         return false;
     }
 
-    // only called from WebCore Thread
-    // make sure to call startCacheTransaction/endCacheTransaction in pair
     /**
-     * @deprecated Always returns false.
+     * Ends the innermost cache transaction and returns whether this was the
+     * only running transaction.
+     * @return True if this was the only running transaction
+     * @deprecated This method no longer has any effect and always returns false
      */
     @Deprecated
     public static boolean endCacheTransaction() {
@@ -470,13 +535,8 @@ public final class CacheManager {
      * CacheResult, and is used to supply surrogate responses for URL
      * interception.
      * @return CacheResult for a given url
-     * @hide - hide createCacheFile since it has a parameter of type headers, which is
-     * in a hidden package.
-     *
-     * @deprecated Access to the HTTP cache will be removed in a future release.
      */
-    @Deprecated
-    public static CacheResult createCacheFile(String url, int statusCode,
+    static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, boolean forceCache) {
         if (JniUtil.useChromiumHttpStack()) {
             // This method is public but hidden. We break functionality.
@@ -545,14 +605,15 @@ public final class CacheManager {
     }
 
     /**
-     * Save the info of a cache file for a given url to the CacheMap so that it
-     * can be reused later
-     *
+     * Adds a cache entry to the HTTP cache for the specicifed URL. Also closes
+     * the cache entry's output stream.
+     * @param url The URL for which the cache entry should be added
+     * @param cacheResult The cache entry to add
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
-    public static void saveCacheFile(String url, CacheResult cacheRet) {
-        saveCacheFile(url, 0, cacheRet);
+    public static void saveCacheFile(String url, CacheResult cacheResult) {
+        saveCacheFile(url, 0, cacheResult);
     }
 
     static void saveCacheFile(String url, long postIdentifier,
@@ -564,16 +625,26 @@ public final class CacheManager {
         }
 
         if (JniUtil.useChromiumHttpStack()) {
-            // This method is exposed in the public API but the API provides no way to obtain a
-            // new CacheResult object with a non-null output stream ...
-            // - CacheResult objects returned by getCacheFile() have a null output stream.
-            // - new CacheResult objects have a null output stream and no setter is provided.
-            // Since for the Android HTTP stack this method throws a null pointer exception in this
-            // case, this method is effectively useless from the point of view of the public API.
-
-            // We should already have thrown an exception above, to maintain 'backward
-            // compatibility' with the Android HTTP stack.
+            // This method is exposed in the public API but the API provides no
+            // way to obtain a new CacheResult object with a non-null output
+            // stream ...
+            // - CacheResult objects returned by getCacheFile() have a null
+            //   output stream.
+            // - new CacheResult objects have a null output stream and no
+            //   setter is provided.
+            // Since this method throws a null pointer exception in this case,
+            // it is effectively useless from the point of view of the public
+            // API.
+            //
+            // With the Chromium HTTP stack we continue to throw the same
+            // exception for 'backwards compatibility' with the Android HTTP
+            // stack.
+            //
+            // This method is not used from within this package with the
+            // Chromium HTTP stack, and for public API use, we should already
+            // have thrown an exception above.
             assert false;
+            return;
         }
 
         if (!cacheRet.outFile.exists()) {
