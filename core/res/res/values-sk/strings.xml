@@ -535,7 +535,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Zakázať fotoaparáty"</string>
     <string name="policydesc_disableCamera" msgid="5680054212889413366">"Zakázať používanie všetkých fotoaparátov zariadenia"</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Domovská stránka"</item>
+    <item msgid="8901098336658710359">"Domov"</item>
     <item msgid="869923650527136615">"Mobil"</item>
     <item msgid="7897544654242874543">"Práca"</item>
     <item msgid="1103601433382158155">"Fax do práce"</item>
@@ -545,19 +545,19 @@
     <item msgid="9192514806975898961">"Vlastné"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Domovská stránka"</item>
+    <item msgid="8073994352956129127">"Domov"</item>
     <item msgid="7084237356602625604">"Práca"</item>
     <item msgid="1112044410659011023">"Iné"</item>
     <item msgid="2374913952870110618">"Vlastné"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Domovská stránka"</item>
+    <item msgid="6880257626740047286">"Domov"</item>
     <item msgid="5629153956045109251">"Práca"</item>
     <item msgid="4966604264500343469">"Iné"</item>
     <item msgid="4932682847595299369">"Vlastné"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Domovská stránka"</item>
+    <item msgid="1738585194601476694">"Domov"</item>
     <item msgid="1359644565647383708">"Práca"</item>
     <item msgid="7868549401053615677">"Iné"</item>
     <item msgid="3145118944639869809">"Vlastné"</item>
@@ -578,7 +578,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Vlastné"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Domovská stránka"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Domov"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobil"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Práca"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax do práce"</string>
@@ -603,16 +603,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Výročie"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Iné"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Vlastné"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Domovská stránka"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Domov"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Práca"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Iné"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Vlastné"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Domovská stránka"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Domov"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Práca"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Iné"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Vlastné"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Domovská stránka"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Domov"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Práca"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Iné"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Vlastné"</string>
@@ -644,7 +644,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Sestra"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Manžel(-ka)"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Vlastné"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Domovská stránka"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Domov"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Práca"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Iné"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Zadajte kód PIN"</string>
