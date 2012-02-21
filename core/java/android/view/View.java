@@ -5046,6 +5046,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *        the View's internal state from a previously set "pressed" state.
      */
     public void setPressed(boolean pressed) {
+        if (pressed == ((mPrivateFlags & PRESSED) == PRESSED)) {
+            return;
+        }
+
         if (pressed) {
             mPrivateFlags |= PRESSED;
         } else {
@@ -6548,8 +6552,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         if ((viewFlags & ENABLED_MASK) == DISABLED) {
             if (event.getAction() == MotionEvent.ACTION_UP && (mPrivateFlags & PRESSED) != 0) {
-                mPrivateFlags &= ~PRESSED;
-                refreshDrawableState();
+                setPressed(false);
             }
             // A disabled view that is clickable still consumes the touch
             // events, it just doesn't respond to them.
@@ -6581,8 +6584,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                             // showed it as pressed.  Make it show the pressed
                             // state now (before scheduling the click) to ensure
                             // the user sees it.
-                            mPrivateFlags |= PRESSED;
-                            refreshDrawableState();
+                            setPressed(true);
                        }
 
                         if (!mHasPerformedLongPress) {
@@ -6638,15 +6640,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                         postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                     } else {
                         // Not inside a scrolling container, so show the feedback right away
-                        mPrivateFlags |= PRESSED;
-                        refreshDrawableState();
+                        setPressed(true);
                         checkForLongClick(0);
                     }
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
-                    mPrivateFlags &= ~PRESSED;
-                    refreshDrawableState();
+                    setPressed(false);
                     removeTapCallback();
                     break;
 
@@ -6662,9 +6662,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                             // Remove any future long press/tap checks
                             removeLongPressCallback();
 
-                            // Need to switch from pressed to not pressed
-                            mPrivateFlags &= ~PRESSED;
-                            refreshDrawableState();
+                            setPressed(false);
                         }
                     }
                     break;
@@ -14505,8 +14503,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     private final class CheckForTap implements Runnable {
         public void run() {
             mPrivateFlags &= ~PREPRESSED;
-            mPrivateFlags |= PRESSED;
-            refreshDrawableState();
+            setPressed(true);
             checkForLongClick(ViewConfiguration.getTapTimeout());
         }
     }
