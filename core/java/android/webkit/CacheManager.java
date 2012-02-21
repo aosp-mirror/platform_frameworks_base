@@ -351,15 +351,15 @@ public final class CacheManager {
     }
 
     /**
-     * Given a URL, returns the corresponding CacheResult if it exists, or null otherwise.
-     *
-     * The input stream of the CacheEntry object is initialized and opened and should be closed by
-     * the caller when access to the underlying file is no longer required.
-     * If a non-zero value is provided for the headers map, and the cache entry needs validation,
-     * HEADER_KEY_IFNONEMATCH or HEADER_KEY_IFMODIFIEDSINCE will be set in headers.
-     *
-     * @return The CacheResult for the given URL
-     *
+     * Gets the cache entry for the specified URL, or null if none is found.
+     * If a non-null value is provided for the HTTP headers map, and the cache
+     * entry needs validation, appropriate headers will be added to the map.
+     * The input stream of the CacheEntry object should be closed by the caller
+     * when access to the underlying file is no longer required.
+     * @param url The URL for which a cache entry is requested
+     * @param headers A map from HTTP header name to value, to be populated
+     *                for the returned cache entry
+     * @return The cache entry for the specified URL
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
@@ -368,32 +368,32 @@ public final class CacheManager {
         return getCacheFile(url, 0, headers);
     }
 
-    static CacheResult getCacheFile(String url, long postIdentifier,
-            Map<String, String> headers) {
-        if (mDisabled) {
+    private static CacheResult getCacheFileChromiumHttpStack(String url) {
+        assert JniUtil.useChromiumHttpStack();
+
+        CacheResult result = nativeGetCacheResult(url);
+        if (result == null) {
             return null;
         }
-
-        if (JniUtil.useChromiumHttpStack()) {
-            CacheResult result = nativeGetCacheResult(url);
-            if (result == null) {
-                return null;
-            }
-            // A temporary local file will have been created native side and localPath set
-            // appropriately.
-            File src = new File(mBaseDir, result.localPath);
-            try {
-                // Open the file here so that even if it is deleted, the content
-                // is still readable by the caller until close() is called.
-                result.inStream = new FileInputStream(src);
-            } catch (FileNotFoundException e) {
-                Log.v(LOGTAG, "getCacheFile(): Failed to open file: " + e);
-                // TODO: The files in the cache directory can be removed by the
-                // system. If it is gone, what should we do?
-                return null;
-            }
-            return result;
+        // A temporary local file will have been created native side and localPath set
+        // appropriately.
+        File src = new File(mBaseDir, result.localPath);
+        try {
+            // Open the file here so that even if it is deleted, the content
+            // is still readable by the caller until close() is called.
+            result.inStream = new FileInputStream(src);
+        } catch (FileNotFoundException e) {
+            Log.v(LOGTAG, "getCacheFile(): Failed to open file: " + e);
+            // TODO: The files in the cache directory can be removed by the
+            // system. If it is gone, what should we do?
+            return null;
         }
+        return result;
+    }
+
+    private static CacheResult getCacheFileAndroidHttpStack(String url,
+            long postIdentifier) {
+        assert !JniUtil.useChromiumHttpStack();
 
         String databaseKey = getDatabaseKey(url, postIdentifier);
         CacheResult result = mDataBase.getCache(databaseKey);
@@ -418,6 +418,22 @@ public final class CacheManager {
                 mDataBase.removeCache(databaseKey);
                 return null;
             }
+        }
+        return result;
+    }
+
+    static CacheResult getCacheFile(String url, long postIdentifier,
+            Map<String, String> headers) {
+        if (mDisabled) {
+            return null;
+        }
+
+        CacheResult result = JniUtil.useChromiumHttpStack() ?
+                getCacheFileChromiumHttpStack(url) :
+                getCacheFileAndroidHttpStack(url, postIdentifier);
+
+        if (result == null) {
+            return null;
         }
 
         // A null value for headers is used by CACHE_MODE_CACHE_ONLY to imply
