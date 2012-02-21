@@ -6181,6 +6181,8 @@ package android.content.pm {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int REQUESTED_PERMISSION_GRANTED = 2; // 0x2
+    field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;
     field public android.content.pm.ConfigurationInfo[] configPreferences;
@@ -6194,6 +6196,7 @@ package android.content.pm {
     field public android.content.pm.ActivityInfo[] receivers;
     field public android.content.pm.FeatureInfo[] reqFeatures;
     field public java.lang.String[] requestedPermissions;
+    field public int[] requestedPermissionsFlags;
     field public android.content.pm.ServiceInfo[] services;
     field public java.lang.String sharedUserId;
     field public int sharedUserLabel;
@@ -6416,6 +6419,10 @@ package android.content.pm {
     method public java.lang.CharSequence loadDescription(android.content.pm.PackageManager);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int PROTECTION_DANGEROUS = 1; // 0x1
+    field public static final int PROTECTION_FLAG_DEVELOPMENT = 32; // 0x20
+    field public static final int PROTECTION_FLAG_SYSTEM = 16; // 0x10
+    field public static final int PROTECTION_MASK_BASE = 15; // 0xf
+    field public static final int PROTECTION_MASK_FLAGS = 240; // 0xf0
     field public static final int PROTECTION_NORMAL = 0; // 0x0
     field public static final int PROTECTION_SIGNATURE = 2; // 0x2
     field public static final int PROTECTION_SIGNATURE_OR_SYSTEM = 3; // 0x3

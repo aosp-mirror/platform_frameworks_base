@@ -81,7 +81,11 @@ interface IPackageManager {
     boolean addPermission(in PermissionInfo info);
     
     void removePermission(String name);
-    
+
+    void grantPermission(String packageName, String permissionName);
+
+    void revokePermission(String packageName, String permissionName);
+
     boolean isProtectedBroadcast(String actionName);
     
     int checkSignatures(String pkg1, String pkg2);

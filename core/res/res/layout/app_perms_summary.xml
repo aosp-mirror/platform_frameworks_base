@@ -32,6 +32,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <!-- List view containing list of new permissions categorized by groups. -->
+    <LinearLayout
+        android:id="@+id/new_perms_list"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:paddingLeft="16dip"
+        android:paddingRight="12dip"
+        android:layout_height="wrap_content" />
+
     <!-- List view containing list of dangerous permissions categorized by groups. -->
     <LinearLayout
         android:id="@+id/dangerous_perms_list"

@@ -1127,7 +1127,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + "; regranting permissions for internal storage");
             mSettings.mInternalSdkPlatform = mSdkVersion;
             
-            updatePermissionsLPw(null, null, true, regrantPermissions, regrantPermissions);
+            updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
+                    | (regrantPermissions
+                            ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
+                            : 0));
 
             // can downgrade to reader
             mSettings.writeLPr();
@@ -1473,7 +1476,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     PackageInfo generatePackageInfo(PackageParser.Package p, int flags) {
         if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
             // The package has been uninstalled but has retained data and resources.
-            return PackageParser.generatePackageInfo(p, null, flags, 0, 0);
+            return PackageParser.generatePackageInfo(p, null, flags, 0, 0, null);
         }
         final PackageSetting ps = (PackageSetting)p.mExtras;
         if (ps == null) {
@@ -1481,7 +1484,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
         return PackageParser.generatePackageInfo(p, gp.gids, flags,
-                ps.firstInstallTime, ps.lastUpdateTime);
+                ps.firstInstallTime, ps.lastUpdateTime, gp.grantedPermissions);
     }
 
     public PackageInfo getPackageInfo(String packageName, int flags) {
@@ -1934,6 +1937,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         BasePermission bp = mSettings.mPermissions.get(info.name);
         boolean added = bp == null;
         boolean changed = true;
+        int fixedLevel = PermissionInfo.fixProtectionLevel(info.protectionLevel);
         if (added) {
             bp = new BasePermission(info.name, tree.sourcePackage,
                     BasePermission.TYPE_DYNAMIC);
@@ -1942,16 +1946,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                     "Not allowed to modify non-dynamic permission "
                     + info.name);
         } else {
-            if (bp.protectionLevel == info.protectionLevel
+            if (bp.protectionLevel == fixedLevel
                     && bp.perm.owner.equals(tree.perm.owner)
                     && bp.uid == tree.uid
                     && comparePermissionInfos(bp.perm.info, info)) {
                 changed = false;
             }
         }
-        bp.protectionLevel = info.protectionLevel;
-        bp.perm = new PackageParser.Permission(tree.perm.owner,
-                new PermissionInfo(info));
+        bp.protectionLevel = fixedLevel;
+        info = new PermissionInfo(info);
+        info.protectionLevel = fixedLevel;
+        bp.perm = new PackageParser.Permission(tree.perm.owner, info);
         bp.perm.info.packageName = tree.perm.info.packageName;
         bp.uid = tree.uid;
         if (added) {
@@ -1990,6 +1995,77 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + name);
                 }
                 mSettings.mPermissions.remove(name);
+                mSettings.writeLPr();
+            }
+        }
+    }
+
+    public void grantPermission(String packageName, String permissionName) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.GRANT_REVOKE_PERMISSIONS, null);
+        synchronized (mPackages) {
+            final PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            final BasePermission bp = mSettings.mPermissions.get(permissionName);
+            if (bp == null) {
+                throw new IllegalArgumentException("Unknown permission: " + packageName);
+            }
+            if (!pkg.requestedPermissions.contains(permissionName)) {
+                throw new SecurityException("Package " + packageName
+                        + " has not requested permission " + permissionName);
+            }
+            if ((bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) == 0) {
+                throw new SecurityException("Permission " + permissionName
+                        + " is not a development permission");
+            }
+            final PackageSetting ps = (PackageSetting) pkg.mExtras;
+            if (ps == null) {
+                return;
+            }
+            final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
+            if (gp.grantedPermissions.add(permissionName)) {
+                if (ps.haveGids) {
+                    gp.gids = appendInts(gp.gids, bp.gids);
+                }
+                mSettings.writeLPr();
+            }
+        }
+    }
+
+    public void revokePermission(String packageName, String permissionName) {
+        synchronized (mPackages) {
+            final PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            if (pkg.applicationInfo.uid != Binder.getCallingUid()) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.GRANT_REVOKE_PERMISSIONS, null);
+            }
+            final BasePermission bp = mSettings.mPermissions.get(permissionName);
+            if (bp == null) {
+                throw new IllegalArgumentException("Unknown permission: " + packageName);
+            }
+            if (!pkg.requestedPermissions.contains(permissionName)) {
+                throw new SecurityException("Package " + packageName
+                        + " has not requested permission " + permissionName);
+            }
+            if ((bp.protectionLevel&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) == 0) {
+                throw new SecurityException("Permission " + permissionName
+                        + " is not a development permission");
+            }
+            final PackageSetting ps = (PackageSetting) pkg.mExtras;
+            if (ps == null) {
+                return;
+            }
+            final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
+            if (gp.grantedPermissions.remove(permissionName)) {
+                gp.grantedPermissions.remove(permissionName);
+                if (ps.haveGids) {
+                    gp.gids = removeInts(gp.gids, bp.gids);
+                }
                 mSettings.writeLPr();
             }
         }
@@ -4117,10 +4193,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         return false;
     }
-    
+
+    static final int UPDATE_PERMISSIONS_ALL = 1<<0;
+    static final int UPDATE_PERMISSIONS_REPLACE_PKG = 1<<1;
+    static final int UPDATE_PERMISSIONS_REPLACE_ALL = 1<<2;
+
     private void updatePermissionsLPw(String changingPkg,
-            PackageParser.Package pkgInfo, boolean grantPermissions,
-            boolean replace, boolean replaceAll) {
+            PackageParser.Package pkgInfo, int flags) {
         // Make sure there are no dangling permission trees.
         Iterator<BasePermission> it = mSettings.mPermissionTrees.values().iterator();
         while (it.hasNext()) {
@@ -4138,7 +4217,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkgInfo == null || !hasPermission(pkgInfo, bp.name)) {
                     Slog.i(TAG, "Removing old permission tree: " + bp.name
                             + " from package " + bp.sourcePackage);
-                    grantPermissions = true;
+                    flags |= UPDATE_PERMISSIONS_ALL;
                     it.remove();
                 }
             }
@@ -4178,7 +4257,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkgInfo == null || !hasPermission(pkgInfo, bp.name)) {
                     Slog.i(TAG, "Removing old permission: " + bp.name
                             + " from package " + bp.sourcePackage);
-                    grantPermissions = true;
+                    flags |= UPDATE_PERMISSIONS_ALL;
                     it.remove();
                 }
             }
@@ -4186,16 +4265,16 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Now update the permissions for all packages, in particular
         // replace the granted permissions of the system packages.
-        if (grantPermissions) {
+        if ((flags&UPDATE_PERMISSIONS_ALL) != 0) {
             for (PackageParser.Package pkg : mPackages.values()) {
                 if (pkg != pkgInfo) {
-                    grantPermissionsLPw(pkg, replaceAll);
+                    grantPermissionsLPw(pkg, (flags&UPDATE_PERMISSIONS_REPLACE_ALL) != 0);
                 }
             }
         }
         
         if (pkgInfo != null) {
-            grantPermissionsLPw(pkgInfo, replace);
+            grantPermissionsLPw(pkgInfo, (flags&UPDATE_PERMISSIONS_REPLACE_PKG) != 0);
         }
     }
 
@@ -4205,11 +4284,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
         final GrantedPermissions gp = ps.sharedUser != null ? ps.sharedUser : ps;
+        HashSet<String> origPermissions = gp.grantedPermissions;
         boolean changedPermission = false;
 
         if (replace) {
             ps.permissionsFixed = false;
             if (gp == ps) {
+                origPermissions = new HashSet<String>(gp.grantedPermissions);
                 gp.grantedPermissions.clear();
                 gp.gids = mGlobalGids;
             }
@@ -4222,6 +4303,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int N = pkg.requestedPermissions.size();
         for (int i=0; i<N; i++) {
             final String name = pkg.requestedPermissions.get(i);
+            //final boolean required = pkg.requestedPermssionsRequired.get(i);
             final BasePermission bp = mSettings.mPermissions.get(name);
             if (DEBUG_INSTALL) {
                 if (gp != ps) {
@@ -4232,23 +4314,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final String perm = bp.name;
                 boolean allowed;
                 boolean allowedSig = false;
-                if (bp.protectionLevel == PermissionInfo.PROTECTION_NORMAL
-                        || bp.protectionLevel == PermissionInfo.PROTECTION_DANGEROUS) {
+                final int level = bp.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
+                if (level == PermissionInfo.PROTECTION_NORMAL
+                        || level == PermissionInfo.PROTECTION_DANGEROUS) {
                     allowed = true;
                 } else if (bp.packageSetting == null) {
                     // This permission is invalid; skip it.
                     allowed = false;
-                } else if (bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE
-                        || bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
+                } else if (level == PermissionInfo.PROTECTION_SIGNATURE) {
                     allowed = (compareSignatures(
                             bp.packageSetting.signatures.mSignatures, pkg.mSignatures)
                                     == PackageManager.SIGNATURE_MATCH)
                             || (compareSignatures(mPlatformPackage.mSignatures, pkg.mSignatures)
                                     == PackageManager.SIGNATURE_MATCH);
-                    if (!allowed && bp.protectionLevel
-                            == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
+                    if (!allowed && (bp.protectionLevel
+                            & PermissionInfo.PROTECTION_FLAG_SYSTEM) != 0) {
                         if (isSystemApp(pkg)) {
-                            // For updated system applications, the signatureOrSystem permission
+                            // For updated system applications, a system permission
                             // is granted only if it had been defined by the original application.
                             if (isUpdatedSystemApp(pkg)) {
                                 final PackageSetting sysPs = mSettings
@@ -4263,6 +4345,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                             } else {
                                 allowed = true;
                             }
+                        }
+                    }
+                    if (!allowed && (bp.protectionLevel
+                            & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
+                        // For development permissions, a development permission
+                        // is granted only if it was already granted.
+                        if (origPermissions.contains(perm)) {
+                            allowed = true;
+                        } else {
+                            allowed = false;
                         }
                     }
                     if (allowed) {
@@ -4883,7 +4975,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // writer
                             synchronized (mPackages) {
                                 updatePermissionsLPw(p.packageName, p,
-                                        p.permissions.size() > 0, false, false);
+                                        p.permissions.size() > 0 ? UPDATE_PERMISSIONS_ALL : 0);
                             }
                             addedPackage = p.applicationInfo.packageName;
                             addedUid = p.applicationInfo.uid;
@@ -6447,7 +6539,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // writer
                 synchronized (mPackages) {
                     updatePermissionsLPw(deletedPackage.packageName, deletedPackage,
-                            true, false, false);
+                            UPDATE_PERMISSIONS_ALL);
                     // can downgrade to reader
                     mSettings.writeLPr();
                 }
@@ -6591,7 +6683,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         synchronized (mPackages) {
             updatePermissionsLPw(newPackage.packageName, newPackage,
-                    newPackage.permissions.size() > 0, true, false);
+                    UPDATE_PERMISSIONS_REPLACE_PKG | (newPackage.permissions.size() > 0
+                            ? UPDATE_PERMISSIONS_ALL : 0));
             res.name = pkgName;
             res.uid = newPackage.applicationInfo.uid;
             res.pkg = newPackage;
@@ -7019,7 +7112,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         outInfo.removedUid = mSettings.removePackageLPw(packageName);
                     }
                     if (deletedPs != null) {
-                        updatePermissionsLPw(deletedPs.name, null, false, false, false);
+                        updatePermissionsLPw(deletedPs.name, null, 0);
                         if (deletedPs.sharedUser != null) {
                             // remove permissions associated with package
                             mSettings.updateSharedUserPermsLPw(deletedPs, mGlobalGids);
@@ -7102,7 +7195,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         // writer
         synchronized (mPackages) {
-            updatePermissionsLPw(newPkg.packageName, newPkg, true, true, false);
+            updatePermissionsLPw(newPkg.packageName, newPkg,
+                    UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
             // can downgrade to reader here
             if (writeSettings) {
                 mSettings.writeLPr();
@@ -8320,7 +8414,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Make sure group IDs have been assigned, and any permission
             // changes in other apps are accounted for
-            updatePermissionsLPw(null, null, true, regrantPermissions, regrantPermissions);
+            updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
+                    | (regrantPermissions
+                            ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
+                            : 0));
             // can downgrade to reader
             // Persist settings
             mSettings.writeLPr();

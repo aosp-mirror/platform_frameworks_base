@@ -1475,6 +1475,29 @@ public abstract class PackageManager {
     public abstract void removePermission(String name);
 
     /**
+     * Grant a permission to an application which the application does not
+     * already have.  The permission must have been requested by the application,
+     * but as an optional permission.  If the application is not allowed to
+     * hold the permission, a SecurityException is thrown.
+     * @hide
+     *
+     * @param packageName The name of the package that the permission will be
+     * granted to.
+     * @param permissionName The name of the permission.
+     */
+    public abstract void grantPermission(String packageName, String permissionName);
+
+    /**
+     * Revoke a permission that was previously granted by {@link #grantPermission}.
+     * @hide
+     *
+     * @param packageName The name of the package that the permission will be
+     * granted to.
+     * @param permissionName The name of the permission.
+     */
+    public abstract void revokePermission(String packageName, String permissionName);
+
+    /**
      * Compare the signatures of two packages to determine if the same
      * signature appears in both of them.  If they do contain the same
      * signature, then they are allowed special privileges when working
@@ -2125,7 +2148,7 @@ public abstract class PackageManager {
         if ((flags & GET_SIGNATURES) != 0) {
             packageParser.collectCertificates(pkg, 0);
         }
-        return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0);
+        return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null);
     }
 
     /**

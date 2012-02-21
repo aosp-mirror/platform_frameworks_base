@@ -332,6 +332,24 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public void grantPermission(String packageName, String permissionName) {
+        try {
+            mPM.grantPermission(packageName, permissionName);
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
+    public void revokePermission(String packageName, String permissionName) {
+        try {
+            mPM.revokePermission(packageName, permissionName);
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
     public int checkSignatures(String pkg1, String pkg2) {
         try {
             return mPM.checkSignatures(pkg1, pkg2);
