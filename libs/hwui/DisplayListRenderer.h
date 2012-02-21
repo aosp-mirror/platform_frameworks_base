@@ -20,6 +20,7 @@
 #include <SkChunkAlloc.h>
 #include <SkFlattenable.h>
 #include <SkMatrix.h>
+#include <SkCamera.h>
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkRefCnt.h>
@@ -28,11 +29,8 @@
 
 #include <cutils/compiler.h>
 
-#include <utils/String8.h>
-
 #include "DisplayListLogBuffer.h"
 #include "OpenGLRenderer.h"
-#include "utils/Functor.h"
 
 namespace android {
 namespace uirenderer {
@@ -50,6 +48,16 @@ namespace uirenderer {
 #else
     #define DISPLAY_LIST_LOGD(...)
 #endif
+
+// Set to 1 to enable native processing of View properties. 0 by default. Eventually this
+// will go away and we will always use this approach for accelerated apps.
+#define USE_DISPLAY_LIST_PROPERTIES 0
+
+#define TRANSLATION 0x0001
+#define ROTATION    0x0002
+#define ROTATION_3D 0x0004
+#define SCALE       0x0008
+#define PIVOT       0x0010
 
 ///////////////////////////////////////////////////////////////////////////////
 // Display list
@@ -119,13 +127,18 @@ public:
 
     static const char* OP_NAMES[];
 
+    void setViewProperties(OpenGLRenderer& renderer, uint32_t width, uint32_t height,
+            uint32_t level);
+    void outputViewProperties(OpenGLRenderer& renderer, char* indent);
+
     ANDROID_API size_t getSize();
     ANDROID_API static void destroyDisplayListDeferred(DisplayList* displayList);
     ANDROID_API static void outputLogBuffer(int fd);
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
-    bool replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level = 0);
+    bool replay(OpenGLRenderer& renderer, uint32_t width, uint32_t height,
+            Rect& dirty, int32_t flags, uint32_t level = 0);
 
     void output(OpenGLRenderer& renderer, uint32_t level = 0);
 
@@ -143,10 +156,239 @@ public:
         }
     }
 
+    void setApplicationScale(float scale) {
+        mApplicationScale = scale;
+    }
+
+    void setClipChildren(bool clipChildren) {
+        mClipChildren = clipChildren;
+    }
+
+    void setAlpha(float alpha) {
+        if (alpha != mAlpha) {
+            mAlpha = alpha;
+            mMultipliedAlpha = (int)(255 * alpha);
+        }
+    }
+
+    void setTranslationX(float translationX) {
+        if (translationX != mTranslationX) {
+            mTranslationX = translationX;
+            mMatrixDirty = true;
+            if (ALMOST_EQUAL(mTranslationX, 0) && ALMOST_EQUAL(mTranslationY, 0)) {
+                mMatrixFlags &= ~TRANSLATION;
+            } else {
+                mMatrixFlags |= TRANSLATION;
+            }
+        }
+    }
+
+    void setTranslationY(float translationY) {
+        if (translationY != mTranslationY) {
+            mTranslationY = translationY;
+            mMatrixDirty = true;
+            if (ALMOST_EQUAL(mTranslationX, 0) && ALMOST_EQUAL(mTranslationY, 0)) {
+                mMatrixFlags &= ~TRANSLATION;
+            } else {
+                mMatrixFlags |= TRANSLATION;
+            }
+        }
+    }
+
+    void setRotation(float rotation) {
+        if (rotation != mRotation) {
+            mRotation = rotation;
+            mMatrixDirty = true;
+            if (ALMOST_EQUAL(mRotation, 0)) {
+                mMatrixFlags &= ~ROTATION;
+            } else {
+                mMatrixFlags |= ROTATION;
+            }
+        }
+    }
+
+    void setRotationX(float rotationX) {
+        if (rotationX != mRotationX) {
+            mRotationX = rotationX;
+            mMatrixDirty = true;
+            if (ALMOST_EQUAL(mRotationX, 0) && ALMOST_EQUAL(mRotationY, 0)) {
+                mMatrixFlags &= ~ROTATION_3D;
+            } else {
+                mMatrixFlags |= ROTATION_3D;
+            }
+        }
+    }
+
+    void setRotationY(float rotationY) {
+        if (rotationY != mRotationY) {
+            mRotationY = rotationY;
+            mMatrixDirty = true;
+            if (ALMOST_EQUAL(mRotationX, 0) && ALMOST_EQUAL(mRotationY, 0)) {
+                mMatrixFlags &= ~ROTATION_3D;
+            } else {
+                mMatrixFlags |= ROTATION_3D;
+            }
+        }
+    }
+
+    void setScaleX(float scaleX) {
+        if (scaleX != mScaleX) {
+            mScaleX = scaleX;
+            mMatrixDirty = true;
+            if (ALMOST_EQUAL(mScaleX, 1) && ALMOST_EQUAL(mScaleY, 1)) {
+                mMatrixFlags &= ~SCALE;
+            } else {
+                mMatrixFlags |= SCALE;
+            }
+        }
+    }
+
+    void setScaleY(float scaleY) {
+        if (scaleY != mScaleY) {
+            mScaleY = scaleY;
+            mMatrixDirty = true;
+            if (ALMOST_EQUAL(mScaleX, 1) && ALMOST_EQUAL(mScaleY, 1)) {
+                mMatrixFlags &= ~SCALE;
+            } else {
+                mMatrixFlags |= SCALE;
+            }
+        }
+    }
+
+    void setPivotX(float pivotX) {
+        mPivotX = pivotX;
+        mMatrixDirty = true;
+        if (ALMOST_EQUAL(mPivotX, 0) && ALMOST_EQUAL(mPivotY, 0)) {
+            mMatrixFlags &= ~PIVOT;
+        } else {
+            mMatrixFlags |= PIVOT;
+        }
+        mPivotExplicitlySet = true;
+    }
+
+    void setPivotY(float pivotY) {
+        mPivotY = pivotY;
+        mMatrixDirty = true;
+        if (ALMOST_EQUAL(mPivotX, 0) && ALMOST_EQUAL(mPivotY, 0)) {
+            mMatrixFlags &= ~PIVOT;
+        } else {
+            mMatrixFlags |= PIVOT;
+        }
+        mPivotExplicitlySet = true;
+    }
+
+    void setCameraDistance(float distance) {
+        if (distance != mCameraDistance) {
+            mCameraDistance = distance;
+            mMatrixDirty = true;
+            if (!mTransformCamera) {
+                mTransformCamera = new Sk3DView();
+                mTransformMatrix3D = new SkMatrix();
+            }
+            mTransformCamera->setCameraLocation(0, 0, distance);
+        }
+    }
+
+    void setLeft(int left) {
+        if (left != mLeft) {
+            mLeft = left;
+            mWidth = mRight - mLeft;
+            if (mMatrixFlags > TRANSLATION && !mPivotExplicitlySet) {
+                mMatrixDirty = true;
+            }
+        }
+    }
+
+    void setTop(int top) {
+        if (top != mTop) {
+            mTop = top;
+            mHeight = mBottom - mTop;
+            if (mMatrixFlags > TRANSLATION && !mPivotExplicitlySet) {
+                mMatrixDirty = true;
+            }
+        }
+    }
+
+    void setRight(int right) {
+        if (right != mRight) {
+            mRight = right;
+            mWidth = mRight - mLeft;
+            if (mMatrixFlags > TRANSLATION && !mPivotExplicitlySet) {
+                mMatrixDirty = true;
+            }
+        }
+    }
+
+    void setBottom(int bottom) {
+        if (bottom != mBottom) {
+            mBottom = bottom;
+            mHeight = mBottom - mTop;
+            if (mMatrixFlags > TRANSLATION && !mPivotExplicitlySet) {
+                mMatrixDirty = true;
+            }
+        }
+    }
+
+    void setLeftTop(int left, int top) {
+        if (left != mLeft || top != mTop) {
+            mLeft = left;
+            mTop = top;
+            mWidth = mRight - mLeft;
+            mHeight = mBottom - mTop;
+            if (mMatrixFlags > TRANSLATION && !mPivotExplicitlySet) {
+                mMatrixDirty = true;
+            }
+        }
+    }
+
+    void setLeftTopRightBottom(int left, int top, int right, int bottom) {
+        if (left != mLeft || top != mTop || right != mRight || bottom != mBottom) {
+            mLeft = left;
+            mTop = top;
+            mRight = right;
+            mBottom = bottom;
+            mWidth = mRight - mLeft;
+            mHeight = mBottom - mTop;
+            if (mMatrixFlags > TRANSLATION && !mPivotExplicitlySet) {
+                mMatrixDirty = true;
+            }
+        }
+    }
+
+    void offsetLeftRight(int offset) {
+        if (offset != 0) {
+            mLeft += offset;
+            mRight += offset;
+            if (mMatrixFlags > TRANSLATION && !mPivotExplicitlySet) {
+                mMatrixDirty = true;
+            }
+        }
+    }
+
+    void offsetTopBottom(int offset) {
+        if (offset != 0) {
+            mTop += offset;
+            mBottom += offset;
+            if (mMatrixFlags > TRANSLATION && !mPivotExplicitlySet) {
+                mMatrixDirty = true;
+            }
+        }
+    }
+
+    void setCaching(bool caching) {
+        mCaching = caching;
+    }
+
+    void transformRect(float left, float top, float right, float bottom, Rect& result);
+
 private:
     void init();
 
+    void initProperties();
+
     void clearResources();
+
+    void updateMatrix();
 
     class TextContainer {
     public:
@@ -241,6 +483,28 @@ private:
     bool mIsRenderable;
 
     String8 mName;
+
+    // View properties
+    float mApplicationScale;
+    bool mClipChildren;
+    float mAlpha;
+    int mMultipliedAlpha;
+    float mTranslationX, mTranslationY;
+    float mRotation, mRotationX, mRotationY;
+    float mScaleX, mScaleY;
+    float mPivotX, mPivotY;
+    float mCameraDistance;
+    int mLeft, mTop, mRight, mBottom;
+    int mWidth, mHeight;
+    int mPrevWidth, mPrevHeight;
+    bool mPivotExplicitlySet;
+    bool mMatrixDirty;
+    bool mMatrixIsIdentity;
+    uint32_t mMatrixFlags;
+    SkMatrix* mTransformMatrix;
+    Sk3DView* mTransformCamera;
+    SkMatrix* mTransformMatrix3D;
+    bool mCaching;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

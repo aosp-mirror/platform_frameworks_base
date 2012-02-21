@@ -36,6 +36,7 @@ abstract class HardwareLayer {
     
     int mWidth;
     int mHeight;
+    DisplayList mDisplayList;
 
     boolean mOpaque;
 
@@ -76,6 +77,24 @@ abstract class HardwareLayer {
      */
     int getHeight() {
         return mHeight;
+    }
+
+    /**
+     * Returns the DisplayList for the layer.
+     *
+     * @return The DisplayList of the hardware layer
+     */
+    DisplayList getDisplayList() {
+        return mDisplayList;
+    }
+
+    /**
+     * Sets the DisplayList for the layer.
+     *
+     * @param displayList The new DisplayList for this layer
+     */
+    void setDisplayList(DisplayList displayList) {
+        mDisplayList = displayList;
     }
 
     /**
