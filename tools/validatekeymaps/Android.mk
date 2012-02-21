@@ -18,7 +18,7 @@ LOCAL_CFLAGS := -Wall -Werror
 #LOCAL_C_INCLUDES +=
 
 LOCAL_STATIC_LIBRARIES := \
-	libui \
+	libandroidfw \
 	libutils \
 	libcutils
 

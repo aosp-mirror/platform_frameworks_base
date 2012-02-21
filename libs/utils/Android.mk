@@ -18,9 +18,6 @@ LOCAL_PATH:= $(call my-dir)
 # and once for the device.
 
 commonSources:= \
-	Asset.cpp \
-	AssetDir.cpp \
-	AssetManager.cpp \
 	BasicHashtable.cpp \
 	BlobCache.cpp \
 	BufferedTextOutput.cpp \
@@ -29,14 +26,11 @@ commonSources:= \
 	FileMap.cpp \
 	Flattenable.cpp \
 	LinearTransform.cpp \
-	ObbFile.cpp \
 	PropertyMap.cpp \
 	RefBase.cpp \
-	ResourceTypes.cpp \
 	SharedBuffer.cpp \
 	Static.cpp \
 	StopWatch.cpp \
-	StreamingZipInflater.cpp \
 	String8.cpp \
 	String16.cpp \
 	StringArray.cpp \
@@ -47,9 +41,6 @@ commonSources:= \
 	Tokenizer.cpp \
 	Unicode.cpp \
 	VectorImpl.cpp \
-	ZipFileCRO.cpp \
-	ZipFileRO.cpp \
-	ZipUtils.cpp \
 	misc.cpp
 
 
@@ -63,7 +54,6 @@ LOCAL_SRC_FILES:= $(commonSources)
 LOCAL_MODULE:= libutils
 
 LOCAL_CFLAGS += -DLIBUTILS_NATIVE=1 $(TOOL_CFLAGS)
-LOCAL_C_INCLUDES += external/zlib
 
 ifeq ($(HOST_OS),windows)
 ifeq ($(strip $(USE_CYGWIN),),)
@@ -79,7 +69,6 @@ endif
 include $(BUILD_HOST_STATIC_LIBRARY)
 
 
-
 # For the device
 # =====================================================
 include $(CLEAR_VARS)
@@ -88,8 +77,6 @@ include $(CLEAR_VARS)
 # we have the common sources, plus some device-specific stuff
 LOCAL_SRC_FILES:= \
 	$(commonSources) \
-	BackupData.cpp \
-	BackupHelpers.cpp \
 	Looper.cpp
 
 ifeq ($(TARGET_OS),linux)
@@ -97,14 +84,11 @@ LOCAL_LDLIBS += -lrt -ldl
 endif
 
 LOCAL_C_INCLUDES += \
-		external/zlib \
-		external/icu4c/common \
 		bionic/libc/private
 
 LOCAL_LDLIBS += -lpthread
 
 LOCAL_SHARED_LIBRARIES := \
-	libz \
 	liblog \
 	libcutils \
 	libdl \
@@ -112,19 +96,6 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MODULE:= libutils
 include $(BUILD_SHARED_LIBRARY)
-
-ifeq ($(TARGET_OS),linux)
-include $(CLEAR_VARS)
-LOCAL_C_INCLUDES += \
-		external/zlib \
-		external/icu4c/common \
-		bionic/libc/private
-LOCAL_LDLIBS := -lrt -ldl -lpthread
-LOCAL_MODULE := libutils
-LOCAL_SRC_FILES := $(commonSources) BackupData.cpp BackupHelpers.cpp
-include $(BUILD_STATIC_LIBRARY)
-endif
-
 
 # Include subdirectory makefiles
 # ============================================================

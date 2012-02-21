@@ -185,6 +185,7 @@ LOCAL_C_INCLUDES += \
 	libcore/include
 
 LOCAL_SHARED_LIBRARIES := \
+	libandroidfw \
 	libexpat \
 	libnativehelper \
 	libcutils \

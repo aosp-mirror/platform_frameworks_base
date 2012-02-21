@@ -4,23 +4,24 @@ include $(CLEAR_VARS)
 
 # Build the unit tests.
 test_src_files := \
-    InputReader_test.cpp \
-    InputDispatcher_test.cpp
+    InputChannel_test.cpp \
+    InputEvent_test.cpp \
+    InputPublisherAndConsumer_test.cpp \
+    ObbFile_test.cpp \
+    ZipFileRO_test.cpp 
 
 shared_libraries := \
-    libcutils \
-    libandroidfw \
-    libutils \
-    libhardware \
-    libhardware_legacy \
-    libui \
-    libskia \
-    libstlport \
-    libinput
+	libandroidfw \
+	libcutils \
+	libutils \
+	libbinder \
+	libui \
+	libstlport \
+	libskia
 
 static_libraries := \
-    libgtest \
-    libgtest_main
+	libgtest \
+	libgtest_main
 
 c_includes := \
     bionic \
