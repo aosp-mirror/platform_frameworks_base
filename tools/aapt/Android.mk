@@ -39,6 +39,7 @@ LOCAL_C_INCLUDES += build/libs/host/include
 LOCAL_STATIC_LIBRARIES := \
 	libhost \
 	libutils \
+	libandroidfw \
 	libcutils \
 	libexpat \
 	libpng

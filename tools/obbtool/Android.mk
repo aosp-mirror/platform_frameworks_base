@@ -19,6 +19,7 @@ LOCAL_CFLAGS := -Wall -Werror
 
 LOCAL_STATIC_LIBRARIES := \
 	libutils \
+	libandroidfw \
 	libcutils
 
 ifeq ($(HOST_OS),linux)

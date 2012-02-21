@@ -18,6 +18,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
+    libandroidfw \
     libutils \
     libbinder \
     libui \
