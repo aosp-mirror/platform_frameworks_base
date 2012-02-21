@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
 
@@ -140,19 +141,21 @@ public abstract class SpellCheckerService extends Service {
 
         /**
          * @hide
-         * The default implementation returns an array of SuggestionsInfo by simply calling
+         * The default implementation returns an array of SentenceSuggestionsInfo by simply calling
          * onGetSuggestions().
          * When you override this method, make sure that suggestionsLimit is applied to suggestions
          * that share the same start position and length.
          */
-        public SuggestionsInfo[] onGetSuggestionsMultipleForSentence(TextInfo[] textInfos,
+        public SentenceSuggestionsInfo[] onGetSentenceSuggestionsMultiple(TextInfo[] textInfos,
                 int suggestionsLimit) {
             final int length = textInfos.length;
-            final SuggestionsInfo[] retval = new SuggestionsInfo[length];
+            final SentenceSuggestionsInfo[] retval = new SentenceSuggestionsInfo[length];
             for (int i = 0; i < length; ++i) {
-                retval[i] = onGetSuggestions(textInfos[i], suggestionsLimit);
-                retval[i].setCookieAndSequence(
-                        textInfos[i].getCookie(), textInfos[i].getSequence());
+                final SuggestionsInfo si = onGetSuggestions(textInfos[i], suggestionsLimit);
+                si.setCookieAndSequence(textInfos[i].getCookie(), textInfos[i].getSequence());
+                final int N = textInfos[i].getText().length();
+                retval[i] = new SentenceSuggestionsInfo(
+                        new SuggestionsInfo[] {si}, new int[]{0}, new int[]{N});
             }
             return retval;
         }
@@ -220,11 +223,10 @@ public abstract class SpellCheckerService extends Service {
         }
 
         @Override
-        public void onGetSuggestionsMultipleForSentence(
-                TextInfo[] textInfos, int suggestionsLimit) {
+        public void onGetSentenceSuggestionsMultiple(TextInfo[] textInfos, int suggestionsLimit) {
             try {
-                mListener.onGetSuggestionsForSentence(
-                        mSession.onGetSuggestionsMultipleForSentence(textInfos, suggestionsLimit));
+                mListener.onGetSentenceSuggestions(
+                        mSession.onGetSentenceSuggestionsMultiple(textInfos, suggestionsLimit));
             } catch (RemoteException e) {
             }
         }

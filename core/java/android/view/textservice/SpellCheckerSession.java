@@ -115,7 +115,7 @@ public class SpellCheckerSession {
                     handleOnGetSuggestionsMultiple((SuggestionsInfo[]) msg.obj);
                     break;
                 case MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE:
-                    handleOnGetSuggestionsMultipleForSentence((SuggestionsInfo[]) msg.obj);
+                    handleOnGetSentenceSuggestionsMultiple((SentenceSuggestionsInfo[]) msg.obj);
                     break;
             }
         }
@@ -180,8 +180,8 @@ public class SpellCheckerSession {
     /**
      * @hide
      */
-    public void getSuggestionsForSentence(TextInfo textInfo, int suggestionsLimit) {
-        mSpellCheckerSessionListenerImpl.getSuggestionsMultipleForSentence(
+    public void getSentenceSuggestions(TextInfo textInfo, int suggestionsLimit) {
+        mSpellCheckerSessionListenerImpl.getSentenceSuggestionsMultiple(
                 new TextInfo[] {textInfo}, suggestionsLimit);
     }
 
@@ -214,8 +214,8 @@ public class SpellCheckerSession {
         mSpellCheckerSessionListener.onGetSuggestions(suggestionInfos);
     }
 
-    private void handleOnGetSuggestionsMultipleForSentence(SuggestionsInfo[] suggestionInfos) {
-        mSpellCheckerSessionListener.onGetSuggestionsForSentence(suggestionInfos);
+    private void handleOnGetSentenceSuggestionsMultiple(SentenceSuggestionsInfo[] suggestionInfos) {
+        mSpellCheckerSessionListener.onGetSentenceSuggestions(suggestionInfos);
     }
 
     private static class SpellCheckerSessionListenerImpl extends ISpellCheckerSessionListener.Stub {
@@ -285,7 +285,7 @@ public class SpellCheckerSession {
                             throw new IllegalArgumentException();
                         }
                         try {
-                            session.onGetSuggestionsMultipleForSentence(
+                            session.onGetSentenceSuggestionsMultiple(
                                     scp.mTextInfos, scp.mSuggestionsLimit);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Failed to get suggestions " + e);
@@ -366,9 +366,9 @@ public class SpellCheckerSession {
                             suggestionsLimit, sequentialWords));
         }
 
-        public void getSuggestionsMultipleForSentence(TextInfo[] textInfos, int suggestionsLimit) {
+        public void getSentenceSuggestionsMultiple(TextInfo[] textInfos, int suggestionsLimit) {
             if (DBG) {
-                Log.w(TAG, "getSuggestionsMultipleForSentence");
+                Log.w(TAG, "getSentenceSuggestionsMultiple");
             }
             processOrEnqueueTask(
                     new SpellCheckerParams(TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE,
@@ -399,8 +399,8 @@ public class SpellCheckerSession {
                         while (!mPendingTasks.isEmpty()) {
                             final SpellCheckerParams tmp = mPendingTasks.poll();
                             if (tmp.mWhat == TASK_CLOSE) {
-                                // Only one close task should be processed, while we need to remove all
-                                // close tasks from the queue
+                                // Only one close task should be processed, while we need to remove
+                                // all close tasks from the queue
                                 closeTask = tmp;
                             }
                         }
@@ -426,7 +426,7 @@ public class SpellCheckerSession {
         }
 
         @Override
-        public void onGetSuggestionsForSentence(SuggestionsInfo[] results) {
+        public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results) {
             mHandler.sendMessage(
                     Message.obtain(mHandler, MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE, results));
         }
@@ -444,7 +444,7 @@ public class SpellCheckerSession {
         /**
          * @hide
          */
-        public void onGetSuggestionsForSentence(SuggestionsInfo[] results);
+        public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results);
     }
 
     private static class InternalListener extends ITextServicesSessionListener.Stub {
