@@ -75,6 +75,9 @@ public class Scene extends SceneGraphBase {
     }
 
     public void appendTransform(Transform t) {
+        if (t == null) {
+            throw new RuntimeException("Adding null object");
+        }
         mRootTransforms.appendChild(t);
     }
 
@@ -88,6 +91,9 @@ public class Scene extends SceneGraphBase {
     }
 
     public void appendRenderPass(RenderPass p) {
+        if (p == null) {
+            throw new RuntimeException("Adding null object");
+        }
         mRenderPasses.add(p);
     }
 
@@ -96,18 +102,30 @@ public class Scene extends SceneGraphBase {
     }
 
     public void appendLight(LightBase l) {
+        if (l == null) {
+            throw new RuntimeException("Adding null object");
+        }
         mLights.add(l);
     }
 
     public void appendCamera(Camera c) {
+        if (c == null) {
+            throw new RuntimeException("Adding null object");
+        }
         mCameras.add(c);
     }
 
     public void appendShader(FragmentShader f) {
+        if (f == null) {
+            throw new RuntimeException("Adding null object");
+        }
         mFragmentShaders.add(f);
     }
 
     public void appendShader(VertexShader v) {
+        if (v == null) {
+            throw new RuntimeException("Adding null object");
+        }
         mVertexShaders.add(v);
     }
 
@@ -120,6 +138,9 @@ public class Scene extends SceneGraphBase {
     }
 
     public void appendRenderable(RenderableBase d) {
+        if (d == null) {
+            throw new RuntimeException("Adding null object");
+        }
         mRenderables.add(d);
         mRenderableMap.put(d.getName(), d);
     }
@@ -133,6 +154,9 @@ public class Scene extends SceneGraphBase {
     }
 
     public void appendTextures(Texture2D tex) {
+        if (tex == null) {
+            throw new RuntimeException("Adding null object");
+        }
         mTextures.add(tex);
     }
 

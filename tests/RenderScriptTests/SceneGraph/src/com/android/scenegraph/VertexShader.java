@@ -44,6 +44,11 @@ public class VertexShader extends Shader {
             return this;
         }
 
+        public Builder setShader(String code) {
+            mBuilder.setShader(code);
+            return this;
+        }
+
         public Builder setObjectConst(Type type) {
             mShader.mPerObjConstants = type;
             return this;

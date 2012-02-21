@@ -29,8 +29,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.android.scenegraph.Camera;
+import com.android.scenegraph.FragmentShader;
 import com.android.scenegraph.MatrixTransform;
 import com.android.scenegraph.Scene;
+import com.android.scenegraph.VertexShader;
 import com.android.testapp.R;
 
 import android.content.res.Resources;
@@ -41,7 +43,6 @@ import android.renderscript.*;
 import android.renderscript.Allocation.MipmapControl;
 import android.renderscript.Mesh;
 import android.renderscript.RenderScriptGL;
-import android.renderscript.Type.Builder;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -74,6 +75,12 @@ public class SceneManager extends SceneGraphBase {
     private Allocation mDefault2D;
     private Allocation mDefaultCube;
 
+    private FragmentShader mColor;
+    private FragmentShader mTexture;
+    private VertexShader mDefaultVertex;
+
+    private RenderState mDefaultState;
+
     private static Allocation getDefault(boolean isCube) {
         final int dimension = 4;
         final int bytesPerPixel = 4;
@@ -101,12 +108,18 @@ public class SceneManager extends SceneGraphBase {
         if (sSceneManager == null) {
             return null;
         }
+        if (sSceneManager.mDefault2D == null) {
+            sSceneManager.mDefault2D = getDefault(false);
+        }
         return sSceneManager.mDefault2D;
     }
 
     static Allocation getDefaultTexCube() {
         if (sSceneManager == null) {
             return null;
+        }
+        if (sSceneManager.mDefaultCube == null) {
+            sSceneManager.mDefaultCube = getDefault(true);
         }
         return sSceneManager.mDefaultCube;
     }
@@ -229,6 +242,10 @@ public class SceneManager extends SceneGraphBase {
     public void setActiveScene(Scene s) {
         mActiveScene = s;
 
+        if (mActiveScene == null) {
+            return;
+        }
+
         // Do some sanity checking
         if (mActiveScene.getCameras().size() == 0) {
             Matrix4f camPos = new Matrix4f();
@@ -242,6 +259,8 @@ public class SceneManager extends SceneGraphBase {
             cam.setTransform(cameraTransform);
             mActiveScene.appendCamera(cam);
         }
+
+        mActiveScene.appendShader(getDefaultVS());
     }
 
     static RenderScriptGL getRS() {
@@ -256,6 +275,114 @@ public class SceneManager extends SceneGraphBase {
             return null;
         }
         return sSceneManager.mRes;
+    }
+
+    // Provides the folowing inputs to fragment shader
+    // Assigned by default if nothing is present
+    // vec3 varWorldPos;
+    // vec3 varWorldNormal;
+    // vec2 varTex0;
+    public static VertexShader getDefaultVS() {
+        if (sSceneManager == null) {
+            return null;
+        }
+
+        if (sSceneManager.mDefaultVertex == null) {
+            RenderScriptGL rs = getRS();
+            Element.Builder b = new Element.Builder(rs);
+            b.add(Element.MATRIX_4X4(rs), "model");
+            Type.Builder objConstBuilder = new Type.Builder(rs, b.create());
+
+            b = new Element.Builder(rs);
+            b.add(Element.MATRIX_4X4(rs), "viewProj");
+            Type.Builder shaderConstBuilder = new Type.Builder(rs, b.create());
+
+            b = new Element.Builder(rs);
+            b.add(Element.F32_4(rs), "position");
+            b.add(Element.F32_2(rs), "texture0");
+            b.add(Element.F32_3(rs), "normal");
+            Element defaultIn = b.create();
+
+            final String code = "\n" +
+                "varying vec3 varWorldPos;\n" +
+                "varying vec3 varWorldNormal;\n" +
+                "varying vec2 varTex0;\n" +
+                "void main() {" +
+                "   vec4 objPos = ATTRIB_position;\n" +
+                "   vec4 worldPos = UNI_model * objPos;\n" +
+                "   gl_Position = UNI_viewProj * worldPos;\n" +
+                "   mat3 model3 = mat3(UNI_model[0].xyz, UNI_model[1].xyz, UNI_model[2].xyz);\n" +
+                "   vec3 worldNorm = model3 * ATTRIB_normal;\n" +
+                "   varWorldPos = worldPos.xyz;\n" +
+                "   varWorldNormal = worldNorm;\n" +
+                "   varTex0 = ATTRIB_texture0;\n" +
+                "}\n";
+
+            VertexShader.Builder sb = new VertexShader.Builder(rs);
+            sb.addInput(defaultIn);
+            sb.setObjectConst(objConstBuilder.setX(1).create());
+            sb.setShaderConst(shaderConstBuilder.setX(1).create());
+            sb.setShader(code);
+            sSceneManager.mDefaultVertex = sb.create();
+        }
+
+        return sSceneManager.mDefaultVertex;
+    }
+
+    public static FragmentShader getColorFS() {
+        if (sSceneManager == null) {
+            return null;
+        }
+        if (sSceneManager.mColor == null) {
+            RenderScriptGL rs = getRS();
+            Element.Builder b = new Element.Builder(rs);
+            b.add(Element.F32_4(rs), "color");
+            Type.Builder objConstBuilder = new Type.Builder(rs, b.create());
+
+            final String code = "\n" +
+                "varying vec2 varTex0;\n" +
+                "void main() {\n" +
+                "   lowp vec4 col = texture2D(UNI_Tex0, varTex0).rgba;\n" +
+                "   gl_FragColor = col;\n" +
+                "}\n";
+            FragmentShader.Builder fb = new FragmentShader.Builder(rs);
+            fb.setShader(code);
+            fb.setObjectConst(objConstBuilder.create());
+            sSceneManager.mColor = fb.create();
+        }
+
+        return sSceneManager.mColor;
+    }
+
+    public static FragmentShader getTextureFS() {
+        if (sSceneManager == null) {
+            return null;
+        }
+        if (sSceneManager.mTexture == null) {
+            RenderScriptGL rs = getRS();
+            final String code = "\n" +
+                "varying vec2 varTex0;\n" +
+                "void main() {\n" +
+                "   lowp vec4 col = UNI_color;\n" +
+                "   gl_FragColor = col;\n" +
+                "}\n";
+            FragmentShader.Builder fb = new FragmentShader.Builder(rs);
+            fb.setShader(code);
+            fb.addTexture(Program.TextureType.TEXTURE_2D, "Tex0");
+            sSceneManager.mTexture = fb.create();
+        }
+
+        return sSceneManager.mTexture;
+    }
+
+    static RenderState getDefaultState() {
+        if (sSceneManager == null) {
+            return null;
+        }
+        if (sSceneManager.mDefaultState == null) {
+            sSceneManager.mDefaultState = new RenderState(getDefaultVS(), getColorFS(), null, null);
+        }
+        return sSceneManager.mDefaultState;
     }
 
     public static SceneManager getInstance() {
@@ -316,8 +443,12 @@ public class SceneManager extends SceneGraphBase {
         mAllocationMap = new HashMap<String, Allocation>();
 
         mQuad = null;
-        mDefault2D = getDefault(false);
-        mDefaultCube = getDefault(true);
+        mDefault2D = null;
+        mDefaultCube = null;
+        mDefaultVertex = null;
+        mColor = null;
+        mTexture = null;
+        mDefaultState = null;
 
         mExportScript = new ScriptC_export(rs, res, R.raw.export);
 
