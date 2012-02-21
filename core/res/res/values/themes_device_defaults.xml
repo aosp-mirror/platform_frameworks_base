@@ -379,6 +379,23 @@ easier.
     <style name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" parent="Theme.Holo.Dialog.NoActionBar.MinWidth" >
 
     </style>
+
+    <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
+    <style name="Theme.DeviceDefault.Dialog.FixedSize">
+        <item name="windowFixedWidthMajor">@android:dimen/dialog_fixed_width_major</item>
+        <item name="windowFixedWidthMinor">@android:dimen/dialog_fixed_width_minor</item>
+        <item name="windowFixedHeightMajor">@android:dimen/dialog_fixed_height_major</item>
+        <item name="windowFixedHeightMinor">@android:dimen/dialog_fixed_height_minor</item>
+    </style>
+
+    <!-- Variant of Theme.DeviceDefault.Dialog.NoActionBar that has a fixed size. -->
+    <style name="Theme.DeviceDefault.Dialog.NoActionBar.FixedSize">
+        <item name="windowFixedWidthMajor">@android:dimen/dialog_fixed_width_major</item>
+        <item name="windowFixedWidthMinor">@android:dimen/dialog_fixed_width_minor</item>
+        <item name="windowFixedHeightMajor">@android:dimen/dialog_fixed_height_major</item>
+        <item name="windowFixedHeightMinor">@android:dimen/dialog_fixed_height_minor</item>
+    </style>
+
     <!-- DeviceDefault light theme for dialog windows and activities. This changes the window to be
     floating (not fill the entire screen), and puts a frame around its contents. You can set this
     theme on an activity if you would like to make an activity that looks like a Dialog.-->
@@ -406,6 +423,23 @@ easier.
     <style name="Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" parent="Theme.Holo.Light.Dialog.NoActionBar.MinWidth" >
 
     </style>
+
+    <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
+    <style name="Theme.DeviceDefault.Light.Dialog.FixedSize">
+        <item name="windowFixedWidthMajor">@android:dimen/dialog_fixed_width_major</item>
+        <item name="windowFixedWidthMinor">@android:dimen/dialog_fixed_width_minor</item>
+        <item name="windowFixedHeightMajor">@android:dimen/dialog_fixed_height_major</item>
+        <item name="windowFixedHeightMinor">@android:dimen/dialog_fixed_height_minor</item>
+    </style>
+
+    <!-- Variant of Theme.DeviceDefault.Dialog.NoActionBar that has a fixed size. -->
+    <style name="Theme.DeviceDefault.Light.Dialog.NoActionBar.FixedSize">
+        <item name="windowFixedWidthMajor">@android:dimen/dialog_fixed_width_major</item>
+        <item name="windowFixedWidthMinor">@android:dimen/dialog_fixed_width_minor</item>
+        <item name="windowFixedHeightMajor">@android:dimen/dialog_fixed_height_major</item>
+        <item name="windowFixedHeightMinor">@android:dimen/dialog_fixed_height_minor</item>
+    </style>
+
     <!-- DeviceDefault theme for a window that will be displayed either full-screen on smaller
     screens (small, normal) or as a dialog on larger screens (large, xlarge). -->
     <style name="Theme.DeviceDefault.DialogWhenLarge" parent="Theme.Holo.DialogWhenLarge" >

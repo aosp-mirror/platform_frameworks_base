@@ -1580,6 +1580,22 @@ please see themes_device_defaults.xml.
         <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
+    <!-- Variant of Theme.Holo.Dialog that has a fixed size. -->
+    <style name="Theme.Holo.Dialog.FixedSize">
+        <item name="windowFixedWidthMajor">@android:dimen/dialog_fixed_width_major</item>
+        <item name="windowFixedWidthMinor">@android:dimen/dialog_fixed_width_minor</item>
+        <item name="windowFixedHeightMajor">@android:dimen/dialog_fixed_height_major</item>
+        <item name="windowFixedHeightMinor">@android:dimen/dialog_fixed_height_minor</item>
+    </style>
+
+    <!-- Variant of Theme.Holo.Dialog.NoActionBar that has a fixed size. -->
+    <style name="Theme.Holo.Dialog.NoActionBar.FixedSize">
+        <item name="windowFixedWidthMajor">@android:dimen/dialog_fixed_width_major</item>
+        <item name="windowFixedWidthMinor">@android:dimen/dialog_fixed_width_minor</item>
+        <item name="windowFixedHeightMajor">@android:dimen/dialog_fixed_height_major</item>
+        <item name="windowFixedHeightMinor">@android:dimen/dialog_fixed_height_minor</item>
+    </style>
+
     <!-- Variant of Theme.Holo.Dialog that does not include a frame (or background).
          The view hierarchy of the dialog is responsible for drawing all of
          its pixels. -->
@@ -1670,6 +1686,22 @@ please see themes_device_defaults.xml.
     <style name="Theme.Holo.Light.Dialog.NoActionBar.MinWidth">
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
         <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
+    </style>
+
+    <!-- Variant of Theme.Holo.Light.Dialog that has a fixed size. -->
+    <style name="Theme.Holo.Light.Dialog.FixedSize">
+        <item name="windowFixedWidthMajor">@android:dimen/dialog_fixed_width_major</item>
+        <item name="windowFixedWidthMinor">@android:dimen/dialog_fixed_width_minor</item>
+        <item name="windowFixedHeightMajor">@android:dimen/dialog_fixed_height_major</item>
+        <item name="windowFixedHeightMinor">@android:dimen/dialog_fixed_height_minor</item>
+    </style>
+
+    <!-- Variant of Theme.Holo.Light.Dialog.NoActionBar that has a fixed size. -->
+    <style name="Theme.Holo.Light.Dialog.NoActionBar.FixedSize">
+        <item name="windowFixedWidthMajor">@android:dimen/dialog_fixed_width_major</item>
+        <item name="windowFixedWidthMinor">@android:dimen/dialog_fixed_width_minor</item>
+        <item name="windowFixedHeightMajor">@android:dimen/dialog_fixed_height_major</item>
+        <item name="windowFixedHeightMinor">@android:dimen/dialog_fixed_height_minor</item>
     </style>
 
     <!-- Theme for a window that will be displayed either full-screen on
