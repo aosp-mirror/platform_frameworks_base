@@ -13,94 +13,59 @@
         height: 100%;
         padding: 0%;
         z-index: 10;
+        background-size: 100%;
+        background: no-repeat;
+        background-position: center;
+      }
+      #play {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+      }
+      #logo {
+        position: absolute;
+        bottom: 0;
+        right: 0;
       }
     </style>
   </head>
   <body id="body">
   <script type="text/javascript">
-    // Nominal original size. If the embed is smaller than this, the play and logo
-    // images get scaled appropriately. These are actually 3/4 of the sizes suggested
-    // by youtube, so the images don't get too tiny.
-    defHeight = 258;
-    defWidth = 318;
-
     function setup() {
         var width = document.body.clientWidth;
         var height = document.body.clientHeight;
-        var canvas = document.getElementById("canvas");
-        // Resize the canvas to the right size
-        canvas.width = width;
-        canvas.height = height;
-        var ctx = canvas.getContext('2d');
+        var mainElement = document.getElementById("main");
+        var playElement = document.getElementById("play");
         var loadcount = 0;
+        var POSTER = "http://img.youtube.com/vi/VIDEO_ID/0.jpg";
+
         function doload() {
-            if (++loadcount == 3) {
-                // All images are loaded, so display them.
-                // (Note that the images are loaded from javascript, so might load
-                // after document.onload fires)
-
-                playWidth = play.width;
-                playHeight = play.height;
-                logoWidth = logo.width;
-                logoHeight = logo.height;
-                var ratio = 1;
-                // If the page is smaller than it 'should' be in either dimension
-                // we scale the background, play button and logo according to the
-                // dimension that has been shrunk the most.
-                if (width / height > defWidth / defHeight && height < defHeight) {
-                    ratio = height / defHeight;
-                    // Stretch the background in this dimension only.
-                    backgroundHeight = background.height / ratio;
-                    ctx.drawImage(background, 0, 0, background.width, background.height,
-                        0, (height - backgroundHeight) / 2, width, backgroundHeight);
-                } else if (width / height < defWidth / defHeight && width < defWidth) {
-                    ratio = width / defWidth;
-                    backgroundWidth = background.width / ratio;
-                    ctx.drawImage(background, 0, 0, background.width, background.height,
-                        (width - backgroundWidth) / 2, 0, backgroundWidth, height);
-                } else {
-                    // In this case stretch the background in both dimensions to fill the space.
-                    ctx.drawImage(background, 0, 0, width, height);
-                }
-                playWidth *= ratio;
-                playHeight *= ratio;
-                logoWidth *= ratio;
-                logoHeight *= ratio;
-                playLeft = (width - playWidth) / 2;
-                playTop = (height - playHeight) / 2;
-                ctx.drawImage(play, playLeft, playTop, playWidth, playHeight);
-                ctx.globalAlpha = 0.7
-                ctx.drawImage(logo, width - logoWidth, height - logoHeight, logoWidth, logoHeight);
-                // To make it slightly easier to hit, the click target is twice the width/height of the unscaled play button
-                targetLeft = width / 2 - play.width;
-                targetRight = width / 2 + play.width;
-                targetTop = height / 2 - play.height;
-                targetBottom = height / 2 + play.height;
-
-                canvas.addEventListener("click", function(e) {
-                   var posx = e.clientX-canvas.offsetLeft;
-                   var posy = e.clientY-canvas.offsetTop;
-                   if (posx >= targetLeft && posx <= targetRight &&
-                       posy >= targetTop && posy <= targetBottom) {
-                       top.location.href = "vnd.youtube:VIDEO_ID";
-                   }
-               }, false);
+            if (++loadcount == 2) {
+                // Resize the element to the right size
+                mainElement.width = width;
+                mainElement.height = height;
+                mainElement.style.backgroundImage = "url('" + POSTER + "')";
+                // Center the play button
+                playElement.style.marginTop = "-" + play.height/2 + "px";
+                playElement.style.marginLeft = "-" + play.width/2 + "px";
+                playElement.addEventListener("click", function(e) {
+                    top.location.href = "vnd.youtube:VIDEO_ID";
+                }, false);
             }
         }
         var background = new Image();
         background.onload = doload;
-        background.src = "http://img.youtube.com/vi/VIDEO_ID/0.jpg";
+        background.src = POSTER;
         play = new Image();
         play.onload = doload;
         play.src = "play.png";
-        logo = new Image();
-        logo.onload = doload;
-        logo.src = "youtube.png";
     }
+
     window.onload = setup;
   </script>
     <div id="main">
-    <canvas id="canvas"></canvas>
+        <img src="play.png" id="play"></img>
+        <img src="youtube.png" id="logo"></img>
     </div>
   </body>
 </html>
