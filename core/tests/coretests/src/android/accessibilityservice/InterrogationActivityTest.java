@@ -50,6 +50,12 @@ public class InterrogationActivityTest
     // Timeout for the accessibility state of an Activity to be fully initialized.
     private static final int TIMEOUT_PROPAGATE_ACCESSIBILITY_EVENT_MILLIS = 5000;
 
+    // Timeout for which non getting accessibility events considers the app idle.
+    private static final long IDLE_EVENT_TIME_DELTA_MILLIS = 200;
+
+    // Timeout in which to wait for idle device.
+    private static final long GLOBAL_IDLE_DETECTION_TIMEOUT_MILLIS = 1000;
+
     // Handle to a connection to the AccessibilityManagerService
     private UiTestAutomationBridge mUiTestAutomationBridge;
 
@@ -62,6 +68,8 @@ public class InterrogationActivityTest
         super.setUp();
         mUiTestAutomationBridge = new UiTestAutomationBridge();
         mUiTestAutomationBridge.connect();
+        mUiTestAutomationBridge.waitForIdle(IDLE_EVENT_TIME_DELTA_MILLIS,
+                GLOBAL_IDLE_DETECTION_TIMEOUT_MILLIS);
         mUiTestAutomationBridge.executeCommandAndWaitForAccessibilityEvent(new Runnable() {
                 // wait for the first accessibility event
                 @Override

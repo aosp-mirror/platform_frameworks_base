@@ -52,7 +52,14 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final boolean DEBUG = false;
 
-    private static final int UNDEFINED = -1;
+    /** @hide */
+    public static final int UNDEFINED = -1;
+
+    /** @hide */
+    public static final long ROOT_NODE_ID = makeNodeId(UNDEFINED, UNDEFINED);
+
+    /** @hide */
+    public static final int ACTIVE_WINDOW_ID = UNDEFINED;
 
     // Actions.
 
@@ -162,8 +169,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     // Data.
     private int mWindowId = UNDEFINED;
-    private long mSourceNodeId = makeNodeId(UNDEFINED, UNDEFINED);
-    private long mParentNodeId = makeNodeId(UNDEFINED, UNDEFINED);
+    private long mSourceNodeId = ROOT_NODE_ID;
+    private long mParentNodeId = ROOT_NODE_ID;
 
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
@@ -1160,8 +1167,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private void clear() {
         mSealed = false;
-        mSourceNodeId = makeNodeId(UNDEFINED, UNDEFINED);
-        mParentNodeId = makeNodeId(UNDEFINED, UNDEFINED);
+        mSourceNodeId = ROOT_NODE_ID;
+        mParentNodeId = ROOT_NODE_ID;
         mWindowId = UNDEFINED;
         mConnectionId = UNDEFINED;
         mChildIds.clear();

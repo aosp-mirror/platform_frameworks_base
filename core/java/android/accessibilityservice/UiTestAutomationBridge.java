@@ -49,11 +49,13 @@ public class UiTestAutomationBridge {
 
     private static final String LOG_TAG = UiTestAutomationBridge.class.getSimpleName();
 
-    public static final int ACTIVE_WINDOW_ID = -1;
-
-    public static final long ROOT_NODE_ID = -1;
-
     private static final int TIMEOUT_REGISTER_SERVICE = 5000;
+
+    public static final int ACTIVE_WINDOW_ID = AccessibilityNodeInfo.ACTIVE_WINDOW_ID;
+
+    public static final long ROOT_NODE_ID = AccessibilityNodeInfo.ROOT_NODE_ID;
+
+    public static final int UNDEFINED = -1;
 
     private final Object mLock = new Object();
 
@@ -62,8 +64,6 @@ public class UiTestAutomationBridge {
     private IEventListenerWrapper mListener;
 
     private AccessibilityEvent mLastEvent;
-
-    private AccessibilityEvent mLastWindowStateChangeEvent;
 
     private volatile boolean mWaitingForEventDelivery;
 
@@ -141,17 +141,8 @@ public class UiTestAutomationBridge {
                 synchronized (mLock) {
                     while (true) {
                         mLastEvent = AccessibilityEvent.obtain(event);
-
-                        final int eventType = event.getEventType();
-                        if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-                                || eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
-                            if (mLastWindowStateChangeEvent != null) {
-                                mLastWindowStateChangeEvent.recycle();
-                            }
-                            mLastWindowStateChangeEvent = mLastEvent;
-                        }
-
                         if (!mWaitingForEventDelivery) {
+                            mLock.notifyAll();
                             break;
                         }
                         if (!mUnprocessedEventAvailable) {
@@ -295,6 +286,43 @@ public class UiTestAutomationBridge {
     }
 
     /**
+     * Waits for the accessibility event stream to become idle, which is not to
+     * have received a new accessibility event within <code>idleTimeout</code>,
+     * and do so within a maximal global timeout as specified by
+     * <code>globalTimeout</code>.
+     *
+     * @param idleTimeout The timeout between two event to consider the device idle.
+     * @param globalTimeout The maximal global timeout in which to wait for idle.
+     */
+    public void waitForIdle(long idleTimeout, long globalTimeout) {
+        final long startTimeMillis = SystemClock.uptimeMillis();
+        long lastEventTime = (mLastEvent != null)
+                ? mLastEvent.getEventTime() : SystemClock.uptimeMillis();
+        synchronized (mLock) {
+            while (true) {
+                final long currentTimeMillis = SystemClock.uptimeMillis();
+                final long sinceLastEventTimeMillis = currentTimeMillis - lastEventTime;
+                if (sinceLastEventTimeMillis > idleTimeout) {
+                    return;
+                }
+                if (mLastEvent != null) {
+                    lastEventTime = mLastEvent.getEventTime();
+                }
+                final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
+                final long remainingTimeMillis = globalTimeout - elapsedTimeMillis;
+                if (remainingTimeMillis <= 0) {
+                    return;
+                }
+                try {
+                     mLock.wait(idleTimeout);
+                } catch (InterruptedException e) {
+                     /* ignore */
+                }
+            }
+        }
+    }
+
+    /**
      * Finds an {@link AccessibilityNodeInfo} by accessibility id in the active
      * window. The search is performed from the root node.
      *
@@ -310,8 +338,8 @@ public class UiTestAutomationBridge {
     /**
      * Finds an {@link AccessibilityNodeInfo} by accessibility id.
      *
-     * @param accessibilityWindowId A unique window id. Use {@link #ACTIVE_WINDOW_ID}
-     *     to query the currently active window.
+     * @param accessibilityWindowId A unique window id. Use {@link #ACTIVE_WINDOW_ID} to query
+     *     the currently active window.
      * @param accessibilityNodeId A unique view id or virtual descendant id for
      *     which to search.
      * @return The current window scale, where zero means a failure.
@@ -341,10 +369,10 @@ public class UiTestAutomationBridge {
      * the window whose id is specified and starts from the node whose accessibility
      * id is specified.
      *
-     * @param accessibilityWindowId A unique window id. Use {@link #ACTIVE_WINDOW_ID}
-     *     to query the currently active window.
+     * @param accessibilityWindowId A unique window id. Use
+     *     {@link  #ACTIVE_WINDOW_ID} to query the currently active window.
      * @param accessibilityNodeId A unique view id or virtual descendant id from
-     *     where to start the search. Use {@link #ROOT_NODE_ID} to start from the root.
+     *     where to start the search. Use {@link  #ROOT_NODE_ID} to start from the root.
      * @return The current window scale, where zero means a failure.
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfoByViewId(int accessibilityWindowId,
@@ -374,8 +402,8 @@ public class UiTestAutomationBridge {
      * id is specified and starts from the node whose accessibility id is
      * specified.
      *
-     * @param accessibilityWindowId A unique window id. Use {@link #ACTIVE_WINDOW_ID}
-     *     to query the currently active window.
+     * @param accessibilityWindowId A unique window id. Use
+     *     {@link #ACTIVE_WINDOW_ID} to query the currently active window.
      * @param accessibilityNodeId A unique view id or virtual descendant id from
      *     where to start the search. Use {@link #ROOT_NODE_ID} to start from the root.
      * @param text The searched text.
@@ -406,8 +434,8 @@ public class UiTestAutomationBridge {
     /**
      * Performs an accessibility action on an {@link AccessibilityNodeInfo}.
      *
-     * @param accessibilityWindowId A unique window id. Use {@link #ACTIVE_WINDOW_ID}
-     *     to query the currently active window.
+     * @param accessibilityWindowId A unique window id. Use
+     *     {@link #ACTIVE_WINDOW_ID} to query the currently active window.
      * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id).
      * @param action The action to perform.
      * @return Whether the action was performed.
@@ -427,16 +455,16 @@ public class UiTestAutomationBridge {
      * @return The root info.
      */
     public AccessibilityNodeInfo getRootAccessibilityNodeInfoInActiveWindow() {
-        synchronized (mLock) {
-            if (mLastWindowStateChangeEvent != null) {
-                return mLastWindowStateChangeEvent.getSource();
-            }
-        }
-        return null;
+        // Cache the id to avoid locking
+        final int connectionId = mConnectionId;
+        ensureValidConnection(connectionId);
+        return AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByAccessibilityId(connectionId, ACTIVE_WINDOW_ID,
+                        ROOT_NODE_ID);
     }
 
     private void ensureValidConnection(int connectionId) {
-        if (connectionId == AccessibilityInteractionClient.NO_ID) {
+        if (connectionId == UNDEFINED) {
             throw new IllegalStateException("UiAutomationService not connected."
                     + " Did you call #register()?");
         }

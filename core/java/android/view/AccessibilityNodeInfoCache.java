@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.os.Process;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -30,7 +32,11 @@ import android.view.accessibility.AccessibilityNodeInfo;
  */
 public class AccessibilityNodeInfoCache {
 
-    private final boolean ENABLED = true;
+    private static final String LOG_TAG = AccessibilityNodeInfoCache.class.getSimpleName();
+
+    private static final boolean ENABLED = true;
+
+    private static final boolean DEBUG = false;
 
     /**
      * @return A new <strong>not synchronized</strong> AccessibilityNodeInfoCache.
@@ -95,6 +101,7 @@ public class AccessibilityNodeInfoCache {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         final int eventType = event.getEventType();
         switch (eventType) {
+            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
             case AccessibilityEvent.TYPE_VIEW_SCROLLED:
                 clear();
@@ -117,7 +124,14 @@ public class AccessibilityNodeInfoCache {
      */
     public AccessibilityNodeInfo get(long accessibilityNodeId) {
         if (ENABLED) {
-            return mCacheImpl.get(accessibilityNodeId);
+            if (DEBUG) {
+                AccessibilityNodeInfo info = mCacheImpl.get(accessibilityNodeId);
+                Log.i(LOG_TAG, "Process: " + Process.myPid() +
+                        " get(" + accessibilityNodeId + ") = " + info);
+                return info;
+            } else {
+                return mCacheImpl.get(accessibilityNodeId);
+            }
         } else {
             return null;
         }
@@ -131,6 +145,10 @@ public class AccessibilityNodeInfoCache {
      */
     public void put(long accessibilityNodeId, AccessibilityNodeInfo info) {
         if (ENABLED) {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Process: " + Process.myPid()
+                        + " put(" + accessibilityNodeId + ", " + info + ")");
+            }
             mCacheImpl.put(accessibilityNodeId, info);
         }
     }
@@ -156,6 +174,10 @@ public class AccessibilityNodeInfoCache {
      */
     public void remove(long accessibilityNodeId) {
         if (ENABLED) {
+            if (DEBUG) {
+                Log.i(LOG_TAG,  "Process: " + Process.myPid()
+                        + " remove(" + accessibilityNodeId + ")");
+            }
             mCacheImpl.remove(accessibilityNodeId);
         }
     }
@@ -165,6 +187,9 @@ public class AccessibilityNodeInfoCache {
      */
     public void clear() {
         if (ENABLED) {
+            if (DEBUG) {
+                Log.i(LOG_TAG,  "Process: " + Process.myPid() + "clear()");
+            }
             mCacheImpl.clear();
         }
     }
