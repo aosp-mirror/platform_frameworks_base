@@ -282,8 +282,6 @@ status_t AudioSource::dataCallbackTimestamp(
         mPrevSampleTimeUs = mStartTimeUs;
     }
 
-    int64_t timestampUs = mPrevSampleTimeUs;
-
     size_t numLostBytes = 0;
     if (mNumFramesReceived > 0) {  // Ignore earlier frame lost
         // getInputFramesLost() returns the number of lost frames.
@@ -293,37 +291,58 @@ status_t AudioSource::dataCallbackTimestamp(
 
     CHECK_EQ(numLostBytes & 1, 0u);
     CHECK_EQ(audioBuffer.size & 1, 0u);
-    size_t bufferSize = numLostBytes + audioBuffer.size;
-    MediaBuffer *buffer = new MediaBuffer(bufferSize);
     if (numLostBytes > 0) {
-        memset(buffer->data(), 0, numLostBytes);
-        memcpy((uint8_t *) buffer->data() + numLostBytes,
-                    audioBuffer.i16, audioBuffer.size);
-    } else {
-        if (audioBuffer.size == 0) {
-            ALOGW("Nothing is available from AudioRecord callback buffer");
-            buffer->release();
-            return OK;
-        }
-        memcpy((uint8_t *) buffer->data(),
-                audioBuffer.i16, audioBuffer.size);
+        // Loss of audio frames should happen rarely; thus the LOGW should
+        // not cause a logging spam
+        ALOGW("Lost audio record data: %d bytes", numLostBytes);
     }
 
+    while (numLostBytes > 0) {
+        size_t bufferSize = numLostBytes;
+        if (numLostBytes > kMaxBufferSize) {
+            numLostBytes -= kMaxBufferSize;
+            bufferSize = kMaxBufferSize;
+        } else {
+            numLostBytes = 0;
+        }
+        MediaBuffer *lostAudioBuffer = new MediaBuffer(bufferSize);
+        memset(lostAudioBuffer->data(), 0, bufferSize);
+        lostAudioBuffer->set_range(0, bufferSize);
+        queueInputBuffer_l(lostAudioBuffer, timeUs);
+    }
+
+    if (audioBuffer.size == 0) {
+        ALOGW("Nothing is available from AudioRecord callback buffer");
+        return OK;
+    }
+
+    const size_t bufferSize = audioBuffer.size;
+    MediaBuffer *buffer = new MediaBuffer(bufferSize);
+    memcpy((uint8_t *) buffer->data(),
+            audioBuffer.i16, audioBuffer.size);
     buffer->set_range(0, bufferSize);
-    timestampUs += ((1000000LL * (bufferSize >> 1)) +
-                    (mSampleRate >> 1)) / mSampleRate;
+    queueInputBuffer_l(buffer, timeUs);
+    return OK;
+}
+
+void AudioSource::queueInputBuffer_l(MediaBuffer *buffer, int64_t timeUs) {
+    const size_t bufferSize = buffer->range_length();
+    const size_t frameSize = mRecord->frameSize();
+    const int64_t timestampUs =
+                mPrevSampleTimeUs +
+                    ((1000000LL * (bufferSize / frameSize)) +
+                        (mSampleRate >> 1)) / mSampleRate;
 
     if (mNumFramesReceived == 0) {
         buffer->meta_data()->setInt64(kKeyAnchorTime, mStartTimeUs);
     }
+
     buffer->meta_data()->setInt64(kKeyTime, mPrevSampleTimeUs);
     buffer->meta_data()->setInt64(kKeyDriftTime, timeUs - mInitialReadTimeUs);
     mPrevSampleTimeUs = timestampUs;
-    mNumFramesReceived += buffer->range_length() / sizeof(int16_t);
+    mNumFramesReceived += bufferSize / frameSize;
     mBuffersReceived.push_back(buffer);
     mFrameAvailableCondition.signal();
-
-    return OK;
 }
 
 void AudioSource::trackMaxAmplitude(int16_t *data, int nSamples) {
