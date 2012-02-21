@@ -216,7 +216,7 @@
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止正在运行的应用程序"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"允许该应用程序删除任务并终止这些任务的应用程序。恶意应用程序可以籍此影响其他应用程序的行为。"</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"设置屏幕兼容性"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"允许应用程序控制其他应用程序的屏幕兼容模式。恶意应用程序可以籍此影响其他应用程序的行为。"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"允许该应用程序控制其他应用程序的屏幕兼容模式。恶意应用程序可以籍此影响其他应用程序的行为。"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"启用应用程序调试"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"允许该应用程序对其他应用程序启用调试。恶意应用程序可以籍此终止其他的应用程序。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"更改用户界面设置"</string>
@@ -764,10 +764,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"允许用户请求使用程序包验证程序。普通应用程序绝不需要此权限。"</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"访问串行端口"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"允许持有人使用 SerialManager API 访问串行端口。"</string>
-    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
-    <skip />
-    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
-    <skip />
+    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"从外部访问内容提供程序"</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"允许持有者通过界面访问内容提供程序。普通应用程序绝不需要此权限。"</string>
     <string name="save_password_message" msgid="767344687139195790">"是否希望浏览器记住此密码？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"暂不保存"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"记住"</string>

@@ -764,10 +764,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Permet que el titular sol·liciti verificadors de paquets. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"accedeix a ports sèrie"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Permet que el titular accedeixi a ports sèrie amb l\'API SerialManager."</string>
-    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
-    <skip />
-    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
-    <skip />
+    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"accedeix als proveïdors de contingut externament"</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Permet que el titular accedeixi als proveïdors de contingut des de l\'intèrpret d\'ordres. No és necessari per a les aplicacions normals."</string>
     <string name="save_password_message" msgid="767344687139195790">"Voleu que el navegador recordi aquesta contrasenya?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ara no"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Recorda-ho"</string>

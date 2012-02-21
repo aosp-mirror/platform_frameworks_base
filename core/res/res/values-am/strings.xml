@@ -764,10 +764,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"የፓኬጅ አረጋጋጮችን ጥየቃ ለማድረግ ያዡ ይፈቅዳሉ። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"ተከታታይ ወደቦችን ድረስ"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Allows the holder to access serial ports using the SerialManager API. የተከታታይ አደራጅ APIን በመጠቀም ያዡ የተከታታይ ወደቦችን እንዲደርስ ይፈቅዳል።"</string>
-    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
-    <skip />
-    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
-    <skip />
+    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"ይዘት አቅራቢዎች በውጭ በኩል ድረስባቸው"</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"ያዢውን ከቀፎው ወደሚመጡ የይዘት አቅራቢዎች እንዲደርስ ይፈቅድለታል። ለመደበኛ መተግበሪያዎች በፍጹም ማስፈለግ የለባቸውም።"</string>
     <string name="save_password_message" msgid="767344687139195790">"አሳሹ ይህን ይለፍ ቃል እንዲያስታወስ ይፈልጋሉ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"አሁን አይደለም"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"አስታውስ"</string>

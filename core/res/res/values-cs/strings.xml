@@ -764,10 +764,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Umožňuje držiteli podávat žádosti o ověření balíčků. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"přístup k sériovým portům"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Umožňuje držiteli přístup k sériovým portům pomocí rozhraní SerialManager API."</string>
-    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
-    <skip />
-    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
-    <skip />
+    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"externí přístup k poskytovatelům obsahu"</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Umožňuje držiteli získat z příkazového řádku přístup k poskytovatelům obsahu. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="save_password_message" msgid="767344687139195790">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nyní ne"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamatovat"</string>

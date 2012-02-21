@@ -764,10 +764,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Mengizinkan pemegang mengajukan permintaan pemverifikasian paket. Tidak pernah dibutuhkan oleh apl normal."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"akses port serial"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Memungkinkan pemegangnya mengakses port serial menggunakan API SerialManager."</string>
-    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
-    <skip />
-    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
-    <skip />
+    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"mengakses penyedia konten dari luar"</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Memungkinkan pemegang mengakses penyedia konten dari cangkang. Tidak pernah diperlukan untuk apl normal."</string>
     <string name="save_password_message" msgid="767344687139195790">"Apakah Anda ingin peramban menyimpan sandi ini?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Tidak sekarang"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
