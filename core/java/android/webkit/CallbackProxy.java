@@ -920,7 +920,10 @@ class CallbackProxy extends Handler {
         if (PERF_PROBE) {
             mWebCoreThreadTime = SystemClock.currentThreadTimeMillis();
             mWebCoreIdleTime = 0;
-            Network.getInstance(mContext).startTiming();
+            if (!JniUtil.useChromiumHttpStack()) {
+                // Network is only used with the Android HTTP stack.
+                Network.getInstance(mContext).startTiming();
+            }
             // un-comment this if PERF_PROBE is true
 //            Looper.myQueue().setWaitCallback(mIdleCallback);
         }
@@ -938,7 +941,10 @@ class CallbackProxy extends Handler {
             Log.d("WebCore", "WebCore thread used " +
                     (SystemClock.currentThreadTimeMillis() - mWebCoreThreadTime)
                     + " ms and idled " + mWebCoreIdleTime + " ms");
-            Network.getInstance(mContext).stopTiming();
+            if (!JniUtil.useChromiumHttpStack()) {
+                // Network is only used with the Android HTTP stack.
+                Network.getInstance(mContext).stopTiming();
+            }
         }
         Message msg = obtainMessage(PAGE_FINISHED, url);
         sendMessage(msg);
