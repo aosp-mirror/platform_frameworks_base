@@ -8599,7 +8599,11 @@ public class WindowManagerService extends IWindowManager.Stub
                                 if (mDimAnimator == null) {
                                     mDimAnimator = new DimAnimator(mFxSession);
                                 }
-                                mDimAnimator.show(innerDw, innerDh);
+                                if (attrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
+                                    mDimAnimator.show(dw, dh);
+                                } else {
+                                    mDimAnimator.show(innerDw, innerDh);
+                                }
                                 mDimAnimator.updateParameters(mContext.getResources(),
                                         w, currentTime);
                             }
