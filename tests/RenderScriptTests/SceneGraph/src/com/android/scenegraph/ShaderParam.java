@@ -75,7 +75,7 @@ public abstract class ShaderParam extends SceneGraphBase {
             // Make one if it's not there
             if (matchingParam == null) {
                 if (subElem.getDataType() == Element.DataType.FLOAT_32) {
-                    matchingParam = new Float4Param(inputName);
+                    matchingParam = new Float4Param(inputName, 0.5f, 0.5f, 0.5f, 0.5f);
                 } else if (subElem.getDataType() == Element.DataType.MATRIX_4X4) {
                     TransformParam trParam = new TransformParam(inputName);
                     trParam.setTransform(transform);

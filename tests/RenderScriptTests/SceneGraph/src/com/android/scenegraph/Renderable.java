@@ -196,6 +196,9 @@ public class Renderable extends RenderableBase {
     }
 
     void updateFieldItem(RenderScriptGL rs) {
+        if (mRenderState == null) {
+            mRenderState = SceneManager.getDefaultState();
+        }
         updateVertexConstants(rs);
         updateFragmentConstants(rs);
 

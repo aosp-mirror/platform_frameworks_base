@@ -149,34 +149,27 @@ public class TestAppRS {
     }
 
     private void initPaintShaders() {
-        ScriptField_ModelParams objConst = new ScriptField_ModelParams(mRS, 1);
-        ScriptField_ViewProjParams shaderConst = new ScriptField_ViewProjParams(mRS, 1);
+        mGenericV = SceneManager.getDefaultVS();
 
-        VertexShader.Builder vb = new VertexShader.Builder(mRS);
-        vb.addInput(ScriptField_VertexShaderInputs.createElement(mRS));
-        vb.setShader(mRes, R.raw.shader2v);
-        vb.setObjectConst(objConst.getAllocation().getType());
-        vb.setShaderConst(shaderConst.getAllocation().getType());
-        mGenericV = vb.create();
+        ScriptField_CameraParams camParams = new ScriptField_CameraParams(mRS, 1);
+        Type camParamType = camParams.getAllocation().getType();
+        ScriptField_LightParams lightParams = new ScriptField_LightParams(mRS, 1);
 
-        ScriptField_CameraParams fsConst = new ScriptField_CameraParams(mRS, 1);
-        ScriptField_LightParams fsConst2 = new ScriptField_LightParams(mRS, 1);
-
-        mPaintF = createFromResource(R.raw.paintf, true, fsConst.getAllocation().getType());
+        mPaintF = createFromResource(R.raw.paintf, true, camParamType);
         // Assign a reflection map
         TextureCube envCube = new TextureCube("sdcard/scenegraph/", "cube_env.png");
         mPaintF.appendSourceParams(new TextureParam("reflection", envCube));
 
-        mAluminumF = createFromResource(R.raw.metal, true, fsConst.getAllocation().getType());
+        mAluminumF = createFromResource(R.raw.metal, true, camParamType);
         TextureCube diffCube = new TextureCube("sdcard/scenegraph/", "cube_spec.png");
         mAluminumF.appendSourceParams(new TextureParam("reflection", diffCube));
 
-        mPlasticF = createFromResource(R.raw.plastic, false, fsConst.getAllocation().getType());
-        mDiffuseF = createFromResource(R.raw.diffuse, false, fsConst.getAllocation().getType());
-        mTextureF = createFromResource(R.raw.texture, false, fsConst.getAllocation().getType());
+        mPlasticF = createFromResource(R.raw.plastic, false, camParamType);
+        mDiffuseF = createFromResource(R.raw.diffuse, false, camParamType);
+        mTextureF = SceneManager.getTextureFS();
 
         FragmentShader.Builder fb = new FragmentShader.Builder(mRS);
-        fb.setObjectConst(fsConst2.getAllocation().getType());
+        fb.setObjectConst(lightParams.getAllocation().getType());
         fb.setShader(mRes, R.raw.plastic_lights);
         mLightsF = fb.create();
 
@@ -214,7 +207,6 @@ public class TestAppRS {
         mActiveScene.appendShader(mPlasticF);
         mActiveScene.appendShader(mDiffuseF);
         mActiveScene.appendShader(mTextureF);
-        mActiveScene.appendShader(mGenericV);
     }
 
     public void prepareToRender(Scene s) {
