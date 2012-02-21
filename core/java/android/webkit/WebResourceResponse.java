@@ -21,9 +21,9 @@ import android.net.http.Headers;
 import java.io.InputStream;
 
 /**
- * A WebResourceResponse is return by
- * {@link WebViewClient#shouldInterceptRequest} and
- * contains the response information for a particular resource.
+ * Encapsulates a resource response. Applications can return an instance of this
+ * class from {@link WebViewClient#shouldInterceptRequest} to provide a custom
+ * response when the WebView requests a particular resource.
  */
 public class WebResourceResponse {
 
@@ -50,11 +50,13 @@ public class WebResourceResponse {
     private InputStream mInputStream;
 
     /**
-     * Construct a response with the given mime type, encoding, and data.
-     * @param mimeType The mime type of the data (i.e. text/html).
-     * @param encoding The encoding of the bytes read from data.
-     * @param data An InputStream for reading custom data.  The implementation
-     *             must implement {@link InputStream#read(byte[])}.
+     * Constructs a resource response with the given MIME type, encoding, and
+     * input stream. Callers must implement
+     * {@link InputStream#read(byte[]) InputStream.read(byte[])} for the input
+     * stream.
+     * @param mimeType The resource response's MIME type, for example text/html
+     * @param encoding The resource response's encoding
+     * @param data The input stream that provides the resource response's data
      */
     public WebResourceResponse(String mimeType, String encoding,
             InputStream data) {
@@ -64,47 +66,50 @@ public class WebResourceResponse {
     }
 
     /**
-     * Set the mime type of the response data (i.e. text/html).
-     * @param mimeType
+     * Sets the resource response's MIME type, for example text/html.
+     * @param mimeType The resource response's MIME type
      */
     public void setMimeType(String mimeType) {
         mMimeType = mimeType;
     }
 
     /**
-     * @see #setMimeType
+     * Gets the resource response's MIME type.
+     * @return The resource response's MIME type
      */
     public String getMimeType() {
         return mMimeType;
     }
 
     /**
-     * Set the encoding of the response data (i.e. utf-8).  This will be used to
-     * decode the raw bytes from the input stream.
-     * @param encoding
+     * Sets the resource response's encoding, for example UTF-8. This is used
+     * to decode the data from the input stream.
+     * @param encoding The resource response's encoding
      */
     public void setEncoding(String encoding) {
         mEncoding = encoding;
     }
 
     /**
-     * @see #setEncoding
+     * Gets the resource response's encoding.
+     * @return The resource response's encoding
      */
     public String getEncoding() {
         return mEncoding;
     }
 
     /**
-     * Set the input stream containing the data for this resource.
-     * @param data An InputStream for reading custom data.  The implementation
-     *             must implement {@link InputStream#read(byte[])}.
+     * Sets the input stream that provides the resource respone's data. Callers
+     * must implement {@link InputStream#read(byte[]) InputStream.read(byte[])}.
+     * @param data The input stream that provides the resource response's data
      */
     public void setData(InputStream data) {
         mInputStream = data;
     }
 
     /**
-     * @see #setData
+     * Gets the input stream that provides the resource respone's data.
+     * @return The input stream that provides the resource response's data
      */
     public InputStream getData() {
         return mInputStream;
