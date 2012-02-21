@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.animation.ObjectAnimator;
 import android.annotation.Widget;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -36,6 +37,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.DrawFilter;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
@@ -4621,15 +4623,7 @@ public class WebView extends AbsoluteLayout
         if (mTitleBar != null) {
             canvas.translate(0, getTitleHeight());
         }
-        boolean drawJavaRings = !mTouchHighlightRegion.isEmpty()
-                && (mTouchMode == TOUCH_INIT_MODE
-                || mTouchMode == TOUCH_SHORTPRESS_START_MODE
-                || mTouchMode == TOUCH_SHORTPRESS_MODE
-                || mTouchMode == TOUCH_DONE_MODE);
-        boolean drawNativeRings = !drawJavaRings;
-        if (sDisableNavcache) {
-            drawNativeRings = !drawJavaRings && !isInTouchMode();
-        }
+        boolean drawNativeRings = !sDisableNavcache;
         drawContent(canvas, drawNativeRings);
         canvas.restoreToCount(saveCount);
 
@@ -4642,18 +4636,13 @@ public class WebView extends AbsoluteLayout
             invalidate();
         }
 
-        // paint the highlight in the end
-        if (drawJavaRings) {
-            long delay = System.currentTimeMillis() - mTouchHighlightRequested;
-            if (delay < ViewConfiguration.getTapTimeout()) {
-                Rect r = mTouchHighlightRegion.getBounds();
-                postInvalidateDelayed(delay, r.left, r.top, r.right, r.bottom);
-            } else {
-                RegionIterator iter = new RegionIterator(mTouchHighlightRegion);
-                Rect r = new Rect();
-                while (iter.next(r)) {
-                    canvas.drawRect(r, mTouchHightlightPaint);
-                }
+        if (mFocusTransition != null) {
+            mFocusTransition.draw(canvas);
+        } else if (shouldDrawHighlightRect()) {
+            RegionIterator iter = new RegionIterator(mTouchHighlightRegion);
+            Rect r = new Rect();
+            while (iter.next(r)) {
+                canvas.drawRect(r, mTouchHightlightPaint);
             }
         }
         if (DEBUG_TOUCH_HIGHLIGHT) {
@@ -9123,10 +9112,112 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    private boolean shouldDrawHighlightRect() {
+        if (mFocusedNode == null || mInitialHitTestResult == null) {
+            return false;
+        }
+        if (mTouchHighlightRegion.isEmpty()) {
+            return false;
+        }
+        if (mFocusedNode.mHasFocus) {
+            return !mFocusedNode.mEditable;
+        }
+        if (mInitialHitTestResult.mType == HitTestResult.UNKNOWN_TYPE) {
+            return false;
+        }
+        long delay = System.currentTimeMillis() - mTouchHighlightRequested;
+        if (delay < ViewConfiguration.getTapTimeout()) {
+            Rect r = mTouchHighlightRegion.getBounds();
+            postInvalidateDelayed(delay, r.left, r.top, r.right, r.bottom);
+            return false;
+        }
+        return true;
+    }
+
+
+    private FocusTransitionDrawable mFocusTransition = null;
+    static class FocusTransitionDrawable extends Drawable {
+        Region mPreviousRegion;
+        Region mNewRegion;
+        float mProgress = 0;
+        WebView mWebView;
+        Paint mPaint;
+        int mMaxAlpha;
+        Point mTranslate;
+
+        public FocusTransitionDrawable(WebView view) {
+            mWebView = view;
+            mPaint = new Paint(mWebView.mTouchHightlightPaint);
+            mMaxAlpha = mPaint.getAlpha();
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter cf) {
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+        }
+
+        @Override
+        public int getOpacity() {
+            return 0;
+        }
+
+        public void setProgress(float p) {
+            mProgress = p;
+            if (mWebView.mFocusTransition == this) {
+                if (mProgress == 1f)
+                    mWebView.mFocusTransition = null;
+                mWebView.invalidate();
+            }
+        }
+
+        public float getProgress() {
+            return mProgress;
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            if (mTranslate == null) {
+                Rect bounds = mPreviousRegion.getBounds();
+                Point from = new Point(bounds.centerX(), bounds.centerY());
+                mNewRegion.getBounds(bounds);
+                Point to = new Point(bounds.centerX(), bounds.centerY());
+                mTranslate = new Point(from.x - to.x, from.y - to.y);
+            }
+            int alpha = (int) (mProgress * mMaxAlpha);
+            RegionIterator iter = new RegionIterator(mPreviousRegion);
+            Rect r = new Rect();
+            mPaint.setAlpha(mMaxAlpha - alpha);
+            float tx = mTranslate.x * mProgress;
+            float ty = mTranslate.y * mProgress;
+            int save = canvas.save(Canvas.MATRIX_SAVE_FLAG);
+            canvas.translate(-tx, -ty);
+            while (iter.next(r)) {
+                canvas.drawRect(r, mPaint);
+            }
+            canvas.restoreToCount(save);
+            iter = new RegionIterator(mNewRegion);
+            r = new Rect();
+            mPaint.setAlpha(alpha);
+            save = canvas.save(Canvas.MATRIX_SAVE_FLAG);
+            tx = mTranslate.x - tx;
+            ty = mTranslate.y - ty;
+            canvas.translate(tx, ty);
+            while (iter.next(r)) {
+                canvas.drawRect(r, mPaint);
+            }
+            canvas.restoreToCount(save);
+        }
+    };
+
     private void setTouchHighlightRects(WebKitHitTest hit) {
+        FocusTransitionDrawable transition = new FocusTransitionDrawable(this);
         Rect[] rects = hit != null ? hit.mTouchRects : null;
         if (!mTouchHighlightRegion.isEmpty()) {
             invalidate(mTouchHighlightRegion.getBounds());
+            transition.mPreviousRegion = new Region(mTouchHighlightRegion);
             mTouchHighlightRegion.setEmpty();
         }
         if (rects != null) {
@@ -9145,7 +9236,13 @@ public class WebView extends AbsoluteLayout
                             + viewRect);
                 }
             }
+            transition.mNewRegion = new Region(mTouchHighlightRegion);
             invalidate(mTouchHighlightRegion.getBounds());
+            if (hit.mHasFocus && transition.mPreviousRegion != null) {
+                mFocusTransition = transition;
+                ObjectAnimator animator = ObjectAnimator.ofFloat(mFocusTransition, "progress", 1f);
+                animator.start();
+            }
         }
     }
 
