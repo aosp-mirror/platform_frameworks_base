@@ -268,6 +268,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final TokenWatcher mKeyguardTokenWatcher = new TokenWatcher(
             new Handler(), "WindowManagerService.mKeyguardTokenWatcher") {
+        @Override
         public void acquired() {
             if (shouldAllowDisableKeyguard()) {
                 mPolicy.enableKeyguard(false);
@@ -276,6 +277,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Log.v(TAG, "Not disabling keyguard since device policy is enforced");
             }
         }
+        @Override
         public void released() {
             mPolicy.enableKeyguard(true);
             synchronized (mKeyguardTokenWatcher) {
@@ -599,6 +601,7 @@ public class WindowManagerService extends IWindowManager.Stub
         private boolean mSyswin = false;
         private float mScreenBrightness = -1;
         private float mButtonBrightness = -1;
+        private boolean mUpdateRotation = false;
     }
     private LayoutAndSurfaceFields mInnerFields = new LayoutAndSurfaceFields();
 
@@ -7621,53 +7624,53 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param innerDh Height of app window.
      * @return true if rotation has stopped, false otherwise
      */
-    private boolean updateAppsAndRotationAnimationsLocked(long currentTime,
+    private void updateWindowsAppsAndRotationAnimationsLocked(long currentTime,
                                                           int innerDw, int innerDh) {
         int i;
+        for (i = mWindows.size() - 1; i >= 0; i--) {
+            mInnerFields.mAnimating |= mWindows.get(i).stepAnimationLocked(currentTime);
+        }
+
         final int NAT = mAppTokens.size();
         for (i=0; i<NAT; i++) {
-            if (mAppTokens.get(i).stepAnimationLocked(currentTime,
-                    innerDw, innerDh)) {
-                mInnerFields.mAnimating = true;
-            }
+            mInnerFields.mAnimating |=
+                    mAppTokens.get(i).stepAnimationLocked(currentTime, innerDw, innerDh);
         }
         final int NEAT = mExitingAppTokens.size();
         for (i=0; i<NEAT; i++) {
-            if (mExitingAppTokens.get(i).stepAnimationLocked(currentTime,
-                    innerDw, innerDh)) {
-                mInnerFields.mAnimating = true;
-            }
+            mInnerFields.mAnimating |=
+                    mExitingAppTokens.get(i).stepAnimationLocked(currentTime, innerDw, innerDh);
         }
 
-        boolean updateRotation = false;
         if (mScreenRotationAnimation != null) {
             if (mScreenRotationAnimation.isAnimating()) {
                 if (mScreenRotationAnimation.stepAnimation(currentTime)) {
+                    mInnerFields.mUpdateRotation = false;
                     mInnerFields.mAnimating = true;
                 } else {
-                    updateRotation = true;
+                    mInnerFields.mUpdateRotation = true;
                     mScreenRotationAnimation.kill();
                     mScreenRotationAnimation = null;
                 }
             }
         }
-
-        return updateRotation;
     }
 
     /**
      * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
      *
      * @param currentTime The time which animations use for calculating transitions.
+     * @param dw Width of app window.
+     * @param dh Height of app window.
      * @param innerDw Width of app window.
      * @param innerDh Height of app window.
      */
-    private void updateWindowsAndWallpaperLocked(final long currentTime,
-                                                 final int innerDw, final int innerDh) {
-        int i;
-        final int N = mWindows.size();
+    private int updateWindowsAndWallpaperLocked(final long currentTime, final int dw, final int dh,
+                                                final int innerDw, final int innerDh) {
 
-        for (i=N-1; i>=0; i--) {
+        mPolicy.beginAnimationLw(dw, dh);
+
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
             WindowState w = mWindows.get(i);
 
             final WindowManager.LayoutParams attrs = w.mAttrs;
@@ -7685,9 +7688,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 final boolean wasAnimating = w.mAnimating;
 
-                int animDw = innerDw;
-                int animDh = innerDh;
-
                 // If the window has moved due to its containing
                 // content frame changing, then we'd like to animate
                 // it.  The checks here are ordered by what is least
@@ -7699,13 +7699,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     Animation a = AnimationUtils.loadAnimation(mContext,
                             com.android.internal.R.anim.window_move_from_decor);
                     w.setAnimation(a);
-                    animDw = w.mLastFrame.left - w.mFrame.left;
-                    animDh = w.mLastFrame.top - w.mFrame.top;
+                    w.mAnimDw = w.mLastFrame.left - w.mFrame.left;
+                    w.mAnimDh = w.mLastFrame.top - w.mFrame.top;
+                } else {
+                    w.mAnimDw = innerDw;
+                    w.mAnimDh = innerDh;
                 }
 
                 // Execute animation.
-                final boolean nowAnimating = w.stepAnimationLocked(currentTime,
-                        animDw, animDh);
+                final boolean nowAnimating = w.isAnimating();
 
                 // If this window is animating, make a note that we have
                 // an animating window and take care of a request to run
@@ -7847,6 +7849,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 w.performShowLocked();
             }
         } // end forall windows
+
+        return mPolicy.finishAnimationLw();
     }
 
     /**
@@ -8117,7 +8121,7 @@ public class WindowManagerService extends IWindowManager.Stub
      *
      * @return bitmap indicating if another pass through layout must be made.
      */
-    private int handleAnimatingAndTransitionLocked() {
+    private int handleAnimatingStoppedAndTransitionLocked() {
         int changes = 0;
 
         mAppTransitionRunning = false;
@@ -8653,7 +8657,6 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean focusDisplayed = false;
         mInnerFields.mAnimating = false;
         boolean createWatermark = false;
-        boolean updateRotation = false;
 
         if (mFxSession == null) {
             mFxSession = new SurfaceSession();
@@ -8707,21 +8710,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // FIRST LOOP: Perform a layout, if needed.
                 if (repeats < 4) {
-                    performLayoutLockedInner(repeats == 0, false /*updateInputWindows*/);
+                    performLayoutLockedInner(repeats == 1, false /*updateInputWindows*/);
                 } else {
                     Slog.w(TAG, "Layout repeat skipped after too many iterations");
                 }
 
-                changes = 0;
                 ++mTransactionSequence;
-
-                // Update animations of all applications, including those
-                // associated with exiting/removed apps
-                mInnerFields.mAnimating = false;
-
-                // SECOND LOOP: Execute animations and update visibility of windows.
-                updateRotation |=
-                        updateAppsAndRotationAnimationsLocked(currentTime, innerDw, innerDh);
 
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: seq="
                         + mTransactionSequence + " mAnimating="
@@ -8734,11 +8728,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInnerFields.mWindowAnimationBackground = null;
                 mInnerFields.mWindowAnimationBackgroundColor = 0;
 
-                mPolicy.beginAnimationLw(dw, dh);
-
-                updateWindowsAndWallpaperLocked(currentTime, innerDw, innerDh);
-
-                changes |= mPolicy.finishAnimationLw();
+                changes = updateWindowsAndWallpaperLocked(currentTime, dw, dh, innerDw, innerDh);
 
                 if (mInnerFields.mTokenMayBeDrawn) {
                     changes |= testTokenMayBeDrawnLocked();
@@ -8760,7 +8750,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // reflects the correct Z-order, but the window list may now
                     // be out of sync with it.  So here we will just rebuild the
                     // entire app window list.  Fun!
-                    changes |= handleAnimatingAndTransitionLocked();
+                    changes |= handleAnimatingStoppedAndTransitionLocked();
                 }
 
                 if (mInnerFields.mWallpaperForceHidingChanged && changes == 0 && !mAppTransitionReady) {
@@ -8782,6 +8772,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: changes=0x"
                         + Integer.toHexString(changes));
             } while (changes != 0);
+
+            // Update animations of all applications, including those
+            // associated with exiting/removed apps
+            mInnerFields.mAnimating = false;
+
+            updateWindowsAppsAndRotationAnimationsLocked(currentTime, innerDw, innerDh);
 
             // THIRD LOOP: Update the surfaces of all windows.
 
@@ -9024,16 +9020,17 @@ public class WindowManagerService extends IWindowManager.Stub
             mTurnOnScreen = false;
         }
 
-        if (updateRotation) {
+        if (mInnerFields.mUpdateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
             if (updateRotationUncheckedLocked(false)) {
                 mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
             } else {
-                updateRotation = false;
+                mInnerFields.mUpdateRotation = false;
             }
         }
 
-        if (mInnerFields.mOrientationChangeComplete && !needRelayout && !updateRotation) {
+        if (mInnerFields.mOrientationChangeComplete && !needRelayout &&
+                !mInnerFields.mUpdateRotation) {
             checkDrawnWindowsLocked();
         }
 
