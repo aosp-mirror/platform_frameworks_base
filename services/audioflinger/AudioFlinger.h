@@ -312,19 +312,12 @@ private:
                 PAUSED
             };
 
-            enum track_flags {
-                STEPSERVER_FAILED = 0x01, //  StepServer could not acquire cblk->lock mutex
-                SYSTEM_FLAGS_MASK = 0x0000ffffUL,
-                // The upper 16 bits are used for track-specific flags.
-            };
-
                                 TrackBase(ThreadBase *thread,
                                         const sp<Client>& client,
                                         uint32_t sampleRate,
                                         audio_format_t format,
                                         uint32_t channelMask,
                                         int frameCount,
-                                        uint32_t flags,
                                         const sp<IMemory>& sharedBuffer,
                                         int sessionId);
             virtual             ~TrackBase();
@@ -384,7 +377,7 @@ private:
             // we don't really need a lock for these
             track_state         mState;
             const audio_format_t mFormat;
-            uint32_t            mFlags;
+            bool                mStepServerFailed;
             const int           mSessionId;
             uint8_t             mChannelCount;
             uint32_t            mChannelMask;
@@ -1048,7 +1041,6 @@ private:
                                         audio_format_t format,
                                         uint32_t channelMask,
                                         int frameCount,
-                                        uint32_t flags,
                                         int sessionId);
             virtual             ~RecordTrack();
 
@@ -1094,7 +1086,6 @@ private:
                         audio_format_t format,
                         int channelMask,
                         int frameCount,
-                        uint32_t flags,
                         int sessionId,
                         status_t *status);
 
