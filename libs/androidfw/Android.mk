@@ -94,7 +94,7 @@ LOCAL_C_INCLUDES += \
 	external/icu4c/common \
 	bionic/libc/private
 LOCAL_LDLIBS := -lrt -ldl -lpthread
-LOCAL_MODULE := libutils
+LOCAL_MODULE := libandroidfw
 LOCAL_SRC_FILES := $(commonUtilsSources) BackupData.cpp BackupHelpers.cpp
 include $(BUILD_STATIC_LIBRARY)
 endif
