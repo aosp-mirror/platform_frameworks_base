@@ -201,7 +201,6 @@ public:
             status_t        attachAuxEffect(int effectId);
             status_t        setParameter(int key, const Parcel& request);
             status_t        getParameter(int key, Parcel* reply);
-            status_t        setMediaPlayerType(int playerType);
 
 private:
             void            clear_l();
@@ -232,8 +231,6 @@ private:
     int                         mVideoHeight;
     int                         mAudioSessionId;
     float                       mSendLevel;
-    bool                        mOverridePlayerType;
-    int                         mOverridePlayerTypeValue;
 };
 
 }; // namespace android
