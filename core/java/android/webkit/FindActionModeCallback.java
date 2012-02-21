@@ -43,7 +43,9 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     private Resources mResources;
     private boolean mMatchesFound;
     private int mNumberOfMatches;
+    private int mActiveMatchIndex;
     private ActionMode mActionMode;
+    private String mLastFind;
 
     FindActionModeCallback(Context context) {
         mCustomView = LayoutInflater.from(context).inflate(
@@ -132,16 +134,13 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
             mWebView.clearMatches();
             mMatches.setVisibility(View.GONE);
             mMatchesFound = false;
+            mLastFind = null;
         } else {
             mMatchesFound = true;
-            mMatches.setVisibility(View.VISIBLE);
-            mNumberOfMatches = mWebView.findAll(find.toString());
-            if (0 == mNumberOfMatches) {
-                mMatches.setText(mResources.getString(
-                        com.android.internal.R.string.no_matches));
-            } else {
-                updateMatchesString();
-            }
+            mMatches.setVisibility(View.INVISIBLE);
+            mNumberOfMatches = 0;
+            mLastFind = find.toString();
+            mWebView.findAllAsync(mLastFind);
         }
     }
 
@@ -151,17 +150,31 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mInput.showSoftInput(mEditText, 0);
     }
 
+    public void updateMatchCount(int matchIndex, int matchCount,
+        String findText) {
+        if (mLastFind != null && mLastFind.equals(findText)) {
+            mNumberOfMatches = matchCount;
+            mActiveMatchIndex = matchIndex;
+            updateMatchesString();
+        } else {
+            mMatches.setVisibility(View.INVISIBLE);
+            mNumberOfMatches = 0;
+        }
+    }
+
     /*
      * Update the string which tells the user how many matches were found, and
      * which match is currently highlighted.
-     * Not to be called when mNumberOfMatches is 0.
      */
     private void updateMatchesString() {
-        String template = mResources.getQuantityString(
+        if (mNumberOfMatches == 0) {
+            mMatches.setText(com.android.internal.R.string.no_matches);
+        } else {
+            mMatches.setText(mResources.getQuantityString(
                 com.android.internal.R.plurals.matches_found, mNumberOfMatches,
-                mWebView.findIndex() + 1, mNumberOfMatches);
-
-        mMatches.setText(template);
+                mActiveMatchIndex + 1, mNumberOfMatches));
+        }
+        mMatches.setVisibility(View.VISIBLE);
     }
 
     // OnLongClickListener implementation
