@@ -29,12 +29,14 @@ LOCAL_SRC_FILES:=                         \
         MPEG4Writer.cpp                   \
         MediaBuffer.cpp                   \
         MediaBufferGroup.cpp              \
+        MediaCodec.cpp                    \
         MediaDefs.cpp                     \
         MediaExtractor.cpp                \
         MediaSource.cpp                   \
         MediaSourceSplitter.cpp           \
         MetaData.cpp                      \
         NuCachedSource2.cpp               \
+        NuMediaExtractor.cpp              \
         OMXClient.cpp                     \
         OMXCodec.cpp                      \
         OggExtractor.cpp                  \

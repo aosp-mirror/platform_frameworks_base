@@ -542,4 +542,20 @@ void AMessage::writeToParcel(Parcel *parcel) const {
     }
 }
 
+size_t AMessage::countEntries() const {
+    return mNumItems;
+}
+
+const char *AMessage::getEntryNameAt(size_t index, Type *type) const {
+    if (index >= mNumItems) {
+        *type = kTypeInt32;
+
+        return NULL;
+    }
+
+    *type = mItems[index].mType;
+
+    return mItems[index].mName;
+}
+
 }  // namespace android

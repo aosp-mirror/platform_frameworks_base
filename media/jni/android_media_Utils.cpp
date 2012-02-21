@@ -20,6 +20,10 @@
 #include <utils/Log.h>
 #include "android_media_Utils.h"
 
+#include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/foundation/ABuffer.h>
+#include <media/stagefright/foundation/AMessage.h>
+
 namespace android {
 
 bool ConvertKeyValueArraysToKeyedVector(
@@ -69,6 +73,267 @@ bool ConvertKeyValueArraysToKeyedVector(
         env->DeleteLocalRef(value);
     }
     return true;
+}
+
+static jobject makeIntegerObject(JNIEnv *env, int32_t value) {
+    jclass clazz = env->FindClass("java/lang/Integer");
+    CHECK(clazz != NULL);
+
+    jmethodID integerConstructID = env->GetMethodID(clazz, "<init>", "(I)V");
+    CHECK(integerConstructID != NULL);
+
+    return env->NewObject(clazz, integerConstructID, value);
+}
+
+static jobject makeFloatObject(JNIEnv *env, float value) {
+    jclass clazz = env->FindClass("java/lang/Float");
+    CHECK(clazz != NULL);
+
+    jmethodID floatConstructID = env->GetMethodID(clazz, "<init>", "(F)V");
+    CHECK(floatConstructID != NULL);
+
+    return env->NewObject(clazz, floatConstructID, value);
+}
+
+static jobject makeByteBufferObject(
+        JNIEnv *env, const void *data, size_t size) {
+    jbyteArray byteArrayObj = env->NewByteArray(size);
+    env->SetByteArrayRegion(byteArrayObj, 0, size, (const jbyte *)data);
+
+    jclass clazz = env->FindClass("java/nio/ByteBuffer");
+    CHECK(clazz != NULL);
+
+    jmethodID byteBufWrapID =
+        env->GetStaticMethodID(clazz, "wrap", "([B)Ljava/nio/ByteBuffer;");
+    CHECK(byteBufWrapID != NULL);
+
+    jobject byteBufObj = env->CallStaticObjectMethod(
+            clazz, byteBufWrapID, byteArrayObj);
+
+    env->DeleteLocalRef(byteArrayObj); byteArrayObj = NULL;
+
+    return byteBufObj;
+}
+
+status_t ConvertMessageToMap(
+        JNIEnv *env, const sp<AMessage> &msg, jobject *map) {
+    jclass hashMapClazz = env->FindClass("java/util/HashMap");
+
+    if (hashMapClazz == NULL) {
+        return -EINVAL;
+    }
+
+    jmethodID hashMapConstructID =
+        env->GetMethodID(hashMapClazz, "<init>", "()V");
+
+    if (hashMapConstructID == NULL) {
+        return -EINVAL;
+    }
+
+    jmethodID hashMapPutID =
+        env->GetMethodID(
+                hashMapClazz,
+                "put",
+                "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+
+    if (hashMapPutID == NULL) {
+        return -EINVAL;
+    }
+
+    jobject hashMap = env->NewObject(hashMapClazz, hashMapConstructID);
+
+    for (size_t i = 0; i < msg->countEntries(); ++i) {
+        AMessage::Type valueType;
+        const char *key = msg->getEntryNameAt(i, &valueType);
+
+        jobject valueObj = NULL;
+
+        switch (valueType) {
+            case AMessage::kTypeInt32:
+            {
+                int32_t val;
+                CHECK(msg->findInt32(key, &val));
+
+                valueObj = makeIntegerObject(env, val);
+                break;
+            }
+
+            case AMessage::kTypeFloat:
+            {
+                float val;
+                CHECK(msg->findFloat(key, &val));
+
+                valueObj = makeFloatObject(env, val);
+                break;
+            }
+
+            case AMessage::kTypeString:
+            {
+                AString val;
+                CHECK(msg->findString(key, &val));
+
+                valueObj = env->NewStringUTF(val.c_str());
+                break;
+            }
+
+            case AMessage::kTypeObject:
+            {
+                sp<RefBase> obj;
+                CHECK(msg->findObject(key, &obj));
+
+                // XXX dangerous, object is not guaranteed to be a buffer.
+                sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+
+                valueObj = makeByteBufferObject(
+                        env, buffer->data(), buffer->size());
+                break;
+            }
+
+            default:
+                break;
+        }
+
+        if (valueObj != NULL) {
+            jstring keyObj = env->NewStringUTF(key);
+
+            jobject res = env->CallObjectMethod(
+                    hashMap, hashMapPutID, keyObj, valueObj);
+
+            env->DeleteLocalRef(keyObj); keyObj = NULL;
+            env->DeleteLocalRef(valueObj); valueObj = NULL;
+        }
+    }
+
+    *map = hashMap;
+
+    return OK;
+}
+
+status_t ConvertKeyValueArraysToMessage(
+        JNIEnv *env, jobjectArray keys, jobjectArray values,
+        sp<AMessage> *out) {
+    jclass stringClass = env->FindClass("java/lang/String");
+    CHECK(stringClass != NULL);
+
+    jclass integerClass = env->FindClass("java/lang/Integer");
+    CHECK(integerClass != NULL);
+
+    jclass floatClass = env->FindClass("java/lang/Float");
+    CHECK(floatClass != NULL);
+
+    jclass byteBufClass = env->FindClass("java/nio/ByteBuffer");
+    CHECK(byteBufClass != NULL);
+
+    sp<AMessage> msg = new AMessage;
+
+    jsize numEntries = 0;
+
+    if (keys != NULL) {
+        if (values == NULL) {
+            return -EINVAL;
+        }
+
+        numEntries = env->GetArrayLength(keys);
+
+        if (numEntries != env->GetArrayLength(values)) {
+            return -EINVAL;
+        }
+    } else if (values != NULL) {
+        return -EINVAL;
+    }
+
+    for (jsize i = 0; i < numEntries; ++i) {
+        jobject keyObj = env->GetObjectArrayElement(keys, i);
+
+        if (!env->IsInstanceOf(keyObj, stringClass)) {
+            return -EINVAL;
+        }
+
+        const char *tmp = env->GetStringUTFChars((jstring)keyObj, NULL);
+
+        if (tmp == NULL) {
+            return -ENOMEM;
+        }
+
+        AString key = tmp;
+
+        env->ReleaseStringUTFChars((jstring)keyObj, tmp);
+        tmp = NULL;
+
+        jobject valueObj = env->GetObjectArrayElement(values, i);
+
+        if (env->IsInstanceOf(valueObj, stringClass)) {
+            const char *value = env->GetStringUTFChars((jstring)valueObj, NULL);
+
+            if (value == NULL) {
+                return -ENOMEM;
+            }
+
+            msg->setString(key.c_str(), value);
+
+            env->ReleaseStringUTFChars((jstring)valueObj, value);
+            value = NULL;
+        } else if (env->IsInstanceOf(valueObj, integerClass)) {
+            jmethodID intValueID =
+                env->GetMethodID(integerClass, "intValue", "()I");
+            CHECK(intValueID != NULL);
+
+            jint value = env->CallIntMethod(valueObj, intValueID);
+
+            msg->setInt32(key.c_str(), value);
+        } else if (env->IsInstanceOf(valueObj, floatClass)) {
+            jmethodID floatValueID =
+                env->GetMethodID(floatClass, "floatValue", "()F");
+            CHECK(floatValueID != NULL);
+
+            jfloat value = env->CallFloatMethod(valueObj, floatValueID);
+
+            msg->setFloat(key.c_str(), value);
+        } else if (env->IsInstanceOf(valueObj, byteBufClass)) {
+            jmethodID positionID =
+                env->GetMethodID(byteBufClass, "position", "()I");
+            CHECK(positionID != NULL);
+
+            jmethodID limitID =
+                env->GetMethodID(byteBufClass, "limit", "()I");
+            CHECK(limitID != NULL);
+
+            jint position = env->CallIntMethod(valueObj, positionID);
+            jint limit = env->CallIntMethod(valueObj, limitID);
+
+            sp<ABuffer> buffer = new ABuffer(limit - position);
+
+            void *data = env->GetDirectBufferAddress(valueObj);
+
+            if (data != NULL) {
+                memcpy(buffer->data(),
+                       (const uint8_t *)data + position,
+                       buffer->size());
+            } else {
+                jmethodID arrayID =
+                    env->GetMethodID(byteBufClass, "array", "()[B");
+                CHECK(arrayID != NULL);
+
+                jbyteArray byteArray =
+                    (jbyteArray)env->CallObjectMethod(valueObj, arrayID);
+                CHECK(byteArray != NULL);
+
+                env->GetByteArrayRegion(
+                        byteArray,
+                        position,
+                        buffer->size(),
+                        (jbyte *)buffer->data());
+
+                env->DeleteLocalRef(byteArray); byteArray = NULL;
+            }
+
+            msg->setObject(key.c_str(), buffer);
+        }
+    }
+
+    *out = msg;
+
+    return OK;
 }
 
 }  // namespace android

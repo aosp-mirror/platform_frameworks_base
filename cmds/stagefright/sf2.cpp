@@ -198,9 +198,7 @@ protected:
 
                     (new AMessage(kWhatSeek, id()))->post(5000000ll);
                 } else if (what == ACodec::kWhatOutputFormatChanged) {
-                } else {
-                    CHECK_EQ(what, (int32_t)ACodec::kWhatShutdownCompleted);
-
+                } else if (what == ACodec::kWhatShutdownCompleted) {
                     mDecodeLooper->unregisterHandler(mCodec->id());
 
                     if (mDecodeLooper != looper()) {

@@ -810,6 +810,8 @@ static int register_android_media_MediaPlayer(JNIEnv *env)
                 "android/media/MediaPlayer", gMethods, NELEM(gMethods));
 }
 
+extern int register_android_media_MediaCodec(JNIEnv *env);
+extern int register_android_media_MediaExtractor(JNIEnv *env);
 extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
 extern int register_android_media_MediaRecorder(JNIEnv *env);
 extern int register_android_media_MediaScanner(JNIEnv *env);
@@ -878,6 +880,16 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_mtp_MtpServer(env) < 0) {
         ALOGE("ERROR: MtpServer native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MediaCodec(env) < 0) {
+        ALOGE("ERROR: MediaCodec native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MediaExtractor(env) < 0) {
+        ALOGE("ERROR: MediaCodec native registration failed");
         goto bail;
     }
 

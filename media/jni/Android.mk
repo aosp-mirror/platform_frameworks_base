@@ -2,6 +2,8 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
+    android_media_MediaCodec.cpp \
+    android_media_MediaExtractor.cpp \
     android_media_MediaPlayer.cpp \
     android_media_MediaRecorder.cpp \
     android_media_MediaScanner.cpp \
@@ -25,6 +27,7 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libgui \
     libstagefright \
+    libstagefright_foundation \
     libcamera_client \
     libmtp \
     libusbhost \
@@ -39,10 +42,12 @@ LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
     frameworks/base/core/jni \
     frameworks/base/media/libmedia \
+    frameworks/base/media/libstagefright \
     frameworks/base/media/libstagefright/codecs/amrnb/enc/src \
     frameworks/base/media/libstagefright/codecs/amrnb/common \
     frameworks/base/media/libstagefright/codecs/amrnb/common/include \
     frameworks/base/media/mtp \
+    frameworks/base/include/media/stagefright/openmax \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, corecg graphics)
