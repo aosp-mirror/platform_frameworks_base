@@ -985,7 +985,7 @@ class LoadListener extends Handler implements EventHandler {
      * be used. This is just for forward/back navigation to a POST
      * URL.
      */
-    static boolean willLoadFromCache(String url, long identifier) {
+    private static boolean willLoadFromCache(String url, long identifier) {
         assert !JniUtil.useChromiumHttpStack();
         boolean inCache =
                 CacheManager.getCacheFile(url, identifier, null) != null;
