@@ -639,7 +639,7 @@ sp<ARTPSource> ARTPConnection::findSource(StreamInfo *info, uint32_t srcId) {
 void ARTPConnection::injectPacket(int index, const sp<ABuffer> &buffer) {
     sp<AMessage> msg = new AMessage(kWhatInjectPacket, id());
     msg->setInt32("index", index);
-    msg->setObject("buffer", buffer);
+    msg->setBuffer("buffer", buffer);
     msg->post();
 }
 
@@ -647,10 +647,8 @@ void ARTPConnection::onInjectPacket(const sp<AMessage> &msg) {
     int32_t index;
     CHECK(msg->findInt32("index", &index));
 
-    sp<RefBase> obj;
-    CHECK(msg->findObject("buffer", &obj));
-
-    sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+    sp<ABuffer> buffer;
+    CHECK(msg->findBuffer("buffer", &buffer));
 
     List<StreamInfo>::iterator it = mStreams.begin();
     while (it != mStreams.end()

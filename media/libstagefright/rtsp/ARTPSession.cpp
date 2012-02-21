@@ -145,10 +145,8 @@ void ARTPSession::onMessageReceived(const sp<AMessage> &msg) {
                 break;
             }
 
-            sp<RefBase> obj;
-            CHECK(msg->findObject("access-unit", &obj));
-
-            sp<ABuffer> accessUnit = static_cast<ABuffer *>(obj.get());
+            sp<ABuffer> accessUnit;
+            CHECK(msg->findBuffer("access-unit", &accessUnit));
 
             uint64_t ntpTime;
             CHECK(accessUnit->meta()->findInt64(

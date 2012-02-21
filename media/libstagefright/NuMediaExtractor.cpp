@@ -165,7 +165,7 @@ status_t NuMediaExtractor::getTrackFormat(
         buffer->meta()->setInt32("csd", true);
         buffer->meta()->setInt64("timeUs", 0);
 
-        msg->setObject("csd-0", buffer);
+        msg->setBuffer("csd-0", buffer);
 
         buffer = new ABuffer(1024);
         buffer->setRange(0, 0);
@@ -194,7 +194,7 @@ status_t NuMediaExtractor::getTrackFormat(
 
         buffer->meta()->setInt32("csd", true);
         buffer->meta()->setInt64("timeUs", 0);
-        msg->setObject("csd-1", buffer);
+        msg->setBuffer("csd-1", buffer);
     } else if (meta->findData(kKeyESDS, &type, &data, &size)) {
         ESDS esds((const char *)data, size);
         CHECK_EQ(esds.InitCheck(), (status_t)OK);
@@ -211,14 +211,14 @@ status_t NuMediaExtractor::getTrackFormat(
 
         buffer->meta()->setInt32("csd", true);
         buffer->meta()->setInt64("timeUs", 0);
-        msg->setObject("csd-0", buffer);
+        msg->setBuffer("csd-0", buffer);
     } else if (meta->findData(kKeyVorbisInfo, &type, &data, &size)) {
         sp<ABuffer> buffer = new ABuffer(size);
         memcpy(buffer->data(), data, size);
 
         buffer->meta()->setInt32("csd", true);
         buffer->meta()->setInt64("timeUs", 0);
-        msg->setObject("csd-0", buffer);
+        msg->setBuffer("csd-0", buffer);
 
         if (!meta->findData(kKeyVorbisBooks, &type, &data, &size)) {
             return -EINVAL;
@@ -229,7 +229,7 @@ status_t NuMediaExtractor::getTrackFormat(
 
         buffer->meta()->setInt32("csd", true);
         buffer->meta()->setInt64("timeUs", 0);
-        msg->setObject("csd-1", buffer);
+        msg->setBuffer("csd-1", buffer);
     }
 
     *format = msg;

@@ -446,7 +446,7 @@ status_t ACodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         notify->setPointer(name.c_str(), mBuffers[portIndex][i].mBufferID);
 
         name = StringPrintf("data_%d", i);
-        notify->setObject(name.c_str(), mBuffers[portIndex][i].mData);
+        notify->setBuffer(name.c_str(), mBuffers[portIndex][i].mData);
     }
 
     notify->post();
@@ -2142,7 +2142,7 @@ void ACodec::BaseState::postFillThisBuffer(BufferInfo *info) {
     notify->setPointer("buffer-id", info->mBufferID);
 
     info->mData->meta()->clear();
-    notify->setObject("buffer", info->mData);
+    notify->setBuffer("buffer", info->mData);
 
     sp<AMessage> reply = new AMessage(kWhatInputBufferFilled, mCodec->id());
     reply->setPointer("buffer-id", info->mBufferID);
@@ -2158,22 +2158,20 @@ void ACodec::BaseState::onInputBufferFilled(const sp<AMessage> &msg) {
     IOMX::buffer_id bufferID;
     CHECK(msg->findPointer("buffer-id", &bufferID));
 
-    sp<RefBase> obj;
+    sp<ABuffer> buffer;
     int32_t err = OK;
     bool eos = false;
 
-    if (!msg->findObject("buffer", &obj)) {
+    if (!msg->findBuffer("buffer", &buffer)) {
         CHECK(msg->findInt32("err", &err));
 
         ALOGV("[%s] saw error %d instead of an input buffer",
              mCodec->mComponentName.c_str(), err);
 
-        obj.clear();
+        buffer.clear();
 
         eos = true;
     }
-
-    sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
 
     int32_t tmp;
     if (buffer != NULL && buffer->meta()->findInt32("eos", &tmp) && tmp) {
@@ -2374,7 +2372,7 @@ bool ACodec::BaseState::onOMXFillBufferDone(
             sp<AMessage> notify = mCodec->mNotify->dup();
             notify->setInt32("what", ACodec::kWhatDrainThisBuffer);
             notify->setPointer("buffer-id", info->mBufferID);
-            notify->setObject("buffer", info->mData);
+            notify->setBuffer("buffer", info->mData);
             notify->setInt32("flags", flags);
 
             sp<AMessage> reply =

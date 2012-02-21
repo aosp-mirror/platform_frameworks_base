@@ -324,9 +324,8 @@ status_t SimplePlayer::onPrepare() {
         CHECK_EQ(err, (status_t)OK);
 
         size_t j = 0;
-        sp<RefBase> obj;
-        while (format->findObject(StringPrintf("csd-%d", j).c_str(), &obj)) {
-            sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+        sp<ABuffer> buffer;
+        while (format->findBuffer(StringPrintf("csd-%d", j).c_str(), &buffer)) {
             state->mCSD.push_back(buffer);
 
             ++j;

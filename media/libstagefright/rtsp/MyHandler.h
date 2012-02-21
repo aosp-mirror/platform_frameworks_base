@@ -857,10 +857,8 @@ struct MyHandler : public AHandler {
                     return;
                 }
 
-                sp<RefBase> obj;
-                CHECK(msg->findObject("access-unit", &obj));
-
-                sp<ABuffer> accessUnit = static_cast<ABuffer *>(obj.get());
+                sp<ABuffer> accessUnit;
+                CHECK(msg->findBuffer("access-unit", &accessUnit));
 
                 uint32_t seqNum = (uint32_t)accessUnit->int32Data();
 
@@ -1005,9 +1003,8 @@ struct MyHandler : public AHandler {
 
             case 'biny':
             {
-                sp<RefBase> obj;
-                CHECK(msg->findObject("buffer", &obj));
-                sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+                sp<ABuffer> buffer;
+                CHECK(msg->findBuffer("buffer", &buffer));
 
                 int32_t index;
                 CHECK(buffer->meta()->findInt32("index", &index));
@@ -1488,7 +1485,7 @@ private:
         sp<AMessage> msg = mNotify->dup();
         msg->setInt32("what", kWhatAccessUnit);
         msg->setSize("trackIndex", trackIndex);
-        msg->setObject("accessUnit", accessUnit);
+        msg->setBuffer("accessUnit", accessUnit);
         msg->post();
     }
 
