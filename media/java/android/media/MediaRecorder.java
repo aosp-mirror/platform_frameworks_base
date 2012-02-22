@@ -303,6 +303,8 @@ public class MediaRecorder
     /**
      * Uses the settings from a CamcorderProfile object for recording. This method should
      * be called after the video AND audio sources are set, and before setOutputFile().
+     * If a time lapse CamcorderProfile is used, audio related source or recording
+     * parameters are ignored.
      *
      * @param profile the CamcorderProfile to use
      * @see android.media.CamcorderProfile
@@ -315,8 +317,8 @@ public class MediaRecorder
         setVideoEncoder(profile.videoCodec);
         if (profile.quality >= CamcorderProfile.QUALITY_TIME_LAPSE_LOW &&
              profile.quality <= CamcorderProfile.QUALITY_TIME_LAPSE_QVGA) {
-            // Enable time lapse. Also don't set audio for time lapse.
-            setParameter(String.format("time-lapse-enable=1"));
+            // Nothing needs to be done. Call to setCaptureRate() enables
+            // time lapse video recording.
         } else {
             setAudioEncodingBitRate(profile.audioBitRate);
             setAudioChannels(profile.audioChannels);
@@ -327,7 +329,10 @@ public class MediaRecorder
 
     /**
      * Set video frame capture rate. This can be used to set a different video frame capture
-     * rate than the recorded video's playback rate. Currently this works only for time lapse mode.
+     * rate than the recorded video's playback rate. This method also sets the recording mode
+     * to time lapse. In time lapse video recording, only video is recorded. Audio related
+     * parameters are ignored when a time lapse recording session starts, if an application
+     * sets them.
      *
      * @param fps Rate at which frames should be captured in frames per second.
      * The fps can go as low as desired. However the fastest fps will be limited by the hardware.
@@ -339,6 +344,9 @@ public class MediaRecorder
      * possible.
      */
     public void setCaptureRate(double fps) {
+        // Make sure that time lapse is enabled when this method is called.
+        setParameter(String.format("time-lapse-enable=1"));
+
         double timeBetweenFrameCapture = 1 / fps;
         int timeBetweenFrameCaptureMs = (int) (1000 * timeBetweenFrameCapture);
         setParameter(String.format("time-between-time-lapse-frame-capture=%d",

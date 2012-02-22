@@ -1291,6 +1291,12 @@ status_t StagefrightRecorder::setupCameraSource(
     videoSize.width = mVideoWidth;
     videoSize.height = mVideoHeight;
     if (mCaptureTimeLapse) {
+        if (mTimeBetweenTimeLapseFrameCaptureUs < 0) {
+            ALOGE("Invalid mTimeBetweenTimeLapseFrameCaptureUs value: %lld",
+                mTimeBetweenTimeLapseFrameCaptureUs);
+            return BAD_VALUE;
+        }
+
         mCameraSourceTimeLapse = CameraSourceTimeLapse::CreateFromCamera(
                 mCamera, mCameraProxy, mCameraId,
                 videoSize, mFrameRate, mPreviewSurface,
