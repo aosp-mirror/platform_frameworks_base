@@ -24,8 +24,8 @@ import com.android.ide.common.rendering.api.DrawableParams;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
-import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.Result.Status;
+import com.android.ide.common.rendering.api.SessionParams;
 import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.layoutlib.bridge.impl.RenderDrawable;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
@@ -242,6 +242,8 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         if (fontLoader != null) {
             Typeface_Delegate.init(fontLoader);
         } else {
+            log.error(LayoutLog.TAG_BROKEN,
+                    "Failed create FontLoader in layout lib.", null);
             return false;
         }
 
