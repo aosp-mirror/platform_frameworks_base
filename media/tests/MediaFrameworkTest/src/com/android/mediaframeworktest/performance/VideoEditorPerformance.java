@@ -196,7 +196,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_001
     @LargeTest
     public void testPerformanceAddRemoveVideoItem() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
@@ -241,7 +240,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_002
     @LargeTest
     public void testPerformanceAddRemoveImageItem() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_1600x1200.jpg";
@@ -280,7 +278,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_003
     @LargeTest
     public void testPerformanceAddRemoveTransition() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH +
@@ -360,7 +357,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_004
     @LargeTest
     public void testPerformanceExport() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -541,7 +537,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_005
     @LargeTest
     public void testPerformanceThumbnailVideoItem() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -574,7 +569,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_006
     @LargeTest
     public void testPerformanceOverlayVideoItem() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH +
@@ -629,7 +623,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_007
     @LargeTest
     public void testPerformanceVideoItemProperties() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH +
@@ -688,7 +681,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_008
     @LargeTest
     public void testPerformanceGeneratePreviewWithTransitions()
         throws Exception {
@@ -740,7 +732,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_009
     @LargeTest
     public void testPerformanceWithKenBurn() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
@@ -795,7 +786,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_010
     @LargeTest
     public void testPerformanceEffectOverlappingTransition() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH +
@@ -864,7 +854,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_011
     @LargeTest
     public void testPerformanceTransitionWithEffectOverlapping() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH +
@@ -994,7 +983,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_014
     @LargeTest
     public void testPerformanceWithAudioTrack() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH +
@@ -1049,7 +1037,6 @@ public class VideoEditorPerformance extends
      *
      * @throws Exception
      */
-    // TODO : remove PRF_015
     @LargeTest
     public void testPerformanceAddRemoveImageItem640x480() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_640x480.jpg";
