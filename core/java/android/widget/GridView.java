@@ -1029,10 +1029,9 @@ public class GridView extends AbsListView {
         if (count > 0) {
             final View child = obtainView(0, mIsScrap);
 
-            AbsListView.LayoutParams p = (AbsListView.LayoutParams)child.getLayoutParams();
+            AbsListView.LayoutParams p = (AbsListView.LayoutParams) child.getLayoutParams();
             if (p == null) {
-                p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+                p = (AbsListView.LayoutParams) generateDefaultLayoutParams();
                 child.setLayoutParams(p);
             }
             p.viewType = mAdapter.getItemViewType(0);
@@ -1362,10 +1361,9 @@ public class GridView extends AbsListView {
 
         // Respect layout params that are already in the view. Otherwise make
         // some up...
-        AbsListView.LayoutParams p = (AbsListView.LayoutParams)child.getLayoutParams();
+        AbsListView.LayoutParams p = (AbsListView.LayoutParams) child.getLayoutParams();
         if (p == null) {
-            p = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+            p = (AbsListView.LayoutParams) generateDefaultLayoutParams();
         }
         p.viewType = mAdapter.getItemViewType(position);
 
