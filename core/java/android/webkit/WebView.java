@@ -9212,12 +9212,22 @@ public class WebView extends AbsoluteLayout
         }
     };
 
+    private boolean shouldAnimateTo(WebKitHitTest hit) {
+        // TODO: Don't be annoying or throw out the animation entirely
+        return false;
+    }
+
     private void setTouchHighlightRects(WebKitHitTest hit) {
-        FocusTransitionDrawable transition = new FocusTransitionDrawable(this);
+        FocusTransitionDrawable transition = null;
+        if (shouldAnimateTo(hit)) {
+            transition = new FocusTransitionDrawable(this);
+        }
         Rect[] rects = hit != null ? hit.mTouchRects : null;
         if (!mTouchHighlightRegion.isEmpty()) {
             invalidate(mTouchHighlightRegion.getBounds());
-            transition.mPreviousRegion = new Region(mTouchHighlightRegion);
+            if (transition != null) {
+                transition.mPreviousRegion = new Region(mTouchHighlightRegion);
+            }
             mTouchHighlightRegion.setEmpty();
         }
         if (rects != null) {
@@ -9236,11 +9246,12 @@ public class WebView extends AbsoluteLayout
                             + viewRect);
                 }
             }
-            transition.mNewRegion = new Region(mTouchHighlightRegion);
             invalidate(mTouchHighlightRegion.getBounds());
-            if (hit.mHasFocus && transition.mPreviousRegion != null) {
+            if (transition != null && transition.mPreviousRegion != null) {
+                transition.mNewRegion = new Region(mTouchHighlightRegion);
                 mFocusTransition = transition;
-                ObjectAnimator animator = ObjectAnimator.ofFloat(mFocusTransition, "progress", 1f);
+                ObjectAnimator animator = ObjectAnimator.ofFloat(
+                        mFocusTransition, "progress", 1f);
                 animator.start();
             }
         }
