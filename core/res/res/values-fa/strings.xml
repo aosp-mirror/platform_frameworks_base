@@ -764,10 +764,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"به دارنده اجازه می‎دهد تا تاییدکنندگان بسته را درخواست کند. برای برنامه‎های عادی نیاز نیست."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"دسترسی به درگاه‌های سریال"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"به دارنده اجازه می‌دهد با استفاده از SerialManager API به درگاه‌های سریال دسترسی داشته باشد."</string>
-    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
-    <skip />
-    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
-    <skip />
+    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"دسترسی خارجی به ارائه‌دهندگان محتوا"</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"به دارنده اجازه می‌دهد تا از خارج برنامه به ارائه دهندگان محتوا دسترسی داشته باشد. هرگز برای برنامه‌های معمولی به آن نیازی نیست."</string>
     <string name="save_password_message" msgid="767344687139195790">"می خواهید مرورگر این رمز ورود را به خاطر داشته باشد؟"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"اکنون خیر"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>
