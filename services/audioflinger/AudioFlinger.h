@@ -318,7 +318,7 @@ private:
                 // The upper 16 bits are used for track-specific flags.
             };
 
-                                TrackBase(const wp<ThreadBase>& thread,
+                                TrackBase(ThreadBase *thread,
                                         const sp<Client>& client,
                                         uint32_t sampleRate,
                                         audio_format_t format,
@@ -591,7 +591,7 @@ private:
         // playback track
         class Track : public TrackBase {
         public:
-                                Track(  const wp<ThreadBase>& thread,
+                                Track(  PlaybackThread *thread,
                                         const sp<Client>& client,
                                         audio_stream_type_t streamType,
                                         uint32_t sampleRate,
@@ -674,7 +674,7 @@ private:
 
         class TimedTrack : public Track {
           public:
-            static sp<TimedTrack> create(const wp<ThreadBase>& thread,
+            static sp<TimedTrack> create(PlaybackThread *thread,
                                          const sp<Client>& client,
                                          audio_stream_type_t streamType,
                                          uint32_t sampleRate,
@@ -719,7 +719,7 @@ private:
             void        trimTimedBufferQueue_l();
 
           private:
-            TimedTrack(const wp<ThreadBase>& thread,
+            TimedTrack(PlaybackThread *thread,
                        const sp<Client>& client,
                        audio_stream_type_t streamType,
                        uint32_t sampleRate,
@@ -755,7 +755,7 @@ private:
                 int16_t *mBuffer;
             };
 
-                                OutputTrack(  const wp<ThreadBase>& thread,
+                                OutputTrack(PlaybackThread *thread,
                                         DuplicatingThread *sourceThread,
                                         uint32_t sampleRate,
                                         audio_format_t format,
@@ -1042,7 +1042,7 @@ private:
         // record track
         class RecordTrack : public TrackBase {
         public:
-                                RecordTrack(const wp<ThreadBase>& thread,
+                                RecordTrack(RecordThread *thread,
                                         const sp<Client>& client,
                                         uint32_t sampleRate,
                                         audio_format_t format,
@@ -1168,7 +1168,7 @@ private:
     // the attached track(s) to accumulate their auxiliary channel.
     class EffectModule: public RefBase {
     public:
-        EffectModule(const wp<ThreadBase>& wThread,
+        EffectModule(ThreadBase *thread,
                         const wp<AudioFlinger::EffectChain>& chain,
                         effect_descriptor_t *desc,
                         int id,
@@ -1353,6 +1353,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
     class EffectChain: public RefBase {
     public:
         EffectChain(const wp<ThreadBase>& wThread, int sessionId);
+        EffectChain(ThreadBase *thread, int sessionId);
         virtual ~EffectChain();
 
         // special key used for an entry in mSuspendedEffects keyed vector
