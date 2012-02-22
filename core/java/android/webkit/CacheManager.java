@@ -68,8 +68,6 @@ public final class CacheManager {
     // Limit the maximum cache file size to half of the normal capacity
     static long CACHE_MAX_SIZE = (CACHE_THRESHOLD - CACHE_TRIM_AMOUNT) / 2;
 
-    private static boolean mDisabled;
-
     // Reference count the enable/disable transaction
     private static int mRefCount;
 
@@ -322,29 +320,13 @@ public final class CacheManager {
     }
 
     /**
-     * Sets whether the HTTP cache should be disabled.
-     * @param disabled Whether the cache should be disabled
-     */
-    static void setCacheDisabled(boolean disabled) {
-        assert !JniUtil.useChromiumHttpStack();
-
-        if (disabled == mDisabled) {
-            return;
-        }
-        mDisabled = disabled;
-        if (mDisabled) {
-            removeAllCacheFiles();
-        }
-    }
-
-    /**
      * Gets whether the HTTP cache is disabled.
      * @return True if the HTTP cache is disabled
      * @deprecated Access to the HTTP cache will be removed in a future release.
      */
     @Deprecated
     public static boolean cacheDisabled() {
-        return mDisabled;
+        return false;
     }
 
     // only called from WebViewWorkerThread
@@ -489,10 +471,6 @@ public final class CacheManager {
 
     static CacheResult getCacheFile(String url, long postIdentifier,
             Map<String, String> headers) {
-        if (mDisabled) {
-            return null;
-        }
-
         CacheResult result = JniUtil.useChromiumHttpStack() ?
                 getCacheFileChromiumHttpStack(url) :
                 getCacheFileAndroidHttpStack(url, postIdentifier);
@@ -551,10 +529,6 @@ public final class CacheManager {
             Headers headers, String mimeType, long postIdentifier,
             boolean forceCache) {
         assert !JniUtil.useChromiumHttpStack();
-
-        if (!forceCache && mDisabled) {
-            return null;
-        }
 
         String databaseKey = getDatabaseKey(url, postIdentifier);
 

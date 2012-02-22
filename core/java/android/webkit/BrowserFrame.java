@@ -1351,15 +1351,6 @@ class BrowserFrame extends Handler {
     private native void nativeAddJavascriptInterface(int nativeFramePointer,
             Object obj, String interfaceName);
 
-    /**
-     * Enable or disable the native cache.
-     */
-    /* FIXME: The native cache is always on for now until we have a better
-     * solution for our 2 caches. */
-    private native void setCacheDisabled(boolean disabled);
-
-    public native boolean cacheDisabled();
-
     public native void clearCache();
 
     /**
