@@ -14,8 +14,8 @@ void main() {
    float light0_Specular = pow(light0Spec, 15.0) * 0.5;
 
    vec2 t0 = varTex0.xy;
-   lowp vec4 col = texture2D(UNI_Tex0, t0).rgba;
-   col.xyz = col.xyz * (textureCube(UNI_Tex1, worldNorm).rgb * 0.5 + vec3(light0_Diffuse));
+   lowp vec4 col = texture2D(UNI_diffuse, t0).rgba;
+   col.xyz = col.xyz * (textureCube(UNI_reflection, worldNorm).rgb * 0.5 + vec3(light0_Diffuse));
    col.xyz += light0_Specular * vec3(0.8, 0.8, 1.0);
 
    gl_FragColor = col;

@@ -12,8 +12,8 @@ void main() {
    float light0_Diffuse = dot(worldNorm, light0Vec);
 
    vec2 t0 = varTex0.xy;
-   lowp vec4 col = texture2D(UNI_Tex0, t0).rgba;
+   lowp vec4 col = texture2D(UNI_diffuse, t0).rgba;
    col.xyz = col.xyz * light0_Diffuse * 1.2;
-   gl_FragColor = col; //vec4(0.0, 1.0, 0.0, 0.0);
+   gl_FragColor = col;
 }
 

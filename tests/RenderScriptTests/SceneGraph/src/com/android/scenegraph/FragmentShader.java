@@ -83,10 +83,12 @@ public class FragmentShader extends Shader {
                 mBuilder.addConstant(mShader.mPerObjConstants);
             }
             for (int i = 0; i < mShader.mTextureTypes.size(); i ++) {
-                mBuilder.addTexture(mShader.mTextureTypes.get(i));
+                mBuilder.addTexture(mShader.mTextureTypes.get(i),
+                                    mShader.mTextureNames.get(i));
             }
             for (int i = 0; i < mShader.mShaderTextureTypes.size(); i ++) {
-                mBuilder.addTexture(mShader.mShaderTextureTypes.get(i));
+                mBuilder.addTexture(mShader.mShaderTextureTypes.get(i),
+                                    mShader.mShaderTextureNames.get(i));
             }
 
             mShader.mProgram = mBuilder.create();
