@@ -9249,7 +9249,7 @@ public class WebView extends AbsoluteLayout
         if (mTouchHighlightRegion.isEmpty()) {
             return false;
         }
-        if (mFocusedNode.mHasFocus) {
+        if (mFocusedNode.mHasFocus && !isInTouchMode()) {
             return !mFocusedNode.mEditable;
         }
         if (mInitialHitTestResult.mType == HitTestResult.UNKNOWN_TYPE) {
