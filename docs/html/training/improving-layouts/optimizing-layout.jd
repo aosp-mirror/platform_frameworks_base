@@ -18,7 +18,7 @@ next.link=reusing-layouts.html
 <ol>
   <li><a href="#Inspect">Inspect Your Layout</a></li>
   <li><a href="#Revise">Revise Your Layout</a></li>
-  <li><a href="#Layoutopt">Use Layoutopt</a></li>
+  <li><a href="#Lint">Use Lint</a></li>
 </ol>
 
 <!-- other docs (NOT javadocs) -->
@@ -44,7 +44,7 @@ is inflated repeatedly, such as when used in a {@link android.widget.ListView} o
 android.widget.GridView}.</p>
 
 <p>In this lesson you'll learn to use <a
-href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">Heirachy Viewer</a> and <a
+href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a> and <a
 href="{@docRoot}guide/developing/tools/layoutopt.html">Layoutopt</a> to examine and optimize your
 layout.</p>
 
@@ -53,7 +53,7 @@ layout.</p>
 <h2 id="Inspect">Inspect Your Layout</h2>
 
 <p>The Android SDK tools include a tool called <a
-href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">Heirachy Viewer</a> that allows
+href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a> that allows
 you to analyze your layout while your application is running. Using this tool helps you discover
 bottlenecks in the layout performance.</p>
 
@@ -130,27 +130,28 @@ example of how each layout has appropriate uses and you should carefully conside
 layout weight is necessary.</p>
 
 
-<h2 id="Layoutopt">Use Layoutopt</h2>
+<h2 id="Lint">Use Lint</h2>
 
-<p>It is always good practice to also run the <a
-href="{@docRoot}guide/developing/tools/layoutopt.html">layoutopt</a> tool on your final layout files
-to search for places in your view hierarchy that may be optimized. Layoutopt is also in your SDK
-{@code tools/} directory and takes a layout directory name or a space-separated list of layout files
-that you'd like to inspect.</p>
+<p>It is always good practice to run the <a href="http://tools.android.com/tips/lint">Lint</a> tool on your layout files to search for possible view hierarchy optimizations. Lint has replaced the Layoutopt tool and has much greater functionality. Some examples of Lint <a
+href="http://tools.android.com/tips/lint-checks">rules</a> are:</p>
 
-<p>When you run {@code layoutopt} on a layout file, it prints a line number for each issue found, a
-description of the issue, and for some types of issues it also suggests a resolution. For
-example:</p>
+<ul>
+<li>Use compound drawables - A {@link android.widget.LinearLayout} which contains an {@link android.widget.ImageView} and a {@link android.widget.TextView} can be more efficiently handled as a compound drawable.</li>
+<li>Merge root frame - If a {@link android.widget.FrameLayout} is the root of a layout and does not provide background or padding etc, it can be replaced with a merge tag which is slightly more efficient.</li>
+<li>Useless leaf - A layout that has no children or no background can often be removed (since it is invisible) for a flatter and more efficient layout hierarchy.</li>
+<li>Useless parent - A layout with children that has no siblings, is not a {@link android.widget.ScrollView} or a root layout, and does not have a background, can be removed and have its children moved directly into the parent for a flatter and more efficient layout hierarchy.</li>
+<li>Deep layouts - Layouts with too much nesting are bad for performance. Consider using flatter layouts such as {@link android.widget.RelativeLayout} or {@link android.widget.GridLayout} to improve performance. The default maximum depth is 10.</li>
+</ul>
 
-<pre class="no-pretty-print classic">
-$ layoutopt samples/
-samples/compound.xml
-   7:23 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-   11:21 This LinearLayout layout or its FrameLayout parent is useless
-samples/simple.xml
-   7:7 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
-</pre>
+<p>Another benefit of Lint is that it is integrated into the Android Development Tools for Eclipse (ADT 16+). Lint automatically runs whenever you export an APK, edit and save an XML file or use the Layout Editor. To manually force Lint to run press the Lint button in the Eclipse toolbar.</p>
 
-<p>After you apply the suggested layout optimizations, run Hierarchy Viewer again to inspect the
-performance changes.</p>
+<img src="{@docRoot}images/training/lint_icon.png" alt="" />
+
+<p>When used inside Eclipse, Lint has the ability to automatically fix some issues, provide suggestions for others and jump directly to the offending code for review. If you don’t use Eclipse for your development, Lint can also be run from the command line. More information about Lint is available at <a href="http://tools.android.com/tips/lint">tools.android.com</a>.</p>
+
+
+
+
+
+
 
