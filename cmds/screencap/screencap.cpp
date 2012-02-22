@@ -49,7 +49,6 @@ static SkBitmap::Config flinger2skia(PixelFormat f)
 {
     switch (f) {
         case PIXEL_FORMAT_A_8:
-        case PIXEL_FORMAT_L_8:
             return SkBitmap::kA8_Config;
         case PIXEL_FORMAT_RGB_565:
             return SkBitmap::kRGB_565_Config;

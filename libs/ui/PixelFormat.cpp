@@ -15,12 +15,50 @@
  */
 
 #include <ui/PixelFormat.h>
-#include <pixelflinger/format.h>
 #include <hardware/hardware.h>
 
+// ----------------------------------------------------------------------------
 namespace android {
+// ----------------------------------------------------------------------------
 
 static const int COMPONENT_YUV = 0xFF;
+
+struct Info {
+    size_t      size;
+    size_t      bitsPerPixel;
+    struct {
+        uint8_t     ah;
+        uint8_t     al;
+        uint8_t     rh;
+        uint8_t     rl;
+        uint8_t     gh;
+        uint8_t     gl;
+        uint8_t     bh;
+        uint8_t     bl;
+    };
+    uint8_t     components;
+};
+
+static Info const sPixelFormatInfos[] = {
+        { 0,  0, { 0, 0,   0, 0,   0, 0,   0, 0 }, 0 },
+        { 4, 32, {32,24,   8, 0,  16, 8,  24,16 }, PixelFormatInfo::RGBA },
+        { 4, 24, { 0, 0,   8, 0,  16, 8,  24,16 }, PixelFormatInfo::RGB  },
+        { 3, 24, { 0, 0,   8, 0,  16, 8,  24,16 }, PixelFormatInfo::RGB  },
+        { 2, 16, { 0, 0,  16,11,  11, 5,   5, 0 }, PixelFormatInfo::RGB  },
+        { 4, 32, {32,24,  24,16,  16, 8,   8, 0 }, PixelFormatInfo::RGBA },
+        { 2, 16, { 1, 0,  16,11,  11, 6,   6, 1 }, PixelFormatInfo::RGBA },
+        { 2, 16, { 4, 0,  16,12,  12, 8,   8, 4 }, PixelFormatInfo::RGBA },
+        { 1,  8, { 8, 0,   0, 0,   0, 0,   0, 0 }, PixelFormatInfo::ALPHA}
+};
+
+static const Info* gGetPixelFormatTable(size_t* numEntries) {
+    if (numEntries) {
+        *numEntries = sizeof(sPixelFormatInfos)/sizeof(Info);
+    }
+    return sPixelFormatInfos;
+}
+
+// ----------------------------------------------------------------------------
 
 size_t PixelFormatInfo::getScanlineSize(unsigned int width) const
 {
@@ -77,27 +115,12 @@ status_t getPixelFormatInfo(PixelFormat format, PixelFormatInfo* info)
     }
 
     size_t numEntries;
-    const GGLFormat *i = gglGetPixelFormatTable(&numEntries) + format;
+    const Info *i = gGetPixelFormatTable(&numEntries) + format;
     bool valid = uint32_t(format) < numEntries;
     if (!valid) {
         return BAD_INDEX;
     }
 
-    #define COMPONENT(name) \
-        case GGL_##name: info->components = PixelFormatInfo::name; break;
-    
-    switch (i->components) {
-        COMPONENT(ALPHA)
-        COMPONENT(RGB)
-        COMPONENT(RGBA)
-        COMPONENT(LUMINANCE)
-        COMPONENT(LUMINANCE_ALPHA)
-        default:
-            return BAD_INDEX;
-    }
-    
-    #undef COMPONENT
-    
     info->format = format;
     info->bytesPerPixel = i->size;
     info->bitsPerPixel  = i->bitsPerPixel;
@@ -109,9 +132,12 @@ status_t getPixelFormatInfo(PixelFormat format, PixelFormatInfo* info)
     info->l_green       = i->gl;
     info->h_blue        = i->bh;
     info->l_blue        = i->bl;
+    info->components    = i->components;
 
     return NO_ERROR;
 }
 
+// ----------------------------------------------------------------------------
 }; // namespace android
+// ----------------------------------------------------------------------------
 
