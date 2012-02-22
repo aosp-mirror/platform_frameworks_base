@@ -722,6 +722,45 @@ android_media_MediaPlayer_pullBatteryData(JNIEnv *env, jobject thiz, jobject jav
     return service->pullBatteryData(reply);
 }
 
+static jint
+android_media_MediaPlayer_setRetransmitEndpoint(JNIEnv *env, jobject thiz,
+                                                jstring addrString, jint port) {
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return INVALID_OPERATION;
+    }
+
+    const char *cAddrString = NULL;
+
+    if (NULL != addrString) {
+        cAddrString = env->GetStringUTFChars(addrString, NULL);
+        if (cAddrString == NULL) {  // Out of memory
+            return NO_MEMORY;
+        }
+    }
+    LOGV("setRetransmitEndpoint: %s:%d",
+            cAddrString ? cAddrString : "(null)", port);
+
+    status_t ret;
+    if (cAddrString && (port > 0xFFFF)) {
+        ret = BAD_VALUE;
+    } else {
+        ret = mp->setRetransmitEndpoint(cAddrString,
+                static_cast<uint16_t>(port));
+    }
+
+    if (NULL != addrString) {
+        env->ReleaseStringUTFChars(addrString, cAddrString);
+    }
+
+    if (ret == INVALID_OPERATION ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+    }
+
+    return ret;
+}
+
 static jboolean
 android_media_MediaPlayer_setParameter(JNIEnv *env, jobject thiz, jint key, jobject java_request)
 {
@@ -799,6 +838,7 @@ static JNINativeMethod gMethods[] = {
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
     {"setParameter",        "(ILandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_setParameter},
     {"getParameter",        "(ILandroid/os/Parcel;)V",          (void *)android_media_MediaPlayer_getParameter},
+    {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer_setRetransmitEndpoint},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";

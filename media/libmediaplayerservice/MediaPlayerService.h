@@ -18,6 +18,8 @@
 #ifndef ANDROID_MEDIAPLAYERSERVICE_H
 #define ANDROID_MEDIAPLAYERSERVICE_H
 
+#include <arpa/inet.h>
+
 #include <utils/Log.h>
 #include <utils/threads.h>
 #include <utils/List.h>
@@ -271,6 +273,7 @@ private:
         virtual status_t        attachAuxEffect(int effectId);
         virtual status_t        setParameter(int key, const Parcel &request);
         virtual status_t        getParameter(int key, Parcel *reply);
+        virtual status_t        setRetransmitEndpoint(const struct sockaddr_in* endpoint);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
 
@@ -333,6 +336,8 @@ private:
                     uid_t                       mUID;
                     sp<ANativeWindow>           mConnectedWindow;
                     sp<IBinder>                 mConnectedWindowBinder;
+                    struct sockaddr_in          mRetransmitEndpoint;
+                    bool                        mRetransmitEndpointValid;
 
         // Metadata filters.
         media::Metadata::Filter mMetadataAllow;  // protected by mLock

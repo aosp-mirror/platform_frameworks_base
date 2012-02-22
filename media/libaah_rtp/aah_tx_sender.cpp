@@ -243,7 +243,7 @@ void AAH_TXSender::doSendPacket_l(const sp<TRTPPacket>& packet,
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = endpoint.addr;
-    addr.sin_port = htons(endpoint.port);
+    addr.sin_port = endpoint.port;
 
     ssize_t result = sendto(mSocket,
                             packet->getPacket(),
@@ -411,7 +411,7 @@ void AAH_TXSender::RetryReceiver::handleRetryRequest() {
         return;
     }
 
-    Endpoint endpoint(request.endpointIP, ntohs(request.endpointPort));
+    Endpoint endpoint(request.endpointIP, request.endpointPort);
 
     Mutex::Autolock lock(mSender->mEndpointLock);
 

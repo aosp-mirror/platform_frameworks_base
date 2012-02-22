@@ -35,6 +35,7 @@ import android.media.AudioManager;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Set;
 import java.lang.ref.WeakReference;
@@ -1485,6 +1486,34 @@ public class MediaPlayer
      * {@hide}
      */
     public native static int native_pullBatteryData(Parcel reply);
+
+    /**
+     * Sets the target re-transmit endpoint for the low level player.  When set, the player will
+     * attempt to re-mux its media data using the A@H RTP profile and re-transmit to the target
+     * endpoint.  setRetransmitEndpoint may only be called before setDataSource has been called;
+     * while the player is in the Idle state.
+     *
+     * @param endpoint the address and UDP port of the re-transmission target or null if no
+     * re-transmission is to be performed.
+     * @throws IllegalStateException if it is called in an invalid state
+     * @return The status code.
+     * @hide pending API council
+     */
+    public int setRetransmitEndpoint(InetSocketAddress endpoint)
+            throws IllegalStateException
+    {
+        String addrString = null;
+        int port = 0;
+
+        if (null != endpoint) {
+            addrString = endpoint.getAddress().getHostAddress();
+            port = endpoint.getPort();
+        }
+
+        return native_setRetransmitEndpoint(addrString, port);
+    }
+
+    private native final int native_setRetransmitEndpoint(String addrString, int port);
 
     @Override
     protected void finalize() { native_finalize(); }

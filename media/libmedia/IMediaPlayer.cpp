@@ -15,6 +15,7 @@
 ** limitations under the License.
 */
 
+#include <arpa/inet.h>
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -55,6 +56,7 @@ enum {
     SET_VIDEO_SURFACETEXTURE,
     SET_PARAMETER,
     GET_PARAMETER,
+    SET_RETRANSMIT_ENDPOINT,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -291,6 +293,25 @@ public:
         return remote()->transact(GET_PARAMETER, data, reply);
     }
 
+    status_t setRetransmitEndpoint(const struct sockaddr_in* endpoint) {
+        Parcel data, reply;
+        status_t err;
+
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        if (NULL != endpoint) {
+            data.writeInt32(sizeof(*endpoint));
+            data.write(endpoint, sizeof(*endpoint));
+        } else {
+            data.writeInt32(0);
+        }
+
+        err = remote()->transact(SET_RETRANSMIT_ENDPOINT, data, &reply);
+        if (OK != err) {
+            return err;
+        }
+
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
@@ -458,6 +479,20 @@ status_t BnMediaPlayer::onTransact(
         case GET_PARAMETER: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             return getParameter(data.readInt32(), reply);
+        } break;
+        case SET_RETRANSMIT_ENDPOINT: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+
+            struct sockaddr_in endpoint;
+            int amt = data.readInt32();
+            if (amt == sizeof(endpoint)) {
+                data.read(&endpoint, sizeof(struct sockaddr_in));
+                reply->writeInt32(setRetransmitEndpoint(&endpoint));
+            } else {
+                reply->writeInt32(setRetransmitEndpoint(NULL));
+            }
+
+            return NO_ERROR;
         } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);

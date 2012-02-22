@@ -149,14 +149,7 @@ status_t AAH_TXPlayer::setDataSource_l(
         const KeyedVector<String8, String8> *headers) {
     reset_l();
 
-    // the URL must consist of "aahTX://" followed by the real URL of
-    // the data source
-    const char *kAAHPrefix = "aahTX://";
-    if (strncasecmp(url, kAAHPrefix, strlen(kAAHPrefix))) {
-        return INVALID_OPERATION;
-    }
-
-    mUri.setTo(url + strlen(kAAHPrefix));
+    mUri.setTo(url);
 
     if (headers) {
         mUriHeaders = *headers;
@@ -794,67 +787,7 @@ status_t AAH_TXPlayer::getParameter(int key, Parcel *reply) {
 }
 
 status_t AAH_TXPlayer::invoke(const Parcel& request, Parcel *reply) {
-    if (!reply) {
-        return BAD_VALUE;
-    }
-
-    int32_t methodID;
-    status_t err = request.readInt32(&methodID);
-    if (err != android::OK) {
-        return err;
-    }
-
-    switch (methodID) {
-        case kInvokeSetAAHDstIPPort:
-        case kInvokeSetAAHConfigBlob: {
-            if (mEndpointValid) {
-                return INVALID_OPERATION;
-            }
-
-            String8 addr;
-            uint16_t port;
-
-            if (methodID == kInvokeSetAAHDstIPPort) {
-                addr = String8(request.readString16());
-
-                int32_t port32;
-                err = request.readInt32(&port32);
-                if (err != android::OK) {
-                    return err;
-                }
-                port = static_cast<uint16_t>(port32);
-            } else {
-                String8 blob(request.readString16());
-
-                char addr_buf[101];
-                if (sscanf(blob.string(), "V1:%100s %" SCNu16,
-                           addr_buf, &port) != 2) {
-                    return BAD_VALUE;
-                }
-                if (addr.setTo(addr_buf) != OK) {
-                    return NO_MEMORY;
-                }
-            }
-
-            struct hostent* ent = gethostbyname(addr.string());
-            if (ent == NULL) {
-                return ERROR_UNKNOWN_HOST;
-            }
-            if (!(ent->h_addrtype == AF_INET && ent->h_length == 4)) {
-                return BAD_VALUE;
-            }
-
-            Mutex::Autolock lock(mEndpointLock);
-            mEndpoint = AAH_TXSender::Endpoint(
-                        reinterpret_cast<struct in_addr*>(ent->h_addr)->s_addr,
-                        port);
-            mEndpointValid = true;
-            return OK;
-        };
-
-        default:
-            return INVALID_OPERATION;
-    }
+    return INVALID_OPERATION;
 }
 
 status_t AAH_TXPlayer::getMetadata(const media::Metadata::Filter& ids,
@@ -886,6 +819,24 @@ status_t AAH_TXPlayer::setVolume(float leftVolume, float rightVolume) {
 }
 
 status_t AAH_TXPlayer::setAudioStreamType(int streamType) {
+    return OK;
+}
+
+status_t AAH_TXPlayer::setRetransmitEndpoint(
+        const struct sockaddr_in* endpoint) {
+    Mutex::Autolock lock(mLock);
+
+    if (NULL == endpoint)
+        return BAD_VALUE;
+
+    // Once the endpoint has been registered, it may not be changed.
+    if (mEndpointRegistered)
+        return INVALID_OPERATION;
+
+    mEndpoint.addr = endpoint->sin_addr.s_addr;
+    mEndpoint.port = endpoint->sin_port;
+    mEndpointValid = true;
+
     return OK;
 }
 

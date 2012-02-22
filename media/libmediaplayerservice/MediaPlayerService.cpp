@@ -492,6 +492,7 @@ MediaPlayerService::Client::Client(
     mStatus = NO_INIT;
     mAudioSessionId = audioSessionId;
     mUID = uid;
+    mRetransmitEndpointValid = false;
 
 #if CALLBACK_ANTAGONIZER
     LOGD("create Antagonizer");
@@ -600,10 +601,6 @@ player_type getPlayerType(const char* url)
 
     if (!strncasecmp("aahRX://", url, 8)) {
         return AAH_RX_PLAYER;
-    }
-
-    if (!strncasecmp("aahTX://", url, 8)) {
-        return AAH_TX_PLAYER;
     }
 
     // use MidiFile for MIDI extensions
@@ -716,7 +713,12 @@ status_t MediaPlayerService::Client::setDataSource(
         close(fd);
         return mStatus;
     } else {
-        player_type playerType = getPlayerType(url);
+        // Until re-transmit functionality is added to the existing core android
+        // players, we use the special AAH TX player whenever we were configured
+        // for retransmission.
+        player_type playerType = mRetransmitEndpointValid
+                               ? AAH_TX_PLAYER
+                               : getPlayerType(url);
         LOGV("player type = %d", playerType);
 
         // create the right type of player
@@ -732,6 +734,15 @@ status_t MediaPlayerService::Client::setDataSource(
         LOGV(" setDataSource");
         mStatus = p->setDataSource(url, headers);
         if (mStatus == NO_ERROR) {
+            // Set the re-transmission endpoint if one was chosen.
+            if (mRetransmitEndpointValid) {
+                mStatus = p->setRetransmitEndpoint(&mRetransmitEndpoint);
+                if (mStatus != NO_ERROR) {
+                    LOGE("setRetransmitEndpoint error: %d", mStatus);
+                    return mStatus;
+                }
+            }
+
             mPlayer = p;
         } else {
             LOGE("  error: %d", mStatus);
@@ -766,7 +777,12 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
         LOGV("calculated length = %lld", length);
     }
 
-    player_type playerType = getPlayerType(fd, offset, length);
+    // Until re-transmit functionality is added to the existing core android
+    // players, we use the special AAH TX player whenever we were configured for
+    // retransmission.
+    player_type playerType = mRetransmitEndpointValid
+                           ? AAH_TX_PLAYER
+                           : getPlayerType(fd, offset, length);
     LOGV("player type = %d", playerType);
 
     // create the right type of player
@@ -780,7 +796,18 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
 
     // now set data source
     mStatus = p->setDataSource(fd, offset, length);
-    if (mStatus == NO_ERROR) mPlayer = p;
+    if (mStatus == NO_ERROR) {
+        // Set the re-transmission endpoint if one was chosen.
+        if (mRetransmitEndpointValid) {
+            mStatus = p->setRetransmitEndpoint(&mRetransmitEndpoint);
+            if (mStatus != NO_ERROR) {
+                LOGE("setRetransmitEndpoint error: %d", mStatus);
+                return mStatus;
+            }
+        }
+
+        mPlayer = p;
+    }
 
     return mStatus;
 }
@@ -788,7 +815,14 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
 status_t MediaPlayerService::Client::setDataSource(
         const sp<IStreamSource> &source) {
     // create the right type of player
-    sp<MediaPlayerBase> p = createPlayer(NU_PLAYER);
+    // Until re-transmit functionality is added to the existing core android
+    // players, we use the special AAH TX player whenever we were configured for
+    // retransmission.
+    player_type playerType = mRetransmitEndpointValid
+                           ? AAH_TX_PLAYER
+                           : NU_PLAYER;
+    LOGV("player type = %d", playerType);
+    sp<MediaPlayerBase> p = createPlayer(playerType);
 
     if (p == NULL) {
         return NO_INIT;
@@ -803,6 +837,15 @@ status_t MediaPlayerService::Client::setDataSource(
     mStatus = p->setDataSource(source);
 
     if (mStatus == OK) {
+        // Set the re-transmission endpoint if one was chosen.
+        if (mRetransmitEndpointValid) {
+            mStatus = p->setRetransmitEndpoint(&mRetransmitEndpoint);
+            if (mStatus != NO_ERROR) {
+                LOGE("setRetransmitEndpoint error: %d", mStatus);
+                return mStatus;
+            }
+        }
+
         mPlayer = p;
     }
 
@@ -1026,6 +1069,7 @@ status_t MediaPlayerService::Client::seekTo(int msec)
 status_t MediaPlayerService::Client::reset()
 {
     LOGV("[%d] reset", mConnId);
+    mRetransmitEndpointValid = false;
     sp<MediaPlayerBase> p = getPlayer();
     if (p == 0) return UNKNOWN_ERROR;
     return p->reset();
@@ -1098,6 +1142,36 @@ status_t MediaPlayerService::Client::getParameter(int key, Parcel *reply) {
     sp<MediaPlayerBase> p = getPlayer();
     if (p == 0) return UNKNOWN_ERROR;
     return p->getParameter(key, reply);
+}
+
+status_t MediaPlayerService::Client::setRetransmitEndpoint(
+        const struct sockaddr_in* endpoint) {
+
+    if (NULL != endpoint) {
+        uint32_t a = ntohl(endpoint->sin_addr.s_addr);
+        uint16_t p = ntohs(endpoint->sin_port);
+        LOGV("[%d] setRetransmitEndpoint(%u.%u.%u.%u:%hu)", mConnId,
+                (a >> 24), (a >> 16) & 0xFF, (a >> 8) & 0xFF, (a & 0xFF), p);
+    } else {
+        LOGV("[%d] setRetransmitEndpoint = <none>", mConnId);
+    }
+
+    sp<MediaPlayerBase> p = getPlayer();
+
+    // Right now, the only valid time to set a retransmit endpoint is before
+    // player selection has been made (since the presence or absence of a
+    // retransmit endpoint is going to determine which player is selected during
+    // setDataSource).
+    if (p != 0) return INVALID_OPERATION;
+
+    if (NULL != endpoint) {
+        mRetransmitEndpoint = *endpoint;
+        mRetransmitEndpointValid = true;
+    } else {
+        mRetransmitEndpointValid = false;
+    }
+
+    return NO_ERROR;
 }
 
 void MediaPlayerService::Client::notify(

@@ -29,6 +29,10 @@
 #include <media/AudioSystem.h>
 #include <media/Metadata.h>
 
+// Fwd decl to make sure everyone agrees that the scope of struct sockaddr_in is
+// global, and not in android::
+struct sockaddr_in;
+
 namespace android {
 
 class Parcel;
@@ -138,6 +142,14 @@ public:
     virtual player_type playerType() = 0;
     virtual status_t    setParameter(int key, const Parcel &request) = 0;
     virtual status_t    getParameter(int key, Parcel *reply) = 0;
+
+    // Right now, only the AAX TX player supports this functionality.  For now,
+    // provide a default implementation which indicates a lack of support for
+    // this functionality to make life easier for all of the other media player
+    // maintainers out there.
+    virtual status_t setRetransmitEndpoint(const struct sockaddr_in* endpoint) {
+        return INVALID_OPERATION;
+    }
 
     // Invoke a generic method on the player by using opaque parcels
     // for the request and reply.
