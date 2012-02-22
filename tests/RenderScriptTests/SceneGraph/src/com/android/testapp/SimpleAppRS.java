@@ -38,11 +38,12 @@ public class SimpleAppRS {
     private static String TAG = "SimpleAppRS";
 
     SceneManager mSceneManager;
-    ArrayList<Renderable> geometry = new ArrayList<Renderable>();
 
-    Scene mScene;
     RenderScriptGL mRS;
     Resources mRes;
+
+    Scene mScene;
+    Mesh mSimpleMesh;
 
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
@@ -53,9 +54,9 @@ public class SimpleAppRS {
         mScene = new Scene();
 
         setupGeometry();
+        setupRenderables();
         setupCamera();
         setupRenderPass();
-        setupShaders();
 
         mSceneManager.setActiveScene(mScene);
 
@@ -63,16 +64,9 @@ public class SimpleAppRS {
         mRS.bindRootScript(mSceneManager.getRenderLoop());
     }
 
-    private void setupShaders() {
-        // Built-in shader that provides position, texcoord and normal
-        VertexShader genericV = SceneManager.getDefaultVS();
-        // Built-in shader that displays a color
-        FragmentShader colorF = SceneManager.getColorFS();
-        mScene.assignRenderState(new RenderState(genericV, colorF, null, null));
-    }
     private void setupGeometry() {
-        Mesh.TriangleMeshBuilder tmb = new Mesh.TriangleMeshBuilder(mRS,
-                                           3, Mesh.TriangleMeshBuilder.TEXTURE_0);
+        Mesh.TriangleMeshBuilder tmb = new Mesh.TriangleMeshBuilder(mRS, 3,
+                                                         Mesh.TriangleMeshBuilder.TEXTURE_0);
 
         tmb.setTexture(0.0f, 1.0f).addVertex(-1.0f, 1.0f, 0.0f);
         tmb.setTexture(0.0f, 0.0f).addVertex(-1.0f, -1.0f, 0.0f);
@@ -81,40 +75,57 @@ public class SimpleAppRS {
 
         tmb.addTriangle(0, 1, 2);
         tmb.addTriangle(2, 3, 0);
+        mSimpleMesh = tmb.create(true);
+    }
 
-        Mesh mesh  = tmb.create(true);
+    private void setupRenderables() {
+        // Built-in shader that provides position, texcoord and normal
+        VertexShader genericV = SceneManager.getDefaultVS();
+        // Built-in shader that displays a color
+        FragmentShader colorF = SceneManager.getColorFS();
+        // Built-in shader that displays a texture
+        FragmentShader textureF = SceneManager.getTextureFS();
+        RenderState colorRS = new RenderState(genericV, colorF, null, null);
+        ProgramStore alphaBlend = ProgramStore.BLEND_ALPHA_DEPTH_TEST(mRS);
+        RenderState texRS = new RenderState(genericV, textureF, alphaBlend, null);
 
-        Renderable quad = new Renderable();
-        quad.setMesh(mesh);
-        quad.setTransform(new CompoundTransform());
+        // Draw a simple colored quad
+        Renderable quad = mScene.appendNewRenderable();
+        quad.setMesh(mSimpleMesh);
         quad.appendSourceParams(new Float4Param("color", 0.2f, 0.3f, 0.4f));
+        quad.setRenderState(colorRS);
 
-        mScene.appendRenderable(quad);
-        geometry.add(quad);
+        // Draw a textured quad
+        quad = mScene.appendNewRenderable();
+        quad.setMesh(mSimpleMesh);
+        // Make a transform to position the quad
+        CompoundTransform t = mScene.appendNewCompoundTransform();
+        t.addTranslate("position", new Float3(2, 2, 0));
+        quad.setTransform(t);
+        quad.appendSourceParams(new TextureParam("color", new Texture2D(R.drawable.icon)));
+        quad.setRenderState(texRS);
     }
 
     private void setupCamera() {
-        Camera camera = new Camera();
+        Camera camera = mScene.appendNewCamera();
         camera.setFar(200);
         camera.setNear(0.1f);
         camera.setFOV(60);
-        CompoundTransform cameraTransform = new CompoundTransform();
+        CompoundTransform cameraTransform = mScene.appendNewCompoundTransform();
         cameraTransform.addTranslate("camera", new Float3(0, 0, 10));
-        mScene.appendTransform(cameraTransform);
         camera.setTransform(cameraTransform);
-        mScene.appendCamera(camera);
     }
 
     private void setupRenderPass() {
-        RenderPass mainPass = new RenderPass();
+        RenderPass mainPass = mScene.appendNewRenderPass();
         mainPass.setClearColor(new Float4(1.0f, 1.0f, 1.0f, 1.0f));
         mainPass.setShouldClearColor(true);
         mainPass.setClearDepth(1.0f);
         mainPass.setShouldClearDepth(true);
         mainPass.setCamera(mScene.getCameras().get(0));
-        for (Renderable renderable : geometry) {
-            mainPass.appendRenderable(renderable);
+        ArrayList<RenderableBase> allRender = mScene.getRenderables();
+        for (RenderableBase renderable : allRender) {
+            mainPass.appendRenderable((Renderable)renderable);
         }
-        mScene.appendRenderPass(mainPass);
     }
 }

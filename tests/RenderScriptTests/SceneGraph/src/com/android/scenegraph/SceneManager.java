@@ -80,6 +80,7 @@ public class SceneManager extends SceneGraphBase {
     private VertexShader mDefaultVertex;
 
     private RenderState mDefaultState;
+    private Transform mDefaultTransform;
 
     private static Allocation getDefault(boolean isCube) {
         final int dimension = 4;
@@ -161,24 +162,32 @@ public class SceneManager extends SceneGraphBase {
         return b;
     }
 
-    public static Allocation loadCubemap(String name, RenderScriptGL rs, Resources res) {
-        Bitmap b = loadBitmap(name, res);
+    static Allocation createFromBitmap(Bitmap b, RenderScriptGL rs, boolean isCube) {
         if (b == null) {
             return null;
         }
-        return Allocation.createCubemapFromBitmap(rs, b,
-                                                  MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
-                                                  Allocation.USAGE_GRAPHICS_TEXTURE);
+        MipmapControl mip = MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
+        int usage = Allocation.USAGE_GRAPHICS_TEXTURE;
+        if (isCube) {
+            return Allocation.createCubemapFromBitmap(rs, b, mip, usage);
+        }
+        return Allocation.createFromBitmap(rs, b, mip, usage);
+    }
+
+    public static Allocation loadCubemap(String name, RenderScriptGL rs, Resources res) {
+        return createFromBitmap(loadBitmap(name, res), rs, true);
+    }
+
+    public static Allocation loadCubemap(int id, RenderScriptGL rs, Resources res) {
+        return createFromBitmap(BitmapFactory.decodeResource(res, id), rs, true);
     }
 
     public static Allocation loadTexture2D(String name, RenderScriptGL rs, Resources res) {
-        Bitmap b = loadBitmap(name, res);
-        if (b == null) {
-            return null;
-        }
-        return Allocation.createFromBitmap(rs, b,
-                                           Allocation.MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
-                                           Allocation.USAGE_GRAPHICS_TEXTURE);
+        return createFromBitmap(loadBitmap(name, res), rs, false);
+    }
+
+    public static Allocation loadTexture2D(int id, RenderScriptGL rs, Resources res) {
+        return createFromBitmap(BitmapFactory.decodeResource(res, id), rs, false);
     }
 
     public static ProgramStore BLEND_ADD_DEPTH_NONE(RenderScript rs) {
@@ -261,6 +270,7 @@ public class SceneManager extends SceneGraphBase {
         }
 
         mActiveScene.appendShader(getDefaultVS());
+        mActiveScene.appendTransform(getDefaultTransform());
     }
 
     static RenderScriptGL getRS() {
@@ -364,14 +374,15 @@ public class SceneManager extends SceneGraphBase {
             final String code = "\n" +
                 "varying vec2 varTex0;\n" +
                 "void main() {\n" +
-                "   lowp vec4 col = texture2D(UNI_Tex0, varTex0).rgba;\n" +
+                "   lowp vec4 col = texture2D(UNI_color, varTex0).rgba;\n" +
                 "   gl_FragColor = col;\n" +
                 "}\n";
 
             FragmentShader.Builder fb = new FragmentShader.Builder(rs);
             fb.setShader(code);
-            fb.addTexture(Program.TextureType.TEXTURE_2D, "Tex0");
+            fb.addTexture(Program.TextureType.TEXTURE_2D, "color");
             sSceneManager.mTexture = fb.create();
+            sSceneManager.mTexture.mProgram.bindSampler(Sampler.CLAMP_LINEAR_MIP_LINEAR(rs), 0);
         }
 
         return sSceneManager.mTexture;
@@ -383,8 +394,20 @@ public class SceneManager extends SceneGraphBase {
         }
         if (sSceneManager.mDefaultState == null) {
             sSceneManager.mDefaultState = new RenderState(getDefaultVS(), getColorFS(), null, null);
+            sSceneManager.mDefaultState.setName("__DefaultState");
         }
         return sSceneManager.mDefaultState;
+    }
+
+    static Transform getDefaultTransform() {
+        if (sSceneManager == null) {
+            return null;
+        }
+        if (sSceneManager.mDefaultTransform == null) {
+            sSceneManager.mDefaultTransform = new MatrixTransform();
+            sSceneManager.mDefaultTransform.setName("__DefaultTransform");
+        }
+        return sSceneManager.mDefaultTransform;
     }
 
     public static SceneManager getInstance() {
@@ -444,6 +467,7 @@ public class SceneManager extends SceneGraphBase {
         mColor = null;
         mTexture = null;
         mDefaultState = null;
+        mDefaultTransform = null;
 
         mExportScript = new ScriptC_export(rs, res, R.raw.export);
 

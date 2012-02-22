@@ -31,6 +31,7 @@ import android.util.Log;
 public class TextureCube extends TextureBase {
     String mFileName;
     String mFileDir;
+    int mResourceID;
 
     public TextureCube() {
         super(ScriptC_export.const_TextureType_TEXTURE_CUBE);
@@ -45,6 +46,11 @@ public class TextureCube extends TextureBase {
         super(ScriptC_export.const_TextureType_TEXTURE_CUBE);
         setFileDir(dir);
         setFileName(file);
+    }
+
+    public TextureCube(int resourceID) {
+        super(ScriptC_export.const_TextureType_TEXTURE_2D);
+        mResourceID = resourceID;
     }
 
     public void setFileDir(String dir) {
@@ -69,8 +75,12 @@ public class TextureCube extends TextureBase {
     void load() {
         RenderScriptGL rs = SceneManager.getRS();
         Resources res = SceneManager.getRes();
-        String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);
-        setTexture(SceneManager.loadCubemap(mFileDir + shortName, rs, res));
+        if (mFileName != null && mFileName.length() > 0) {
+            String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);
+            setTexture(SceneManager.loadCubemap(mFileDir + shortName, rs, res));
+        } else if (mResourceID != 0) {
+            setTexture(SceneManager.loadCubemap(mResourceID , rs, res));
+        }
     }
 
     ScriptField_Texture_s getRsData(boolean loadNow) {
