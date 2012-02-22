@@ -606,6 +606,9 @@ public class ActionBarView extends AbsActionBarView {
                 ((mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) == 0 || mLogo == null)) {
             mHomeLayout.setIcon(icon);
         }
+        if (mExpandedActionView != null) {
+            mExpandedHomeLayout.setIcon(mIcon.getConstantState().newDrawable(getResources()));
+        }
     }
 
     public void setIcon(int resId) {
