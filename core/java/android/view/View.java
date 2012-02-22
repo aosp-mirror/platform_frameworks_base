@@ -3631,7 +3631,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see ActionMode
      */
     public ActionMode startActionMode(ActionMode.Callback callback) {
-        return getParent().startActionModeForChild(this, callback);
+        ViewParent parent = getParent();
+        if (parent == null) return null;
+        return parent.startActionModeForChild(this, callback);
     }
 
     /**
