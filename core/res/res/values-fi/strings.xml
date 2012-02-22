@@ -764,10 +764,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Antaa sovelluksen tehdä pakettien vahvistuspyyntöjä. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"käytä sarjaportteja"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Luvan haltija voi käyttää sarjaportteja SerialManager-sovellusliittymän avulla."</string>
-    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
-    <skip />
-    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
-    <skip />
+    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"käytä ulkoisia sisällöntarjoajia"</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Antaa luvan haltijan käyttää liittymän sisällöntarjoajia. Ei normaalien sovelluksien käyttöön."</string>
     <string name="save_password_message" msgid="767344687139195790">"Haluatko selaimen muistavan tämän salasanan?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ei nyt"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Muista"</string>

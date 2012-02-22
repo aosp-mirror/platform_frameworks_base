@@ -764,10 +764,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Lehetővé teszi, hogy a tulajdonos kérelmeket nyújtson be a csomag hitelesítőivel kapcsolatban. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"soros portok elérése"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Lehetővé teszi a tulajdonos számára a soros portok elérését a SerialManager API segítségével."</string>
-    <!-- no translation found for permlab_accessContentProvidersExternally (5077774297943409285) -->
-    <skip />
-    <!-- no translation found for permdesc_accessContentProvidersExternally (4544346486697853685) -->
-    <skip />
+    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"tartalomszolgáltatók külső elérése"</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Lehetővé teszi, hogy a tulajdonos hozzáférjen a tartalomszolgáltatókhoz a shellből. Normál alkalmazásoknál nem szükséges."</string>
     <string name="save_password_message" msgid="767344687139195790">"Szeretné, hogy a böngésző megjegyezze a jelszót?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Most nem"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Megjegyzés"</string>
