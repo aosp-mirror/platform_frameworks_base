@@ -24,6 +24,7 @@ import android.text.Spanned;
 import android.text.method.WordIterator;
 import android.text.style.SpellCheckSpan;
 import android.text.style.SuggestionSpan;
+import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SpellCheckerSession;
 import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
 import android.view.textservice.SuggestionsInfo;
@@ -277,9 +278,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     @Override
-    public void onGetSuggestionsForSentence(SuggestionsInfo[] results) {
+    public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results) {
         // TODO: Handle the position and length for each suggestion
-        onGetSuggestions(results);
+        // do nothing for now
     }
 
     @Override
