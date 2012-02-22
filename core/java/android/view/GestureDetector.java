@@ -193,8 +193,7 @@ public class GestureDetector {
         }
     }
 
-    // TODO: ViewConfiguration
-    private int mBiggerTouchSlopSquare = 20 * 20;
+    private int mBiggerTouchSlopSquare;
 
     private int mTouchSlopSquare;
     private int mDoubleTapSlopSquare;
@@ -408,6 +407,14 @@ public class GestureDetector {
         }
         mTouchSlopSquare = touchSlop * touchSlop;
         mDoubleTapSlopSquare = doubleTapSlop * doubleTapSlop;
+
+        // The biggerTouchSlop should be a little bit bigger than touchSlop
+        // and mBiggerTouchSlopSquare should not be over mDoubleTapSlopSquare.
+        int biggerTouchSlop = (int)(touchSlop * 1.25f);
+        mBiggerTouchSlopSquare = biggerTouchSlop * biggerTouchSlop;
+        if (mBiggerTouchSlopSquare > mDoubleTapSlopSquare) {
+            mBiggerTouchSlopSquare = mDoubleTapSlopSquare;
+        }
     }
 
     /**
