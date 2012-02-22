@@ -342,7 +342,7 @@ public class SceneManager extends SceneGraphBase {
             final String code = "\n" +
                 "varying vec2 varTex0;\n" +
                 "void main() {\n" +
-                "   lowp vec4 col = texture2D(UNI_Tex0, varTex0).rgba;\n" +
+                "   lowp vec4 col = UNI_color;\n" +
                 "   gl_FragColor = col;\n" +
                 "}\n";
             FragmentShader.Builder fb = new FragmentShader.Builder(rs);
@@ -360,12 +360,14 @@ public class SceneManager extends SceneGraphBase {
         }
         if (sSceneManager.mTexture == null) {
             RenderScriptGL rs = getRS();
+
             final String code = "\n" +
                 "varying vec2 varTex0;\n" +
                 "void main() {\n" +
-                "   lowp vec4 col = UNI_color;\n" +
+                "   lowp vec4 col = texture2D(UNI_Tex0, varTex0).rgba;\n" +
                 "   gl_FragColor = col;\n" +
                 "}\n";
+
             FragmentShader.Builder fb = new FragmentShader.Builder(rs);
             fb.setShader(code);
             fb.addTexture(Program.TextureType.TEXTURE_2D, "Tex0");
@@ -408,17 +410,10 @@ public class SceneManager extends SceneGraphBase {
         Mesh.TriangleMeshBuilder tmb = new Mesh.TriangleMeshBuilder(mRS,
                                            3, Mesh.TriangleMeshBuilder.TEXTURE_0);
 
-        tmb.setTexture(0.0f, 1.0f);
-        tmb.addVertex(-1.0f, 1.0f, 1.0f);
-
-        tmb.setTexture(0.0f, 0.0f);
-        tmb.addVertex(-1.0f, -1.0f, 1.0f);
-
-        tmb.setTexture(1.0f, 0.0f);
-        tmb.addVertex(1.0f, -1.0f, 1.0f);
-
-        tmb.setTexture(1.0f, 1.0f);
-        tmb.addVertex(1.0f, 1.0f, 1.0f);
+        tmb.setTexture(0.0f, 1.0f).addVertex(-1.0f, 1.0f, 1.0f);
+        tmb.setTexture(0.0f, 0.0f).addVertex(-1.0f, -1.0f, 1.0f);
+        tmb.setTexture(1.0f, 0.0f).addVertex(1.0f, -1.0f, 1.0f);
+        tmb.setTexture(1.0f, 1.0f).addVertex(1.0f, 1.0f, 1.0f);
 
         tmb.addTriangle(0, 1, 2);
         tmb.addTriangle(2, 3, 0);
