@@ -14884,7 +14884,7 @@ package android.os {
 
   public class Looper {
     method public void dump(android.util.Printer, java.lang.String);
-    method public static synchronized android.os.Looper getMainLooper();
+    method public static android.os.Looper getMainLooper();
     method public java.lang.Thread getThread();
     method public static void loop();
     method public static android.os.Looper myLooper();

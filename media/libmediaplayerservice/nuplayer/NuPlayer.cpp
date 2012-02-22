@@ -387,10 +387,10 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                      audio ? "audio" : "video");
 
                 mRenderer->queueEOS(audio, UNKNOWN_ERROR);
-            } else {
-                CHECK_EQ((int)what, (int)ACodec::kWhatDrainThisBuffer);
-
+            } else if (what == ACodec::kWhatDrainThisBuffer) {
                 renderBuffer(audio, codecRequest);
+            } else {
+                ALOGV("Unhandled codec notification %d.", what);
             }
 
             break;

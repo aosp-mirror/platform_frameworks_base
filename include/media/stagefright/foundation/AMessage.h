@@ -90,10 +90,6 @@ struct AMessage : public RefBase {
 
     AString debugString(int32_t indent = 0) const;
 
-protected:
-    virtual ~AMessage();
-
-private:
     enum Type {
         kTypeInt32,
         kTypeInt64,
@@ -107,6 +103,13 @@ private:
         kTypeRect,
     };
 
+    size_t countEntries() const;
+    const char *getEntryNameAt(size_t index, Type *type) const;
+
+protected:
+    virtual ~AMessage();
+
+private:
     uint32_t mWhat;
     ALooper::handler_id mTarget;
 
@@ -131,7 +134,7 @@ private:
     };
 
     enum {
-        kMaxNumItems = 16
+        kMaxNumItems = 32
     };
     Item mItems[kMaxNumItems];
     size_t mNumItems;

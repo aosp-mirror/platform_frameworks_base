@@ -18,40 +18,28 @@
 
 #define NATIVE_WINDOW_WRAPPER_H_
 
-#include <surfaceflinger/Surface.h>
 #include <gui/SurfaceTextureClient.h>
 
 namespace android {
 
-// Both Surface and SurfaceTextureClient are RefBase that implement the
-// ANativeWindow interface, but at different addresses. ANativeWindow is not
-// a RefBase but acts like one for use with sp<>.  This wrapper converts a
-// Surface or SurfaceTextureClient into a single reference-counted object
-// that holds an sp reference to the underlying Surface or SurfaceTextureClient,
-// It provides a method to get the ANativeWindow.
+// SurfaceTextureClient derives from ANativeWindow which derives from multiple
+// base classes, in order to carry it in AMessages, we'll temporarily wrap it
+// into a NativeWindowWrapper.
 
 struct NativeWindowWrapper : RefBase {
-    NativeWindowWrapper(
-            const sp<Surface> &surface) :
-        mSurface(surface) { }
-
     NativeWindowWrapper(
             const sp<SurfaceTextureClient> &surfaceTextureClient) :
         mSurfaceTextureClient(surfaceTextureClient) { }
 
     sp<ANativeWindow> getNativeWindow() const {
-        if (mSurface != NULL) {
-            return mSurface;
-        } else {
-            return mSurfaceTextureClient;
-        }
+        return mSurfaceTextureClient;
     }
 
-    // If needed later we can provide a method to ask what kind of native window
+    sp<SurfaceTextureClient> getSurfaceTextureClient() const {
+        return mSurfaceTextureClient;
+    }
 
 private:
-    // At most one of mSurface and mSurfaceTextureClient will be non-NULL
-    const sp<Surface> mSurface;
     const sp<SurfaceTextureClient> mSurfaceTextureClient;
 
     DISALLOW_EVIL_CONSTRUCTORS(NativeWindowWrapper);

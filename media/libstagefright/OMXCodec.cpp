@@ -1541,6 +1541,8 @@ void OMXCodec::setComponentRole(
             "video_decoder.mpeg4", "video_encoder.mpeg4" },
         { MEDIA_MIMETYPE_VIDEO_H263,
             "video_decoder.h263", "video_encoder.h263" },
+        { MEDIA_MIMETYPE_VIDEO_VPX,
+            "video_decoder.vpx", "video_encoder.vpx" },
     };
 
     static const size_t kNumMimeToRole =
@@ -3556,6 +3558,7 @@ status_t OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t
         //////////////// output port ////////////////////
         // format
         OMX_AUDIO_PARAM_PORTFORMATTYPE format;
+        InitOMXParams(&format);
         format.nPortIndex = kPortIndexOutput;
         format.nIndex = 0;
         status_t err = OMX_ErrorNone;
