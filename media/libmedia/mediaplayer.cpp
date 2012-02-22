@@ -61,6 +61,7 @@ MediaPlayer::MediaPlayer()
     mAudioSessionId = AudioSystem::newAudioSessionId();
     AudioSystem::acquireAudioSessionId(mAudioSessionId);
     mSendLevel = 0;
+    mRetransmitEndpointValid = false;
 }
 
 MediaPlayer::~MediaPlayer()
@@ -93,6 +94,7 @@ void MediaPlayer::clear_l()
     mCurrentPosition = -1;
     mSeekPosition = -1;
     mVideoWidth = mVideoHeight = 0;
+    mRetransmitEndpointValid = false;
 }
 
 status_t MediaPlayer::setListener(const sp<MediaPlayerListener>& listener)
@@ -144,7 +146,8 @@ status_t MediaPlayer::setDataSource(
         const sp<IMediaPlayerService>& service(getMediaPlayerService());
         if (service != 0) {
             sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
-            if (NO_ERROR != player->setDataSource(url, headers)) {
+            if ((NO_ERROR != doSetRetransmitEndpoint(player)) ||
+                (NO_ERROR != player->setDataSource(url, headers))) {
                 player.clear();
             }
             err = attachNewPlayer(player);
@@ -160,7 +163,8 @@ status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
     const sp<IMediaPlayerService>& service(getMediaPlayerService());
     if (service != 0) {
         sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
-        if (NO_ERROR != player->setDataSource(fd, offset, length)) {
+        if ((NO_ERROR != doSetRetransmitEndpoint(player)) ||
+            (NO_ERROR != player->setDataSource(fd, offset, length))) {
             player.clear();
         }
         err = attachNewPlayer(player);
@@ -175,7 +179,8 @@ status_t MediaPlayer::setDataSource(const sp<IStreamSource> &source)
     const sp<IMediaPlayerService>& service(getMediaPlayerService());
     if (service != 0) {
         sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
-        if (NO_ERROR != player->setDataSource(source)) {
+        if ((NO_ERROR != doSetRetransmitEndpoint(player)) ||
+            (NO_ERROR != player->setDataSource(source))) {
             player.clear();
         }
         err = attachNewPlayer(player);
@@ -469,6 +474,20 @@ status_t MediaPlayer::reset_l()
     return NO_ERROR;
 }
 
+status_t MediaPlayer::doSetRetransmitEndpoint(const sp<IMediaPlayer>& player) {
+    Mutex::Autolock _l(mLock);
+
+    if (player == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    if (mRetransmitEndpointValid) {
+        return player->setRetransmitEndpoint(&mRetransmitEndpoint);
+    }
+
+    return OK;
+}
+
 status_t MediaPlayer::reset()
 {
     ALOGV("reset");
@@ -595,6 +614,34 @@ status_t MediaPlayer::getParameter(int key, Parcel *reply)
     }
     ALOGV("getParameter: no active player");
     return INVALID_OPERATION;
+}
+
+status_t MediaPlayer::setRetransmitEndpoint(const char* addrString,
+                                            uint16_t port) {
+    ALOGV("MediaPlayer::setRetransmitEndpoint(%s:%hu)",
+            addrString ? addrString : "(null)", port);
+
+    Mutex::Autolock _l(mLock);
+    if ((mPlayer != NULL) || (mCurrentState != MEDIA_PLAYER_IDLE))
+        return INVALID_OPERATION;
+
+    if (NULL == addrString) {
+        mRetransmitEndpointValid = false;
+        return OK;
+    }
+
+    struct in_addr saddr;
+    if(!inet_aton(addrString, &saddr)) {
+        return BAD_VALUE;
+    }
+
+    memset(&mRetransmitEndpoint, 0, sizeof(&mRetransmitEndpoint));
+    mRetransmitEndpoint.sin_family = AF_INET;
+    mRetransmitEndpoint.sin_addr   = saddr;
+    mRetransmitEndpoint.sin_port   = htons(port);
+    mRetransmitEndpointValid       = true;
+
+    return OK;
 }
 
 void MediaPlayer::notify(int msg, int ext1, int ext2, const Parcel *obj)

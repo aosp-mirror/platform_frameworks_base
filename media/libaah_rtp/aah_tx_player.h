@@ -63,16 +63,8 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
                                     Parcel* records);
     virtual status_t    setVolume(float leftVolume, float rightVolume);
     virtual status_t    setAudioStreamType(audio_stream_type_t streamType);
-
-    // invoke method IDs
-    enum {
-        // set the IP address and port of the A@H receiver
-        kInvokeSetAAHDstIPPort = 1,
-
-        // set the destination IP address and port (and perhaps any additional
-        // parameters added in the future) packaged in one string
-        kInvokeSetAAHConfigBlob,
-    };
+    virtual status_t    setRetransmitEndpoint(
+                            const struct sockaddr_in* endpoint);
 
     static const int64_t kAAHRetryKeepAroundTimeNs;
 

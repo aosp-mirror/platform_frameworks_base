@@ -17,6 +17,8 @@
 #ifndef ANDROID_MEDIAPLAYER_H
 #define ANDROID_MEDIAPLAYER_H
 
+#include <arpa/inet.h>
+
 #include <binder/IMemory.h>
 #include <media/IMediaPlayerClient.h>
 #include <media/IMediaPlayer.h>
@@ -204,6 +206,7 @@ public:
             status_t        attachAuxEffect(int effectId);
             status_t        setParameter(int key, const Parcel& request);
             status_t        getParameter(int key, Parcel* reply);
+            status_t        setRetransmitEndpoint(const char* addrString, uint16_t port);
 
 private:
             void            clear_l();
@@ -212,6 +215,7 @@ private:
             status_t        getDuration_l(int *msec);
             status_t        attachNewPlayer(const sp<IMediaPlayer>& player);
             status_t        reset_l();
+            status_t        doSetRetransmitEndpoint(const sp<IMediaPlayer>& player);
 
     sp<IMediaPlayer>            mPlayer;
     thread_id_t                 mLockThreadId;
@@ -234,6 +238,8 @@ private:
     int                         mVideoHeight;
     int                         mAudioSessionId;
     float                       mSendLevel;
+    struct sockaddr_in          mRetransmitEndpoint;
+    bool                        mRetransmitEndpointValid;
 };
 
 }; // namespace android

@@ -23,6 +23,10 @@
 #include <utils/KeyedVector.h>
 #include <system/audio.h>
 
+// Fwd decl to make sure everyone agrees that the scope of struct sockaddr_in is
+// global, and not in android::
+struct sockaddr_in;
+
 namespace android {
 
 class Parcel;
@@ -59,6 +63,7 @@ public:
     virtual status_t        attachAuxEffect(int effectId) = 0;
     virtual status_t        setParameter(int key, const Parcel& request) = 0;
     virtual status_t        getParameter(int key, Parcel* reply) = 0;
+    virtual status_t        setRetransmitEndpoint(const struct sockaddr_in* endpoint) = 0;
 
     // Invoke a generic method on the player by using opaque parcels
     // for the request and reply.
