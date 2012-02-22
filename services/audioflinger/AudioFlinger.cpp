@@ -2891,8 +2891,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             // output audio to hardware
             while (frameCount) {
                 buffer.frameCount = frameCount;
-                activeTrack->getNextBuffer(&buffer,
-                                           AudioBufferProvider::kInvalidPTS);
+                activeTrack->getNextBuffer(&buffer);
                 if (CC_UNLIKELY(buffer.raw == NULL)) {
                     memset(curBuf, 0, frameCount * mFrameSize);
                     break;
@@ -3398,11 +3397,14 @@ AudioFlinger::ThreadBase::TrackBase::~TrackBase()
     }
 }
 
+// AudioBufferProvider interface
+// getNextBuffer() = 0;
+// This implementation of releaseBuffer() is used by Track and RecordTrack, but not TimedTrack
 void AudioFlinger::ThreadBase::TrackBase::releaseBuffer(AudioBufferProvider::Buffer* buffer)
 {
     buffer->raw = NULL;
     mFrameCount = buffer->frameCount;
-    step();
+    (void) step();      // ignore return value of step()
     buffer->frameCount = 0;
 }
 
@@ -3548,6 +3550,7 @@ void AudioFlinger::PlaybackThread::Track::dump(char* buffer, size_t size)
             (int)mAuxBuffer);
 }
 
+// AudioBufferProvider interface
 status_t AudioFlinger::PlaybackThread::Track::getNextBuffer(
     AudioBufferProvider::Buffer* buffer, int64_t pts)
 {
@@ -4096,6 +4099,7 @@ void AudioFlinger::PlaybackThread::TimedTrack::timedYieldSilence(
     mTimedAudioOutputOnTime = false;
 }
 
+// AudioBufferProvider interface
 void AudioFlinger::PlaybackThread::TimedTrack::releaseBuffer(
     AudioBufferProvider::Buffer* buffer) {
 
@@ -4181,6 +4185,7 @@ AudioFlinger::RecordThread::RecordTrack::~RecordTrack()
     }
 }
 
+// AudioBufferProvider interface
 status_t AudioFlinger::RecordThread::RecordTrack::getNextBuffer(AudioBufferProvider::Buffer* buffer, int64_t pts)
 {
     audio_track_cblk_t* cblk = this->cblk();
@@ -4868,8 +4873,7 @@ bool AudioFlinger::RecordThread::threadLoop()
             }
 
             buffer.frameCount = mFrameCount;
-            if (CC_LIKELY(mActiveTrack->getNextBuffer(
-                    &buffer, AudioBufferProvider::kInvalidPTS) == NO_ERROR)) {
+            if (CC_LIKELY(mActiveTrack->getNextBuffer(&buffer) == NO_ERROR)) {
                 size_t framesOut = buffer.frameCount;
                 if (mResampler == NULL) {
                     // no resampling
@@ -5147,6 +5151,7 @@ status_t AudioFlinger::RecordThread::dump(int fd, const Vector<String16>& args)
     return NO_ERROR;
 }
 
+// AudioBufferProvider interface
 status_t AudioFlinger::RecordThread::getNextBuffer(AudioBufferProvider::Buffer* buffer, int64_t pts)
 {
     size_t framesReq = buffer->frameCount;
@@ -5185,6 +5190,7 @@ status_t AudioFlinger::RecordThread::getNextBuffer(AudioBufferProvider::Buffer* 
     return NO_ERROR;
 }
 
+// AudioBufferProvider interface
 void AudioFlinger::RecordThread::releaseBuffer(AudioBufferProvider::Buffer* buffer)
 {
     mRsmpInIndex += buffer->frameCount;
