@@ -552,13 +552,17 @@ public class WebView extends AbsoluteLayout
                         && TextUtils.regionMatches(text, 0, original, 0,
                                 textLength);
             }
+            boolean sendChange = false;
             if (isCharacterAdd) {
-                sendCharacter(text.charAt(textLength - 1));
+                sendChange = !sendCharacter(text.charAt(textLength - 1));
             } else if (isCharacterDelete) {
                 sendDeleteKey();
-            } else if (textLength != originalLength ||
-                    !TextUtils.regionMatches(text, 0, original, 0,
-                            textLength)) {
+            } else {
+                sendChange = (textLength != originalLength) ||
+                        !TextUtils.regionMatches(text, 0, original, 0,
+                                textLength);
+            }
+            if (sendChange) {
                 // Send a message so that key strokes and text replacement
                 // do not come out of order.
                 Message replaceMessage = mPrivateHandler.obtainMessage(
@@ -572,18 +576,20 @@ public class WebView extends AbsoluteLayout
          * Send a single character to the WebView as a key down and up event.
          * @param c The character to be sent.
          */
-        private void sendCharacter(char c) {
+        private boolean sendCharacter(char c) {
             if (mKeyCharacterMap == null) {
                 mKeyCharacterMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
             }
             char[] chars = new char[1];
             chars[0] = c;
             KeyEvent[] events = mKeyCharacterMap.getEvents(chars);
-            if (events != null) {
+            boolean mapsToKeyEvent = (events != null);
+            if (mapsToKeyEvent) {
                 for (KeyEvent event : events) {
                     sendKeyEvent(event);
                 }
             }
+            return mapsToKeyEvent;
         }
 
         /**
@@ -1418,7 +1424,7 @@ public class WebView extends AbsoluteLayout
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_STORAGE_CHANGED);
         sTrustStorageListener = new TrustStorageListener();
-        Intent current = 
+        Intent current =
             context.getApplicationContext().registerReceiver(sTrustStorageListener, filter);
         if (current != null) {
             handleCertTrustChanged();
