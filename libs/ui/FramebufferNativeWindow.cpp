@@ -100,6 +100,18 @@ FramebufferNativeWindow::FramebufferNativeWindow()
         mNumFreeBuffers = NUM_FRAME_BUFFERS;
         mBufferHead = mNumBuffers-1;
 
+        /*
+         * This does not actually change the framebuffer format. It merely
+         * fakes this format to surfaceflinger so that when it creates
+         * framebuffer surfaces it will use this format. It's really a giant
+         * HACK to allow interworking with buggy gralloc+GPU driver
+         * implementations. You should *NEVER* need to set this for shipping
+         * devices.
+         */
+#ifdef FRAMEBUFFER_FORCE_FORMAT
+        *((uint32_t *)&fbDev->format) = FRAMEBUFFER_FORCE_FORMAT;
+#endif
+
         for (i = 0; i < mNumBuffers; i++)
         {
                 buffers[i] = new NativeBuffer(
