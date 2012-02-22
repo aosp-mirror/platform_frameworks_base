@@ -2035,13 +2035,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             child = mAdapter.getView(position, scrapView, this);
-            if (mAdapterHasStableIds) {
-                LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                if (lp == null) {
-                    lp = (LayoutParams) generateDefaultLayoutParams();
-                }
-                lp.itemId = mAdapter.getItemId(position);
-            }
 
             if (ViewDebug.TRACE_RECYCLER) {
                 ViewDebug.trace(child, ViewDebug.RecyclerTraceType.BIND_VIEW,
@@ -2070,6 +2063,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 ViewDebug.trace(child, ViewDebug.RecyclerTraceType.NEW_VIEW,
                         position, getChildCount());
             }
+        }
+
+        if (mAdapterHasStableIds) {
+            final ViewGroup.LayoutParams vlp = child.getLayoutParams();
+            LayoutParams lp;
+            if (vlp == null) {
+                lp = (LayoutParams) generateDefaultLayoutParams();
+            } else if (!checkLayoutParams(vlp)) {
+                lp = (LayoutParams) generateLayoutParams(vlp);
+            } else {
+                lp = (LayoutParams) vlp;
+            }
+            lp.itemId = mAdapter.getItemId(position);
+            child.setLayoutParams(lp);
         }
 
         return child;
@@ -5380,6 +5387,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mResurrectToPosition = INVALID_POSITION;
             resurrectSelection();
         }
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
+        return new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, 0);
     }
 
     @Override
