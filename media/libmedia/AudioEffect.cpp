@@ -202,7 +202,7 @@ bool AudioEffect::getEnabled() const
 status_t AudioEffect::setEnabled(bool enabled)
 {
     if (mStatus != NO_ERROR) {
-        return (mStatus == ALREADY_EXISTS) ? INVALID_OPERATION : mStatus;
+        return (mStatus == ALREADY_EXISTS) ? (status_t) INVALID_OPERATION : mStatus;
     }
 
     status_t status = NO_ERROR;
@@ -263,7 +263,7 @@ status_t AudioEffect::command(uint32_t cmdCode,
 status_t AudioEffect::setParameter(effect_param_t *param)
 {
     if (mStatus != NO_ERROR) {
-        return (mStatus == ALREADY_EXISTS) ? INVALID_OPERATION : mStatus;
+        return (mStatus == ALREADY_EXISTS) ? (status_t) INVALID_OPERATION : mStatus;
     }
 
     if (param == NULL || param->psize == 0 || param->vsize == 0) {
@@ -281,7 +281,7 @@ status_t AudioEffect::setParameter(effect_param_t *param)
 status_t AudioEffect::setParameterDeferred(effect_param_t *param)
 {
     if (mStatus != NO_ERROR) {
-        return (mStatus == ALREADY_EXISTS) ? INVALID_OPERATION : mStatus;
+        return (mStatus == ALREADY_EXISTS) ? (status_t) INVALID_OPERATION : mStatus;
     }
 
     if (param == NULL || param->psize == 0 || param->vsize == 0) {
@@ -307,7 +307,7 @@ status_t AudioEffect::setParameterDeferred(effect_param_t *param)
 status_t AudioEffect::setParameterCommit()
 {
     if (mStatus != NO_ERROR) {
-        return (mStatus == ALREADY_EXISTS) ? INVALID_OPERATION : mStatus;
+        return (mStatus == ALREADY_EXISTS) ? (status_t) INVALID_OPERATION : mStatus;
     }
 
     Mutex::Autolock _l(mCblk->lock);
