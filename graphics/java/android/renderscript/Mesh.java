@@ -631,7 +631,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
-        * Sets the texture coordinate for the last added vertex
+        * Sets the texture coordinate for the vertices that are added after this method call.
         *
         * @param s texture coordinate s
         * @param t texture coordinate t
@@ -648,7 +648,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
-        * Sets the normal vector for the last added vertex
+        * Sets the normal vector for the vertices that are added after this method call.
         *
         * @param x normal vector x
         * @param y normal vector y
@@ -667,7 +667,7 @@ public class Mesh extends BaseObj {
         }
 
         /**
-        * Sets the color for the last added vertex
+        * Sets the color for the vertices that are added after this method call.
         *
         * @param r red component
         * @param g green component

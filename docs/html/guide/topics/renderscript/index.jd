@@ -231,7 +231,8 @@ would block until the value was returned.</p>
 
 <p>
 If you want the Renderscript code to send a value back to the Android framework, use the
-<code>rsSendToClient()</code> function.
+<a href="{@docRoot}reference/renderscript/rs__core_8rsh.html"><code>rsSendToClient()</code></a>
+function.
 </p>
 
 <h3 id="var">Variables</h3>
@@ -256,53 +257,6 @@ public long get_unsignedInteger(){
 }
   </pre>
 
-  <h3 id="pointer">Pointers</h3>
-  <p>Pointers are reflected into the script class itself, located in
-<code>project_root/gen/package/name/ScriptC_renderscript_filename</code>. You
-can declare pointers to a <code>struct</code> or any of the supported Renderscript types, but a
-<code>struct</code> cannot contain pointers or nested arrays. For example, if you declare the
-following pointers to a <code>struct</code> and <code>int32_t</code></p>
-
-<pre>
-typedef struct Point {
-    float2 point;
-} Point_t;
-
-Point_t *touchPoints;
-int32_t *intPointer;
-</pre>
-  <p>then the following code is generated in:</p>
-
-  <pre>
-private ScriptField_Point mExportVar_touchPoints;
-public void bind_touchPoints(ScriptField_Point v) {
-    mExportVar_touchPoints = v;
-    if (v == null) bindAllocation(null, mExportVarIdx_touchPoints);
-    else bindAllocation(v.getAllocation(), mExportVarIdx_touchPoints);
-    }
-
-    public ScriptField_Point get_touchPoints() {
-    return mExportVar_touchPoints;
-    }
-
-    private Allocation mExportVar_intPointer;
-    public void bind_intPointer(Allocation v) {
-    mExportVar_intPointer = v;
-    if (v == null) bindAllocation(null, mExportVarIdx_intPointer);
-    else bindAllocation(v, mExportVarIdx_intPointer);
-    }
-
-    public Allocation get_intPointer() {
-        return mExportVar_intPointer;
-    }
-  </pre>
-
-<p>A <code>get</code> method and a special method named <code>bind_<em>pointer_name</em></code>
-(instead of a <code>set()</code> method) is generated. This method allows you to bind the memory
-that is allocated in the Android VM to the Renderscript runtime (you cannot allocate
-memory in your <code>.rs</code> file). For more information, see <a href="#memory">Working
-with Allocated Memory</a>.
-</p>
 
   <h3 id="struct">Structs</h3>
   <p>Structs are reflected into their own classes, located in
@@ -311,7 +265,8 @@ with Allocated Memory</a>.
     specified number of <code>struct</code>s. For example, if you declare the following struct:</p>
 <pre>
 typedef struct Point {
-float2 point;
+    float2 position;
+    float size;
 } Point_t;
 </pre>
 
@@ -478,7 +433,8 @@ in memory. Each <code>struct</code>'s class defines the following methods and co
       </pre>
 
       <p>If you modify the memory in one memory space and want to push the updates to the rest of
-        the memory spaces, call <code>rsgAllocationSyncAll()</code> in your Renderscript code to
+        the memory spaces, call <a href="{@docRoot}reference/renderscript/rs__graphics_8rsh.html">
+        <code>rsgAllocationSyncAll()</code></a> in your Renderscript code to
         synchronize the memory.</p>
     </li>
 
@@ -510,6 +466,56 @@ Renderscript runtime. When you call a set accessor method on a member, there is 
         you can call <code>copyAll()</code> once, and it synchronizes memory for all the
 properties that are not yet synchronized.</li>
     </ul>
+
+  <h3 id="pointer">Pointers</h3>
+  <p>Pointers are reflected into the script class itself, located in
+<code>project_root/gen/package/name/ScriptC_renderscript_filename</code>. You
+can declare pointers to a <code>struct</code> or any of the supported Renderscript types, but a
+<code>struct</code> cannot contain pointers or nested arrays. For example, if you declare the
+following pointers to a <code>struct</code> and <code>int32_t</code></p>
+
+<pre>
+typedef struct Point {
+    float2 position;
+    float size;
+} Point_t;
+
+Point_t *touchPoints;
+int32_t *intPointer;
+</pre>
+  <p>then the following code is generated in:</p>
+
+<pre>
+private ScriptField_Point mExportVar_touchPoints;
+public void bind_touchPoints(ScriptField_Point v) {
+    mExportVar_touchPoints = v;
+    if (v == null) bindAllocation(null, mExportVarIdx_touchPoints);
+    else bindAllocation(v.getAllocation(), mExportVarIdx_touchPoints);
+}
+
+public ScriptField_Point get_touchPoints() {
+    return mExportVar_touchPoints;
+}
+
+private Allocation mExportVar_intPointer;
+public void bind_intPointer(Allocation v) {
+    mExportVar_intPointer = v;
+    if (v == null) bindAllocation(null, mExportVarIdx_intPointer);
+    else bindAllocation(v, mExportVarIdx_intPointer);
+}
+
+public Allocation get_intPointer() {
+    return mExportVar_intPointer;
+}
+  </pre>
+
+<p>A <code>get</code> method and a special method named <code>bind_<em>pointer_name</em></code>
+(instead of a <code>set()</code> method) is generated. This method allows you to bind the memory
+that is allocated in the Android VM to the Renderscript runtime (you cannot allocate
+memory in your <code>.rs</code> file). For more information, see <a href="#memory">Working
+with Allocated Memory</a>.
+</p>
+
 
   <h2 id="mem-allocation">Memory Allocation APIs</h2>
 
@@ -693,7 +699,8 @@ communicated back to the Android framework layer for efficiency purposes. The la
 that is set from the Android framework is always returned during a call to a <code>get</code>
 method. However, when Android framework code modifies a variable, that change can be communicated to
 the Renderscript runtime automatically or synchronized at a later time. If you need to send data
-from the Renderscript runtime to the Android framework layer, you can use the <code>rsSendToClient()</code> function
+from the Renderscript runtime to the Android framework layer, you can use the
+<a href="{@docRoot}reference/renderscript/rs__core_8rsh.html"><code>rsSendToClient()</code></a> function
 to overcome this limitation.
 </p>
 <p>When working with dynamically allocated memory, any changes at the Renderscript runtime layer are propagated
