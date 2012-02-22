@@ -47,18 +47,15 @@ public class TouchHandler {
         mDistValue = new Float3(0, 0, 45);
         mPosValue = new Float3(0, 4, 0);
 
-        mRotateX = new RotateComponent("RotateX", new Float3(1, 0, 0), mRotateXValue);
-        mRotateY = new RotateComponent("RotateY", new Float3(0, 1, 0), mRotateYValue);
-        mDist = new TranslateComponent("Distance", mDistValue);
-        mPosition = new TranslateComponent("Distance", mPosValue);
-
         // Make a camera transform we can manipulate
         mCameraRig = new CompoundTransform();
         mCameraRig.setName("CameraRig");
-        mCameraRig.addComponent(mPosition);
-        mCameraRig.addComponent(mRotateY);
-        mCameraRig.addComponent(mRotateX);
-        mCameraRig.addComponent(mDist);
+
+        mPosition = mCameraRig.addTranslate("Position", mPosValue);
+        mRotateY  = mCameraRig.addRotate("RotateY", new Float3(0, 1, 0), mRotateYValue);
+        mRotateX  = mCameraRig.addRotate("RotateX", new Float3(1, 0, 0), mRotateXValue);
+        mDist     = mCameraRig.addTranslate("Distance", mDistValue);
+
         scene.appendTransform(mCameraRig);
         mCamera = new Camera();
         mCamera.setTransform(mCameraRig);

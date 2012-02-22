@@ -134,6 +134,24 @@ public class CompoundTransform extends Transform {
         mTransformComponents = new ArrayList<Component>();
     }
 
+    public TranslateComponent addTranslate(String name, Float3 translate) {
+        TranslateComponent c = new TranslateComponent(name, translate);
+        addComponent(c);
+        return c;
+    }
+
+    public RotateComponent addRotate(String name, Float3 axis, float angle) {
+        RotateComponent c = new RotateComponent(name, axis, angle);
+        addComponent(c);
+        return c;
+    }
+
+    public ScaleComponent addScale(String name, Float3 scale) {
+        ScaleComponent c = new ScaleComponent(name, scale);
+        addComponent(c);
+        return c;
+    }
+
     public void addComponent(Component c) {
         if (c.mParent != null) {
             throw new IllegalArgumentException("Transform components may not be shared");

@@ -142,10 +142,14 @@ static void drawAllObjects(rs_allocation allObj) {
         return;
     }
 
-    rsForEach(gVertexParamsScript, nullAlloc, gVertexShaders,
-              gActiveCamera, sizeof(gActiveCamera));
-    rsForEach(gFragmentParamsScript, nullAlloc, gFragmentShaders,
-              gActiveCamera, sizeof(gActiveCamera));
+    if (rsIsObject(gVertexShaders)) {
+        rsForEach(gVertexParamsScript, nullAlloc, gVertexShaders,
+                  gActiveCamera, sizeof(gActiveCamera));
+    }
+    if (rsIsObject(gFragmentShaders)) {
+        rsForEach(gFragmentParamsScript, nullAlloc, gFragmentShaders,
+                  gActiveCamera, sizeof(gActiveCamera));
+    }
 
     // Run the params and cull script
     rsForEach(gCullScript, nullAlloc, allObj, gActiveCamera, sizeof(gActiveCamera));

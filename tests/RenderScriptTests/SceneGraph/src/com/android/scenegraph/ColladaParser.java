@@ -248,17 +248,17 @@ public class ColladaParser {
                 String description = field.getAttribute("sid");
                 if (fieldName.equals("translate")) {
                     Float3 value = getFloat3(field);
-                    current.addComponent(new TranslateComponent(description, value));
+                    current.addTranslate(description, value);
                     //Log.v(TAG, indent + " translate " + description + toString(value));
                 } else if (fieldName.equals("rotate")) {
                     Float4 value = getFloat4(field);
                     //Log.v(TAG, indent + " rotate " + description + toString(value));
                     Float3 axis = new Float3(value.x, value.y, value.z);
-                    current.addComponent(new RotateComponent(description, axis, value.w));
+                    current.addRotate(description, axis, value.w);
                 } else if (fieldName.equals("scale")) {
                     Float3 value = getFloat3(field);
                     //Log.v(TAG, indent + " scale " + description + toString(value));
-                    current.addComponent(new ScaleComponent(description, value));
+                    current.addScale(description, value);
                 } else if (fieldName.equals("instance_geometry")) {
                     getRenderable(field, current);
                 } else if (fieldName.equals("instance_light")) {
