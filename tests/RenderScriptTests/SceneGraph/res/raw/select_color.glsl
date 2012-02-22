@@ -1,7 +1,7 @@
 varying vec2 varTex0;
 
 void main() {
-   vec3 col = texture2D(UNI_Tex0, varTex0).rgb;
+   vec3 col = texture2D(UNI_color, varTex0).rgb;
 
    vec3 desat = vec3(0.299, 0.587, 0.114);
    float lum = dot(desat, col);
