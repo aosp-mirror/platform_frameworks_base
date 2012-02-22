@@ -913,7 +913,7 @@ public abstract class Animation implements Cloneable {
      * 
      * @param interpolatedTime The value of the normalized time (0.0 to 1.0)
      *        after it has been run through the interpolation function.
-     * @param t The Transofrmation object to fill in with the current
+     * @param t The Transformation object to fill in with the current
      *        transforms.
      */
     protected void applyTransformation(float interpolatedTime, Transformation t) {
