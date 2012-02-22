@@ -52,6 +52,9 @@ LOCAL_MODULE:= libandroidfw
 
 LOCAL_MODULE_TAGS := optional
 
+LOCAL_C_INCLUDES := \
+	external/zlib
+
 include $(BUILD_HOST_STATIC_LIBRARY)
 
 
