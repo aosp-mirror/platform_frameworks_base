@@ -30,6 +30,7 @@ import android.util.Log;
 public class Texture2D extends TextureBase {
     String mFileName;
     String mFileDir;
+    int mResourceID;
 
     public Texture2D() {
         super(ScriptC_export.const_TextureType_TEXTURE_2D);
@@ -38,6 +39,17 @@ public class Texture2D extends TextureBase {
     public Texture2D(Allocation tex) {
         super(ScriptC_export.const_TextureType_TEXTURE_2D);
         setTexture(tex);
+    }
+
+    public Texture2D(String dir, String file) {
+        super(ScriptC_export.const_TextureType_TEXTURE_CUBE);
+        setFileDir(dir);
+        setFileName(file);
+    }
+
+    public Texture2D(int resourceID) {
+        super(ScriptC_export.const_TextureType_TEXTURE_2D);
+        mResourceID = resourceID;
     }
 
     public void setFileDir(String dir) {
@@ -62,8 +74,12 @@ public class Texture2D extends TextureBase {
     void load() {
         RenderScriptGL rs = SceneManager.getRS();
         Resources res = SceneManager.getRes();
-        String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);
-        setTexture(SceneManager.loadTexture2D(mFileDir + shortName, rs, res));
+        if (mFileName != null && mFileName.length() > 0) {
+            String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);
+            setTexture(SceneManager.loadTexture2D(mFileDir + shortName, rs, res));
+        } else if (mResourceID != 0) {
+            setTexture(SceneManager.loadTexture2D(mResourceID, rs, res));
+        }
     }
 
     ScriptField_Texture_s getRsData(boolean loadNow) {

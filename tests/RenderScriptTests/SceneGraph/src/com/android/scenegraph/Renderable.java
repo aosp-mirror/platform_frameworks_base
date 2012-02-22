@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import com.android.scenegraph.Float4Param;
+import com.android.scenegraph.MatrixTransform;
 import com.android.scenegraph.SceneManager;
 import com.android.scenegraph.ShaderParam;
 import com.android.scenegraph.TransformParam;
@@ -87,6 +88,10 @@ public class Renderable extends RenderableBase {
 
     public void setMaterialName(String name) {
         mMaterialName = name;
+    }
+
+    public Transform getTransform() {
+        return mTransform;
     }
 
     public void setTransform(Transform t) {
@@ -199,12 +204,14 @@ public class Renderable extends RenderableBase {
         if (mRenderState == null) {
             mRenderState = SceneManager.getDefaultState();
         }
+        if (mTransform == null) {
+            mTransform = SceneManager.getDefaultTransform();
+        }
         updateVertexConstants(rs);
         updateFragmentConstants(rs);
 
-        if (mTransform != null) {
-            mData.transformMatrix = mTransform.getRSData().getAllocation();
-        }
+        mData.transformMatrix = mTransform.getRSData().getAllocation();
+
         mData.name = getNameAlloc(rs);
         mData.render_state = mRenderState.getRSData().getAllocation();
         mData.bVolInitialized = 0;

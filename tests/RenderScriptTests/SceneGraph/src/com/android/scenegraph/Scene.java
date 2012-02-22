@@ -22,6 +22,10 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.android.scenegraph.Camera;
+import com.android.scenegraph.CompoundTransform;
+import com.android.scenegraph.RenderPass;
+import com.android.scenegraph.Renderable;
 import com.android.scenegraph.SceneManager;
 import com.android.scenegraph.TextureBase;
 
@@ -81,6 +85,18 @@ public class Scene extends SceneGraphBase {
         mRootTransforms.appendChild(t);
     }
 
+    public CompoundTransform appendNewCompoundTransform() {
+        CompoundTransform t = new CompoundTransform();
+        appendTransform(t);
+        return t;
+    }
+
+    public MatrixTransform appendNewMatrixTransform() {
+        MatrixTransform t = new MatrixTransform();
+        appendTransform(t);
+        return t;
+    }
+
     // temporary
     public void addToTransformMap(Transform t) {
         mTransformMap.put(t.getName(), t);
@@ -95,6 +111,12 @@ public class Scene extends SceneGraphBase {
             throw new RuntimeException("Adding null object");
         }
         mRenderPasses.add(p);
+    }
+
+    public RenderPass appendNewRenderPass() {
+        RenderPass p = new RenderPass();
+        appendRenderPass(p);
+        return p;
     }
 
     public void clearRenderPasses() {
@@ -113,6 +135,12 @@ public class Scene extends SceneGraphBase {
             throw new RuntimeException("Adding null object");
         }
         mCameras.add(c);
+    }
+
+    public Camera appendNewCamera() {
+        Camera c = new Camera();
+        appendCamera(c);
+        return c;
     }
 
     public void appendShader(FragmentShader f) {
@@ -142,7 +170,15 @@ public class Scene extends SceneGraphBase {
             throw new RuntimeException("Adding null object");
         }
         mRenderables.add(d);
-        mRenderableMap.put(d.getName(), d);
+        if (d.getName() != null) {
+            mRenderableMap.put(d.getName(), d);
+        }
+    }
+
+    public Renderable appendNewRenderable() {
+        Renderable r = new Renderable();
+        appendRenderable(r);
+        return r;
     }
 
     public ArrayList<RenderableBase> getRenderables() {
