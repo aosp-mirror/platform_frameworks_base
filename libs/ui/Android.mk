@@ -29,7 +29,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
 	libEGL \
-	libpixelflinger \
 	libhardware
 
 LOCAL_MODULE:= libui
