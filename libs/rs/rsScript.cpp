@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2009-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ void rsi_ScriptForEach(Context *rsc, RsScript vs, uint32_t slot,
                        RsAllocation vain, RsAllocation vaout,
                        const void *params, size_t paramLen) {
     Script *s = static_cast<Script *>(vs);
-    s->runForEach(rsc,
+    s->runForEach(rsc, slot,
                   static_cast<const Allocation *>(vain), static_cast<Allocation *>(vaout),
                   params, paramLen);
 

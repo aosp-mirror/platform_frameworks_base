@@ -64,11 +64,6 @@ public class RSTestCore {
 
         unitTests = new ArrayList<UnitTest>();
 
-        unitTests.add(new UT_mesh(this, mRes, mCtx));
-        unitTests.add(new UT_element(this, mRes, mCtx));
-        unitTests.add(new UT_sampler(this, mRes, mCtx));
-        unitTests.add(new UT_program_store(this, mRes, mCtx));
-        unitTests.add(new UT_program_raster(this, mRes, mCtx));
         unitTests.add(new UT_primitives(this, mRes, mCtx));
         unitTests.add(new UT_constant(this, mRes, mCtx));
         unitTests.add(new UT_vector(this, mRes, mCtx));
@@ -79,10 +74,17 @@ public class RSTestCore {
         unitTests.add(new UT_alloc(this, mRes, mCtx));
         unitTests.add(new UT_refcount(this, mRes, mCtx));
         unitTests.add(new UT_foreach(this, mRes, mCtx));
+        unitTests.add(new UT_noroot(this, mRes, mCtx));
         unitTests.add(new UT_atomic(this, mRes, mCtx));
         unitTests.add(new UT_struct(this, mRes, mCtx));
         unitTests.add(new UT_math(this, mRes, mCtx));
+        unitTests.add(new UT_mesh(this, mRes, mCtx));
+        unitTests.add(new UT_element(this, mRes, mCtx));
+        unitTests.add(new UT_sampler(this, mRes, mCtx));
+        unitTests.add(new UT_program_store(this, mRes, mCtx));
+        unitTests.add(new UT_program_raster(this, mRes, mCtx));
         unitTests.add(new UT_fp_mad(this, mRes, mCtx));
+
         /*
         unitTests.add(new UnitTest(null, "<Pass>", 1));
         unitTests.add(new UnitTest());

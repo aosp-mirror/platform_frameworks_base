@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2009-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,7 @@ uint32_t ScriptC::run(Context *rsc) {
 
 
 void ScriptC::runForEach(Context *rsc,
+                         uint32_t slot,
                          const Allocation * ain,
                          Allocation * aout,
                          const void * usr,
@@ -138,7 +139,7 @@ void ScriptC::runForEach(Context *rsc,
 
     setupGLState(rsc);
     setupScript(rsc);
-    rsc->mHal.funcs.script.invokeForEach(rsc, this, 0, ain, aout, usr, usrBytes, sc);
+    rsc->mHal.funcs.script.invokeForEach(rsc, this, slot, ain, aout, usr, usrBytes, sc);
 }
 
 void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, size_t len) {

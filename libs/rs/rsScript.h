@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2009-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,7 @@ public:
     virtual bool freeChildren();
 
     virtual void runForEach(Context *rsc,
+                            uint32_t slot,
                             const Allocation * ain,
                             Allocation * aout,
                             const void * usr,
