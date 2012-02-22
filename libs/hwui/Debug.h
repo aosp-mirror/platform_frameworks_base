@@ -30,7 +30,7 @@
 #define DEBUG_MEMORY_USAGE 0
 
 // Turn on to enable debugging of cache flushes
-#define DEBUG_CACHE_FLUSH 1
+#define DEBUG_CACHE_FLUSH 0
 
 // Turn on to enable layers debugging when rendered as regions
 #define DEBUG_LAYERS_AS_REGIONS 0
