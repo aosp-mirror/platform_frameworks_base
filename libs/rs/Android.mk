@@ -127,7 +127,12 @@ LOCAL_SRC_FILES:= \
 	driver/rsdSampler.cpp \
 	driver/rsdShader.cpp \
 	driver/rsdShaderCache.cpp \
-	driver/rsdVertexArray.cpp
+	driver/rsdVertexArray.cpp \
+	RenderScript.cpp \
+	BaseObj.cpp \
+	Element.cpp \
+	Type.cpp \
+	Allocation.cpp
 
 LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc libbcinfo libgui
 
