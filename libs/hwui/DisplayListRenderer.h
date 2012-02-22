@@ -462,7 +462,8 @@ private:
         SkPath* pathCopy = mPathMap.valueFor(path);
         if (pathCopy == NULL || pathCopy->getGenerationID() != path->getGenerationID()) {
             pathCopy = new SkPath(*path);
-            mPathMap.add(path, pathCopy);
+            // replaceValueFor() performs an add if the entry doesn't exist
+            mPathMap.replaceValueFor(path, pathCopy);
             mPaths.add(pathCopy);
         }
 
@@ -478,7 +479,8 @@ private:
         SkPaint* paintCopy = mPaintMap.valueFor(paint);
         if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
             paintCopy = new SkPaint(*paint);
-            mPaintMap.add(paint, paintCopy);
+            // replaceValueFor() performs an add if the entry doesn't exist
+            mPaintMap.replaceValueFor(paint, paintCopy);
             mPaints.add(paintCopy);
         }
 
@@ -520,7 +522,8 @@ private:
         // TODO: We also need to handle generation ID changes in compose shaders
         if (shaderCopy == NULL || shaderCopy->getGenerationId() != shader->getGenerationId()) {
             shaderCopy = shader->copy();
-            mShaderMap.add(shader, shaderCopy);
+            // replaceValueFor() performs an add if the entry doesn't exist
+            mShaderMap.replaceValueFor(shader, shaderCopy);
             mShaders.add(shaderCopy);
             Caches::getInstance().resourceCache.incrementRefcount(shaderCopy);
         }
