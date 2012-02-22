@@ -297,6 +297,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     CharSequence mLastTitle;
     boolean mWasPaused;
 
+    // Used to save animation distances between the time they are calculated and when they are 
+    // used.
+    int mAnimDw;
+    int mAnimDh;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
            int viewVisibility) {
@@ -973,7 +978,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     // This must be called while inside a transaction.  Returns true if
     // there is more animation to run.
-    boolean stepAnimationLocked(long currentTime, int dw, int dh) {
+    boolean stepAnimationLocked(long currentTime) {
         if (!mService.mDisplayFrozen && mService.mPolicy.isScreenOnFully()) {
             // We will run animations as long as the display isn't frozen.
 
@@ -985,8 +990,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                         WindowManagerService.TAG, "Starting animation in " + this +
                         " @ " + currentTime + ": ww=" + mFrame.width() +
                         " wh=" + mFrame.height() +
-                        " dw=" + dw + " dh=" + dh + " scale=" + mService.mWindowAnimationScale);
-                    mAnimation.initialize(mFrame.width(), mFrame.height(), dw, dh);
+                        " dw=" + mAnimDw + " dh=" + mAnimDh +
+                        " scale=" + mService.mWindowAnimationScale);
+                    mAnimation.initialize(mFrame.width(), mFrame.height(), mAnimDw, mAnimDh);
                     mAnimation.setStartTime(currentTime);
                     mLocalAnimating = true;
                     mAnimating = true;
