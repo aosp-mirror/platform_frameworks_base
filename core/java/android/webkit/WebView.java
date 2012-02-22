@@ -908,14 +908,22 @@ public class WebView extends AbsoluteLayout
     // know to handle Shift and arrows natively first
     private boolean mAccessibilityScriptInjected;
 
+
+    /**
+     * How long the caret handle will last without being touched.
+     */
+    private static final long CARET_HANDLE_STAMINA_MS = 3000;
+
     private Drawable mSelectHandleLeft;
     private Drawable mSelectHandleRight;
+    private Drawable mSelectHandleCenter;
     private Rect mSelectCursorBase = new Rect();
     private int mSelectCursorBaseLayerId;
     private Rect mSelectCursorExtent = new Rect();
     private int mSelectCursorExtentLayerId;
     private Rect mSelectDraggingCursor;
     private Point mSelectDraggingOffset = new Point();
+    private boolean mIsCaretSelection;
     static final int HANDLE_ID_START = 0;
     static final int HANDLE_ID_END = 1;
     static final int HANDLE_ID_BASE = 2;
@@ -1012,6 +1020,7 @@ public class WebView extends AbsoluteLayout
     static final int COPY_TO_CLIPBOARD                  = 141;
     static final int INIT_EDIT_FIELD                    = 142;
     static final int REPLACE_TEXT                       = 143;
+    static final int CLEAR_CARET_HANDLE                 = 144;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -1418,7 +1427,7 @@ public class WebView extends AbsoluteLayout
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_STORAGE_CHANGED);
         sTrustStorageListener = new TrustStorageListener();
-        Intent current = 
+        Intent current =
             context.getApplicationContext().registerReceiver(sTrustStorageListener, filter);
         if (current != null) {
             handleCertTrustChanged();
@@ -5108,31 +5117,45 @@ public class WebView extends AbsoluteLayout
     }
 
     private void drawTextSelectionHandles(Canvas canvas) {
-        if (mSelectHandleLeft == null) {
-            mSelectHandleLeft = mContext.getResources().getDrawable(
-                    com.android.internal.R.drawable.text_select_handle_left);
-        }
         int[] handles = new int[4];
         getSelectionHandles(handles);
         int start_x = contentToViewDimension(handles[0]);
         int start_y = contentToViewDimension(handles[1]);
         int end_x = contentToViewDimension(handles[2]);
         int end_y = contentToViewDimension(handles[3]);
-        // Magic formula copied from TextView
-        start_x -= (mSelectHandleLeft.getIntrinsicWidth() * 3) / 4;
-        mSelectHandleLeft.setBounds(start_x, start_y,
-                start_x + mSelectHandleLeft.getIntrinsicWidth(),
-                start_y + mSelectHandleLeft.getIntrinsicHeight());
-        if (mSelectHandleRight == null) {
-            mSelectHandleRight = mContext.getResources().getDrawable(
-                    com.android.internal.R.drawable.text_select_handle_right);
+
+        if (mIsCaretSelection) {
+            if (mSelectHandleCenter == null) {
+                mSelectHandleCenter = mContext.getResources().getDrawable(
+                        com.android.internal.R.drawable.text_select_handle_middle);
+            }
+            // Caret handle is centered
+            start_x -= (mSelectHandleCenter.getIntrinsicWidth() / 2);
+            mSelectHandleCenter.setBounds(start_x, start_y,
+                    start_x + mSelectHandleCenter.getIntrinsicWidth(),
+                    start_y + mSelectHandleCenter.getIntrinsicHeight());
+            mSelectHandleCenter.draw(canvas);
+        } else {
+            if (mSelectHandleLeft == null) {
+                mSelectHandleLeft = mContext.getResources().getDrawable(
+                        com.android.internal.R.drawable.text_select_handle_left);
+            }
+            // Magic formula copied from TextView
+            start_x -= (mSelectHandleLeft.getIntrinsicWidth() * 3) / 4;
+            mSelectHandleLeft.setBounds(start_x, start_y,
+                    start_x + mSelectHandleLeft.getIntrinsicWidth(),
+                    start_y + mSelectHandleLeft.getIntrinsicHeight());
+            if (mSelectHandleRight == null) {
+                mSelectHandleRight = mContext.getResources().getDrawable(
+                        com.android.internal.R.drawable.text_select_handle_right);
+            }
+            end_x -= mSelectHandleRight.getIntrinsicWidth() / 4;
+            mSelectHandleRight.setBounds(end_x, end_y,
+                    end_x + mSelectHandleRight.getIntrinsicWidth(),
+                    end_y + mSelectHandleRight.getIntrinsicHeight());
+            mSelectHandleLeft.draw(canvas);
+            mSelectHandleRight.draw(canvas);
         }
-        end_x -= mSelectHandleRight.getIntrinsicWidth() / 4;
-        mSelectHandleRight.setBounds(end_x, end_y,
-                end_x + mSelectHandleRight.getIntrinsicWidth(),
-                end_y + mSelectHandleRight.getIntrinsicHeight());
-        mSelectHandleLeft.draw(canvas);
-        mSelectHandleRight.draw(canvas);
     }
 
     /**
@@ -5554,6 +5577,9 @@ public class WebView extends AbsoluteLayout
                     + "keyCode=" + keyCode
                     + ", " + event + ", unicode=" + event.getUnicodeChar());
         }
+        if (mIsCaretSelection) {
+            selectionDone();
+        }
         if (mBlockWebkitViewMessages) {
             return false;
         }
@@ -5866,6 +5892,7 @@ public class WebView extends AbsoluteLayout
 
     private boolean startSelectActionMode() {
         mSelectCallback = new SelectActionModeCallback();
+        mSelectCallback.setTextSelected(!mIsCaretSelection);
         mSelectCallback.setWebView(this);
         if (startActionMode(mSelectCallback) == null) {
             // There is no ActionMode, so do not allow the user to modify a
@@ -5886,9 +5913,13 @@ public class WebView extends AbsoluteLayout
 
     private boolean setupWebkitSelect() {
         syncSelectionCursors();
-        if (!startSelectActionMode()) {
-            selectionDone();
-            return false;
+        ClipboardManager cm = (ClipboardManager)(mContext
+                .getSystemService(Context.CLIPBOARD_SERVICE));
+        if (!mIsCaretSelection || cm.hasPrimaryClip()) {
+            if (!startSelectActionMode()) {
+                selectionDone();
+                return false;
+            }
         }
         mSelectingText = true;
         mTouchMode = TOUCH_DRAG_MODE;
@@ -5897,6 +5928,9 @@ public class WebView extends AbsoluteLayout
 
     private void updateWebkitSelection() {
         int[] handles = null;
+        if (mIsCaretSelection) {
+            mSelectCursorExtent.set(mSelectCursorBase);
+        }
         if (mSelectingText) {
             handles = new int[4];
             handles[0] = mSelectCursorBase.centerX();
@@ -5908,6 +5942,14 @@ public class WebView extends AbsoluteLayout
         }
         mWebViewCore.removeMessages(EventHub.SELECT_TEXT);
         mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SELECT_TEXT, handles);
+    }
+
+    private void resetCaretTimer() {
+        mPrivateHandler.removeMessages(CLEAR_CARET_HANDLE);
+        if (!mSelectionStarted) {
+            mPrivateHandler.sendEmptyMessageDelayed(CLEAR_CARET_HANDLE,
+                    CARET_HANDLE_STAMINA_MS);
+        }
     }
 
     /**
@@ -5937,9 +5979,14 @@ public class WebView extends AbsoluteLayout
             mSelectingText = false;
             // finish is idempotent, so this is fine even if selectionDone was
             // called by mSelectCallback.onDestroyActionMode
-            mSelectCallback.finish();
-            mSelectCallback = null;
-            updateWebkitSelection();
+            if (mSelectCallback != null) {
+                mSelectCallback.finish();
+                mSelectCallback = null;
+            }
+            if (!mIsCaretSelection) {
+                updateWebkitSelection();
+            }
+            mIsCaretSelection = false;
             invalidate(); // redraw without selection
             mAutoScrollX = 0;
             mAutoScrollY = 0;
@@ -6553,18 +6600,26 @@ public class WebView extends AbsoluteLayout
                                 (eventTime - mLastTouchUpTime), eventTime);
                     }
                     mSelectionStarted = false;
-                    if (mSelectingText && mSelectHandleLeft != null
-                            && mSelectHandleRight != null) {
+                    if (mSelectingText) {
                         int shiftedY = y - getTitleHeight() + mScrollY;
                         int shiftedX = x + mScrollX;
-                        if (mSelectHandleLeft.getBounds()
+                        if (mSelectHandleCenter != null && mSelectHandleCenter.getBounds()
                                 .contains(shiftedX, shiftedY)) {
                             mSelectionStarted = true;
                             mSelectDraggingCursor = mSelectCursorBase;
-                        } else if (mSelectHandleRight.getBounds()
+                            mPrivateHandler.removeMessages(CLEAR_CARET_HANDLE);
+                        } else if (mSelectHandleLeft != null
+                                && mSelectHandleLeft.getBounds()
+                                    .contains(shiftedX, shiftedY)) {
+                                mSelectionStarted = true;
+                                mSelectDraggingCursor = mSelectCursorBase;
+                        } else if (mSelectHandleRight != null
+                                && mSelectHandleRight.getBounds()
                                 .contains(shiftedX, shiftedY)) {
                             mSelectionStarted = true;
                             mSelectDraggingCursor = mSelectCursorExtent;
+                        } else if (mIsCaretSelection) {
+                            selectionDone();
                         }
                         if (mSelectDraggingCursor != null) {
                             mSelectDraggingOffset.set(
@@ -7215,6 +7270,9 @@ public class WebView extends AbsoluteLayout
 
         if (mSelectingText) {
             mSelectionStarted = false;
+            if (mIsCaretSelection) {
+                resetCaretTimer();
+            }
             syncSelectionCursors();
             invalidate();
         }
@@ -9173,6 +9231,9 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 }
+                case CLEAR_CARET_HANDLE:
+                    selectionDone();
+                    break;
 
                 default:
                     super.handleMessage(msg);
@@ -9423,13 +9484,18 @@ public class WebView extends AbsoluteLayout
                 mInputConnection.setSelection(data.mStart, data.mEnd);
             }
         }
-
         nativeSetTextSelection(mNativeClass, data.mSelectTextPtr);
         if (data.mSelectTextPtr != 0) {
+            mIsCaretSelection = (mFieldPointer == nodePointer)
+                    && (mFieldPointer != 0)
+                    && (data.mStart == data.mEnd);
             if (!mSelectingText) {
                 setupWebkitSelect();
             } else if (!mSelectionStarted) {
                 syncSelectionCursors();
+            }
+            if (mIsCaretSelection) {
+                resetCaretTimer();
             }
         } else {
             selectionDone();

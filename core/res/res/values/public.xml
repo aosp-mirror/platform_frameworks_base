@@ -962,6 +962,7 @@
   <java-symbol type="drawable" name="tab_bottom_right_v4" />
   <java-symbol type="drawable" name="tab_indicator_v4" />
   <java-symbol type="drawable" name="text_select_handle_left" />
+  <java-symbol type="drawable" name="text_select_handle_middle" />
   <java-symbol type="drawable" name="text_select_handle_right" />
   <java-symbol type="drawable" name="unknown_image" />
   <java-symbol type="drawable" name="unlock_default" />

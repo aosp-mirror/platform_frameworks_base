@@ -2834,7 +2834,7 @@ public final class WebViewCore {
     // called by JNI
     private void initEditField(int pointer, String text, int inputType,
             boolean isSpellCheckEnabled, boolean nextFieldIsText,
-            String label, int start, int end) {
+            String label, int start, int end, int selectionPtr) {
         if (mWebView == null) {
             return;
         }
@@ -2844,7 +2844,7 @@ public final class WebViewCore {
                 WebView.INIT_EDIT_FIELD, initData).sendToTarget();
         Message.obtain(mWebView.mPrivateHandler,
                 WebView.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
-                0, new TextSelectionData(start, end, 0))
+                0, new TextSelectionData(start, end, selectionPtr))
                 .sendToTarget();
     }
 
