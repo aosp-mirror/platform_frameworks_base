@@ -167,7 +167,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_001
     @LargeTest
     public void testStressAddRemoveVideoItem() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -241,7 +240,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_002
     @LargeTest
     public void testStressAddRemoveImageItem() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -310,7 +308,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_003
     @LargeTest
     public void testStressAddRemoveTransition() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -428,7 +425,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_004
     @LargeTest
     public void testStressAddRemoveOverlay() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -493,7 +489,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_005
     @LargeTest
     public void testStressAddRemoveEffects() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -590,7 +585,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_006
     @LargeTest
     public void testStressThumbnailVideoItem() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -651,7 +645,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_007
     @LargeTest
     public void testStressMediaProperties() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -747,7 +740,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_008
     @LargeTest
     public void testStressInsertMovieItems() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -759,7 +751,7 @@ public class VideoEditorStressTest
             "MPEG4_SP_640x480_15fps_1200kbps_AACLC_48khz_64kbps_m_1_17.3gp";
         final String[] loggingInfo = new String[1];
         int i = 0;
-        writeTestCaseHeader("testStressInsertMoveItems");
+        writeTestCaseHeader("testStressInsertMovieItems");
 
         final MediaVideoItem mediaItem1 = new MediaVideoItem(mVideoEditor,
             "m1", VideoItemFileName1, renderingMode);
@@ -801,7 +793,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_009
     @LargeTest
     public void testStressLoadAndSave() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -916,7 +907,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_010
     @LargeTest
     public void testStressMultipleExport() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -1007,7 +997,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_011
     @LargeTest
     public void testStressOverlayTransKenBurn() throws Exception {
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -1094,7 +1083,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_012
     @LargeTest
     public void testStressAudioTrackVideo() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH +
@@ -1147,7 +1135,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_013
     @LargeTest
     public void testStressStoryBoard() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH +
@@ -1237,7 +1224,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_014
     @LargeTest
     public void testStressAudioTrackOnly() throws Exception {
 
@@ -1267,7 +1253,6 @@ public class VideoEditorStressTest
      *
      * @throws Exception
      */
-    // TODO : remove TC_STR_016  -- New Test Case
     @LargeTest
     public void testStressThumbnailImageItem() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_640x480.jpg";
