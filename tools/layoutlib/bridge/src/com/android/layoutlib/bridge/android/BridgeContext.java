@@ -60,6 +60,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -429,6 +430,10 @@ public final class BridgeContext extends Context {
         // needed by SearchView
         if (INPUT_METHOD_SERVICE.equals(service)) {
             return null;
+        }
+
+        if (POWER_SERVICE.equals(service)) {
+            return new PowerManager(new BridgePowerManager(), new Handler());
         }
 
         throw new UnsupportedOperationException("Unsupported Service: " + service);
