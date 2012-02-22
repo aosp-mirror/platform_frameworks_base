@@ -86,18 +86,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private static final String LOG_TAG = "AccessibilityManagerService";
 
-    private static final String FUNCTION_REGISTER_EVENT_LISTENER =
-        "registerEventListener";
+    private static final String FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE =
+        "registerUiTestAutomationService";
 
     private static int sIdCounter = 0;
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
 
     private static final int DO_SET_SERVICE_INFO = 10;
-
-    public static final int ACTIVE_WINDOW_ID = -1;
-
-    public static final long ROOT_NODE_ID = -1;
 
     private static int sNextWindowId;
 
@@ -241,19 +237,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
                     synchronized (mLock) {
                         populateAccessibilityServiceListLocked();
-                        // get accessibility enabled setting on boot
-                        mIsAccessibilityEnabled = Settings.Secure.getInt(
-                                mContext.getContentResolver(),
-                                Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
-
-                        manageServicesLocked();
-
-                        // get touch exploration enabled setting on boot
-                        mIsTouchExplorationEnabled = Settings.Secure.getInt(
-                                mContext.getContentResolver(),
-                                Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
+                        handleAccessibilityEnabledSettingChangedLocked();
+                        handleTouchExplorationEnabledSettingChangedLocked();
                         updateInputFilterLocked();
-
                         sendStateToClientsLocked();
                     }
                     
@@ -301,9 +287,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 @Override
                 public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
-
                     synchronized (mLock) {
                         handleAccessibilityEnabledSettingChangedLocked();
+                        updateInputFilterLocked();
+                        sendStateToClientsLocked();
                     }
                 }
             });
@@ -315,11 +302,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     @Override
                     public void onChange(boolean selfChange) {
                         super.onChange(selfChange);
-
                         synchronized (mLock) {
-                            mIsTouchExplorationEnabled = Settings.Secure.getInt(
-                                    mContext.getContentResolver(),
-                                    Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
+                            handleTouchExplorationEnabledSettingChangedLocked();
                             updateInputFilterLocked();
                             sendStateToClientsLocked();
                         }
@@ -333,7 +317,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 @Override
                 public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
-
                     synchronized (mLock) {
                         manageServicesLocked();
                     }
@@ -475,7 +458,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public void registerUiTestAutomationService(IEventListener listener,
             AccessibilityServiceInfo accessibilityServiceInfo) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
-                FUNCTION_REGISTER_EVENT_LISTENER);
+                FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE);
         ComponentName componentName = new ComponentName("foo.bar",
                 "AutomationAccessibilityService");
         synchronized (mLock) {
@@ -905,8 +888,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         } else {
             unbindAllServicesLocked();
         }
-        updateInputFilterLocked();
-        sendStateToClientsLocked();
+    }
+
+    /**
+     * Updates the state based on the touch exploration enabled setting.
+     */
+    private void handleTouchExplorationEnabledSettingChangedLocked() {
+        mIsTouchExplorationEnabled = Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
     }
 
     private class AccessibilityConnectionWrapper implements DeathRecipient {
@@ -1229,13 +1219,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         public void binderDied() {
             synchronized (mLock) {
-                unlinkToOwnDeath();
+                // The death recipient is unregistered in tryRemoveServiceLocked
                 tryRemoveServiceLocked(this);
                 // We no longer have an automation service, so restore
                 // the state based on values in the settings database.
                 if (mIsAutomation) {
                     mUiAutomationService = null;
                     handleAccessibilityEnabledSettingChangedLocked();
+                    handleTouchExplorationEnabledSettingChangedLocked();
+                    updateInputFilterLocked();
+                    sendStateToClientsLocked();
                 }
             }
         }
@@ -1256,7 +1249,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         private int resolveAccessibilityWindowId(int accessibilityWindowId) {
-            if (accessibilityWindowId == ACTIVE_WINDOW_ID) {
+            if (accessibilityWindowId == AccessibilityNodeInfo.ACTIVE_WINDOW_ID) {
                 return mSecurityPolicy.mRetrievalAlowingWindowId;
             }
             return accessibilityWindowId;
