@@ -243,10 +243,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int SIGNED = 2;
     private static final int DECIMAL = 4;
 
-    private static enum TEXT_ALIGN {
-        INHERIT, GRAVITY, TEXT_START, TEXT_END, CENTER, VIEW_START, VIEW_END;
-    }
-
     /**
      * Draw marquee text with fading edges as usual
      */
@@ -328,9 +324,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     // The alignment to pass to Layout, or null if not resolved.
     private Layout.Alignment mLayoutAlignment;
-
-    // The default value for mTextAlign.
-    private TEXT_ALIGN mTextAlign = TEXT_ALIGN.INHERIT;
 
     private boolean mResolvedDrawables;
 
@@ -5658,69 +5651,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                       physicalWidth, false);
     }
 
-    @Override
-    protected void resetResolvedLayoutDirection() {
-        super.resetResolvedLayoutDirection();
-
-        if (mLayoutAlignment != null &&
-                (mTextAlign == TEXT_ALIGN.VIEW_START ||
-                mTextAlign == TEXT_ALIGN.VIEW_END)) {
-            mLayoutAlignment = null;
-        }
-    }
-
     private Layout.Alignment getLayoutAlignment() {
         if (mLayoutAlignment == null) {
-            Layout.Alignment alignment;
-            TEXT_ALIGN textAlign = mTextAlign;
-            switch (textAlign) {
-                case INHERIT:
-                    // fall through to gravity temporarily
-                    // intention is to inherit value through view hierarchy.
-                case GRAVITY:
-                    switch (mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) {
-                        case Gravity.START:
-                            alignment = Layout.Alignment.ALIGN_NORMAL;
-                            break;
-                        case Gravity.END:
-                            alignment = Layout.Alignment.ALIGN_OPPOSITE;
-                            break;
-                        case Gravity.LEFT:
-                            alignment = Layout.Alignment.ALIGN_LEFT;
-                            break;
-                        case Gravity.RIGHT:
-                            alignment = Layout.Alignment.ALIGN_RIGHT;
-                            break;
-                        case Gravity.CENTER_HORIZONTAL:
-                            alignment = Layout.Alignment.ALIGN_CENTER;
-                            break;
-                        default:
-                            alignment = Layout.Alignment.ALIGN_NORMAL;
-                            break;
-                    }
+            switch (mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) {
+                case Gravity.START:
+                    mLayoutAlignment = Layout.Alignment.ALIGN_NORMAL;
                     break;
-                case TEXT_START:
-                    alignment = Layout.Alignment.ALIGN_NORMAL;
+                case Gravity.END:
+                    mLayoutAlignment = Layout.Alignment.ALIGN_OPPOSITE;
                     break;
-                case TEXT_END:
-                    alignment = Layout.Alignment.ALIGN_OPPOSITE;
+                case Gravity.LEFT:
+                    mLayoutAlignment = Layout.Alignment.ALIGN_LEFT;
                     break;
-                case CENTER:
-                    alignment = Layout.Alignment.ALIGN_CENTER;
+                case Gravity.RIGHT:
+                    mLayoutAlignment = Layout.Alignment.ALIGN_RIGHT;
                     break;
-                case VIEW_START:
-                    alignment = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
-                            Layout.Alignment.ALIGN_RIGHT : Layout.Alignment.ALIGN_LEFT;
-                    break;
-                case VIEW_END:
-                    alignment = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
-                            Layout.Alignment.ALIGN_LEFT : Layout.Alignment.ALIGN_RIGHT;
+                case Gravity.CENTER_HORIZONTAL:
+                    mLayoutAlignment = Layout.Alignment.ALIGN_CENTER;
                     break;
                 default:
-                    alignment = Layout.Alignment.ALIGN_NORMAL;
+                    mLayoutAlignment = Layout.Alignment.ALIGN_NORMAL;
                     break;
             }
-            mLayoutAlignment = alignment;
         }
         return mLayoutAlignment;
     }
