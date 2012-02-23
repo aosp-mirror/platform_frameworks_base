@@ -555,17 +555,13 @@ public class WebView extends AbsoluteLayout
                         && TextUtils.regionMatches(text, 0, original, 0,
                                 textLength);
             }
-            boolean sendChange = false;
             if (isCharacterAdd) {
-                sendChange = !sendCharacter(text.charAt(textLength - 1));
+                sendCharacter(text.charAt(textLength - 1));
             } else if (isCharacterDelete) {
                 sendDeleteKey();
-            } else {
-                sendChange = (textLength != originalLength) ||
-                        !TextUtils.regionMatches(text, 0, original, 0,
-                                textLength);
-            }
-            if (sendChange) {
+            } else if ((textLength != originalLength) ||
+                    !TextUtils.regionMatches(text, 0, original, 0,
+                            textLength)) {
                 // Send a message so that key strokes and text replacement
                 // do not come out of order.
                 Message replaceMessage = mPrivateHandler.obtainMessage(
@@ -579,20 +575,21 @@ public class WebView extends AbsoluteLayout
          * Send a single character to the WebView as a key down and up event.
          * @param c The character to be sent.
          */
-        private boolean sendCharacter(char c) {
+        private void sendCharacter(char c) {
             if (mKeyCharacterMap == null) {
                 mKeyCharacterMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
             }
             char[] chars = new char[1];
             chars[0] = c;
             KeyEvent[] events = mKeyCharacterMap.getEvents(chars);
-            boolean mapsToKeyEvent = (events != null);
-            if (mapsToKeyEvent) {
+            if (events != null) {
                 for (KeyEvent event : events) {
                     sendKeyEvent(event);
                 }
+            } else {
+                Message msg = mPrivateHandler.obtainMessage(KEY_PRESS, (int) c, 0);
+                mPrivateHandler.sendMessage(msg);
             }
-            return mapsToKeyEvent;
         }
 
         /**
@@ -1030,6 +1027,7 @@ public class WebView extends AbsoluteLayout
     static final int INIT_EDIT_FIELD                    = 142;
     static final int REPLACE_TEXT                       = 143;
     static final int CLEAR_CARET_HANDLE                 = 144;
+    static final int KEY_PRESS                          = 145;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -9240,6 +9238,10 @@ public class WebView extends AbsoluteLayout
                 }
                 case CLEAR_CARET_HANDLE:
                     selectionDone();
+                    break;
+
+                case KEY_PRESS:
+                    mWebViewCore.sendMessage(EventHub.KEY_PRESS, msg.arg1);
                     break;
 
                 default:
