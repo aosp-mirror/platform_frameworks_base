@@ -25,6 +25,7 @@
 #include "rsdGL.h"
 
 typedef void (* InvokeFunc_t)(void);
+typedef void (* ForEachFunc_t)(void);
 typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
 
 typedef struct RsdSymbolTableRec {

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #include "rsdCore.h"
 #include "rsdBcc.h"
 #include "rsdRuntime.h"
@@ -30,7 +29,6 @@ extern "C" {
 #include "libdex/ZipArchive.h"
 }
 
-
 using namespace android;
 using namespace android::renderscript;
 
@@ -45,6 +43,7 @@ struct DrvScript {
     bcinfo::MetadataExtractor *ME;
 
     InvokeFunc_t *mInvokeFunctions;
+    ForEachFunc_t *mForEachFunctions;
     void ** mFieldAddress;
     bool * mFieldIsObject;
     const uint32_t *mExportForEachSignatureList;
@@ -162,8 +161,16 @@ bool rsdScriptInit(const Context *rsc,
     }
 
     exportForEachSignatureCount = drv->ME->getExportForEachSignatureCount();
-    rsAssert(exportForEachSignatureCount <= 1);
     drv->mExportForEachSignatureList = drv->ME->getExportForEachSignatureList();
+    if (exportForEachSignatureCount > 0) {
+        drv->mForEachFunctions =
+            (ForEachFunc_t*) calloc(exportForEachSignatureCount,
+                                    sizeof(ForEachFunc_t));
+        bccGetExportForEachList(drv->mBccScript, exportForEachSignatureCount,
+                                (void **) drv->mForEachFunctions);
+    } else {
+        drv->mForEachFunctions = NULL;
+    }
 
     // Copy info over to runtime
     script->mHal.info.exportedFunctionCount = drv->ME->getExportFuncCount();
@@ -196,6 +203,7 @@ error:
 typedef struct {
     Context *rsc;
     Script *script;
+    ForEachFunc_t kernel;
     uint32_t sig;
     const Allocation * ain;
     Allocation * aout;
@@ -235,7 +243,7 @@ static void wc_xy(void *usr, uint32_t idx) {
     RsdHal * dc = (RsdHal *)mtls->rsc->mHal.drv;
     uint32_t sig = mtls->sig;
 
-    outer_foreach_t fn = (outer_foreach_t) mtls->script->mHal.info.root;
+    outer_foreach_t fn = (outer_foreach_t) mtls->kernel;
     while (1) {
         uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
         uint32_t yStart = mtls->yStart + slice * mtls->mSliceSize;
@@ -265,7 +273,7 @@ static void wc_x(void *usr, uint32_t idx) {
     RsdHal * dc = (RsdHal *)mtls->rsc->mHal.drv;
     uint32_t sig = mtls->sig;
 
-    outer_foreach_t fn = (outer_foreach_t) mtls->script->mHal.info.root;
+    outer_foreach_t fn = (outer_foreach_t) mtls->kernel;
     while (1) {
         uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
         uint32_t xStart = mtls->xStart + slice * mtls->mSliceSize;
@@ -299,8 +307,8 @@ void rsdScriptInvokeForEach(const Context *rsc,
     memset(&mtls, 0, sizeof(mtls));
 
     DrvScript *drv = (DrvScript *)s->mHal.drv;
-    // We only support slot 0 (root) at this point in time.
-    rsAssert(slot == 0);
+    mtls.kernel = drv->mForEachFunctions[slot];
+    rsAssert(mtls.kernel != NULL);
     mtls.sig = 0x1f;  // temp fix for old apps, full table in slang_rs_export_foreach.cpp
     if (drv->mExportForEachSignatureList) {
         mtls.sig = drv->mExportForEachSignatureList[slot];
@@ -391,7 +399,7 @@ void rsdScriptInvokeForEach(const Context *rsc,
         uint32_t sig = mtls.sig;
 
         //ALOGE("launch 3");
-        outer_foreach_t fn = (outer_foreach_t) mtls.script->mHal.info.root;
+        outer_foreach_t fn = (outer_foreach_t) mtls.kernel;
         for (p.ar[0] = mtls.arrayStart; p.ar[0] < mtls.arrayEnd; p.ar[0]++) {
             for (p.z = mtls.zStart; p.z < mtls.zEnd; p.z++) {
                 for (p.y = mtls.yStart; p.y < mtls.yEnd; p.y++) {
@@ -515,6 +523,11 @@ void rsdScriptDestroy(const Context *dc, Script *script) {
     if (drv->mInvokeFunctions) {
         free(drv->mInvokeFunctions);
         drv->mInvokeFunctions = NULL;
+    }
+
+    if (drv->mForEachFunctions) {
+        free(drv->mForEachFunctions);
+        drv->mForEachFunctions = NULL;
     }
 
     delete drv->ME;

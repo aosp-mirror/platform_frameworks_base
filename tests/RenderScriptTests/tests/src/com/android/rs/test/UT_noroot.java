@@ -20,16 +20,16 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.renderscript.*;
 
-public class UT_foreach extends UnitTest {
+public class UT_noroot extends UnitTest {
     private Resources mRes;
     private Allocation A;
 
-    protected UT_foreach(RSTestCore rstc, Resources res, Context ctx) {
-        super(rstc, "ForEach", ctx);
+    protected UT_noroot(RSTestCore rstc, Resources res, Context ctx) {
+        super(rstc, "ForEach (no root)", ctx);
         mRes = res;
     }
 
-    private void initializeGlobals(RenderScript RS, ScriptC_foreach s) {
+    private void initializeGlobals(RenderScript RS, ScriptC_noroot s) {
         Type.Builder typeBuilder = new Type.Builder(RS, Element.I32(RS));
         int X = 5;
         int Y = 7;
@@ -44,14 +44,12 @@ public class UT_foreach extends UnitTest {
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
-        ScriptC_foreach s = new ScriptC_foreach(pRS, mRes, R.raw.foreach);
+        ScriptC_noroot s = new ScriptC_noroot(pRS, mRes, R.raw.noroot);
         pRS.setMessageHandler(mRsMessage);
         initializeGlobals(pRS, s);
-        s.forEach_root(A);
-        s.invoke_verify_root();
         s.forEach_foo(A, A);
         s.invoke_verify_foo();
-        s.invoke_foreach_test();
+        s.invoke_noroot_test();
         pRS.finish();
         waitForMessage();
         pRS.destroy();
