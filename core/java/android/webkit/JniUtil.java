@@ -37,7 +37,6 @@ class JniUtil {
     // Used by the Chromium HTTP stack.
     private static String sDatabaseDirectory;
     private static String sCacheDirectory;
-    private static Boolean sUseChromiumHttpStack;
     private static Context sContext;
 
     private static void checkInitialized() {
@@ -111,10 +110,9 @@ class JniUtil {
         // content://
         if (url.startsWith(ANDROID_CONTENT)) {
             try {
-                // Strip off mimetype, for compatibility with ContentLoader.java
-                // If we don't do this, we can fail to load Gmail attachments,
-                // because the URL being loaded doesn't exactly match the URL we
-                // have permission to read.
+                // Strip off MIME type. If we don't do this, we can fail to
+                // load Gmail attachments, because the URL being loaded doesn't
+                // exactly match the URL we have permission to read.
                 int mimeIndex = url.lastIndexOf('?');
                 if (mimeIndex != -1) {
                     url = url.substring(0, mimeIndex);
@@ -152,6 +150,7 @@ class JniUtil {
         if (url.startsWith(ANDROID_CONTENT)) {
             try {
                 // Strip off mimetype, for compatibility with ContentLoader.java
+                // (used with Android HTTP stack, now removed).
                 // If we don't do this, we can fail to load Gmail attachments,
                 // because the URL being loaded doesn't exactly match the URL we
                 // have permission to read.
@@ -168,19 +167,6 @@ class JniUtil {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Returns true if we're using the Chromium HTTP stack.
-     *
-     * TODO: Remove this if/when we permanently switch to the Chromium HTTP stack
-     * http:/b/3118772
-     */
-    static boolean useChromiumHttpStack() {
-        if (sUseChromiumHttpStack == null) {
-            sUseChromiumHttpStack = nativeUseChromiumHttpStack();
-        }
-        return sUseChromiumHttpStack;
     }
 
     private static synchronized String getAutofillQueryUrl() {
@@ -200,7 +186,4 @@ class JniUtil {
         long leftToAllocate = memInfo.availMem - memInfo.threshold;
         return !memInfo.lowMemory && bytesRequested < leftToAllocate;
     }
-
-
-    private static native boolean nativeUseChromiumHttpStack();
 }

@@ -2048,7 +2048,6 @@ public class WebView extends AbsoluteLayout
     public static void enablePlatformNotifications() {
         checkThread();
         synchronized (WebView.class) {
-            Network.enablePlatformNotifications();
             sNotificationsEnabled = true;
             Context context = JniUtil.getContext();
             if (context != null)
@@ -2066,7 +2065,6 @@ public class WebView extends AbsoluteLayout
     public static void disablePlatformNotifications() {
         checkThread();
         synchronized (WebView.class) {
-            Network.disablePlatformNotifications();
             sNotificationsEnabled = false;
             Context context = JniUtil.getContext();
             if (context != null)

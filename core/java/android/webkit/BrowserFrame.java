@@ -471,18 +471,6 @@ class BrowserFrame extends Handler {
     }
 
     /**
-     * We have received an SSL certificate for the main top-level page.
-     * Used by the Android HTTP stack only.
-     */
-    void certificate(SslCertificate certificate) {
-        if (mIsMainFrame) {
-            // we want to make this call even if the certificate is null
-            // (ie, the site is not secure)
-            mCallbackProxy.onReceivedCertificate(certificate);
-        }
-    }
-
-    /**
      * Destroy all native components of the BrowserFrame.
      */
     public void destroy() {
@@ -514,10 +502,6 @@ class BrowserFrame extends Handler {
                             setUsernamePassword(up[0], up[1]);
                         }
                     }
-                }
-                if (!JniUtil.useChromiumHttpStack()) {
-                    WebViewWorker.getHandler().sendEmptyMessage(
-                            WebViewWorker.MSG_TRIM_CACHE);
                 }
                 break;
             }
@@ -767,10 +751,9 @@ class BrowserFrame extends Handler {
         } else if (mSettings.getAllowContentAccess() &&
                    url.startsWith(ANDROID_CONTENT)) {
             try {
-                // Strip off mimetype, for compatibility with ContentLoader.java
-                // If we don't do this, we can fail to load Gmail attachments,
-                // because the URL being loaded doesn't exactly match the URL we
-                // have permission to read.
+                // Strip off MIME type. If we don't do this, we can fail to
+                // load Gmail attachments, because the URL being loaded doesn't
+                // exactly match the URL we have permission to read.
                 int mimeIndex = url.lastIndexOf('?');
                 if (mimeIndex != -1) {
                     url = url.substring(0, mimeIndex);
@@ -787,101 +770,11 @@ class BrowserFrame extends Handler {
     }
 
     /**
-     * Start loading a resource.
-     * @param loaderHandle The native ResourceLoader that is the target of the
-     *                     data.
-     * @param url The url to load.
-     * @param method The http method.
-     * @param headers The http headers.
-     * @param postData If the method is "POST" postData is sent as the request
-     *                 body. Is null when empty.
-     * @param postDataIdentifier If the post data contained form this is the form identifier, otherwise it is 0.
-     * @param cacheMode The cache mode to use when loading this resource. See WebSettings.setCacheMode
-     * @param mainResource True if the this resource is the main request, not a supporting resource
-     * @param userGesture
-     * @param synchronous True if the load is synchronous.
-     * @return A newly created LoadListener object.
-     */
-    private LoadListener startLoadingResource(int loaderHandle,
-                                              String url,
-                                              String method,
-                                              HashMap headers,
-                                              byte[] postData,
-                                              long postDataIdentifier,
-                                              int cacheMode,
-                                              boolean mainResource,
-                                              boolean userGesture,
-                                              boolean synchronous,
-                                              String username,
-                                              String password) {
-        if (mSettings.getCacheMode() != WebSettings.LOAD_DEFAULT) {
-            cacheMode = mSettings.getCacheMode();
-        }
-
-        if (method.equals("POST")) {
-            // Don't use the cache on POSTs when issuing a normal POST
-            // request.
-            if (cacheMode == WebSettings.LOAD_NORMAL) {
-                cacheMode = WebSettings.LOAD_NO_CACHE;
-            }
-            String[] ret = getUsernamePassword();
-            if (ret != null) {
-                String domUsername = ret[0];
-                String domPassword = ret[1];
-                maybeSavePassword(postData, domUsername, domPassword);
-            }
-        }
-
-        // is this resource the main-frame top-level page?
-        boolean isMainFramePage = mIsMainFrame;
-
-        if (DebugFlags.BROWSER_FRAME) {
-            Log.v(LOGTAG, "startLoadingResource: url=" + url + ", method="
-                    + method + ", postData=" + postData + ", isMainFramePage="
-                    + isMainFramePage + ", mainResource=" + mainResource
-                    + ", userGesture=" + userGesture);
-        }
-
-        // Create a LoadListener
-        LoadListener loadListener = LoadListener.getLoadListener(mContext,
-                this, url, loaderHandle, synchronous, isMainFramePage,
-                mainResource, userGesture, postDataIdentifier, username, password);
-
-        if (LoadListener.getNativeLoaderCount() > MAX_OUTSTANDING_REQUESTS) {
-            // send an error message, so that loadListener can be deleted
-            // after this is returned. This is important as LoadListener's 
-            // nativeError will remove the request from its DocLoader's request
-            // list. But the set up is not done until this method is returned.
-            loadListener.error(
-                    android.net.http.EventHandler.ERROR, mContext.getString(
-                            com.android.internal.R.string.httpErrorTooManyRequests));
-            return loadListener;
-        }
-
-        // Note that we are intentionally skipping
-        // inputStreamForAndroidResource.  This is so that FrameLoader will use
-        // the various StreamLoader classes to handle assets.
-        FrameLoader loader = new FrameLoader(loadListener, mSettings, method,
-                mCallbackProxy.shouldInterceptRequest(url));
-        loader.setHeaders(headers);
-        loader.setPostData(postData);
-        // Set the load mode to the mode used for the current page.
-        // If WebKit wants validation, go to network directly.
-        loader.setCacheMode(headers.containsKey("If-Modified-Since")
-                || headers.containsKey("If-None-Match") ? 
-                        WebSettings.LOAD_NO_CACHE : cacheMode);
-        loader.executeLoad();
-        // Set referrer to current URL?
-        return !synchronous ? loadListener : null;
-    }
-
-    /**
      * If this looks like a POST request (form submission) containing a username
      * and password, give the user the option of saving them. Will either do
      * nothing, or block until the UI interaction is complete.
      *
-     * Called by startLoadingResource when using the Apache HTTP stack.
-     * Called directly by WebKit when using the Chrome HTTP stack.
+     * Called directly by WebKit.
      *
      * @param postData The data about to be sent as the body of a POST request.
      * @param username The username entered by the user (sniffed from the DOM).

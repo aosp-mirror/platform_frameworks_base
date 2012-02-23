@@ -100,77 +100,6 @@ public final class CookieSyncManager extends WebSyncManager {
         return sRef;
     }
 
-    /**
-     * Package level api, called from CookieManager. Get all the cookies which
-     * matches a given base domain.
-     * @param domain
-     * @return A list of Cookie
-     */
-    ArrayList<Cookie> getCookiesForDomain(String domain) {
-        // null mDataBase implies that the host application doesn't support
-        // persistent cookie. No sync needed.
-        if (mDataBase == null) {
-            return new ArrayList<Cookie>();
-        }
-
-        return mDataBase.getCookiesForDomain(domain);
-    }
-
-    /**
-     * Package level api, called from CookieManager Clear all cookies in the
-     * database
-     */
-    void clearAllCookies() {
-        // null mDataBase implies that the host application doesn't support
-        // persistent cookie.
-        if (mDataBase == null) {
-            return;
-        }
-
-        mDataBase.clearCookies();
-    }
-
-    /**
-     * Returns true if there are any saved cookies.
-     */
-    boolean hasCookies() {
-        // null mDataBase implies that the host application doesn't support
-        // persistent cookie.
-        if (mDataBase == null) {
-            return false;
-        }
-
-        return mDataBase.hasCookies();
-    }
-
-    /**
-     * Package level api, called from CookieManager Clear all session cookies in
-     * the database
-     */
-    void clearSessionCookies() {
-        // null mDataBase implies that the host application doesn't support
-        // persistent cookie.
-        if (mDataBase == null) {
-            return;
-        }
-
-        mDataBase.clearSessionCookies();
-    }
-
-    /**
-     * Package level api, called from CookieManager Clear all expired cookies in
-     * the database
-     */
-    void clearExpiredCookies(long now) {
-        // null mDataBase implies that the host application doesn't support
-        // persistent cookie.
-        if (mDataBase == null) {
-            return;
-        }
-
-        mDataBase.clearExpiredCookies(now);
-    }
-
     protected void syncFromRamToFlash() {
         if (DebugFlags.COOKIE_SYNC_MANAGER) {
             Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash STARTS");
@@ -182,38 +111,10 @@ public final class CookieSyncManager extends WebSyncManager {
             return;
         }
 
-        if (JniUtil.useChromiumHttpStack()) {
-            manager.flushCookieStore();
-        } else {
-            ArrayList<Cookie> cookieList = manager.getUpdatedCookiesSince(mLastUpdate);
-            mLastUpdate = System.currentTimeMillis();
-            syncFromRamToFlash(cookieList);
-
-            ArrayList<Cookie> lruList = manager.deleteLRUDomain();
-            syncFromRamToFlash(lruList);
-        }
+        manager.flushCookieStore();
 
         if (DebugFlags.COOKIE_SYNC_MANAGER) {
             Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash DONE");
-        }
-    }
-
-    private void syncFromRamToFlash(ArrayList<Cookie> list) {
-        Iterator<Cookie> iter = list.iterator();
-        while (iter.hasNext()) {
-            Cookie cookie = iter.next();
-            if (cookie.mode != Cookie.MODE_NORMAL) {
-                if (cookie.mode != Cookie.MODE_NEW) {
-                    mDataBase.deleteCookies(cookie.domain, cookie.path,
-                            cookie.name);
-                }
-                if (cookie.mode != Cookie.MODE_DELETED) {
-                    mDataBase.addCookie(cookie);
-                    CookieManager.getInstance().syncedACookie(cookie);
-                } else {
-                    CookieManager.getInstance().deleteACookie(cookie);
-                }
-            }
         }
     }
 
