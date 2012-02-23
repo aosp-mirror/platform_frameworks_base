@@ -24,6 +24,10 @@ import java.util.HashMap;
  *
  */
 public class DrmErrorEvent extends DrmEvent {
+
+    // Please add newly defined type constants to the end of the list,
+    // and modify checkTypeValidity() accordingly.
+
     /**
      * Something went wrong installing the rights.
      */
@@ -60,28 +64,46 @@ public class DrmErrorEvent extends DrmEvent {
      */
     public static final int TYPE_ACQUIRE_DRM_INFO_FAILED = 2008;
 
+    // Add more type constants here...
+
+    // FIXME:
+    // We may want to add a user-defined type constant, such as
+    // TYPE_VENDOR_SPECIFIC_FAILED, to take care vendor specific use
+    // cases.
+
+
     /**
      * Creates a <code>DrmErrorEvent</code> object with the specified parameters.
      *
      * @param uniqueId Unique session identifier.
-     * @param type Type of the event. Could be any of the event types defined above.
-     * @param message Message description.
+     * @param type Type of the event. Must be any of the event types defined above.
+     * @param message Message description. It can be null.
      */
     public DrmErrorEvent(int uniqueId, int type, String message) {
         super(uniqueId, type, message);
+        checkTypeValidity(type);
     }
 
     /**
      * Creates a <code>DrmErrorEvent</code> object with the specified parameters.
      *
      * @param uniqueId Unique session identifier.
-     * @param type Type of the event. Could be any of the event types defined above.
+     * @param type Type of the event. Must be any of the event types defined above.
      * @param message Message description.
      * @param attributes Attributes for extensible information. Could be any
-     * information provided by the plug-in.
+     * information provided by the plug-in. It can be null.
      */
     public DrmErrorEvent(int uniqueId, int type, String message,
                             HashMap<String, Object> attributes) {
         super(uniqueId, type, message, attributes);
+        checkTypeValidity(type);
+    }
+
+    private void checkTypeValidity(int type) {
+        if (type < TYPE_RIGHTS_NOT_INSTALLED ||
+            type > TYPE_ACQUIRE_DRM_INFO_FAILED) {
+            final String msg = "Unsupported type: " + type;
+            throw new IllegalArgumentException(msg);
+        }
     }
 }

@@ -24,6 +24,10 @@ import java.util.HashMap;
  *
  */
 public class DrmInfoEvent extends DrmEvent {
+
+    // Please add newly defined type constants to the end of the list,
+    // and modify checkTypeValidity() accordingly.
+
     /**
      * The registration has already been done by another account ID.
      */
@@ -50,29 +54,57 @@ public class DrmInfoEvent extends DrmEvent {
      */
     public static final int TYPE_RIGHTS_REMOVED = 6;
 
+    // Add more type constants here...
+
+    // FIXME:
+    // We may want to add a user-defined type constant, such as
+    // TYPE_VENDOR_SPECIFIC, to take care vendor specific use
+    // cases.
+
     /**
      * Creates a <code>DrmInfoEvent</code> object with the specified parameters.
      *
      * @param uniqueId Unique session identifier.
-     * @param type Type of the event. Could be any of the event types defined above.
-     * @param message Message description.
+     * @param type Type of the event. Must be any of the event types defined above,
+     * or the constants defined in {@link DrmEvent}.
+     * @param message Message description. It can be null.
      */
     public DrmInfoEvent(int uniqueId, int type, String message) {
         super(uniqueId, type, message);
+        checkTypeValidity(type);
     }
 
     /**
      * Creates a <code>DrmInfoEvent</code> object with the specified parameters.
      *
      * @param uniqueId Unique session identifier.
-     * @param type Type of the event. Could be any of the event types defined above.
-     * @param message Message description.
+     * @param type Type of the event. Must be any of the event types defined above,
+     * or the constants defined in {@link DrmEvent}
+     * @param message Message description. It can be null.
      * @param attributes Attributes for extensible information. Could be any
      * information provided by the plug-in.
      */
     public DrmInfoEvent(int uniqueId, int type, String message,
                             HashMap<String, Object> attributes) {
         super(uniqueId, type, message, attributes);
+        checkTypeValidity(type);
+    }
+
+    /*
+     * Check the validity of the given type.
+     * To overcome a design flaw, we need also accept the type constants
+     * defined in super class, DrmEvent.
+     */
+    private void checkTypeValidity(int type) {
+        if (type < TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT ||
+            type > TYPE_RIGHTS_REMOVED) {
+
+            if (type != TYPE_ALL_RIGHTS_REMOVED &&
+                type != TYPE_DRM_INFO_PROCESSED) {
+                final String msg = "Unsupported type: " + type;
+                throw new IllegalArgumentException(msg);
+            }
+        }
     }
 }
 
