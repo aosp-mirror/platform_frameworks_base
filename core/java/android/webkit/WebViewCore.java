@@ -1173,8 +1173,11 @@ public final class WebViewCore {
         static final int TRUST_STORAGE_UPDATED = 220;
 
         // find-on-page controls
-        static final int FIND_ALL = 220;
-        static final int FIND_NEXT = 221;
+        static final int FIND_ALL = 221;
+        static final int FIND_NEXT = 222;
+
+        // key was pressed (down and up)
+        static final int KEY_PRESS = 223;
 
         // Private handler for WebCore messages.
         private Handler mHandler;
@@ -1353,6 +1356,10 @@ public final class WebViewCore {
 
                         case KEY_UP:
                             key((KeyEvent) msg.obj, false);
+                            break;
+
+                        case KEY_PRESS:
+                            keyPress(msg.arg1);
                             break;
 
                         case FAKE_CLICK:
@@ -2059,6 +2066,11 @@ public final class WebViewCore {
             // bar without any text.
             mCallbackProxy.onUnhandledKeyEvent(evt);
         }
+    }
+
+    private void keyPress(int unicodeChar) {
+        nativeKey(mNativeClass, 0, unicodeChar, 0, false, false, false, true);
+        nativeKey(mNativeClass, 0, unicodeChar, 0, false, false, false, false);
     }
 
     // These values are used to avoid requesting a layout based on old values
