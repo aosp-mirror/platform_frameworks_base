@@ -122,6 +122,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7922,7 +7923,10 @@ public class WebView extends AbsoluteLayout
                 }
             }, ViewConfiguration.getPressedStateDuration());
         }
-        if (sDisableNavcache) {
+        if (mFocusedNode != null && mFocusedNode.mIntentUrl != null) {
+            playSoundEffect(SoundEffectConstants.CLICK);
+            overrideLoading(mFocusedNode.mIntentUrl);
+        } else if (sDisableNavcache) {
             WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
             // use "0" as generation id to inform WebKit to use the same x/y as
             // it used when processing GET_TOUCH_HIGHLIGHT_RECTS
@@ -9160,24 +9164,7 @@ public class WebView extends AbsoluteLayout
                     WebKitHitTest hit = (WebKitHitTest) msg.obj;
                     mFocusedNode = hit;
                     setTouchHighlightRects(hit);
-                    if (hit == null) {
-                        mInitialHitTestResult = null;
-                    } else {
-                        mInitialHitTestResult = new HitTestResult();
-                        if (hit.mLinkUrl != null) {
-                            mInitialHitTestResult.mType = HitTestResult.SRC_ANCHOR_TYPE;
-                            mInitialHitTestResult.mExtra = hit.mLinkUrl;
-                            if (hit.mImageUrl != null) {
-                                mInitialHitTestResult.mType = HitTestResult.SRC_IMAGE_ANCHOR_TYPE;
-                                mInitialHitTestResult.mExtra = hit.mImageUrl;
-                            }
-                        } else if (hit.mImageUrl != null) {
-                            mInitialHitTestResult.mType = HitTestResult.IMAGE_TYPE;
-                            mInitialHitTestResult.mExtra = hit.mImageUrl;
-                        } else if (hit.mEditable) {
-                            mInitialHitTestResult.mType = HitTestResult.EDIT_TEXT_TYPE;
-                        }
-                    }
+                    setHitTestResult(hit);
                     break;
 
                 case SAVE_WEBARCHIVE_FINISHED:
@@ -9245,6 +9232,38 @@ public class WebView extends AbsoluteLayout
                 default:
                     super.handleMessage(msg);
                     break;
+            }
+        }
+    }
+
+    private void setHitTestResult(WebKitHitTest hit) {
+        if (hit == null) {
+            mInitialHitTestResult = null;
+        } else {
+            mInitialHitTestResult = new HitTestResult();
+            if (hit.mLinkUrl != null) {
+                mInitialHitTestResult.mType = HitTestResult.SRC_ANCHOR_TYPE;
+                mInitialHitTestResult.mExtra = hit.mLinkUrl;
+                if (hit.mImageUrl != null) {
+                    mInitialHitTestResult.mType = HitTestResult.SRC_IMAGE_ANCHOR_TYPE;
+                    mInitialHitTestResult.mExtra = hit.mImageUrl;
+                }
+            } else if (hit.mImageUrl != null) {
+                mInitialHitTestResult.mType = HitTestResult.IMAGE_TYPE;
+                mInitialHitTestResult.mExtra = hit.mImageUrl;
+            } else if (hit.mEditable) {
+                mInitialHitTestResult.mType = HitTestResult.EDIT_TEXT_TYPE;
+            } else if (hit.mIntentUrl != null) {
+                if (hit.mIntentUrl.startsWith(SCHEME_GEO)) {
+                    mInitialHitTestResult.mType = HitTestResult.GEO_TYPE;
+                    String substr = hit.mIntentUrl.substring(SCHEME_GEO.length());
+                    try {
+                        mInitialHitTestResult.mExtra = URLDecoder.decode(substr, "UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        Log.w(LOGTAG, "Failed to decode GEO URL!", e);
+                        mInitialHitTestResult.mType = HitTestResult.UNKNOWN_TYPE;
+                    }
+                }
             }
         }
     }
