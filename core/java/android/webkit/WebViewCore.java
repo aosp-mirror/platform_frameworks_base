@@ -879,6 +879,7 @@ public final class WebViewCore {
 
     static class WebKitHitTest {
         String mLinkUrl;
+        String mIntentUrl;
         String mAnchorText;
         String mImageUrl;
         String mAltDisplayString;
