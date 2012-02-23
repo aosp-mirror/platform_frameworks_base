@@ -18,12 +18,15 @@
 #define LOG_TAG "TimedTextSource"
 #include <utils/Log.h>
 
+#include <media/stagefright/foundation/ADebug.h>  // CHECK_XX macro
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaDefs.h>  // for MEDIA_MIMETYPE_xxx
 #include <media/stagefright/MediaSource.h>
+#include <media/stagefright/MetaData.h>
 
 #include "TimedTextSource.h"
 
-#include "TimedTextInBandSource.h"
+#include "TimedText3GPPSource.h"
 #include "TimedTextSRTSource.h"
 
 namespace android {
@@ -31,7 +34,13 @@ namespace android {
 // static
 sp<TimedTextSource> TimedTextSource::CreateTimedTextSource(
         const sp<MediaSource>& mediaSource) {
-    return new TimedTextInBandSource(mediaSource);
+    const char *mime;
+    CHECK(mediaSource->getFormat()->findCString(kKeyMIMEType, &mime));
+    if (strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP) == 0) {
+        return new TimedText3GPPSource(mediaSource);
+    }
+    ALOGE("Unsupported mime type for subtitle. : %s", mime);
+    return NULL;
 }
 
 // static

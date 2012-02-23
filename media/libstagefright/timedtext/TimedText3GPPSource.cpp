@@ -15,7 +15,7 @@
  */
 
 //#define LOG_NDEBUG 0
-#define LOG_TAG "TimedTextInBandSource"
+#define LOG_TAG "TimedText3GPPSource"
 #include <utils/Log.h>
 
 #include <binder/Parcel.h>
@@ -26,19 +26,19 @@
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 
-#include "TimedTextInBandSource.h"
+#include "TimedText3GPPSource.h"
 #include "TextDescriptions.h"
 
 namespace android {
 
-TimedTextInBandSource::TimedTextInBandSource(const sp<MediaSource>& mediaSource)
+TimedText3GPPSource::TimedText3GPPSource(const sp<MediaSource>& mediaSource)
     : mSource(mediaSource) {
 }
 
-TimedTextInBandSource::~TimedTextInBandSource() {
+TimedText3GPPSource::~TimedText3GPPSource() {
 }
 
-status_t TimedTextInBandSource::read(
+status_t TimedText3GPPSource::read(
         int64_t *timeUs, Parcel *parcel, const MediaSource::ReadOptions *options) {
     MediaBuffer *textBuffer = NULL;
     status_t err = mSource->read(&textBuffer, options);
@@ -60,7 +60,7 @@ status_t TimedTextInBandSource::read(
 // text style for the string of text. These descriptions are present only
 // if they are needed. This method is used to extract the modifier
 // description and append it at the end of the text.
-status_t TimedTextInBandSource::extractAndAppendLocalDescriptions(
+status_t TimedText3GPPSource::extractAndAppendLocalDescriptions(
         int64_t timeUs, const MediaBuffer *textBuffer, Parcel *parcel) {
     const void *data;
     size_t size = 0;
@@ -68,51 +68,46 @@ status_t TimedTextInBandSource::extractAndAppendLocalDescriptions(
 
     const char *mime;
     CHECK(mSource->getFormat()->findCString(kKeyMIMEType, &mime));
+    CHECK(strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP) == 0);
 
-    if (strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP) == 0) {
-        data = textBuffer->data();
-        size = textBuffer->size();
+    data = textBuffer->data();
+    size = textBuffer->size();
 
-        if (size > 0) {
-            parcel->freeData();
-            flag |= TextDescriptions::IN_BAND_TEXT_3GPP;
-            return TextDescriptions::getParcelOfDescriptions(
-                    (const uint8_t *)data, size, flag, timeUs / 1000, parcel);
-        }
-        return OK;
+    if (size > 0) {
+      parcel->freeData();
+      flag |= TextDescriptions::IN_BAND_TEXT_3GPP;
+      return TextDescriptions::getParcelOfDescriptions(
+          (const uint8_t *)data, size, flag, timeUs / 1000, parcel);
     }
-    return ERROR_UNSUPPORTED;
+    return OK;
 }
 
 // To extract and send the global text descriptions for all the text samples
 // in the text track or text file.
 // TODO: send error message to application via notifyListener()...?
-status_t TimedTextInBandSource::extractGlobalDescriptions(Parcel *parcel) {
+status_t TimedText3GPPSource::extractGlobalDescriptions(Parcel *parcel) {
     const void *data;
     size_t size = 0;
     int32_t flag = TextDescriptions::GLOBAL_DESCRIPTIONS;
 
     const char *mime;
     CHECK(mSource->getFormat()->findCString(kKeyMIMEType, &mime));
+    CHECK(strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP) == 0);
 
-    // support 3GPP only for now
-    if (strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP) == 0) {
-        uint32_t type;
-        // get the 'tx3g' box content. This box contains the text descriptions
-        // used to render the text track
-        if (!mSource->getFormat()->findData(
-                kKeyTextFormatData, &type, &data, &size)) {
-            return ERROR_MALFORMED;
-        }
-
-        if (size > 0) {
-            flag |= TextDescriptions::IN_BAND_TEXT_3GPP;
-            return TextDescriptions::getParcelOfDescriptions(
-                    (const uint8_t *)data, size, flag, 0, parcel);
-        }
-        return OK;
+    uint32_t type;
+    // get the 'tx3g' box content. This box contains the text descriptions
+    // used to render the text track
+    if (!mSource->getFormat()->findData(
+            kKeyTextFormatData, &type, &data, &size)) {
+        return ERROR_MALFORMED;
     }
-    return ERROR_UNSUPPORTED;
+
+    if (size > 0) {
+        flag |= TextDescriptions::IN_BAND_TEXT_3GPP;
+        return TextDescriptions::getParcelOfDescriptions(
+                (const uint8_t *)data, size, flag, 0, parcel);
+    }
+    return OK;
 }
 
 }  // namespace android

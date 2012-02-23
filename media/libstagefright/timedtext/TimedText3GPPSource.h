@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef TIMED_TEXT_IN_BAND_SOURCE_H_
-#define TIMED_TEXT_IN_BAND_SOURCE_H_
+#ifndef TIMED_TEXT_3GPP_SOURCE_H_
+#define TIMED_TEXT_3GPP_SOURCE_H_
 
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
@@ -27,9 +27,9 @@ namespace android {
 class MediaBuffer;
 class Parcel;
 
-class TimedTextInBandSource : public TimedTextSource {
+class TimedText3GPPSource : public TimedTextSource {
  public:
-  TimedTextInBandSource(const sp<MediaSource>& mediaSource);
+  TimedText3GPPSource(const sp<MediaSource>& mediaSource);
   virtual status_t start() { return mSource->start(); }
   virtual status_t stop() { return mSource->stop(); }
   virtual status_t read(
@@ -39,7 +39,7 @@ class TimedTextInBandSource : public TimedTextSource {
   virtual status_t extractGlobalDescriptions(Parcel *parcel);
 
  protected:
-  virtual ~TimedTextInBandSource();
+  virtual ~TimedText3GPPSource();
 
  private:
   sp<MediaSource> mSource;
@@ -47,9 +47,9 @@ class TimedTextInBandSource : public TimedTextSource {
   status_t extractAndAppendLocalDescriptions(
         int64_t timeUs, const MediaBuffer *textBuffer, Parcel *parcel);
 
-  DISALLOW_EVIL_CONSTRUCTORS(TimedTextInBandSource);
+  DISALLOW_EVIL_CONSTRUCTORS(TimedText3GPPSource);
 };
 
 }  // namespace android
 
-#endif  // TIMED_TEXT_IN_BAND_SOURCE_H_
+#endif  // TIMED_TEXT_3GPP_SOURCE_H_
