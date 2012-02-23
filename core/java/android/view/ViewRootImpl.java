@@ -771,19 +771,29 @@ public final class ViewRootImpl implements ViewParent,
         return mLayoutRequested;
     }
 
+    void invalidate() {
+        mDirty.set(0, 0, mWidth, mHeight);
+        scheduleTraversals();
+    }
+
     public void invalidateChild(View child, Rect dirty) {
+        invalidateChildInParent(null, dirty);
+    }
+
+    public ViewParent invalidateChildInParent(int[] location, Rect dirty) {
         checkThread();
         if (DEBUG_DRAW) Log.v(TAG, "Invalidate child: " + dirty);
+
         if (dirty == null) {
-            // Fast invalidation for GL-enabled applications; GL must redraw everything
             invalidate();
-            return;
+            return null;
         }
+
         if (mCurScrollY != 0 || mTranslator != null) {
             mTempRect.set(dirty);
             dirty = mTempRect;
             if (mCurScrollY != 0) {
-               dirty.offset(0, -mCurScrollY);
+                dirty.offset(0, -mCurScrollY);
             }
             if (mTranslator != null) {
                 mTranslator.translateRectInAppWindowToScreen(dirty);
@@ -792,19 +802,24 @@ public final class ViewRootImpl implements ViewParent,
                 dirty.inset(-1, -1);
             }
         }
-        if (!mDirty.isEmpty() && !mDirty.contains(dirty)) {
+
+        final Rect localDirty = mDirty;
+        if (!localDirty.isEmpty() && !localDirty.contains(dirty)) {
             mAttachInfo.mSetIgnoreDirtyState = true;
             mAttachInfo.mIgnoreDirtyState = true;
         }
-        mDirty.union(dirty);
+
+        // Add the new dirty rect to the current one
+        localDirty.union(dirty.left, dirty.top, dirty.right, dirty.bottom);
+        // Intersect with the bounds of the window to skip
+        // updates that lie outside of the visible region
+        localDirty.intersect(0, 0, mWidth, mHeight);
+
         if (!mWillDrawSoon) {
             scheduleTraversals();
         }
-    }
-    
-    void invalidate() {
-        mDirty.set(0, 0, mWidth, mHeight);
-        scheduleTraversals();
+
+        return null;
     }
 
     void setStopped(boolean stopped) {
@@ -815,13 +830,8 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
     }
-    
-    public ViewParent getParent() {
-        return null;
-    }
 
-    public ViewParent invalidateChildInParent(final int[] location, final Rect dirty) {
-        invalidateChild(null, dirty);
+    public ViewParent getParent() {
         return null;
     }
 
