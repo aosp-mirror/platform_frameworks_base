@@ -21,6 +21,7 @@
 
 const char* const RESOURCES_ROOT_NAMESPACE = "http://schemas.android.com/apk/res/";
 const char* const RESOURCES_ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android";
+const char* const RESOURCES_AUTO_PACKAGE_NAMESPACE = "http://schemas.android.com/apk/res/auto";
 const char* const RESOURCES_ROOT_PRV_NAMESPACE = "http://schemas.android.com/apk/prv/res/";
 
 const char* const XLIFF_XMLNS = "urn:oasis:names:tc:xliff:document:1.2";
@@ -44,15 +45,20 @@ bool isWhitespace(const char16_t* str)
 }
 
 static const String16 RESOURCES_PREFIX(RESOURCES_ROOT_NAMESPACE);
+static const String16 RESOURCES_PREFIX_AUTO_PACKAGE(RESOURCES_AUTO_PACKAGE_NAMESPACE);
 static const String16 RESOURCES_PRV_PREFIX(RESOURCES_ROOT_PRV_NAMESPACE);
 
-String16 getNamespaceResourcePackage(String16 namespaceUri, bool* outIsPublic)
+String16 getNamespaceResourcePackage(String16 appPackage, String16 namespaceUri, bool* outIsPublic)
 {
     //printf("%s starts with %s?\n", String8(namespaceUri).string(),
     //       String8(RESOURCES_PREFIX).string());
     size_t prefixSize;
     bool isPublic = true;
-    if (namespaceUri.startsWith(RESOURCES_PREFIX)) {
+    if(namespaceUri.startsWith(RESOURCES_PREFIX_AUTO_PACKAGE)) {
+        NOISY(printf("Using default application package: %s -> %s\n", String8(namespaceUri).string(), String8(appPackage).string()));
+        isPublic = true;
+        return appPackage;
+    } else if (namespaceUri.startsWith(RESOURCES_PREFIX)) {
         prefixSize = RESOURCES_PREFIX.size();
     } else if (namespaceUri.startsWith(RESOURCES_PRV_PREFIX)) {
         isPublic = false;
@@ -922,7 +928,7 @@ status_t XMLNode::assignResourceIds(const sp<AaptAssets>& assets,
             const attribute_entry& e = mAttributes.itemAt(i);
             if (e.ns.size() <= 0) continue;
             bool nsIsPublic;
-            String16 pkg(getNamespaceResourcePackage(e.ns, &nsIsPublic));
+            String16 pkg(getNamespaceResourcePackage(String16(assets->getPackage()), e.ns, &nsIsPublic));
             NOISY(printf("Elem %s %s=\"%s\": namespace(%s) %s ===> %s\n",
                     String8(getElementName()).string(),
                     String8(e.name).string(),
