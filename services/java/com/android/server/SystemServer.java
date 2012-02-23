@@ -402,6 +402,14 @@ class ServerThread extends Thread {
                 reportWtf("starting ThrottleService", e);
             }
 
+            try {
+                Slog.i(TAG, "UpdateLock Service");
+                ServiceManager.addService(Context.UPDATE_LOCK_SERVICE,
+                        new UpdateLockService(context));
+            } catch (Throwable e) {
+                reportWtf("starting UpdateLockService", e);
+            }
+
             if (!"0".equals(SystemProperties.get("system_init.startmountservice"))) {
                 try {
                     /*
