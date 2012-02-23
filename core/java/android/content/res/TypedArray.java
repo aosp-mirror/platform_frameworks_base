@@ -469,13 +469,20 @@ public class TypedArray {
      * {@link android.view.ViewGroup}'s layout_width and layout_height
      * attributes.  This is only here for performance reasons; applications
      * should use {@link #getDimensionPixelSize}.
-     * 
+     *
      * @param index Index of the attribute to retrieve.
      * @param name Textual name of attribute for error reporting.
      * 
      * @return Attribute dimension value multiplied by the appropriate 
      * metric and truncated to integer pixels.
+     *
+     * @throws RuntimeException
+     *             if this TypedArray does not contain an entry for <code>index</code>
+     *
+     * @deprecated Use {@link #getLayoutDimension(int, int)} instead.
+     *
      */
+    @Deprecated
     public int getLayoutDimension(int index, String name) {
         index *= AssetManager.STYLE_NUM_ENTRIES;
         final int[] data = mData;
