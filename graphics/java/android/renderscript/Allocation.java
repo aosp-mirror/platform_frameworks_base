@@ -534,6 +534,7 @@ public class Allocation extends BaseObj {
      * @param fp
      */
     public void setFromFieldPacker(int xoff, FieldPacker fp) {
+        mRS.validate();
         int eSize = mType.mElement.getSizeBytes();
         final byte[] data = fp.getData();
 
@@ -554,6 +555,7 @@ public class Allocation extends BaseObj {
      * @param fp
      */
     public void setFromFieldPacker(int xoff, int component_number, FieldPacker fp) {
+        mRS.validate();
         if (component_number >= mType.mElement.mElements.length) {
             throw new RSIllegalArgumentException("Component_number " + component_number + " out of range.");
         }
