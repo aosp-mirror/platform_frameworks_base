@@ -1753,6 +1753,15 @@ public class WebView extends AbsoluteLayout
         mZoomManager.updateMultiTouchSupport(context);
     }
 
+    // Setters for the Scroll X & Y, without invoking the onScrollChanged etc code paths.
+    final void setScrollXRaw(int scrollX) {
+        mScrollX = scrollX;
+    }
+
+    final void setScrollYRaw(int scrollY) {
+        mScrollY = scrollY;
+    }
+
     private void init() {
         OnTrimMemoryListener.init(getContext());
         sDisableNavcache = nativeDisableNavcache();
@@ -1836,8 +1845,8 @@ public class WebView extends AbsoluteLayout
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         event.setScrollable(isScrollableForAccessibility());
-        event.setScrollX(mScrollX);
-        event.setScrollY(mScrollY);
+        event.setScrollX(getScrollX());
+        event.setScrollY(getScrollY());
         final int convertedContentWidth = contentToViewX(getContentWidth());
         final int adjustedViewWidth = getWidth() - mPaddingLeft - mPaddingRight;
         event.setMaxScrollX(Math.max(convertedContentWidth - adjustedViewWidth, 0));
@@ -2017,7 +2026,7 @@ public class WebView extends AbsoluteLayout
 
     private int getVisibleTitleHeightImpl() {
         // need to restrict mScrollY due to over scroll
-        return Math.max(getTitleHeight() - Math.max(0, mScrollY),
+        return Math.max(getTitleHeight() - Math.max(0, getScrollY()),
                 getOverlappingActionModeHeight());
     }
 
@@ -2370,8 +2379,8 @@ public class WebView extends AbsoluteLayout
             }
         }).start();
         // now update the bundle
-        b.putInt("scrollX", mScrollX);
-        b.putInt("scrollY", mScrollY);
+        b.putInt("scrollX", getScrollX());
+        b.putInt("scrollY", getScrollY());
         mZoomManager.saveZoomState(b);
         return true;
     }
@@ -2383,8 +2392,8 @@ public class WebView extends AbsoluteLayout
         mDrawHistory = true;
         mHistoryPicture = p;
 
-        mScrollX = sx;
-        mScrollY = sy;
+        setScrollXRaw(sx);
+        setScrollYRaw(sy);
         mZoomManager.restoreZoomState(b);
         final float scale = mZoomManager.getScale();
         mHistoryWidth = Math.round(p.getWidth() * scale);
@@ -2897,7 +2906,7 @@ public class WebView extends AbsoluteLayout
         nativeClearCursor(); // start next trackball movement from page edge
         if (top) {
             // go to the top of the document
-            return pinScrollTo(mScrollX, 0, true, 0);
+            return pinScrollTo(getScrollX(), 0, true, 0);
         }
         // Page up
         int h = getHeight();
@@ -2923,7 +2932,7 @@ public class WebView extends AbsoluteLayout
         }
         nativeClearCursor(); // start next trackball movement from page edge
         if (bottom) {
-            return pinScrollTo(mScrollX, computeRealVerticalScrollRange(), true, 0);
+            return pinScrollTo(getScrollX(), computeRealVerticalScrollRange(), true, 0);
         }
         // Page down.
         int h = getHeight();
@@ -3100,8 +3109,8 @@ public class WebView extends AbsoluteLayout
         if (type == HitTestResult.UNKNOWN_TYPE
                 || type == HitTestResult.SRC_ANCHOR_TYPE) {
             // Now check to see if it is an image.
-            int contentX = viewToContentX(mLastTouchX + mScrollX);
-            int contentY = viewToContentY(mLastTouchY + mScrollY);
+            int contentX = viewToContentX(mLastTouchX + getScrollX());
+            int contentY = viewToContentY(mLastTouchY + getScrollY());
             String text = nativeImageURI(contentX, contentY);
             if (text != null) {
                 result.setType(type == HitTestResult.UNKNOWN_TYPE ?
@@ -3167,8 +3176,8 @@ public class WebView extends AbsoluteLayout
         if (hrefMsg == null) {
             return;
         }
-        int contentX = viewToContentX(mLastTouchX + mScrollX);
-        int contentY = viewToContentY(mLastTouchY + mScrollY);
+        int contentX = viewToContentX(mLastTouchX + getScrollX());
+        int contentY = viewToContentY(mLastTouchY + getScrollY());
         if (mFocusedNode != null && mFocusedNode.mHitTestX == contentX
                 && mFocusedNode.mHitTestY == contentY) {
             hrefMsg.getData().putString(FocusNodeHref.URL, mFocusedNode.mLinkUrl);
@@ -3202,8 +3211,8 @@ public class WebView extends AbsoluteLayout
     public void requestImageRef(Message msg) {
         checkThread();
         if (0 == mNativeClass) return; // client isn't initialized
-        int contentX = viewToContentX(mLastTouchX + mScrollX);
-        int contentY = viewToContentY(mLastTouchY + mScrollY);
+        int contentX = viewToContentX(mLastTouchX + getScrollX());
+        int contentY = viewToContentY(mLastTouchY + getScrollY());
         String ref = nativeImageURI(contentX, contentY);
         Bundle data = msg.getData();
         data.putString("url", ref);
@@ -3425,7 +3434,7 @@ public class WebView extends AbsoluteLayout
             // updated when we get out of that mode.
             if (!mDrawHistory) {
                 // repin our scroll, taking into account the new content size
-                updateScrollCoordinates(pinLocX(mScrollX), pinLocY(mScrollY));
+                updateScrollCoordinates(pinLocX(getScrollX()), pinLocY(getScrollY()));
                 if (!mScroller.isFinished()) {
                     // We are in the middle of a scroll.  Repin the final scroll
                     // position.
@@ -3605,7 +3614,7 @@ public class WebView extends AbsoluteLayout
         int range = computeRealHorizontalScrollRange();
 
         // Adjust reported range if overscrolled to compress the scroll bars
-        final int scrollX = mScrollX;
+        final int scrollX = getScrollX();
         final int overscrollRight = computeMaxScrollX();
         if (scrollX < 0) {
             range -= scrollX;
@@ -3618,7 +3627,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected int computeHorizontalScrollOffset() {
-        return Math.max(mScrollX, 0);
+        return Math.max(getScrollX(), 0);
     }
 
     private int computeRealVerticalScrollRange() {
@@ -3635,7 +3644,7 @@ public class WebView extends AbsoluteLayout
         int range = computeRealVerticalScrollRange();
 
         // Adjust reported range if overscrolled to compress the scroll bars
-        final int scrollY = mScrollY;
+        final int scrollY = getScrollY();
         final int overscrollBottom = computeMaxScrollY();
         if (scrollY < 0) {
             range -= scrollY;
@@ -3648,7 +3657,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected int computeVerticalScrollOffset() {
-        return Math.max(mScrollY - getTitleHeight(), 0);
+        return Math.max(getScrollY() - getTitleHeight(), 0);
     }
 
     @Override
@@ -3661,8 +3670,8 @@ public class WebView extends AbsoluteLayout
     protected void onDrawVerticalScrollBar(Canvas canvas,
                                            Drawable scrollBar,
                                            int l, int t, int r, int b) {
-        if (mScrollY < 0) {
-            t -= mScrollY;
+        if (getScrollY() < 0) {
+            t -= getScrollY();
         }
         scrollBar.setBounds(l, t + getVisibleTitleHeightImpl(), r, b);
         scrollBar.draw(canvas);
@@ -3690,13 +3699,13 @@ public class WebView extends AbsoluteLayout
             mInOverScrollMode = true;
         }
 
-        int oldX = mScrollX;
-        int oldY = mScrollY;
+        int oldX = getScrollX();
+        int oldY = getScrollY();
 
         super.scrollTo(scrollX, scrollY);
 
         if (mOverScrollGlow != null) {
-            mOverScrollGlow.pullGlow(mScrollX, mScrollY, oldX, oldY, maxX, maxY);
+            mOverScrollGlow.pullGlow(getScrollX(), getScrollY(), oldX, oldY, maxX, maxY);
         }
     }
 
@@ -4145,7 +4154,7 @@ public class WebView extends AbsoluteLayout
         setFindIsUp(false);
         // Now that the dialog has been removed, ensure that we scroll to a
         // location that is not beyond the end of the page.
-        pinScrollTo(mScrollX, mScrollY, false, 0);
+        pinScrollTo(getScrollX(), getScrollY(), false, 0);
         invalidate();
     }
 
@@ -4176,8 +4185,8 @@ public class WebView extends AbsoluteLayout
     @Override
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
-            int oldX = mScrollX;
-            int oldY = mScrollY;
+            int oldX = getScrollX();
+            int oldY = getScrollY();
             int x = mScroller.getCurrX();
             int y = mScroller.getCurrY();
             invalidate();  // So we draw again
@@ -4206,8 +4215,8 @@ public class WebView extends AbsoluteLayout
                 }
             } else {
                 if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
-                    mScrollX = x;
-                    mScrollY = y;
+                    setScrollXRaw(x);
+                    setScrollYRaw(y);
                 } else {
                     // Update the layer position instead of WebView.
                     scrollLayerTo(x, y);
@@ -4220,7 +4229,7 @@ public class WebView extends AbsoluteLayout
                         WebViewCore.resumeUpdatePicture(mWebViewCore);
                     }
                 }
-                if (oldX != mScrollX || oldY != mScrollY) {
+                if (oldX != getScrollX() || oldY != getScrollY()) {
                     sendOurVisibleRect();
                 }
             }
@@ -4248,7 +4257,7 @@ public class WebView extends AbsoluteLayout
         mScrollingLayerRect.top = y;
         mWebViewCore.sendMessage(WebViewCore.EventHub.SCROLL_LAYER, mCurrentScrollingLayerId,
                 mScrollingLayerRect);
-        onScrollChanged(mScrollX, mScrollY, mScrollX, mScrollY);
+        onScrollChanged(getScrollX(), getScrollY(), getScrollX(), getScrollY());
         invalidate();
     }
 
@@ -4261,15 +4270,15 @@ public class WebView extends AbsoluteLayout
     // helper to pin the scrollBy parameters (already in view coordinates)
     // returns true if the scroll was changed
     private boolean pinScrollBy(int dx, int dy, boolean animate, int animationDuration) {
-        return pinScrollTo(mScrollX + dx, mScrollY + dy, animate, animationDuration);
+        return pinScrollTo(getScrollX() + dx, getScrollY() + dy, animate, animationDuration);
     }
     // helper to pin the scrollTo parameters (already in view coordinates)
     // returns true if the scroll was changed
     private boolean pinScrollTo(int x, int y, boolean animate, int animationDuration) {
         x = pinLocX(x);
         y = pinLocY(y);
-        int dx = x - mScrollX;
-        int dy = y - mScrollY;
+        int dx = x - getScrollX();
+        int dy = y - getScrollY();
 
         if ((dx | dy) == 0) {
             return false;
@@ -4277,7 +4286,7 @@ public class WebView extends AbsoluteLayout
         abortAnimation();
         if (animate) {
             //        Log.d(LOGTAG, "startScroll: " + dx + " " + dy);
-            mScroller.startScroll(mScrollX, mScrollY, dx, dy,
+            mScroller.startScroll(getScrollX(), getScrollY(), dx, dy,
                     animationDuration > 0 ? animationDuration : computeDuration(dx, dy));
             awakenScrollBars(mScroller.getDuration());
             invalidate();
@@ -4345,7 +4354,7 @@ public class WebView extends AbsoluteLayout
             // past the point where the title bar is offscreen, ignore the
             // scroll request.
             if (mPageThatNeedsToSlideTitleBarOffScreen.equals(url)
-                    && mScrollX == 0 && mScrollY == 0) {
+                    && getScrollX() == 0 && getScrollY() == 0) {
                 pinScrollTo(0, mYDistanceToSlideTitleOffScreen, true,
                         SLIDE_TITLE_DURATION);
             }
@@ -4513,7 +4522,7 @@ public class WebView extends AbsoluteLayout
         // page, assume this is an attempt to scroll off the title bar, and
         // animate the title bar off screen slowly enough that the user can see
         // it.
-        if (cx == 0 && cy == 1 && mScrollX == 0 && mScrollY == 0
+        if (cx == 0 && cy == 1 && getScrollX() == 0 && getScrollY() == 0
                 && mTitleBar != null) {
             // FIXME: 100 should be defined somewhere as our max progress.
             if (getProgress() < 100) {
@@ -4532,7 +4541,7 @@ public class WebView extends AbsoluteLayout
         pinScrollTo(vx, vy, false, 0);
         // If the request was to scroll to a negative coordinate, treat it as if
         // it was a request to scroll to 0
-        if ((mScrollX != vx && cx >= 0) || (mScrollY != vy && cy >= 0)) {
+        if ((getScrollX() != vx && cx >= 0) || (getScrollY() != vy && cy >= 0)) {
             return true;
         } else {
             return false;
@@ -4787,12 +4796,12 @@ public class WebView extends AbsoluteLayout
         if (child == mTitleBar) {
             // When drawing the title bar, move it horizontally to always show
             // at the top of the WebView.
-            mTitleBar.offsetLeftAndRight(mScrollX - mTitleBar.getLeft());
+            mTitleBar.offsetLeftAndRight(getScrollX() - mTitleBar.getLeft());
             int newTop = 0;
             if (mTitleGravity == Gravity.NO_GRAVITY) {
-                newTop = Math.min(0, mScrollY);
+                newTop = Math.min(0, getScrollY());
             } else if (mTitleGravity == Gravity.TOP) {
-                newTop = mScrollY;
+                newTop = getScrollY();
             }
             mTitleBar.setBottom(newTop + mTitleBar.getHeight());
             mTitleBar.setTop(newTop);
@@ -4828,9 +4837,9 @@ public class WebView extends AbsoluteLayout
         int bottom = top + computeRealVerticalScrollRange();
         // first draw the background and anchor to the top of the view
         canvas.save();
-        canvas.translate(mScrollX, mScrollY);
-        canvas.clipRect(-mScrollX, top - mScrollY, right - mScrollX, bottom
-                - mScrollY, Region.Op.DIFFERENCE);
+        canvas.translate(getScrollX(), getScrollY());
+        canvas.clipRect(-getScrollX(), top - getScrollY(), right - getScrollX(), bottom
+                - getScrollY(), Region.Op.DIFFERENCE);
         canvas.drawPaint(mOverScrollBackground);
         canvas.restore();
         // then draw the border
@@ -4961,8 +4970,8 @@ public class WebView extends AbsoluteLayout
                     = (AbsoluteLayout.LayoutParams) mWebTextView.getLayoutParams();
             MotionEvent fake = MotionEvent.obtain(mLastTouchTime,
                     mLastTouchTime, MotionEvent.ACTION_DOWN,
-                    mLastTouchX - params.x + mScrollX,
-                    mLastTouchY - params.y + mScrollY, 0);
+                    mLastTouchX - params.x + getScrollX(),
+                    mLastTouchY - params.y + getScrollY(), 0);
             mWebTextView.dispatchTouchEvent(fake);
             return mWebTextView.performLongClick();
         }
@@ -4995,8 +5004,8 @@ public class WebView extends AbsoluteLayout
      * @hide This is an implementation detail.
      */
     public boolean selectText() {
-        int x = viewToContentX(mLastTouchX + mScrollX);
-        int y = viewToContentY(mLastTouchY + mScrollY);
+        int x = viewToContentX(mLastTouchX + getScrollX());
+        int y = viewToContentY(mLastTouchY + getScrollY());
         return selectText(x, y);
     }
 
@@ -5367,12 +5376,12 @@ public class WebView extends AbsoluteLayout
             mDrawHistory = false;
             mHistoryPicture = null;
             invalidate();
-            int oldScrollX = mScrollX;
-            int oldScrollY = mScrollY;
-            mScrollX = pinLocX(mScrollX);
-            mScrollY = pinLocY(mScrollY);
-            if (oldScrollX != mScrollX || oldScrollY != mScrollY) {
-                onScrollChanged(mScrollX, mScrollY, oldScrollX, oldScrollY);
+            int oldScrollX = getScrollX();
+            int oldScrollY = getScrollY();
+            setScrollXRaw(pinLocX(getScrollX()));
+            setScrollYRaw(pinLocY(getScrollY()));
+            if (oldScrollX != getScrollX() || oldScrollY != getScrollY()) {
+                onScrollChanged(getScrollX(), getScrollY(), oldScrollX, oldScrollY);
             } else {
                 sendOurVisibleRect();
             }
@@ -5853,10 +5862,10 @@ public class WebView extends AbsoluteLayout
                         return true;
                     case KeyEvent.KEYCODE_DPAD_LEFT:
                         nativeClearCursor(); // start next trackball movement from page edge
-                        return pinScrollTo(0, mScrollY, true, 0);
+                        return pinScrollTo(0, getScrollY(), true, 0);
                     case KeyEvent.KEYCODE_DPAD_RIGHT:
                         nativeClearCursor(); // start next trackball movement from page edge
-                        return pinScrollTo(mContentWidth, mScrollY, true, 0);
+                        return pinScrollTo(mContentWidth, getScrollY(), true, 0);
                 }
             }
             if (navHandledKey(keyCode, 1, false, event.getEventTime())) {
@@ -6634,8 +6643,8 @@ public class WebView extends AbsoluteLayout
     // See if there is a layer at x, y and switch to TOUCH_DRAG_LAYER_MODE if a
     // layer is found.
     private void startScrollingLayer(float x, float y) {
-        int contentX = viewToContentX((int) x + mScrollX);
-        int contentY = viewToContentY((int) y + mScrollY);
+        int contentX = viewToContentX((int) x + getScrollX());
+        int contentY = viewToContentY((int) y + getScrollY());
         mCurrentScrollingLayerId = nativeScrollableLayer(contentX, contentY,
                 mScrollingLayerRect, mScrollingLayerBounds);
         if (mCurrentScrollingLayerId != 0) {
@@ -6657,8 +6666,8 @@ public class WebView extends AbsoluteLayout
             return false;
         }
         WebViewCore.CursorData data = cursorDataNoPosition();
-        data.mX = viewToContentX((int) event.getX() + mScrollX);
-        data.mY = viewToContentY((int) event.getY() + mScrollY);
+        data.mX = viewToContentX((int) event.getX() + getScrollX());
+        data.mY = viewToContentY((int) event.getY() + getScrollY());
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
         return true;
     }
@@ -6711,8 +6720,8 @@ public class WebView extends AbsoluteLayout
 
         int deltaX = mLastTouchX - x;
         int deltaY = mLastTouchY - y;
-        int contentX = viewToContentX(x + mScrollX);
-        int contentY = viewToContentY(y + mScrollY);
+        int contentX = viewToContentX(x + getScrollX());
+        int contentY = viewToContentY(y + getScrollY());
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
@@ -6769,8 +6778,8 @@ public class WebView extends AbsoluteLayout
                         }
                         if (DEBUG_TOUCH_HIGHLIGHT) {
                             if (getSettings().getNavDump()) {
-                                mTouchHighlightX = x + mScrollX;
-                                mTouchHighlightY = y + mScrollY;
+                                mTouchHighlightX = x + getScrollX();
+                                mTouchHighlightY = y + getScrollY();
                                 mPrivateHandler.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
@@ -6787,8 +6796,8 @@ public class WebView extends AbsoluteLayout
                     }
                     mSelectionStarted = false;
                     if (mSelectingText) {
-                        int shiftedY = y - getTitleHeight() + mScrollY;
-                        int shiftedX = x + mScrollX;
+                        int shiftedY = y - getTitleHeight() + getScrollY();
+                        int shiftedX = x + getScrollX();
                         if (mSelectHandleCenter != null && mSelectHandleCenter.getBounds()
                                 .contains(shiftedX, shiftedY)) {
                             mSelectionStarted = true;
@@ -7197,7 +7206,7 @@ public class WebView extends AbsoluteLayout
                             doFling();
                             break;
                         } else {
-                            if (mScroller.springBack(mScrollX, mScrollY, 0,
+                            if (mScroller.springBack(getScrollX(), getScrollY(), 0,
                                     computeMaxScrollX(), 0,
                                     computeMaxScrollY())) {
                                 invalidate();
@@ -7223,7 +7232,7 @@ public class WebView extends AbsoluteLayout
             }
             case MotionEvent.ACTION_CANCEL: {
                 if (mTouchMode == TOUCH_DRAG_MODE) {
-                    mScroller.springBack(mScrollX, mScrollY, 0,
+                    mScroller.springBack(getScrollX(), getScrollY(), 0,
                             computeMaxScrollX(), 0, computeMaxScrollY());
                     invalidate();
                 }
@@ -7244,8 +7253,8 @@ public class WebView extends AbsoluteLayout
         ted.mPointsInView = new Point[count];
         for (int c = 0; c < count; c++) {
             ted.mIds[c] = ev.getPointerId(c);
-            int x = viewToContentX((int) ev.getX(c) + mScrollX);
-            int y = viewToContentY((int) ev.getY(c) + mScrollY);
+            int x = viewToContentX((int) ev.getX(c) + getScrollX());
+            int y = viewToContentY((int) ev.getY(c) + getScrollY());
             ted.mPoints[c] = new Point(x, y);
             ted.mPointsInView[c] = new Point((int) ev.getX(c), (int) ev.getY(c));
         }
@@ -7268,7 +7277,7 @@ public class WebView extends AbsoluteLayout
             Log.v(LOGTAG, "multi-touch: " + ev + " at " + ev.getEventTime()
                 + " mTouchMode=" + mTouchMode
                 + " numPointers=" + ev.getPointerCount()
-                + " scrolloffset=(" + mScrollX + "," + mScrollY + ")");
+                + " scrolloffset=(" + getScrollX() + "," + getScrollY() + ")");
         }
 
         final ScaleGestureDetector detector =
@@ -7333,8 +7342,8 @@ public class WebView extends AbsoluteLayout
             ted.mPoints = new Point[1];
             ted.mPoints[0] = new Point(x, y);
             ted.mPointsInView = new Point[1];
-            int viewX = contentToViewX(x) - mScrollX;
-            int viewY = contentToViewY(y) - mScrollY;
+            int viewX = contentToViewX(x) - getScrollX();
+            int viewY = contentToViewY(y) - getScrollY();
             ted.mPointsInView[0] = new Point(viewX, viewY);
             ted.mAction = MotionEvent.ACTION_CANCEL;
             ted.mNativeLayer = nativeScrollableLayer(
@@ -7380,8 +7389,8 @@ public class WebView extends AbsoluteLayout
 
     private void doDrag(int deltaX, int deltaY) {
         if ((deltaX | deltaY) != 0) {
-            int oldX = mScrollX;
-            int oldY = mScrollY;
+            int oldX = getScrollX();
+            int oldY = getScrollY();
             int rangeX = computeMaxScrollX();
             int rangeY = computeMaxScrollY();
             // Check for the original scrolling layer in case we change
@@ -7711,8 +7720,8 @@ public class WebView extends AbsoluteLayout
         ay = Math.abs(mTrackballRemainsY * TRACKBALL_MULTIPLIER);
         maxA = Math.max(ax, ay);
         int count = Math.max(0, (int) maxA);
-        int oldScrollX = mScrollX;
-        int oldScrollY = mScrollY;
+        int oldScrollX = getScrollX();
+        int oldScrollY = getScrollY();
         if (count > 0) {
             int selectKeyCode = ax < ay ? mTrackballRemainsY < 0 ?
                     KeyEvent.KEYCODE_DPAD_UP : KeyEvent.KEYCODE_DPAD_DOWN :
@@ -7742,14 +7751,14 @@ public class WebView extends AbsoluteLayout
                 Log.v(LOGTAG, "doTrackball pinScrollBy"
                         + " count=" + count
                         + " xMove=" + xMove + " yMove=" + yMove
-                        + " mScrollX-oldScrollX=" + (mScrollX-oldScrollX)
-                        + " mScrollY-oldScrollY=" + (mScrollY-oldScrollY)
+                        + " mScrollX-oldScrollX=" + (getScrollX()-oldScrollX)
+                        + " mScrollY-oldScrollY=" + (getScrollY()-oldScrollY)
                         );
             }
-            if (Math.abs(mScrollX - oldScrollX) > Math.abs(xMove)) {
+            if (Math.abs(getScrollX() - oldScrollX) > Math.abs(xMove)) {
                 xMove = 0;
             }
-            if (Math.abs(mScrollY - oldScrollY) > Math.abs(yMove)) {
+            if (Math.abs(getScrollY() - oldScrollY) > Math.abs(yMove)) {
                 yMove = 0;
             }
             if (xMove != 0 || yMove != 0) {
@@ -7776,12 +7785,12 @@ public class WebView extends AbsoluteLayout
     }
 
     boolean updateScrollCoordinates(int x, int y) {
-        int oldX = mScrollX;
-        int oldY = mScrollY;
-        mScrollX = x;
-        mScrollY = y;
-        if (oldX != mScrollX || oldY != mScrollY) {
-            onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+        int oldX = getScrollX();
+        int oldY = getScrollY();
+        setScrollXRaw(x);
+        setScrollYRaw(y);
+        if (oldX != getScrollX() || oldY != getScrollY()) {
+            onScrollChanged(getScrollX(), getScrollY(), oldX, oldY);
             return true;
         } else {
             return false;
@@ -7790,7 +7799,7 @@ public class WebView extends AbsoluteLayout
 
     public void flingScroll(int vx, int vy) {
         checkThread();
-        mScroller.fling(mScrollX, mScrollY, vx, vy, 0, computeMaxScrollX(), 0,
+        mScroller.fling(getScrollX(), getScrollY(), vx, vy, 0, computeMaxScrollX(), 0,
                 computeMaxScrollY(), mOverflingDistance, mOverflingDistance);
         invalidate();
     }
@@ -7806,8 +7815,8 @@ public class WebView extends AbsoluteLayout
         int vx = (int) mVelocityTracker.getXVelocity();
         int vy = (int) mVelocityTracker.getYVelocity();
 
-        int scrollX = mScrollX;
-        int scrollY = mScrollY;
+        int scrollX = getScrollX();
+        int scrollY = getScrollY();
         int overscrollDistance = mOverscrollDistance;
         int overflingDistance = mOverflingDistance;
 
@@ -7988,8 +7997,8 @@ public class WebView extends AbsoluteLayout
         }
         mPrivateHandler.removeMessages(UPDATE_SELECTION);
         // mLastTouchX and mLastTouchY are the point in the current viewport
-        int contentX = viewToContentX(mLastTouchX + mScrollX);
-        int contentY = viewToContentY(mLastTouchY + mScrollY);
+        int contentX = viewToContentX(mLastTouchX + getScrollX());
+        int contentY = viewToContentY(mLastTouchY + getScrollY());
         int slop = viewToContentDimension(mNavSlop);
         Rect rect = new Rect(contentX - slop, contentY - slop,
                 contentX + slop, contentY + slop);
@@ -8027,8 +8036,8 @@ public class WebView extends AbsoluteLayout
         if (!inEditingMode()) {
             return;
         }
-        mLastTouchX = Math.round(x + mWebTextView.getLeft() - mScrollX);
-        mLastTouchY = Math.round(y + mWebTextView.getTop() - mScrollY);
+        mLastTouchX = Math.round(x + mWebTextView.getLeft() - getScrollX());
+        mLastTouchY = Math.round(y + mWebTextView.getTop() - getScrollY());
         mLastTouchTime = eventTime;
         if (!mScroller.isFinished()) {
             abortAnimation();
@@ -8047,8 +8056,8 @@ public class WebView extends AbsoluteLayout
             return false;
         }
         mDragFromTextInput = true;
-        event.offsetLocation((mWebTextView.getLeft() - mScrollX),
-                (mWebTextView.getTop() - mScrollY));
+        event.offsetLocation((mWebTextView.getLeft() - getScrollX()),
+                (mWebTextView.getTop() - getScrollY()));
         boolean result = onTouchEvent(event);
         mDragFromTextInput = false;
         return result;
@@ -8088,8 +8097,8 @@ public class WebView extends AbsoluteLayout
         updateSelection();
         switchOutDrawHistory();
         // mLastTouchX and mLastTouchY are the point in the current viewport
-        int contentX = viewToContentX(mLastTouchX + mScrollX);
-        int contentY = viewToContentY(mLastTouchY + mScrollY);
+        int contentX = viewToContentX(mLastTouchX + getScrollX());
+        int contentY = viewToContentY(mLastTouchY + getScrollY());
         int slop = viewToContentDimension(mNavSlop);
         if (sDisableNavcache && !mTouchHighlightRegion.isEmpty()) {
             // set mTouchHighlightRequested to 0 to cause an immediate
@@ -8166,10 +8175,10 @@ public class WebView extends AbsoluteLayout
         float scale = Math.min((float) viewWidth / rectWidth, (float) viewHeight / rectHeight);
         scale = mZoomManager.computeScaleWithLimits(scale);
         return !mZoomManager.willScaleTriggerZoom(scale)
-                && contentToViewX(rect.left) >= mScrollX
-                && contentToViewX(rect.right) <= mScrollX + viewWidth
-                && contentToViewY(rect.top) >= mScrollY
-                && contentToViewY(rect.bottom) <= mScrollY + viewHeight;
+                && contentToViewX(rect.left) >= getScrollX()
+                && contentToViewX(rect.right) <= getScrollX() + viewWidth
+                && contentToViewY(rect.top) >= getScrollY()
+                && contentToViewY(rect.bottom) <= getScrollY() + viewHeight;
     }
 
     /*
@@ -8193,7 +8202,7 @@ public class WebView extends AbsoluteLayout
                     true, 0);
         } else {
             float actualScale = mZoomManager.getScale();
-            float oldScreenX = rect.left * actualScale - mScrollX;
+            float oldScreenX = rect.left * actualScale - getScrollX();
             float rectViewX = rect.left * scale;
             float rectViewWidth = rectWidth * scale;
             float newMaxWidth = mContentWidth * scale;
@@ -8207,7 +8216,7 @@ public class WebView extends AbsoluteLayout
             float zoomCenterX = (oldScreenX * scale - newScreenX * actualScale)
                     / (scale - actualScale);
             float oldScreenY = rect.top * actualScale + getTitleHeight()
-                    - mScrollY;
+                    - getScrollY();
             float rectViewY = rect.top * scale + getTitleHeight();
             float rectViewHeight = rectHeight * scale;
             float newMaxHeight = mContentHeight * scale + getTitleHeight();
@@ -8339,11 +8348,11 @@ public class WebView extends AbsoluteLayout
         rect.offset(child.getLeft() - child.getScrollX(),
                 child.getTop() - child.getScrollY());
 
-        Rect content = new Rect(viewToContentX(mScrollX),
-                viewToContentY(mScrollY),
-                viewToContentX(mScrollX + getWidth()
+        Rect content = new Rect(viewToContentX(getScrollX()),
+                viewToContentY(getScrollY()),
+                viewToContentX(getScrollX() + getWidth()
                 - getVerticalScrollbarWidth()),
-                viewToContentY(mScrollY + getViewHeightWithTitle()));
+                viewToContentY(getScrollY() + getViewHeightWithTitle()));
         content = nativeSubtractLayers(content);
         int screenTop = contentToViewY(content.top);
         int screenBottom = contentToViewY(content.bottom);
@@ -8859,12 +8868,12 @@ public class WebView extends AbsoluteLayout
                                 startScrollingLayer(x, y);
                                 startDrag();
                             }
-                            int deltaX = pinLocX((int) (mScrollX
+                            int deltaX = pinLocX((int) (getScrollX()
                                     + mLastDeferTouchX - x))
-                                    - mScrollX;
-                            int deltaY = pinLocY((int) (mScrollY
+                                    - getScrollX();
+                            int deltaY = pinLocY((int) (getScrollY()
                                     + mLastDeferTouchY - y))
-                                    - mScrollY;
+                                    - getScrollY();
                             doDrag(deltaX, deltaY);
                             if (deltaX != 0) mLastDeferTouchX = x;
                             if (deltaY != 0) mLastDeferTouchY = y;
@@ -8874,7 +8883,7 @@ public class WebView extends AbsoluteLayout
                         case MotionEvent.ACTION_CANCEL:
                             if (mDeferTouchMode == TOUCH_DRAG_MODE) {
                                 // no fling in defer process
-                                mScroller.springBack(mScrollX, mScrollY, 0,
+                                mScroller.springBack(getScrollX(), getScrollY(), 0,
                                         computeMaxScrollX(), 0,
                                         computeMaxScrollY());
                                 invalidate();
@@ -8961,8 +8970,8 @@ public class WebView extends AbsoluteLayout
                             || (msg.arg1 == MotionEvent.ACTION_MOVE
                             && mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN)) {
                         cancelWebCoreTouchEvent(
-                                viewToContentX(mLastTouchX + mScrollX),
-                                viewToContentY(mLastTouchY + mScrollY),
+                                viewToContentX(mLastTouchX + getScrollX()),
+                                viewToContentY(mLastTouchY + getScrollY()),
                                 true);
                     }
                     break;
@@ -9016,8 +9025,8 @@ public class WebView extends AbsoluteLayout
                         ted.mIds = new int[1];
                         ted.mIds[0] = 0;
                         ted.mPoints = new Point[1];
-                        ted.mPoints[0] = new Point(viewToContentX(mLastTouchX + mScrollX),
-                                                   viewToContentY(mLastTouchY + mScrollY));
+                        ted.mPoints[0] = new Point(viewToContentX(mLastTouchX + getScrollX()),
+                                                   viewToContentY(mLastTouchY + getScrollY()));
                         ted.mPointsInView = new Point[1];
                         ted.mPointsInView[0] = new Point(mLastTouchX, mLastTouchY);
                         // metaState for long press is tricky. Should it be the
@@ -9277,17 +9286,17 @@ public class WebView extends AbsoluteLayout
 
                 case SHOW_RECT_MSG_ID: {
                     WebViewCore.ShowRectData data = (WebViewCore.ShowRectData) msg.obj;
-                    int x = mScrollX;
+                    int x = getScrollX();
                     int left = contentToViewX(data.mLeft);
                     int width = contentToViewDimension(data.mWidth);
                     int maxWidth = contentToViewDimension(data.mContentWidth);
                     int viewWidth = getViewWidth();
                     if (width < viewWidth) {
                         // center align
-                        x += left + width / 2 - mScrollX - viewWidth / 2;
+                        x += left + width / 2 - getScrollX() - viewWidth / 2;
                     } else {
                         x += (int) (left + data.mXPercentInDoc * width
-                                - mScrollX - data.mXPercentInView * viewWidth);
+                                - getScrollX() - data.mXPercentInView * viewWidth);
                     }
                     if (DebugFlags.WEB_VIEW) {
                         Log.v(LOGTAG, "showRectMsg=(left=" + left + ",width=" +
