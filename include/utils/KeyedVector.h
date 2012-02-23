@@ -122,7 +122,7 @@ ssize_t KeyedVector<KEY,VALUE>::indexOfKey(const KEY& key) const {
 
 template<typename KEY, typename VALUE> inline
 const VALUE& KeyedVector<KEY,VALUE>::valueFor(const KEY& key) const {
-    ssize_t i = indexOfKey(key);
+    ssize_t i = this->indexOfKey(key);
     assert(i>=0);
     return mVector.itemAt(i).value;
 }
@@ -139,7 +139,7 @@ const KEY& KeyedVector<KEY,VALUE>::keyAt(size_t index) const {
 
 template<typename KEY, typename VALUE> inline
 VALUE& KeyedVector<KEY,VALUE>::editValueFor(const KEY& key) {
-    ssize_t i = indexOfKey(key);
+    ssize_t i = this->indexOfKey(key);
     assert(i>=0);
     return mVector.editItemAt(i).value;
 }
@@ -190,7 +190,7 @@ DefaultKeyedVector<KEY,VALUE>::DefaultKeyedVector(const VALUE& defValue)
 
 template<typename KEY, typename VALUE> inline
 const VALUE& DefaultKeyedVector<KEY,VALUE>::valueFor(const KEY& key) const {
-    ssize_t i = indexOfKey(key);
+    ssize_t i = this->indexOfKey(key);
     return i >= 0 ? KeyedVector<KEY,VALUE>::valueAt(i) : mDefault;
 }
 
