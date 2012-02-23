@@ -402,8 +402,8 @@ public final class CalendarContract {
          * A comma separated list of reminder methods supported for this
          * calendar in the format "#,#,#". Valid types are
          * {@link Reminders#METHOD_DEFAULT}, {@link Reminders#METHOD_ALERT},
-         * {@link Reminders#METHOD_EMAIL}, {@link Reminders#METHOD_SMS}. Column
-         * name.
+         * {@link Reminders#METHOD_EMAIL}, {@link Reminders#METHOD_SMS},
+         * {@link Reminders#METHOD_ALARM}. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String ALLOWED_REMINDERS = "allowedReminders";
@@ -1930,11 +1930,11 @@ public final class CalendarContract {
 
         /**
          * The alarm method, as set on the server. {@link #METHOD_DEFAULT},
-         * {@link #METHOD_ALERT}, {@link #METHOD_EMAIL}, and {@link #METHOD_SMS}
-         * are possible values; the device will only process
-         * {@link #METHOD_DEFAULT} and {@link #METHOD_ALERT} reminders (the
-         * other types are simply stored so we can send the same reminder info
-         * back to the server when we make changes).
+         * {@link #METHOD_ALERT}, {@link #METHOD_EMAIL}, {@link #METHOD_SMS} and
+         * {@link #METHOD_ALARM} are possible values; the device will only
+         * process {@link #METHOD_DEFAULT} and {@link #METHOD_ALERT} reminders
+         * (the other types are simply stored so we can send the same reminder
+         * info back to the server when we make changes).
          */
         public static final String METHOD = "method";
 
@@ -1942,6 +1942,7 @@ public final class CalendarContract {
         public static final int METHOD_ALERT = 1;
         public static final int METHOD_EMAIL = 2;
         public static final int METHOD_SMS = 3;
+        public static final int METHOD_ALARM = 4;
     }
 
     /**
