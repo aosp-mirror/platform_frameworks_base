@@ -335,6 +335,10 @@ status_t OMXClient::connect() {
 }
 
 void OMXClient::disconnect() {
+    if (mOMX.get() != NULL) {
+        mOMX.clear();
+        mOMX = NULL;
+    }
 }
 
 }  // namespace android
