@@ -121,6 +121,7 @@
     <protected-broadcast android:name="android.intent.action.CLEAR_DNS_CACHE" />
     <protected-broadcast android:name="android.intent.action.PROXY_CHANGE" />
 
+    <protected-broadcast android:name="android.os.UpdateLock.UPDATE_LOCK_CHANGED" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
@@ -1538,6 +1539,13 @@
         android:label="@string/permlab_accessContentProvidersExternally"
         android:description="@string/permdesc_accessContentProvidersExternally"
         android:protectionLevel="signature" />
+    <!-- Allows an application to hold an UpdateLock, recommending that a headless
+         OTA reboot *not* occur while the lock is held.
+         @hide -->
+    <permission android:name="android.permission.UPDATE_LOCK"
+        android:label="@string/permlab_updateLock"
+        android:description="@string/permdesc_updateLock"
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->

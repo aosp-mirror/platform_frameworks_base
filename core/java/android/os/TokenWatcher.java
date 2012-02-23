@@ -16,6 +16,8 @@
 
 package android.os;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.WeakHashMap;
 import java.util.Set;
 import android.util.Log;
@@ -115,15 +117,31 @@ public abstract class TokenWatcher
 
     public void dump()
     {
+        ArrayList<String> a = dumpInternal();
+        for (String s : a) {
+            Log.i(mTag, s);
+        }
+    }
+
+    public void dump(PrintWriter pw) {
+        ArrayList<String> a = dumpInternal();
+        for (String s : a) {
+            pw.println(s);
+        }
+    }
+
+    private ArrayList<String> dumpInternal() {
+        ArrayList<String> a = new ArrayList<String>();
         synchronized (mTokens) {
             Set<IBinder> keys = mTokens.keySet();
-            Log.i(mTag, "Token count: " + mTokens.size());
+            a.add("Token count: " + mTokens.size());
             int i = 0;
             for (IBinder b: keys) {
-                Log.i(mTag, "[" + i + "] " + mTokens.get(b).tag + " - " + b);
+                a.add("[" + i + "] " + mTokens.get(b).tag + " - " + b);
                 i++;
             }
         }
+        return a;
     }
 
     private Runnable mNotificationTask = new Runnable() {
