@@ -382,21 +382,24 @@ public class WebView extends AbsoluteLayout
 
         @Override
         public boolean sendKeyEvent(KeyEvent event) {
-            // Latin IME occasionally sends delete codes directly using
-            // sendKeyEvents. WebViewInputConnection should treat this
-            // as a deleteSurroundingText.
-            if (!mIsKeySentByMe
-                    && event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
-                Editable editable = getEditable();
-                int selectionStart = Selection.getSelectionStart(editable);
-                int selectionEnd = Selection.getSelectionEnd(editable);
-                if (selectionEnd > 0 && (selectionStart == selectionEnd)) {
-                    int action = event.getAction();
-                    if (action == KeyEvent.ACTION_UP) {
+            // Some IMEs send key events directly using sendKeyEvents.
+            // WebViewInputConnection should treat these as text changes.
+            if (!mIsKeySentByMe) {
+                if (event.getAction() == KeyEvent.ACTION_UP) {
+                    if (event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
                         return deleteSurroundingText(1, 0);
-                    } else if (action == KeyEvent.ACTION_DOWN) {
-                        return true; // the delete will happen in ACTION_UP
+                    } else if (event.getKeyCode() == KeyEvent.KEYCODE_FORWARD_DEL) {
+                        return deleteSurroundingText(0, 1);
+                    } else if (event.getUnicodeChar() != 0){
+                        String newComposingText =
+                                Character.toString((char)event.getUnicodeChar());
+                        return commitText(newComposingText, 1);
                     }
+                } else if (event.getAction() == KeyEvent.ACTION_DOWN &&
+                        (event.getKeyCode() == KeyEvent.KEYCODE_DEL
+                        || event.getKeyCode() == KeyEvent.KEYCODE_FORWARD_DEL
+                        || event.getUnicodeChar() != 0)) {
+                    return true; // only act on action_down
                 }
             }
             return super.sendKeyEvent(event);
