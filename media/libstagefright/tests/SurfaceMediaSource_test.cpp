@@ -107,7 +107,7 @@ protected:
                     window.get(), NULL);
         } else {
             ALOGV("No actual display. Choosing EGLSurface based on SurfaceMediaSource");
-            sp<SurfaceMediaSource> sms = new SurfaceMediaSource(
+            sp<ISurfaceTexture> sms = new SurfaceMediaSource(
                     getSurfaceWidth(), getSurfaceHeight());
             sp<SurfaceTextureClient> stc = new SurfaceTextureClient(sms);
             sp<ANativeWindow> window = stc;
@@ -360,7 +360,8 @@ protected:
         android::ProcessState::self()->startThreadPool();
         mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
         mSMS->setSynchronousMode(true);
-        mSTC = new SurfaceTextureClient(mSMS);
+        // Manual cast is required to avoid constructor ambiguity
+        mSTC = new SurfaceTextureClient(static_cast<sp<ISurfaceTexture> >( mSMS));
         mANW = mSTC;
     }
 
@@ -395,7 +396,7 @@ protected:
         ALOGV("SMS-GLTest::SetUp()");
         android::ProcessState::self()->startThreadPool();
         mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
-        mSTC = new SurfaceTextureClient(mSMS);
+        mSTC = new SurfaceTextureClient(static_cast<sp<ISurfaceTexture> >( mSMS));
         mANW = mSTC;
 
         // Doing the setup related to the GL Side
@@ -773,7 +774,7 @@ TEST_F(SurfaceMediaSourceGLTest, ChooseAndroidRecordableEGLConfigDummyWriter) {
     ALOGV("Verify creating a surface w/ right config + dummy writer*********");
 
     mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
-    mSTC = new SurfaceTextureClient(mSMS);
+    mSTC = new SurfaceTextureClient(static_cast<sp<ISurfaceTexture> >( mSMS));
     mANW = mSTC;
 
     DummyRecorder writer(mSMS);

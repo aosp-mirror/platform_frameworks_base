@@ -251,8 +251,16 @@ static void Surface_init(
 static void Surface_initFromSurfaceTexture(
         JNIEnv* env, jobject clazz, jobject jst)
 {
-    sp<ISurfaceTexture> st(SurfaceTexture_getSurfaceTexture(env, jst));
-    sp<Surface> surface(new Surface(st));
+    sp<SurfaceTexture> st(SurfaceTexture_getSurfaceTexture(env, jst));
+
+    if (st == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "SurfaceTexture has already been released");
+        return;
+    }
+    sp<ISurfaceTexture> bq = st->getBufferQueue();
+
+    sp<Surface> surface(new Surface(bq));
     if (surface == NULL) {
         jniThrowException(env, OutOfResourcesException, NULL);
         return;

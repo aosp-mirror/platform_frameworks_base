@@ -54,6 +54,9 @@ SurfaceMediaSource::SurfaceMediaSource(uint32_t bufW, uint32_t bufH) :
     ALOGV("SurfaceMediaSource::SurfaceMediaSource");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
+    if (mGraphicBufferAlloc == 0) {
+        ALOGE("createGraphicBufferAlloc() failed in SurfaceMediaSource()");
+    }
 }
 
 SurfaceMediaSource::~SurfaceMediaSource() {
