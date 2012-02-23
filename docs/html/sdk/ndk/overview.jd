@@ -46,7 +46,7 @@ page.title=What is the NDK?
     <li>Documentation, samples, and tutorials</li>
   </ul>
 
-  <p>The latest release of the NDK supports these ARM instruction sets:</p>
+  <p>The latest release of the NDK supports the following instruction sets:</p>
 
   <ul>
     <li>ARMv5TE (including Thumb-1 instructions)</li>
