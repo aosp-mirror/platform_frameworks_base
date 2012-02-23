@@ -3054,7 +3054,7 @@
         <!-- Specifies whether the TextView is enabled or not. {@deprecated Use state_enabled instead}. -->
         <attr name="enabled" format="boolean" />
         <!-- If the text is selectable, select it all when the view takes
-             focus instead of moving the cursor to the start or end. -->
+             focus. -->
         <attr name="selectAllOnFocus" format="boolean" />
         <!-- Leave enough room for ascenders and descenders instead of
              using the font ascent and descent strictly.  (Normally true). -->
