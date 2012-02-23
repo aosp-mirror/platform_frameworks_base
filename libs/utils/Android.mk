@@ -77,7 +77,8 @@ include $(CLEAR_VARS)
 # we have the common sources, plus some device-specific stuff
 LOCAL_SRC_FILES:= \
 	$(commonSources) \
-	Looper.cpp
+	Looper.cpp \
+	Trace.cpp
 
 ifeq ($(TARGET_OS),linux)
 LOCAL_LDLIBS += -lrt -ldl
