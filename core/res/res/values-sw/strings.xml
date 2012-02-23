@@ -337,9 +337,9 @@
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Inaruhusu programu kusoma maelezo mafupi ya kibinafsi yaliyohifadhiwa kwenye kifaa chako, kama vile jina lako na taarifa ya kuwasiliana. Hii ina maanisha programu inaweza kukutambua na kutuma taarifa yako fupi ya kibinafsi kwa wengine."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"andika kwenye data ya maelezo yako mafupi"</string>
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"Inaruhusu programu kubadilisha au kuongeza taarifa fupi ya kibinafsi iliyohifadhiwa katika kifaa chako, kama vile jina lako na maelezo ya kuwasiliana. Hii ina maanisha kwamba programu zingine zinaweza kukutambua na kutuma taarifa yako fupi kwa wengine."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"soma mkondo wako wa kijamii"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"soma mipasho yako wa kijamii"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">"Inaruhusu programu kufikia na kulandanisha sasisho za kijamii kutoka kwako na marafiki zako. Programu hasidi zinaweza kutumia hii kusoma mawasiliano ya kibinafsi kati yako na marafiki zako kwenye mitandao ya kijamii."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"andika kwa mkondo wako wa kijamii"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"andika kwa mipasho yako wa kijamii"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3496277176955721451">"Inaruhusu programu kuonyesha sasisho za kijamii kutoka kwa marafiki zako. Programu hasidi zinaweza kutumia hii kujifanya kuwa rafiki na kukuhadaa kuonyesha nenosiri au taarifa zingine za siri."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"soma matukio ya kalenda pamoja na maelezo ya siri"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"Inaruhusu programu kusoma matukio yote ya kalenda yaliyohifadhiwa kwa kompyuta yako kibao pamoja na za marafiki au wafanyakazi wenzako. Programu hasidi zinaweza kutoa maelezo ya kibinafsi kutoka kwa kalenda hizi bila wamiliki kujua."</string>
@@ -639,7 +639,7 @@
     <string name="relationTypeParent" msgid="4755635567562925226">"Mzazi"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Mshirika"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Alipendekezwa na"</string>
-    <string name="relationTypeRelative" msgid="1799819930085610271">"Ndugu"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Jamaa"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Dada"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Mwenzi wa Ndoa"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Maalum"</string>
@@ -765,7 +765,7 @@
     <string name="permlab_serialPort" msgid="546083327654631076">"kituo tambulishi cha ufikivu"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Inaruhusu mmiliki kufikia vituo tambulishi kwa kutumia KisimamiziTambulishi cha API."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"fikia watoa huduma nje"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Inaruhusu mmiliki kufikia watoa huduma  kutoka kwa onyesho. Haifai kuhitajika kwa programu za kawaida."</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Inaruhusu mmiliki kufikia watoa huduma  kutoka kwa onyesho. Haifai kuhitajika kamwe kwa programu za kawaida."</string>
     <string name="save_password_message" msgid="767344687139195790">"Unataka kuvinjari ili ukumbuke nenosiri hili?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Si Sasa"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Kumbuka"</string>
