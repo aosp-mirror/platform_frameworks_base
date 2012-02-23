@@ -24,7 +24,7 @@ package android.view;
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For information about how to provide contextual actions with {@code ActionMode},
- * read the <a href="{@docRoot}guide/topics/ui/menu.html#context-menu">Menus</a>
+ * read the <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Menus</a>
  * developer guide.</p>
  * </div>
  */
