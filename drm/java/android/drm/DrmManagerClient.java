@@ -317,6 +317,7 @@ public class DrmManagerClient {
      *
      * @return A {@link android.content.ContentValues} instance that contains
      * key-value pairs representing the constraints. Null in case of failure.
+     * The keys are defined in {@link DrmStore.ConstraintsColumns}.
      */
     public ContentValues getConstraints(String path, int action) {
         if (null == path || path.equals("") || !DrmStore.Action.isValid(action)) {
