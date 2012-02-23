@@ -368,7 +368,7 @@ void AMPEG4ElementaryAssembler::submitAccessUnit() {
     mAccessUnitDamaged = false;
 
     sp<AMessage> msg = mNotifyMsg->dup();
-    msg->setObject("access-unit", accessUnit);
+    msg->setBuffer("access-unit", accessUnit);
     msg->post();
 }
 

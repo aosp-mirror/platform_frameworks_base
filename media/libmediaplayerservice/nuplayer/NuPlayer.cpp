@@ -768,7 +768,7 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
          mediaTimeUs / 1E6);
 #endif
 
-    reply->setObject("buffer", accessUnit);
+    reply->setBuffer("buffer", accessUnit);
     reply->post();
 
     return OK;
@@ -793,10 +793,8 @@ void NuPlayer::renderBuffer(bool audio, const sp<AMessage> &msg) {
         return;
     }
 
-    sp<RefBase> obj;
-    CHECK(msg->findObject("buffer", &obj));
-
-    sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+    sp<ABuffer> buffer;
+    CHECK(msg->findBuffer("buffer", &buffer));
 
     int64_t &skipUntilMediaTimeUs =
         audio

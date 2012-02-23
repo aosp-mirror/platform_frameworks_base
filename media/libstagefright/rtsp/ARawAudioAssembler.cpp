@@ -94,7 +94,7 @@ ARTPAssembler::AssemblyStatus ARawAudioAssembler::addPacket(
     }
 
     sp<AMessage> msg = mNotifyMsg->dup();
-    msg->setObject("access-unit", buffer);
+    msg->setBuffer("access-unit", buffer);
     msg->post();
 
     queue->erase(queue->begin());

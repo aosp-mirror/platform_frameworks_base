@@ -612,7 +612,7 @@ bool ARTSPConnection::receiveRTSPReponse() {
 
         if (mObserveBinaryMessage != NULL) {
             sp<AMessage> notify = mObserveBinaryMessage->dup();
-            notify->setObject("buffer", buffer);
+            notify->setBuffer("buffer", buffer);
             notify->post();
         } else {
             ALOGW("received binary data, but no one cares.");

@@ -60,7 +60,7 @@ void NuPlayer::Renderer::queueBuffer(
         const sp<AMessage> &notifyConsumed) {
     sp<AMessage> msg = new AMessage(kWhatQueueBuffer, id());
     msg->setInt32("audio", static_cast<int32_t>(audio));
-    msg->setObject("buffer", buffer);
+    msg->setBuffer("buffer", buffer);
     msg->setMessage("notifyConsumed", notifyConsumed);
     msg->post();
 }
@@ -411,9 +411,8 @@ void NuPlayer::Renderer::onQueueBuffer(const sp<AMessage> &msg) {
         return;
     }
 
-    sp<RefBase> obj;
-    CHECK(msg->findObject("buffer", &obj));
-    sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+    sp<ABuffer> buffer;
+    CHECK(msg->findBuffer("buffer", &buffer));
 
     sp<AMessage> notifyConsumed;
     CHECK(msg->findMessage("notifyConsumed", &notifyConsumed));

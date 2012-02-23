@@ -218,10 +218,8 @@ void NuPlayer::RTSPSource::onMessageReceived(const sp<AMessage> &msg) {
             CHECK(msg->findSize("trackIndex", &trackIndex));
             CHECK_LT(trackIndex, mTracks.size());
 
-            sp<RefBase> obj;
-            CHECK(msg->findObject("accessUnit", &obj));
-
-            sp<ABuffer> accessUnit = static_cast<ABuffer *>(obj.get());
+            sp<ABuffer> accessUnit;
+            CHECK(msg->findBuffer("accessUnit", &accessUnit));
 
             int32_t damaged;
             if (accessUnit->meta()->findInt32("damaged", &damaged)

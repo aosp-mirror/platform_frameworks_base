@@ -19,6 +19,7 @@
 #include <ctype.h>
 
 #include "AAtomizer.h"
+#include "ABuffer.h"
 #include "ADebug.h"
 #include "ALooperRoster.h"
 #include "AString.h"
@@ -157,12 +158,21 @@ void AMessage::setString(
     item->u.stringValue = new AString(s, len < 0 ? strlen(s) : len);
 }
 
-void AMessage::setObject(const char *name, const sp<RefBase> &obj) {
+void AMessage::setObjectInternal(
+        const char *name, const sp<RefBase> &obj, Type type) {
     Item *item = allocateItem(name);
-    item->mType = kTypeObject;
+    item->mType = type;
 
     if (obj != NULL) { obj->incStrong(this); }
     item->u.refValue = obj.get();
+}
+
+void AMessage::setObject(const char *name, const sp<RefBase> &obj) {
+    setObjectInternal(name, obj, kTypeObject);
+}
+
+void AMessage::setBuffer(const char *name, const sp<ABuffer> &buffer) {
+    setObjectInternal(name, sp<RefBase>(buffer), kTypeBuffer);
 }
 
 void AMessage::setMessage(const char *name, const sp<AMessage> &obj) {
@@ -198,6 +208,15 @@ bool AMessage::findObject(const char *name, sp<RefBase> *obj) const {
     const Item *item = findItem(name, kTypeObject);
     if (item) {
         *obj = item->u.refValue;
+        return true;
+    }
+    return false;
+}
+
+bool AMessage::findBuffer(const char *name, sp<ABuffer> *buf) const {
+    const Item *item = findItem(name, kTypeBuffer);
+    if (item) {
+        *buf = (ABuffer *)(item->u.refValue);
         return true;
     }
     return false;

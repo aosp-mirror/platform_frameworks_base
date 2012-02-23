@@ -176,13 +176,10 @@ status_t ConvertMessageToMap(
                 break;
             }
 
-            case AMessage::kTypeObject:
+            case AMessage::kTypeBuffer:
             {
-                sp<RefBase> obj;
-                CHECK(msg->findObject(key, &obj));
-
-                // XXX dangerous, object is not guaranteed to be a buffer.
-                sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+                sp<ABuffer> buffer;
+                CHECK(msg->findBuffer(key, &buffer));
 
                 valueObj = makeByteBufferObject(
                         env, buffer->data(), buffer->size());

@@ -244,7 +244,7 @@ void MPEG2TSWriter::SourceInfo::extractCodecSpecificData() {
 
     sp<AMessage> notify = mNotify->dup();
     notify->setInt32("what", kNotifyBuffer);
-    notify->setObject("buffer", out);
+    notify->setBuffer("buffer", out);
     notify->setInt32("oob", true);
     notify->post();
 }
@@ -270,7 +270,7 @@ void MPEG2TSWriter::SourceInfo::postAVCFrame(MediaBuffer *buffer) {
         copy->meta()->setInt32("isSync", true);
     }
 
-    notify->setObject("buffer", copy);
+    notify->setBuffer("buffer", copy);
     notify->post();
 }
 
@@ -351,7 +351,7 @@ bool MPEG2TSWriter::SourceInfo::flushAACFrames() {
 
     sp<AMessage> notify = mNotify->dup();
     notify->setInt32("what", kNotifyBuffer);
-    notify->setObject("buffer", mAACBuffer);
+    notify->setBuffer("buffer", mAACBuffer);
     notify->post();
 
     mAACBuffer.clear();
@@ -614,10 +614,8 @@ void MPEG2TSWriter::onMessageReceived(const sp<AMessage> &msg) {
 
                 ++mNumSourcesDone;
             } else if (what == SourceInfo::kNotifyBuffer) {
-                sp<RefBase> obj;
-                CHECK(msg->findObject("buffer", &obj));
-
-                sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+                sp<ABuffer> buffer;
+                CHECK(msg->findBuffer("buffer", &buffer));
 
                 int32_t oob;
                 if (msg->findInt32("oob", &oob) && oob) {

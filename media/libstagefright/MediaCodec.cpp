@@ -515,13 +515,10 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
 
                         name = StringPrintf("data_%d", i);
 
-                        sp<RefBase> obj;
-                        CHECK(msg->findObject(name.c_str(), &obj));
-
                         BufferInfo info;
                         info.mBufferID = bufferID;
-                        info.mData = static_cast<ABuffer *>(obj.get());
                         info.mOwnedByClient = false;
+                        CHECK(msg->findBuffer(name.c_str(), &info.mData));
 
                         buffers->push_back(info);
                     }
@@ -604,10 +601,8 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                         break;
                     }
 
-                    sp<RefBase> obj;
-                    CHECK(msg->findObject("buffer", &obj));
-
-                    sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+                    sp<ABuffer> buffer;
+                    CHECK(msg->findBuffer("buffer", &buffer));
 
                     int32_t omxFlags;
                     CHECK(msg->findInt32("flags", &omxFlags));
@@ -1118,7 +1113,7 @@ status_t MediaCodec::onQueueInputBuffer(const sp<AMessage> &msg) {
         info->mData->meta()->setInt32("csd", true);
     }
 
-    reply->setObject("buffer", info->mData);
+    reply->setBuffer("buffer", info->mData);
     reply->post();
 
     return OK;

@@ -214,8 +214,6 @@ sp<AMessage> NuPlayer::Decoder::makeFormat(const sp<MetaData> &meta) {
 
         buffer->meta()->setInt32("csd", true);
         mCSD.push(buffer);
-
-        msg->setObject("csd", buffer);
     } else if (meta->findData(kKeyESDS, &type, &data, &size)) {
         ESDS esds((const char *)data, size);
         CHECK_EQ(esds.InitCheck(), (status_t)OK);
@@ -242,9 +240,8 @@ void NuPlayer::Decoder::onFillThisBuffer(const sp<AMessage> &msg) {
     CHECK(msg->findMessage("reply", &reply));
 
 #if 0
-    sp<RefBase> obj;
-    CHECK(msg->findObject("buffer", &obj));
-    sp<ABuffer> outBuffer = static_cast<ABuffer *>(obj.get());
+    sp<ABuffer> outBuffer;
+    CHECK(msg->findBuffer("buffer", &outBuffer));
 #else
     sp<ABuffer> outBuffer;
 #endif
@@ -253,7 +250,7 @@ void NuPlayer::Decoder::onFillThisBuffer(const sp<AMessage> &msg) {
         outBuffer = mCSD.editItemAt(mCSDIndex++);
         outBuffer->meta()->setInt64("timeUs", 0);
 
-        reply->setObject("buffer", outBuffer);
+        reply->setBuffer("buffer", outBuffer);
         reply->post();
         return;
     }

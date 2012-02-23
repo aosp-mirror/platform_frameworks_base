@@ -211,7 +211,7 @@ ARTPAssembler::AssemblyStatus AAMRAssembler::addPacket(
     }
 
     sp<AMessage> msg = mNotifyMsg->dup();
-    msg->setObject("access-unit", accessUnit);
+    msg->setBuffer("access-unit", accessUnit);
     msg->post();
 
     queue->erase(queue->begin());
