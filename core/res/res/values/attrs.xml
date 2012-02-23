@@ -2999,7 +2999,10 @@
         <attr name="textColorLink" />
         <!-- Makes the cursor visible (the default) or invisible. -->
         <attr name="cursorVisible" format="boolean" />
-        <!-- Makes the TextView be at most this many lines tall. -->
+        <!-- Makes the TextView be at most this many lines tall.
+
+        When used on an editable text, the <code>inputType</code> attribute's value must be
+        combined with the <code>textMultiLine</code> flag for the maxLines attribute to apply. -->
         <attr name="maxLines" format="integer" min="0" />
         <!-- Makes the TextView be at most this many pixels tall. -->
         <attr name="maxHeight" />
@@ -3009,7 +3012,10 @@
              You could get the same effect by specifying this number in the
              layout parameters. -->
         <attr name="height" format="dimension" />
-        <!-- Makes the TextView be at least this many lines tall. -->
+        <!-- Makes the TextView be at least this many lines tall.
+
+        When used on an editable text, the <code>inputType</code> attribute's value must be
+        combined with the <code>textMultiLine</code> flag for the minLines attribute to apply. -->
         <attr name="minLines" format="integer" min="0" />
         <!-- Makes the TextView be at least this many pixels tall. -->
         <attr name="minHeight" />
@@ -3040,16 +3046,15 @@
         <!-- Constrains the text to a single horizontally scrolling line
              instead of letting it wrap onto multiple lines, and advances
              focus instead of inserting a newline when you press the
-             enter key.  Note: for editable text views, it is better
-             to control this using the textMultiLine flag in the inputType
-             attribute.  (If both singleLine and inputType are supplied,
-             the inputType flags will override the value of singleLine.)
-             {@deprecated This attribute is deprecated and is replaced by the textMultiLine flag
-             in the inputType attribute.  Use caution when altering existing layouts, as the
-             default value of singeLine is false (multi-line mode), but if you specify any
-             value for inputType, the default is single-line mode.  (If both singleLine and
-             inputType attributes are found,  the inputType flags will override the value of
-             singleLine.) } -->
+             enter key.
+
+             The default value is false (multi-line wrapped text mode) for non-editable text, but if
+             you specify any value for inputType, the default is true (single-line input field mode).
+
+             {@deprecated This attribute is deprecated. Use <code>maxLines</code> instead to change
+             the layout of a static text, and use the <code>textMultiLine</code> flag in the
+             inputType attribute instead for editable text views (if both singleLine and inputType
+             are supplied, the inputType flags will override the value of singleLine). } -->
         <attr name="singleLine" format="boolean" />
         <!-- Specifies whether the TextView is enabled or not. {@deprecated Use state_enabled instead}. -->
         <attr name="enabled" format="boolean" />
