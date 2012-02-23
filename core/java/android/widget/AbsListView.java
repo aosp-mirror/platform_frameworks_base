@@ -1020,6 +1020,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (mChoiceMode != CHOICE_MODE_NONE) {
             handled = true;
+            boolean checkedStateChanged = false;
 
             if (mChoiceMode == CHOICE_MODE_MULTIPLE ||
                     (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null)) {
@@ -1042,6 +1043,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             position, id, newValue);
                     dispatchItemClick = false;
                 }
+                checkedStateChanged = true;
             } else if (mChoiceMode == CHOICE_MODE_SINGLE) {
                 boolean newValue = !mCheckStates.get(position, false);
                 if (newValue) {
@@ -1055,11 +1057,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 } else if (mCheckStates.size() == 0 || !mCheckStates.valueAt(0)) {
                     mCheckedItemCount = 0;
                 }
+                checkedStateChanged = true;
             }
 
-            mDataChanged = true;
-            rememberSyncState();
-            requestLayout();
+            if (checkedStateChanged) {
+                updateOnScreenCheckedViews();
+            }
         }
 
         if (dispatchItemClick) {
@@ -1067,6 +1070,28 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         return handled;
+    }
+
+    /**
+     * Perform a quick, in-place update of the checked or activated state
+     * on all visible item views. This should only be called when a valid
+     * choice mode is active.
+     */
+    private void updateOnScreenCheckedViews() {
+        final int firstPos = mFirstPosition;
+        final int count = getChildCount();
+        final boolean useActivated = getContext().getApplicationInfo().targetSdkVersion
+                >= android.os.Build.VERSION_CODES.HONEYCOMB;
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            final int position = firstPos + i;
+
+            if (child instanceof Checkable) {
+                ((Checkable) child).setChecked(mCheckStates.get(position));
+            } else if (useActivated) {
+                child.setActivated(mCheckStates.get(position));
+            }
+        }
     }
 
     /**
