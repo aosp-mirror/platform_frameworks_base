@@ -1542,6 +1542,21 @@
   <java-symbol type="drawable" name="ic_volume" />
   <java-symbol type="drawable" name="stat_notify_sim_toolkit" />
 
+  <!-- From maps library -->
+  <java-symbol type="array" name="maps_starting_lat_lng" />
+  <java-symbol type="array" name="maps_starting_zoom" />
+  <java-symbol type="attr" name="mapViewStyle" />
+  <java-symbol type="attr" name="state_focused" />
+  <java-symbol type="attr" name="state_selected" />
+  <java-symbol type="attr" name="state_pressed" />
+  <java-symbol type="drawable" name="compass_arrow" />
+  <java-symbol type="drawable" name="compass_base" />
+  <java-symbol type="drawable" name="ic_maps_indicator_current_position_anim" />
+  <java-symbol type="drawable" name="loading_tile_android" />
+  <java-symbol type="drawable" name="maps_google_logo" />
+  <java-symbol type="drawable" name="no_tile_256" />
+  <java-symbol type="drawable" name="reticle" />
+
   <!-- From PinyinIME(!!!) -->
   <java-symbol type="string" name="inputMethod" />
 
