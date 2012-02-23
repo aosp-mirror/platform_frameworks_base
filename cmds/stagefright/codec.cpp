@@ -394,7 +394,7 @@ int main(int argc, char **argv) {
         player->setDataSource(argv[0]);
         player->setSurface(surface->getSurfaceTexture());
         player->start();
-        sleep(10);
+        sleep(60);
         player->stop();
         player->reset();
 

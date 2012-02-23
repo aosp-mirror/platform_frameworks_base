@@ -259,7 +259,7 @@ void SimplePlayer::onMessageReceived(const sp<AMessage> &msg) {
             status_t err = onDoMoreStuff();
 
             if (err == OK) {
-                msg->post(5000ll);
+                msg->post(10000ll);
             }
             break;
         }
@@ -411,33 +411,53 @@ status_t SimplePlayer::onReset() {
 }
 
 status_t SimplePlayer::onDoMoreStuff() {
+    ALOGV("onDoMoreStuff");
     for (size_t i = 0; i < mStateByTrackIndex.size(); ++i) {
         CodecState *state = &mStateByTrackIndex.editValueAt(i);
 
-        size_t index;
-        status_t err = state->mCodec->dequeueInputBuffer(&index);
+        status_t err;
+        do {
+            size_t index;
+            err = state->mCodec->dequeueInputBuffer(&index);
 
-        if (err == OK) {
-            state->mAvailInputBufferIndices.push_back(index);
-        }
+            if (err == OK) {
+                ALOGV("dequeued input buffer on track %d",
+                      mStateByTrackIndex.keyAt(i));
 
-        BufferInfo info;
-        err = state->mCodec->dequeueOutputBuffer(
-                &info.mIndex,
-                &info.mOffset,
-                &info.mSize,
-                &info.mPresentationTimeUs,
-                &info.mFlags);
+                state->mAvailInputBufferIndices.push_back(index);
+            } else {
+                ALOGV("dequeueInputBuffer on track %d returned %d",
+                      mStateByTrackIndex.keyAt(i), err);
+            }
+        } while (err == OK);
 
-        if (err == OK) {
-            state->mAvailOutputBufferInfos.push_back(info);
-        } else if (err == INFO_FORMAT_CHANGED) {
-            err = onOutputFormatChanged(mStateByTrackIndex.keyAt(i), state);
-            CHECK_EQ(err, (status_t)OK);
-        } else if (err == INFO_OUTPUT_BUFFERS_CHANGED) {
-            err = state->mCodec->getOutputBuffers(&state->mBuffers[1]);
-            CHECK_EQ(err, (status_t)OK);
-        }
+        do {
+            BufferInfo info;
+            err = state->mCodec->dequeueOutputBuffer(
+                    &info.mIndex,
+                    &info.mOffset,
+                    &info.mSize,
+                    &info.mPresentationTimeUs,
+                    &info.mFlags);
+
+            if (err == OK) {
+                ALOGV("dequeued output buffer on track %d",
+                      mStateByTrackIndex.keyAt(i));
+
+                state->mAvailOutputBufferInfos.push_back(info);
+            } else if (err == INFO_FORMAT_CHANGED) {
+                err = onOutputFormatChanged(mStateByTrackIndex.keyAt(i), state);
+                CHECK_EQ(err, (status_t)OK);
+            } else if (err == INFO_OUTPUT_BUFFERS_CHANGED) {
+                err = state->mCodec->getOutputBuffers(&state->mBuffers[1]);
+                CHECK_EQ(err, (status_t)OK);
+            } else {
+                ALOGV("dequeueOutputBuffer on track %d returned %d",
+                      mStateByTrackIndex.keyAt(i), err);
+            }
+        } while (err == OK
+                || err == INFO_FORMAT_CHANGED
+                || err == INFO_OUTPUT_BUFFERS_CHANGED);
     }
 
     for (;;) {
@@ -475,6 +495,8 @@ status_t SimplePlayer::onDoMoreStuff() {
                     0);
             CHECK_EQ(err, (status_t)OK);
 
+            ALOGV("enqueued input data on track %d", trackIndex);
+
             err = mExtractor->advance();
             CHECK_EQ(err, (status_t)OK);
         }
@@ -500,7 +522,7 @@ status_t SimplePlayer::onDoMoreStuff() {
 
                 if (lateByUs > 30000ll) {
                     ALOGI("track %d buffer late by %lld us, dropping.",
-                          i, lateByUs);
+                          mStateByTrackIndex.keyAt(i), lateByUs);
                     state->mCodec->releaseOutputBuffer(info->mIndex);
                 } else {
                     if (state->mAudioTrack != NULL) {
@@ -529,7 +551,8 @@ status_t SimplePlayer::onDoMoreStuff() {
                     break;
                 }
             } else {
-                ALOGV("track %d buffer early by %lld us.", i, -lateByUs);
+                ALOGV("track %d buffer early by %lld us.",
+                      mStateByTrackIndex.keyAt(i), -lateByUs);
                 break;
             }
         }
