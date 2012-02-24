@@ -281,7 +281,7 @@ noiselessCounter(SECTION_DATA *sectionData,
                  const Word32 blockType)
 {
   Word32 grpNdx, i;
-  Word16 *sideInfoTab = NULL;
+  const Word16 *sideInfoTab = NULL;
   SECTION_INFO *sectionInfo;
 
   /*
