@@ -42,7 +42,6 @@
 
 #define DEBUG_RESIZE    0
 
-
 namespace android {
 
 // ---------------------------------------------------------------------------
@@ -55,7 +54,7 @@ Layer::Layer(SurfaceFlinger* flinger,
         mCurrentTransform(0),
         mCurrentScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
         mCurrentOpacity(true),
-        mRefreshPending(0),
+        mRefreshPending(false),
         mFrameLatencyNeeded(false),
         mFrameLatencyOffset(0),
         mFormat(PIXEL_FORMAT_NONE),
@@ -408,15 +407,9 @@ bool Layer::isCropped() const {
 // pageflip handling...
 // ----------------------------------------------------------------------------
 
-bool Layer::onPreComposition()
-{
-    // if there was more than one pending update, request a refresh
-    if (mRefreshPending >= 2) {
-        mRefreshPending = 0;
-        return true;
-    }
-    mRefreshPending = 0;
-    return false;
+bool Layer::onPreComposition() {
+    mRefreshPending = false;
+    return mQueuedFrames > 0;
 }
 
 void Layer::lockPageFlip(bool& recomputeVisibleRegions)
@@ -428,9 +421,11 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
         // because we cannot call updateTeximage() without a corresponding
         // compositionComplete() call.
         // we'll trigger an update in onPreComposition().
-        if (mRefreshPending++) {
+        if (mRefreshPending) {
+            mPostedDirtyRegion.clear();
             return;
         }
+        mRefreshPending = true;
 
         // Capture the old state of the layer for comparisons later
         const bool oldOpacity = isOpaque();
@@ -541,25 +536,23 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 void Layer::unlockPageFlip(
         const Transform& planeTransform, Region& outDirtyRegion)
 {
-    if (mRefreshPending >= 2) {
-        return;
-    }
-
-    Region dirtyRegion(mPostedDirtyRegion);
-    if (!dirtyRegion.isEmpty()) {
+    Region postedRegion(mPostedDirtyRegion);
+    if (!postedRegion.isEmpty()) {
         mPostedDirtyRegion.clear();
-        // The dirty region is given in the layer's coordinate space
-        // transform the dirty region by the surface's transformation
-        // and the global transformation.
-        const Layer::State& s(drawingState());
-        const Transform tr(planeTransform * s.transform);
-        dirtyRegion = tr.transform(dirtyRegion);
+        if (!visibleRegionScreen.isEmpty()) {
+            // The dirty region is given in the layer's coordinate space
+            // transform the dirty region by the surface's transformation
+            // and the global transformation.
+            const Layer::State& s(drawingState());
+            const Transform tr(planeTransform * s.transform);
+            postedRegion = tr.transform(postedRegion);
 
-        // At this point, the dirty region is in screen space.
-        // Make sure it's constrained by the visible region (which
-        // is in screen space as well).
-        dirtyRegion.andSelf(visibleRegionScreen);
-        outDirtyRegion.orSelf(dirtyRegion);
+            // At this point, the dirty region is in screen space.
+            // Make sure it's constrained by the visible region (which
+            // is in screen space as well).
+            postedRegion.andSelf(visibleRegionScreen);
+            outDirtyRegion.orSelf(postedRegion);
+        }
     }
 }
 

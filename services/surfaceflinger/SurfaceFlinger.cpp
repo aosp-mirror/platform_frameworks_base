@@ -1776,6 +1776,10 @@ status_t SurfaceFlinger::onTransact(
                 setTransactionFlags(eTransactionNeeded|eTraversalNeeded);
                 return NO_ERROR;
             }
+            case 1006:{ // send empty update
+                signalRefresh();
+                return NO_ERROR;
+            }
             case 1008:  // toggle use of hw composer
                 n = data.readInt32();
                 mDebugDisableHWC = n ? 1 : 0;
