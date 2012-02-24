@@ -116,7 +116,7 @@ private:
     uint32_t mCurrentTransform;
     uint32_t mCurrentScalingMode;
     bool mCurrentOpacity;
-    size_t mRefreshPending;
+    bool mRefreshPending;
     bool mFrameLatencyNeeded;
     int mFrameLatencyOffset;
 
