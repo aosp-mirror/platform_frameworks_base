@@ -138,7 +138,7 @@ Word16 GetBitsAvail(HANDLE_BIT_BUF hBitBuf)
 *
 *****************************************************************************/
 Word16 WriteBits(HANDLE_BIT_BUF hBitBuf,
-                 Word32 writeValue,
+                 UWord32 writeValue,
                  Word16 noBitsToWrite)
 {
   Word16 wBitPos;
