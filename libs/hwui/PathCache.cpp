@@ -83,6 +83,11 @@ void PathCache::clearGarbage() {
 }
 
 PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
+    const SkPath* sourcePath = path->getSourcePath();
+    if (sourcePath && sourcePath->getGenerationID() == path->getGenerationID()) {
+        path = const_cast<SkPath*>(sourcePath);
+    }
+
     PathCacheEntry entry(path, paint);
     PathTexture* texture = mCache.get(entry);
 

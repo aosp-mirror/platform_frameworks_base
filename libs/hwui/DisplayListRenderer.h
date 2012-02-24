@@ -462,6 +462,7 @@ private:
         SkPath* pathCopy = mPathMap.valueFor(path);
         if (pathCopy == NULL || pathCopy->getGenerationID() != path->getGenerationID()) {
             pathCopy = new SkPath(*path);
+            pathCopy->setSourcePath(path);
             // replaceValueFor() performs an add if the entry doesn't exist
             mPathMap.replaceValueFor(path, pathCopy);
             mPaths.add(pathCopy);
