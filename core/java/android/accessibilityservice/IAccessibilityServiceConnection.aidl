@@ -42,11 +42,12 @@ interface IAccessibilityServiceConnection {
      * @param interactionId The id of the interaction for matching with the callback result.
      * @param callback Callback which to receive the result.
      * @param threadId The id of the calling thread.
+     * @param prefetchFlags flags to guide prefetching.
      * @return The current window scale, where zero means a failure.
      */
     float findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
         long accessibilityNodeId, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, long threadId);
+        IAccessibilityInteractionConnectionCallback callback, long threadId, int prefetchFlags);
 
     /**
      * Finds {@link android.view.accessibility.AccessibilityNodeInfo}s by View text.
