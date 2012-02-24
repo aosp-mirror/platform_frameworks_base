@@ -39,11 +39,15 @@ public class PixelFormat
     public static final int RGB_888     = 3;
     public static final int RGB_565     = 4;
 
+    @Deprecated
     public static final int RGBA_5551   = 6;
+    @Deprecated
     public static final int RGBA_4444   = 7;
     public static final int A_8         = 8;
     public static final int L_8         = 9;
+    @Deprecated
     public static final int LA_88       = 0xA;
+    @Deprecated
     public static final int RGB_332     = 0xB;
 
 

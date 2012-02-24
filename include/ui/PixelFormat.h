@@ -64,9 +64,6 @@ enum {
     PIXEL_FORMAT_RGBA_5551   = HAL_PIXEL_FORMAT_RGBA_5551,  // 16-bit ARGB
     PIXEL_FORMAT_RGBA_4444   = HAL_PIXEL_FORMAT_RGBA_4444,  // 16-bit ARGB
     PIXEL_FORMAT_A_8         = 8,                           // 8-bit A
-
-    // New formats can be added if they're also defined in
-    // pixelflinger/format.h
 };
 
 typedef int32_t PixelFormat;
@@ -80,10 +77,12 @@ struct PixelFormatInfo {
     };
 
     enum { // components
-        ALPHA               = 1,
-        RGB                 = 2,
-        RGBA                = 3,
-        OTHER               = 0xFF
+        ALPHA   = 1,
+        RGB     = 2,
+        RGBA    = 3,
+        L       = 4,
+        LA      = 5,
+        OTHER   = 0xFF
     };
 
     struct szinfo {

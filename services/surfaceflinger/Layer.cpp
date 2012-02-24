@@ -160,7 +160,10 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     // this surfaces pixel format
     PixelFormatInfo info;
     status_t err = getPixelFormatInfo(format, &info);
-    if (err) return err;
+    if (err) {
+        ALOGE("unsupported pixelformat %d", format);
+        return err;
+    }
 
     // the display's pixel format
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
@@ -170,6 +173,7 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     // never allow a surface larger than what our underlying GL implementation
     // can handle.
     if ((uint32_t(w)>maxSurfaceDims) || (uint32_t(h)>maxSurfaceDims)) {
+        ALOGE("dimensions too large %u x %u", uint32_t(w), uint32_t(h));
         return BAD_VALUE;
     }
 

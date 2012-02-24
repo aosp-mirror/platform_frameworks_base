@@ -1285,7 +1285,7 @@ sp<ISurface> SurfaceFlinger::createSurface(
         return surfaceHandle;
     }
 
-    //ALOGD("createSurface for pid %d (%d x %d)", pid, w, h);
+    //ALOGD("createSurface for (%d x %d), name=%s", w, h, name.string());
     sp<Layer> normalLayer;
     switch (flags & eFXSurfaceMask) {
         case eFXSurfaceNormal:
