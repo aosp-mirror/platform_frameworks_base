@@ -28,7 +28,7 @@ import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 oneway interface IAccessibilityInteractionConnection {
 
     void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback,
+        IAccessibilityInteractionConnectionCallback callback, int prefetchFlags,
         int interrogatingPid, long interrogatingTid);
 
     void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int id, int interactionId,

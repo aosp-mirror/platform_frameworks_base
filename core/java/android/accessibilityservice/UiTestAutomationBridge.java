@@ -57,6 +57,11 @@ public class UiTestAutomationBridge {
 
     public static final int UNDEFINED = -1;
 
+    private static final int FIND_ACCESSIBILITY_NODE_INFO_PREFETCH_FLAGS =
+        AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS
+        | AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS
+        | AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS;
+
     private final Object mLock = new Object();
 
     private volatile int mConnectionId = AccessibilityInteractionClient.NO_ID;
@@ -351,13 +356,15 @@ public class UiTestAutomationBridge {
         ensureValidConnection(connectionId);
         return AccessibilityInteractionClient.getInstance()
                 .findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                        accessibilityWindowId, accessibilityNodeId);
+                        accessibilityWindowId, accessibilityNodeId,
+                        FIND_ACCESSIBILITY_NODE_INFO_PREFETCH_FLAGS);
     }
 
     /**
      * Finds an {@link AccessibilityNodeInfo} by View id in the active
      * window. The search is performed from the root node.
      *
+     * @param viewId The id of a View.
      * @return The current window scale, where zero means a failure.
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfoByViewIdInActiveWindow(int viewId) {
@@ -373,6 +380,7 @@ public class UiTestAutomationBridge {
      *     {@link  #ACTIVE_WINDOW_ID} to query the currently active window.
      * @param accessibilityNodeId A unique view id or virtual descendant id from
      *     where to start the search. Use {@link  #ROOT_NODE_ID} to start from the root.
+     * @param viewId The id of a View.
      * @return The current window scale, where zero means a failure.
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfoByViewId(int accessibilityWindowId,
@@ -460,7 +468,7 @@ public class UiTestAutomationBridge {
         ensureValidConnection(connectionId);
         return AccessibilityInteractionClient.getInstance()
                 .findAccessibilityNodeInfoByAccessibilityId(connectionId, ACTIVE_WINDOW_ID,
-                        ROOT_NODE_ID);
+                        ROOT_NODE_ID, AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
     }
 
     private void ensureValidConnection(int connectionId) {

@@ -54,12 +54,12 @@ import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.LongSparseArray;
 import android.util.Pool;
 import android.util.Poolable;
 import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.Slog;
+import android.util.SparseLongArray;
 import android.util.TypedValue;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
@@ -87,7 +87,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -309,7 +311,7 @@ public final class ViewRootImpl implements ViewParent,
 
     SendWindowContentChangedAccessibilityEvent mSendWindowContentChangedAccessibilityEvent;
 
-    AccessibilityPrefetchStrategy mAccessibilityPrefetchStrategy;
+    AccessibilityNodePrefetcher mAccessibilityNodePrefetcher;
 
     private final int mDensity;
 
@@ -379,8 +381,6 @@ public final class ViewRootImpl implements ViewParent,
         mAccessibilityManager = AccessibilityManager.getInstance(context);
         mAccessibilityInteractionConnectionManager =
             new AccessibilityInteractionConnectionManager();
-        mAccessibilityManager.addAccessibilityStateChangeListener(
-                mAccessibilityInteractionConnectionManager);
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, mHandler, this);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
@@ -3554,15 +3554,15 @@ public final class ViewRootImpl implements ViewParent,
         return mAccessibilityInteractionController;
     }
 
-    public AccessibilityPrefetchStrategy getAccessibilityPrefetchStrategy() {
+    public AccessibilityNodePrefetcher getAccessibilityNodePrefetcher() {
         if (mView == null) {
-            throw new IllegalStateException("getAccessibilityPrefetchStrategy"
+            throw new IllegalStateException("getAccessibilityNodePrefetcher"
                     + " called when there is no mView");
         }
-        if (mAccessibilityPrefetchStrategy == null) {
-            mAccessibilityPrefetchStrategy = new AccessibilityPrefetchStrategy();
+        if (mAccessibilityNodePrefetcher == null) {
+            mAccessibilityNodePrefetcher = new AccessibilityNodePrefetcher();
         }
-        return mAccessibilityPrefetchStrategy;
+        return mAccessibilityNodePrefetcher;
     }
 
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
@@ -4108,7 +4108,6 @@ public final class ViewRootImpl implements ViewParent,
         if (mView == null) {
             return false;
         }
-        getAccessibilityPrefetchStrategy().onAccessibilityEvent(event);
         mAccessibilityManager.sendAccessibilityEvent(event);
         return true;
     }
@@ -4680,12 +4679,12 @@ public final class ViewRootImpl implements ViewParent,
 
         public void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                int interrogatingPid, long interrogatingTid) {
+                int prefetchFlags, int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityNodeId,
-                        interactionId, callback, interrogatingPid, interrogatingTid);
+                        interactionId, callback, prefetchFlags, interrogatingPid, interrogatingTid);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -4820,11 +4819,11 @@ public final class ViewRootImpl implements ViewParent,
 
         public void findAccessibilityNodeInfoByAccessibilityIdClientThread(
                 long accessibilityNodeId, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
-                long interrogatingTid) {
+                IAccessibilityInteractionConnectionCallback callback, int prefetchFlags,
+                int interrogatingPid, long interrogatingTid) {
             Message message = mHandler.obtainMessage();
             message.what = MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID;
-            message.arg1 = interrogatingPid;
+            message.arg1 = prefetchFlags;
             SomeArgs args = mPool.acquire();
             args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
             args.argi2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
@@ -4845,8 +4844,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         public void findAccessibilityNodeInfoByAccessibilityIdUiThread(Message message) {
+            final int prefetchFlags = message.arg1;
             SomeArgs args = (SomeArgs) message.obj;
-            final int interrogatingPid = message.arg1;
             final int accessibilityViewId = args.argi1;
             final int virtualDescendantId = args.argi2;
             final int interactionId = args.argi3;
@@ -4856,22 +4855,15 @@ public final class ViewRootImpl implements ViewParent,
             List<AccessibilityNodeInfo> infos = mTempAccessibilityNodeInfoList;
             infos.clear();
             try {
+                View target = null;
                 if (accessibilityViewId == AccessibilityNodeInfo.UNDEFINED) {
-                    View target = ViewRootImpl.this.mView;
-                    if (target != null && target.getVisibility() == View.VISIBLE) {
-                        infos.add(target.createAccessibilityNodeInfo());
-                    }
+                    target = ViewRootImpl.this.mView;
                 } else {
-                    View target = findViewByAccessibilityId(accessibilityViewId);
-                    if (target != null && target.getVisibility() == View.VISIBLE) {
-                        AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
-                        if (provider != null) {
-                            infos.add(provider.createAccessibilityNodeInfo(virtualDescendantId));
-                        } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED) {
-                            getAccessibilityPrefetchStrategy().prefetchAccessibilityNodeInfos(
-                                    interrogatingPid, target, infos);
-                        }
-                    }
+                    target = findViewByAccessibilityId(accessibilityViewId);
+                }
+                if (target != null && target.getVisibility() == View.VISIBLE) {
+                    getAccessibilityNodePrefetcher().prefetchAccessibilityNodeInfos(target,
+                            virtualDescendantId, prefetchFlags, infos);
                 }
             } finally {
                 try {
@@ -5132,83 +5124,216 @@ public final class ViewRootImpl implements ViewParent,
 
     /**
      * This class encapsulates a prefetching strategy for the accessibility APIs for
-     * querying window content.It is responsible to prefetch a batch of
-     * AccessibilityNodeInfos in addition to the one for a requested node. It caches
-     * the ids of the prefeteched nodes such that they are fetched only once.
+     * querying window content. It is responsible to prefetch a batch of
+     * AccessibilityNodeInfos in addition to the one for a requested node.
      */
-    class AccessibilityPrefetchStrategy {
-        private static final int MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE = 100;
+    class AccessibilityNodePrefetcher {
 
-        // We need to keep track of what we have sent for each interrogating
-        // process. Usually there will be only one such process but we
-        // should support the general case. Note that the accessibility event
-        // stream will take care of clearing caches of querying processes that
-        // are not longer alive, so we do not waste memory.
-        private final LongSparseArray<AccessibilityNodeInfoCache> mAccessibilityNodeInfoCaches =
-            new LongSparseArray<AccessibilityNodeInfoCache>();
+        private static final int MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE = 50;
 
-        private AccessibilityNodeInfoCache getCacheForInterrogatingPid(long interrogatingPid) {
-            AccessibilityNodeInfoCache cache = mAccessibilityNodeInfoCaches.get(interrogatingPid);
-            if (cache == null) {
-                cache = AccessibilityNodeInfoCache.newAccessibilityNodeInfoCache();
-                mAccessibilityNodeInfoCaches.put(interrogatingPid, cache);
-            }
-            return cache;
-        }
-
-        public void onAccessibilityEvent(AccessibilityEvent event) {
-            final int cacheCount = mAccessibilityNodeInfoCaches.size();
-            for (int i = 0; i < cacheCount; i++) {
-                AccessibilityNodeInfoCache cache = mAccessibilityNodeInfoCaches.valueAt(i);
-                cache.onAccessibilityEvent(event);
-            }
-        }
-
-        public void prefetchAccessibilityNodeInfos(long interrogatingPid, View root,
+        public void prefetchAccessibilityNodeInfos(View view, int virtualViewId, int prefetchFlags,
                 List<AccessibilityNodeInfo> outInfos) {
-            addAndCacheNotCachedNodeInfo(interrogatingPid, root, outInfos);
-            addAndCacheNotCachedPredecessorInfos(interrogatingPid, root, outInfos);
-            addAndCacheNotCachedDescendantInfos(interrogatingPid, root, outInfos);
-        }
-
-        private void addAndCacheNotCachedNodeInfo(long interrogatingPid,
-                View view, List<AccessibilityNodeInfo> outInfos) {
-            final long accessibilityNodeId = AccessibilityNodeInfo.makeNodeId(
-                    view.getAccessibilityViewId(), AccessibilityNodeInfo.UNDEFINED);
-            AccessibilityNodeInfoCache cache = getCacheForInterrogatingPid(interrogatingPid);
-            if (!cache.containsKey(accessibilityNodeId)) {
-                // Account for the ids of the fetched infos. The infos will be
-                // cached in the window querying process. We just need to know
-                // which infos are cached to avoid fetching a cached one again.
-                cache.put(accessibilityNodeId, null);
-                outInfos.add(view.createAccessibilityNodeInfo());
+            AccessibilityNodeProvider provider = view.getAccessibilityNodeProvider();
+            if (provider == null) {
+                AccessibilityNodeInfo root = view.createAccessibilityNodeInfo();
+                if (root != null) {
+                    outInfos.add(root);
+                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) != 0) {
+                        prefetchPredecessorsOfRealNode(view, outInfos);
+                    }
+                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS) != 0) {
+                        prefetchSiblingsOfRealNode(view, outInfos);
+                    }
+                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS) != 0) {
+                        prefetchDescendantsOfRealNode(view, outInfos);
+                    }
+                }
+            } else {
+                AccessibilityNodeInfo root = provider.createAccessibilityNodeInfo(virtualViewId);
+                if (root != null) {
+                    outInfos.add(root);
+                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) != 0) {
+                        prefetchPredecessorsOfVirtualNode(root, view, provider, outInfos);
+                    }
+                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS) != 0) {
+                        prefetchSiblingsOfVirtualNode(root, view, provider, outInfos);
+                    }
+                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS) != 0) {
+                        prefetchDescendantsOfVirtualNode(root, provider, outInfos);
+                    }
+                }
             }
         }
 
-        private void addAndCacheNotCachedPredecessorInfos(long interrogatingPid, View view,
+        private void prefetchPredecessorsOfRealNode(View view,
                 List<AccessibilityNodeInfo> outInfos) {
-            ViewParent predecessor = view.getParent();
-            while (predecessor instanceof View
+            ViewParent parent = view.getParent();
+            while (parent instanceof View
                     && outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
-                View predecessorView = (View) predecessor;
-                addAndCacheNotCachedNodeInfo(interrogatingPid, predecessorView, outInfos);
-                predecessor = predecessor.getParent();
+                View parentView = (View) parent;
+                final long parentNodeId = AccessibilityNodeInfo.makeNodeId(
+                        parentView.getAccessibilityViewId(), AccessibilityNodeInfo.UNDEFINED);
+                AccessibilityNodeInfo info = parentView.createAccessibilityNodeInfo();
+                if (info != null) {
+                    outInfos.add(info);
+                }
+                parent = parent.getParent();
             }
         }
 
-        private void addAndCacheNotCachedDescendantInfos(long interrogatingPid, View view,
+        private void prefetchSiblingsOfRealNode(View current,
                 List<AccessibilityNodeInfo> outInfos) {
-            if (outInfos.size() > MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE
-                    || view.getAccessibilityNodeProvider() != null) {
-                return;
+            ViewParent parent = current.getParent();
+            if (parent instanceof ViewGroup) {
+                ViewGroup parentGroup = (ViewGroup) parent;
+                final int childCount = parentGroup.getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    View child = parentGroup.getChildAt(i);
+                    if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE
+                            && child.getAccessibilityViewId() != current.getAccessibilityViewId()
+                            && child.getVisibility() == View.VISIBLE) {
+                        final long childNodeId = AccessibilityNodeInfo.makeNodeId(
+                                child.getAccessibilityViewId(), AccessibilityNodeInfo.UNDEFINED);
+                        AccessibilityNodeInfo info = null;
+                        AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
+                        if (provider == null) {
+                            info = child.createAccessibilityNodeInfo();
+                        } else {
+                            info = provider.createAccessibilityNodeInfo(
+                                    AccessibilityNodeInfo.UNDEFINED);
+                        }
+                        if (info != null) {
+                            outInfos.add(info);
+                        }
+                    }
+                }
             }
-            addAndCacheNotCachedNodeInfo(interrogatingPid, view, outInfos);
-            if (view instanceof ViewGroup) {
-                ViewGroup rootGroup = (ViewGroup) view;
+        }
+
+        private void prefetchDescendantsOfRealNode(View root,
+                List<AccessibilityNodeInfo> outInfos) {
+            if (root instanceof ViewGroup) {
+                ViewGroup rootGroup = (ViewGroup) root;
+                HashMap<View, AccessibilityNodeInfo> addedChildren =
+                    new HashMap<View, AccessibilityNodeInfo>();
                 final int childCount = rootGroup.getChildCount();
                 for (int i = 0; i < childCount; i++) {
-                View child = rootGroup.getChildAt(i);
-                    addAndCacheNotCachedDescendantInfos(interrogatingPid, child, outInfos);
+                    View child = rootGroup.getChildAt(i);
+                    if (child.getVisibility() == View.VISIBLE
+                            && outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
+                        final long childNodeId = AccessibilityNodeInfo.makeNodeId(
+                                child.getAccessibilityViewId(), AccessibilityNodeInfo.UNDEFINED);
+                        AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
+                        if (provider == null) {
+                            AccessibilityNodeInfo info = child.createAccessibilityNodeInfo();
+                            if (info != null) {
+                                outInfos.add(info);
+                                addedChildren.put(child, null);
+                            }
+                        } else {
+                            AccessibilityNodeInfo info = provider.createAccessibilityNodeInfo(
+                                   AccessibilityNodeInfo.UNDEFINED);
+                            if (info != null) {
+                                outInfos.add(info);
+                                addedChildren.put(child, info);
+                            }
+                        }
+                    }
+                }
+                if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
+                    for (Map.Entry<View, AccessibilityNodeInfo> entry : addedChildren.entrySet()) {
+                        View addedChild = entry.getKey();
+                        AccessibilityNodeInfo virtualRoot = entry.getValue();
+                        if (virtualRoot == null) {
+                            prefetchDescendantsOfRealNode(addedChild, outInfos);
+                        } else {
+                            AccessibilityNodeProvider provider =
+                                addedChild.getAccessibilityNodeProvider();
+                            prefetchDescendantsOfVirtualNode(virtualRoot, provider, outInfos);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void prefetchPredecessorsOfVirtualNode(AccessibilityNodeInfo root,
+                View providerHost, AccessibilityNodeProvider provider,
+                List<AccessibilityNodeInfo> outInfos) {
+            long parentNodeId = root.getParentNodeId();
+            int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(parentNodeId);
+            while (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
+                final int virtualDescendantId =
+                    AccessibilityNodeInfo.getVirtualDescendantId(parentNodeId);
+                if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED
+                        || accessibilityViewId == providerHost.getAccessibilityViewId()) {
+                    AccessibilityNodeInfo parent = provider.createAccessibilityNodeInfo(
+                            virtualDescendantId);
+                    if (parent != null) {
+                        outInfos.add(parent);
+                    }
+                    parentNodeId = parent.getParentNodeId();
+                    accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
+                            parentNodeId);
+                } else {
+                    prefetchPredecessorsOfRealNode(providerHost, outInfos);
+                    return;
+                }
+            }
+        }
+
+        private void prefetchSiblingsOfVirtualNode(AccessibilityNodeInfo current, View providerHost,
+                AccessibilityNodeProvider provider, List<AccessibilityNodeInfo> outInfos) {
+            final long parentNodeId = current.getParentNodeId();
+            final int parentAccessibilityViewId =
+                AccessibilityNodeInfo.getAccessibilityViewId(parentNodeId);
+            final int parentVirtualDescendantId =
+                AccessibilityNodeInfo.getVirtualDescendantId(parentNodeId);
+            if (parentVirtualDescendantId != AccessibilityNodeInfo.UNDEFINED
+                    || parentAccessibilityViewId == providerHost.getAccessibilityViewId()) {
+                AccessibilityNodeInfo parent =
+                    provider.createAccessibilityNodeInfo(parentVirtualDescendantId);
+                if (parent != null) {
+                    SparseLongArray childNodeIds = parent.getChildNodeIds();
+                    final int childCount = childNodeIds.size();
+                    for (int i = 0; i < childCount; i++) {
+                        final long childNodeId = childNodeIds.get(i);
+                        if (childNodeId != current.getSourceNodeId()
+                                && outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
+                            final int childVirtualDescendantId =
+                                AccessibilityNodeInfo.getVirtualDescendantId(childNodeId);
+                            AccessibilityNodeInfo child = provider.createAccessibilityNodeInfo(
+                                    childVirtualDescendantId);
+                            if (child != null) {
+                                outInfos.add(child);
+                            }
+                        }
+                    }
+                }
+            } else {
+                prefetchSiblingsOfRealNode(providerHost, outInfos);
+            }
+        }
+
+        private void prefetchDescendantsOfVirtualNode(AccessibilityNodeInfo root,
+                AccessibilityNodeProvider provider, List<AccessibilityNodeInfo> outInfos) {
+            SparseLongArray childNodeIds = root.getChildNodeIds();
+            final int initialOutInfosSize = outInfos.size();
+            final int childCount = childNodeIds.size();
+            for (int i = 0; i < childCount; i++) {
+                if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
+                    final long childNodeId = childNodeIds.get(i);
+                    AccessibilityNodeInfo child = provider.createAccessibilityNodeInfo(
+                            AccessibilityNodeInfo.getVirtualDescendantId(childNodeId));
+                    if (child != null) {
+                        outInfos.add(child);
+                    }
+                }
+            }
+            if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
+                final int addedChildCount = outInfos.size() - initialOutInfosSize;
+                for (int i = 0; i < addedChildCount; i++) {
+                    AccessibilityNodeInfo child = outInfos.get(initialOutInfosSize + i);
+                    prefetchDescendantsOfVirtualNode(child, provider, outInfos);
                 }
             }
         }

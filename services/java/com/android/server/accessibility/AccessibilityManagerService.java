@@ -1129,7 +1129,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         public float findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
                 long accessibilityNodeId, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
+                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid,
+                int prefetchFlags)
                 throws RemoteException {
             final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
             IAccessibilityInteractionConnection connection = null;
@@ -1150,7 +1151,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final long identityToken = Binder.clearCallingIdentity();
             try {
                 connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
-                        interactionId, callback, interrogatingPid, interrogatingTid);
+                        interactionId, callback, prefetchFlags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfoByAccessibilityId()");

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.view.accessibility;
 
 import android.os.Process;
 import android.util.Log;
 import android.util.LongSparseArray;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * Simple cache for AccessibilityNodeInfos. The cache is mapping an
@@ -38,53 +36,11 @@ public class AccessibilityNodeInfoCache {
 
     private static final boolean DEBUG = false;
 
-    /**
-     * @return A new <strong>not synchronized</strong> AccessibilityNodeInfoCache.
-     */
-    public static AccessibilityNodeInfoCache newAccessibilityNodeInfoCache() {
-        return new AccessibilityNodeInfoCache();
-    }
-
-    /**
-     * @return A new <strong>synchronized</strong> AccessibilityNodeInfoCache.
-     */
-    public static AccessibilityNodeInfoCache newSynchronizedAccessibilityNodeInfoCache() {
-        return new AccessibilityNodeInfoCache() {
-            private final Object mLock = new Object();
-
-            @Override
-            public void clear() {
-                synchronized(mLock) {
-                    super.clear();
-                }
-            }
-
-            @Override
-            public AccessibilityNodeInfo get(long accessibilityNodeId) {
-                synchronized(mLock) {
-                    return super.get(accessibilityNodeId);
-                }
-            }
-
-            @Override
-            public void put(long accessibilityNodeId, AccessibilityNodeInfo info) {
-                synchronized(mLock) {
-                   super.put(accessibilityNodeId, info);
-                }
-            }
-
-            @Override
-            public void remove(long accessibilityNodeId) {
-                synchronized(mLock) {
-                   super.remove(accessibilityNodeId);
-                }
-            }
-        };
-    }
+    private final Object mLock = new Object();
 
     private final LongSparseArray<AccessibilityNodeInfo> mCacheImpl;
 
-    private AccessibilityNodeInfoCache() {
+    public AccessibilityNodeInfoCache() {
         if (ENABLED) {
             mCacheImpl = new LongSparseArray<AccessibilityNodeInfo>();
         } else {
@@ -124,13 +80,15 @@ public class AccessibilityNodeInfoCache {
      */
     public AccessibilityNodeInfo get(long accessibilityNodeId) {
         if (ENABLED) {
-            if (DEBUG) {
-                AccessibilityNodeInfo info = mCacheImpl.get(accessibilityNodeId);
-                Log.i(LOG_TAG, "Process: " + Process.myPid() +
-                        " get(" + accessibilityNodeId + ") = " + info);
-                return info;
-            } else {
-                return mCacheImpl.get(accessibilityNodeId);
+            synchronized(mLock) {
+                if (DEBUG) {
+                    AccessibilityNodeInfo info = mCacheImpl.get(accessibilityNodeId);
+                    Log.i(LOG_TAG, "Process: " + Process.myPid() +
+                            " get(" + accessibilityNodeId + ") = " + info);
+                    return info;
+                } else {
+                    return mCacheImpl.get(accessibilityNodeId);
+                }
             }
         } else {
             return null;
@@ -145,11 +103,13 @@ public class AccessibilityNodeInfoCache {
      */
     public void put(long accessibilityNodeId, AccessibilityNodeInfo info) {
         if (ENABLED) {
-            if (DEBUG) {
-                Log.i(LOG_TAG, "Process: " + Process.myPid()
-                        + " put(" + accessibilityNodeId + ", " + info + ")");
+            synchronized(mLock) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Process: " + Process.myPid()
+                            + " put(" + accessibilityNodeId + ", " + info + ")");
+                }
+                mCacheImpl.put(accessibilityNodeId, info);
             }
-            mCacheImpl.put(accessibilityNodeId, info);
         }
     }
 
@@ -161,7 +121,9 @@ public class AccessibilityNodeInfoCache {
      */
     public boolean containsKey(long accessibilityNodeId) {
         if (ENABLED) {
-            return (mCacheImpl.indexOfKey(accessibilityNodeId) >= 0);
+            synchronized(mLock) {
+                return (mCacheImpl.indexOfKey(accessibilityNodeId) >= 0);
+            }
         } else {
             return false;
         }
@@ -174,11 +136,13 @@ public class AccessibilityNodeInfoCache {
      */
     public void remove(long accessibilityNodeId) {
         if (ENABLED) {
-            if (DEBUG) {
-                Log.i(LOG_TAG,  "Process: " + Process.myPid()
-                        + " remove(" + accessibilityNodeId + ")");
+            synchronized(mLock) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG,  "Process: " + Process.myPid()
+                            + " remove(" + accessibilityNodeId + ")");
+                }
+                mCacheImpl.remove(accessibilityNodeId);
             }
-            mCacheImpl.remove(accessibilityNodeId);
         }
     }
 
@@ -187,10 +151,12 @@ public class AccessibilityNodeInfoCache {
      */
     public void clear() {
         if (ENABLED) {
-            if (DEBUG) {
-                Log.i(LOG_TAG,  "Process: " + Process.myPid() + "clear()");
+            synchronized(mLock) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG,  "Process: " + Process.myPid() + "clear()");
+                }
+                mCacheImpl.clear();
             }
-            mCacheImpl.clear();
         }
     }
 }

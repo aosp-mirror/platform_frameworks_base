@@ -24,7 +24,6 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
-import android.view.AccessibilityNodeInfoCache;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,7 +101,7 @@ public final class AccessibilityInteractionClient
     // The connection cache is shared between all interrogating threads since
     // at any given time there is only one window allowing querying.
     private static final AccessibilityNodeInfoCache sAccessibilityNodeInfoCache =
-        AccessibilityNodeInfoCache.newSynchronizedAccessibilityNodeInfoCache();
+        new AccessibilityNodeInfoCache();
 
     /**
      * @return The client for the current thread.
@@ -159,10 +158,11 @@ public final class AccessibilityInteractionClient
      *     where to start the search. Use
      *     {@link android.view.accessibility.AccessibilityNodeInfo#ROOT_NODE_ID}
      *     to start from the root.
+     * @param prefetchFlags flags to guide prefetching.
      * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(int connectionId,
-            int accessibilityWindowId, long accessibilityNodeId) {
+            int accessibilityWindowId, long accessibilityNodeId, int prefetchFlags) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
@@ -174,7 +174,7 @@ public final class AccessibilityInteractionClient
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final float windowScale = connection.findAccessibilityNodeInfoByAccessibilityId(
                         accessibilityWindowId, accessibilityNodeId, interactionId, this,
-                        Thread.currentThread().getId());
+                        Thread.currentThread().getId(), prefetchFlags);
                 // If the scale is zero the call has failed.
                 if (windowScale > 0) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(

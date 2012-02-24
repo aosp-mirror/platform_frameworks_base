@@ -56,6 +56,11 @@ public class AccessibilityRecord {
     private static final int PROPERTY_FULL_SCREEN = 0x00000080;
     private static final int PROPERTY_SCROLLABLE = 0x00000100;
 
+    private static final int GET_SOURCE_PREFETCH_FLAGS =
+        AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS
+        | AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS
+        | AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS;
+
     // Housekeeping
     private static final int MAX_POOL_SIZE = 10;
     private static final Object sPoolLock = new Object();
@@ -144,7 +149,7 @@ public class AccessibilityRecord {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mSourceWindowId,
-                mSourceNodeId);
+                mSourceNodeId, GET_SOURCE_PREFETCH_FLAGS);
     }
 
     /**

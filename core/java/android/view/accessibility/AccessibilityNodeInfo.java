@@ -61,6 +61,15 @@ public class AccessibilityNodeInfo implements Parcelable {
     /** @hide */
     public static final int ACTIVE_WINDOW_ID = UNDEFINED;
 
+    /** @hide */
+    public static final int FLAG_PREFETCH_PREDECESSORS = 0x00000001;
+
+    /** @hide */
+    public static final int FLAG_PREFETCH_SIBLINGS = 0x00000002;
+
+    /** @hide */
+    public static final int FLAG_PREFETCH_DESCENDANTS = 0x00000003;
+
     // Actions.
 
     /**
@@ -181,7 +190,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mText;
     private CharSequence mContentDescription;
 
-    private SparseLongArray mChildIds = new SparseLongArray();
+    private SparseLongArray mChildNodeIds = new SparseLongArray();
     private int mActions;
 
     private int mConnectionId = UNDEFINED;
@@ -244,12 +253,21 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * @return The ids of the children.
+     *
+     * @hide
+     */
+    public SparseLongArray getChildNodeIds() {
+        return mChildNodeIds;
+    }
+
+    /**
      * Gets the number of children.
      *
      * @return The child count.
      */
     public int getChildCount() {
-        return mChildIds.size();
+        return mChildNodeIds.size();
     }
 
     /**
@@ -271,9 +289,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return null;
         }
-        final long childId = mChildIds.get(index);
+        final long childId = mChildNodeIds.get(index);
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mWindowId, childId);
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mWindowId,
+                childId, FLAG_PREFETCH_DESCENDANTS);
     }
 
     /**
@@ -308,11 +327,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void addChild(View root, int virtualDescendantId) {
         enforceNotSealed();
-        final int index = mChildIds.size();
+        final int index = mChildNodeIds.size();
         final int rootAccessibilityViewId =
             (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         final long childNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
-        mChildIds.put(index, childNodeId);
+        mChildNodeIds.put(index, childNodeId);
     }
 
     /**
@@ -408,7 +427,16 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mParentNodeId);
+                mWindowId, mParentNodeId, FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+    }
+
+    /**
+     * @return The parent node id.
+     *
+     * @hide
+     */
+    public long getParentNodeId() {
+        return mParentNodeId;
     }
 
     /**
@@ -1070,7 +1098,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeLong(mParentNodeId);
         parcel.writeInt(mConnectionId);
 
-        SparseLongArray childIds = mChildIds;
+        SparseLongArray childIds = mChildNodeIds;
         final int childIdsSize = childIds.size();
         parcel.writeInt(childIdsSize);
         for (int i = 0; i < childIdsSize; i++) {
@@ -1120,7 +1148,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mContentDescription = other.mContentDescription;
         mActions= other.mActions;
         mBooleanProperties = other.mBooleanProperties;
-        mChildIds = other.mChildIds.clone();
+        mChildNodeIds = other.mChildNodeIds.clone();
     }
 
     /**
@@ -1135,7 +1163,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mParentNodeId = parcel.readLong();
         mConnectionId = parcel.readInt();
 
-        SparseLongArray childIds = mChildIds;
+        SparseLongArray childIds = mChildNodeIds;
         final int childrenSize = parcel.readInt();
         for (int i = 0; i < childrenSize; i++) {
             final long childId = parcel.readLong();
@@ -1171,7 +1199,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mParentNodeId = ROOT_NODE_ID;
         mWindowId = UNDEFINED;
         mConnectionId = UNDEFINED;
-        mChildIds.clear();
+        mChildNodeIds.clear();
         mBoundsInParent.set(0, 0, 0, 0);
         mBoundsInScreen.set(0, 0, 0, 0);
         mBooleanProperties = 0;
@@ -1249,7 +1277,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             builder.append("; accessibilityViewId: " + getAccessibilityViewId(mSourceNodeId));
             builder.append("; virtualDescendantId: " + getVirtualDescendantId(mSourceNodeId));
             builder.append("; mParentNodeId: " + mParentNodeId);
-            SparseLongArray childIds = mChildIds;
+            SparseLongArray childIds = mChildNodeIds;
             builder.append("; childAccessibilityIds: [");
             for (int i = 0, count = childIds.size(); i < count; i++) {
                 builder.append(childIds.valueAt(i));
