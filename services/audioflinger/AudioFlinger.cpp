@@ -1973,6 +1973,23 @@ void CpuStats::sample() {
 #endif
 };
 
+void AudioFlinger::PlaybackThread::checkSilentMode_l()
+{
+    if (!mMasterMute) {
+        char value[PROPERTY_VALUE_MAX];
+        if (property_get("ro.audio.silent", value, "0") > 0) {
+            char *endptr;
+            unsigned long ul = strtoul(value, &endptr, 0);
+            if (*endptr == '\0' && ul != 0) {
+                ALOGD("Silence is golden");
+                // The setprop command will not allow a property to be changed after
+                // the first time it is set, so we don't have to worry about un-muting.
+                setMasterMute_l(true);
+            }
+        }
+    }
+}
+
 bool AudioFlinger::MixerThread::threadLoop()
 {
     Vector< sp<Track> > tracksToRemove;
@@ -2042,14 +2059,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                     acquireWakeLock_l();
 
                     mPrevMixerStatus = MIXER_IDLE;
-                    if (!mMasterMute) {
-                        char value[PROPERTY_VALUE_MAX];
-                        property_get("ro.audio.silent", value, "0");
-                        if (atoi(value)) {
-                            ALOGD("Silence is golden");
-                            setMasterMute_l(true);
-                        }
-                    }
+                    checkSilentMode_l();
 
                     standbyTime = systemTime() + mStandbyTimeInNsecs;
                     sleepTime = idleSleepTime;
@@ -2751,14 +2761,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     ALOGV("DirectOutputThread %p TID %d waking up in active mode", this, gettid());
                     acquireWakeLock_l();
 
-                    if (!mMasterMute) {
-                        char value[PROPERTY_VALUE_MAX];
-                        property_get("ro.audio.silent", value, "0");
-                        if (atoi(value)) {
-                            ALOGD("Silence is golden");
-                            setMasterMute_l(true);
-                        }
-                    }
+                    checkSilentMode_l();
 
                     standbyTime = systemTime() + standbyDelay;
                     sleepTime = idleSleepTime;
@@ -3147,15 +3150,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     ALOGV("DuplicatingThread %p TID %d waking up", this, gettid());
                     acquireWakeLock_l();
 
-                    mPrevMixerStatus = MIXER_IDLE;
-                    if (!mMasterMute) {
-                        char value[PROPERTY_VALUE_MAX];
-                        property_get("ro.audio.silent", value, "0");
-                        if (atoi(value)) {
-                            ALOGD("Silence is golden");
-                            setMasterMute_l(true);
-                        }
-                    }
+                    checkSilentMode_l();
 
                     standbyTime = systemTime() + mStandbyTimeInNsecs;
                     sleepTime = idleSleepTime;

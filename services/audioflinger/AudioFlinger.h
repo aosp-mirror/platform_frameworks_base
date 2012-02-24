@@ -859,6 +859,9 @@ private:
         virtual uint32_t        idleSleepTimeUs() = 0;
         virtual uint32_t        suspendSleepTimeUs() = 0;
 
+        // Code snippets that are temporarily lifted up out of threadLoop() until the merge
+                    void        checkSilentMode_l();
+
     private:
 
         friend class AudioFlinger;
