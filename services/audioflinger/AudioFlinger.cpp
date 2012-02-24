@@ -432,6 +432,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
         audio_format_t format,
         uint32_t channelMask,
         int frameCount,
+        // FIXME dead, remove from IAudioFlinger
         uint32_t flags,
         const sp<IMemory>& sharedBuffer,
         audio_io_handle_t output,
@@ -3306,7 +3307,6 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
             audio_format_t format,
             uint32_t channelMask,
             int frameCount,
-            uint32_t flags,
             const sp<IMemory>& sharedBuffer,
             int sessionId)
     :   RefBase(),
@@ -3318,7 +3318,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
         mFrameCount(0),
         mState(IDLE),
         mFormat(format),
-        mFlags(flags & ~SYSTEM_FLAGS_MASK),
+        mStepServerFailed(false),
         mSessionId(sessionId)
         // mChannelCount
         // mChannelMask
@@ -3413,7 +3413,7 @@ bool AudioFlinger::ThreadBase::TrackBase::step() {
     result = cblk->stepServer(mFrameCount);
     if (!result) {
         ALOGV("stepServer failed acquiring cblk mutex");
-        mFlags |= STEPSERVER_FAILED;
+        mStepServerFailed = true;
     }
     return result;
 }
@@ -3425,7 +3425,7 @@ void AudioFlinger::ThreadBase::TrackBase::reset() {
     cblk->server = 0;
     cblk->userBase = 0;
     cblk->serverBase = 0;
-    mFlags &= (uint32_t)(~SYSTEM_FLAGS_MASK);
+    mStepServerFailed = false;
     ALOGV("TrackBase::reset");
 }
 
@@ -3465,7 +3465,7 @@ AudioFlinger::PlaybackThread::Track::Track(
             int frameCount,
             const sp<IMemory>& sharedBuffer,
             int sessionId)
-    :   TrackBase(thread, client, sampleRate, format, channelMask, frameCount, 0, sharedBuffer, sessionId),
+    :   TrackBase(thread, client, sampleRate, format, channelMask, frameCount, sharedBuffer, sessionId),
     mMute(false), mSharedBuffer(sharedBuffer), mName(-1), mMainBuffer(NULL), mAuxBuffer(NULL),
     mAuxEffectId(0), mHasVolumeController(false)
 {
@@ -3556,10 +3556,10 @@ status_t AudioFlinger::PlaybackThread::Track::getNextBuffer(
      uint32_t framesReq = buffer->frameCount;
 
      // Check if last stepServer failed, try to step now
-     if (mFlags & TrackBase::STEPSERVER_FAILED) {
+     if (mStepServerFailed) {
          if (!step())  goto getNextBuffer_exit;
          ALOGV("stepServer recovered");
-         mFlags &= ~TrackBase::STEPSERVER_FAILED;
+         mStepServerFailed = false;
      }
 
      framesReady = cblk->framesReady();
@@ -4155,10 +4155,9 @@ AudioFlinger::RecordThread::RecordTrack::RecordTrack(
             audio_format_t format,
             uint32_t channelMask,
             int frameCount,
-            uint32_t flags,
             int sessionId)
     :   TrackBase(thread, client, sampleRate, format,
-                  channelMask, frameCount, flags, 0, sessionId),
+                  channelMask, frameCount, 0 /*sharedBuffer*/, sessionId),
         mOverflow(false)
 {
     if (mCblk != NULL) {
@@ -4188,10 +4187,10 @@ status_t AudioFlinger::RecordThread::RecordTrack::getNextBuffer(AudioBufferProvi
     uint32_t framesReq = buffer->frameCount;
 
      // Check if last stepServer failed, try to step now
-    if (mFlags & TrackBase::STEPSERVER_FAILED) {
+    if (mStepServerFailed) {
         if (!step()) goto getNextBuffer_exit;
         ALOGV("stepServer recovered");
-        mFlags &= ~TrackBase::STEPSERVER_FAILED;
+        mStepServerFailed = false;
     }
 
     framesAvail = cblk->framesAvailable_l();
@@ -4654,6 +4653,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         audio_format_t format,
         uint32_t channelMask,
         int frameCount,
+        // FIXME dead, remove from IAudioFlinger
         uint32_t flags,
         int *sessionId,
         status_t *status)
@@ -4698,7 +4698,6 @@ sp<IAudioRecord> AudioFlinger::openRecord(
                                                 format,
                                                 channelMask,
                                                 frameCount,
-                                                flags,
                                                 lSessionId,
                                                 &lStatus);
     }
@@ -4992,7 +4991,6 @@ sp<AudioFlinger::RecordThread::RecordTrack>  AudioFlinger::RecordThread::createR
         audio_format_t format,
         int channelMask,
         int frameCount,
-        uint32_t flags,
         int sessionId,
         status_t *status)
 {
@@ -5009,7 +5007,7 @@ sp<AudioFlinger::RecordThread::RecordTrack>  AudioFlinger::RecordThread::createR
         Mutex::Autolock _l(mLock);
 
         track = new RecordTrack(this, client, sampleRate,
-                      format, channelMask, frameCount, flags, sessionId);
+                      format, channelMask, frameCount, sessionId);
 
         if (track->getCblk() == 0) {
             lStatus = NO_MEMORY;
