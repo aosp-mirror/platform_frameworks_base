@@ -149,7 +149,7 @@ public class PhoneProxy extends Handler implements Phone {
                     logd("LTE ON CDMA property is set. Switch to CDMALTEPhone" +
                             " newVoiceRadioTech = " + newVoiceRadioTech +
                             " Active Phone = " + mActivePhone.getPhoneName());
-                    newVoiceRadioTech = ServiceState.RADIO_TECHNOLOGY_1xRTT;
+                    newVoiceRadioTech = ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT;
                 }
             } else {
                 if ((ServiceState.isCdma(newVoiceRadioTech) &&
@@ -165,7 +165,7 @@ public class PhoneProxy extends Handler implements Phone {
             }
         }
 
-        if (newVoiceRadioTech == ServiceState.RADIO_TECHNOLOGY_UNKNOWN) {
+        if (newVoiceRadioTech == ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN) {
             // We need some voice phone object to be active always, so never
             // delete the phone without anything to replace it with!
             logd("Ignoring voice radio technology changed message. newVoiceRadioTech = Unknown."

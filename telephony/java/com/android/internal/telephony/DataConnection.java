@@ -355,14 +355,14 @@ public abstract class DataConnection extends StateMachine {
         if (DBG) log("NotifyDisconnectCompleted DisconnectParams=" + dp);
     }
 
-    protected int getRadioTechnology(int defaultRadioTechnology) {
-        int radioTechnology;
+    protected int getRilRadioTechnology(int defaultRilRadioTechnology) {
+        int rilRadioTechnology;
         if (mRilVersion < 6) {
-            radioTechnology = defaultRadioTechnology;
+            rilRadioTechnology = defaultRilRadioTechnology;
         } else {
-            radioTechnology = phone.getServiceState().getRadioTechnology() + 2;
+            rilRadioTechnology = phone.getServiceState().getRilRadioTechnology() + 2;
         }
-        return radioTechnology;
+        return rilRadioTechnology;
     }
 
     /*
