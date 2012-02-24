@@ -299,7 +299,7 @@ public:
 
     /* obtains a buffer of "frameCount" frames. The buffer must be
      * filled entirely. If the track is stopped, obtainBuffer() returns
-     * STOPPED instead of NO_ERROR as long as there are buffers availlable,
+     * STOPPED instead of NO_ERROR as long as there are buffers available,
      * at which point NO_MORE_BUFFERS is returned.
      * Buffers will be returned until the pool (buffercount())
      * is exhausted, at which point obtainBuffer() will either block
@@ -317,13 +317,14 @@ public:
 
 
     /* As a convenience we provide a read() interface to the audio buffer.
-     * This is implemented on top of lockBuffer/unlockBuffer.
+     * This is implemented on top of obtainBuffer/releaseBuffer.
      */
             ssize_t     read(void* buffer, size_t size);
 
-    /* Return the amount of input frames lost in the audio driver since the last call of this function.
-     * Audio driver is expected to reset the value to 0 and restart counting upon returning the current value by this function call.
-     * Such loss typically occurs when the user space process is blocked longer than the capacity of audio driver buffers.
+    /* Return the amount of input frames lost in the audio driver since the last call of this
+     * function.  Audio driver is expected to reset the value to 0 and restart counting upon
+     * returning the current value by this function call.  Such loss typically occurs when the
+     * user space process is blocked longer than the capacity of audio driver buffers.
      * Unit: the number of input audio frames
      */
             unsigned int  getInputFramesLost();
