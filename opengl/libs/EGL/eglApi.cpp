@@ -14,6 +14,8 @@
  ** limitations under the License.
  */
 
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +36,7 @@
 #include <utils/KeyedVector.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
+#include <utils/Trace.h>
 
 #include "egl_impl.h"
 #include "egl_tls.h"
@@ -348,6 +351,7 @@ EGLBoolean eglQuerySurface( EGLDisplay dpy, EGLSurface surface,
 }
 
 void EGLAPI eglBeginFrame(EGLDisplay dpy, EGLSurface surface) {
+    ATRACE_CALL();
     clearError();
 
     egl_display_t const * const dp = validate_display(dpy);
@@ -712,6 +716,7 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
 
 EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
 {
+    ATRACE_CALL();
     clearError();
 
     egl_display_t const * const dp = validate_display(dpy);

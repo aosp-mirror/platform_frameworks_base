@@ -15,9 +15,11 @@
  */
 
 #define LOG_TAG "SurfaceTextureClient"
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
 //#define LOG_NDEBUG 0
 
 #include <utils/Log.h>
+#include <utils/Trace.h>
 
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
@@ -121,6 +123,7 @@ int SurfaceTextureClient::hook_perform(ANativeWindow* window, int operation, ...
 }
 
 int SurfaceTextureClient::setSwapInterval(int interval) {
+    ATRACE_CALL();
     // EGL specification states:
     //  interval is silently clamped to minimum and maximum implementation
     //  dependent values before being stored.
@@ -138,6 +141,7 @@ int SurfaceTextureClient::setSwapInterval(int interval) {
 }
 
 int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::dequeueBuffer");
     Mutex::Autolock lock(mMutex);
     int buf = -1;
@@ -167,6 +171,7 @@ int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
 }
 
 int SurfaceTextureClient::cancelBuffer(android_native_buffer_t* buffer) {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::cancelBuffer");
     Mutex::Autolock lock(mMutex);
     int i = getSlotFromBufferLocked(buffer);
@@ -213,6 +218,7 @@ int SurfaceTextureClient::lockBuffer(android_native_buffer_t* buffer) {
 }
 
 int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::queueBuffer");
     Mutex::Autolock lock(mMutex);
     int64_t timestamp;
@@ -236,6 +242,7 @@ int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
 }
 
 int SurfaceTextureClient::query(int what, int* value) const {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::query");
     { // scope for the lock
         Mutex::Autolock lock(mMutex);
@@ -404,6 +411,7 @@ int SurfaceTextureClient::dispatchUnlockAndPost(va_list args) {
 
 
 int SurfaceTextureClient::connect(int api) {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::connect");
     Mutex::Autolock lock(mMutex);
     int err = mSurfaceTexture->connect(api,
@@ -415,6 +423,7 @@ int SurfaceTextureClient::connect(int api) {
 }
 
 int SurfaceTextureClient::disconnect(int api) {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::disconnect");
     Mutex::Autolock lock(mMutex);
     freeAllBuffers();
@@ -441,6 +450,7 @@ int SurfaceTextureClient::setUsage(uint32_t reqUsage)
 
 int SurfaceTextureClient::setCrop(Rect const* rect)
 {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::setCrop");
     Mutex::Autolock lock(mMutex);
 
@@ -459,6 +469,7 @@ int SurfaceTextureClient::setCrop(Rect const* rect)
 
 int SurfaceTextureClient::setBufferCount(int bufferCount)
 {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::setBufferCount");
     Mutex::Autolock lock(mMutex);
 
@@ -475,6 +486,7 @@ int SurfaceTextureClient::setBufferCount(int bufferCount)
 
 int SurfaceTextureClient::setBuffersDimensions(int w, int h)
 {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::setBuffersDimensions");
     Mutex::Autolock lock(mMutex);
 
@@ -508,6 +520,7 @@ int SurfaceTextureClient::setBuffersFormat(int format)
 
 int SurfaceTextureClient::setScalingMode(int mode)
 {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::setScalingMode(%d)", mode);
     Mutex::Autolock lock(mMutex);
     // mode is validated on the server
@@ -520,6 +533,7 @@ int SurfaceTextureClient::setScalingMode(int mode)
 
 int SurfaceTextureClient::setBuffersTransform(int transform)
 {
+    ATRACE_CALL();
     ALOGV("SurfaceTextureClient::setBuffersTransform");
     Mutex::Autolock lock(mMutex);
     status_t err = mSurfaceTexture->setTransform(transform);

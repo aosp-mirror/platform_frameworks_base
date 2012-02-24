@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "SurfaceTexture"
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
 //#define LOG_NDEBUG 0
 
 #define GL_GLEXT_PROTOTYPES
@@ -36,6 +37,7 @@
 
 #include <utils/Log.h>
 #include <utils/String8.h>
+#include <utils/Trace.h>
 
 // This compile option makes SurfaceTexture use the EGL_KHR_fence_sync extension
 // to synchronize access to the buffers.  It will cause dequeueBuffer to stall,
@@ -143,6 +145,7 @@ status_t SurfaceTexture::setDefaultBufferSize(uint32_t w, uint32_t h)
 }
 
 status_t SurfaceTexture::updateTexImage() {
+    ATRACE_CALL();
     ST_LOGV("updateTexImage");
     Mutex::Autolock lock(mMutex);
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -39,6 +41,7 @@
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include <utils/StopWatch.h>
+#include <utils/Trace.h>
 
 #include <ui/GraphicBufferAllocator.h>
 #include <ui/PixelFormat.h>
@@ -402,6 +405,7 @@ bool SurfaceFlinger::threadLoop()
 
 void SurfaceFlinger::onMessageReceived(int32_t what)
 {
+    ATRACE_CALL();
     switch (what) {
         case MessageQueue::REFRESH: {
 //        case MessageQueue::INVALIDATE: {
@@ -737,6 +741,7 @@ void SurfaceFlinger::commitTransaction()
 
 void SurfaceFlinger::handlePageFlip()
 {
+    ATRACE_CALL();
     const DisplayHardware& hw = graphicPlane(0).displayHardware();
     const Region screenRegion(hw.bounds());
 
