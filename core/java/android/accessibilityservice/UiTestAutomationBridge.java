@@ -74,6 +74,8 @@ public class UiTestAutomationBridge {
 
     private volatile boolean mUnprocessedEventAvailable;
 
+    private HandlerThread mHandlerThread;
+
     /**
      * Gets the last received {@link AccessibilityEvent}.
      *
@@ -126,9 +128,10 @@ public class UiTestAutomationBridge {
         // is needed for making sure the binder calls are interleaved
         // with check for the expected event and also to make sure the
         // binder threads are allowed to proceed in the received order.
-        HandlerThread handlerThread = new HandlerThread("UiTestAutomationBridge");
-        handlerThread.start();
-        Looper looper = handlerThread.getLooper();
+        mHandlerThread = new HandlerThread("UiTestAutomationBridge");
+        mHandlerThread.setDaemon(true);
+        mHandlerThread.start();
+        Looper looper = mHandlerThread.getLooper();
 
         mListener = new IEventListenerWrapper(null, looper, new Callbacks() {
             @Override
@@ -216,6 +219,8 @@ public class UiTestAutomationBridge {
         if (!isConnected()) {
             throw new IllegalStateException("Already disconnected.");
         }
+
+        mHandlerThread.quit();
 
         IAccessibilityManager manager = IAccessibilityManager.Stub.asInterface(
               ServiceManager.getService(Context.ACCESSIBILITY_SERVICE));
