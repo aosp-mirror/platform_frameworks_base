@@ -780,7 +780,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return flags;
     }
 
-    InputBindResult attachNewInputLocked(boolean initial, boolean needResult) {
+    InputBindResult attachNewInputLocked(boolean initial) {
         if (!mBoundToMethod) {
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                     MSG_BIND_INPUT, mCurMethod, mCurClient.binding));
@@ -798,14 +798,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(getAppShowFlags(), null);
         }
-        return needResult
-                ? new InputBindResult(session.session, mCurId, mCurSeq)
-                : null;
+        return new InputBindResult(session.session, mCurId, mCurSeq);
     }
 
     InputBindResult startInputLocked(IInputMethodClient client,
-            IInputContext inputContext, EditorInfo attribute,
-            boolean initial, boolean needResult) {
+            IInputContext inputContext, EditorInfo attribute, int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return mNoBinding;
@@ -829,6 +826,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return null;
             }
         } catch (RemoteException e) {
+        }
+
+        return startInputUncheckedLocked(cs, inputContext, attribute, controlFlags);
+    }
+
+    InputBindResult startInputUncheckedLocked(ClientState cs,
+            IInputContext inputContext, EditorInfo attribute, int controlFlags) {
+        // If no method is currently selected, do nothing.
+        if (mCurMethodId == null) {
+            return mNoBinding;
         }
 
         if (mCurClient != cs) {
@@ -861,7 +868,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
-                return attachNewInputLocked(initial, needResult);
+                return attachNewInputLocked(
+                        (controlFlags&InputMethodManager.CONTROL_START_INITIAL) != 0);
             }
             if (mHaveConnection) {
                 if (mCurMethod != null) {
@@ -942,13 +950,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public InputBindResult startInput(IInputMethodClient client,
-            IInputContext inputContext, EditorInfo attribute,
-            boolean initial, boolean needResult) {
+            IInputContext inputContext, EditorInfo attribute, int controlFlags) {
         synchronized (mMethodMap) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return startInputLocked(client, inputContext, attribute,
-                        initial, needResult);
+                return startInputLocked(client, inputContext, attribute, controlFlags);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -991,7 +997,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mCurClient.curSession = new SessionState(mCurClient,
                             method, session);
                     mCurClient.sessionRequested = false;
-                    InputBindResult res = attachNewInputLocked(true, true);
+                    InputBindResult res = attachNewInputLocked(true);
                     if (res.method != null) {
                         executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
                                 MSG_BIND_METHOD, mCurClient.client, res));
@@ -1476,36 +1482,45 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void windowGainedFocus(IInputMethodClient client, IBinder windowToken,
-            boolean viewHasFocus, boolean isTextEditor, int softInputMode,
-            boolean first, int windowFlags) {
+    public InputBindResult windowGainedFocus(IInputMethodClient client, IBinder windowToken,
+            int controlFlags, int softInputMode, int windowFlags,
+            EditorInfo attribute, IInputContext inputContext) {
+        InputBindResult res = null;
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mMethodMap) {
                 if (DEBUG) Slog.v(TAG, "windowGainedFocus: " + client.asBinder()
-                        + " viewHasFocus=" + viewHasFocus
-                        + " isTextEditor=" + isTextEditor
+                        + " controlFlags=#" + Integer.toHexString(controlFlags)
                         + " softInputMode=#" + Integer.toHexString(softInputMode)
-                        + " first=" + first + " flags=#"
-                        + Integer.toHexString(windowFlags));
+                        + " windowFlags=#" + Integer.toHexString(windowFlags));
 
-                if (mCurClient == null || client == null
-                        || mCurClient.client.asBinder() != client.asBinder()) {
-                    try {
-                        // We need to check if this is the current client with
-                        // focus in the window manager, to allow this call to
-                        // be made before input is started in it.
-                        if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                            Slog.w(TAG, "Client not active, ignoring focus gain of: " + client);
-                            return;
-                        }
-                    } catch (RemoteException e) {
+                ClientState cs = mClients.get(client.asBinder());
+                if (cs == null) {
+                    throw new IllegalArgumentException("unknown client "
+                            + client.asBinder());
+                }
+
+                try {
+                    if (!mIWindowManager.inputMethodClientHasFocus(cs.client)) {
+                        // Check with the window manager to make sure this client actually
+                        // has a window with focus.  If not, reject.  This is thread safe
+                        // because if the focus changes some time before or after, the
+                        // next client receiving focus that has any interest in input will
+                        // be calling through here after that change happens.
+                        Slog.w(TAG, "Focus gain on non-focused client " + cs.client
+                                + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
+                        return null;
                     }
+                } catch (RemoteException e) {
                 }
 
                 if (mCurFocusedWindow == windowToken) {
                     Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client);
-                    return;
+                    if (attribute != null) {
+                        return startInputUncheckedLocked(cs, inputContext, attribute,
+                                controlFlags);
+                    }
+                    return null;
                 }
                 mCurFocusedWindow = windowToken;
 
@@ -1521,6 +1536,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
                         || mRes.getConfiguration().isLayoutSizeAtLeast(
                                 Configuration.SCREENLAYOUT_SIZE_LARGE);
+                final boolean isTextEditor =
+                        (controlFlags&InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR) != 0;
+
+                // We want to start input before showing the IME, but after closing
+                // it.  We want to do this after closing it to help the IME disappear
+                // more quickly (not get stuck behind it initializing itself for the
+                // new focused input, even if its window wants to hide the IME).
+                boolean didStart = false;
                         
                 switch (softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
@@ -1536,12 +1559,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                             // There is a focus view, and we are navigating forward
                             // into the window, so show the input window for the user.
-                            // We only do this automatically if the window an resize
-                            // to accomodate the IME (so what the user sees will give
+                            // We only do this automatically if the window can resize
+                            // to accommodate the IME (so what the user sees will give
                             // them good context without input information being obscured
                             // by the IME) or if running on a large screen where there
                             // is more room for the target window + IME.
                             if (DEBUG) Slog.v(TAG, "Unspecified window will show input");
+                            if (attribute != null) {
+                                res = startInputUncheckedLocked(cs, inputContext, attribute,
+                                        controlFlags);
+                                didStart = true;
+                            }
                             showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                         }
                         break;
@@ -1563,18 +1591,35 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if ((softInputMode &
                                 WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                             if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
+                            if (attribute != null) {
+                                res = startInputUncheckedLocked(cs, inputContext, attribute,
+                                        controlFlags);
+                                didStart = true;
+                            }
                             showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                         }
                         break;
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
                         if (DEBUG) Slog.v(TAG, "Window asks to always show input");
+                        if (attribute != null) {
+                            res = startInputUncheckedLocked(cs, inputContext, attribute,
+                                    controlFlags);
+                            didStart = true;
+                        }
                         showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                         break;
+                }
+
+                if (!didStart && attribute != null) {
+                    res = startInputUncheckedLocked(cs, inputContext, attribute,
+                            controlFlags);
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+
+        return res;
     }
 
     @Override
