@@ -381,6 +381,8 @@ public final class ViewRootImpl implements ViewParent,
         mAccessibilityManager = AccessibilityManager.getInstance(context);
         mAccessibilityInteractionConnectionManager =
             new AccessibilityInteractionConnectionManager();
+        mAccessibilityManager.addAccessibilityStateChangeListener(
+                mAccessibilityInteractionConnectionManager);
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, mHandler, this);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
