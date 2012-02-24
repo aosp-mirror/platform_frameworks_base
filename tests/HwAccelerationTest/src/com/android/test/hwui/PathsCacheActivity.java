@@ -92,19 +92,24 @@ public class PathsCacheActivity extends Activity {
 
             canvas.restore();
 
-//            Path path = makePath();
-//            int r = mRandom.nextInt(10);
-//            if (r == 5 || r == 3) {
-//                mPathList.add(path);
-//            } else if (r == 9) {
-//                mPathList.clear();
-//            }
-//
-//            canvas.save();
-//            canvas.translate(550.0f + mRandom.nextInt(50), 60.0f + mRandom.nextInt(50));
-//            canvas.drawPath(path, mMediumPaint);
-//            canvas.restore();
-//            
+            for (int i = 0; i < mRandom.nextInt(20); i++) {
+                Path path = makePath();
+                int r = mRandom.nextInt(10);
+                if (r == 5 || r == 3) {
+                    mPathList.add(path);
+                }
+    
+                canvas.save();
+                canvas.translate(450.0f + mRandom.nextInt(200), mRandom.nextInt(200));
+                canvas.drawPath(path, mMediumPaint);
+                canvas.restore();
+            }
+
+            int r = mRandom.nextInt(100);
+            if (r == 50) {
+                mPathList.clear();
+            }
+
             invalidate();
         }
     }
