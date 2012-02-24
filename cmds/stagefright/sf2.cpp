@@ -358,7 +358,7 @@ private:
             buffer->meta()->setInt32("csd", true);
             mCSD.push(buffer);
 
-            msg->setObject("csd", buffer);
+            msg->setBuffer("csd", buffer);
         } else if (meta->findData(kKeyESDS, &type, &data, &size)) {
             ESDS esds((const char *)data, size);
             CHECK_EQ(esds.InitCheck(), (status_t)OK);
@@ -408,9 +408,8 @@ private:
             return;
         }
 
-        sp<RefBase> obj;
-        CHECK(msg->findObject("buffer", &obj));
-        sp<ABuffer> outBuffer = static_cast<ABuffer *>(obj.get());
+        sp<ABuffer> outBuffer;
+        CHECK(msg->findBuffer("buffer", &outBuffer));
 
         if (mCSDIndex < mCSD.size()) {
             outBuffer = mCSD.editItemAt(mCSDIndex++);
@@ -509,15 +508,14 @@ private:
             }
         }
 
-        reply->setObject("buffer", outBuffer);
+        reply->setBuffer("buffer", outBuffer);
         reply->post();
     }
 
     void onDrainThisBuffer(const sp<AMessage> &msg) {
-        sp<RefBase> obj;
-        CHECK(msg->findObject("buffer", &obj));
+        sp<ABuffer> buffer;
+        CHECK(msg->findBuffer("buffer", &buffer));
 
-        sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
         mTotalBytesReceived += buffer->size();
 
         sp<AMessage> reply;
