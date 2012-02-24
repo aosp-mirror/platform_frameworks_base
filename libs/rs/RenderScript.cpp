@@ -76,6 +76,13 @@ bool RenderScript::init(int targetApi) {
     return true;
 }
 
+void RenderScript::throwError(const char *err) const {
+    ALOGE("RS CPP error: %s", err);
+    int * v = NULL;
+    v[0] = 0;
+}
+
+
 void * RenderScript::threadProc(void *vrsc) {
     RenderScript *rs = static_cast<RenderScript *>(vrsc);
     size_t rbuf_size = 256;

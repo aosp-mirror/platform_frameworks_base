@@ -24,41 +24,40 @@
 
 const Element * Element::getSubElement(uint32_t index) {
     if (!mVisibleElementMap.size()) {
-        ALOGE("Element contains no sub-elements");
-        return NULL;
+        mRS->throwError("Element contains no sub-elements");
     }
     if (index >= mVisibleElementMap.size()) {
-        ALOGE("Illegal sub-element index");
+        mRS->throwError("Illegal sub-element index");
     }
     return mElements[mVisibleElementMap[index]];
 }
 
 const char * Element::getSubElementName(uint32_t index) {
     if (!mVisibleElementMap.size()) {
-        ALOGE("Element contains no sub-elements");
+        mRS->throwError("Element contains no sub-elements");
     }
     if (index >= mVisibleElementMap.size()) {
-        ALOGE("Illegal sub-element index");
+        mRS->throwError("Illegal sub-element index");
     }
     return mElementNames[mVisibleElementMap[index]];
 }
 
 size_t Element::getSubElementArraySize(uint32_t index) {
     if (!mVisibleElementMap.size()) {
-        ALOGE("Element contains no sub-elements");
+        mRS->throwError("Element contains no sub-elements");
     }
     if (index >= mVisibleElementMap.size()) {
-        ALOGE("Illegal sub-element index");
+        mRS->throwError("Illegal sub-element index");
     }
     return mArraySizes[mVisibleElementMap[index]];
 }
 
 uint32_t Element::getSubElementOffsetBytes(uint32_t index) {
     if (mVisibleElementMap.size()) {
-        ALOGE("Element contains no sub-elements");
+        mRS->throwError("Element contains no sub-elements");
     }
     if (index >= mVisibleElementMap.size()) {
-        ALOGE("Illegal sub-element index");
+        mRS->throwError("Illegal sub-element index");
     }
     return mOffsetInBytes[mVisibleElementMap[index]];
 }
@@ -293,54 +292,45 @@ void Element::updateFromNative() {
 }
 
 const Element * Element::createUser(RenderScript *rs, RsDataType dt) {
-    ALOGE("createUser %p %i", rs, dt);
     void * id = rsElementCreate(rs->mContext, dt, RS_KIND_USER, false, 1);
     return new Element(id, rs, dt, RS_KIND_USER, false, 1);
 }
 
 const Element * Element::createVector(RenderScript *rs, RsDataType dt, uint32_t size) {
     if (size < 2 || size > 4) {
-        ALOGE("Vector size out of range 2-4.");
-        return NULL;
+        rs->throwError("Vector size out of range 2-4.");
     }
     void *id = rsElementCreate(rs->mContext, dt, RS_KIND_USER, false, size);
     return new Element(id, rs, dt, RS_KIND_USER, false, size);
 }
 
 const Element * Element::createPixel(RenderScript *rs, RsDataType dt, RsDataKind dk) {
-    ALOGE("createPixel %p %i %i", rs, dt, dk);
     if (!(dk == RS_KIND_PIXEL_L ||
           dk == RS_KIND_PIXEL_A ||
           dk == RS_KIND_PIXEL_LA ||
           dk == RS_KIND_PIXEL_RGB ||
           dk == RS_KIND_PIXEL_RGBA ||
           dk == RS_KIND_PIXEL_DEPTH)) {
-        ALOGE("Unsupported DataKind");
-        return NULL;
+        rs->throwError("Unsupported DataKind");
     }
     if (!(dt == RS_TYPE_UNSIGNED_8 ||
           dt == RS_TYPE_UNSIGNED_16 ||
           dt == RS_TYPE_UNSIGNED_5_6_5 ||
           dt == RS_TYPE_UNSIGNED_4_4_4_4 ||
           dt == RS_TYPE_UNSIGNED_5_5_5_1)) {
-        ALOGE("Unsupported DataType");
-        return NULL;
+        rs->throwError("Unsupported DataType");
     }
     if (dt == RS_TYPE_UNSIGNED_5_6_5 && dk != RS_KIND_PIXEL_RGB) {
-        ALOGE("Bad kind and type combo");
-        return NULL;
+        rs->throwError("Bad kind and type combo");
     }
     if (dt == RS_TYPE_UNSIGNED_5_5_5_1 && dk != RS_KIND_PIXEL_RGBA) {
-        ALOGE("Bad kind and type combo");
-        return NULL;
+        rs->throwError("Bad kind and type combo");
     }
     if (dt == RS_TYPE_UNSIGNED_4_4_4_4 && dk != RS_KIND_PIXEL_RGBA) {
-        ALOGE("Bad kind and type combo");
-        return NULL;
+        rs->throwError("Bad kind and type combo");
     }
     if (dt == RS_TYPE_UNSIGNED_16 && dk != RS_KIND_PIXEL_DEPTH) {
-        ALOGE("Bad kind and type combo");
-        return NULL;
+        rs->throwError("Bad kind and type combo");
     }
 
     int size = 1;

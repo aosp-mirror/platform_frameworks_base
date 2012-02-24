@@ -27,6 +27,11 @@ void * BaseObj::getID() const {
     return mID;
 }
 
+void * BaseObj::getObjID(const BaseObj *o) {
+    return o == NULL ? NULL : o->getID();
+}
+
+
 BaseObj::BaseObj(void *id, RenderScript *rs) {
     mRS = rs;
     mID = id;
