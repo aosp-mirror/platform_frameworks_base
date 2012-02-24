@@ -19,7 +19,7 @@
 
 #include <rs.h>
 #include "RenderScript.h"
-#include "BaseObj.h"
+#include "Element.h"
 
 class Type : public BaseObj {
 protected:

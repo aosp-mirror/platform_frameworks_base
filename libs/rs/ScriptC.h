@@ -14,39 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef __ANDROID_BASE_OBJ_H__
-#define __ANDROID_BASE_OBJ_H__
-
+#ifndef __ANDROID_SCRIPTC_H__
+#define __ANDROID_SCRIPTC_H__
 
 #include <pthread.h>
 #include <rs.h>
 
-#include "RenderScript.h"
+#include "Script.h"
 
-class BaseObj {
+class ScriptC : public Script {
 protected:
-    friend class Element;
-    friend class Type;
-    friend class Allocation;
-    friend class Script;
-    friend class ScriptC;
+    ScriptC(RenderScript *rs, void *txt, size_t len);
+    ScriptC(RenderScript *rs,
+            const char *codeTxt, size_t codeLength,
+            const char *cachedName, size_t cachedNameLength,
+            const char *cacheDir, size_t cacheDirLength);
 
-    void *mID;
-    RenderScript *mRS;
-    android::String8 mName;
-
-    void * getID() const;
-
-    BaseObj(void *id, RenderScript *rs);
-    void checkValid();
-
-    static void * getObjID(const BaseObj *o);
-
-public:
-
-    virtual ~BaseObj();
-    virtual void updateFromNative();
-    virtual bool equals(const BaseObj *obj);
 };
 
 #endif

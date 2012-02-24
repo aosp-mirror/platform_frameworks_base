@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifndef __ANDROID_ALLOCATION_H__
+#define __ANDROID_ALLOCATION_H__
 
 #include <pthread.h>
 #include <rs.h>
@@ -22,7 +24,7 @@
 #include "Type.h"
 #include "Element.h"
 
-class Allocation : BaseObj {
+class Allocation : public BaseObj {
 protected:
     const Type *mType;
     uint32_t mUsage;
@@ -121,4 +123,4 @@ public:
 
 };
 
-
+#endif

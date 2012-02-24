@@ -33,6 +33,8 @@ class RenderScript {
     friend class Allocation;
     friend class Element;
     friend class Type;
+    friend class Script;
+    friend class ScriptC;
 
 public:
     RenderScript();
@@ -144,6 +146,7 @@ private:
 
 
 
+    void throwError(const char *err) const;
 
     static void * threadProc(void *);
 

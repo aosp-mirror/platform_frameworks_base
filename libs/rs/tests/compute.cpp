@@ -10,8 +10,6 @@ int main(int argc, char** argv)
     RenderScript *rs = new RenderScript();
     printf("New RS %p\n", rs);
 
-    //usleep(100000);
-
     bool r = rs->init(16);
     printf("Init returned %i\n", r);
 
@@ -28,8 +26,6 @@ int main(int argc, char** argv)
     const Allocation *a1 = Allocation::createSized(rs, e, 1000);
     printf("Allocation %p\n", a1);
 
-
-    //usleep(1000000);
 
 
     printf("Deleting stuff\n");

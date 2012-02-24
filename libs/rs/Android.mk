@@ -132,7 +132,9 @@ LOCAL_SRC_FILES:= \
 	BaseObj.cpp \
 	Element.cpp \
 	Type.cpp \
-	Allocation.cpp
+	Allocation.cpp \
+	Script.cpp \
+	ScriptC.cpp
 
 LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc libbcinfo libgui
 
