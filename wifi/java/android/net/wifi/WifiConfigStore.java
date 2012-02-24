@@ -261,6 +261,7 @@ class WifiConfigStore {
      * Add/update the specified configuration and save config
      *
      * @param config WifiConfiguration to be saved
+     * @return network update result
      */
     NetworkUpdateResult saveNetwork(WifiConfiguration config) {
         boolean newNetwork = (config.networkId == INVALID_NETWORK_ID);
@@ -298,8 +299,9 @@ class WifiConfigStore {
      * Forget the specified network and save config
      *
      * @param netId network to forget
+     * @return {@code true} if it succeeds, {@code false} otherwise
      */
-    void forgetNetwork(int netId) {
+    boolean forgetNetwork(int netId) {
         if (mWifiNative.removeNetwork(netId)) {
             mWifiNative.saveConfig();
             WifiConfiguration config = mConfiguredNetworks.get(netId);
@@ -309,8 +311,10 @@ class WifiConfigStore {
             }
             writeIpAndProxyConfigurations();
             sendConfiguredNetworksChangedBroadcast();
+            return true;
         } else {
             loge("Failed to remove network " + netId);
+            return false;
         }
     }
 
@@ -321,6 +325,7 @@ class WifiConfigStore {
      * state machine
      *
      * @param config wifi configuration to add/update
+     * @return network Id
      */
     int addOrUpdateNetwork(WifiConfiguration config) {
         NetworkUpdateResult result = addOrUpdateNetworkNative(config);
@@ -335,6 +340,7 @@ class WifiConfigStore {
      * state machine for network removal
      *
      * @param netId network to be removed
+     * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean removeNetwork(int netId) {
         boolean ret = mWifiNative.removeNetwork(netId);
@@ -356,6 +362,7 @@ class WifiConfigStore {
      * state machine for connecting to a network
      *
      * @param netId network to be removed
+     * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean enableNetwork(int netId, boolean disableOthers) {
         boolean ret = enableNetworkWithoutBroadcast(netId, disableOthers);
@@ -378,6 +385,7 @@ class WifiConfigStore {
     /**
      * Disable a network. Note that there is no saveConfig operation.
      * @param netId network to be disabled
+     * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean disableNetwork(int netId) {
         return disableNetwork(netId, WifiConfiguration.DISABLED_UNKNOWN_REASON);
@@ -387,6 +395,7 @@ class WifiConfigStore {
      * Disable a network. Note that there is no saveConfig operation.
      * @param netId network to be disabled
      * @param reason reason code network was disabled
+     * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean disableNetwork(int netId, int reason) {
         boolean ret = mWifiNative.disableNetwork(netId);
@@ -402,6 +411,7 @@ class WifiConfigStore {
 
     /**
      * Save the configured networks in supplicant to disk
+     * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean saveConfig() {
         return mWifiNative.saveConfig();
@@ -410,6 +420,8 @@ class WifiConfigStore {
     /**
      * Start WPS pin method configuration with pin obtained
      * from the access point
+     * @param config WPS configuration
+     * @return Wps result containing status and pin
      */
     WpsResult startWpsWithPinFromAccessPoint(WpsInfo config) {
         WpsResult result = new WpsResult();
@@ -445,6 +457,8 @@ class WifiConfigStore {
 
     /**
      * Start WPS push button configuration
+     * @param config WPS configuration
+     * @return WpsResult indicating status and pin
      */
     WpsResult startWpsPbc(WpsInfo config) {
         WpsResult result = new WpsResult();
@@ -461,6 +475,7 @@ class WifiConfigStore {
 
     /**
      * Fetch the link properties for a given network id
+     * @return LinkProperties for the given network id
      */
     LinkProperties getLinkProperties(int netId) {
         WifiConfiguration config = mConfiguredNetworks.get(netId);
@@ -474,6 +489,7 @@ class WifiConfigStore {
      *       right now until NetworkUtils is fixed. When we do
      *       that, we should remove handling DhcpInfo and move
      *       to using LinkProperties
+     * @return DhcpInfoInternal for the given network id
      */
     DhcpInfoInternal getIpConfiguration(int netId) {
         DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
@@ -516,6 +532,7 @@ class WifiConfigStore {
 
     /**
      * clear IP configuration for a given network id
+     * @param network id
      */
     void clearIpConfiguration(int netId) {
         WifiConfiguration config = mConfiguredNetworks.get(netId);
@@ -530,6 +547,8 @@ class WifiConfigStore {
 
     /**
      * Fetch the proxy properties for a given network id
+     * @param network id
+     * @return ProxyProperties for the network id
      */
     ProxyProperties getProxyProperties(int netId) {
         LinkProperties linkProperties = getLinkProperties(netId);
@@ -541,6 +560,8 @@ class WifiConfigStore {
 
     /**
      * Return if the specified network is using static IP
+     * @param network id
+     * @return {@code true} if using static ip for netId
      */
     boolean isUsingStaticIp(int netId) {
         WifiConfiguration config = mConfiguredNetworks.get(netId);
@@ -597,16 +618,6 @@ class WifiConfigStore {
 
         readIpAndProxyConfigurations();
         sendConfiguredNetworksChangedBroadcast();
-    }
-
-    void updateIpAndProxyFromWpsConfig(int netId, WpsInfo wpsConfig) {
-        WifiConfiguration config = mConfiguredNetworks.get(netId);
-        if (config != null) {
-            config.ipAssignment = wpsConfig.ipAssignment;
-            config.proxySettings = wpsConfig.proxySettings;
-            config.linkProperties = wpsConfig.linkProperties;
-            writeIpAndProxyConfigurations();
-        }
     }
 
     /* Mark all networks except specified netId as disabled */

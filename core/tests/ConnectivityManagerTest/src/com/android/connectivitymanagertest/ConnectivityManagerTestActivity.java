@@ -94,6 +94,7 @@ public class ConnectivityManagerTestActivity extends Activity {
      * Control Wifi States
      */
     public WifiManager mWifiManager;
+    public WifiManager.Channel mChannel;
 
     /*
      * Verify connectivity state
@@ -240,7 +241,7 @@ public class ConnectivityManagerTestActivity extends Activity {
         mCM = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         // Get an instance of WifiManager
         mWifiManager =(WifiManager)getSystemService(Context.WIFI_SERVICE);
-        mWifiManager.asyncConnect(this, new WifiServiceHandler());
+        mChannel = mWifiManager.initialize(mContext, mContext.getMainLooper(), null);
 
         initializeNetworkStates();
 
@@ -594,7 +595,14 @@ public class ConnectivityManagerTestActivity extends Activity {
                         log("found " + ssid + " in the scan result list");
                         log("retry: " + retry);
                         foundApInScanResults = true;
-                        mWifiManager.connectNetwork(config);
+                        mWifiManager.connect(mChannel, config,
+                                new WifiManager.ActionListener() {
+                                    public void onSuccess() {
+                                    }
+                                    public void onFailure(int reason) {
+                                        log("connect failure " + reason);
+                                    }
+                                });
                         break;
                    }
                 }
@@ -641,7 +649,13 @@ public class ConnectivityManagerTestActivity extends Activity {
         for (WifiConfiguration wifiConfig: wifiConfigList) {
             log("remove wifi configuration: " + wifiConfig.networkId);
             int netId = wifiConfig.networkId;
-            mWifiManager.forgetNetwork(netId);
+            mWifiManager.forget(mChannel, netId, new WifiManager.ActionListener() {
+                    public void onSuccess() {
+                    }
+                    public void onFailure(int reason) {
+                        log("Failed to forget " + reason);
+                    }
+                });
         }
         return true;
     }

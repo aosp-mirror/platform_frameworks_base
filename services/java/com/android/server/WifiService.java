@@ -263,47 +263,42 @@ public class WifiService extends IWifiManager.Stub {
                     ac.connect(mContext, this, msg.replyTo);
                     break;
                 }
-                case WifiManager.CMD_ENABLE_TRAFFIC_STATS_POLL: {
+                case WifiManager.ENABLE_TRAFFIC_STATS_POLL: {
                     mEnableTrafficStatsPoll = (msg.arg1 == 1);
                     mTrafficStatsPollToken++;
                     if (mEnableTrafficStatsPoll) {
                         notifyOnDataActivity();
-                        sendMessageDelayed(Message.obtain(this, WifiManager.CMD_TRAFFIC_STATS_POLL,
+                        sendMessageDelayed(Message.obtain(this, WifiManager.TRAFFIC_STATS_POLL,
                                 mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
                     }
                     break;
                 }
-                case WifiManager.CMD_TRAFFIC_STATS_POLL: {
+                case WifiManager.TRAFFIC_STATS_POLL: {
                     if (msg.arg1 == mTrafficStatsPollToken) {
                         notifyOnDataActivity();
-                        sendMessageDelayed(Message.obtain(this, WifiManager.CMD_TRAFFIC_STATS_POLL,
+                        sendMessageDelayed(Message.obtain(this, WifiManager.TRAFFIC_STATS_POLL,
                                 mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
                     }
                     break;
                 }
-                case WifiManager.CMD_CONNECT_NETWORK: {
-                    if (msg.obj != null) {
-                        mWifiStateMachine.connectNetwork((WifiConfiguration)msg.obj);
-                    } else {
-                        mWifiStateMachine.connectNetwork(msg.arg1);
-                    }
+                case WifiManager.CONNECT_NETWORK: {
+                    mWifiStateMachine.sendMessage(Message.obtain(msg));
                     break;
                 }
-                case WifiManager.CMD_SAVE_NETWORK: {
-                    mWifiStateMachine.saveNetwork((WifiConfiguration)msg.obj);
+                case WifiManager.SAVE_NETWORK: {
+                    mWifiStateMachine.sendMessage(Message.obtain(msg));
                     break;
                 }
-                case WifiManager.CMD_FORGET_NETWORK: {
-                    mWifiStateMachine.forgetNetwork(msg.arg1);
+                case WifiManager.FORGET_NETWORK: {
+                    mWifiStateMachine.sendMessage(Message.obtain(msg));
                     break;
                 }
-                case WifiManager.CMD_START_WPS: {
-                    //replyTo has the original source
-                    mWifiStateMachine.startWps(msg.replyTo, (WpsInfo)msg.obj);
+                case WifiManager.START_WPS: {
+                    mWifiStateMachine.sendMessage(Message.obtain(msg));
                     break;
                 }
-                case WifiManager.CMD_DISABLE_NETWORK: {
-                    mWifiStateMachine.disableNetwork(msg.replyTo, msg.arg1, msg.arg2);
+                case WifiManager.DISABLE_NETWORK: {
+                    mWifiStateMachine.sendMessage(Message.obtain(msg));
                     break;
                 }
                 default: {
@@ -1594,10 +1589,10 @@ public class WifiService extends IWifiManager.Stub {
         Message msg;
         if (mNetworkInfo.getDetailedState() == DetailedState.CONNECTED && !mScreenOff) {
             msg = Message.obtain(mAsyncServiceHandler,
-                    WifiManager.CMD_ENABLE_TRAFFIC_STATS_POLL, 1, 0);
+                    WifiManager.ENABLE_TRAFFIC_STATS_POLL, 1, 0);
         } else {
             msg = Message.obtain(mAsyncServiceHandler,
-                    WifiManager.CMD_ENABLE_TRAFFIC_STATS_POLL, 0, 0);
+                    WifiManager.ENABLE_TRAFFIC_STATS_POLL, 0, 0);
         }
         msg.sendToTarget();
     }

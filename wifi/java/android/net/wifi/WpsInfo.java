@@ -16,9 +16,6 @@
 
 package android.net.wifi;
 
-import android.net.LinkProperties;
-import android.net.wifi.WifiConfiguration.IpAssignment;
-import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -51,22 +48,10 @@ public class WpsInfo implements Parcelable {
     /** Passed with pin method configuration */
     public String pin;
 
-    /** @hide */
-    public IpAssignment ipAssignment;
-
-    /** @hide */
-    public ProxySettings proxySettings;
-
-    /** @hide */
-    public LinkProperties linkProperties;
-
     public WpsInfo() {
         setup = INVALID;
         BSSID = null;
         pin = null;
-        ipAssignment = IpAssignment.UNASSIGNED;
-        proxySettings = ProxySettings.UNASSIGNED;
-        linkProperties = new LinkProperties();
     }
 
     public String toString() {
@@ -77,12 +62,6 @@ public class WpsInfo implements Parcelable {
         sbuf.append('\n');
         sbuf.append(" pin: ").append(pin);
         sbuf.append('\n');
-        sbuf.append("IP assignment: " + ipAssignment.toString());
-        sbuf.append("\n");
-        sbuf.append("Proxy settings: " + proxySettings.toString());
-        sbuf.append("\n");
-        sbuf.append(linkProperties.toString());
-        sbuf.append("\n");
         return sbuf.toString();
     }
 
@@ -97,9 +76,6 @@ public class WpsInfo implements Parcelable {
             setup = source.setup;
             BSSID = source.BSSID;
             pin = source.pin;
-            ipAssignment = source.ipAssignment;
-            proxySettings = source.proxySettings;
-            linkProperties = new LinkProperties(source.linkProperties);
         }
     }
 
@@ -108,9 +84,6 @@ public class WpsInfo implements Parcelable {
         dest.writeInt(setup);
         dest.writeString(BSSID);
         dest.writeString(pin);
-        dest.writeString(ipAssignment.name());
-        dest.writeString(proxySettings.name());
-        dest.writeParcelable(linkProperties, flags);
     }
 
     /** Implement the Parcelable interface */
@@ -121,9 +94,6 @@ public class WpsInfo implements Parcelable {
                 config.setup = in.readInt();
                 config.BSSID = in.readString();
                 config.pin = in.readString();
-                config.ipAssignment = IpAssignment.valueOf(in.readString());
-                config.proxySettings = ProxySettings.valueOf(in.readString());
-                config.linkProperties = in.readParcelable(null);
                 return config;
             }
 

@@ -175,7 +175,7 @@ class SupplicantStateTracker extends StateMachine {
                 case WifiStateMachine.CMD_RESET_SUPPLICANT_STATE:
                     transitionTo(mUninitializedState);
                     break;
-                case WifiStateMachine.CMD_CONNECT_NETWORK:
+                case WifiManager.CONNECT_NETWORK:
                     mNetworksDisabledDuringConnect = true;
                     break;
                 default:
