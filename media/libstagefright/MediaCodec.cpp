@@ -673,9 +673,8 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
 
             int32_t nameIsType;
             int32_t encoder = false;
-            if (!msg->findInt32("nameIsType", &nameIsType)) {
-                nameIsType = false;
-            } else {
+            CHECK(msg->findInt32("nameIsType", &nameIsType));
+            if (nameIsType) {
                 CHECK(msg->findInt32("encoder", &encoder));
             }
 
