@@ -201,7 +201,7 @@ parent.link=index.html
   priority. The application itself has highest priority and its resources are always used in
   preference to identical resource IDs defined in libraries.</p>
 
-  <h3>Declaring library components in the the manifest file</h3>
+  <h3>Declaring library components in the manifest file</h3>
 
   <p>In the manifest file of the application project, you must add declarations of all components
   that the application will use that are imported from a library project. For example, you must
