@@ -3229,6 +3229,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
 
 void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
 {
+    Mutex::Autolock _l(mLock);
     // FIXME explain this formula
     int frameCount = (3 * mFrameCount * mSampleRate) / thread->sampleRate();
     OutputTrack *outputTrack = new OutputTrack(thread,
