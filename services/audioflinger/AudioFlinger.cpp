@@ -1464,7 +1464,8 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
         mMasterVolume(audioFlinger->masterVolumeSW_l()),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false),
         // mMixerStatus
-        mPrevMixerStatus(MIXER_IDLE)
+        mPrevMixerStatus(MIXER_IDLE),
+        standbyDelay(AudioFlinger::mStandbyTimeInNsecs)
 {
     snprintf(mName, kNameLength, "AudioOut_%X", id);
 
@@ -1997,14 +1998,8 @@ bool AudioFlinger::PlaybackThread::threadLoop()
     Vector< sp<Track> > tracksToRemove;
 
     standbyTime = systemTime();
-    mixBufferSize = mFrameCount * mFrameSize;
 
     // MIXER
-    // FIXME: Relaxed timing because of a certain device that can't meet latency
-    // Should be reduced to 2x after the vendor fixes the driver issue
-    // increase threshold again due to low power audio mode. The way this warning threshold is
-    // calculated and its usefulness should be reconsidered anyway.
-    nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 15;
     nsecs_t lastWarning = 0;
 if (mType == MIXER) {
     longStandbyExit = false;
@@ -2014,8 +2009,7 @@ if (mType == MIXER) {
     // FIXME could this be made local to while loop?
     writeFrames = 0;
 
-    activeSleepTime = activeSleepTimeUs();
-    idleSleepTime = idleSleepTimeUs();
+    cacheParameters_l();
     sleepTime = idleSleepTime;
 
 if (mType == MIXER) {
@@ -2024,13 +2018,6 @@ if (mType == MIXER) {
 
     // MIXER
     CpuStats cpuStats;
-
-    // DIRECT
-if (mType == DIRECT) {
-    // use shorter standby delay as on normal output to release
-    // hardware resources as soon as possible
-    standbyDelay = microseconds(activeSleepTime*2);
-}
 
     acquireWakeLock();
 
@@ -2050,25 +2037,7 @@ if (mType == MIXER) {
             Mutex::Autolock _l(mLock);
 
             if (checkForNewParameters_l()) {
-                mixBufferSize = mFrameCount * mFrameSize;
-
-if (mType == MIXER) {
-                // FIXME: Relaxed timing because of a certain device that can't meet latency
-                // Should be reduced to 2x after the vendor fixes the driver issue
-                // increase threshold again due to low power audio mode. The way this warning
-                // threshold is calculated and its usefulness should be reconsidered anyway.
-                maxPeriod = seconds(mFrameCount) / mSampleRate * 15;
-}
-
-                updateWaitTime_l();
-
-                activeSleepTime = activeSleepTimeUs();
-                idleSleepTime = idleSleepTimeUs();
-
-if (mType == DIRECT) {
-                standbyDelay = microseconds(activeSleepTime*2);
-}
-
+                cacheParameters_l();
             }
 
             saveOutputTracks();
@@ -2103,19 +2072,11 @@ if (mType == DIRECT) {
 
                     checkSilentMode_l();
 
-if (mType == MIXER || mType == DUPLICATING) {
-                    standbyTime = systemTime() + mStandbyTimeInNsecs;
-}
-
-if (mType == DIRECT) {
                     standbyTime = systemTime() + standbyDelay;
-}
-
                     sleepTime = idleSleepTime;
-
-if (mType == MIXER) {
-                    sleepTimeShift = 0;
-}
+                    if (mType == MIXER) {
+                        sleepTimeShift = 0;
+                    }
 
                     continue;
                 }
@@ -2261,7 +2222,7 @@ void AudioFlinger::MixerThread::threadLoop_mix()
         sleepTimeShift--;
     }
     sleepTime = 0;
-    standbyTime = systemTime() + mStandbyTimeInNsecs;
+    standbyTime = systemTime() + standbyDelay;
     //TODO: delay standby when effects have a tail
 }
 
@@ -2548,6 +2509,32 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
     return mixerStatus;
 }
 
+/*
+The derived values that are cached:
+ - mixBufferSize from frame count * frame size
+ - activeSleepTime from activeSleepTimeUs()
+ - idleSleepTime from idleSleepTimeUs()
+ - standbyDelay from mActiveSleepTimeUs (DIRECT only)
+ - maxPeriod from frame count and sample rate (MIXER only)
+
+The parameters that affect these derived values are:
+ - frame count
+ - frame size
+ - sample rate
+ - device type: A2DP or not
+ - device latency
+ - format: PCM or not
+ - active sleep time
+ - idle sleep time
+*/
+
+void AudioFlinger::PlaybackThread::cacheParameters_l()
+{
+    mixBufferSize = mFrameCount * mFrameSize;
+    activeSleepTime = activeSleepTimeUs();
+    idleSleepTime = idleSleepTimeUs();
+}
+
 void AudioFlinger::MixerThread::invalidateTracks(audio_stream_type_t streamType)
 {
     ALOGV ("MixerThread::invalidateTracks() mixer %p, streamType %d, mTracks.size %d",
@@ -2716,6 +2703,17 @@ uint32_t AudioFlinger::MixerThread::idleSleepTimeUs()
 uint32_t AudioFlinger::MixerThread::suspendSleepTimeUs()
 {
     return (uint32_t)(((mFrameCount * 1000) / mSampleRate) * 1000);
+}
+
+void AudioFlinger::MixerThread::cacheParameters_l()
+{
+    PlaybackThread::cacheParameters_l();
+
+    // FIXME: Relaxed timing because of a certain device that can't meet latency
+    // Should be reduced to 2x after the vendor fixes the driver issue
+    // increase threshold again due to low power audio mode. The way this warning
+    // threshold is calculated and its usefulness should be reconsidered anyway.
+    maxPeriod = seconds(mFrameCount) / mSampleRate * 15;
 }
 
 // ----------------------------------------------------------------------------
@@ -3074,6 +3072,14 @@ uint32_t AudioFlinger::DirectOutputThread::suspendSleepTimeUs()
     return time;
 }
 
+void AudioFlinger::DirectOutputThread::cacheParameters_l()
+{
+    PlaybackThread::cacheParameters_l();
+
+    // use shorter standby delay as on normal output to release
+    // hardware resources as soon as possible
+    standbyDelay = microseconds(activeSleepTime*2);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -3127,7 +3133,7 @@ void AudioFlinger::DuplicatingThread::threadLoop_sleepTime()
 
 void AudioFlinger::DuplicatingThread::threadLoop_write()
 {
-    standbyTime = systemTime() + mStandbyTimeInNsecs;
+    standbyTime = systemTime() + standbyDelay;
     for (size_t i = 0; i < outputTracks.size(); i++) {
         outputTracks[i]->write(mMixBuffer, writeFrames);
     }
@@ -3221,6 +3227,14 @@ bool AudioFlinger::DuplicatingThread::outputsReady(const SortedVector< sp<Output
 uint32_t AudioFlinger::DuplicatingThread::activeSleepTimeUs()
 {
     return (mWaitTimeMs * 1000) / 2;
+}
+
+void AudioFlinger::DuplicatingThread::cacheParameters_l()
+{
+    // updateWaitTime_l() sets mWaitTimeMs, which affects activeSleepTimeUs(), so call it first
+    updateWaitTime_l();
+
+    MixerThread::cacheParameters_l();
 }
 
 // ----------------------------------------------------------------------------
