@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "libRS_cpp"
-
-#include <utils/Log.h>
-#include <malloc.h>
-
 #include "ScriptC.h"
 
-ScriptC::ScriptC(RenderScript *rs,
-                 const char *codeTxt, size_t codeLength,
-                 const char *cachedName, size_t cachedNameLength,
-                 const char *cacheDir, size_t cacheDirLength)
-: Script(NULL, rs) {
-    mID = rsScriptCCreate(rs->mContext, cachedName, cachedNameLength,
-                          cacheDir, cacheDirLength, codeTxt, codeLength);
-}
+class ScriptC_mono : protected ScriptC {
+public:
+    ScriptC_mono(RenderScript *rs, const char *cacheDir, size_t cacheDirLength);
+
+    void forEach_root(const Allocation *ain, const Allocation *aout);
+
+};
 

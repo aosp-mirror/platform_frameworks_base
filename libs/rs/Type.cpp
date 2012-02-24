@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "libRS_cpp"
+
 #include <utils/Log.h>
 #include <malloc.h>
 #include <string.h>
@@ -124,7 +126,6 @@ void Type::Builder::setFaces(bool value) {
 }
 
 const Type * Type::Builder::create() {
-    ALOGE(" %i %i %i %i %i", mDimX, mDimY, mDimZ, mDimFaces, mDimMipmaps);
     if (mDimZ > 0) {
         if ((mDimX < 1) || (mDimY < 1)) {
             ALOGE("Both X and Y dimension required when Z is present.");

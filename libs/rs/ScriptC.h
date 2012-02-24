@@ -24,7 +24,6 @@
 
 class ScriptC : public Script {
 protected:
-    ScriptC(RenderScript *rs, void *txt, size_t len);
     ScriptC(RenderScript *rs,
             const char *codeTxt, size_t codeLength,
             const char *cachedName, size_t cachedNameLength,

@@ -2,7 +2,8 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	compute.cpp
+	compute.cpp \
+	ScriptC_mono.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libRS \
