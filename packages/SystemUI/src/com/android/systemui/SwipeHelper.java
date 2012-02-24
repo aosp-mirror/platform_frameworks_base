@@ -236,10 +236,6 @@ public class SwipeHelper {
             public void onAnimationEnd(Animator animation) {
                 mCallback.onChildDismissed(view);
                 animView.setLayerType(View.LAYER_TYPE_NONE, null);
-                // Restore the alpha/translation parameters to what they were before swiping
-                // (for when these items are recycled)
-                animView.setAlpha(1f);
-                setTranslation(animView, 0f);
             }
         });
         anim.addUpdateListener(new AnimatorUpdateListener() {

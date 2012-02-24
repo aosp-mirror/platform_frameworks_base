@@ -187,6 +187,11 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
         mLinearLayout.removeView(v);
         mCallback.handleSwipe(v);
         v.setActivated(false);
+        // Restore the alpha/translation parameters to what they were before swiping
+        // (for when these items are recycled)
+        View contentView = getChildContentView(v);
+        contentView.setAlpha(1f);
+        contentView.setTranslationX(0);
     }
 
     public void onBeginDrag(View v) {
