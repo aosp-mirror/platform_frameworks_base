@@ -72,7 +72,7 @@ public:
     static  int32_t     getNumberOfCameras();
     static  status_t    getCameraInfo(int cameraId,
                                       struct CameraInfo* cameraInfo);
-    static  sp<Camera>  connect(int cameraId);
+    static  sp<Camera>  connect(int cameraId, bool force, bool keep);
             virtual     ~Camera();
             void        init();
 

@@ -182,7 +182,7 @@ status_t CameraSource::isCameraAvailable(
     int32_t cameraId) {
 
     if (camera == 0) {
-        mCamera = Camera::connect(cameraId);
+        mCamera = Camera::connect(cameraId, false, false);
         if (mCamera == 0) return -EBUSY;
         mCameraFlags &= ~FLAGS_HOT_CAMERA;
     } else {
