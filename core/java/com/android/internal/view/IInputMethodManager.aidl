@@ -43,16 +43,17 @@ interface IInputMethodManager {
     void removeClient(in IInputMethodClient client);
             
     InputBindResult startInput(in IInputMethodClient client,
-            IInputContext inputContext, in EditorInfo attribute,
-            boolean initial, boolean needResult);
+            IInputContext inputContext, in EditorInfo attribute, int controlFlags);
     void finishInput(in IInputMethodClient client);
     boolean showSoftInput(in IInputMethodClient client, int flags,
             in ResultReceiver resultReceiver);
     boolean hideSoftInput(in IInputMethodClient client, int flags,
             in ResultReceiver resultReceiver);
-    void windowGainedFocus(in IInputMethodClient client, in IBinder windowToken,
-            boolean viewHasFocus, boolean isTextEditor,
-            int softInputMode, boolean first, int windowFlags);
+    // Report that a window has gained focus.  If 'attribute' is non-null,
+    // this will also do a startInput.
+    InputBindResult windowGainedFocus(in IInputMethodClient client, in IBinder windowToken,
+            int controlFlags, int softInputMode, int windowFlags,
+            in EditorInfo attribute, IInputContext inputContext);
             
     void showInputMethodPickerFromClient(in IInputMethodClient client);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
