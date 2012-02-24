@@ -249,12 +249,20 @@ if (!mBluetoothAdapter.isEnabled()) {
 <p>A dialog will appear requesting user permission to enable Bluetooth, as shown
 in Figure 1. If the user responds "Yes," the system will begin to enable Bluetooth
 and focus will return to your application once the process completes (or fails).</p> 
-<p>If enabling Bluetooth succeeds, your Activity will receive the {@link
+
+<p>The {@code REQUEST_ENABLE_BT} constant passed to {@link
+android.app.Activity#startActivityForResult(Intent,int) startActivityForResult()} is a locally
+defined integer (which must be greater than 0), that the system passes back to you in your
+{@link
+android.app.Activity#onActivityResult(int,int,Intent) onActivityResult()} implementation as the
+<code>requestCode</code> parameter.</p>
+
+<p>If enabling Bluetooth succeeds, your activity receives the {@link
 android.app.Activity#RESULT_OK} result code in the {@link
 android.app.Activity#onActivityResult(int,int,Intent) onActivityResult()}
 callback. If Bluetooth was not enabled
-due to an error (or the user responded "No") then the result code will be {@link
-android.app.Activity#RESULT_CANCELED}.</p> 
+due to an error (or the user responded "No") then the result code is {@link
+android.app.Activity#RESULT_CANCELED}.</p>
 </li> 
 </ol> 
  
@@ -431,11 +439,11 @@ startActivity(discoverableIntent);
  
 <p>A dialog will be displayed, requesting user permission to make the device
 discoverable, as shown in Figure 2. If the user responds "Yes," then the device
-will become discoverable for the specified amount of time. Your Activity will
+will become discoverable for the specified amount of time. Your activity will
 then receive a call to the {@link android.app.Activity#onActivityResult(int,int,Intent)
 onActivityResult())} callback, with the result code equal to the duration that the device
 is discoverable. If the user responded "No" or if an error occurred, the result code will
-be Activity.RESULT_CANCELLED.</p> 
+be {@link android.app.Activity#RESULT_CANCELED}.</p> 
  
 <p class="note"><strong>Note:</strong> If Bluetooth has not been enabled on the device,
 then enabling device discoverability will automatically enable Bluetooth.</p> 
@@ -568,7 +576,7 @@ socket.</p>
 </ol> 
  
 <p>The {@link android.bluetooth.BluetoothServerSocket#accept()} call should not
-be executed in the main Activity UI thread because it is a blocking call and
+be executed in the main activity UI thread because it is a blocking call and
 will prevent any other interaction with the application. It usually makes
 sense to do all work with a {@link android.bluetooth.BluetoothServerSocket} or {@link
 android.bluetooth.BluetoothSocket} in a new
@@ -696,7 +704,7 @@ android.bluetooth.BluetoothSocket#connect()} method times out (after about
 12 seconds), then it will throw an exception.</p> 
 <p>Because {@link
 android.bluetooth.BluetoothSocket#connect()} is a blocking call, this connection
-procedure should always be performed in a thread separate from the main Activity
+procedure should always be performed in a thread separate from the main activity
 thread.</p> 
 <p class="note">Note: You should always ensure that the device is not performing
 device discovery when you call {@link
@@ -838,7 +846,7 @@ private class ConnectedThread extends Thread {
             try {
                 // Read from the InputStream
                 bytes = mmInStream.read(buffer);
-                // Send the obtained bytes to the UI Activity
+                // Send the obtained bytes to the UI activity
                 mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
                         .sendToTarget();
             } catch (IOException e) {
@@ -847,14 +855,14 @@ private class ConnectedThread extends Thread {
         }
     }
  
-    /* Call this from the main Activity to send data to the remote device */
+    /* Call this from the main activity to send data to the remote device */
     public void write(byte[] bytes) {
         try {
             mmOutStream.write(bytes);
         } catch (IOException e) { }
     }
  
-    /* Call this from the main Activity to shutdown the connection */
+    /* Call this from the main activity to shutdown the connection */
     public void cancel() {
         try {
             mmSocket.close();
@@ -866,12 +874,12 @@ private class ConnectedThread extends Thread {
 <p>The constructor acquires the necessary streams and once executed, the thread
 will wait for data to come through the InputStream. When {@link
 java.io.InputStream#read(byte[])} returns with
-bytes from the stream, the data is sent to the main Activity using a member
+bytes from the stream, the data is sent to the main activity using a member
 Handler from the parent class. Then it goes back and waits for more bytes from
 the stream.</p> 
  
 <p>Sending outgoing data is as simple as calling the thread's
-<code>write()</code> method from the main Activity and passing in the bytes to
+<code>write()</code> method from the main activity and passing in the bytes to
 be sent. This method then simply calls {@link
 java.io.OutputStream#write(byte[])} to send the data to the remote device.</p> 
  
