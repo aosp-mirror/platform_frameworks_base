@@ -139,7 +139,7 @@ static Word16 BarcLineValue(Word16 noOfLines, Word16 fftLine, Word32 samplingFre
 *
 *****************************************************************************/
 static void initThrQuiet(Word16  numPb,
-                         Word16 *pbOffset,
+                         const Word16 *pbOffset,
                          Word16 *pbBarcVal,
                          Word32 *pbThresholdQuiet) {
   Word16 i;
@@ -250,7 +250,7 @@ static void initSpreading(Word16  numPb,
 *
 *****************************************************************************/
 static void initBarcValues(Word16  numPb,
-                           Word16 *pbOffset,
+                           const Word16 *pbOffset,
                            Word16  numLines,
                            Word32  samplingFrequency,
                            Word16 *pbBval)
