@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:=                 \
         TextDescriptions.cpp      \
         TimedTextDriver.cpp       \
-        TimedTextInBandSource.cpp \
+        TimedText3GPPSource.cpp \
         TimedTextSource.cpp       \
         TimedTextSRTSource.cpp    \
         TimedTextPlayer.cpp
@@ -12,8 +12,7 @@ LOCAL_SRC_FILES:=                 \
 LOCAL_CFLAGS += -Wno-multichar
 LOCAL_C_INCLUDES:= \
         $(JNI_H_INCLUDE) \
-        $(TOP)/frameworks/base/media/libstagefright \
-        $(TOP)/frameworks/base/include/media/stagefright/openmax
+        $(TOP)/frameworks/base/media/libstagefright
 
 LOCAL_MODULE:= libstagefright_timedtext
 
