@@ -95,11 +95,11 @@ LOCAL_STATIC_LIBRARIES := \
 # currently must follow the same logic to determine how webkit was built and
 # if it's safe to link against libchromium.net
 
-# V8 also requires an ARMv7 & x86 CPU, and since we must use jsc, we cannot
+# On ARM, V8 also requires an ARMv7 CPU, and since we must use jsc, we cannot
 # use the Chrome http stack either.
-ifneq ($(strip $(ARCH_ARM_HAVE_ARMV7A)),true)
-  ifneq ($(TARGET_ARCH),x86)
-      USE_ALT_HTTP := true
+ifeq ($(TARGET_ARCH),arm)
+  ifneq ($(strip $(ARCH_ARM_HAVE_ARMV7A)),true)
+    USE_ALT_HTTP := true
   endif
 endif
 
