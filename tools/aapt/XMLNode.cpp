@@ -21,7 +21,7 @@
 
 const char* const RESOURCES_ROOT_NAMESPACE = "http://schemas.android.com/apk/res/";
 const char* const RESOURCES_ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android";
-const char* const RESOURCES_AUTO_PACKAGE_NAMESPACE = "http://schemas.android.com/apk/res/auto";
+const char* const RESOURCES_AUTO_PACKAGE_NAMESPACE = "http://schemas.android.com/apk/res-auto";
 const char* const RESOURCES_ROOT_PRV_NAMESPACE = "http://schemas.android.com/apk/prv/res/";
 
 const char* const XLIFF_XMLNS = "urn:oasis:names:tc:xliff:document:1.2";
