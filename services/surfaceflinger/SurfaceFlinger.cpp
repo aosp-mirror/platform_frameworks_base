@@ -1000,6 +1000,12 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
         drawWormhole();
     }
 
+    // FIXME: workaroud for b/6020860
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0,0,0,0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    // end-workaround
+
     /*
      * and then, render the layers targeted at the framebuffer
      */
