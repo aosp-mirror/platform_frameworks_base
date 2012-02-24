@@ -9522,10 +9522,11 @@ public class WebView extends AbsoluteLayout
             }
         }
         nativeSetTextSelection(mNativeClass, data.mSelectTextPtr);
-        if (data.mSelectTextPtr != 0) {
-            mIsCaretSelection = (mFieldPointer == nodePointer)
-                    && (mFieldPointer != 0)
-                    && (data.mStart == data.mEnd);
+
+        if (data.mSelectTextPtr != 0 &&
+                (data.mStart != data.mEnd ||
+                (mFieldPointer == nodePointer && mFieldPointer != 0))) {
+            mIsCaretSelection = (data.mStart == data.mEnd);
             if (!mSelectingText) {
                 setupWebkitSelect();
             } else if (!mSelectionStarted) {
