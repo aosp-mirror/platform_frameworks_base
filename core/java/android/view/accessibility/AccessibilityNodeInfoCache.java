@@ -16,7 +16,6 @@
 
 package android.view.accessibility;
 
-import android.os.Process;
 import android.util.Log;
 import android.util.LongSparseArray;
 
@@ -81,14 +80,16 @@ public class AccessibilityNodeInfoCache {
     public AccessibilityNodeInfo get(long accessibilityNodeId) {
         if (ENABLED) {
             synchronized(mLock) {
-                if (DEBUG) {
-                    AccessibilityNodeInfo info = mCacheImpl.get(accessibilityNodeId);
-                    Log.i(LOG_TAG, "Process: " + Process.myPid() +
-                            " get(" + accessibilityNodeId + ") = " + info);
-                    return info;
-                } else {
-                    return mCacheImpl.get(accessibilityNodeId);
+                AccessibilityNodeInfo info = mCacheImpl.get(accessibilityNodeId);
+                if (info != null) {
+                    // Return a copy since the client calls to AccessibilityNodeInfo#recycle()
+                    // will wipe the data of the cached info.
+                    info = AccessibilityNodeInfo.obtain(info);
                 }
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "get(" + accessibilityNodeId + ") = " + info);
+                }
+                return info;
             }
         } else {
             return null;
@@ -105,10 +106,12 @@ public class AccessibilityNodeInfoCache {
         if (ENABLED) {
             synchronized(mLock) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "Process: " + Process.myPid()
-                            + " put(" + accessibilityNodeId + ", " + info + ")");
+                    Log.i(LOG_TAG, "put(" + accessibilityNodeId + ", " + info + ")");
                 }
-                mCacheImpl.put(accessibilityNodeId, info);
+                // Cache a copy since the client calls to AccessibilityNodeInfo#recycle()
+                // will wipe the data of the cached info.
+                AccessibilityNodeInfo clone = AccessibilityNodeInfo.obtain(info);
+                mCacheImpl.put(accessibilityNodeId, clone);
             }
         }
     }
@@ -138,8 +141,7 @@ public class AccessibilityNodeInfoCache {
         if (ENABLED) {
             synchronized(mLock) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG,  "Process: " + Process.myPid()
-                            + " remove(" + accessibilityNodeId + ")");
+                    Log.i(LOG_TAG, "remove(" + accessibilityNodeId + ")");
                 }
                 mCacheImpl.remove(accessibilityNodeId);
             }
@@ -153,7 +155,13 @@ public class AccessibilityNodeInfoCache {
         if (ENABLED) {
             synchronized(mLock) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG,  "Process: " + Process.myPid() + "clear()");
+                    Log.i(LOG_TAG, "clear()");
+                }
+                // Recycle the nodes before clearing the cache.
+                final int nodeCount = mCacheImpl.size();
+                for (int i = 0; i < nodeCount; i++) {
+                    AccessibilityNodeInfo info = mCacheImpl.valueAt(i);
+                    info.recycle();
                 }
                 mCacheImpl.clear();
             }
