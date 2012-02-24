@@ -9239,31 +9239,40 @@ public class WebView extends AbsoluteLayout
     private void setHitTestResult(WebKitHitTest hit) {
         if (hit == null) {
             mInitialHitTestResult = null;
-        } else {
-            mInitialHitTestResult = new HitTestResult();
-            if (hit.mLinkUrl != null) {
-                mInitialHitTestResult.mType = HitTestResult.SRC_ANCHOR_TYPE;
-                mInitialHitTestResult.mExtra = hit.mLinkUrl;
-                if (hit.mImageUrl != null) {
-                    mInitialHitTestResult.mType = HitTestResult.SRC_IMAGE_ANCHOR_TYPE;
-                    mInitialHitTestResult.mExtra = hit.mImageUrl;
-                }
-            } else if (hit.mImageUrl != null) {
-                mInitialHitTestResult.mType = HitTestResult.IMAGE_TYPE;
+            return;
+        }
+        mInitialHitTestResult = new HitTestResult();
+        if (hit.mLinkUrl != null) {
+            mInitialHitTestResult.mType = HitTestResult.SRC_ANCHOR_TYPE;
+            mInitialHitTestResult.mExtra = hit.mLinkUrl;
+            if (hit.mImageUrl != null) {
+                mInitialHitTestResult.mType = HitTestResult.SRC_IMAGE_ANCHOR_TYPE;
                 mInitialHitTestResult.mExtra = hit.mImageUrl;
-            } else if (hit.mEditable) {
-                mInitialHitTestResult.mType = HitTestResult.EDIT_TEXT_TYPE;
-            } else if (hit.mIntentUrl != null) {
-                if (hit.mIntentUrl.startsWith(SCHEME_GEO)) {
-                    mInitialHitTestResult.mType = HitTestResult.GEO_TYPE;
-                    String substr = hit.mIntentUrl.substring(SCHEME_GEO.length());
-                    try {
-                        mInitialHitTestResult.mExtra = URLDecoder.decode(substr, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        Log.w(LOGTAG, "Failed to decode GEO URL!", e);
-                        mInitialHitTestResult.mType = HitTestResult.UNKNOWN_TYPE;
-                    }
-                }
+            }
+        } else if (hit.mImageUrl != null) {
+            mInitialHitTestResult.mType = HitTestResult.IMAGE_TYPE;
+            mInitialHitTestResult.mExtra = hit.mImageUrl;
+        } else if (hit.mEditable) {
+            mInitialHitTestResult.mType = HitTestResult.EDIT_TEXT_TYPE;
+        } else if (hit.mIntentUrl != null) {
+            String substr = null;
+            if (hit.mIntentUrl.startsWith(SCHEME_GEO)) {
+                mInitialHitTestResult.mType = HitTestResult.GEO_TYPE;
+                substr = hit.mIntentUrl.substring(SCHEME_GEO.length());
+            } else if (hit.mIntentUrl.startsWith(SCHEME_TEL)) {
+                mInitialHitTestResult.mType = HitTestResult.PHONE_TYPE;
+                substr = hit.mIntentUrl.substring(SCHEME_TEL.length());
+            } else if (hit.mIntentUrl.startsWith(SCHEME_MAILTO)) {
+                mInitialHitTestResult.mType = HitTestResult.EMAIL_TYPE;
+                substr = hit.mIntentUrl.substring(SCHEME_MAILTO.length());
+            } else {
+                return;
+            }
+            try {
+                mInitialHitTestResult.mExtra = URLDecoder.decode(substr, "UTF-8");
+            } catch (Throwable e) {
+                Log.w(LOGTAG, "Failed to decode GEO URL!", e);
+                mInitialHitTestResult.mType = HitTestResult.UNKNOWN_TYPE;
             }
         }
     }
