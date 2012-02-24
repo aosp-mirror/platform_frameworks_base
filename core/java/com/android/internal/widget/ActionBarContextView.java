@@ -56,6 +56,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     private int mTitleStyleRes;
     private int mSubtitleStyleRes;
     private Drawable mSplitBackground;
+    private boolean mTitleOptional;
 
     private Animator mCurrentAnimation;
     private boolean mAnimateInOnLayout;
@@ -354,7 +355,18 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         }
 
         if (mTitleLayout != null && mCustomView == null) {
-            availableWidth = measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
+            if (mTitleOptional) {
+                final int titleWidthSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+                mTitleLayout.measure(titleWidthSpec, childSpecHeight);
+                final int titleWidth = mTitleLayout.getMeasuredWidth();
+                final boolean titleFits = titleWidth <= availableWidth;
+                if (titleFits) {
+                    availableWidth -= titleWidth;
+                }
+                mTitleLayout.setVisibility(titleFits ? VISIBLE : GONE);
+            } else {
+                availableWidth = measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
+            }
         }
 
         if (mCustomView != null) {
@@ -460,7 +472,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
             }
         }
 
-        if (mTitleLayout != null && mCustomView == null) {
+        if (mTitleLayout != null && mCustomView == null && mTitleLayout.getVisibility() != GONE) {
             x += positionChild(mTitleLayout, x, y, contentHeight);
         }
         
@@ -511,5 +523,16 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         } else {
             super.onInitializeAccessibilityEvent(event);
         }
+    }
+
+    public void setTitleOptional(boolean titleOptional) {
+        if (titleOptional != mTitleOptional) {
+            requestLayout();
+        }
+        mTitleOptional = titleOptional;
+    }
+
+    public boolean isTitleOptional() {
+        return mTitleOptional;
     }
 }

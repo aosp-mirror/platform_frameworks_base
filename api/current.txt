@@ -21935,12 +21935,14 @@ package android.view {
     method public java.lang.Object getTag();
     method public abstract java.lang.CharSequence getTitle();
     method public abstract void invalidate();
+    method public boolean isTitleOptional();
     method public abstract void setCustomView(android.view.View);
     method public abstract void setSubtitle(java.lang.CharSequence);
     method public abstract void setSubtitle(int);
     method public void setTag(java.lang.Object);
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract void setTitle(int);
+    method public void setTitleOptionalHint(boolean);
   }
 
   public static abstract interface ActionMode.Callback {

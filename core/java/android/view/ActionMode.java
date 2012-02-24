@@ -104,6 +104,32 @@ public abstract class ActionMode {
     public abstract void setSubtitle(int resId);
 
     /**
+     * Set whether or not the title/subtitle display for this action mode
+     * is optional.
+     *
+     * <p>In many cases the supplied title for an action mode is merely
+     * meant to add context and is not strictly required for the action
+     * mode to be useful. If the title is optional, the system may choose
+     * to hide the title entirely rather than truncate it due to a lack
+     * of available space.</p>
+     *
+     * <p>Note that this is merely a hint; the underlying implementation
+     * may choose to ignore this setting under some circumstances.</p>
+     *
+     * @param titleOptional true if the title only presents optional information.
+     */
+    public void setTitleOptionalHint(boolean titleOptional) {
+    }
+
+    /**
+     * @return true if this action mode considers the title and subtitle fields
+     *         as optional. Optional titles may not be displayed to the user.
+     */
+    public boolean isTitleOptional() {
+        return false;
+    }
+
+    /**
      * Set a custom view for this action mode. The custom view will take the place of
      * the title and subtitle. Useful for things like search boxes.
      *

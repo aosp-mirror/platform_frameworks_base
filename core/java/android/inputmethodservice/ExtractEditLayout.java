@@ -124,6 +124,12 @@ public class ExtractEditLayout extends LinearLayout {
         }
 
         @Override
+        public boolean isTitleOptional() {
+            // Not only is it optional, it will *never* be shown.
+            return true;
+        }
+
+        @Override
         public void setCustomView(View view) {
             // Custom view is not supported here.
         }
