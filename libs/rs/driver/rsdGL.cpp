@@ -455,3 +455,37 @@ void rsdGLCheckError(const android::renderscript::Context *rsc,
     }
 
 }
+
+void rsdGLClearColor(const android::renderscript::Context *rsc,
+                     float r, float g, float b, float a) {
+    RSD_CALL_GL(glClearColor, r, g, b, a);
+    RSD_CALL_GL(glClear, GL_COLOR_BUFFER_BIT);
+}
+
+void rsdGLClearDepth(const android::renderscript::Context *rsc, float v) {
+    RSD_CALL_GL(glClearDepthf, v);
+    RSD_CALL_GL(glClear, GL_DEPTH_BUFFER_BIT);
+}
+
+void rsdGLFinish(const android::renderscript::Context *rsc) {
+    RSD_CALL_GL(glFinish);
+}
+
+void rsdGLDrawQuadTexCoords(const android::renderscript::Context *rsc,
+                            float x1, float y1, float z1, float u1, float v1,
+                            float x2, float y2, float z2, float u2, float v2,
+                            float x3, float y3, float z3, float u3, float v3,
+                            float x4, float y4, float z4, float u4, float v4) {
+
+    float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
+    const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
+
+    RsdVertexArray::Attrib attribs[2];
+    attribs[0].set(GL_FLOAT, 3, 12, false, (uint32_t)vtx, "ATTRIB_position");
+    attribs[1].set(GL_FLOAT, 2, 8, false, (uint32_t)tex, "ATTRIB_texture0");
+
+    RsdVertexArray va(attribs, 2);
+    va.setup(rsc);
+
+    RSD_CALL_GL(glDrawArrays, GL_TRIANGLE_FAN, 0, 4);
+}

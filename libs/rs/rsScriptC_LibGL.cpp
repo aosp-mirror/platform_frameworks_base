@@ -269,25 +269,9 @@ void rsrColor(Context *rsc, Script *sc, float r, float g, float b, float a) {
     pf->setConstantColor(rsc, r, g, b, a);
 }
 
-void rsrFinish(Context *rsc, Script *sc) {
-    RSD_CALL_GL(glFinish);
-}
-
-
-void rsrClearColor(Context *rsc, Script *sc, float r, float g, float b, float a) {
+void rsrPrepareClear(Context *rsc, Script *sc) {
     rsc->mFBOCache.setup(rsc);
     rsc->setupProgramStore();
-
-    RSD_CALL_GL(glClearColor, r, g, b, a);
-    RSD_CALL_GL(glClear, GL_COLOR_BUFFER_BIT);
-}
-
-void rsrClearDepth(Context *rsc, Script *sc, float v) {
-    rsc->mFBOCache.setup(rsc);
-    rsc->setupProgramStore();
-
-    RSD_CALL_GL(glClearDepthf, v);
-    RSD_CALL_GL(glClear, GL_DEPTH_BUFFER_BIT);
 }
 
 uint32_t rsrGetWidth(Context *rsc, Script *sc) {

@@ -257,17 +257,19 @@ static void SC_Color(float r, float g, float b, float a) {
 
 static void SC_Finish() {
     GET_TLS();
-    rsrFinish(rsc, sc);
+    rsdGLFinish(rsc);
 }
 
 static void SC_ClearColor(float r, float g, float b, float a) {
     GET_TLS();
-    rsrClearColor(rsc, sc, r, g, b, a);
+    rsrPrepareClear(rsc, sc);
+    rsdGLClearColor(rsc, r, g, b, a);
 }
 
 static void SC_ClearDepth(float v) {
     GET_TLS();
-    rsrClearDepth(rsc, sc, v);
+    rsrPrepareClear(rsc, sc);
+    rsdGLClearDepth(rsc, v);
 }
 
 static uint32_t SC_GetWidth() {
