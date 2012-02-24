@@ -577,7 +577,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                 {
                     /* size_t index = */updateBuffers(kPortIndexInput, msg);
 
-                    if (mState == FLUSHING) {
+                    if (mState == FLUSHING || mState == STOPPING) {
                         returnBuffersToCodecOnPort(kPortIndexInput);
                         break;
                     }
@@ -596,7 +596,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                 {
                     /* size_t index = */updateBuffers(kPortIndexOutput, msg);
 
-                    if (mState == FLUSHING) {
+                    if (mState == FLUSHING || mState == STOPPING) {
                         returnBuffersToCodecOnPort(kPortIndexOutput);
                         break;
                     }
