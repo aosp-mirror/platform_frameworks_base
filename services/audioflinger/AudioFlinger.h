@@ -424,8 +424,8 @@ private:
                     void        sendConfigEvent_l(int event, int param = 0);
                     void        processConfigEvents();
                     audio_io_handle_t id() const { return mId;}
-                    bool        standby() { return mStandby; }
-                    uint32_t    device() { return mDevice; }
+                    bool        standby() const { return mStandby; }
+                    uint32_t    device() const { return mDevice; }
         virtual     audio_stream_t* stream() = 0;
 
                     sp<EffectHandle> createEffect_l(
@@ -461,7 +461,7 @@ private:
                     // integrity of the chains during the process.
                     void lockEffectChains_l(Vector<sp <EffectChain> >& effectChains);
                     // unlock effect chains after process
-                    void unlockEffectChains(Vector<sp <EffectChain> >& effectChains);
+                    void unlockEffectChains(const Vector<sp<EffectChain> >& effectChains);
                     // set audio mode to all effect chains
                     void setMode(audio_mode_t mode);
                     // get effect module with corresponding ID on specified audio session
@@ -968,7 +968,7 @@ private:
         virtual     uint32_t    activeSleepTimeUs();
 
     private:
-                    bool        outputsReady(SortedVector< sp<OutputTrack> > &outputTracks);
+                    bool        outputsReady(const SortedVector<sp<OutputTrack> > &outputTracks);
                     void        updateWaitTime();
 
         SortedVector < sp<OutputTrack> >  mOutputTracks;
@@ -993,8 +993,9 @@ private:
                                      PlaybackThread *srcThread,
                                      PlaybackThread *dstThread,
                                      bool reRegister);
-              PlaybackThread *primaryPlaybackThread_l();
-              uint32_t primaryOutputDevice_l();
+              // return thread associated with primary hardware device, or NULL
+              PlaybackThread *primaryPlaybackThread_l() const;
+              uint32_t primaryOutputDevice_l() const;
 
     friend class AudioBuffer;
 
