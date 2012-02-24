@@ -222,23 +222,27 @@ class MeasuredText {
         return wid;
     }
 
-    int breakText(int start, int limit, boolean forwards, float width) {
+    int breakText(int limit, boolean forwards, float width) {
         float[] w = mWidths;
         if (forwards) {
-            for (int i = start; i < limit; ++i) {
-                if ((width -= w[i]) < 0) {
-                    return i - start;
-                }
+            int i = 0;
+            while (i < limit) {
+                width -= w[i];
+                if (width < 0.0f) break;
+                i++;
             }
+            while (i > 0 && mChars[i - 1] == ' ') i--;
+            return i;
         } else {
-            for (int i = limit; --i >= start;) {
-                if ((width -= w[i]) < 0) {
-                    return limit - i -1;
-                }
+            int i = limit - 1;
+            while (i >= 0) {
+                width -= w[i];
+                if (width < 0.0f) break;
+                i--;
             }
+            while (i < limit - 1 && mChars[i + 1] == ' ') i++;
+            return limit - i - 1;
         }
-
-        return limit - start;
     }
 
     float measure(int start, int limit) {
