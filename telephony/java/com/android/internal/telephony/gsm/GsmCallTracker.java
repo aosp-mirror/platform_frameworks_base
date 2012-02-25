@@ -167,7 +167,7 @@ public final class GsmCallTracker extends CallTracker {
     /**
      * clirMode is one of the CLIR_ constants
      */
-    Connection
+    synchronized Connection
     dial (String dialString, int clirMode, UUSInfo uusInfo) throws CallStateException {
         // note that this triggers call state changed notif
         clearDisconnected();
@@ -406,7 +406,7 @@ public final class GsmCallTracker extends CallTracker {
         }
     }
 
-    protected void
+    protected synchronized void
     handlePollCalls(AsyncResult ar) {
         List polledCalls;
 
