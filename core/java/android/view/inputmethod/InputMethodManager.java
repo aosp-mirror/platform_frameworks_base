@@ -26,7 +26,6 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -690,6 +689,10 @@ public final class InputMethodManager {
     public void reportFinishInputConnection(InputConnection ic) {
         if (mServedInputConnection != ic) {
             ic.finishComposingText();
+            // To avoid modifying the public InputConnection interface
+            if (ic instanceof BaseInputConnection) {
+                ((BaseInputConnection) ic).reportFinish();
+            }
         }
     }
 
