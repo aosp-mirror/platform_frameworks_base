@@ -87,6 +87,7 @@ public class RenderScript {
      * Name of the file that holds the object cache.
      */
     private static final String CACHE_PATH = "com.android.renderscript.cache";
+    static String mCachePath;
 
      /**
      * Sets the directory to use as a persistent storage for the
@@ -95,8 +96,6 @@ public class RenderScript {
      * @hide
      * @param cacheDir A directory the current process can write to
      */
-
-    static String mCachePath;
     public static void setupDiskCache(File cacheDir) {
         File f = new File(cacheDir, CACHE_PATH);
         mCachePath = f.getAbsolutePath();
@@ -905,7 +904,9 @@ public class RenderScript {
     }
 
     RenderScript(Context ctx) {
-        mApplicationContext = ctx.getApplicationContext();
+        if (ctx != null) {
+            mApplicationContext = ctx.getApplicationContext();
+        }
     }
 
     /**
@@ -917,20 +918,15 @@ public class RenderScript {
         return mApplicationContext;
     }
 
-    static int getTargetSdkVersion(Context ctx) {
-        return ctx.getApplicationInfo().targetSdkVersion;
-    }
-
     /**
      * Create a basic RenderScript context.
      *
+     * @hide
      * @param ctx The context.
      * @return RenderScript
      */
-    public static RenderScript create(Context ctx) {
+    public static RenderScript create(Context ctx, int sdkVersion) {
         RenderScript rs = new RenderScript(ctx);
-
-        int sdkVersion = getTargetSdkVersion(ctx);
 
         rs.mDev = rs.nDeviceCreate();
         rs.mContext = rs.nContextCreate(rs.mDev, 0, sdkVersion);
@@ -940,6 +936,17 @@ public class RenderScript {
         rs.mMessageThread = new MessageThread(rs);
         rs.mMessageThread.start();
         return rs;
+    }
+
+    /**
+     * Create a basic RenderScript context.
+     *
+     * @param ctx The context.
+     * @return RenderScript
+     */
+    public static RenderScript create(Context ctx) {
+        int v = ctx.getApplicationInfo().targetSdkVersion;
+        return create(ctx, v);
     }
 
     /**
