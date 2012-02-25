@@ -23,45 +23,65 @@ package android.drm;
 public class DrmStore {
     /**
      * Interface definition for the columns that represent DRM constraints.
+     * {@link android.drm.DrmManagerClient#getConstraints DrmManagerClient.getConstraints()}
+     * can be called by an application to find out the contraints on the
+     * {@link android.drm.DrmStore.Action actions} that can be performed
+     * on right-protected content. The constants defined in this interface
+     * represent three most common types of constraints: count-based,
+     * date-based, and duration-based. Two or more constraints can be used
+     * at the same time to represent more sophisticated constraints.
+     * In addition, user-defined constraint,
+     * {@link #EXTENDED_METADATA extended metadata}, can be
+     * used if these three types of constraints are not sufficient.
      */
     public interface ConstraintsColumns {
         /**
-         * The maximum repeat count.
+         * This is a count-based constraint. It represents the maximum
+         * repeat count that can be performed on an
+         * {@link android.drm.DrmStore.Action action}.
          * <p>
          * Type: INTEGER
          */
         public static final String MAX_REPEAT_COUNT = "max_repeat_count";
 
         /**
-         * The remaining repeat count.
+         * This is a count-based constraint. It represents the remaining
+         * repeat count that can be performed on an
+         * {@link android.drm.DrmStore.Action action}.
          * <p>
          * Type: INTEGER
          */
         public static final String REMAINING_REPEAT_COUNT = "remaining_repeat_count";
 
         /**
-         * The time before which the rights-protected file cannot be played/viewed.
+         * This is a date-based constraint. It represents the time before which
+         * an {@link android.drm.DrmStore.Action action} can be performed on
+         * the rights-protected content.
          * <p>
          * Type: TEXT
          */
         public static final String LICENSE_START_TIME = "license_start_time";
 
         /**
-         * The time after which the rights-protected file cannot be played/viewed.
+         * This is a date-based constaint. It represents the time after which
+         * an {@link android.drm.DrmStore.Action action} can not be performed on
+         * the rights-protected content.
          * <p>
          * Type: TEXT
          */
         public static final String LICENSE_EXPIRY_TIME = "license_expiry_time";
 
         /**
-         * The available time left before the license expires.
+         * This is a duration-based constaint. It represents the available time left
+         * before the license expires.
          * <p>
          * Type: TEXT
          */
         public static final String LICENSE_AVAILABLE_TIME = "license_available_time";
 
         /**
-         * The data stream for extended metadata.
+         * This is a user-defined constraint. It represents the additional constraint
+         * using extended metadata.
          * <p>
          * Type: TEXT
          */
