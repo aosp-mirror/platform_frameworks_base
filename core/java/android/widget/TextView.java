@@ -406,9 +406,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private InputFilter[] mFilters = NO_FILTERS;
 
+    // It is possible to have a selection even when mEditor is null (programmatically set, like when
+    // a link is pressed). These highlight-related fields do not go in mEditor.
+    private int mHighlightColor = 0x6633B5E5;
+    private Path mHighlightPath;
+    private final Paint mHighlightPaint;
+    private boolean mHighlightPathBogus = true;
+
     // Although these fields are specific to editable text, they are not added to Editor because
     // they are defined by the TextView's style and are theme-dependent.
-    private int mHighlightColor = 0x6633B5E5;
     private int mCursorDrawableRes;
     // These four fields, could be moved to Editor, since we know their default values and we
     // could condition the creation of the Editor to a non standard value. This is however
@@ -476,6 +482,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.density = res.getDisplayMetrics().density;
         mTextPaint.setCompatibilityScaling(compat.applicationScale);
+
+        mHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mHighlightPaint.setCompatibilityScaling(compat.applicationScale);
 
         mMovement = getDefaultMovementMethod();
 
@@ -4064,7 +4073,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void invalidateCursorPath() {
-        if (getEditor().mHighlightPathBogus) {
+        if (mHighlightPathBogus) {
             invalidateCursor();
         } else {
             final int horizontalPadding = getCompoundPaddingLeft();
@@ -4088,7 +4097,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     thick /= 2.0f;
 
-                    getEditor().mHighlightPath.computeBounds(TEMP_RECTF, false);
+                    // mHighlightPath is guaranteed to be non null at that point.
+                    mHighlightPath.computeBounds(TEMP_RECTF, false);
 
                     invalidate((int) FloatMath.floor(horizontalPadding + TEMP_RECTF.left - thick),
                             (int) FloatMath.floor(verticalPadding + TEMP_RECTF.top - thick),
@@ -4150,7 +4160,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 int bottom = mLayout.getLineBottom(lineEnd);
 
-                if (invalidateCursor) {
+                // mEditor can be null in case selection is set programmatically.
+                if (invalidateCursor && mEditor != null) {
                     for (int i = 0; i < getEditor().mCursorCount; i++) {
                         Rect bounds = getEditor().mCursorDrawable[i].getBounds();
                         top = Math.min(top, bounds.top);
@@ -4515,6 +4526,55 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return drawableState;
     }
 
+    private Path getUpdatedHighlightPath() {
+        Path highlight = null;
+        Paint highlightPaint = mHighlightPaint;
+
+        final int selStart = getSelectionStart();
+        final int selEnd = getSelectionEnd();
+        if (mMovement != null && (isFocused() || isPressed()) && selStart >= 0) {
+            if (selStart == selEnd) {
+                if (mEditor != null && isCursorVisible() &&
+                        (SystemClock.uptimeMillis() - getEditor().mShowCursor) % (2 * BLINK) < BLINK) {
+                    if (mHighlightPathBogus) {
+                        if (mHighlightPath == null) mHighlightPath = new Path();
+                        mHighlightPath.reset();
+                        mLayout.getCursorPath(selStart, mHighlightPath, mText);
+                        getEditor().updateCursorsPositions();
+                        mHighlightPathBogus = false;
+                    }
+
+                    // XXX should pass to skin instead of drawing directly
+                    highlightPaint.setColor(mCurTextColor);
+                    if (mCurrentAlpha != 255) {
+                        highlightPaint.setAlpha(
+                                (mCurrentAlpha * Color.alpha(mCurTextColor)) / 255);
+                    }
+                    highlightPaint.setStyle(Paint.Style.STROKE);
+                    highlight = mHighlightPath;
+                }
+            } else {
+                if (mHighlightPathBogus) {
+                    if (mHighlightPath == null) mHighlightPath = new Path();
+                    mHighlightPath.reset();
+                    mLayout.getSelectionPath(selStart, selEnd, mHighlightPath);
+                    mHighlightPathBogus = false;
+                }
+
+                // XXX should pass to skin instead of drawing directly
+                highlightPaint.setColor(mHighlightColor);
+                if (mCurrentAlpha != 255) {
+                    highlightPaint.setAlpha(
+                            (mCurrentAlpha * Color.alpha(mHighlightColor)) / 255);
+                }
+                highlightPaint.setStyle(Paint.Style.FILL);
+
+                highlight = mHighlightPath;
+            }
+        }
+        return highlight;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return;
@@ -4666,66 +4726,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int cursorOffsetVertical = voffsetCursor - voffsetText;
 
+        Path highlight = getUpdatedHighlightPath();
         if (mEditor != null) {
-            getEditor().onDraw(canvas, layout, cursorOffsetVertical);
+            getEditor().onDraw(canvas, layout, highlight, cursorOffsetVertical);
         } else {
-            layout.draw(canvas, null, null, cursorOffsetVertical);
+            layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
 
             if (mMarquee != null && mMarquee.shouldDrawGhost()) {
                 canvas.translate((int) mMarquee.getGhostOffset(), 0.0f);
-                layout.draw(canvas, null, null, cursorOffsetVertical);
+                layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
             }
         }
 
         canvas.restore();
-    }
-
-    private void updateCursorsPositions() {
-        if (mCursorDrawableRes == 0) {
-            getEditor().mCursorCount = 0;
-            return; 
-        }
-
-        final int offset = getSelectionStart();
-        final int line = mLayout.getLineForOffset(offset);
-        final int top = mLayout.getLineTop(line);
-        final int bottom = mLayout.getLineTop(line + 1);
-
-        getEditor().mCursorCount = mLayout.isLevelBoundary(offset) ? 2 : 1;
-
-        int middle = bottom;
-        if (getEditor().mCursorCount == 2) {
-            // Similar to what is done in {@link Layout.#getCursorPath(int, Path, CharSequence)}
-            middle = (top + bottom) >> 1;
-        }
-
-        updateCursorPosition(0, top, middle, mLayout.getPrimaryHorizontal(offset));
-
-        if (getEditor().mCursorCount == 2) {
-            updateCursorPosition(1, middle, bottom, mLayout.getSecondaryHorizontal(offset));
-        }
-    }
-
-    private void updateCursorPosition(int cursorIndex, int top, int bottom, float horizontal) {
-        if (getEditor().mCursorDrawable[cursorIndex] == null)
-            getEditor().mCursorDrawable[cursorIndex] = mContext.getResources().getDrawable(mCursorDrawableRes);
-
-        if (mTempRect == null) mTempRect = new Rect();
-        getEditor().mCursorDrawable[cursorIndex].getPadding(mTempRect);
-        final int width = getEditor().mCursorDrawable[cursorIndex].getIntrinsicWidth();
-        horizontal = Math.max(0.5f, horizontal - 0.5f);
-        final int left = (int) (horizontal) - mTempRect.left;
-        getEditor().mCursorDrawable[cursorIndex].setBounds(left, top - mTempRect.top, left + width,
-                bottom + mTempRect.bottom);
-    }
-
-    private void drawCursor(Canvas canvas, int cursorOffsetVertical) {
-        final boolean translate = cursorOffsetVertical != 0;
-        if (translate) canvas.translate(0, cursorOffsetVertical);
-        for (int i = 0; i < getEditor().mCursorCount; i++) {
-            getEditor().mCursorDrawable[i].draw(canvas);
-        }
-        if (translate) canvas.translate(0, -cursorOffsetVertical);
     }
 
     @Override
@@ -4759,21 +4772,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 // Selection extends across multiple lines -- make the focused
                 // rect cover the entire width.
-                if (mEditor != null) {
-                    if (getEditor().mHighlightPath == null) getEditor().mHighlightPath = new Path();
-                    if (getEditor().mHighlightPathBogus) {
-                        getEditor().mHighlightPath.reset();
-                        mLayout.getSelectionPath(selStart, selEnd, getEditor().mHighlightPath);
-                        getEditor().mHighlightPathBogus = false;
-                    }
-                    synchronized (TEMP_RECTF) {
-                        getEditor().mHighlightPath.computeBounds(TEMP_RECTF, true);
-                        r.left = (int)TEMP_RECTF.left-1;
-                        r.right = (int)TEMP_RECTF.right+1;
-                    }
-                } else {
-                    r.left = 0;
-                    r.right = getMeasuredWidth();
+                if (mHighlightPathBogus) {
+                    if (mHighlightPath == null) mHighlightPath = new Path();
+                    mHighlightPath.reset();
+                    mLayout.getSelectionPath(selStart, selEnd, mHighlightPath);
+                    mHighlightPathBogus = false;
+                }
+                synchronized (TEMP_RECTF) {
+                    mHighlightPath.computeBounds(TEMP_RECTF, true);
+                    r.left = (int)TEMP_RECTF.left-1;
+                    r.right = (int)TEMP_RECTF.right+1;
                 }
             }
         }
@@ -5584,7 +5592,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (curs >= 0) {
-            getEditor().mHighlightPathBogus = true;
+            mHighlightPathBogus = true;
             makeBlink();
             bringPointIntoView(curs);
         }
@@ -5741,7 +5749,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mOldMaximum = mMaximum;
         mOldMaxMode = mMaxMode;
 
-        if (mEditor != null) getEditor().mHighlightPathBogus = true;
+        mHighlightPathBogus = true;
 
         if (wantWidth < 0) {
             wantWidth = 0;
@@ -6982,10 +6990,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
-        // mEditor may be null if selection is created programatically.
-        createEditorIfNeeded("onSelectionChanged");
-        // Invalidate even when selection range is empty, to remove previous highlight
-        getEditor().mTextDisplayListIsValid = false;
+        if (mEditor != null) getEditor().mTextDisplayListIsValid = false;
     }
 
     /**
@@ -7141,10 +7146,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (selChanged) {
-            if (mEditor != null) {
-                getEditor().mHighlightPathBogus = true;
-                if (!isFocused()) getEditor().mSelectionMoved = true;
-            }
+            mHighlightPathBogus = true;
+            if (mEditor != null && !isFocused()) getEditor().mSelectionMoved = true;
 
             if ((buf.getSpanFlags(what)&Spanned.SPAN_INTERMEDIATE) == 0) {
                 if (newSelStart < 0) {
@@ -7161,7 +7164,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 what instanceof CharacterStyle) {
             if (ims == null || ims.mBatchEditNesting == 0) {
                 invalidate();
-                if (mEditor != null) getEditor().mHighlightPathBogus = true;
+                mHighlightPathBogus = true;
                 checkForResize();
             } else {
                 ims.mContentChanged = true;
@@ -7170,7 +7173,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (MetaKeyKeyListener.isMetaTracker(buf, what)) {
-            if (mEditor != null) getEditor().mHighlightPathBogus = true;
+            mHighlightPathBogus = true;
             if (ims != null && MetaKeyKeyListener.isSelectingMetaTracker(buf, what)) {
                 ims.mSelectionModeChanged = true;
             }
@@ -11330,12 +11333,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class Editor {
-        Editor() {
-            mHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            final CompatibilityInfo compat = TextView.this.getResources().getCompatibilityInfo();
-            mHighlightPaint.setCompatibilityScaling(compat.applicationScale);
-        }
-
         // Cursor Controllers.
         InsertionPointCursorController mInsertionPointCursorController;
         SelectionModifierCursorController mSelectionModifierCursorController;
@@ -11348,10 +11345,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         InputContentType mInputContentType;
         InputMethodState mInputMethodState;
-
-        Path mHighlightPath;
-        boolean mHighlightPathBogus = true;
-        final Paint mHighlightPaint;
 
         DisplayList mTextDisplayList;
         boolean mTextDisplayListIsValid;
@@ -11391,7 +11384,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Runnable mShowSuggestionRunnable;
 
         final Drawable[] mCursorDrawable = new Drawable[2];
-        int mCursorCount; // Actual current number of used mCursorDrawable: 0, 1 or 2 (split)
+        int mCursorCount; // Current number of used mCursorDrawable: 0 (resource=0), 1 or 2 (split)
 
         Drawable mSelectHandleLeft;
         Drawable mSelectHandleRight;
@@ -11649,65 +11642,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        void onDraw(Canvas canvas, Layout layout, int cursorOffsetVertical) {
-            Path highlight = null;
-            Paint highlightPaint = null;
-
-            int selStart = -1, selEnd = -1;
-            boolean drawCursor = false;
-
-            highlightPaint = mHighlightPaint;
-            //  If there is no movement method, then there can be no selection.
-            //  Check that first and attempt to skip everything having to do with
-            //  the cursor.
-            //  XXX This is not strictly true -- a program could set the
-            //  selection manually if it really wanted to.
-            if (mMovement != null && (isFocused() || isPressed())) {
-                selStart = getSelectionStart();
-                selEnd = getSelectionEnd();
-
-                if (selStart >= 0) {
-                    if (mHighlightPath == null) mHighlightPath = new Path();
-
-                    if (selStart == selEnd) {
-                        if (isCursorVisible() &&
-                                (SystemClock.uptimeMillis() - mShowCursor) % (2 * BLINK) < BLINK) {
-                            if (mHighlightPathBogus) {
-                                mHighlightPath.reset();
-                                mLayout.getCursorPath(selStart, mHighlightPath, mText);
-                                updateCursorsPositions();
-                                mHighlightPathBogus = false;
-                            }
-
-                            // XXX should pass to skin instead of drawing directly
-                            highlightPaint.setColor(mCurTextColor);
-                            if (mCurrentAlpha != 255) {
-                                highlightPaint.setAlpha(
-                                        (mCurrentAlpha * Color.alpha(mCurTextColor)) / 255);
-                            }
-                            highlightPaint.setStyle(Paint.Style.STROKE);
-                            highlight = mHighlightPath;
-                            drawCursor = mCursorCount > 0;
-                        }
-                    } else if (textCanBeSelected()) {
-                        if (mHighlightPathBogus) {
-                            mHighlightPath.reset();
-                            mLayout.getSelectionPath(selStart, selEnd, mHighlightPath);
-                            mHighlightPathBogus = false;
-                        }
-
-                        // XXX should pass to skin instead of drawing directly
-                        highlightPaint.setColor(mHighlightColor);
-                        if (mCurrentAlpha != 255) {
-                            highlightPaint.setAlpha(
-                                    (mCurrentAlpha * Color.alpha(mHighlightColor)) / 255);
-                        }
-                        highlightPaint.setStyle(Paint.Style.FILL);
-
-                        highlight = mHighlightPath;
-                    }
-                }
-            }
+        void onDraw(Canvas canvas, Layout layout, Path highlight, int cursorOffsetVertical) {
+            final int selectionStart = getSelectionStart();
+            final int selectionEnd = getSelectionEnd();
 
             final InputMethodState ims = mInputMethodState;
             if (ims != null && ims.mBatchEditNesting == 0) {
@@ -11729,7 +11666,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 candStart = EditableInputConnection.getComposingSpanStart(sp);
                                 candEnd = EditableInputConnection.getComposingSpanEnd(sp);
                             }
-                            imm.updateSelection(TextView.this, selStart, selEnd, candStart, candEnd);
+                            imm.updateSelection(TextView.this,
+                                    selectionStart, selectionEnd, candStart, candEnd);
                         }
                     }
 
@@ -11758,7 +11696,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mCorrectionHighlighter.draw(canvas, cursorOffsetVertical);
             }
 
-            if (drawCursor) {
+            if (highlight != null && selectionStart == selectionEnd && mCursorCount > 0) {
                 drawCursor(canvas, cursorOffsetVertical);
                 // Rely on the drawable entirely, do not draw the cursor line.
                 // Has to be done after the IMM related code above which relies on the highlight.
@@ -11781,7 +11719,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         // The dirty rect should always be null for a display list
                         hardwareCanvas.onPreDraw(null);
                         hardwareCanvas.translate(-mScrollX, -mScrollY);
-                        layout.draw(hardwareCanvas, highlight, highlightPaint, cursorOffsetVertical);
+                        layout.draw(hardwareCanvas, highlight, mHighlightPaint, cursorOffsetVertical);
                         hardwareCanvas.translate(mScrollX, mScrollY);
                     } finally {
                         hardwareCanvas.onPostDraw();
@@ -11794,13 +11732,61 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         DisplayList.FLAG_CLIP_CHILDREN);
                 canvas.translate(-mScrollX, -mScrollY);
             } else {
-                layout.draw(canvas, highlight, highlightPaint, cursorOffsetVertical);
+                layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
             }
 
             if (mMarquee != null && mMarquee.shouldDrawGhost()) {
                 canvas.translate((int) mMarquee.getGhostOffset(), 0.0f);
-                layout.draw(canvas, highlight, highlightPaint, cursorOffsetVertical);
+                layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
             }
+        }
+
+        private void drawCursor(Canvas canvas, int cursorOffsetVertical) {
+            final boolean translate = cursorOffsetVertical != 0;
+            if (translate) canvas.translate(0, cursorOffsetVertical);
+            for (int i = 0; i < getEditor().mCursorCount; i++) {
+                mCursorDrawable[i].draw(canvas);
+            }
+            if (translate) canvas.translate(0, -cursorOffsetVertical);
+        }
+
+        private void updateCursorsPositions() {
+            if (mCursorDrawableRes == 0) {
+                mCursorCount = 0;
+                return;
+            }
+
+            final int offset = getSelectionStart();
+            final int line = mLayout.getLineForOffset(offset);
+            final int top = mLayout.getLineTop(line);
+            final int bottom = mLayout.getLineTop(line + 1);
+
+            mCursorCount = mLayout.isLevelBoundary(offset) ? 2 : 1;
+
+            int middle = bottom;
+            if (mCursorCount == 2) {
+                // Similar to what is done in {@link Layout.#getCursorPath(int, Path, CharSequence)}
+                middle = (top + bottom) >> 1;
+            }
+
+            updateCursorPosition(0, top, middle, mLayout.getPrimaryHorizontal(offset));
+
+            if (mCursorCount == 2) {
+                updateCursorPosition(1, middle, bottom, mLayout.getSecondaryHorizontal(offset));
+            }
+        }
+
+        private void updateCursorPosition(int cursorIndex, int top, int bottom, float horizontal) {
+            if (mCursorDrawable[cursorIndex] == null)
+                mCursorDrawable[cursorIndex] = mContext.getResources().getDrawable(mCursorDrawableRes);
+
+            if (mTempRect == null) mTempRect = new Rect();
+            mCursorDrawable[cursorIndex].getPadding(mTempRect);
+            final int width = mCursorDrawable[cursorIndex].getIntrinsicWidth();
+            horizontal = Math.max(0.5f, horizontal - 0.5f);
+            final int left = (int) (horizontal) - mTempRect.left;
+            mCursorDrawable[cursorIndex].setBounds(left, top - mTempRect.top, left + width,
+                    bottom + mTempRect.bottom);
         }
     }
 }
