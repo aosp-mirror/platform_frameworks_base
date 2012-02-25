@@ -8201,7 +8201,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             vibrate = false;
         }
 
-        if (!handled && (mEditor == null || getEditor().mSelectionActionMode != null)) {
+        if (!handled && mEditor != null && getEditor().mSelectionActionMode != null) {
             if (touchPositionIsInSelection()) {
                 // Start a drag
                 final int start = getSelectionStart();
