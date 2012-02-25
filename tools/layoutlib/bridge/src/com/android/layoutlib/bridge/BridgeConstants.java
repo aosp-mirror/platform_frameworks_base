@@ -39,6 +39,9 @@ public class BridgeConstants {
     /** Namespace for the resource XML */
     public final static String NS_RESOURCES = "http://schemas.android.com/apk/res/android";
 
+    /** App auto namespace */
+    public final static String NS_APP_RES_AUTO = "http://schemas.android.com/apk/res-auto";
+
     public final static String R = "com.android.internal.R";
 
 
