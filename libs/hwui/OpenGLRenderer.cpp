@@ -2292,6 +2292,11 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     drawTextDecorations(text, bytesCount, length, oldX, oldY, paint);
 }
 
+void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
+        float hOffset, float vOffset, SkPaint* paint) {
+    // TODO: Implement
+}
+
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 

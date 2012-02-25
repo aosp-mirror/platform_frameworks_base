@@ -1208,13 +1208,37 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawTextOnPath(char[] text, int index, int count, Path path, float hOffset,
             float vOffset, Paint paint) {
-        // TODO: Implement
+        if (index < 0 || index + count > text.length) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+
+        int modifiers = setupModifiers(paint);
+        try {
+            nDrawTextOnPath(mRenderer, text, index, count, path.mNativePath, hOffset, vOffset,
+                    paint.mBidiFlags, paint.mNativePaint);
+        } finally {
+            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
+        }
     }
+
+    private static native void nDrawTextOnPath(int renderer, char[] text, int index, int count,
+            int path, float hOffset, float vOffset, int bidiFlags, int nativePaint);
 
     @Override
     public void drawTextOnPath(String text, Path path, float hOffset, float vOffset, Paint paint) {
-        // TODO: Implement
+        if (text.length() == 0) return;
+
+        int modifiers = setupModifiers(paint);
+        try {
+            nDrawTextOnPath(mRenderer, text, 0, text.length(), path.mNativePath, hOffset, vOffset,
+                    paint.mBidiFlags, paint.mNativePaint);
+        } finally {
+            if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
+        }
     }
+
+    private static native void nDrawTextOnPath(int renderer, String text, int start, int end,
+            int path, float hOffset, float vOffset, int bidiFlags, int nativePaint);
 
     @Override
     public void drawTextRun(char[] text, int index, int count, int contextIndex, int contextCount,

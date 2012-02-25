@@ -101,11 +101,6 @@ void TextLayout::drawTextOnPath(SkPaint* paint, const jchar* text, int count,
     SkScalar h_ = SkFloatToScalar(hOffset);
     SkScalar v_ = SkFloatToScalar(vOffset);
 
-    if (!needsLayout(text, count, bidiFlags)) {
-        canvas->drawTextOnPathHV(text, count << 1, *path, h_, v_, *paint);
-        return;
-    }
-
     sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
             text, 0, count, count, bidiFlags);
     if (value == NULL) {

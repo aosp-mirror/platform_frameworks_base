@@ -568,6 +568,15 @@
         </activity>
 
         <activity
+                android:name="TextOnPathActivity"
+                android:label="_TextOnPath">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="PathsCacheActivity"
                 android:label="_PathsCache">
             <intent-filter>
