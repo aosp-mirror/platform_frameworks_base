@@ -2980,8 +2980,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                           "/" + ss.selEnd + " out of range for " + restored +
                           "text " + mText);
                 } else {
-                    Selection.setSelection((Spannable) mText, ss.selStart,
-                                           ss.selEnd);
+                    Selection.setSelection((Spannable) mText, ss.selStart, ss.selEnd);
 
                     if (ss.frozenWithFocus) {
                         createEditorIfNeeded("restore instance with focus");
@@ -6983,6 +6982,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
+        // mEditor may be null if selection is created programatically.
+        createEditorIfNeeded("onSelectionChanged");
+        // Invalidate even when selection range is empty, to remove previous highlight
         getEditor().mTextDisplayListIsValid = false;
     }
 
