@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "libRS_cpp"
 
 #include <rs.h>
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "libRS_cpp"
+
 #include <utils/Log.h>
 #include <malloc.h>
 
