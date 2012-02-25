@@ -102,6 +102,8 @@ public class PhoneStatusBar extends StatusBar {
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
+    private static final boolean ENABLE_INTRUDERS = false;
+
     static final int EXPANDED_LEAVE_ALONE = -10000;
     static final int EXPANDED_FULL_OPEN = -10001;
 
@@ -268,7 +270,7 @@ public class PhoneStatusBar extends StatusBar {
 
         addNavigationBar();
 
-        //addIntruderView();
+        if (ENABLE_INTRUDERS) addIntruderView();
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
@@ -557,8 +559,9 @@ public class PhoneStatusBar extends StatusBar {
             }
         } catch (RemoteException ex) {
         }
-        if ((notification.score >= mIntruderInImmersiveMinScore) 
-                || (!immersive && (notification.score > mIntruderMinScore))) {
+        if (ENABLE_INTRUDERS && (
+                   (notification.score >= mIntruderInImmersiveMinScore)
+                || (!immersive && (notification.score > mIntruderMinScore)))) {
             Slog.d(TAG, "Presenting high-priority notification");
             // special new transient ticker mode
             // 1. Populate mIntruderAlertView
