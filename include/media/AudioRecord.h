@@ -225,7 +225,7 @@ public:
 
     /* get sample rate for this record track
      */
-            uint32_t    getSampleRate();
+            uint32_t    getSampleRate() const;
 
     /* Sets marker position. When record reaches the number of frames specified,
      * a callback with event type EVENT_MARKER is called. Calling setMarkerPosition
@@ -242,7 +242,7 @@ public:
      *  - INVALID_OPERATION: the AudioRecord has no callback installed.
      */
             status_t    setMarkerPosition(uint32_t marker);
-            status_t    getMarkerPosition(uint32_t *marker);
+            status_t    getMarkerPosition(uint32_t *marker) const;
 
 
     /* Sets position update period. Every time the number of frames specified has been recorded,
@@ -261,7 +261,7 @@ public:
      *  - INVALID_OPERATION: the AudioRecord has no callback installed.
      */
             status_t    setPositionUpdatePeriod(uint32_t updatePeriod);
-            status_t    getPositionUpdatePeriod(uint32_t *updatePeriod);
+            status_t    getPositionUpdatePeriod(uint32_t *updatePeriod) const;
 
 
     /* Gets record head position. The position is the  total number of frames
@@ -275,7 +275,7 @@ public:
      *  - NO_ERROR: successful operation
      *  - BAD_VALUE:  position is NULL
      */
-            status_t    getPosition(uint32_t *position);
+            status_t    getPosition(uint32_t *position) const;
 
     /* returns a handle on the audio input used by this AudioRecord.
      *
@@ -285,7 +285,7 @@ public:
      * Returned value:
      *  handle on audio hardware input
      */
-            audio_io_handle_t    getInput();
+            audio_io_handle_t    getInput() const;
 
     /* returns the audio session ID associated to this AudioRecord.
      *
@@ -295,7 +295,7 @@ public:
      * Returned value:
      *  AudioRecord session ID.
      */
-            int    getSessionId();
+            int    getSessionId() const;
 
     /* obtains a buffer of "frameCount" frames. The buffer must be
      * filled entirely. If the track is stopped, obtainBuffer() returns
@@ -326,7 +326,7 @@ public:
      * Such loss typically occurs when the user space process is blocked longer than the capacity of audio driver buffers.
      * Unit: the number of input audio frames
      */
-            unsigned int  getInputFramesLost();
+            unsigned int  getInputFramesLost() const;
 
 private:
     /* copying audio tracks is not allowed */
@@ -360,7 +360,7 @@ private:
     sp<IMemory>             mCblkMemory;
     sp<ClientRecordThread>  mClientRecordThread;
     status_t                mReadyToRun;
-    Mutex                   mLock;
+    mutable Mutex           mLock;
     Condition               mCondition;
 
     uint32_t                mFrameCount;

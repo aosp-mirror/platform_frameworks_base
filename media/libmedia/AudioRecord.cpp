@@ -386,7 +386,7 @@ bool AudioRecord::stopped() const
     return !mActive;
 }
 
-uint32_t AudioRecord::getSampleRate()
+uint32_t AudioRecord::getSampleRate() const
 {
     AutoMutex lock(mLock);
     return mCblk->sampleRate;
@@ -402,7 +402,7 @@ status_t AudioRecord::setMarkerPosition(uint32_t marker)
     return NO_ERROR;
 }
 
-status_t AudioRecord::getMarkerPosition(uint32_t *marker)
+status_t AudioRecord::getMarkerPosition(uint32_t *marker) const
 {
     if (marker == NULL) return BAD_VALUE;
 
@@ -423,7 +423,7 @@ status_t AudioRecord::setPositionUpdatePeriod(uint32_t updatePeriod)
     return NO_ERROR;
 }
 
-status_t AudioRecord::getPositionUpdatePeriod(uint32_t *updatePeriod)
+status_t AudioRecord::getPositionUpdatePeriod(uint32_t *updatePeriod) const
 {
     if (updatePeriod == NULL) return BAD_VALUE;
 
@@ -432,7 +432,7 @@ status_t AudioRecord::getPositionUpdatePeriod(uint32_t *updatePeriod)
     return NO_ERROR;
 }
 
-status_t AudioRecord::getPosition(uint32_t *position)
+status_t AudioRecord::getPosition(uint32_t *position) const
 {
     if (position == NULL) return BAD_VALUE;
 
@@ -442,7 +442,7 @@ status_t AudioRecord::getPosition(uint32_t *position)
     return NO_ERROR;
 }
 
-unsigned int AudioRecord::getInputFramesLost()
+unsigned int AudioRecord::getInputFramesLost() const
 {
     if (mActive)
         return AudioSystem::getInputFramesLost(mInput);
@@ -597,7 +597,7 @@ void AudioRecord::releaseBuffer(Buffer* audioBuffer)
     mCblk->stepUser(audioBuffer->frameCount);
 }
 
-audio_io_handle_t AudioRecord::getInput()
+audio_io_handle_t AudioRecord::getInput() const
 {
     AutoMutex lock(mLock);
     return mInput;
@@ -615,7 +615,7 @@ audio_io_handle_t AudioRecord::getInput_l()
     return mInput;
 }
 
-int AudioRecord::getSessionId()
+int AudioRecord::getSessionId() const
 {
     return mSessionId;
 }
