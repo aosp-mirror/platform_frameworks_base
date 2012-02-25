@@ -88,11 +88,11 @@ static void dumpstate() {
 
     if (screenshot_path[0]) {
         ALOGI("taking screenshot\n");
-        run_command(NULL, 5, "su", "root", "screenshot", screenshot_path, NULL);
+        run_command(NULL, 5, SU_PATH, "root", "screenshot", screenshot_path, NULL);
         ALOGI("wrote screenshot: %s\n", screenshot_path);
     }
 
-    run_command("SYSTEM SETTINGS", 20, "su", "root", "sqlite3",
+    run_command("SYSTEM SETTINGS", 20, SU_PATH, "root", "sqlite3",
             "/data/data/com.android.providers.settings/databases/settings.db",
             "pragma user_version; select * from system; select * from secure;", NULL);
     run_command("SYSTEM LOG", 20, "logcat", "-v", "threadtime", "-d", "*:v", NULL);
@@ -118,7 +118,7 @@ static void dumpstate() {
     run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "threadtime", "-d", "*:v", NULL);
     run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "threadtime", "-d", "*:v", NULL);
 
-    run_command("NETWORK INTERFACES", 10, "su", "root", "netcfg", NULL);
+    run_command("NETWORK INTERFACES", 10, SU_PATH, "root", "netcfg", NULL);
     dump_file("NETWORK DEV INFO", "/proc/net/dev");
     dump_file("QTAGUID NETWORK INTERFACES INFO", "/proc/net/xt_qtaguid/iface_stat_all");
     dump_file("QTAGUID CTRL INFO", "/proc/net/xt_qtaguid/ctrl");
@@ -133,28 +133,28 @@ static void dumpstate() {
     run_command("ROUTE TABLE 61", 10, "ip", "route", "show", "table", "61", NULL);
     run_command("ROUTE TABLE 61 v6", 10, "ip", "-6", "route", "show", "table", "61", NULL);
     dump_file("ARP CACHE", "/proc/net/arp");
-    run_command("IPTABLES", 10, "su", "root", "iptables", "-L", "-nvx", NULL);
-    run_command("IP6TABLES", 10, "su", "root", "ip6tables", "-L", "-nvx", NULL);
-    run_command("IPTABLE NAT", 10, "su", "root", "iptables", "-t", "nat", "-L", "-n", NULL);
-    run_command("IPT6ABLE NAT", 10, "su", "root", "ip6tables", "-t", "nat", "-L", "-n", NULL);
+    run_command("IPTABLES", 10, SU_PATH, "root", "iptables", "-L", "-nvx", NULL);
+    run_command("IP6TABLES", 10, SU_PATH, "root", "ip6tables", "-L", "-nvx", NULL);
+    run_command("IPTABLE NAT", 10, SU_PATH, "root", "iptables", "-t", "nat", "-L", "-n", NULL);
+    run_command("IPT6ABLE NAT", 10, SU_PATH, "root", "ip6tables", "-t", "nat", "-L", "-n", NULL);
 
     run_command("WIFI NETWORKS", 20,
-            "su", "root", "wpa_cli", "list_networks", NULL);
+            SU_PATH, "root", "wpa_cli", "list_networks", NULL);
 
     property_get("dhcp.wlan0.gateway", network, "");
     if (network[0])
-        run_command("PING GATEWAY", 10, "su", "root", "ping", "-c", "3", "-i", ".5", network, NULL);
+        run_command("PING GATEWAY", 10, SU_PATH, "root", "ping", "-c", "3", "-i", ".5", network, NULL);
     property_get("dhcp.wlan0.dns1", network, "");
     if (network[0])
-        run_command("PING DNS1", 10, "su", "root", "ping", "-c", "3", "-i", ".5", network, NULL);
+        run_command("PING DNS1", 10, SU_PATH, "root", "ping", "-c", "3", "-i", ".5", network, NULL);
     property_get("dhcp.wlan0.dns2", network, "");
     if (network[0])
-        run_command("PING DNS2", 10, "su", "root", "ping", "-c", "3", "-i", ".5", network, NULL);
+        run_command("PING DNS2", 10, SU_PATH, "root", "ping", "-c", "3", "-i", ".5", network, NULL);
 #ifdef FWDUMP_bcm4329
     run_command("DUMP WIFI STATUS", 20,
-            "su", "root", "dhdutil", "-i", "wlan0", "dump", NULL);
+            SU_PATH, "root", "dhdutil", "-i", "wlan0", "dump", NULL);
     run_command("DUMP WIFI INTERNAL COUNTERS", 20,
-            "su", "root", "wlutil", "counters", NULL);
+            SU_PATH, "root", "wlutil", "counters", NULL);
 #endif
 
     char ril_dumpstate_timeout[PROPERTY_VALUE_MAX] = {0};
@@ -168,7 +168,7 @@ static void dumpstate() {
                     "vril-dump", NULL);
         } else {
             run_command("DUMP VENDOR RIL LOGS", atoi(ril_dumpstate_timeout),
-                    "su", "root", "vril-dump", NULL);
+                    SU_PATH, "root", "vril-dump", NULL);
         }
     }
 
@@ -192,7 +192,7 @@ static void dumpstate() {
     dump_file("BINDER STATS", "/sys/kernel/debug/binder/stats");
     dump_file("BINDER STATE", "/sys/kernel/debug/binder/state");
 
-    run_command("FILESYSTEMS & FREE SPACE", 10, "su", "root", "df", NULL);
+    run_command("FILESYSTEMS & FREE SPACE", 10, SU_PATH, "root", "df", NULL);
 
     dump_file("PACKAGE SETTINGS", "/data/system/packages.xml");
     dump_file("PACKAGE UID ERRORS", "/data/system/uiderrors.txt");
@@ -218,7 +218,7 @@ static void dumpstate() {
     dump_file(NULL, "/sys/class/leds/lcd-backlight/registers");
     printf("\n");
 
-    run_command("LIST OF OPEN FILES", 10, "su", "root", "lsof", NULL);
+    run_command("LIST OF OPEN FILES", 10, SU_PATH, "root", "lsof", NULL);
 
     for_each_pid(do_showmap, "SMAPS OF ALL PROCESSES");
 

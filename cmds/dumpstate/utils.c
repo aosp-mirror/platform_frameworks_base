@@ -127,7 +127,7 @@ void do_showmap(int pid, const char *name) {
 
     sprintf(title, "SHOW MAP %d (%s)", pid, name);
     sprintf(arg, "%d", pid);
-    run_command(title, 10, "su", "root", "showmap", arg, NULL);
+    run_command(title, 10, SU_PATH, "root", "showmap", arg, NULL);
 }
 
 /* prints the contents of a file */
