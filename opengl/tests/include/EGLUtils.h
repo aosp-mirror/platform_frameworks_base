@@ -15,19 +15,40 @@
  */
 
 
-#define LOG_TAG "EGLUtils"
+#ifndef ANDROID_UI_EGLUTILS_H
+#define ANDROID_UI_EGLUTILS_H
 
-#include <cutils/log.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include <system/window.h>
 #include <utils/Errors.h>
-
-#include <ui/EGLUtils.h>
-
 #include <EGL/egl.h>
 
-#include <private/ui/android_natives_priv.h>
 
 // ----------------------------------------------------------------------------
 namespace android {
+// ----------------------------------------------------------------------------
+
+class EGLUtils
+{
+public:
+
+    static inline const char *strerror(EGLint err);
+
+    static inline status_t selectConfigForPixelFormat(
+            EGLDisplay dpy,
+            EGLint const* attrs,
+            int32_t format,
+            EGLConfig* outConfig);
+
+    static inline status_t selectConfigForNativeWindow(
+            EGLDisplay dpy,
+            EGLint const* attrs,
+            EGLNativeWindowType window,
+            EGLConfig* outConfig);
+};
+
 // ----------------------------------------------------------------------------
 
 const char *EGLUtils::strerror(EGLint err)
@@ -55,7 +76,7 @@ const char *EGLUtils::strerror(EGLint err)
 status_t EGLUtils::selectConfigForPixelFormat(
         EGLDisplay dpy,
         EGLint const* attrs,
-        PixelFormat format,
+        int32_t format,
         EGLConfig* outConfig)
 {
     EGLint numConfigs = -1, n=0;
@@ -65,7 +86,7 @@ status_t EGLUtils::selectConfigForPixelFormat(
 
     if (outConfig == NULL)
         return BAD_VALUE;
-    
+
     // Get all the "potential match" configs...
     if (eglGetConfigs(dpy, NULL, 0, &numConfigs) == EGL_FALSE)
         return BAD_VALUE;
@@ -75,7 +96,7 @@ status_t EGLUtils::selectConfigForPixelFormat(
         free(configs);
         return BAD_VALUE;
     }
-    
+
     int i;
     EGLConfig config = NULL;
     for (i=0 ; i<n ; i++) {
@@ -88,7 +109,7 @@ status_t EGLUtils::selectConfigForPixelFormat(
     }
 
     free(configs);
-    
+
     if (i<n) {
         *outConfig = config;
         return NO_ERROR;
@@ -105,10 +126,10 @@ status_t EGLUtils::selectConfigForNativeWindow(
 {
     int err;
     int format;
-    
+
     if (!window)
         return BAD_VALUE;
-    
+
     if ((err = window->query(window, NATIVE_WINDOW_FORMAT, &format)) < 0) {
         return err;
     }
@@ -119,3 +140,5 @@ status_t EGLUtils::selectConfigForNativeWindow(
 // ----------------------------------------------------------------------------
 }; // namespace android
 // ----------------------------------------------------------------------------
+
+#endif /* ANDROID_UI_EGLUTILS_H */

@@ -98,7 +98,6 @@
 
 #include <ui/FramebufferNativeWindow.h>
 #include <ui/GraphicBuffer.h>
-#include <ui/EGLUtils.h>
 
 #define LOG_TAG "hwcCommitTest"
 #include <utils/Log.h>

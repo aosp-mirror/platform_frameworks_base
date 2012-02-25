@@ -10,6 +10,8 @@ LOCAL_SHARED_LIBRARIES := \
     libGLESv2 \
     libui
 
+LOCAL_C_INCLUDES += frameworks/base/opengl/tests/include
+
 LOCAL_MODULE:= test-opengl-gl2_basic
 
 LOCAL_MODULE_TAGS := optional
