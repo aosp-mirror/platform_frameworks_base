@@ -54,7 +54,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusBar;
+import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
@@ -66,7 +66,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     static final String TAG = "RecentsPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private Context mContext;
-    private StatusBar mBar;
+    private BaseStatusBar mBar;
     private View mRecentsScrim;
     private View mRecentsNoApps;
     private ViewGroup mRecentsContainer;
@@ -379,7 +379,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         return mShowing;
     }
 
-    public void setBar(StatusBar bar) {
+    public void setBar(BaseStatusBar bar) {
         mBar = bar;
 
     }

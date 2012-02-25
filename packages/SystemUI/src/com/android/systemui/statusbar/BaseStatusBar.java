@@ -16,60 +16,75 @@
 
 package com.android.systemui.statusbar;
 
-import android.app.ActivityManager;
-import android.app.Service;
+import java.util.ArrayList;
+
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Slog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.Display;
-import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
-
-import java.util.ArrayList;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
-
 import com.android.systemui.SystemUI;
+import com.android.systemui.statusbar.CommandQueue;
+
 import com.android.systemui.R;
 
-public abstract class StatusBar extends SystemUI implements CommandQueue.Callbacks {
+public abstract class BaseStatusBar extends SystemUI implements CommandQueue.Callbacks {
     static final String TAG = "StatusBar";
-    private static final boolean SPEW = false;
+    private static final boolean DEBUG = false;
 
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
 
-    // Up-call methods
-    protected abstract View makeStatusBarView();
-    protected abstract int getStatusBarGravity();
-    public abstract int getStatusBarHeight();
-    public abstract void animateCollapse();
+    // UI-specific methods
+    
+    /**
+     * Create all windows necessary for the status bar (including navigation, overlay panels, etc)
+     * and add them to the window manager.
+     */
+    protected abstract void createAndAddWindows();
 
-    private DoNotDisturb mDoNotDisturb;
+    protected Display mDisplay;
+    private IWindowManager mWindowManager;
+
+    
+    public IWindowManager getWindowManager() {
+        return mWindowManager;
+    }
+    
+    public Display getDisplay() {
+        return mDisplay;
+    }
+    
+    public IStatusBarService getStatusBarService() {
+        return mBarService;
+    }
 
     public void start() {
-        // First set up our views and stuff.
-        View sb = makeStatusBarView();
+        mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+
+        mWindowManager = IWindowManager.Stub.asInterface(
+                ServiceManager.getService(Context.WINDOW_SERVICE));
+
+        mBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         // Connect in to the status bar manager service
         StatusBarIconList iconList = new StatusBarIconList();
         ArrayList<IBinder> notificationKeys = new ArrayList<IBinder>();
         ArrayList<StatusBarNotification> notifications = new ArrayList<StatusBarNotification>();
         mCommandQueue = new CommandQueue(this, iconList);
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        
         int[] switches = new int[7];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
         try {
@@ -78,6 +93,8 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
+        
+        createAndAddWindows();
 
         disable(switches[0]);
         setSystemUiVisibility(switches[1]);
@@ -108,50 +125,18 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
                     + " notifications=" + notifications.size());
         }
 
-        // Put up the view
-        final int height = getStatusBarHeight();
-
-        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                height,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                // We use a pixel format of RGB565 for the status bar to save memory bandwidth and
-                // to ensure that the layer can be handled by HWComposer.  On some devices the
-                // HWComposer is unable to handle SW-rendered RGBX_8888 layers.
-                PixelFormat.RGB_565);
-        
-        // the status bar should be in an overlay if possible
-        final Display defaultDisplay 
-            = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay();
-
-        // We explicitly leave FLAG_HARDWARE_ACCELERATED out of the flags.  The status bar occupies
-        // very little screen real-estate and is updated fairly frequently.  By using CPU rendering
-        // for the status bar, we prevent the GPU from having to wake up just to do these small
-        // updates, which should help keep power consumption down.
-
-        lp.gravity = getStatusBarGravity();
-        lp.setTitle("StatusBar");
-        lp.packageName = mContext.getPackageName();
-        lp.windowAnimations = R.style.Animation_StatusBar;
-        WindowManagerImpl.getDefault().addView(sb, lp);
-
-        if (SPEW) {
-            Slog.d(TAG, "Added status bar view: gravity=0x" + Integer.toHexString(lp.gravity) 
-                   + " icons=" + iconList.size()
-                   + " disabled=0x" + Integer.toHexString(switches[0])
-                   + " lights=" + switches[1]
-                   + " menu=" + switches[2]
-                   + " imeButton=" + switches[3]
-                   );
+        if (DEBUG) {
+            Slog.d(TAG, String.format(
+                    "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x", 
+                   iconList.size(),
+                   switches[0],
+                   switches[1],
+                   switches[2],
+                   switches[3]
+                   ));
         }
-
-        mDoNotDisturb = new DoNotDisturb(mContext);
     }
-
+    
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
         if (n.isClearable()) {

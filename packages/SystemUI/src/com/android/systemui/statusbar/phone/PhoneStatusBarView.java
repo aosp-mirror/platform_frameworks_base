@@ -64,7 +64,7 @@ public class PhoneStatusBarView extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mService.onBarViewAttached();
+        //mService.onBarViewAttached();
     }
     
     @Override

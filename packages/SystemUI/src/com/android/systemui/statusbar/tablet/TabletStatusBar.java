@@ -75,9 +75,10 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsPanelView;
+import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
-import com.android.systemui.statusbar.StatusBar;
+import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
@@ -86,7 +87,7 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.Prefs;
 
-public class TabletStatusBar extends StatusBar implements
+public class TabletStatusBar extends BaseStatusBar implements
         HeightReceiver.OnBarHeightChangedListener,
         InputMethodsPanel.OnHardKeyboardEnabledChangeListener,
         RecentsPanelView.OnRecentsPanelVisibilityChangedListener {
@@ -198,6 +199,44 @@ public class TabletStatusBar extends StatusBar implements
     private int mNavigationIconHints = 0;
 
     public Context getContext() { return mContext; }
+
+    @Override
+    protected void createAndAddWindows() {
+        addStatusBarWindow();
+        addPanelWindows();
+    }
+    
+    private void addStatusBarWindow() {
+        final int height = getStatusBarHeight();
+
+        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                height,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                // We use a pixel format of RGB565 for the status bar to save memory bandwidth and
+                // to ensure that the layer can be handled by HWComposer.  On some devices the
+                // HWComposer is unable to handle SW-rendered RGBX_8888 layers.
+                PixelFormat.RGB_565);
+
+        // the status bar should be in an overlay if possible
+        final Display defaultDisplay
+            = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+
+        // We explicitly leave FLAG_HARDWARE_ACCELERATED out of the flags.  The status bar occupies
+        // very little screen real-estate and is updated fairly frequently.  By using CPU rendering
+        // for the status bar, we prevent the GPU from having to wake up just to do these small
+        // updates, which should help keep power consumption down.
+
+        lp.gravity = getStatusBarGravity();
+        lp.setTitle("StatusBar");
+        lp.packageName = mContext.getPackageName();
+        lp.windowAnimations = R.style.Animation_StatusBar;
+        WindowManagerImpl.getDefault().addView(makeStatusBarView(), lp);
+    }
 
     protected void addPanelWindows() {
         final Context context = mContext;
@@ -379,6 +418,14 @@ public class TabletStatusBar extends StatusBar implements
         lp.windowAnimations = android.R.style.Animation_Dialog;
 
         WindowManagerImpl.getDefault().addView(mCompatModePanel, lp);
+        
+        mRecentButton.setOnTouchListener(mRecentsPanel);
+
+        mPile = (ViewGroup)mNotificationPanel.findViewById(R.id.content);
+        mPile.removeAllViews();
+
+        ScrollView scroller = (ScrollView)mPile.getParent();
+        scroller.setFillViewport(true);
     }
 
     private int getNotificationPanelHeight() {
@@ -598,16 +645,6 @@ public class TabletStatusBar extends StatusBar implements
 
         // set the initial view visibility
         setAreThereNotifications();
-
-        // Add the windows
-        addPanelWindows();
-        mRecentButton.setOnTouchListener(mRecentsPanel);
-
-        mPile = (ViewGroup)mNotificationPanel.findViewById(R.id.content);
-        mPile.removeAllViews();
-
-        ScrollView scroller = (ScrollView)mPile.getParent();
-        scroller.setFillViewport(true);
 
         mHeightReceiver.addOnBarHeightChangedListener(this);
 
@@ -1796,9 +1833,9 @@ public class TabletStatusBar extends StatusBar implements
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
         workAroundBadLayerDrawableOpacity(row);
-        View vetoButton = updateNotificationVetoButton(row, entry.notification);
-        vetoButton.setContentDescription(mContext.getString(
-                R.string.accessibility_remove_notification));
+//        View vetoButton = updateNotificationVetoButton(row, entry.notification);
+//        vetoButton.setContentDescription(mContext.getString(
+//                R.string.accessibility_remove_notification));
 
         // the large icon
         ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);
@@ -1942,6 +1979,7 @@ public class TabletStatusBar extends StatusBar implements
         pw.println("mNetworkController:");
         mNetworkController.dump(fd, pw, args);
     }
+
 }
 
 
