@@ -30,6 +30,7 @@
 #include <cutils/atomic.h>
 
 #include <utils/threads.h>
+#include <ui/ANativeObjectBase.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -39,8 +40,6 @@
 #include <pixelflinger/format.h>
 #include <pixelflinger/pixelflinger.h>
 
-#include <private/ui/android_natives_priv.h>
-
 #include "context.h"
 #include "state.h"
 #include "texture.h"
@@ -49,13 +48,14 @@
 #undef NELEM
 #define NELEM(x) (sizeof(x)/sizeof(*(x)))
 
+// ----------------------------------------------------------------------------
 
 EGLBoolean EGLAPI eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
         EGLint left, EGLint top, EGLint width, EGLint height);
 
-
 // ----------------------------------------------------------------------------
 namespace android {
+
 // ----------------------------------------------------------------------------
 
 const unsigned int NUM_DISPLAYS = 1;

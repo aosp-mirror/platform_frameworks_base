@@ -22,8 +22,7 @@
 
 #include <hardware/gralloc.h>
 #include <system/window.h>
-// FIXME: remove this header, it's for legacy use.  native_window is pulled from frameworks/base/native/include/android/
-#include <android/native_window.h>
+
 // ---------------------------------------------------------------------------
 
 /* FIXME: this is legacy for pixmaps */
@@ -52,11 +51,11 @@ typedef struct egl_native_pixmap_t
 namespace android {
 
 /*
- * This helper class turns an EGL android_native_xxx type into a C++
+ * This helper class turns a ANativeXXX object type into a C++
  * reference-counted object; with proper type conversions.
  */
 template <typename NATIVE_TYPE, typename TYPE, typename REF>
-class EGLNativeBase : public NATIVE_TYPE, public REF
+class ANativeObjectBase : public NATIVE_TYPE, public REF
 {
 public:
     // Disambiguate between the incStrong in REF and NATIVE_TYPE
@@ -68,8 +67,8 @@ public:
     }
 
 protected:
-    typedef EGLNativeBase<NATIVE_TYPE, TYPE, REF> BASE;
-    EGLNativeBase() : NATIVE_TYPE(), REF() {
+    typedef ANativeObjectBase<NATIVE_TYPE, TYPE, REF> BASE;
+    ANativeObjectBase() : NATIVE_TYPE(), REF() {
         NATIVE_TYPE::common.incRef = incRef;
         NATIVE_TYPE::common.decRef = decRef;
     }
@@ -86,11 +85,11 @@ protected:
         return getSelf(reinterpret_cast<NATIVE_TYPE const*>(base));
     }
     static void incRef(android_native_base_t* base) {
-        EGLNativeBase* self = getSelf(base);
+        ANativeObjectBase* self = getSelf(base);
         self->incStrong(self);
     }
     static void decRef(android_native_base_t* base) {
-        EGLNativeBase* self = getSelf(base);
+        ANativeObjectBase* self = getSelf(base);
         self->decStrong(self);
     }
 };

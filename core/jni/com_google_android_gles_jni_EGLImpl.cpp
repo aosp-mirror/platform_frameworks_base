@@ -30,6 +30,8 @@
 #include <SkBitmap.h>
 #include <SkPixelRef.h>
 
+#include <ui/ANativeObjectBase.h>
+
 #include <gui/SurfaceTexture.h>
 #include <gui/SurfaceTextureClient.h>
 
