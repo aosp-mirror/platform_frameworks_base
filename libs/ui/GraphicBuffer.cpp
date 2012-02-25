@@ -28,8 +28,6 @@
 #include <ui/GraphicBufferMapper.h>
 #include <ui/PixelFormat.h>
 
-#include <pixelflinger/pixelflinger.h>
-
 namespace android {
 
 // ===========================================================================
@@ -179,21 +177,6 @@ status_t GraphicBuffer::lock(uint32_t usage, const Rect& rect, void** vaddr)
 status_t GraphicBuffer::unlock()
 {
     status_t res = getBufferMapper().unlock(handle);
-    return res;
-}
-
-status_t GraphicBuffer::lock(GGLSurface* sur, uint32_t usage) 
-{
-    void* vaddr;
-    status_t res = GraphicBuffer::lock(usage, &vaddr);
-    if (res == NO_ERROR && sur) {
-        sur->version = sizeof(GGLSurface);
-        sur->width = width;
-        sur->height = height;
-        sur->stride = stride;
-        sur->format = format;
-        sur->data = static_cast<GGLubyte*>(vaddr);
-    }
     return res;
 }
 

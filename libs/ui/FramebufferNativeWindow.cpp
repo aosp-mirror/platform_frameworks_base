@@ -27,25 +27,21 @@
 #include <utils/threads.h>
 #include <utils/RefBase.h>
 
-#include <ui/Rect.h>
+#include <ui/ANativeObjectBase.h>
 #include <ui/FramebufferNativeWindow.h>
+#include <ui/Rect.h>
 
 #include <EGL/egl.h>
 
-#include <pixelflinger/format.h>
-#include <pixelflinger/pixelflinger.h>
-
 #include <hardware/hardware.h>
 #include <hardware/gralloc.h>
-
-#include <private/ui/android_natives_priv.h>
 
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
 
 class NativeBuffer 
-    : public EGLNativeBase<
+    : public ANativeObjectBase<
         ANativeWindowBuffer, 
         NativeBuffer, 
         LightRefBase<NativeBuffer> >

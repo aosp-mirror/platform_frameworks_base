@@ -26,7 +26,6 @@
 
 #include <ui/PixelFormat.h>
 #include <ui/Region.h>
-#include <ui/egl/android_natives.h>
 
 #include <gui/SurfaceTextureClient.h>
 

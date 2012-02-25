@@ -24,11 +24,9 @@
 
 #include <utils/threads.h>
 #include <utils/String8.h>
+
+#include <ui/ANativeObjectBase.h>
 #include <ui/Rect.h>
-
-#include <pixelflinger/pixelflinger.h>
-
-#include <ui/egl/android_natives.h>
 
 #define NUM_FRAME_BUFFERS  2
 
@@ -44,7 +42,7 @@ class NativeBuffer;
 // ---------------------------------------------------------------------------
 
 class FramebufferNativeWindow 
-    : public EGLNativeBase<
+    : public ANativeObjectBase<
         ANativeWindow, 
         FramebufferNativeWindow, 
         LightRefBase<FramebufferNativeWindow> >

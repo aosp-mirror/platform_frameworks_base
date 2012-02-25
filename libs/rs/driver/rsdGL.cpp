@@ -16,7 +16,8 @@
 
 #include <ui/FramebufferNativeWindow.h>
 #include <ui/PixelFormat.h>
-#include <ui/egl/android_natives.h>
+
+#include <system/window.h>
 
 #include <sys/types.h>
 #include <sys/resource.h>

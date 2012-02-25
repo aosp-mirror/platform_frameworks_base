@@ -22,7 +22,6 @@
 #include <binder/MemoryHeapBase.h>
 #include <utils/RefBase.h>
 #include <surfaceflinger/ISurface.h>
-#include <ui/android_native_buffer.h>
 #include <ui/GraphicBuffer.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>

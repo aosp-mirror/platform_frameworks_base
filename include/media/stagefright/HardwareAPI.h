@@ -19,7 +19,7 @@
 #define HARDWARE_API_H_
 
 #include <media/stagefright/OMXPluginBase.h>
-#include <ui/android_native_buffer.h>
+#include <system/window.h>
 #include <utils/RefBase.h>
 
 #include <OMX_Component.h>

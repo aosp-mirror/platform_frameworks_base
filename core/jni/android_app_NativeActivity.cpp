@@ -26,7 +26,7 @@
 #include <android_runtime/android_app_NativeActivity.h>
 #include <android_runtime/android_util_AssetManager.h>
 #include <surfaceflinger/Surface.h>
-#include <ui/egl/android_natives.h>
+#include <system/window.h>
 #include <androidfw/InputTransport.h>
 #include <utils/Looper.h>
 

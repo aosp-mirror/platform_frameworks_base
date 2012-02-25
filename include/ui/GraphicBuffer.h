@@ -20,11 +20,11 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <ui/android_native_buffer.h>
+#include <ui/ANativeObjectBase.h>
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
 #include <utils/Flattenable.h>
-#include <pixelflinger/pixelflinger.h>
+
 
 struct ANativeWindowBuffer;
 
@@ -37,7 +37,7 @@ class GraphicBufferMapper;
 // ===========================================================================
 
 class GraphicBuffer
-    : public EGLNativeBase<
+    : public ANativeObjectBase<
         ANativeWindowBuffer,
         GraphicBuffer, 
         LightRefBase<GraphicBuffer> >, public Flattenable
@@ -93,7 +93,6 @@ public:
 
     status_t lock(uint32_t usage, void** vaddr);
     status_t lock(uint32_t usage, const Rect& rect, void** vaddr);
-    status_t lock(GGLSurface* surface, uint32_t usage);
     status_t unlock();
 
     ANativeWindowBuffer* getNativeBuffer() const;

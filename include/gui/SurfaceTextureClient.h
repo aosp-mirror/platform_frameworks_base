@@ -20,7 +20,7 @@
 #include <gui/ISurfaceTexture.h>
 #include <gui/SurfaceTexture.h>
 
-#include <ui/egl/android_natives.h>
+#include <ui/ANativeObjectBase.h>
 #include <ui/Region.h>
 
 #include <utils/RefBase.h>
@@ -31,7 +31,7 @@ namespace android {
 class Surface;
 
 class SurfaceTextureClient
-    : public EGLNativeBase<ANativeWindow, SurfaceTextureClient, RefBase>
+    : public ANativeObjectBase<ANativeWindow, SurfaceTextureClient, RefBase>
 {
 public:
     SurfaceTextureClient(const sp<ISurfaceTexture>& surfaceTexture);

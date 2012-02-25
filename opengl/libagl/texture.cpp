@@ -23,7 +23,6 @@
 #include "texture.h"
 #include "TextureObjectManager.h"
 
-#include <private/ui/android_natives_priv.h>
 #include <ETC1/etc1.h>
 
 namespace android {
