@@ -124,8 +124,10 @@ public:
     virtual void drawPoints(float* points, int count, SkPaint* paint);
     virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
             SkPaint* paint, float length = -1.0f);
-    virtual void drawPosText(const char* text, int bytesCount, int count, const float* positions,
-            SkPaint* paint);
+    virtual void drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
+            float hOffset, float vOffset, SkPaint* paint);
+    virtual void drawPosText(const char* text, int bytesCount, int count,
+            const float* positions, SkPaint* paint);
 
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);

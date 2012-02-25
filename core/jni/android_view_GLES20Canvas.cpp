@@ -521,6 +521,20 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y, paint);
 }
 
+static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int count,
+        SkPath* path, jfloat hOffset, jfloat vOffset, int flags, SkPaint* paint) {
+    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
+            text, 0, count, count, flags);
+    if (value == NULL) {
+        return;
+    }
+    const jchar* glyphs = value->getGlyphs();
+    size_t glyphsCount = value->getGlyphsCount();
+    int bytesCount = glyphsCount * sizeof(jchar);
+    renderer->drawTextOnPath((const char*) glyphs, bytesCount, glyphsCount, path,
+            hOffset, vOffset, paint);
+}
+
 static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
         int flags, SkPaint* paint) {
@@ -548,6 +562,24 @@ static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject clazz,
         jfloat x, jfloat y, jint flags, SkPaint* paint) {
     const jchar* textArray = env->GetStringChars(text, NULL);
     renderText(renderer, textArray + start, end - start, x, y, flags, paint);
+    env->ReleaseStringChars(text, textArray);
+}
+
+static void android_view_GLES20Canvas_drawTextArrayOnPath(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, jcharArray text, jint index, jint count,
+        SkPath* path, jfloat hOffset, jfloat vOffset, jint flags, SkPaint* paint) {
+    jchar* textArray = env->GetCharArrayElements(text, NULL);
+    renderTextOnPath(renderer, textArray + index, count, path,
+            hOffset, vOffset, flags, paint);
+    env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+}
+
+static void android_view_GLES20Canvas_drawTextOnPath(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, jstring text, jint start, jint end,
+        SkPath* path, jfloat hOffset, jfloat vOffset, jint flags, SkPaint* paint) {
+    const jchar* textArray = env->GetStringChars(text, NULL);
+    renderTextOnPath(renderer, textArray + start, end - start, path,
+            hOffset, vOffset, flags, paint);
     env->ReleaseStringChars(text, textArray);
 }
 
@@ -884,6 +916,10 @@ static JNINativeMethod gMethods[] = {
     { "nDrawText",          "(I[CIIFFII)V",    (void*) android_view_GLES20Canvas_drawTextArray },
     { "nDrawText",          "(ILjava/lang/String;IIFFII)V",
             (void*) android_view_GLES20Canvas_drawText },
+
+    { "nDrawTextOnPath",    "(I[CIIIFFII)V",   (void*) android_view_GLES20Canvas_drawTextArrayOnPath },
+    { "nDrawTextOnPath",    "(ILjava/lang/String;IIIFFII)V",
+            (void*) android_view_GLES20Canvas_drawTextOnPath },
 
     { "nDrawTextRun",       "(I[CIIIIFFII)V",  (void*) android_view_GLES20Canvas_drawTextRunArray },
     { "nDrawTextRun",       "(ILjava/lang/String;IIIIFFII)V",

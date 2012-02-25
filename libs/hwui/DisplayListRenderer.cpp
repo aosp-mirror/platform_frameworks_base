@@ -61,6 +61,7 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawLines",
     "DrawPoints",
     "DrawText",
+    "DrawTextOnPath",
     "DrawPosText",
     "ResetShader",
     "SetupShader",
@@ -483,13 +484,24 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
             break;
             case DrawText: {
                 getText(&text);
-                int count = getInt();
+                int32_t count = getInt();
                 float x = getFloat();
                 float y = getFloat();
                 SkPaint* paint = getPaint(renderer);
                 float length = getFloat();
                 ALOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent, OP_NAMES[op],
                     text.text(), text.length(), count, x, y, paint, length);
+            }
+            break;
+            case DrawTextOnPath: {
+                getText(&text);
+                int32_t count = getInt();
+                SkPath* path = getPath();
+                float hOffset = getFloat();
+                float vOffset = getFloat();
+                SkPaint* paint = getPaint(renderer);
+                ALOGD("%s%s %s, %d, %d, %p", (char*) indent, OP_NAMES[op],
+                    text.text(), text.length(), count, paint);
             }
             break;
             case DrawPosText: {
@@ -888,6 +900,19 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, u
                 DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent,
                         OP_NAMES[op], text.text(), text.length(), count, x, y, paint, length);
                 renderer.drawText(text.text(), text.length(), count, x, y, paint, length);
+            }
+            break;
+            case DrawTextOnPath: {
+                getText(&text);
+                int32_t count = getInt();
+                SkPath* path = getPath();
+                float hOffset = getFloat();
+                float vOffset = getFloat();
+                SkPaint* paint = getPaint(renderer);
+                DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %p", (char*) indent, OP_NAMES[op],
+                    text.text(), text.length(), count, paint);
+                renderer.drawTextOnPath(text.text(), text.length(), count, path,
+                        hOffset, vOffset, paint);
             }
             break;
             case DrawPosText: {
@@ -1329,6 +1354,19 @@ void DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
     addPaint(paint);
     addFloat(length);
     addSkip(location);
+}
+
+void DisplayListRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
+        SkPath* path, float hOffset, float vOffset, SkPaint* paint) {
+    if (!text || count <= 0) return;
+    addOp(DisplayList::DrawTextOnPath);
+    addText(text, bytesCount);
+    addInt(count);
+    addPath(path);
+    addFloat(hOffset);
+    addFloat(vOffset);
+    paint->setAntiAlias(true);
+    addPaint(paint);
 }
 
 void DisplayListRenderer::drawPosText(const char* text, int bytesCount, int count,
