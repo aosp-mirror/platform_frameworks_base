@@ -10363,9 +10363,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             boolean allowText = getContext().getResources().getBoolean(
                     com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
 
-            mode.setTitle(allowText ?
-                    mContext.getString(com.android.internal.R.string.textSelectionCABTitle) : null);
+            mode.setTitle(mContext.getString(com.android.internal.R.string.textSelectionCABTitle));
             mode.setSubtitle(null);
+            mode.setTitleOptionalHint(true);
 
             int selectAllIconId = 0; // No icon by default
             if (!allowText) {

@@ -53,10 +53,8 @@ class SelectActionModeCallback implements ActionMode.Callback {
         mode.getMenuInflater().inflate(com.android.internal.R.menu.webview_copy, menu);
 
         final Context context = mWebView.getContext();
-        boolean allowText = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
-        mode.setTitle(allowText ?
-                context.getString(com.android.internal.R.string.textSelectionCABTitle) : null);
+        mode.setTitle(context.getString(com.android.internal.R.string.textSelectionCABTitle));
+        mode.setTitleOptionalHint(true);
 
         // If the action mode UI we're running in isn't capable of taking window focus
         // the user won't be able to type into the find on page UI. Disable this functionality.

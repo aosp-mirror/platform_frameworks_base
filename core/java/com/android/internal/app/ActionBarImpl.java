@@ -748,6 +748,16 @@ public class ActionBarImpl extends ActionBar {
         }
         
         @Override
+        public void setTitleOptionalHint(boolean titleOptional) {
+            mContextView.setTitleOptional(titleOptional);
+        }
+
+        @Override
+        public boolean isTitleOptional() {
+            return mContextView.isTitleOptional();
+        }
+
+        @Override
         public View getCustomView() {
             return mCustomView != null ? mCustomView.get() : null;
         }
