@@ -115,6 +115,7 @@
   <java-symbol type="id" name="new_app_action" />
   <java-symbol type="id" name="new_app_description" />
   <java-symbol type="id" name="new_app_icon" />
+  <java-symbol type="id" name="new_perms_list" />
   <java-symbol type="id" name="no_permissions" />
   <java-symbol type="id" name="non_dangerous_perms_list" />
   <java-symbol type="id" name="numberpicker_input" />
@@ -629,6 +630,7 @@
   <java-symbol type="string" name="orgTypeWork" />
   <java-symbol type="string" name="passwordIncorrect" />
   <java-symbol type="string" name="permissions_format" />
+  <java-symbol type="string" name="perms_new_perm_prefix" />
   <java-symbol type="string" name="perms_hide" />
   <java-symbol type="string" name="perms_show_all" />
   <java-symbol type="string" name="petabyteShort" />

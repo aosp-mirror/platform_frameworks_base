@@ -51,6 +51,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -211,7 +212,8 @@ public class PackageParser {
      * @param flags indicating which optional information is included.
      */
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
-            int gids[], int flags, long firstInstallTime, long lastUpdateTime) {
+            int gids[], int flags, long firstInstallTime, long lastUpdateTime,
+            HashSet<String> grantedPermissions) {
 
         final int userId = Binder.getOrigCallingUser();
 
@@ -346,8 +348,16 @@ public class PackageParser {
             N = p.requestedPermissions.size();
             if (N > 0) {
                 pi.requestedPermissions = new String[N];
+                pi.requestedPermissionsFlags = new int[N];
                 for (int i=0; i<N; i++) {
-                    pi.requestedPermissions[i] = p.requestedPermissions.get(i);
+                    final String perm = p.requestedPermissions.get(i);
+                    pi.requestedPermissions[i] = perm;
+                    if (p.requestedPermissionsRequired.get(i)) {
+                        pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_REQUIRED;
+                    }
+                    if (grantedPermissions != null && grantedPermissions.contains(perm)) {
+                        pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_GRANTED;
+                    }
                 }
             }
         }
@@ -927,11 +937,14 @@ public class PackageParser {
                 // that may change.
                 String name = sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestUsesPermission_name);
+                boolean required = sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestUsesPermission_required, true);
 
                 sa.recycle();
 
                 if (name != null && !pkg.requestedPermissions.contains(name)) {
                     pkg.requestedPermissions.add(name.intern());
+                    pkg.requestedPermissionsRequired.add(required);
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -1419,11 +1432,23 @@ public class PackageParser {
                 PermissionInfo.PROTECTION_NORMAL);
 
         sa.recycle();
-        
+
         if (perm.info.protectionLevel == -1) {
             outError[0] = "<permission> does not specify protectionLevel";
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return null;
+        }
+
+        perm.info.protectionLevel = PermissionInfo.fixProtectionLevel(perm.info.protectionLevel);
+
+        if ((perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_FLAGS) != 0) {
+            if ((perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_BASE) !=
+                    PermissionInfo.PROTECTION_SIGNATURE) {
+                outError[0] = "<permission>  protectionLevel specifies a flag but is "
+                        + "not based on signature type";
+                mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                return null;
+            }
         }
         
         if (!parseAllMetaData(res, parser, attrs, "<permission>", perm,
@@ -2951,6 +2976,7 @@ public class PackageParser {
         public final ArrayList<Instrumentation> instrumentation = new ArrayList<Instrumentation>(0);
 
         public final ArrayList<String> requestedPermissions = new ArrayList<String>();
+        public final ArrayList<Boolean> requestedPermissionsRequired = new ArrayList<Boolean>();
 
         public ArrayList<String> protectedBroadcasts;
         

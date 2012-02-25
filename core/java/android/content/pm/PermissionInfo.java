@@ -55,6 +55,30 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_SIGNATURE_OR_SYSTEM = 3;
 
     /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>system</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_SYSTEM = 0x10;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>development</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_DEVELOPMENT = 0x20;
+
+    /**
+     * Mask for {@link #protectionLevel}: the basic protection type.
+     */
+    public static final int PROTECTION_MASK_BASE = 0xf;
+
+    /**
+     * Mask for {@link #protectionLevel}: additional flag bits.
+     */
+    public static final int PROTECTION_MASK_FLAGS = 0xf0;
+
+    /**
      * The group this permission is a part of, as per
      * {@link android.R.attr#permissionGroup}.
      */
@@ -79,9 +103,46 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * The level of access this permission is protecting, as per
      * {@link android.R.attr#protectionLevel}.  Values may be
      * {@link #PROTECTION_NORMAL}, {@link #PROTECTION_DANGEROUS}, or
+     * {@link #PROTECTION_SIGNATURE}.  May also include the additional
+     * flags {@link #PROTECTION_FLAG_SYSTEM} or {@link #PROTECTION_FLAG_DEVELOPMENT}
+     * (which only make sense in combination with the base
      * {@link #PROTECTION_SIGNATURE}.
      */
     public int protectionLevel;
+
+    /** @hide */
+    public static int fixProtectionLevel(int level) {
+        if (level == PROTECTION_SIGNATURE_OR_SYSTEM) {
+            level = PROTECTION_SIGNATURE | PROTECTION_FLAG_SYSTEM;
+        }
+        return level;
+    }
+
+    /** @hide */
+    public static String protectionToString(int level) {
+        String protLevel = "????";
+        switch (level&PROTECTION_MASK_BASE) {
+            case PermissionInfo.PROTECTION_DANGEROUS:
+                protLevel = "dangerous";
+                break;
+            case PermissionInfo.PROTECTION_NORMAL:
+                protLevel = "normal";
+                break;
+            case PermissionInfo.PROTECTION_SIGNATURE:
+                protLevel = "signature";
+                break;
+            case PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM:
+                protLevel = "signatureOrSystem";
+                break;
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_SYSTEM) != 0) {
+            protLevel += "|system";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
+            protLevel += "|development";
+        }
+        return protLevel;
+    }
 
     public PermissionInfo() {
     }

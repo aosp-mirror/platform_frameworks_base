@@ -157,7 +157,7 @@
              of permission to a requesting application at installation, without
              asking for the user's explicit approval (though the user always
              has the option to review these permissions before installing). -->
-        <enum name="normal" value="0" />
+        <flag name="normal" value="0" />
         <!-- A higher-risk permission that would give a requesting application
              access to private user data or control over the device that can
              negatively impact the user.  Because this type of permission
@@ -167,13 +167,13 @@
              user and require confirmation before proceeding, or some other
              approach may be taken to avoid the user automatically allowing
              the use of such facilities.  -->
-        <enum name="dangerous" value="1" />
+        <flag name="dangerous" value="1" />
         <!-- A permission that the system is to grant only if the requesting
              application is signed with the same certificate as the application
              that declared the permission. If the certificates match, the system
              automatically grants the permission without notifying the user or
              asking for the user's explicit approval. -->
-        <enum name="signature" value="2" />
+        <flag name="signature" value="2" />
         <!-- A permission that the system is to grant only to packages in the
              Android system image <em>or</em> that are signed with the same
              certificates. Please avoid using this option, as the
@@ -183,7 +183,20 @@
              vendors have applications built in to a system image which need
              to share specific features explicitly because they are being built
              together. -->
-        <enum name="signatureOrSystem" value="3" />
+        <flag name="signatureOrSystem" value="3" />
+        <!-- Additional flag from base permission type: this permission can also
+             be granted to any applications installed on the system image.
+             Please avoid using this option, as the
+             signature protection level should be sufficient for most needs and
+             works regardless of exactly where applications are installed.  This
+             permission flag is used for certain special situations where multiple
+             vendors have applications built in to a system image which need
+             to share specific features explicitly because they are being built
+             together. -->
+        <flag name="system" value="0x10" />
+        <!-- Additional flag from base permission type: this permission can also
+             (optionally) be granted to development applications. -->
+        <flag name="development" value="0x20" />
     </attr>
     
     <!-- Specified the name of a group that this permission is associated
@@ -924,6 +937,13 @@
         tag; often this is one of the {@link android.Manifest.permission standard
         system permissions}. -->
         <attr name="name" />
+        <!--  Specify whether this permission is required for the application.
+              The default is true, meaning the application requires the
+              permission, and it must always be granted when it is installed.
+              If you set this to false, then in some cases the application may
+              be installed with it being granted the permission, and it will
+              need to request the permission later if it needs it. -->
+        <attr name="required" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>uses-configuration</code> tag specifies
@@ -966,7 +986,7 @@
               don't support it.  If you set this to false, then this will
               not impose a restriction on where the application can be
               installed. -->
-        <attr name="required" format="boolean" />
+        <attr name="required" />
     </declare-styleable>
 
     <!-- The <code>uses-sdk</code> tag describes the SDK features that the

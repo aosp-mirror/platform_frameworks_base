@@ -1398,6 +1398,7 @@ final class Settings {
                             dynamic ? BasePermission.TYPE_DYNAMIC : BasePermission.TYPE_NORMAL);
                     bp.protectionLevel = readInt(parser, null, "protection",
                             PermissionInfo.PROTECTION_NORMAL);
+                    bp.protectionLevel = PermissionInfo.fixProtectionLevel(bp.protectionLevel);
                     if (dynamic) {
                         PermissionInfo pi = new PermissionInfo();
                         pi.packageName = sourcePackage.intern();
@@ -2244,7 +2245,8 @@ final class Settings {
             pw.print("    uid="); pw.print(p.uid);
                     pw.print(" gids="); pw.print(PackageManagerService.arrayToString(p.gids));
                     pw.print(" type="); pw.print(p.type);
-                    pw.print(" prot="); pw.println(p.protectionLevel);
+                    pw.print(" prot=");
+                    pw.println(PermissionInfo.protectionToString(p.protectionLevel));
             if (p.packageSetting != null) {
                 pw.print("    packageSetting="); pw.println(p.packageSetting);
             }

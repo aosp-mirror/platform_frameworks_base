@@ -159,6 +159,18 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public void grantPermission(String packageName, String permissionName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public void revokePermission(String packageName, String permissionName) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public int checkSignatures(String pkg1, String pkg2) {
         throw new UnsupportedOperationException();

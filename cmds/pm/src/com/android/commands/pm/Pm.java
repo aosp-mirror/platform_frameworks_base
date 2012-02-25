@@ -126,6 +126,16 @@ public final class Pm {
             return;
         }
 
+        if ("grant".equals(op)) {
+            runGrantRevokePermission(true);
+            return;
+        }
+
+        if ("revoke".equals(op)) {
+            runGrantRevokePermission(false);
+            return;
+        }
+
         if ("set-install-location".equals(op)) {
             runSetInstallLocation();
             return;
@@ -596,8 +606,9 @@ public final class Pm {
                 if (groups && groupName == null && pi.group != null) {
                     continue;
                 }
-                if (pi.protectionLevel < startProtectionLevel
-                        || pi.protectionLevel > endProtectionLevel) {
+                final int base = pi.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE;
+                if (base < startProtectionLevel
+                        || base > endProtectionLevel) {
                     continue;
                 }
                 if (summary) {
@@ -627,22 +638,8 @@ public final class Pm {
                                     + loadText(pi, pi.descriptionRes,
                                             pi.nonLocalizedDescription));
                         }
-                        String protLevel = "unknown";
-                        switch(pi.protectionLevel) {
-                            case PermissionInfo.PROTECTION_DANGEROUS:
-                                protLevel = "dangerous";
-                                break;
-                            case PermissionInfo.PROTECTION_NORMAL:
-                                protLevel = "normal";
-                                break;
-                            case PermissionInfo.PROTECTION_SIGNATURE:
-                                protLevel = "signature";
-                                break;
-                            case PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM:
-                                protLevel = "signatureOrSystem";
-                                break;
-                        }
-                        System.out.println(prefix + "  protectionLevel:" + protLevel);
+                        System.out.println(prefix + "  protectionLevel:"
+                                + PermissionInfo.protectionToString(pi.protectionLevel));
                     }
                 }
             }
@@ -1063,6 +1060,36 @@ public final class Pm {
         }
     }
 
+    private void runGrantRevokePermission(boolean grant) {
+        String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified");
+            showUsage();
+            return;
+        }
+        String perm = nextArg();
+        if (perm == null) {
+            System.err.println("Error: no permission specified");
+            showUsage();
+            return;
+        }
+        try {
+            if (grant) {
+                mPm.grantPermission(pkg, perm);
+            } else {
+                mPm.revokePermission(pkg, perm);
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Bad argument: " + e.toString());
+            showUsage();
+        } catch (SecurityException e) {
+            System.err.println("Operation not allowed: " + e.toString());
+        }
+    }
+
     /**
      * Displays the package file for a package.
      * @param pckg
@@ -1158,6 +1185,8 @@ public final class Pm {
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-user PACKAGE_OR_COMPONENT");
+        System.err.println("       pm grant PACKAGE PERMISSION");
+        System.err.println("       pm revoke PACKAGE PERMISSION");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
         System.err.println("       pm create-profile USER_NAME");
@@ -1207,6 +1236,10 @@ public final class Pm {
         System.err.println("");
         System.err.println("pm enable, disable, disable-user: these commands change the enabled state");
         System.err.println("  of a given package or component (written as \"package/class\").");
+        System.err.println("");
+        System.err.println("pm grant, revoke: these commands either grant or revoke permissions");
+        System.err.println("  to applications.  Only optional permissions the application has");
+        System.err.println("  declared can be granted or revoked.");
         System.err.println("");
         System.err.println("pm get-install-location: returns the current install location.");
         System.err.println("    0 [auto]: Let system decide the best location");
