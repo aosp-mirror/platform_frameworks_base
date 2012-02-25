@@ -166,7 +166,7 @@ public class RenderScriptGL extends RenderScript {
         super(ctx);
         mSurfaceConfig = new SurfaceConfig(sc);
 
-        int sdkVersion = getTargetSdkVersion(ctx);
+        int sdkVersion = ctx.getApplicationInfo().targetSdkVersion;
 
         mWidth = 0;
         mHeight = 0;
