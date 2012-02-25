@@ -78,6 +78,7 @@ import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
+import android.renderscript.RenderScript;
 
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
@@ -3779,6 +3780,7 @@ public final class ActivityThread {
                 appContext.init(info, null, this);
 
                 HardwareRenderer.setupDiskCache(appContext.getCacheDir());
+                RenderScript.setupDiskCache(appContext.getCacheDir());
             }
         } catch (RemoteException e) {
             // Ignore
