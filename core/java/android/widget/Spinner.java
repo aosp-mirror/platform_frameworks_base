@@ -282,6 +282,13 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         throw new RuntimeException("setOnItemClickListener cannot be used with a spinner.");
     }
 
+    /**
+     * @hide internal use only
+     */
+    public void setOnItemClickListenerInt(OnItemClickListener l) {
+        super.setOnItemClickListener(l);
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -707,6 +714,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         
         public void onClick(DialogInterface dialog, int which) {
             setSelection(which);
+            if (mOnItemClickListener != null) {
+                performItemClick(null, which, mListAdapter.getItemId(which));
+            }
             dismiss();
         }
     }
@@ -724,6 +734,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             setOnItemClickListener(new OnItemClickListener() {
                 public void onItemClick(AdapterView parent, View v, int position, long id) {
                     Spinner.this.setSelection(position);
+                    if (mOnItemClickListener != null) {
+                        Spinner.this.performItemClick(null, position, mAdapter.getItemId(position));
+                    }
                     dismiss();
                 }
             });

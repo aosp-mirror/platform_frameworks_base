@@ -45,7 +45,7 @@ import android.widget.TextView;
  * across different configurations or circumstances.
  */
 public class ScrollingTabContainerView extends HorizontalScrollView
-        implements AdapterView.OnItemSelectedListener {
+        implements AdapterView.OnItemClickListener {
     private static final String TAG = "ScrollingTabContainerView";
     Runnable mTabSelector;
     private TabClickListener mTabClickListener;
@@ -197,7 +197,7 @@ public class ScrollingTabContainerView extends HorizontalScrollView
                 com.android.internal.R.attr.actionDropDownStyle);
         spinner.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        spinner.setOnItemSelectedListener(this);
+        spinner.setOnItemClickListenerInt(this);
         return spinner;
     }
 
@@ -347,13 +347,9 @@ public class ScrollingTabContainerView extends HorizontalScrollView
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         TabView tabView = (TabView) view;
         tabView.getTab().select();
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
     }
 
     private class TabView extends LinearLayout {
