@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <SkCanvas.h>
+#include <SkPathMeasure.h>
 #include <SkTypeface.h>
 
 #include <utils/Log.h>
@@ -2294,7 +2295,72 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
 void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count, SkPath* path,
         float hOffset, float vOffset, SkPaint* paint) {
-    // TODO: Implement
+    if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
+            (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
+        return;
+    }
+
+    float x = 0.0f;
+    float y = 0.0f;
+
+    const bool pureTranslate = mSnapshot->transform->isPureTranslate();
+    if (CC_LIKELY(pureTranslate)) {
+        x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
+        y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
+    }
+
+    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
+    fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
+            paint->getTextSize());
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    mCaches.activeTexture(0);
+    setupDraw();
+    setupDrawDirtyRegionsDisabled();
+    setupDrawWithTexture(true);
+    setupDrawAlpha8Color(paint->getColor(), alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(true, mode);
+    setupDrawProgram();
+    setupDrawModelView(x, y, x, y, pureTranslate, true);
+    setupDrawTexture(fontRenderer.getTexture(true));
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderUniforms(pureTranslate);
+
+//    mat4 pathTransform;
+//    pathTransform.loadTranslate(hOffset, vOffset, 0.0f);
+//
+//    float offset = 0.0f;
+//    SkPathMeasure pathMeasure(*path, false);
+//
+//    if (paint->getTextAlign() != SkPaint::kLeft_Align) {
+//        SkScalar pathLength = pathMeasure.getLength();
+//        if (paint->getTextAlign() == SkPaint::kCenter_Align) {
+//            pathLength = SkScalarHalf(pathLength);
+//        }
+//        offset += SkScalarToFloat(pathLength);
+//    }
+
+//        SkScalar x;
+//        SkPath      tmp;
+//        SkMatrix    m(scaledMatrix);
+//
+//        m.postTranslate(xpos + hOffset, 0);
+//        if (matrix) {
+//            m.postConcat(*matrix);
+//        }
+//        morphpath(&tmp, *iterPath, meas, m);
+//        if (fDevice) {
+//            fDevice->drawPath(*this, tmp, iter.getPaint(), NULL, true);
+//        } else {
+//            this->drawPath(tmp, iter.getPaint(), NULL, true);
+//        }
+//    }
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {

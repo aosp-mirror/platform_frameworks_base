@@ -64,8 +64,8 @@ public class TextOnPathActivity extends Activity {
             mPaint.setAntiAlias(true);
             mPaint.setColor(0xff000000);
 
-            StringBuilder builder = new StringBuilder(TEST_STRING.length() * 5);
-            for (int i = 0; i < 5; i++) {
+            StringBuilder builder = new StringBuilder(TEST_STRING.length() * 2);
+            for (int i = 0; i < 2; i++) {
                 builder.append(TEST_STRING);
             }
             mText = builder.toString();
@@ -77,8 +77,24 @@ public class TextOnPathActivity extends Activity {
 
             canvas.drawARGB(255, 255, 255, 255);
 
-            canvas.translate(550.0f, 60.0f);
+            canvas.save();
+            canvas.translate(400.0f, 350.0f);
+            mPaint.setTextAlign(Paint.Align.LEFT);
+            canvas.drawTextOnPath(mText + mText, mPath, 0.0f, 0.0f, mPaint);
+            canvas.restore();
+
+            canvas.save();
+            canvas.translate(150.0f, 60.0f);
             canvas.drawTextOnPath(mText, mPath, 0.0f, 0.0f, mPaint);
+
+            canvas.translate(250.0f, 0.0f);
+            mPaint.setTextAlign(Paint.Align.CENTER);
+            canvas.drawTextOnPath(mText, mPath, 0.0f, 0.0f, mPaint);
+
+            canvas.translate(250.0f, 0.0f);
+            mPaint.setTextAlign(Paint.Align.RIGHT);
+            canvas.drawTextOnPath(mText, mPath, 0.0f, 0.0f, mPaint);
+            canvas.restore();
         }
     }
 }
