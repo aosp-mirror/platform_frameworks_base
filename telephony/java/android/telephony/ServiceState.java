@@ -650,6 +650,10 @@ public class ServiceState implements Parcelable {
     public int getRilRadioTechnology() {
         return this.mRadioTechnology;
     }
+    /** @hide */
+    public int getRadioTechnology() {
+        return getRilRadioTechnology();
+    }
 
     /** @hide */
     public int getNetworkType() {
