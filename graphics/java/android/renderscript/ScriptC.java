@@ -92,13 +92,9 @@ public class ScriptC extends Script {
             throw new Resources.NotFoundException();
         }
 
-        // E.g, /system/apps/Fountain.apk
-        //String packageName = rs.getApplicationContext().getPackageResourcePath();
-        // For res/raw/fountain.bc, it wil be /com.android.fountain:raw/fountain
         String resName = resources.getResourceEntryName(resourceID);
-        String cacheDir = rs.getApplicationContext().getCacheDir().toString();
 
         Log.v(TAG, "Create script for resource = " + resName);
-        return rs.nScriptCCreate(resName, cacheDir, pgm, pgmLength);
+        return rs.nScriptCCreate(resName, rs.mCachePath, pgm, pgmLength);
     }
 }

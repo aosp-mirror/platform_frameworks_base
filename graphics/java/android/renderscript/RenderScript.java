@@ -17,6 +17,7 @@
 package android.renderscript;
 
 import java.lang.reflect.Field;
+import java.io.File;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -81,6 +82,26 @@ public class RenderScript {
     native int  nContextPeekMessage(int con, int[] subID);
     native void nContextInitToClient(int con);
     native void nContextDeinitToClient(int con);
+
+    /**
+     * Name of the file that holds the object cache.
+     */
+    private static final String CACHE_PATH = "com.android.renderscript.cache";
+
+     /**
+     * Sets the directory to use as a persistent storage for the
+     * renderscript object file cache.
+     *
+     * @hide
+     * @param cacheDir A directory the current process can write to
+     */
+
+    static String mCachePath;
+    public static void setupDiskCache(File cacheDir) {
+        File f = new File(cacheDir, CACHE_PATH);
+        mCachePath = f.getAbsolutePath();
+        f.mkdirs();
+    }
 
 
     // Methods below are wrapped to protect the non-threadsafe
