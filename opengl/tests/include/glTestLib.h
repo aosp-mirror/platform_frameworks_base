@@ -24,9 +24,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-//#include <ui/FramebufferNativeWindow.h>
-//#include <ui/GraphicBuffer.h>
-#include <ui/EGLUtils.h>
+#include "EGLUtils.h"
 
 void glTestPrintGLString(const char *name, GLenum s);
 void glTestCheckEglError(const char* op, EGLBoolean returnVal = EGL_TRUE);

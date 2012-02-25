@@ -53,7 +53,7 @@
 #include <GLES/gl.h>
 
 #include <ui/FramebufferNativeWindow.h>
-#include <ui/EGLUtils.h>
+#include "EGLUtils.h"
 
 using namespace android;
 

@@ -11,6 +11,8 @@ LOCAL_SHARED_LIBRARIES := \
     libGLESv1_CM \
     libui
 
+LOCAL_C_INCLUDES += frameworks/base/opengl/tests/include
+
 LOCAL_MODULE:= test-opengl-swapinterval
 
 LOCAL_MODULE_TAGS := optional

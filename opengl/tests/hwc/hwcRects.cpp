@@ -106,7 +106,6 @@
 
 #include <ui/FramebufferNativeWindow.h>
 #include <ui/GraphicBuffer.h>
-#include <ui/EGLUtils.h>
 
 #define LOG_TAG "hwcRectsTest"
 #include <utils/Log.h>

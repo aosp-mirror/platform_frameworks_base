@@ -26,7 +26,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <ui/EGLUtils.h>
+#include "EGLUtils.h"
 
 #include <utils/Log.h>
 #include <testUtil.h>

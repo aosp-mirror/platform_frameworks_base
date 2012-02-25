@@ -29,7 +29,6 @@
 
 #include <ui/FramebufferNativeWindow.h>
 #include <ui/GraphicBuffer.h>
-#include <ui/EGLUtils.h>
 
 #include <utils/Log.h>
 #include <testUtil.h>

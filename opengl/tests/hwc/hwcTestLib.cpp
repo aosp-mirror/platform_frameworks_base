@@ -27,6 +27,8 @@
 
 #include <hwc/hwcTestLib.h>
 
+#include "EGLUtils.h"
+
 // Defines
 #define NUMA(a) (sizeof(a) / sizeof(a [0]))
 
