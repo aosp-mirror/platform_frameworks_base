@@ -17,11 +17,11 @@
 #define LOG_TAG "SurfaceTextureClient"
 //#define LOG_NDEBUG 0
 
-#include <gui/SurfaceTextureClient.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-
 #include <utils/Log.h>
+
+#include <gui/ISurfaceComposer.h>
+#include <gui/SurfaceComposerClient.h>
+#include <gui/SurfaceTextureClient.h>
 
 #include <private/gui/ComposerService.h>
 

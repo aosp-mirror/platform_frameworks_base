@@ -22,6 +22,8 @@
 #include <sys/types.h>
 #include <binder/Parcel.h>
 #include <camera/ICamera.h>
+#include <gui/ISurfaceTexture.h>
+#include <gui/Surface.h>
 
 namespace android {
 

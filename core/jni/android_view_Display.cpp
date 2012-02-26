@@ -19,7 +19,7 @@
 
 #include <cutils/properties.h>
 
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/SurfaceComposerClient.h>
 #include <ui/PixelFormat.h>
 #include <ui/DisplayInfo.h>
 

@@ -28,10 +28,9 @@
 
 #include <ui/Region.h>
 
-#include <surfaceflinger/ISurfaceComposerClient.h>
-#include <private/surfaceflinger/LayerState.h>
+#include <gui/ISurfaceComposerClient.h>
 
-#include <pixelflinger/pixelflinger.h>
+#include <private/gui/LayerState.h>
 
 #include <hardware/hwcomposer.h>
 

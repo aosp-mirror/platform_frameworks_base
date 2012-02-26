@@ -43,14 +43,13 @@
 #include <ui/GraphicBufferAllocator.h>
 #include <ui/PixelFormat.h>
 
-#include <pixelflinger/pixelflinger.h>
 #include <GLES/gl.h>
 
 #include "clz.h"
+#include "DdmConnection.h"
 #include "DisplayEventConnection.h"
 #include "EventThread.h"
 #include "GLExtensions.h"
-#include "DdmConnection.h"
 #include "Layer.h"
 #include "LayerDim.h"
 #include "LayerScreenshot.h"
@@ -60,7 +59,7 @@
 #include "DisplayHardware/HWComposer.h"
 
 #include <private/android_filesystem_config.h>
-#include <private/surfaceflinger/SharedBufferStack.h>
+#include <private/gui/SharedBufferStack.h>
 
 #define EGL_VERSION_HW_ANDROID  0x3143
 

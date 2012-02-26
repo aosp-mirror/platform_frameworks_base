@@ -27,8 +27,6 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#include <pixelflinger/pixelflinger.h>
-
 #include "GLExtensions.h"
 
 #include "DisplayHardware/DisplayHardwareBase.h"

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SF_IGRAPHIC_BUFFER_ALLOC_H
-#define ANDROID_SF_IGRAPHIC_BUFFER_ALLOC_H
+#ifndef ANDROID_GUI_IGRAPHIC_BUFFER_ALLOC_H
+#define ANDROID_GUI_IGRAPHIC_BUFFER_ALLOC_H
 
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/RefBase.h>
-
 #include <binder/IInterface.h>
+#include <ui/PixelFormat.h>
+#include <utils/RefBase.h>
 
 namespace android {
 // ----------------------------------------------------------------------------
@@ -55,4 +55,4 @@ public:
 
 }; // namespace android
 
-#endif // ANDROID_SF_IGRAPHIC_BUFFER_ALLOC_H
+#endif // ANDROID_GUI_IGRAPHIC_BUFFER_ALLOC_H

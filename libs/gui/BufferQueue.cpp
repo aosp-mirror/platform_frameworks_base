@@ -24,8 +24,8 @@
 #include <EGL/eglext.h>
 
 #include <gui/BufferQueue.h>
+#include <gui/ISurfaceComposer.h>
 #include <private/gui/ComposerService.h>
-#include <surfaceflinger/ISurfaceComposer.h>
 
 #include <utils/Log.h>
 #include <gui/SurfaceTexture.h>

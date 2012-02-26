@@ -24,7 +24,7 @@
 
 #include <ui/GraphicBuffer.h>
 
-#include <surfaceflinger/IGraphicBufferAlloc.h>
+#include <gui/IGraphicBufferAlloc.h>
 
 // ---------------------------------------------------------------------------
 

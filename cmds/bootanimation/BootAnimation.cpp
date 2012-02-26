@@ -38,8 +38,8 @@
 #include <ui/DisplayInfo.h>
 #include <ui/FramebufferNativeWindow.h>
 
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/ISurfaceComposerClient.h>
+#include <gui/Surface.h>
+#include <gui/SurfaceComposerClient.h>
 
 #include <core/SkBitmap.h>
 #include <core/SkStream.h>

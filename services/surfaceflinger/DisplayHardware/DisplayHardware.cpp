@@ -31,8 +31,6 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#include <pixelflinger/pixelflinger.h>
-
 #include "DisplayHardware/DisplayHardware.h"
 
 #include <hardware/gralloc.h>

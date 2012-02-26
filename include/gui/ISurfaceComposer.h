@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SF_ISURFACE_COMPOSER_H
-#define ANDROID_SF_ISURFACE_COMPOSER_H
+#ifndef ANDROID_GUI_ISURFACE_COMPOSER_H
+#define ANDROID_GUI_ISURFACE_COMPOSER_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -27,8 +27,8 @@
 
 #include <ui/PixelFormat.h>
 
-#include <surfaceflinger/ISurfaceComposerClient.h>
-#include <surfaceflinger/IGraphicBufferAlloc.h>
+#include <gui/IGraphicBufferAlloc.h>
+#include <gui/ISurfaceComposerClient.h>
 
 namespace android {
 // ----------------------------------------------------------------------------
@@ -171,4 +171,4 @@ public:
 
 }; // namespace android
 
-#endif // ANDROID_SF_ISURFACE_COMPOSER_H
+#endif // ANDROID_GUI_ISURFACE_COMPOSER_H

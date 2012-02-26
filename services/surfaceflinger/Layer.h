@@ -22,9 +22,12 @@
 
 #include <gui/SurfaceTexture.h>
 
-#include <pixelflinger/pixelflinger.h>
+#include <utils/Timers.h>
+
 #include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
+
+#include <gui/ISurfaceComposerClient.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -34,7 +37,6 @@
 #include "LayerBase.h"
 #include "SurfaceTextureLayer.h"
 #include "Transform.h"
-#include <utils/Timers.h>
 
 namespace android {
 

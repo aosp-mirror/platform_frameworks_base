@@ -31,15 +31,14 @@
 
 #include <ui/DisplayInfo.h>
 
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/ISurfaceComposerClient.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-
-#include <private/surfaceflinger/LayerState.h>
-#include <private/surfaceflinger/SharedBufferStack.h>
+#include <gui/ISurface.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/ISurfaceComposerClient.h>
+#include <gui/SurfaceComposerClient.h>
 
 #include <private/gui/ComposerService.h>
+#include <private/gui/LayerState.h>
+#include <private/gui/SharedBufferStack.h>
 
 namespace android {
 // ---------------------------------------------------------------------------

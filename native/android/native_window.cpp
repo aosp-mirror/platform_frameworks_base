@@ -18,7 +18,7 @@
 #include <utils/Log.h>
 
 #include <android/native_window_jni.h>
-#include <surfaceflinger/Surface.h>
+#include <gui/Surface.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 

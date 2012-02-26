@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SF_SURFACE_COMPOSER_CLIENT_H
-#define ANDROID_SF_SURFACE_COMPOSER_CLIENT_H
+#ifndef ANDROID_GUI_SURFACE_COMPOSER_CLIENT_H
+#define ANDROID_GUI_SURFACE_COMPOSER_CLIENT_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -29,7 +29,7 @@
 
 #include <ui/PixelFormat.h>
 
-#include <surfaceflinger/Surface.h>
+#include <gui/Surface.h>
 
 namespace android {
 
@@ -174,4 +174,4 @@ public:
 // ---------------------------------------------------------------------------
 }; // namespace android
 
-#endif // ANDROID_SF_SURFACE_COMPOSER_CLIENT_H
+#endif // ANDROID_GUI_SURFACE_COMPOSER_CLIENT_H

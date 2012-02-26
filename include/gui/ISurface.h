@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SF_ISURFACE_H
-#define ANDROID_SF_ISURFACE_H
+#ifndef ANDROID_GUI_ISURFACE_H
+#define ANDROID_GUI_ISURFACE_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -61,4 +61,4 @@ public:
 
 }; // namespace android
 
-#endif // ANDROID_SF_ISURFACE_H
+#endif // ANDROID_GUI_ISURFACE_H

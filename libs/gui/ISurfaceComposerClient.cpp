@@ -29,9 +29,9 @@
 #include <ui/Point.h>
 #include <ui/Rect.h>
 
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/ISurfaceComposerClient.h>
-#include <private/surfaceflinger/LayerState.h>
+#include <gui/ISurface.h>
+#include <gui/ISurfaceComposerClient.h>
+#include <private/gui/LayerState.h>
 
 // ---------------------------------------------------------------------------
 

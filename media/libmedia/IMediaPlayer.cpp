@@ -23,8 +23,6 @@
 #include <media/IMediaPlayer.h>
 #include <media/IStreamSource.h>
 
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/Surface.h>
 #include <gui/ISurfaceTexture.h>
 #include <utils/String8.h>
 

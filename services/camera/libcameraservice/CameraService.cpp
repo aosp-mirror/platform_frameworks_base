@@ -29,10 +29,10 @@
 #include <cutils/atomic.h>
 #include <cutils/properties.h>
 #include <gui/SurfaceTextureClient.h>
+#include <gui/Surface.h>
 #include <hardware/hardware.h>
 #include <media/AudioSystem.h>
 #include <media/mediaplayer.h>
-#include <surfaceflinger/ISurface.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <utils/String16.h>

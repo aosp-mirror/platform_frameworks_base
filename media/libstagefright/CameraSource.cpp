@@ -27,7 +27,7 @@
 #include <media/stagefright/MetaData.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>
-#include <surfaceflinger/Surface.h>
+#include <gui/Surface.h>
 #include <utils/String8.h>
 #include <cutils/properties.h>
 

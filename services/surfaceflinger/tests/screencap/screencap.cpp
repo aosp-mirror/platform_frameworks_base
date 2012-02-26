@@ -21,7 +21,7 @@
 #include <binder/IServiceManager.h>
 
 #include <binder/IMemory.h>
-#include <surfaceflinger/ISurfaceComposer.h>
+#include <gui/ISurfaceComposer.h>
 
 #include <SkImageEncoder.h>
 #include <SkBitmap.h>

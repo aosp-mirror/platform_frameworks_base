@@ -24,9 +24,9 @@
 #include <utils/String8.h>
 #include <utils/threads.h>
 
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/Surface.h>
+#include <gui/SurfaceComposerClient.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>

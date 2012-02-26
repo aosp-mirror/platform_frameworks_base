@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
+#include <math.h>
 
 #include <cutils/compiler.h>
 #include <cutils/native_handle.h>
@@ -29,7 +30,7 @@
 #include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
 
-#include <surfaceflinger/Surface.h>
+#include <gui/Surface.h>
 
 #include "clz.h"
 #include "DisplayHardware/DisplayHardware.h"
@@ -38,7 +39,6 @@
 #include "Layer.h"
 #include "SurfaceFlinger.h"
 #include "SurfaceTextureLayer.h"
-#include <math.h>
 
 #define DEBUG_RESIZE    0
 

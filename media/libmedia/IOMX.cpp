@@ -22,8 +22,6 @@
 #include <binder/Parcel.h>
 #include <media/IOMX.h>
 #include <media/stagefright/foundation/ADebug.h>
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/Surface.h>
 
 namespace android {
 

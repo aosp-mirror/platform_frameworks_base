@@ -29,8 +29,6 @@
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/Utils.h>
-#include <surfaceflinger/Surface.h>
-#include <gui/ISurfaceTexture.h>
 
 namespace android {
 

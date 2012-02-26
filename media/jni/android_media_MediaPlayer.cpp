@@ -39,7 +39,7 @@
 #include "android_util_Binder.h"
 #include <binder/Parcel.h>
 #include <gui/ISurfaceTexture.h>
-#include <surfaceflinger/Surface.h>
+#include <gui/Surface.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 

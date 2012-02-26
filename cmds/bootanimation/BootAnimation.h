@@ -23,9 +23,6 @@
 #include <androidfw/AssetManager.h>
 #include <utils/threads.h>
 
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
@@ -33,7 +30,9 @@ class SkBitmap;
 
 namespace android {
 
-class AssetManager;
+class Surface;
+class SurfaceComposerClient;
+class SurfaceControl;
 
 // ---------------------------------------------------------------------------
 

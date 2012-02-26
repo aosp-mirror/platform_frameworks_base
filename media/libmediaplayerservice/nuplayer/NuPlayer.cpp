@@ -38,7 +38,6 @@
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
-#include <surfaceflinger/Surface.h>
 #include <gui/ISurfaceTexture.h>
 
 #include "avc_utils.h"

@@ -25,8 +25,6 @@
 #include <utils/Log.h>
 #include <utils/threads.h>
 
-#include <surfaceflinger/ISurfaceComposer.h>
-
 #if defined(HAVE_PTHREADS)
 # include <pthread.h>
 # include <sys/resource.h>

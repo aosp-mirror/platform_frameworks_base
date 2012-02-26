@@ -23,7 +23,6 @@
 #include <binder/MemoryHeapPmem.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MetaData.h>
-#include <surfaceflinger/Surface.h>
 #include <system/window.h>
 #include <ui/GraphicBufferMapper.h>
 #include <gui/ISurfaceTexture.h>

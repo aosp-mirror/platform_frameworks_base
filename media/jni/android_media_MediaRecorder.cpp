@@ -18,7 +18,7 @@
 #define LOG_TAG "MediaRecorderJNI"
 #include <utils/Log.h>
 
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/Surface.h>
 #include <camera/ICameraService.h>
 #include <camera/Camera.h>
 #include <media/mediarecorder.h>

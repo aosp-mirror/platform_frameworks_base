@@ -21,13 +21,16 @@
 #include <dlfcn.h>
 #include <fcntl.h>
 
-#include <android_runtime/AndroidRuntime.h>
-#include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_app_NativeActivity.h>
 #include <android_runtime/android_util_AssetManager.h>
-#include <surfaceflinger/Surface.h>
-#include <system/window.h>
+#include <android_runtime/android_view_Surface.h>
+#include <android_runtime/AndroidRuntime.h>
 #include <androidfw/InputTransport.h>
+
+#include <gui/Surface.h>
+
+#include <system/window.h>
+
 #include <utils/Looper.h>
 
 #include "JNIHelp.h"

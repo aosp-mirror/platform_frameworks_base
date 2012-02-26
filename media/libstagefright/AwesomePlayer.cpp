@@ -47,10 +47,8 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXCodec.h>
 
-#include <surfaceflinger/Surface.h>
 #include <gui/ISurfaceTexture.h>
 #include <gui/SurfaceTextureClient.h>
-#include <surfaceflinger/ISurfaceComposer.h>
 
 #include <media/stagefright/foundation/AMessage.h>
 

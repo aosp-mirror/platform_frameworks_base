@@ -19,9 +19,9 @@
 
 #include <EGL/egl.h>
 
+#include <gui/IGraphicBufferAlloc.h>
 #include <gui/ISurfaceTexture.h>
 
-#include <surfaceflinger/IGraphicBufferAlloc.h>
 #include <ui/GraphicBuffer.h>
 
 #include <utils/String8.h>

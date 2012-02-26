@@ -26,7 +26,7 @@
 #include <utils/Vector.h>
 
 #include <gui/SurfaceTexture.h>
-#include <surfaceflinger/Surface.h>
+#include <gui/Surface.h>
 #include <camera/Camera.h>
 #include <binder/IMemory.h>
 

@@ -30,7 +30,7 @@
 #include <media/stagefright/MediaCodec.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/NuMediaExtractor.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/SurfaceComposerClient.h>
 
 static void usage(const char *me) {
     fprintf(stderr, "usage: %s [-a] use audio\n"

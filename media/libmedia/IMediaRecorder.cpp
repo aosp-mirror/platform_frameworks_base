@@ -19,10 +19,10 @@
 #define LOG_TAG "IMediaRecorder"
 #include <utils/Log.h>
 #include <binder/Parcel.h>
-#include <surfaceflinger/Surface.h>
 #include <camera/ICamera.h>
 #include <media/IMediaRecorderClient.h>
 #include <media/IMediaRecorder.h>
+#include <gui/Surface.h>
 #include <gui/ISurfaceTexture.h>
 #include <unistd.h>
 

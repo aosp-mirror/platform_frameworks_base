@@ -23,8 +23,6 @@
 #include <math.h>
 #include <utils/misc.h>
 
-#include <surfaceflinger/Surface.h>
-
 #include <core/SkBitmap.h>
 #include <core/SkPixelRef.h>
 #include <core/SkStream.h>

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SF_SURFACE_H
-#define ANDROID_SF_SURFACE_H
+#ifndef ANDROID_GUI_SURFACE_H
+#define ANDROID_GUI_SURFACE_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -28,9 +28,8 @@
 #include <ui/Region.h>
 
 #include <gui/SurfaceTextureClient.h>
-
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/ISurfaceComposerClient.h>
+#include <gui/ISurface.h>
+#include <gui/ISurfaceComposerClient.h>
 
 #define ANDROID_VIEW_SURFACE_JNI_ID    "mNativeSurface"
 
@@ -173,4 +172,4 @@ private:
 
 }; // namespace android
 
-#endif // ANDROID_SF_SURFACE_H
+#endif // ANDROID_GUI_SURFACE_H

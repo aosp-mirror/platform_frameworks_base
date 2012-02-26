@@ -32,8 +32,6 @@
 #include <media/mediaplayer.h>
 #include <media/AudioSystem.h>
 
-#include <surfaceflinger/Surface.h>
-
 #include <binder/MemoryBase.h>
 
 #include <utils/KeyedVector.h>

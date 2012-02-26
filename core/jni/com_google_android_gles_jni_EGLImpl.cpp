@@ -21,19 +21,19 @@
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <utils/misc.h>
 
+
+#include <EGL/egl_display.h>
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
-#include <EGL/egl_display.h>
+#include <gui/Surface.h>
+#include <gui/SurfaceTexture.h>
+#include <gui/SurfaceTextureClient.h>
 
-#include <surfaceflinger/Surface.h>
 #include <SkBitmap.h>
 #include <SkPixelRef.h>
 
 #include <ui/ANativeObjectBase.h>
-
-#include <gui/SurfaceTexture.h>
-#include <gui/SurfaceTextureClient.h>
 
 namespace android {
 
@@ -46,7 +46,6 @@ static jfieldID gContext_EGLContextFieldID;
 static jfieldID gSurface_EGLSurfaceFieldID;
 static jfieldID gSurface_NativePixelRefFieldID;
 static jfieldID gConfig_EGLConfigFieldID;
-static jfieldID gSurface_SurfaceFieldID;
 static jfieldID gBitmap_NativeBitmapFieldID;
 
 static inline EGLDisplay getDisplay(JNIEnv* env, jobject o) {

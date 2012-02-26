@@ -40,7 +40,7 @@
 #include <media/MediaProfiles.h>
 #include <camera/ICamera.h>
 #include <camera/CameraParameters.h>
-#include <surfaceflinger/Surface.h>
+#include <gui/Surface.h>
 
 #include <utils/Errors.h>
 #include <sys/types.h>

@@ -28,16 +28,15 @@
 
 #include <binder/IPCThreadState.h>
 
-#include <gui/SurfaceTextureClient.h>
-
 #include <ui/DisplayInfo.h>
 #include <ui/GraphicBuffer.h>
 #include <ui/Rect.h>
 
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/ISurface.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/Surface.h>
+#include <gui/SurfaceComposerClient.h>
+#include <gui/SurfaceTextureClient.h>
 
 namespace android {
 

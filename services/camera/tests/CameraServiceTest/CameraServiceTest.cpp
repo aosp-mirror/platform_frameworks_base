@@ -22,7 +22,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <surfaceflinger/ISurface.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>
 #include <ui/GraphicBuffer.h>

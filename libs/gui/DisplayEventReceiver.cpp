@@ -21,10 +21,9 @@
 #include <gui/BitTube.h>
 #include <gui/DisplayEventReceiver.h>
 #include <gui/IDisplayEventConnection.h>
+#include <gui/ISurfaceComposer.h>
 
 #include <private/gui/ComposerService.h>
-
-#include <surfaceflinger/ISurfaceComposer.h>
 
 // ---------------------------------------------------------------------------
 

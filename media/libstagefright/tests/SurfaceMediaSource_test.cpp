@@ -26,11 +26,11 @@
 #include <media/stagefright/SurfaceMediaSource.h>
 #include <media/mediarecorder.h>
 
-#include <gui/SurfaceTextureClient.h>
 #include <ui/GraphicBuffer.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/SurfaceTextureClient.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/Surface.h>
+#include <gui/SurfaceComposerClient.h>
 
 #include <binder/ProcessState.h>
 #include <ui/FramebufferNativeWindow.h>

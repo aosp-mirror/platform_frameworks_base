@@ -26,13 +26,15 @@
 #include "jni.h"
 #include "JNIHelp.h"
 
+#include <gui/Surface.h>
+#include <gui/SurfaceTextureClient.h>
+
 #include <media/stagefright/MediaCodec.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/MediaErrors.h>
-#include <surfaceflinger/Surface.h>
 
 namespace android {
 

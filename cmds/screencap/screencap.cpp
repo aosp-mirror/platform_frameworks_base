@@ -24,7 +24,7 @@
 #include <sys/mman.h>
 
 #include <binder/IMemory.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/SurfaceComposerClient.h>
 
 #include <SkImageEncoder.h>
 #include <SkBitmap.h>

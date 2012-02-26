@@ -25,8 +25,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Timers.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/ISurfaceComposer.h>
 
 #include <private/gui/ComposerService.h>
 

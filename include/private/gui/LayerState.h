@@ -23,8 +23,7 @@
 #include <utils/Errors.h>
 
 #include <ui/Region.h>
-
-#include <surfaceflinger/ISurface.h>
+#include <gui/ISurface.h>
 
 namespace android {
 

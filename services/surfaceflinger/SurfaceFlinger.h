@@ -33,9 +33,9 @@
 #include <binder/IMemory.h>
 
 #include <ui/PixelFormat.h>
-#include <surfaceflinger/IGraphicBufferAlloc.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/ISurfaceComposerClient.h>
+#include <gui/IGraphicBufferAlloc.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/ISurfaceComposerClient.h>
 
 #include "Barrier.h"
 #include "Layer.h"

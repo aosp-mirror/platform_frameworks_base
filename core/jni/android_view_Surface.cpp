@@ -22,11 +22,13 @@
 #include "android/graphics/GraphicsJNI.h"
 
 #include <binder/IMemory.h>
+
+#include <gui/Surface.h>
+#include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceTexture.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <surfaceflinger/Surface.h>
-#include <ui/Region.h>
+
 #include <ui/Rect.h>
+#include <ui/Region.h>
 
 #include <EGL/egl.h>
 

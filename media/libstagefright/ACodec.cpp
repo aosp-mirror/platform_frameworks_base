@@ -31,9 +31,6 @@
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
 
-#include <surfaceflinger/Surface.h>
-#include <gui/SurfaceTextureClient.h>
-
 #include <OMX_Component.h>
 
 namespace android {

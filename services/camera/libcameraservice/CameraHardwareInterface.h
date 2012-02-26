@@ -21,7 +21,6 @@
 #include <binder/MemoryBase.h>
 #include <binder/MemoryHeapBase.h>
 #include <utils/RefBase.h>
-#include <surfaceflinger/ISurface.h>
 #include <ui/GraphicBuffer.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>

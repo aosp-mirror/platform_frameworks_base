@@ -20,15 +20,15 @@
 #include <utils/RefBase.h>
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
-#include <surfaceflinger/Surface.h>
 #include <binder/IMemory.h>
 #include <utils/String8.h>
 #include <camera/Camera.h>
-#include <gui/ISurfaceTexture.h>
 
 namespace android {
 
 class ICameraClient;
+class ISurfaceTexture;
+class Surface;
 
 class ICamera: public IInterface
 {

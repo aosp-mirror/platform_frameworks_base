@@ -25,15 +25,14 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <gui/SurfaceTexture.h>
-
 #include <hardware/hardware.h>
 
-#include <private/gui/ComposerService.h>
+#include <gui/IGraphicBufferAlloc.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/SurfaceComposerClient.h>
+#include <gui/SurfaceTexture.h>
 
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <surfaceflinger/IGraphicBufferAlloc.h>
+#include <private/gui/ComposerService.h>
 
 #include <utils/Log.h>
 #include <utils/String8.h>

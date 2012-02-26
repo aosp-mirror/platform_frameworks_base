@@ -24,9 +24,8 @@
 #include <media/stagefright/MetadataBufferType.h>
 
 #include <ui/GraphicBuffer.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <surfaceflinger/IGraphicBufferAlloc.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/IGraphicBufferAlloc.h>
 #include <OMX_Component.h>
 
 #include <utils/Log.h>
