@@ -8222,7 +8222,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Start a new selection
-        if (!handled) {
+        if (!handled && mEditor != null) {
             vibrate = handled = startSelectionActionMode();
         }
 
