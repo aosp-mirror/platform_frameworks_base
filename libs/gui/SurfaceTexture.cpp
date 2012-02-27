@@ -96,11 +96,6 @@ static float mtxRot270[16] = {
 
 static void mtxMul(float out[16], const float a[16], const float b[16]);
 
-// Get an ID that's unique within this process.
-static int32_t createProcessUniqueId() {
-    static volatile int32_t globalCounter = 0;
-    return android_atomic_inc(&globalCounter);
-}
 
 SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode,
         GLenum texTarget, bool useFenceSync) :
@@ -113,13 +108,8 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode,
 #else
     mUseFenceSync(false),
 #endif
-    mTexTarget(texTarget),
-    mAbandoned(false),
-    mCurrentTexture(BufferQueue::INVALID_BUFFER_SLOT)
+    mTexTarget(texTarget)
 {
-    // Choose a name using the PID and a process-unique ID.
-    mName = String8::format("unnamed-%d-%d", getpid(), createProcessUniqueId());
-    BufferQueue::setConsumerName(mName);
 
     ST_LOGV("SurfaceTexture");
     memcpy(mCurrentTransformMatrix, mtxIdentity,
@@ -128,18 +118,28 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode,
 
 SurfaceTexture::~SurfaceTexture() {
     ST_LOGV("~SurfaceTexture");
-    abandon();
+    freeAllBuffersLocked();
 }
 
 status_t SurfaceTexture::setBufferCountServer(int bufferCount) {
     Mutex::Autolock lock(mMutex);
-    return BufferQueue::setBufferCountServer(bufferCount);
+    return setBufferCountServerLocked(bufferCount);
 }
 
 
 status_t SurfaceTexture::setDefaultBufferSize(uint32_t w, uint32_t h)
 {
-    return BufferQueue::setDefaultBufferSize(w, h);
+    ST_LOGV("setDefaultBufferSize: w=%d, h=%d", w, h);
+    if (!w || !h) {
+        ST_LOGE("setDefaultBufferSize: dimensions cannot be 0 (w=%d, h=%d)",
+                w, h);
+        return BAD_VALUE;
+    }
+
+    Mutex::Autolock lock(mMutex);
+    mDefaultWidth = w;
+    mDefaultHeight = h;
+    return OK;
 }
 
 status_t SurfaceTexture::updateTexImage() {
@@ -151,35 +151,23 @@ status_t SurfaceTexture::updateTexImage() {
         return NO_INIT;
     }
 
-    BufferItem item;
-
     // In asynchronous mode the list is guaranteed to be one buffer
     // deep, while in synchronous mode we use the oldest buffer.
-    if (acquire(&item) == NO_ERROR) {
-        int buf = item.mBuf;
-        // This buffer was newly allocated, so we need to clean up on our side
-        if (item.mGraphicBuffer != NULL) {
-            mEGLSlots[buf].mGraphicBuffer = 0;
-            if (mEGLSlots[buf].mEglImage != EGL_NO_IMAGE_KHR) {
-                eglDestroyImageKHR(mEGLSlots[buf].mEglDisplay,
-                        mEGLSlots[buf].mEglImage);
-                mEGLSlots[buf].mEglImage = EGL_NO_IMAGE_KHR;
-                mEGLSlots[buf].mEglDisplay = EGL_NO_DISPLAY;
-            }
-            mEGLSlots[buf].mGraphicBuffer = item.mGraphicBuffer;
-        }
+    if (!mQueue.empty()) {
+        Fifo::iterator front(mQueue.begin());
+        int buf = *front;
 
         // Update the GL texture object.
-        EGLImageKHR image = mEGLSlots[buf].mEglImage;
+        EGLImageKHR image = mSlots[buf].mEglImage;
         EGLDisplay dpy = eglGetCurrentDisplay();
         if (image == EGL_NO_IMAGE_KHR) {
-            if (item.mGraphicBuffer == 0) {
+            if (mSlots[buf].mGraphicBuffer == 0) {
                 ST_LOGE("buffer at slot %d is null", buf);
                 return BAD_VALUE;
             }
-            image = createImage(dpy, item.mGraphicBuffer);
-            mEGLSlots[buf].mEglImage = image;
-            mEGLSlots[buf].mEglDisplay = dpy;
+            image = createImage(dpy, mSlots[buf].mGraphicBuffer);
+            mSlots[buf].mEglImage = image;
+            mSlots[buf].mEglDisplay = dpy;
             if (image == EGL_NO_IMAGE_KHR) {
                 // NOTE: if dpy was invalid, createImage() is guaranteed to
                 // fail. so we'd end up here.
@@ -202,8 +190,6 @@ status_t SurfaceTexture::updateTexImage() {
             failed = true;
         }
         if (failed) {
-            releaseBuffer(buf, mEGLSlots[buf].mEglDisplay,
-                    mEGLSlots[buf].mFence);
             return -EINVAL;
         }
 
@@ -214,37 +200,40 @@ status_t SurfaceTexture::updateTexImage() {
                 if (fence == EGL_NO_SYNC_KHR) {
                     ALOGE("updateTexImage: error creating fence: %#x",
                             eglGetError());
-                    releaseBuffer(buf, mEGLSlots[buf].mEglDisplay,
-                            mEGLSlots[buf].mFence);
                     return -EINVAL;
                 }
                 glFlush();
-                mEGLSlots[mCurrentTexture].mFence = fence;
+                mSlots[mCurrentTexture].mFence = fence;
             }
         }
 
         ST_LOGV("updateTexImage: (slot=%d buf=%p) -> (slot=%d buf=%p)",
                 mCurrentTexture,
                 mCurrentTextureBuf != NULL ? mCurrentTextureBuf->handle : 0,
-                buf, item.mGraphicBuffer->handle);
+                buf, mSlots[buf].mGraphicBuffer->handle);
 
-        // release old buffer
-        releaseBuffer(mCurrentTexture,
-                mEGLSlots[mCurrentTexture].mEglDisplay,
-                mEGLSlots[mCurrentTexture].mFence);
+        if (mCurrentTexture != INVALID_BUFFER_SLOT) {
+            // The current buffer becomes FREE if it was still in the queued
+            // state. If it has already been given to the client
+            // (synchronous mode), then it stays in DEQUEUED state.
+            if (mSlots[mCurrentTexture].mBufferState == BufferSlot::QUEUED) {
+                mSlots[mCurrentTexture].mBufferState = BufferSlot::FREE;
+            }
+        }
 
         // Update the SurfaceTexture state.
         mCurrentTexture = buf;
-        mCurrentTextureBuf = mEGLSlots[buf].mGraphicBuffer;
-        mCurrentCrop = item.mCrop;
-        mCurrentTransform = item.mTransform;
-        mCurrentScalingMode = item.mScalingMode;
-        mCurrentTimestamp = item.mTimestamp;
+        mCurrentTextureBuf = mSlots[buf].mGraphicBuffer;
+        mCurrentCrop = mSlots[buf].mCrop;
+        mCurrentTransform = mSlots[buf].mTransform;
+        mCurrentScalingMode = mSlots[buf].mScalingMode;
+        mCurrentTimestamp = mSlots[buf].mTimestamp;
         computeCurrentTransformMatrix();
 
         // Now that we've passed the point at which failures can happen,
         // it's safe to remove the buffer from the front of the queue.
-
+        mQueue.erase(front);
+        mDequeueCondition.signal();
     } else {
         // We always bind the texture even if we don't update its contents.
         glBindTexture(mTexTarget, mTexName);
@@ -310,7 +299,7 @@ void SurfaceTexture::computeCurrentTransformMatrix() {
         }
     }
 
-    sp<GraphicBuffer>& buf(mCurrentTextureBuf);
+    sp<GraphicBuffer>& buf(mSlots[mCurrentTexture].mGraphicBuffer);
     float tx, ty, sx, sy;
     if (!mCurrentCrop.isEmpty()) {
         // In order to prevent bilinear sampling at the of the crop rectangle we
@@ -382,7 +371,7 @@ void SurfaceTexture::setFrameAvailableListener(
         const sp<FrameAvailableListener>& listener) {
     ST_LOGV("setFrameAvailableListener");
     Mutex::Autolock lock(mMutex);
-    BufferQueue::setFrameAvailableListener(listener);
+    mFrameAvailableListener = listener;
 }
 
 EGLImageKHR SurfaceTexture::createImage(EGLDisplay dpy,
@@ -423,33 +412,22 @@ uint32_t SurfaceTexture::getCurrentScalingMode() const {
 
 bool SurfaceTexture::isSynchronousMode() const {
     Mutex::Autolock lock(mMutex);
-    return BufferQueue::isSynchronousMode();
+    return mSynchronousMode;
 }
+
+
 
 void SurfaceTexture::abandon() {
     Mutex::Autolock lock(mMutex);
+    mQueue.clear();
     mAbandoned = true;
     mCurrentTextureBuf.clear();
-
-    // destroy all egl buffers
-    for (int i =0; i < NUM_BUFFER_SLOTS; i++) {
-        mEGLSlots[i].mGraphicBuffer = 0;
-        if (mEGLSlots[i].mEglImage != EGL_NO_IMAGE_KHR) {
-            eglDestroyImageKHR(mEGLSlots[i].mEglDisplay,
-                    mEGLSlots[i].mEglImage);
-            mEGLSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
-            mEGLSlots[i].mEglDisplay = EGL_NO_DISPLAY;
-        }
-    }
-
-    // disconnect from the BufferQueue
-    BufferQueue::consumerDisconnect();
+    freeAllBuffersLocked();
+    mDequeueCondition.signal();
 }
 
 void SurfaceTexture::setName(const String8& name) {
-    Mutex::Autolock _l(mMutex);
     mName = name;
-    BufferQueue::setConsumerName(name);
 }
 
 void SurfaceTexture::dump(String8& result) const
@@ -462,19 +440,68 @@ void SurfaceTexture::dump(String8& result, const char* prefix,
         char* buffer, size_t SIZE) const
 {
     Mutex::Autolock _l(mMutex);
-    snprintf(buffer, SIZE, "%smTexName=%d\n", prefix, mTexName);
+    snprintf(buffer, SIZE,
+            "%smBufferCount=%d, mSynchronousMode=%d, default-size=[%dx%d], "
+            "mPixelFormat=%d, mTexName=%d\n",
+            prefix, mBufferCount, mSynchronousMode, mDefaultWidth,
+            mDefaultHeight, mPixelFormat, mTexName);
     result.append(buffer);
 
+    String8 fifo;
+    int fifoSize = 0;
+    Fifo::const_iterator i(mQueue.begin());
+    while (i != mQueue.end()) {
+        snprintf(buffer, SIZE, "%02d ", *i++);
+        fifoSize++;
+        fifo.append(buffer);
+    }
+
     snprintf(buffer, SIZE,
-            "%snext   : {crop=[%d,%d,%d,%d], transform=0x%02x, current=%d}\n"
-            ,prefix, mCurrentCrop.left,
+            "%scurrent: {crop=[%d,%d,%d,%d], transform=0x%02x, current=%d}\n"
+            "%snext   : {crop=[%d,%d,%d,%d], transform=0x%02x, FIFO(%d)={%s}}\n"
+            ,
+            prefix, mCurrentCrop.left,
             mCurrentCrop.top, mCurrentCrop.right, mCurrentCrop.bottom,
-            mCurrentTransform, mCurrentTexture
+            mCurrentTransform, mCurrentTexture,
+            prefix, mNextCrop.left, mNextCrop.top, mNextCrop.right,
+            mNextCrop.bottom, mNextTransform, fifoSize, fifo.string()
     );
     result.append(buffer);
 
+    struct {
+        const char * operator()(int state) const {
+            switch (state) {
+                case BufferSlot::DEQUEUED: return "DEQUEUED";
+                case BufferSlot::QUEUED: return "QUEUED";
+                case BufferSlot::FREE: return "FREE";
+                default: return "Unknown";
+            }
+        }
+    } stateName;
 
-    BufferQueue::dump(result, prefix, buffer, SIZE);
+    for (int i=0 ; i<mBufferCount ; i++) {
+        const BufferSlot& slot(mSlots[i]);
+        snprintf(buffer, SIZE,
+                "%s%s[%02d] "
+                "state=%-8s, crop=[%d,%d,%d,%d], "
+                "transform=0x%02x, timestamp=%lld",
+                prefix, (i==mCurrentTexture)?">":" ", i,
+                stateName(slot.mBufferState),
+                slot.mCrop.left, slot.mCrop.top, slot.mCrop.right,
+                slot.mCrop.bottom, slot.mTransform, slot.mTimestamp
+        );
+        result.append(buffer);
+
+        const sp<GraphicBuffer>& buf(slot.mGraphicBuffer);
+        if (buf != NULL) {
+            snprintf(buffer, SIZE,
+                    ", %p [%4ux%4u:%4u,%3X]",
+                    buf->handle, buf->width, buf->height, buf->stride,
+                    buf->format);
+            result.append(buffer);
+        }
+        result.append("\n");
+    }
 }
 
 static void mtxMul(float out[16], const float a[16], const float b[16]) {
