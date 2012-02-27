@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "BufferQueue"
+//#define LOG_NDEBUG 0
 
 #define GL_GLEXT_PROTOTYPES
 #define EGL_EGLEXT_PROTOTYPES
@@ -27,6 +28,7 @@
 #include <surfaceflinger/ISurfaceComposer.h>
 
 #include <utils/Log.h>
+#include <gui/SurfaceTexture.h>
 
 // This compile option causes SurfaceTexture to return the buffer that is currently
 // attached to the GL texture from dequeueBuffer when no other buffers are
@@ -42,11 +44,11 @@
 #endif
 
 // Macros for including the BufferQueue name in log messages
-#define ST_LOGV(x, ...) ALOGV("[%s] "x, mName.string(), ##__VA_ARGS__)
-#define ST_LOGD(x, ...) ALOGD("[%s] "x, mName.string(), ##__VA_ARGS__)
-#define ST_LOGI(x, ...) ALOGI("[%s] "x, mName.string(), ##__VA_ARGS__)
-#define ST_LOGW(x, ...) ALOGW("[%s] "x, mName.string(), ##__VA_ARGS__)
-#define ST_LOGE(x, ...) ALOGE("[%s] "x, mName.string(), ##__VA_ARGS__)
+#define ST_LOGV(x, ...) ALOGV("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
+#define ST_LOGD(x, ...) ALOGD("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
+#define ST_LOGI(x, ...) ALOGI("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
+#define ST_LOGW(x, ...) ALOGW("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
+#define ST_LOGE(x, ...) ALOGE("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
 
 namespace android {
 
@@ -63,17 +65,17 @@ BufferQueue::BufferQueue( bool allowSynchronousMode ) :
     mBufferCount(MIN_ASYNC_BUFFER_SLOTS),
     mClientBufferCount(0),
     mServerBufferCount(MIN_ASYNC_BUFFER_SLOTS),
-    mCurrentTexture(INVALID_BUFFER_SLOT),
     mNextTransform(0),
     mNextScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
     mSynchronousMode(false),
     mAllowSynchronousMode(allowSynchronousMode),
     mConnectedApi(NO_CONNECTED_API),
     mAbandoned(false),
-    mFrameCounter(0)
+    mFrameCounter(0),
+    mBufferHasBeenQueued(false)
 {
     // Choose a name using the PID and a process-unique ID.
-    mName = String8::format("unnamed-%d-%d", getpid(), createProcessUniqueId());
+    mConsumerName = String8::format("unnamed-%d-%d", getpid(), createProcessUniqueId());
 
     ST_LOGV("BufferQueue");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
@@ -119,6 +121,23 @@ status_t BufferQueue::setBufferCountServerLocked(int bufferCount) {
     return OK;
 }
 
+bool BufferQueue::isSynchronousMode() const {
+    Mutex::Autolock lock(mMutex);
+    return mSynchronousMode;
+}
+
+void BufferQueue::setConsumerName(const String8& name) {
+    Mutex::Autolock lock(mMutex);
+    mConsumerName = name;
+}
+
+void BufferQueue::setFrameAvailableListener(
+        const sp<FrameAvailableListener>& listener) {
+    ST_LOGV("setFrameAvailableListener");
+    Mutex::Autolock lock(mMutex);
+    mFrameAvailableListener = listener;
+}
+
 status_t BufferQueue::setBufferCount(int bufferCount) {
     ST_LOGV("setBufferCount: count=%d", bufferCount);
     Mutex::Autolock lock(mMutex);
@@ -160,7 +179,7 @@ status_t BufferQueue::setBufferCount(int bufferCount) {
     freeAllBuffersLocked();
     mBufferCount = bufferCount;
     mClientBufferCount = bufferCount;
-    mCurrentTexture = INVALID_BUFFER_SLOT;
+    mBufferHasBeenQueued = false;
     mQueue.clear();
     mDequeueCondition.signal();
     return OK;
@@ -276,7 +295,7 @@ status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                 mBufferCount = mServerBufferCount;
                 if (mBufferCount < minBufferCountNeeded)
                     mBufferCount = minBufferCountNeeded;
-                mCurrentTexture = INVALID_BUFFER_SLOT;
+                mBufferHasBeenQueued = false;
                 returnFlags |= ISurfaceTexture::RELEASE_ALL_BUFFERS;
             }
 
@@ -290,19 +309,10 @@ status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                     dequeuedCount++;
                 }
 
-                // if buffer is FREE it CANNOT be current
-                ALOGW_IF((state == BufferSlot::FREE) && (mCurrentTexture==i),
-                        "dequeueBuffer: buffer %d is both FREE and current!",
-                        i);
-
                 if (FLAG_ALLOW_DEQUEUE_CURRENT_BUFFER) {
-                    if (state == BufferSlot::FREE || i == mCurrentTexture) {
-                        foundSync = i;
-                        if (i != mCurrentTexture) {
-                            found = i;
-                            break;
-                        }
-                    }
+                    // This functionality has been temporarily removed so
+                    // BufferQueue and SurfaceTexture can be refactored into
+                    // separate objects
                 } else {
                     if (state == BufferSlot::FREE) {
                         /* We return the oldest of the free buffers to avoid
@@ -331,8 +341,7 @@ status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             // See whether a buffer has been queued since the last
             // setBufferCount so we know whether to perform the
             // MIN_UNDEQUEUED_BUFFERS check below.
-            bool bufferHasBeenQueued = mCurrentTexture != INVALID_BUFFER_SLOT;
-            if (bufferHasBeenQueued) {
+            if (mBufferHasBeenQueued) {
                 // make sure the client is not trying to dequeue more buffers
                 // than allowed.
                 const int avail = mBufferCount - (dequeuedCount+1);
@@ -404,27 +413,23 @@ status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             if (updateFormat) {
                 mPixelFormat = format;
             }
+
+            mSlots[buf].mAcquireCalled = false;
             mSlots[buf].mGraphicBuffer = graphicBuffer;
             mSlots[buf].mRequestBufferCalled = false;
             mSlots[buf].mFence = EGL_NO_SYNC_KHR;
-            if (mSlots[buf].mEglImage != EGL_NO_IMAGE_KHR) {
-                eglDestroyImageKHR(mSlots[buf].mEglDisplay,
-                        mSlots[buf].mEglImage);
-                mSlots[buf].mEglImage = EGL_NO_IMAGE_KHR;
-                mSlots[buf].mEglDisplay = EGL_NO_DISPLAY;
-            }
-            if (mCurrentTexture == buf) {
-                // The current texture no longer references the buffer in this slot
-                // since we just allocated a new buffer.
-                mCurrentTexture = INVALID_BUFFER_SLOT;
-            }
+            mSlots[buf].mEglDisplay = EGL_NO_DISPLAY;
+
+
+
+
             returnFlags |= ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
         }
 
         dpy = mSlots[buf].mEglDisplay;
         fence = mSlots[buf].mFence;
         mSlots[buf].mFence = EGL_NO_SYNC_KHR;
-    }
+    }  // end lock scope
 
     if (fence != EGL_NO_SYNC_KHR) {
         EGLint result = eglClientWaitSyncKHR(dpy, fence, 0, 1000000000);
@@ -437,6 +442,7 @@ status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             ALOGE("dequeueBuffer: timeout waiting for fence");
         }
         eglDestroySyncKHR(dpy, fence);
+
     }
 
     ST_LOGV("dequeueBuffer: returning slot=%d buf=%p flags=%#x", *outBuf,
@@ -496,9 +502,6 @@ status_t BufferQueue::queueBuffer(int buf, int64_t timestamp,
             ST_LOGE("queueBuffer: slot %d is not owned by the client "
                     "(state=%d)", buf, mSlots[buf].mBufferState);
             return -EINVAL;
-        } else if (buf == mCurrentTexture) {
-            ST_LOGE("queueBuffer: slot %d is current!", buf);
-            return -EINVAL;
         } else if (!mSlots[buf].mRequestBufferCalled) {
             ST_LOGE("queueBuffer: slot %d was enqueued without requesting a "
                     "buffer", buf);
@@ -538,6 +541,7 @@ status_t BufferQueue::queueBuffer(int buf, int64_t timestamp,
         mFrameCounter++;
         mSlots[buf].mFrameNumber = mFrameCounter;
 
+        mBufferHasBeenQueued = true;
         mDequeueCondition.signal();
 
         *outWidth = mDefaultWidth;
@@ -647,6 +651,9 @@ status_t BufferQueue::connect(int api,
             err = -EINVAL;
             break;
     }
+
+    mBufferHasBeenQueued = false;
+
     return err;
 }
 
@@ -687,24 +694,183 @@ status_t BufferQueue::disconnect(int api) {
     return err;
 }
 
+void BufferQueue::dump(String8& result) const
+{
+    char buffer[1024];
+    BufferQueue::dump(result, "", buffer, 1024);
+}
+
+void BufferQueue::dump(String8& result, const char* prefix,
+        char* buffer, size_t SIZE) const
+{
+    Mutex::Autolock _l(mMutex);
+    snprintf(buffer, SIZE,
+            "%snext   : {crop=[%d,%d,%d,%d], transform=0x%02x}\n"
+            ,prefix, mNextCrop.left, mNextCrop.top, mNextCrop.right,
+            mNextCrop.bottom, mNextTransform
+    );
+    result.append(buffer);
+
+    String8 fifo;
+    int fifoSize = 0;
+    Fifo::const_iterator i(mQueue.begin());
+    while (i != mQueue.end()) {
+       snprintf(buffer, SIZE, "%02d ", *i++);
+       fifoSize++;
+       fifo.append(buffer);
+    }
+
+    snprintf(buffer, SIZE,
+            "%s-BufferQueue mBufferCount=%d, mSynchronousMode=%d, default-size=[%dx%d], "
+            "mPixelFormat=%d, FIFO(%d)={%s}\n",
+            prefix, mBufferCount, mSynchronousMode, mDefaultWidth,
+            mDefaultHeight, mPixelFormat, fifoSize, fifo.string());
+    result.append(buffer);
+
+
+    struct {
+        const char * operator()(int state) const {
+            switch (state) {
+                case BufferSlot::DEQUEUED: return "DEQUEUED";
+                case BufferSlot::QUEUED: return "QUEUED";
+                case BufferSlot::FREE: return "FREE";
+                case BufferSlot::ACQUIRED: return "ACQUIRED";
+                default: return "Unknown";
+            }
+        }
+    } stateName;
+
+    for (int i=0 ; i<mBufferCount ; i++) {
+        const BufferSlot& slot(mSlots[i]);
+        snprintf(buffer, SIZE,
+                "%s%s[%02d] "
+                "state=%-8s, crop=[%d,%d,%d,%d], "
+                "transform=0x%02x, timestamp=%lld",
+                prefix, (slot.mBufferState == BufferSlot::ACQUIRED)?">":" ", i,
+                stateName(slot.mBufferState),
+                slot.mCrop.left, slot.mCrop.top, slot.mCrop.right,
+                slot.mCrop.bottom, slot.mTransform, slot.mTimestamp
+        );
+        result.append(buffer);
+
+        const sp<GraphicBuffer>& buf(slot.mGraphicBuffer);
+        if (buf != NULL) {
+            snprintf(buffer, SIZE,
+                    ", %p [%4ux%4u:%4u,%3X]",
+                    buf->handle, buf->width, buf->height, buf->stride,
+                    buf->format);
+            result.append(buffer);
+        }
+        result.append("\n");
+    }
+}
+
 void BufferQueue::freeBufferLocked(int i) {
     mSlots[i].mGraphicBuffer = 0;
     mSlots[i].mBufferState = BufferSlot::FREE;
     mSlots[i].mFrameNumber = 0;
-    if (mSlots[i].mEglImage != EGL_NO_IMAGE_KHR) {
-        eglDestroyImageKHR(mSlots[i].mEglDisplay, mSlots[i].mEglImage);
-        mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
-        mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
+    mSlots[i].mAcquireCalled = false;
+
+    // destroy fence as BufferQueue now takes ownership
+    if (mSlots[i].mFence != EGL_NO_SYNC_KHR) {
+        eglDestroySyncKHR(mSlots[i].mEglDisplay, mSlots[i].mFence);
+        mSlots[i].mFence = EGL_NO_SYNC_KHR;
     }
 }
 
 void BufferQueue::freeAllBuffersLocked() {
     ALOGW_IF(!mQueue.isEmpty(),
             "freeAllBuffersLocked called but mQueue is not empty");
-    mCurrentTexture = INVALID_BUFFER_SLOT;
+    mQueue.clear();
+    mBufferHasBeenQueued = false;
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         freeBufferLocked(i);
     }
+}
+
+status_t BufferQueue::acquire(BufferItem *buffer) {
+    Mutex::Autolock _l(mMutex);
+    // check if queue is empty
+    // In asynchronous mode the list is guaranteed to be one buffer
+    // deep, while in synchronous mode we use the oldest buffer.
+    if (!mQueue.empty()) {
+        Fifo::iterator front(mQueue.begin());
+        int buf = *front;
+
+        if (mSlots[buf].mAcquireCalled) {
+            buffer->mGraphicBuffer = NULL;
+        }
+        else {
+            buffer->mGraphicBuffer = mSlots[buf].mGraphicBuffer;
+        }
+        buffer->mCrop = mSlots[buf].mCrop;
+        buffer->mTransform = mSlots[buf].mTransform;
+        buffer->mScalingMode = mSlots[buf].mScalingMode;
+        buffer->mFrameNumber = mSlots[buf].mFrameNumber;
+        buffer->mBuf = buf;
+        mSlots[buf].mAcquireCalled = true;
+
+        mSlots[buf].mBufferState = BufferSlot::ACQUIRED;
+        mQueue.erase(front);
+    }
+    else {
+        return -EINVAL; //should be a better return code
+    }
+
+    return OK;
+}
+
+status_t BufferQueue::releaseBuffer(int buf, EGLDisplay display,
+        EGLSyncKHR fence) {
+    Mutex::Autolock _l(mMutex);
+
+    if (buf == INVALID_BUFFER_SLOT) {
+        return -EINVAL;
+    }
+
+    mSlots[buf].mEglDisplay = display;
+    mSlots[buf].mFence = fence;
+
+    // The current buffer becomes FREE if it was still in the queued
+    // state. If it has already been given to the client
+    // (synchronous mode), then it stays in DEQUEUED state.
+    if (mSlots[buf].mBufferState == BufferSlot::QUEUED
+            || mSlots[buf].mBufferState == BufferSlot::ACQUIRED) {
+        mSlots[buf].mBufferState = BufferSlot::FREE;
+    }
+    mDequeueCondition.signal();
+
+    return OK;
+}
+
+status_t BufferQueue::consumerDisconnect() {
+    Mutex::Autolock lock(mMutex);
+    // Once the SurfaceTexture disconnects, the BufferQueue
+    // is considered abandoned
+    mAbandoned = true;
+    freeAllBuffersLocked();
+    mDequeueCondition.signal();
+    return OK;
+}
+
+status_t BufferQueue::setDefaultBufferSize(uint32_t w, uint32_t h)
+{
+    ST_LOGV("setDefaultBufferSize: w=%d, h=%d", w, h);
+    if (!w || !h) {
+        ST_LOGE("setDefaultBufferSize: dimensions cannot be 0 (w=%d, h=%d)",
+                w, h);
+        return BAD_VALUE;
+    }
+
+    Mutex::Autolock lock(mMutex);
+    mDefaultWidth = w;
+    mDefaultHeight = h;
+    return OK;
+}
+
+status_t BufferQueue::setBufferCountServer(int bufferCount) {
+    Mutex::Autolock lock(mMutex);
+    return setBufferCountServerLocked(bufferCount);
 }
 
 void BufferQueue::freeAllBuffersExceptHeadLocked() {
@@ -715,7 +881,7 @@ void BufferQueue::freeAllBuffersExceptHeadLocked() {
         Fifo::iterator front(mQueue.begin());
         head = *front;
     }
-    mCurrentTexture = INVALID_BUFFER_SLOT;
+    mBufferHasBeenQueued = false;
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         if (i != head) {
             freeBufferLocked(i);
