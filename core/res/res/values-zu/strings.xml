@@ -70,11 +70,11 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Isevisi ayilungiselelwe."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ngeke ukwazi ukuguqul izilungiselelo zemininingwane yoshayayo."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Ukufinyelela okuvinjelwe kushintshiwe"</string>
-    <string name="RestrictedOnData" msgid="8653794784690065540">"Insizakalo yedatha ivaliwe."</string>
-    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Insizakalo ephuthumayo ivimbelwe."</string>
-    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Insizakalo yezwi ivimbelwe."</string>
+    <string name="RestrictedOnData" msgid="8653794784690065540">"Isevisi yedatha ivaliwe."</string>
+    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Isevisi ephuthumayo ivimbelwe."</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Isevisi yezwi ivimbelwe."</string>
     <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"Wonke amasevisi Wezwi avimbelwe."</string>
-    <string name="RestrictedOnSms" msgid="8314352327461638897">"Insizakalo ye-SMS ivaliwe."</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"Isevisi ye-SMS ivaliwe."</string>
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Amasevisi Wezwi/Idatha avimbelwe."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Amasevisi Wezwi/SMS avimbelwe."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Wonke amasevisi Wezwi/Idatha/SMS avimbelwe."</string>
@@ -276,7 +276,7 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Ivumela umnini ukuthi abophele kwissekelo esingaphezulu sesevisi ye-Vpm. Ayidingakeli izinsiza ezejwayelekile."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"hlanganisa kwiphephadonga"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lwephephadonga. Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bophezela kube insizakalo yesinqunjana"</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bophezela kube isevisi yesinqunjana"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lensizakalo yesinqunjwana. Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"xhumana nomphathi wedivaysi"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Ivumela ummeli ukuthumela okuqukethwe kumphathi wedivaysi. Akusoze kwadingeka kwizinhlelo zokusebenza ezivamile."</string>
@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"vumela noma vimbela izingxenye zensiza"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Ivumela ukuthi insiza iguqule ukuthi okuqukethwe kwenye insiza kuyasebenza noma cha. Izinsiza ezinobungozi zingasebenzisa lokhu ukwenza ukuthi izinto ezisemqoka ekhompyutheni yepeni zingasebenzi. Kufanele kuqashelwe uma kukhishwa lemvume njengoba kungenzeka kwenze izinto zensiza zibe sesimweni esingazinzile, nesiguquguqukayo."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Ivumela ukuthi insiza iguqule ukuthi okuqukethwe kwenye insiza kuyasebenza noma cha. Izinsiza ezinobungozi zingasebenzisa lokhu ukwenza ukuthi izinto ezisemqoka ocingweni zingasebenzi. Kufanele kuqashelwe uma kukhishwa lemvume njengoba kungenzeka kwenze izinto zensiza zibe sesmweni esingazinzile, nesiguquguqukayo."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"setha izinsiza ezincamelwayo"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Ivuela insiza ukuthi iguqule izinsiza ezincanyelwayo. Izinsiza ezinobungozi zingashintsha izinsiz buthule ezisebenzyo okwenza ukuthi izinsiza zakho ezikhona zingasebenzi ukuthola ze zithole imininingwane yakho eyimfihlo."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"guqula izilungiselelo zohlelo jikelele"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setha idethi"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Hlela"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Okuzenzakalelayo"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Ayikho imvume edingekayo"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Fihla "</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Bonisa konke"</b></string>

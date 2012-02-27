@@ -315,6 +315,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktiveer of deaktiveer programkomponente"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Laat die program toe om te verander of \'n komponent van ander program geaktiveer is of nie. Kwaadwillige programme kan dit dalk gebruik om belangrike tabletvermoëns te deaktiveer. Wees versigtig met hierdie toestemming, want dit kan programkomponente tot \'n onbruikbare, inkonsekwente of onstabiele toestand bring."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Laat die program toe om te verander of \'n komponent van ander program geaktiveer is of nie. Kwaadwillige programme kan dit gebruik om belangrike foonvermoëns te deaktiveer. Wees versigtig met hierdie toestemming, want dit kan programkomponente tot \'n onbruikbare, inkonsekwente of onstabiele toestand bring."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"stel voorkeurprogramme"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Laat die program toe om jou voorkeur-programme te verander. Kwaadwillige programme kan stilweg die programme wat loop, verander, wat jou bestaande programme bedrieg om private data oor jou in te samel."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"verander globale stelselinstellings"</string>
@@ -1006,6 +1010,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Stel datum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Stel"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Verstek"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Geen toestemmings benodig nie"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Versteek"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Wys alle"</b></string>

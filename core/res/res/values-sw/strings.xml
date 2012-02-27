@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"wezesha au lemeza vijenzi vya programu"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Inaruhusu programu kubadilisha kama kijenzi cha programu nyingine kimewezeshwa au la. Programu hasidi zinaweza kutumia hii kulemeza uwezo muhimu wa kompyuta kibao. Lazina uangalifu utumike kwa ruhusa hii, kwani kuna uwezekano kupata vijenzi vya programu katika hali isiyotumika, isiyowiana, au hali isiyo thabiti."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Inaruhusu programu kubadilisha kama kijenzi cha programu nyingine kimewezeshwa au la. Programu hasidi zinaweza kutumia hii kulemeza mambo muhimu ambayo simu inaweza kufanya. Lazima uangalifu utumike kwa ruhusa hii, kwani kuna uwezekano kufanya vijenzi vya programu kuwa katika hali ya kutotumika, kutokuwa na uwiano, au kutokuwa thabiti."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"kuweka programu zinazopendelewa"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Inaruhusu programu kurekebisha programu unazopendelea. Programu hasidi zinaweza, polepole, kubadilisha programu zinazoendeshwa, na kuzifanya programu ulizo nazo kukusanya data ya kibinafsi kutoka kwako."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"rekebisha mipangilio ya mfumo jumla"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Weka tarehe"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Weka"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Chaguo-msingi"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Hakuna vibali vinavyohitajika"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ficha"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Onyesha zote"</b></string>

@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"įgalinti programos komponentus arba jų neleisti"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Leidžiama programai pakeisti, ar įgalintas kitos programos komponentas, ar ne. Kenkėjiškos programos gali tai naudoti, kad neleistų svarbių planšetinio kompiuterio funkcijų. Šį leidimą reikia naudoti atsargiai, nes programos komponentai gali tapti nenaudojami, nenuoseklūs ar nestabilūs."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Leidžiama programai pakeisti nustatymą, ar įgalintas kitos programos komponentas, ar ne. Kenkėjiškos programos gali tai naudoti, kad neleistų svarbių telefono funkcijų. Šį leidimą reikia naudoti atsargiai, nes programos komponentai gali tapti nenaudojami, nenuoseklūs ar nestabilūs."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"nustatyti pageidaujamas programas"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Leidžiama programai keisti jūsų pageidaujamas programas. Kenkėjiškos programos gali nepastebimai pakeisti vykdomas programas, klastodama esamas programas, kad rinktų jūsų privačius duomenis."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"keisti visuotinius sistemos nustatymus"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nustatyti datą"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nustatyti"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Numatytasis"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Nereikia leidimų"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Slėpti"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Rodyti viską"</b></string>

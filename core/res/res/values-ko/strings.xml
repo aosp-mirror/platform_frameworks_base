@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"앱 구성요소 사용 또는 사용 안함"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"앱이 다른 앱 구성요소 사용 여부를 변경할 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 중요한 태블릿 기능을 중지시킬 수 있습니다. 이 권한을 허용할 경우 앱 구성요소가 사용 불가능하게 되거나 일관성이 맞지 않거나 불안정해질 수 있으므로 주의해야 합니다."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"앱이 다른 앱 구성요소 사용 여부를 변경할 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 중요한 휴대전화 기능을 중지시킬 수 있습니다. 이 권한을 허용할 경우 앱 구성요소가 사용 불가능하게 되거나 일관성이 맞지 않거나 불안정해질 수 있으므로 주의해야 합니다."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"기본 앱 설정"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"앱이 기본 앱을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 실행되는 앱을 몰래 변경하고 기존 앱으로 위장하여 사용자의 개인 정보를 수집할 수 있습니다."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"전체 시스템 설정 수정"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"날짜 설정"</string>
     <string name="date_time_set" msgid="5777075614321087758">"설정"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"기본값"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"권한 필요 없음"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"숨기기"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"모두 표시"</b></string>

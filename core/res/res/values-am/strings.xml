@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"የመተግበሪያ ምንዝሮችን አንቃ ወይም አቦዝን"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"የሌላ መተግበሪያ ክፍለ አካል እንደነቃ ወይም እንዳልነቃ መተግበሪያው እንዲለውጥ ይፈቅዳል፡፡ አስፈላጊ የጡባዊ ተኮ አቅሞችን ለማስወገድ ጎጂ መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡ ከፍቃድ ጋር ጥንቃቄ መወሰድ ይገባል፤ ልክ የማያገለግል፣ ወጥ ያልሆነ፣ ወይም ያልተረጋጋ ሁኔታ ወደ የመተግበሪያ ክፍለ አካል ማግኘት እንደሚቻል ሁሉ፡፡"</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"የሌላ መተግበሪያ ክፍለ አካል እንደነቃ ወይም እንዳልነቃ መተግበሪያው እንዲለውጥ ይፈቅዳል፡፡ አስፈላጊ የስልክ አቅሞችን ለማስወገድ ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙበት ይችላሉ፡፡ ከፍቃድ ጋር ጥንቃቄ መወሰድ ይገባል፤ ልክ የማያገለግል፣ ወጥ ያልሆነ፣ ወይም ያልተረጋጋ ሁኔታ ወደ የመተግበሪያ ክፍለ አካል ማግኘት እንደሚቻል ሁሉ፡፡"</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ተመራጭ መተግበሪያዎች አዘጋጅ"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"ተመራጭ መተግበሪያዎችህን ለመቀየር ለመተግበሪያው ይፈቅዳሉ፡፡ ካንተ የግል ውሂብ ለመሰብሰብ ያሉትን መተግበሪያዎች በመላክ፤ በመሄድ ላይ ያሉ መተግበሪያዎችን  ተንኮል አዘል መተግበሪያዎች በዝምታ ሊለውጡ ይችላሉ፡፡"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"የሁሉንም ስርዓት ቅንብሮች ቀይር"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ውሂብ አዘጋጅ"</string>
     <string name="date_time_set" msgid="5777075614321087758">"አዘጋጅ"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"ነባሪ"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"ምንም ፍቃዶች አይጠየቁም"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"ደብቅ "</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"ሁሉንም አሳይ"</b></string>

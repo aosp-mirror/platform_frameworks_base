@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ativar ou desativar os componentes do aplicativo"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Permite que o aplicativo ative ou desative um componente de outro aplicativo. Aplicativos maliciosos podem usar esse recurso para desativar recursos importantes do tablet. Tenha cuidado com essa permissão, pois é possível fazer com que os componentes do aplicativo fiquem inutilizáveis, inconsistentes ou instáveis."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Permite que o aplicativo altere se um componente de outro aplicativo está ativado ou não. Aplicativos maliciosos podem usar esse recurso para desativar recursos importantes do telefone. Deve-se tomar cuidado com essa permissão, uma vez que isso pode deixar os componentes do aplicativo inutilizáveis, inconsistentes ou instáveis."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"definir aplicativos preferidos"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permite que o aplicativo modifique seus aplicativos preferidos. Aplicativos maliciosos podem alterar os aplicativos que são executados, falsificando seus aplicativos existentes para coletar seus dados particulares."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modificar configurações globais do sistema"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Definir data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Padrão"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Nenhuma permissão necessária"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ocultar"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar todas"</b></string>

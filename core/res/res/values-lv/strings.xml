@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"iespējot vai atspējot lietotnes komponentus"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Ļauj lietotnei mainīt to, vai tiek iespējots citas lietotnes komponents. Ļaunprātīgas lietotnes to var izmantot, lai atspējotu svarīgas planšetdatora iespējas. Izmantojiet šo atļauju uzmanīgi, jo pastāv iespēja, ka lietotnes komponenti var kļūt neizmantojami, neatbilstīgi vai nestabili."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Ļauj lietotnei mainīt to, vai tiek iespējots citas lietotnes komponents. Ļaunprātīgas lietotnes to var izmantot, lai atspējotu svarīgas tālruņa iespējas. Izmantojiet šo atļauju uzmanīgi, jo pastāv iespēja, ka lietotnes komponenti var kļūt neizmantojami, neatbilstīgi vai nestabili."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"iestatīt vēlamās lietotnes"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Ļauj lietotnei modificēt jūsu vēlamās lietotnes. Ļaunprātīgas lietotnes var nemanāmi mainīt izmantotās lietotnes, atveidojot esošās lietotnes, lai no jums iegūtu privātus datus."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"pārveidot globālos sistēmas iestatījumus"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datuma iestatīšana"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Iestatīt"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Noklusējums"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Atļaujas nav nepieciešamas."</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Slēpt"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Rādīt visu"</b></string>
