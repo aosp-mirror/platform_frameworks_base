@@ -121,6 +121,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "amrdecode.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -152,7 +153,7 @@ extern "C"
     ----------------------------------------------------------------------------*/
     /* Table containing the number of core AMR data bytes for                */
     /* each codec mode for WMF input format(number excludes frame type byte) */
-    extern const Word16 WmfDecBytesPerFrame[16] =
+    const Word16 WmfDecBytesPerFrame[16] =
     {
         12, /* 4.75 */
         13, /* 5.15 */
@@ -174,7 +175,7 @@ extern "C"
 
     /* Table containing the number of core AMR data bytes for   */
     /* each codec mode for IF2 input format.                    */
-    extern const Word16 If2DecBytesPerFrame[16] =
+    const Word16 If2DecBytesPerFrame[16] =
     {
         13, /* 4.75 */
         14, /* 5.15 */

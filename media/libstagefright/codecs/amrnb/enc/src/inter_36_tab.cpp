@@ -123,6 +123,7 @@ terms listed above has been obtained from the copyright holder.
 ----------------------------------------------------------------------------*/
 #include    "typedef.h"
 #include    "cnst.h"
+#include    "inter_36_tab.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -162,7 +163,7 @@ extern "C"
              inter_3[k] = inter_6[2*k], 0 <= k <= 3*L_INTER_SRCH
      */
 
-    extern const Word16 inter_6[FIR_SIZE] =
+    const Word16 inter_6[FIR_SIZE] =
     {
         29519,
         28316, 24906, 19838, 13896, 7945, 2755,

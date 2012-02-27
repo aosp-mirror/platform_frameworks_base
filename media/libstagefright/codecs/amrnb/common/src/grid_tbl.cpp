@@ -63,6 +63,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "az_lsp.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -91,7 +92,7 @@ extern "C"
     ; LOCAL VARIABLE DEFINITIONS
     ; [Variable declaration - defined here and used outside this module]
     ----------------------------------------------------------------------------*/
-    extern const Word16 grid[grid_points + 1] =
+    const Word16 grid[grid_points + 1] =
     {
         32760, 32723, 32588, 32364, 32051, 31651,
         31164, 30591, 29935, 29196, 28377, 27481,

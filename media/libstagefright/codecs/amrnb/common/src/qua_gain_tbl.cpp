@@ -54,6 +54,7 @@ terms listed above has been obtained from the copyright holder.
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
 #include "qua_gain.h"
+#include "qua_gain_tbl.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -96,7 +97,7 @@ extern "C"
 
     /* table used in 'high' rates: MR67 MR74 */
 
-    extern const Word16 table_gain_highrates[VQ_SIZE_HIGHRATES*4] =
+    const Word16 table_gain_highrates[VQ_SIZE_HIGHRATES*4] =
     {
 
         /*
@@ -240,7 +241,7 @@ extern "C"
 
     /* table used in 'low' rates: MR475, MR515, MR59 */
 
-    extern const Word16 table_gain_lowrates[VQ_SIZE_LOWRATES*4] =
+    const Word16 table_gain_lowrates[VQ_SIZE_LOWRATES*4] =
     {
         /*g_pit,    g_fac,  qua_ener_MR122, qua_ener */
         10813,    28753,            2879,    17333,

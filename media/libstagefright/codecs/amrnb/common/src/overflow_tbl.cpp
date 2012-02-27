@@ -81,7 +81,7 @@ extern "C"
     ; LOCAL VARIABLE DEFINITIONS
     ; [Variable declaration - defined here and used outside this module]
     ----------------------------------------------------------------------------*/
-    extern const Word32 overflow_tbl [32]   = {0x7fffffffL, 0x3fffffffL,
+    const Word32 overflow_tbl [32]   = {0x7fffffffL, 0x3fffffffL,
         0x1fffffffL, 0x0fffffffL,
         0x07ffffffL, 0x03ffffffL,
         0x01ffffffL, 0x00ffffffL,
