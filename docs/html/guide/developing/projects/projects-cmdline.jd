@@ -218,7 +218,7 @@ android update lib-project \
   <p>To add a reference to a library project, navigate to the <code>&lt;sdk&gt;/tools/</code>
   directory and use this command:</p>
   <pre>
-android update lib-project \
+android update project \
 --target <em>&lt;target_ID&gt;</em> \
 --path <em>path/to/your/project</em>
 --library <em>path/to/library_projectA</em>
