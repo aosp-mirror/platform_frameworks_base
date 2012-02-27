@@ -106,7 +106,7 @@ extern "C"
 #define NUM_OF_MODES  10
 
 
-    const int16 AMR_WB_COMPRESSED[NUM_OF_MODES] =
+    static const int16 AMR_WB_COMPRESSED[NUM_OF_MODES] =
     {
         NBBITS_7k,
         NBBITS_9k,
