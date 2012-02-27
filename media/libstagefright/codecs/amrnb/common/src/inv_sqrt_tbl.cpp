@@ -55,6 +55,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "inv_sqrt.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -82,7 +83,7 @@ extern "C"
     ; LOCAL VARIABLE DEFINITIONS
     ; [Variable declaration - defined here and used outside this module]
     ----------------------------------------------------------------------------*/
-    extern const Word16 inv_sqrt_tbl[49] =
+    const Word16 inv_sqrt_tbl[49] =
     {
 
         32767, 31790, 30894, 30070, 29309, 28602, 27945, 27330, 26755, 26214,

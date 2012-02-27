@@ -117,6 +117,7 @@ terms listed above has been obtained from the copyright holder.
 ----------------------------------------------------------------------------*/
 #include    "typedef.h"
 #include    "cnst.h"
+#include    "window_tab.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -154,7 +155,7 @@ extern "C"
 
     /* window for non-EFR modesm; uses 40 samples lookahead */
 
-    extern const Word16 window_200_40[L_WINDOW] =
+    const Word16 window_200_40[L_WINDOW] =
     {
         2621,  2623,  2629,  2638,  2651,  2668,  2689,  2713,  2741,  2772,
         2808,  2847,  2890,  2936,  2986,  3040,  3097,  3158,  3223,  3291,
@@ -185,7 +186,7 @@ extern "C"
 
     /* window for EFR, first two subframes, no lookahead */
 
-    extern const Word16 window_160_80[L_WINDOW] =
+    const Word16 window_160_80[L_WINDOW] =
     {
         2621, 2624, 2633, 2648, 2668, 2695, 2727, 2765, 2809, 2859,
         2915, 2976, 3043, 3116, 3194, 3279, 3368, 3464, 3565, 3671,
@@ -215,7 +216,7 @@ extern "C"
 
     /* window for EFR, last two subframes, no lookahead */
 
-    extern const Word16 window_232_8[L_WINDOW] =
+    const Word16 window_232_8[L_WINDOW] =
     {
         2621, 2623, 2627, 2634, 2644, 2656, 2671, 2689, 2710, 2734,
         2760, 2789, 2821, 2855, 2893, 2933, 2975, 3021, 3069, 3120,

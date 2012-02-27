@@ -117,6 +117,7 @@ terms listed above has been obtained from the copyright holder.
 ----------------------------------------------------------------------------*/
 #include    "typedef.h"
 #include    "cnst.h"
+#include    "lsp_tab.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -146,7 +147,7 @@ extern "C"
     ; LOCAL STORE/BUFFER/POINTER DEFINITIONS
     ; Variable declaration - defined here and used outside this module
     ----------------------------------------------------------------------------*/
-    extern const Word16 lsp_init_data[M] = {30000, 26000, 21000, 15000, 8000,
+    const Word16 lsp_init_data[M] = {30000, 26000, 21000, 15000, 8000,
         0, -8000, -15000, -21000, -26000
     };
 

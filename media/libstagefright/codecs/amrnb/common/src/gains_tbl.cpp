@@ -86,14 +86,16 @@ extern "C"
     ----------------------------------------------------------------------------*/
 
 
-    extern const Word16 qua_gain_pitch[NB_QUA_PITCH] =
+    extern const Word16 qua_gain_pitch[];
+    const Word16 qua_gain_pitch[NB_QUA_PITCH] =
     {
         0, 3277, 6556, 8192, 9830, 11469, 12288, 13107,
         13926, 14746, 15565, 16384, 17203, 18022, 18842, 19661
     };
 
 
-    extern const Word16 qua_gain_code[(NB_QUA_CODE+1)*3] =
+    extern const Word16 qua_gain_code[];
+    const Word16 qua_gain_code[(NB_QUA_CODE+1)*3] =
     {
         /* gain factor (g_fac) and quantized energy error (qua_ener_MR122, qua_ener)
          * are stored:
