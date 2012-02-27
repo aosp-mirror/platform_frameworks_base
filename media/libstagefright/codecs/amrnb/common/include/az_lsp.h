@@ -83,7 +83,7 @@ extern "C"
     ; EXTERNAL VARIABLES REFERENCES
     ; Declare variables used in this module but defined elsewhere
     ----------------------------------------------------------------------------*/
-    extern Word16 grid[];
+    extern const Word16 grid[];
 
     /*----------------------------------------------------------------------------
     ; SIMPLE TYPEDEF'S

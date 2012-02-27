@@ -83,8 +83,10 @@ extern "C"
     ; [Variable declaration - defined here and used outside this module]
     ----------------------------------------------------------------------------*/
 
-    extern const Word16 gray[8]  = {0, 1, 3, 2, 6, 4, 5, 7};
-    extern const Word16 dgray[8] = {0, 1, 3, 2, 5, 6, 4, 7};
+    extern const Word16 gray[];
+    extern const Word16 dgray[];
+    const Word16 gray[8]  = {0, 1, 3, 2, 6, 4, 5, 7};
+    const Word16 dgray[8] = {0, 1, 3, 2, 5, 6, 4, 7};
 
     /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
