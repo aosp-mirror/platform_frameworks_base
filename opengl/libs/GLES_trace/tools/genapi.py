@@ -92,8 +92,8 @@ GL2PROTOBUF_TYPE_MAP = {
     "GLclampf":DataType.FLOAT,
     "GLfixed":DataType.INT,
     "GLclampx":DataType.INT,
-    "GLsizeiptr":DataType.POINTER,
-    "GLintptr":DataType.POINTER,
+    "GLsizeiptr":DataType.INT,
+    "GLintptr":DataType.INT,
     "GLeglImageOES":DataType.POINTER,
 }
 
@@ -180,9 +180,20 @@ TRACE_CALL_TEMPLATE = pyratemp.Template(
     rt->$!retDataType.getProtobufCall()!$retValue);
 <!--(end)-->
 
+    void *pointerArgs[] = {
+<!--(for argname, argtype in parsedArgs)-->
+    <!--(if argtype == DataType.POINTER)-->
+        (void *) $!argname!$,
+    <!--(end)-->
+<!--(end)-->
+<!--(if retDataType == DataType.POINTER)-->
+        (void *) retValue,
+<!--(end)-->
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 <!--(if retType != "void")-->
 

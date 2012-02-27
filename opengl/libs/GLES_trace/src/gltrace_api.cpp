@@ -49,9 +49,12 @@ void GLTrace_glActiveTexture(GLenum texture) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -80,9 +83,12 @@ void GLTrace_glAttachShader(GLuint program, GLuint shader) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -117,9 +123,13 @@ void GLTrace_glBindAttribLocation(GLuint program, GLuint index, const GLchar* na
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) name,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -148,9 +158,12 @@ void GLTrace_glBindBuffer(GLenum target, GLuint buffer) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -179,9 +192,12 @@ void GLTrace_glBindFramebuffer(GLenum target, GLuint framebuffer) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -210,9 +226,12 @@ void GLTrace_glBindRenderbuffer(GLenum target, GLuint renderbuffer) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -241,9 +260,12 @@ void GLTrace_glBindTexture(GLenum target, GLuint texture) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -284,9 +306,12 @@ void GLTrace_glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -309,9 +334,12 @@ void GLTrace_glBlendEquation(GLenum mode) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -340,9 +368,12 @@ void GLTrace_glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -371,9 +402,12 @@ void GLTrace_glBlendFunc(GLenum sfactor, GLenum dfactor) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -414,9 +448,12 @@ void GLTrace_glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -436,7 +473,7 @@ void GLTrace_glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GL
     GLMessage_DataType *arg_size = glmsg.add_args();
     arg_size->set_isarray(false);
     arg_size->set_type(GLMessage::DataType::INT);
-    arg_size->add_intvalue((int)size);
+    arg_size->add_intvalue(size);
 
     // copy argument data
     GLMessage_DataType *arg_data = glmsg.add_args();
@@ -457,9 +494,13 @@ void GLTrace_glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GL
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) data,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -479,13 +520,13 @@ void GLTrace_glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, co
     GLMessage_DataType *arg_offset = glmsg.add_args();
     arg_offset->set_isarray(false);
     arg_offset->set_type(GLMessage::DataType::INT);
-    arg_offset->add_intvalue((int)offset);
+    arg_offset->add_intvalue(offset);
 
     // copy argument size
     GLMessage_DataType *arg_size = glmsg.add_args();
     arg_size->set_isarray(false);
     arg_size->set_type(GLMessage::DataType::INT);
-    arg_size->add_intvalue((int)size);
+    arg_size->add_intvalue(size);
 
     // copy argument data
     GLMessage_DataType *arg_data = glmsg.add_args();
@@ -500,9 +541,13 @@ void GLTrace_glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, co
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) data,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -531,9 +576,12 @@ GLenum GLTrace_glCheckFramebufferStatus(GLenum target) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -558,9 +606,12 @@ void GLTrace_glClear(GLbitfield mask) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -601,9 +652,12 @@ void GLTrace_glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -626,9 +680,12 @@ void GLTrace_glClearDepthf(GLclampf depth) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -651,9 +708,12 @@ void GLTrace_glClearStencil(GLint s) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -694,9 +754,12 @@ void GLTrace_glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboole
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -719,9 +782,12 @@ void GLTrace_glCompileShader(GLuint shader) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -786,9 +852,13 @@ void GLTrace_glCompressedTexImage2D(GLenum target, GLint level, GLenum internalf
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) data,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -859,9 +929,13 @@ void GLTrace_glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) data,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -926,9 +1000,12 @@ void GLTrace_glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat,
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -993,9 +1070,12 @@ void GLTrace_glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLin
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1018,9 +1098,12 @@ GLuint GLTrace_glCreateProgram(void) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -1051,9 +1134,12 @@ GLuint GLTrace_glCreateShader(GLenum type) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -1078,9 +1164,12 @@ void GLTrace_glCullFace(GLenum mode) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1109,9 +1198,13 @@ void GLTrace_glDeleteBuffers(GLsizei n, const GLuint* buffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) buffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1140,9 +1233,13 @@ void GLTrace_glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) framebuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1165,9 +1262,12 @@ void GLTrace_glDeleteProgram(GLuint program) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1196,9 +1296,13 @@ void GLTrace_glDeleteRenderbuffers(GLsizei n, const GLuint* renderbuffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) renderbuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1221,9 +1325,12 @@ void GLTrace_glDeleteShader(GLuint shader) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1252,9 +1359,13 @@ void GLTrace_glDeleteTextures(GLsizei n, const GLuint* textures) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) textures,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1277,9 +1388,12 @@ void GLTrace_glDepthFunc(GLenum func) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1302,9 +1416,12 @@ void GLTrace_glDepthMask(GLboolean flag) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1333,9 +1450,12 @@ void GLTrace_glDepthRangef(GLclampf zNear, GLclampf zFar) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1364,9 +1484,12 @@ void GLTrace_glDetachShader(GLuint program, GLuint shader) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1389,9 +1512,12 @@ void GLTrace_glDisable(GLenum cap) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1414,9 +1540,12 @@ void GLTrace_glDisableVertexAttribArray(GLuint index) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1451,9 +1580,12 @@ void GLTrace_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1494,9 +1626,13 @@ void GLTrace_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoi
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) indices,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1519,9 +1655,12 @@ void GLTrace_glEnable(GLenum cap) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1544,9 +1683,12 @@ void GLTrace_glEnableVertexAttribArray(GLuint index) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1563,9 +1705,12 @@ void GLTrace_glFinish(void) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1582,9 +1727,12 @@ void GLTrace_glFlush(void) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1625,9 +1773,12 @@ void GLTrace_glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1674,9 +1825,12 @@ void GLTrace_glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum tex
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1699,9 +1853,12 @@ void GLTrace_glFrontFace(GLenum mode) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1730,9 +1887,13 @@ void GLTrace_glGenBuffers(GLsizei n, GLuint* buffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) buffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1755,9 +1916,12 @@ void GLTrace_glGenerateMipmap(GLenum target) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1786,9 +1950,13 @@ void GLTrace_glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) framebuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1817,9 +1985,13 @@ void GLTrace_glGenRenderbuffers(GLsizei n, GLuint* renderbuffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) renderbuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1848,9 +2020,13 @@ void GLTrace_glGenTextures(GLsizei n, GLuint* textures) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) textures,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1909,9 +2085,16 @@ void GLTrace_glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GL
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) size,
+        (void *) type,
+        (void *) name,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1970,9 +2153,16 @@ void GLTrace_glGetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, G
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) size,
+        (void *) type,
+        (void *) name,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2013,9 +2203,14 @@ void GLTrace_glGetAttachedShaders(GLuint program, GLsizei maxcount, GLsizei* cou
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) count,
+        (void *) shaders,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2050,9 +2245,13 @@ int GLTrace_glGetAttribLocation(GLuint program, const GLchar* name) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
+    void *pointerArgs[] = {
+        (void *) name,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2083,9 +2282,13 @@ void GLTrace_glGetBooleanv(GLenum pname, GLboolean* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2120,9 +2323,13 @@ void GLTrace_glGetBufferParameteriv(GLenum target, GLenum pname, GLint* params) 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2145,9 +2352,12 @@ GLenum GLTrace_glGetError(void) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2178,9 +2388,13 @@ void GLTrace_glGetFloatv(GLenum pname, GLfloat* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2221,9 +2435,13 @@ void GLTrace_glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachm
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2252,9 +2470,13 @@ void GLTrace_glGetIntegerv(GLenum pname, GLint* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2289,9 +2511,13 @@ void GLTrace_glGetProgramiv(GLuint program, GLenum pname, GLint* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2332,9 +2558,14 @@ void GLTrace_glGetProgramInfoLog(GLuint program, GLsizei bufsize, GLsizei* lengt
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) infolog,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2369,9 +2600,13 @@ void GLTrace_glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* pa
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2406,9 +2641,13 @@ void GLTrace_glGetShaderiv(GLuint shader, GLenum pname, GLint* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2449,9 +2688,14 @@ void GLTrace_glGetShaderInfoLog(GLuint shader, GLsizei bufsize, GLsizei* length,
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) infolog,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2492,9 +2736,14 @@ void GLTrace_glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype,
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) range,
+        (void *) precision,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2535,9 +2784,14 @@ void GLTrace_glGetShaderSource(GLuint shader, GLsizei bufsize, GLsizei* length, 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) source,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2566,9 +2820,13 @@ const GLubyte* GLTrace_glGetString(GLenum name) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue((int)retValue);
 
+    void *pointerArgs[] = {
+        (void *) retValue,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2605,9 +2863,13 @@ void GLTrace_glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2642,9 +2904,13 @@ void GLTrace_glGetTexParameteriv(GLenum target, GLenum pname, GLint* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2679,9 +2945,13 @@ void GLTrace_glGetUniformfv(GLuint program, GLint location, GLfloat* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2716,9 +2986,13 @@ void GLTrace_glGetUniformiv(GLuint program, GLint location, GLint* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2753,9 +3027,13 @@ int GLTrace_glGetUniformLocation(GLuint program, const GLchar* name) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
+    void *pointerArgs[] = {
+        (void *) name,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2792,9 +3070,13 @@ void GLTrace_glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2829,9 +3111,13 @@ void GLTrace_glGetVertexAttribiv(GLuint index, GLenum pname, GLint* params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2866,9 +3152,13 @@ void GLTrace_glGetVertexAttribPointerv(GLuint index, GLenum pname, GLvoid** poin
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pointer,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2897,9 +3187,12 @@ void GLTrace_glHint(GLenum target, GLenum mode) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2928,9 +3221,12 @@ GLboolean GLTrace_glIsBuffer(GLuint buffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2961,9 +3257,12 @@ GLboolean GLTrace_glIsEnabled(GLenum cap) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2994,9 +3293,12 @@ GLboolean GLTrace_glIsFramebuffer(GLuint framebuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -3027,9 +3329,12 @@ GLboolean GLTrace_glIsProgram(GLuint program) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -3060,9 +3365,12 @@ GLboolean GLTrace_glIsRenderbuffer(GLuint renderbuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -3093,9 +3401,12 @@ GLboolean GLTrace_glIsShader(GLuint shader) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -3126,9 +3437,12 @@ GLboolean GLTrace_glIsTexture(GLuint texture) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -3153,9 +3467,12 @@ void GLTrace_glLineWidth(GLfloat width) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3178,9 +3495,12 @@ void GLTrace_glLinkProgram(GLuint program) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3209,9 +3529,12 @@ void GLTrace_glPixelStorei(GLenum pname, GLint param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3240,9 +3563,12 @@ void GLTrace_glPolygonOffset(GLfloat factor, GLfloat units) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3301,9 +3627,13 @@ void GLTrace_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenu
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pixels,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3320,9 +3650,12 @@ void GLTrace_glReleaseShaderCompiler(void) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3363,9 +3696,12 @@ void GLTrace_glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3394,9 +3730,12 @@ void GLTrace_glSampleCoverage(GLclampf value, GLboolean invert) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3437,9 +3776,12 @@ void GLTrace_glScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3486,9 +3828,14 @@ void GLTrace_glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryforma
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) shaders,
+        (void *) binary,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3529,9 +3876,14 @@ void GLTrace_glShaderSource(GLuint shader, GLsizei count, const GLchar** string,
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) string,
+        (void *) length,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3566,9 +3918,12 @@ void GLTrace_glStencilFunc(GLenum func, GLint ref, GLuint mask) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3609,9 +3964,12 @@ void GLTrace_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint m
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3634,9 +3992,12 @@ void GLTrace_glStencilMask(GLuint mask) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3665,9 +4026,12 @@ void GLTrace_glStencilMaskSeparate(GLenum face, GLuint mask) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3702,9 +4066,12 @@ void GLTrace_glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3745,9 +4112,12 @@ void GLTrace_glStencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3818,9 +4188,13 @@ void GLTrace_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsi
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pixels,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3855,9 +4229,12 @@ void GLTrace_glTexParameterf(GLenum target, GLenum pname, GLfloat param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3892,9 +4269,13 @@ void GLTrace_glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3929,9 +4310,12 @@ void GLTrace_glTexParameteri(GLenum target, GLenum pname, GLint param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3966,9 +4350,13 @@ void GLTrace_glTexParameteriv(GLenum target, GLenum pname, const GLint* params) 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4039,9 +4427,13 @@ void GLTrace_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yo
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pixels,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4070,9 +4462,12 @@ void GLTrace_glUniform1f(GLint location, GLfloat x) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4107,9 +4502,13 @@ void GLTrace_glUniform1fv(GLint location, GLsizei count, const GLfloat* v) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) v,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4138,9 +4537,12 @@ void GLTrace_glUniform1i(GLint location, GLint x) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4175,9 +4577,13 @@ void GLTrace_glUniform1iv(GLint location, GLsizei count, const GLint* v) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) v,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4212,9 +4618,12 @@ void GLTrace_glUniform2f(GLint location, GLfloat x, GLfloat y) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4249,9 +4658,13 @@ void GLTrace_glUniform2fv(GLint location, GLsizei count, const GLfloat* v) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) v,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4286,9 +4699,12 @@ void GLTrace_glUniform2i(GLint location, GLint x, GLint y) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4323,9 +4739,13 @@ void GLTrace_glUniform2iv(GLint location, GLsizei count, const GLint* v) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) v,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4366,9 +4786,12 @@ void GLTrace_glUniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4403,9 +4826,13 @@ void GLTrace_glUniform3fv(GLint location, GLsizei count, const GLfloat* v) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) v,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4446,9 +4873,12 @@ void GLTrace_glUniform3i(GLint location, GLint x, GLint y, GLint z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4483,9 +4913,13 @@ void GLTrace_glUniform3iv(GLint location, GLsizei count, const GLint* v) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) v,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4532,9 +4966,12 @@ void GLTrace_glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloa
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4569,9 +5006,13 @@ void GLTrace_glUniform4fv(GLint location, GLsizei count, const GLfloat* v) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) v,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4618,9 +5059,12 @@ void GLTrace_glUniform4i(GLint location, GLint x, GLint y, GLint z, GLint w) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4655,9 +5099,13 @@ void GLTrace_glUniform4iv(GLint location, GLsizei count, const GLint* v) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) v,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4698,9 +5146,13 @@ void GLTrace_glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpo
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4741,9 +5193,13 @@ void GLTrace_glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpo
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4784,9 +5240,13 @@ void GLTrace_glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpo
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4809,9 +5269,12 @@ void GLTrace_glUseProgram(GLuint program) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4834,9 +5297,12 @@ void GLTrace_glValidateProgram(GLuint program) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4865,9 +5331,12 @@ void GLTrace_glVertexAttrib1f(GLuint indx, GLfloat x) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4896,9 +5365,13 @@ void GLTrace_glVertexAttrib1fv(GLuint indx, const GLfloat* values) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) values,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4933,9 +5406,12 @@ void GLTrace_glVertexAttrib2f(GLuint indx, GLfloat x, GLfloat y) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4964,9 +5440,13 @@ void GLTrace_glVertexAttrib2fv(GLuint indx, const GLfloat* values) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) values,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5007,9 +5487,12 @@ void GLTrace_glVertexAttrib3f(GLuint indx, GLfloat x, GLfloat y, GLfloat z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5038,9 +5521,13 @@ void GLTrace_glVertexAttrib3fv(GLuint indx, const GLfloat* values) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) values,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5087,9 +5574,12 @@ void GLTrace_glVertexAttrib4f(GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfl
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5118,9 +5608,13 @@ void GLTrace_glVertexAttrib4fv(GLuint indx, const GLfloat* values) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) values,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5173,9 +5667,13 @@ void GLTrace_glVertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboole
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) ptr,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5216,9 +5714,12 @@ void GLTrace_glViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5250,9 +5751,13 @@ void GLTrace_glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) image,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5281,9 +5786,13 @@ void GLTrace_glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) image,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5330,9 +5839,15 @@ void GLTrace_glGetProgramBinaryOES(GLuint program, GLsizei bufSize, GLsizei *len
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) binaryFormat,
+        (void *) binary,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5373,9 +5888,13 @@ void GLTrace_glProgramBinaryOES(GLuint program, GLenum binaryFormat, const GLvoi
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) binary,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5410,9 +5929,13 @@ void* GLTrace_glMapBufferOES(GLenum target, GLenum access) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue((int)retValue);
 
+    void *pointerArgs[] = {
+        (void *) retValue,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -5443,9 +5966,12 @@ GLboolean GLTrace_glUnmapBufferOES(GLenum target) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -5482,9 +6008,13 @@ void GLTrace_glGetBufferPointervOES(GLenum target, GLenum pname, GLvoid** params
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5561,9 +6091,13 @@ void GLTrace_glTexImage3DOES(GLenum target, GLint level, GLenum internalformat, 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pixels,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5646,9 +6180,13 @@ void GLTrace_glTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, GLint
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pixels,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5719,9 +6257,12 @@ void GLTrace_glCopyTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, G
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5792,9 +6333,13 @@ void GLTrace_glCompressedTexImage3DOES(GLenum target, GLint level, GLenum intern
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) data,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5877,9 +6422,13 @@ void GLTrace_glCompressedTexSubImage3DOES(GLenum target, GLint level, GLint xoff
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) data,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5932,9 +6481,12 @@ void GLTrace_glFramebufferTexture3DOES(GLenum target, GLenum attachment, GLenum 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5957,9 +6509,12 @@ void GLTrace_glBindVertexArrayOES(GLuint array) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5988,9 +6543,13 @@ void GLTrace_glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) arrays,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6019,9 +6578,13 @@ void GLTrace_glGenVertexArraysOES(GLsizei n, GLuint *arrays) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) arrays,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6050,9 +6613,12 @@ GLboolean GLTrace_glIsVertexArrayOES(GLuint array) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -6089,9 +6655,14 @@ void GLTrace_glGetPerfMonitorGroupsAMD(GLint *numGroups, GLsizei groupsSize, GLu
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) numGroups,
+        (void *) groups,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6138,9 +6709,15 @@ void GLTrace_glGetPerfMonitorCountersAMD(GLuint group, GLint *numCounters, GLint
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) numCounters,
+        (void *) maxActiveCounters,
+        (void *) counters,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6181,9 +6758,14 @@ void GLTrace_glGetPerfMonitorGroupStringAMD(GLuint group, GLsizei bufSize, GLsiz
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) groupString,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6230,9 +6812,14 @@ void GLTrace_glGetPerfMonitorCounterStringAMD(GLuint group, GLuint counter, GLsi
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) counterString,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6273,9 +6860,13 @@ void GLTrace_glGetPerfMonitorCounterInfoAMD(GLuint group, GLuint counter, GLenum
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) data,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6304,9 +6895,13 @@ void GLTrace_glGenPerfMonitorsAMD(GLsizei n, GLuint *monitors) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) monitors,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6335,9 +6930,13 @@ void GLTrace_glDeletePerfMonitorsAMD(GLsizei n, GLuint *monitors) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) monitors,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6384,9 +6983,13 @@ void GLTrace_glSelectPerfMonitorCountersAMD(GLuint monitor, GLboolean enable, GL
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) countersList,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6409,9 +7012,12 @@ void GLTrace_glBeginPerfMonitorAMD(GLuint monitor) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6434,9 +7040,12 @@ void GLTrace_glEndPerfMonitorAMD(GLuint monitor) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6483,9 +7092,14 @@ void GLTrace_glGetPerfMonitorCounterDataAMD(GLuint monitor, GLenum pname, GLsize
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) data,
+        (void *) bytesWritten,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6562,9 +7176,12 @@ void GLTrace_glBlitFramebufferANGLE(GLint srcX0, GLint srcY0, GLint srcX1, GLint
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6611,9 +7228,12 @@ void GLTrace_glRenderbufferStorageMultisampleANGLE(GLenum target, GLsizei sample
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6660,9 +7280,12 @@ void GLTrace_glRenderbufferStorageMultisampleAPPLE(GLenum target, GLsizei sample
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6679,9 +7302,12 @@ void GLTrace_glResolveMultisampleFramebufferAPPLE(void) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6722,9 +7348,13 @@ void GLTrace_glLabelObjectEXT(GLenum type, GLuint object, GLsizei length, const 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) label,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6771,9 +7401,14 @@ void GLTrace_glGetObjectLabelEXT(GLenum type, GLuint object, GLsizei bufSize, GL
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) label,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6802,9 +7437,13 @@ void GLTrace_glInsertEventMarkerEXT(GLsizei length, const GLchar *marker) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) marker,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6833,9 +7472,13 @@ void GLTrace_glPushGroupMarkerEXT(GLsizei length, const GLchar *marker) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) marker,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6852,9 +7495,12 @@ void GLTrace_glPopGroupMarkerEXT(void) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6889,9 +7535,13 @@ void GLTrace_glDiscardFramebufferEXT(GLenum target, GLsizei numAttachments, cons
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) attachments,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6938,9 +7588,12 @@ void GLTrace_glRenderbufferStorageMultisampleEXT(GLenum target, GLsizei samples,
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6993,9 +7646,12 @@ void GLTrace_glFramebufferTexture2DMultisampleEXT(GLenum target, GLenum attachme
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7036,9 +7692,14 @@ void GLTrace_glMultiDrawArraysEXT(GLenum mode, GLint *first, GLsizei *count, GLs
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) first,
+        (void *) count,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7085,9 +7746,14 @@ void GLTrace_glMultiDrawElementsEXT(GLenum mode, const GLsizei *count, GLenum ty
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) count,
+        (void *) indices,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7116,9 +7782,13 @@ void GLTrace_glGenQueriesEXT(GLsizei n, GLuint *ids) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) ids,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7147,9 +7817,13 @@ void GLTrace_glDeleteQueriesEXT(GLsizei n, const GLuint *ids) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) ids,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7178,9 +7852,12 @@ GLboolean GLTrace_glIsQueryEXT(GLuint id) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -7211,9 +7888,12 @@ void GLTrace_glBeginQueryEXT(GLenum target, GLuint id) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7236,9 +7916,12 @@ void GLTrace_glEndQueryEXT(GLenum target) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7273,9 +7956,13 @@ void GLTrace_glGetQueryivEXT(GLenum target, GLenum pname, GLint *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7310,9 +7997,13 @@ void GLTrace_glGetQueryObjectuivEXT(GLuint id, GLenum pname, GLuint *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7335,9 +8026,12 @@ GLenum GLTrace_glGetGraphicsResetStatusEXT(void) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -7404,9 +8098,13 @@ void GLTrace_glReadnPixelsEXT(GLint x, GLint y, GLsizei width, GLsizei height, G
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) data,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7447,9 +8145,13 @@ void GLTrace_glGetnUniformfvEXT(GLuint program, GLint location, GLsizei bufSize,
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7490,9 +8192,13 @@ void GLTrace_glGetnUniformivEXT(GLuint program, GLint location, GLsizei bufSize,
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7527,9 +8233,12 @@ void GLTrace_glUseProgramStagesEXT(GLuint pipeline, GLbitfield stages, GLuint pr
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7558,9 +8267,12 @@ void GLTrace_glActiveShaderProgramEXT(GLuint pipeline, GLuint program) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7601,9 +8313,13 @@ GLuint GLTrace_glCreateShaderProgramvEXT(GLenum type, GLsizei count, const GLcha
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
+    void *pointerArgs[] = {
+        (void *) strings,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -7628,9 +8344,12 @@ void GLTrace_glBindProgramPipelineEXT(GLuint pipeline) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7659,9 +8378,13 @@ void GLTrace_glDeleteProgramPipelinesEXT(GLsizei n, const GLuint *pipelines) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pipelines,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7690,9 +8413,13 @@ void GLTrace_glGenProgramPipelinesEXT(GLsizei n, GLuint *pipelines) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pipelines,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7721,9 +8448,12 @@ GLboolean GLTrace_glIsProgramPipelineEXT(GLuint pipeline) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -7760,9 +8490,12 @@ void GLTrace_glProgramParameteriEXT(GLuint program, GLenum pname, GLint value) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7797,9 +8530,13 @@ void GLTrace_glGetProgramPipelineivEXT(GLuint pipeline, GLenum pname, GLint *par
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7834,9 +8571,12 @@ void GLTrace_glProgramUniform1iEXT(GLuint program, GLint location, GLint x) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7877,9 +8617,12 @@ void GLTrace_glProgramUniform2iEXT(GLuint program, GLint location, GLint x, GLin
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7926,9 +8669,12 @@ void GLTrace_glProgramUniform3iEXT(GLuint program, GLint location, GLint x, GLin
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7981,9 +8727,12 @@ void GLTrace_glProgramUniform4iEXT(GLuint program, GLint location, GLint x, GLin
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8018,9 +8767,12 @@ void GLTrace_glProgramUniform1fEXT(GLuint program, GLint location, GLfloat x) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8061,9 +8813,12 @@ void GLTrace_glProgramUniform2fEXT(GLuint program, GLint location, GLfloat x, GL
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8110,9 +8865,12 @@ void GLTrace_glProgramUniform3fEXT(GLuint program, GLint location, GLfloat x, GL
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8165,9 +8923,12 @@ void GLTrace_glProgramUniform4fEXT(GLuint program, GLint location, GLfloat x, GL
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8208,9 +8969,13 @@ void GLTrace_glProgramUniform1ivEXT(GLuint program, GLint location, GLsizei coun
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8251,9 +9016,13 @@ void GLTrace_glProgramUniform2ivEXT(GLuint program, GLint location, GLsizei coun
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8294,9 +9063,13 @@ void GLTrace_glProgramUniform3ivEXT(GLuint program, GLint location, GLsizei coun
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8337,9 +9110,13 @@ void GLTrace_glProgramUniform4ivEXT(GLuint program, GLint location, GLsizei coun
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8380,9 +9157,13 @@ void GLTrace_glProgramUniform1fvEXT(GLuint program, GLint location, GLsizei coun
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8423,9 +9204,13 @@ void GLTrace_glProgramUniform2fvEXT(GLuint program, GLint location, GLsizei coun
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8466,9 +9251,13 @@ void GLTrace_glProgramUniform3fvEXT(GLuint program, GLint location, GLsizei coun
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8509,9 +9298,13 @@ void GLTrace_glProgramUniform4fvEXT(GLuint program, GLint location, GLsizei coun
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8558,9 +9351,13 @@ void GLTrace_glProgramUniformMatrix2fvEXT(GLuint program, GLint location, GLsize
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8607,9 +9404,13 @@ void GLTrace_glProgramUniformMatrix3fvEXT(GLuint program, GLint location, GLsize
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8656,9 +9457,13 @@ void GLTrace_glProgramUniformMatrix4fvEXT(GLuint program, GLint location, GLsize
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) value,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8681,9 +9486,12 @@ void GLTrace_glValidateProgramPipelineEXT(GLuint pipeline) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8724,9 +9532,14 @@ void GLTrace_glGetProgramPipelineInfoLogEXT(GLuint pipeline, GLsizei bufSize, GL
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) infoLog,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8767,9 +9580,12 @@ void GLTrace_glTexStorage1DEXT(GLenum target, GLsizei levels, GLenum internalfor
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8816,9 +9632,12 @@ void GLTrace_glTexStorage2DEXT(GLenum target, GLsizei levels, GLenum internalfor
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8871,9 +9690,12 @@ void GLTrace_glTexStorage3DEXT(GLenum target, GLsizei levels, GLenum internalfor
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8920,9 +9742,12 @@ void GLTrace_glTextureStorage1DEXT(GLuint texture, GLenum target, GLsizei levels
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8975,9 +9800,12 @@ void GLTrace_glTextureStorage2DEXT(GLuint texture, GLenum target, GLsizei levels
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9036,9 +9864,12 @@ void GLTrace_glTextureStorage3DEXT(GLuint texture, GLenum target, GLsizei levels
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9085,9 +9916,12 @@ void GLTrace_glRenderbufferStorageMultisampleIMG(GLenum target, GLsizei samples,
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9140,9 +9974,12 @@ void GLTrace_glFramebufferTexture2DMultisampleIMG(GLenum target, GLenum attachme
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9165,9 +10002,12 @@ void GLTrace_glCoverageMaskNV(GLboolean mask) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9190,9 +10030,12 @@ void GLTrace_glCoverageOperationNV(GLenum operation) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9221,9 +10064,13 @@ void GLTrace_glDrawBuffersNV(GLsizei n, const GLenum *bufs) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) bufs,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9252,9 +10099,13 @@ void GLTrace_glDeleteFencesNV(GLsizei n, const GLuint *fences) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) fences,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9283,9 +10134,13 @@ void GLTrace_glGenFencesNV(GLsizei n, GLuint *fences) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) fences,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9314,9 +10169,12 @@ GLboolean GLTrace_glIsFenceNV(GLuint fence) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -9347,9 +10205,12 @@ GLboolean GLTrace_glTestFenceNV(GLuint fence) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -9386,9 +10247,13 @@ void GLTrace_glGetFenceivNV(GLuint fence, GLenum pname, GLint *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9411,9 +10276,12 @@ void GLTrace_glFinishFenceNV(GLuint fence) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9442,9 +10310,12 @@ void GLTrace_glSetFenceNV(GLuint fence, GLenum condition) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9467,9 +10338,12 @@ void GLTrace_glReadBufferNV(GLenum mode) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9498,9 +10372,12 @@ void GLTrace_glAlphaFuncQCOM(GLenum func, GLclampf ref) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9535,9 +10412,14 @@ void GLTrace_glGetDriverControlsQCOM(GLint *num, GLsizei size, GLuint *driverCon
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) num,
+        (void *) driverControls,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9578,9 +10460,14 @@ void GLTrace_glGetDriverControlStringQCOM(GLuint driverControl, GLsizei bufSize,
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) length,
+        (void *) driverControlString,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9603,9 +10490,12 @@ void GLTrace_glEnableDriverControlQCOM(GLuint driverControl) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9628,9 +10518,12 @@ void GLTrace_glDisableDriverControlQCOM(GLuint driverControl) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9665,9 +10558,14 @@ void GLTrace_glExtGetTexturesQCOM(GLuint *textures, GLint maxTextures, GLint *nu
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) textures,
+        (void *) numTextures,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9702,9 +10600,14 @@ void GLTrace_glExtGetBuffersQCOM(GLuint *buffers, GLint maxBuffers, GLint *numBu
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) buffers,
+        (void *) numBuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9739,9 +10642,14 @@ void GLTrace_glExtGetRenderbuffersQCOM(GLuint *renderbuffers, GLint maxRenderbuf
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) renderbuffers,
+        (void *) numRenderbuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9776,9 +10684,14 @@ void GLTrace_glExtGetFramebuffersQCOM(GLuint *framebuffers, GLint maxFramebuffer
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) framebuffers,
+        (void *) numFramebuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9825,9 +10738,13 @@ void GLTrace_glExtGetTexLevelParameterivQCOM(GLuint texture, GLenum face, GLint 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9862,9 +10779,12 @@ void GLTrace_glExtTexObjectStateOverrideiQCOM(GLenum target, GLenum pname, GLint
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9947,9 +10867,13 @@ void GLTrace_glExtGetTexSubImageQCOM(GLenum target, GLint level, GLint xoffset, 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) texels,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9978,9 +10902,13 @@ void GLTrace_glExtGetBufferPointervQCOM(GLenum target, GLvoid **params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10015,9 +10943,14 @@ void GLTrace_glExtGetShadersQCOM(GLuint *shaders, GLint maxShaders, GLint *numSh
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) shaders,
+        (void *) numShaders,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10052,9 +10985,14 @@ void GLTrace_glExtGetProgramsQCOM(GLuint *programs, GLint maxPrograms, GLint *nu
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) programs,
+        (void *) numPrograms,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10083,9 +11021,12 @@ GLboolean GLTrace_glExtIsProgramBinaryQCOM(GLuint program) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -10128,9 +11069,14 @@ void GLTrace_glExtGetProgramBinarySourceQCOM(GLuint program, GLenum shadertype, 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) source,
+        (void *) length,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10177,9 +11123,12 @@ void GLTrace_glStartTilingQCOM(GLuint x, GLuint y, GLuint width, GLuint height, 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10202,9 +11151,12 @@ void GLTrace_glEndTilingQCOM(GLbitfield preserveMask) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10236,9 +11188,12 @@ void GLTrace_glAlphaFunc(GLenum func, GLclampf ref) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10267,9 +11222,13 @@ void GLTrace_glClipPlanef(GLenum plane, const GLfloat *equation) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) equation,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10310,9 +11269,12 @@ void GLTrace_glColor4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10341,9 +11303,12 @@ void GLTrace_glFogf(GLenum pname, GLfloat param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10372,9 +11337,13 @@ void GLTrace_glFogfv(GLenum pname, const GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10427,9 +11396,12 @@ void GLTrace_glFrustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10458,9 +11430,13 @@ void GLTrace_glGetClipPlanef(GLenum pname, GLfloat eqn[4]) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) eqn,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10495,9 +11471,13 @@ void GLTrace_glGetLightfv(GLenum light, GLenum pname, GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10532,9 +11512,13 @@ void GLTrace_glGetMaterialfv(GLenum face, GLenum pname, GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10569,9 +11553,13 @@ void GLTrace_glGetTexEnvfv(GLenum env, GLenum pname, GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10600,9 +11588,12 @@ void GLTrace_glLightModelf(GLenum pname, GLfloat param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10631,9 +11622,13 @@ void GLTrace_glLightModelfv(GLenum pname, const GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10668,9 +11663,12 @@ void GLTrace_glLightf(GLenum light, GLenum pname, GLfloat param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10705,9 +11703,13 @@ void GLTrace_glLightfv(GLenum light, GLenum pname, const GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10730,9 +11732,13 @@ void GLTrace_glLoadMatrixf(const GLfloat *m) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) m,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10767,9 +11773,12 @@ void GLTrace_glMaterialf(GLenum face, GLenum pname, GLfloat param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10804,9 +11813,13 @@ void GLTrace_glMaterialfv(GLenum face, GLenum pname, const GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10829,9 +11842,13 @@ void GLTrace_glMultMatrixf(const GLfloat *m) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) m,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10878,9 +11895,12 @@ void GLTrace_glMultiTexCoord4f(GLenum target, GLfloat s, GLfloat t, GLfloat r, G
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10915,9 +11935,12 @@ void GLTrace_glNormal3f(GLfloat nx, GLfloat ny, GLfloat nz) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10970,9 +11993,12 @@ void GLTrace_glOrthof(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11001,9 +12027,12 @@ void GLTrace_glPointParameterf(GLenum pname, GLfloat param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11032,9 +12061,13 @@ void GLTrace_glPointParameterfv(GLenum pname, const GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11057,9 +12090,12 @@ void GLTrace_glPointSize(GLfloat size) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11100,9 +12136,12 @@ void GLTrace_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11137,9 +12176,12 @@ void GLTrace_glScalef(GLfloat x, GLfloat y, GLfloat z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11174,9 +12216,12 @@ void GLTrace_glTexEnvf(GLenum target, GLenum pname, GLfloat param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11211,9 +12256,13 @@ void GLTrace_glTexEnvfv(GLenum target, GLenum pname, const GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11248,9 +12297,12 @@ void GLTrace_glTranslatef(GLfloat x, GLfloat y, GLfloat z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11279,9 +12331,12 @@ void GLTrace_glAlphaFuncx(GLenum func, GLclampx ref) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11322,9 +12377,12 @@ void GLTrace_glClearColorx(GLclampx red, GLclampx green, GLclampx blue, GLclampx
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11347,9 +12405,12 @@ void GLTrace_glClearDepthx(GLclampx depth) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11372,9 +12433,12 @@ void GLTrace_glClientActiveTexture(GLenum texture) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11403,9 +12467,13 @@ void GLTrace_glClipPlanex(GLenum plane, const GLfixed *equation) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) equation,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11446,9 +12514,12 @@ void GLTrace_glColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11489,9 +12560,12 @@ void GLTrace_glColor4x(GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha) 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11532,9 +12606,13 @@ void GLTrace_glColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoi
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pointer,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11563,9 +12641,12 @@ void GLTrace_glDepthRangex(GLclampx zNear, GLclampx zFar) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11588,9 +12669,12 @@ void GLTrace_glDisableClientState(GLenum array) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11613,9 +12697,12 @@ void GLTrace_glEnableClientState(GLenum array) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11644,9 +12731,12 @@ void GLTrace_glFogx(GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11675,9 +12765,13 @@ void GLTrace_glFogxv(GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11730,9 +12824,12 @@ void GLTrace_glFrustumx(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11761,9 +12858,13 @@ void GLTrace_glGetClipPlanex(GLenum pname, GLfixed eqn[4]) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) eqn,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11792,9 +12893,13 @@ void GLTrace_glGetFixedv(GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11829,9 +12934,13 @@ void GLTrace_glGetLightxv(GLenum light, GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11866,9 +12975,13 @@ void GLTrace_glGetMaterialxv(GLenum face, GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11897,9 +13010,13 @@ void GLTrace_glGetPointerv(GLenum pname, GLvoid **params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11934,9 +13051,13 @@ void GLTrace_glGetTexEnviv(GLenum env, GLenum pname, GLint *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11971,9 +13092,13 @@ void GLTrace_glGetTexEnvxv(GLenum env, GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12008,9 +13133,13 @@ void GLTrace_glGetTexParameterxv(GLenum target, GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12039,9 +13168,12 @@ void GLTrace_glLightModelx(GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12070,9 +13202,13 @@ void GLTrace_glLightModelxv(GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12107,9 +13243,12 @@ void GLTrace_glLightx(GLenum light, GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12144,9 +13283,13 @@ void GLTrace_glLightxv(GLenum light, GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12169,9 +13312,12 @@ void GLTrace_glLineWidthx(GLfixed width) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12188,9 +13334,12 @@ void GLTrace_glLoadIdentity(void) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12213,9 +13362,13 @@ void GLTrace_glLoadMatrixx(const GLfixed *m) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) m,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12238,9 +13391,12 @@ void GLTrace_glLogicOp(GLenum opcode) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12275,9 +13431,12 @@ void GLTrace_glMaterialx(GLenum face, GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12312,9 +13471,13 @@ void GLTrace_glMaterialxv(GLenum face, GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12337,9 +13500,12 @@ void GLTrace_glMatrixMode(GLenum mode) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12362,9 +13528,13 @@ void GLTrace_glMultMatrixx(const GLfixed *m) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) m,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12411,9 +13581,12 @@ void GLTrace_glMultiTexCoord4x(GLenum target, GLfixed s, GLfixed t, GLfixed r, G
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12448,9 +13621,12 @@ void GLTrace_glNormal3x(GLfixed nx, GLfixed ny, GLfixed nz) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12485,9 +13661,13 @@ void GLTrace_glNormalPointer(GLenum type, GLsizei stride, const GLvoid *pointer)
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pointer,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12540,9 +13720,12 @@ void GLTrace_glOrthox(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12571,9 +13754,12 @@ void GLTrace_glPointParameterx(GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12602,9 +13788,13 @@ void GLTrace_glPointParameterxv(GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12627,9 +13817,12 @@ void GLTrace_glPointSizex(GLfixed size) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12658,9 +13851,12 @@ void GLTrace_glPolygonOffsetx(GLfixed factor, GLfixed units) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12677,9 +13873,12 @@ void GLTrace_glPopMatrix(void) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12696,9 +13895,12 @@ void GLTrace_glPushMatrix(void) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12739,9 +13941,12 @@ void GLTrace_glRotatex(GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12770,9 +13975,12 @@ void GLTrace_glSampleCoveragex(GLclampx value, GLboolean invert) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12807,9 +14015,12 @@ void GLTrace_glScalex(GLfixed x, GLfixed y, GLfixed z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12832,9 +14043,12 @@ void GLTrace_glShadeModel(GLenum mode) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12875,9 +14089,13 @@ void GLTrace_glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GL
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pointer,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12912,9 +14130,12 @@ void GLTrace_glTexEnvi(GLenum target, GLenum pname, GLint param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12949,9 +14170,12 @@ void GLTrace_glTexEnvx(GLenum target, GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -12986,9 +14210,13 @@ void GLTrace_glTexEnviv(GLenum target, GLenum pname, const GLint *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13023,9 +14251,13 @@ void GLTrace_glTexEnvxv(GLenum target, GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13060,9 +14292,12 @@ void GLTrace_glTexParameterx(GLenum target, GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13097,9 +14332,13 @@ void GLTrace_glTexParameterxv(GLenum target, GLenum pname, const GLfixed *params
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13134,9 +14373,12 @@ void GLTrace_glTranslatex(GLfixed x, GLfixed y, GLfixed z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13177,9 +14419,13 @@ void GLTrace_glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvo
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pointer,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13214,9 +14460,13 @@ void GLTrace_glPointSizePointerOES(GLenum type, GLsizei stride, const GLvoid *po
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pointer,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13248,9 +14498,12 @@ void GLTrace_glBlendEquationSeparateOES(GLenum modeRGB, GLenum modeAlpha) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13291,9 +14544,12 @@ void GLTrace_glBlendFuncSeparateOES(GLenum srcRGB, GLenum dstRGB, GLenum srcAlph
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13316,9 +14572,12 @@ void GLTrace_glBlendEquationOES(GLenum mode) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13365,9 +14624,12 @@ void GLTrace_glDrawTexsOES(GLshort x, GLshort y, GLshort z, GLshort width, GLsho
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13414,9 +14676,12 @@ void GLTrace_glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13463,9 +14728,12 @@ void GLTrace_glDrawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed width, GLfix
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13488,9 +14756,13 @@ void GLTrace_glDrawTexsvOES(const GLshort *coords) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) coords,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13513,9 +14785,13 @@ void GLTrace_glDrawTexivOES(const GLint *coords) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) coords,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13538,9 +14814,13 @@ void GLTrace_glDrawTexxvOES(const GLfixed *coords) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) coords,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13587,9 +14867,12 @@ void GLTrace_glDrawTexfOES(GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLflo
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13612,9 +14895,13 @@ void GLTrace_glDrawTexfvOES(const GLfloat *coords) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) coords,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13643,9 +14930,12 @@ void GLTrace_glAlphaFuncxOES(GLenum func, GLclampx ref) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13686,9 +14976,12 @@ void GLTrace_glClearColorxOES(GLclampx red, GLclampx green, GLclampx blue, GLcla
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13711,9 +15004,12 @@ void GLTrace_glClearDepthxOES(GLclampx depth) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13742,9 +15038,13 @@ void GLTrace_glClipPlanexOES(GLenum plane, const GLfixed *equation) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) equation,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13785,9 +15085,12 @@ void GLTrace_glColor4xOES(GLfixed red, GLfixed green, GLfixed blue, GLfixed alph
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13816,9 +15119,12 @@ void GLTrace_glDepthRangexOES(GLclampx zNear, GLclampx zFar) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13847,9 +15153,12 @@ void GLTrace_glFogxOES(GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13878,9 +15187,13 @@ void GLTrace_glFogxvOES(GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13933,9 +15246,12 @@ void GLTrace_glFrustumxOES(GLfixed left, GLfixed right, GLfixed bottom, GLfixed 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13964,9 +15280,13 @@ void GLTrace_glGetClipPlanexOES(GLenum pname, GLfixed eqn[4]) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) eqn,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -13995,9 +15315,13 @@ void GLTrace_glGetFixedvOES(GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14032,9 +15356,13 @@ void GLTrace_glGetLightxvOES(GLenum light, GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14069,9 +15397,13 @@ void GLTrace_glGetMaterialxvOES(GLenum face, GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14106,9 +15438,13 @@ void GLTrace_glGetTexEnvxvOES(GLenum env, GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14143,9 +15479,13 @@ void GLTrace_glGetTexParameterxvOES(GLenum target, GLenum pname, GLfixed *params
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14174,9 +15514,12 @@ void GLTrace_glLightModelxOES(GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14205,9 +15548,13 @@ void GLTrace_glLightModelxvOES(GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14242,9 +15589,12 @@ void GLTrace_glLightxOES(GLenum light, GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14279,9 +15629,13 @@ void GLTrace_glLightxvOES(GLenum light, GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14304,9 +15658,12 @@ void GLTrace_glLineWidthxOES(GLfixed width) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14329,9 +15686,13 @@ void GLTrace_glLoadMatrixxOES(const GLfixed *m) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) m,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14366,9 +15727,12 @@ void GLTrace_glMaterialxOES(GLenum face, GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14403,9 +15767,13 @@ void GLTrace_glMaterialxvOES(GLenum face, GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14428,9 +15796,13 @@ void GLTrace_glMultMatrixxOES(const GLfixed *m) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) m,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14477,9 +15849,12 @@ void GLTrace_glMultiTexCoord4xOES(GLenum target, GLfixed s, GLfixed t, GLfixed r
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14514,9 +15889,12 @@ void GLTrace_glNormal3xOES(GLfixed nx, GLfixed ny, GLfixed nz) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14569,9 +15947,12 @@ void GLTrace_glOrthoxOES(GLfixed left, GLfixed right, GLfixed bottom, GLfixed to
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14600,9 +15981,12 @@ void GLTrace_glPointParameterxOES(GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14631,9 +16015,13 @@ void GLTrace_glPointParameterxvOES(GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14656,9 +16044,12 @@ void GLTrace_glPointSizexOES(GLfixed size) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14687,9 +16078,12 @@ void GLTrace_glPolygonOffsetxOES(GLfixed factor, GLfixed units) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14730,9 +16124,12 @@ void GLTrace_glRotatexOES(GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14761,9 +16158,12 @@ void GLTrace_glSampleCoveragexOES(GLclampx value, GLboolean invert) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14798,9 +16198,12 @@ void GLTrace_glScalexOES(GLfixed x, GLfixed y, GLfixed z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14835,9 +16238,12 @@ void GLTrace_glTexEnvxOES(GLenum target, GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14872,9 +16278,13 @@ void GLTrace_glTexEnvxvOES(GLenum target, GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14909,9 +16319,12 @@ void GLTrace_glTexParameterxOES(GLenum target, GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14946,9 +16359,13 @@ void GLTrace_glTexParameterxvOES(GLenum target, GLenum pname, const GLfixed *par
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -14983,9 +16400,12 @@ void GLTrace_glTranslatexOES(GLfixed x, GLfixed y, GLfixed z) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15014,9 +16434,12 @@ GLboolean GLTrace_glIsRenderbufferOES(GLuint renderbuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -15047,9 +16470,12 @@ void GLTrace_glBindRenderbufferOES(GLenum target, GLuint renderbuffer) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15078,9 +16504,13 @@ void GLTrace_glDeleteRenderbuffersOES(GLsizei n, const GLuint* renderbuffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) renderbuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15109,9 +16539,13 @@ void GLTrace_glGenRenderbuffersOES(GLsizei n, GLuint* renderbuffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) renderbuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15152,9 +16586,12 @@ void GLTrace_glRenderbufferStorageOES(GLenum target, GLenum internalformat, GLsi
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15189,9 +16626,13 @@ void GLTrace_glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint*
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15220,9 +16661,12 @@ GLboolean GLTrace_glIsFramebufferOES(GLuint framebuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -15253,9 +16697,12 @@ void GLTrace_glBindFramebufferOES(GLenum target, GLuint framebuffer) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15284,9 +16731,13 @@ void GLTrace_glDeleteFramebuffersOES(GLsizei n, const GLuint* framebuffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) framebuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15315,9 +16766,13 @@ void GLTrace_glGenFramebuffersOES(GLsizei n, GLuint* framebuffers) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) framebuffers,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15346,9 +16801,12 @@ GLenum GLTrace_glCheckFramebufferStatusOES(GLenum target) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -15391,9 +16849,12 @@ void GLTrace_glFramebufferRenderbufferOES(GLenum target, GLenum attachment, GLen
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15440,9 +16901,12 @@ void GLTrace_glFramebufferTexture2DOES(GLenum target, GLenum attachment, GLenum 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15483,9 +16947,13 @@ void GLTrace_glGetFramebufferAttachmentParameterivOES(GLenum target, GLenum atta
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15508,9 +16976,12 @@ void GLTrace_glGenerateMipmapOES(GLenum target) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15533,9 +17004,12 @@ void GLTrace_glCurrentPaletteMatrixOES(GLuint matrixpaletteindex) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15552,9 +17026,12 @@ void GLTrace_glLoadPaletteFromModelViewMatrixOES(void) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15595,9 +17072,13 @@ void GLTrace_glMatrixIndexPointerOES(GLint size, GLenum type, GLsizei stride, co
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pointer,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15638,9 +17119,13 @@ void GLTrace_glWeightPointerOES(GLint size, GLenum type, GLsizei stride, const G
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) pointer,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15675,9 +17160,14 @@ GLbitfield GLTrace_glQueryMatrixxOES(GLfixed mantissa[16], GLint exponent[16]) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
+    void *pointerArgs[] = {
+        (void *) mantissa,
+        (void *) exponent,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -15708,9 +17198,12 @@ void GLTrace_glDepthRangefOES(GLclampf zNear, GLclampf zFar) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15763,9 +17256,12 @@ void GLTrace_glFrustumfOES(GLfloat left, GLfloat right, GLfloat bottom, GLfloat 
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15818,9 +17314,12 @@ void GLTrace_glOrthofOES(GLfloat left, GLfloat right, GLfloat bottom, GLfloat to
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15849,9 +17348,13 @@ void GLTrace_glClipPlanefOES(GLenum plane, const GLfloat *equation) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) equation,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15880,9 +17383,13 @@ void GLTrace_glGetClipPlanefOES(GLenum pname, GLfloat eqn[4]) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) eqn,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15905,9 +17412,12 @@ void GLTrace_glClearDepthfOES(GLclampf depth) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15942,9 +17452,12 @@ void GLTrace_glTexGenfOES(GLenum coord, GLenum pname, GLfloat param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -15979,9 +17492,13 @@ void GLTrace_glTexGenfvOES(GLenum coord, GLenum pname, const GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -16016,9 +17533,12 @@ void GLTrace_glTexGeniOES(GLenum coord, GLenum pname, GLint param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -16053,9 +17573,13 @@ void GLTrace_glTexGenivOES(GLenum coord, GLenum pname, const GLint *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -16090,9 +17614,12 @@ void GLTrace_glTexGenxOES(GLenum coord, GLenum pname, GLfixed param) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -16127,9 +17654,13 @@ void GLTrace_glTexGenxvOES(GLenum coord, GLenum pname, const GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -16164,9 +17695,13 @@ void GLTrace_glGetTexGenfvOES(GLenum coord, GLenum pname, GLfloat *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -16201,9 +17736,13 @@ void GLTrace_glGetTexGenivOES(GLenum coord, GLenum pname, GLint *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -16238,9 +17777,13 @@ void GLTrace_glGetTexGenxvOES(GLenum coord, GLenum pname, GLfixed *params) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) params,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -16269,9 +17812,13 @@ void GLTrace_glClipPlanefIMG(GLenum p, const GLfloat *eqn) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) eqn,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -16300,9 +17847,13 @@ void GLTrace_glClipPlanexIMG(GLenum p, const GLfixed *eqn) {
     nsecs_t threadEndTime = systemTime(SYSTEM_TIME_THREAD);
     nsecs_t wallEndTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+    void *pointerArgs[] = {
+        (void *) eqn,
+    };
+
     fixupGLMessage(glContext, wallStartTime, wallEndTime,
                               threadStartTime, threadEndTime,
-                              &glmsg);
+                              &glmsg, pointerArgs);
     glContext->traceGLMessage(&glmsg);
 }
 
