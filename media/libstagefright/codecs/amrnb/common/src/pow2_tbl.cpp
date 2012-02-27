@@ -53,6 +53,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "pow2.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -81,7 +82,7 @@ extern "C"
     ; [Variable declaration - defined here and used outside this module]
     ----------------------------------------------------------------------------*/
 
-    extern const Word16 pow2_tbl[33] =
+    const Word16 pow2_tbl[33] =
     {
         16384, 16743, 17109, 17484, 17867, 18258, 18658, 19066, 19484, 19911,
         20347, 20792, 21247, 21713, 22188, 22674, 23170, 23678, 24196, 24726,

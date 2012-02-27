@@ -92,7 +92,7 @@ extern "C"
      *    g_fac(2)          (Q12) // frame 1 and 3
      *
      */
-    extern const Word16 table_gain_MR475[MR475_VQ_SIZE*4] =
+    const Word16 table_gain_MR475[MR475_VQ_SIZE*4] =
     {
         /*g_pit(0), g_fac(0),      g_pit(1), g_fac(1) */
         812,          128,           542,      140,

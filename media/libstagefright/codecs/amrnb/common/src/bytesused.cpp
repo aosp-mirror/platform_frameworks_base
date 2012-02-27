@@ -152,7 +152,7 @@ extern "C"
     ; LOCAL STORE/BUFFER/POINTER DEFINITIONS
     ; Variable declaration - defined here and used outside this module
     ----------------------------------------------------------------------------*/
-    extern const short BytesUsed[16] =
+    const short BytesUsed[16] =
     {
         13, /* 4.75 */
         14, /* 5.15 */

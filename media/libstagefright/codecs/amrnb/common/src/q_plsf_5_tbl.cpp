@@ -56,6 +56,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "q_plsf_5_tbl.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -94,7 +95,7 @@ extern "C"
     ----------------------------------------------------------------------------*/
     /* LSF means ->normalize frequency domain */
 
-    extern const Word16 mean_lsf_5[10] =
+    const Word16 mean_lsf_5[10] =
     {
         1384,
         2077,
@@ -108,7 +109,7 @@ extern "C"
         13701
     };
 
-    extern const Word16 dico1_lsf_5[DICO1_5_SIZE * 4] =
+    const Word16 dico1_lsf_5[DICO1_5_SIZE * 4] =
     {
         -451, -1065, -529, -1305,
         -450, -756, -497, -863,
@@ -240,7 +241,7 @@ extern "C"
         1469, 2181, 1443, 2016
     };
 
-    extern const Word16 dico2_lsf_5[DICO2_5_SIZE * 4] =
+    const Word16 dico2_lsf_5[DICO2_5_SIZE * 4] =
     {
         -1631, -1600, -1796, -2290,
         -1027, -1770, -1100, -2025,
@@ -500,7 +501,7 @@ extern "C"
         2374, 2787, 1821, 2788
     };
 
-    extern const Word16 dico3_lsf_5[DICO3_5_SIZE * 4] =
+    const Word16 dico3_lsf_5[DICO3_5_SIZE * 4] =
     {
         -1812, -2275, -1879, -2537,
         -1640, -1848, -1695, -2004,
@@ -760,7 +761,7 @@ extern "C"
         2180, 1975, 2326, 2020
     };
 
-    extern const Word16 dico4_lsf_5[DICO4_5_SIZE * 4] =
+    const Word16 dico4_lsf_5[DICO4_5_SIZE * 4] =
     {
         -1857, -1681, -1857, -1755,
         -2056, -1150, -2134, -1654,
@@ -1020,7 +1021,7 @@ extern "C"
         1716, 1376, 1948, 1465
     };
 
-    extern const Word16 dico5_lsf_5[DICO5_5_SIZE * 4] =
+    const Word16 dico5_lsf_5[DICO5_5_SIZE * 4] =
     {
         -1002, -929, -1096, -1203,
         -641, -931, -604, -961,
