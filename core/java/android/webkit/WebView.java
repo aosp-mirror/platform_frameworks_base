@@ -122,7 +122,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -460,6 +459,38 @@ public class WebView extends AbsoluteLayout
             return super.deleteSurroundingText(leftLength, rightLength);
         }
 
+        @Override
+        public boolean performEditorAction(int editorAction) {
+
+            boolean handled = true;
+            switch (editorAction) {
+            case EditorInfo.IME_ACTION_NEXT:
+                WebView.this.requestFocus(FOCUS_FORWARD);
+                break;
+            case EditorInfo.IME_ACTION_PREVIOUS:
+                WebView.this.requestFocus(FOCUS_BACKWARD);
+                break;
+            case EditorInfo.IME_ACTION_DONE:
+                WebView.this.hideSoftKeyboard();
+                break;
+            case EditorInfo.IME_ACTION_GO:
+            case EditorInfo.IME_ACTION_SEARCH:
+                WebView.this.hideSoftKeyboard();
+                String text = getEditable().toString();
+                passToJavaScript(text, new KeyEvent(KeyEvent.ACTION_DOWN,
+                        KeyEvent.KEYCODE_ENTER));
+                passToJavaScript(text, new KeyEvent(KeyEvent.ACTION_UP,
+                        KeyEvent.KEYCODE_ENTER));
+                break;
+
+            default:
+                handled = super.performEditorAction(editorAction);
+                break;
+            }
+
+            return handled;
+        }
+
         public void initEditorInfo(WebViewCore.TextFieldInitData initData) {
             int type = initData.mType;
             int inputType = InputType.TYPE_CLASS_TEXT
@@ -559,7 +590,7 @@ public class WebView extends AbsoluteLayout
             if (isCharacterAdd) {
                 sendCharacter(text.charAt(textLength - 1));
             } else if (isCharacterDelete) {
-                sendDeleteKey();
+                sendKey(KeyEvent.KEYCODE_DEL);
             } else if ((textLength != originalLength) ||
                     !TextUtils.regionMatches(text, 0, original, 0,
                             textLength)) {
@@ -594,16 +625,18 @@ public class WebView extends AbsoluteLayout
         }
 
         /**
-         * Send the delete character as a key down and up event.
+         * Send a key event for a specific key code, not a standard
+         * unicode character.
+         * @param keyCode The key code to send.
          */
-        private void sendDeleteKey() {
+        private void sendKey(int keyCode) {
             long eventTime = SystemClock.uptimeMillis();
             sendKeyEvent(new KeyEvent(eventTime, eventTime,
-                    KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL, 0, 0,
+                    KeyEvent.ACTION_DOWN, keyCode, 0, 0,
                     KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                     KeyEvent.FLAG_SOFT_KEYBOARD));
             sendKeyEvent(new KeyEvent(SystemClock.uptimeMillis(), eventTime,
-                    KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL, 0, 0,
+                    KeyEvent.ACTION_UP, keyCode, 0, 0,
                     KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                     KeyEvent.FLAG_SOFT_KEYBOARD));
         }
