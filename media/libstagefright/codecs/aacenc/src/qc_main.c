@@ -163,7 +163,7 @@ void QCOutDelete(QC_OUT* hQC, VO_MEM_OPERATOR *pMemOP)
    Word32 i;
    if(hQC)
    {
-      if(hQC->qcChannel[0].quantSpec);
+      if(hQC->qcChannel[0].quantSpec)
 		 mem_free(pMemOP, hQC->qcChannel[0].quantSpec, VO_INDEX_ENC_AAC);
 
       if(hQC->qcChannel[0].maxValueInSfb)
