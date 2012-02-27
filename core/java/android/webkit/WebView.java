@@ -68,6 +68,7 @@ import android.text.InputType;
 import android.text.Selection;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
@@ -111,6 +112,8 @@ import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.OverScroller;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import junit.framework.Assert;
@@ -122,7 +125,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -423,6 +425,23 @@ public class WebView extends AbsoluteLayout
             setSelection(selectionStart, selectionEnd);
         }
 
+        public void replaceSelection(CharSequence text) {
+            Editable editable = getEditable();
+            int selectionStart = Selection.getSelectionStart(editable);
+            int selectionEnd = Selection.getSelectionEnd(editable);
+            setNewText(selectionStart, selectionEnd, text);
+            editable.replace(selectionStart, selectionEnd, text);
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                // Since the text has changed, do not allow the IME to replace the
+                // existing text as though it were a completion.
+                imm.restartInput(WebView.this);
+            }
+            // Move caret to the end of the new text
+            int newCaret = selectionStart + text.length();
+            setSelection(newCaret, newCaret);
+        }
+
         @Override
         public boolean setComposingText(CharSequence text, int newCursorPosition) {
             Editable editable = getEditable();
@@ -609,6 +628,78 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    private class PastePopupWindow extends PopupWindow implements OnClickListener {
+        private ViewGroup mContentView;
+        private TextView mPasteTextView;
+
+        public PastePopupWindow() {
+            super(WebView.this.mContext, null,
+                    com.android.internal.R.attr.textSelectHandleWindowStyle);
+            setClippingEnabled(true);
+            LinearLayout linearLayout = new LinearLayout(WebView.this.getContext());
+            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+            mContentView = linearLayout;
+            mContentView.setBackgroundResource(
+                    com.android.internal.R.drawable.text_edit_paste_window);
+
+            LayoutInflater inflater = (LayoutInflater)WebView.this.mContext.
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            ViewGroup.LayoutParams wrapContent = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+            mPasteTextView = (TextView) inflater.inflate(
+                    com.android.internal.R.layout.text_edit_action_popup_text, null);
+            mPasteTextView.setLayoutParams(wrapContent);
+            mContentView.addView(mPasteTextView);
+            mPasteTextView.setText(com.android.internal.R.string.paste);
+            mPasteTextView.setOnClickListener(this);
+            this.setContentView(mContentView);
+        }
+
+        public void show(Rect cursorRect, int windowLeft, int windowTop) {
+            measureContent();
+
+            int width = mContentView.getMeasuredWidth();
+            int height = mContentView.getMeasuredHeight();
+            int y = cursorRect.top - height;
+            if (y < windowTop) {
+                // There's not enough room vertically, move it below the
+                // handle.
+                // The selection handle is vertically offset by 1/4 of the
+                // line height.
+                y = cursorRect.bottom - (cursorRect.height() / 4) +
+                        mSelectHandleCenter.getIntrinsicHeight();
+            }
+            int x = cursorRect.centerX() - (width / 2);
+            if (x < windowLeft) {
+                x = windowLeft;
+            }
+            if (!isShowing()) {
+                showAtLocation(WebView.this, Gravity.NO_GRAVITY, x, y);
+            }
+            update(x, y, width, height);
+        }
+
+        public void hide() {
+            dismiss();
+        }
+
+        @Override
+        public void onClick(View view) {
+            pasteFromClipboard();
+            selectionDone();
+        }
+
+        protected void measureContent() {
+            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+            mContentView.measure(
+                    View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels,
+                            View.MeasureSpec.AT_MOST),
+                    View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels,
+                            View.MeasureSpec.AT_MOST));
+        }
+    }
 
     // The listener to capture global layout change event.
     private InnerGlobalLayoutListener mGlobalLayoutListener = null;
@@ -636,6 +727,7 @@ public class WebView extends AbsoluteLayout
     private boolean mGLViewportEmpty = false;
     WebViewInputConnection mInputConnection = null;
     private int mFieldPointer;
+    private PastePopupWindow mPasteWindow;
 
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -5910,6 +6002,27 @@ public class WebView extends AbsoluteLayout
         return true;
     }
 
+    private void showPasteWindow() {
+        ClipboardManager cm = (ClipboardManager)(mContext
+                .getSystemService(Context.CLIPBOARD_SERVICE));
+        if (cm.hasPrimaryClip()) {
+            Rect cursorRect = contentToViewRect(mSelectCursorBase);
+            int[] location = new int[2];
+            getLocationInWindow(location);
+            cursorRect.offset(location[0] - mScrollX, location[1] - mScrollY);
+            if (mPasteWindow == null) {
+                mPasteWindow = new PastePopupWindow();
+            }
+            mPasteWindow.show(cursorRect, location[0], location[1]);
+        }
+    }
+
+    private void hidePasteButton() {
+        if (mPasteWindow != null) {
+            mPasteWindow.hide();
+        }
+    }
+
     private void syncSelectionCursors() {
         mSelectCursorBaseLayerId =
                 nativeGetHandleLayerId(mNativeClass, HANDLE_ID_BASE, mSelectCursorBase);
@@ -5919,13 +6032,11 @@ public class WebView extends AbsoluteLayout
 
     private boolean setupWebkitSelect() {
         syncSelectionCursors();
-        ClipboardManager cm = (ClipboardManager)(mContext
-                .getSystemService(Context.CLIPBOARD_SERVICE));
-        if (!mIsCaretSelection || cm.hasPrimaryClip()) {
-            if (!startSelectActionMode()) {
-                selectionDone();
-                return false;
-            }
+        if (mIsCaretSelection) {
+            showPasteWindow();
+        } else if (!startSelectActionMode()) {
+            selectionDone();
+            return false;
         }
         mSelectingText = true;
         mTouchMode = TOUCH_DRAG_MODE;
@@ -5982,6 +6093,7 @@ public class WebView extends AbsoluteLayout
      */
     void selectionDone() {
         if (mSelectingText) {
+            hidePasteButton();
             mSelectingText = false;
             // finish is idempotent, so this is fine even if selectionDone was
             // called by mSelectCallback.onDestroyActionMode
@@ -6051,12 +6163,8 @@ public class WebView extends AbsoluteLayout
         if (clipData != null) {
             ClipData.Item clipItem = clipData.getItemAt(0);
             CharSequence pasteText = clipItem.getText();
-            if (pasteText != null) {
-                int[] handles = new int[4];
-                getSelectionHandles(handles);
-                mWebViewCore.sendMessage(EventHub.DELETE_TEXT, handles);
-                mWebViewCore.sendMessage(EventHub.INSERT_TEXT,
-                        pasteText.toString());
+            if (mInputConnection != null) {
+                mInputConnection.replaceSelection(pasteText);
             }
         }
     }
@@ -6614,6 +6722,7 @@ public class WebView extends AbsoluteLayout
                             mSelectionStarted = true;
                             mSelectDraggingCursor = mSelectCursorBase;
                             mPrivateHandler.removeMessages(CLEAR_CARET_HANDLE);
+                            hidePasteButton();
                         } else if (mSelectHandleLeft != null
                                 && mSelectHandleLeft.getBounds()
                                     .contains(shiftedX, shiftedY)) {
@@ -7276,10 +7385,11 @@ public class WebView extends AbsoluteLayout
 
         if (mSelectingText) {
             mSelectionStarted = false;
+            syncSelectionCursors();
             if (mIsCaretSelection) {
                 resetCaretTimer();
+                showPasteWindow();
             }
-            syncSelectionCursors();
             invalidate();
         }
     }
