@@ -49,8 +49,8 @@ import android.content.res.BridgeResources;
 import android.content.res.BridgeTypedArray;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
+import android.content.res.TypedArray;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -78,8 +78,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -615,7 +615,8 @@ public final class BridgeContext extends Context {
         }
 
         String namespace = BridgeConstants.NS_RESOURCES;
-        if (frameworkAttributes.get() == false) {
+        boolean useFrameworkNS = frameworkAttributes.get();
+        if (useFrameworkNS == false) {
             // need to use the application namespace
             namespace = mProjectCallback.getNamespace();
         }
@@ -628,6 +629,12 @@ public final class BridgeContext extends Context {
                 String value = null;
                 if (set != null) {
                     value = set.getAttributeValue(namespace, name);
+
+                    // if this is an app attribute, and the first get fails, try with the
+                    // new res-auto namespace as well
+                    if (useFrameworkNS == false && value == null) {
+                        value = set.getAttributeValue(BridgeConstants.NS_APP_RES_AUTO, name);
+                    }
                 }
 
                 // if there's no direct value for this attribute in the XML, we look for default
