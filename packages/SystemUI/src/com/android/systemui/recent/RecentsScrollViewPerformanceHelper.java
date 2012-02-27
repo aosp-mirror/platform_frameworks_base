@@ -78,39 +78,13 @@ public class RecentsScrollViewPerformanceHelper {
             mScrollView.setVerticalFadingEdgeEnabled(false);
             mScrollView.setHorizontalFadingEdgeEnabled(false);
         }
-        if (mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS) {
-            mCallback = callback;
-            mLinearLayout = layout;
-            mAttachedToWindow = true;
-            mBackgroundDrawable = mContext.getResources()
-                .getDrawable(R.drawable.status_bar_recents_background_solid).getConstantState();
-            updateShowBackground();
-        }
-
     }
 
     public void addViewCallback(View newLinearLayoutChild) {
         if (mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS) {
             final View view = newLinearLayoutChild;
-            if (mShowBackground) {
-                view.setBackgroundDrawable(mBackgroundDrawable.newDrawable());
-                view.setDrawingCacheEnabled(true);
-                view.buildDrawingCache();
-            } else {
-                view.setBackgroundDrawable(null);
-                view.setDrawingCacheEnabled(false);
-                view.destroyDrawingCache();
-            }
-        }
-    }
-
-    public void onLayoutCallback() {
-        if (mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS) {
-            mScrollView.post(new Runnable() {
-                public void run() {
-                    updateShowBackground();
-                }
-            });
+            view.setDrawingCacheEnabled(true);
+            view.buildDrawingCache();
         }
     }
 
@@ -118,37 +92,6 @@ public class RecentsScrollViewPerformanceHelper {
             int left, int right, int top, int bottom, int scrollX, int scrollY,
             float topFadingEdgeStrength, float bottomFadingEdgeStrength,
             float leftFadingEdgeStrength, float rightFadingEdgeStrength) {
-        if (mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS) {
-            if (mIsVertical) {
-                if (scrollY < 0) {
-                    Drawable d = mBackgroundDrawable.newDrawable().getCurrent();
-                    d.setBounds(0, scrollY, mScrollView.getWidth(), 0);
-                    d.draw(canvas);
-                } else {
-                    final int childHeight = mLinearLayout.getHeight();
-                    if (scrollY + mScrollView.getHeight() > childHeight) {
-                        Drawable d = mBackgroundDrawable.newDrawable().getCurrent();
-                        d.setBounds(0, childHeight, mScrollView.getWidth(),
-                                scrollY + mScrollView.getHeight());
-                        d.draw(canvas);
-                    }
-                }
-            } else {
-                if (scrollX < 0) {
-                    Drawable d = mBackgroundDrawable.newDrawable().getCurrent();
-                    d.setBounds(scrollX, 0, 0, mScrollView.getHeight());
-                    d.draw(canvas);
-                } else {
-                    final int childWidth = mLinearLayout.getWidth();
-                    if (scrollX + mScrollView.getWidth() > childWidth) {
-                        Drawable d = mBackgroundDrawable.newDrawable().getCurrent();
-                        d.setBounds(childWidth, 0,
-                                scrollX + mScrollView.getWidth(), mScrollView.getHeight());
-                        d.draw(canvas);
-                    }
-                }
-            }
-        }
 
         if ((mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS)
                 || USE_DARK_FADE_IN_HW_ACCELERATED_MODE) {
@@ -239,66 +182,6 @@ public class RecentsScrollViewPerformanceHelper {
 
     public int getHorizontalFadingEdgeLengthCallback() {
         return mFadingEdgeLength;
-    }
-
-    public void setLayoutTransitionCallback(LayoutTransition transition) {
-        if (mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS) {
-            if (transition != null) {
-                transition.addTransitionListener(new LayoutTransition.TransitionListener() {
-                    @Override
-                    public void startTransition(LayoutTransition transition,
-                            ViewGroup container, View view, int transitionType) {
-                        updateShowBackground();
-                    }
-
-                    @Override
-                    public void endTransition(LayoutTransition transition,
-                            ViewGroup container, View view, int transitionType) {
-                        updateShowBackground();
-                    }
-                });
-            }
-        }
-    }
-
-    // Turn on/off drawing the background in our ancestor, and turn on/off drawing
-    // in the items in LinearLayout contained by this scrollview.
-    // Moving the background drawing to our children, and turning on a drawing cache
-    // for each of them, gives us a ~20fps gain when Recents is rendered in software
-    public void updateShowBackground() {
-        if (!mAttachedToWindow) {
-            // We haven't been initialized yet-- we'll get called again when we are
-            return;
-        }
-        if (mSoftwareRendered && OPTIMIZE_SW_RENDERED_RECENTS) {
-            LayoutTransition transition = mLinearLayout.getLayoutTransition();
-            int linearLayoutSize =
-                mIsVertical ? mLinearLayout.getHeight() : mLinearLayout.getWidth();
-            int scrollViewSize =
-                mIsVertical ? mScrollView.getHeight() : mScrollView.getWidth();
-            boolean show = !mScrollView.isHardwareAccelerated() &&
-                (linearLayoutSize > scrollViewSize) &&
-                !(transition != null && transition.isRunning()) &&
-                mCallback.isRecentsVisible();
-
-            if (!mFirstTime && show == mShowBackground) return;
-            mShowBackground = show;
-            mFirstTime = false;
-
-            mCallback.handleShowBackground(!show);
-            for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
-                View v = mLinearLayout.getChildAt(i);
-                if (show) {
-                    v.setBackgroundDrawable(mBackgroundDrawable.newDrawable());
-                    v.setDrawingCacheEnabled(true);
-                    v.buildDrawingCache();
-                } else {
-                    v.setDrawingCacheEnabled(false);
-                    v.destroyDrawingCache();
-                    v.setBackgroundDrawable(null);
-                }
-            }
-        }
     }
 
 }
