@@ -149,7 +149,7 @@ final class FragmentState implements Parcelable {
  * {@link Fragment#getFragmentManager() Fragment.getFragmentManager()}.
  *
  * <p>The Fragment class can be used many ways to achieve a wide variety of
- * results.  It is core, it represents a particular operation or interface
+ * results. In its core, it represents a particular operation or interface
  * that is running within a larger {@link Activity}.  A Fragment is closely
  * tied to the Activity it is in, and can not be used apart from one.  Though
  * Fragment defines its own lifecycle, that lifecycle is dependent on its
