@@ -492,6 +492,7 @@ public class MtpDatabase {
             MtpConstants.FORMAT_MPEG,
             MtpConstants.FORMAT_EXIF_JPEG,
             MtpConstants.FORMAT_TIFF_EP,
+            MtpConstants.FORMAT_BMP,
             MtpConstants.FORMAT_GIF,
             MtpConstants.FORMAT_JFIF,
             MtpConstants.FORMAT_PNG,
