@@ -108,7 +108,7 @@ terms listed above has been obtained from the copyright holder.
 
 /* table of cos(x) in Q15 */
 
-const int16 table[129] =
+static const int16 table[129] =
 {
     32767,
     32758,  32729,  32679,  32610,  32522,  32413,  32286,  32138,
