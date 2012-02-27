@@ -451,6 +451,10 @@
     <skip />
     <!-- no translation found for permdesc_changeComponentState (1827232484416505615) -->
     <skip />
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <!-- no translation found for permlab_setPreferredApplications (8463181628695396391) -->
     <skip />
     <!-- no translation found for permdesc_setPreferredApplications (4973986762241783712) -->
@@ -1474,6 +1478,8 @@
     <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Naginas permissiuns obligatoricas"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Zuppentar"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mussar tut"</b></string>

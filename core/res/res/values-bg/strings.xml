@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"активиране или деактивиране на компоненти на приложенията"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Разрешава на приложението да активира или деактивира компонент на друго приложение. Злонамерените приложения могат да използват това, за да деактивират важни възможности на таблета. С това разрешение трябва да се внимава, тъй като компонентите на приложенията може да бъдат приведени в неизползваемо, несъгласувано или нестабилно състояние."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Разрешава на приложението да активира или деактивира компонент на друго приложение. Злонамерените приложения могат да използват това, за да деактивират важни възможности на телефона. С това разрешение трябва да се внимава, тъй като компонентите на приложенията може да бъдат приведени в неизползваемо, несъгласувано или нестабилно състояние."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"задаване на предпочитани приложения"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Разрешава на приложението да променя предпочитаните ви приложения. Злонамерените приложения могат скрито да променят приложенията, които се изпълняват, като ги фалшифицират, за да се сдобият с ваши лични данни."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"промяна на глобалните системни настройки"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Задаване на дата"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Задаване"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"По подразбиране"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Не се изискват разрешения"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Скриване"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Показване на всички"</b></string>

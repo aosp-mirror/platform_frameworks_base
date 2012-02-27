@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"componenten van apps in- of uitschakelen"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Hiermee kan de app wijzigen of een component van een andere app wel of niet is ingeschakeld. Schadelijke apps kunnen dit gebruiken om belangrijke tabletfuncties uit te schakelen. U moet voorzichtig omgaan met deze rechten, aangezien het mogelijk is dat onderdelen van apps onbruikbaar, inconsistent of instabiel worden."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Hiermee kan de app wijzigen of een component van een andere app wel of niet is ingeschakeld. Schadelijke apps kunnen dit gebruiken om belangrijke telefoonfuncties uit te schakelen. U moet voorzichtig omgaan met deze rechten, aangezien het mogelijk is dat onderdelen van apps onbruikbaar, inconsistent of instabiel worden."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"voorkeursapps instellen"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Hiermee kan de app uw voorkeursapps aanpassen. Schadelijke apps kunnen de apps die worden uitgevoerd zonder uw medeweten wijzigen om uw bestaande apps te imiteren en privégegevens van u te verzamelen."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"algemene systeeminstellingen wijzigen"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datum instellen"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Instellen"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standaard"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Geen machtigingen vereist"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Verbergen"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Alles weergeven"</b></string>

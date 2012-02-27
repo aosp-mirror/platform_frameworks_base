@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ενεργοποίηση ή απενεργοποίηση στοιχείων εφαρμογής"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Επιτρέπει στην εφαρμογή την αλλαγή της κατάστασης ενεργοποίησης κάποιου στοιχείου. Τυχόν κακόβουλες εφαρμογές μπορούν να χρησιμοποιήσουν αυτήν τη δυνατότητα για την απενεργοποίηση σημαντικών δυνατοτήτων του tablet. Αυτή η άδεια θα πρέπει να χρησιμοποιείται προσεκτικά, καθώς είναι πιθανό να θέσει τα στοιχεία εφαρμογών σε κατάσταση αχρηστίας, μη συνοχής και αστάθειας."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Επιτρέπει στην εφαρμογή την αλλαγή της κατάστασης ενεργοποίησης κάποιου στοιχείου. Τυχόν κακόβουλες εφαρμογές μπορούν να χρησιμοποιήσουν αυτήν τη δυνατότητα για την απενεργοποίηση σημαντικών δυνατοτήτων του τηλεφώνου. Αυτή η άδεια θα πρέπει να χρησιμοποιείται προσεκτικά, καθώς είναι πιθανό να θέσει τα στοιχεία εφαρμογών σε κατάσταση αχρηστίας, μη συνοχής και αστάθειας."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ορισμός προτιμώμενων εφαρμογών"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Επιτρέπει στην εφαρμογή την τροποποίηση των εφαρμογών της προτίμησής σας. Τυχόν κακόβουλες εφαρμογές ενδέχεται να να αλλάξουν χωρίς ειδοποίηση τις εφαρμογές που εκτελούνται, \"ξεγελώντας\" τις υπάρχουσες εφαρμογές ώστε να συλλέξουν ιδιωτικά δεδομένα από εσάς."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"τροποποίηση καθολικών ρυθμίσεων συστήματος"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Ορισμός ημερομηνίας"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ορισμός"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Προεπιλεγμένο"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Δεν απαιτούνται άδειες"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Απόκρυψη"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Εμφάνιση όλων"</b></string>

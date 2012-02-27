@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivera eller inaktivera appkomponenter"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Tillåter att appen ändrar inställningen för om en komponent i en annan app ska aktiveras eller inte. Skadliga appar kan använda detta för att inaktivera viktiga funktioner i pekdatorn. Var försiktig med behörigheten, eftersom appkomponenter kan bli oanvändbara, inkonsekventa eller instabila."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Tillåter att appen ändrar inställningen för om en komponent i en annan app ska aktiveras eller inte. Skadliga appar kan använda detta för att inaktivera viktiga funktioner i pekdatorn. Var försiktig med behörigheten, eftersom programkomponenter kan bli oanvändbara, inkonsekventa eller instabila."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ange önskade appar"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Tillåter att appen ändrar dina önskade appar. Skadliga appar kan utan förvarning ändra de appar som körs och kapa dina befintliga appar så att de börjar samla privata uppgifter från dig."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"ändra globala systeminställningar"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Ange datum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ställ in"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standardinställning"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Inga behörigheter krävs"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Dölj"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Visa alla"</b></string>

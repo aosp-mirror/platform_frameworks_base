@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activare sau dezactivare a componentelor aplicaţiei"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Permite aplicaţiei să modifice starea activată sau dezactivată a unei componente a altei aplicaţii. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a dezactiva funcţii importante ale tabletei. Este necesar să utilizaţi cu atenţie această permisiune, deoarece este posibil să aduceţi componentele aplicaţiei într-o stare inutilizabilă, inconsecventă sau instabilă."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Permite aplicaţiei să modifice starea activată sau dezactivată a unei componente a altei aplicaţii. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a dezactiva funcţii importante ale telefonului. Este necesar să utilizaţi cu atenţie această permisiune, deoarece este posibil să aduceţi componentele aplicaţiei într-o stare inutilizabilă, inconsecventă sau instabilă."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"setare aplicaţii preferate"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permite aplicaţiei să modifice aplicaţiile dvs. preferate. Aplicaţiile rău intenţionate pot să modifice fără a vă înştiinţa aplicaţiile care rulează, păcălind aplicaţiile existente să colecteze date private de la dvs."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modificare setări sistem globale"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setaţi data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Setaţi"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Prestabilit"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Nu se solicită nicio permisiune"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ascundeţi"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Afişaţi-le pe toate"</b></string>

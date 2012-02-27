@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"dayakan atau lumpuhkan komponen apl"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Membenarkan apl untuk menukar sama ada komponen apl lain didayakan atau tidak. Apl hasad boleh menggunakannya untuk melumpuhkan keupayaan telefon yang penting. Berhati-hati semasa menggunakan kebenaran ini, kerana hal ini boleh menjadikan komponen apl berada dalam keadaan tidak boleh digunakan, tidak konsisten, atau tidak stabil."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Membenarkan apl untuk menukar sama ada komponen apl lain didayakan atau tidak. Apl hasad boleh menggunakannya untuk melumpuhkan keupayaan telefon yang penting. Berhati-hati semasa menggunakan kebenaran ini, kerana hal ini boleh menjadikan komponen apl berada dalam keadaan tidak boleh digunakan, tidak konsisten, atau tidak stabil."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"tetapkan keutamaan apl"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Membenarkan apl untuk mengubah suai apl pilihan anda. Apl hasad secara diam-diam boleh menukar apl yang dijalankan, menipu apl anda yang sedia ada untuk mengumpul data peribadi daripada anda."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"mengubah suai tetapan sistem global"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tetapkan tarikh"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Tetapkan"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Lalai"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Tiada kebenaran diperlukan"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Sembunyikan"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Tunjukkan semua"</b></string>

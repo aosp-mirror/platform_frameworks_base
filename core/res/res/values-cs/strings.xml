@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivace či deaktivace komponent aplikací"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou toto oprávnění použít k vypnutí důležitých funkcí tabletu. Toto oprávnění je třeba používat opatrně, protože může dojít k nepoužitelnosti, nekonzistenci nebo nestabilitě komponent aplikací."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou toto oprávnění použít k vypnutí důležitých funkcí telefonu. Toto oprávnění je třeba používat opatrně, protože může dojít k nepoužitelnosti, nekonzistenci nebo nestabilitě komponent aplikací."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"nastavení upřednostňovaných aplikací"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Umožňuje aplikaci upravit preferované aplikace. Škodlivé aplikace mohou tajně měnit běžící aplikace a přinutit stávající aplikace, aby shromažďovaly vaše soukromé údaje."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"změna globálních nastavení systému"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastavení data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nastavit"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Výchozí"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Nejsou vyžadována žádná oprávnění"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Skrýt"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Zobrazit vše"</b></string>

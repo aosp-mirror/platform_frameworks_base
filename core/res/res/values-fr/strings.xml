@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activer ou désactiver les composants de l\'application"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Permet à l\'application d\'activer ou de désactiver un composant d\'une autre application. Des applications malveillantes peuvent exploiter cette fonctionnalité pour désactiver les fonctionnalités principales de votre tablette. Cette autorisation doit être utilisée avec prudence, car elle peut rendre les composants d\'une application instables, voire inutilisables."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Permet à l\'application d\'activer ou de désactiver un composant d\'une autre application. Des applications malveillantes peuvent exploiter cette fonctionnalité pour désactiver les fonctionnalités principales de votre téléphone. Cette autorisation doit être utilisée avec prudence, car elle peut rendre les composants d\'une application instables, voire inutilisables."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"définir les applications préférées"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permet à l\'application de modifier vos applications préférées. Des applications malveillantes peuvent exploiter cette fonctionnalité pour modifier les applications exécutées en usurpant l\'identité de vos applications existantes dans le but de recueillir des données privées."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"Modification des paramètres généraux du système"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Définir la date"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Définir"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Par défaut"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Aucune autorisation requise"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Masquer"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Tout afficher"</b></string>

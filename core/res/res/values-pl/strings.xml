@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"włączanie lub wyłączanie składników aplikacji"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Pozwala aplikacji na włączenie lub wyłączenie składnika innej aplikacji. Złośliwe aplikacje mogą wykorzystać to uprawnienie do wyłączenia ważnych funkcji tabletu. W przypadku tego uprawnienia należy zachować ostrożność, ponieważ istnieje możliwość wprowadzenia składników aplikacji w stan nieużywalności, niespójności lub niestabilności."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Pozwala aplikacji na włączenie lub wyłączenie składnika innej aplikacji. Złośliwe aplikacje mogą wykorzystać to uprawnienie do wyłączenia ważnych funkcji telefonu. W przypadku tego uprawnienia należy zachować ostrożność, ponieważ istnieje możliwość wprowadzenia składników aplikacji w stan nieużywalności, niespójności lub niestabilności."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ustawianie preferowanych aplikacji"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Pozwala aplikacji na zmianę Twoich preferowanych aplikacji. Złośliwe aplikacje mogą dyskretnie zmienić uruchamiane aplikacje, podszywając się pod dotychczasowe aplikacje w celu zebrania od Ciebie prywatnych danych."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modyfikowanie ogólnych ustawień systemu"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Ustaw datę"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ustaw"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Domyślne"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Nie są wymagane żadne uprawnienia"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ukryj"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Pokaż wszystko"</b></string>

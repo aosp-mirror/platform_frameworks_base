@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"омогућавање или онемогућавање компоненти апликације"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Дозвољава апликацији да промени да ли је компонента друге апликације омогућена или онемогућена. Злонамерне апликације могу то да искористе да онемогуће важне функције таблета. Треба бити опрезан при додељивању ове дозволе, јер компоненте апликација могу постати неупотребљиве, непоуздане или нестабилне."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Дозвољава апликацији да промени да ли је компонента друге апликације омогућена или онемогућена. Злонамерне апликације могу то да искористе да онемогуће важне функције телефона. Треба бити опрезан при додељивању ове дозволе, јер компоненте апликација могу да постану неупотребљиве, непоуздане или нестабилне."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"подешавање жељених апликација"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Дозвољава апликацији да мења омиљене апликације. Злонамерне апликације могу без обавештења да промене апликације које су покренуте и да преко њих прикупљају ваше приватне податке."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"измена глобалних подешавања система"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Подешавање датума"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Подеси"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Подразумевано"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Није потребна ниједна дозвола"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Сакриј"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Прикажи све"</b></string>

@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"уключыць або адключыць кампаненты прыкладання"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Дазваляе прыкладанням змяняць вызначэнне таго, будзе ўключаны кампанент іншага прыкладання ці не. Шкоднасныя прыкладанні могуць выкарыстоўваць гэта для адключэння важных магчымасцяў планшэта. З гэтым дазволам трэба быць уважлівым, бо можна прывесці кампаненты прыкладання ў непрыдатны, супярэчлівы або няўстойлівы стан."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Дазваляе прыкладанням змяняць вызначэнне таго, будзе ўключаны кампанент іншага прыкладання ці не. Шкоднасныя прыкладанні могуць выкарыстоўваць гэта для адключэння важных магчымасцяў тэлефона. З гэтым дазволам трэба быць уважлівым, бо можна прывесці кампаненты прыкладання ў непрыдатны, супярэчлівы або няўстойлівы стан."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"усталяваць пажаданыя прыкладанні"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Дазваляе прыкладанням змяняць вашы пажаданыя прыкладанні. Шкоднасныя прыкладанні могуць непрыкметна змяняць запушчаныя прыкладанні, падмяняючы існуючыя прыкладанні, каб збiраць вашы асабістыя дадзеныя."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"змена глабальных параметраў сістэмы"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Усталяваць дату"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Задаць"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Па змаўчанні"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Дазволу не патрабуецца"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Не паказваць"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Паказаць усе"</b></string>

@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"فعال یا غیر فعال کردن اجزای برنامه"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"به برنامه اجازه می‎دهد تا فعال بودن یا نبودن اجزای برنامه دیگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا قابلیتهای مهم رایانه لوحی را غیرفعال کنند. باید دقت کرد که با این مجوز ممکن است وضعیت اجزای برنامه ناپایدار، ناهماهنگ یا غیرقابل استفاده شود."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"به برنامه اجازه می‎دهد تا فعال بودن یا غیرفعال بودن جزئیات برنامه دیگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا ویژگیهای مهم را غیرفعال کنند. برای این مجوز باید دقت کنید چون ممکن است وضعیت جزئیات برنامه ناپایدار، بی‎ثبات یا غیرقابل استفاده شود."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"تنظیم برنامه‎های ترجیحی"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"به برنامه اجازه می‎دهد تا برنامه‎های ترجیحی شما را تغییر دهد. برنامه‎های مخرب می‎توانند بدون اعلان برنامه‎هایی را که اجرا می‎شوند، تغییر دهند خود را به جای برنامه‎های کنونی قلمداد کنند تا داده‎های شخصی را از شما جمع آوری کنند."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"اصلاح کردن تنظیمات سیستم کلی"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تاریخ تنظیم"</string>
     <string name="date_time_set" msgid="5777075614321087758">"تنظیم"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"پیش فرض"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"مجوزی لازم نیست"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"پنهان کردن"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"نمایش همه"</b></string>

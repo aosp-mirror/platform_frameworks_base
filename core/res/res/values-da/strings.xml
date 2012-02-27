@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivere eller deaktivere appkomponenter"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Tillader, at appen kan ændre, om en komponent i en anden app er aktiveret eller ej. Ondsindede apps kan bruge dette til at deaktivere vigtige tabletfunktioner. Man skal være forsigtig med denne tilladelse, da det er muligt at bringe appkomponenter ind i en ubrugelig, inkonsekvent eller ustabil tilstand."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Tillader, at appen kan ændre, om en komponent i en anden app er aktiveret eller ej. Ondsindede apps kan bruge dette til at deaktivere vigtige funktioner på telefonen. Denne tilladelse skal anvendes med forsigtighed, da det kan forårsage ubrugelige eller ustabile appkomponenter."</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"angive foretrukne apps"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Tillader, at appen kan ændre dine foretrukne apps. Ondsindede apps kan ubemærket ændre kørende apps derved udgive sig for at være dine eksisterende apps og på den måde indsamle private data fra dig."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"rediger globale systemindstillinger"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angiv dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Angiv"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"Der kræves ingen tilladelser"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Skjul"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Vis alle"</b></string>

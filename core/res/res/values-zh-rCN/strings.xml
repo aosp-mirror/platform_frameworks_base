@@ -313,6 +313,10 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"启用或停用应用程序组件"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"允许应用程序启用或停用其他应用程序的组件。恶意应用程序可能借此停用重要的平板电脑功能。请务必谨慎使用此权限，因为这可能导致某些应用程序组件处于无法使用、不一致或不稳定的状态。"</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"允许应用程序启用或停用其他应用程序的组件。恶意应用程序可能借此停用重要的手机功能。请务必谨慎使用此权限，因为这可能导致某些应用程序组件进入无法使用、不一致或不稳定的状态。"</string>
+    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
+    <skip />
+    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
+    <skip />
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"设置首选应用程序"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"允许应用程序修改您的首选应用程序。恶意应用程序可能会在后台更改运行的应用程序，欺骗您现有的应用程序，以收集您的私人数据。"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"修改全局系统设置"</string>
@@ -1004,6 +1008,8 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"设置日期"</string>
     <string name="date_time_set" msgid="5777075614321087758">"设置"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"默认"</string>
+    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
+    <skip />
     <string name="no_permissions" msgid="7283357728219338112">"不需要任何权限"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"隐藏"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"全部显示"</b></string>
