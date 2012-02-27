@@ -339,6 +339,12 @@ static void PostMDCT(int *buf0, int num, const int *csptr)
 		*buf1-- = MULHIGH(cosb, tr2) + MULHIGH(sinb, ti2);
 	}
 }
+#else
+void Radix4First(int *buf, int num);
+void Radix8First(int *buf, int num);
+void Radix4FFT(int *buf, int num, int bgn, int *twidTab);
+void PreMDCT(int *buf0, int num, const int *csptr);
+void PostMDCT(int *buf0, int num, const int *csptr);
 #endif
 
 
