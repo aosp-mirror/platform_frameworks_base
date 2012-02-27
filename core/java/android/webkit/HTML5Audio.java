@@ -142,8 +142,7 @@ class HTML5Audio extends Handler
 
     // MediaPlayer.OnCompletionListener;
     public void onCompletion(MediaPlayer mp) {
-        resetMediaPlayer();
-        mState = IDLE;
+        mState = COMPLETE;
         nativeOnEnded(mNativePointer);
     }
 
@@ -265,7 +264,18 @@ class HTML5Audio extends Handler
 
 
     private void play() {
-        if ((mState >= ERROR && mState < PREPARED) && mUrl != null) {
+        if (mState == COMPLETE) {
+            // Play it again, Sam
+            mTimer.cancel();
+            mTimer = new Timer();
+            mAskToPlay = true;
+            mMediaPlayer.stop();
+            mState = STOPPED;
+            mMediaPlayer.prepareAsync();
+            return;
+        }
+
+        if (((mState >= ERROR && mState < PREPARED)) && mUrl != null) {
             resetMediaPlayer();
             setDataSource(mUrl);
             mAskToPlay = true;
@@ -296,6 +306,12 @@ class HTML5Audio extends Handler
     private void seek(int msec) {
         if (mState >= PREPARED) {
             mMediaPlayer.seekTo(msec);
+            if (mState == COMPLETE) {
+                // Seeking after the stream had completed will
+                // cause us to start playing again. This is to
+                // support audio tags that specify loop=true.
+                play();
+            }
         }
     }
 
