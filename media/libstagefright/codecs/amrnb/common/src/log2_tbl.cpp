@@ -54,6 +54,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "log2_norm.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -82,7 +83,7 @@ extern "C"
     ; [Variable declaration - defined here and used outside this module]
     ----------------------------------------------------------------------------*/
 
-    extern const Word16 log2_tbl[33] =
+    const Word16 log2_tbl[33] =
     {
         0, 1455, 2866, 4236, 5568, 6863, 8124, 9352, 10549, 11716,
         12855, 13967, 15054, 16117, 17156, 18172, 19167, 20142, 21097, 22033,

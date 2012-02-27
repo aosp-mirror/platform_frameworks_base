@@ -58,6 +58,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "sqrt_l.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -85,7 +86,7 @@ extern "C"
     ; LOCAL VARIABLE DEFINITIONS
     ; [Variable declaration - defined here and used outside this module]
     ----------------------------------------------------------------------------*/
-    extern const Word16 sqrt_l_tbl[50] =
+    const Word16 sqrt_l_tbl[50] =
     {
         16384, 16888, 17378, 17854, 18318, 18770, 19212, 19644, 20066, 20480,
         20886, 21283, 21674, 22058, 22435, 22806, 23170, 23530, 23884, 24232,
