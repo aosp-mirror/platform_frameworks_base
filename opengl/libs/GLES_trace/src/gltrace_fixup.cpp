@@ -237,6 +237,26 @@ void fixup_glUniformMatrixGeneric(int matrixSize, GLMessage *glmsg) {
     fixup_glUniformGeneric(3, matrixSize * matrixSize * n_matrices, glmsg);
 }
 
+void fixup_glBufferData(int sizeIndex, int dataIndex, GLMessage *glmsg) {
+    /* void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) */
+    /* void glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) */
+    GLsizeiptr size = glmsg->args(sizeIndex).intvalue(0);
+
+    GLMessage_DataType *arg_datap = glmsg->mutable_args(dataIndex);
+    GLvoid *datap = (GLvoid *)arg_datap->intvalue(0);
+
+    if (datap == NULL) {
+        // glBufferData can be called with a NULL data pointer
+        return;
+    }
+
+    arg_datap->set_type(GLMessage::DataType::VOID);
+    arg_datap->set_isarray(true);
+    arg_datap->clear_intvalue();
+
+    arg_datap->add_rawbytes(datap, size);
+}
+
 void fixup_GenericIntArray(int argIndex, int nInts, GLMessage *glmsg) {
     GLMessage_DataType *arg_intarray = glmsg->mutable_args(argIndex);
     GLint *intp = (GLint *)arg_intarray->intvalue(0);
@@ -502,6 +522,14 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t wallStart, nsecs_t wallEnd,
         /* void glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose,
                                                                     const GLfloat* value) */
         fixup_glUniformMatrixGeneric(4, glmsg);
+        break;
+    case GLMessage::glBufferData:
+        /* void glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) */
+        fixup_glBufferData(1, 2, glmsg);
+        break;
+    case GLMessage::glBufferSubData:
+        /* void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) */
+        fixup_glBufferData(2, 3, glmsg);
         break;
     case GLMessage::glDrawArrays:
         /* void glDrawArrays(GLenum mode, GLint first, GLsizei count) */
