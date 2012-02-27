@@ -232,7 +232,7 @@ void AudioFlinger::onFirstRef()
             (NO_ERROR != dev->set_master_volume(dev, initialVolume))) {
             mMasterVolumeSupportLvl = MVS_NONE;
         }
-        mHardwareStatus = AUDIO_HW_INIT;
+        mHardwareStatus = AUDIO_HW_IDLE;
     }
 
     // Set the mode for each audio HAL, and try to set the initial volume (if
@@ -254,7 +254,7 @@ void AudioFlinger::onFirstRef()
                 dev->set_master_volume(dev, initialVolume);
             }
 
-            mHardwareStatus = AUDIO_HW_INIT;
+            mHardwareStatus = AUDIO_HW_IDLE;
         }
     }
 
@@ -823,8 +823,6 @@ bool AudioFlinger::streamMute(audio_stream_type_t stream) const
 
 status_t AudioFlinger::setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs)
 {
-    status_t result;
-
     ALOGV("setParameters(): io %d, keyvalue %s, tid %d, calling pid %d",
             ioHandle, keyValuePairs.string(), gettid(), IPCThreadState::self()->getCallingPid());
     // check calling permissions
@@ -834,15 +832,17 @@ status_t AudioFlinger::setParameters(audio_io_handle_t ioHandle, const String8& 
 
     // ioHandle == 0 means the parameters are global to the audio hardware interface
     if (ioHandle == 0) {
-        AutoMutex lock(mHardwareLock);
-        mHardwareStatus = AUDIO_SET_PARAMETER;
         status_t final_result = NO_ERROR;
+        {
+        AutoMutex lock(mHardwareLock);
+        mHardwareStatus = AUDIO_HW_SET_PARAMETER;
         for (size_t i = 0; i < mAudioHwDevs.size(); i++) {
             audio_hw_device_t *dev = mAudioHwDevs[i];
-            result = dev->set_parameters(dev, keyValuePairs.string());
+            status_t result = dev->set_parameters(dev, keyValuePairs.string());
             final_result = result ?: final_result;
         }
         mHardwareStatus = AUDIO_HW_IDLE;
+        }
         // disable AEC and NS if the device is a BT SCO headset supporting those pre processings
         AudioParameter param = AudioParameter(keyValuePairs);
         String8 value;
@@ -905,8 +905,14 @@ String8 AudioFlinger::getParameters(audio_io_handle_t ioHandle, const String8& k
         String8 out_s8;
 
         for (size_t i = 0; i < mAudioHwDevs.size(); i++) {
+            char *s;
+            {
+            AutoMutex lock(mHardwareLock);
+            mHardwareStatus = AUDIO_HW_GET_PARAMETER;
             audio_hw_device_t *dev = mAudioHwDevs[i];
-            char *s = dev->get_parameters(dev, keys.string());
+            s = dev->get_parameters(dev, keys.string());
+            mHardwareStatus = AUDIO_HW_IDLE;
+            }
             out_s8 += String8(s ? s : "");
             free(s);
         }
@@ -968,7 +974,7 @@ status_t AudioFlinger::setVoiceVolume(float value)
     }
 
     AutoMutex lock(mHardwareLock);
-    mHardwareStatus = AUDIO_SET_VOICE_VOLUME;
+    mHardwareStatus = AUDIO_HW_SET_VOICE_VOLUME;
     ret = mPrimaryHardwareDev->set_voice_volume(mPrimaryHardwareDev, value);
     mHardwareStatus = AUDIO_HW_IDLE;
 
@@ -5431,7 +5437,6 @@ audio_io_handle_t AudioFlinger::openOutput(uint32_t *pDevices,
 {
     status_t status;
     PlaybackThread *thread = NULL;
-    mHardwareStatus = AUDIO_HW_OUTPUT_OPEN;
     uint32_t samplingRate = pSamplingRate ? *pSamplingRate : 0;
     audio_format_t format = pFormat ? *pFormat : AUDIO_FORMAT_DEFAULT;
     uint32_t channels = pChannels ? *pChannels : 0;
@@ -5456,8 +5461,10 @@ audio_io_handle_t AudioFlinger::openOutput(uint32_t *pDevices,
     if (outHwDev == NULL)
         return 0;
 
+    mHardwareStatus = AUDIO_HW_OUTPUT_OPEN;
     status = outHwDev->open_output_stream(outHwDev, *pDevices, &format,
                                           &channels, &samplingRate, &outStream);
+    mHardwareStatus = AUDIO_HW_IDLE;
     ALOGV("openOutput() openOutputStream returned output %p, SamplingRate %d, Format %d, Channels %x, status %d",
             outStream,
             samplingRate,
@@ -5465,7 +5472,6 @@ audio_io_handle_t AudioFlinger::openOutput(uint32_t *pDevices,
             channels,
             status);
 
-    mHardwareStatus = AUDIO_HW_IDLE;
     if (outStream != NULL) {
         AudioStreamOut *output = new AudioStreamOut(outHwDev, outStream);
         audio_io_handle_t id = nextUniqueId();

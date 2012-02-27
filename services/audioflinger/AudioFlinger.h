@@ -1531,25 +1531,27 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
                 audio_hw_device_t*                  mPrimaryHardwareDev; // mAudioHwDevs[0] or NULL
                 Vector<audio_hw_device_t*>          mAudioHwDevs;
 
+    // for dump, indicates which hardware operation is currently in progress (but not stream ops)
     enum hardware_call_state {
-        AUDIO_HW_IDLE = 0,
-        AUDIO_HW_INIT,
-        AUDIO_HW_OUTPUT_OPEN,
-        AUDIO_HW_OUTPUT_CLOSE,
-        AUDIO_HW_INPUT_OPEN,
-        AUDIO_HW_INPUT_CLOSE,
-        AUDIO_HW_STANDBY,
-        AUDIO_HW_SET_MASTER_VOLUME,
-        AUDIO_HW_GET_ROUTING,
-        AUDIO_HW_SET_ROUTING,
-        AUDIO_HW_GET_MODE,
-        AUDIO_HW_SET_MODE,
-        AUDIO_HW_GET_MIC_MUTE,
-        AUDIO_HW_SET_MIC_MUTE,
-        AUDIO_SET_VOICE_VOLUME,
-        AUDIO_SET_PARAMETER,
-        AUDIO_HW_GET_INPUT_BUFFER_SIZE,
-        AUDIO_HW_GET_MASTER_VOLUME,
+        AUDIO_HW_IDLE = 0,              // no operation in progress
+        AUDIO_HW_INIT,                  // init_check
+        AUDIO_HW_OUTPUT_OPEN,           // open_output_stream
+        AUDIO_HW_OUTPUT_CLOSE,          // unused
+        AUDIO_HW_INPUT_OPEN,            // unused
+        AUDIO_HW_INPUT_CLOSE,           // unused
+        AUDIO_HW_STANDBY,               // unused
+        AUDIO_HW_SET_MASTER_VOLUME,     // set_master_volume
+        AUDIO_HW_GET_ROUTING,           // unused
+        AUDIO_HW_SET_ROUTING,           // unused
+        AUDIO_HW_GET_MODE,              // unused
+        AUDIO_HW_SET_MODE,              // set_mode
+        AUDIO_HW_GET_MIC_MUTE,          // get_mic_mute
+        AUDIO_HW_SET_MIC_MUTE,          // set_mic_mute
+        AUDIO_HW_SET_VOICE_VOLUME,      // set_voice_volume
+        AUDIO_HW_SET_PARAMETER,         // set_parameters
+        AUDIO_HW_GET_INPUT_BUFFER_SIZE, // get_input_buffer_size
+        AUDIO_HW_GET_MASTER_VOLUME,     // get_master_volume
+        AUDIO_HW_GET_PARAMETER,         // get_parameters
     };
 
     mutable     hardware_call_state                 mHardwareStatus;    // for dump only
