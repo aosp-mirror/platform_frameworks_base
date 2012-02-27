@@ -8619,7 +8619,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onDragEvent(DragEvent event) {
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_STARTED:
-                return hasInsertionController();
+                return mEditor != null && hasInsertionController();
 
             case DragEvent.ACTION_DRAG_ENTERED:
                 TextView.this.requestFocus();
