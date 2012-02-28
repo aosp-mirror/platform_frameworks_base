@@ -459,6 +459,12 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
         mActiveBuffer = mSurfaceTexture->getCurrentBuffer();
         mFrameLatencyNeeded = true;
 
+        if (oldActiveBuffer == NULL && mActiveBuffer != NULL) {
+            // the first time we receive a buffer, we need to trigger a
+            // geometry invalidation.
+            mFlinger->invalidateHwcGeometry();
+        }
+
         const Rect crop(mSurfaceTexture->getCurrentCrop());
         const uint32_t transform(mSurfaceTexture->getCurrentTransform());
         const uint32_t scalingMode(mSurfaceTexture->getCurrentScalingMode());
