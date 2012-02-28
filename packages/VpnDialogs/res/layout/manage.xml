@@ -32,12 +32,12 @@
         <TextView android:id="@+id/duration" style="@style/value"/>
     </TableRow>
 
-    <TableRow>
+    <TableRow android:id="@+id/data_transmitted_row" android:visibility="gone">
         <TextView android:text="@string/data_transmitted" style="@style/label"/>
         <TextView android:id="@+id/data_transmitted" style="@style/value"/>
     </TableRow>
 
-    <TableRow>
+    <TableRow android:id="@+id/data_received_row" android:visibility="gone">
         <TextView android:text="@string/data_received" style="@style/label"/>
         <TextView android:id="@+id/data_received" style="@style/value"/>
     </TableRow>

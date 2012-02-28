@@ -25,6 +25,5 @@
         <item name="android:gravity">center_vertical|left</item>
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:text">@string/blank_value</item>
     </style>
 </resources>
