@@ -3414,6 +3414,33 @@ final class ActivityStack {
         return true;
     }
 
+    final void finishActivityResultsLocked(ActivityRecord r, int resultCode, Intent resultData) {
+        // send the result
+        ActivityRecord resultTo = r.resultTo;
+        if (resultTo != null) {
+            if (DEBUG_RESULTS) Slog.v(TAG, "Adding result to " + resultTo
+                    + " who=" + r.resultWho + " req=" + r.requestCode
+                    + " res=" + resultCode + " data=" + resultData);
+            if (r.info.applicationInfo.uid > 0) {
+                mService.grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
+                        resultTo.packageName, resultData,
+                        resultTo.getUriPermissionsLocked());
+            }
+            resultTo.addResultLocked(r, r.resultWho, r.requestCode, resultCode,
+                                     resultData);
+            r.resultTo = null;
+        }
+        else if (DEBUG_RESULTS) Slog.v(TAG, "No result destination from " + r);
+
+        // Make sure this HistoryRecord is not holding on to other resources,
+        // because clients have remote IPC references to this object so we
+        // can't assume that will go away and want to avoid circular IPC refs.
+        r.results = null;
+        r.pendingResults = null;
+        r.newIntents = null;
+        r.icicle = null;
+    }
+
     /**
      * @return Returns true if this activity has been removed from the history
      * list, or false if it is still in the list and will be removed later.
@@ -3452,30 +3479,7 @@ final class ActivityStack {
             }
         }
 
-        // send the result
-        ActivityRecord resultTo = r.resultTo;
-        if (resultTo != null) {
-            if (DEBUG_RESULTS) Slog.v(TAG, "Adding result to " + resultTo
-                    + " who=" + r.resultWho + " req=" + r.requestCode
-                    + " res=" + resultCode + " data=" + resultData);
-            if (r.info.applicationInfo.uid > 0) {
-                mService.grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
-                        resultTo.packageName, resultData, 
-                        resultTo.getUriPermissionsLocked());
-            }
-            resultTo.addResultLocked(r, r.resultWho, r.requestCode, resultCode,
-                                     resultData);
-            r.resultTo = null;
-        }
-        else if (DEBUG_RESULTS) Slog.v(TAG, "No result destination from " + r);
-
-        // Make sure this HistoryRecord is not holding on to other resources,
-        // because clients have remote IPC references to this object so we
-        // can't assume that will go away and want to avoid circular IPC refs.
-        r.results = null;
-        r.pendingResults = null;
-        r.newIntents = null;
-        r.icicle = null;
+        finishActivityResultsLocked(r, resultCode, resultData);
         
         if (mService.mPendingThumbnails.size() > 0) {
             // There are clients waiting to receive thumbnails so, in case
@@ -3638,8 +3642,9 @@ final class ActivityStack {
         mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
     }
 
-    private final void removeActivityFromHistoryLocked(ActivityRecord r) {
+    final void removeActivityFromHistoryLocked(ActivityRecord r) {
         if (r.state != ActivityState.DESTROYED) {
+            finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
             r.makeFinishing();
             if (DEBUG_ADD_REMOVE) {
                 RuntimeException here = new RuntimeException("here");

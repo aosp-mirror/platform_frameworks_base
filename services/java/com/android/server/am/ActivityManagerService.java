@@ -2792,14 +2792,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 r.task.taskId, r.shortComponentName,
                                 "proc died without state saved");
                     }
-                    r.makeFinishing();
-                    mMainStack.mHistory.remove(i);
-                    r.takeFromHistory();
-                    mWindowManager.removeAppToken(r.appToken);
-                    if (VALIDATE_TOKENS) {
-                        mMainStack.validateAppTokensLocked();
-                    }
-                    r.removeUriPermissionsLocked();
+                    mMainStack.removeActivityFromHistoryLocked(r);
 
                 } else {
                     // We have the current state for this activity, so
