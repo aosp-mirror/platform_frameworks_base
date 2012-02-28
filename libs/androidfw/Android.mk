@@ -67,6 +67,7 @@ LOCAL_SRC_FILES:= \
 	$(commonSources) \
 	BackupData.cpp \
 	BackupHelpers.cpp \
+    CursorWindow.cpp \
 	InputTransport.cpp
 
 LOCAL_SHARED_LIBRARIES := \
