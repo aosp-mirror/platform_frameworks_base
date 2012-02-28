@@ -105,6 +105,11 @@ class="new">&nbsp;new!</span></span>
                     <span class="en">Calendar Provider<span class="new">&nbsp;new!</span></span>
                 </a>
             </li>
+            <li>
+                <a href="<?cs var:toroot ?>guide/topics/providers/contacts-provider.html">
+                    <span class="en">Contacts Provider<span class="new">&nbsp;new!</span></span>
+                </a>
+            </li>
           </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">
