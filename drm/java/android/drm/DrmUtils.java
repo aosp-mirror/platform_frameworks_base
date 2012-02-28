@@ -55,8 +55,8 @@ public class DrmUtils {
                 bufferedStream.read(data);
              }
         } finally {
-            quiteDispose(bufferedStream);
-            quiteDispose(inputStream);
+            quietlyDispose(bufferedStream);
+            quietlyDispose(inputStream);
         }
         return data;
     }
@@ -70,7 +70,7 @@ public class DrmUtils {
                 outputStream = new FileOutputStream(path);
                 outputStream.write(data);
             } finally {
-                quiteDispose(outputStream);
+                quietlyDispose(outputStream);
             }
         }
     }
@@ -80,7 +80,7 @@ public class DrmUtils {
         file.delete();
     }
 
-    private static void quiteDispose(InputStream stream) {
+    private static void quietlyDispose(InputStream stream) {
         try {
             if (null != stream) {
                 stream.close();
@@ -90,7 +90,7 @@ public class DrmUtils {
         }
     }
 
-    private static void quiteDispose(OutputStream stream) {
+    private static void quietlyDispose(OutputStream stream) {
         try {
             if (null != stream) {
                 stream.close();
@@ -175,14 +175,34 @@ public class DrmUtils {
             }
         }
 
+        /**
+         * This method returns an iterator object that can be used to iterate over
+         * all values of the metadata.
+         *
+         * @return The iterator object.
+         */
         public Iterator<String> iterator() {
             return mMap.values().iterator();
         }
 
+        /**
+         * This method returns an iterator object that can be used to iterate over
+         * all keys of the metadata.
+         *
+         * @return The iterator object.
+         */
         public Iterator<String> keyIterator() {
             return mMap.keySet().iterator();
         }
 
+        /**
+         * This method retrieves the metadata value associated with a given key.
+         *
+         * @param key The key whose value is being retrieved.
+         *
+         * @return The metadata value associated with the given key. Returns null
+         * if the key is not found.
+         */
         public String get(String key) {
             return mMap.get(key);
         }
