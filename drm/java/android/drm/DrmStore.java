@@ -108,6 +108,12 @@ public class DrmStore {
          * A trigger information object type.
          */
         public static final int TRIGGER_OBJECT = 0x03;
+
+        /**
+         * @deprecated This class should have been an interface instead.
+         * The default constuctor should have not been exposed.
+         */
+        public DrmObjectType() {}
     }
 
     /**
@@ -143,6 +149,12 @@ public class DrmStore {
             }
             return isValid;
         }
+
+        /**
+         * @deprecated This class should have been an interface instead.
+         * The default constuctor should have not been exposed.
+         */
+        public Playback() {}
     }
 
     /**
@@ -198,6 +210,12 @@ public class DrmStore {
             }
             return isValid;
         }
+
+        /**
+         * @deprecated This class should have been an interface instead.
+         * The default constuctor should have not been exposed.
+         */
+        public Action() {}
     }
 
     /**
@@ -220,6 +238,18 @@ public class DrmStore {
          * The digital rights have not been acquired for the rights-protected content.
          */
         public static final int RIGHTS_NOT_ACQUIRED = 0x03;
+
+        /**
+         * @deprecated This class should have been an interface instead.
+         * The default constuctor should have not been exposed.
+         */
+        public RightsStatus() {}
     }
+
+    /**
+     * @deprecated This class should have been an interface instead.
+     * The default constuctor should have not been exposed.
+     */
+    public DrmStore() {}
 }
 
