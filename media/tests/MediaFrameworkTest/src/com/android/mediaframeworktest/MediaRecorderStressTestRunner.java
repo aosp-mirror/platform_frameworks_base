@@ -44,7 +44,9 @@ public class MediaRecorderStressTestRunner extends InstrumentationTestRunner {
     public static int mVideoHeight = profile.videoFrameHeight;
     public static int mBitRate = profile.videoBitRate;
     public static boolean mRemoveVideo = true;
-    public static int mDuration = 10000;
+    public static int mDuration = 10 * 1000; // 10 seconds
+    public static int mTimeLapseDuration = 180 * 1000; // 3 minutes
+    public static double mCaptureRate = 0.5; // 2 sec timelapse interval
 
     @Override
     public TestSuite getAllTests() {
