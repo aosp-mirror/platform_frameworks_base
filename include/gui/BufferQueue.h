@@ -40,6 +40,7 @@ public:
     };
     enum { NUM_BUFFER_SLOTS = 32 };
     enum { NO_CONNECTED_API = 0 };
+    enum { INVALID_BUFFER_SLOT = -1 };
 
     struct FrameAvailableListener : public virtual RefBase {
         // onFrameAvailable() is called from queueBuffer() each time an
@@ -119,8 +120,91 @@ public:
     // connected to the specified client API.
     virtual status_t disconnect(int api);
 
-protected:
+    // dump our state in a String
+    virtual void dump(String8& result) const;
+    virtual void dump(String8& result, const char* prefix, char* buffer, size_t SIZE) const;
 
+    // public facing structure for BufferSlot
+    struct BufferItem {
+
+        BufferItem()
+         :
+           mTransform(0),
+           mScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
+           mTimestamp(0),
+           mFrameNumber(0),
+           mBuf(INVALID_BUFFER_SLOT) {
+             mCrop.makeInvalid();
+         }
+        // mGraphicBuffer points to the buffer allocated for this slot or is NULL
+        // if no buffer has been allocated.
+        sp<GraphicBuffer> mGraphicBuffer;
+
+        // mCrop is the current crop rectangle for this buffer slot. This gets
+        // set to mNextCrop each time queueBuffer gets called for this buffer.
+        Rect mCrop;
+
+        // mTransform is the current transform flags for this buffer slot. This
+        // gets set to mNextTransform each time queueBuffer gets called for this
+        // slot.
+        uint32_t mTransform;
+
+        // mScalingMode is the current scaling mode for this buffer slot. This
+        // gets set to mNextScalingMode each time queueBuffer gets called for
+        // this slot.
+        uint32_t mScalingMode;
+
+        // mTimestamp is the current timestamp for this buffer slot. This gets
+        // to set by queueBuffer each time this slot is queued.
+        int64_t mTimestamp;
+
+        // mFrameNumber is the number of the queued frame for this slot.
+        uint64_t mFrameNumber;
+
+        // buf is the slot index of this buffer
+        int mBuf;
+
+    };
+
+    // The following public functions is the consumer facing interface
+
+    // acquire consumes a buffer by transferring its ownership to a consumer.
+    // buffer contains the GraphicBuffer and its corresponding information.
+    // buffer.mGraphicsBuffer will be NULL when the buffer has been already
+    // acquired by the consumer.
+
+    status_t acquire(BufferItem *buffer);
+
+    // releaseBuffer releases a buffer slot from the consumer back to the
+    // BufferQueue pending a fence sync.
+    status_t releaseBuffer(int buf, EGLDisplay display, EGLSyncKHR fence);
+
+    // consumerDisconnect disconnects a consumer from the BufferQueue. All
+    // buffers will be freed.
+    status_t consumerDisconnect();
+
+    // setDefaultBufferSize is used to set the size of buffers returned by
+    // requestBuffers when a with and height of zero is requested.
+    status_t setDefaultBufferSize(uint32_t w, uint32_t h);
+
+    // setBufferCountServer set the buffer count. If the client has requested
+    // a buffer count using setBufferCount, the server-buffer count will
+    // take effect once the client sets the count back to zero.
+    status_t setBufferCountServer(int bufferCount);
+
+    // isSynchronousMode returns whether the SurfaceTexture is currently in
+    // synchronous mode.
+    bool isSynchronousMode() const;
+
+    // setConsumerName sets the name used in logging
+    void setConsumerName(const String8& name);
+
+    // setFrameAvailableListener sets the listener object that will be notified
+    // when a new frame becomes available.
+    void setFrameAvailableListener(const sp<FrameAvailableListener>& listener);
+
+
+private:
     // freeBufferLocked frees the resources (both GraphicBuffer and EGLImage)
     // for the given slot.
     void freeBufferLocked(int index);
@@ -145,29 +229,24 @@ protected:
 
     status_t setBufferCountServerLocked(int bufferCount);
 
-    enum { INVALID_BUFFER_SLOT = -1 };
-
     struct BufferSlot {
 
         BufferSlot()
-        : mEglImage(EGL_NO_IMAGE_KHR),
-          mEglDisplay(EGL_NO_DISPLAY),
+        : mEglDisplay(EGL_NO_DISPLAY),
           mBufferState(BufferSlot::FREE),
           mRequestBufferCalled(false),
           mTransform(0),
           mScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
           mTimestamp(0),
           mFrameNumber(0),
-          mFence(EGL_NO_SYNC_KHR) {
+          mFence(EGL_NO_SYNC_KHR),
+          mAcquireCalled(false) {
             mCrop.makeInvalid();
         }
 
         // mGraphicBuffer points to the buffer allocated for this slot or is NULL
         // if no buffer has been allocated.
         sp<GraphicBuffer> mGraphicBuffer;
-
-        // mEglImage is the EGLImage created from mGraphicBuffer.
-        EGLImageKHR mEglImage;
 
         // mEglDisplay is the EGLDisplay used to create mEglImage.
         EGLDisplay mEglDisplay;
@@ -178,6 +257,7 @@ protected:
             // FREE indicates that the buffer is not currently being used and
             // will not be used in the future until it gets dequeued and
             // subsequently queued by the client.
+            // aka "owned by BufferQueue, ready to be dequeued"
             FREE = 0,
 
             // DEQUEUED indicates that the buffer has been dequeued by the
@@ -190,6 +270,7 @@ protected:
             // dequeued by the client.  That means that the current buffer can
             // be in either the DEQUEUED or QUEUED state.  In asynchronous mode,
             // however, the current buffer is always in the QUEUED state.
+            // aka "owned by producer, ready to be queued"
             DEQUEUED = 1,
 
             // QUEUED indicates that the buffer has been queued by the client,
@@ -199,7 +280,11 @@ protected:
             // the current buffer may be dequeued by the client under some
             // circumstances. See the note about the current buffer in the
             // documentation for DEQUEUED.
+            // aka "owned by BufferQueue, ready to be acquired"
             QUEUED = 2,
+
+            // aka "owned by consumer, ready to be released"
+            ACQUIRED = 3
         };
 
         // mBufferState is the current state of this buffer slot.
@@ -236,6 +321,9 @@ protected:
         // to EGL_NO_SYNC_KHR when the buffer is created and (optionally, based
         // on a compile-time option) set to a new sync object in updateTexImage.
         EGLSyncKHR mFence;
+
+        // Indicates whether this buffer has been seen by a consumer yet
+        bool mAcquireCalled;
     };
 
     // mSlots is the array of buffer slots that must be mirrored on the client
@@ -244,7 +332,6 @@ protected:
     // is initialized to NULL at construction time, and buffers are allocated
     // for a slot when requestBuffer is called with that slot's index.
     BufferSlot mSlots[NUM_BUFFER_SLOTS];
-
 
     // mDefaultWidth holds the default width of allocated buffers. It is used
     // in requestBuffers() if a width and height of zero is specified.
@@ -270,14 +357,6 @@ protected:
 
     // mServerBufferCount buffer count requested by the server-side
     int mServerBufferCount;
-
-    // mCurrentTexture is the buffer slot index of the buffer that is currently
-    // bound to the OpenGL texture. It is initialized to INVALID_BUFFER_SLOT,
-    // indicating that no buffer slot is currently bound to the texture. Note,
-    // however, that a value of INVALID_BUFFER_SLOT does not necessarily mean
-    // that no buffer is bound to the texture. A call to setBufferCount will
-    // reset mCurrentTexture to INVALID_BUFFER_SLOT.
-    int mCurrentTexture;
 
     // mNextCrop is the crop rectangle that will be used for the next buffer
     // that gets queued. It is set by calling setCrop.
@@ -327,7 +406,7 @@ protected:
 
     // mName is a string used to identify the BufferQueue in log messages.
     // It is set by the setName method.
-    String8 mName;
+    String8 mConsumerName;
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of BufferQueue objects. It must be locked whenever the
@@ -337,6 +416,8 @@ protected:
     // mFrameCounter is the free running counter, incremented for every buffer queued
     // with the surface Texture.
     uint64_t mFrameCounter;
+
+    bool mBufferHasBeenQueued;
 };
 
 // ----------------------------------------------------------------------------

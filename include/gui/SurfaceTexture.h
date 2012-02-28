@@ -153,8 +153,8 @@ public:
     void setName(const String8& name);
 
     // dump our state in a String
-    void dump(String8& result) const;
-    void dump(String8& result, const char* prefix, char* buffer, size_t SIZE) const;
+    virtual void dump(String8& result) const;
+    virtual void dump(String8& result, const char* prefix, char* buffer, size_t SIZE) const;
 
 protected:
 
@@ -216,6 +216,56 @@ private:
     // around a GL driver limitation on the number of FBO attachments, which the
     // browser's tile cache exceeds.
     const GLenum mTexTarget;
+
+    // SurfaceTexture maintains EGL information about GraphicBuffers that corresponds
+    // directly with BufferQueue's buffers
+    struct EGLSlot {
+        EGLSlot()
+        : mEglImage(EGL_NO_IMAGE_KHR),
+          mEglDisplay(EGL_NO_DISPLAY),
+          mFence(EGL_NO_SYNC_KHR) {
+        }
+
+        sp<GraphicBuffer> mGraphicBuffer;
+
+        // mEglImage is the EGLImage created from mGraphicBuffer.
+        EGLImageKHR mEglImage;
+
+        // mEglDisplay is the EGLDisplay used to create mEglImage.
+        EGLDisplay mEglDisplay;
+
+        // mFence is the EGL sync object that must signal before the buffer
+        // associated with this buffer slot may be dequeued. It is initialized
+        // to EGL_NO_SYNC_KHR when the buffer is created and (optionally, based
+        // on a compile-time option) set to a new sync object in updateTexImage.
+        EGLSyncKHR mFence;
+    };
+
+    EGLSlot mEGLSlots[NUM_BUFFER_SLOTS];
+
+    // mAbandoned indicates that the BufferQueue will no longer be used to
+    // consume images buffers pushed to it using the ISurfaceTexture interface.
+    // It is initialized to false, and set to true in the abandon method.  A
+    // BufferQueue that has been abandoned will return the NO_INIT error from
+    // all ISurfaceTexture methods capable of returning an error.
+    bool mAbandoned;
+
+    // mName is a string used to identify the SurfaceTexture in log messages.
+    // It can be set by the setName method.
+    String8 mName;
+
+    // mMutex is the mutex used to prevent concurrent access to the member
+    // variables of SurfaceTexture objects. It must be locked whenever the
+    // member variables are accessed.
+    mutable Mutex mMutex;
+
+    // mCurrentTexture is the buffer slot index of the buffer that is currently
+    // bound to the OpenGL texture. It is initialized to INVALID_BUFFER_SLOT,
+    // indicating that no buffer slot is currently bound to the texture. Note,
+    // however, that a value of INVALID_BUFFER_SLOT does not necessarily mean
+    // that no buffer is bound to the texture. A call to setBufferCount will
+    // reset mCurrentTexture to INVALID_BUFFER_SLOT.
+    int mCurrentTexture;
 
 };
 
