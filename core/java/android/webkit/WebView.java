@@ -5345,7 +5345,11 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    // TODO: Remove this
     WebViewCore.CursorData cursorData() {
+        if (sDisableNavcache) {
+            return new WebViewCore.CursorData(0, 0, 0, 0);
+        }
         WebViewCore.CursorData result = cursorDataNoPosition();
         Point position = nativeCursorPosition();
         result.mX = position.x;
