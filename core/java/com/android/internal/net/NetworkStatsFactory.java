@@ -28,7 +28,6 @@ import android.util.Slog;
 
 import com.android.internal.util.ProcFileReader;
 import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
 
 import java.io.BufferedReader;
@@ -37,7 +36,6 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
@@ -62,22 +60,6 @@ public class NetworkStatsFactory {
     private final File mStatsXtIfaceAll;
     /** Path to {@code /proc/net/xt_qtaguid/stats}. */
     private final File mStatsXtUid;
-
-    /** {@link #mStatsXtUid} and {@link #mStatsXtIfaceAll} headers. */
-    private static final String KEY_IDX = "idx";
-    private static final String KEY_IFACE = "iface";
-    private static final String KEY_ACTIVE = "active";
-    private static final String KEY_UID = "uid_tag_int";
-    private static final String KEY_COUNTER_SET = "cnt_set";
-    private static final String KEY_TAG_HEX = "acct_tag_hex";
-    private static final String KEY_SNAP_RX_BYTES = "snap_rx_bytes";
-    private static final String KEY_SNAP_RX_PACKETS = "snap_rx_packets";
-    private static final String KEY_SNAP_TX_BYTES = "snap_tx_bytes";
-    private static final String KEY_SNAP_TX_PACKETS = "snap_tx_packets";
-    private static final String KEY_RX_BYTES = "rx_bytes";
-    private static final String KEY_RX_PACKETS = "rx_packets";
-    private static final String KEY_TX_BYTES = "tx_bytes";
-    private static final String KEY_TX_PACKETS = "tx_packets";
 
     public NetworkStatsFactory() {
         this(new File("/proc/"));
@@ -112,44 +94,34 @@ public class NetworkStatsFactory {
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
 
-        // TODO: transition to ProcFileReader
-        // TODO: read directly from proc once headers are added
-        final ArrayList<String> keys = Lists.newArrayList(KEY_IFACE, KEY_ACTIVE, KEY_SNAP_RX_BYTES,
-                KEY_SNAP_RX_PACKETS, KEY_SNAP_TX_BYTES, KEY_SNAP_TX_PACKETS, KEY_RX_BYTES,
-                KEY_RX_PACKETS, KEY_TX_BYTES, KEY_TX_PACKETS);
-        final ArrayList<String> values = Lists.newArrayList();
-        final HashMap<String, String> parsed = Maps.newHashMap();
-
-        BufferedReader reader = null;
+        ProcFileReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(mStatsXtIfaceAll));
+            reader = new ProcFileReader(new FileInputStream(mStatsXtIfaceAll));
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                splitLine(line, values);
-                parseLine(keys, values, parsed);
-
-                entry.iface = parsed.get(KEY_IFACE);
+            while (reader.hasMoreData()) {
+                entry.iface = reader.nextString();
                 entry.uid = UID_ALL;
                 entry.set = SET_DEFAULT;
                 entry.tag = TAG_NONE;
 
+                final boolean active = reader.nextInt() != 0;
+
                 // always include snapshot values
-                entry.rxBytes = getParsedLong(parsed, KEY_SNAP_RX_BYTES);
-                entry.rxPackets = getParsedLong(parsed, KEY_SNAP_RX_PACKETS);
-                entry.txBytes = getParsedLong(parsed, KEY_SNAP_TX_BYTES);
-                entry.txPackets = getParsedLong(parsed, KEY_SNAP_TX_PACKETS);
+                entry.rxBytes = reader.nextLong();
+                entry.rxPackets = reader.nextLong();
+                entry.txBytes = reader.nextLong();
+                entry.txPackets = reader.nextLong();
 
                 // fold in active numbers, but only when active
-                final boolean active = getParsedInt(parsed, KEY_ACTIVE) != 0;
                 if (active) {
-                    entry.rxBytes += getParsedLong(parsed, KEY_RX_BYTES);
-                    entry.rxPackets += getParsedLong(parsed, KEY_RX_PACKETS);
-                    entry.txBytes += getParsedLong(parsed, KEY_TX_BYTES);
-                    entry.txPackets += getParsedLong(parsed, KEY_TX_PACKETS);
+                    entry.rxBytes += reader.nextLong();
+                    entry.rxPackets += reader.nextLong();
+                    entry.txBytes += reader.nextLong();
+                    entry.txPackets += reader.nextLong();
                 }
 
                 stats.addValues(entry);
+                reader.finishLine();
             }
         } catch (NullPointerException e) {
             throw new IllegalStateException("problem parsing stats: " + e);
@@ -315,18 +287,6 @@ public class NetworkStatsFactory {
         return stats;
     }
 
-    @Deprecated
-    private static int getParsedInt(HashMap<String, String> parsed, String key) {
-        final String value = parsed.get(key);
-        return value != null ? Integer.parseInt(value) : 0;
-    }
-
-    @Deprecated
-    private static long getParsedLong(HashMap<String, String> parsed, String key) {
-        final String value = parsed.get(key);
-        return value != null ? Long.parseLong(value) : 0;
-    }
-
     /**
      * Split given line into {@link ArrayList}.
      */
@@ -337,21 +297,6 @@ public class NetworkStatsFactory {
         final StringTokenizer t = new StringTokenizer(line, " \t\n\r\f:");
         while (t.hasMoreTokens()) {
             outSplit.add(t.nextToken());
-        }
-    }
-
-    /**
-     * Zip the two given {@link ArrayList} as key and value pairs into
-     * {@link HashMap}.
-     */
-    @Deprecated
-    private static void parseLine(
-            ArrayList<String> keys, ArrayList<String> values, HashMap<String, String> outParsed) {
-        outParsed.clear();
-
-        final int size = Math.min(keys.size(), values.size());
-        for (int i = 0; i < size; i++) {
-            outParsed.put(keys.get(i), values.get(i));
         }
     }
 
