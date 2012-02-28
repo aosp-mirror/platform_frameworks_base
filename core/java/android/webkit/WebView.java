@@ -378,6 +378,7 @@ public class WebView extends AbsoluteLayout
         private int mInputType;
         private int mImeOptions;
         private String mHint;
+        private int mMaxLength;
 
         public WebViewInputConnection() {
             super(WebView.this, true);
@@ -412,13 +413,9 @@ public class WebView extends AbsoluteLayout
             Editable editable = getEditable();
             int selectionStart = Selection.getSelectionStart(editable);
             int selectionEnd = Selection.getSelectionEnd(editable);
+            text = limitReplaceTextByMaxLength(text, editable.length());
             editable.replace(0, editable.length(), text);
-            InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) {
-                // Since the text has changed, do not allow the IME to replace the
-                // existing text as though it were a completion.
-                imm.restartInput(WebView.this);
-            }
+            restartInput();
             // Keep the previous selection.
             selectionStart = Math.min(selectionStart, editable.length());
             selectionEnd = Math.min(selectionEnd, editable.length());
@@ -429,14 +426,10 @@ public class WebView extends AbsoluteLayout
             Editable editable = getEditable();
             int selectionStart = Selection.getSelectionStart(editable);
             int selectionEnd = Selection.getSelectionEnd(editable);
+            text = limitReplaceTextByMaxLength(text, selectionEnd - selectionStart);
             setNewText(selectionStart, selectionEnd, text);
             editable.replace(selectionStart, selectionEnd, text);
-            InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) {
-                // Since the text has changed, do not allow the IME to replace the
-                // existing text as though it were a completion.
-                imm.restartInput(WebView.this);
-            }
+            restartInput();
             // Move caret to the end of the new text
             int newCaret = selectionStart + text.length();
             setSelection(newCaret, newCaret);
@@ -456,8 +449,19 @@ public class WebView extends AbsoluteLayout
                 end = start;
                 start = temp;
             }
-            setNewText(start, end, text);
-            return super.setComposingText(text, newCursorPosition);
+            CharSequence limitedText = limitReplaceTextByMaxLength(text, end - start);
+            setNewText(start, end, limitedText);
+            if (limitedText != text) {
+                newCursorPosition -= text.length() - limitedText.length();
+            }
+            super.setComposingText(limitedText, newCursorPosition);
+            if (limitedText != text) {
+                restartInput();
+                int lastCaret = start + limitedText.length();
+                finishComposingText();
+                setSelection(lastCaret, lastCaret);
+            }
+            return true;
         }
 
         @Override
@@ -541,6 +545,7 @@ public class WebView extends AbsoluteLayout
             mHint = initData.mLabel;
             mInputType = inputType;
             mImeOptions = imeOptions;
+            mMaxLength = initData.mMaxLength;
         }
 
         public void setupEditorInfo(EditorInfo outAttrs) {
@@ -625,6 +630,29 @@ public class WebView extends AbsoluteLayout
                     KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL, 0, 0,
                     KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                     KeyEvent.FLAG_SOFT_KEYBOARD));
+        }
+
+        private CharSequence limitReplaceTextByMaxLength(CharSequence text,
+                int numReplaced) {
+            if (mMaxLength > 0) {
+                Editable editable = getEditable();
+                int maxReplace = mMaxLength - editable.length() + numReplaced;
+                if (maxReplace < text.length()) {
+                    maxReplace = Math.max(maxReplace, 0);
+                    // New length is greater than the maximum. trim it down.
+                    text = text.subSequence(0, maxReplace);
+                }
+            }
+            return text;
+        }
+
+        private void restartInput() {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                // Since the text has changed, do not allow the IME to replace the
+                // existing text as though it were a completion.
+                imm.restartInput(WebView.this);
+            }
         }
     }
 
