@@ -7668,7 +7668,8 @@ package android.drm {
     ctor public DrmSupportInfo();
     method public void addFileSuffix(java.lang.String);
     method public void addMimeType(java.lang.String);
-    method public java.lang.String getDescriprition();
+    method public deprecated java.lang.String getDescriprition();
+    method public java.lang.String getDescription();
     method public java.util.Iterator<java.lang.String> getFileSuffixIterator();
     method public java.util.Iterator<java.lang.String> getMimeTypeIterator();
     method public void setDescription(java.lang.String);
