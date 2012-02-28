@@ -22,6 +22,7 @@ import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
 import android.net.NetworkStats;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.Slog;
 
@@ -106,6 +107,8 @@ public class NetworkStatsFactory {
     }
 
     private NetworkStats readNetworkStatsSummarySingleFile() {
+        final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
+
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
 
@@ -156,6 +159,7 @@ public class NetworkStatsFactory {
             throw new IllegalStateException("problem parsing stats: " + e);
         } finally {
             IoUtils.closeQuietly(reader);
+            StrictMode.setThreadPolicy(savedPolicy);
         }
         return stats;
     }
@@ -165,6 +169,8 @@ public class NetworkStatsFactory {
      */
     @Deprecated
     private NetworkStats readNetworkStatsSummaryMultipleFiles() {
+        final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
+
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
 
@@ -241,6 +247,7 @@ public class NetworkStatsFactory {
             throw new IllegalStateException("problem parsing stats: " + e);
         } finally {
             IoUtils.closeQuietly(reader);
+            StrictMode.setThreadPolicy(savedPolicy);
         }
 
         return stats;
@@ -257,6 +264,8 @@ public class NetworkStatsFactory {
      * @throws IllegalStateException when problem parsing stats.
      */
     public NetworkStats readNetworkStatsDetail(int limitUid) throws IllegalStateException {
+        final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
+
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 24);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
 
@@ -300,6 +309,7 @@ public class NetworkStatsFactory {
             throw new IllegalStateException("problem parsing idx " + idx, e);
         } finally {
             IoUtils.closeQuietly(reader);
+            StrictMode.setThreadPolicy(savedPolicy);
         }
 
         return stats;
