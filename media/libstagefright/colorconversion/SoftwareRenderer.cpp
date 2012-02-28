@@ -19,8 +19,6 @@
 
 #include "../include/SoftwareRenderer.h"
 
-#include <binder/MemoryHeapBase.h>
-#include <binder/MemoryHeapPmem.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MetaData.h>
 #include <system/window.h>
