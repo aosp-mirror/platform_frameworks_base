@@ -1240,7 +1240,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Odcisk cyfrowy SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Zobacz wszystkie"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Wybierz działanie"</string>
-    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Udostępnij"</string>
+    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Udostępnij przez"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Urządzenie zablokowane."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Wysyłanie..."</string>

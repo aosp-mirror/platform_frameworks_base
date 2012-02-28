@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"App-Komponenten aktivieren oder deaktivieren"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Ermöglicht der App, Komponenten einer anderen App zu aktivieren oder zu deaktivieren. Schädliche Apps können so wichtige Tabletfunktionen deaktivieren. Bei der Erteilung dieser Berechtigung ist Vorsicht geboten, da die App-Komponenten unbrauchbar, inkonsistent oder instabil werden können."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Ermöglicht der App, Komponenten einer anderen App zu aktivieren oder zu deaktivieren. Schädliche Apps können so wichtige Telefonfunktionen deaktivieren. Bei der Erteilung dieser Berechtigung ist Vorsicht geboten, da die App-Komponenten unbrauchbar, inkonsistent oder instabil werden können."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"Berechtigungen erteilen oder entziehen"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Hiermit kann eine App sich selbst oder anderen Apps bestimmte Berechtigungen erteilen oder entziehen. Schädliche Apps können hierdurch Zugriff auf Funktionen erlangen, den Sie nicht gewährt haben."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"Bevorzugte Apps festlegen"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Ermöglicht der App, Änderungen an Ihren bevorzugten Apps vorzunehmen. Schädliche Apps können so aktive Apps ohne Ihr Wissen ändern, damit die vorhandenen Apps private Daten von Ihnen erfassen."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"allgemeine Systemeinstellungen ändern"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datum festlegen"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Speichern"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"Neu: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Keine Berechtigungen erforderlich"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ausblenden"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Alle anzeigen"</b></string>

@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"הפעלה או השבתה של רכיבי יישומים"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"מאפשר ליישום לשנות את מצב ההפעלה של רכיב ביישום אחר. יישומים זדוניים עלולים להשתמש בכך כדי להשבית יכולות חשובות של הטבלט. יש לנהוג בהרשאה זו בזהירות, מכיוון שהיא יכולה להביא רכיבי יישומים למצב לא שמיש, לא עקבי או לא יציב."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"מאפשר ליישום לשנות את מצב ההפעלה של רכיב ביישום אחר. יישומים זדוניים עלולים להשתמש בכך כדי להשבית יכולות חשובות של הטלפון. יש לנהוג בהרשאה זו בזהירות, מכיוון שהיא יכולה להביא רכיבי יישומים למצב לא שמיש, לא עקבי או לא יציב."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"הענק או בטל הרשאות"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"מאפשר ליישום להעניק או לבטל הרשאות ספציפיות ביחס לעצמו או ליישומים אחרים. יישומים זדוניים עלולים להשתמש באפשרות זו על מנת לקבל גישה לתכונות שלא אישרת להם."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"הגדרת יישומים מועדפים"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"מאפשר ליישום לשנות את היישומים המועדפים עליך. יישומים זדוניים עלולים לשנות בחשאי את היישומים שמופעלים, תוך שידול במרמה של היישומים הקיימים שלך לאסוף ממך נתונים פרטיים."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"שנה את הגדרות המערכת הכלליות"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"הגדר תאריך"</string>
     <string name="date_time_set" msgid="5777075614321087758">"הגדר"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"ברירת מחדל"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"חדש: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"לא דרושים אישורים"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"הסתר"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"הצג הכל"</b></string>
