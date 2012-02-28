@@ -25,7 +25,8 @@
         style="?android:attr/numberPickerUpButtonStyle"
         android:contentDescription="@string/number_picker_increment_button" />
 
-    <EditText android:id="@+id/numberpicker_input"
+    <view class="android.widget.NumberPicker$CustomEditText"
+        android:id="@+id/numberpicker_input"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         style="?android:attr/numberPickerInputTextStyle" />
