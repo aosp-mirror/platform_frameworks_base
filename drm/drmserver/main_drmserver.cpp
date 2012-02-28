@@ -17,15 +17,10 @@
 #define LOG_TAG "drmserver"
 //#define LOG_NDEBUG 0
 
-#include <sys/types.h>
-#include <unistd.h>
-#include <grp.h>
-
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
-#include <private/android_filesystem_config.h>
 
 #include <DrmManagerService.h>
 
