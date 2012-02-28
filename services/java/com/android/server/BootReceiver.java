@@ -39,8 +39,10 @@ import java.io.IOException;
 public class BootReceiver extends BroadcastReceiver {
     private static final String TAG = "BootReceiver";
 
-    // Maximum size of a logged event (files get truncated if they're longer)
-    private static final int LOG_SIZE = 65536;
+    // Maximum size of a logged event (files get truncated if they're longer).
+    // Give userdebug builds a larger max to capture extra debug, esp. for last_kmsg.
+    private static final int LOG_SIZE =
+        SystemProperties.getInt("ro.debuggable", 0) == 1 ? 98304 : 65536;
 
     private static final File TOMBSTONE_DIR = new File("/data/tombstones");
 
