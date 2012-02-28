@@ -2133,13 +2133,19 @@ bool AudioFlinger::MixerThread::threadLoop()
         if (mSuspended) {
             sleepTime = suspendSleepTimeUs();
         }
-        // sleepTime == 0 means we must write to audio hardware
+
+        // only process effects if we're going to write
         if (sleepTime == 0) {
             for (size_t i = 0; i < effectChains.size(); i ++) {
                 effectChains[i]->process_l();
             }
-            // enable changes in effect chain
-            unlockEffectChains(effectChains);
+        }
+
+        // enable changes in effect chain
+        unlockEffectChains(effectChains);
+
+        // sleepTime == 0 means we must write to audio hardware
+        if (sleepTime == 0) {
             mLastWriteTime = systemTime();
             mInWrite = true;
             mBytesWritten += mixBufferSize;
@@ -2163,8 +2169,6 @@ bool AudioFlinger::MixerThread::threadLoop()
             }
             mStandby = false;
         } else {
-            // enable changes in effect chain
-            unlockEffectChains(effectChains);
             usleep(sleepTime);
         }
 
@@ -2932,7 +2936,8 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
         if (mSuspended) {
             sleepTime = suspendSleepTimeUs();
         }
-        // sleepTime == 0 means we must write to audio hardware
+
+        // only process effects if we're going to write
         if (sleepTime == 0) {
             if (mixerStatus == MIXER_TRACKS_READY) {
                 applyVolume(leftVol, rightVol, rampVolume);
@@ -2940,8 +2945,13 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             for (size_t i = 0; i < effectChains.size(); i ++) {
                 effectChains[i]->process_l();
             }
-            unlockEffectChains(effectChains);
+        }
 
+        // enable changes in effect chain
+        unlockEffectChains(effectChains);
+
+        // sleepTime == 0 means we must write to audio hardware
+        if (sleepTime == 0) {
             mLastWriteTime = systemTime();
             mInWrite = true;
             mBytesWritten += mixBufferSize;
@@ -2951,7 +2961,6 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             mInWrite = false;
             mStandby = false;
         } else {
-            unlockEffectChains(effectChains);
             usleep(sleepTime);
         }
 
@@ -3195,14 +3204,19 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
         if (mSuspended) {
             sleepTime = suspendSleepTimeUs();
         }
-        // sleepTime == 0 means we must write to audio hardware
+
+        // only process effects if we're going to write
         if (sleepTime == 0) {
             for (size_t i = 0; i < effectChains.size(); i ++) {
                 effectChains[i]->process_l();
             }
-            // enable changes in effect chain
-            unlockEffectChains(effectChains);
+        }
 
+        // enable changes in effect chain
+        unlockEffectChains(effectChains);
+
+        // sleepTime == 0 means we must write to audio hardware
+        if (sleepTime == 0) {
             standbyTime = systemTime() + mStandbyTimeInNsecs;
             for (size_t i = 0; i < outputTracks.size(); i++) {
                 outputTracks[i]->write(mMixBuffer, writeFrames);
@@ -3210,8 +3224,6 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             mStandby = false;
             mBytesWritten += mixBufferSize;
         } else {
-            // enable changes in effect chain
-            unlockEffectChains(effectChains);
             usleep(sleepTime);
         }
 
