@@ -50,7 +50,7 @@ import java.util.Map;
  */
 public class NetworkStatsRecorder {
     private static final String TAG = "NetworkStatsRecorder";
-    private static final boolean LOGD = true;
+    private static final boolean LOGD = false;
     private static final boolean LOGV = false;
 
     private final FileRotator mRotator;

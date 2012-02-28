@@ -48,7 +48,7 @@ import libcore.io.IoUtils;
  */
 public class FileRotator {
     private static final String TAG = "FileRotator";
-    private static final boolean LOGD = true;
+    private static final boolean LOGD = false;
 
     private final File mBasePath;
     private final String mPrefix;
