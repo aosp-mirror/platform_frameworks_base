@@ -36,6 +36,8 @@ namespace android {
 #define TYPE_FACE_HEBREW_REGULAR "/system/fonts/DroidSansHebrew-Regular.ttf"
 #define TYPE_FACE_HEBREW_BOLD "/system/fonts/DroidSansHebrew-Bold.ttf"
 #define TYPEFACE_BENGALI "/system/fonts/Lohit-Bengali.ttf"
+#define TYPEFACE_DEVANAGARI "/system/fonts/Lohit-Devanagari.ttf"
+#define TYPEFACE_TAMIL "/system/fonts/Lohit-Tamil.ttf"
 #define TYPEFACE_THAI "/system/fonts/DroidSansThai.ttf"
 
 ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
@@ -828,6 +830,20 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
 #endif
         break;
 
+    case HB_Script_Devanagari:
+        typeface = getCachedTypeface(&mDevanagariTypeface, TYPEFACE_DEVANAGARI);
+#if DEBUG_GLYPHS
+        ALOGD("Using Devanagari Typeface");
+#endif
+        break;
+
+    case HB_Script_Tamil:
+        typeface = getCachedTypeface(&mTamilTypeface, TYPEFACE_TAMIL);
+#if DEBUG_GLYPHS
+        ALOGD("Using Tamil Typeface");
+#endif
+        break;
+
     default:
         if (!typeface) {
             typeface = mDefaultTypeface;
@@ -859,6 +875,8 @@ size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
     case HB_Script_Arabic:
     case HB_Script_Hebrew:
     case HB_Script_Bengali:
+    case HB_Script_Devanagari:
+    case HB_Script_Tamil:
     case HB_Script_Thai:{
         const uint16_t* text16 = (const uint16_t*)(mShaperItem.string + mShaperItem.item.pos);
         SkUnichar firstUnichar = SkUTF16_NextUnichar(&text16);
