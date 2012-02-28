@@ -7616,11 +7616,11 @@ package android.drm {
   }
 
   public class DrmStore {
-    ctor public DrmStore();
+    ctor public deprecated DrmStore();
   }
 
   public static class DrmStore.Action {
-    ctor public DrmStore.Action();
+    ctor public deprecated DrmStore.Action();
     field public static final int DEFAULT = 0; // 0x0
     field public static final int DISPLAY = 7; // 0x7
     field public static final int EXECUTE = 6; // 0x6
@@ -7641,7 +7641,7 @@ package android.drm {
   }
 
   public static class DrmStore.DrmObjectType {
-    ctor public DrmStore.DrmObjectType();
+    ctor public deprecated DrmStore.DrmObjectType();
     field public static final int CONTENT = 1; // 0x1
     field public static final int RIGHTS_OBJECT = 2; // 0x2
     field public static final int TRIGGER_OBJECT = 3; // 0x3
@@ -7649,7 +7649,7 @@ package android.drm {
   }
 
   public static class DrmStore.Playback {
-    ctor public DrmStore.Playback();
+    ctor public deprecated DrmStore.Playback();
     field public static final int PAUSE = 2; // 0x2
     field public static final int RESUME = 3; // 0x3
     field public static final int START = 0; // 0x0
@@ -7657,7 +7657,7 @@ package android.drm {
   }
 
   public static class DrmStore.RightsStatus {
-    ctor public DrmStore.RightsStatus();
+    ctor public deprecated DrmStore.RightsStatus();
     field public static final int RIGHTS_EXPIRED = 2; // 0x2
     field public static final int RIGHTS_INVALID = 1; // 0x1
     field public static final int RIGHTS_NOT_ACQUIRED = 3; // 0x3
