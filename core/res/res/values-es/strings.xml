@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"habilitar o inhabilitar componentes de la aplicación"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Permite que la aplicación determine si un componente de otra aplicación está habilitado o inhabilitado. Las aplicaciones malintencionadas pueden usar este permiso para inhabilitar funciones importantes del tablet. Este permiso se debe usar con precaución, ya que los componentes de las aplicaciones se pueden volver inestables, incoherentes o inservibles."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Permite que la aplicación determine si un componente de otra aplicación está habilitado o inhabilitado. Las aplicaciones malintencionadas pueden usar este permiso para inhabilitar funciones importantes del teléfono. Este permiso se debe usar con precaución, ya que los componentes de las aplicaciones se pueden volver inestables, incoherentes o inservibles."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"conceder o revocar permisos"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Permite que una aplicación conceda o revoque permisos específicos para sí misma o para otras aplicaciones. Las aplicaciones malintencionadas pueden aprovechar este permiso para acceder a funciones sin tu autorización."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"establecer aplicaciones preferidas"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permite que la aplicación modifique las aplicaciones preferidas del usuario. De esta forma, las aplicaciones malintencionadas pueden cambiar sin aviso las aplicaciones que se están ejecutando y falsificarlas para obtener datos privados del usuario."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modificar la configuración global del sistema"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Establecer fecha"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predeterminado"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NUEVO:"</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ocultar"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar todos"</b></string>
