@@ -16080,6 +16080,7 @@ package android.provider {
   protected static abstract interface CalendarContract.RemindersColumns {
     field public static final java.lang.String EVENT_ID = "event_id";
     field public static final java.lang.String METHOD = "method";
+    field public static final int METHOD_ALARM = 4; // 0x4
     field public static final int METHOD_ALERT = 1; // 0x1
     field public static final int METHOD_DEFAULT = 0; // 0x0
     field public static final int METHOD_EMAIL = 2; // 0x2
