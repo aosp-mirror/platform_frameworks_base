@@ -22,11 +22,13 @@ import com.android.mediaframeworktest.MediaFrameworkTest;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import android.hardware.Camera;
+import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Handler;
@@ -39,21 +41,21 @@ import com.android.mediaframeworktest.MediaRecorderStressTestRunner;
 
 /**
  * Junit / Instrumentation test case for the media player api
- 
- */  
-public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {    
-    
-  
+ */
+public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
+
     private String TAG = "MediaRecorderStressTest";
     private MediaRecorder mRecorder;
     private Camera mCamera;
-   
+
     private static final int NUMBER_OF_CAMERA_STRESS_LOOPS = 100;
     private static final int NUMBER_OF_RECORDER_STRESS_LOOPS = 100;
     private static final int NUMBER_OF_RECORDERANDPLAY_STRESS_LOOPS = 50;
     private static final int NUMBER_OF_SWTICHING_LOOPS_BW_CAMERA_AND_RECORDER = 200;
-    private static final long WAIT_TIME_CAMERA_TEST = 3000;  // 3 second
-    private static final long WAIT_TIME_RECORDER_TEST = 6000;  // 6 second
+    private static final int NUMBER_OF_TIME_LAPSE_LOOPS = 25;
+    private static final int TIME_LAPSE_PLAYBACK_WAIT_TIME = 5* 1000; // 5 seconds
+    private static final long WAIT_TIME_CAMERA_TEST = 3 * 1000; // 3 seconds
+    private static final long WAIT_TIME_RECORDER_TEST = 6 * 1000; // 6 seconds
     private static final String OUTPUT_FILE = "/sdcard/temp";
     private static final String OUTPUT_FILE_EXT = ".3gp";
     private static final String MEDIA_STRESS_OUTPUT =
@@ -61,7 +63,7 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
     private final CameraErrorCallback mCameraErrorCallback = new CameraErrorCallback();
     private final RecorderErrorCallback mRecorderErrorCallback = new RecorderErrorCallback();
 
-    private final static int WAIT_TIMEOUT = 10000;
+    private final static int WAIT_TIMEOUT = 10 * 1000; // 10 seconds
     private Thread mLooperThread;
     private Handler mHandler;
 
@@ -306,7 +308,7 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
         }
     }
 
-    public void removeRecodedVideo(String filename){
+    public void removeRecordedVideo(String filename){
         File video = new File(filename);
         Log.v(TAG, "remove recorded video " + filename);
         video.delete();
@@ -381,13 +383,99 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 mp.release();
                 validateRecordedVideo(filename);
                 if (remove_video) {
-                    removeRecodedVideo(filename);
+                    removeRecordedVideo(filename);
                 }
                 output.write(", " + i);
             }
         } catch (Exception e) {
             Log.v(TAG, e.toString());
             assertTrue("record and playback", false);
+        }
+        output.write("\n\n");
+        output.close();
+    }
+
+    // Test case for stressing time lapse
+    @LargeTest
+    public void testStressTimeLapse() throws Exception {
+        SurfaceHolder mSurfaceHolder;
+        mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
+        int record_duration = MediaRecorderStressTestRunner.mTimeLapseDuration;
+        boolean remove_video = MediaRecorderStressTestRunner.mRemoveVideo;
+        double captureRate = MediaRecorderStressTestRunner.mCaptureRate;
+        String filename;
+        File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
+        Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
+        output.write("Start camera time lapse stress:\n");
+        output.write("Total number of loops: " + NUMBER_OF_TIME_LAPSE_LOOPS + "\n");
+
+        try {
+            output.write("No of loop: ");
+            for (int i = 0; i < NUMBER_OF_TIME_LAPSE_LOOPS; i++) {
+                filename = OUTPUT_FILE + i + OUTPUT_FILE_EXT;
+                Log.v(TAG, filename);
+                runOnLooper(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRecorder = new MediaRecorder();
+                    }
+                });
+
+                // Set callback
+                mRecorder.setOnErrorListener(mRecorderErrorCallback);
+
+                // Set video source
+                mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+
+                // Set camcorder profile for time lapse
+                CamcorderProfile profile =
+                        CamcorderProfile.get(CamcorderProfile.QUALITY_TIME_LAPSE_HIGH);
+                mRecorder.setProfile(profile);
+
+                // Set the timelapse setting; 0.1 = 10 sec timelapse, 0.5 = 2 sec timelapse, etc.
+                // http://developer.android.com/guide/topics/media/camera.html#time-lapse-video
+                mRecorder.setCaptureRate(captureRate);
+
+                // Set output file
+                mRecorder.setOutputFile(filename);
+
+                // Set the preview display
+                Log.v(TAG, "mediaRecorder setPreviewDisplay");
+                mRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
+
+                mRecorder.prepare();
+                mRecorder.start();
+                Thread.sleep(record_duration);
+                Log.v(TAG, "Before stop");
+                mRecorder.stop();
+                mRecorder.release();
+
+                // Start the playback
+                MediaPlayer mp = new MediaPlayer();
+                mp.setDataSource(filename);
+                mp.setDisplay(mSurfaceHolder);
+                mp.prepare();
+                mp.start();
+                Thread.sleep(TIME_LAPSE_PLAYBACK_WAIT_TIME);
+                mp.release();
+                validateRecordedVideo(filename);
+                if(remove_video) {
+                  removeRecordedVideo(filename);
+                }
+                output.write(", " + i);
+            }
+        }
+        catch (IllegalStateException e) {
+            assertTrue("Camera time lapse stress test IllegalStateException", false);
+            Log.v(TAG, e.toString());
+        }
+        catch (IOException e) {
+            assertTrue("Camera time lapse stress test IOException", false);
+            Log.v(TAG, e.toString());
+        }
+        catch (Exception e) {
+            assertTrue("Camera time lapse stress test Exception", false);
+            Log.v(TAG, e.toString());
         }
         output.write("\n\n");
         output.close();
