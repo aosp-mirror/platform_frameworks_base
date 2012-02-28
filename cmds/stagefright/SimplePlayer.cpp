@@ -396,7 +396,7 @@ status_t SimplePlayer::onReset() {
     for (size_t i = 0; i < mStateByTrackIndex.size(); ++i) {
         CodecState *state = &mStateByTrackIndex.editValueAt(i);
 
-        CHECK_EQ(state->mCodec->stop(), (status_t)OK);
+        CHECK_EQ(state->mCodec->release(), (status_t)OK);
     }
 
     mStartTimeRealUs = -1ll;

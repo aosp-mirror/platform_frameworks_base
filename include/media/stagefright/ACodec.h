@@ -49,7 +49,7 @@ struct ACodec : public AHierarchicalStateMachine {
     void initiateSetup(const sp<AMessage> &msg);
     void signalFlush();
     void signalResume();
-    void initiateShutdown();
+    void initiateShutdown(bool keepComponentAllocated = false);
 
     void initiateAllocateComponent(const sp<AMessage> &msg);
     void initiateConfigureComponent(const sp<AMessage> &msg);
@@ -61,6 +61,7 @@ protected:
 private:
     struct BaseState;
     struct UninitializedState;
+    struct LoadedState;
     struct LoadedToIdleState;
     struct IdleToExecutingState;
     struct ExecutingState;
@@ -107,6 +108,7 @@ private:
     sp<AMessage> mNotify;
 
     sp<UninitializedState> mUninitializedState;
+    sp<LoadedState> mLoadedState;
     sp<LoadedToIdleState> mLoadedToIdleState;
     sp<IdleToExecutingState> mIdleToExecutingState;
     sp<ExecutingState> mExecutingState;
@@ -130,6 +132,12 @@ private:
 
     bool mSentFormat;
     bool mIsEncoder;
+
+    bool mShutdownInProgress;
+
+    // If "mKeepComponentAllocated" we only transition back to Loaded state
+    // and do not release the component instance.
+    bool mKeepComponentAllocated;
 
     status_t allocateBuffersOnPort(OMX_U32 portIndex);
     status_t freeBuffersOnPort(OMX_U32 portIndex);

@@ -53,7 +53,14 @@ struct MediaCodec : public AHandler {
             uint32_t flags);
 
     status_t start();
+
+    // Returns to a state in which the component remains allocated but
+    // unconfigured.
     status_t stop();
+
+    // Client MUST call release before releasing final reference to this
+    // object.
+    status_t release();
 
     status_t flush();
 
@@ -97,6 +104,7 @@ private:
         STARTED,
         FLUSHING,
         STOPPING,
+        RELEASING,
     };
 
     enum {
@@ -109,6 +117,7 @@ private:
         kWhatConfigure                  = 'conf',
         kWhatStart                      = 'strt',
         kWhatStop                       = 'stop',
+        kWhatRelease                    = 'rele',
         kWhatDequeueInputBuffer         = 'deqI',
         kWhatQueueInputBuffer           = 'queI',
         kWhatDequeueOutputBuffer        = 'deqO',
