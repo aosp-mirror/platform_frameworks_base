@@ -3285,7 +3285,7 @@ void AudioFlinger::DuplicatingThread::updateWaitTime()
 }
 
 
-bool AudioFlinger::DuplicatingThread::outputsReady(SortedVector< sp<OutputTrack> > &outputTracks)
+bool AudioFlinger::DuplicatingThread::outputsReady(const SortedVector< sp<OutputTrack> > &outputTracks)
 {
     for (size_t i = 0; i < outputTracks.size(); i++) {
         sp <ThreadBase> thread = outputTracks[i]->thread().promote();
@@ -5870,7 +5870,7 @@ uint32_t AudioFlinger::nextUniqueId()
     return android_atomic_inc(&mNextUniqueId);
 }
 
-AudioFlinger::PlaybackThread *AudioFlinger::primaryPlaybackThread_l()
+AudioFlinger::PlaybackThread *AudioFlinger::primaryPlaybackThread_l() const
 {
     for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
         PlaybackThread *thread = mPlaybackThreads.valueAt(i).get();
@@ -5882,7 +5882,7 @@ AudioFlinger::PlaybackThread *AudioFlinger::primaryPlaybackThread_l()
     return NULL;
 }
 
-uint32_t AudioFlinger::primaryOutputDevice_l()
+uint32_t AudioFlinger::primaryOutputDevice_l() const
 {
     PlaybackThread *thread = primaryPlaybackThread_l();
 
@@ -6377,7 +6377,7 @@ void AudioFlinger::ThreadBase::lockEffectChains_l(
 }
 
 void AudioFlinger::ThreadBase::unlockEffectChains(
-        Vector<sp <AudioFlinger::EffectChain> >& effectChains)
+        const Vector<sp <AudioFlinger::EffectChain> >& effectChains)
 {
     for (size_t i = 0; i < effectChains.size(); i++) {
         effectChains[i]->unlock();
