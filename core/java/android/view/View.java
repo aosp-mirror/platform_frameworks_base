@@ -5048,16 +5048,17 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *        the View's internal state from a previously set "pressed" state.
      */
     public void setPressed(boolean pressed) {
-        if (pressed == ((mPrivateFlags & PRESSED) == PRESSED)) {
-            return;
-        }
+        final boolean needsRefresh = pressed != ((mPrivateFlags & PRESSED) == PRESSED);
 
         if (pressed) {
             mPrivateFlags |= PRESSED;
         } else {
             mPrivateFlags &= ~PRESSED;
         }
-        refreshDrawableState();
+
+        if (needsRefresh) {
+            refreshDrawableState();
+        }
         dispatchSetPressed(pressed);
     }
 

@@ -2770,7 +2770,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         final int count = mChildrenCount;
         for (int i = 0; i < count; i++) {
-            children[i].setPressed(pressed);
+            final View child = children[i];
+            // Children that are clickable on their own should not
+            // show a pressed state when their parent view does.
+            // Clearing a pressed state always propagates.
+            if (!pressed || (!child.isClickable() && !child.isLongClickable())) {
+                child.setPressed(pressed);
+            }
         }
     }
 
