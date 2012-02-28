@@ -3144,7 +3144,7 @@ public class WebView extends AbsoluteLayout
             return;
         }
         if (nativeHasCursorNode()) {
-            Rect cursorBounds = nativeGetCursorRingBounds();
+            Rect cursorBounds = cursorRingBounds();
             if (!cursorBounds.contains(contentX, contentY)) {
                 int slop = viewToContentDimension(mNavSlop);
                 cursorBounds.inset(-slop, -slop);
@@ -7541,7 +7541,7 @@ public class WebView extends AbsoluteLayout
                 return false;
             }
             if (time - mLastCursorTime <= TRACKBALL_TIMEOUT
-                    && !mLastCursorBounds.equals(nativeGetCursorRingBounds())) {
+                    && !mLastCursorBounds.equals(cursorRingBounds())) {
                 nativeSelectBestAt(mLastCursorBounds);
             }
             if (DebugFlags.WEB_VIEW) {
@@ -10121,7 +10121,7 @@ public class WebView extends AbsoluteLayout
         }
         mInitialHitTestResult = null;
         mLastCursorTime = time;
-        mLastCursorBounds = nativeGetCursorRingBounds();
+        mLastCursorBounds = cursorRingBounds();
         boolean keyHandled
                 = nativeMoveCursor(keyCode, count, noScroll) == false;
         if (DebugFlags.WEB_VIEW) {
@@ -10132,7 +10132,7 @@ public class WebView extends AbsoluteLayout
         if (keyHandled == false) {
             return keyHandled;
         }
-        Rect contentCursorRingBounds = nativeGetCursorRingBounds();
+        Rect contentCursorRingBounds = cursorRingBounds();
         if (contentCursorRingBounds.isEmpty()) return keyHandled;
         Rect viewCursorRingBounds = contentToViewRect(contentCursorRingBounds);
         // set last touch so that context menu related functions will work
@@ -10344,6 +10344,14 @@ public class WebView extends AbsoluteLayout
             isEditable = mFocusedNode.mEditable;
         }
         return isEditable;
+    }
+
+    // TODO: Remove this
+    Rect cursorRingBounds() {
+        if (sDisableNavcache) {
+            return new Rect();
+        }
+        return nativeGetCursorRingBounds();
     }
 
     private native int nativeCacheHitFramePointer();
