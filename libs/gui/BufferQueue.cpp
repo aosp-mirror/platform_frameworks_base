@@ -16,6 +16,7 @@
 
 #define LOG_TAG "BufferQueue"
 //#define LOG_NDEBUG 0
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
 #define GL_GLEXT_PROTOTYPES
 #define EGL_EGLEXT_PROTOTYPES
@@ -29,6 +30,7 @@
 
 #include <utils/Log.h>
 #include <gui/SurfaceTexture.h>
+#include <utils/Trace.h>
 
 // This compile option causes SurfaceTexture to return the buffer that is currently
 // attached to the GL texture from dequeueBuffer when no other buffers are
@@ -191,6 +193,7 @@ status_t BufferQueue::setBufferCount(int bufferCount) {
 
 int BufferQueue::query(int what, int* outValue)
 {
+    ATRACE_CALL();
     Mutex::Autolock lock(mMutex);
 
     if (mAbandoned) {
@@ -221,6 +224,7 @@ int BufferQueue::query(int what, int* outValue)
 }
 
 status_t BufferQueue::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
+    ATRACE_CALL();
     ST_LOGV("requestBuffer: slot=%d", slot);
     Mutex::Autolock lock(mMutex);
     if (mAbandoned) {
@@ -239,6 +243,7 @@ status_t BufferQueue::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
 
 status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         uint32_t format, uint32_t usage) {
+    ATRACE_CALL();
     ST_LOGV("dequeueBuffer: w=%d h=%d fmt=%#x usage=%#x", w, h, format, usage);
 
     if ((w && !h) || (!w && h)) {
@@ -458,6 +463,7 @@ status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
 }
 
 status_t BufferQueue::setSynchronousMode(bool enabled) {
+    ATRACE_CALL();
     ST_LOGV("setSynchronousMode: enabled=%d", enabled);
     Mutex::Autolock lock(mMutex);
 
@@ -490,6 +496,7 @@ status_t BufferQueue::setSynchronousMode(bool enabled) {
 
 status_t BufferQueue::queueBuffer(int buf, int64_t timestamp,
         uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
+    ATRACE_CALL();
     ST_LOGV("queueBuffer: slot=%d time=%lld", buf, timestamp);
 
     sp<FrameAvailableListener> listener;
@@ -553,6 +560,8 @@ status_t BufferQueue::queueBuffer(int buf, int64_t timestamp,
         *outWidth = mDefaultWidth;
         *outHeight = mDefaultHeight;
         *outTransform = 0;
+
+        ATRACE_INT(mConsumerName.string(), mQueue.size());
     } // scope for the lock
 
     // call back without lock held
@@ -563,6 +572,7 @@ status_t BufferQueue::queueBuffer(int buf, int64_t timestamp,
 }
 
 void BufferQueue::cancelBuffer(int buf) {
+    ATRACE_CALL();
     ST_LOGV("cancelBuffer: slot=%d", buf);
     Mutex::Autolock lock(mMutex);
 
@@ -586,6 +596,7 @@ void BufferQueue::cancelBuffer(int buf) {
 }
 
 status_t BufferQueue::setCrop(const Rect& crop) {
+    ATRACE_CALL();
     ST_LOGV("setCrop: crop=[%d,%d,%d,%d]", crop.left, crop.top, crop.right,
             crop.bottom);
 
@@ -599,6 +610,7 @@ status_t BufferQueue::setCrop(const Rect& crop) {
 }
 
 status_t BufferQueue::setTransform(uint32_t transform) {
+    ATRACE_CALL();
     ST_LOGV("setTransform: xform=%#x", transform);
     Mutex::Autolock lock(mMutex);
     if (mAbandoned) {
@@ -610,6 +622,7 @@ status_t BufferQueue::setTransform(uint32_t transform) {
 }
 
 status_t BufferQueue::setScalingMode(int mode) {
+    ATRACE_CALL();
     ST_LOGV("setScalingMode: mode=%d", mode);
 
     switch (mode) {
@@ -628,6 +641,7 @@ status_t BufferQueue::setScalingMode(int mode) {
 
 status_t BufferQueue::connect(int api,
         uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
+    ATRACE_CALL();
     ST_LOGV("connect: api=%d", api);
     Mutex::Autolock lock(mMutex);
 
@@ -664,6 +678,7 @@ status_t BufferQueue::connect(int api,
 }
 
 status_t BufferQueue::disconnect(int api) {
+    ATRACE_CALL();
     ST_LOGV("disconnect: api=%d", api);
     Mutex::Autolock lock(mMutex);
 
@@ -818,6 +833,8 @@ status_t BufferQueue::acquire(BufferItem *buffer) {
 
         mSlots[buf].mBufferState = BufferSlot::ACQUIRED;
         mQueue.erase(front);
+
+        ATRACE_INT(mConsumerName.string(), mQueue.size());
     }
     else {
         return -EINVAL; //should be a better return code
@@ -875,6 +892,7 @@ status_t BufferQueue::setDefaultBufferSize(uint32_t w, uint32_t h)
 }
 
 status_t BufferQueue::setBufferCountServer(int bufferCount) {
+    ATRACE_CALL();
     Mutex::Autolock lock(mMutex);
     return setBufferCountServerLocked(bufferCount);
 }

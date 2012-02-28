@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
@@ -26,6 +28,7 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
+#include <utils/Trace.h>
 
 #include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
@@ -267,6 +270,8 @@ void Layer::setPerFrameData(hwc_layer_t* hwcl) {
 
 void Layer::onDraw(const Region& clip) const
 {
+    ATRACE_CALL();
+
     if (CC_UNLIKELY(mActiveBuffer == 0)) {
         // the texture has not been created yet, this Layer has
         // in fact never been drawn into. This happens frequently with
@@ -365,6 +370,8 @@ bool Layer::isProtected() const
 
 uint32_t Layer::doTransaction(uint32_t flags)
 {
+    ATRACE_CALL();
+
     const Layer::State& front(drawingState());
     const Layer::State& temp(currentState());
 
@@ -418,6 +425,8 @@ bool Layer::onPreComposition() {
 
 void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 {
+    ATRACE_CALL();
+
     if (mQueuedFrames > 0) {
 
         // if we've already called updateTexImage() without going through
@@ -540,6 +549,8 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 void Layer::unlockPageFlip(
         const Transform& planeTransform, Region& outDirtyRegion)
 {
+    ATRACE_CALL();
+
     Region postedRegion(mPostedDirtyRegion);
     if (!postedRegion.isEmpty()) {
         mPostedDirtyRegion.clear();
