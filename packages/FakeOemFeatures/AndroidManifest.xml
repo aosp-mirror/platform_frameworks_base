@@ -1,0 +1,25 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.fakeoemfeatures"
+        coreApp="true"
+        >
+
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <application
+        android:persistent="true"
+        android:name=".FakeApp"
+        android:allowClearUserData="false"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
+        android:label="Fake OEM Features">
+
+        <service android:name=".FakeCoreService" android:process=":core"
+                android:label="Fake OEM Core Service" />
+        <service android:name=".FakeCoreService2" android:process=":core"
+                android:label="Fake OEM Core Service Also" />
+        <service android:name=".FakeCoreService3" android:process=":core"
+                android:label="Fake OEM Core Service Me Too" />
+        <service android:name=".FakeBackgroundService" android:process=":background"
+                android:label="Fake OEM Bg Service" />
+    </application>
+</manifest>
