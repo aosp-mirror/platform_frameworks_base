@@ -50,6 +50,7 @@ public class ManageDialog extends AlertActivity implements
     private TextView mDuration;
     private TextView mDataTransmitted;
     private TextView mDataReceived;
+    private boolean mDataRowsHidden;
 
     private Handler mHandler;
 
@@ -76,6 +77,7 @@ public class ManageDialog extends AlertActivity implements
             mDuration = (TextView) view.findViewById(R.id.duration);
             mDataTransmitted = (TextView) view.findViewById(R.id.data_transmitted);
             mDataReceived = (TextView) view.findViewById(R.id.data_received);
+            mDataRowsHidden = true;
 
             if (mConfig.user.equals(VpnConfig.LEGACY_VPN)) {
                 mAlertParams.mIconId = android.R.drawable.ic_dialog_info;
@@ -140,8 +142,15 @@ public class ManageDialog extends AlertActivity implements
                         seconds / 3600, seconds / 60 % 60, seconds % 60));
             }
 
-            String[] numbers = getStatistics();
+            String[] numbers = getNumbers();
             if (numbers != null) {
+                // First unhide the related data rows.
+                if (mDataRowsHidden) {
+                    findViewById(R.id.data_transmitted_row).setVisibility(View.VISIBLE);
+                    findViewById(R.id.data_received_row).setVisibility(View.VISIBLE);
+                    mDataRowsHidden = false;
+                }
+
                 // [1] and [2] are received data in bytes and packets.
                 mDataReceived.setText(getString(R.string.data_value_format,
                         numbers[1], numbers[2]));
@@ -155,7 +164,7 @@ public class ManageDialog extends AlertActivity implements
         return true;
     }
 
-    private String[] getStatistics() {
+    private String[] getNumbers() {
         DataInputStream in = null;
         try {
             // See dev_seq_printf_stats() in net/core/dev.c.

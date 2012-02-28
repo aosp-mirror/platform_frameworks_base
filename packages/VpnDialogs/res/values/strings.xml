@@ -48,8 +48,6 @@
     <!-- Label for the network usage of data received over VPN. [CHAR LIMIT=20] -->
     <string name="data_received">Received:</string>
 
-    <!-- Dummy string for a blank value. [CHAR LIMIT=40] -->
-    <string name="blank_value">--</string>
     <!-- Formatted string for the network usage over VPN. [CHAR LIMIT=40] -->
     <string name="data_value_format">
         <xliff:g id="number">%1$s</xliff:g> bytes /
