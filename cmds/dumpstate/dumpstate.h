@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#define SU_PATH "/system/xbin/su"
+
 /* prints the contents of a file */
 int dump_file(const char *title, const char* path);
 
