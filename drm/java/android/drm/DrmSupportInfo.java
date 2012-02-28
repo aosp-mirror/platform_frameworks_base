@@ -85,8 +85,19 @@ public class DrmSupportInfo {
      * Retrieves the DRM plug-in (agent) description.
      *
      * @return The plug-in description.
+     * @deprecated The method name is mis-spelled, and it is replaced by
+     * {@link #getDescription()}.
      */
     public String getDescriprition() {
+        return mDescription;
+    }
+
+    /**
+     * Retrieves the DRM plug-in (agent) description.
+     *
+     * @return The plug-in description.
+     */
+    public String getDescription() {
         return mDescription;
     }
 
