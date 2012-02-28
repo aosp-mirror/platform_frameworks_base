@@ -7685,7 +7685,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                final boolean wasAnimating = w.mAnimating;
+                final boolean wasAnimating = w.mWasAnimating;
 
                 // If the window has moved due to its containing
                 // content frame changing, then we'd like to animate
