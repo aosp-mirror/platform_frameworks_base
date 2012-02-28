@@ -161,6 +161,7 @@ public final class PduCache extends AbstractCache<Uri, PduCacheEntry> {
     }
 
     private PduCacheEntry purgeSingleEntry(Uri key) {
+        mUpdating.remove(key);
         PduCacheEntry entry = super.purge(key);
         if (entry != null) {
             removeFromThreads(key, entry);
@@ -176,6 +177,7 @@ public final class PduCache extends AbstractCache<Uri, PduCacheEntry> {
 
         mMessageBoxes.clear();
         mThreads.clear();
+        mUpdating.clear();
     }
 
     /**
@@ -216,6 +218,7 @@ public final class PduCache extends AbstractCache<Uri, PduCacheEntry> {
             HashSet<Uri> msgBox = mMessageBoxes.remove(msgBoxId);
             if (msgBox != null) {
                 for (Uri key : msgBox) {
+                    mUpdating.remove(key);
                     PduCacheEntry entry = super.purge(key);
                     if (entry != null) {
                         removeFromThreads(key, entry);
@@ -240,6 +243,7 @@ public final class PduCache extends AbstractCache<Uri, PduCacheEntry> {
         HashSet<Uri> thread = mThreads.remove(threadId);
         if (thread != null) {
             for (Uri key : thread) {
+                mUpdating.remove(key);
                 PduCacheEntry entry = super.purge(key);
                 if (entry != null) {
                     removeFromMessageBoxes(key, entry);
