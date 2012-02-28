@@ -3986,6 +3986,12 @@ public final class ActivityThread {
             dalvik.system.VMRuntime.getRuntime().clearGrowthLimit();
         }
 
+        // allow disk access during application and provider setup. this could
+        // block processing ordered broadcasts, but later processing would
+        // probably end up doing the same disk access. restore not guarded with
+        // finally block, since exceptions here will take down the application.
+        final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskWrites();
+
         // If the app is being launched for full backup or restore, bring it up in
         // a restricted environment with the base application class.
         Application app = data.info.makeApplication(data.restrictedBackupMode, null);
@@ -3993,7 +3999,7 @@ public final class ActivityThread {
 
         // don't bring up providers in restricted mode; they may depend on the
         // app's custom Application class
-        if (!data.restrictedBackupMode){ 
+        if (!data.restrictedBackupMode) {
             List<ProviderInfo> providers = data.providers;
             if (providers != null) {
                 installContentProviders(app, providers);
@@ -4012,6 +4018,8 @@ public final class ActivityThread {
                     + ": " + e.toString(), e);
             }
         }
+
+        StrictMode.setThreadPolicy(savedPolicy);
     }
 
     /*package*/ final void finishInstrumentation(int resultCode, Bundle results) {
