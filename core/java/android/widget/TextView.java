@@ -8189,24 +8189,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean performLongClick() {
         boolean handled = false;
-        boolean vibrate = true;
 
         if (super.performLongClick()) {
             handled = true;
         }
 
+        if (mEditor == null) {
+            return handled;
+        }
+
         // Long press in empty space moves cursor and shows the Paste affordance if available.
-        if (!handled && mEditor != null && !isPositionOnText(getEditor().mLastDownPositionX, getEditor().mLastDownPositionY) &&
+        if (!handled && !isPositionOnText(getEditor().mLastDownPositionX, getEditor().mLastDownPositionY) &&
                 getEditor().mInsertionControllerEnabled) {
             final int offset = getOffsetForPosition(getEditor().mLastDownPositionX, getEditor().mLastDownPositionY);
             stopSelectionActionMode();
             Selection.setSelection((Spannable) mText, offset);
             getInsertionController().showWithActionPopup();
             handled = true;
-            vibrate = false;
         }
 
-        if (!handled && mEditor != null && getEditor().mSelectionActionMode != null) {
+        if (!handled && getEditor().mSelectionActionMode != null) {
             if (touchPositionIsInSelection()) {
                 // Start a drag
                 final int start = getSelectionStart();
@@ -8225,15 +8227,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Start a new selection
-        if (!handled && mEditor != null) {
-            vibrate = handled = startSelectionActionMode();
+        if (!handled) {
+            handled = startSelectionActionMode();
         }
 
-        if (vibrate) {
+        if (handled) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        }
-
-        if (handled && mEditor != null) {
             getEditor().mDiscardNextActionUp = true;
         }
 
