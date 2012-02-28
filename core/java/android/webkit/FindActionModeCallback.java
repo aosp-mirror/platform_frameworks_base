@@ -38,7 +38,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     private View mCustomView;
     private EditText mEditText;
     private TextView mMatches;
-    private WebView mWebView;
+    private WebViewClassic mWebView;
     private InputMethodManager mInput;
     private Resources mResources;
     private boolean mMatchesFound;
@@ -90,7 +90,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
      * Set the WebView to search.  Must be non null, and set before calling
      * startActionMode.
      */
-    void setWebView(WebView webView) {
+    void setWebView(WebViewClassic webView) {
         if (null == webView) {
             throw new AssertionError("WebView supplied to "
                     + "FindActionModeCallback cannot be null");
@@ -218,7 +218,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     public void onDestroyActionMode(ActionMode mode) {
         mActionMode = null;
         mWebView.notifyFindDialogDismissed();
-        mInput.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
+        mInput.hideSoftInputFromWindow(mWebView.getWebView().getWindowToken(), 0);
     }
 
     @Override
@@ -232,7 +232,7 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
             throw new AssertionError(
                     "No WebView for FindActionModeCallback::onActionItemClicked");
         }
-        mInput.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
+        mInput.hideSoftInputFromWindow(mWebView.getWebView().getWindowToken(), 0);
         switch(item.getItemId()) {
             case com.android.internal.R.id.find_prev:
                 findNext(false);

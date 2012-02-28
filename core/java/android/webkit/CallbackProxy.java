@@ -61,8 +61,8 @@ class CallbackProxy extends Handler {
     private volatile WebViewClient mWebViewClient;
     // Instance of WebChromeClient for handling all chrome functions.
     private volatile WebChromeClient mWebChromeClient;
-    // Instance of WebView for handling UI requests.
-    private final WebView mWebView;
+    // Instance of WebViewClassic for handling UI requests.
+    private final WebViewClassic mWebView;
     // Client registered callback listener for download events
     private volatile DownloadListener mDownloadListener;
     // Keep track of multiple progress updates.
@@ -148,7 +148,7 @@ class CallbackProxy extends Handler {
     /**
      * Construct a new CallbackProxy.
      */
-    public CallbackProxy(Context context, WebView w) {
+    public CallbackProxy(Context context, WebViewClassic w) {
         // Used to start a default activity.
         mContext = context;
         mWebView = w;
@@ -221,7 +221,7 @@ class CallbackProxy extends Handler {
         }
         boolean override = false;
         if (mWebViewClient != null) {
-            override = mWebViewClient.shouldOverrideUrlLoading(mWebView,
+            override = mWebViewClient.shouldOverrideUrlLoading(mWebView.getWebView(),
                     overrideUrl);
         } else {
             Intent intent = new Intent(Intent.ACTION_VIEW,
@@ -248,7 +248,7 @@ class CallbackProxy extends Handler {
      */
     public boolean uiOverrideKeyEvent(KeyEvent event) {
         if (mWebViewClient != null) {
-            return mWebViewClient.shouldOverrideKeyEvent(mWebView, event);
+            return mWebViewClient.shouldOverrideKeyEvent(mWebView.getWebView(), event);
         }
         return false;
     }
@@ -264,7 +264,8 @@ class CallbackProxy extends Handler {
                 String startedUrl = msg.getData().getString("url");
                 mWebView.onPageStarted(startedUrl);
                 if (mWebViewClient != null) {
-                    mWebViewClient.onPageStarted(mWebView, startedUrl, (Bitmap) msg.obj);
+                    mWebViewClient.onPageStarted(mWebView.getWebView(), startedUrl,
+                            (Bitmap) msg.obj);
                 }
                 break;
 
@@ -272,26 +273,26 @@ class CallbackProxy extends Handler {
                 String finishedUrl = (String) msg.obj;
                 mWebView.onPageFinished(finishedUrl);
                 if (mWebViewClient != null) {
-                    mWebViewClient.onPageFinished(mWebView, finishedUrl);
+                    mWebViewClient.onPageFinished(mWebView.getWebView(), finishedUrl);
                 }
                 break;
 
             case RECEIVED_ICON:
                 if (mWebChromeClient != null) {
-                    mWebChromeClient.onReceivedIcon(mWebView, (Bitmap) msg.obj);
+                    mWebChromeClient.onReceivedIcon(mWebView.getWebView(), (Bitmap) msg.obj);
                 }
                 break;
 
             case RECEIVED_TOUCH_ICON_URL:
                 if (mWebChromeClient != null) {
-                    mWebChromeClient.onReceivedTouchIconUrl(mWebView,
+                    mWebChromeClient.onReceivedTouchIconUrl(mWebView.getWebView(),
                             (String) msg.obj, msg.arg1 == 1);
                 }
                 break;
 
             case RECEIVED_TITLE:
                 if (mWebChromeClient != null) {
-                    mWebChromeClient.onReceivedTitle(mWebView,
+                    mWebChromeClient.onReceivedTitle(mWebView.getWebView(),
                             (String) msg.obj);
                 }
                 break;
@@ -301,7 +302,7 @@ class CallbackProxy extends Handler {
                     int reasonCode = msg.arg1;
                     final String description  = msg.getData().getString("description");
                     final String failUrl  = msg.getData().getString("failingUrl");
-                    mWebViewClient.onReceivedError(mWebView, reasonCode,
+                    mWebViewClient.onReceivedError(mWebView.getWebView(), reasonCode,
                             description, failUrl);
                 }
                 break;
@@ -312,7 +313,7 @@ class CallbackProxy extends Handler {
                 Message dontResend =
                         (Message) msg.getData().getParcelable("dontResend");
                 if (mWebViewClient != null) {
-                    mWebViewClient.onFormResubmission(mWebView, dontResend,
+                    mWebViewClient.onFormResubmission(mWebView.getWebView(), dontResend,
                             resend);
                 } else {
                     dontResend.sendToTarget();
@@ -335,7 +336,7 @@ class CallbackProxy extends Handler {
                     HttpAuthHandler handler = (HttpAuthHandler) msg.obj;
                     String host = msg.getData().getString("host");
                     String realm = msg.getData().getString("realm");
-                    mWebViewClient.onReceivedHttpAuthRequest(mWebView, handler,
+                    mWebViewClient.onReceivedHttpAuthRequest(mWebView.getWebView(), handler,
                             host, realm);
                 }
                 break;
@@ -344,7 +345,7 @@ class CallbackProxy extends Handler {
                 if (mWebViewClient != null) {
                     HashMap<String, Object> map =
                         (HashMap<String, Object>) msg.obj;
-                    mWebViewClient.onReceivedSslError(mWebView,
+                    mWebViewClient.onReceivedSslError(mWebView.getWebView(),
                             (SslErrorHandler) map.get("handler"),
                             (SslError) map.get("error"));
                 }
@@ -352,7 +353,7 @@ class CallbackProxy extends Handler {
 
             case PROCEEDED_AFTER_SSL_ERROR:
                 if (mWebViewClient != null) {
-                    mWebViewClient.onProceededAfterSslError(mWebView,
+                    mWebViewClient.onProceededAfterSslError(mWebView.getWebView(),
                             (SslError) msg.obj);
                 }
                 break;
@@ -361,7 +362,7 @@ class CallbackProxy extends Handler {
                 if (mWebViewClient != null) {
                     HashMap<String, Object> map =
                         (HashMap<String, Object>) msg.obj;
-                    mWebViewClient.onReceivedClientCertRequest(mWebView,
+                    mWebViewClient.onReceivedClientCertRequest(mWebView.getWebView(),
                             (ClientCertRequestHandler) map.get("handler"),
                             (String) map.get("host_and_port"));
                 }
@@ -373,7 +374,7 @@ class CallbackProxy extends Handler {
                 // changed.
                 synchronized (this) {
                     if (mWebChromeClient != null) {
-                        mWebChromeClient.onProgressChanged(mWebView,
+                        mWebChromeClient.onProgressChanged(mWebView.getWebView(),
                                 mLatestProgress);
                     }
                     mProgressUpdatePending = false;
@@ -382,14 +383,14 @@ class CallbackProxy extends Handler {
 
             case UPDATE_VISITED:
                 if (mWebViewClient != null) {
-                    mWebViewClient.doUpdateVisitedHistory(mWebView,
+                    mWebViewClient.doUpdateVisitedHistory(mWebView.getWebView(),
                             (String) msg.obj, msg.arg1 != 0);
                 }
                 break;
 
             case LOAD_RESOURCE:
                 if (mWebViewClient != null) {
-                    mWebViewClient.onLoadResource(mWebView, (String) msg.obj);
+                    mWebViewClient.onLoadResource(mWebView.getWebView(), (String) msg.obj);
                 }
                 break;
 
@@ -409,7 +410,7 @@ class CallbackProxy extends Handler {
 
             case CREATE_WINDOW:
                 if (mWebChromeClient != null) {
-                    if (!mWebChromeClient.onCreateWindow(mWebView,
+                    if (!mWebChromeClient.onCreateWindow(mWebView.getWebView(),
                                 msg.arg1 == 1, msg.arg2 == 1,
                                 (Message) msg.obj)) {
                         synchronized (this) {
@@ -422,13 +423,13 @@ class CallbackProxy extends Handler {
 
             case REQUEST_FOCUS:
                 if (mWebChromeClient != null) {
-                    mWebChromeClient.onRequestFocus(mWebView);
+                    mWebChromeClient.onRequestFocus(mWebView.getWebView());
                 }
                 break;
 
             case CLOSE_WINDOW:
                 if (mWebChromeClient != null) {
-                    mWebChromeClient.onCloseWindow((WebView) msg.obj);
+                    mWebChromeClient.onCloseWindow(((WebViewClassic) msg.obj).getWebView());
                 }
                 break;
 
@@ -449,7 +450,7 @@ class CallbackProxy extends Handler {
 
             case ASYNC_KEYEVENTS:
                 if (mWebViewClient != null) {
-                    mWebViewClient.onUnhandledKeyEvent(mWebView,
+                    mWebViewClient.onUnhandledKeyEvent(mWebView.getWebView(),
                             (KeyEvent) msg.obj);
                 }
                 break;
@@ -516,7 +517,7 @@ class CallbackProxy extends Handler {
                     final JsResult res = (JsResult) msg.obj;
                     String message = msg.getData().getString("message");
                     String url = msg.getData().getString("url");
-                    if (!mWebChromeClient.onJsAlert(mWebView, url, message,
+                    if (!mWebChromeClient.onJsAlert(mWebView.getWebView(), url, message,
                             res)) {
                         if (!canShowAlertDialog()) {
                             res.cancel();
@@ -552,7 +553,7 @@ class CallbackProxy extends Handler {
                     final JsResult res = (JsResult) msg.obj;
                     String message = msg.getData().getString("message");
                     String url = msg.getData().getString("url");
-                    if (!mWebChromeClient.onJsConfirm(mWebView, url, message,
+                    if (!mWebChromeClient.onJsConfirm(mWebView.getWebView(), url, message,
                             res)) {
                         if (!canShowAlertDialog()) {
                             res.cancel();
@@ -597,7 +598,7 @@ class CallbackProxy extends Handler {
                     String message = msg.getData().getString("message");
                     String defaultVal = msg.getData().getString("default");
                     String url = msg.getData().getString("url");
-                    if (!mWebChromeClient.onJsPrompt(mWebView, url, message,
+                    if (!mWebChromeClient.onJsPrompt(mWebView.getWebView(), url, message,
                                 defaultVal, res)) {
                         if (!canShowAlertDialog()) {
                             res.cancel();
@@ -653,7 +654,7 @@ class CallbackProxy extends Handler {
                     final JsResult res = (JsResult) msg.obj;
                     String message = msg.getData().getString("message");
                     String url = msg.getData().getString("url");
-                    if (!mWebChromeClient.onJsBeforeUnload(mWebView, url,
+                    if (!mWebChromeClient.onJsBeforeUnload(mWebView.getWebView(), url,
                             message, res)) {
                         if (!canShowAlertDialog()) {
                             res.cancel();
@@ -710,7 +711,7 @@ class CallbackProxy extends Handler {
 
             case SCALE_CHANGED:
                 if (mWebViewClient != null) {
-                    mWebViewClient.onScaleChanged(mWebView, msg.getData()
+                    mWebViewClient.onScaleChanged(mWebView.getWebView(), msg.getData()
                             .getFloat("old"), msg.getData().getFloat("new"));
                 }
                 break;
@@ -817,7 +818,7 @@ class CallbackProxy extends Handler {
                     String realm = msg.getData().getString("realm");
                     String account = msg.getData().getString("account");
                     String args = msg.getData().getString("args");
-                    mWebViewClient.onReceivedLoginRequest(mWebView, realm,
+                    mWebViewClient.onReceivedLoginRequest(mWebView.getWebView(), realm,
                             account, args);
                 }
                 break;
@@ -1074,7 +1075,7 @@ class CallbackProxy extends Handler {
         }
         // Note: This method does _not_ send a message.
         WebResourceResponse r =
-                mWebViewClient.shouldInterceptRequest(mWebView, url);
+                mWebViewClient.shouldInterceptRequest(mWebView.getWebView(), url);
         if (r == null) {
             sendMessage(obtainMessage(LOAD_RESOURCE, url));
         }
@@ -1219,7 +1220,8 @@ class CallbackProxy extends Handler {
             return null;
         }
 
-        WebView.WebViewTransport transport = mWebView.new WebViewTransport();
+        WebView.WebViewTransport transport =
+            mWebView.getWebView().new WebViewTransport();
         final Message msg = obtainMessage(NOTIFY);
         msg.obj = transport;
         synchronized (this) {
@@ -1234,7 +1236,7 @@ class CallbackProxy extends Handler {
             }
         }
 
-        WebView w = transport.getWebView();
+        WebViewClassic w = WebViewClassic.fromWebView(transport.getWebView());
         if (w != null) {
             WebViewCore core = w.getWebViewCore();
             // If WebView.destroy() has been called, core may be null.  Skip
@@ -1257,7 +1259,7 @@ class CallbackProxy extends Handler {
         sendEmptyMessage(REQUEST_FOCUS);
     }
 
-    public void onCloseWindow(WebView window) {
+    public void onCloseWindow(WebViewClassic window) {
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
         if (mWebChromeClient == null) {

@@ -43,10 +43,10 @@ final class JWebCoreJavaBridge extends Handler {
     private boolean mTimerPaused;
     private boolean mHasDeferredTimers;
 
-    // keep track of the main WebView attached to the current window so that we
+    // keep track of the main WebViewClassic attached to the current window so that we
     // can get the proper Context.
-    private static WeakReference<WebView> sCurrentMainWebView =
-            new WeakReference<WebView>(null);
+    private static WeakReference<WebViewClassic> sCurrentMainWebView =
+            new WeakReference<WebViewClassic>(null);
 
     /* package */
     static final int REFRESH_PLUGINS = 100;
@@ -67,15 +67,15 @@ final class JWebCoreJavaBridge extends Handler {
         nativeFinalize();
     }
 
-    static synchronized void setActiveWebView(WebView webview) {
+    static synchronized void setActiveWebView(WebViewClassic webview) {
         if (sCurrentMainWebView.get() != null) {
             // it is possible if there is a sub-WebView. Do nothing.
             return;
         }
-        sCurrentMainWebView = new WeakReference<WebView>(webview);
+        sCurrentMainWebView = new WeakReference<WebViewClassic>(webview);
     }
 
-    static synchronized void removeActiveWebView(WebView webview) {
+    static synchronized void removeActiveWebView(WebViewClassic webview) {
         if (sCurrentMainWebView.get() != webview) {
             // it is possible if there is a sub-WebView. Do nothing.
             return;
@@ -259,7 +259,7 @@ final class JWebCoreJavaBridge extends Handler {
 
     synchronized private String getSignedPublicKey(int index, String challenge,
             String url) {
-        WebView current = sCurrentMainWebView.get();
+        WebViewClassic current = sCurrentMainWebView.get();
         if (current != null) {
             // generateKeyPair expects organizations which we don't have. Ignore
             // url.

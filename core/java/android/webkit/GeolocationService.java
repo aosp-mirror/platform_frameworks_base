@@ -24,7 +24,6 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.util.Log;
-import android.webkit.WebView;
 import android.webkit.WebViewCore;
 
 

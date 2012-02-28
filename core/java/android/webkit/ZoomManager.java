@@ -50,7 +50,7 @@ class ZoomManager {
 
     static final String LOGTAG = "webviewZoom";
 
-    private final WebView mWebView;
+    private final WebViewClassic mWebView;
     private final CallbackProxy mCallbackProxy;
 
     // Widgets responsible for the on-screen zoom functions of the WebView.
@@ -211,7 +211,7 @@ class ZoomManager {
     private boolean mHardwareAccelerated = false;
     private boolean mInHWAcceleratedZoom = false;
 
-    public ZoomManager(WebView webView, CallbackProxy callbackProxy) {
+    public ZoomManager(WebViewClassic webView, CallbackProxy callbackProxy) {
         mWebView = webView;
         mCallbackProxy = callbackProxy;
 
@@ -220,7 +220,7 @@ class ZoomManager {
          * ESPN and Engadget always have wider mContentWidth no matter what the
          * viewport size is.
          */
-        setZoomOverviewWidth(WebView.DEFAULT_VIEWPORT_WIDTH);
+        setZoomOverviewWidth(WebViewClassic.DEFAULT_VIEWPORT_WIDTH);
 
         mFocusMovementQueue = new FocusMovementQueue();
     }
@@ -487,13 +487,13 @@ class ZoomManager {
         // zoomScale, we can't use the WebView's pinLocX/Y functions directly.
         float scale = zoomScale * mInvInitialZoomScale;
         int tx = Math.round(scale * (mInitialScrollX + mZoomCenterX) - mZoomCenterX);
-        tx = -WebView.pinLoc(tx, mWebView.getViewWidth(), Math.round(mWebView.getContentWidth()
+        tx = -WebViewClassic.pinLoc(tx, mWebView.getViewWidth(), Math.round(mWebView.getContentWidth()
                 * zoomScale)) + mWebView.getScrollX();
         int titleHeight = mWebView.getTitleHeight();
         int ty = Math.round(scale
                 * (mInitialScrollY + mZoomCenterY - titleHeight)
                 - (mZoomCenterY - titleHeight));
-        ty = -(ty <= titleHeight ? Math.max(ty, 0) : WebView.pinLoc(ty
+        ty = -(ty <= titleHeight ? Math.max(ty, 0) : WebViewClassic.pinLoc(ty
                 - titleHeight, mWebView.getViewHeight(), Math.round(mWebView.getContentHeight()
                 * zoomScale)) + titleHeight) + mWebView.getScrollY();
 
@@ -630,7 +630,7 @@ class ZoomManager {
     public void handleDoubleTap(float lastTouchX, float lastTouchY) {
         // User takes action, set initial zoom overview to false.
         mInitialZoomOverview = false;
-        WebSettings settings = mWebView.getSettings();
+        WebSettingsClassic settings = mWebView.getSettings();
         if (!isDoubleTapEnabled()) {
             return;
         }
@@ -690,7 +690,7 @@ class ZoomManager {
 
     private void setZoomOverviewWidth(int width) {
         if (width == 0) {
-            mZoomOverviewWidth = WebView.DEFAULT_VIEWPORT_WIDTH;
+            mZoomOverviewWidth = WebViewClassic.DEFAULT_VIEWPORT_WIDTH;
         } else {
             mZoomOverviewWidth = width;
         }
@@ -719,7 +719,7 @@ class ZoomManager {
         final float readingScale = getReadingLevelScale();
 
         int left = mWebView.getBlockLeftEdge(mAnchorX, mAnchorY, readingScale);
-        if (left != WebView.NO_LEFTEDGE) {
+        if (left != WebViewClassic.NO_LEFTEDGE) {
             // add a 5pt padding to the left edge.
             int viewLeft = mWebView.contentToViewX(left < 5 ? 0 : (left - 5))
                     - mWebView.getScrollX();
@@ -728,7 +728,7 @@ class ZoomManager {
             if (viewLeft > 0) {
                 mZoomCenterX = viewLeft * readingScale / (readingScale - mActualScale);
             } else {
-                mWebView.scrollBy(viewLeft, 0);
+                mWebView.getWebView().scrollBy(viewLeft, 0);
                 mZoomCenterX = 0;
             }
         }
@@ -955,7 +955,7 @@ class ZoomManager {
         // cause its child View to reposition itself through ViewManager's
         // scaleAll(), we need to post a Runnable to ensure requestLayout().
         // Additionally, only update the text wrap scale if the width changed.
-        mWebView.post(new PostScale(w != ow &&
+        mWebView.getWebView().post(new PostScale(w != ow &&
             !mWebView.getSettings().getUseFixedViewport(), mInZoomOverview, w < ow));
     }
 
@@ -1027,7 +1027,7 @@ class ZoomManager {
         final int viewWidth = mWebView.getViewWidth();
         final boolean zoomOverviewWidthChanged = setupZoomOverviewWidth(drawData, viewWidth);
         final float newZoomOverviewScale = getZoomOverviewScale();
-        WebSettings settings = mWebView.getSettings();
+        WebSettingsClassic settings = mWebView.getSettings();
         if (zoomOverviewWidthChanged && settings.isNarrowColumnLayout() &&
             settings.getUseFixedViewport() &&
             (mInitialZoomOverview || mInZoomOverview)) {
@@ -1085,7 +1085,7 @@ class ZoomManager {
             if (drawData.mContentSize.x > 0) {
                 // The webkitDraw for layers will not populate contentSize, and it'll be
                 // ignored for zoom overview width update.
-                newZoomOverviewWidth = Math.min(WebView.sMaxViewportWidth,
+                newZoomOverviewWidth = Math.min(WebViewClassic.sMaxViewportWidth,
                     drawData.mContentSize.x);
             }
         } else {
@@ -1117,7 +1117,7 @@ class ZoomManager {
         updateZoomRange(viewState, viewSize.x, drawData.mMinPrefWidth);
         setupZoomOverviewWidth(drawData, mWebView.getViewWidth());
         final float overviewScale = getZoomOverviewScale();
-        WebSettings settings = mWebView.getSettings();
+        WebSettingsClassic settings = mWebView.getSettings();
         if (!mMinZoomScaleFixed || settings.getUseWideViewPort()) {
             mMinZoomScale = (mInitialScale > 0) ?
                     Math.min(mInitialScale, overviewScale) : overviewScale;

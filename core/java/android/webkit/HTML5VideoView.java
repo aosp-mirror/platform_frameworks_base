@@ -280,7 +280,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     // screen mode. Some are specific to one type, but currently are called
     // directly from the proxy.
     public void enterFullScreenVideoState(int layerId,
-            HTML5VideoViewProxy proxy, WebView webView) {
+            HTML5VideoViewProxy proxy, WebViewClassic webView) {
     }
 
     public boolean isFullScreenMode() {

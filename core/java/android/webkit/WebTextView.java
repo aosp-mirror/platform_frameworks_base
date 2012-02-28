@@ -78,7 +78,7 @@ import java.util.ArrayList;
 
     private int mRingInset;
 
-    private WebView         mWebView;
+    private WebViewClassic  mWebView;
     private boolean         mSingle;
     private int             mWidthSpec;
     private int             mHeightSpec;
@@ -177,7 +177,7 @@ import java.util.ArrayList;
      * @param   context The Context for this WebTextView.
      * @param   webView The WebView that created this.
      */
-    /* package */ WebTextView(Context context, WebView webView, int autoFillQueryId) {
+    /* package */ WebTextView(Context context, WebViewClassic webView, int autoFillQueryId) {
         super(context, null, com.android.internal.R.attr.webTextViewStyle);
         mWebView = webView;
         mMaxLength = -1;
@@ -833,9 +833,9 @@ import java.util.ArrayList;
         }
         mInsideRemove = true;
         boolean isFocused = hasFocus();
-        mWebView.removeView(this);
+        mWebView.getWebView().removeView(this);
         if (isFocused) {
-            mWebView.requestFocus();
+            mWebView.getWebView().requestFocus();
         }
         mInsideRemove = false;
         mHandler.removeCallbacksAndMessages(null);
@@ -997,7 +997,7 @@ import java.util.ArrayList;
         }
         if (getParent() == null) {
             // Insert the view so that it's drawn first (at index 0)
-            mWebView.addView(this, 0, lp);
+            mWebView.getWebView().addView(this, 0, lp);
         } else if (needsUpdate) {
             setLayoutParams(lp);
         }

@@ -75,8 +75,8 @@ class HTML5VideoViewProxy extends Handler
     int mNativePointer;
     // The handler for WebCore thread messages;
     private Handler mWebCoreHandler;
-    // The WebView instance that created this view.
-    private WebView mWebView;
+    // The WebViewClassic instance that created this view.
+    private WebViewClassic mWebView;
     // The poster image to be shown when the video is not playing.
     // This ref prevents the bitmap from being GC'ed.
     private Bitmap mPoster;
@@ -142,7 +142,7 @@ class HTML5VideoViewProxy extends Handler
         }
 
         public static void enterFullScreenVideo(int layerId, String url,
-                HTML5VideoViewProxy proxy, WebView webView) {
+                HTML5VideoViewProxy proxy, WebViewClassic webView) {
                 // Save the inline video info and inherit it in the full screen
                 int savePosition = 0;
                 if (mHTML5VideoView != null) {
@@ -163,7 +163,7 @@ class HTML5VideoViewProxy extends Handler
         }
 
         public static void exitFullScreenVideo(HTML5VideoViewProxy proxy,
-                WebView webView) {
+                WebViewClassic webView) {
             if (!mHTML5VideoView.fullScreenExited() && mHTML5VideoView.isFullScreenMode()) {
                 WebChromeClient client = webView.getWebChromeClient();
                 if (client != null) {
@@ -551,7 +551,7 @@ class HTML5VideoViewProxy extends Handler
      * @param webView is the WebView that hosts the video.
      * @param nativePtr is the C++ pointer to the MediaPlayerPrivate object.
      */
-    private HTML5VideoViewProxy(WebView webView, int nativePtr) {
+    private HTML5VideoViewProxy(WebViewClassic webView, int nativePtr) {
         // This handler is for the main (UI) thread.
         super(Looper.getMainLooper());
         // Save the WebView object.
@@ -721,7 +721,7 @@ class HTML5VideoViewProxy extends Handler
         return new HTML5VideoViewProxy(webViewCore.getWebView(), nativePtr);
     }
 
-    /* package */ WebView getWebView() {
+    /* package */ WebViewClassic getWebView() {
         return mWebView;
     }
 

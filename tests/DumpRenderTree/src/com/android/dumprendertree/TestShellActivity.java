@@ -45,8 +45,10 @@ import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebSettingsClassic;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
+import android.webkit.WebViewClassic;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 
@@ -112,10 +114,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             case DUMP_AS_TEXT:
                 callback.arg1 = mDumpTopFrameAsText ? 1 : 0;
                 callback.arg2 = mDumpChildFramesAsText ? 1 : 0;
-                mWebView.documentAsText(callback);
+                mWebViewClassic.documentAsText(callback);
                 break;
             case EXT_REPR:
-                mWebView.externalRepresentation(callback);
+                mWebViewClassic.externalRepresentation(callback);
                 break;
             default:
                 finished();
@@ -144,6 +146,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
         CookieManager.setAcceptFileSchemeCookies(true);
         mWebView = new WebView(this);
+        mWebViewClassic = WebViewClassic.fromWebView(mWebView);
         mEventSender = new WebViewEventSender(mWebView);
         mCallbackProxy = new CallbackProxy(mEventSender, this);
 
@@ -158,7 +161,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         // Expose window.gc function to JavaScript. JSC build exposes
         // this function by default, but V8 requires the flag to turn it on.
         // WebView::setJsFlags is noop in JSC build.
-        mWebView.setJsFlags("--expose_gc");
+        mWebViewClassic.setJsFlags("--expose_gc");
 
         mHandler = new AsyncHandler();
 
@@ -168,7 +171,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         }
 
         // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
-        mWebView.useMockDeviceOrientation();
+        mWebViewClassic.useMockDeviceOrientation();
     }
 
     @Override
@@ -290,6 +293,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         super.onDestroy();
         mWebView.destroy();
         mWebView = null;
+        mWebViewClassic = null;
     }
 
     @Override
@@ -531,8 +535,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
             boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
-        mWebView.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
-                canProvideGamma, gamma);
+        WebViewClassic.fromWebView(mWebView).setMockDeviceOrientation(canProvideAlpha, alpha,
+                canProvideBeta, beta, canProvideGamma, gamma);
     }
 
     public void overridePreference(String key, boolean value) {
@@ -541,10 +545,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         // WebView for the main frame. EventSender suffers from the same
         // problem.
         if (WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED.equals(key)) {
-            mWebView.getSettings().setAppCacheEnabled(value);
+            mWebViewClassic.getSettings().setAppCacheEnabled(value);
         } else if (WEBKIT_USES_PAGE_CACHE_PREFERENCE_KEY.equals(key)) {
             // Cache the maximum possible number of pages.
-            mWebView.getSettings().setPageCacheCapacity(Integer.MAX_VALUE);
+            mWebViewClassic.getSettings().setPageCacheCapacity(Integer.MAX_VALUE);
         } else {
             Log.w(LOGTAG, "LayoutTestController.overridePreference(): " +
                   "Unsupported preference '" + key + "'");
@@ -552,7 +556,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     }
 
     public void setXSSAuditorEnabled (boolean flag) {
-        mWebView.getSettings().setXSSAuditorEnabled(flag);
+        mWebViewClassic.getSettings().setXSSAuditorEnabled(flag);
     }
 
     private final WebViewClient mViewClient = new WebViewClient(){
@@ -855,7 +859,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         Bitmap bitmap = Bitmap.createBitmap(view.getContentWidth(), view.getContentHeight(),
                 Config.ARGB_8888);
         canvas.setBitmap(bitmap);
-        view.drawPage(canvas);
+        WebViewClassic.fromWebView(view).drawPage(canvas);
         try {
             FileOutputStream fos = new FileOutputStream(fileName);
             if(!bitmap.compress(CompressFormat.PNG, 90, fos)) {
@@ -885,11 +889,11 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         // single event rather than a stream of events (like what would generally happen in
         // a real use of touch events in a WebView)  and so if the WebView drops the event,
         // the test will fail as the test expects one callback for every touch it synthesizes.
-        webview.setTouchInterval(-1);
+        WebViewClassic.fromWebView(webview).setTouchInterval(-1);
     }
 
     public void setDefaultWebSettings(WebView webview) {
-        WebSettings settings = webview.getSettings();
+        WebSettingsClassic settings = WebViewClassic.fromWebView(webview).getSettings();
         settings.setAppCacheEnabled(true);
         settings.setAppCachePath(getApplicationContext().getCacheDir().getPath());
         settings.setAppCacheMaxSize(Long.MAX_VALUE);
@@ -906,6 +910,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         settings.setProperty("use_minimal_memory", "false");
     }
 
+    private WebViewClassic mWebViewClassic;
     private WebView mWebView;
     private WebViewEventSender mEventSender;
     private AsyncHandler mHandler;

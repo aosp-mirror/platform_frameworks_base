@@ -34,7 +34,7 @@ class ViewStateSerializer {
 
     static final int VERSION = 1;
 
-    static boolean serializeViewState(OutputStream stream, WebView web)
+    static boolean serializeViewState(OutputStream stream, WebViewClassic web)
             throws IOException {
         int baseLayer = web.getBaseLayer();
         if (baseLayer == 0) {
@@ -48,7 +48,7 @@ class ViewStateSerializer {
                 new byte[WORKING_STREAM_STORAGE]);
     }
 
-    static DrawData deserializeViewState(InputStream stream, WebView web)
+    static DrawData deserializeViewState(InputStream stream, WebViewClassic web)
             throws IOException {
         DataInputStream dis = new DataInputStream(stream);
         int version = dis.readInt();

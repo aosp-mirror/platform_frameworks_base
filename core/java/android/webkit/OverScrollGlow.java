@@ -29,7 +29,7 @@ import android.widget.EdgeEffect;
  * @hide
  */
 public class OverScrollGlow {
-    private WebView mHostView;
+    private WebViewClassic mHostView;
 
     private EdgeEffect mEdgeGlowTop;
     private EdgeEffect mEdgeGlowBottom;
@@ -39,7 +39,7 @@ public class OverScrollGlow {
     private int mOverScrollDeltaX;
     private int mOverScrollDeltaY;
 
-    public OverScrollGlow(WebView host) {
+    public OverScrollGlow(WebViewClassic host) {
         mHostView = host;
         Context context = host.getContext();
         mEdgeGlowTop = new EdgeEffect(context);
@@ -80,7 +80,7 @@ public class OverScrollGlow {
                 mOverScrollDeltaX = 0;
             }
 
-            if (maxY > 0 || mHostView.getOverScrollMode() == View.OVER_SCROLL_ALWAYS) {
+            if (maxY > 0 || mHostView.getWebView().getOverScrollMode() == View.OVER_SCROLL_ALWAYS) {
                 final int pulledToY = oldY + mOverScrollDeltaY;
                 if (pulledToY < 0) {
                     mEdgeGlowTop.onPull((float) mOverScrollDeltaY / mHostView.getHeight());
@@ -120,7 +120,7 @@ public class OverScrollGlow {
      * @param rangeY Maximum range for vertical scrolling
      */
     public void absorbGlow(int x, int y, int oldX, int oldY, int rangeX, int rangeY) {
-        if (rangeY > 0 || mHostView.getOverScrollMode() == View.OVER_SCROLL_ALWAYS) {
+        if (rangeY > 0 || mHostView.getWebView().getOverScrollMode() == View.OVER_SCROLL_ALWAYS) {
             if (y < 0 && oldY >= 0) {
                 mEdgeGlowTop.onAbsorb((int) mHostView.mScroller.getCurrVelocity());
                 if (!mEdgeGlowBottom.isFinished()) {

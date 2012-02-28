@@ -41,9 +41,11 @@ import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebSettingsClassic;
 import android.webkit.WebStorage;
 import android.webkit.WebStorage.QuotaUpdater;
 import android.webkit.WebView;
+import android.webkit.WebViewClassic;
 import android.webkit.WebViewClient;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -369,11 +371,12 @@ public class LayoutTestsExecutor extends Activity {
          * a real use of touch events in a WebView)  and so if the WebView drops the event,
          * the test will fail as the test expects one callback for every touch it synthesizes.
          */
-        webView.setTouchInterval(-1);
+        WebViewClassic webViewClassic = WebViewClassic.fromWebView(webView);
+        webViewClassic.setTouchInterval(-1);
 
-        webView.clearCache(true);
+        webViewClassic.clearCache(true);
 
-        WebSettings webViewSettings = webView.getSettings();
+        WebSettingsClassic webViewSettings = webViewClassic.getSettings();
         webViewSettings.setAppCacheEnabled(true);
         webViewSettings.setAppCachePath(getApplicationContext().getCacheDir().getPath());
         // Use of larger values causes unexplained AppCache database corruption.
@@ -391,7 +394,7 @@ public class LayoutTestsExecutor extends Activity {
         webViewSettings.setPageCacheCapacity(0);
 
         // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
-        mCurrentWebView.useMockDeviceOrientation();
+        WebViewClassic.fromWebView(mCurrentWebView).useMockDeviceOrientation();
 
         // Must do this after setting the AppCache path.
         WebStorage.getInstance().deleteAllData();
@@ -625,10 +628,12 @@ public class LayoutTestsExecutor extends Activity {
                     String key = msg.getData().getString("key");
                     boolean value = msg.getData().getBoolean("value");
                     if (WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED.equals(key)) {
-                        mCurrentWebView.getSettings().setAppCacheEnabled(value);
+                        WebViewClassic.fromWebView(mCurrentWebView).getSettings().
+                                setAppCacheEnabled(value);
                     } else if (WEBKIT_USES_PAGE_CACHE_PREFERENCE_KEY.equals(key)) {
                         // Cache the maximum possible number of pages.
-                        mCurrentWebView.getSettings().setPageCacheCapacity(Integer.MAX_VALUE);
+                        WebViewClassic.fromWebView(mCurrentWebView).getSettings().
+                                setPageCacheCapacity(Integer.MAX_VALUE);
                     } else {
                         Log.w(LOG_TAG, "LayoutTestController.overridePreference(): " +
                               "Unsupported preference '" + key + "'");
@@ -656,7 +661,8 @@ public class LayoutTestsExecutor extends Activity {
                     break;
 
                 case MSG_SET_XSS_AUDITOR_ENABLED:
-                    mCurrentWebView.getSettings().setXSSAuditorEnabled(msg.arg1 == 1);
+                    WebViewClassic.fromWebView(mCurrentWebView).getSettings().
+                            setXSSAuditorEnabled(msg.arg1 == 1);
                     break;
 
                 case MSG_WAIT_UNTIL_DONE:
@@ -728,8 +734,8 @@ public class LayoutTestsExecutor extends Activity {
         Log.i(LOG_TAG, mCurrentTestRelativePath + ": setMockDeviceOrientation(" + canProvideAlpha +
                 ", " + alpha + ", " + canProvideBeta + ", " + beta + ", " + canProvideGamma +
                 ", " + gamma + ")");
-        mCurrentWebView.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
-                canProvideGamma, gamma);
+        WebViewClassic.fromWebView(mCurrentWebView).setMockDeviceOrientation(canProvideAlpha,
+                alpha, canProvideBeta, beta, canProvideGamma, gamma);
     }
 
     public void setXSSAuditorEnabled(boolean flag) {

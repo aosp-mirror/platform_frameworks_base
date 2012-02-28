@@ -34,7 +34,7 @@ import android.os.SystemProperties;
 import android.util.Log;
 
 /**
- * Class for managing the relationship between the {@link WebView} and installed
+ * Class for managing the relationship between the {@link WebViewClassic} and installed
  * plugins in the system. You can find this class through
  * {@link PluginManager#getInstance}.
  * 

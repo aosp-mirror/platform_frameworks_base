@@ -236,7 +236,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
 
     @Override
     public void enterFullScreenVideoState(int layerId,
-            HTML5VideoViewProxy proxy, WebView webView) {
+            HTML5VideoViewProxy proxy, WebViewClassic webView) {
         mFullScreenMode = FULLSCREEN_SURFACECREATING;
         mCurrentBufferPercentage = 0;
         mPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);

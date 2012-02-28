@@ -26,11 +26,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 class SelectActionModeCallback implements ActionMode.Callback {
-    private WebView mWebView;
+    private WebViewClassic mWebView;
     private ActionMode mActionMode;
     private boolean mIsTextSelected = true;
 
-    void setWebView(WebView webView) {
+    void setWebView(WebViewClassic webView) {
         mWebView = webView;
     }
 

@@ -20,8 +20,9 @@ import android.content.Context;
 import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.webkit.WebSettings;
+import android.webkit.WebSettingsClassic;
 import android.webkit.WebView;
+import android.webkit.WebViewClassic;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import com.test.tilebenchmark.ProfileActivity.ProfileCallback;
 import com.test.tilebenchmark.RunData.TileData;
 
-public class ProfiledWebView extends WebView {
+public class ProfiledWebView extends WebView implements WebViewClassic.PageSwapDelegate {
     private static final String LOGTAG = "ProfiledWebView";
 
     private int mSpeed;
@@ -80,7 +81,7 @@ public class ProfiledWebView extends WebView {
     }
 
     public void init(Context c) {
-        WebSettings settings = getSettings();
+        WebSettingsClassic settings = getWebViewClassic().getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setSupportZoom(true);
         settings.setEnableSmoothTransition(true);
@@ -118,7 +119,7 @@ public class ProfiledWebView extends WebView {
         mCallback = callback;
         mIsTesting = false;
         mIsScrolling = false;
-        WebSettings settings = getSettings();
+        WebSettingsClassic settings = getWebViewClassic().getSettings();
         settings.setProperty("tree_updates", "0");
 
 
@@ -134,7 +135,7 @@ public class ProfiledWebView extends WebView {
                     // invalidate all content, and kick off redraw
                     Log.d("ProfiledWebView",
                             "kicking off test with callback registration, and tile discard...");
-                    discardAllTextures();
+                    getWebViewClassic().discardAllTextures();
                     invalidate();
                     mIsScrolling = true;
                     mContentInvalMillis = System.currentTimeMillis();
@@ -142,30 +143,29 @@ public class ProfiledWebView extends WebView {
             }.start();
         } else {
             mIsTesting = true;
-            tileProfilingStart();
+            getWebViewClassic().tileProfilingStart();
         }
     }
 
     /*
      * Called after the manual contentInvalidateAll, after the tiles have all
      * been redrawn.
+     * From PageSwapDelegate.
      */
     @Override
-    protected void pageSwapCallback(boolean startAnim) {
-        super.pageSwapCallback(startAnim);
-
+    public void onPageSwapOccurred(boolean startAnim) {
         if (!mIsTesting && mIsScrolling) {
             // kick off testing
             mContentInvalMillis = System.currentTimeMillis() - mContentInvalMillis;
             Log.d("ProfiledWebView", "REDRAW TOOK " + mContentInvalMillis + "millis");
             mIsTesting = true;
             invalidate(); // ensure a redraw so that auto-scrolling can occur
-            tileProfilingStart();
+            getWebViewClassic().tileProfilingStart();
         }
     }
 
     private double animFramerate() {
-        WebSettings settings = getSettings();
+        WebSettingsClassic settings = getWebViewClassic().getSettings();
         String updatesString = settings.getProperty("tree_updates");
         int updates = (updatesString == null) ? -1 : Integer.parseInt(updatesString);
 
@@ -180,7 +180,7 @@ public class ProfiledWebView extends WebView {
     }
 
     public void setDoubleBuffering(boolean useDoubleBuffering) {
-        WebSettings settings = getSettings();
+        WebSettingsClassic settings = getWebViewClassic().getSettings();
         settings.setProperty("use_double_buffering", useDoubleBuffering ? "true" : "false");
     }
 
@@ -188,15 +188,15 @@ public class ProfiledWebView extends WebView {
      * Called once the page has stopped scrolling
      */
     public void stopScrollTest() {
-        tileProfilingStop();
+        getWebViewClassic().tileProfilingStop();
         mIsTesting = false;
 
         if (mCallback == null) {
-            tileProfilingClear();
+            getWebViewClassic().tileProfilingClear();
             return;
         }
 
-        RunData data = new RunData(super.tileProfilingNumFrames());
+        RunData data = new RunData(getWebViewClassic().tileProfilingNumFrames());
         // record the time spent (before scrolling) rendering the page
         data.singleStats.put(getResources().getString(R.string.render_millis),
                 (double)mContentInvalMillis);
@@ -209,24 +209,24 @@ public class ProfiledWebView extends WebView {
 
         for (int frame = 0; frame < data.frames.length; frame++) {
             data.frames[frame] = new TileData[
-                    tileProfilingNumTilesInFrame(frame)];
+                    getWebViewClassic().tileProfilingNumTilesInFrame(frame)];
             for (int tile = 0; tile < data.frames[frame].length; tile++) {
-                int left = tileProfilingGetInt(frame, tile, "left");
-                int top = tileProfilingGetInt(frame, tile, "top");
-                int right = tileProfilingGetInt(frame, tile, "right");
-                int bottom = tileProfilingGetInt(frame, tile, "bottom");
+                int left = getWebViewClassic().tileProfilingGetInt(frame, tile, "left");
+                int top = getWebViewClassic().tileProfilingGetInt(frame, tile, "top");
+                int right = getWebViewClassic().tileProfilingGetInt(frame, tile, "right");
+                int bottom = getWebViewClassic().tileProfilingGetInt(frame, tile, "bottom");
 
-                boolean isReady = super.tileProfilingGetInt(
+                boolean isReady = getWebViewClassic().tileProfilingGetInt(
                         frame, tile, "isReady") == 1;
-                int level = tileProfilingGetInt(frame, tile, "level");
+                int level = getWebViewClassic().tileProfilingGetInt(frame, tile, "level");
 
-                float scale = tileProfilingGetFloat(frame, tile, "scale");
+                float scale = getWebViewClassic().tileProfilingGetFloat(frame, tile, "scale");
 
                 data.frames[frame][tile] = data.new TileData(left, top, right, bottom,
                         isReady, level, scale);
             }
         }
-        tileProfilingClear();
+        getWebViewClassic().tileProfilingClear();
 
         mCallback.profileCallback(data);
     }
@@ -243,5 +243,9 @@ public class ProfiledWebView extends WebView {
 
     public void setAutoScrollSpeed(int speedInt) {
         mSpeed = speedInt;
+    }
+
+    public WebViewClassic getWebViewClassic() {
+        return WebViewClassic.fromWebView(this);
     }
 }

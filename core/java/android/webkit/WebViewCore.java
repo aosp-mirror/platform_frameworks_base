@@ -39,7 +39,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
-import android.webkit.WebView.FocusNodeHref;
+import android.webkit.WebViewClassic.FocusNodeHref;
 
 import junit.framework.Assert;
 
@@ -72,11 +72,12 @@ public final class WebViewCore {
      */
 
     // The WebView that corresponds to this WebViewCore.
-    private WebView mWebView;
+    // TODO: rename this field (and its getter) to mWebViewClassic or  mWebViewImpl.
+    private WebViewClassic mWebView;
     // Proxy for handling callbacks from native code
     private final CallbackProxy mCallbackProxy;
     // Settings object for maintaining all settings
-    private final WebSettings mSettings;
+    private final WebSettingsClassic mSettings;
     // Context for initializing the BrowserFrame with the proper assets.
     private final Context mContext;
     // The pointer to a native view object.
@@ -142,7 +143,7 @@ public final class WebViewCore {
     // debugging other classes that require operation within the WebCore thread.
     /* package */ static final String THREAD_NAME = "WebViewCoreThread";
 
-    public WebViewCore(Context context, WebView w, CallbackProxy proxy,
+    public WebViewCore(Context context, WebViewClassic w, CallbackProxy proxy,
             Map<String, Object> javascriptInterfaces) {
         // No need to assign this in the WebCore thread.
         mCallbackProxy = proxy;
@@ -179,7 +180,7 @@ public final class WebViewCore {
         // ready.
         mEventHub = new EventHub();
         // Create a WebSettings object for maintaining all settings
-        mSettings = new WebSettings(mContext, mWebView);
+        mSettings = new WebSettingsClassic(mContext, mWebView);
         // The WebIconDatabase needs to be initialized within the UI thread so
         // just request the instance here.
         WebIconDatabase.getInstance();
@@ -234,7 +235,7 @@ public final class WebViewCore {
         // WebCore thread.
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.WEBCORE_INITIALIZED_MSG_ID,
+                    WebViewClassic.WEBCORE_INITIALIZED_MSG_ID,
                     mNativeClass, 0).sendToTarget();
         }
 
@@ -284,7 +285,7 @@ public final class WebViewCore {
         BrowserFrame.sJavaBridge.resume();
     }
 
-    public WebSettings getSettings() {
+    public WebSettingsClassic getSettings() {
         return mSettings;
     }
 
@@ -329,7 +330,7 @@ public final class WebViewCore {
      */
     private void formDidBlur(int nodePointer) {
         if (mWebView == null) return;
-        Message.obtain(mWebView.mPrivateHandler, WebView.FORM_DID_BLUR,
+        Message.obtain(mWebView.mPrivateHandler, WebViewClassic.FORM_DID_BLUR,
                 nodePointer, 0).sendToTarget();
     }
 
@@ -338,7 +339,7 @@ public final class WebViewCore {
      */
     private void focusNodeChanged(WebKitHitTest hitTest) {
         if (mWebView == null) return;
-        mWebView.mPrivateHandler.obtainMessage(WebView.HIT_TEST_RESULT, hitTest)
+        mWebView.mPrivateHandler.obtainMessage(WebViewClassic.HIT_TEST_RESULT, hitTest)
                 .sendToTarget();
     }
 
@@ -508,7 +509,7 @@ public final class WebViewCore {
     protected void enterFullscreenForVideoLayer(int layerId, String url) {
         if (mWebView == null) return;
         Message message = Message.obtain(mWebView.mPrivateHandler,
-                       WebView.ENTER_FULLSCREEN_VIDEO, layerId, 0);
+                       WebViewClassic.ENTER_FULLSCREEN_VIDEO, layerId, 0);
         message.obj = url;
         message.sendToTarget();
     }
@@ -520,7 +521,7 @@ public final class WebViewCore {
     protected void exitFullscreenVideo() {
         if (mWebView == null) return;
         Message message = Message.obtain(mWebView.mPrivateHandler,
-                       WebView.EXIT_FULLSCREEN_VIDEO);
+                       WebViewClassic.EXIT_FULLSCREEN_VIDEO);
         message.sendToTarget();
     }
 
@@ -886,7 +887,7 @@ public final class WebViewCore {
         String mTitle;
         Rect[] mTouchRects;
         boolean mEditable;
-        int mTapHighlightColor = WebView.HIGHLIGHT_COLOR;
+        int mTapHighlightColor = WebViewClassic.HIGHLIGHT_COLOR;
         Rect[] mEnclosingParentRects;
         boolean mHasFocus;
 
@@ -1270,7 +1271,7 @@ public final class WebViewCore {
                                         msg.arg1, nodePointer);
                                 if (label != null && label.length() > 0) {
                                     Message.obtain(mWebView.mPrivateHandler,
-                                            WebView.RETURN_LABEL, nodePointer,
+                                            WebViewClassic.RETURN_LABEL, nodePointer,
                                             0, label).sendToTarget();
                                 }
                             }
@@ -1373,7 +1374,7 @@ public final class WebViewCore {
                             break;
 
                         case VIEW_SIZE_CHANGED: {
-                            viewSizeChanged((WebView.ViewSizeData) msg.obj);
+                            viewSizeChanged((WebViewClassic.ViewSizeData) msg.obj);
                             break;
                         }
                         case SET_SCROLL_OFFSET:
@@ -1529,7 +1530,7 @@ public final class WebViewCore {
                                     ted.mMetaState);
                             Message.obtain(
                                     mWebView.mPrivateHandler,
-                                    WebView.PREVENT_TOUCH_ID,
+                                    WebViewClassic.PREVENT_TOUCH_ID,
                                     ted.mAction,
                                     ted.mNativeResult ? 1 : 0,
                                     ted).sendToTarget();
@@ -1594,7 +1595,7 @@ public final class WebViewCore {
                             nativeUpdateFrameCache(mNativeClass);
                             // FIXME: this should provide a minimal rectangle
                             if (mWebView != null) {
-                                mWebView.postInvalidate();
+                                mWebView.getWebView().postInvalidate();
                             }
                             sendUpdateTextEntry();
                             break;
@@ -1621,7 +1622,8 @@ public final class WebViewCore {
                             String modifiedSelectionString =
                                 nativeModifySelection(mNativeClass, msg.arg1,
                                         msg.arg2);
-                            mWebView.mPrivateHandler.obtainMessage(WebView.SELECTION_STRING_CHANGED,
+                            mWebView.mPrivateHandler.obtainMessage(
+                                    WebViewClassic.SELECTION_STRING_CHANGED,
                                     modifiedSelectionString).sendToTarget();
                             break;
 
@@ -1666,12 +1668,12 @@ public final class WebViewCore {
                             break;
 
                         case SAVE_WEBARCHIVE:
-                            WebView.SaveWebArchiveMessage saveMessage =
-                                (WebView.SaveWebArchiveMessage)msg.obj;
+                            WebViewClassic.SaveWebArchiveMessage saveMessage =
+                                (WebViewClassic.SaveWebArchiveMessage)msg.obj;
                             saveMessage.mResultFile =
                                 saveWebArchive(saveMessage.mBasename, saveMessage.mAutoname);
                             mWebView.mPrivateHandler.obtainMessage(
-                                WebView.SAVE_WEBARCHIVE_FINISHED, saveMessage).sendToTarget();
+                                WebViewClassic.SAVE_WEBARCHIVE_FINISHED, saveMessage).sendToTarget();
                             break;
 
                         case GEOLOCATION_PERMISSIONS_PROVIDE:
@@ -1684,7 +1686,7 @@ public final class WebViewCore {
                         case SPLIT_PICTURE_SET:
                             nativeSplitContent(mNativeClass, msg.arg1);
                             mWebView.mPrivateHandler.obtainMessage(
-                                    WebView.REPLACE_BASE_CONTENT, msg.arg1, 0);
+                                    WebViewClassic.REPLACE_BASE_CONTENT, msg.arg1, 0);
                             mSplitPictureIsScheduled = false;
                             break;
 
@@ -1711,7 +1713,7 @@ public final class WebViewCore {
                                 nativeUpdateFrameCache(mNativeClass);
                             }
                             Message message = mWebView.mPrivateHandler
-                                    .obtainMessage(WebView.DO_MOTION_UP,
+                                    .obtainMessage(WebViewClassic.DO_MOTION_UP,
                                     motionUpData.mX, motionUpData.mY);
                             mWebView.mPrivateHandler.sendMessageAtFrontOfQueue(
                                     message);
@@ -1747,7 +1749,7 @@ public final class WebViewCore {
                             }
                             WebKitHitTest hit = performHitTest(d.mX, d.mY, d.mSlop, true);
                             mWebView.mPrivateHandler.obtainMessage(
-                                    WebView.HIT_TEST_RESULT, hit)
+                                    WebViewClassic.HIT_TEST_RESULT, hit)
                                     .sendToTarget();
                             break;
 
@@ -1757,7 +1759,7 @@ public final class WebViewCore {
 
                         case AUTOFILL_FORM:
                             nativeAutoFillForm(mNativeClass, msg.arg1);
-                            mWebView.mPrivateHandler.obtainMessage(WebView.AUTOFILL_COMPLETE, null)
+                            mWebView.mPrivateHandler.obtainMessage(WebViewClassic.AUTOFILL_COMPLETE, null)
                                     .sendToTarget();
                             break;
 
@@ -1788,7 +1790,7 @@ public final class WebViewCore {
                                     handles[0], handles[1], handles[2],
                                     handles[3]);
                             if (copiedText != null) {
-                                mWebView.mPrivateHandler.obtainMessage(WebView.COPY_TO_CLIPBOARD, copiedText)
+                                mWebView.mPrivateHandler.obtainMessage(WebViewClassic.COPY_TO_CLIPBOARD, copiedText)
                                         .sendToTarget();
                             }
                             break;
@@ -2058,7 +2060,7 @@ public final class WebViewCore {
                 }
                 if (mWebView != null && evt.isDown()) {
                     Message.obtain(mWebView.mPrivateHandler,
-                            WebView.UNHANDLED_NAV_KEY, keyCode,
+                            WebViewClassic.UNHANDLED_NAV_KEY, keyCode,
                             0).sendToTarget();
                 }
                 return;
@@ -2081,7 +2083,7 @@ public final class WebViewCore {
     private float mCurrentViewScale = 1.0f;
 
     // notify webkit that our virtual view size changed size (after inv-zoom)
-    private void viewSizeChanged(WebView.ViewSizeData data) {
+    private void viewSizeChanged(WebViewClassic.ViewSizeData data) {
         int w = data.mWidth;
         int h = data.mHeight;
         int textwrapWidth = data.mTextWrapWidth;
@@ -2125,7 +2127,7 @@ public final class WebViewCore {
         if (mSettings.getUseWideViewPort()) {
             if (mViewportWidth == -1) {
                 // Fixed viewport width.
-                width = WebView.DEFAULT_VIEWPORT_WIDTH;
+                width = WebViewClassic.DEFAULT_VIEWPORT_WIDTH;
             } else if (mViewportWidth > 0) {
                 // Use website specified or desired fixed viewport width.
                 width = mViewportWidth;
@@ -2140,7 +2142,7 @@ public final class WebViewCore {
     private void sendUpdateTextEntry() {
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.UPDATE_TEXT_ENTRY_MSG_ID).sendToTarget();
+                    WebViewClassic.UPDATE_TEXT_ENTRY_MSG_ID).sendToTarget();
         }
     }
 
@@ -2230,9 +2232,9 @@ public final class WebViewCore {
             // If anything more complex than position has been touched, let's do a full draw
             webkitDraw();
         }
-        mWebView.mPrivateHandler.removeMessages(WebView.INVAL_RECT_MSG_ID);
+        mWebView.mPrivateHandler.removeMessages(WebViewClassic.INVAL_RECT_MSG_ID);
         mWebView.mPrivateHandler.sendMessageAtFrontOfQueue(mWebView.mPrivateHandler
-                .obtainMessage(WebView.INVAL_RECT_MSG_ID));
+                .obtainMessage(WebViewClassic.INVAL_RECT_MSG_ID));
     }
 
     private Boolean m_skipDrawFlag = false;
@@ -2289,7 +2291,7 @@ public final class WebViewCore {
             draw.mViewSize = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (mSettings.getUseWideViewPort()) {
                 draw.mMinPrefWidth = Math.max(
-                        mViewportWidth == -1 ? WebView.DEFAULT_VIEWPORT_WIDTH
+                        mViewportWidth == -1 ? WebViewClassic.DEFAULT_VIEWPORT_WIDTH
                                 : (mViewportWidth == 0 ? mCurrentViewWidth
                                         : mViewportWidth),
                         nativeGetContentMinPrefWidth(mNativeClass));
@@ -2304,7 +2306,7 @@ public final class WebViewCore {
             }
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.NEW_PICTURE_MSG_ID, draw).sendToTarget();
+                    WebViewClassic.NEW_PICTURE_MSG_ID, draw).sendToTarget();
         }
     }
 
@@ -2433,7 +2435,7 @@ public final class WebViewCore {
         }
         if (mWebView != null) {
             Message msg = Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SCROLL_TO_MSG_ID, animate ? 1 : 0,
+                    WebViewClassic.SCROLL_TO_MSG_ID, animate ? 1 : 0,
                     onlyIfImeIsShowing ? 1 : 0, new Point(x, y));
             if (mDrawIsScheduled) {
                 mEventHub.sendMessage(Message.obtain(null,
@@ -2457,7 +2459,7 @@ public final class WebViewCore {
     private void sendViewInvalidate(int left, int top, int right, int bottom) {
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                           WebView.INVAL_RECT_MSG_ID,
+                           WebViewClassic.INVAL_RECT_MSG_ID,
                            new Rect(left, top, right, bottom)).sendToTarget();
         }
     }
@@ -2473,7 +2475,7 @@ public final class WebViewCore {
 
     // Gets the WebView corresponding to this WebViewCore. Note that the
     // WebView object must only be used on the UI thread.
-    /* package */ WebView getWebView() {
+    /* package */ WebViewClassic getWebView() {
         return mWebView;
     }
 
@@ -2499,9 +2501,9 @@ public final class WebViewCore {
         }
 
         // remove the touch highlight when moving to a new page
-        if (WebView.sDisableNavcache) {
+        if (WebViewClassic.sDisableNavcache) {
             mWebView.mPrivateHandler.sendEmptyMessage(
-                    WebView.HIT_TEST_RESULT);
+                    WebViewClassic.HIT_TEST_RESULT);
         }
 
         // reset the scroll position, the restored offset and scales
@@ -2567,7 +2569,7 @@ public final class WebViewCore {
         }
         if (adjust != mWebView.getDefaultZoomScale()) {
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.UPDATE_ZOOM_DENSITY, adjust).sendToTarget();
+                    WebViewClassic.UPDATE_ZOOM_DENSITY, adjust).sendToTarget();
         }
         int defaultScale = (int) (adjust * 100);
 
@@ -2618,7 +2620,7 @@ public final class WebViewCore {
             viewState.mScrollX = 0;
             viewState.mShouldStartScrolledRight = false;
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.UPDATE_ZOOM_RANGE, viewState).sendToTarget();
+                    WebViewClassic.UPDATE_ZOOM_RANGE, viewState).sendToTarget();
             return;
         }
 
@@ -2689,7 +2691,7 @@ public final class WebViewCore {
             mWebView.mLastHeightSent = 0;
             // Send a negative scale to indicate that WebCore should reuse
             // the current scale
-            WebView.ViewSizeData data = new WebView.ViewSizeData();
+            WebViewClassic.ViewSizeData data = new WebViewClassic.ViewSizeData();
             data.mWidth = mWebView.mLastWidthSent;
             data.mHeight = 0;
             // if mHeightCanMeasure is true, getUseWideViewPort() can't be
@@ -2713,7 +2715,7 @@ public final class WebViewCore {
                 // to WebViewCore
                 mWebView.mLastWidthSent = 0;
             } else {
-                WebView.ViewSizeData data = new WebView.ViewSizeData();
+                WebViewClassic.ViewSizeData data = new WebViewClassic.ViewSizeData();
                 // mViewScale as 0 means it is in zoom overview mode. So we don't
                 // know the exact scale. If mRestoredScale is non-zero, use it;
                 // otherwise just use mTextWrapScale as the initial scale.
@@ -2791,7 +2793,7 @@ public final class WebViewCore {
     private void needTouchEvents(boolean need) {
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.WEBCORE_NEED_TOUCH_EVENTS, need ? 1 : 0, 0)
+                    WebViewClassic.WEBCORE_NEED_TOUCH_EVENTS, need ? 1 : 0, 0)
                     .sendToTarget();
         }
     }
@@ -2801,7 +2803,7 @@ public final class WebViewCore {
             String text, int textGeneration) {
         if (mWebView != null) {
             Message msg = Message.obtain(mWebView.mPrivateHandler,
-                    WebView.UPDATE_TEXTFIELD_TEXT_MSG_ID, ptr,
+                    WebViewClassic.UPDATE_TEXTFIELD_TEXT_MSG_ID, ptr,
                     textGeneration, text);
             msg.getData().putBoolean("password", changeToPassword);
             msg.sendToTarget();
@@ -2813,7 +2815,7 @@ public final class WebViewCore {
             int textGeneration, int selectionPtr) {
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                WebView.UPDATE_TEXT_SELECTION_MSG_ID, pointer, textGeneration,
+                WebViewClassic.UPDATE_TEXT_SELECTION_MSG_ID, pointer, textGeneration,
                 new TextSelectionData(start, end, selectionPtr)).sendToTarget();
         }
     }
@@ -2822,7 +2824,7 @@ public final class WebViewCore {
     private void clearTextEntry() {
         if (mWebView == null) return;
         Message.obtain(mWebView.mPrivateHandler,
-                WebView.CLEAR_TEXT_ENTRY).sendToTarget();
+                WebViewClassic.CLEAR_TEXT_ENTRY).sendToTarget();
     }
 
     // called by JNI
@@ -2836,9 +2838,9 @@ public final class WebViewCore {
                 text, inputType, isSpellCheckEnabled, nextFieldIsText, label,
                 maxLength);
         Message.obtain(mWebView.mPrivateHandler,
-                WebView.INIT_EDIT_FIELD, initData).sendToTarget();
+                WebViewClassic.INIT_EDIT_FIELD, initData).sendToTarget();
         Message.obtain(mWebView.mPrivateHandler,
-                WebView.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
+                WebViewClassic.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
                 0, new TextSelectionData(start, end, selectionPtr))
                 .sendToTarget();
     }
@@ -2850,7 +2852,7 @@ public final class WebViewCore {
             return;
         }
         Message.obtain(mWebView.mPrivateHandler,
-                WebView.UPDATE_MATCH_COUNT, matchIndex, matchCount,
+                WebViewClassic.UPDATE_MATCH_COUNT, matchIndex, matchCount,
                 findText).sendToTarget();
     }
 
@@ -2892,14 +2894,14 @@ public final class WebViewCore {
     private void requestKeyboard(boolean showKeyboard) {
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
-                    WebView.REQUEST_KEYBOARD, showKeyboard ? 1 : 0, 0)
+                    WebViewClassic.REQUEST_KEYBOARD, showKeyboard ? 1 : 0, 0)
                     .sendToTarget();
         }
     }
 
     private void setWebTextViewAutoFillable(int queryId, String preview) {
         if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler, WebView.SET_AUTOFILLABLE,
+            Message.obtain(mWebView.mPrivateHandler, WebViewClassic.SET_AUTOFILLABLE,
                     new AutoFillData(queryId, preview))
                     .sendToTarget();
         }
@@ -2912,7 +2914,7 @@ public final class WebViewCore {
     // called by JNI
     private void keepScreenOn(boolean screenOn) {
         if (mWebView != null) {
-            Message message = mWebView.mPrivateHandler.obtainMessage(WebView.SCREEN_ON);
+            Message message = mWebView.mPrivateHandler.obtainMessage(WebViewClassic.SCREEN_ON);
             message.arg1 = screenOn ? 1 : 0;
             message.sendToTarget();
         }
@@ -2952,7 +2954,7 @@ public final class WebViewCore {
             return;
         }
 
-        Message message = mWebView.mPrivateHandler.obtainMessage(WebView.SHOW_FULLSCREEN);
+        Message message = mWebView.mPrivateHandler.obtainMessage(WebViewClassic.SHOW_FULLSCREEN);
         message.obj = childView.mView;
         message.arg1 = orientation;
         message.arg2 = npp;
@@ -2964,7 +2966,7 @@ public final class WebViewCore {
         if (mWebView == null) {
             return;
         }
-        mWebView.mPrivateHandler.obtainMessage(WebView.HIDE_FULLSCREEN)
+        mWebView.mPrivateHandler.obtainMessage(WebViewClassic.HIDE_FULLSCREEN)
                 .sendToTarget();
     }
 
@@ -3036,7 +3038,7 @@ public final class WebViewCore {
             data.mXPercentInView = xPercentInView;
             data.mYPercentInDoc = yPercentInDoc;
             data.mYPercentInView = yPercentInView;
-            Message.obtain(mWebView.mPrivateHandler, WebView.SHOW_RECT_MSG_ID,
+            Message.obtain(mWebView.mPrivateHandler, WebViewClassic.SHOW_RECT_MSG_ID,
                     data).sendToTarget();
         }
     }
@@ -3046,7 +3048,7 @@ public final class WebViewCore {
         if (mWebView == null) {
             return;
         }
-        mWebView.mPrivateHandler.obtainMessage(WebView.CENTER_FIT_RECT,
+        mWebView.mPrivateHandler.obtainMessage(WebViewClassic.CENTER_FIT_RECT,
                 new Rect(x, y, x + width, y + height)).sendToTarget();
     }
 
@@ -3055,7 +3057,7 @@ public final class WebViewCore {
         if (mWebView == null) {
             return;
         }
-        mWebView.mPrivateHandler.obtainMessage(WebView.SET_SCROLLBAR_MODES,
+        mWebView.mPrivateHandler.obtainMessage(WebViewClassic.SET_SCROLLBAR_MODES,
                 hMode, vMode).sendToTarget();
     }
 
@@ -3063,7 +3065,7 @@ public final class WebViewCore {
     @SuppressWarnings("unused")
     private void selectAt(int x, int y) {
         if (mWebView != null) {
-            mWebView.mPrivateHandler.obtainMessage(WebView.SELECT_AT, x, y).sendToTarget();
+            mWebView.mPrivateHandler.obtainMessage(WebViewClassic.SELECT_AT, x, y).sendToTarget();
         }
     }
 

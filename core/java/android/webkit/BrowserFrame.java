@@ -70,7 +70,7 @@ class BrowserFrame extends Handler {
     private final static int MAX_OUTSTANDING_REQUESTS = 300;
 
     private final CallbackProxy mCallbackProxy;
-    private final WebSettings mSettings;
+    private final WebSettingsClassic mSettings;
     private final Context mContext;
     private final WebViewDatabase mDatabase;
     private final WebViewCore mWebViewCore;
@@ -200,7 +200,7 @@ class BrowserFrame extends Handler {
      * XXX: Called by WebCore thread.
      */
     public BrowserFrame(Context context, WebViewCore w, CallbackProxy proxy,
-            WebSettings settings, Map<String, Object> javascriptInterfaces) {
+            WebSettingsClassic settings, Map<String, Object> javascriptInterfaces) {
 
         Context appContext = context.getApplicationContext();
 

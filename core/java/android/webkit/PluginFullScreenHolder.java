@@ -35,7 +35,7 @@ import android.widget.FrameLayout;
 
 class PluginFullScreenHolder {
 
-    private final WebView mWebView;
+    private final WebViewClassic mWebView;
     private final int mNpp;
     private final int mOrientation;
 
@@ -44,7 +44,7 @@ class PluginFullScreenHolder {
 
     private View mContentView;
 
-    PluginFullScreenHolder(WebView webView, int orientation, int npp) {
+    PluginFullScreenHolder(WebViewClassic webView, int orientation, int npp) {
         mWebView = webView;
         mNpp = npp;
         mOrientation = orientation;
@@ -134,7 +134,7 @@ class PluginFullScreenHolder {
         new WebChromeClient.CustomViewCallback() {
             public void onCustomViewHidden() {
 
-                mWebView.mPrivateHandler.obtainMessage(WebView.HIDE_FULLSCREEN)
+                mWebView.mPrivateHandler.obtainMessage(WebViewClassic.HIDE_FULLSCREEN)
                     .sendToTarget();
 
                 mWebView.getWebViewCore().sendMessage(

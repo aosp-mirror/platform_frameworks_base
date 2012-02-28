@@ -79,8 +79,8 @@ class AccessibilityInjector {
     private static ArrayList<AccessibilityWebContentKeyBinding> sBindings =
         new ArrayList<AccessibilityWebContentKeyBinding>();
 
-    // handle to the WebView this injector is associated with.
-    private final WebView mWebView;
+    // handle to the WebViewClassic this injector is associated with.
+    private final WebViewClassic mWebView;
 
     // events scheduled for sending as soon as we receive the selected text
     private final Stack<AccessibilityEvent> mScheduledEventStack = new Stack<AccessibilityEvent>();
@@ -98,11 +98,11 @@ class AccessibilityInjector {
     private int mLastDirection;
 
     /**
-     * Creates a new injector associated with a given {@link WebView}.
+     * Creates a new injector associated with a given {@link WebViewClassic}.
      *
-     * @param webView The associated WebView.
+     * @param webView The associated WebViewClassic.
      */
-    public AccessibilityInjector(WebView webView) {
+    public AccessibilityInjector(WebViewClassic webView) {
         mWebView = webView;
         ensureWebContentKeyBindings();
     }
@@ -327,7 +327,7 @@ class AccessibilityInjector {
         AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_SELECTED);
         event.setClassName(mWebView.getClass().getName());
         event.setPackageName(mWebView.getContext().getPackageName());
-        event.setEnabled(mWebView.isEnabled());
+        event.setEnabled(mWebView.getWebView().isEnabled());
         return event;
     }
 

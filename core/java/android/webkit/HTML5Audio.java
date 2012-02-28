@@ -92,7 +92,7 @@ class HTML5Audio extends Handler
     private class IsPrivateBrowsingEnabledGetter {
         private boolean mIsReady;
         private boolean mIsPrivateBrowsingEnabled;
-        IsPrivateBrowsingEnabledGetter(Looper uiThreadLooper, final WebView webView) {
+        IsPrivateBrowsingEnabledGetter(Looper uiThreadLooper, final WebViewClassic webView) {
             new Handler(uiThreadLooper).post(new Runnable() {
                 @Override
                 public void run() {
