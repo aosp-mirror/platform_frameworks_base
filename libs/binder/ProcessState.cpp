@@ -286,8 +286,8 @@ void ProcessState::spawnPooledThread(bool isMain)
 {
     if (mThreadPoolStarted) {
         int32_t s = android_atomic_add(1, &mThreadPoolSeq);
-        char buf[32];
-        sprintf(buf, "Binder Thread #%d", s);
+        char buf[16];
+        snprintf(buf, sizeof(buf), "Binder_%X", s);
         ALOGV("Spawning new pooled thread, name=%s\n", buf);
         sp<Thread> t = new PoolThread(isMain);
         t->run(buf);

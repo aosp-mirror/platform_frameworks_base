@@ -307,7 +307,7 @@ status_t AudioRecord::start()
         pid_t tid;
         if (t != 0) {
             mReadyToRun = WOULD_BLOCK;
-            t->run("ClientRecordThread", ANDROID_PRIORITY_AUDIO);
+            t->run("AudioRecord", ANDROID_PRIORITY_AUDIO);
             tid = t->getTid();  // pid_t is unknown until run()
             ALOGV("getTid=%d", tid);
             if (tid == -1) {

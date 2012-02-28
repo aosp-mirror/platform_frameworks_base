@@ -69,7 +69,7 @@ AudioPolicyService::AudioPolicyService()
     // start tone playback thread
     mTonePlaybackThread = new AudioCommandThread(String8(""));
     // start audio commands thread
-    mAudioCommandThread = new AudioCommandThread(String8("ApmCommandThread"));
+    mAudioCommandThread = new AudioCommandThread(String8("ApmCommand"));
 
     /* instantiate the audio policy manager */
     rc = hw_get_module(AUDIO_POLICY_HARDWARE_MODULE_ID, &module);
@@ -638,7 +638,7 @@ void AudioPolicyService::AudioCommandThread::onFirstRef()
     if (mName != "") {
         run(mName.string(), ANDROID_PRIORITY_AUDIO);
     } else {
-        run("AudioCommandThread", ANDROID_PRIORITY_AUDIO);
+        run("AudioCommand", ANDROID_PRIORITY_AUDIO);
     }
 }
 
