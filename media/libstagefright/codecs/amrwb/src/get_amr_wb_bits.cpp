@@ -119,8 +119,9 @@ int16 Serial_parm(                        /* Return the parameter    */
 )
 {
     int16 value = 0;
+    int16 i;
 
-    for (int16 i = no_of_bits >> 1; i != 0; i--)
+    for (i = no_of_bits >> 1; i != 0; i--)
     {
         value <<= 2;
 
