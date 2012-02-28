@@ -91,6 +91,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mLastHidden;        // was this window last hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
+    boolean mWasAnimating;      // Were we animating going into the most recent animation step?
 
     /**
      * The window size that was requested by the application.  These are in
@@ -979,6 +980,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // This must be called while inside a transaction.  Returns true if
     // there is more animation to run.
     boolean stepAnimationLocked(long currentTime) {
+        // Save the animation state as it was before this step so WindowManagerService can tell if
+        // we just started or just stopped animating by comparing mWasAnimating with isAnimating().
+        mWasAnimating = isAnimating();
         if (!mService.mDisplayFrozen && mService.mPolicy.isScreenOnFully()) {
             // We will run animations as long as the display isn't frozen.
 
