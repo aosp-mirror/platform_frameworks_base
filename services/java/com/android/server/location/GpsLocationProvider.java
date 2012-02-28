@@ -1082,6 +1082,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             } else {
                 mLocation.removeAccuracy();
             }
+            mLocation.setExtras(mLocationExtras);
 
             try {
                 mLocationManager.reportLocation(mLocation, false);
