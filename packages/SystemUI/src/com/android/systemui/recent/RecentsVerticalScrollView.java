@@ -224,14 +224,6 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
     }
 
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        if (mPerformanceHelper != null) {
-            mPerformanceHelper.onLayoutCallback();
-        }
-    }
-
-    @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
@@ -334,12 +326,6 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
         });
     }
 
-    public void onRecentsVisibilityChanged() {
-        if (mPerformanceHelper != null) {
-            mPerformanceHelper.updateShowBackground();
-        }
-    }
-
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
@@ -387,9 +373,6 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
 
     @Override
     public void setLayoutTransition(LayoutTransition transition) {
-        if (mPerformanceHelper != null) {
-            mPerformanceHelper.setLayoutTransitionCallback(transition);
-        }
         // The layout transition applies to our embedded LinearLayout
         mLinearLayout.setLayoutTransition(transition);
     }

@@ -32,13 +32,14 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewRootImpl;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
@@ -325,18 +326,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
-    public void handleShowBackground(boolean show) {
-        if (show) {
-            mRecentsScrim.setBackgroundResource(R.drawable.status_bar_recents_background_solid);
-        } else {
-            mRecentsScrim.setBackgroundDrawable(null);
-        }
-    }
-
-    public boolean isRecentsVisible() {
-        return getVisibility() == VISIBLE;
-    }
-
     public void onAnimationCancel(Animator animation) {
     }
 
@@ -457,9 +446,15 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
         mChoreo = new Choreographer(this, mRecentsScrim, mRecentsContainer, mRecentsNoApps, this);
 
-        // In order to save space, we make the background texture repeat in the Y direction
-        if (mRecentsScrim != null && mRecentsScrim.getBackground() instanceof BitmapDrawable) {
-            ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
+        if (mRecentsScrim != null) {
+            Display d = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+            if (!ActivityManager.isHighEndGfx(d)) {
+                mRecentsScrim.setBackgroundDrawable(null);
+            } else if (mRecentsScrim.getBackground() instanceof BitmapDrawable) {
+                // In order to save space, we make the background texture repeat in the Y direction
+                ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
+            }
         }
 
         mPreloadTasksRunnable = new Runnable() {
@@ -477,21 +472,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         transitioner.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 0);
         transitioner.setAnimator(LayoutTransition.DISAPPEARING, null);
     }
-
-    @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-        if (DEBUG) Log.v(TAG, "onVisibilityChanged(" + changedView + ", " + visibility + ")");
-
-        if (mRecentsContainer instanceof RecentsHorizontalScrollView) {
-            ((RecentsHorizontalScrollView) mRecentsContainer).onRecentsVisibilityChanged();
-        } else if (mRecentsContainer instanceof RecentsVerticalScrollView) {
-            ((RecentsVerticalScrollView) mRecentsContainer).onRecentsVisibilityChanged();
-        } else {
-            throw new IllegalArgumentException("missing Recents[Horizontal]ScrollView");
-        }
-    }
-
 
     private void updateIcon(ViewHolder h, Drawable icon, boolean show, boolean anim) {
         if (icon != null) {
