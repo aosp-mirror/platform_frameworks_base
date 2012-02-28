@@ -1029,12 +1029,7 @@ void AudioFlinger::removeNotificationClient(pid_t pid)
 {
     Mutex::Autolock _l(mLock);
 
-    ssize_t index = mNotificationClients.indexOfKey(pid);
-    if (index >= 0) {
-        sp <NotificationClient> client = mNotificationClients.valueFor(pid);
-        ALOGV("removeNotificationClient() %p, pid %d", client.get(), pid);
-        mNotificationClients.removeItem(pid);
-    }
+    mNotificationClients.removeItem(pid);
 
     ALOGV("%d died, releasing its sessions", pid);
     size_t num = mAudioSessionRefs.size();
