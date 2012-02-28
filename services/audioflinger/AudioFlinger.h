@@ -339,9 +339,8 @@ private:
                                 TrackBase(const TrackBase&);
                                 TrackBase& operator = (const TrackBase&);
 
-            virtual status_t getNextBuffer(
-                AudioBufferProvider::Buffer* buffer,
-                int64_t pts) = 0;
+            // AudioBufferProvider interface
+            virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer, int64_t pts) = 0;
             virtual void releaseBuffer(AudioBufferProvider::Buffer* buffer);
 
             audio_format_t format() const {
@@ -627,9 +626,10 @@ private:
                                 Track(const Track&);
                                 Track& operator = (const Track&);
 
-            virtual status_t getNextBuffer(
-                AudioBufferProvider::Buffer* buffer,
-                int64_t pts);
+            // AudioBufferProvider interface
+            virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer, int64_t pts = kInvalidPTS);
+            // releaseBuffer() not overridden
+
             virtual uint32_t framesReady() const;
 
             bool isMuted() const { return mMute; }
@@ -696,9 +696,10 @@ private:
 
             virtual uint32_t framesReady() const;
 
-            virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer,
-                                           int64_t pts);
+            // AudioBufferProvider interface
+            virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer, int64_t pts);
             virtual void releaseBuffer(AudioBufferProvider::Buffer* buffer);
+
             void timedYieldSamples(AudioBufferProvider::Buffer* buffer);
             void timedYieldSilence(uint32_t numFrames,
                                    AudioBufferProvider::Buffer* buffer);
@@ -1062,9 +1063,9 @@ private:
                                 RecordTrack(const RecordTrack&);
                                 RecordTrack& operator = (const RecordTrack&);
 
-            virtual status_t getNextBuffer(
-                AudioBufferProvider::Buffer* buffer,
-                int64_t pts);
+            // AudioBufferProvider interface
+            virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer, int64_t pts = kInvalidPTS);
+            // releaseBuffer() not overridden
 
             bool                mOverflow;
         };
@@ -1100,9 +1101,10 @@ private:
                 AudioStreamIn* clearInput();
                 virtual audio_stream_t* stream();
 
-        virtual status_t    getNextBuffer(AudioBufferProvider::Buffer* buffer,
-                                          int64_t pts);
+        // AudioBufferProvider interface
+        virtual status_t    getNextBuffer(AudioBufferProvider::Buffer* buffer, int64_t pts);
         virtual void        releaseBuffer(AudioBufferProvider::Buffer* buffer);
+
         virtual bool        checkForNewParameters_l();
         virtual String8     getParameters(const String8& keys);
         virtual void        audioConfigChanged_l(int event, int param = 0);

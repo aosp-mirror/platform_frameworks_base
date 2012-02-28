@@ -332,11 +332,11 @@ size_t AudioMixer::getUnreleasedFrames(int name) const
     return 0;
 }
 
-void AudioMixer::setBufferProvider(int name, AudioBufferProvider* buffer)
+void AudioMixer::setBufferProvider(int name, AudioBufferProvider* bufferProvider)
 {
     name -= TRACK0;
     assert(uint32_t(name) < MAX_NUM_TRACKS);
-    mState.tracks[name].bufferProvider = buffer;
+    mState.tracks[name].bufferProvider = bufferProvider;
 }
 
 
