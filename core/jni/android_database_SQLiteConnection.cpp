@@ -29,7 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "binder/CursorWindow.h"
+#include <androidfw/CursorWindow.h>
 
 #include <sqlite3.h>
 #include <sqlite3_android.h>

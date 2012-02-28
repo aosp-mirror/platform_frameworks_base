@@ -18,7 +18,7 @@
 #define LOG_TAG "CursorWindow"
 
 #include <utils/Log.h>
-#include <binder/CursorWindow.h>
+#include <androidfw/CursorWindow.h>
 
 #include <cutils/ashmem.h>
 #include <sys/mman.h>

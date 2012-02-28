@@ -30,7 +30,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "binder/CursorWindow.h"
+#include <androidfw/CursorWindow.h>
 #include "android_util_Binder.h"
 #include "android_database_SQLiteCommon.h"
 
