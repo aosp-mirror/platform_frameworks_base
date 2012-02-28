@@ -779,6 +779,15 @@ public class AudioTrack
 
 
     /**
+     * Similar, except set volume of all channels to same value.
+     * @hide
+     */
+    public int setVolume(float volume) {
+        return setStereoVolume(volume, volume);
+    }
+
+
+    /**
      * Sets the playback sample rate for this track. This sets the sampling rate at which
      * the audio data will be consumed and played back, not the original sampling rate of the
      * content. Setting it to half the sample rate of the content will cause the playback to

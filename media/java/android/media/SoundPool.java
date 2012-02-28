@@ -354,6 +354,14 @@ public class SoundPool
             float leftVolume, float rightVolume);
 
     /**
+     * Similar, except set volume of all channels to same value.
+     * @hide
+     */
+    public void setVolume(int streamID, float volume) {
+        setVolume(streamID, volume, volume);
+    }
+
+    /**
      * Change stream priority.
      *
      * Change the priority of the stream specified by the streamID.
