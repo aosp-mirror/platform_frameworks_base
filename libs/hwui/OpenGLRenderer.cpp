@@ -2300,15 +2300,6 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
         return;
     }
 
-    float x = 0.0f;
-    float y = 0.0f;
-
-    const bool pureTranslate = mSnapshot->transform->isPureTranslate();
-    if (CC_LIKELY(pureTranslate)) {
-        x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
-        y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
-    }
-
     FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
@@ -2326,41 +2317,30 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
     setupDrawShader();
     setupDrawBlending(true, mode);
     setupDrawProgram();
-    setupDrawModelView(x, y, x, y, pureTranslate, true);
+    setupDrawModelView(0.0f, 0.0f, 0.0f, 0.0f, false, true);
     setupDrawTexture(fontRenderer.getTexture(true));
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms(pureTranslate);
+    setupDrawShaderUniforms(false);
 
-//    mat4 pathTransform;
-//    pathTransform.loadTranslate(hOffset, vOffset, 0.0f);
-//
-//    float offset = 0.0f;
-//    SkPathMeasure pathMeasure(*path, false);
-//
-//    if (paint->getTextAlign() != SkPaint::kLeft_Align) {
-//        SkScalar pathLength = pathMeasure.getLength();
-//        if (paint->getTextAlign() == SkPaint::kCenter_Align) {
-//            pathLength = SkScalarHalf(pathLength);
-//        }
-//        offset += SkScalarToFloat(pathLength);
-//    }
+    const Rect* clip = &mSnapshot->getLocalClip();
+    Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
-//        SkScalar x;
-//        SkPath      tmp;
-//        SkMatrix    m(scaledMatrix);
-//
-//        m.postTranslate(xpos + hOffset, 0);
-//        if (matrix) {
-//            m.postConcat(*matrix);
-//        }
-//        morphpath(&tmp, *iterPath, meas, m);
-//        if (fDevice) {
-//            fDevice->drawPath(*this, tmp, iter.getPaint(), NULL, true);
-//        } else {
-//            this->drawPath(tmp, iter.getPaint(), NULL, true);
-//        }
-//    }
+#if RENDER_LAYERS_AS_REGIONS
+    const bool hasActiveLayer = hasLayer();
+#else
+    const bool hasActiveLayer = false;
+#endif
+
+    if (fontRenderer.renderTextOnPath(paint, clip, text, 0, bytesCount, count, path,
+            hOffset, vOffset, hasActiveLayer ? &bounds : NULL)) {
+#if RENDER_LAYERS_AS_REGIONS
+        if (hasActiveLayer) {
+            mSnapshot->transform->mapRect(bounds);
+            dirtyLayerUnchecked(bounds, getRegion());
+        }
+#endif
+    }
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
