@@ -118,6 +118,7 @@ private:
     sp<FlushingState> mFlushingState;
 
     AString mComponentName;
+    uint32_t mQuirks;
     sp<IOMX> mOMX;
     IOMX::node_id mNode;
     sp<MemoryDealer> mDealer[2];
