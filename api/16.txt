@@ -27303,7 +27303,6 @@ package android.widget {
     method public boolean onTextContextMenuItem(int);
     method public void removeTextChangedListener(android.text.TextWatcher);
     method protected void resetResolvedDrawables();
-    method protected void resetResolvedLayoutDirection();
     method protected void resolveDrawables();
     method protected void resolveTextDirection();
     method public void setAllCaps(boolean);
