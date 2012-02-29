@@ -30,7 +30,6 @@ import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
-import android.telephony.SmsCbMessage;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage.MessageClass;
 import android.util.Log;
@@ -98,10 +97,6 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         }
     }
 
-    private void handleServiceCategoryProgramData(SmsMessage sms) {
-
-    }
-
     /** {@inheritDoc} */
     @Override
     public int dispatchMessage(SmsMessageBase smsb) {
@@ -124,19 +119,8 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             return Intents.RESULT_SMS_HANDLED;
         }
 
-        SmsMessage sms = (SmsMessage) smsb;
-
-        // Handle CMAS emergency broadcast messages.
-        if (SmsEnvelope.MESSAGE_TYPE_BROADCAST == sms.getMessageType()) {
-            Log.d(TAG, "Broadcast type message");
-            SmsCbMessage message = sms.parseBroadcastSms();
-            if (message != null) {
-                dispatchBroadcastMessage(message);
-            }
-            return Intents.RESULT_SMS_HANDLED;
-        }
-
         // See if we have a network duplicate SMS.
+        SmsMessage sms = (SmsMessage) smsb;
         mLastDispatchedSmsFingerprint = sms.getIncomingSmsFingerprint();
         if (mLastAcknowledgedSmsFingerprint != null &&
                 Arrays.equals(mLastDispatchedSmsFingerprint, mLastAcknowledgedSmsFingerprint)) {
@@ -164,9 +148,6 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
                 (SmsEnvelope.TELESERVICE_WEMT == teleService)) &&
                 sms.isStatusReportMessage()) {
             handleCdmaStatusReport(sms);
-            handled = true;
-        } else if (SmsEnvelope.TELESERVICE_SCPT == teleService) {
-            handleServiceCategoryProgramData(sms);
             handled = true;
         } else if ((sms.getUserData() == null)) {
             if (false) {

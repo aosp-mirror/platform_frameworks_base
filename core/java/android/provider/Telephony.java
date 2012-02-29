@@ -596,8 +596,8 @@ public final class Telephony {
              * values:</p>
              *
              * <ul>
-             *   <li><em>message</em> - An SmsCbMessage object containing the broadcast message
-             *   data. This is not an emergency alert, so ETWS and CMAS data will be null.</li>
+             *   <li><em>pdus</em> - An Object[] of byte[]s containing the PDUs
+             *   that make up the message.</li>
              * </ul>
              *
              * <p>The extra values can be extracted using
@@ -616,8 +616,8 @@ public final class Telephony {
              * values:</p>
              *
              * <ul>
-             *   <li><em>message</em> - An SmsCbMessage object containing the broadcast message
-             *   data, including ETWS or CMAS warning notification info if present.</li>
+             *   <li><em>pdus</em> - An Object[] of byte[]s containing the PDUs
+             *   that make up the message.</li>
              * </ul>
              *
              * <p>The extra values can be extracted using
@@ -629,26 +629,6 @@ public final class Telephony {
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SMS_EMERGENCY_CB_RECEIVED_ACTION =
                     "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
-
-            /**
-             * Broadcast Action: A new CDMA SMS has been received containing Service Category
-             * Program Data (updates the list of enabled broadcast channels). The intent will
-             * have the following extra values:</p>
-             *
-             * <ul>
-             *   <li><em>operations</em> - An array of CdmaSmsCbProgramData objects containing
-             *   the service category operations (add/delete/clear) to perform.</li>
-             * </ul>
-             *
-             * <p>The extra values can be extracted using
-             * {@link #getMessagesFromIntent(Intent)}.</p>
-             *
-             * <p>If a BroadcastReceiver encounters an error while processing
-             * this intent it should set the result code appropriately.</p>
-             */
-            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            public static final String SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION =
-                    "android.provider.Telephony.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED";
 
             /**
              * Broadcast Action: The SIM storage for SMS messages is full.  If

@@ -14,54 +14,34 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm;
+package com.android.internal.telephony;
 
-import android.telephony.SmsCbEtwsInfo;
-import android.telephony.SmsCbLocation;
 import android.telephony.SmsCbMessage;
 import android.test.AndroidTestCase;
 import android.util.Log;
-
-import com.android.internal.telephony.IccUtils;
-
-import java.util.Random;
 
 /**
  * Test cases for basic SmsCbMessage operations
  */
 public class GsmSmsCbTest extends AndroidTestCase {
 
-    private static final String TAG = "GsmSmsCbTest";
-
-    private static final SmsCbLocation sTestLocation = new SmsCbLocation("94040", 1234, 5678);
-
-    private static SmsCbMessage createFromPdu(byte[] pdu) {
-        try {
-            SmsCbHeader header = new SmsCbHeader(pdu);
-            byte[][] pdus = new byte[1][];
-            pdus[0] = pdu;
-            return GsmSmsCbMessage.createSmsCbMessage(header, sTestLocation, pdus);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-
-    private static void doTestGeographicalScopeValue(byte[] pdu, byte b, int expectedGs) {
+    private void doTestGeographicalScopeValue(byte[] pdu, byte b, int expectedGs) {
         pdu[0] = b;
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected geographical scope decoded", expectedGs, msg
                 .getGeographicalScope());
     }
 
     public void testCreateNullPdu() {
-        SmsCbMessage msg = createFromPdu(null);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(null);
+
         assertNull("createFromPdu(byte[] with null pdu should return null", msg);
     }
 
     public void testCreateTooShortPdu() {
         byte[] pdu = new byte[4];
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertNull("createFromPdu(byte[] with too short pdu should return null", msg);
     }
@@ -114,7 +94,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x34
         };
 
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected geographical scope decoded",
                 SmsCbMessage.GEOGRAPHICAL_SCOPE_CELL_WIDE, msg.getGeographicalScope());
@@ -136,7 +116,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x46, (byte)0xA3, (byte)0xD1, (byte)0x68, (byte)0x34, (byte)0x1A, (byte)0x8D,
                 (byte)0x46, (byte)0xA3, (byte)0xD1, (byte)0x00
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected 7-bit string decoded",
                 "A GSM default alphabet message with carriage return padding",
@@ -166,7 +146,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
 
                 (byte)0x34
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected 7-bit string decoded",
                 "A GSM default alphabet message with carriage return padding",
@@ -213,7 +193,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
 
                 (byte)0x0A
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected multipage 7-bit string decoded",
                 "First page+Second page",
@@ -236,7 +216,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x90, (byte)0xFB, (byte)0x0D, (byte)0x82, (byte)0x87, (byte)0xC9, (byte)0xE4,
                 (byte)0xB4, (byte)0xFB, (byte)0x1C, (byte)0x02
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals(
                 "Unexpected 7-bit string decoded",
@@ -268,7 +248,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
 
                 (byte)0x52
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals(
                 "Unexpected 7-bit string decoded",
@@ -293,7 +273,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x46, (byte)0xA3, (byte)0xD1, (byte)0x68, (byte)0x34, (byte)0x1A, (byte)0x8D,
                 (byte)0x46, (byte)0xA3, (byte)0xD1, (byte)0x00
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected 7-bit string decoded",
                 "A GSM default alphabet message with carriage return padding",
@@ -318,7 +298,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x46, (byte)0xA3, (byte)0xD1, (byte)0x68, (byte)0x34, (byte)0x1A, (byte)0x8D,
                 (byte)0x46, (byte)0xA3, (byte)0xD1, (byte)0x00
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected 7-bit string decoded",
                 "A GSM default alphabet message with carriage return padding",
@@ -350,7 +330,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
 
                 (byte)0x37
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected 7-bit string decoded",
                 "A GSM default alphabet message with carriage return padding",
@@ -375,7 +355,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x42, (byte)0x43, (byte)0x44, (byte)0x45, (byte)0x46, (byte)0x47, (byte)0x41,
                 (byte)0x42, (byte)0x43, (byte)0x44, (byte)0x45
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("8-bit message body should be empty", "", msg.getMessageBody());
     }
@@ -396,7 +376,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x63, (byte)0x00, (byte)0x74, (byte)0x00, (byte)0x65, (byte)0x00, (byte)0x72,
                 (byte)0x00, (byte)0x0D, (byte)0x00, (byte)0x0D
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected 7-bit string decoded",
                 "A UCS2 message containing a \u0434 character", msg.getMessageBody());
@@ -425,7 +405,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
 
                 (byte)0x4E
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected 7-bit string decoded",
                 "A UCS2 message containing a \u0434 character", msg.getMessageBody());
@@ -471,7 +451,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
 
                 (byte)0x06
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected multipage UCS2 string decoded",
                 "AAABBB", msg.getMessageBody());
@@ -493,7 +473,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x61, (byte)0x00, (byte)0x63, (byte)0x00, (byte)0x74, (byte)0x00, (byte)0x65,
                 (byte)0x00, (byte)0x72, (byte)0x00, (byte)0x0D
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected 7-bit string decoded",
                 "A UCS2 message containing a \u0434 character", msg.getMessageBody());
@@ -524,7 +504,7 @@ public class GsmSmsCbTest extends AndroidTestCase {
 
                 (byte)0x50
         };
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected 7-bit string decoded",
                 "A UCS2 message containing a \u0434 character", msg.getMessageBody());
@@ -549,9 +529,9 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x46, (byte)0xA3, (byte)0xD1, (byte)0x00
         };
 
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
-        assertEquals("Unexpected message identifier decoded", 12345, msg.getServiceCategory());
+        assertEquals("Unexpected message identifier decoded", 12345, msg.getMessageIdentifier());
     }
 
     public void testGetMessageIdentifierUmts() {
@@ -578,9 +558,9 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x34
         };
 
-        SmsCbMessage msg = createFromPdu(pdu);
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
-        assertEquals("Unexpected message identifier decoded", 12345, msg.getServiceCategory());
+        assertEquals("Unexpected message identifier decoded", 12345, msg.getMessageIdentifier());
     }
 
     public void testGetMessageCode() {
@@ -600,10 +580,9 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x46, (byte)0xA3, (byte)0xD1, (byte)0x00
         };
 
-        SmsCbMessage msg = createFromPdu(pdu);
-        int messageCode = (msg.getSerialNumber() & 0x3ff0) >> 4;
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
-        assertEquals("Unexpected message code decoded", 682, messageCode);
+        assertEquals("Unexpected message code decoded", 682, msg.getMessageCode());
     }
 
     public void testGetMessageCodeUmts() {
@@ -630,10 +609,9 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x34
         };
 
-        SmsCbMessage msg = createFromPdu(pdu);
-        int messageCode = (msg.getSerialNumber() & 0x3ff0) >> 4;
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
-        assertEquals("Unexpected message code decoded", 682, messageCode);
+        assertEquals("Unexpected message code decoded", 682, msg.getMessageCode());
     }
 
     public void testGetUpdateNumber() {
@@ -653,10 +631,9 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x46, (byte)0xA3, (byte)0xD1, (byte)0x00
         };
 
-        SmsCbMessage msg = createFromPdu(pdu);
-        int updateNumber = msg.getSerialNumber() & 0x000f;
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
-        assertEquals("Unexpected update number decoded", 5, updateNumber);
+        assertEquals("Unexpected update number decoded", 5, msg.getUpdateNumber());
     }
 
     public void testGetUpdateNumberUmts() {
@@ -683,10 +660,9 @@ public class GsmSmsCbTest extends AndroidTestCase {
                 (byte)0x34
         };
 
-        SmsCbMessage msg = createFromPdu(pdu);
-        int updateNumber = msg.getSerialNumber() & 0x000f;
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
-        assertEquals("Unexpected update number decoded", 5, updateNumber);
+        assertEquals("Unexpected update number decoded", 5, msg.getUpdateNumber());
     }
 
     /* ETWS Test message including header */
@@ -708,51 +684,29 @@ public class GsmSmsCbTest extends AndroidTestCase {
     // FIXME: add example of ETWS primary notification PDU
 
     public void testEtwsMessageNormal() {
-        SmsCbMessage msg = createFromPdu(etwsMessageNormal);
-        Log.d(TAG, msg.toString());
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(etwsMessageNormal);
+        Log.d("GsmSmsCbTest", msg.toString());
         assertEquals("GS mismatch", 0, msg.getGeographicalScope());
-        assertEquals("serial number mismatch", 0, msg.getSerialNumber());
-        assertEquals("message ID mismatch", 0x1100, msg.getServiceCategory());
-        assertEquals("warning type mismatch", SmsCbEtwsInfo.ETWS_WARNING_TYPE_EARTHQUAKE,
-                msg.getEtwsWarningInfo().getWarningType());
+        assertEquals("message code mismatch", 0, msg.getMessageCode());
+        assertEquals("update number mismatch", 0, msg.getUpdateNumber());
+        assertEquals("message ID mismatch", 0x1100, msg.getMessageIdentifier());
     }
 
     public void testEtwsMessageCancel() {
-        SmsCbMessage msg = createFromPdu(etwsMessageCancel);
-        Log.d(TAG, msg.toString());
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(etwsMessageCancel);
+        Log.d("GsmSmsCbTest", msg.toString());
         assertEquals("GS mismatch", 0, msg.getGeographicalScope());
-        assertEquals("serial number mismatch", 0, msg.getSerialNumber());
-        assertEquals("message ID mismatch", 0x1100, msg.getServiceCategory());
-        assertEquals("warning type mismatch", SmsCbEtwsInfo.ETWS_WARNING_TYPE_EARTHQUAKE,
-                msg.getEtwsWarningInfo().getWarningType());
+        assertEquals("message code mismatch", 0, msg.getMessageCode());
+        assertEquals("update number mismatch", 0, msg.getUpdateNumber());
+        assertEquals("message ID mismatch", 0x1100, msg.getMessageIdentifier());
     }
 
     public void testEtwsMessageTest() {
-        SmsCbMessage msg = createFromPdu(etwsMessageTest);
-        Log.d(TAG, msg.toString());
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(etwsMessageTest);
+        Log.d("GsmSmsCbTest", msg.toString());
         assertEquals("GS mismatch", 0, msg.getGeographicalScope());
-        assertEquals("serial number mismatch", 0, msg.getSerialNumber());
-        assertEquals("message ID mismatch", 0x1103, msg.getServiceCategory());
-        assertEquals("warning type mismatch", SmsCbEtwsInfo.ETWS_WARNING_TYPE_TEST_MESSAGE,
-                msg.getEtwsWarningInfo().getWarningType());
-    }
-
-    // Make sure we don't throw an exception if we feed random data to the PDU parser.
-    public void testRandomPdus() {
-        Random r = new Random(94040);
-        for (int run = 0; run < 10000; run++) {
-            int len = r.nextInt(140);
-            byte[] data = new byte[len];
-            for (int i = 0; i < len; i++) {
-                data[i] = (byte) r.nextInt(256);
-            }
-            try {
-                // this should return a SmsCbMessage object or null for invalid data
-                SmsCbMessage msg = createFromPdu(data);
-            } catch (Exception e) {
-                Log.d(TAG, "exception thrown", e);
-                fail("Exception in decoder at run " + run + " length " + len + ": " + e);
-            }
-        }
+        assertEquals("message code mismatch", 0, msg.getMessageCode());
+        assertEquals("update number mismatch", 0, msg.getUpdateNumber());
+        assertEquals("message ID mismatch", 0x1103, msg.getMessageIdentifier());
     }
 }

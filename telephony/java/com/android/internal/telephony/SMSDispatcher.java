@@ -39,7 +39,6 @@ import android.os.SystemProperties;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.provider.Settings;
-import android.telephony.SmsCbMessage;
 import android.telephony.SmsMessage;
 import android.telephony.ServiceState;
 import android.util.Log;
@@ -1079,16 +1078,16 @@ public abstract class SMSDispatcher extends Handler {
         }
     };
 
-    protected void dispatchBroadcastMessage(SmsCbMessage message) {
-        if (message.isEmergencyMessage()) {
+    protected void dispatchBroadcastPdus(byte[][] pdus, boolean isEmergencyMessage) {
+        if (isEmergencyMessage) {
             Intent intent = new Intent(Intents.SMS_EMERGENCY_CB_RECEIVED_ACTION);
-            intent.putExtra("message", message);
-            Log.d(TAG, "Dispatching emergency SMS CB");
+            intent.putExtra("pdus", pdus);
+            Log.d(TAG, "Dispatching " + pdus.length + " emergency SMS CB pdus");
             dispatch(intent, RECEIVE_EMERGENCY_BROADCAST_PERMISSION);
         } else {
             Intent intent = new Intent(Intents.SMS_CB_RECEIVED_ACTION);
-            intent.putExtra("message", message);
-            Log.d(TAG, "Dispatching SMS CB");
+            intent.putExtra("pdus", pdus);
+            Log.d(TAG, "Dispatching " + pdus.length + " SMS CB pdus");
             dispatch(intent, RECEIVE_SMS_PERMISSION);
         }
     }
