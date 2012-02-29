@@ -7496,6 +7496,7 @@ package android.drm {
     method public java.lang.String getOriginalMimeType(android.net.Uri);
     method public int openConvertSession(java.lang.String);
     method public int processDrmInfo(android.drm.DrmInfo);
+    method public void release();
     method public int removeAllRights();
     method public int removeRights(java.lang.String);
     method public int removeRights(android.net.Uri);
