@@ -388,25 +388,35 @@ public class WifiNative {
         return doStringCommand("SIGNAL_POLL");
     }
 
-    public boolean startWpsPbc() {
-        return doBooleanCommand("WPS_PBC");
-    }
-
     public boolean startWpsPbc(String bssid) {
-        return doBooleanCommand("WPS_PBC " + bssid);
+        if (TextUtils.isEmpty(bssid)) {
+            return doBooleanCommand("WPS_PBC");
+        } else {
+            return doBooleanCommand("WPS_PBC " + bssid);
+        }
     }
 
     public boolean startWpsPinKeypad(String pin) {
+        if (TextUtils.isEmpty(pin)) return false;
         return doBooleanCommand("WPS_PIN any " + pin);
     }
 
     public String startWpsPinDisplay(String bssid) {
-        return doStringCommand("WPS_PIN " + bssid);
+        if (TextUtils.isEmpty(bssid)) {
+            return doStringCommand("WPS_PIN any");
+        } else {
+            return doStringCommand("WPS_PIN " + bssid);
+        }
     }
 
     /* Configures an access point connection */
     public boolean startWpsRegistrar(String bssid, String pin) {
+        if (TextUtils.isEmpty(bssid) || TextUtils.isEmpty(pin)) return false;
         return doBooleanCommand("WPS_REG " + bssid + " " + pin);
+    }
+
+    public boolean cancelWps() {
+        return doBooleanCommand("WPS_CANCEL");
     }
 
     public boolean setPersistentReconnect(boolean enabled) {
@@ -539,7 +549,7 @@ public class WifiNative {
     }
 
     public boolean p2pGroupRemove(String iface) {
-        if (iface == null) return false;
+        if (TextUtils.isEmpty(iface)) return false;
         return doBooleanCommand("P2P_GROUP_REMOVE " + iface);
     }
 
@@ -549,7 +559,7 @@ public class WifiNative {
 
     /* Invite a peer to a group */
     public boolean p2pInvite(WifiP2pGroup group, String deviceAddress) {
-        if (deviceAddress == null) return false;
+        if (TextUtils.isEmpty(deviceAddress)) return false;
 
         if (group == null) {
             return doBooleanCommand("P2P_INVITE peer=" + deviceAddress);
@@ -561,19 +571,19 @@ public class WifiNative {
 
     /* Reinvoke a persistent connection */
     public boolean p2pReinvoke(int netId, String deviceAddress) {
-        if (deviceAddress == null || netId < 0) return false;
+        if (TextUtils.isEmpty(deviceAddress) || netId < 0) return false;
 
         return doBooleanCommand("P2P_INVITE persistent=" + netId + " peer=" + deviceAddress);
     }
 
 
     public String p2pGetInterfaceAddress(String deviceAddress) {
-        if (deviceAddress == null) return null;
+        if (TextUtils.isEmpty(deviceAddress)) return null;
 
         //  "p2p_peer deviceAddress" returns a multi-line result containing
         //      intended_addr=fa:7b:7a:42:82:13
         String peerInfo = p2pPeer(deviceAddress);
-        if (peerInfo == null) return null;
+        if (TextUtils.isEmpty(peerInfo)) return null;
         String[] tokens= peerInfo.split("\n");
 
         for (String token : tokens) {

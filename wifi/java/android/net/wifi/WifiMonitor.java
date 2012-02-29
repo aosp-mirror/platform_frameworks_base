@@ -65,7 +65,20 @@ public class WifiMonitor {
 
     /* WPS events */
     private static final String WPS_SUCCESS_STR = "WPS-SUCCESS";
+
+    /* Format: WPS-FAIL msg=%d [config_error=%d] [reason=%d (%s)] */
     private static final String WPS_FAIL_STR    = "WPS-FAIL";
+    private static final String WPS_FAIL_PATTERN =
+            "WPS-FAIL msg=\\d+(?: config_error=(\\d+))?(?: reason=(\\d+))?";
+
+    /* config error code values for config_error=%d */
+    private static final int CONFIG_MULTIPLE_PBC_DETECTED = 12;
+    private static final int CONFIG_AUTH_FAILURE = 18;
+
+    /* reason code values for reason=%d */
+    private static final int REASON_TKIP_ONLY_PROHIBITED = 1;
+    private static final int REASON_WEP_PROHIBITED = 2;
+
     private static final String WPS_OVERLAP_STR = "WPS-OVERLAP-DETECTED";
     private static final String WPS_TIMEOUT_STR = "WPS-TIMEOUT";
 
@@ -316,7 +329,7 @@ public class WifiMonitor {
                     } else if (eventStr.startsWith(WPS_SUCCESS_STR)) {
                         mStateMachine.sendMessage(WPS_SUCCESS_EVENT);
                     } else if (eventStr.startsWith(WPS_FAIL_STR)) {
-                        mStateMachine.sendMessage(WPS_FAIL_EVENT);
+                        handleWpsFailEvent(eventStr);
                     } else if (eventStr.startsWith(WPS_OVERLAP_STR)) {
                         mStateMachine.sendMessage(WPS_OVERLAP_EVENT);
                     } else if (eventStr.startsWith(WPS_TIMEOUT_STR)) {
@@ -456,6 +469,43 @@ public class WifiMonitor {
                 case UNKNOWN:
                     break;
             }
+        }
+
+        private void handleWpsFailEvent(String dataString) {
+            final Pattern p = Pattern.compile(WPS_FAIL_PATTERN);
+            Matcher match = p.matcher(dataString);
+            if (match.find()) {
+                String cfgErr = match.group(1);
+                String reason = match.group(2);
+
+                if (reason != null) {
+                    switch(Integer.parseInt(reason)) {
+                        case REASON_TKIP_ONLY_PROHIBITED:
+                            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                                    WifiManager.WPS_TKIP_ONLY_PROHIBITED, 0));
+                            return;
+                        case REASON_WEP_PROHIBITED:
+                            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                                    WifiManager.WPS_WEP_PROHIBITED, 0));
+                            return;
+                    }
+                }
+                if (cfgErr != null) {
+                    switch(Integer.parseInt(cfgErr)) {
+                        case CONFIG_AUTH_FAILURE:
+                            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                                    WifiManager.WPS_AUTH_FAILURE, 0));
+                            return;
+                        case CONFIG_MULTIPLE_PBC_DETECTED:
+                            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                                    WifiManager.WPS_OVERLAP_ERROR, 0));
+                            return;
+                    }
+                }
+            }
+            //For all other errors, return a generic internal error
+            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                    WifiManager.ERROR, 0));
         }
 
         /**

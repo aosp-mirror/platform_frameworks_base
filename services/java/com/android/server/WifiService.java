@@ -297,6 +297,10 @@ public class WifiService extends IWifiManager.Stub {
                     mWifiStateMachine.sendMessage(Message.obtain(msg));
                     break;
                 }
+                case WifiManager.CANCEL_WPS: {
+                    mWifiStateMachine.sendMessage(Message.obtain(msg));
+                    break;
+                }
                 case WifiManager.DISABLE_NETWORK: {
                     mWifiStateMachine.sendMessage(Message.obtain(msg));
                     break;

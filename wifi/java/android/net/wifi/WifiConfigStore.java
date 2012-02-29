@@ -286,7 +286,10 @@ class WifiConfigStore {
                     config.status = Status.CURRENT;
                     break;
                 case DISCONNECTED:
-                    config.status = Status.ENABLED;
+                    //If network is already disabled, keep the status
+                    if (config.status == Status.CURRENT) {
+                        config.status = Status.ENABLED;
+                    }
                     break;
                 default:
                     //do nothing, retain the existing state
@@ -906,7 +909,7 @@ class WifiConfigStore {
                         }
                     }
                 } else {
-                    loge("Missing id while parsing configuration");
+                    if (DBG) log("Missing id while parsing configuration");
                 }
             }
         } catch (EOFException ignore) {
