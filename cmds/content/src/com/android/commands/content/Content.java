@@ -69,6 +69,7 @@ public class Content {
         + "  <COLUMN_NAME>:<TYPE>:<COLUMN_VALUE> where:\n"
         + "  <TYPE> specifies data type such as:\n"
         + "  b - boolean, s - string, i - integer, l - long, f - float, d - double\n"
+        + "  Note: Omit the value for passing an empty string, e.g column:s:\n"
         + "  Example:\n"
         + "  # Add \"new_setting\" secure setting with value \"new_value\".\n"
         + "  adb shell content insert --uri content://settings/secure --bind name:s:new_setting"
@@ -245,13 +246,17 @@ public class Content {
             if (TextUtils.isEmpty(argument)) {
                 throw new IllegalArgumentException("Binding not well formed: " + argument);
             }
-            String[] binding = argument.split(COLON);
-            if (binding.length != 3) {
+            final int firstColonIndex = argument.indexOf(COLON);
+            if (firstColonIndex < 0) {
                 throw new IllegalArgumentException("Binding not well formed: " + argument);
             }
-            String column = binding[0];
-            String type = binding[1];
-            String value = binding[2];
+            final int secondColonIndex = argument.indexOf(COLON, firstColonIndex + 1);
+            if (secondColonIndex < 0) {
+                throw new IllegalArgumentException("Binding not well formed: " + argument);
+            }
+            String column = argument.substring(0, firstColonIndex);
+            String type = argument.substring(firstColonIndex + 1, secondColonIndex);
+            String value = argument.substring(secondColonIndex + 1);
             if (TYPE_STRING.equals(type)) {
                 values.put(column, value);
             } else if (TYPE_BOOLEAN.equalsIgnoreCase(type)) {
