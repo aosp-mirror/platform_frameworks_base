@@ -2012,7 +2012,6 @@ bool AudioFlinger::MixerThread::threadLoop()
     uint32_t sleepTime = idleSleepTime;
 
     uint32_t sleepTimeShift = 0;
-    Vector< sp<EffectChain> > effectChains;
     CpuStats cpuStats;
 
     // DirectOutputThread has shorter standbyDelay
@@ -2024,6 +2023,8 @@ bool AudioFlinger::MixerThread::threadLoop()
         cpuStats.sample();
 
         // DirectOutputThread has rampVolume, leftVol, rightVol
+
+        Vector< sp<EffectChain> > effectChains;
 
         processConfigEvents();
 
@@ -2200,6 +2201,9 @@ bool AudioFlinger::MixerThread::threadLoop()
         // Effect chains will be actually deleted here if they were removed from
         // mEffectChains list during mixing or effects processing
         effectChains.clear();
+
+        // FIXME Note that the above .clear() is no longer necessary since effectChains
+        // is now local to this block, but will keep it for now (at least until merge done).
     }
 
     // put output stream into standby mode
@@ -3022,6 +3026,9 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
         // Effect chains will be actually deleted here if they were removed from
         // mEffectChains list during mixing or effects processing
         effectChains.clear();
+
+        // FIXME Note that the above .clear() is no longer necessary since effectChains
+        // is now local to this block, but will keep it for now (at least until merge done).
     }
 
     // put output stream into standby mode
@@ -3158,13 +3165,14 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
     uint32_t activeSleepTime = activeSleepTimeUs();
     uint32_t idleSleepTime = idleSleepTimeUs();
     uint32_t sleepTime = idleSleepTime;
-    Vector< sp<EffectChain> > effectChains;
 
     acquireWakeLock();
 
     while (!exitPending())
     {
         // MixerThread has cpuStats.sample
+
+        Vector< sp<EffectChain> > effectChains;
 
         processConfigEvents();
 
@@ -3302,6 +3310,9 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
         // Effect chains will be actually deleted here if they were removed from
         // mEffectChains list during mixing or effects processing
         effectChains.clear();
+
+        // FIXME Note that the above .clear() is no longer necessary since effectChains
+        // is now local to this block, but will keep it for now (at least until merge done).
     }
 
     // MixerThread and DirectOutpuThread have standby here,
