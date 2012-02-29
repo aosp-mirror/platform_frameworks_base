@@ -80,6 +80,10 @@ Android Design - Multi-pane Layouts
             </ul>
           </li>
 
+          <li class="nav-section">
+            <div class="nav-section-header empty"><a href="../downloads/index.html">Downloads</a></div>
+          </li>
+
           <li>
             <div id="back-dac-section"><a href="../../index.html">Developers</a></div>
           </li>
@@ -108,7 +112,8 @@ layout by adjusting its content to varying screen sizes and orientations.</p>
 <p><em>Panels</em> are a great way for your app to achieve this. They allow you to combine multiple views into
 one compound view when a lot of horizontal screen real estate is available and by splitting them up
 when less space is available.</p>
-<h2>Combining Multiple Views Into One</h2>
+<h2 id="combining-views">Combining Multiple Views Into One</h2>
+
 <p>On smaller devices your content is typically divided into a master grid or list view and a detail
 view. Touching an item in the master view opens a different screen showing that item's detail
 information.</p>
@@ -124,7 +129,8 @@ and makes navigating the app easier. </p>
 <p>In general, use the pane on the right to present more information about the item you selected in the
 left pane. Make sure to keep the item in the left pane selected in order to establish the
 relationship between the panels.</p>
-<h2>Compound Views and Orientation Changes</h2>
+<h2 id="orientation">Compound Views and Orientation Changes</h2>
+
 <p>Screens should have the same functionality regardless of orientation. If you use a compound view in
 one orientation, don't split it up when the user rotates the screen. There are several techniques
 you can use to adjust the layout after orientation change while keeping functional parity intact.</p>
@@ -189,7 +195,8 @@ the content in the detail panel.</p>
   </div>
 </div>
 
-<h2>Checklist</h2>
+<h2 id="checklist">Checklist</h2>
+
 <ul>
 <li>
 <p>Plan in advance on how your app scales to different screen sizes and screen orientations.</p>
