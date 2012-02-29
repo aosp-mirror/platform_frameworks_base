@@ -27,8 +27,7 @@
 #include <media/stagefright/Utils.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/ALooper.h>
-
-#include "TimedTextDriver.h"
+#include <media/stagefright/timedtext/TimedTextDriver.h>
 
 #include "TextDescriptions.h"
 #include "TimedTextPlayer.h"

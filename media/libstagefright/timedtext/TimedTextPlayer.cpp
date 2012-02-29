@@ -20,12 +20,12 @@
 
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/timedtext/TimedTextDriver.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/MediaPlayerInterface.h>
 
 #include "TimedTextPlayer.h"
 
-#include "TimedTextDriver.h"
 #include "TimedTextSource.h"
 
 namespace android {

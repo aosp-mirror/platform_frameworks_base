@@ -30,13 +30,12 @@
 #include "include/MPEG2TSExtractor.h"
 #include "include/WVMExtractor.h"
 
-#include "timedtext/TimedTextDriver.h"
-
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/timedtext/TimedTextDriver.h>
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
