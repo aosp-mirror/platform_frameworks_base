@@ -1464,7 +1464,7 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
         mMasterVolume(audioFlinger->masterVolumeSW_l()),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
 {
-    snprintf(mName, kNameLength, "AudioOut_%d", id);
+    snprintf(mName, kNameLength, "AudioOut_%X", id);
 
     readOutputParameters();
 
@@ -4870,7 +4870,7 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger,
     // mBytesRead is only meaningful while active, and so is cleared in start()
     // (but might be better to also clear here for dump?)
 {
-    snprintf(mName, kNameLength, "AudioIn_%d", id);
+    snprintf(mName, kNameLength, "AudioIn_%X", id);
 
     readInputParameters();
 }

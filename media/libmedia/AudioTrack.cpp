@@ -370,7 +370,7 @@ void AudioTrack::start()
         android_atomic_and(~CBLK_DISABLED_ON, &cblk->flags);
         pid_t tid;
         if (t != 0) {
-            t->run("AudioTrackThread", ANDROID_PRIORITY_AUDIO);
+            t->run("AudioTrack", ANDROID_PRIORITY_AUDIO);
             tid = t->getTid();  // pid_t is unknown until run()
             ALOGV("getTid=%d", tid);
             if (tid == -1) {

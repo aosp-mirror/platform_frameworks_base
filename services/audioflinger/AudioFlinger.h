@@ -549,7 +549,7 @@ private:
                     Vector< sp<EffectChain> > mEffectChains;
                     uint32_t                mDevice;    // output device for PlaybackThread
                                                         // input + output devices for RecordThread
-                    static const int        kNameLength = 32;
+                    static const int        kNameLength = 16;   // prctl(PR_SET_NAME) limit
                     char                    mName[kNameLength];
                     sp<IPowerManager>       mPowerManager;
                     sp<IBinder>             mWakeLockToken;
