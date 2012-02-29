@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"sovelluskomponenttien ottaminen käyttöön tai pois käytöstä"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Antaa sovelluksen muuttaa, onko toisen sovelluksen komponentti käytössä vai ei. Haitalliset sovellukset voivat käyttää tätä tablet-laitteen tärkeiden ominaisuuksien poistamiseen käytöstä. Tämän luvan käyttöönotto edellyttää varovaisuutta, sillä sen avulla sovelluskomponentit on mahdollista saada epäkäytettävään, epäyhtenäiseen tai epävakaaseen tilaan."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Antaa sovelluksen muuttaa sitä, onko toisen sovelluksen komponentti käytössä vai ei. Haitalliset sovellukset voivat käyttää tätä puhelimen tärkeiden ominaisuuksien poistamiseen käytöstä. Tämän luvan käyttöönotto edellyttää varovaisuutta, sillä sen avulla sovelluskomponentit on mahdollista saada epäkäytettävään, epäyhtenäiseen tai epävakaaseen tilaan."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"myönnä tai kiellä käyttöluvat"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Antaa sovelluksen myöntää tai kieltää tiettyjä käyttööoikeuksia itselleen tai muille sovelluksille. Haittaohjelmat voivat käyttää tämän ominaisuuden avulla toimintoja, joiden käyttöön et ole antanut lupaa."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ensisijaisten sovellusten asettaminen"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Antaa sovelluksen muokata ensisijaisia sovelluksia. Haitalliset sovellukset voivat muuttaa käynnistettäviä sovelluksia huomaamattomasti ja kerätä henkilökohtaisia tietoja matkimalla nykyisiä sovelluksia."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"muokkaa yleisiä järjestelmän asetuksia"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Aseta päivämäärä"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Aseta"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Oletus"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"UUTTA: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Lupia ei tarvita"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Piilota"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Näytä kaikki"</b></string>

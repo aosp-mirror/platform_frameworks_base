@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"เปิดหรือปิดใช้งานคอมโพเนนต์ของแอปพลิเคชัน"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงการเปิดใช้งานส่วนประกอบของแอปพลิเคชันอื่น แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ปิดใช้งานความสามารถของแท็บเล็ตที่สำคัญ ต้องใช้ความระมัดระวังสำหรับการอนุญาตนี้ เนื่องจากอาจทำให้ส่วนประกอบต่างๆ ของแอปพลิเคชันไม่สามารถใช้งาน ไม่สอดคล้อง หรือมีสถานะที่ไม่เสถียร"</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงการเปิดใช้งานส่วนประกอบของแอปพลิเคชันอื่น แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ปิดใช้งานความสามารถที่สำคัญของโทรศัพท์ ต้องใช้ความระมัดระวังสำหรับการอนุญาตนี้เนื่องจากอาจทำให้ส่วนประกอบต่างๆ ของแอปพลิเคชันไม่สามารถใช้งาน ไม่สอดคล้อง หรือมีสถานะที่ไม่เสถียร"</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"อนุญาตหรือยกเลิกการอนุญาต"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"อนุญาตให้แอปพลิเคชันให้หรือยกเลิกการอนุญาตบางอย่างของตัวเองหรือแอปพลิเคชันอื่น แอปพลิเคชันที่เป็นอันตรายอาจใช้การทำงานนี้ในการเข้าถึงคุณลักษณะที่คุณไม่อนุญาต"</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ตั้งค่าแอปพลิเคชันที่ต้องการ"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"อนุญาตให้แอปพลิเคชันแก้ไขแอปพลิเคชันต่างๆ ที่คุณชอบใช้ แอปพลิเคชันที่เป็นอันตรายอาจจะแอบเปลี่ยนแอปพลิเคชันที่กำลังทำงาน ปลอมแปลงเป็นแอปพลิเคชันที่มีอยู่ของคุณเพื่อรวบรวมข้อมูลส่วนบุคคลจากคุณ"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"แก้ไขการตั้งค่าระบบสากล"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ตั้งวันที่"</string>
     <string name="date_time_set" msgid="5777075614321087758">"ตั้งค่า"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"เริ่มต้น"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"ใหม่: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"ไม่ต้องการการอนุญาต"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"ซ่อน"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"แสดงทั้งหมด"</b></string>

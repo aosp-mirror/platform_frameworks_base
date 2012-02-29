@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"एप्‍लिकेशन घटकों को सक्षम या अक्षम करें"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"एप्‍लिकेशन को यह बदलने देता है कि किसी अन्‍य एप्‍लिकेशन का घटक सक्षम है या नहीं. दुर्भावनापूर्ण एप्‍लिकेशन महत्‍वपूर्ण फ़ोन क्षमताओं को अक्षम करने में इसका उपयोग कर सकते हैं. इस अनुमति का उपयोग सावधानी के साथ करना चाहिए, क्योंकि इससे एप्‍लिकेशन घटकों के अनुपयोगी, असंगत, या अस्‍थिर स्‍थिति में जाने की संभावना है."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"एप्‍लिकेशन को यह बदलने देता है कि किसी अन्‍य एप्‍लिकेशन का घटक सक्षम है या नहीं. दुर्भावनापूर्ण एप्‍लिकेशन महत्‍वपूर्ण फ़ोन क्षमताओं को अक्षम करने में इसका उपयोग कर सकते हैं. इस अनुमति का उपयोग सावधानी के साथ करना चाहिए, क्योंकि इससे एप्‍लिकेशन घटकों के अनुपयोगी, असंगत, या अस्‍थिर स्‍थिति में जाने की संभावना है."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"अनुमति दें या रद्द करें"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"एप्लिकेशन को उसके या अन्य एप्लिकेशन के लिए विशेष अनुमतियां देने या रद्द करने देता है. दुर्भावनापूर्ण एप्लिकेशन इसका उपयोग उन विशेषताओं तक पहुंचने के लिए कर सकते हैं जो आपने उन्हें नहीं दी हैं."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"पसंदीदा एप्‍लिकेशन सेट करें"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"एप्लिकेशन को आपके पसंदीदा एप्लिकेशन को संशोधित करने देता है. दुर्भावनापूर्ण एप्लिकेशन आपसे निजी डेटा एकत्रित करने के लिए आपके मौजूदा एप्लिकेशन को स्पूफ़ करके, चलाए जाने वाले एप्लिकेशन को चुपचाप बदल सकते हैं."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"वैश्विक सिस्‍टम सेटिंग संशोधित करें"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"दिनांक सेट करें"</string>
     <string name="date_time_set" msgid="5777075614321087758">"सेट करें"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"डिफ़ॉल्ट"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"नया: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"किसी अनुमति की आवश्‍यकता नहीं है"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"छुपाएं"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"सभी दिखाएं"</b></string>

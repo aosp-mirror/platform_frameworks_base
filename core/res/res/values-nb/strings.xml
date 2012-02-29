@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivere eller deaktivere appkomponenter"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Lar appen endre hvorvidt en komponent i en annen app er aktivert eller ikke. Ondsinnede apper kan bruke dette til å deaktivere viktige nettbrettfunksjoner. Denne tillatelsen må brukes med forsiktighet, ettersom det er mulig å få appkomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Lar appen endre hvorvidt en komponent i en annen app er aktivert eller ikke. Ondsinnede apper kan bruke dette til å deaktivere viktige telefonfunksjoner. Denne tillatelsen må brukes med forsiktighet, ettersom det er mulig å få appkomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"gi eller trekke tilbake tillatelser"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Lar et program gi eller trekke tilbake spesielle tillatelser for eget bruk eller for andre programmer. Skadelige programmer kan bruke dette for å få tilgang til funksjoner de ikke skal ha tilgang til."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"angi foretrukne apper"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Lar appen endre de foretrukne appene dine. Ondsinnede apper kan ubemerket endre apper som kjøres, og forfalske eksisterende apper til å samle private data fra deg."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"endre globale systeminnstillinger"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angi dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Lagre"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NY: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Trenger ingen rettigheter"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Skjul"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Vis alle"</b></string>

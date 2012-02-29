@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"omogućavanje ili onemogućavanje komponenti aplikacije"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Omogućuje aplikaciji da promijeni hoće li komponenta neke druge aplikacije biti omogućena ili neće. Zlonamjerne aplikacije mogu to upotrijebiti da bi onemogućile važne mogućnosti tabletnog računala. Treba biti oprezan s tom dozvolom jer je moguće dovesti komponente aplikacija u neupotrebljivo, nedosljedno ili nestabilno stanje."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Omogućuje aplikaciji da promijeni hoće li komponenta neke druge aplikacije biti omogućena. Zlonamjerne aplikacije mogu to upotrijebiti da bi onemogućile važne mogućnosti telefona. Treba biti oprezan s tom dozvolom jer je moguće dovesti komponente aplikacija u neupotrebljivo, nedosljedno ili nestabilno stanje."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"dati ili oduzeti dopuštenja"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Aplikaciji omogućuje da odobri ili odbije određena dopuštenja za sebe ili druge aplikacije. Zlonamjerne aplikacije to mogu upotrijebiti za pristup značajkama za koje im niste odobrili pristup."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"postavljanje željenih aplikacija"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Omogućuje aplikaciji promjenu vaših željenih aplikacija. Zlonamjerne aplikacije mogu potajno promijeniti aplikacije koje su pokrenute, zavaravajući vaše postojeće aplikacije kako bi prikupljale privatne podatke od vas."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"izmjena postavki globalnog sustava"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Postavi datum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Postavi"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Zadano"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NOVO: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Nije potrebno dopuštenje"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Sakrij"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Pokaži sve"</b></string>

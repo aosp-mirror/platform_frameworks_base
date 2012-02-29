@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"bật hoặc tắt cấu phần ứng dụng"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Cho phép ứng dụng thay đổi việc có bật cấu phần của ứng dụng khác hay không. Ứng dụng độc hại có thể sử dụng quyền này để vô hiệu hóa những tính năng quan trọng của máy tính bảng. Phải cẩn trọng khi sử dụng quyền này vì quyền này có thể khiến các cấu phần rơi vào trạng thái không sử dụng được, không đồng nhất hoặc không ổn định."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Cho phép ứng dụng thay đổi việc có bật cấu phần của một ứng dụng khác hay không. Ứng dụng độc hại có thể sử dụng quyền này để tắt những tính năng quan trọng của điện thoại. Phải sử dụng quyền này thận trọng vì có thể khiến các cấu phần của ứng dụng rơi vào trạng thái không thể sử dụng được, không đồng nhất hoặc không ổn định."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"cấp hoặc thu hồi quyền"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Cho phép ứng dụng cấp hoặc thu hồi quyền cụ thể đối với ứng dụng đó hoặc các ứng dụng khác. Các ứng dụng độc hại có thể lợi dụng điều này để truy cập các tính năng mà bạn không cấp."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"đặt ứng dụng ưa thích"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Cho phép ứng dụng sửa đổi ứng dụng ưa thích của bạn. Ứng dụng độc hại có thể ngầm thay đổi các ứng dụng đã được chạy, giả mạo các ứng dụng hiện có để thu thập dữ liệu cá nhân của bạn."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"sửa đổi cài đặt hệ thống chung"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Đặt ngày"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Đặt"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Mặc định"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"MỚI: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Không yêu cầu quyền"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ẩn"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Hiển thị tất cả"</b></string>

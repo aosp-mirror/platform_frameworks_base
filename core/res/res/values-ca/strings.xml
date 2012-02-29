@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activa o desactiva els components de l\'aplicació"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Permet que l\'aplicació canviï si un component d\'una altra aplicació està activat o no. Les aplicacions malicioses poden utilitzar aquesta funció per desactivar funcions importants de la tauleta. Cal anar amb compte amb aquest permís, ja que és possible que els components de l\'aplicació esdevinguin inutilitzables, incoherents o inestables."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Permet que l\'aplicació canviï si un component d\'una altra aplicació està activat o no. Les aplicacions malicioses poden utilitzar aquesta funció per desactivar funcions importants del telèfon. Cal anar amb compte amb aquest permís, perquè és possible que els components de l\'aplicació esdevinguin inutilitzables, incoherents o inestables."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"concedeix o denega permisos"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Permet que una aplicació concedeixi o denegui permisos específics per a aquesta o per a altres aplicacions. És possible que les aplicacions malicioses ho facin servir per accedir a funcions a les quals no heu concedit accés."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"defineix les aplicacions preferides"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Permet que l\'aplicació modifiqui les aplicacions preferides. Les aplicacions malicioses poden canviar silenciosament les aplicacions que s\'executen, falsejar les aplicacions existents o recollir dades privades de l\'usuari."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modificar la configuració global del sistema"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Establiment de data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Defineix"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predeterminat"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NOU: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"No cal cap permís"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Amaga"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostra\'ls tots"</b></string>
