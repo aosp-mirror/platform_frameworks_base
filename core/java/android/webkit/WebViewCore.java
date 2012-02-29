@@ -923,13 +923,14 @@ public final class WebViewCore {
     static class TextFieldInitData {
         public TextFieldInitData(int fieldPointer,
                 String text, int type, boolean isSpellCheckEnabled,
-                boolean isTextFieldNext, String label) {
+                boolean isTextFieldNext, String label, int maxLength) {
             mFieldPointer = fieldPointer;
             mText = text;
             mType = type;
             mIsSpellCheckEnabled = isSpellCheckEnabled;
             mIsTextFieldNext = isTextFieldNext;
             mLabel = label;
+            mMaxLength = maxLength;
         }
         int mFieldPointer;
         String mText;
@@ -937,6 +938,7 @@ public final class WebViewCore {
         boolean mIsSpellCheckEnabled;
         boolean mIsTextFieldNext;
         String mLabel;
+        int mMaxLength;
     }
 
     // mAction of TouchEventData can be MotionEvent.getAction() which uses the
@@ -2826,12 +2828,13 @@ public final class WebViewCore {
     // called by JNI
     private void initEditField(int pointer, String text, int inputType,
             boolean isSpellCheckEnabled, boolean nextFieldIsText,
-            String label, int start, int end, int selectionPtr) {
+            String label, int start, int end, int selectionPtr, int maxLength) {
         if (mWebView == null) {
             return;
         }
         TextFieldInitData initData = new TextFieldInitData(pointer,
-                text, inputType, isSpellCheckEnabled, nextFieldIsText, label);
+                text, inputType, isSpellCheckEnabled, nextFieldIsText, label,
+                maxLength);
         Message.obtain(mWebView.mPrivateHandler,
                 WebView.INIT_EDIT_FIELD, initData).sendToTarget();
         Message.obtain(mWebView.mPrivateHandler,
