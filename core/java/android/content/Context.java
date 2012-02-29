@@ -1646,6 +1646,17 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
+     * android.os.IUpdateLock} for managing runtime sequences that
+     * must not be interrupted by headless OTA application or similar.
+     *
+     * @hide
+     * @see #getSystemService
+     * @see android.os.UpdateLock
+     */
+    public static final String UPDATE_LOCK_SERVICE = "updatelock";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
      * android.net.NetworkManagementService} for handling management of
      * system network services
      *
