@@ -295,7 +295,7 @@ static int decode(
     for (size_t i = 0; i < stateByTrack.size(); ++i) {
         CodecState *state = &stateByTrack.editValueAt(i);
 
-        CHECK_EQ((status_t)OK, state->mCodec->stop());
+        CHECK_EQ((status_t)OK, state->mCodec->release());
     }
 
     return 0;

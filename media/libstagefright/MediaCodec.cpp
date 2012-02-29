@@ -164,6 +164,13 @@ status_t MediaCodec::stop() {
     return PostAndAwaitResponse(msg, &response);
 }
 
+status_t MediaCodec::release() {
+    sp<AMessage> msg = new AMessage(kWhatRelease, id());
+
+    sp<AMessage> response;
+    return PostAndAwaitResponse(msg, &response);
+}
+
 status_t MediaCodec::queueInputBuffer(
         size_t index,
         size_t offset,
@@ -422,6 +429,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                         }
 
                         case STOPPING:
+                        case RELEASING:
                         {
                             // Ignore the error, assuming we'll still get
                             // the shutdown complete notification.
@@ -577,7 +585,9 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                 {
                     /* size_t index = */updateBuffers(kPortIndexInput, msg);
 
-                    if (mState == FLUSHING || mState == STOPPING) {
+                    if (mState == FLUSHING
+                            || mState == STOPPING
+                            || mState == RELEASING) {
                         returnBuffersToCodecOnPort(kPortIndexInput);
                         break;
                     }
@@ -596,7 +606,9 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                 {
                     /* size_t index = */updateBuffers(kPortIndexOutput, msg);
 
-                    if (mState == FLUSHING || mState == STOPPING) {
+                    if (mState == FLUSHING
+                            || mState == STOPPING
+                            || mState == RELEASING) {
                         returnBuffersToCodecOnPort(kPortIndexOutput);
                         break;
                     }
@@ -628,8 +640,12 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
 
                 case ACodec::kWhatShutdownCompleted:
                 {
-                    CHECK_EQ(mState, STOPPING);
-                    setState(UNINITIALIZED);
+                    if (mState == STOPPING) {
+                        setState(INITIALIZED);
+                    } else {
+                        CHECK_EQ(mState, RELEASING);
+                        setState(UNINITIALIZED);
+                    }
 
                     (new AMessage)->postReply(mReplyID);
                     break;
@@ -766,6 +782,28 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
 
             mReplyID = replyID;
             setState(STOPPING);
+
+            mCodec->initiateShutdown(true /* keepComponentAllocated */);
+            returnBuffersToCodec();
+            break;
+        }
+
+        case kWhatRelease:
+        {
+            uint32_t replyID;
+            CHECK(msg->senderAwaitsResponse(&replyID));
+
+            if (mState != INITIALIZED
+                    && mState != CONFIGURED && mState != STARTED) {
+                sp<AMessage> response = new AMessage;
+                response->setInt32("err", INVALID_OPERATION);
+
+                response->postReply(replyID);
+                break;
+            }
+
+            mReplyID = replyID;
+            setState(RELEASING);
 
             mCodec->initiateShutdown();
             returnBuffersToCodec();

@@ -165,14 +165,32 @@ struct ACodec::UninitializedState : public ACodec::BaseState {
 
 protected:
     virtual bool onMessageReceived(const sp<AMessage> &msg);
+    virtual void stateEntered();
 
 private:
     void onSetup(const sp<AMessage> &msg);
-    void onAllocateComponent(const sp<AMessage> &msg);
-    void onConfigureComponent(const sp<AMessage> &msg);
-    void onStart();
+    bool onAllocateComponent(const sp<AMessage> &msg);
 
     DISALLOW_EVIL_CONSTRUCTORS(UninitializedState);
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct ACodec::LoadedState : public ACodec::BaseState {
+    LoadedState(ACodec *codec);
+
+protected:
+    virtual bool onMessageReceived(const sp<AMessage> &msg);
+    virtual void stateEntered();
+
+private:
+    friend struct ACodec::UninitializedState;
+
+    bool onConfigureComponent(const sp<AMessage> &msg);
+    void onStart();
+    void onShutdown(bool keepComponentAllocated);
+
+    DISALLOW_EVIL_CONSTRUCTORS(LoadedState);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -312,8 +330,10 @@ private:
 ACodec::ACodec()
     : mNode(NULL),
       mSentFormat(false),
-      mIsEncoder(false) {
+      mIsEncoder(false),
+      mShutdownInProgress(false) {
     mUninitializedState = new UninitializedState(this);
+    mLoadedState = new LoadedState(this);
     mLoadedToIdleState = new LoadedToIdleState(this);
     mIdleToExecutingState = new IdleToExecutingState(this);
     mExecutingState = new ExecutingState(this);
@@ -369,8 +389,10 @@ void ACodec::signalResume() {
     (new AMessage(kWhatResume, id()))->post();
 }
 
-void ACodec::initiateShutdown() {
-    (new AMessage(kWhatShutdown, id()))->post();
+void ACodec::initiateShutdown(bool keepComponentAllocated) {
+    sp<AMessage> msg = new AMessage(kWhatShutdown, id());
+    msg->setInt32("keepComponentAllocated", keepComponentAllocated);
+    msg->post();
 }
 
 status_t ACodec::allocateBuffersOnPort(OMX_U32 portIndex) {
@@ -2492,6 +2514,10 @@ ACodec::UninitializedState::UninitializedState(ACodec *codec)
     : BaseState(codec) {
 }
 
+void ACodec::UninitializedState::stateEntered() {
+    ALOGV("Now uninitialized");
+}
+
 bool ACodec::UninitializedState::onMessageReceived(const sp<AMessage> &msg) {
     bool handled = false;
 
@@ -2511,22 +2537,13 @@ bool ACodec::UninitializedState::onMessageReceived(const sp<AMessage> &msg) {
             break;
         }
 
-        case ACodec::kWhatConfigureComponent:
-        {
-            onConfigureComponent(msg);
-            handled = true;
-            break;
-        }
-
-        case ACodec::kWhatStart:
-        {
-            onStart();
-            handled = true;
-            break;
-        }
-
         case ACodec::kWhatShutdown:
         {
+            int32_t keepComponentAllocated;
+            CHECK(msg->findInt32(
+                        "keepComponentAllocated", &keepComponentAllocated));
+            CHECK(!keepComponentAllocated);
+
             sp<AMessage> notify = mCodec->mNotify->dup();
             notify->setInt32("what", ACodec::kWhatShutdownCompleted);
             notify->post();
@@ -2554,22 +2571,16 @@ bool ACodec::UninitializedState::onMessageReceived(const sp<AMessage> &msg) {
 
 void ACodec::UninitializedState::onSetup(
         const sp<AMessage> &msg) {
-    onAllocateComponent(msg);
-    onConfigureComponent(msg);
-    onStart();
+    if (onAllocateComponent(msg)
+            && mCodec->mLoadedState->onConfigureComponent(msg)) {
+        mCodec->mLoadedState->onStart();
+    }
 }
 
-void ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
+bool ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
     ALOGV("onAllocateComponent");
 
-    if (mCodec->mNode != NULL) {
-        CHECK_EQ(mCodec->mOMX->freeNode(mCodec->mNode), (status_t)OK);
-
-        mCodec->mNativeWindow.clear();
-        mCodec->mNode = NULL;
-        mCodec->mOMX.clear();
-        mCodec->mComponentName.clear();
-    }
+    CHECK(mCodec->mNode == NULL);
 
     OMXClient client;
     CHECK_EQ(client.connect(), (status_t)OK);
@@ -2628,7 +2639,7 @@ void ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
         }
 
         mCodec->signalError(OMX_ErrorComponentNotFound);
-        return;
+        return false;
     }
 
     sp<AMessage> notify = new AMessage(kWhatOMXMessage, mCodec->id());
@@ -2649,9 +2660,96 @@ void ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
         notify->setString("componentName", mCodec->mComponentName.c_str());
         notify->post();
     }
+
+    mCodec->changeState(mCodec->mLoadedState);
+
+    return true;
 }
 
-void ACodec::UninitializedState::onConfigureComponent(
+////////////////////////////////////////////////////////////////////////////////
+
+ACodec::LoadedState::LoadedState(ACodec *codec)
+    : BaseState(codec) {
+}
+
+void ACodec::LoadedState::stateEntered() {
+    ALOGV("[%s] Now Loaded", mCodec->mComponentName.c_str());
+
+    if (mCodec->mShutdownInProgress) {
+        bool keepComponentAllocated = mCodec->mKeepComponentAllocated;
+
+        mCodec->mShutdownInProgress = false;
+        mCodec->mKeepComponentAllocated = false;
+
+        onShutdown(keepComponentAllocated);
+    }
+}
+
+void ACodec::LoadedState::onShutdown(bool keepComponentAllocated) {
+    if (!keepComponentAllocated) {
+        CHECK_EQ(mCodec->mOMX->freeNode(mCodec->mNode), (status_t)OK);
+
+        mCodec->mNativeWindow.clear();
+        mCodec->mNode = NULL;
+        mCodec->mOMX.clear();
+        mCodec->mComponentName.clear();
+
+        mCodec->changeState(mCodec->mUninitializedState);
+    }
+
+    sp<AMessage> notify = mCodec->mNotify->dup();
+    notify->setInt32("what", ACodec::kWhatShutdownCompleted);
+    notify->post();
+}
+
+bool ACodec::LoadedState::onMessageReceived(const sp<AMessage> &msg) {
+    bool handled = false;
+
+    switch (msg->what()) {
+        case ACodec::kWhatConfigureComponent:
+        {
+            onConfigureComponent(msg);
+            handled = true;
+            break;
+        }
+
+        case ACodec::kWhatStart:
+        {
+            onStart();
+            handled = true;
+            break;
+        }
+
+        case ACodec::kWhatShutdown:
+        {
+            int32_t keepComponentAllocated;
+            CHECK(msg->findInt32(
+                        "keepComponentAllocated", &keepComponentAllocated));
+
+            onShutdown(keepComponentAllocated);
+
+            handled = true;
+            break;
+        }
+
+        case ACodec::kWhatFlush:
+        {
+            sp<AMessage> notify = mCodec->mNotify->dup();
+            notify->setInt32("what", ACodec::kWhatFlushCompleted);
+            notify->post();
+
+            handled = true;
+            break;
+        }
+
+        default:
+            return BaseState::onMessageReceived(msg);
+    }
+
+    return handled;
+}
+
+bool ACodec::LoadedState::onConfigureComponent(
         const sp<AMessage> &msg) {
     ALOGV("onConfigureComponent");
 
@@ -2664,7 +2762,7 @@ void ACodec::UninitializedState::onConfigureComponent(
 
     if (err != OK) {
         mCodec->signalError(OMX_ErrorUndefined, err);
-        return;
+        return false;
     }
 
     sp<RefBase> obj;
@@ -2682,9 +2780,11 @@ void ACodec::UninitializedState::onConfigureComponent(
         notify->setInt32("what", ACodec::kWhatComponentConfigured);
         notify->post();
     }
+
+    return true;
 }
 
-void ACodec::UninitializedState::onStart() {
+void ACodec::LoadedState::onStart() {
     ALOGV("onStart");
 
     CHECK_EQ(mCodec->mOMX->sendCommand(
@@ -2873,6 +2973,13 @@ bool ACodec::ExecutingState::onMessageReceived(const sp<AMessage> &msg) {
     switch (msg->what()) {
         case kWhatShutdown:
         {
+            int32_t keepComponentAllocated;
+            CHECK(msg->findInt32(
+                        "keepComponentAllocated", &keepComponentAllocated));
+
+            mCodec->mShutdownInProgress = true;
+            mCodec->mKeepComponentAllocated = keepComponentAllocated;
+
             mActive = false;
 
             CHECK_EQ(mCodec->mOMX->sendCommand(
@@ -3210,20 +3317,7 @@ bool ACodec::IdleToLoadedState::onOMXEvent(
             CHECK_EQ(data1, (OMX_U32)OMX_CommandStateSet);
             CHECK_EQ(data2, (OMX_U32)OMX_StateLoaded);
 
-            ALOGV("[%s] Now Loaded", mCodec->mComponentName.c_str());
-
-            CHECK_EQ(mCodec->mOMX->freeNode(mCodec->mNode), (status_t)OK);
-
-            mCodec->mNativeWindow.clear();
-            mCodec->mNode = NULL;
-            mCodec->mOMX.clear();
-            mCodec->mComponentName.clear();
-
-            mCodec->changeState(mCodec->mUninitializedState);
-
-            sp<AMessage> notify = mCodec->mNotify->dup();
-            notify->setInt32("what", ACodec::kWhatShutdownCompleted);
-            notify->post();
+            mCodec->changeState(mCodec->mLoadedState);
 
             return true;
         }
