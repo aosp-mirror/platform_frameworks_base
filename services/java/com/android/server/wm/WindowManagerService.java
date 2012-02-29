@@ -146,7 +146,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean DEBUG_ADD_REMOVE = false;
-    static final boolean DEBUG_FOCUS = true;
+    static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_ANIM = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_RESIZE = false;
@@ -162,13 +162,13 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_APP_TRANSITIONS = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_REORDER = false;
-    static final boolean DEBUG_WALLPAPER = true;
+    static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_DRAG = false;
     static final boolean DEBUG_SCREEN_ON = false;
     static final boolean DEBUG_SCREENSHOT = false;
     static final boolean DEBUG_BOOT = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
-    static final boolean SHOW_TRANSACTIONS = true;
+    static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
     static final boolean HIDE_STACK_CRAWLS = true;
 
@@ -7685,8 +7685,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                final boolean wasAnimating = w.mWasAnimating;
-
                 // If the window has moved due to its containing
                 // content frame changing, then we'd like to animate
                 // it.  The checks here are ordered by what is least
@@ -7705,8 +7703,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     w.mAnimDh = innerDh;
                 }
 
-                // Execute animation.
-                final boolean nowAnimating = w.isAnimating();
+                final boolean wasAnimating = w.mWasAnimating;
+                final boolean nowAnimating = w.mLocalAnimating;
+
+                if (DEBUG_WALLPAPER) {
+                    Slog.v(TAG, w + ": wasAnimating=" + wasAnimating +
+                            ", nowAnimating=" + nowAnimating);
+                }
 
                 // If this window is animating, make a note that we have
                 // an animating window and take care of a request to run
