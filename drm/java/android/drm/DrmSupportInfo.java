@@ -36,8 +36,16 @@ public class DrmSupportInfo {
      * Adds the specified MIME type to the list of MIME types this DRM plug-in supports.
      *
      * @param mimeType MIME type that can be handles by this DRM plug-in.
+     * Must not be null or an empty string.
      */
     public void addMimeType(String mimeType) {
+        if (mimeType == null) {
+            throw new IllegalArgumentException("mimeType is null");
+        }
+        if (mimeType == "") {
+            throw new IllegalArgumentException("mimeType is an empty string");
+        }
+
         mMimeTypeList.add(mimeType);
     }
 
@@ -45,8 +53,14 @@ public class DrmSupportInfo {
      * Adds the specified file suffix to the list of file suffixes this DRM plug-in supports.
      *
      * @param fileSuffix File suffix that can be handled by this DRM plug-in.
+     * it could be null but not an empty string. When it is null, it indicates
+     * that some DRM content comes with no file suffix.
      */
     public void addFileSuffix(String fileSuffix) {
+        if (fileSuffix == "") {
+            throw new IllegalArgumentException("fileSuffix is an empty string");
+        }
+
         mFileSuffixList.add(fileSuffix);
     }
 
@@ -73,12 +87,18 @@ public class DrmSupportInfo {
     /**
      * Sets a description for the DRM plug-in (agent).
      *
-     * @param description Unique description of plug-in.
+     * @param description Unique description of plug-in. Must not be null
+     * or an empty string.
      */
     public void setDescription(String description) {
-        if (null != description) {
-            mDescription = description;
+        if (description == null) {
+            throw new IllegalArgumentException("description is null");
         }
+        if (description == "") {
+            throw new IllegalArgumentException("description is an empty string");
+        }
+
+        mDescription = description;
     }
 
     /**
@@ -93,7 +113,10 @@ public class DrmSupportInfo {
     }
 
     /**
-     * Retrieves the DRM plug-in (agent) description.
+     * Retrieves the DRM plug-in (agent) description. Even if null or an empty
+     * string is not allowed in {@link #setDescription(String)}, if
+     * {@link #setDescription(String)} is not called, description returned
+     * from this method is an empty string.
      *
      * @return The plug-in description.
      */
@@ -111,20 +134,21 @@ public class DrmSupportInfo {
     }
 
     /**
-     * Overridden <code>equals</code> implementation.
+     * Overridden <code>equals</code> implementation. Two DrmSupportInfo objects
+     * are considered being equal if they support exactly the same set of mime
+     * types, file suffixes, and has exactly the same description.
      *
      * @param object The object to be compared.
      * @return True if equal; false if not equal.
      */
     public boolean equals(Object object) {
-        boolean result = false;
-
         if (object instanceof DrmSupportInfo) {
-            result = mFileSuffixList.equals(((DrmSupportInfo) object).mFileSuffixList) &&
-                    mMimeTypeList.equals(((DrmSupportInfo) object).mMimeTypeList) &&
-                    mDescription.equals(((DrmSupportInfo) object).mDescription);
+            DrmSupportInfo info = (DrmSupportInfo) object;
+            return mFileSuffixList.equals(info.mFileSuffixList) &&
+                   mMimeTypeList.equals(info.mMimeTypeList) &&
+                   mDescription.equals(info.mDescription);
         }
-        return result;
+        return false;
     }
 
     /**
@@ -132,11 +156,17 @@ public class DrmSupportInfo {
      *
      * @param mimeType MIME type.
      * @return True if Mime type is supported; false if MIME type is not supported.
+     * Null or empty string is not a supported mimeType.
      */
     /* package */ boolean isSupportedMimeType(String mimeType) {
         if (null != mimeType && !mimeType.equals("")) {
             for (int i = 0; i < mMimeTypeList.size(); i++) {
                 String completeMimeType = mMimeTypeList.get(i);
+
+                // The reason that equals() is not used is that sometimes,
+                // content distributor might just append something to
+                // the basic MIME type. startsWith() is used to avoid
+                // frequent update of DRM agent.
                 if (completeMimeType.startsWith(mimeType)) {
                     return true;
                 }

@@ -17,53 +17,81 @@
 package android.drm;
 
 /**
- * An entity class that wraps the result of communication between a device and an online DRM
- * server. Specifically, when the {@link DrmManagerClient#processDrmInfo processDrmInfo()} method
- * is called, an instance of <code>DrmInfoStatus</code> is returned.
+ * An entity class that wraps the result of communication between a device
+ * and an online DRM server. Specifically, when the
+ * {@link DrmManagerClient#processDrmInfo DrmManagerClient.processDrmInfo()}
+ * method is called, an instance of <code>DrmInfoStatus</code> is returned.
  *<p>
- * This class contains the {@link ProcessedData} object, which can be used to instantiate a
- * {@link DrmRights} object during license acquisition.
+ * This class contains the {@link ProcessedData} object, which can be used
+ * to instantiate a {@link DrmRights} object during license acquisition.
  *
  */
 public class DrmInfoStatus {
-    // Should be in sync with DrmInfoStatus.cpp
+    // The following status code constants must be in sync with DrmInfoStatus.cpp
+    // Please update isValidStatusCode() if more status codes are added.
+    /**
+     * Indicate successful communication.
+     */
     public static final int STATUS_OK = 1;
+
+    /**
+     * Indicate failed communication.
+     */
     public static final int STATUS_ERROR = 2;
 
     /**
-     * The status of the communication.
+     * The status of the communication. Must be one of the defined status
+     * constants above.
      */
     public final int statusCode;
     /**
-     * The type of DRM information processed.
+     * The type of DRM information processed. Must be one of the valid type
+     * constants defined in {@link DrmInfoRequest}.
      */
     public final int infoType;
     /**
-     * The MIME type of the content.
+     * The MIME type of the content. Must not be null or an empty string.
      */
     public final String mimeType;
     /**
-     * The processed data.
+     * The processed data. It is optional and thus could be null. When it
+     * is null, it indicates that a particular call to
+     * {@link DrmManagerClient#processDrmInfo DrmManagerClient.processDrmInfo()}
+     * does not return any additional useful information except for the status code.
      */
     public final ProcessedData data;
 
     /**
      * Creates a <code>DrmInfoStatus</code> object with the specified parameters.
      *
-     * @param _statusCode The status of the communication.
-     * @param _infoType The type of the DRM information processed.
-     * @param _data The processed data.
-     * @param _mimeType The MIME type.
+     * @param statusCode The status of the communication. Must be one of the defined
+     * status constants above.
+     * @param infoType The type of the DRM information processed. Must be a valid
+     * type for {@link DrmInfoRequest}.
+     * @param data The processed data.
+     * @param mimeType The MIME type.
      */
-    public DrmInfoStatus(int _statusCode, int _infoType, ProcessedData _data, String _mimeType) {
-        if (!DrmInfoRequest.isValidType(_infoType)) {
-            throw new IllegalArgumentException("infoType: " + _infoType);
+    public DrmInfoStatus(int statusCode, int infoType, ProcessedData data, String mimeType) {
+        if (!DrmInfoRequest.isValidType(infoType)) {
+            throw new IllegalArgumentException("infoType: " + infoType);
         }
 
-        statusCode = _statusCode;
-        infoType = _infoType;
-        data = _data;
-        mimeType = _mimeType;
+        if (!isValidStatusCode(statusCode)) {
+            throw new IllegalArgumentException("Unsupported status code: " + statusCode);
+        }
+
+        if (mimeType == null || mimeType == "") {
+            throw new IllegalArgumentException("mimeType is null or an empty string");
+        }
+
+        this.statusCode = statusCode;
+        this.infoType = infoType;
+        this.data = data;
+        this.mimeType = mimeType;
+    }
+
+    private boolean isValidStatusCode(int statusCode) {
+        return statusCode == STATUS_OK || statusCode == STATUS_ERROR;
     }
 }
 
