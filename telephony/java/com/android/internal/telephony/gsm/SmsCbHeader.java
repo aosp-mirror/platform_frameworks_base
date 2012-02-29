@@ -16,28 +16,42 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.telephony.SmsCbConstants;
+import android.telephony.SmsCbCmasInfo;
+import android.telephony.SmsCbEtwsInfo;
 
-public class SmsCbHeader implements SmsCbConstants {
+import java.util.Arrays;
+
+/**
+ * Parses a 3GPP TS 23.041 cell broadcast message header. This class is public for use by
+ * CellBroadcastReceiver test cases, but should not be used by applications.
+ *
+ * All relevant header information is now sent as a Parcelable
+ * {@link android.telephony.SmsCbMessage} object in the "message" extra of the
+ * {@link android.provider.Telephony.Sms.Intents#SMS_CB_RECEIVED_ACTION} or
+ * {@link android.provider.Telephony.Sms.Intents#SMS_EMERGENCY_CB_RECEIVED_ACTION} intent.
+ * The raw PDU is no longer sent to SMS CB applications.
+ */
+class SmsCbHeader {
+
     /**
      * Length of SMS-CB header
      */
-    public static final int PDU_HEADER_LENGTH = 6;
+    static final int PDU_HEADER_LENGTH = 6;
 
     /**
      * GSM pdu format, as defined in 3gpp TS 23.041, section 9.4.1
      */
-    public static final int FORMAT_GSM = 1;
+    static final int FORMAT_GSM = 1;
 
     /**
      * UMTS pdu format, as defined in 3gpp TS 23.041, section 9.4.2
      */
-    public static final int FORMAT_UMTS = 2;
+    static final int FORMAT_UMTS = 2;
 
     /**
      * GSM pdu format, as defined in 3gpp TS 23.041, section 9.4.1.3
      */
-    public static final int FORMAT_ETWS_PRIMARY = 3;
+    static final int FORMAT_ETWS_PRIMARY = 3;
 
     /**
      * Message type value as defined in 3gpp TS 25.324, section 11.1.
@@ -47,34 +61,34 @@ public class SmsCbHeader implements SmsCbConstants {
     /**
      * Length of GSM pdus
      */
-    public static final int PDU_LENGTH_GSM = 88;
+    private static final int PDU_LENGTH_GSM = 88;
 
     /**
      * Maximum length of ETWS primary message GSM pdus
      */
-    public static final int PDU_LENGTH_ETWS = 56;
+    private static final int PDU_LENGTH_ETWS = 56;
 
-    public final int geographicalScope;
+    private final int geographicalScope;
 
-    public final int messageCode;
+    /** The serial number combines geographical scope, message code, and update number. */
+    private final int serialNumber;
 
-    public final int updateNumber;
+    /** The Message Identifier in 3GPP is the same as the Service Category in CDMA. */
+    private final int messageIdentifier;
 
-    public final int messageIdentifier;
+    private final int dataCodingScheme;
 
-    public final int dataCodingScheme;
+    private final int pageIndex;
 
-    public final int pageIndex;
+    private final int nrOfPages;
 
-    public final int nrOfPages;
+    private final int format;
 
-    public final int format;
+    /** ETWS warning notification info. */
+    private final SmsCbEtwsInfo mEtwsInfo;
 
-    public final boolean etwsEmergencyUserAlert;
-
-    public final boolean etwsPopup;
-
-    public final int etwsWarningType;
+    /** CMAS warning notification info. */
+    private final SmsCbCmasInfo mCmasInfo;
 
     public SmsCbHeader(byte[] pdu) throws IllegalArgumentException {
         if (pdu == null || pdu.length < PDU_HEADER_LENGTH) {
@@ -83,22 +97,31 @@ public class SmsCbHeader implements SmsCbConstants {
 
         if (pdu.length <= PDU_LENGTH_ETWS) {
             format = FORMAT_ETWS_PRIMARY;
-            geographicalScope = -1; //not applicable
-            messageCode = -1;
-            updateNumber = -1;
+            geographicalScope = (pdu[0] & 0xc0) >> 6;
+            serialNumber = ((pdu[0] & 0xff) << 8) | (pdu[1] & 0xff);
             messageIdentifier = ((pdu[2] & 0xff) << 8) | (pdu[3] & 0xff);
             dataCodingScheme = -1;
             pageIndex = -1;
             nrOfPages = -1;
-            etwsEmergencyUserAlert = (pdu[4] & 0x1) != 0;
-            etwsPopup = (pdu[5] & 0x80) != 0;
-            etwsWarningType = (pdu[4] & 0xfe) >> 1;
+            boolean emergencyUserAlert = (pdu[4] & 0x1) != 0;
+            boolean activatePopup = (pdu[5] & 0x80) != 0;
+            int warningType = (pdu[4] & 0xfe) >> 1;
+            byte[] warningSecurityInfo;
+            // copy the Warning-Security-Information, if present
+            if (pdu.length > PDU_HEADER_LENGTH) {
+                warningSecurityInfo = Arrays.copyOfRange(pdu, 6, pdu.length);
+            } else {
+                warningSecurityInfo = null;
+            }
+            mEtwsInfo = new SmsCbEtwsInfo(warningType, emergencyUserAlert, activatePopup,
+                    warningSecurityInfo);
+            mCmasInfo = null;
+            return;     // skip the ETWS/CMAS initialization code for regular notifications
         } else if (pdu.length <= PDU_LENGTH_GSM) {
             // GSM pdus are no more than 88 bytes
             format = FORMAT_GSM;
             geographicalScope = (pdu[0] & 0xc0) >> 6;
-            messageCode = ((pdu[0] & 0x3f) << 4) | ((pdu[1] & 0xf0) >> 4);
-            updateNumber = pdu[1] & 0x0f;
+            serialNumber = ((pdu[0] & 0xff) << 8) | (pdu[1] & 0xff);
             messageIdentifier = ((pdu[2] & 0xff) << 8) | (pdu[3] & 0xff);
             dataCodingScheme = pdu[4] & 0xff;
 
@@ -113,9 +136,6 @@ public class SmsCbHeader implements SmsCbConstants {
 
             this.pageIndex = pageIndex;
             this.nrOfPages = nrOfPages;
-            etwsEmergencyUserAlert = false;
-            etwsPopup = false;
-            etwsWarningType = -1;
         } else {
             // UMTS pdus are always at least 90 bytes since the payload includes
             // a number-of-pages octet and also one length octet per page
@@ -129,8 +149,7 @@ public class SmsCbHeader implements SmsCbConstants {
 
             messageIdentifier = ((pdu[1] & 0xff) << 8) | pdu[2] & 0xff;
             geographicalScope = (pdu[3] & 0xc0) >> 6;
-            messageCode = ((pdu[3] & 0x3f) << 4) | ((pdu[4] & 0xf0) >> 4);
-            updateNumber = pdu[4] & 0x0f;
+            serialNumber = ((pdu[3] & 0xff) << 8) | (pdu[4] & 0xff);
             dataCodingScheme = pdu[5] & 0xff;
 
             // We will always consider a UMTS message as having one single page
@@ -138,75 +157,251 @@ public class SmsCbHeader implements SmsCbConstants {
             // actual payload may contain several pages.
             pageIndex = 1;
             nrOfPages = 1;
-            etwsEmergencyUserAlert = false;
-            etwsPopup = false;
-            etwsWarningType = -1;
+        }
+
+        if (isEtwsMessage()) {
+            boolean emergencyUserAlert = isEtwsEmergencyUserAlert();
+            boolean activatePopup = isEtwsPopupAlert();
+            int warningType = getEtwsWarningType();
+            mEtwsInfo = new SmsCbEtwsInfo(warningType, emergencyUserAlert, activatePopup, null);
+            mCmasInfo = null;
+        } else if (isCmasMessage()) {
+            int messageClass = getCmasMessageClass();
+            int severity = getCmasSeverity();
+            int urgency = getCmasUrgency();
+            int certainty = getCmasCertainty();
+            mEtwsInfo = null;
+            mCmasInfo = new SmsCbCmasInfo(messageClass, SmsCbCmasInfo.CMAS_CATEGORY_UNKNOWN,
+                    SmsCbCmasInfo.CMAS_RESPONSE_TYPE_UNKNOWN, severity, urgency, certainty);
+        } else {
+            mEtwsInfo = null;
+            mCmasInfo = null;
+        }
+    }
+
+    int getGeographicalScope() {
+        return geographicalScope;
+    }
+
+    int getSerialNumber() {
+        return serialNumber;
+    }
+
+    int getServiceCategory() {
+        return messageIdentifier;
+    }
+
+    int getDataCodingScheme() {
+        return dataCodingScheme;
+    }
+
+    int getPageIndex() {
+        return pageIndex;
+    }
+
+    int getNumberOfPages() {
+        return nrOfPages;
+    }
+
+    SmsCbEtwsInfo getEtwsInfo() {
+        return mEtwsInfo;
+    }
+
+    SmsCbCmasInfo getCmasInfo() {
+        return mCmasInfo;
+    }
+
+    /**
+     * Return whether this broadcast is an emergency (PWS) message type.
+     * @return true if this message is emergency type; false otherwise
+     */
+    boolean isEmergencyMessage() {
+        return messageIdentifier >= SmsCbConstants.MESSAGE_ID_PWS_FIRST_IDENTIFIER
+                && messageIdentifier <= SmsCbConstants.MESSAGE_ID_PWS_LAST_IDENTIFIER;
+    }
+
+    /**
+     * Return whether this broadcast is an ETWS emergency message type.
+     * @return true if this message is ETWS emergency type; false otherwise
+     */
+    private boolean isEtwsMessage() {
+        return (messageIdentifier & SmsCbConstants.MESSAGE_ID_ETWS_TYPE_MASK)
+                == SmsCbConstants.MESSAGE_ID_ETWS_TYPE;
+    }
+
+    /**
+     * Return whether this broadcast is an ETWS primary notification.
+     * @return true if this message is an ETWS primary notification; false otherwise
+     */
+    boolean isEtwsPrimaryNotification() {
+        return format == FORMAT_ETWS_PRIMARY;
+    }
+
+    /**
+     * Return whether this broadcast is in UMTS format.
+     * @return true if this message is in UMTS format; false otherwise
+     */
+    boolean isUmtsFormat() {
+        return format == FORMAT_UMTS;
+    }
+
+    /**
+     * Return whether this message is a CMAS emergency message type.
+     * @return true if this message is CMAS emergency type; false otherwise
+     */
+    private boolean isCmasMessage() {
+        return messageIdentifier >= SmsCbConstants.MESSAGE_ID_CMAS_FIRST_IDENTIFIER
+                && messageIdentifier <= SmsCbConstants.MESSAGE_ID_CMAS_LAST_IDENTIFIER;
+    }
+
+    /**
+     * Return whether the popup alert flag is set for an ETWS warning notification.
+     * This method assumes that the message ID has already been checked for ETWS type.
+     *
+     * @return true if the message code indicates a popup alert should be displayed
+     */
+    private boolean isEtwsPopupAlert() {
+        return (serialNumber & SmsCbConstants.SERIAL_NUMBER_ETWS_ACTIVATE_POPUP) != 0;
+    }
+
+    /**
+     * Return whether the emergency user alert flag is set for an ETWS warning notification.
+     * This method assumes that the message ID has already been checked for ETWS type.
+     *
+     * @return true if the message code indicates an emergency user alert
+     */
+    private boolean isEtwsEmergencyUserAlert() {
+        return (serialNumber & SmsCbConstants.SERIAL_NUMBER_ETWS_EMERGENCY_USER_ALERT) != 0;
+    }
+
+    /**
+     * Returns the warning type for an ETWS warning notification.
+     * This method assumes that the message ID has already been checked for ETWS type.
+     *
+     * @return the ETWS warning type defined in 3GPP TS 23.041 section 9.3.24
+     */
+    private int getEtwsWarningType() {
+        return messageIdentifier - SmsCbConstants.MESSAGE_ID_ETWS_EARTHQUAKE_WARNING;
+    }
+
+    /**
+     * Returns the message class for a CMAS warning notification.
+     * This method assumes that the message ID has already been checked for CMAS type.
+     * @return the CMAS message class as defined in {@link SmsCbCmasInfo}
+     */
+    private int getCmasMessageClass() {
+        switch (messageIdentifier) {
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_PRESIDENTIAL_LEVEL:
+                return SmsCbCmasInfo.CMAS_CLASS_PRESIDENTIAL_LEVEL_ALERT;
+
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_IMMEDIATE_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_IMMEDIATE_LIKELY:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_EXPECTED_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_EXPECTED_LIKELY:
+                return SmsCbCmasInfo.CMAS_CLASS_EXTREME_THREAT;
+
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_IMMEDIATE_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_IMMEDIATE_LIKELY:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_EXPECTED_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_EXPECTED_LIKELY:
+                return SmsCbCmasInfo.CMAS_CLASS_SEVERE_THREAT;
+
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_CHILD_ABDUCTION_EMERGENCY:
+                return SmsCbCmasInfo.CMAS_CLASS_CHILD_ABDUCTION_EMERGENCY;
+
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_REQUIRED_MONTHLY_TEST:
+                return SmsCbCmasInfo.CMAS_CLASS_REQUIRED_MONTHLY_TEST;
+
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXERCISE:
+                return SmsCbCmasInfo.CMAS_CLASS_CMAS_EXERCISE;
+
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_OPERATOR_DEFINED_USE:
+                return SmsCbCmasInfo.CMAS_CLASS_OPERATOR_DEFINED_USE;
+
+            default:
+                return SmsCbCmasInfo.CMAS_CLASS_UNKNOWN;
         }
     }
 
     /**
-     * Return whether the specified message ID is an emergency (PWS) message type.
-     * This method is static and takes an argument so that it can be used by
-     * CellBroadcastReceiver, which stores message ID's in SQLite rather than PDU.
-     * @param id the message identifier to check
-     * @return true if the message is emergency type; false otherwise
+     * Returns the severity for a CMAS warning notification. This is only available for extreme
+     * and severe alerts, not for other types such as Presidential Level and AMBER alerts.
+     * This method assumes that the message ID has already been checked for CMAS type.
+     * @return the CMAS severity as defined in {@link SmsCbCmasInfo}
      */
-    public static boolean isEmergencyMessage(int id) {
-        return id >= MESSAGE_ID_PWS_FIRST_IDENTIFIER && id <= MESSAGE_ID_PWS_LAST_IDENTIFIER;
+    private int getCmasSeverity() {
+        switch (messageIdentifier) {
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_IMMEDIATE_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_IMMEDIATE_LIKELY:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_EXPECTED_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_EXPECTED_LIKELY:
+                return SmsCbCmasInfo.CMAS_SEVERITY_EXTREME;
+
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_IMMEDIATE_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_IMMEDIATE_LIKELY:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_EXPECTED_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_EXPECTED_LIKELY:
+                return SmsCbCmasInfo.CMAS_SEVERITY_SEVERE;
+
+            default:
+                return SmsCbCmasInfo.CMAS_SEVERITY_UNKNOWN;
+        }
     }
 
     /**
-     * Return whether the specified message ID is an ETWS emergency message type.
-     * This method is static and takes an argument so that it can be used by
-     * CellBroadcastReceiver, which stores message ID's in SQLite rather than PDU.
-     * @param id the message identifier to check
-     * @return true if the message is ETWS emergency type; false otherwise
+     * Returns the urgency for a CMAS warning notification. This is only available for extreme
+     * and severe alerts, not for other types such as Presidential Level and AMBER alerts.
+     * This method assumes that the message ID has already been checked for CMAS type.
+     * @return the CMAS urgency as defined in {@link SmsCbCmasInfo}
      */
-    public static boolean isEtwsMessage(int id) {
-        return (id & MESSAGE_ID_ETWS_TYPE_MASK) == MESSAGE_ID_ETWS_TYPE;
+    private int getCmasUrgency() {
+        switch (messageIdentifier) {
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_IMMEDIATE_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_IMMEDIATE_LIKELY:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_IMMEDIATE_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_IMMEDIATE_LIKELY:
+                return SmsCbCmasInfo.CMAS_URGENCY_IMMEDIATE;
+
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_EXPECTED_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_EXPECTED_LIKELY:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_EXPECTED_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_EXPECTED_LIKELY:
+                return SmsCbCmasInfo.CMAS_URGENCY_EXPECTED;
+
+            default:
+                return SmsCbCmasInfo.CMAS_URGENCY_UNKNOWN;
+        }
     }
 
     /**
-     * Return whether the specified message ID is a CMAS emergency message type.
-     * This method is static and takes an argument so that it can be used by
-     * CellBroadcastReceiver, which stores message ID's in SQLite rather than PDU.
-     * @param id the message identifier to check
-     * @return true if the message is CMAS emergency type; false otherwise
+     * Returns the certainty for a CMAS warning notification. This is only available for extreme
+     * and severe alerts, not for other types such as Presidential Level and AMBER alerts.
+     * This method assumes that the message ID has already been checked for CMAS type.
+     * @return the CMAS certainty as defined in {@link SmsCbCmasInfo}
      */
-    public static boolean isCmasMessage(int id) {
-        return id >= MESSAGE_ID_CMAS_FIRST_IDENTIFIER && id <= MESSAGE_ID_CMAS_LAST_IDENTIFIER;
-    }
+    private int getCmasCertainty() {
+        switch (messageIdentifier) {
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_IMMEDIATE_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_EXPECTED_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_IMMEDIATE_OBSERVED:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_EXPECTED_OBSERVED:
+                return SmsCbCmasInfo.CMAS_CERTAINTY_OBSERVED;
 
-    /**
-     * Return whether the specified message code indicates an ETWS popup alert.
-     * This method is static and takes an argument so that it can be used by
-     * CellBroadcastReceiver, which stores message codes in SQLite rather than PDU.
-     * This method assumes that the message ID has already been checked for ETWS type.
-     *
-     * @param messageCode the message code to check
-     * @return true if the message code indicates a popup alert should be displayed
-     */
-    public static boolean isEtwsPopupAlert(int messageCode) {
-        return (messageCode & MESSAGE_CODE_ETWS_ACTIVATE_POPUP) != 0;
-    }
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_IMMEDIATE_LIKELY:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_EXTREME_EXPECTED_LIKELY:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_IMMEDIATE_LIKELY:
+            case SmsCbConstants.MESSAGE_ID_CMAS_ALERT_SEVERE_EXPECTED_LIKELY:
+                return SmsCbCmasInfo.CMAS_CERTAINTY_LIKELY;
 
-    /**
-     * Return whether the specified message code indicates an ETWS emergency user alert.
-     * This method is static and takes an argument so that it can be used by
-     * CellBroadcastReceiver, which stores message codes in SQLite rather than PDU.
-     * This method assumes that the message ID has already been checked for ETWS type.
-     *
-     * @param messageCode the message code to check
-     * @return true if the message code indicates an emergency user alert
-     */
-    public static boolean isEtwsEmergencyUserAlert(int messageCode) {
-        return (messageCode & MESSAGE_CODE_ETWS_EMERGENCY_USER_ALERT) != 0;
+            default:
+                return SmsCbCmasInfo.CMAS_CERTAINTY_UNKNOWN;
+        }
     }
 
     @Override
     public String toString() {
-        return "SmsCbHeader{GS=" + geographicalScope + ", messageCode=0x" +
-                Integer.toHexString(messageCode) + ", updateNumber=" + updateNumber +
+        return "SmsCbHeader{GS=" + geographicalScope + ", serialNumber=0x" +
+                Integer.toHexString(serialNumber) +
                 ", messageIdentifier=0x" + Integer.toHexString(messageIdentifier) +
                 ", DCS=0x" + Integer.toHexString(dataCodingScheme) +
                 ", page " + pageIndex + " of " + nrOfPages + '}';
