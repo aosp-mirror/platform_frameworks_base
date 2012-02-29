@@ -15246,6 +15246,7 @@ package android.os {
     method public abstract void acquired();
     method public void cleanup(android.os.IBinder, boolean);
     method public void dump();
+    method public void dump(java.io.PrintWriter);
     method public boolean isAcquired();
     method public void release(android.os.IBinder);
     method public abstract void released();
