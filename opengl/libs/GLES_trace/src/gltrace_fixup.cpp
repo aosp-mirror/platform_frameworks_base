@@ -193,7 +193,7 @@ void fixup_glTexImage2D(GLMessage *glmsg, void *pointersToFixup[]) {
                         GLint border,
                         GLenum format,
                         GLenum type,
-                        const GLvoid *data); 
+                        const GLvoid *data);
     */
     int widthIndex = 3;
     int heightIndex = 4;
@@ -218,7 +218,7 @@ void fixup_glTexSubImage2D(GLMessage *glmsg, void *pointersToFixup[]) {
 }
 
 void fixup_glShaderSource(GLMessage *glmsg, void *pointersToFixup[]) {
-    /* void glShaderSource(GLuint shader, GLsizei count, const GLchar** string, 
+    /* void glShaderSource(GLuint shader, GLsizei count, const GLchar** string,
                                     const GLint* length) */
     GLMessage_DataType arg_count  = glmsg->args(1);
     GLMessage_DataType arg_lenp   = glmsg->args(3);
@@ -256,31 +256,11 @@ void fixup_glUniformGeneric(int argIndex, int nFloats, GLMessage *glmsg, void *s
 }
 
 void fixup_glUniformMatrixGeneric(int matrixSize, GLMessage *glmsg, void *pointersToFixup[]) {
-    /* void glUniformMatrix?fv(GLint location, GLsizei count, GLboolean transpose, 
+    /* void glUniformMatrix?fv(GLint location, GLsizei count, GLboolean transpose,
                                                                 const GLfloat* value) */
     GLMessage_DataType arg_count  = glmsg->args(1);
     int n_matrices = arg_count.intvalue(0);
     fixup_glUniformGeneric(3, matrixSize * matrixSize * n_matrices, glmsg, pointersToFixup[0]);
-}
-
-void fixup_glBufferData(int sizeIndex, int dataIndex, GLMessage *glmsg, void *pointersToFixup[]) {
-    /* void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) */
-    /* void glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) */
-    GLsizeiptr size = glmsg->args(sizeIndex).intvalue(0);
-
-    GLMessage_DataType *arg_datap = glmsg->mutable_args(dataIndex);
-    GLvoid *datap = (GLvoid *) pointersToFixup[0];
-
-    if (datap == NULL) {
-        // glBufferData can be called with a NULL data pointer
-        return;
-    }
-
-    arg_datap->set_type(GLMessage::DataType::VOID);
-    arg_datap->set_isarray(true);
-    arg_datap->clear_intvalue();
-
-    arg_datap->add_rawbytes(datap, size);
 }
 
 void fixup_glGenGeneric(GLMessage *glmsg, void *pointersToFixup[]) {
@@ -375,7 +355,7 @@ int getShaderVariableLocation(GLTraceContext *context, GLMessage *glmsg, GLchar 
     }
 }
 
-void fixup_glGetActiveAttribOrUniform(GLTraceContext *context, GLMessage *glmsg, 
+void fixup_glGetActiveAttribOrUniform(GLTraceContext *context, GLMessage *glmsg,
                                                                 void *pointersToFixup[]) {
     /* void glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize,
                 GLsizei* length, GLint* size, GLenum* type, GLchar* name); */
@@ -398,6 +378,303 @@ void fixup_glGetActiveAttribOrUniform(GLTraceContext *context, GLMessage *glmsg,
     arg_location->set_isarray(false);
     arg_location->set_type(GLMessage::DataType::INT);
     arg_location->add_intvalue(location);
+}
+
+GLint glGetInteger(GLTraceContext *context, GLenum param) {
+    GLint x;
+    context->hooks->gl.glGetIntegerv(param, &x);
+    return x;
+}
+
+GLint glGetVertexAttrib(GLTraceContext *context, GLuint index, GLenum pname) {
+    GLint x;
+    context->hooks->gl.glGetVertexAttribiv(index, pname, &x);
+    return x;
+}
+
+bool isUsingArrayBuffers(GLTraceContext *context) {
+    return glGetInteger(context, GL_ARRAY_BUFFER_BINDING) != 0;
+}
+
+bool isUsingElementArrayBuffers(GLTraceContext *context) {
+    return glGetInteger(context, GL_ELEMENT_ARRAY_BUFFER_BINDING) != 0;
+}
+
+/** Copy @len bytes of data from @src into the @dataIndex'th argument of the message. */
+void addGlBufferData(GLMessage *glmsg, int dataIndex, GLvoid *src, GLsizeiptr len) {
+    GLMessage_DataType *arg_datap = glmsg->mutable_args(dataIndex);
+    arg_datap->set_type(GLMessage::DataType::VOID);
+    arg_datap->set_isarray(true);
+    arg_datap->clear_intvalue();
+    arg_datap->add_rawbytes(src, len);
+}
+
+void fixup_glBufferData(GLTraceContext *context, GLMessage *glmsg, void *pointersToFixup[]) {
+    /* void glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) */
+    GLsizeiptr size = glmsg->args(1).intvalue(0);
+    GLvoid *datap = (GLvoid *) pointersToFixup[0];
+
+    // Save element array buffers for future use to fixup glVertexAttribPointers
+    // when a glDrawElements() call is performed.
+    GLenum target = glmsg->args(0).intvalue(0);
+    if (target == GL_ELEMENT_ARRAY_BUFFER) {
+        GLint bufferId = glGetInteger(context, GL_ELEMENT_ARRAY_BUFFER_BINDING);
+        context->bindBuffer(bufferId, datap, size);
+    }
+
+    // add buffer data to the protobuf message
+    if (datap != NULL) {
+        addGlBufferData(glmsg, 2, datap, size);
+    }
+}
+
+void fixup_glBufferSubData(GLTraceContext *context, GLMessage *glmsg, void *pointersToFixup[]) {
+    /* void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) */
+    GLenum target = glmsg->args(0).intvalue(0);
+    GLintptr offset = glmsg->args(1).intvalue(0);
+    GLsizeiptr size = glmsg->args(2).intvalue(0);
+    GLvoid *datap = (GLvoid *) pointersToFixup[0];
+    if (target == GL_ELEMENT_ARRAY_BUFFER) {
+        GLint bufferId = glGetInteger(context, GL_ELEMENT_ARRAY_BUFFER_BINDING);
+        context->updateBufferSubData(bufferId, offset, datap, size);
+    }
+
+    // add buffer data to the protobuf message
+    addGlBufferData(glmsg, 3, datap, size);
+}
+
+/** Obtain the size of each vertex attribute. */
+int vertexAttribSize(GLenum type, GLsizei numComponents) {
+    int sizePerComponent;
+
+    switch(type) {
+    case GL_BYTE:
+    case GL_UNSIGNED_BYTE:
+        sizePerComponent = 1;
+        break;
+    case GL_SHORT:
+    case GL_UNSIGNED_SHORT:
+        sizePerComponent = 2;
+        break;
+    case GL_FIXED:
+    case GL_FLOAT:
+    default:
+        sizePerComponent = 4;
+        break;
+    }
+
+    return sizePerComponent * numComponents;
+}
+
+/** Create and send a glVertexAttribPointerData trace message to the host. */
+void trace_glVertexAttribPointerData(GLTraceContext *context,
+                    GLuint indx, GLint size, GLenum type,
+                    GLboolean normalized, GLsizei stride, const GLvoid* ptr,
+                    GLuint minIndex, GLuint maxIndex, nsecs_t startTime) {
+    /* void glVertexAttribPointerData(GLuint indx, GLint size, GLenum type,
+                    GLboolean normalized, GLsizei stride, const GLvoid* ptr,
+                    int minIndex, int maxIndex) */
+    GLMessage glmsg;
+    GLTraceContext *glContext = context;
+
+    glmsg.set_function(GLMessage::glVertexAttribPointerData);
+
+    // copy argument indx
+    GLMessage_DataType *arg_indx = glmsg.add_args();
+    arg_indx->set_isarray(false);
+    arg_indx->set_type(GLMessage::DataType::INT);
+    arg_indx->add_intvalue(indx);
+
+    // copy argument size
+    GLMessage_DataType *arg_size = glmsg.add_args();
+    arg_size->set_isarray(false);
+    arg_size->set_type(GLMessage::DataType::INT);
+    arg_size->add_intvalue(size);
+
+    // copy argument type
+    GLMessage_DataType *arg_type = glmsg.add_args();
+    arg_type->set_isarray(false);
+    arg_type->set_type(GLMessage::DataType::ENUM);
+    arg_type->add_intvalue((int)type);
+
+    // copy argument normalized
+    GLMessage_DataType *arg_normalized = glmsg.add_args();
+    arg_normalized->set_isarray(false);
+    arg_normalized->set_type(GLMessage::DataType::BOOL);
+    arg_normalized->add_boolvalue(normalized);
+
+    // copy argument stride
+    GLMessage_DataType *arg_stride = glmsg.add_args();
+    arg_stride->set_isarray(false);
+    arg_stride->set_type(GLMessage::DataType::INT);
+    arg_stride->add_intvalue(stride);
+
+    // copy argument ptr
+    GLMessage_DataType *arg_ptr = glmsg.add_args();
+    arg_ptr->set_isarray(true);
+    arg_ptr->set_type(GLMessage::DataType::BYTE);
+    int perVertexSize = vertexAttribSize(type, size);
+    GLchar *p = (GLchar*) ptr;
+    std::string data;
+    for (GLuint i = minIndex; i < maxIndex; i++) {
+        data.append(p, perVertexSize);
+        p += stride == 0 ? perVertexSize : stride;
+    }
+    arg_ptr->add_rawbytes(data);
+
+    // copy argument min index
+    GLMessage_DataType *arg_min = glmsg.add_args();
+    arg_min->set_isarray(false);
+    arg_min->set_type(GLMessage::DataType::INT);
+    arg_min->add_intvalue(minIndex);
+
+    // copy argument max index
+    GLMessage_DataType *arg_max = glmsg.add_args();
+    arg_max->set_isarray(false);
+    arg_max->set_type(GLMessage::DataType::INT);
+    arg_max->add_intvalue(maxIndex);
+
+    glmsg.set_context_id(context->getId());
+    glmsg.set_start_time(startTime);
+    glmsg.set_threadtime(0);
+    glmsg.set_duration(0);
+
+    context->traceGLMessage(&glmsg);
+}
+
+void findMinAndMaxIndices(GLvoid *indices, GLsizei count, GLenum type,
+                            GLuint *minIndex, GLuint *maxIndex) {
+    GLuint index;
+    *minIndex = UINT_MAX;
+    *maxIndex = 0;
+
+    if (indices == NULL) {
+        return;
+    }
+
+    for (GLsizei i = 0; i < count; i++) {
+        if (type == GL_UNSIGNED_BYTE) {
+            index = *((GLubyte*) indices + i);
+        } else {
+            index = *((GLushort*) indices + i);
+        }
+
+        if (index < *minIndex) *minIndex = index;
+        if (index > *maxIndex) *maxIndex = index;
+    }
+}
+
+void trace_VertexAttribPointerData(GLTraceContext *context,
+                            GLuint minIndex, GLuint maxIndex, nsecs_t time) {
+    GLuint maxAttribs = glGetInteger(context, GL_MAX_VERTEX_ATTRIBS);
+    for (GLuint index = 0; index < maxAttribs; index++) {
+        if (!glGetVertexAttrib(context, index, GL_VERTEX_ATTRIB_ARRAY_ENABLED)) {
+            // vertex array disabled
+            continue;
+        }
+
+        if (glGetVertexAttrib(context, index, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING)) {
+            // vbo
+            continue;
+        }
+
+        GLint size = glGetVertexAttrib(context, index, GL_VERTEX_ATTRIB_ARRAY_SIZE);
+        GLenum type = glGetVertexAttrib(context, index, GL_VERTEX_ATTRIB_ARRAY_TYPE);
+        GLboolean norm = glGetVertexAttrib(context, index, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED);
+        GLsizei stride = glGetVertexAttrib(context, index, GL_VERTEX_ATTRIB_ARRAY_STRIDE);
+        GLvoid* ptr;
+        context->hooks->gl.glGetVertexAttribPointerv(index, GL_VERTEX_ATTRIB_ARRAY_POINTER, &ptr);
+
+        trace_glVertexAttribPointerData(context,
+                    index, size, type, norm, stride, ptr,
+                    minIndex, maxIndex, time);
+    }
+}
+
+void trace_VertexAttribPointerDataForGlDrawArrays(GLTraceContext *context, GLMessage *glmsg) {
+    /* void glDrawArrays(GLenum mode, GLint first, GLsizei count) */
+    GLsizei count = glmsg->args(2).intvalue(0);
+
+    // Vertex attrib pointer data patchup calls should appear as if
+    // they occurred right before the draw call.
+    nsecs_t time = glmsg->start_time() - 1;
+
+    trace_VertexAttribPointerData(context, 0, count, time);
+}
+
+void trace_VertexAttribPointerDataForGlDrawElements(GLTraceContext *context, GLMessage *glmsg,
+                            GLvoid *indices) {
+    /* void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) */
+    GLsizei count = glmsg->args(1).intvalue(0);
+    GLenum type = glmsg->args(2).intvalue(0);
+    GLuint index;
+
+    GLuint minIndex, maxIndex;
+
+    // The index buffer is either passed in as an argument to the glDrawElements() call,
+    // or it is stored in the current GL_ELEMENT_ARRAY_BUFFER.
+    GLvoid *indexBuffer;
+    if (isUsingElementArrayBuffers(context)) {
+        GLsizeiptr eaBufferSize;
+        GLuint bufferId = glGetInteger(context, GL_ELEMENT_ARRAY_BUFFER_BINDING);
+        context->getBuffer(bufferId, &indexBuffer, &eaBufferSize);
+    } else {
+        indexBuffer = indices;
+    }
+
+    // Rather than sending vertex attribute data that corresponds to the indices
+    // being drawn, we send the vertex attribute data for the entire range of
+    // indices being drawn, including the ones not drawn. The min & max indices
+    // provide the range of indices being drawn.
+    findMinAndMaxIndices(indexBuffer, count, type, &minIndex, &maxIndex);
+
+    // Vertex attrib pointer data patchup calls should appear as if
+    // they occurred right before the draw call.
+    nsecs_t time = glmsg->start_time() - 1;
+
+    trace_VertexAttribPointerData(context, minIndex, maxIndex + 1, time);
+}
+
+void fixup_glDrawArrays(GLTraceContext *context, GLMessage *glmsg) {
+    // Trace all vertex attribute data stored in client space.
+    trace_VertexAttribPointerDataForGlDrawArrays(context, glmsg);
+
+    // Attach the FB if requested
+    if (context->getGlobalTraceState()->shouldCollectFbOnGlDraw()) {
+        fixup_addFBContents(context, glmsg, CURRENTLY_BOUND_FB);
+    }
+}
+
+void fixup_glDrawElements(GLTraceContext *context, GLMessage *glmsg, void *pointersToFixup[]) {
+    /* void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) */
+    GLvoid *indices = pointersToFixup[0];
+    GLenum type = glmsg->args(2).intvalue(0);
+    GLsizei count = glmsg->args(1).intvalue(0);
+    GLuint index;
+
+    // Trace all vertex attribute data stored in client space.
+    trace_VertexAttribPointerDataForGlDrawElements(context, glmsg, indices);
+
+    // Fixup indices argument
+    if (!isUsingElementArrayBuffers(context)) {
+        GLMessage_DataType *arg_indices = glmsg->mutable_args(3);
+        arg_indices->set_isarray(true);
+        arg_indices->clear_intvalue();
+        arg_indices->set_type(GLMessage::DataType::INT);
+        for (GLsizei i = 0; i < count; i++) {
+            if (type == GL_UNSIGNED_BYTE) {
+                index = *((GLubyte*) indices + i);
+            } else {
+                index = *((GLushort*) indices + i);
+            }
+            arg_indices->add_intvalue(index);
+        }
+    }
+
+    // Attach the FB if requested
+    if (context->getGlobalTraceState()->shouldCollectFbOnGlDraw()) {
+        fixup_addFBContents(context, glmsg, CURRENTLY_BOUND_FB);
+    }
 }
 
 void fixupGLMessage(GLTraceContext *context, nsecs_t wallStart, nsecs_t wallEnd,
@@ -438,8 +715,8 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t wallStart, nsecs_t wallEnd,
         /* void glBindAttribLocation(GLuint program, GLuint index, const GLchar* name); */
         fixup_CStringPtr(2, glmsg, pointersToFixup[0]);
         break;
-    case GLMessage::glGetAttribLocation:  
-    case GLMessage::glGetUniformLocation: 
+    case GLMessage::glGetAttribLocation:
+    case GLMessage::glGetUniformLocation:
         /* int glGetAttribLocation(GLuint program, const GLchar* name) */
         /* int glGetUniformLocation(GLuint program, const GLchar* name) */
         fixup_CStringPtr(1, glmsg, pointersToFixup[0]);
@@ -526,23 +803,19 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t wallStart, nsecs_t wallEnd,
         break;
     case GLMessage::glBufferData:
         /* void glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) */
-        fixup_glBufferData(1, 2, glmsg, pointersToFixup);
+        fixup_glBufferData(context, glmsg, pointersToFixup);
         break;
     case GLMessage::glBufferSubData:
         /* void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) */
-        fixup_glBufferData(2, 3, glmsg, pointersToFixup);
+        fixup_glBufferSubData(context, glmsg, pointersToFixup);
         break;
     case GLMessage::glDrawArrays:
         /* void glDrawArrays(GLenum mode, GLint first, GLsizei count) */
-        if (context->getGlobalTraceState()->shouldCollectFbOnGlDraw()) {
-            fixup_addFBContents(context, glmsg, CURRENTLY_BOUND_FB);
-        }
+        fixup_glDrawArrays(context, glmsg);
         break;
     case GLMessage::glDrawElements:
         /* void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) */
-        if (context->getGlobalTraceState()->shouldCollectFbOnGlDraw()) {
-            fixup_addFBContents(context, glmsg, CURRENTLY_BOUND_FB);
-        }
+        fixup_glDrawElements(context, glmsg, pointersToFixup);
         break;
     case GLMessage::glPushGroupMarkerEXT:
         /* void PushGroupMarkerEXT(sizei length, const char *marker); */

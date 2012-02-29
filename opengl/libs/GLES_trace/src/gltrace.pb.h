@@ -535,11 +535,11 @@ enum GLMessage_Function {
   GLMessage_Function_eglGetSystemTimeFrequencyNV = 2044,
   GLMessage_Function_eglGetSystemTimeNV = 2045,
   GLMessage_Function_invalid = 3000,
-  GLMessage_Function_frameBufferContents = 3001
+  GLMessage_Function_glVertexAttribPointerData = 3001
 };
 bool GLMessage_Function_IsValid(int value);
 const GLMessage_Function GLMessage_Function_Function_MIN = GLMessage_Function_glActiveTexture;
-const GLMessage_Function GLMessage_Function_Function_MAX = GLMessage_Function_frameBufferContents;
+const GLMessage_Function GLMessage_Function_Function_MAX = GLMessage_Function_glVertexAttribPointerData;
 const int GLMessage_Function_Function_ARRAYSIZE = GLMessage_Function_Function_MAX + 1;
 
 // ===================================================================
@@ -1351,7 +1351,7 @@ class GLMessage : public ::google::protobuf::MessageLite {
   static const Function eglGetSystemTimeFrequencyNV = GLMessage_Function_eglGetSystemTimeFrequencyNV;
   static const Function eglGetSystemTimeNV = GLMessage_Function_eglGetSystemTimeNV;
   static const Function invalid = GLMessage_Function_invalid;
-  static const Function frameBufferContents = GLMessage_Function_frameBufferContents;
+  static const Function glVertexAttribPointerData = GLMessage_Function_glVertexAttribPointerData;
   static inline bool Function_IsValid(int value) {
     return GLMessage_Function_IsValid(value);
   }

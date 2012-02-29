@@ -129,13 +129,14 @@ GLTraceContext *GLTraceState::getTraceContext(EGLContext c) {
     return mPerContextState[c];
 }
 
-GLTraceContext::GLTraceContext(int id, GLTraceState *state, BufferedOutputStream *stream) {
-    mId = id;
-    mState = state;
-
+GLTraceContext::GLTraceContext(int id, GLTraceState *state, BufferedOutputStream *stream) :
+    mId(id),
+    mState(state),
+    mBufferedOutputStream(stream),
+    mElementArrayBuffers(DefaultKeyedVector<GLuint, ElementArrayBuffer*>(NULL))
+{
     fbcontents = fbcompressed = NULL;
     fbcontentsSize = 0;
-    mBufferedOutputStream = stream;
 }
 
 int GLTraceContext::getId() {
@@ -206,6 +207,75 @@ void GLTraceContext::traceGLMessage(GLMessage *msg) {
         || func == GLMessage::glDrawElements) {
         mBufferedOutputStream->flush();
     }
+}
+
+void GLTraceContext::bindBuffer(GLuint bufferId, GLvoid *data, GLsizeiptr size) {
+    // free previously bound buffer if any
+    ElementArrayBuffer *oldBuffer = mElementArrayBuffers.valueFor(bufferId);
+    if (oldBuffer != NULL) {
+        delete oldBuffer;
+    }
+
+    mElementArrayBuffers.add(bufferId, new ElementArrayBuffer(data, size));
+}
+
+void GLTraceContext::getBuffer(GLuint bufferId, GLvoid **data, GLsizeiptr *size) {
+    ElementArrayBuffer *buffer = mElementArrayBuffers.valueFor(bufferId);
+    if (buffer == NULL) {
+        *data = NULL;
+        *size = 0;
+    } else {
+        *data = buffer->getBuffer();
+        *size = buffer->getSize();
+    }
+}
+
+void GLTraceContext::updateBufferSubData(GLuint bufferId, GLintptr offset, GLvoid *data,
+                                                            GLsizeiptr size) {
+    ElementArrayBuffer *buffer = mElementArrayBuffers.valueFor(bufferId);
+    if (buffer != NULL) {
+        buffer->updateSubBuffer(offset, data, size);
+    }
+}
+
+void GLTraceContext::deleteBuffer(GLuint bufferId) {
+    ElementArrayBuffer *buffer = mElementArrayBuffers.valueFor(bufferId);
+    if (buffer != NULL) {
+        delete buffer;
+        mElementArrayBuffers.removeItem(bufferId);
+    }
+}
+
+ElementArrayBuffer::ElementArrayBuffer(GLvoid *buf, GLsizeiptr size) {
+    mBuf = malloc(size);
+    mSize = size;
+
+    if (buf != NULL) {
+        memcpy(mBuf, buf, size);
+    }
+}
+
+ElementArrayBuffer::~ElementArrayBuffer() {
+    if (mBuf != NULL) {
+        free(mBuf);
+        mSize = 0;
+    }
+
+    mBuf = NULL;
+}
+
+void ElementArrayBuffer::updateSubBuffer(GLintptr offset, const GLvoid* data, GLsizeiptr size) {
+    if (offset + size <= mSize) {
+        memcpy((char*)mBuf + offset, data, size);
+    }
+}
+
+GLvoid *ElementArrayBuffer::getBuffer() {
+    return mBuf;
+}
+
+GLsizeiptr ElementArrayBuffer::getSize() {
+    return mSize;
 }
 
 }; // namespace gltrace
