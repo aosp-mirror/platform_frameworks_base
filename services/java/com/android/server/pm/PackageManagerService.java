@@ -1132,6 +1132,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                             ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
                             : 0));
 
+            // Verify that all of the preferred activity components actually
+            // exist.  It is possible for applications to be updated and at
+            // that point remove a previously declared activity component that
+            // had been set as a preferred activity.  We try to clean this up
+            // the next time we encounter that preferred activity, but it is
+            // possible for the user flow to never be able to return to that
+            // situation so here we do a sanity check to make sure we haven't
+            // left any junk around.
+            ArrayList<PreferredActivity> removed = new ArrayList<PreferredActivity>();
+            for (PreferredActivity pa : mSettings.mPreferredActivities.filterSet()) {
+                if (mActivities.mActivities.get(pa.mPref.mComponent) == null) {
+                    removed.add(pa);
+                }
+            }
+            for (int i=0; i<removed.size(); i++) {
+                PreferredActivity pa = removed.get(i);
+                Slog.w(TAG, "Removing dangling preferred activity: "
+                        + pa.mPref.mComponent);
+                mSettings.mPreferredActivities.removeFilter(pa);
+            }
+
             // can downgrade to reader
             mSettings.writeLPr();
 
@@ -2295,31 +2316,40 @@ public class PackageManagerService extends IPackageManager.Stub {
                             Log.v(TAG, "  null");
                         }
                     }
-                    if (ai != null) {
-                        for (int j=0; j<N; j++) {
-                            final ResolveInfo ri = query.get(j);
-                            if (!ri.activityInfo.applicationInfo.packageName
-                                    .equals(ai.applicationInfo.packageName)) {
-                                continue;
-                            }
-                            if (!ri.activityInfo.name.equals(ai.name)) {
-                                continue;
-                            }
-
-                            // Okay we found a previously set preferred app.
-                            // If the result set is different from when this
-                            // was created, we need to clear it and re-ask the
-                            // user their preference.
-                            if (!pa.mPref.sameSet(query, priority)) {
-                                Slog.i(TAG, "Result set changed, dropping preferred activity for "
-                                        + intent + " type " + resolvedType);
-                                mSettings.mPreferredActivities.removeFilter(pa);
-                                return null;
-                            }
-
-                            // Yay!
-                            return ri;
+                    if (ai == null) {
+                        // This previously registered preferred activity
+                        // component is no longer known.  Most likely an update
+                        // to the app was installed and in the new version this
+                        // component no longer exists.  Clean it up by removing
+                        // it from the preferred activities list, and skip it.
+                        Slog.w(TAG, "Removing dangling preferred activity: "
+                                + pa.mPref.mComponent);
+                        mSettings.mPreferredActivities.removeFilter(pa);
+                        continue;
+                    }
+                    for (int j=0; j<N; j++) {
+                        final ResolveInfo ri = query.get(j);
+                        if (!ri.activityInfo.applicationInfo.packageName
+                                .equals(ai.applicationInfo.packageName)) {
+                            continue;
                         }
+                        if (!ri.activityInfo.name.equals(ai.name)) {
+                            continue;
+                        }
+
+                        // Okay we found a previously set preferred app.
+                        // If the result set is different from when this
+                        // was created, we need to clear it and re-ask the
+                        // user their preference.
+                        if (!pa.mPref.sameSet(query, priority)) {
+                            Slog.i(TAG, "Result set changed, dropping preferred activity for "
+                                    + intent + " type " + resolvedType);
+                            mSettings.mPreferredActivities.removeFilter(pa);
+                            return null;
+                        }
+
+                        // Yay!
+                        return ri;
                     }
                 }
             }
@@ -4036,8 +4066,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // writer
         synchronized (mPackages) {
-            clearPackagePreferredActivitiesLPw(pkg.packageName);
-
             mPackages.remove(pkg.applicationInfo.packageName);
             if (pkg.mPath != null) {
                 mAppDirs.remove(pkg.mPath);
@@ -7118,16 +7146,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             mSettings.updateSharedUserPermsLPw(deletedPs, mGlobalGids);
                         }
                     }
-                }
-                // remove from preferred activities.
-                ArrayList<PreferredActivity> removed = new ArrayList<PreferredActivity>();
-                for (PreferredActivity pa : mSettings.mPreferredActivities.filterSet()) {
-                    if (pa.mPref.mComponent.getPackageName().equals(deletedPs.name)) {
-                        removed.add(pa);
-                    }
-                }
-                for (PreferredActivity pa : removed) {
-                    mSettings.mPreferredActivities.removeFilter(pa);
+                    clearPackagePreferredActivitiesLPw(deletedPs.name);
                 }
             }
             // can downgrade to reader
@@ -7569,15 +7588,25 @@ public class PackageManagerService extends IPackageManager.Stub {
                         android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
             
+            ArrayList<PreferredActivity> removed = null;
             Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
             String action = filter.getAction(0);
             String category = filter.getCategory(0);
             while (it.hasNext()) {
                 PreferredActivity pa = it.next();
                 if (pa.getAction(0).equals(action) && pa.getCategory(0).equals(category)) {
-                    it.remove();
-                    Log.i(TAG, "Removed preferred activity " + pa.mPref.mComponent + ":");
+                    if (removed == null) {
+                        removed = new ArrayList<PreferredActivity>();
+                    }
+                    removed.add(pa);
+                    Log.i(TAG, "Removing preferred activity " + pa.mPref.mComponent + ":");
                     filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                }
+            }
+            if (removed != null) {
+                for (int i=0; i<removed.size(); i++) {
+                    PreferredActivity pa = removed.get(i);
+                    mSettings.mPreferredActivities.removeFilter(pa);
                 }
             }
             addPreferredActivity(filter, match, set, activity);
@@ -7611,16 +7640,25 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     boolean clearPackagePreferredActivitiesLPw(String packageName) {
-        boolean changed = false;
+        ArrayList<PreferredActivity> removed = null;
         Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
         while (it.hasNext()) {
             PreferredActivity pa = it.next();
             if (pa.mPref.mComponent.getPackageName().equals(packageName)) {
-                it.remove();
-                changed = true;
+                if (removed == null) {
+                    removed = new ArrayList<PreferredActivity>();
+                }
+                removed.add(pa);
             }
         }
-        return changed;
+        if (removed != null) {
+            for (int i=0; i<removed.size(); i++) {
+                PreferredActivity pa = removed.get(i);
+                mSettings.mPreferredActivities.removeFilter(pa);
+            }
+            return true;
+        }
+        return false;
     }
 
     public int getPreferredActivities(List<IntentFilter> outFilters,
