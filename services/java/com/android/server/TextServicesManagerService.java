@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TextServicesManagerService extends ITextServicesManager.Stub {
     private static final String TAG = TextServicesManagerService.class.getSimpleName();
@@ -582,8 +583,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private class SpellCheckerBindGroup {
         private final String TAG = SpellCheckerBindGroup.class.getSimpleName();
         private final InternalServiceConnection mInternalConnection;
-        private final ArrayList<InternalDeathRecipient> mListeners =
-                new ArrayList<InternalDeathRecipient>();
+        private final CopyOnWriteArrayList<InternalDeathRecipient> mListeners =
+                new CopyOnWriteArrayList<InternalDeathRecipient>();
         public boolean mBound;
         public ISpellCheckerService mSpellChecker;
         public boolean mConnected;
@@ -601,19 +602,24 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             if (DBG) {
                 Slog.d(TAG, "onServiceConnected");
             }
-            synchronized(mSpellCheckerMap) {
-                for (InternalDeathRecipient listener : mListeners) {
-                    try {
-                        final ISpellCheckerSession session = spellChecker.getISpellCheckerSession(
-                                listener.mScLocale, listener.mScListener, listener.mBundle);
-                        listener.mTsListener.onServiceConnected(session);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Exception in getting the spell checker session."
-                                + "Reconnect to the spellchecker. ", e);
-                        removeAll();
-                        return;
+
+            for (InternalDeathRecipient listener : mListeners) {
+                try {
+                    final ISpellCheckerSession session = spellChecker.getISpellCheckerSession(
+                            listener.mScLocale, listener.mScListener, listener.mBundle);
+                    synchronized(mSpellCheckerMap) {
+                        if (mListeners.contains(listener)) {
+                            listener.mTsListener.onServiceConnected(session);
+                        }
                     }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception in getting the spell checker session."
+                            + "Reconnect to the spellchecker. ", e);
+                    removeAll();
+                    return;
                 }
+            }
+            synchronized(mSpellCheckerMap) {
                 mSpellChecker = spellChecker;
                 mConnected = true;
             }
