@@ -43,7 +43,8 @@ import com.android.systemui.recent.RecentsPanelView.TaskDescriptionAdapter;
 
 import java.util.ArrayList;
 
-public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper.Callback {
+public class RecentsVerticalScrollView extends ScrollView
+        implements SwipeHelper.Callback, RecentsPanelView.RecentsScrollView {
     private static final String TAG = RecentsPanelView.TAG;
     private static final boolean DEBUG = RecentsPanelView.DEBUG;
     private LinearLayout mLinearLayout;
@@ -63,6 +64,10 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
 
         mPerformanceHelper = RecentsScrollViewPerformanceHelper.create(context, attrs, this, true);
         mRecycledViews = new ArrayList<View>();
+    }
+
+    public void setMinSwipeAlpha(float minAlpha) {
+        mSwipeHelper.setMinAlpha(minAlpha);
     }
 
     private int scrollPositionOfMostRecent() {
