@@ -916,8 +916,11 @@ private:
         virtual     status_t    dumpInternals(int fd, const Vector<String16>& args);
 
     protected:
-                    mixer_state prepareTracks_l(const SortedVector< wp<Track> >& activeTracks,
-                                                Vector< sp<Track> > *tracksToRemove);
+                    // prepareTracks_l reads and writes mActiveTracks, and also returns the
+                    // pending set of tracks to remove via Vector 'tracksToRemove'.  The caller is
+                    // responsible for clearing or destroying this Vector later on, when it
+                    // is safe to do so. That will drop the final ref count and destroy the tracks.
+                    mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove);
         virtual     int         getTrackName_l();
         virtual     void        deleteTrackName_l(int name);
         virtual     uint32_t    idleSleepTimeUs();

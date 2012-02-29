@@ -2047,10 +2047,8 @@ bool AudioFlinger::MixerThread::threadLoop()
                 // DirectOutputThread updates standbyDelay also
             }
 
-            const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
-
             // put audio hardware into standby after short delay
-            if (CC_UNLIKELY((!activeTracks.size() && systemTime() > standbyTime) ||
+            if (CC_UNLIKELY((!mActiveTracks.size() && systemTime() > standbyTime) ||
                         mSuspended > 0)) {
                 if (!mStandby) {
                     ALOGV("Audio hardware entering standby, mixer %p, suspend count %u", this, mSuspended);
@@ -2059,7 +2057,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                     mBytesWritten = 0;
                 }
 
-                if (!activeTracks.size() && mConfigEvents.isEmpty()) {
+                if (!mActiveTracks.size() && mConfigEvents.isEmpty()) {
                     // we're about to wait, flush the binder command buffer
                     IPCThreadState::self()->flushCommands();
 
@@ -2082,7 +2080,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                 }
             }
 
-            mixerStatus = prepareTracks_l(activeTracks, &tracksToRemove);
+            mixerStatus = prepareTracks_l(&tracksToRemove);
 
             // prevent any changes in effect chain list and in each effect chain
             // during mixing and effect process as the audio buffers could be deleted
@@ -2219,12 +2217,12 @@ bool AudioFlinger::MixerThread::threadLoop()
 
 // prepareTracks_l() must be called with ThreadBase::mLock held
 AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTracks_l(
-        const SortedVector< wp<Track> >& activeTracks, Vector< sp<Track> > *tracksToRemove)
+        Vector< sp<Track> > *tracksToRemove)
 {
 
     mixer_state mixerStatus = MIXER_IDLE;
     // find out which tracks need to be processed
-    size_t count = activeTracks.size();
+    size_t count = mActiveTracks.size();
     size_t mixedTracks = 0;
     size_t tracksWithEffect = 0;
 
@@ -2244,7 +2242,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
     }
 
     for (size_t i=0 ; i<count ; i++) {
-        sp<Track> t = activeTracks[i].promote();
+        sp<Track> t = mActiveTracks[i].promote();
         if (t == 0) continue;
 
         // this const just means the local variable doesn't change
@@ -2733,8 +2731,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
 {
     // MixerThread has Vector instead of single trackToRemove
     sp<Track> trackToRemove;
-    // MixerThread does not have activeTrack here
-    sp<Track> activeTrack;
+
     nsecs_t standbyTime = systemTime();
     size_t mixBufferSize = mFrameCount * mFrameSize;
 
@@ -2763,6 +2760,9 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
         Vector< sp<EffectChain> > effectChains;
 
         processConfigEvents();
+
+        // MixerThread does not have activeTrack here
+        sp<Track> activeTrack;
 
         mixer_state mixerStatus = MIXER_IDLE;
         { // scope for the mLock
@@ -2948,6 +2948,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             lockEffectChains_l(effectChains);
        }
 
+        // For DirectOutputThread, this test is equivalent to "activeTrack != 0"
         if (CC_LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             AudioBufferProvider::Buffer buffer;
             size_t frameCount = mFrameCount;
@@ -3191,15 +3192,13 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                 idleSleepTime = idleSleepTimeUs();
             }
 
-            const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
-
             // Only in DuplicatingThread
             for (size_t i = 0; i < mOutputTracks.size(); i++) {
                 outputTracks.add(mOutputTracks[i]);
             }
 
             // put audio hardware into standby after short delay
-            if (CC_UNLIKELY((!activeTracks.size() && systemTime() > standbyTime) ||
+            if (CC_UNLIKELY((!mActiveTracks.size() && systemTime() > standbyTime) ||
                          mSuspended > 0)) {
                 if (!mStandby) {
                     // DuplicatingThread implements standby by stopping all tracks
@@ -3210,7 +3209,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     mBytesWritten = 0;
                 }
 
-                if (!activeTracks.size() && mConfigEvents.isEmpty()) {
+                if (!mActiveTracks.size() && mConfigEvents.isEmpty()) {
                     // we're about to wait, flush the binder command buffer
                     IPCThreadState::self()->flushCommands();
                     outputTracks.clear();
@@ -3234,7 +3233,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                 }
             }
 
-            mixerStatus = prepareTracks_l(activeTracks, &tracksToRemove);
+            mixerStatus = prepareTracks_l(&tracksToRemove);
 
             // prevent any changes in effect chain list and in each effect chain
             // during mixing and effect process as the audio buffers could be deleted
