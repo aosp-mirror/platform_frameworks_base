@@ -7685,8 +7685,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                final boolean wasAnimating = w.mWasAnimating;
-
                 // If the window has moved due to its containing
                 // content frame changing, then we'd like to animate
                 // it.  The checks here are ordered by what is least
@@ -7705,8 +7703,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     w.mAnimDh = innerDh;
                 }
 
-                // Execute animation.
-                final boolean nowAnimating = w.isAnimating();
+                final boolean wasAnimating = w.mWasAnimating;
+                final boolean nowAnimating = w.mLocalAnimating;
+
+                if (DEBUG_WALLPAPER) {
+                    Slog.v(TAG, w + ": wasAnimating=" + wasAnimating +
+                            ", nowAnimating=" + nowAnimating);
+                }
 
                 // If this window is animating, make a note that we have
                 // an animating window and take care of a request to run

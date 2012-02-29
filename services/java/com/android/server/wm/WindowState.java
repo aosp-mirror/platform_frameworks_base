@@ -982,7 +982,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean stepAnimationLocked(long currentTime) {
         // Save the animation state as it was before this step so WindowManagerService can tell if
         // we just started or just stopped animating by comparing mWasAnimating with isAnimating().
-        mWasAnimating = isAnimating();
+        mWasAnimating = mAnimating;
         if (!mService.mDisplayFrozen && mService.mPolicy.isScreenOnFully()) {
             // We will run animations as long as the display isn't frozen.
 
