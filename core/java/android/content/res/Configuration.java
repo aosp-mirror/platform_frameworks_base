@@ -20,6 +20,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.LocaleUtil;
+import android.view.View;
 
 import java.util.Locale;
 
@@ -280,9 +281,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int compatSmallestScreenWidthDp;
 
     /**
-     * @hide The text layout direction associated to the current Locale
+     * @hide The layout direction associated to the current Locale
      */
-    public int textLayoutDirection;
+    public int layoutDirection;
 
     /**
      * @hide Internal book-keeping.
@@ -310,7 +311,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         mnc = o.mnc;
         if (o.locale != null) {
             locale = (Locale) o.locale.clone();
-            textLayoutDirection = o.textLayoutDirection;
+            layoutDirection = o.layoutDirection;
         }
         userSetLocale = o.userSetLocale;
         touchscreen = o.touchscreen;
@@ -346,10 +347,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         } else {
             sb.append(" (no locale)");
         }
-        switch (textLayoutDirection) {
-            case LocaleUtil.TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE: /* ltr not interesting */ break;
-            case LocaleUtil.TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE: sb.append(" rtl"); break;
-            default: sb.append(" layoutdir="); sb.append(textLayoutDirection); break;
+        switch (layoutDirection) {
+            case View.LAYOUT_DIRECTION_LTR: /* ltr not interesting */ break;
+            case View.LAYOUT_DIRECTION_RTL: sb.append(" rtl"); break;
+            default: sb.append(" layoutDir="); sb.append(layoutDirection); break;
         }
         if (smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             sb.append(" sw"); sb.append(smallestScreenWidthDp); sb.append("dp");
@@ -472,7 +473,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         screenWidthDp = compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
         screenHeightDp = compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
-        textLayoutDirection = LocaleUtil.TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
+        layoutDirection = View.LAYOUT_DIRECTION_LTR;
         seq = 0;
     }
 
@@ -508,7 +509,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_LOCALE;
             locale = delta.locale != null
                     ? (Locale) delta.locale.clone() : null;
-            textLayoutDirection = LocaleUtil.getLayoutDirectionFromLocale(locale);
+            layoutDirection = LocaleUtil.getLayoutDirectionFromLocale(locale);
         }
         if (delta.userSetLocale && (!userSetLocale || ((changed & ActivityInfo.CONFIG_LOCALE) != 0)))
         {
@@ -776,7 +777,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenWidthDp);
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
-        dest.writeInt(textLayoutDirection);
+        dest.writeInt(layoutDirection);
         dest.writeInt(seq);
     }
 
@@ -804,7 +805,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = source.readInt();
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
-        textLayoutDirection = source.readInt();
+        layoutDirection = source.readInt();
         seq = source.readInt();
     }
     
