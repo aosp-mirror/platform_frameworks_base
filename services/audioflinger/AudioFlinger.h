@@ -821,8 +821,8 @@ private:
                     virtual audio_stream_t* stream();
 
                     void        suspend() { mSuspended++; }
-                    void        restore() { if (mSuspended) mSuspended--; }
-                    bool        isSuspended() const { return (mSuspended != 0); }
+                    void        restore() { if (mSuspended > 0) mSuspended--; }
+                    bool        isSuspended() const { return (mSuspended > 0); }
         virtual     String8     getParameters(const String8& keys);
         virtual     void        audioConfigChanged_l(int event, int param = 0);
         virtual     status_t    getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames);
@@ -843,7 +843,7 @@ private:
 
     protected:
         int16_t*                        mMixBuffer;
-        int                             mSuspended;
+        uint32_t                        mSuspended;     // suspend count, > 0 means suspended
         int                             mBytesWritten;
     private:
         // mMasterMute is in both PlaybackThread and in AudioFlinger.  When a

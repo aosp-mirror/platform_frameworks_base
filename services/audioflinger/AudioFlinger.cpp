@@ -2050,9 +2050,9 @@ bool AudioFlinger::MixerThread::threadLoop()
 
             // put audio hardware into standby after short delay
             if (CC_UNLIKELY((!activeTracks.size() && systemTime() > standbyTime) ||
-                        mSuspended)) {
+                        mSuspended > 0)) {
                 if (!mStandby) {
-                    ALOGV("Audio hardware entering standby, mixer %p, mSuspended %d", this, mSuspended);
+                    ALOGV("Audio hardware entering standby, mixer %p, suspend count %u", this, mSuspended);
                     mOutput->stream->common.standby(&mOutput->stream->common);
                     mStandby = true;
                     mBytesWritten = 0;
@@ -2143,7 +2143,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             // TODO add standby time extension fct of effect tail
         }
 
-        if (mSuspended) {
+        if (mSuspended > 0) {
             sleepTime = suspendSleepTimeUs();
         }
 
@@ -2778,9 +2778,9 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
 
             // put audio hardware into standby after short delay
             if (CC_UNLIKELY((!mActiveTracks.size() && systemTime() > standbyTime) ||
-                        mSuspended)) {
+                        mSuspended > 0)) {
                 if (!mStandby) {
-                    ALOGV("Audio hardware entering standby, mixer %p, mSuspended %d", this, mSuspended);
+                    ALOGV("Audio hardware entering standby, mixer %p, suspend count %u", this, mSuspended);
                     mOutput->stream->common.standby(&mOutput->stream->common);
                     mStandby = true;
                     mBytesWritten = 0;
@@ -2976,7 +2976,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             }
         }
 
-        if (mSuspended) {
+        if (mSuspended > 0) {
             sleepTime = suspendSleepTimeUs();
         }
 
@@ -3192,7 +3192,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
 
             // put audio hardware into standby after short delay
             if (CC_UNLIKELY((!activeTracks.size() && systemTime() > standbyTime) ||
-                         mSuspended)) {
+                         mSuspended > 0)) {
                 if (!mStandby) {
                     // DuplicatingThread implements standby by stopping all tracks
                     for (size_t i = 0; i < outputTracks.size(); i++) {
@@ -3264,7 +3264,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             }
         }
 
-        if (mSuspended) {
+        if (mSuspended > 0) {
             sleepTime = suspendSleepTimeUs();
         }
 
