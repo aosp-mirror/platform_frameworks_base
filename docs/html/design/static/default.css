@@ -3,8 +3,8 @@
 /* clearfix idiom */
 /* common mixins */
 /* page layout + top-level styles */
-::-moz-selection,
 ::-webkit-selection,
+::-moz-selection,
 ::selection {
   background-color: #0099cc;
   color: #fff; }
@@ -256,6 +256,8 @@ video.with-shadow {
       position: absolute;
       top: 10px;
       right: 10px; }
+    #nav .nav-section-header.empty:after {
+      display: none; }
   #nav li.expanded .nav-section-header {
     background: rgba(0, 0, 0, 0.05); }
     #nav li.expanded .nav-section-header:after {
@@ -268,9 +270,9 @@ video.with-shadow {
     overflow: hidden;
     margin-bottom: 0; }
     #nav > li > ul.animate-height {
-      transition: height 0.25s ease-in;
       -webkit-transition: height 0.25s ease-in;
-      -moz-transition: height 0.25s ease-in; }
+      -moz-transition: height 0.25s ease-in;
+      transition: height 0.25s ease-in; }
     #nav > li > ul li {
       padding: 10px 10px 11px 10px; }
   #nav > li.expanded > ul {
@@ -330,6 +332,39 @@ video.with-shadow {
       margin-left: 5px; }
 
 /* content body */
+@-webkit-keyframes glowheader {
+  from {
+    background-color: #33b5e5;
+    color: #000;
+    border-bottom-color: #000; }
+
+  to {
+    background-color: transparent;
+    color: #33b5e5;
+    border-bottom-color: #33b5e5; } }
+
+@-moz-keyframes glowheader {
+  from {
+    background-color: #33b5e5;
+    color: #000;
+    border-bottom-color: #000; }
+
+  to {
+    background-color: transparent;
+    color: #33b5e5;
+    border-bottom-color: #33b5e5; } }
+
+@keyframes glowheader {
+  from {
+    background-color: #33b5e5;
+    color: #000;
+    border-bottom-color: #000; }
+
+  to {
+    background-color: transparent;
+    color: #33b5e5;
+    border-bottom-color: #33b5e5; } }
+
 #content p,
 #content ul,
 #content ol,
@@ -345,6 +380,16 @@ video.with-shadow {
   color: #33b5e5;
   border-bottom: 1px solid #33b5e5;
   height: 30px; }
+  #content h2:target {
+    -webkit-animation-name: glowheader;
+    -moz-animation-name: glowheader;
+    animation-name: glowheader;
+    -webkit-animation-duration: 0.7s;
+    -moz-animation-duration: 0.7s;
+    animation-duration: 0.7s;
+    -webkit-animation-timing-function: ease-out;
+    -moz-animation-timing-function: ease-out;
+    animation-timing-function: ease-out; }
 #content hr {
   border: 0;
   border-bottom: 1px solid #33b5e5;
@@ -569,3 +614,20 @@ li.no-bullet {
     margin-right: 8px; }
   .video-instructions:after {
     content: 'Click to replay movie.'; }
+
+/* download buttons */
+.download-button {
+  display: block;
+  margin-bottom: 5px;
+  text-decoration: none;
+  background-color: #33b5e5;
+  color: #fff !important;
+  font-weight: 500;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
+  padding: 6px 12px;
+  border-radius: 2px; }
+  .download-button:hover, .download-button:focus {
+    background-color: #0099cc;
+    color: #fff !important; }
+  .download-button:active {
+    background-color: #006699; }

@@ -80,6 +80,10 @@ Android Design - Navigation with Back and Up
             </ul>
           </li>
 
+          <li class="nav-section">
+            <div class="nav-section-header empty"><a href="../downloads/index.html">Downloads</a></div>
+          </li>
+
           <li>
             <div id="back-dac-section"><a href="../../index.html">Developers</a></div>
           </li>
@@ -112,7 +116,8 @@ the <em>Up</em> button, consisting of the app icon and a left-point caret.</p>
 
 <img src="../static/content/navigation_with_back_and_up.png">
 
-<h2>Up vs. Back</h2>
+<h2 id="up-vs-back">Up vs. Back</h2>
+
 <p>The Up button is used to navigate within an application based on the hierarchical relationships
 between screens. For instance, if screen A displays a list of items, and selecting an item leads to
 screen B (which presents that item in more detail), then screen B should offer an Up button that
@@ -134,7 +139,8 @@ return the user to the Home screen, or even to a different application.</p>
 <li>Back dismisses contextual action bars, and removes the highlight from the selected items</li>
 <li>Back hides the onscreen keyboard (IME)</li>
 </ul>
-<h2>Navigation Within Your App</h2>
+<h2 id="within-app">Navigation Within Your App</h2>
+
 <h4>Navigating to screens with multiple entry points</h4>
 <p>Sometimes a screen doesn't have a strict position within the app's hierarchy, and can be reached
 from multiple entry points&mdash;e.g., a settings screen which can be navigated to from any screen
@@ -176,7 +182,8 @@ which the user had not previously navigated through.</p>
 
 <img src="../static/content/navigation_between_siblings_market2.png">
 
-<h2>Navigation From Outside Your App</h2>
+<h2 id="from-outside">Navigation From Outside Your App</h2>
+
 <p>There are two categories of navigation from outside your app to screens deep within the app's
 hierarchy:</p>
 <ul>
