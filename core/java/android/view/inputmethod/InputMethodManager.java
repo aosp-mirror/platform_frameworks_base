@@ -708,6 +708,10 @@ public final class InputMethodManager {
     public void reportFinishInputConnection(InputConnection ic) {
         if (mServedInputConnection != ic) {
             ic.finishComposingText();
+            // To avoid modifying the public InputConnection interface
+            if (ic instanceof BaseInputConnection) {
+                ((BaseInputConnection) ic).reportFinish();
+            }
         }
     }
 

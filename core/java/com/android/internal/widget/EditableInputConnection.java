@@ -70,7 +70,7 @@ public class EditableInputConnection extends BaseInputConnection {
     public boolean endBatchEdit() {
         synchronized(this) {
             if (mBatchEditNesting > 0) {
-                // When the connection is reset by the InputMethodManager and finishComposingText
+                // When the connection is reset by the InputMethodManager and reportFinish
                 // is called, some endBatchEdit calls may still be asynchronously received from the
                 // IME. Do not take these into account, thus ensuring that this IC's final
                 // contribution to mTextView's nested batch edit count is zero.
@@ -80,6 +80,19 @@ public class EditableInputConnection extends BaseInputConnection {
             }
         }
         return false;
+    }
+
+    @Override
+    protected void reportFinish() {
+        super.reportFinish();
+
+        synchronized(this) {
+            while (mBatchEditNesting > 0) {
+                endBatchEdit();
+            }
+            // Will prevent any further calls to begin or endBatchEdit
+            mBatchEditNesting = -1;
+        }
     }
 
     @Override
@@ -96,23 +109,6 @@ public class EditableInputConnection extends BaseInputConnection {
             }
         }
         return true;
-    }
-
-    @Override
-    public boolean finishComposingText() {
-        final boolean superResult = super.finishComposingText();
-        synchronized(this) {
-            if (mBatchEditNesting < 0) {
-                // The connection was already finished
-                return false;
-            }
-            while (mBatchEditNesting > 0) {
-                endBatchEdit();
-            }
-            // Will prevent any further calls to begin or endBatchEdit
-            mBatchEditNesting = -1;
-        }
-        return superResult;
     }
 
     @Override

@@ -152,6 +152,15 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
+     * Called when this InputConnection is no longer used by the InputMethodManager.
+     *
+     * @hide
+     */
+    protected void reportFinish() {
+        // Intentionaly empty
+    }
+
+    /**
      * Default implementation uses
      * {@link MetaKeyKeyListener#clearMetaKeyState(long, int)
      * MetaKeyKeyListener.clearMetaKeyState(long, int)} to clear the state.
