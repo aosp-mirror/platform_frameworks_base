@@ -1148,6 +1148,26 @@ public class MediaPlayer
     }
 
     /**
+     * Set the MediaPlayer to start when this MediaPlayer finishes playback
+     * (i.e. reaches the end of the stream).
+     * The media framework will attempt to transition from this player to
+     * the next as seamlessly as possible. The next player can be set at
+     * any time before completion. The next player must be prepared by the
+     * app, and the application should not call start() on it.
+     * The next MediaPlayer must be different from 'this'. An exception
+     * will be thrown if next == this.
+     * The application may call setNextMediaPlayer(null) to indicate no
+     * next player should be started at the end of playback.
+     * If the current player is looping, it will keep looping and the next
+     * player will not be started.
+     *
+     * @param next the player to start after this one completes playback.
+     *
+     * @hide
+     */
+    public native void setNextMediaPlayer(MediaPlayer next);
+
+    /**
      * Releases resources associated with this MediaPlayer object.
      * It is considered good practice to call this method when you're
      * done using the MediaPlayer. In particular, whenever an Activity
@@ -1652,6 +1672,10 @@ public class MediaPlayer
             return;
         }
 
+        if (what == MEDIA_INFO && arg1 == MEDIA_INFO_STARTED_AS_NEXT) {
+            // this acquires the wakelock if needed, and sets the client side state
+            mp.start();
+        }
         if (mp.mEventHandler != null) {
             Message m = mp.mEventHandler.obtainMessage(what, arg1, arg2, obj);
             mp.mEventHandler.sendMessage(m);
@@ -1905,6 +1929,13 @@ public class MediaPlayer
      * @see android.media.MediaPlayer.OnInfoListener
      */
     public static final int MEDIA_INFO_UNKNOWN = 1;
+
+    /** The player was started because it was used as the next player for another
+     * player, which just completed playback.
+     * @see android.media.MediaPlayer.OnInfoListener
+     * @hide
+     */
+    public static final int MEDIA_INFO_STARTED_AS_NEXT = 2;
 
     /** The video is too complex for the decoder: it can't decode frames fast
      *  enough. Possibly only the audio plays fine at this stage.

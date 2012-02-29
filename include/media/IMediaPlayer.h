@@ -64,6 +64,7 @@ public:
     virtual status_t        setParameter(int key, const Parcel& request) = 0;
     virtual status_t        getParameter(int key, Parcel* reply) = 0;
     virtual status_t        setRetransmitEndpoint(const struct sockaddr_in* endpoint) = 0;
+    virtual status_t        setNextPlayer(const sp<IMediaPlayer>& next) = 0;
 
     // Invoke a generic method on the player by using opaque parcels
     // for the request and reply.

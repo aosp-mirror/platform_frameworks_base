@@ -107,6 +107,7 @@ public:
         virtual void        close() = 0;
 
         virtual status_t    setPlaybackRatePermille(int32_t rate) { return INVALID_OPERATION; }
+        virtual bool        needsTrailingPadding() { return true; }
     };
 
                         MediaPlayerBase() : mCookie(0), mNotify(0) {}

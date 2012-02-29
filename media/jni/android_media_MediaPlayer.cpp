@@ -795,6 +795,33 @@ android_media_MediaPlayer_getParameter(JNIEnv *env, jobject thiz, jint key, jobj
     process_media_player_call(env, thiz, mp->getParameter(key, reply), NULL, NULL );
 }
 
+static void
+android_media_MediaPlayer_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject java_player)
+{
+    ALOGV("setNextMediaPlayer");
+    sp<MediaPlayer> thisplayer = getMediaPlayer(env, thiz);
+    if (thisplayer == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", "This player not initialized");
+        return;
+    }
+    sp<MediaPlayer> nextplayer = (java_player == NULL) ? NULL : getMediaPlayer(env, java_player);
+    if (nextplayer == NULL && java_player != NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", "That player not initialized");
+        return;
+    }
+
+    if (nextplayer == thisplayer) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "Next player can't be self");
+        return;
+    }
+    // tie the two players together
+    process_media_player_call(
+            env, thiz, thisplayer->setNextMediaPlayer(nextplayer),
+            "java/lang/IllegalArgumentException",
+            "setNextMediaPlayer failed." );
+    ;
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -840,6 +867,7 @@ static JNINativeMethod gMethods[] = {
     {"setParameter",        "(ILandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_setParameter},
     {"getParameter",        "(ILandroid/os/Parcel;)V",          (void *)android_media_MediaPlayer_getParameter},
     {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer_setRetransmitEndpoint},
+    {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer;)V",   (void *)android_media_MediaPlayer_setNextMediaPlayer},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";

@@ -96,6 +96,9 @@ enum media_error_type {
 enum media_info_type {
     // 0xx
     MEDIA_INFO_UNKNOWN = 1,
+    // The player was started because it was used as the next player for another
+    // player, which just completed playback
+    MEDIA_INFO_STARTED_AS_NEXT = 2,
     // 7xx
     // The video is too complex for the decoder: it can't decode frames fast
     // enough. Possibly only the audio plays fine at this stage.
@@ -207,6 +210,7 @@ public:
             status_t        setParameter(int key, const Parcel& request);
             status_t        getParameter(int key, Parcel* reply);
             status_t        setRetransmitEndpoint(const char* addrString, uint16_t port);
+            status_t        setNextMediaPlayer(const sp<MediaPlayer>& player);
 
 private:
             void            clear_l();
