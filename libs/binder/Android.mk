@@ -24,7 +24,6 @@ sources := \
     MemoryDealer.cpp \
     MemoryBase.cpp \
     MemoryHeapBase.cpp \
-    MemoryHeapPmem.cpp \
     Parcel.cpp \
     PermissionCache.cpp \
     ProcessState.cpp \
