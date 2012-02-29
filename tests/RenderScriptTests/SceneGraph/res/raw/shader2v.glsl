@@ -1,3 +1,8 @@
+/*
+    rs_matrix4x4 model;
+    rs_matrix4x4 viewProj;
+*/
+
 varying vec3 varWorldPos;
 varying vec3 varWorldNormal;
 varying vec2 varTex0;

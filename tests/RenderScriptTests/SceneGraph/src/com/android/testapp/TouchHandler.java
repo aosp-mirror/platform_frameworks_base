@@ -43,7 +43,7 @@ public class TouchHandler {
     public void init(Scene scene) {
         // Some initial values for camera position
         mRotateXValue = -20;
-        mRotateYValue = 45;
+        mRotateYValue = 0;
         mDistValue = new Float3(0, 0, 45);
         mPosValue = new Float3(0, 4, 0);
 
