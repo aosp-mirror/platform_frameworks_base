@@ -455,9 +455,10 @@ private:
         virtual     status_t addEffectChain_l(const sp<EffectChain>& chain) = 0;
                     // remove an effect chain from the chain list (mEffectChains)
         virtual     size_t removeEffectChain_l(const sp<EffectChain>& chain) = 0;
-                    // lock mall effect chains Mutexes. Must be called before releasing the
+                    // lock all effect chains Mutexes. Must be called before releasing the
                     // ThreadBase mutex before processing the mixer and effects. This guarantees the
                     // integrity of the chains during the process.
+                    // Also sets the parameter 'effectChains' to current value of mEffectChains.
                     void lockEffectChains_l(Vector<sp <EffectChain> >& effectChains);
                     // unlock effect chains after process
                     void unlockEffectChains(const Vector<sp<EffectChain> >& effectChains);
@@ -575,9 +576,11 @@ private:
     public:
 
         enum mixer_state {
-            MIXER_IDLE,
-            MIXER_TRACKS_ENABLED,
-            MIXER_TRACKS_READY
+            MIXER_IDLE,             // no active tracks
+            MIXER_TRACKS_ENABLED,   // at least one active track, but no track has any data ready
+            MIXER_TRACKS_READY      // at least one active track, and at least one track has data
+            // standby mode does not have an enum value
+            // suspend by audio policy manager is orthogonal to mixer state
         };
 
         // playback track
