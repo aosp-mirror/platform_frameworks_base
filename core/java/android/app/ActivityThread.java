@@ -3986,40 +3986,40 @@ public final class ActivityThread {
             dalvik.system.VMRuntime.getRuntime().clearGrowthLimit();
         }
 
-        // allow disk access during application and provider setup. this could
+        // Allow disk access during application and provider setup. This could
         // block processing ordered broadcasts, but later processing would
-        // probably end up doing the same disk access. restore not guarded with
-        // finally block, since exceptions here will take down the application.
+        // probably end up doing the same disk access.
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskWrites();
-
-        // If the app is being launched for full backup or restore, bring it up in
-        // a restricted environment with the base application class.
-        Application app = data.info.makeApplication(data.restrictedBackupMode, null);
-        mInitialApplication = app;
-
-        // don't bring up providers in restricted mode; they may depend on the
-        // app's custom Application class
-        if (!data.restrictedBackupMode) {
-            List<ProviderInfo> providers = data.providers;
-            if (providers != null) {
-                installContentProviders(app, providers);
-                // For process that contains content providers, we want to
-                // ensure that the JIT is enabled "at some point".
-                mH.sendEmptyMessageDelayed(H.ENABLE_JIT, 10*1000);
-            }
-        }
-
         try {
-            mInstrumentation.callApplicationOnCreate(app);
-        } catch (Exception e) {
-            if (!mInstrumentation.onException(app, e)) {
-                throw new RuntimeException(
-                    "Unable to create application " + app.getClass().getName()
-                    + ": " + e.toString(), e);
-            }
-        }
+            // If the app is being launched for full backup or restore, bring it up in
+            // a restricted environment with the base application class.
+            Application app = data.info.makeApplication(data.restrictedBackupMode, null);
+            mInitialApplication = app;
 
-        StrictMode.setThreadPolicy(savedPolicy);
+            // don't bring up providers in restricted mode; they may depend on the
+            // app's custom Application class
+            if (!data.restrictedBackupMode) {
+                List<ProviderInfo> providers = data.providers;
+                if (providers != null) {
+                    installContentProviders(app, providers);
+                    // For process that contains content providers, we want to
+                    // ensure that the JIT is enabled "at some point".
+                    mH.sendEmptyMessageDelayed(H.ENABLE_JIT, 10*1000);
+                }
+            }
+
+            try {
+                mInstrumentation.callApplicationOnCreate(app);
+            } catch (Exception e) {
+                if (!mInstrumentation.onException(app, e)) {
+                    throw new RuntimeException(
+                        "Unable to create application " + app.getClass().getName()
+                        + ": " + e.toString(), e);
+                }
+            }
+        } finally {
+            StrictMode.setThreadPolicy(savedPolicy);
+        }
     }
 
     /*package*/ final void finishInstrumentation(int resultCode, Bundle results) {
