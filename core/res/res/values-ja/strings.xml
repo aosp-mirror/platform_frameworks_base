@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"アプリのコンポーネントの有効/無効化"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"別のアプリのコンポーネントの有効/無効を変更することをアプリに許可します。この許可を悪意のあるアプリに利用されると、タブレットの重要な機能が無効にされる恐れがあります。アプリのコンポーネントが利用できなくなったり、整合性が取れなくなったり、不安定な状態になったりする恐れがあるので許可には注意が必要です。"</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"別のアプリのコンポーネントの有効/無効を変更することをアプリに許可します。この許可を悪意のあるアプリに利用されると、携帯端末の重要な機能が無効にされる恐れがあります。アプリのコンポーネントが利用できなくなったり、整合性が取れなくなったり、不安定な状態になったりする恐れがあるので許可には注意が必要です。"</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"権限の許可または取り消し"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"このアプリケーションや他のアプリケーションに対して特定の権限を許可したり取り消したりすることをアプリケーションに許可します。悪意のあるアプリケーションがユーザーの許可なく複数の機能にアクセスする恐れがあります。"</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"優先アプリの設定"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"優先アプリを変更することをアプリに許可します。この許可を悪意のあるアプリに利用されると、実行中のアプリが密かに変更され、既存のアプリへのなりすましにより非公開データがだまし取られる恐れがあります。"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"システムの全般設定の変更"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日付設定"</string>
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"端末既定"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"NEW: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"権限の許可は必要ありません"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"隠す"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"すべて表示"</b></string>

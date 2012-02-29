@@ -767,7 +767,7 @@
     <string name="permlab_serialPort" msgid="546083327654631076">"accéder aux ports série"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Permet à l\'application autorisée d\'accéder aux ports série avec l\'API SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"accès externe fournisseurs de contenu"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Permettre à l\'application titulaire d\'accéder à des fournisseurs de contenu depuis l\'interface. Les applications standards ne devraient jamais avoir recours à cette autorisation."</string>
+    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Permettre à l\'application titulaire d\'accéder à des fournisseurs de contenu depuis la commande shell. Les applications standards ne devraient jamais avoir recours à cette autorisation."</string>
     <string name="save_password_message" msgid="767344687139195790">"Voulez-vous que le navigateur se souvienne de ce mot de passe ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Pas maintenant"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Mémoriser"</string>

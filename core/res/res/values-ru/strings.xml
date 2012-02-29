@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"включение и отключение компонентов приложения"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Приложение сможет включать и отключать компоненты других программ. Вредоносные программы смогут таким образом отключать важные функции планшетного ПК. Используйте это разрешение с особой осторожностью, чтобы случайно не нарушить работу компонентов приложения."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Приложение сможет включать и отключать компоненты других программ. Вредоносные программы смогут таким образом отключать важные функции телефона. Используйте это разрешение с особой осторожностью, чтобы случайно не нарушить работу компонентов приложения."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"предоставление и отзыв разрешений"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Позволяет приложению предоставлять и отзывать разрешения самому себе и другим программам. Вредоносные приложения могут использовать эту функцию для получения прав, которых вы им не предоставляли."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"настройка предпочтительных приложений"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Приложение сможет изменять предпочтительные приложения. Вредоносные программы смогут незаметно изменять запускаемые вами программы и собирать ваши личные данные от имени существующих приложений."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"изменять общие настройки системы"</string>
@@ -1008,8 +1006,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Настройка даты"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Установить"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"По умолчанию"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"НОВОЕ: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Не требуется разрешений"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Скрыть"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Показать все"</b></string>
