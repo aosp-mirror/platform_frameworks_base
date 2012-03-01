@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.content.res.Resources;
 import android.os.StatFs;
 
 /**
@@ -63,5 +64,45 @@ public final class SQLiteGlobal {
             }
             return sDefaultPageSize;
         }
+    }
+
+    /**
+     * Gets the default journal mode when WAL is not in use.
+     */
+    public static String getDefaultJournalMode() {
+        return Resources.getSystem().getString(
+                com.android.internal.R.string.db_default_journal_mode);
+    }
+
+    /**
+     * Gets the journal size limit in bytes.
+     */
+    public static int getJournalSizeLimit() {
+        return Resources.getSystem().getInteger(
+                com.android.internal.R.integer.db_journal_size_limit);
+    }
+
+    /**
+     * Gets the database synchronization mode.
+     */
+    public static String getSyncMode() {
+        return Resources.getSystem().getString(
+                com.android.internal.R.string.db_sync_mode);
+    }
+
+    /**
+     * Gets the WAL auto-checkpoint integer in database pages.
+     */
+    public static int getWALAutoCheckpoint() {
+        return Math.max(1, Resources.getSystem().getInteger(
+                com.android.internal.R.integer.db_wal_autocheckpoint));
+    }
+
+    /**
+     * Gets the default connection pool size when in WAL mode.
+     */
+    public static int getWALConnectionPoolSize() {
+        return Math.max(2, Resources.getSystem().getInteger(
+                com.android.internal.R.integer.db_connection_pool_size));
     }
 }

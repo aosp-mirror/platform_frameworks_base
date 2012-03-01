@@ -646,8 +646,28 @@
     <bool translatable="false" name="skip_restoring_network_selection">false</bool>
 
     <!-- Maximum number of database connections opened and managed by framework layer
-         to handle queries on each database. -->
+         to handle queries on each database when using Write-Ahead Logging. -->
     <integer name="db_connection_pool_size">4</integer>
+
+    <!-- The default journal mode to use use when Write-Ahead Logging is not active.
+         Choices are: OFF, DELETE, TRUNCATE, PERSIST and MEMORY.
+         PERSIST may improve performance by reducing how often journal blocks are
+         reallocated (compared to truncation) resulting in better data block locality
+         and less churn of the storage media. -->
+    <string name="db_default_journal_mode">TRUNCATE</string>
+
+    <!-- Maximum size of the persistent journal file in bytes.
+         If the journal file grows to be larger than this amount then SQLite will
+         truncate it after committing the transaction. -->
+    <integer name="db_journal_size_limit">524288</integer>
+
+    <!-- The database synchronization mode.
+         Choices are: FULL, NORMAL, OFF. -->
+    <string name="db_sync_mode">FULL</string>
+
+    <!-- The Write-Ahead Log auto-checkpoint interval in database pages.
+         The log is checkpointed automatically whenever it exceeds this many pages. -->
+    <integer name="db_wal_autocheckpoint">1</integer>
 
     <!-- Max space (in MB) allocated to DownloadManager to store the downloaded
          files if they are to be stored in DownloadManager's data dir,

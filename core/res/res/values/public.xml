@@ -250,6 +250,8 @@
   <java-symbol type="integer" name="config_wifi_framework_scan_interval" />
   <java-symbol type="integer" name="config_wifi_supplicant_scan_interval" />
   <java-symbol type="integer" name="db_connection_pool_size" />
+  <java-symbol type="integer" name="db_journal_size_limit" />
+  <java-symbol type="integer" name="db_wal_autocheckpoint" />
   <java-symbol type="integer" name="max_action_buttons" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
@@ -438,6 +440,8 @@
   <java-symbol type="string" name="day_of_week_shortest_thursday" />
   <java-symbol type="string" name="day_of_week_shortest_tuesday" />
   <java-symbol type="string" name="day_of_week_shortest_wednesday" />
+  <java-symbol type="string" name="db_default_journal_mode" />
+  <java-symbol type="string" name="db_sync_mode" />
   <java-symbol type="string" name="decline" />
   <java-symbol type="string" name="default_permission_group" />
   <java-symbol type="string" name="default_text_encoding" />

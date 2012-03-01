@@ -717,9 +717,6 @@ public class SQLiteDatabase extends SQLiteClosable {
                 onCorruption();
                 openInner();
             }
-
-            // Disable WAL if it was previously enabled.
-            setJournalMode("TRUNCATE");
         } catch (SQLiteException ex) {
             Log.e(TAG, "Failed to open database '" + getLabel() + "'.", ex);
             close();
@@ -736,19 +733,6 @@ public class SQLiteDatabase extends SQLiteClosable {
 
         synchronized (sActiveDatabases) {
             sActiveDatabases.put(this, null);
-        }
-    }
-
-    private void setJournalMode(String mode) {
-        // Journal mode can be set only for non-memory databases
-        // AND can't be set for readonly databases
-        if (isInMemoryDatabase() || isReadOnly()) {
-            return;
-        }
-        String s = DatabaseUtils.stringForQuery(this, "PRAGMA journal_mode=" + mode, null);
-        if (!s.equalsIgnoreCase(mode)) {
-            Log.e(TAG, "setting journal_mode to " + mode + " failed for db: " + getLabel()
-                    + " (on pragma set journal_mode, sqlite returned:" + s);
         }
     }
 
@@ -1761,13 +1745,10 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
 
             mIsWALEnabledLocked = true;
-            mConfigurationLocked.maxConnectionPoolSize = Math.max(2,
-                    Resources.getSystem().getInteger(
-                            com.android.internal.R.integer.db_connection_pool_size));
+            mConfigurationLocked.maxConnectionPoolSize = SQLiteGlobal.getWALConnectionPoolSize();
+            mConfigurationLocked.journalMode = "WAL";
             mConnectionPoolLocked.reconfigure(mConfigurationLocked);
         }
-
-        setJournalMode("WAL");
         return true;
     }
 
@@ -1785,10 +1766,9 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             mIsWALEnabledLocked = false;
             mConfigurationLocked.maxConnectionPoolSize = 1;
+            mConfigurationLocked.journalMode = SQLiteGlobal.getDefaultJournalMode();
             mConnectionPoolLocked.reconfigure(mConfigurationLocked);
         }
-
-        setJournalMode("TRUNCATE");
     }
 
     /**
