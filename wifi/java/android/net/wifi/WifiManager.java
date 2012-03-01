@@ -1096,7 +1096,7 @@ public class WifiManager {
      * @hide
      */
      public void asyncConnect(Context srcContext, Handler srcHandler) {
-        mAsyncChannel.connect(srcContext, srcHandler, getMessenger());
+        mAsyncChannel.connect(srcContext, srcHandler, getWifiServiceMessenger());
      }
 
     /**
@@ -1197,13 +1197,28 @@ public class WifiManager {
      * @return Messenger pointing to the WifiService handler
      * @hide
      */
-    public Messenger getMessenger() {
+    public Messenger getWifiServiceMessenger() {
         try {
-            return mService.getMessenger();
+            return mService.getWifiServiceMessenger();
         } catch (RemoteException e) {
             return null;
         }
     }
+
+    /**
+     * Get a reference to WifiStateMachine handler.
+     * @return Messenger pointing to the WifiService handler
+     * @hide
+     */
+    public Messenger getWifiStateMachineMessenger() {
+        try {
+            return mService.getWifiStateMachineMessenger();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+
 
     /**
      * Returns the file in which IP and proxy configuration data is stored

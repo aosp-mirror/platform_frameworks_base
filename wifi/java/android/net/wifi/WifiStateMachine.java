@@ -463,8 +463,12 @@ public class WifiStateMachine extends StateMachine {
     private State mScanModeState = new ScanModeState();
     /* Connecting to an access point */
     private State mConnectModeState = new ConnectModeState();
-    /* Fetching IP after network connection (assoc+auth complete) */
-    private State mConnectingState = new ConnectingState();
+    /* Connected at 802.11 (L2) level */
+    private State mL2ConnectedState = new L2ConnectedState();
+    /* fetching IP after connection to access point (assoc+auth complete) */
+    private State mObtainingIpState = new ObtainingIpState();
+    /* Waiting for link quality verification to be complete */
+    private State mVerifyingLinkState = new VerifyingLinkState();
     /* Connected with IP addr */
     private State mConnectedState = new ConnectedState();
     /* disconnect issued, waiting for network disconnect confirmation */
@@ -629,8 +633,10 @@ public class WifiStateMachine extends StateMachine {
                 addState(mDriverStartedState, mSupplicantStartedState);
                     addState(mScanModeState, mDriverStartedState);
                     addState(mConnectModeState, mDriverStartedState);
-                        addState(mConnectingState, mConnectModeState);
-                        addState(mConnectedState, mConnectModeState);
+                        addState(mL2ConnectedState, mConnectModeState);
+                            addState(mObtainingIpState, mL2ConnectedState);
+                            addState(mVerifyingLinkState, mL2ConnectedState);
+                            addState(mConnectedState, mL2ConnectedState);
                         addState(mDisconnectingState, mConnectModeState);
                         addState(mDisconnectedState, mConnectModeState);
                         addState(mWaitForWpsCompletionState, mConnectModeState);
@@ -655,6 +661,9 @@ public class WifiStateMachine extends StateMachine {
      * Methods exposed for public use
      ********************************************************/
 
+    public Messenger getMessenger() {
+        return new Messenger(getHandler());
+    }
     /**
      * TODO: doc
      */
@@ -1543,12 +1552,14 @@ public class WifiStateMachine extends StateMachine {
         Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, mNetworkInfo);
+        intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, new NetworkInfo(mNetworkInfo));
         intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, new LinkProperties (mLinkProperties));
         if (bssid != null)
             intent.putExtra(WifiManager.EXTRA_BSSID, bssid);
-        if (mNetworkInfo.getState() == NetworkInfo.State.CONNECTED)
+        if (mNetworkInfo.getDetailedState() == DetailedState.VERIFYING_POOR_LINK ||
+                mNetworkInfo.getDetailedState() == DetailedState.CONNECTED) {
             intent.putExtra(WifiManager.EXTRA_WIFI_INFO, new WifiInfo(mWifiInfo));
+        }
         mContext.sendStickyBroadcast(intent);
     }
 
@@ -1740,9 +1751,6 @@ public class WifiStateMachine extends StateMachine {
             }
         } else {
             configureLinkProperties();
-            setNetworkDetailedState(DetailedState.CONNECTED);
-            mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.CONNECTED);
-            sendNetworkStateChangeBroadcast(mLastBssid);
         }
     }
 
@@ -1890,6 +1898,8 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_AP_CONFIG_COMPLETED:
                 case CMD_REQUEST_AP_CONFIG:
                 case CMD_RESPONSE_AP_CONFIG:
+                case WifiWatchdogStateMachine.POOR_LINK_DETECTED:
+                case WifiWatchdogStateMachine.GOOD_LINK_DETECTED:
                     break;
                 case WifiMonitor.DRIVER_HUNG_EVENT:
                     setWifiEnabled(false);
@@ -2885,7 +2895,7 @@ public class WifiStateMachine extends StateMachine {
                     /* send event to CM & network change broadcast */
                     setNetworkDetailedState(DetailedState.OBTAINING_IPADDR);
                     sendNetworkStateChangeBroadcast(mLastBssid);
-                    transitionTo(mConnectingState);
+                    transitionTo(mObtainingIpState);
                     break;
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                     if (DBG) log("Network connection lost");
@@ -2900,122 +2910,18 @@ public class WifiStateMachine extends StateMachine {
         }
     }
 
-    class ConnectingState extends State {
 
-        @Override
-        public void enter() {
-            if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
-
-            try {
-                mNwService.enableIpv6(mInterfaceName);
-            } catch (RemoteException re) {
-                loge("Failed to enable IPv6: " + re);
-            } catch (IllegalStateException e) {
-                loge("Failed to enable IPv6: " + e);
-            }
-
-            if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
-                //start DHCP
-                mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
-                        mContext, WifiStateMachine.this, mInterfaceName);
-                mDhcpStateMachine.registerForPreDhcpNotification();
-                mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
-            } else {
-                DhcpInfoInternal dhcpInfoInternal = mWifiConfigStore.getIpConfiguration(
-                        mLastNetworkId);
-                InterfaceConfiguration ifcg = new InterfaceConfiguration();
-                ifcg.setLinkAddress(dhcpInfoInternal.makeLinkAddress());
-                ifcg.setInterfaceUp();
-                try {
-                    mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-                    if (DBG) log("Static IP configuration succeeded");
-                    sendMessage(CMD_STATIC_IP_SUCCESS, dhcpInfoInternal);
-                } catch (RemoteException re) {
-                    loge("Static IP configuration failed: " + re);
-                    sendMessage(CMD_STATIC_IP_FAILURE);
-                } catch (IllegalStateException e) {
-                    loge("Static IP configuration failed: " + e);
-                    sendMessage(CMD_STATIC_IP_FAILURE);
-                }
-            }
-        }
-      @Override
-      public boolean processMessage(Message message) {
-          if (DBG) log(getName() + message.toString() + "\n");
-
-          switch(message.what) {
-              case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
-                  handlePreDhcpSetup();
-                  mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE);
-                  break;
-              case DhcpStateMachine.CMD_POST_DHCP_ACTION:
-                  handlePostDhcpSetup();
-                  if (message.arg1 == DhcpStateMachine.DHCP_SUCCESS) {
-                      handleSuccessfulIpConfiguration((DhcpInfoInternal) message.obj);
-                      transitionTo(mConnectedState);
-                  } else if (message.arg1 == DhcpStateMachine.DHCP_FAILURE) {
-                      handleFailedIpConfiguration();
-                      transitionTo(mDisconnectingState);
-                  }
-                  break;
-              case CMD_STATIC_IP_SUCCESS:
-                  handleSuccessfulIpConfiguration((DhcpInfoInternal) message.obj);
-                  transitionTo(mConnectedState);
-                  break;
-              case CMD_STATIC_IP_FAILURE:
-                  handleFailedIpConfiguration();
-                  transitionTo(mDisconnectingState);
-                  break;
-              case CMD_DISCONNECT:
-                  mWifiNative.disconnect();
-                  transitionTo(mDisconnectingState);
-                  break;
-                  /* Ignore connection to same network */
-              case CMD_CONNECT_NETWORK:
-                  int netId = message.arg1;
-                  if (mWifiInfo.getNetworkId() == netId) {
-                      break;
-                  }
-                  return NOT_HANDLED;
-              case CMD_SAVE_NETWORK:
-                  deferMessage(message);
-                  break;
-                  /* Ignore */
-              case WifiMonitor.NETWORK_CONNECTION_EVENT:
-                  break;
-              case CMD_SET_SCAN_MODE:
-                  if (message.arg1 == SCAN_ONLY_MODE) {
-                      sendMessage(CMD_DISCONNECT);
-                      deferMessage(message);
-                  }
-                  break;
-                  /* Defer scan when IP is being fetched */
-              case CMD_START_SCAN:
-                  deferMessage(message);
-                  break;
-                  /* Defer any power mode changes since we must keep active power mode at DHCP */
-              case CMD_SET_HIGH_PERF_MODE:
-                  deferMessage(message);
-                  break;
-              default:
-                return NOT_HANDLED;
-          }
-          EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-          return HANDLED;
-      }
-    }
-
-    class ConnectedState extends State {
+    class L2ConnectedState extends State {
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             mRssiPollToken++;
             if (mEnableRssiPolling) {
-                sendMessage(obtainMessage(WifiStateMachine.CMD_RSSI_POLL, mRssiPollToken, 0));
+                sendMessage(obtainMessage(CMD_RSSI_POLL, mRssiPollToken, 0));
             }
         }
+
         @Override
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
@@ -3028,8 +2934,11 @@ public class WifiStateMachine extends StateMachine {
               case DhcpStateMachine.CMD_POST_DHCP_ACTION:
                   handlePostDhcpSetup();
                   if (message.arg1 == DhcpStateMachine.DHCP_SUCCESS) {
+                      if (DBG) log("DHCP successful");
                       handleSuccessfulIpConfiguration((DhcpInfoInternal) message.obj);
+                      transitionTo(mVerifyingLinkState);
                   } else if (message.arg1 == DhcpStateMachine.DHCP_FAILURE) {
+                      if (DBG) log("DHCP failed");
                       handleFailedIpConfiguration();
                       transitionTo(mDisconnectingState);
                   }
@@ -3067,7 +2976,7 @@ public class WifiStateMachine extends StateMachine {
                     if (mWifiInfo.getNetworkId() == result.getNetworkId()) {
                         if (result.hasIpChanged()) {
                             log("Reconfiguring IP on connection");
-                            transitionTo(mConnectingState);
+                            transitionTo(mObtainingIpState);
                         }
                         if (result.hasProxyChanged()) {
                             log("Reconfiguring proxy on connection");
@@ -3084,7 +2993,7 @@ public class WifiStateMachine extends StateMachine {
                     if (message.arg1 == mRssiPollToken) {
                         // Get Info and continue polling
                         fetchRssiAndLinkSpeedNative();
-                        sendMessageDelayed(obtainMessage(WifiStateMachine.CMD_RSSI_POLL,
+                        sendMessageDelayed(obtainMessage(CMD_RSSI_POLL,
                                 mRssiPollToken, 0), POLL_RSSI_INTERVAL_MSECS);
                     } else {
                         // Polling has completed
@@ -3096,31 +3005,163 @@ public class WifiStateMachine extends StateMachine {
                     if (mEnableRssiPolling) {
                         // first poll
                         fetchRssiAndLinkSpeedNative();
-                        sendMessageDelayed(obtainMessage(WifiStateMachine.CMD_RSSI_POLL,
+                        sendMessageDelayed(obtainMessage(CMD_RSSI_POLL,
                                 mRssiPollToken, 0), POLL_RSSI_INTERVAL_MSECS);
                     }
                     break;
                 default:
                     return NOT_HANDLED;
             }
+
             if (eventLoggingEnabled) {
                 EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             }
             return HANDLED;
         }
+
         @Override
         public void exit() {
-
-            /* Request a CS wakelock during transition to mobile */
-            checkAndSetConnectivityInstance();
-            mCm.requestNetworkTransitionWakelock(TAG);
-
             /* If a scan result is pending in connected state, the supplicant
              * is in SCAN_ONLY_MODE. Restore CONNECT_MODE on exit
              */
             if (mScanResultIsPending) {
                 mWifiNative.setScanResultHandling(CONNECT_MODE);
             }
+        }
+    }
+
+    class ObtainingIpState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
+                //start DHCP
+                mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
+                        mContext, WifiStateMachine.this, mInterfaceName);
+                mDhcpStateMachine.registerForPreDhcpNotification();
+                mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
+            } else {
+                DhcpInfoInternal dhcpInfoInternal = mWifiConfigStore.getIpConfiguration(
+                        mLastNetworkId);
+                InterfaceConfiguration ifcg = new InterfaceConfiguration();
+                ifcg.setLinkAddress(dhcpInfoInternal.makeLinkAddress());
+                ifcg.setInterfaceUp();
+                try {
+                    mNwService.setInterfaceConfig(mInterfaceName, ifcg);
+                    if (DBG) log("Static IP configuration succeeded");
+                    sendMessage(CMD_STATIC_IP_SUCCESS, dhcpInfoInternal);
+                } catch (RemoteException re) {
+                    loge("Static IP configuration failed: " + re);
+                    sendMessage(CMD_STATIC_IP_FAILURE);
+                } catch (IllegalStateException e) {
+                    loge("Static IP configuration failed: " + e);
+                    sendMessage(CMD_STATIC_IP_FAILURE);
+                }
+            }
+        }
+      @Override
+      public boolean processMessage(Message message) {
+          if (DBG) log(getName() + message.toString() + "\n");
+          switch(message.what) {
+            case CMD_STATIC_IP_SUCCESS:
+                  handleSuccessfulIpConfiguration((DhcpInfoInternal) message.obj);
+                  transitionTo(mVerifyingLinkState);
+                  break;
+              case CMD_STATIC_IP_FAILURE:
+                  handleFailedIpConfiguration();
+                  transitionTo(mDisconnectingState);
+                  break;
+             case CMD_SAVE_NETWORK:
+                  deferMessage(message);
+                  break;
+                  /* Defer any power mode changes since we must keep active power mode at DHCP */
+              case CMD_SET_HIGH_PERF_MODE:
+                  deferMessage(message);
+                  break;
+              default:
+                  return NOT_HANDLED;
+          }
+          EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+          return HANDLED;
+      }
+    }
+
+    class VerifyingLinkState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+            setNetworkDetailedState(DetailedState.VERIFYING_POOR_LINK);
+            mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.VERIFYING_POOR_LINK);
+            sendNetworkStateChangeBroadcast(mLastBssid);
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            switch (message.what) {
+                case WifiWatchdogStateMachine.POOR_LINK_DETECTED:
+                    //stay here
+                    break;
+                case WifiWatchdogStateMachine.GOOD_LINK_DETECTED:
+                    try {
+                        mNwService.enableIpv6(mInterfaceName);
+                    } catch (RemoteException re) {
+                        loge("Failed to enable IPv6: " + re);
+                    } catch (IllegalStateException e) {
+                        loge("Failed to enable IPv6: " + e);
+                    }
+
+                    setNetworkDetailedState(DetailedState.CONNECTED);
+                    mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.CONNECTED);
+                    sendNetworkStateChangeBroadcast(mLastBssid);
+                    transitionTo(mConnectedState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class ConnectedState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+       }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) log(getName() + message.toString() + "\n");
+            switch (message.what) {
+               case WifiWatchdogStateMachine.POOR_LINK_DETECTED:
+                    if (DBG) log("Watchdog reports poor link");
+                    try {
+                        mNwService.disableIpv6(mInterfaceName);
+                    } catch (RemoteException re) {
+                        loge("Failed to disable IPv6: " + re);
+                    } catch (IllegalStateException e) {
+                        loge("Failed to disable IPv6: " + e);
+                    }
+                    /* Report a disconnect */
+                    setNetworkDetailedState(DetailedState.DISCONNECTED);
+                    mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.DISCONNECTED);
+                    sendNetworkStateChangeBroadcast(mLastBssid);
+
+                    transitionTo(mVerifyingLinkState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+        @Override
+        public void exit() {
+            /* Request a CS wakelock during transition to mobile */
+            checkAndSetConnectivityInstance();
+            mCm.requestNetworkTransitionWakelock(TAG);
         }
     }
 

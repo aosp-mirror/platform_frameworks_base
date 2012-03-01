@@ -203,7 +203,7 @@ public class NetworkController extends BroadcastReceiver {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         Handler handler = new WifiHandler();
         mWifiChannel = new AsyncChannel();
-        Messenger wifiMessenger = mWifiManager.getMessenger();
+        Messenger wifiMessenger = mWifiManager.getWifiServiceMessenger();
         if (wifiMessenger != null) {
             mWifiChannel.connect(mContext, handler, wifiMessenger);
         }
@@ -767,17 +767,10 @@ public class NetworkController extends BroadcastReceiver {
             } else if (!mWifiConnected) {
                 mWifiSsid = null;
             }
-            // Apparently the wifi level is not stable at this point even if we've just connected to
-            // the network; we need to wait for an RSSI_CHANGED_ACTION for that. So let's just set
-            // it to 0 for now
-            mWifiLevel = 0;
-            mWifiRssi = -200;
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
-            if (mWifiConnected) {
-                mWifiRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
-                mWifiLevel = WifiManager.calculateSignalLevel(
-                        mWifiRssi, WifiIcons.WIFI_LEVEL_COUNT);
-            }
+            mWifiRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
+            mWifiLevel = WifiManager.calculateSignalLevel(
+                    mWifiRssi, WifiIcons.WIFI_LEVEL_COUNT);
         }
 
         updateWifiIcons();
