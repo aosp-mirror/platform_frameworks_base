@@ -432,6 +432,11 @@ public class PhoneStatusBar extends StatusBar {
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
                 mRecentsPanel));
         mRecentsPanel.setVisibility(View.GONE);
+
+        // Make .03 alpha the minimum so you always see the item a bit-- slightly below
+        // .03, the item disappears entirely (as if alpha = 0) and that discontinuity looks
+        // a bit jarring
+        mRecentsPanel.setMinSwipeAlpha(0.03f);
         WindowManager.LayoutParams lp = getRecentsLayoutParams(mRecentsPanel.getLayoutParams());
 
         WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);

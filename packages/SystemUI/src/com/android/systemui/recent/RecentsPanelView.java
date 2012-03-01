@@ -92,6 +92,13 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         public void onRecentsPanelVisibilityChanged(boolean visible);
     }
 
+    public static interface RecentsScrollView {
+        public int numItemsInOneScreenful();
+        public void setAdapter(TaskDescriptionAdapter adapter);
+        public void setCallback(RecentsCallback callback);
+        public void setMinSwipeAlpha(float minAlpha);
+    }
+
     private final class OnLongClickDelegate implements View.OnLongClickListener {
         View mOtherView;
         OnLongClickDelegate(View other) {
@@ -196,16 +203,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public int numItemsInOneScreenful() {
-        if (mRecentsContainer instanceof RecentsHorizontalScrollView){
-            RecentsHorizontalScrollView scrollView
-                    = (RecentsHorizontalScrollView) mRecentsContainer;
+        if (mRecentsContainer instanceof RecentsScrollView){
+            RecentsScrollView scrollView
+                    = (RecentsScrollView) mRecentsContainer;
             return scrollView.numItemsInOneScreenful();
-        } else if (mRecentsContainer instanceof RecentsVerticalScrollView){
-            RecentsVerticalScrollView scrollView
-                    = (RecentsVerticalScrollView) mRecentsContainer;
-            return scrollView.numItemsInOneScreenful();
-        }
-        else {
+        }  else {
             throw new IllegalArgumentException("missing Recents[Horizontal]ScrollView");
         }
     }
@@ -427,18 +429,12 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRecentsContainer = (ViewGroup) findViewById(R.id.recents_container);
         mStatusBarTouchProxy = (StatusBarTouchProxy) findViewById(R.id.status_bar_touch_proxy);
         mListAdapter = new TaskDescriptionAdapter(mContext);
-        if (mRecentsContainer instanceof RecentsHorizontalScrollView){
-            RecentsHorizontalScrollView scrollView
-                    = (RecentsHorizontalScrollView) mRecentsContainer;
+        if (mRecentsContainer instanceof RecentsScrollView){
+            RecentsScrollView scrollView
+                    = (RecentsScrollView) mRecentsContainer;
             scrollView.setAdapter(mListAdapter);
             scrollView.setCallback(this);
-        } else if (mRecentsContainer instanceof RecentsVerticalScrollView){
-            RecentsVerticalScrollView scrollView
-                    = (RecentsVerticalScrollView) mRecentsContainer;
-            scrollView.setAdapter(mListAdapter);
-            scrollView.setCallback(this);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("missing Recents[Horizontal]ScrollView");
         }
 
@@ -465,6 +461,14 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 }
             }
         };
+    }
+
+    public void setMinSwipeAlpha(float minAlpha) {
+        if (mRecentsContainer instanceof RecentsScrollView){
+            RecentsScrollView scrollView
+                = (RecentsScrollView) mRecentsContainer;
+            scrollView.setMinSwipeAlpha(minAlpha);
+        }
     }
 
     private void createCustomAnimations(LayoutTransition transitioner) {
@@ -523,8 +527,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         synchronized (td) {
             if (mRecentsContainer != null) {
                 ViewGroup container = mRecentsContainer;
-                if (container instanceof HorizontalScrollView
-                        || container instanceof ScrollView) {
+                if (container instanceof RecentsScrollView) {
                     container = (ViewGroup) container.findViewById(
                             R.id.recents_linear_layout);
                 }

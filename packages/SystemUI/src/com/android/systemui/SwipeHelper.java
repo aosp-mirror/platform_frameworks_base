@@ -53,6 +53,7 @@ public class SwipeHelper {
                                                  // where fade starts
     static final float ALPHA_FADE_END = 0.5f; // fraction of thumbnail width
                                               // beyond which alpha->0
+    private float mMinAlpha = 0f;
 
     private float mPagingTouchSlop;
     private Callback mCallback;
@@ -120,6 +121,10 @@ public class SwipeHelper {
                 v.getMeasuredHeight();
     }
 
+    public void setMinAlpha(float minAlpha) {
+        mMinAlpha = minAlpha;
+    }
+
     private float getAlphaForOffset(View view) {
         float viewSize = getSize(view);
         final float fadeSize = ALPHA_FADE_END * viewSize;
@@ -130,10 +135,7 @@ public class SwipeHelper {
         } else if (pos < viewSize * (1.0f - ALPHA_FADE_START)) {
             result = 1.0f + (viewSize * ALPHA_FADE_START + pos) / fadeSize;
         }
-        // Make .03 alpha the minimum so you always see the item a bit-- slightly below
-        // .03, the item disappears entirely (as if alpha = 0) and that discontinuity looks
-        // a bit jarring
-        return Math.max(0.03f, result);
+        return Math.max(mMinAlpha, result);
     }
 
     // invalidate the view's own bounds all the way up the view hierarchy
