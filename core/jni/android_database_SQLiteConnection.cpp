@@ -426,11 +426,11 @@ static void nativeFinalizeStatement(JNIEnv* env, jclass clazz, jint connectionPt
     SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
+    // We ignore the result of sqlite3_finalize because it is really telling us about
+    // whether any errors occurred while executing the statement.  The statement itself
+    // is always finalized regardless.
     ALOGV("Finalized statement %p on connection %p", statement, connection->db);
-    int err = sqlite3_finalize(statement);
-    if (err != SQLITE_OK) {
-        throw_sqlite3_exception(env, connection->db, NULL);
-    }
+    sqlite3_finalize(statement);
 }
 
 static jint nativeGetParameterCount(JNIEnv* env, jclass clazz, jint connectionPtr,
