@@ -534,7 +534,10 @@ private:
         friend class RecordTrack;
 
                     const type_t            mType;
+
+                    // Used by parameters, config events, addTrack_l, exit
                     Condition               mWaitWorkCV;
+
                     const sp<AudioFlinger>  mAudioFlinger;
                     uint32_t                mSampleRate;
                     size_t                  mFrameCount;
@@ -542,9 +545,30 @@ private:
                     uint16_t                mChannelCount;
                     size_t                  mFrameSize;
                     audio_format_t          mFormat;
+
+                    // Parameter sequence by client: binder thread calling setParameters():
+                    //  1. Lock mLock
+                    //  2. Append to mNewParameters
+                    //  3. mWaitWorkCV.signal
+                    //  4. mParamCond.waitRelative with timeout
+                    //  5. read mParamStatus
+                    //  6. mWaitWorkCV.signal
+                    //  7. Unlock
+                    //
+                    // Parameter sequence by server: threadLoop calling checkForNewParameters_l():
+                    // 1. Lock mLock
+                    // 2. If there is an entry in mNewParameters proceed ...
+                    // 2. Read first entry in mNewParameters
+                    // 3. Process
+                    // 4. Remove first entry from mNewParameters
+                    // 5. Set mParamStatus
+                    // 6. mParamCond.signal
+                    // 7. mWaitWorkCV.wait with timeout (this is to avoid overwriting mParamStatus)
+                    // 8. Unlock
                     Condition               mParamCond;
                     Vector<String8>         mNewParameters;
                     status_t                mParamStatus;
+
                     Vector<ConfigEvent>     mConfigEvents;
                     bool                    mStandby;
                     const audio_io_handle_t mId;
