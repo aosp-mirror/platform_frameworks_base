@@ -161,6 +161,7 @@ public class PowerManagerService extends IPowerManager.Stub
     // used for noChangeLights in setPowerState()
     private static final int LIGHTS_MASK        = SCREEN_BRIGHT_BIT | BUTTON_BRIGHT_BIT | KEYBOARD_BRIGHT_BIT;
 
+    // animate screen lights in PowerManager (as opposed to SurfaceFlinger)
     boolean mAnimateScreenLights = true;
 
     static final int ANIM_STEPS = 60; // nominal # of frames at 60Hz
@@ -1716,6 +1717,7 @@ public class PowerManagerService extends IPowerManager.Stub
                             + Integer.toHexString(mPowerState)
                             + " mSkippedScreenOn=" + mSkippedScreenOn);
                 }
+                mScreenBrightnessHandler.removeMessages(ScreenBrightnessAnimator.ANIMATE_LIGHTS);
                 mScreenBrightnessAnimator.animateTo(Power.BRIGHTNESS_OFF, SCREEN_BRIGHT_BIT, 0);
             }
         }
@@ -2113,7 +2115,7 @@ public class PowerManagerService extends IPowerManager.Stub
      */
     class ScreenBrightnessAnimator extends HandlerThread {
         static final int ANIMATE_LIGHTS = 10;
-        static final int POWER_OFF = 11;
+        static final int ANIMATE_POWER_OFF = 11;
         volatile int startValue;
         volatile int endValue;
         volatile int currentValue;
@@ -2161,11 +2163,9 @@ public class PowerManagerService extends IPowerManager.Stub
                             currentValue = value;
                         }
                         animateInternal(mask, false, delay);
-                    } else if (msg.what == POWER_OFF) {
-                        if (!mHeadless) {
-                            int mode = msg.arg1;
-                            nativeStartSurfaceFlingerAnimation(mode);
-                        }
+                    } else if (msg.what == ANIMATE_POWER_OFF) {
+                        int mode = msg.arg1;
+                        nativeStartSurfaceFlingerAnimation(mode);
                     }
                 }
             };
@@ -2198,11 +2198,12 @@ public class PowerManagerService extends IPowerManager.Stub
                                 + ", delay:" + delay);
                     }
 
-                    if (turningOff) {
+                    if (turningOff && !mHeadless && !mAnimateScreenLights) {
                         int mode = mScreenOffReason == OFF_BECAUSE_OF_PROX_SENSOR
                                 ? 0 : mAnimationSetting;
                         if (mDebugLightAnimation) Log.v(TAG, "Doing power-off anim, mode=" + mode);
-                        mScreenBrightnessHandler.obtainMessage(POWER_OFF, mode, 0).sendToTarget();
+                        mScreenBrightnessHandler.obtainMessage(ANIMATE_POWER_OFF, mode, 0)
+                                .sendToTarget();
                     }
                     Message msg = mScreenBrightnessHandler
                             .obtainMessage(ANIMATE_LIGHTS, mask, newValue);
