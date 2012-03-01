@@ -2566,13 +2566,20 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 result[0] = ret;
                 result[1] = Long.valueOf(nitzReceiveTime);
 
-                if (mNITZTimeRegistrant != null) {
+                boolean ignoreNitz = SystemProperties.getBoolean(
+                        TelephonyProperties.PROPERTY_IGNORE_NITZ, false);
 
-                    mNITZTimeRegistrant
-                        .notifyRegistrant(new AsyncResult (null, result, null));
+                if (ignoreNitz) {
+                    if (RILJ_LOGD) riljLog("ignoring UNSOL_NITZ_TIME_RECEIVED");
                 } else {
-                    // in case NITZ time registrant isnt registered yet
-                    mLastNITZTimeInfo = result;
+                    if (mNITZTimeRegistrant != null) {
+
+                        mNITZTimeRegistrant
+                            .notifyRegistrant(new AsyncResult (null, result, null));
+                    } else {
+                        // in case NITZ time registrant isnt registered yet
+                        mLastNITZTimeInfo = result;
+                    }
                 }
             break;
 
