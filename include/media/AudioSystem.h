@@ -218,8 +218,8 @@ private:
         // IAudioFlingerClient
 
         // indicate a change in the configuration of an output or input: keeps the cached
-        // values for output/input parameters upto date in client process
-        virtual void ioConfigChanged(int event, audio_io_handle_t ioHandle, void *param2);
+        // values for output/input parameters up-to-date in client process
+        virtual void ioConfigChanged(int event, audio_io_handle_t ioHandle, const void *param2);
     };
 
     class AudioPolicyServiceClient: public IBinder::DeathRecipient

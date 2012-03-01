@@ -33,7 +33,7 @@ public:
     DECLARE_META_INTERFACE(AudioFlingerClient);
 
     // Notifies a change of audio input/output configuration.
-    virtual void ioConfigChanged(int event, audio_io_handle_t ioHandle, void *param2) = 0;
+    virtual void ioConfigChanged(int event, audio_io_handle_t ioHandle, const void *param2) = 0;
 
 };
 

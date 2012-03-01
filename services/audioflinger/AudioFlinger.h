@@ -1063,7 +1063,7 @@ public:
               // no range check, doesn't check per-thread stream volume, AudioFlinger::mLock held
               float streamVolume_l(audio_stream_type_t stream) const
                                 { return mStreamTypes[stream].volume; }
-              void audioConfigChanged_l(int event, audio_io_handle_t ioHandle, void *param2);
+              void audioConfigChanged_l(int event, audio_io_handle_t ioHandle, const void *param2);
 
               // allocate an audio_io_handle_t, session ID, or effect ID
               uint32_t nextUniqueId();

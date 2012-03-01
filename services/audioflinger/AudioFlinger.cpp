@@ -1053,7 +1053,7 @@ void AudioFlinger::removeNotificationClient(pid_t pid)
 }
 
 // audioConfigChanged_l() must be called with AudioFlinger::mLock held
-void AudioFlinger::audioConfigChanged_l(int event, audio_io_handle_t ioHandle, void *param2)
+void AudioFlinger::audioConfigChanged_l(int event, audio_io_handle_t ioHandle, const void *param2)
 {
     size_t size = mNotificationClients.size();
     for (size_t i = 0; i < size; i++) {
