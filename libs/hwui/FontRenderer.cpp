@@ -39,6 +39,8 @@ namespace uirenderer {
 #define MAX_TEXT_CACHE_WIDTH 2048
 #define TEXTURE_BORDER_SIZE 2
 
+#define AUTO_KERN(prev, next) (((next) - (prev) + 32) >> 6 << 16)
+
 ///////////////////////////////////////////////////////////////////////////////
 // CacheTextureLine
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,6 +165,44 @@ void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
     }
 }
 
+void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float vOffset,
+        SkPathMeasure& measure, SkPoint* position, SkVector* tangent) {
+    const float halfWidth = glyph->mBitmapWidth * 0.5f;
+    const float height = glyph->mBitmapHeight;
+
+    float nPenX = glyph->mBitmapLeft;
+    vOffset += glyph->mBitmapTop + height;
+
+    const float u1 = glyph->mBitmapMinU;
+    const float u2 = glyph->mBitmapMaxU;
+    const float v1 = glyph->mBitmapMinV;
+    const float v2 = glyph->mBitmapMaxV;
+
+    SkPoint destination[4];
+    measure.getPosTan(x + hOffset + nPenX + halfWidth, position, tangent);
+
+    // Move along the tangent and offset by the normal
+    destination[0].set(-tangent->fX * halfWidth - tangent->fY * vOffset,
+            -tangent->fY * halfWidth + tangent->fX * vOffset);
+    destination[1].set(tangent->fX * halfWidth - tangent->fY * vOffset,
+            tangent->fY * halfWidth + tangent->fX * vOffset);
+    destination[2].set(destination[1].fX + tangent->fY * height,
+            destination[1].fY - tangent->fX * height);
+    destination[3].set(destination[0].fX + tangent->fY * height,
+            destination[0].fY - tangent->fX * height);
+
+    mState->appendRotatedMeshQuad(
+            position->fX + destination[0].fX,
+            position->fY + destination[0].fY, u1, v2,
+            position->fX + destination[1].fX,
+            position->fY + destination[1].fY, u2, v2,
+            position->fX + destination[2].fX,
+            position->fY + destination[2].fY, u2, v1,
+            position->fX + destination[3].fX,
+            position->fY + destination[3].fY, u1, v1,
+            glyph->mCachedTextureLine->mCacheTexture);
+}
+
 CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit) {
     CachedGlyphInfo* cachedGlyph = NULL;
     ssize_t index = mCachedGlyphs.indexOfKey(textUnit);
@@ -198,6 +238,56 @@ void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len
             0, 0, NULL, positions);
 }
 
+void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+        int numGlyphs, SkPath* path, float hOffset, float vOffset) {
+    if (numGlyphs == 0 || text == NULL || len == 0) {
+        return;
+    }
+
+    text += start;
+
+    int glyphsCount = 0;
+    SkFixed prevRsbDelta = 0;
+
+    float penX = 0.0f;
+
+    SkPoint position;
+    SkVector tangent;
+
+    SkPathMeasure measure(*path, false);
+    float pathLength = SkScalarToFloat(measure.getLength());
+
+    if (paint->getTextAlign() != SkPaint::kLeft_Align) {
+        float textWidth = SkScalarToFloat(paint->measureText(text, len));
+        float pathOffset = pathLength;
+        if (paint->getTextAlign() == SkPaint::kCenter_Align) {
+            textWidth *= 0.5f;
+            pathOffset *= 0.5f;
+        }
+        penX += pathOffset - textWidth;
+    }
+
+    while (glyphsCount < numGlyphs && penX <= pathLength) {
+        glyph_t glyph = GET_GLYPH(text);
+
+        if (IS_END_OF_STRING(glyph)) {
+            break;
+        }
+
+        CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
+        penX += SkFixedToFloat(AUTO_KERN(prevRsbDelta, cachedGlyph->mLsbDelta));
+        prevRsbDelta = cachedGlyph->mRsbDelta;
+
+        if (cachedGlyph->mIsValid) {
+            drawCachedGlyph(cachedGlyph, roundf(penX), hOffset, vOffset, measure, &position, &tangent);
+        }
+
+        penX += SkFixedToFloat(cachedGlyph->mAdvanceX);
+
+        glyphsCount++;
+    }
+}
+
 void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, Rect *bounds) {
     if (bounds == NULL) {
@@ -208,18 +298,12 @@ void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t le
     render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds, NULL);
 }
 
-#define SkAutoKern_AdjustF(prev, next) (((next) - (prev) + 32) >> 6 << 16)
-
 void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
-        uint32_t bitmapW, uint32_t bitmapH, Rect *bounds, const float* positions) {
+        uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* positions) {
     if (numGlyphs == 0 || text == NULL || len == 0) {
         return;
     }
-
-    int glyphsCount = 0;
-
-    text += start;
 
     static RenderGlyph gRenderGlyph[] = {
             &android::uirenderer::Font::drawCachedGlyph,
@@ -228,13 +312,14 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
     };
     RenderGlyph render = gRenderGlyph[mode];
 
+    text += start;
+    int glyphsCount = 0;
+
     if (CC_LIKELY(positions == NULL)) {
         SkFixed prevRsbDelta = 0;
 
-        float penX = x;
+        float penX = x + 0.5f;
         int penY = y;
-
-        penX += 0.5f;
 
         while (glyphsCount < numGlyphs) {
             glyph_t glyph = GET_GLYPH(text);
@@ -245,7 +330,7 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
             }
 
             CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
-            penX += SkFixedToFloat(SkAutoKern_AdjustF(prevRsbDelta, cachedGlyph->mLsbDelta));
+            penX += SkFixedToFloat(AUTO_KERN(prevRsbDelta, cachedGlyph->mLsbDelta));
             prevRsbDelta = cachedGlyph->mRsbDelta;
 
             // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
@@ -582,6 +667,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
             cacheBuffer[cacheY * cacheWidth + cacheX] = mGammaTable[tempCol];
         }
     }
+
     cachedGlyph->mIsValid = true;
 }
 
@@ -758,15 +844,9 @@ void FontRenderer::issueDrawCommand() {
     mDrawn = true;
 }
 
-void FontRenderer::appendMeshQuad(float x1, float y1, float u1, float v1,
-        float x2, float y2, float u2, float v2,
-        float x3, float y3, float u3, float v3,
+void FontRenderer::appendMeshQuadNoClip(float x1, float y1, float u1, float v1,
+        float x2, float y2, float u2, float v2, float x3, float y3, float u3, float v3,
         float x4, float y4, float u4, float v4, CacheTexture* texture) {
-
-    if (mClip &&
-            (x1 > mClip->right || y1 < mClip->top || x2 < mClip->left || y4 > mClip->bottom)) {
-        return;
-    }
     if (texture != mCurrentCacheTexture) {
         if (mCurrentQuadIndex != 0) {
             // First, draw everything stored already which uses the previous texture
@@ -802,12 +882,43 @@ void FontRenderer::appendMeshQuad(float x1, float y1, float u1, float v1,
     (*currentPos++) = v4;
 
     mCurrentQuadIndex++;
+}
+
+void FontRenderer::appendMeshQuad(float x1, float y1, float u1, float v1,
+        float x2, float y2, float u2, float v2, float x3, float y3, float u3, float v3,
+        float x4, float y4, float u4, float v4, CacheTexture* texture) {
+
+    if (mClip &&
+            (x1 > mClip->right || y1 < mClip->top || x2 < mClip->left || y4 > mClip->bottom)) {
+        return;
+    }
+
+    appendMeshQuadNoClip(x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3, x4, y4, u4, v4, texture);
 
     if (mBounds) {
         mBounds->left = fmin(mBounds->left, x1);
         mBounds->top = fmin(mBounds->top, y3);
         mBounds->right = fmax(mBounds->right, x3);
         mBounds->bottom = fmax(mBounds->bottom, y1);
+    }
+
+    if (mCurrentQuadIndex == mMaxNumberOfQuads) {
+        issueDrawCommand();
+        mCurrentQuadIndex = 0;
+    }
+}
+
+void FontRenderer::appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
+        float x2, float y2, float u2, float v2, float x3, float y3, float u3, float v3,
+        float x4, float y4, float u4, float v4, CacheTexture* texture) {
+
+    appendMeshQuadNoClip(x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3, x4, y4, u4, v4, texture);
+
+    if (mBounds) {
+        mBounds->left = fmin(mBounds->left, fmin(x1, fmin(x2, fmin(x3, x4))));
+        mBounds->top = fmin(mBounds->top, fmin(y1, fmin(y2, fmin(y3, y4))));
+        mBounds->right = fmax(mBounds->right, fmax(x1, fmax(x2, fmax(x3, x4))));
+        mBounds->bottom = fmax(mBounds->bottom, fmax(y1, fmax(y2, fmax(y3, y4))));
     }
 
     if (mCurrentQuadIndex == mMaxNumberOfQuads) {
@@ -951,6 +1062,21 @@ bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *t
 
     initRender(clip, bounds);
     mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y, positions);
+    finishRender();
+
+    return mDrawn;
+}
+
+bool FontRenderer::renderTextOnPath(SkPaint* paint, const Rect* clip, const char *text,
+        uint32_t startIndex, uint32_t len, int numGlyphs, SkPath* path,
+        float hOffset, float vOffset, Rect* bounds) {
+    if (!mCurrentFont) {
+        ALOGE("No font set");
+        return false;
+    }
+
+    initRender(clip, bounds);
+    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, path, hOffset, vOffset);
     finishRender();
 
     return mDrawn;

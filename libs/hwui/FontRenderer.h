@@ -24,6 +24,8 @@
 
 #include <SkScalerContext.h>
 #include <SkPaint.h>
+#include <SkPathMeasure.h>
+#include <SkPoint.h>
 
 #include <GLES2/gl2.h>
 
@@ -155,6 +157,9 @@ public:
     void render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
             int numGlyphs, int x, int y, const float* positions);
 
+    void render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+            int numGlyphs, SkPath* path, float hOffset, float vOffset);
+
     /**
      * Creates a new font associated with the specified font state.
      */
@@ -200,6 +205,8 @@ protected:
     void drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
             uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
             Rect* bounds, const float* pos);
+    void drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float vOffset,
+            SkPathMeasure& measure, SkPoint* position, SkVector* tangent);
 
     CachedGlyphInfo* getCachedGlyph(SkPaint* paint, glyph_t textUnit);
 
@@ -244,6 +251,9 @@ public:
     // bounds is an out parameter
     bool renderPosText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y, const float* positions, Rect* bounds);
+    // bounds is an out parameter
+    bool renderTextOnPath(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
+            uint32_t len, int numGlyphs, SkPath* path, float hOffset, float vOffset, Rect* bounds);
 
     struct DropShadow {
         DropShadow() { };
@@ -305,7 +315,7 @@ protected:
     void allocateTextureMemory(CacheTexture* cacheTexture);
     void deallocateTextureMemory(CacheTexture* cacheTexture);
     void initTextTexture();
-    CacheTexture *createCacheTexture(int width, int height, bool allocate);
+    CacheTexture* createCacheTexture(int width, int height, bool allocate);
     void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
             uint32_t *retOriginX, uint32_t *retOriginY);
 
@@ -320,7 +330,15 @@ protected:
     void precacheLatin(SkPaint* paint);
 
     void issueDrawCommand();
+    void appendMeshQuadNoClip(float x1, float y1, float u1, float v1,
+            float x2, float y2, float u2, float v2,
+            float x3, float y3, float u3, float v3,
+            float x4, float y4, float u4, float v4, CacheTexture* texture);
     void appendMeshQuad(float x1, float y1, float u1, float v1,
+            float x2, float y2, float u2, float v2,
+            float x3, float y3, float u3, float v3,
+            float x4, float y4, float u4, float v4, CacheTexture* texture);
+    void appendRotatedMeshQuad(float x1, float y1, float u1, float v1,
             float x2, float y2, float u2, float v2,
             float x3, float y3, float u3, float v3,
             float x4, float y4, float u4, float v4, CacheTexture* texture);
