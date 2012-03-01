@@ -159,12 +159,18 @@ int DrmManagerService::checkRightsStatus(
 status_t DrmManagerService::consumeRights(
             int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve) {
     ALOGV("Entering consumeRights");
+    if (!isProtectedCallAllowed()) {
+        return DRM_ERROR_NO_PERMISSION;
+    }
     return mDrmManager->consumeRights(uniqueId, decryptHandle, action, reserve);
 }
 
 status_t DrmManagerService::setPlaybackStatus(
             int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position) {
     ALOGV("Entering setPlaybackStatus");
+    if (!isProtectedCallAllowed()) {
+        return DRM_ERROR_NO_PERMISSION;
+    }
     return mDrmManager->setPlaybackStatus(uniqueId, decryptHandle, playbackStatus, position);
 }
 
@@ -229,12 +235,18 @@ DecryptHandle* DrmManagerService::openDecryptSession(
 
 status_t DrmManagerService::closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {
     ALOGV("Entering closeDecryptSession");
+    if (!isProtectedCallAllowed()) {
+        return DRM_ERROR_NO_PERMISSION;
+    }
     return mDrmManager->closeDecryptSession(uniqueId, decryptHandle);
 }
 
 status_t DrmManagerService::initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
             int decryptUnitId, const DrmBuffer* headerInfo) {
     ALOGV("Entering initializeDecryptUnit");
+    if (!isProtectedCallAllowed()) {
+        return DRM_ERROR_NO_PERMISSION;
+    }
     return mDrmManager->initializeDecryptUnit(uniqueId,decryptHandle, decryptUnitId, headerInfo);
 }
 
@@ -242,18 +254,27 @@ status_t DrmManagerService::decrypt(
             int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId,
             const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV) {
     ALOGV("Entering decrypt");
+    if (!isProtectedCallAllowed()) {
+        return DRM_ERROR_NO_PERMISSION;
+    }
     return mDrmManager->decrypt(uniqueId, decryptHandle, decryptUnitId, encBuffer, decBuffer, IV);
 }
 
 status_t DrmManagerService::finalizeDecryptUnit(
             int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId) {
     ALOGV("Entering finalizeDecryptUnit");
+    if (!isProtectedCallAllowed()) {
+        return DRM_ERROR_NO_PERMISSION;
+    }
     return mDrmManager->finalizeDecryptUnit(uniqueId, decryptHandle, decryptUnitId);
 }
 
 ssize_t DrmManagerService::pread(int uniqueId, DecryptHandle* decryptHandle,
             void* buffer, ssize_t numBytes, off64_t offset) {
     ALOGV("Entering pread");
+    if (!isProtectedCallAllowed()) {
+        return DRM_ERROR_NO_PERMISSION;
+    }
     return mDrmManager->pread(uniqueId, decryptHandle, buffer, numBytes, offset);
 }
 
