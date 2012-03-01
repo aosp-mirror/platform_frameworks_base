@@ -80,6 +80,10 @@ Android Design - Action Bar
             </ul>
           </li>
 
+          <li class="nav-section">
+            <div class="nav-section-header empty"><a href="../downloads/index.html">Downloads</a></div>
+          </li>
+
           <li>
             <div id="back-dac-section"><a href="../../index.html">Developers</a></div>
           </li>
@@ -118,7 +122,8 @@ app.</p>
 <p>If you're new to writing Android apps, note that the action bar is one of the most important design
 elements you can implement. Following the guidelines described here will go a long way toward making
 your app's interface consistent with the core Android apps.</p>
-<h2>General Organization</h2>
+<h2 id="organization">General Organization</h2>
+
 <p>The action bar is split into four different functional areas that apply to most apps.</p>
 <img src="../static/content/action_bar_basics.png">
 
@@ -129,8 +134,8 @@ your app's interface consistent with the core Android apps.</p>
       <li class="value-1"><h4>App icon</h4>
         <p>
 
-The app icon establishes your app's identity. It can be replaced with a different logo or branding if
-you wish.
+The app icon establishes your app's identity. It can be replaced with a different logo or branding
+if you wish.
 Important: If the app is currently not displaying the top-level screen, be sure to display the Up
 caret to the left of the app icon, so the user can navigate up the hierarchy. For more discussion of
 Up navigation, see the <a href="../patterns/navigation.html">Navigation</a> pattern.
@@ -180,12 +185,11 @@ Move less often used actions to the action overflow.
         </p>
       </li>
     </ol>
-
   </div>
 </div>
 
+<h2 id="adapting-rotation">Adapting to Rotation and Different Screen Sizes</h2>
 
-<h2>Adapting to Rotation and Different Screen Sizes</h2>
 <p>One of the most important UI issues to consider when creating an app is how to adjust to screen
 rotation on different screen sizes.</p>
 <p>You can adapt to such changes by using <em>split action bars</em>, which allow you to distribute action bar
@@ -196,7 +200,7 @@ content across multiple bars located below the main action bar or at the bottom 
   Split action bar showing action buttons at the bottom of the screen in vertical orientation.
 </div>
 
-<h2>Layout Considerations for Split Action Bars</h2>
+<h2 id="considerations-split-action-bars">Layout Considerations for Split Action Bars</h2>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-8 with-callouts">
@@ -222,7 +226,8 @@ the top bar.</p>
   </div>
 </div>
 
-<h2>Contextual Action Bars</h2>
+<h2 id="contextual">Contextual Action Bars</h2>
+
 <p>A <em>contextual action bar (CAB)</em> is a temporary action bar that overlays the app's action bar for the
 duration of a particular sub-task. CABs are most typically used for tasks that involve acting on
 selected data or text.</p>
@@ -244,7 +249,8 @@ selected data or text.</p>
 <p>Use CABs whenever you allow the user to select data via long press. You can control the action
 content of a CAB in order to insert the actions you would like the user to be able to perform.</p>
 <p>For more information, refer to the "Selection" pattern.</p>
-<h2>Action Bar Elements</h2>
+<h2 id="elements">Action Bar Elements</h2>
+
 <h4>Tabs</h4>
 <p><em>Tabs</em> display app views concurrently and make it easy to explore and switch between them. Use tabs
 if you expect your users to switch views frequently.</p>
@@ -326,7 +332,9 @@ tabs. Fixed tabs in the main action bar can move to the top bar when the screen 
 <p><em>Action buttons</em> on the action bar surface your app's most important activities. Think about which
 buttons will get used most often, and order them accordingly. Depending on available screen real
 estate, the system shows your most important actions as action buttons and moves the rest to the
-action overflow.</p>
+action overflow. The action bar and the action overflow should only present actions to the user that
+are available. If an action is unavailable in the current context, hide it. Do not show it as
+disabled.</p>
 
 <img src="../static/content/action_bar_pattern_action_icons.png">
 <div class="figure-caption">
@@ -380,8 +388,7 @@ files for further customization.
 </p>
 <p>
 
-<a href="../static/download/action_bar_icons-v4.0.zip">Download the Action Bar Icon
-Pack</a>
+<a href="https://dl-ssl.google.com/android/design/Android_Design_Icons_20120229.zip">Download the Action Bar Icon Pack</a>
 
 </p>
 
@@ -436,7 +443,8 @@ sharing options.</p>
   The Gallery app's share action provider with extended spinner for additional sharing options.
 </div>
 
-<h2>Action Bar Checklist</h2>
+<h2 id="checklist">Action Bar Checklist</h2>
+
 <p>When planning your split action bars, ask yourself questions like these:</p>
 <h4>How important is view navigation to the task?</h4>
 <p>If view navigation is very important to your app, use tabs (for fastest view-switching) or spinners.</p>

@@ -158,4 +158,12 @@ $(document).ready(function() {
       $tooltip.hide();
     });
   });
+
+  // Set up <h2> deeplinks
+  $('h2').click(function() {
+    var id = $(this).attr('id');
+    if (id) {
+      document.location.hash = id;
+    }
+  });
 });
