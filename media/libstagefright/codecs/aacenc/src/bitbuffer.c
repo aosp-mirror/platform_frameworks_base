@@ -152,6 +152,7 @@ Word16 WriteBits(HANDLE_BIT_BUF hBitBuf,
 
   wBitPos = hBitBuf->wBitPos;
   wBitPos += noBitsToWrite;
+  writeValue &= ~(0xffffffff << noBitsToWrite); // Mask out everything except the lowest noBitsToWrite bits
   writeValue <<= 32 - wBitPos;
   writeValue |= hBitBuf->cache;
 
