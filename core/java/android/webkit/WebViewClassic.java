@@ -375,7 +375,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * InputConnection used for ContentEditable. This captures changes
      * to the text and sends them either as key strokes or text changes.
      */
-    private class WebViewInputConnection extends BaseInputConnection {
+    class WebViewInputConnection extends BaseInputConnection {
         // Used for mapping characters to keys typed.
         private KeyCharacterMap mKeyCharacterMap;
         private boolean mIsKeySentByMe;
@@ -383,9 +383,29 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         private int mImeOptions;
         private String mHint;
         private int mMaxLength;
+        private boolean mIsAutoFillable;
+        private boolean mIsAutoCompleteEnabled;
+        private String mName;
 
         public WebViewInputConnection() {
             super(mWebView, true);
+        }
+
+        public void setAutoFillable(int queryId) {
+            mIsAutoFillable = getSettings().getAutoFillEnabled()
+                    && (queryId != WebTextView.FORM_NOT_AUTOFILLABLE);
+            int variation = mInputType & EditorInfo.TYPE_MASK_VARIATION;
+            if (variation != EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD
+                    && (mIsAutoFillable || mIsAutoCompleteEnabled)) {
+                if (mName != null && mName.length() > 0) {
+                    requestFormData(mName, mFieldPointer, mIsAutoFillable,
+                            mIsAutoCompleteEnabled);
+                }
+            }
+        }
+
+        public boolean getIsAutoFillable() {
+            return mIsAutoFillable;
         }
 
         @Override
@@ -582,6 +602,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mInputType = inputType;
             mImeOptions = imeOptions;
             mMaxLength = initData.mMaxLength;
+            mIsAutoCompleteEnabled = initData.mIsAutoCompleteEnabled;
+            mName = initData.mName;
+            mAutoCompletePopup.clearAdapter();
         }
 
         public void setupEditorInfo(EditorInfo outAttrs) {
@@ -628,6 +651,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 Message replaceMessage = mPrivateHandler.obtainMessage(
                         REPLACE_TEXT, start,  end, text.toString());
                 mPrivateHandler.sendMessage(replaceMessage);
+            }
+            if (mAutoCompletePopup != null) {
+                StringBuilder newText = new StringBuilder();
+                newText.append(editable.subSequence(0, start));
+                newText.append(text);
+                newText.append(editable.subSequence(end, editable.length()));
+                mAutoCompletePopup.setText(newText.toString());
             }
             mIsKeySentByMe = false;
         }
@@ -795,6 +825,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     WebViewInputConnection mInputConnection = null;
     private int mFieldPointer;
     private PastePopupWindow mPasteWindow;
+    AutoCompletePopup mAutoCompletePopup;
 
     private static class OnTrimMemoryListener implements ComponentCallbacks2 {
         private static OnTrimMemoryListener sInstance = null;
@@ -1104,6 +1135,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static final int SWITCH_TO_SHORTPRESS       = 3;
     private static final int SWITCH_TO_LONGPRESS        = 4;
     private static final int RELEASE_SINGLE_TAP         = 5;
+    private static final int REQUEST_FORM_DATA          = 6;
     private static final int DRAG_HELD_MOTIONLESS       = 8;
     private static final int AWAKEN_SCROLL_BARS         = 9;
     private static final int PREVENT_DEFAULT_TIMEOUT    = 10;
@@ -1156,6 +1188,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int REPLACE_TEXT                       = 143;
     static final int CLEAR_CARET_HANDLE                 = 144;
     static final int KEY_PRESS                          = 145;
+    static final int RELOCATE_AUTO_COMPLETE_POPUP       = 146;
+    static final int FOCUS_NODE_CHANGED                 = 147;
+    static final int AUTOFILL_FORM                      = 148;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -3559,7 +3594,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     public void clearFormData() {
         checkThread();
-        // TODO: Implement b/6083041
+        if (mAutoCompletePopup != null) {
+            mAutoCompletePopup.clearAdapter();
+        }
     }
 
     /**
@@ -3860,18 +3897,21 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void scrollLayerTo(int x, int y) {
-        if (x == mScrollingLayerRect.left && y == mScrollingLayerRect.top) {
+        int dx = mScrollingLayerRect.left - x;
+        int dy = mScrollingLayerRect.top - y;
+        if (dx == 0 && y == 0) {
             return;
         }
         if (mSelectingText) {
-            int dx = mScrollingLayerRect.left - x;
-            int dy = mScrollingLayerRect.top - y;
             if (mSelectCursorBaseLayerId == mCurrentScrollingLayerId) {
                 mSelectCursorBase.offset(dx, dy);
             }
             if (mSelectCursorExtentLayerId == mCurrentScrollingLayerId) {
                 mSelectCursorExtent.offset(dx, dy);
             }
+        }
+        if (mAutoCompletePopup != null) {
+            mAutoCompletePopup.scrollDelta(mCurrentScrollingLayerId, dx, dy);
         }
         nativeScrollLayer(mCurrentScrollingLayerId, x, y);
         mScrollingLayerRect.left = x;
@@ -4725,6 +4765,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void onZoomAnimationEnd() {
+        mPrivateHandler.sendEmptyMessage(RELOCATE_AUTO_COMPLETE_POPUP);
     }
 
     void onFixedLengthZoomAnimationStart() {
@@ -4879,9 +4920,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         if (mInputConnection == null) {
             mInputConnection = new WebViewInputConnection();
+            mAutoCompletePopup = new AutoCompletePopup(mContext, this,
+                    mInputConnection);
         }
         mInputConnection.setupEditorInfo(outAttrs);
         return mInputConnection;
+    }
+
+    private void relocateAutoCompletePopup() {
+        if (mAutoCompletePopup != null) {
+            mAutoCompletePopup.resetRect();
+            mAutoCompletePopup.setText(mInputConnection.getEditable());
+        }
     }
 
     /**
@@ -4911,6 +4961,91 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         InputMethodManager imm = InputMethodManager.peekInstance();
         if (imm != null && (imm.isActive(mWebView))) {
             imm.hideSoftInputFromWindow(mWebView.getWindowToken(), 0);
+        }
+    }
+
+    /**
+     * Called by AutoCompletePopup to find saved form data associated with the
+     * textfield
+     * @param name Name of the textfield.
+     * @param nodePointer Pointer to the node of the textfield, so it can be
+     *          compared to the currently focused textfield when the data is
+     *          retrieved.
+     * @param autoFillable true if WebKit has determined this field is part of
+     *          a form that can be auto filled.
+     * @param autoComplete true if the attribute "autocomplete" is set to true
+     *          on the textfield.
+     */
+    /* package */ void requestFormData(String name, int nodePointer,
+            boolean autoFillable, boolean autoComplete) {
+        if (mWebViewCore.getSettings().getSaveFormData()) {
+            Message update = mPrivateHandler.obtainMessage(REQUEST_FORM_DATA);
+            update.arg1 = nodePointer;
+            RequestFormData updater = new RequestFormData(name, getUrl(),
+                    update, autoFillable, autoComplete);
+            Thread t = new Thread(updater);
+            t.start();
+        }
+    }
+
+    /*
+     * This class requests an Adapter for the AutoCompletePopup which shows past
+     * entries stored in the database.  It is a Runnable so that it can be done
+     * in its own thread, without slowing down the UI.
+     */
+    private class RequestFormData implements Runnable {
+        private String mName;
+        private String mUrl;
+        private Message mUpdateMessage;
+        private boolean mAutoFillable;
+        private boolean mAutoComplete;
+        private WebSettingsClassic mWebSettings;
+
+        public RequestFormData(String name, String url, Message msg,
+                boolean autoFillable, boolean autoComplete) {
+            mName = name;
+            mUrl = WebTextView.urlForAutoCompleteData(url);
+            mUpdateMessage = msg;
+            mAutoFillable = autoFillable;
+            mAutoComplete = autoComplete;
+            mWebSettings = getSettings();
+        }
+
+        @Override
+        public void run() {
+            ArrayList<String> pastEntries = new ArrayList<String>();
+
+            if (mAutoFillable) {
+                // Note that code inside the adapter click handler in AutoCompletePopup depends
+                // on the AutoFill item being at the top of the drop down list. If you change
+                // the order, make sure to do it there too!
+                if (mWebSettings != null && mWebSettings.getAutoFillProfile() != null) {
+                    pastEntries.add(mWebView.getResources().getText(
+                            com.android.internal.R.string.autofill_this_form).toString() +
+                            " " +
+                    mAutoFillData.getPreviewString());
+                    mAutoCompletePopup.setIsAutoFillProfileSet(true);
+                } else {
+                    // There is no autofill profile set up yet, so add an option that
+                    // will invite the user to set their profile up.
+                    pastEntries.add(mWebView.getResources().getText(
+                            com.android.internal.R.string.setup_autofill).toString());
+                    mAutoCompletePopup.setIsAutoFillProfileSet(false);
+                }
+            }
+
+            if (mAutoComplete) {
+                pastEntries.addAll(mDatabase.getFormData(mUrl, mName));
+            }
+
+            if (pastEntries.size() > 0) {
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                        mContext,
+                        com.android.internal.R.layout.web_text_view_dropdown,
+                        pastEntries);
+                mUpdateMessage.obj = adapter;
+                mUpdateMessage.sendToTarget();
+            }
         }
     }
 
@@ -4987,6 +5122,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return keyCode == KeyEvent.KEYCODE_DPAD_CENTER
                 || keyCode == KeyEvent.KEYCODE_ENTER
                 || keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER;
+    }
+
+    public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+        if (mAutoCompletePopup != null) {
+            return mAutoCompletePopup.onKeyPreIme(keyCode, event);
+        }
+        return false;
     }
 
     @Override
@@ -5592,6 +5734,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // However, do not update the base layer as that hasn't changed
             setNewPicture(mLoadedPicture, false);
         }
+        relocateAutoCompletePopup();
     }
 
     @Override
@@ -8020,6 +8163,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                     break;
                 }
+                case REQUEST_FORM_DATA:
+                    if (mFieldPointer == msg.arg1) {
+                        ArrayAdapter<String> adapter = (ArrayAdapter<String>)msg.obj;
+                        mAutoCompletePopup.setAdapter(adapter);
+                    }
+                    break;
 
                 case LONG_PRESS_CENTER:
                     // as this is shared by keydown and trackballdown, reset all
@@ -8174,6 +8323,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                     break;
 
+                case FOCUS_NODE_CHANGED:
+                    if (mAutoCompletePopup != null) {
+                        mAutoCompletePopup.setFocused(msg.arg1 == mFieldPointer);
+                    }
+                    // fall through to HIT_TEST_RESULT
                 case HIT_TEST_RESULT:
                     WebKitHitTest hit = (WebKitHitTest) msg.obj;
                     mFocusedNode = hit;
@@ -8190,11 +8344,20 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
                 case SET_AUTOFILLABLE:
                     mAutoFillData = (WebViewCore.AutoFillData) msg.obj;
-                    // TODO: Support (b/6083041)
+                    if (mInputConnection != null) {
+                        mInputConnection.setAutoFillable(mAutoFillData.getQueryId());
+                        mAutoCompletePopup.setAutoFillQueryId(mAutoFillData.getQueryId());
+                    }
                     break;
 
                 case AUTOFILL_COMPLETE:
-                    // TODO: Support (b/6083041)
+                    if (mAutoCompletePopup != null) {
+                        ArrayList<String> pastEntries = new ArrayList<String>();
+                        mAutoCompletePopup.setAdapter(new ArrayAdapter<String>(
+                                mContext,
+                                com.android.internal.R.layout.web_text_view_dropdown,
+                                pastEntries));
+                    }
                     break;
 
                 case COPY_TO_CLIPBOARD:
@@ -8208,6 +8371,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         mFieldPointer = initData.mFieldPointer;
                         mInputConnection.initEditorInfo(initData);
                         mInputConnection.setTextAndKeepSelection(initData.mText);
+                        nativeMapLayerRect(mNativeClass, initData.mNodeLayerId,
+                                initData.mNodeBounds);
+                        mAutoCompletePopup.setNodeBounds(initData.mNodeBounds,
+                                initData.mNodeLayerId);
+                        mAutoCompletePopup.setText(mInputConnection.getEditable());
                     }
                     break;
 
@@ -8234,6 +8402,15 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
                 case KEY_PRESS:
                     mWebViewCore.sendMessage(EventHub.KEY_PRESS, msg.arg1);
+                    break;
+
+                case RELOCATE_AUTO_COMPLETE_POPUP:
+                    relocateAutoCompletePopup();
+                    break;
+
+                case AUTOFILL_FORM:
+                    mWebViewCore.sendMessage(EventHub.AUTOFILL_FORM,
+                            msg.arg1, /* unused */0);
                     break;
 
                 default:
@@ -9019,7 +9196,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /*package*/ void autoFillForm(int autoFillQueryId) {
-        mWebViewCore.sendMessage(EventHub.AUTOFILL_FORM, autoFillQueryId, /* unused */0);
+        mPrivateHandler.obtainMessage(AUTOFILL_FORM, autoFillQueryId, 0)
+            .sendToTarget();
     }
 
     /* package */ ViewManager getViewManager() {
@@ -9170,4 +9348,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static native int nativeGetHandleLayerId(int instance, int handle,
             Rect cursorLocation);
     private static native boolean nativeIsBaseFirst(int instance);
+    private static native void nativeMapLayerRect(int instance, int layerId,
+            Rect rect);
 }
