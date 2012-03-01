@@ -45,6 +45,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.LocalPowerManager;
+import android.os.Message;
 import android.os.Power;
 import android.os.PowerManager;
 import android.os.Process;
@@ -57,6 +58,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManagerPolicy;
+import static android.view.WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR;
 import static android.provider.Settings.System.DIM_SCREEN;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE;
@@ -76,6 +78,7 @@ import java.util.Observer;
 
 public class PowerManagerService extends IPowerManager.Stub
         implements LocalPowerManager, Watchdog.Monitor {
+    private static final int NOMINAL_FRAME_TIME_MS = 1000/60;
 
     private static final String TAG = "PowerManagerService";
     static final String PARTIAL_NAME = "PowerManagerService";
@@ -131,6 +134,7 @@ public class PowerManagerService extends IPowerManager.Stub
     private static final int DEFAULT_SCREEN_BRIGHTNESS = 192;
 
     // flags for setPowerState
+    private static final int ALL_LIGHTS_OFF         = 0x00000000;
     private static final int SCREEN_ON_BIT          = 0x00000001;
     private static final int SCREEN_BRIGHT_BIT      = 0x00000002;
     private static final int BUTTON_BRIGHT_BIT      = 0x00000004;
@@ -159,9 +163,9 @@ public class PowerManagerService extends IPowerManager.Stub
 
     boolean mAnimateScreenLights = true;
 
-    static final int ANIM_STEPS = 60/4;
+    static final int ANIM_STEPS = 60; // nominal # of frames at 60Hz
     // Slower animation for autobrightness changes
-    static final int AUTOBRIGHTNESS_ANIM_STEPS = 60;
+    static final int AUTOBRIGHTNESS_ANIM_STEPS = 2 * ANIM_STEPS;
     // Number of steps when performing a more immediate brightness change.
     static final int IMMEDIATE_ANIM_STEPS = 4;
 
@@ -221,12 +225,11 @@ public class PowerManagerService extends IPowerManager.Stub
     private UnsynchronizedWakeLock mPreventScreenOnPartialLock;
     private UnsynchronizedWakeLock mProximityPartialLock;
     private HandlerThread mHandlerThread;
-    private HandlerThread mScreenOffThread;
     private Handler mScreenOffHandler;
+    private Handler mScreenBrightnessHandler;
     private Handler mHandler;
     private final TimeoutTask mTimeoutTask = new TimeoutTask();
-    private final BrightnessState mScreenBrightness
-            = new BrightnessState(SCREEN_BRIGHT_BIT);
+    private ScreenBrightnessAnimator mScreenBrightnessAnimator;
     private boolean mStillNeedSleepNotification;
     private boolean mIsPowered = false;
     private IActivityManager mActivityService;
@@ -271,6 +274,7 @@ public class PowerManagerService extends IPowerManager.Stub
     private int mWarningSpewThrottleCount;
     private long mWarningSpewThrottleTime;
     private int mAnimationSetting = ANIM_SETTING_OFF;
+    private float mWindowScaleAnimation;
 
     // Must match with the ISurfaceComposer constants in C++.
     private static final int ANIM_SETTING_ON = 0x01;
@@ -285,7 +289,8 @@ public class PowerManagerService extends IPowerManager.Stub
     private static final boolean mSpew = false;
     private static final boolean mDebugProximitySensor = (false || mSpew);
     private static final boolean mDebugLightSensor = (false || mSpew);
-    
+    private static final boolean mDebugLightAnimation = (false || mSpew);
+
     private native void nativeInit();
     private native void nativeSetPowerState(boolean screenOn, boolean screenBright);
     private native void nativeStartSurfaceFlingerAnimation(int mode);
@@ -487,10 +492,10 @@ public class PowerManagerService extends IPowerManager.Stub
                 // recalculate everything
                 setScreenOffTimeoutsLocked();
 
-                final float windowScale = getFloat(WINDOW_ANIMATION_SCALE, 1.0f);
+                mWindowScaleAnimation = getFloat(WINDOW_ANIMATION_SCALE, 1.0f);
                 final float transitionScale = getFloat(TRANSITION_ANIMATION_SCALE, 1.0f);
                 mAnimationSetting = 0;
-                if (windowScale > 0.5f) {
+                if (mWindowScaleAnimation > 0.5f) {
                     mAnimationSetting |= ANIM_SETTING_OFF;
                 }
                 if (transitionScale > 0.5f) {
@@ -540,28 +545,20 @@ public class PowerManagerService extends IPowerManager.Stub
         }
 
         mInitComplete = false;
-        mScreenOffThread = new HandlerThread("PowerManagerService.mScreenOffThread") {
-            @Override
-            protected void onLooperPrepared() {
-                mScreenOffHandler = new Handler();
-                synchronized (mScreenOffThread) {
-                    mInitComplete = true;
-                    mScreenOffThread.notifyAll();
-                }
-            }
-        };
-        mScreenOffThread.start();
+        mScreenBrightnessAnimator = new ScreenBrightnessAnimator("mScreenBrightnessUpdaterThread",
+                Process.THREAD_PRIORITY_DISPLAY);
+        mScreenBrightnessAnimator.start();
 
-        synchronized (mScreenOffThread) {
+        synchronized (mScreenBrightnessAnimator) {
             while (!mInitComplete) {
                 try {
-                    mScreenOffThread.wait();
+                    mScreenBrightnessAnimator.wait();
                 } catch (InterruptedException e) {
                     // Ignore
                 }
             }
         }
-        
+
         mInitComplete = false;
         mHandlerThread = new HandlerThread("PowerManagerService") {
             @Override
@@ -581,7 +578,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 }
             }
         }
-        
+
         nativeInit();
         Power.powerInitNative();
         synchronized (mLocks) {
@@ -1079,7 +1076,6 @@ public class PowerManagerService extends IPowerManager.Stub
 
             int oldPokey = mPokey;
             int cumulative = 0;
-            boolean oldAwakeOnSet = mPokeAwakeOnSet;
             boolean awakeOnSet = false;
             for (PokeLock p: mPokeLocks.values()) {
                 cumulative |= p.pokey;
@@ -1199,7 +1195,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     + " mLightSensorKeyboardBrightness=" + mLightSensorKeyboardBrightness);
             pw.println("  mUseSoftwareAutoBrightness=" + mUseSoftwareAutoBrightness);
             pw.println("  mAutoBrightessEnabled=" + mAutoBrightessEnabled);
-            mScreenBrightness.dump(pw, "  mScreenBrightness: ");
+            mScreenBrightnessAnimator.dump(pw, "  mScreenBrightnessAnimator: ");
 
             int N = mLocks.size();
             pw.println();
@@ -1431,7 +1427,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     private WindowManagerPolicy.ScreenOnListener mScreenOnListener =
             new WindowManagerPolicy.ScreenOnListener() {
-                @Override public void onScreenOn() {
+                public void onScreenOn() {
                     synchronized (mLocks) {
                         if (mPreparingForScreenOn) {
                             mPreparingForScreenOn = false;
@@ -1720,7 +1716,7 @@ public class PowerManagerService extends IPowerManager.Stub
                             + Integer.toHexString(mPowerState)
                             + " mSkippedScreenOn=" + mSkippedScreenOn);
                 }
-                mScreenBrightness.forceValueLocked(Power.BRIGHTNESS_OFF);
+                mScreenBrightnessAnimator.animateTo(Power.BRIGHTNESS_OFF, SCREEN_BRIGHT_BIT, 0);
             }
         }
         int err = Power.setScreenState(on);
@@ -1879,7 +1875,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     }
                     mPowerState &= ~SCREEN_ON_BIT;
                     mScreenOffReason = reason;
-                    if (!mScreenBrightness.animating) {
+                    if (!mScreenBrightnessAnimator.isAnimating()) {
                         err = screenOffFinishedAnimatingLocked(reason);
                     } else {
                         err = 0;
@@ -1953,11 +1949,11 @@ public class PowerManagerService extends IPowerManager.Stub
 
         // If the screen is not currently on, we will want to delay actually
         // turning the lights on if we are still getting the UI put up.
-        if ((oldState&SCREEN_ON_BIT) == 0 || mSkippedScreenOn) {
+        if ((oldState & SCREEN_ON_BIT) == 0 || mSkippedScreenOn) {
             // Don't turn screen on until we know we are really ready to.
             // This is to avoid letting the screen go on before things like the
             // lock screen have been displayed.
-            if ((mSkippedScreenOn=shouldDeferScreenOnLocked())) {
+            if ((mSkippedScreenOn = shouldDeferScreenOnLocked())) {
                 newState &= ~(SCREEN_ON_BIT|SCREEN_BRIGHT_BIT);
             }
         }
@@ -2017,7 +2013,7 @@ public class PowerManagerService extends IPowerManager.Stub
                     case SCREEN_BRIGHT_BIT:
                     default:
                         // not possible
-                        nominalCurrentValue = (int)mScreenBrightness.curValue;
+                        nominalCurrentValue = (int)mScreenBrightnessAnimator.getCurrentBrightness();
                         break;
                 }
             }
@@ -2067,8 +2063,8 @@ public class PowerManagerService extends IPowerManager.Stub
                 Binder.restoreCallingIdentity(identity);
             }
             if (!mSkippedScreenOn) {
-                mScreenBrightness.setTargetLocked(brightness, steps,
-                        INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
+                int dt = steps * NOMINAL_FRAME_TIME_MS;
+                mScreenBrightnessAnimator.animateTo(brightness, SCREEN_BRIGHT_BIT, dt);
                 if (DEBUG_SCREEN_ON) {
                     RuntimeException e = new RuntimeException("here");
                     e.fillInStackTrace();
@@ -2111,152 +2107,163 @@ public class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    private void setLightBrightness(int mask, int value) {
-        int brightnessMode = (mAutoBrightessEnabled
+    /**
+     * Note: by design this class does not hold mLocks while calling native methods.
+     * Nor should it. Ever.
+     */
+    class ScreenBrightnessAnimator extends HandlerThread {
+        static final int ANIMATE_LIGHTS = 10;
+        static final int POWER_OFF = 11;
+        volatile int startValue;
+        volatile int endValue;
+        volatile int currentValue;
+        private int currentMask;
+        private int duration;
+        private long startTimeMillis;
+        private final String prefix;
+
+        public ScreenBrightnessAnimator(String name, int priority) {
+            super(name, priority);
+            prefix = name;
+        }
+
+        @Override
+        protected void onLooperPrepared() {
+            mScreenBrightnessHandler = new Handler() {
+                public void handleMessage(Message msg) {
+                    int brightnessMode = (mAutoBrightessEnabled && !mInitialAnimation
                             ? LightsService.BRIGHTNESS_MODE_SENSOR
                             : LightsService.BRIGHTNESS_MODE_USER);
-        if ((mask & SCREEN_BRIGHT_BIT) != 0) {
-            if (DEBUG_SCREEN_ON) {
-                RuntimeException e = new RuntimeException("here");
-                e.fillInStackTrace();
-                Slog.i(TAG, "Set LCD brightness: " + value, e);
+                    if (msg.what == ANIMATE_LIGHTS) {
+                        final int mask = msg.arg1;
+                        int value = msg.arg2;
+                        long tStart = SystemClock.uptimeMillis();
+                        if ((mask & SCREEN_BRIGHT_BIT) != 0) {
+                            if (mDebugLightAnimation) Log.v(TAG, "Set brightness: " + value);
+                            mLcdLight.setBrightness(value, brightnessMode);
+                        }
+                        long elapsed = SystemClock.uptimeMillis() - tStart;
+                        if ((mask & BUTTON_BRIGHT_BIT) != 0) {
+                            mButtonLight.setBrightness(value);
+                        }
+                        if ((mask & KEYBOARD_BRIGHT_BIT) != 0) {
+                            mKeyboardLight.setBrightness(value);
+                        }
+
+                        if (elapsed > 100) {
+                            Log.e(TAG, "Excessive delay setting brightness: " + elapsed
+                                    + "ms, mask=" + mask);
+                        }
+
+                        // Throttle brightness updates to frame refresh rate
+                        int delay = elapsed < NOMINAL_FRAME_TIME_MS ? NOMINAL_FRAME_TIME_MS : 0;
+                        synchronized(this) {
+                            currentValue = value;
+                        }
+                        animateInternal(mask, false, delay);
+                    } else if (msg.what == POWER_OFF) {
+                        if (!mHeadless) {
+                            int mode = msg.arg1;
+                            nativeStartSurfaceFlingerAnimation(mode);
+                        }
+                    }
+                }
+            };
+            synchronized (this) {
+                mInitComplete = true;
+                notifyAll();
             }
-            mLcdLight.setBrightness(value, brightnessMode);
         }
-        if ((mask & BUTTON_BRIGHT_BIT) != 0) {
-            mButtonLight.setBrightness(value);
+
+        private void animateInternal(int mask, boolean turningOff, int delay) {
+            synchronized (this) {
+                if (currentValue != endValue) {
+                    final long now = SystemClock.elapsedRealtime();
+                    final int elapsed = (int) (now - startTimeMillis);
+                    int newValue;
+                    if (elapsed < duration) {
+                        int delta = endValue - startValue;
+                        newValue = startValue + delta * elapsed / duration;
+                        newValue = Math.max(Power.BRIGHTNESS_OFF, newValue);
+                        newValue = Math.min(Power.BRIGHTNESS_ON, newValue);
+                    } else {
+                        newValue = endValue;
+                        mInitialAnimation = false;
+                    }
+
+                    if (mDebugLightAnimation) {
+                        Log.v(TAG, "Animating light: " + "start:" + startValue
+                                + ", end:" + endValue + ", elapsed:" + elapsed
+                                + ", duration:" + duration + ", current:" + currentValue
+                                + ", delay:" + delay);
+                    }
+
+                    if (turningOff) {
+                        int mode = mScreenOffReason == OFF_BECAUSE_OF_PROX_SENSOR
+                                ? 0 : mAnimationSetting;
+                        if (mDebugLightAnimation) Log.v(TAG, "Doing power-off anim, mode=" + mode);
+                        mScreenBrightnessHandler.obtainMessage(POWER_OFF, mode, 0).sendToTarget();
+                    }
+                    Message msg = mScreenBrightnessHandler
+                            .obtainMessage(ANIMATE_LIGHTS, mask, newValue);
+                    mScreenBrightnessHandler.sendMessageDelayed(msg, delay);
+                }
+            }
         }
-        if ((mask & KEYBOARD_BRIGHT_BIT) != 0) {
-            mKeyboardLight.setBrightness(value);
+
+        public void dump(PrintWriter pw, String string) {
+            pw.println(prefix + "animating: " + "start:" + startValue + ", end:" + endValue
+                    + ", duration:" + duration + ", current:" + currentValue);
+        }
+
+        public void animateTo(int target, int mask, int animationDuration) {
+            synchronized(this) {
+                startValue = currentValue;
+                endValue = target;
+                currentMask = mask;
+                duration = (int) (mWindowScaleAnimation * animationDuration);
+                startTimeMillis = SystemClock.elapsedRealtime();
+                mInitialAnimation = currentValue == 0 && target > 0;
+
+                if (mDebugLightAnimation) {
+                    Log.v(TAG, "animateTo(target=" + target + ", mask=" + mask
+                            + ", duration=" + animationDuration +")"
+                            + ", currentValue=" + currentValue
+                            + ", startTime=" + startTimeMillis);
+                }
+
+                if (target != currentValue) {
+                    final boolean turningOff = endValue == Power.BRIGHTNESS_OFF;
+                    if (turningOff) {
+                        // Cancel all pending animations since we're turning off
+                        mScreenBrightnessHandler.removeCallbacksAndMessages(null);
+                        screenOffFinishedAnimatingLocked(mScreenOffReason);
+                        duration = 200; // TODO: how long should this be?
+                    }
+                    animateInternal(mask, turningOff, 0);
+                }
+            }
+        }
+
+        public int getCurrentBrightness() {
+            synchronized (this) {
+                return currentValue;
+            }
+        }
+
+        public boolean isAnimating() {
+            synchronized (this) {
+                return currentValue != endValue;
+            }
+        }
+
+        public void cancelAnimation() {
+            animateTo(endValue, currentMask, 0);
         }
     }
 
-    class BrightnessState implements Runnable {
-        final int mask;
-
-        boolean initialized;
-        int targetValue;
-        float curValue;
-        float delta;
-        boolean animating;
-
-        BrightnessState(int m) {
-            mask = m;
-        }
-
-        public void dump(PrintWriter pw, String prefix) {
-            pw.println(prefix + "animating=" + animating
-                    + " targetValue=" + targetValue
-                    + " curValue=" + curValue
-                    + " delta=" + delta);
-        }
-
-        void forceValueLocked(int value) {
-            targetValue = -1;
-            curValue = value;
-            setLightBrightness(mask, value);
-            if (animating) {
-                finishAnimationLocked(false, value);
-            }
-        }
-
-        void setTargetLocked(int target, int stepsToTarget, int initialValue,
-                int nominalCurrentValue) {
-            if (!initialized) {
-                initialized = true;
-                curValue = (float)initialValue;
-            } else if (targetValue == target) {
-                return;
-            }
-            targetValue = target;
-            delta = (targetValue -
-                    (nominalCurrentValue >= 0 ? nominalCurrentValue : curValue))
-                    / stepsToTarget;
-            if (mSpew || DEBUG_SCREEN_ON) {
-                String noticeMe = nominalCurrentValue == curValue ? "" : "  ******************";
-                Slog.i(TAG, "setTargetLocked mask=" + mask + " curValue=" + curValue
-                        + " target=" + target + " targetValue=" + targetValue + " delta=" + delta
-                        + " nominalCurrentValue=" + nominalCurrentValue
-                        + noticeMe);
-            }
-            animating = true;
-
-            if (mSpew) {
-                Slog.i(TAG, "scheduling light animator");
-            }
-            mScreenOffHandler.removeCallbacks(this);
-            mScreenOffHandler.post(this);
-        }
-
-        boolean stepLocked() {
-            if (!animating) return false;
-            if (false && mSpew) {
-                Slog.i(TAG, "Step target " + mask + ": cur=" + curValue
-                        + " target=" + targetValue + " delta=" + delta);
-            }
-            curValue += delta;
-            int curIntValue = (int)curValue;
-            boolean more = true;
-            if (delta == 0) {
-                curValue = curIntValue = targetValue;
-                more = false;
-            } else if (delta > 0) {
-                if (curIntValue >= targetValue) {
-                    curValue = curIntValue = targetValue;
-                    more = false;
-                }
-            } else {
-                if (curIntValue <= targetValue) {
-                    curValue = curIntValue = targetValue;
-                    more = false;
-                }
-            }
-            if (mSpew) Slog.d(TAG, "Animating curIntValue=" + curIntValue + ": " + mask);
-            setLightBrightness(mask, curIntValue);
-            finishAnimationLocked(more, curIntValue);
-            return more;
-        }
-
-        void jumpToTargetLocked() {
-            if (mSpew) Slog.d(TAG, "jumpToTargetLocked targetValue=" + targetValue + ": " + mask);
-            setLightBrightness(mask, targetValue);
-            final int tv = targetValue;
-            curValue = tv;
-            targetValue = -1;
-            finishAnimationLocked(false, tv);
-        }
-
-        private void finishAnimationLocked(boolean more, int curIntValue) {
-            animating = more;
-            if (!more) {
-                if (mask == SCREEN_BRIGHT_BIT && curIntValue == Power.BRIGHTNESS_OFF) {
-                    screenOffFinishedAnimatingLocked(mScreenOffReason);
-                }
-            }
-        }
-
-        public void run() {
-            synchronized (mLocks) {
-                // we're turning off
-                final boolean turningOff = animating && targetValue == Power.BRIGHTNESS_OFF;
-                if (mAnimateScreenLights || !turningOff) {
-                    long now = SystemClock.uptimeMillis();
-                    boolean more = mScreenBrightness.stepLocked();
-                    if (more) {
-                        mScreenOffHandler.postAtTime(this, now+(1000/60));
-                    }
-                } else {
-                    if (!mHeadless) {
-                        // It's pretty scary to hold mLocks for this long, and we should
-                        // redesign this, but it works for now.
-                        nativeStartSurfaceFlingerAnimation(
-                                mScreenOffReason == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR
-                                ? 0 : mAnimationSetting);
-                    }
-                    mScreenBrightness.jumpToTargetLocked();
-                }
-            }
-        }
+    private void setLightBrightness(int mask, int value) {
+        mScreenBrightnessAnimator.animateTo(value, mask, 0);
     }
 
     private int getPreferredBrightness() {
@@ -2326,7 +2333,8 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     private boolean isScreenTurningOffLocked() {
-        return (mScreenBrightness.animating && mScreenBrightness.targetValue == 0);
+        return (mScreenBrightnessAnimator.isAnimating()
+                && mScreenBrightnessAnimator.endValue == Power.BRIGHTNESS_OFF);
     }
 
     private boolean shouldLog(long time) {
@@ -2347,7 +2355,7 @@ public class PowerManagerService extends IPowerManager.Stub
     private void forceUserActivityLocked() {
         if (isScreenTurningOffLocked()) {
             // cancel animation so userActivity will succeed
-            mScreenBrightness.animating = false;
+            mScreenBrightnessAnimator.cancelAnimation();
         }
         boolean savedActivityAllowed = mUserActivityAllowed;
         mUserActivityAllowed = true;
@@ -2526,6 +2534,8 @@ public class PowerManagerService extends IPowerManager.Stub
         }
     };
 
+    private boolean mInitialAnimation; // used to prevent lightsensor changes while turning on
+
     private void dockStateChanged(int state) {
         synchronized (mLocks) {
             mIsDocked = (state != Intent.EXTRA_DOCK_STATE_UNDOCKED);
@@ -2587,10 +2597,11 @@ public class PowerManagerService extends IPowerManager.Stub
                 }
 
                 if (mAutoBrightessEnabled && mScreenBrightnessOverride < 0) {
-                    if (!mSkippedScreenOn) {
-                        mScreenBrightness.setTargetLocked(lcdValue,
-                                immediate ? IMMEDIATE_ANIM_STEPS : AUTOBRIGHTNESS_ANIM_STEPS,
-                                INITIAL_SCREEN_BRIGHTNESS, (int)mScreenBrightness.curValue);
+                    if (!mSkippedScreenOn && !mInitialAnimation) {
+                        int steps = immediate ? IMMEDIATE_ANIM_STEPS : AUTOBRIGHTNESS_ANIM_STEPS;
+                        mScreenBrightnessAnimator.cancelAnimation();
+                        mScreenBrightnessAnimator.animateTo(lcdValue,
+                                SCREEN_BRIGHT_BIT, steps * NOMINAL_FRAME_TIME_MS);
                     }
                 }
                 if (mButtonBrightnessOverride < 0) {
@@ -2642,7 +2653,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 synchronized (this) {
                     ShutdownThread.reboot(mContext, finalReason, false);
                 }
-                
+
             }
         };
         // ShutdownThread must run on a looper capable of displaying the UI.
@@ -2996,9 +3007,7 @@ public class PowerManagerService extends IPowerManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-
-            mScreenBrightness.targetValue = brightness;
-            mScreenBrightness.jumpToTargetLocked();
+            mScreenBrightnessAnimator.animateTo(brightness, SCREEN_BRIGHT_BIT, 0);
         }
     }
 
