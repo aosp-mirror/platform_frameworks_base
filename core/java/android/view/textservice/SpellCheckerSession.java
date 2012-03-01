@@ -180,9 +180,9 @@ public class SpellCheckerSession {
     /**
      * @hide
      */
-    public void getSentenceSuggestions(TextInfo textInfo, int suggestionsLimit) {
+    public void getSentenceSuggestions(TextInfo[] textInfo, int suggestionsLimit) {
         mSpellCheckerSessionListenerImpl.getSentenceSuggestionsMultiple(
-                new TextInfo[] {textInfo}, suggestionsLimit);
+                textInfo, suggestionsLimit);
     }
 
     /**

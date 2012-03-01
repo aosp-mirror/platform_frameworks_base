@@ -84,6 +84,13 @@ public final class SentenceSuggestionsInfo implements Parcelable {
     /**
      * @hide
      */
+    public int getSuggestionsCount() {
+        return mSuggestionsInfos.length;
+    }
+
+    /**
+     * @hide
+     */
     public SuggestionsInfo getSuggestionsInfoAt(int i) {
         if (i >= 0 && i < mSuggestionsInfos.length) {
             return mSuggestionsInfos[i];
