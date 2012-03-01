@@ -1215,6 +1215,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 return retValue;
             }
             protected boolean turnOffUpstreamMobileConnection() {
+                // ignore pending renewal requests
+                ++mCurrentConnectionSequence;
                 if (mMobileApnReserved != ConnectivityManager.TYPE_NONE) {
                     try {
                         mConnService.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
@@ -1304,6 +1306,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 if (upType == ConnectivityManager.TYPE_MOBILE_DUN ||
                         upType == ConnectivityManager.TYPE_MOBILE_HIPRI) {
                     turnOnUpstreamMobileConnection(upType);
+                } else if (upType != ConnectivityManager.TYPE_NONE) {
+                    /* If we've found an active upstream connection that's not DUN/HIPRI
+                     * we should stop any outstanding DUN/HIPRI start requests.
+                     *
+                     * If we found NONE we don't want to do this as we want any previous
+                     * requests to keep trying to bring up something we can use.
+                     */
+                    turnOffUpstreamMobileConnection();
                 }
 
                 if (upType == ConnectivityManager.TYPE_NONE) {
