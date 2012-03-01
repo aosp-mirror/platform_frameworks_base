@@ -85,6 +85,13 @@ public final class SQLiteDatabaseConfiguration {
     public Locale locale;
 
     /**
+     * The database journal mode.
+     *
+     * Default is {@link SQLiteGlobal#getDefaultJournalMode()}.
+     */
+    public String journalMode;
+
+    /**
      * The custom functions to register.
      */
     public final ArrayList<SQLiteCustomFunction> customFunctions =
@@ -110,6 +117,7 @@ public final class SQLiteDatabaseConfiguration {
         maxConnectionPoolSize = 1;
         maxSqlCacheSize = 25;
         locale = Locale.getDefault();
+        journalMode = SQLiteGlobal.getDefaultJournalMode();
     }
 
     /**
@@ -146,6 +154,7 @@ public final class SQLiteDatabaseConfiguration {
         maxConnectionPoolSize = other.maxConnectionPoolSize;
         maxSqlCacheSize = other.maxSqlCacheSize;
         locale = other.locale;
+        journalMode = other.journalMode;
         customFunctions.clear();
         customFunctions.addAll(other.customFunctions);
     }

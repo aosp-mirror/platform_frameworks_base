@@ -128,15 +128,6 @@ static jint nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFlag
         return 0;
     }
 
-    // Enable WAL auto-checkpointing after a commit whenever at least one frame is in the log.
-    // This ensures that a checkpoint will occur after each transaction if needed.
-    err = sqlite3_wal_autocheckpoint(db, 1);
-    if (err) {
-        throw_sqlite3_exception(env, db, "Could not enable auto-checkpointing.");
-        sqlite3_close(db);
-        return 0;
-    }
-
     // Register custom Android functions.
     err = register_android_functions(db, UTF16_STORAGE);
     if (err) {

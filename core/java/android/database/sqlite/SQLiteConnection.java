@@ -208,6 +208,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 mConfiguration.label,
                 SQLiteDebug.DEBUG_SQL_STATEMENTS, SQLiteDebug.DEBUG_SQL_TIME);
 
+        setSyncMode();
+        setPageSize();
+        setAutoCheckpointInterval();
+        setJournalSizeLimit();
+        setJournalModeFromConfiguration();
         setLocaleFromConfiguration();
     }
 
@@ -231,6 +236,44 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
+    private void setSyncMode() {
+        if (!mConfiguration.isInMemoryDb()) {
+            execute("PRAGMA synchronous=" + SQLiteGlobal.getSyncMode(), null, null);
+        }
+    }
+
+    private void setPageSize() {
+        if (!mConfiguration.isInMemoryDb()) {
+            execute("PRAGMA page_size=" + SQLiteGlobal.getDefaultPageSize(), null, null);
+        }
+    }
+
+    private void setAutoCheckpointInterval() {
+        if (!mConfiguration.isInMemoryDb()) {
+            executeForLong("PRAGMA wal_autocheckpoint=" + SQLiteGlobal.getWALAutoCheckpoint(),
+                    null, null);
+        }
+    }
+
+    private void setJournalSizeLimit() {
+        if (!mConfiguration.isInMemoryDb()) {
+            executeForLong("PRAGMA journal_size_limit=" + SQLiteGlobal.getJournalSizeLimit(),
+                    null, null);
+        }
+    }
+
+    private void setJournalModeFromConfiguration() {
+        if (!mConfiguration.isInMemoryDb()) {
+            String result = executeForString("PRAGMA journal_mode=" + mConfiguration.journalMode,
+                    null, null);
+            if (!result.equalsIgnoreCase(mConfiguration.journalMode)) {
+                Log.e(TAG, "setting journal_mode to " + mConfiguration.journalMode
+                        + " failed for db: " + mConfiguration.label
+                        + " (on pragma set journal_mode, sqlite returned:" + result);
+            }
+        }
+    }
+
     private void setLocaleFromConfiguration() {
         nativeSetLocale(mConnectionPtr, mConfiguration.locale.toString());
     }
@@ -246,7 +289,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             }
         }
 
-        // Remember whether locale has changed.
+        // Remember what changed.
+        boolean journalModeChanged = !configuration.journalMode.equalsIgnoreCase(
+                mConfiguration.journalMode);
         boolean localeChanged = !configuration.locale.equals(mConfiguration.locale);
 
         // Update configuration parameters.
@@ -254,6 +299,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
         // Update prepared statement cache size.
         mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
+
+        // Update journal mode.
+        if (journalModeChanged) {
+            setJournalModeFromConfiguration();
+        }
 
         // Update locale.
         if (localeChanged) {
