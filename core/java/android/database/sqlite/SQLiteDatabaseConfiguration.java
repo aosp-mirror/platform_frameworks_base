@@ -51,15 +51,15 @@ public final class SQLiteDatabaseConfiguration {
     public final String path;
 
     /**
-     * The flags used to open the database.
-     */
-    public final int openFlags;
-
-    /**
      * The label to use to describe the database when it appears in logs.
      * This is derived from the path but is stripped to remove PII.
      */
     public final String label;
+
+    /**
+     * The flags used to open the database.
+     */
+    public int openFlags;
 
     /**
      * The maximum number of connections to retain in the connection pool.
@@ -103,8 +103,8 @@ public final class SQLiteDatabaseConfiguration {
         }
 
         this.path = path;
-        this.openFlags = openFlags;
         label = stripPathForLogs(path);
+        this.openFlags = openFlags;
 
         // Set default values for optional parameters.
         maxConnectionPoolSize = 1;
@@ -123,7 +123,6 @@ public final class SQLiteDatabaseConfiguration {
         }
 
         this.path = other.path;
-        this.openFlags = other.openFlags;
         this.label = other.label;
         updateParametersFrom(other);
     }
@@ -138,11 +137,12 @@ public final class SQLiteDatabaseConfiguration {
         if (other == null) {
             throw new IllegalArgumentException("other must not be null.");
         }
-        if (!path.equals(other.path) || openFlags != other.openFlags) {
+        if (!path.equals(other.path)) {
             throw new IllegalArgumentException("other configuration must refer to "
                     + "the same database.");
         }
 
+        openFlags = other.openFlags;
         maxConnectionPoolSize = other.maxConnectionPoolSize;
         maxSqlCacheSize = other.maxSqlCacheSize;
         locale = other.locale;

@@ -677,6 +677,38 @@ public class SQLiteDatabase extends SQLiteClosable {
         return openDatabase(path, factory, CREATE_IF_NECESSARY, errorHandler);
     }
 
+    /**
+     * Reopens the database in read-write mode.
+     * If the database is already read-write, does nothing.
+     *
+     * @throws SQLiteException if the database could not be reopened as requested, in which
+     * case it remains open in read only mode.
+     * @throws IllegalStateException if the database is not open.
+     *
+     * @see #isReadOnly()
+     * @hide
+     */
+    public void reopenReadWrite() {
+        synchronized (mLock) {
+            throwIfNotOpenLocked();
+
+            if (!isReadOnlyLocked()) {
+                return; // nothing to do
+            }
+
+            // Reopen the database in read-write mode.
+            final int oldOpenFlags = mConfigurationLocked.openFlags;
+            mConfigurationLocked.openFlags = (mConfigurationLocked.openFlags & ~OPEN_READ_MASK)
+                    | OPEN_READWRITE;
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.openFlags = oldOpenFlags;
+                throw ex;
+            }
+        }
+    }
+
     private void open() {
         try {
             try {
@@ -1900,28 +1932,6 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
         }
         return true;
-    }
-
-    /**
-     * Prevent other threads from using the database's primary connection.
-     *
-     * This method is only used by {@link SQLiteOpenHelper} when transitioning from
-     * a readable to a writable database.  It should not be used in any other way.
-     *
-     * @see #unlockPrimaryConnection()
-     */
-    void lockPrimaryConnection() {
-        getThreadSession().beginTransaction(SQLiteSession.TRANSACTION_MODE_DEFERRED,
-                null, SQLiteConnectionPool.CONNECTION_FLAG_PRIMARY_CONNECTION_AFFINITY, null);
-    }
-
-    /**
-     * Allow other threads to use the database's primary connection.
-     *
-     * @see #lockPrimaryConnection()
-     */
-    void unlockPrimaryConnection() {
-        getThreadSession().endTransaction(null);
     }
 
     @Override
