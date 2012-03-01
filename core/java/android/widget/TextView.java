@@ -5996,7 +5996,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (des < 0) {
                     des = (int) FloatMath.ceil(Layout.getDesiredWidth(mTransformed, mTextPaint));
                 }
-
                 width = des;
             } else {
                 width = boring.width;
@@ -6017,7 +6016,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 if (hintDes < 0) {
-                    hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mHintBoring);
+                    hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir, mHintBoring);
                     if (hintBoring != null) {
                         mHintBoring = hintBoring;
                     }
@@ -6025,10 +6024,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (hintBoring == null || hintBoring == UNKNOWN_BORING) {
                     if (hintDes < 0) {
-                        hintDes = (int) FloatMath.ceil(
-                                Layout.getDesiredWidth(mHint, mTextPaint));
+                        hintDes = (int) FloatMath.ceil(Layout.getDesiredWidth(mHint, mTextPaint));
                     }
-
                     hintWidth = hintDes;
                 } else {
                     hintWidth = hintBoring.width;
@@ -6292,20 +6289,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (changed && mEditor != null) getEditor().mTextDisplayListIsValid = false;
     }
 
+    private boolean isShowingHint() {
+        return TextUtils.isEmpty(mText) && !TextUtils.isEmpty(mHint);
+    }
+
     /**
      * Returns true if anything changed.
      */
     private boolean bringTextIntoView() {
+        Layout layout = isShowingHint() ? mHintLayout : mLayout;
         int line = 0;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.BOTTOM) {
-            line = mLayout.getLineCount() - 1;
+            line = layout.getLineCount() - 1;
         }
 
-        Layout.Alignment a = mLayout.getParagraphAlignment(line);
-        int dir = mLayout.getParagraphDirection(line);
+        Layout.Alignment a = layout.getParagraphAlignment(line);
+        int dir = layout.getParagraphDirection(line);
         int hspace = mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight();
         int vspace = mBottom - mTop - getExtendedPaddingTop() - getExtendedPaddingBottom();
-        int ht = mLayout.getHeight();
+        int ht = layout.getHeight();
 
         int scrollx, scrolly;
 
@@ -6324,8 +6326,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
              * keep leading edge in view.
              */
 
-            int left = (int) FloatMath.floor(mLayout.getLineLeft(line));
-            int right = (int) FloatMath.ceil(mLayout.getLineRight(line));
+            int left = (int) FloatMath.floor(layout.getLineLeft(line));
+            int right = (int) FloatMath.ceil(layout.getLineRight(line));
 
             if (right - left < hspace) {
                 scrollx = (right + left) / 2 - hspace / 2;
@@ -6337,10 +6339,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
         } else if (a == Layout.Alignment.ALIGN_RIGHT) {
-            int right = (int) FloatMath.ceil(mLayout.getLineRight(line));
+            int right = (int) FloatMath.ceil(layout.getLineRight(line));
             scrollx = right - hspace;
         } else { // a == Layout.Alignment.ALIGN_LEFT (will also be the default)
-            scrollx = (int) FloatMath.floor(mLayout.getLineLeft(line));
+            scrollx = (int) FloatMath.floor(layout.getLineLeft(line));
         }
 
         if (ht < vspace) {
@@ -6368,22 +6370,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean bringPointIntoView(int offset) {
         boolean changed = false;
 
-        if (mLayout == null) return changed;
+        Layout layout = isShowingHint() ? mHintLayout: mLayout;
 
-        int line = mLayout.getLineForOffset(offset);
+        if (layout == null) return changed;
+
+        int line = layout.getLineForOffset(offset);
 
         // FIXME: Is it okay to truncate this, or should we round?
-        final int x = (int)mLayout.getPrimaryHorizontal(offset);
-        final int top = mLayout.getLineTop(line);
-        final int bottom = mLayout.getLineTop(line + 1);
+        final int x = (int)layout.getPrimaryHorizontal(offset);
+        final int top = layout.getLineTop(line);
+        final int bottom = layout.getLineTop(line + 1);
 
-        int left = (int) FloatMath.floor(mLayout.getLineLeft(line));
-        int right = (int) FloatMath.ceil(mLayout.getLineRight(line));
-        int ht = mLayout.getHeight();
+        int left = (int) FloatMath.floor(layout.getLineLeft(line));
+        int right = (int) FloatMath.ceil(layout.getLineRight(line));
+        int ht = layout.getHeight();
 
         int grav;
 
-        switch (mLayout.getParagraphAlignment(line)) {
+        switch (layout.getParagraphAlignment(line)) {
             case ALIGN_LEFT:
                 grav = 1;
                 break;
@@ -6391,10 +6395,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 grav = -1;
                 break;
             case ALIGN_NORMAL:
-                grav = mLayout.getParagraphDirection(line);
+                grav = layout.getParagraphDirection(line);
                 break;
             case ALIGN_OPPOSITE:
-                grav = -mLayout.getParagraphDirection(line);
+                grav = -layout.getParagraphDirection(line);
                 break;
             case ALIGN_CENTER:
             default:
@@ -8710,6 +8714,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void onResolveTextDirection() {
         if (hasPasswordTransformationMethod()) {
+            // TODO: take care of the content direction to show the password text and dots justified
+            // to the left or to the right
             mTextDir = TextDirectionHeuristics.LOCALE;
             return;
         }
