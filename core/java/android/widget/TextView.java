@@ -8280,8 +8280,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     protected void onScrollChanged(int horiz, int vert, int oldHoriz, int oldVert) {
         super.onScrollChanged(horiz, vert, oldHoriz, oldVert);
-        if (mEditor != null && getEditor().mPositionListener != null) {
-            getEditor().mPositionListener.onScrollChanged();
+        if (mEditor != null) {
+            if (getEditor().mPositionListener != null) {
+                getEditor().mPositionListener.onScrollChanged();
+            }
+            getEditor().mTextDisplayListIsValid = false;
         }
     }
 
@@ -10690,9 +10693,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            if (offset != mPreviousOffset || parentScrolled) {
-                updateSelection(offset);
-                addPositionToTouchUpFilter(offset);
+            boolean offsetChanged = offset != mPreviousOffset;
+            if (offsetChanged || parentScrolled) {
+                if (offsetChanged) {
+                    updateSelection(offset);
+                    addPositionToTouchUpFilter(offset);
+                }
                 final int line = mLayout.getLineForOffset(offset);
 
                 mPositionX = (int) (mLayout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX);
