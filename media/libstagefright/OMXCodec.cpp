@@ -493,16 +493,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
             CODEC_LOGI(
                     "AVC profile = %u (%s), level = %u",
                     profile, AVCProfileToString(profile), level);
-
-            if (!strcmp(mComponentName, "OMX.TI.Video.Decoder")
-                && (profile != kAVCProfileBaseline || level > 30)) {
-                // This stream exceeds the decoder's capabilities. The decoder
-                // does not handle this gracefully and would clobber the heap
-                // and wreak havoc instead...
-
-                ALOGE("Profile and/or level exceed the decoder's capabilities.");
-                return ERROR_UNSUPPORTED;
-            }
         } else if (meta->findData(kKeyVorbisInfo, &type, &data, &size)) {
             addCodecSpecificData(data, size);
 
@@ -558,38 +548,9 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         }
     }
 
-    if (!strcasecmp(mMIME, MEDIA_MIMETYPE_IMAGE_JPEG)
-        && !strcmp(mComponentName, "OMX.TI.JPEG.decode")) {
-        OMX_COLOR_FORMATTYPE format =
-            OMX_COLOR_Format32bitARGB8888;
-            // OMX_COLOR_FormatYUV420PackedPlanar;
-            // OMX_COLOR_FormatCbYCrY;
-            // OMX_COLOR_FormatYUV411Planar;
-
-        int32_t width, height;
-        bool success = meta->findInt32(kKeyWidth, &width);
-        success = success && meta->findInt32(kKeyHeight, &height);
-
-        int32_t compressedSize;
-        success = success && meta->findInt32(
-                kKeyMaxInputSize, &compressedSize);
-
-        CHECK(success);
-        CHECK(compressedSize > 0);
-
-        setImageOutputFormat(format, width, height);
-        setJPEGInputFormat(width, height, (OMX_U32)compressedSize);
-    }
-
     int32_t maxInputSize;
     if (meta->findInt32(kKeyMaxInputSize, &maxInputSize)) {
         setMinBufferSize(kPortIndexInput, (OMX_U32)maxInputSize);
-    }
-
-    if (!strcmp(mComponentName, "OMX.TI.AMR.encode")
-        || !strcmp(mComponentName, "OMX.TI.WBAMR.encode")
-        || !strcmp(mComponentName, "OMX.TI.AAC.encode")) {
-        setMinBufferSize(kPortIndexOutput, 8192);  // XXX
     }
 
     initOutputFormat(meta);
@@ -695,21 +656,6 @@ status_t OMXCodec::setVideoPortFormatType(
              index, format.eCompressionFormat, format.eColorFormat);
 #endif
 
-        if (!strcmp("OMX.TI.Video.encoder", mComponentName)) {
-            if (portIndex == kPortIndexInput
-                    && colorFormat == format.eColorFormat) {
-                // eCompressionFormat does not seem right.
-                found = true;
-                break;
-            }
-            if (portIndex == kPortIndexOutput
-                    && compressionFormat == format.eCompressionFormat) {
-                // eColorFormat does not seem right.
-                found = true;
-                break;
-            }
-        }
-
         if (format.eCompressionFormat == compressionFormat
                 && format.eColorFormat == colorFormat) {
             found = true;
@@ -772,12 +718,7 @@ status_t OMXCodec::findTargetColorFormat(
     int32_t targetColorFormat;
     if (meta->findInt32(kKeyColorFormat, &targetColorFormat)) {
         *colorFormat = (OMX_COLOR_FORMATTYPE) targetColorFormat;
-    } else {
-        if (!strcasecmp("OMX.TI.Video.encoder", mComponentName)) {
-            *colorFormat = OMX_COLOR_FormatYCbYCr;
-        }
     }
-
 
     // Check whether the target color format is supported.
     return isColorFormatSupported(*colorFormat, kPortIndexInput);
@@ -3191,13 +3132,6 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
     }
 
     info->mStatus = OWNED_BY_COMPONENT;
-
-    // This component does not ever signal the EOS flag on output buffers,
-    // Thanks for nothing.
-    if (mSignalledEOS && !strcmp(mComponentName, "OMX.TI.Video.encoder")) {
-        mNoMoreOutputData = true;
-        mBufferFilled.signal();
-    }
 
     return true;
 }
