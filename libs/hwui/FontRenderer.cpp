@@ -170,16 +170,10 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float
     const float halfWidth = glyph->mBitmapWidth * 0.5f;
     const float height = glyph->mBitmapHeight;
 
-    float nPenX = glyph->mBitmapLeft;
     vOffset += glyph->mBitmapTop + height;
 
-    const float u1 = glyph->mBitmapMinU;
-    const float u2 = glyph->mBitmapMaxU;
-    const float v1 = glyph->mBitmapMinV;
-    const float v2 = glyph->mBitmapMaxV;
-
     SkPoint destination[4];
-    measure.getPosTan(x + hOffset + nPenX + halfWidth, position, tangent);
+    measure.getPosTan(x + hOffset +  glyph->mBitmapLeft + halfWidth, position, tangent);
 
     // Move along the tangent and offset by the normal
     destination[0].set(-tangent->fX * halfWidth - tangent->fY * vOffset,
@@ -190,6 +184,11 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, float x, float hOffset, float
             destination[1].fY - tangent->fX * height);
     destination[3].set(destination[0].fX + tangent->fY * height,
             destination[0].fY - tangent->fX * height);
+
+    const float u1 = glyph->mBitmapMinU;
+    const float u2 = glyph->mBitmapMaxU;
+    const float v1 = glyph->mBitmapMinV;
+    const float v2 = glyph->mBitmapMaxV;
 
     mState->appendRotatedMeshQuad(
             position->fX + destination[0].fX,
@@ -267,7 +266,7 @@ void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len
         penX += pathOffset - textWidth;
     }
 
-    while (glyphsCount < numGlyphs && penX <= pathLength) {
+    while (glyphsCount < numGlyphs && penX < pathLength) {
         glyph_t glyph = GET_GLYPH(text);
 
         if (IS_END_OF_STRING(glyph)) {
@@ -279,7 +278,7 @@ void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len
         prevRsbDelta = cachedGlyph->mRsbDelta;
 
         if (cachedGlyph->mIsValid) {
-            drawCachedGlyph(cachedGlyph, roundf(penX), hOffset, vOffset, measure, &position, &tangent);
+            drawCachedGlyph(cachedGlyph, penX, hOffset, vOffset, measure, &position, &tangent);
         }
 
         penX += SkFixedToFloat(cachedGlyph->mAdvanceX);
