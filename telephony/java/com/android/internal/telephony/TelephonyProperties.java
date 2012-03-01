@@ -182,4 +182,9 @@ public interface TelephonyProperties
      * in commercial configuration.
      */
     static final String PROPERTY_TEST_CSIM = "persist.radio.test-csim";
+
+    /**
+     * Ignore RIL_UNSOL_NITZ_TIME_RECEIVED completely, used for debugging/testing.
+     */
+    static final String PROPERTY_IGNORE_NITZ = "telephony.test.ignore.nitz";
 }

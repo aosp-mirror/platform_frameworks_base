@@ -25,6 +25,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.TimeZone;
 import java.util.Date;
 
@@ -35,7 +37,19 @@ import com.android.internal.util.XmlUtils;
  */
 public class TimeUtils {
     /** @hide */ public TimeUtils() {}
+    private static final boolean DBG = false;
     private static final String TAG = "TimeUtils";
+
+    /** Cached results of getTineZones */
+    private static final Object sLastLockObj = new Object();
+    private static ArrayList<TimeZone> sLastZones = null;
+    private static String sLastCountry = null;
+
+    /** Cached results of getTimeZonesWithUniqueOffsets */
+    private static final Object sLastUniqueLockObj = new Object();
+    private static ArrayList<TimeZone> sLastUniqueZoneOffsets = null;
+    private static String sLastUniqueCountry = null;
+
 
     /**
      * Tries to return a time zone that would have had the specified offset
@@ -43,10 +57,6 @@ public class TimeUtils {
      * Returns null if no suitable zone could be found.
      */
     public static TimeZone getTimeZone(int offset, boolean dst, long when, String country) {
-        if (country == null) {
-            return null;
-        }
-
         TimeZone best = null;
 
         Resources r = Resources.getSystem();
@@ -57,6 +67,107 @@ public class TimeUtils {
         String currentName = current.getID();
         int currentOffset = current.getOffset(when);
         boolean currentDst = current.inDaylightTime(d);
+
+        for (TimeZone tz : getTimeZones(country)) {
+            // If the current time zone is from the right country
+            // and meets the other known properties, keep it
+            // instead of changing to another one.
+
+            if (tz.getID().equals(currentName)) {
+                if (currentOffset == offset && currentDst == dst) {
+                    return current;
+                }
+            }
+
+            // Otherwise, take the first zone from the right
+            // country that has the correct current offset and DST.
+            // (Keep iterating instead of returning in case we
+            // haven't encountered the current time zone yet.)
+
+            if (best == null) {
+                if (tz.getOffset(when) == offset &&
+                    tz.inDaylightTime(d) == dst) {
+                    best = tz;
+                }
+            }
+        }
+
+        return best;
+    }
+
+    /**
+     * Return list of unique time zones for the country. Do not modify
+     *
+     * @param country to find
+     * @return list of unique time zones, maybe empty but never null. Do not modify.
+     * @hide
+     */
+    public static ArrayList<TimeZone> getTimeZonesWithUniqueOffsets(String country) {
+        synchronized(sLastUniqueLockObj) {
+            if ((country != null) && country.equals(sLastUniqueCountry)) {
+                if (DBG) {
+                    Log.d(TAG, "getTimeZonesWithUniqueOffsets(" +
+                            country + "): return cached version");
+                }
+                return sLastUniqueZoneOffsets;
+            }
+        }
+
+        Collection<TimeZone> zones = getTimeZones(country);
+        ArrayList<TimeZone> uniqueTimeZones = new ArrayList<TimeZone>();
+        for (TimeZone zone : zones) {
+            // See if we already have this offset,
+            // Using slow but space efficient and these are small.
+            boolean found = false;
+            for (int i = 0; i < uniqueTimeZones.size(); i++) {
+                if (uniqueTimeZones.get(i).getRawOffset() == zone.getRawOffset()) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found == false) {
+                if (DBG) {
+                    Log.d(TAG, "getTimeZonesWithUniqueOffsets: add unique offset=" +
+                            zone.getRawOffset() + " zone.getID=" + zone.getID());
+                }
+                uniqueTimeZones.add(zone);
+            }
+        }
+
+        synchronized(sLastUniqueLockObj) {
+            // Cache the last result
+            sLastUniqueZoneOffsets = uniqueTimeZones;
+            sLastUniqueCountry = country;
+
+            return sLastUniqueZoneOffsets;
+        }
+    }
+
+    /**
+     * Returns the time zones for the country, which is the code
+     * attribute of the timezone element in time_zones_by_country.xml. Do not modify.
+     *
+     * @param country is a two character country code.
+     * @return TimeZone list, maybe empty but never null. Do not modify.
+     * @hide
+     */
+    public static ArrayList<TimeZone> getTimeZones(String country) {
+        synchronized (sLastLockObj) {
+            if ((country != null) && country.equals(sLastCountry)) {
+                if (DBG) Log.d(TAG, "getTimeZones(" + country + "): return cached version");
+                return sLastZones;
+            }
+        }
+
+        ArrayList<TimeZone> tzs = new ArrayList<TimeZone>();
+
+        if (country == null) {
+            if (DBG) Log.d(TAG, "getTimeZones(null): return empty list");
+            return tzs;
+        }
+
+        Resources r = Resources.getSystem();
+        XmlResourceParser parser = r.getXml(com.android.internal.R.xml.time_zones_by_country);
 
         try {
             XmlUtils.beginDocument(parser, "timezones");
@@ -73,43 +184,33 @@ public class TimeUtils {
 
                 if (country.equals(code)) {
                     if (parser.next() == XmlPullParser.TEXT) {
-                        String maybe = parser.getText();
-
-                        // If the current time zone is from the right country
-                        // and meets the other known properties, keep it
-                        // instead of changing to another one.
-
-                        if (maybe.equals(currentName)) {
-                            if (currentOffset == offset && currentDst == dst) {
-                                return current;
-                            }
-                        }
-
-                        // Otherwise, take the first zone from the right
-                        // country that has the correct current offset and DST.
-                        // (Keep iterating instead of returning in case we
-                        // haven't encountered the current time zone yet.)
-
-                        if (best == null) {
-                            TimeZone tz = TimeZone.getTimeZone(maybe);
-
-                            if (tz.getOffset(when) == offset &&
-                                tz.inDaylightTime(d) == dst) {
-                                best = tz;
+                        String zoneIdString = parser.getText();
+                        TimeZone tz = TimeZone.getTimeZone(zoneIdString);
+                        if (tz.getID().startsWith("GMT") == false) {
+                            // tz.getID doesn't start not "GMT" so its valid
+                            tzs.add(tz);
+                            if (DBG) {
+                                Log.d(TAG, "getTimeZone('" + country + "'): found tz.getID=="
+                                    + ((tz != null) ? tz.getID() : "<no tz>"));
                             }
                         }
                     }
                 }
             }
         } catch (XmlPullParserException e) {
-            Log.e(TAG, "Got exception while getting preferred time zone.", e);
+            Log.e(TAG, "Got xml parser exception getTimeZone('" + country + "'): e=", e);
         } catch (IOException e) {
-            Log.e(TAG, "Got exception while getting preferred time zone.", e);
+            Log.e(TAG, "Got IO exception getTimeZone('" + country + "'): e=", e);
         } finally {
             parser.close();
         }
 
-        return best;
+        synchronized(sLastLockObj) {
+            // Cache the last result;
+            sLastZones = tzs;
+            sLastCountry = country;
+            return sLastZones;
+        }
     }
 
     /**
