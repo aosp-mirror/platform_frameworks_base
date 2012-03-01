@@ -86,16 +86,18 @@ static void dumpstate() {
     dump_file("PAGETYPEINFO", "/proc/pagetypeinfo");
     dump_file("BUDDYINFO", "/proc/buddyinfo");
 
-    if (screenshot_path[0]) {
-        ALOGI("taking screenshot\n");
-        run_command(NULL, 5, SU_PATH, "root", "screenshot", screenshot_path, NULL);
-        ALOGI("wrote screenshot: %s\n", screenshot_path);
-    }
+    print_properties();
 
-    run_command("SYSTEM SETTINGS", 20, SU_PATH, "root", "sqlite3",
-            "/data/data/com.android.providers.settings/databases/settings.db",
-            "pragma user_version; select * from system; select * from secure;", NULL);
-    run_command("SYSTEM LOG", 20, "logcat", "-v", "threadtime", "-d", "*:v", NULL);
+    /* TODO: Make last_kmsg CAP_SYSLOG protected. b/5555691 */
+    dump_file("LAST KMSG", "/proc/last_kmsg");
+    do_dmesg();
+
+    dump_file("KERNEL WAKELOCKS", "/proc/wakelocks");
+    dump_file("KERNEL CPUFREQ", "/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
+
+    run_command("PROCESSES", 10, "ps", "-P", NULL);
+    run_command("PROCESSES AND THREADS", 10, "ps", "-t", "-p", "-P", NULL);
+    run_command("LIBRANK", 10, "librank", NULL);
 
     /* show the traces we collected in main(), if that was done */
     if (dump_traces_path != NULL) {
@@ -114,11 +116,6 @@ static void dumpstate() {
         dump_file("VM TRACES AT LAST ANR", anr_traces_path);
     }
 
-    // dump_file("EVENT LOG TAGS", "/etc/event-log-tags");
-    run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "threadtime", "-d", "*:v", NULL);
-    run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "threadtime", "-d", "*:v", NULL);
-
-    run_command("NETWORK INTERFACES", 10, SU_PATH, "root", "netcfg", NULL);
     dump_file("NETWORK DEV INFO", "/proc/net/dev");
     dump_file("QTAGUID NETWORK INTERFACES INFO", "/proc/net/xt_qtaguid/iface_stat_all");
     dump_file("QTAGUID CTRL INFO", "/proc/net/xt_qtaguid/ctrl");
@@ -126,6 +123,23 @@ static void dumpstate() {
 
     dump_file("NETWORK ROUTES", "/proc/net/route");
     dump_file("NETWORK ROUTES IPV6", "/proc/net/ipv6_route");
+
+    if (screenshot_path[0]) {
+        ALOGI("taking screenshot\n");
+        run_command(NULL, 5, SU_PATH, "root", "screenshot", screenshot_path, NULL);
+        ALOGI("wrote screenshot: %s\n", screenshot_path);
+    }
+
+    run_command("SYSTEM SETTINGS", 20, SU_PATH, "root", "sqlite3",
+            "/data/data/com.android.providers.settings/databases/settings.db",
+            "pragma user_version; select * from system; select * from secure;", NULL);
+
+    // dump_file("EVENT LOG TAGS", "/etc/event-log-tags");
+    run_command("SYSTEM LOG", 20, "logcat", "-v", "threadtime", "-d", "*:v", NULL);
+    run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "threadtime", "-d", "*:v", NULL);
+    run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "threadtime", "-d", "*:v", NULL);
+
+    run_command("NETWORK INTERFACES", 10, SU_PATH, "root", "netcfg", NULL);
     run_command("IP RULES", 10, "ip", "rule", "show", NULL);
     run_command("IP RULES v6", 10, "ip", "-6", "rule", "show", NULL);
     run_command("ROUTE TABLE 60", 10, "ip", "route", "show", "table", "60", NULL);
@@ -172,19 +186,8 @@ static void dumpstate() {
         }
     }
 
-    print_properties();
-
-    do_dmesg();
-
-    dump_file("KERNEL WAKELOCKS", "/proc/wakelocks");
-    dump_file("KERNEL CPUFREQ", "/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
-
     run_command("VOLD DUMP", 10, "vdc", "dump", NULL);
     run_command("SECURE CONTAINERS", 10, "vdc", "asec", "list", NULL);
-
-    run_command("PROCESSES", 10, "ps", "-P", NULL);
-    run_command("PROCESSES AND THREADS", 10, "ps", "-t", "-p", "-P", NULL);
-    run_command("LIBRANK", 10, "librank", NULL);
 
     dump_file("BINDER FAILED TRANSACTION LOG", "/sys/kernel/debug/binder/failed_transaction_log");
     dump_file("BINDER TRANSACTION LOG", "/sys/kernel/debug/binder/transaction_log");
@@ -197,8 +200,6 @@ static void dumpstate() {
     dump_file("PACKAGE SETTINGS", "/data/system/packages.xml");
     dump_file("PACKAGE UID ERRORS", "/data/system/uiderrors.txt");
 
-    /* TODO: Make last_kmsg CAP_SYSLOG protected. b/5555691 */
-    dump_file("LAST KMSG", "/proc/last_kmsg");
     run_command("LAST RADIO LOG", 10, "parse_radio_log", "/proc/last_radio_log", NULL);
     dump_file("LAST PANIC CONSOLE", "/data/dontpanic/apanic_console");
     dump_file("LAST PANIC THREADS", "/data/dontpanic/apanic_threads");
