@@ -298,5 +298,67 @@ extern rs_data_kind __attribute__((overloadable))
 extern uint32_t __attribute__((overloadable))
     rsElementGetVectorSize(rs_element e);
 
+/**
+ * Fetch allocation in a way described by the sampler
+ * @param a 1D allocation to sample from
+ * @param s sampler state
+ * @param location to sample from
+ */
+extern const float4 __attribute__((overloadable))
+    rsSample(rs_allocation a, rs_sampler s, float location);
+/**
+ * Fetch allocation in a way described by the sampler
+ * @param a 1D allocation to sample from
+ * @param s sampler state
+ * @param location to sample from
+ * @param lod mip level to sample from, for fractional values
+ *            mip levels will be interpolated if
+ *            RS_SAMPLER_LINEAR_MIP_LINEAR is used
+ */
+extern const float4 __attribute__((overloadable))
+    rsSample(rs_allocation a, rs_sampler s, float location, float lod);
+
+/**
+ * Fetch allocation in a way described by the sampler
+ * @param a 2D allocation to sample from
+ * @param s sampler state
+ * @param location to sample from
+ */
+extern const float4 __attribute__((overloadable))
+    rsSample(rs_allocation a, rs_sampler s, float2 location);
+
+/**
+ * Fetch allocation in a way described by the sampler
+ * @param a 2D allocation to sample from
+ * @param s sampler state
+ * @param location to sample from
+ * @param lod mip level to sample from, for fractional values
+ *            mip levels will be interpolated if
+ *            RS_SAMPLER_LINEAR_MIP_LINEAR is used
+ */
+extern const float4 __attribute__((overloadable))
+    rsSample(rs_allocation a, rs_sampler s, float2 location, float lod);
+
+/**
+ * Fetch allocation in a way described by the sampler
+ * @param a 3D allocation to sample from
+ * @param s sampler state
+ * @param location to sample from
+ */
+extern const float4 __attribute__((overloadable))
+    rsSample(rs_allocation a, rs_sampler s, float3 location);
+
+/**
+ * Fetch allocation in a way described by the sampler
+ * @param a 3D allocation to sample from
+ * @param s sampler state
+ * @param location to sample from
+ * @param lod mip level to sample from, for fractional values
+ *            mip levels will be interpolated if
+ *            RS_SAMPLER_LINEAR_MIP_LINEAR is used
+ */
+extern const float4 __attribute__((overloadable))
+    rsSample(rs_allocation a, rs_sampler s, float3 location, float lod);
+
 #endif
 

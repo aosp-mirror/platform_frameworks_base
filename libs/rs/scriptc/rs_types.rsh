@@ -407,14 +407,14 @@ typedef enum {
  *
  **/
 typedef enum {
-    RS_PRIMITIVE_POINT,
-    RS_PRIMITIVE_LINE,
-    RS_PRIMITIVE_LINE_STRIP,
-    RS_PRIMITIVE_TRIANGLE,
-    RS_PRIMITIVE_TRIANGLE_STRIP,
-    RS_PRIMITIVE_TRIANGLE_FAN,
+    RS_PRIMITIVE_POINT              = 0,
+    RS_PRIMITIVE_LINE               = 1,
+    RS_PRIMITIVE_LINE_STRIP         = 2,
+    RS_PRIMITIVE_TRIANGLE           = 3,
+    RS_PRIMITIVE_TRIANGLE_STRIP     = 4,
+    RS_PRIMITIVE_TRIANGLE_FAN       = 5,
 
-    RS_PRIMITIVE_INVALID = 100,
+    RS_PRIMITIVE_INVALID            = 100,
 } rs_primitive;
 
 /**
@@ -436,41 +436,41 @@ typedef enum {
  * RS_* objects.  32 bit opaque handles.
  */
 typedef enum {
-    RS_TYPE_NONE,
+    RS_TYPE_NONE             = 0,
     //RS_TYPE_FLOAT_16,
-    RS_TYPE_FLOAT_32 = 2,
-    RS_TYPE_FLOAT_64,
-    RS_TYPE_SIGNED_8,
-    RS_TYPE_SIGNED_16,
-    RS_TYPE_SIGNED_32,
-    RS_TYPE_SIGNED_64,
-    RS_TYPE_UNSIGNED_8,
-    RS_TYPE_UNSIGNED_16,
-    RS_TYPE_UNSIGNED_32,
-    RS_TYPE_UNSIGNED_64,
+    RS_TYPE_FLOAT_32         = 2,
+    RS_TYPE_FLOAT_64         = 3,
+    RS_TYPE_SIGNED_8         = 4,
+    RS_TYPE_SIGNED_16        = 5,
+    RS_TYPE_SIGNED_32        = 6,
+    RS_TYPE_SIGNED_64        = 7,
+    RS_TYPE_UNSIGNED_8       = 8,
+    RS_TYPE_UNSIGNED_16      = 9,
+    RS_TYPE_UNSIGNED_32      = 10,
+    RS_TYPE_UNSIGNED_64      = 11,
 
-    RS_TYPE_BOOLEAN,
+    RS_TYPE_BOOLEAN          = 12,
 
-    RS_TYPE_UNSIGNED_5_6_5,
-    RS_TYPE_UNSIGNED_5_5_5_1,
-    RS_TYPE_UNSIGNED_4_4_4_4,
+    RS_TYPE_UNSIGNED_5_6_5   = 13,
+    RS_TYPE_UNSIGNED_5_5_5_1 = 14,
+    RS_TYPE_UNSIGNED_4_4_4_4 = 15,
 
-    RS_TYPE_MATRIX_4X4,
-    RS_TYPE_MATRIX_3X3,
-    RS_TYPE_MATRIX_2X2,
+    RS_TYPE_MATRIX_4X4       = 16,
+    RS_TYPE_MATRIX_3X3       = 17,
+    RS_TYPE_MATRIX_2X2       = 18,
 
-    RS_TYPE_ELEMENT = 1000,
-    RS_TYPE_TYPE,
-    RS_TYPE_ALLOCATION,
-    RS_TYPE_SAMPLER,
-    RS_TYPE_SCRIPT,
-    RS_TYPE_MESH,
-    RS_TYPE_PROGRAM_FRAGMENT,
-    RS_TYPE_PROGRAM_VERTEX,
-    RS_TYPE_PROGRAM_RASTER,
-    RS_TYPE_PROGRAM_STORE,
+    RS_TYPE_ELEMENT          = 1000,
+    RS_TYPE_TYPE             = 1001,
+    RS_TYPE_ALLOCATION       = 1002,
+    RS_TYPE_SAMPLER          = 1003,
+    RS_TYPE_SCRIPT           = 1004,
+    RS_TYPE_MESH             = 1005,
+    RS_TYPE_PROGRAM_FRAGMENT = 1006,
+    RS_TYPE_PROGRAM_VERTEX   = 1007,
+    RS_TYPE_PROGRAM_RASTER   = 1008,
+    RS_TYPE_PROGRAM_STORE    = 1009,
 
-    RS_TYPE_INVALID = 10000,
+    RS_TYPE_INVALID          = 10000,
 } rs_data_type;
 
 /**
@@ -482,16 +482,74 @@ typedef enum {
  * representing texture formats.
  */
 typedef enum {
-    RS_KIND_USER,
+    RS_KIND_USER         = 0,
 
-    RS_KIND_PIXEL_L = 7,
-    RS_KIND_PIXEL_A,
-    RS_KIND_PIXEL_LA,
-    RS_KIND_PIXEL_RGB,
-    RS_KIND_PIXEL_RGBA,
-    RS_KIND_PIXEL_DEPTH,
+    RS_KIND_PIXEL_L      = 7,
+    RS_KIND_PIXEL_A      = 8,
+    RS_KIND_PIXEL_LA     = 9,
+    RS_KIND_PIXEL_RGB    = 10,
+    RS_KIND_PIXEL_RGBA   = 11,
+    RS_KIND_PIXEL_DEPTH  = 12,
 
-    RS_KIND_INVALID = 100,
+    RS_KIND_INVALID      = 100,
 } rs_data_kind;
+
+typedef enum {
+    RS_DEPTH_FUNC_ALWAYS        = 0,
+    RS_DEPTH_FUNC_LESS          = 1,
+    RS_DEPTH_FUNC_LEQUAL        = 2,
+    RS_DEPTH_FUNC_GREATER       = 3,
+    RS_DEPTH_FUNC_GEQUAL        = 4,
+    RS_DEPTH_FUNC_EQUAL         = 5,
+    RS_DEPTH_FUNC_NOTEQUAL      = 6,
+
+    RS_DEPTH_FUNC_INVALID       = 100,
+} rs_depth_func;
+
+typedef enum {
+    RS_BLEND_SRC_ZERO                   = 0,
+    RS_BLEND_SRC_ONE                    = 1,
+    RS_BLEND_SRC_DST_COLOR              = 2,
+    RS_BLEND_SRC_ONE_MINUS_DST_COLOR    = 3,
+    RS_BLEND_SRC_SRC_ALPHA              = 4,
+    RS_BLEND_SRC_ONE_MINUS_SRC_ALPHA    = 5,
+    RS_BLEND_SRC_DST_ALPHA              = 6,
+    RS_BLEND_SRC_ONE_MINUS_DST_ALPHA    = 7,
+    RS_BLEND_SRC_SRC_ALPHA_SATURATE     = 8,
+
+    RS_BLEND_SRC_INVALID                = 100,
+} rs_blend_src_func;
+
+typedef enum {
+    RS_BLEND_DST_ZERO                   = 0,
+    RS_BLEND_DST_ONE                    = 1,
+    RS_BLEND_DST_SRC_COLOR              = 2,
+    RS_BLEND_DST_ONE_MINUS_SRC_COLOR    = 3,
+    RS_BLEND_DST_SRC_ALPHA              = 4,
+    RS_BLEND_DST_ONE_MINUS_SRC_ALPHA    = 5,
+    RS_BLEND_DST_DST_ALPHA              = 6,
+    RS_BLEND_DST_ONE_MINUS_DST_ALPHA    = 7,
+
+    RS_BLEND_DST_INVALID                = 100,
+} rs_blend_dst_func;
+
+typedef enum {
+    RS_CULL_BACK     = 0,
+    RS_CULL_FRONT    = 1,
+    RS_CULL_NONE     = 2,
+
+    RS_CULL_INVALID  = 100,
+} rs_cull_mode;
+
+typedef enum {
+    RS_SAMPLER_NEAREST              = 0,
+    RS_SAMPLER_LINEAR               = 1,
+    RS_SAMPLER_LINEAR_MIP_LINEAR    = 2,
+    RS_SAMPLER_WRAP                 = 3,
+    RS_SAMPLER_CLAMP                = 4,
+    RS_SAMPLER_LINEAR_MIP_NEAREST   = 5,
+
+    RS_SAMPLER_INVALID              = 100,
+} rs_sampler_value;
 
 #endif
