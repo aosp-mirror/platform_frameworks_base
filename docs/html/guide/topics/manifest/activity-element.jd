@@ -307,7 +307,7 @@ attribute).
 <dd>Whether or not an existing instance of the activity should be shut down 
 (finished) whenever the user again launches its task (chooses the task on the 
 home screen) &mdash; "{@code true}" if it should be shut down, and "{@code false}" 
-if not.  The default value is "{@code false}". 
+if not. The default value is "{@code false}".
 
 <p>
 If this attribute and 
@@ -321,13 +321,15 @@ activity is ignored.  The activity is not re-parented, but destroyed.
 Activity &mdash; "{@code true}" if it should be enabled, and "{@code false}" if
 not. The default value is "{@code false}".
 
+
 <p>Starting from Android 3.0, a hardware-accelerated OpenGL renderer is
 available to applications, to improve performance for many common 2D graphics
 operations. When the hardware-accelerated renderer is enabled, most operations
 in Canvas, Paint, Xfermode, ColorFilter, Shader, and Camera are accelerated.
 This results in smoother animations, smoother scrolling, and improved
 responsiveness overall, even for applications that do not explicitly make use
-the framework's OpenGL libraries. </p>
+the framework's OpenGL libraries. Because of the increased resources required to
+enable hardware acceleration, your app will consume more RAM.</p>
 
 <p>Note that not all of the OpenGL 2D operations are accelerated. If you enable
 the hardware-accelerated renderer, test your application to ensure that it can
@@ -587,9 +589,9 @@ Permissions</a>.
 </p></dd>
 
 <dt><a name="proc"></a>{@code android:process}</dt>
-<dd>The name of the process in which the activity should run.  Normally, 
+<dd>The name of the process in which the activity should run. Normally, 
 all components of an application run in the default process created for the 
-application.  It has the same name as the application package.  The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
+application.  It has the same name as the application package. The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element's 
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html#proc">process</a></code> 
 attribute can set a different default for all components.  But each component 
 can override the default, allowing you to spread your application across 
@@ -706,7 +708,7 @@ activity started for the first time.
 A "{@code true}" setting ensures that the activity can be restarted in the 
 absence of retained state.  For example, the activity that displays the 
 home screen uses this setting to make sure that it does not get removed if it 
-crashes for some reason. 
+crashes for some reason.
 </p></dd>
 
 <dt><a name="aff"></a>{@code android:taskAffinity}</dt>
