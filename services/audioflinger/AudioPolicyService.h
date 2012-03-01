@@ -66,7 +66,7 @@ public:
                                         audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                         uint32_t channels = 0,
                                         audio_policy_output_flags_t flags =
-                                            AUDIO_POLICY_OUTPUT_FLAG_INDIRECT);
+                                                AUDIO_POLICY_OUTPUT_FLAG_NONE);
     virtual status_t startOutput(audio_io_handle_t output,
                                  audio_stream_type_t stream,
                                  int session = 0);
