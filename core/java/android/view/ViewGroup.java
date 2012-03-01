@@ -1041,9 +1041,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * {@inheritDoc}
-     *
-     * !!! TODO: write real docs
      */
+    // TODO: Write real docs
     @Override
     public boolean dispatchDragEvent(DragEvent event) {
         boolean retval = false;
