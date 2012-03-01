@@ -716,7 +716,8 @@ public class StaticLayout extends Layout {
             boolean currentLineIsTheLastVisibleOne = (j + 1 == mMaximumVisibleLineCount);
             boolean forceEllipsis = moreChars && (mLineCount + 1 == mMaximumVisibleLineCount);
 
-            boolean doEllipsis = (firstLine && !moreChars &&
+            boolean doEllipsis =
+                        (((mMaximumVisibleLineCount == 1 && moreChars) || (firstLine && !moreChars)) &&
                                 ellipsize != TextUtils.TruncateAt.MARQUEE) ||
                         (!firstLine && (currentLineIsTheLastVisibleOne || !moreChars) &&
                                 ellipsize == TextUtils.TruncateAt.END);
