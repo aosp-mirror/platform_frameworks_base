@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
+
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -21,6 +23,7 @@
 #include <gui/DisplayEventReceiver.h>
 
 #include <utils/Errors.h>
+#include <utils/Trace.h>
 
 #include "DisplayHardware/DisplayHardware.h"
 #include "DisplayEventConnection.h"
@@ -146,6 +149,7 @@ bool EventThread::threadLoop() {
             // at least one listener requested VSYNC
             mLock.unlock();
             timestamp = mHw.waitForRefresh();
+            ATRACE_INT("VSYNC", mDeliveredEvents&1);
             mLock.lock();
             mDeliveredEvents++;
             mLastVSyncTimestamp = timestamp;
