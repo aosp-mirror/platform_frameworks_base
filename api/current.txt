@@ -10773,6 +10773,17 @@ package android.media {
     method public abstract void onJetUserIdUpdate(android.media.JetPlayer, int, int);
   }
 
+  public class MediaActionSound {
+    ctor public MediaActionSound();
+    method public void load(int);
+    method public void play(int);
+    method public void release();
+    field public static final int FOCUS_COMPLETE = 1; // 0x1
+    field public static final int SHUTTER_CLICK = 0; // 0x0
+    field public static final int START_VIDEO_RECORDING = 2; // 0x2
+    field public static final int STOP_VIDEO_RECORDING = 3; // 0x3
+  }
+
   public class MediaMetadataRetriever {
     ctor public MediaMetadataRetriever();
     method public java.lang.String extractMetadata(int);

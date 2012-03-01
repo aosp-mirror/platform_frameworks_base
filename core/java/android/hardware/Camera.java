@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
-
 /**
  * The Camera class is used to set image capture settings, start/stop preview,
  * snap pictures, and retrieve frames for encoding for video.  This class is a

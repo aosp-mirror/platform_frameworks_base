@@ -34,7 +34,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
-import android.hardware.CameraSound;
+import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -256,7 +256,7 @@ class GlobalScreenshot {
     private float mBgPadding;
     private float mBgPaddingScale;
 
-    private CameraSound mCameraSound;
+    private MediaActionSound mCameraSound;
 
 
     /**
@@ -309,7 +309,8 @@ class GlobalScreenshot {
         mBgPaddingScale = mBgPadding /  mDisplayMetrics.widthPixels;
 
         // Setup the Camera shutter sound
-        mCameraSound = new CameraSound();
+        mCameraSound = new MediaActionSound();
+        mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
     }
 
     /**
@@ -422,7 +423,7 @@ class GlobalScreenshot {
             @Override
             public void run() {
                 // Play the shutter sound to notify that we've taken a screenshot
-                mCameraSound.playSound(CameraSound.SHUTTER_CLICK);
+                mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
 
                 mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 mScreenshotView.buildLayer();
