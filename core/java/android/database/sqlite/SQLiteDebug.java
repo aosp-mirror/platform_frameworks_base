@@ -33,12 +33,16 @@ public final class SQLiteDebug {
 
     /**
      * Controls the printing of informational SQL log messages.
+     *
+     * Enable using "adb shell setprop log.tag.SQLiteLog VERBOSE".
      */
     public static final boolean DEBUG_SQL_LOG =
             Log.isLoggable("SQLiteLog", Log.VERBOSE);
 
     /**
      * Controls the printing of SQL statements as they are executed.
+     *
+     * Enable using "adb shell setprop log.tag.SQLiteStatements VERBOSE".
      */
     public static final boolean DEBUG_SQL_STATEMENTS =
             Log.isLoggable("SQLiteStatements", Log.VERBOSE);
@@ -46,6 +50,8 @@ public final class SQLiteDebug {
     /**
      * Controls the printing of wall-clock time taken to execute SQL statements
      * as they are executed.
+     *
+     * Enable using "adb shell setprop log.tag.SQLiteTime VERBOSE".
      */
     public static final boolean DEBUG_SQL_TIME =
             Log.isLoggable("SQLiteTime", Log.VERBOSE);
@@ -61,15 +67,17 @@ public final class SQLiteDebug {
      *
      * Reads the "db.log.slow_query_threshold" system property, which can be changed
      * by the user at any time.  If the value is zero, then all queries will
-     * be considered slow.  If the value does not exist, then no queries will
+     * be considered slow.  If the value does not exist or is negative, then no queries will
      * be considered slow.
      *
      * This value can be changed dynamically while the system is running.
+     * For example, "adb shell setprop db.log.slow_query_threshold 200" will
+     * log all queries that take 200ms or longer to run.
      * @hide
      */
     public static final boolean shouldLogSlowQuery(long elapsedTimeMillis) {
         int slowQueryMillis = SystemProperties.getInt("db.log.slow_query_threshold", -1);
-        return slowQueryMillis >= 0 && elapsedTimeMillis > slowQueryMillis;
+        return slowQueryMillis >= 0 && elapsedTimeMillis >= slowQueryMillis;
     }
 
     /**
