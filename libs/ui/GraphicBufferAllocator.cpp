@@ -16,11 +16,13 @@
 */
 
 #define LOG_TAG "GraphicBufferAllocator"
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
 #include <cutils/log.h>
 
 #include <utils/Singleton.h>
 #include <utils/String8.h>
+#include <utils/Trace.h>
 
 #include <ui/GraphicBufferAllocator.h>
 
@@ -91,6 +93,7 @@ void GraphicBufferAllocator::dumpToSystemLog()
 status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat format,
         int usage, buffer_handle_t* handle, int32_t* stride)
 {
+    ATRACE_CALL();
     // make sure to not allocate a N x 0 or 0 x N buffer, since this is
     // allowed from an API stand-point allocate a 1x1 buffer instead.
     if (!w || !h)
@@ -128,6 +131,7 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat forma
 
 status_t GraphicBufferAllocator::free(buffer_handle_t handle)
 {
+    ATRACE_CALL();
     status_t err;
 
     err = mAllocDev->free(mAllocDev, handle);
