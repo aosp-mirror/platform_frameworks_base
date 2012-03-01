@@ -92,6 +92,11 @@ public class HTML5VideoInline extends HTML5VideoView{
 
     @Override
     public void deleteSurfaceTexture() {
+        cleanupSurfaceTexture();
+        return;
+    }
+
+    public static void cleanupSurfaceTexture() {
         mSurfaceTexture = null;
         mVideoLayerUsingSurfaceTexture = -1;
         return;

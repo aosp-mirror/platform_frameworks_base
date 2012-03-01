@@ -96,6 +96,7 @@ import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.HTML5VideoInline;
 import android.webkit.WebTextView.AutoCompleteAdapter;
 import android.webkit.WebViewCore.DrawData;
 import android.webkit.WebViewCore.EventHub;
@@ -814,6 +815,11 @@ public class WebView extends AbsoluteLayout
             if (DebugFlags.WEB_VIEW) {
                 Log.d("WebView", "onTrimMemory: " + level);
             }
+            // When framework reset EGL context during high memory pressure, all
+            // the existing GL resources for the html5 video will be destroyed
+            // at native side.
+            // Here we just need to clean up the Surface Texture which is static.
+            HTML5VideoInline.cleanupSurfaceTexture();
             WebView.nativeOnTrimMemory(level);
         }
 
