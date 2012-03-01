@@ -105,6 +105,7 @@ public class WindowManagerImpl implements WindowManager {
     private View[] mViews;
     private ViewRootImpl[] mRoots;
     private WindowManager.LayoutParams[] mParams;
+    private boolean mNeedsEglTerminate;
 
     private final static Object sLock = new Object();
     private final static WindowManagerImpl sWindowManager = new WindowManagerImpl();
@@ -447,14 +448,23 @@ public class WindowManagerImpl implements WindowManager {
                                 mRoots[i].terminateHardwareResources();
                             }
                         }
-                        // Terminate the hardware renderer to free all resources
-                        ManagedEGLContext.doTerminate();
+                        mNeedsEglTerminate = true;
                         break;
                     }
                     // high end gfx devices fall through to next case
                 default:
                     HardwareRenderer.trimMemory(level);
             }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void terminateEgl() {
+        if (mNeedsEglTerminate) {
+            ManagedEGLContext.doTerminate();
+            mNeedsEglTerminate = false;
         }
     }
 
