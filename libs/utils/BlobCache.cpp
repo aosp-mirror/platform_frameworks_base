@@ -183,7 +183,7 @@ size_t BlobCache::getFdCount() const {
 status_t BlobCache::flatten(void* buffer, size_t size, int fds[], size_t count)
         const {
     if (count != 0) {
-        ALOGE("flatten: nonzero fd count: %d", count);
+        ALOGE("flatten: nonzero fd count: %zu", count);
         return BAD_VALUE;
     }
 
@@ -234,7 +234,7 @@ status_t BlobCache::unflatten(void const* buffer, size_t size, int fds[],
     mCacheEntries.clear();
 
     if (count != 0) {
-        ALOGE("unflatten: nonzero fd count: %d", count);
+        ALOGE("unflatten: nonzero fd count: %zu", count);
         return BAD_VALUE;
     }
 
