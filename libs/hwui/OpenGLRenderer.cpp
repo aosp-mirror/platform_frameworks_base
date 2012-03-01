@@ -2477,7 +2477,7 @@ void OpenGLRenderer::setupPaintFilter(int clearBits, int setBits) {
 }
 
 SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint) {
-    if (!mHasDrawFilter || !paint) return paint;
+    if (CC_LIKELY(!mHasDrawFilter || !paint)) return paint;
 
     uint32_t flags = paint->getFlags();
 
