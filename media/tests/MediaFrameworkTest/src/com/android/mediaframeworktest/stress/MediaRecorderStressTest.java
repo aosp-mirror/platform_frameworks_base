@@ -365,6 +365,7 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 mRecorder.setVideoSize(video_width, video_height);
                 mRecorder.setVideoEncoder(video_encoder);
                 mRecorder.setAudioEncoder(audio_encoder);
+                mRecorder.setVideoEncodingBitRate(bit_rate);
                 Log.v(TAG, "mediaRecorder setPreview");
                 mRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
                 mRecorder.prepare();
