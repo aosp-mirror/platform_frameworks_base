@@ -23267,6 +23267,7 @@ package android.view {
     method public boolean hasFocus();
     method public boolean hasFocusable();
     method public boolean hasOnClickListeners();
+    method public boolean hasTransientState();
     method public boolean hasWindowFocus();
     method public static android.view.View inflate(android.content.Context, int, android.view.ViewGroup);
     method protected void initializeFadingEdge(android.content.res.TypedArray);
@@ -23419,6 +23420,7 @@ package android.view {
     method public void setFocusable(boolean);
     method public void setFocusableInTouchMode(boolean);
     method public void setHapticFeedbackEnabled(boolean);
+    method public void setHasTransientState(boolean);
     method public void setHorizontalFadingEdgeEnabled(boolean);
     method public void setHorizontalScrollBarEnabled(boolean);
     method public void setHovered(boolean);

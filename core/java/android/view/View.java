@@ -4893,8 +4893,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * the framework should take special note to preserve when possible.
      *
      * @return true if the view has transient state
-     *
-     * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout")
     public boolean hasTransientState() {
@@ -4906,8 +4904,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * framework should attempt to preserve when possible.
      *
      * @param hasTransientState true if this view has transient state
-     *
-     * @hide
      */
     public void setHasTransientState(boolean hasTransientState) {
         if (hasTransientState() == hasTransientState) return;
