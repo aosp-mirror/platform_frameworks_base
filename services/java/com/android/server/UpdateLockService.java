@@ -77,7 +77,7 @@ public class UpdateLockService extends IUpdateLock.Stub {
             Intent intent = new Intent(UpdateLock.UPDATE_LOCK_CHANGED)
                     .putExtra(UpdateLock.NOW_IS_CONVENIENT, state)
                     .putExtra(UpdateLock.TIMESTAMP, System.currentTimeMillis())
-                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendStickyBroadcast(intent);
         } finally {
             Binder.restoreCallingIdentity(oldIdent);
