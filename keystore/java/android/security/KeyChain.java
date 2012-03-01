@@ -224,9 +224,6 @@ public final class KeyChain {
      * <p>{@code alias} allows the chooser to preselect an existing
      * alias which will still be subject to user confirmation.
      *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#USE_CREDENTIALS}.
-     *
      * @param activity The {@link Activity} context to use for
      *     launching the new sub-Activity to prompt the user to select
      *     a private key; used only to call startActivity(); must not
@@ -294,9 +291,6 @@ public final class KeyChain {
      * Returns the {@code PrivateKey} for the requested alias, or null
      * if no there is no result.
      *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#USE_CREDENTIALS}.
-     *
      * @param alias The alias of the desired private key, typically
      * returned via {@link KeyChainAliasCallback#alias}.
      * @throws KeyChainException if the alias was valid but there was some problem accessing it.
@@ -324,9 +318,6 @@ public final class KeyChain {
     /**
      * Returns the {@code X509Certificate} chain for the requested
      * alias, or null if no there is no result.
-     *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#USE_CREDENTIALS}.
      *
      * @param alias The alias of the desired certificate chain, typically
      * returned via {@link KeyChainAliasCallback#alias}.
