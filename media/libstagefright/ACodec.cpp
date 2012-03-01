@@ -26,6 +26,7 @@
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
 
+#include <media/stagefright/MediaCodecList.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/NativeWindowWrapper.h>
 #include <media/stagefright/OMXClient.h>
@@ -328,7 +329,8 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 ACodec::ACodec()
-    : mNode(NULL),
+    : mQuirks(0),
+      mNode(NULL),
       mSentFormat(false),
       mIsEncoder(false),
       mShutdownInProgress(false) {
@@ -427,16 +429,12 @@ status_t ACodec::allocateBuffersOnPort(OMX_U32 portIndex) {
 
                 IOMX::buffer_id buffer;
 
-                if (!strncasecmp(
-                            mComponentName.c_str(), "OMX.TI.DUCATI1.VIDEO.", 21)) {
-                    if (portIndex == kPortIndexInput && i == 0) {
-                        // Only log this warning once per allocation round.
+                uint32_t requiresAllocateBufferBit =
+                    (portIndex == kPortIndexInput)
+                        ? OMXCodec::kRequiresAllocateBufferOnInputPorts
+                        : OMXCodec::kRequiresAllocateBufferOnOutputPorts;
 
-                        ALOGW("OMX.TI.DUCATI1.VIDEO.* require the use of "
-                             "OMX_AllocateBuffer instead of the preferred "
-                             "OMX_UseBuffer. Vendor must fix this.");
-                    }
-
+                if (mQuirks & requiresAllocateBufferBit) {
                     err = mOMX->allocateBufferWithBackup(
                             mNode, portIndex, mem, &buffer);
                 } else {
@@ -2588,12 +2586,19 @@ bool ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
     sp<IOMX> omx = client.interface();
 
     Vector<String8> matchingCodecs;
+    Vector<uint32_t> matchingCodecQuirks;
 
     AString mime;
 
     AString componentName;
+    uint32_t quirks;
     if (msg->findString("componentName", &componentName)) {
         matchingCodecs.push_back(String8(componentName.c_str()));
+
+        if (!OMXCodec::findCodecQuirks(componentName.c_str(), &quirks)) {
+            quirks = 0;
+        }
+        matchingCodecQuirks.push_back(quirks);
     } else {
         CHECK(msg->findString("mime", &mime));
 
@@ -2607,7 +2612,8 @@ bool ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
                 encoder, // createEncoder
                 NULL,  // matchComponentName
                 0,     // flags
-                &matchingCodecs);
+                &matchingCodecs,
+                &matchingCodecQuirks);
     }
 
     sp<CodecObserver> observer = new CodecObserver;
@@ -2616,6 +2622,7 @@ bool ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
     for (size_t matchIndex = 0; matchIndex < matchingCodecs.size();
             ++matchIndex) {
         componentName = matchingCodecs.itemAt(matchIndex).string();
+        quirks = matchingCodecQuirks.itemAt(matchIndex);
 
         pid_t tid = androidGetTid();
         int prevPriority = androidGetThreadPriority(tid);
@@ -2646,6 +2653,7 @@ bool ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
     observer->setNotificationMessage(notify);
 
     mCodec->mComponentName = componentName;
+    mCodec->mQuirks = quirks;
     mCodec->mOMX = omx;
     mCodec->mNode = node;
 
@@ -2692,6 +2700,7 @@ void ACodec::LoadedState::onShutdown(bool keepComponentAllocated) {
         mCodec->mNativeWindow.clear();
         mCodec->mNode = NULL;
         mCodec->mOMX.clear();
+        mCodec->mQuirks = 0;
         mCodec->mComponentName.clear();
 
         mCodec->changeState(mCodec->mUninitializedState);

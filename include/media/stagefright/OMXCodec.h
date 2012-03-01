@@ -26,6 +26,7 @@
 
 namespace android {
 
+struct MediaCodecList;
 class MemoryDealer;
 struct OMXCodecObserver;
 struct CodecProfileLevel;
@@ -82,12 +83,35 @@ struct OMXCodec : public MediaSource,
     // from MediaBufferObserver
     virtual void signalBufferReturned(MediaBuffer *buffer);
 
+    enum Quirks {
+        kNeedsFlushBeforeDisable              = 1,
+        kWantsNALFragments                    = 2,
+        kRequiresLoadedToIdleAfterAllocation  = 4,
+        kRequiresAllocateBufferOnInputPorts   = 8,
+        kRequiresFlushCompleteEmulation       = 16,
+        kRequiresAllocateBufferOnOutputPorts  = 32,
+        kRequiresFlushBeforeShutdown          = 64,
+        kDefersOutputBufferAllocation         = 128,
+        kDecoderLiesAboutNumberOfChannels     = 256,
+        kInputBufferSizesAreBogus             = 512,
+        kSupportsMultipleFramesPerInputBuffer = 1024,
+        kAvoidMemcopyInputRecordingFrames     = 2048,
+        kRequiresLargerEncoderOutputBuffer    = 4096,
+        kOutputBuffersAreUnreadable           = 8192,
+    };
+
     // for use by ACodec
     static void findMatchingCodecs(
             const char *mime,
             bool createEncoder, const char *matchComponentName,
             uint32_t flags,
-            Vector<String8> *matchingCodecs);
+            Vector<String8> *matchingCodecs,
+            Vector<uint32_t> *matchingCodecQuirks = NULL);
+
+    static uint32_t getComponentQuirks(
+            const MediaCodecList *list, size_t index);
+
+    static bool findCodecQuirks(const char *componentName, uint32_t *quirks);
 
 protected:
     virtual ~OMXCodec();
@@ -123,23 +147,6 @@ private:
         DISABLED,
         ENABLING,
         SHUTTING_DOWN,
-    };
-
-    enum Quirks {
-        kNeedsFlushBeforeDisable              = 1,
-        kWantsNALFragments                    = 2,
-        kRequiresLoadedToIdleAfterAllocation  = 4,
-        kRequiresAllocateBufferOnInputPorts   = 8,
-        kRequiresFlushCompleteEmulation       = 16,
-        kRequiresAllocateBufferOnOutputPorts  = 32,
-        kRequiresFlushBeforeShutdown          = 64,
-        kDefersOutputBufferAllocation         = 128,
-        kDecoderLiesAboutNumberOfChannels     = 256,
-        kInputBufferSizesAreBogus             = 512,
-        kSupportsMultipleFramesPerInputBuffer = 1024,
-        kAvoidMemcopyInputRecordingFrames     = 2048,
-        kRequiresLargerEncoderOutputBuffer    = 4096,
-        kOutputBuffersAreUnreadable           = 8192,
     };
 
     enum BufferStatus {
@@ -326,9 +333,6 @@ private:
     void dumpPortStatus(OMX_U32 portIndex);
 
     status_t configureCodec(const sp<MetaData> &meta);
-
-    static uint32_t getComponentQuirks(
-            const char *componentName, bool isEncoder);
 
     void restorePatchedDataPointer(BufferInfo *info);
 

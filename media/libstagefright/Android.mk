@@ -30,6 +30,7 @@ LOCAL_SRC_FILES:=                         \
         MediaBuffer.cpp                   \
         MediaBufferGroup.cpp              \
         MediaCodec.cpp                    \
+        MediaCodecList.cpp                \
         MediaDefs.cpp                     \
         MediaExtractor.cpp                \
         MediaSource.cpp                   \
@@ -59,31 +60,33 @@ LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
         $(TOP)/frameworks/base/include/media/stagefright/openmax \
         $(TOP)/frameworks/base/include/media/stagefright/timedtext \
+        $(TOP)/external/expat/lib \
         $(TOP)/external/flac/include \
         $(TOP)/external/tremolo \
         $(TOP)/external/openssl/include \
 
 LOCAL_SHARED_LIBRARIES := \
         libbinder \
-        libmedia \
-        libutils \
-        libcutils \
-        libui \
-        libsonivox \
-        libvorbisidec \
-        libstagefright_yuv \
         libcamera_client \
-        libdrmframework \
-        libcrypto \
-        libssl \
-        libgui \
-        libstagefright_omx \
-        liblog \
-        libicuuc \
-        libicui18n \
-        libz \
-        libdl \
         libchromium_net \
+        libcrypto \
+        libcutils \
+        libdl \
+        libdrmframework \
+        libexpat \
+        libgui \
+        libicui18n \
+        libicuuc \
+        liblog \
+        libmedia \
+        libsonivox \
+        libssl \
+        libstagefright_omx \
+        libstagefright_yuv \
+        libui \
+        libutils \
+        libvorbisidec \
+        libz \
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \

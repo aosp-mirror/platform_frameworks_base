@@ -33,6 +33,7 @@
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MediaCodecList.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXCodec.h>
@@ -56,11 +57,6 @@ const static int64_t kBufferFilledEventTimeOutNs = 3000000000LL;
 // 1000 is more than enough for us to tell whether the omx
 // component in question is buggy or not.
 const static uint32_t kMaxColorFormatSupported = 1000;
-
-struct CodecInfo {
-    const char *mime;
-    const char *codec;
-};
 
 #define FACTORY_CREATE_ENCODER(name) \
 static sp<MediaSource> Make##name(const sp<MediaSource> &source, const sp<MetaData> &meta) { \
@@ -96,83 +92,8 @@ static sp<MediaSource> InstantiateSoftwareEncoder(
     return NULL;
 }
 
+#undef FACTORY_CREATE_ENCODER
 #undef FACTORY_REF
-#undef FACTORY_CREATE
-
-static const CodecInfo kDecoderInfo[] = {
-    { MEDIA_MIMETYPE_IMAGE_JPEG, "OMX.TI.JPEG.decode" },
-//    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
-    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.google.mp3.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II, "OMX.Nvidia.mp2.decoder" },
-//    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.decode" },
-//    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.Nvidia.amr.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.google.amrnb.decoder" },
-//    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.Nvidia.amrwb.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.decode" },
-    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.google.amrwb.decoder" },
-//    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.Nvidia.aac.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.decode" },
-    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.google.aac.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_G711_ALAW, "OMX.google.g711.alaw.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_G711_MLAW, "OMX.google.g711.mlaw.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.DUCATI1.VIDEO.DECODER" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.Nvidia.mp4.decode" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.7x30.video.decoder.mpeg4" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.decoder.mpeg4" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.Decoder" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.SEC.MPEG4.Decoder" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.google.mpeg4.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.DUCATI1.VIDEO.DECODER" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.Nvidia.h263.decode" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.7x30.video.decoder.h263" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.decoder.h263" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.SEC.H263.Decoder" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.google.h263.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.DUCATI1.VIDEO.DECODER" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.Nvidia.h264.decode" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.7x30.video.decoder.avc" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.decoder.avc" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.SEC.AVC.Decoder" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.google.h264.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.google.avc.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_VORBIS, "OMX.google.vorbis.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_VPX, "OMX.google.vpx.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG2, "OMX.Nvidia.mpeg2v.decode" },
-};
-
-static const CodecInfo kEncoderInfo[] = {
-    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.encode" },
-    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.google.amrnb.encoder" },
-    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.encode" },
-    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.google.amrwb.encoder" },
-    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.encode" },
-    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.google.aac.encoder" },
-    { MEDIA_MIMETYPE_AUDIO_AAC, "AACEncoder" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.DUCATI1.VIDEO.MPEG4E" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.7x30.video.encoder.mpeg4" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.encoder.mpeg4" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.encoder" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.Nvidia.mp4.encoder" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.SEC.MPEG4.Encoder" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH263Encoder" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.DUCATI1.VIDEO.MPEG4E" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.7x30.video.encoder.h263" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.encoder.h263" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.Video.encoder" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.Nvidia.h263.encoder" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.SEC.H263.Encoder" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "M4vH263Encoder" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.DUCATI1.VIDEO.H264E" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.7x30.video.encoder.avc" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.encoder.avc" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.encoder" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.Nvidia.h264.encoder" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.SEC.AVC.Encoder" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "AVCEncoder" },
-};
-
-#undef OPTIONAL
 
 #define CODEC_LOGI(x, ...) ALOGI("[%s] "x, mComponentName, ##__VA_ARGS__)
 #define CODEC_LOGV(x, ...) ALOGV("[%s] "x, mComponentName, ##__VA_ARGS__)
@@ -206,22 +127,6 @@ private:
     OMXCodecObserver(const OMXCodecObserver &);
     OMXCodecObserver &operator=(const OMXCodecObserver &);
 };
-
-static const char *GetCodec(const CodecInfo *info, size_t numInfos,
-                            const char *mime, int index) {
-    CHECK(index >= 0);
-    for(size_t i = 0; i < numInfos; ++i) {
-        if (!strcasecmp(mime, info[i].mime)) {
-            if (index == 0) {
-                return info[i].codec;
-            }
-
-            --index;
-        }
-    }
-
-    return NULL;
-}
 
 template<class T>
 static void InitOMXParams(T *params) {
@@ -278,118 +183,35 @@ static int CompareSoftwareCodecsFirst(
 }
 
 // static
-uint32_t OMXCodec::getComponentQuirks(
-        const char *componentName, bool isEncoder) {
-    uint32_t quirks = 0;
-
-    if (!strcmp(componentName, "OMX.Nvidia.amr.decoder") ||
-         !strcmp(componentName, "OMX.Nvidia.amrwb.decoder") ||
-         !strcmp(componentName, "OMX.Nvidia.aac.decoder") ||
-         !strcmp(componentName, "OMX.Nvidia.mp3.decoder")) {
-        quirks |= kDecoderLiesAboutNumberOfChannels;
-    }
-
-    if (!strcmp(componentName, "OMX.TI.MP3.decode")) {
-        quirks |= kNeedsFlushBeforeDisable;
-        quirks |= kDecoderLiesAboutNumberOfChannels;
-    }
-    if (!strcmp(componentName, "OMX.TI.AAC.decode")) {
-        quirks |= kNeedsFlushBeforeDisable;
-        quirks |= kRequiresFlushCompleteEmulation;
-        quirks |= kSupportsMultipleFramesPerInputBuffer;
-    }
-    if (!strncmp(componentName, "OMX.qcom.video.encoder.", 23)) {
-        quirks |= kRequiresLoadedToIdleAfterAllocation;
-        quirks |= kRequiresAllocateBufferOnInputPorts;
-        quirks |= kRequiresAllocateBufferOnOutputPorts;
-        if (!strncmp(componentName, "OMX.qcom.video.encoder.avc", 26)) {
-
-            // The AVC encoder advertises the size of output buffers
-            // based on the input video resolution and assumes
-            // the worst/least compression ratio is 0.5. It is found that
-            // sometimes, the output buffer size is larger than
-            // size advertised by the encoder.
-            quirks |= kRequiresLargerEncoderOutputBuffer;
-        }
-    }
-    if (!strncmp(componentName, "OMX.qcom.7x30.video.encoder.", 28)) {
-    }
-    if (!strncmp(componentName, "OMX.qcom.video.decoder.", 23)) {
-        quirks |= kRequiresAllocateBufferOnOutputPorts;
-        quirks |= kDefersOutputBufferAllocation;
-    }
-    if (!strncmp(componentName, "OMX.qcom.7x30.video.decoder.", 28)) {
-        quirks |= kRequiresAllocateBufferOnInputPorts;
-        quirks |= kRequiresAllocateBufferOnOutputPorts;
-        quirks |= kDefersOutputBufferAllocation;
-    }
-
-    if (!strcmp(componentName, "OMX.TI.DUCATI1.VIDEO.DECODER")) {
-        quirks |= kRequiresAllocateBufferOnInputPorts;
-        quirks |= kRequiresAllocateBufferOnOutputPorts;
-    }
-
-    // FIXME:
-    // Remove the quirks after the work is done.
-    else if (!strcmp(componentName, "OMX.TI.DUCATI1.VIDEO.MPEG4E") ||
-             !strcmp(componentName, "OMX.TI.DUCATI1.VIDEO.H264E")) {
-
-        quirks |= kRequiresAllocateBufferOnInputPorts;
-        quirks |= kRequiresAllocateBufferOnOutputPorts;
-    }
-    else if (!strncmp(componentName, "OMX.TI.", 7)) {
-        // Apparently I must not use OMX_UseBuffer on either input or
-        // output ports on any of the TI components or quote:
-        // "(I) may have unexpected problem (sic) which can be timing related
-        //  and hard to reproduce."
-
-        quirks |= kRequiresAllocateBufferOnInputPorts;
-        quirks |= kRequiresAllocateBufferOnOutputPorts;
-        if (!strncmp(componentName, "OMX.TI.Video.encoder", 20)) {
-            quirks |= kAvoidMemcopyInputRecordingFrames;
-        }
-    }
-
-    if (!strcmp(componentName, "OMX.TI.Video.Decoder")) {
-        quirks |= kInputBufferSizesAreBogus;
-    }
-
-    if (!strncmp(componentName, "OMX.SEC.", 8) && !isEncoder) {
-        // These output buffers contain no video data, just some
-        // opaque information that allows the overlay to display their
-        // contents.
-        quirks |= kOutputBuffersAreUnreadable;
-    }
-
-    return quirks;
-}
-
-// static
 void OMXCodec::findMatchingCodecs(
         const char *mime,
         bool createEncoder, const char *matchComponentName,
         uint32_t flags,
-        Vector<String8> *matchingCodecs) {
+        Vector<String8> *matchingCodecs,
+        Vector<uint32_t> *matchingCodecQuirks) {
     matchingCodecs->clear();
 
-    for (int index = 0;; ++index) {
-        const char *componentName;
+    if (matchingCodecQuirks) {
+        matchingCodecQuirks->clear();
+    }
 
-        if (createEncoder) {
-            componentName = GetCodec(
-                    kEncoderInfo,
-                    sizeof(kEncoderInfo) / sizeof(kEncoderInfo[0]),
-                    mime, index);
-        } else {
-            componentName = GetCodec(
-                    kDecoderInfo,
-                    sizeof(kDecoderInfo) / sizeof(kDecoderInfo[0]),
-                    mime, index);
-        }
+    const MediaCodecList *list = MediaCodecList::getInstance();
+    if (list == NULL) {
+        return;
+    }
 
-        if (!componentName) {
+    size_t index = 0;
+    for (;;) {
+        ssize_t matchIndex =
+            list->findCodecByType(mime, createEncoder, index);
+
+        if (matchIndex < 0) {
             break;
         }
+
+        index = matchIndex + 1;
+
+        const char *componentName = list->getCodecName(matchIndex);
 
         // If a specific codec is requested, skip the non-matching ones.
         if (matchComponentName && strcmp(componentName, matchComponentName)) {
@@ -405,12 +227,55 @@ void OMXCodec::findMatchingCodecs(
             (!(flags & (kSoftwareCodecsOnly | kHardwareCodecsOnly)))) {
 
             matchingCodecs->push(String8(componentName));
+
+            if (matchingCodecQuirks) {
+                matchingCodecQuirks->push(getComponentQuirks(list, matchIndex));
+            }
         }
     }
 
     if (flags & kPreferSoftwareCodecs) {
         matchingCodecs->sort(CompareSoftwareCodecsFirst);
     }
+}
+
+// static
+uint32_t OMXCodec::getComponentQuirks(
+        const MediaCodecList *list, size_t index) {
+    uint32_t quirks = 0;
+    if (list->codecHasQuirk(
+                index, "requires-allocate-on-input-ports")) {
+        quirks |= kRequiresAllocateBufferOnInputPorts;
+    }
+    if (list->codecHasQuirk(
+                index, "requires-allocate-on-output-ports")) {
+        quirks |= kRequiresAllocateBufferOnOutputPorts;
+    }
+    if (list->codecHasQuirk(
+                index, "output-buffers-are-unreadable")) {
+        quirks |= kOutputBuffersAreUnreadable;
+    }
+
+    return quirks;
+}
+
+// static
+bool OMXCodec::findCodecQuirks(const char *componentName, uint32_t *quirks) {
+    const MediaCodecList *list = MediaCodecList::getInstance();
+
+    if (list == NULL) {
+        return false;
+    }
+
+    ssize_t index = list->findCodecByName(componentName);
+
+    if (index < 0) {
+        return false;
+    }
+
+    *quirks = getComponentQuirks(list, index);
+
+    return true;
 }
 
 // static
@@ -435,8 +300,10 @@ sp<MediaSource> OMXCodec::Create(
     CHECK(success);
 
     Vector<String8> matchingCodecs;
+    Vector<uint32_t> matchingCodecQuirks;
     findMatchingCodecs(
-            mime, createEncoder, matchComponentName, flags, &matchingCodecs);
+            mime, createEncoder, matchComponentName, flags,
+            &matchingCodecs, &matchingCodecQuirks);
 
     if (matchingCodecs.isEmpty()) {
         return NULL;
@@ -447,6 +314,7 @@ sp<MediaSource> OMXCodec::Create(
 
     for (size_t i = 0; i < matchingCodecs.size(); ++i) {
         const char *componentNameBase = matchingCodecs[i].string();
+        uint32_t quirks = matchingCodecQuirks[i];
         const char *componentName = componentNameBase;
 
         AString tmp;
@@ -469,8 +337,6 @@ sp<MediaSource> OMXCodec::Create(
         }
 
         ALOGV("Attempting to allocate OMX node '%s'", componentName);
-
-        uint32_t quirks = getComponentQuirks(componentNameBase, createEncoder);
 
         if (!createEncoder
                 && (quirks & kOutputBuffersAreUnreadable)
