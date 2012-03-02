@@ -1289,7 +1289,10 @@ public class WifiManager {
         if (c == null) throw new IllegalArgumentException("Channel needs to be initialized");
         if (config == null) throw new IllegalArgumentException("config cannot be null");
 
-        c.mAsyncChannel.sendMessage(CONNECT_NETWORK, 0, c.putListener(listener), config);
+        // Use INVALID_NETWORK_ID for arg1 when passing a config object
+        // arg1 is used to pass network id when the network already exists
+        c.mAsyncChannel.sendMessage(CONNECT_NETWORK, WifiConfiguration.INVALID_NETWORK_ID,
+                c.putListener(listener), config);
     }
 
     /**
