@@ -56,6 +56,11 @@
 #define ST_LOGW(x, ...) ALOGW("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
 #define ST_LOGE(x, ...) ALOGE("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
 
+#define ATRACE_BUFFER_INDEX(index)                                            \
+    char ___traceBuf[1024];                                                   \
+    snprintf(___traceBuf, 1024, "%s: %d", mConsumerName.string(), (index));   \
+    android::ScopedTrace ___bufTracer(ATRACE_TAG, ___traceBuf);
+
 namespace android {
 
 // Get an ID that's unique within this process.
@@ -387,6 +392,8 @@ status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         const int buf = found;
         *outBuf = found;
 
+        ATRACE_BUFFER_INDEX(buf);
+
         const bool useDefaultSize = !w && !h;
         if (useDefaultSize) {
             // use the default size
@@ -497,6 +504,8 @@ status_t BufferQueue::setSynchronousMode(bool enabled) {
 status_t BufferQueue::queueBuffer(int buf, int64_t timestamp,
         uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
     ATRACE_CALL();
+    ATRACE_BUFFER_INDEX(buf);
+
     ST_LOGV("queueBuffer: slot=%d time=%lld", buf, timestamp);
 
     sp<FrameAvailableListener> listener;
@@ -810,6 +819,7 @@ void BufferQueue::freeAllBuffersLocked() {
 }
 
 status_t BufferQueue::acquire(BufferItem *buffer) {
+    ATRACE_CALL();
     Mutex::Autolock _l(mMutex);
     // check if queue is empty
     // In asynchronous mode the list is guaranteed to be one buffer
@@ -817,6 +827,8 @@ status_t BufferQueue::acquire(BufferItem *buffer) {
     if (!mQueue.empty()) {
         Fifo::iterator front(mQueue.begin());
         int buf = *front;
+
+        ATRACE_BUFFER_INDEX(buf);
 
         if (mSlots[buf].mAcquireCalled) {
             buffer->mGraphicBuffer = NULL;
@@ -845,6 +857,9 @@ status_t BufferQueue::acquire(BufferItem *buffer) {
 
 status_t BufferQueue::releaseBuffer(int buf, EGLDisplay display,
         EGLSyncKHR fence) {
+    ATRACE_CALL();
+    ATRACE_BUFFER_INDEX(buf);
+
     Mutex::Autolock _l(mMutex);
 
     if (buf == INVALID_BUFFER_SLOT) {
