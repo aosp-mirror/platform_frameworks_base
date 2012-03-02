@@ -785,7 +785,7 @@ class ContextImpl extends Context {
     public boolean deleteDatabase(String name) {
         try {
             File f = validateFilePath(name, false);
-            return f.delete();
+            return SQLiteDatabase.deleteDatabase(f);
         } catch (Exception e) {
         }
         return false;
