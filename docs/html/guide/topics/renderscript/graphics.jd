@@ -142,7 +142,7 @@ href="{@docRoot}resources/samples/RenderScript/MiscSamples/index.html">Misc Samp
 
       <p class="note"><strong>Note:</strong> The Renderscript runtime makes its best effort to
       refresh the frame at the specified rate. For example, if you are creating a live wallpaper
-      and set the return value to 20, the Renderscript runtime renders the wallpaper at 20fps if it has just
+      and set the return value to 20, the Renderscript runtime renders the wallpaper at 50fps if it has just
       enough or more resources to do so. It renders as fast as it can if not enough resources
       are available.</p>
 
@@ -570,7 +570,7 @@ point if this is your first time using Renderscript.</p>
   vertex 0, 1, and 2 (the vertices are drawn counter-clockwise).</p>
   <pre>
 int float2VtxSize = 2;
-Mesh.TriangleMeshBuilder triangle = new Mesh.TriangleMeshBuilder(renderscriptGL,
+Mesh.TriangleMeshBuilder triangles = new Mesh.TriangleMeshBuilder(renderscriptGL,
 float2VtxSize, Mesh.TriangleMeshBuilder.COLOR);
 triangles.addVertex(300.f, 300.f);
 triangles.addVertex(150.f, 450.f);
