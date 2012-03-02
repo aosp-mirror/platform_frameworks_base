@@ -291,17 +291,16 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
     /**
      * @param context Used to inflate, and create views.
+     * @param callback Keyguard callback object for pokewakelock(), etc.
      * @param updateMonitor Knows the state of the world, and passed along to each
      *   screen so they can use the knowledge, and also register for callbacks
      *   on dynamic information.
      * @param lockPatternUtils Used to look up state of lock pattern.
      */
     public LockPatternKeyguardView(
-            Context context,
-            KeyguardUpdateMonitor updateMonitor,
-            LockPatternUtils lockPatternUtils,
-            KeyguardWindowController controller) {
-        super(context);
+            Context context, KeyguardViewCallback callback, KeyguardUpdateMonitor updateMonitor,
+            LockPatternUtils lockPatternUtils, KeyguardWindowController controller) {
+        super(context, callback);
 
         mHandler = new Handler(this);
         mConfiguration = context.getResources().getConfiguration();

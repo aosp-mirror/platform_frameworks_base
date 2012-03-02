@@ -72,18 +72,14 @@ public abstract class KeyguardViewBase extends FrameLayout {
         }
     };
 
-    public KeyguardViewBase(Context context) {
+    public KeyguardViewBase(Context context, KeyguardViewCallback callback) {
         super(context);
+        mCallback = callback;
         resetBackground();
     }
 
     public void resetBackground() {
         setBackgroundDrawable(mBackgroundDrawable);
-    }
-
-    // used to inject callback
-    void setCallback(KeyguardViewCallback callback) {
-        mCallback = callback;
     }
 
     public KeyguardViewCallback getCallback() {

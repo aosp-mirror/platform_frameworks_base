@@ -43,9 +43,10 @@ public class LockPatternKeyguardViewProperties implements KeyguardViewProperties
     }
 
     public KeyguardViewBase createKeyguardView(Context context,
+            KeyguardViewCallback callback,
             KeyguardUpdateMonitor updateMonitor,
             KeyguardWindowController controller) {
-        return new LockPatternKeyguardView(context, updateMonitor,
+        return new LockPatternKeyguardView(context, callback, updateMonitor,
                 mLockPatternUtils, controller);
     }
 
