@@ -9598,10 +9598,19 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         // Set to resolved
         mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED;
+        onResolvedLayoutDirectionChanged();
     }
 
     /**
-     * Force padding depending on layout direction.
+     * Called when layout direction has been resolved.
+     *
+     * The default implementation does nothing.
+     */
+    public void onResolvedLayoutDirectionChanged() {
+    }
+
+    /**
+     * Resolve padding depending on layout direction.
      */
     public void resolvePadding() {
         // If the user specified the absolute padding (either with android:padding or
@@ -9645,7 +9654,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
 
         recomputePadding();
-        onResolvePadding(resolvedLayoutDirection);
+        onPaddingChanged(resolvedLayoutDirection);
     }
 
     /**
@@ -9656,7 +9665,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param layoutDirection the direction of the layout
      *
      */
-    public void onResolvePadding(int layoutDirection) {
+    public void onPaddingChanged(int layoutDirection) {
     }
 
     /**
@@ -9674,17 +9683,26 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Reset the resolved layout direction.
-     *
-     * Subclasses need to override this method to clear cached information that depends on the
-     * resolved layout direction, or to inform child views that inherit their layout direction.
-     * Overrides must also call the superclass implementation at the start of their implementation.
+     * Reset the resolved layout direction. Will call {@link View#onResolvedLayoutDirectionReset}
+     * when reset is done.
      */
     public void resetResolvedLayoutDirection() {
         // Reset the current View resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED;
+        onResolvedLayoutDirectionReset();
         // Reset also the text direction
         resetResolvedTextDirection();
+    }
+
+    /**
+     * Called during reset of resolved layout direction.
+     *
+     * Subclasses need to override this method to clear cached information that depends on the
+     * resolved layout direction, or to inform child views that inherit their layout direction.
+     *
+     * The default implementation does nothing.
+     */
+    public void onResolvedLayoutDirectionReset() {
     }
 
     /**
@@ -14137,8 +14155,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Resolve the text direction. Will call {@link View#onResolveTextDirection()} when resolution
-     * is done.
+     * Resolve the text direction. Will call {@link View#onResolvedTextDirectionChanged} when
+     * resolution is done.
      */
     public void resolveTextDirection() {
         if (mResolvedTextDirection != TEXT_DIRECTION_INHERIT) {
@@ -14152,24 +14170,26 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         } else {
             mResolvedTextDirection = TEXT_DIRECTION_FIRST_STRONG;
         }
-        onResolveTextDirection();
+        onResolvedTextDirectionChanged();
     }
 
     /**
      * Called when text direction has been resolved. Subclasses that care about text direction
-     * resolution should override this method. The default implementation does nothing.
+     * resolution should override this method.
+     *
+     * The default implementation does nothing.
      */
-    public void onResolveTextDirection() {
+    public void onResolvedTextDirectionChanged() {
     }
 
     /**
      * Reset resolved text direction. Text direction can be resolved with a call to
-     * getResolvedTextDirection(). Will call {@link View#onResetResolvedTextDirection()} when
+     * getResolvedTextDirection(). Will call {@link View#onResolvedTextDirectionReset} when
      * reset is done.
      */
     public void resetResolvedTextDirection() {
         mResolvedTextDirection = TEXT_DIRECTION_INHERIT;
-        onResetResolvedTextDirection();
+        onResolvedTextDirectionReset();
     }
 
     /**
@@ -14177,7 +14197,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * override this method and do a reset of the text direction of their children. The default
      * implementation does nothing.
      */
-    public void onResetResolvedTextDirection() {
+    public void onResolvedTextDirectionReset() {
     }
 
     //
