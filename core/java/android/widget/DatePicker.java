@@ -162,7 +162,7 @@ public class DatePicker extends FrameLayout {
         int endYear = attributesArray.getInt(R.styleable.DatePicker_endYear, DEFAULT_END_YEAR);
         String minDate = attributesArray.getString(R.styleable.DatePicker_minDate);
         String maxDate = attributesArray.getString(R.styleable.DatePicker_maxDate);
-        int layoutResourceId = attributesArray.getResourceId(R.styleable.DatePicker_layout,
+        int layoutResourceId = attributesArray.getResourceId(R.styleable.DatePicker_internalLayout,
                 R.layout.date_picker);
         attributesArray.recycle();
 
