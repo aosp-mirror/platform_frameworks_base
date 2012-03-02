@@ -158,9 +158,9 @@ public class KeyguardViewManager implements KeyguardWindowController {
 
         if (mKeyguardView == null) {
             if (DEBUG) Log.d(TAG, "keyguard view is null, creating it...");
-            mKeyguardView = mKeyguardViewProperties.createKeyguardView(mContext, mUpdateMonitor, this);
+            mKeyguardView = mKeyguardViewProperties.createKeyguardView(mContext, mCallback,
+                    mUpdateMonitor, this);
             mKeyguardView.setId(R.id.lock_screen);
-            mKeyguardView.setCallback(mCallback);
 
             final ViewGroup.LayoutParams lp = new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,

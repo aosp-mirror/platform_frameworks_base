@@ -24,16 +24,17 @@ import android.content.Context;
  * of whether the keyguard instance is around or not.
  */
 public interface KeyguardViewProperties {
-    
+
     /**
      * Create a keyguard view.
      * @param context the context to use when creating the view.
+     * @param callback keyguard callback object for pokewakelock(), etc.
      * @param updateMonitor configuration may be based on this.
      * @param controller for talking back with the containing window.
      * @return the view.
      */
     KeyguardViewBase createKeyguardView(Context context,
-            KeyguardUpdateMonitor updateMonitor,
+            KeyguardViewCallback mCallback, KeyguardUpdateMonitor updateMonitor,
             KeyguardWindowController controller);
 
     /**

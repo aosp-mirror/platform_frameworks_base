@@ -17,6 +17,7 @@
 package com.android.internal.policy.impl;
 
 import android.content.Context;
+import com.android.internal.policy.impl.KeyguardViewCallback;
 import com.android.internal.telephony.IccCard;
 import android.content.res.Configuration;
 import android.test.AndroidTestCase;
@@ -133,9 +134,10 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
 
 
 
-        private TestableLockPatternKeyguardView(Context context, KeyguardUpdateMonitor updateMonitor,
+        private TestableLockPatternKeyguardView(Context context, KeyguardViewCallback callback,
+                KeyguardUpdateMonitor updateMonitor,
                 LockPatternUtils lockPatternUtils, KeyguardWindowController controller) {
-            super(context, updateMonitor, lockPatternUtils, controller);
+            super(context, callback, updateMonitor, lockPatternUtils, controller);
         }
 
         @Override
@@ -198,14 +200,13 @@ public class LockPatternKeyguardViewTest extends AndroidTestCase {
         super.setUp();
         mUpdateMonitor = new MockUpdateMonitor(getContext());
         mLockPatternUtils = new MockLockPatternUtils(getContext());
+        mKeyguardViewCallback = new MockKeyguardCallback();
 
-        mLPKV = new TestableLockPatternKeyguardView(getContext(), mUpdateMonitor,
-                mLockPatternUtils, new KeyguardWindowController() {
+        mLPKV = new TestableLockPatternKeyguardView(getContext(), mKeyguardViewCallback,
+                mUpdateMonitor, mLockPatternUtils, new KeyguardWindowController() {
             public void setNeedsInput(boolean needsInput) {
             }
         });
-        mKeyguardViewCallback = new MockKeyguardCallback();
-        mLPKV.setCallback(mKeyguardViewCallback);
     }
 
     public void testStateAfterCreatedWhileScreenOff() {
