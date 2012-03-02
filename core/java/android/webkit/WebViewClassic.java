@@ -10314,6 +10314,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return nativeGetCursorRingBounds();
     }
 
+    // Called via JNI
+    private void postInvalidate() {
+        mWebView.postInvalidate();
+    }
+
     private native int nativeCacheHitFramePointer();
     private native boolean  nativeCacheHitIsPlugin();
     private native Rect nativeCacheHitNodeBounds();
