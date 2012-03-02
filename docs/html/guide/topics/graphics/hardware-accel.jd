@@ -42,19 +42,20 @@ parent.link=index.html
         <li><a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL with the Framework
         APIs</a></li>
 
-        <li><a href="{@docRoot}guide/topics/renderscript/index.html">RenderScript</a></li>
+        <li><a href="{@docRoot}guide/topics/renderscript/index.html">Renderscript</a></li>
       </ol>
     </div>
   </div>
 
   <p>Beginning in Android 3.0 (API level 11), the Android 2D rendering pipeline is designed to
   better support hardware acceleration. Hardware acceleration carries out all drawing operations
-  that are performed on a {@link android.view.View}'s canvas using the GPU.</p>
+  that are performed on a {@link android.view.View}'s canvas using the GPU. Because of the
+  increased resources required to enable hardware acceleration, your app will consume more RAM.</p>
 
   <p>The easiest way to enable hardware acceleration is to turn it on
   globally for your entire application. If your application uses only standard views and {@link
   android.graphics.drawable.Drawable}s, turning it on globally should not cause any adverse
-  effects. However, because hardware acceleration is not supported for all of the 2D drawing
+  drawing effects. However, because hardware acceleration is not supported for all of the 2D drawing
   operations, turning it on might affect some of your applications that use custom views or drawing
   calls. Problems usually manifest themselves as invisible elements, exceptions, or wrongly
   rendered pixels. To remedy this, Android gives you the option to enable or disable hardware
