@@ -391,8 +391,9 @@ private:
         mHasDrawOps = mHasDrawOps || drawOp >= DisplayList::DrawDisplayList;
         if (reject) {
             mWriter.writeInt(OP_MAY_BE_SKIPPED_MASK | drawOp);
-            mWriter.writeInt(0);
-            uint32_t* location = reject ? mWriter.peek32(mWriter.size() - 4) : NULL;
+            mWriter.writeInt(0xdeaddead);
+            uint32_t* location = reject ?
+                    mWriter.peek32(mWriter.size() - sizeof(int32_t)) : NULL;
             return location;
         }
         mWriter.writeInt(drawOp);
@@ -401,7 +402,8 @@ private:
 
     inline void addSkip(uint32_t* location) {
         if (location) {
-            *location = (int32_t) (mWriter.peek32(mWriter.size() - 4) - location);
+            *location = (int32_t) (mWriter.peek32(
+                    mWriter.size() - sizeof(int32_t)) - location);
         }
     }
 
