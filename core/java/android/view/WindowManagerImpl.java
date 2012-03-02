@@ -437,8 +437,6 @@ public class WindowManagerImpl implements WindowManager {
                 case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
                     // On low and medium end gfx devices
                     if (!ActivityManager.isHighEndGfx(getDefaultDisplay())) {
-                        // Force a full memory flush
-                        HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
                         // Destroy all hardware surfaces and resources associated to
                         // known windows
                         synchronized (this) {
@@ -448,6 +446,8 @@ public class WindowManagerImpl implements WindowManager {
                                 mRoots[i].terminateHardwareResources();
                             }
                         }
+                        // Force a full memory flush
+                        HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
                         mNeedsEglTerminate = true;
                         break;
                     }
