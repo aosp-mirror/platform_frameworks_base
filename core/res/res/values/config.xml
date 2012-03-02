@@ -654,7 +654,7 @@
          PERSIST may improve performance by reducing how often journal blocks are
          reallocated (compared to truncation) resulting in better data block locality
          and less churn of the storage media. -->
-    <string name="db_default_journal_mode">TRUNCATE</string>
+    <string name="db_default_journal_mode">PERSIST</string>
 
     <!-- Maximum size of the persistent journal file in bytes.
          If the journal file grows to be larger than this amount then SQLite will
