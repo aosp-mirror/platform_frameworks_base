@@ -348,7 +348,6 @@ import java.util.regex.Pattern;
  *
  * @hide
  */
-// TODO: Remove @hide from fields and methods.
 // TODO: Check if any WebView published API methods are called from within here, and if so
 // we should bounce the call out via the proxy to enable any sub-class to override it.
 @Widget
@@ -1494,8 +1493,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mEditTextScroller = new Scroller(context);
     }
 
-    // === START: WebView Proxy binding ===
-    // Keep the webview proxy / SPI related stuff in this section, to minimize merge conflicts.
+    // WebViewProvider bindings
 
     static class Factory implements WebViewFactoryProvider,  WebViewFactoryProvider.Statics {
         @Override
@@ -1583,8 +1581,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     void setScrollYRaw(int mScrollY) {
         mWebViewPrivate.setScrollYRaw(mScrollY);
     }
-
-    // === END: WebView Proxy binding ===
 
     private static class TrustStorageListener extends BroadcastReceiver {
         @Override
@@ -2015,7 +2011,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Returns the height (in pixels) of the embedded title bar (if any). Does not care about
      * scrolling
-     * @hide
      */
     protected int getTitleHeight() {
         if (mWebView instanceof TitleBarDelegate) {
@@ -2215,7 +2210,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      *
      * @param flags JS engine flags in a String
      *
-     * @hide This is an implementation detail.
+     * This is an implementation detail.
      */
     public void setJsFlags(String flags) {
         mWebViewCore.sendMessage(EventHub.SET_JS_FLAGS, flags);
@@ -2232,7 +2227,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     /**
      * Inform WebView about the current network type.
-     * {@hide}
      */
     public void setNetworkType(String type, String subtype) {
         Map<String, String> map = new HashMap<String, String>();
@@ -2403,7 +2397,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * of WebView.
      * @param stream The {@link OutputStream} to save to
      * @return True if saved successfully
-     * @hide
      */
     public boolean saveViewState(OutputStream stream) {
         try {
@@ -2419,7 +2412,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * {@link #saveViewState(OutputStream)} for more information.
      * @param stream The {@link InputStream} to load from
      * @return True if loaded successfully
-     * @hide
      */
     public boolean loadViewState(InputStream stream) {
         try {
@@ -2971,7 +2963,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * along with it vertically, while remaining in view horizontally. Pass
      * null to remove the title bar from the WebView, and return to drawing
      * the WebView normally without translating to account for the title bar.
-     * @hide
      */
     public void setEmbeddedTitleBar(View v) {
         if (mWebView instanceof TitleBarDelegate) {
@@ -2993,7 +2984,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * Set where to render the embedded title bar
      * NO_GRAVITY at the top of the page
      * TOP        at the top of the screen
-     * @hide
      */
     public void setTitleBarGravity(int gravity) {
         mTitleGravity = gravity;
@@ -3373,7 +3363,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return getViewHeight();
     }
 
-    /** @hide */
     @Override
     public void onDrawVerticalScrollBar(Canvas canvas,
                                            Drawable scrollBar,
@@ -3486,9 +3475,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return mContentWidth;
     }
 
-    /**
-     * @hide
-     */
     public int getPageBackgroundColor() {
         return nativeGetBackgroundColor();
     }
@@ -3640,7 +3626,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * @param listener An implementation of FindListener
      */
      public void setFindListener(FindListener listener) {
-         checkThread();
          mFindListener = listener;
      }
 
@@ -3661,9 +3646,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return findAllBody(find, false);
     }
 
-    /**
-     * @hide
-     */
     public void findAllAsync(String find) {
         findAllBody(find, true);
     }
@@ -3777,7 +3759,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * @hide
      * Return the first substring consisting of the address of a physical
      * location. Currently, only addresses in the United States are detected,
      * and consist of:
@@ -3844,8 +3825,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     /**
      * Request the scroller to abort any ongoing animation
-     *
-     * @hide
      */
     public void stopScroll() {
         mScroller.forceFinished(true);
@@ -4276,7 +4255,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * Gets the WebViewClient
      * @return the current WebViewClient instance.
      *
-     * @hide This is an implementation detail.
+     * This is an implementation detail.
      */
     public WebViewClient getWebViewClient() {
         return mCallbackProxy.getWebViewClient();
@@ -4302,7 +4281,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * Gets the chrome handler.
      * @return the current WebChromeClient instance.
      *
-     * @hide This is an implementation detail.
+     * This is an implementation detail.
      */
     public WebChromeClient getWebChromeClient() {
         return mCallbackProxy.getWebChromeClient();
@@ -4313,7 +4292,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * WebBackForwardListClient for handling new items and changes in the
      * history index.
      * @param client An implementation of WebBackForwardListClient.
-     * {@hide}
      */
     public void setWebBackForwardListClient(WebBackForwardListClient client) {
         mCallbackProxy.setWebBackForwardListClient(client);
@@ -4321,7 +4299,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     /**
      * Gets the WebBackForwardListClient.
-     * {@hide}
      */
     public WebBackForwardListClient getWebBackForwardListClient() {
         return mCallbackProxy.getWebBackForwardListClient();
@@ -4336,17 +4313,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mPictureListener = listener;
     }
 
-    /**
-     * {@hide}
-     */
     /* FIXME: Debug only! Remove for SDK! */
     public void externalRepresentation(Message callback) {
         mWebViewCore.sendMessage(EventHub.REQUEST_EXT_REPRESENTATION, callback);
     }
 
-    /**
-     * {@hide}
-     */
     /* FIXME: Debug only! Remove for SDK! */
     public void documentAsText(Message callback) {
         mWebViewCore.sendMessage(EventHub.REQUEST_DOC_AS_TEXT, callback);
@@ -4704,7 +4675,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Select the word at the last click point.
      *
-     * @hide This is an implementation detail.
+     * This is an implementation detail.
      */
     public boolean selectText() {
         int x = viewToContentX(mLastTouchX + getScrollX());
@@ -5055,7 +5026,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Dump the display tree to "/sdcard/displayTree.txt"
      *
-     * @hide debug only
+     * debug only
      */
     public void dumpDisplayTree() {
         nativeDumpDisplayTree(getUrl());
@@ -5065,7 +5036,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * Dump the dom tree to adb shell if "toFile" is False, otherwise dump it to
      * "/sdcard/domTree.txt"
      *
-     * @hide debug only
+     * debug only
      */
     public void dumpDomTree(boolean toFile) {
         mWebViewCore.sendMessage(EventHub.DUMP_DOMTREE, toFile ? 1 : 0, 0);
@@ -5075,7 +5046,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * Dump the render tree to adb shell if "toFile" is False, otherwise dump it
      * to "/sdcard/renderTree.txt"
      *
-     * @hide debug only
+     * debug only
      */
     public void dumpRenderTree(boolean toFile) {
         mWebViewCore.sendMessage(EventHub.DUMP_RENDERTREE, toFile ? 1 : 0, 0);
@@ -5084,7 +5055,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Called by DRT on UI thread, need to proxy to WebCore thread.
      *
-     * @hide debug only
+     * debug only
      */
     public void useMockDeviceOrientation() {
         mWebViewCore.sendMessage(EventHub.USE_MOCK_DEVICE_ORIENTATION);
@@ -5093,7 +5064,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Called by DRT on WebCore thread.
      *
-     * @hide debug only
+     * debug only
      */
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
             boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
@@ -5435,7 +5406,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Select all of the text in this WebView.
      *
-     * @hide This is an implementation detail.
+     * This is an implementation detail.
      */
     public void selectAll() {
         mWebViewCore.sendMessage(EventHub.SELECT_ALL);
@@ -5467,7 +5438,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Copy the selection to the clipboard
      *
-     * @hide This is an implementation detail.
+     * This is an implementation detail.
      */
     public boolean copySelection() {
         boolean copiedSomething = false;
@@ -5494,7 +5465,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Cut the selected text into the clipboard
      *
-     * @hide This is an implementation detail
+     * This is an implementation detail
      */
     public void cutSelection() {
         copySelection();
@@ -5506,7 +5477,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Paste text from the clipboard to the cursor position.
      *
-     * @hide This is an implementation detail
+     * This is an implementation detail
      */
     public void pasteFromClipboard() {
         ClipboardManager cm = (ClipboardManager)mContext
@@ -5522,7 +5493,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * @hide This is an implementation detail.
+     * This is an implementation detail.
      */
     public SearchBox getSearchBox() {
         if ((mWebViewCore == null) || (mWebViewCore.getBrowserFrame() == null)) {
@@ -5698,9 +5669,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 mVisibleContentRect, getScale());
     }
 
-    /**
-     * @hide
-     */
     @Override
     public boolean setFrame(int left, int top, int right, int bottom) {
         boolean changed = mWebViewPrivate.super_setFrame(left, top, right, bottom);
@@ -7468,9 +7436,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mWebViewCore.sendMessageDelayed(EventHub.SAVE_DOCUMENT_STATE, null, 1000);
     }
 
-    /**
-     * @hide
-     */
     public synchronized WebViewCore getWebViewCore() {
         return mWebViewCore;
     }
@@ -8652,7 +8617,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         void onPageSwapOccurred(boolean notifyAnimationStarted);
     }
 
-    /** @hide Called by JNI when pages are swapped (only occurs with hardware
+    /** Called by JNI when pages are swapped (only occurs with hardware
      * acceleration) */
     protected void pageSwapCallback(boolean notifyAnimationStarted) {
         mWebViewCore.resumeWebKitDraw();
@@ -9218,7 +9183,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * view-specific zoom, scroll offset, or other changes. It does not draw
      * any view-specific chrome, such as progress or URL bars.
      *
-     * @hide only needs to be accessible to Browser and testing
+     * only needs to be accessible to Browser and testing
      */
     public void drawPage(Canvas canvas) {
         calcOurContentVisibleRectF(mVisibleContentRect);
@@ -9228,7 +9193,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Enable the communication b/t the webView and VideoViewProxy
      *
-     * @hide only used by the Browser
+     * only used by the Browser
      */
     public void setHTML5VideoViewProxy(HTML5VideoViewProxy proxy) {
         mHTML5VideoViewProxy = proxy;
@@ -9238,7 +9203,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * Set the time to wait between passing touches to WebCore. See also the
      * TOUCH_SENT_INTERVAL member for further discussion.
      *
-     * @hide This is only used by the DRT test application.
+     * This is only used by the DRT test application.
      */
     public void setTouchInterval(int interval) {
         mCurrentTouchInterval = interval;
@@ -9265,14 +9230,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return mViewManager;
     }
 
-    /** @hide send content invalidate */
+    /** send content invalidate */
     protected void contentInvalidateAll() {
         if (mWebViewCore != null && !mBlockWebkitViewMessages) {
             mWebViewCore.sendMessage(EventHub.CONTENT_INVALIDATE_ALL);
         }
     }
 
-    /** @hide discard all textures from tiles. Used in Profiled WebView */
+    /** discard all textures from tiles. Used in Profiled WebView */
     public void discardAllTextures() {
         nativeDiscardAllTextures();
     }
@@ -9304,7 +9269,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Begin collecting per-tile profiling data
      *
-     * @hide only used by profiling tests
+     * only used by profiling tests
      */
     public void tileProfilingStart() {
         nativeTileProfilingStart();
@@ -9312,29 +9277,29 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Return per-tile profiling data
      *
-     * @hide only used by profiling tests
+     * only used by profiling tests
      */
     public float tileProfilingStop() {
         return nativeTileProfilingStop();
     }
 
-    /** @hide only used by profiling tests */
+    /** only used by profiling tests */
     public void tileProfilingClear() {
         nativeTileProfilingClear();
     }
-    /** @hide only used by profiling tests */
+    /** only used by profiling tests */
     public int tileProfilingNumFrames() {
         return nativeTileProfilingNumFrames();
     }
-    /** @hide only used by profiling tests */
+    /** only used by profiling tests */
     public int tileProfilingNumTilesInFrame(int frame) {
         return nativeTileProfilingNumTilesInFrame(frame);
     }
-    /** @hide only used by profiling tests */
+    /** only used by profiling tests */
     public int tileProfilingGetInt(int frame, int tile, String key) {
         return nativeTileProfilingGetInt(frame, tile, key);
     }
-    /** @hide only used by profiling tests */
+    /** only used by profiling tests */
     public float tileProfilingGetFloat(int frame, int tile, String key) {
         return nativeTileProfilingGetFloat(frame, tile, key);
     }
