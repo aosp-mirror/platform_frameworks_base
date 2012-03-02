@@ -1954,9 +1954,9 @@
   <public type="attr" name="flipInterval" id="0x01010179" />
   <public type="attr" name="fillViewport" id="0x0101017a" />
   <public type="attr" name="prompt" id="0x0101017b" />
-  <!-- {@deprecated Use maxDate instead.} -->
-  <public type="attr" name="startYear" id="0x0101017c" />
   <!-- {@deprecated Use minDate instead.} -->
+  <public type="attr" name="startYear" id="0x0101017c" />
+  <!-- {@deprecated Use maxDate instead.} -->
   <public type="attr" name="endYear" id="0x0101017d" />
   <public type="attr" name="mode" id="0x0101017e" />
   <public type="attr" name="layout_x" id="0x0101017f" />
