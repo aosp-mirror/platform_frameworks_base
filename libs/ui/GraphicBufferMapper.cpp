@@ -15,12 +15,14 @@
  */
 
 #define LOG_TAG "GraphicBufferMapper"
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
 #include <stdint.h>
 #include <errno.h>
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
+#include <utils/Trace.h>
 
 #include <ui/GraphicBufferMapper.h>
 #include <ui/Rect.h>
@@ -46,6 +48,7 @@ GraphicBufferMapper::GraphicBufferMapper()
 
 status_t GraphicBufferMapper::registerBuffer(buffer_handle_t handle)
 {
+    ATRACE_CALL();
     status_t err;
 
     err = mAllocMod->registerBuffer(mAllocMod, handle);
@@ -57,6 +60,7 @@ status_t GraphicBufferMapper::registerBuffer(buffer_handle_t handle)
 
 status_t GraphicBufferMapper::unregisterBuffer(buffer_handle_t handle)
 {
+    ATRACE_CALL();
     status_t err;
 
     err = mAllocMod->unregisterBuffer(mAllocMod, handle);
@@ -69,6 +73,7 @@ status_t GraphicBufferMapper::unregisterBuffer(buffer_handle_t handle)
 status_t GraphicBufferMapper::lock(buffer_handle_t handle, 
         int usage, const Rect& bounds, void** vaddr)
 {
+    ATRACE_CALL();
     status_t err;
 
     err = mAllocMod->lock(mAllocMod, handle, usage,
@@ -81,6 +86,7 @@ status_t GraphicBufferMapper::lock(buffer_handle_t handle,
 
 status_t GraphicBufferMapper::unlock(buffer_handle_t handle)
 {
+    ATRACE_CALL();
     status_t err;
 
     err = mAllocMod->unlock(mAllocMod, handle);
