@@ -207,6 +207,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
     
     private void addStatusBarWindow() {
+        final View sb = makeStatusBarView();
         final int height = getStatusBarHeight();
 
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -235,7 +236,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.setTitle("StatusBar");
         lp.packageName = mContext.getPackageName();
         lp.windowAnimations = R.style.Animation_StatusBar;
-        WindowManagerImpl.getDefault().addView(makeStatusBarView(), lp);
+        WindowManagerImpl.getDefault().addView(sb, lp);
     }
 
     protected void addPanelWindows() {
@@ -1833,9 +1834,9 @@ public class TabletStatusBar extends BaseStatusBar implements
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
         workAroundBadLayerDrawableOpacity(row);
-//        View vetoButton = updateNotificationVetoButton(row, entry.notification);
-//        vetoButton.setContentDescription(mContext.getString(
-//                R.string.accessibility_remove_notification));
+        View vetoButton = updateNotificationVetoButton(row, entry.notification);
+        vetoButton.setContentDescription(mContext.getString(
+                R.string.accessibility_remove_notification));
 
         // the large icon
         ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);

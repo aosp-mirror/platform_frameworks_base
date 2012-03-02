@@ -162,11 +162,10 @@ public class PhoneStatusBar extends BaseStatusBar {
     Dialog mExpandedDialog;
     WindowManager.LayoutParams mExpandedParams;
     View mExpandedWindowView;
-    View mNotificationPanel; // the sliding panel within the notification window
+    View mNotificationPanel; // the sliding/resizing panel within the notification window
     ScrollView mScrollView;
     View mExpandedContents;
     // top bar
-    TextView mNoNotificationsTitle;
     View mClearButton;
     View mSettingsButton;
 
@@ -328,8 +327,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         mExpandedDialog = new ExpandedDialog(context);
         mPile = (NotificationRowLayout)expanded.findViewById(R.id.latestItems);
         mExpandedContents = mPile; // was: expanded.findViewById(R.id.notificationLinearLayout);
-        mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
-        mNoNotificationsTitle.setVisibility(View.GONE); // disabling for now
 
         mClearButton = expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
@@ -339,6 +336,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mSettingsButton = expanded.findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(mSettingsButtonListener);
         mScrollView = (ScrollView)expanded.findViewById(R.id.scroll);
+        mScrollView.setVerticalScrollBarEnabled(false); // less drawing during pulldowns
 
         mTicker = new MyTicker(context, sb);
 
@@ -971,19 +969,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         mClearButton.setEnabled(clearable);
 
-        /*
-        if (mNoNotificationsTitle.isShown()) {
-            if (any != (mNoNotificationsTitle.getAlpha() == 0.0f)) {
-                ObjectAnimator a = ObjectAnimator.ofFloat(mNoNotificationsTitle, "alpha",
-                            (any ? 0.0f : 0.75f));
-                a.setDuration(any ? 0 : 500);
-                a.setStartDelay(any ? 250 : 1000);
-                a.start();
-            }
-        } else {
-            mNoNotificationsTitle.setAlpha(any ? 0.0f : 0.75f);
-        }
-        */
     }
 
     public void showClock(boolean show) {
@@ -1266,6 +1251,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     void stopTracking() {
         mTracking = false;
+        mPile.setLayerType(View.LAYER_TYPE_NONE, null);
         mVelocityTracker.recycle();
         mVelocityTracker = null;
     }
@@ -1309,6 +1295,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         updateExpandedSize();
 
         mTracking = true;
+        mPile.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         mVelocityTracker = VelocityTracker.obtain();
         if (opening) {
             mAnimAccel = mExpandAccelPx;
@@ -1735,7 +1722,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             pw.println("  mExpandedView: " + viewInfo(mExpandedWindowView));
             pw.println("  mExpandedDialog: " + mExpandedDialog);
             pw.println("  mPile: " + viewInfo(mPile));
-            pw.println("  mNoNotificationsTitle: " + viewInfo(mNoNotificationsTitle));
             pw.println("  mCloseView: " + viewInfo(mCloseView));
             pw.println("  mTickerView: " + viewInfo(mTickerView));
             pw.println("  mScrollView: " + viewInfo(mScrollView)
@@ -1889,8 +1875,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     + " mTrackingPosition=" + mTrackingPosition);
         }
 
-        int h = 0;
-        int disph = mDisplayMetrics.heightPixels;
+        int panelh = 0;
+        final int disph = mDisplayMetrics.heightPixels;
 
         // If the expanded view is not visible, make sure they're still off screen.
         // Maybe the view was resized.
@@ -1902,25 +1888,33 @@ public class PhoneStatusBar extends BaseStatusBar {
         // tracking view...
         int pos;
         if (expandedPosition == EXPANDED_FULL_OPEN) {
-            pos = h;
+            panelh = disph;
         }
         else if (expandedPosition == EXPANDED_LEAVE_ALONE) {
-            pos = mTrackingPosition;
+            panelh = mTrackingPosition;
         }
         else {
             if (expandedPosition <= disph) {
-                pos = expandedPosition;
+                panelh = expandedPosition;
             } else {
-                pos = disph;
+                panelh = disph;
             }
-            pos -= disph-h;
         }
-        mTrackingPosition = pos;
+        
+        // catch orientation changes and other peculiar cases
+        if (panelh > disph || (panelh < disph && !mTracking && !mAnimating))
+            panelh = disph;
+        
+        mTrackingPosition = panelh;
         // XXX: this is all very WIP
-        mNotificationPanel.setY(pos);
+        //mNotificationPanel.setY(panelh);
+        final View cropView = mNotificationPanel;
+        ViewGroup.LayoutParams lp = cropView.getLayoutParams();
+        lp.height = panelh;
+        cropView.setLayoutParams(lp);
         // woo, special effects
-        final float frac = 1.0f + (float)pos / mDisplayMetrics.heightPixels;
-        final int color = ((int)(0xCC * frac * frac)) << 24;
+        final float frac = (float)panelh / disph;
+        final int color = ((int)(0xB0 * frac * frac)) << 24;
         mExpandedWindowView.setBackgroundColor(color);
         
 //        Slog.d(TAG, String.format("updateExpanded: pos=%d frac=%.2f col=0x%08x", pos, frac, color));
@@ -2205,8 +2199,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mClearButton instanceof TextView) {
             ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
         }
-        mNoNotificationsTitle.setText(context.getText(R.string.status_bar_no_notifications_title));
-
         loadDimens();
     }
 

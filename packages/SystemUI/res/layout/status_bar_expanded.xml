@@ -25,7 +25,7 @@
     android:descendantFocusability="afterDescendants"
     >
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -90,63 +90,44 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
+            android:layout_marginTop="52dp"
             android:background="@drawable/status_bar_hr"
             />
     
-        <FrameLayout
-            android:layout_width="match_parent" 
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fadingEdge="none"
+            android:overScrollMode="ifContentScrolls"
+			android:layout_marginTop="54dp"
+			android:layout_marginBottom="34dp"
             >
-            <TextView android:id="@+id/noNotificationsTitle"
+            <com.android.systemui.statusbar.policy.NotificationRowLayout
+                android:id="@+id/latestItems"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@android:style/TextAppearance.Large"
-                android:padding="8dp"
-                android:layout_gravity="top"
-                android:gravity="left"
-                android:text="@string/status_bar_no_notifications_title"
+                systemui:rowHeight="@dimen/notification_height"
                 />
+        </ScrollView>
     
-            <ScrollView
-                android:id="@+id/scroll"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fadingEdge="none"
-                android:overScrollMode="ifContentScrolls"
-                >
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    >
-                    <com.android.systemui.statusbar.policy.NotificationRowLayout
-                        android:id="@+id/latestItems"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        systemui:rowHeight="@dimen/notification_height"
-                        />
-    
-                </LinearLayout>
-            </ScrollView>
-    
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/title_bar_shadow"
-                android:scaleType="fitXY"
-            />
-    
-        </FrameLayout>
-
-        <com.android.systemui.statusbar.phone.CloseDragHandle android:id="@+id/close"
+        <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:src="@drawable/title_bar_shadow"
+			android:layout_marginTop="54dp"
+            android:scaleType="fitXY"
+        />
+   
+        <com.android.systemui.statusbar.phone.CloseDragHandle android:id="@+id/close"
+            android:layout_width="match_parent"
+            android:layout_height="34dp"
+            android:layout_gravity="bottom"
             android:orientation="vertical"
             >
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="34dp"
                 android:layout_gravity="bottom"
                 android:scaleType="fitXY"
                 android:src="@drawable/status_bar_close_on"
@@ -154,6 +135,6 @@
     
         </com.android.systemui.statusbar.phone.CloseDragHandle>
     
-    </LinearLayout><!-- end of sliding panel -->
+    </FrameLayout><!-- end of sliding panel -->
 
 </FrameLayout><!-- end of window -->
