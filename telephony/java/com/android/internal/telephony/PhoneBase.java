@@ -41,7 +41,6 @@ import com.android.internal.telephony.gsm.UsimServiceTable;
 import com.android.internal.telephony.ims.IsimRecords;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 import com.android.internal.telephony.gsm.SIMRecords;
-import com.android.internal.telephony.gsm.SimCard;
 
 import java.util.Locale;
 

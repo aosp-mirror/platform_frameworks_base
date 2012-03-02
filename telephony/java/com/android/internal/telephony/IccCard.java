@@ -44,7 +44,7 @@ import com.android.internal.R;
 /**
  * {@hide}
  */
-public abstract class IccCard {
+public class IccCard {
     protected String mLogTag;
     protected boolean mDbg;
 
@@ -67,6 +67,10 @@ public abstract class IccCard {
     private boolean mIccPinLocked = true; // Default to locked
     private boolean mIccFdnEnabled = false; // Default to disabled.
                                             // Will be updated when SIM_READY.
+
+    /* Parameter is3gpp's values to be passed to constructor */
+    public final static boolean CARD_IS_3GPP = true;
+    public final static boolean CARD_IS_NOT_3GPP = false;
 
 
     /* The extra data for broacasting intent INTENT_ICC_STATE_CHANGE */
@@ -162,8 +166,11 @@ public abstract class IccCard {
         return State.UNKNOWN;
     }
 
-    public IccCard(PhoneBase phone, String logTag, Boolean dbg) {
+    public IccCard(PhoneBase phone, String logTag, Boolean is3gpp, Boolean dbg) {
         mPhone = phone;
+        this.is3gpp = is3gpp;
+        mCdmaSSM = CdmaSubscriptionSourceManager.getInstance(mPhone.getContext(),
+                mPhone.mCM, mHandler, EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
         mPhone.mCM.registerForOffOrNotAvailable(mHandler, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mPhone.mCM.registerForOn(mHandler, EVENT_RADIO_ON, null);
         mPhone.mCM.registerForIccStatusChanged(mHandler, EVENT_ICC_STATUS_CHANGED, null);
@@ -175,6 +182,7 @@ public abstract class IccCard {
         mPhone.mCM.unregisterForIccStatusChanged(mHandler);
         mPhone.mCM.unregisterForOffOrNotAvailable(mHandler);
         mPhone.mCM.unregisterForOn(mHandler);
+        mCdmaSSM.dispose(mHandler);
     }
 
     protected void finalize() {
@@ -447,7 +455,9 @@ public abstract class IccCard {
      *         yet available
      *
      */
-    public abstract String getServiceProviderName();
+    public String getServiceProviderName () {
+        return mPhone.mIccRecords.getServiceProviderName();
+    }
 
     protected void updateStateProperty() {
         mPhone.setSystemProperty(TelephonyProperties.PROPERTY_SIM_STATE, getState().toString());
@@ -912,7 +922,13 @@ public abstract class IccCard {
         Log.d(mLogTag, "[IccCard] " + msg);
     }
 
-    protected abstract int getCurrentApplicationIndex();
+    protected int getCurrentApplicationIndex() {
+        if (is3gpp) {
+            return mIccCardStatus.getGsmUmtsSubscriptionAppIndex();
+        } else {
+            return mIccCardStatus.getCdmaSubscriptionAppIndex();
+        }
+    }
 
     public String getAid() {
         String aid = "";

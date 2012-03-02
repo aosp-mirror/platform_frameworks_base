@@ -46,6 +46,7 @@ import com.android.internal.telephony.CallTracker;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccException;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccPhoneBookInterfaceManager;
@@ -148,7 +149,7 @@ public class CDMAPhone extends PhoneBase {
     }
 
     protected void initSstIcc() {
-        mIccCard = new RuimCard(this, LOG_TAG, DBG);
+        mIccCard = new IccCard(this, LOG_TAG, IccCard.CARD_IS_NOT_3GPP, DBG);
         mIccRecords = new RuimRecords(this);
         mIccFileHandler = new RuimFileHandler(this);
         // CdmaServiceStateTracker registers with IccCard to know

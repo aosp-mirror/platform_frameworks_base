@@ -30,8 +30,8 @@ import com.android.internal.telephony.AdnRecordCache;
 import com.android.internal.telephony.AdnRecordLoader;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.IccRefreshResponse;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.TelephonyProperties;
-import com.android.internal.telephony.cdma.RuimCard;
 import com.android.internal.telephony.MccTable;
 
 // can't be used since VoiceMailConstants is not public
@@ -346,7 +346,7 @@ public final class RuimRecords extends IccRecords {
         recordsLoadedRegistrants.notifyRegistrants(
             new AsyncResult(null, null, null));
         phone.mIccCard.broadcastIccStateChangedIntent(
-                RuimCard.INTENT_VALUE_ICC_LOADED, null);
+                IccCard.INTENT_VALUE_ICC_LOADED, null);
     }
 
     private void onRuimReady() {
@@ -355,7 +355,7 @@ public final class RuimRecords extends IccRecords {
         */
 
         phone.mIccCard.broadcastIccStateChangedIntent(
-                RuimCard.INTENT_VALUE_ICC_READY, null);
+                IccCard.INTENT_VALUE_ICC_READY, null);
 
         fetchRuimRecords();
 
