@@ -76,7 +76,6 @@ public abstract class Layout {
                                         int start, int end,
                                         TextPaint paint) {
         float need = 0;
-        TextPaint workPaint = new TextPaint();
 
         int next;
         for (int i = start; i <= end; i = next) {
@@ -86,7 +85,7 @@ public abstract class Layout {
                 next = end;
 
             // note, omits trailing paragraph char
-            float w = measurePara(paint, workPaint, source, i, next);
+            float w = measurePara(paint, source, i, next);
 
             if (w > need)
                 need = w;
@@ -189,106 +188,34 @@ public abstract class Layout {
      * Draw this Layout on the specified canvas, with the highlight path drawn
      * between the background and the text.
      *
-     * @param c the canvas
+     * @param canvas the canvas
      * @param highlight the path of the highlight or cursor; can be null
      * @param highlightPaint the paint for the highlight
      * @param cursorOffsetVertical the amount to temporarily translate the
      *        canvas while rendering the highlight
      */
-    public void draw(Canvas c, Path highlight, Paint highlightPaint,
-                     int cursorOffsetVertical) {
-        int dtop, dbottom;
+    public void draw(Canvas canvas, Path highlight, Paint highlightPaint,
+            int cursorOffsetVertical) {
+        final long lineRange = getLineRangeForDraw(canvas);
+        int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
+        int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
+        if (lastLine < 0) return;
 
-        synchronized (sTempRect) {
-            if (!c.getClipBounds(sTempRect)) {
-                return;
-            }
+        drawBackground(canvas, highlight, highlightPaint, cursorOffsetVertical,
+                firstLine, lastLine);
+        drawText(canvas, firstLine, lastLine);
+    }
 
-            dtop = sTempRect.top;
-            dbottom = sTempRect.bottom;
-        }
-
-        int top = 0;
-        int bottom = getLineTop(getLineCount());
-
-        if (dtop > top) {
-            top = dtop;
-        }
-        if (dbottom < bottom) {
-            bottom = dbottom;
-        }
-
-        int first = getLineForVertical(top);
-        int last = getLineForVertical(bottom);
-
-        int previousLineBottom = getLineTop(first);
-        int previousLineEnd = getLineStart(first);
-
-        TextPaint paint = mPaint;
-        CharSequence buf = mText;
-        int width = mWidth;
-        boolean spannedText = mSpannedText;
-
+    /**
+     * @hide
+     */
+    public void drawText(Canvas canvas, int firstLine, int lastLine) {
+        int previousLineBottom = getLineTop(firstLine);
+        int previousLineEnd = getLineStart(firstLine);
         ParagraphStyle[] spans = NO_PARA_SPANS;
         int spanEnd = 0;
-        int textLength = 0;
-
-        // First, draw LineBackgroundSpans.
-        // LineBackgroundSpans know nothing about the alignment, margins, or
-        // direction of the layout or line.  XXX: Should they?
-        // They are evaluated at each line.
-        if (spannedText) {
-            Spanned sp = (Spanned) buf;
-            textLength = buf.length();
-            for (int i = first; i <= last; i++) {
-                int start = previousLineEnd;
-                int end = getLineStart(i+1);
-                previousLineEnd = end;
-
-                int ltop = previousLineBottom;
-                int lbottom = getLineTop(i+1);
-                previousLineBottom = lbottom;
-                int lbaseline = lbottom - getLineDescent(i);
-
-                if (start >= spanEnd) {
-                    // These should be infrequent, so we'll use this so that
-                    // we don't have to check as often.
-                    spanEnd = sp.nextSpanTransition(start, textLength,
-                            LineBackgroundSpan.class);
-                    // All LineBackgroundSpans on a line contribute to its
-                    // background.
-                   spans = getParagraphSpans(sp, start, end, LineBackgroundSpan.class);
-                }
-
-                for (int n = 0; n < spans.length; n++) {
-                    LineBackgroundSpan back = (LineBackgroundSpan) spans[n];
-
-                    back.drawBackground(c, paint, 0, width,
-                                       ltop, lbaseline, lbottom,
-                                       buf, start, end,
-                                       i);
-                }
-            }
-            // reset to their original values
-            spanEnd = 0;
-            previousLineBottom = getLineTop(first);
-            previousLineEnd = getLineStart(first);
-            spans = NO_PARA_SPANS;
-        }
-
-        // There can be a highlight even without spans if we are drawing
-        // a non-spanned transformation of a spanned editing buffer.
-        if (highlight != null) {
-            if (cursorOffsetVertical != 0) {
-                c.translate(0, cursorOffsetVertical);
-            }
-
-            c.drawPath(highlight, highlightPaint);
-
-            if (cursorOffsetVertical != 0) {
-                c.translate(0, -cursorOffsetVertical);
-            }
-        }
+        TextPaint paint = mPaint;
+        CharSequence buf = mText;
 
         Alignment paraAlign = mAlignment;
         TabStops tabStops = null;
@@ -296,13 +223,11 @@ public abstract class Layout {
 
         TextLine tl = TextLine.obtain();
 
-        // Next draw the lines, one at a time.
-        // the baseline is the top of the following line minus the current
-        // line's descent.
-        for (int i = first; i <= last; i++) {
+        // Draw the lines, one at a time.
+        // The baseline is the top of the following line minus the current line's descent.
+        for (int i = firstLine; i <= lastLine; i++) {
             int start = previousLineEnd;
-
-            previousLineEnd = getLineStart(i+1);
+            previousLineEnd = getLineStart(i + 1);
             int end = getLineVisibleEnd(i, start, previousLineEnd);
 
             int ltop = previousLineBottom;
@@ -314,10 +239,10 @@ public abstract class Layout {
             int left = 0;
             int right = mWidth;
 
-            if (spannedText) {
+            if (mSpannedText) {
                 Spanned sp = (Spanned) buf;
-                boolean isFirstParaLine = (start == 0 ||
-                        buf.charAt(start - 1) == '\n');
+                int textLength = buf.length();
+                boolean isFirstParaLine = (start == 0 || buf.charAt(start - 1) == '\n');
 
                 // New batch of paragraph styles, collect into spans array.
                 // Compute the alignment, last alignment style wins.
@@ -329,13 +254,13 @@ public abstract class Layout {
                 // just collect the ones present at the start of the paragraph.
                 // If spanEnd is before the end of the paragraph, that's not
                 // our problem.
-                if (start >= spanEnd && (i == first || isFirstParaLine)) {
+                if (start >= spanEnd && (i == firstLine || isFirstParaLine)) {
                     spanEnd = sp.nextSpanTransition(start, textLength,
                                                     ParagraphStyle.class);
                     spans = getParagraphSpans(sp, start, spanEnd, ParagraphStyle.class);
 
                     paraAlign = mAlignment;
-                    for (int n = spans.length-1; n >= 0; n--) {
+                    for (int n = spans.length - 1; n >= 0; n--) {
                         if (spans[n] instanceof AlignmentSpan) {
                             paraAlign = ((AlignmentSpan) spans[n]).getAlignment();
                             break;
@@ -359,12 +284,12 @@ public abstract class Layout {
                         }
 
                         if (dir == DIR_RIGHT_TO_LEFT) {
-                            margin.drawLeadingMargin(c, paint, right, dir, ltop,
+                            margin.drawLeadingMargin(canvas, paint, right, dir, ltop,
                                                      lbaseline, lbottom, buf,
                                                      start, end, isFirstParaLine, this);
                             right -= margin.getLeadingMargin(useFirstLineMargin);
                         } else {
-                            margin.drawLeadingMargin(c, paint, left, dir, ltop,
+                            margin.drawLeadingMargin(canvas, paint, left, dir, ltop,
                                                      lbaseline, lbottom, buf,
                                                      start, end, isFirstParaLine, this);
                             left += margin.getLeadingMargin(useFirstLineMargin);
@@ -416,17 +341,95 @@ public abstract class Layout {
             }
 
             Directions directions = getLineDirections(i);
-            if (directions == DIRS_ALL_LEFT_TO_RIGHT &&
-                    !spannedText && !hasTabOrEmoji) {
+            if (directions == DIRS_ALL_LEFT_TO_RIGHT && !mSpannedText && !hasTabOrEmoji) {
                 // XXX: assumes there's nothing additional to be done
-                c.drawText(buf, start, end, x, lbaseline, paint);
+                canvas.drawText(buf, start, end, x, lbaseline, paint);
             } else {
                 tl.set(paint, buf, start, end, dir, directions, hasTabOrEmoji, tabStops);
-                tl.draw(c, x, ltop, lbaseline, lbottom);
+                tl.draw(canvas, x, ltop, lbaseline, lbottom);
             }
         }
 
         TextLine.recycle(tl);
+    }
+
+    /**
+     * @hide
+     */
+    public void drawBackground(Canvas canvas, Path highlight, Paint highlightPaint,
+            int cursorOffsetVertical, int firstLine, int lastLine) {
+        // First, draw LineBackgroundSpans.
+        // LineBackgroundSpans know nothing about the alignment, margins, or
+        // direction of the layout or line.  XXX: Should they?
+        // They are evaluated at each line.
+        if (mSpannedText) {
+            int previousLineBottom = getLineTop(firstLine);
+            int previousLineEnd = getLineStart(firstLine);
+            ParagraphStyle[] spans = NO_PARA_SPANS;
+            TextPaint paint = mPaint;
+            CharSequence buf = mText;
+            int spanEnd = 0;
+            final int width = mWidth;
+            Spanned sp = (Spanned) buf;
+            int textLength = buf.length();
+            for (int i = firstLine; i <= lastLine; i++) {
+                int start = previousLineEnd;
+                int end = getLineStart(i + 1);
+                previousLineEnd = end;
+
+                int ltop = previousLineBottom;
+                int lbottom = getLineTop(i + 1);
+                previousLineBottom = lbottom;
+                int lbaseline = lbottom - getLineDescent(i);
+
+                if (start >= spanEnd) {
+                    // These should be infrequent, so we'll use this so that
+                    // we don't have to check as often.
+                    spanEnd = sp.nextSpanTransition(start, textLength, LineBackgroundSpan.class);
+                    // All LineBackgroundSpans on a line contribute to its background.
+                    spans = getParagraphSpans(sp, start, end, LineBackgroundSpan.class);
+                }
+
+                for (int n = 0; n < spans.length; n++) {
+                    LineBackgroundSpan back = (LineBackgroundSpan) spans[n];
+                    back.drawBackground(canvas, paint, 0, width,
+                            ltop, lbaseline, lbottom,
+                            buf, start, end, i);
+                }
+            }
+        }
+
+        // There can be a highlight even without spans if we are drawing
+        // a non-spanned transformation of a spanned editing buffer.
+        if (highlight != null) {
+            if (cursorOffsetVertical != 0) canvas.translate(0, cursorOffsetVertical);
+            canvas.drawPath(highlight, highlightPaint);
+            if (cursorOffsetVertical != 0) canvas.translate(0, -cursorOffsetVertical);
+        }
+    }
+
+    /**
+     * @param canvas
+     * @return The range of lines that need to be drawn, possibly empty.
+     * @hide
+     */
+    public long getLineRangeForDraw(Canvas canvas) {
+        int dtop, dbottom;
+
+        synchronized (sTempRect) {
+            if (!canvas.getClipBounds(sTempRect)) {
+                // Negative range end used as a special flag
+                return TextUtils.packRangeInLong(0, -1);
+            }
+
+            dtop = sTempRect.top;
+            dbottom = sTempRect.bottom;
+        }
+
+        final int top = Math.max(dtop, 0);
+        final int bottom = Math.min(getLineTop(getLineCount()), dbottom);
+
+        return TextUtils.packRangeInLong(getLineForVertical(top), getLineForVertical(bottom));
     }
 
     /**
@@ -460,7 +463,8 @@ public abstract class Layout {
                 int start = getLineStart(line);
                 int spanEnd = spanned.nextSpanTransition(start, spanned.length(),
                         TabStopSpan.class);
-                TabStopSpan[] tabSpans = getParagraphSpans(spanned, start, spanEnd, TabStopSpan.class);
+                TabStopSpan[] tabSpans = getParagraphSpans(spanned, start, spanEnd,
+                        TabStopSpan.class);
                 if (tabSpans.length > 0) {
                     tabStops = new TabStops(TAB_INCREMENT, tabSpans);
                 }
@@ -1481,8 +1485,7 @@ public abstract class Layout {
     }
 
     /* package */
-    static float measurePara(TextPaint paint, TextPaint workPaint,
-            CharSequence text, int start, int end) {
+    static float measurePara(TextPaint paint, CharSequence text, int start, int end) {
 
         MeasuredText mt = MeasuredText.obtain();
         TextLine tl = TextLine.obtain();
@@ -1659,7 +1662,7 @@ public abstract class Layout {
      */
     /* package */ static <T> T[] getParagraphSpans(Spanned text, int start, int end, Class<T> type) {
         if (start == end && start > 0) {
-            return (T[]) ArrayUtils.emptyArray(type);
+            return ArrayUtils.emptyArray(type);
         }
 
         return text.getSpans(start, end, type);
@@ -1777,8 +1780,7 @@ public abstract class Layout {
 
     }
 
-    /* package */ static class SpannedEllipsizer
-                    extends Ellipsizer implements Spanned {
+    /* package */ static class SpannedEllipsizer extends Ellipsizer implements Spanned {
         private Spanned mSpanned;
 
         public SpannedEllipsizer(CharSequence display) {
@@ -1802,6 +1804,7 @@ public abstract class Layout {
             return mSpanned.getSpanFlags(tag);
         }
 
+        @SuppressWarnings("rawtypes")
         public int nextSpanTransition(int start, int limit, Class type) {
             return mSpanned.nextSpanTransition(start, limit, type);
         }

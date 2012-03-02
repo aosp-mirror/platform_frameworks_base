@@ -1664,6 +1664,36 @@ public class TextUtils {
         }
     }
 
+    /**
+     * Pack 2 int values into a long, useful as a return value for a range
+     * @see #unpackRangeStartFromLong(long)
+     * @see #unpackRangeEndFromLong(long)
+     * @hide
+     */
+    public static long packRangeInLong(int start, int end) {
+        return (((long) start) << 32) | end;
+    }
+
+    /**
+     * Get the start value from a range packed in a long by {@link #packRangeInLong(int, int)}
+     * @see #unpackRangeEndFromLong(long)
+     * @see #packRangeInLong(int, int)
+     * @hide
+     */
+    public static int unpackRangeStartFromLong(long range) {
+        return (int) (range >>> 32);
+    }
+
+    /**
+     * Get the end value from a range packed in a long by {@link #packRangeInLong(int, int)}
+     * @see #unpackRangeStartFromLong(long)
+     * @see #packRangeInLong(int, int)
+     * @hide
+     */
+    public static int unpackRangeEndFromLong(long range) {
+        return (int) (range & 0x00000000FFFFFFFFL);
+    }
+
     private static Object sLock = new Object();
     private static char[] sTemp = null;
 

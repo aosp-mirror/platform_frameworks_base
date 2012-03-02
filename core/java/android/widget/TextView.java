@@ -6946,7 +6946,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
-        if (mEditor != null) getEditor().mTextDisplayListIsValid = false;
     }
 
     /**
@@ -7772,18 +7771,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 hasPrimaryClip());
     }
 
-    private static long packRangeInLong(int start, int end) {
-        return (((long) start) << 32) | end;
-    }
-
-    private static int extractRangeStartFromLong(long range) {
-        return (int) (range >>> 32);
-    }
-
-    private static int extractRangeEndFromLong(long range) {
-        return (int) (range & 0x00000000FFFFFFFFL);
-    }
-
     private boolean selectAll() {
         final int length = mText.length();
         Selection.setSelection((Spannable) mText, 0, length);
@@ -7822,8 +7809,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         long lastTouchOffsets = getLastTouchOffsets();
-        final int minOffset = extractRangeStartFromLong(lastTouchOffsets);
-        final int maxOffset = extractRangeEndFromLong(lastTouchOffsets);
+        final int minOffset = TextUtils.unpackRangeStartFromLong(lastTouchOffsets);
+        final int maxOffset = TextUtils.unpackRangeEndFromLong(lastTouchOffsets);
 
         // Safety check in case standard touch event handling has been bypassed
         if (minOffset < 0 || minOffset >= mText.length()) return false;
@@ -7848,8 +7835,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     selectionStart == selectionEnd) {
                 // Possible when the word iterator does not properly handle the text's language
                 long range = getCharRange(minOffset);
-                selectionStart = extractRangeStartFromLong(range);
-                selectionEnd = extractRangeEndFromLong(range);
+                selectionStart = TextUtils.unpackRangeStartFromLong(range);
+                selectionEnd = TextUtils.unpackRangeEndFromLong(range);
             }
         }
 
@@ -7897,30 +7884,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final char currentChar = mText.charAt(offset);
             final char nextChar = mText.charAt(offset + 1);
             if (Character.isSurrogatePair(currentChar, nextChar)) {
-                return packRangeInLong(offset,  offset + 2);
+                return TextUtils.packRangeInLong(offset,  offset + 2);
             }
         }
         if (offset < textLength) {
-            return packRangeInLong(offset,  offset + 1);
+            return TextUtils.packRangeInLong(offset,  offset + 1);
         }
         if (offset - 2 >= 0) {
             final char previousChar = mText.charAt(offset - 1);
             final char previousPreviousChar = mText.charAt(offset - 2);
             if (Character.isSurrogatePair(previousPreviousChar, previousChar)) {
-                return packRangeInLong(offset - 2,  offset);
+                return TextUtils.packRangeInLong(offset - 2,  offset);
             }
         }
         if (offset - 1 >= 0) {
-            return packRangeInLong(offset - 1,  offset);
+            return TextUtils.packRangeInLong(offset - 1,  offset);
         }
-        return packRangeInLong(offset,  offset);
+        return TextUtils.packRangeInLong(offset,  offset);
     }
 
     private long getLastTouchOffsets() {
         SelectionModifierCursorController selectionController = getSelectionController();
         final int minOffset = selectionController.getMinTouchOffset();
         final int maxOffset = selectionController.getMaxTouchOffset();
-        return packRangeInLong(minOffset, maxOffset);
+        return TextUtils.packRangeInLong(minOffset, maxOffset);
     }
 
     @Override
@@ -8111,7 +8098,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        return packRangeInLong(min, max);
+        return TextUtils.packRangeInLong(min, max);
     }
 
     private DragShadowBuilder getTextThumbnailBuilder(CharSequence text) {
@@ -8470,8 +8457,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (paste != null) {
                     if (!didFirst) {
                         long minMax = prepareSpacesAroundPaste(min, max, paste);
-                        min = extractRangeStartFromLong(minMax);
-                        max = extractRangeEndFromLong(minMax);
+                        min = TextUtils.unpackRangeStartFromLong(minMax);
+                        max = TextUtils.unpackRangeEndFromLong(minMax);
                         Selection.setSelection((Spannable) mText, max);
                         ((Editable) mText).replace(min, max, paste);
                         didFirst = true;
@@ -8630,8 +8617,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int originalLength = mText.length();
         long minMax = prepareSpacesAroundPaste(offset, offset, content);
-        int min = extractRangeStartFromLong(minMax);
-        int max = extractRangeEndFromLong(minMax);
+        int min = TextUtils.unpackRangeStartFromLong(minMax);
+        int max = TextUtils.unpackRangeEndFromLong(minMax);
 
         Selection.setSelection((Spannable) mText, max);
         replaceText_internal(min, max, content);
@@ -11667,33 +11654,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (canHaveDisplayList() && canvas.isHardwareAccelerated()) {
-                final int width = mRight - mLeft;
-                final int height = mBottom - mTop;
-
-                if (mTextDisplayList == null || !mTextDisplayList.isValid() ||
-                        !mTextDisplayListIsValid) {
-                    if (mTextDisplayList == null) {
-                        mTextDisplayList = getHardwareRenderer().createDisplayList("Text");
-                    }
-
-                    final HardwareCanvas hardwareCanvas = mTextDisplayList.start();
-                    try {
-                        hardwareCanvas.setViewport(width, height);
-                        // The dirty rect should always be null for a display list
-                        hardwareCanvas.onPreDraw(null);
-                        hardwareCanvas.translate(-mScrollX, -mScrollY);
-                        layout.draw(hardwareCanvas, highlight, mHighlightPaint, cursorOffsetVertical);
-                        hardwareCanvas.translate(mScrollX, mScrollY);
-                    } finally {
-                        hardwareCanvas.onPostDraw();
-                        mTextDisplayList.end();
-                        mTextDisplayListIsValid = true;
-                    }
-                }
-                canvas.translate(mScrollX, mScrollY);
-                ((HardwareCanvas) canvas).drawDisplayList(mTextDisplayList, width, height, null,
-                        DisplayList.FLAG_CLIP_CHILDREN);
-                canvas.translate(-mScrollX, -mScrollY);
+                drawHardwareAccelerated(canvas, layout, highlight, cursorOffsetVertical);
             } else {
                 layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
             }
@@ -11702,6 +11663,46 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 canvas.translate((int) mMarquee.getGhostOffset(), 0.0f);
                 layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
             }
+        }
+
+        private void drawHardwareAccelerated(Canvas canvas, Layout layout, Path highlight,
+                int cursorOffsetVertical) {
+            final int width = mRight - mLeft;
+            final int height = mBottom - mTop;
+
+            final long lineRange = layout.getLineRangeForDraw(canvas);
+            int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
+            int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
+            if (lastLine < 0) return;
+
+            layout.drawBackground(canvas, highlight, mHighlightPaint, cursorOffsetVertical,
+                    firstLine, lastLine);
+
+            if (mTextDisplayList == null || !mTextDisplayList.isValid() ||
+                    !mTextDisplayListIsValid) {
+                if (mTextDisplayList == null) {
+                    mTextDisplayList = getHardwareRenderer().createDisplayList("Text");
+                }
+
+                final HardwareCanvas hardwareCanvas = mTextDisplayList.start();
+                try {
+                    hardwareCanvas.setViewport(width, height);
+                    // The dirty rect should always be null for a display list
+                    hardwareCanvas.onPreDraw(null);
+                    hardwareCanvas.translate(-mScrollX, -mScrollY);
+                    layout.drawText(hardwareCanvas, firstLine, lastLine);
+                    //layout.draw(hardwareCanvas, highlight, mHighlightPaint, cursorOffsetVertical);
+                    hardwareCanvas.translate(mScrollX, mScrollY);
+                } finally {
+                    hardwareCanvas.onPostDraw();
+                    mTextDisplayList.end();
+                    mTextDisplayListIsValid = true;
+                }
+            }
+            canvas.translate(mScrollX, mScrollY);
+            ((HardwareCanvas) canvas).drawDisplayList(mTextDisplayList, width, height, null,
+                    DisplayList.FLAG_CLIP_CHILDREN);
+            canvas.translate(-mScrollX, -mScrollY);
         }
 
         private void drawCursor(Canvas canvas, int cursorOffsetVertical) {
