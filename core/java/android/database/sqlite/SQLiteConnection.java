@@ -208,11 +208,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 mConfiguration.label,
                 SQLiteDebug.DEBUG_SQL_STATEMENTS, SQLiteDebug.DEBUG_SQL_TIME);
 
-        setSyncMode();
         setPageSize();
-        setAutoCheckpointInterval();
-        setJournalSizeLimit();
+        setSyncModeFromConfiguration();
         setJournalModeFromConfiguration();
+        setJournalSizeLimit();
+        setAutoCheckpointInterval();
         setLocaleFromConfiguration();
     }
 
@@ -236,12 +236,6 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
-    private void setSyncMode() {
-        if (!mConfiguration.isInMemoryDb()) {
-            execute("PRAGMA synchronous=" + SQLiteGlobal.getSyncMode(), null, null);
-        }
-    }
-
     private void setPageSize() {
         if (!mConfiguration.isInMemoryDb()) {
             execute("PRAGMA page_size=" + SQLiteGlobal.getDefaultPageSize(), null, null);
@@ -259,6 +253,12 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         if (!mConfiguration.isInMemoryDb()) {
             executeForLong("PRAGMA journal_size_limit=" + SQLiteGlobal.getJournalSizeLimit(),
                     null, null);
+        }
+    }
+
+    private void setSyncModeFromConfiguration() {
+        if (!mConfiguration.isInMemoryDb()) {
+            execute("PRAGMA synchronous=" + mConfiguration.syncMode, null, null);
         }
     }
 
@@ -290,6 +290,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
 
         // Remember what changed.
+        boolean syncModeChanged = !configuration.syncMode.equalsIgnoreCase(
+                mConfiguration.syncMode);
         boolean journalModeChanged = !configuration.journalMode.equalsIgnoreCase(
                 mConfiguration.journalMode);
         boolean localeChanged = !configuration.locale.equals(mConfiguration.locale);
@@ -299,6 +301,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
         // Update prepared statement cache size.
         mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
+
+        // Update sync mode.
+        if (syncModeChanged) {
+            setSyncModeFromConfiguration();
+        }
 
         // Update journal mode.
         if (journalModeChanged) {

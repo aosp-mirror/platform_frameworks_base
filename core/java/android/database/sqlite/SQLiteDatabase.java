@@ -1781,6 +1781,7 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             mIsWALEnabledLocked = true;
             mConfigurationLocked.maxConnectionPoolSize = SQLiteGlobal.getWALConnectionPoolSize();
+            mConfigurationLocked.syncMode = SQLiteGlobal.getWALSyncMode();
             mConfigurationLocked.journalMode = "WAL";
             mConnectionPoolLocked.reconfigure(mConfigurationLocked);
         }
@@ -1801,6 +1802,7 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             mIsWALEnabledLocked = false;
             mConfigurationLocked.maxConnectionPoolSize = 1;
+            mConfigurationLocked.syncMode = SQLiteGlobal.getDefaultSyncMode();
             mConfigurationLocked.journalMode = SQLiteGlobal.getDefaultJournalMode();
             mConnectionPoolLocked.reconfigure(mConfigurationLocked);
         }

@@ -441,7 +441,8 @@
   <java-symbol type="string" name="day_of_week_shortest_tuesday" />
   <java-symbol type="string" name="day_of_week_shortest_wednesday" />
   <java-symbol type="string" name="db_default_journal_mode" />
-  <java-symbol type="string" name="db_sync_mode" />
+  <java-symbol type="string" name="db_default_sync_mode" />
+  <java-symbol type="string" name="db_wal_sync_mode" />
   <java-symbol type="string" name="decline" />
   <java-symbol type="string" name="default_permission_group" />
   <java-symbol type="string" name="default_text_encoding" />

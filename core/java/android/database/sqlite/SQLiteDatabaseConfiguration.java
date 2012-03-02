@@ -85,6 +85,13 @@ public final class SQLiteDatabaseConfiguration {
     public Locale locale;
 
     /**
+     * The database synchronization mode.
+     *
+     * Default is {@link SQLiteGlobal#getDefaultSyncMode()}.
+     */
+    public String syncMode;
+
+    /**
      * The database journal mode.
      *
      * Default is {@link SQLiteGlobal#getDefaultJournalMode()}.
@@ -117,6 +124,7 @@ public final class SQLiteDatabaseConfiguration {
         maxConnectionPoolSize = 1;
         maxSqlCacheSize = 25;
         locale = Locale.getDefault();
+        syncMode = SQLiteGlobal.getDefaultSyncMode();
         journalMode = SQLiteGlobal.getDefaultJournalMode();
     }
 
@@ -154,6 +162,7 @@ public final class SQLiteDatabaseConfiguration {
         maxConnectionPoolSize = other.maxConnectionPoolSize;
         maxSqlCacheSize = other.maxSqlCacheSize;
         locale = other.locale;
+        syncMode = other.syncMode;
         journalMode = other.journalMode;
         customFunctions.clear();
         customFunctions.addAll(other.customFunctions);

@@ -83,11 +83,19 @@ public final class SQLiteGlobal {
     }
 
     /**
-     * Gets the database synchronization mode.
+     * Gets the default database synchronization mode when WAL is not in use.
      */
-    public static String getSyncMode() {
+    public static String getDefaultSyncMode() {
         return Resources.getSystem().getString(
-                com.android.internal.R.string.db_sync_mode);
+                com.android.internal.R.string.db_default_sync_mode);
+    }
+
+    /**
+     * Gets the database synchronization mode when in WAL mode.
+     */
+    public static String getWALSyncMode() {
+        return Resources.getSystem().getString(
+                com.android.internal.R.string.db_wal_sync_mode);
     }
 
     /**
@@ -99,7 +107,7 @@ public final class SQLiteGlobal {
     }
 
     /**
-     * Gets the default connection pool size when in WAL mode.
+     * Gets the connection pool size when in WAL mode.
      */
     public static int getWALConnectionPoolSize() {
         return Math.max(2, Resources.getSystem().getInteger(
