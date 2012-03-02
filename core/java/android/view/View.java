@@ -956,28 +956,24 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Horizontal direction of this view is from Left to Right.
      * Use with {@link #setLayoutDirection}.
-     * {@hide}
      */
     public static final int LAYOUT_DIRECTION_LTR = 0x00000000;
 
     /**
      * Horizontal direction of this view is from Right to Left.
      * Use with {@link #setLayoutDirection}.
-     * {@hide}
      */
     public static final int LAYOUT_DIRECTION_RTL = 0x40000000;
 
     /**
      * Horizontal direction of this view is inherited from its parent.
      * Use with {@link #setLayoutDirection}.
-     * {@hide}
      */
     public static final int LAYOUT_DIRECTION_INHERIT = 0x80000000;
 
     /**
      * Horizontal direction of this view is from deduced from the default language
      * script for the locale. Use with {@link #setLayoutDirection}.
-     * {@hide}
      */
     public static final int LAYOUT_DIRECTION_LOCALE = 0xC0000000;
 
@@ -4833,8 +4829,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *   {@link #LAYOUT_DIRECTION_INHERIT} or
      *   {@link #LAYOUT_DIRECTION_LOCALE}.
      * @attr ref android.R.styleable#View_layoutDirection
-     *
-     * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout", mapping = {
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR,     to = "LTR"),
@@ -4856,8 +4850,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *   {@link #LAYOUT_DIRECTION_LOCALE}.
      *
      * @attr ref android.R.styleable#View_layoutDirection
-     *
-     * @hide
      */
     @RemotableViewMethod
     public void setLayoutDirection(int layoutDirection) {
@@ -4873,8 +4865,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @return {@link #LAYOUT_DIRECTION_RTL} if the layout direction is RTL or returns
      * {@link #LAYOUT_DIRECTION_LTR} id the layout direction is not RTL.
-     *
-     * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout", mapping = {
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR,     to = "RESOLVED_DIRECTION_LTR"),
@@ -4891,8 +4881,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * layout attribute and/or the inherited value from the parent.</p>
      *
      * @return true if the layout is right-to-left.
-     *
-     * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout")
     public boolean isLayoutRtl() {
@@ -9672,11 +9660,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Return true if layout direction resolution can be done
+     * Check if layout direction resolution can be done.
      *
-     * @hide
+     * @return true if layout direction resolution can be done otherwise return false.
      */
-    protected boolean canResolveLayoutDirection() {
+    public boolean canResolveLayoutDirection() {
         switch (getLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
                 return (mParent != null);
@@ -9691,23 +9679,19 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Subclasses need to override this method to clear cached information that depends on the
      * resolved layout direction, or to inform child views that inherit their layout direction.
      * Overrides must also call the superclass implementation at the start of their implementation.
-     *
-     * @hide
      */
-    protected void resetResolvedLayoutDirection() {
-        // Reset the layout direction resolution
+    public void resetResolvedLayoutDirection() {
+        // Reset the current View resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED;
         // Reset also the text direction
         resetResolvedTextDirection();
     }
 
     /**
-     * Check if a Locale is corresponding to a RTL script.
+     * Check if a Locale uses an RTL script.
      *
      * @param locale Locale to check
-     * @return true if a Locale is corresponding to a RTL script.
-     *
-     * @hide
+     * @return true if the Locale uses an RTL script.
      */
     protected static boolean isLayoutDirectionRtl(Locale locale) {
         return (LAYOUT_DIRECTION_RTL == LocaleUtil.getLayoutDirectionFromLocale(locale));
@@ -11865,8 +11849,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     * Return the layout direction of a given Drawable.
     *
     * @param who the Drawable to query
-    *
-    * @hide
     */
     public int getResolvedLayoutDirection(Drawable who) {
         return (who == mBGDrawable) ? getResolvedLayoutDirection() : LAYOUT_DIRECTION_DEFAULT;
@@ -13059,7 +13041,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         if (mParent != null) {
             if (mLayoutParams != null) {
-                mLayoutParams.resolveWithDirection(getResolvedLayoutDirection());
+                mLayoutParams.onResolveLayoutDirection(getResolvedLayoutDirection());
             }
             if (!mParent.isLayoutRequested()) {
                 mParent.requestLayout();
