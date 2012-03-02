@@ -599,7 +599,6 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, u
                 continue;
             } else {
                 op &= ~OP_MAY_BE_SKIPPED_MASK;
-                ALOGD("%s", OP_NAMES[op]);
             }
         }
         logBuffer.writeCommand(level, op);
