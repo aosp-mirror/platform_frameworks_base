@@ -20,7 +20,10 @@ import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
 import android.app.IActivityManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.util.Log;
 import android.util.Printer;
 import android.util.Singleton;
@@ -195,9 +198,15 @@ public final class StrictMode {
      */
     private static final int DETECT_VM_INSTANCE_LEAKS = 0x1000;  // for VmPolicy
 
+    /**
+     * @hide
+     */
+    public static final int DETECT_VM_REGISTRATION_LEAKS = 0x2000;  // for VmPolicy
+
     private static final int ALL_VM_DETECT_BITS =
             DETECT_VM_CURSOR_LEAKS | DETECT_VM_CLOSABLE_LEAKS |
-            DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_INSTANCE_LEAKS;
+            DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_INSTANCE_LEAKS |
+            DETECT_VM_REGISTRATION_LEAKS;
 
     /**
      * @hide
@@ -618,8 +627,8 @@ public final class StrictMode {
              * but will likely expand in future releases.
              */
             public Builder detectAll() {
-                return enable(DETECT_VM_ACTIVITY_LEAKS |
-                        DETECT_VM_CURSOR_LEAKS | DETECT_VM_CLOSABLE_LEAKS);
+                return enable(DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_CURSOR_LEAKS
+                        | DETECT_VM_CLOSABLE_LEAKS | DETECT_VM_REGISTRATION_LEAKS);
             }
 
             /**
@@ -645,6 +654,15 @@ public final class StrictMode {
              */
             public Builder detectLeakedClosableObjects() {
                 return enable(DETECT_VM_CLOSABLE_LEAKS);
+            }
+
+            /**
+             * Detect when a {@link BroadcastReceiver} or
+             * {@link ServiceConnection} is leaked during {@link Context}
+             * teardown.
+             */
+            public Builder detectLeakedRegistrationObjects() {
+                return enable(DETECT_VM_REGISTRATION_LEAKS);
             }
 
             /**
@@ -1499,6 +1517,13 @@ public final class StrictMode {
     /**
      * @hide
      */
+    public static boolean vmRegistrationLeaksEnabled() {
+        return (sVmPolicyMask & DETECT_VM_REGISTRATION_LEAKS) != 0;
+    }
+
+    /**
+     * @hide
+     */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
         onVmPolicyViolation(message, originStack);
     }
@@ -1507,6 +1532,20 @@ public final class StrictMode {
      * @hide
      */
     public static void onWebViewMethodCalledOnWrongThread(Throwable originStack) {
+        onVmPolicyViolation(null, originStack);
+    }
+
+    /**
+     * @hide
+     */
+    public static void onIntentReceiverLeaked(Throwable originStack) {
+        onVmPolicyViolation(null, originStack);
+    }
+
+    /**
+     * @hide
+     */
+    public static void onServiceConnectionLeaked(Throwable originStack) {
         onVmPolicyViolation(null, originStack);
     }
 
