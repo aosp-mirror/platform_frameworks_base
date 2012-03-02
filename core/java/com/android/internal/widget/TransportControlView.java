@@ -314,7 +314,7 @@ public class TransportControlView extends FrameLayout implements OnClickListener
         final int flags = mTransportControlFlags;
         setVisibilityBasedOnFlag(mBtnPrev, flags, RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS);
         setVisibilityBasedOnFlag(mBtnNext, flags, RemoteControlClient.FLAG_KEY_MEDIA_NEXT);
-        setVisibilityBasedOnFlag(mBtnPrev, flags,
+        setVisibilityBasedOnFlag(mBtnPlay, flags,
                 RemoteControlClient.FLAG_KEY_MEDIA_PLAY
                 | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
                 | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE
