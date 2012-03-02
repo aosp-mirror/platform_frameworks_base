@@ -281,9 +281,6 @@ public abstract class AsyncTask<Params, Progress, Result> {
                             e.getCause());
                 } catch (CancellationException e) {
                     postResultIfNotInvoked(null);
-                } catch (Throwable t) {
-                    throw new RuntimeException("An error occured while executing "
-                            + "doInBackground()", t);
                 }
             }
         };
