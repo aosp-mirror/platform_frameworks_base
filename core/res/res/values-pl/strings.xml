@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (7036352716466529565) -->
+    <skip />
     <string name="untitled" msgid="6071602020171759109">"&lt;bez nazwy&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -495,7 +496,7 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Zezwala aplikacji na odczytywanie wszelkich prywatnych słów, nazw i wyrażeń zapisanych przez użytkownika w swoim słowniku."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"zapisywanie w słowniku zdefiniowanym przez użytkownika"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Zezwala aplikacjom na zapisywanie nowych słów w słowniku użytkownika."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modyfik./usuwan. z nośnika USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"Modyfikowanie/usuwanie z nośnika USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modyfikowanie/usuwanie zawartości karty SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Umożliwia zapis na nośnik USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Umożliwia aplikacji zapis na karcie SD."</string>
@@ -666,7 +667,8 @@
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Spróbuj ponownie"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Ładowanie (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Naładowany."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4776086376723437514) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Podłącz ładowarkę."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Brak karty SIM."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Brak karty SIM w tablecie."</string>
@@ -715,8 +717,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"Nieudany test fabryczny"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Czynność FACTORY_TEST jest obsługiwana tylko dla pakietów zainstalowanych w katalogu /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Nie znaleziono żadnego pakietu, który zapewnia działanie FACTORY_TEST."</string>
@@ -728,7 +732,8 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"Wskazówka: dotknij dwukrotnie, aby powiększyć lub pomniejszyć."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"Autouzupełnianie"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Opcje autouzupełniania"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <!-- no translation found for autofill_address_name_separator (6351406739503217766) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -759,6 +764,12 @@
     <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"Umożliwia aplikacji zweryfikowanie, czy pakiet można zainstalować."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"powiązanie z weryfikatorem pakietów"</string>
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Zezwala na wysyłanie żądań weryfikacji pakietu. To uprawnienie nie powinno być potrzebne zwykłym aplikacjom."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"dostęp do portów szeregowych"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Umożliwia posiadaczowi dostęp do portów szeregowych przy użyciu interfejsu API narzędzia SerialManager."</string>
+    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
+    <skip />
+    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Czy chcesz, aby zapamiętać to hasło w przeglądarce?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nie teraz"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamiętaj"</string>
@@ -1221,7 +1232,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Odcisk cyfrowy SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Pokaż wszystkie"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Wybierz czynność"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Udostępnij..."</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Udostępnij przez..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Urządzenie zablokowane."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="8715108995741758718">"Wysyłanie..."</string>

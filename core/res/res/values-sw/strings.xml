@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"Kishika nafasi<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (7036352716466529565) -->
+    <skip />
     <string name="untitled" msgid="6071602020171759109">"&lt;untitled&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -335,9 +336,9 @@
     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Inaruhusu programu kusoma maelezo mafupi ya binafsi yaliyohifadhiwa kwenye kifaa chako, kama vile jina lako na maelezo yako ya anwani. Hii ina maanisha programu inaweza kukutambua na kutuma habari maelezo yako mafupi kwa wengine."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"andika kwenye data ya maelezo yako mafupi"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Inaruhusu programu kubadilisha au kuongeza maelezo binafsi ya maelezo yako mafupi yaliyohifadhiwa kwenye kifaa chako, kama vile jina lako na maelezo ya anwani. Hii ina maanisha programu nyingine ziweze kukutambua na kutuma maelezo ya maelezo yako mafupi kwa wengine."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"soma mkondo wako wa kijamii"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"soma mipasho yako wa kijamii"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Inaruhusu programu kufikia na kulandanisha usasisho kutoka kwako na marafiki wako. Prog hasidi zinaweza kutumia hizi kusoma mawasiliano ya kibinafsi kati yako na marafiki wako kwenye mitandao ya kijamii."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"andika kwa mkondo wako wa kijamii"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"andika kwa mipasho yako wa kijamii"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Inaruhusu programu kuonyesha usasisho ya kijamii kutoka kwa marafiki wako. Prog hasidi zinaweza kutumia hizi zikijifanya kuwa rafiki na kukuhadaa kuonyesha nenosiri au taarifa zingine za siri."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"soma matukio ya kalenda pamoja na maelezo ya siri"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Huruhusu programu kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako ndogo, pamoja na za marafiki au wafanyakazi wenza. Programu hasidi yenye kibali hiki kinaweza kuchukua maelezo ya kibinagsi kutoka kwa kalenda hizi bila ufahamu wa mmiliki."</string>
@@ -637,7 +638,7 @@
     <string name="relationTypeParent" msgid="4755635567562925226">"Mzazi"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Mshirika"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Alipendekezwa na"</string>
-    <string name="relationTypeRelative" msgid="1799819930085610271">"Ndugu"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Jamaa"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Dada"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Mwenzi wa Ndoa"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Maalum"</string>
@@ -666,7 +667,8 @@
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Samahani, jaribu tena"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Inachaji <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Imechajiwa."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"Kishika nafasi<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4776086376723437514) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Unganisha chaja yako"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Hakuna SIM kadi."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Hakuna SIM kadi katika kompyuta ndogo."</string>
@@ -715,8 +717,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"Kishika nafasi<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"Kishika nafasi<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"Jaribio la kiwanda limeshindikana"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Tendo la JARIBIO_LA KIWANDA  linahimiliwa tu kwa furushi zilizosakinishwa katika /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Hakuna furushi lililopatikana ambalo linatoa tendo la JARIBIO_LA KIWANDA."</string>
@@ -728,7 +732,8 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"Dokezo: gonga mara mbili ili kukuza ndani na nje."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"Mjazo-Atomatiki"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Sanidi Mjazo-Atomatiki"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" Kishika nafasi "</string>
+    <!-- no translation found for autofill_address_name_separator (6351406739503217766) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -759,6 +764,12 @@
     <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"Inaruhusu programu kuthibitisha kuwa furushi linaweza kusakinishwa."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"Funga kwa kithibitishaji cha furushi"</string>
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Inaruhusu mmiliki kufanya maombi ya furushi la vibainishi. Kamwe hazitaitajika kwa programu za kawaida."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"kituo tambulishi cha ufikivu"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Inaruhusu mmiliki kufikia vituo tambulishi kwa kutumia KisimamiziTambulishi cha API."</string>
+    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
+    <skip />
+    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Unataka kuvinjari ili ukumbuke nenosiri hili?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Si Sasa"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Kumbuka"</string>

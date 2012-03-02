@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (7036352716466529565) -->
+    <skip />
     <string name="untitled" msgid="6071602020171759109">"&lt;शीर्षक-रहित&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -666,7 +667,8 @@
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"क्षमा करें, पुन: प्रयास करें"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"चार्ज हो रही है, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"चार्ज हो चुकी है."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4776086376723437514) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"अपना चार्जर कनेक्‍ट करें."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"कोई सिम कार्ड नहीं है."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"टेबलेट में कोई सिम कार्ड नहीं है."</string>
@@ -715,8 +717,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"फ़ैक्‍ट्री परीक्षण विफल"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST क्रिया केवल /system/app में इंस्‍टॉल किए गए पैकेज के लिए समर्थित है."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"ऐसा कोई पैकेज नहीं मिला था जो FACTORY_TEST कार्रवाई प्रदान करता हो."</string>
@@ -728,7 +732,8 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"युक्ति: ज़म इन और आउट के लिए दो बार टैप करें."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"स्वतः भरण"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"स्वत: भरण सेटअप करें"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <!-- no translation found for autofill_address_name_separator (6351406739503217766) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -759,6 +764,12 @@
     <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"एप्‍लि‍केशन को इंस्‍टॉल करने योग्‍य पैकेज सत्‍यापि‍त करने देता है."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"पैकेज प्रमाणक से आबद्ध करें"</string>
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"धारक को पैकेज प्रमाणक के अनुरोध करने की अनुमति‍ देता है. सामान्‍य एप्‍लि‍केशन के लि‍ए कभी आवश्‍यक नहीं होना चाहि‍ए."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"सीरियल पोर्ट पर पहुंचें"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API का उपयोग करके धारक को सीरियल पोर्ट पर पहुंच प्रदान करता है."</string>
+    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
+    <skip />
+    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"क्‍या आप चाहते हैं कि ब्राउज़र पासवर्ड को याद रखे?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"अभी नहीं"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"याद रखें"</string>

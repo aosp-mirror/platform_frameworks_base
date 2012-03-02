@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (7036352716466529565) -->
+    <skip />
     <string name="untitled" msgid="6071602020171759109">"&lt;başlıksız&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -666,7 +667,8 @@
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Maalesef, tekrar deneyin"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Şarj oluyor (<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Şarj oldu."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4776086376723437514) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Şarj cihazınızı bağlayın."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIM kart yok."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tablette SIM kart yok."</string>
@@ -715,8 +717,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabrika testi yapılamadı"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST işlemi yalnızca /system/app dizinine yüklenmiş paketler için desteklenir."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST işlemini sağlayan hiçbir paket bulunamadı."</string>
@@ -728,7 +732,8 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"İpucu: Yakınlaştırmak ve uzaklaştırmak için iki kez hafifçe vurun."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"OtoDoldr"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Oto Doldr Ayarla"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <!-- no translation found for autofill_address_name_separator (6351406739503217766) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -759,6 +764,12 @@
     <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"Uygulamaya, bir paketin yüklenebilir olduğunu doğrulama izni verir."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"paket doğrulayıcıya bağlan"</string>
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"İzin sahibinin, paket doğrulayıcı isteklerinde bulunmasına izin verir. Normal uygulamalar için asla gerekli olmaz."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"seri bağlantı noktalarına eriş"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"İzin sahibinin, SerialManager API\'sını kullanarak seri bağlantı noktalarına erişmesine olanak sağlar."</string>
+    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
+    <skip />
+    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Tarayıcının bu şifreyi anımsamasını istiyor musunuz?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Şimdi değil"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Anımsa"</string>

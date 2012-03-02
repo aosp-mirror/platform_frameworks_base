@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (7036352716466529565) -->
+    <skip />
     <string name="untitled" msgid="6071602020171759109">"&lt;senza titel&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <!-- no translation found for ellipsis_two_dots (1228078994866030736) -->
@@ -825,7 +826,8 @@
     <!-- no translation found for lockscreen_plugged_in (8057762828355572315) -->
     <skip />
     <string name="lockscreen_charged" msgid="4938930459620989972">"Chargià"</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4776086376723437514) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Connectai Voss chargiader."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Nagina carta SIM."</string>
     <!-- no translation found for lockscreen_missing_sim_message (151659196095791474) -->
@@ -893,8 +895,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"Il test da fabrica n\'è betg reussì"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"L\'acziun FACTORY_TEST vegn mo sustegnida per pachets installads en /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Betg chattà in pachet che porscha l\'acziun FACTORY_TEST."</string>
@@ -908,7 +912,7 @@
     <skip />
     <!-- no translation found for setup_autofill (8154593408885654044) -->
     <skip />
-    <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
+    <!-- no translation found for autofill_address_name_separator (6351406739503217766) -->
     <skip />
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
     <skip />
@@ -963,6 +967,14 @@
     <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
     <skip />
     <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
+    <!-- no translation found for permlab_serialPort (546083327654631076) -->
+    <skip />
+    <!-- no translation found for permdesc_serialPort (2991639985224598193) -->
+    <skip />
+    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
+    <skip />
+    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
     <skip />
     <string name="save_password_message" msgid="767344687139195790">"Vulais Vus ch\'il navigatur memorisescha quest pled-clav?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Betg ussa"</string>

@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (7036352716466529565) -->
+    <skip />
     <string name="untitled" msgid="6071602020171759109">"&lt;无标题&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"..."</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -666,7 +667,8 @@
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"很抱歉，请重试"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"正在充电，<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"已充满。"</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4776086376723437514) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"连接您的充电器。"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"没有 SIM 卡"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板电脑中没有 SIM 卡。"</string>
@@ -715,8 +717,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="AMPM">%P</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="AMPM">%p</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
+    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"出厂测试失败"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"只有在 /system/app 中安装的包支持 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"未发现支持 FACTORY_TEST 操作的包。"</string>
@@ -728,7 +732,8 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"提示：点按两次可放大和缩小。"</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"自动填充"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"设置自动填充"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <!-- no translation found for autofill_address_name_separator (6351406739503217766) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -759,6 +764,12 @@
     <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"允许应用程序验证软件包是否可以安装。"</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"绑定到软件包验证程序"</string>
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"允许手机用户请求使用软件包验证程序。普通应用程序无需获取此权限。"</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"访问串行端口"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"允许持有人使用 SerialManager API 访问串行端口。"</string>
+    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
+    <skip />
+    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"是否希望浏览器记住此密码？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"暂不保存"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"记住"</string>
@@ -909,7 +920,7 @@
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> 无响应。"\n\n"要将它关闭吗？"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"活动 <xliff:g id="ACTIVITY">%1$s</xliff:g> 无响应。"\n\n"要将它关闭吗？"</string>
-    <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g> 无响应。要将它关闭吗？"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g>无响应。要将它关闭吗？"</string>
     <string name="anr_process" msgid="306819947562555821">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 无响应。"\n\n"要将它关闭吗？"</string>
     <string name="force_close" msgid="8346072094521265605">"确定"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>

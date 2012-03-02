@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"Gb"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Tb"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Pb"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (7036352716466529565) -->
+    <skip />
     <string name="untitled" msgid="6071602020171759109">"&lt;uden navn&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
@@ -362,7 +363,7 @@
     <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Tillader, at en applikation læser indholdet fra rammebufferen."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"skift dine lydindstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Tillader, at en applikation ændrer globale lydindstillinger som f.eks. lydstyrke og kanalisering."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"optag lyd"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"optage lyd"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Tillader, at en applikation får adgang til lydregistreringsstien."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tag billeder og optag video"</string>
     <string name="permdesc_camera" msgid="6004878235852154239">"Tillader, at applikationen tager billeder og optager video med kameraet. Dette giver applikationen mulighed for altid at indsamle de billeder, kameraet ser."</string>
@@ -388,7 +389,7 @@
     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Tillader, at applikationen monterer/demonterer internt lager."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"omdøbe internt lager"</string>
     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Tillader, at applikationen omdøber internt lager."</string>
-    <string name="permlab_vibrate" msgid="7768356019980849603">"kontroller vibrator"</string>
+    <string name="permlab_vibrate" msgid="7768356019980849603">"kontrollere vibrator"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Lader applikationen kontrollere vibratoren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"kontroller lommelygte"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Tillader, at applikationen kontrollerer lommelygten."</string>
@@ -416,7 +417,7 @@
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"læs telefontilstand og identitet"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Tillader, at applikationen får adgang til enhedens telefonfunktioner. En applikation kan med denne tilladelse registrere denne telefons telefon- og serienummer, om et opkald er aktivt, nummeret som det opkald er forbundet til osv."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"afhold tabletcomputeren fra at gå i dvale"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"afhold telefonen fra at gå i dvale"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"afholde telefonen fra at gå i dvale"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Tillader, at en applikation forhindrer tabletcomputeren i at gå i dvale."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Tillader, at en applikation forhindrer telefonen i at gå i dvale."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"tænd eller sluk for tabletcomputeren"</string>
@@ -445,11 +446,11 @@
     <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"Tillader, at en applikation henter listen over konti, der er kendt af telefonen."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"fungerer som en kontogodkender"</string>
     <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Tillader, at en applikation bruger kontoadministratorens kontogodkendelsesegenskaber, bl.a. oprettelse af konti samt hentning og indstilling af deres adgangskoder."</string>
-    <string name="permlab_manageAccounts" msgid="4440380488312204365">"administrer kontolisten"</string>
+    <string name="permlab_manageAccounts" msgid="4440380488312204365">"administrere kontolisten"</string>
     <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Tillader, at en applikation foretager handlinger, f.eks. at tilføje og fjerne konti samt slette sin adgangskode."</string>
-    <string name="permlab_useCredentials" msgid="6401886092818819856">"brug en kontos godkendelsesoplysninger"</string>
+    <string name="permlab_useCredentials" msgid="6401886092818819856">"bruge en kontos godkendelsesoplysninger"</string>
     <string name="permdesc_useCredentials" msgid="7416570544619546974">"Tillader, at en applikation anmoder om godkendelsestokens"</string>
-    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"vis netværkstilstand"</string>
+    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"vise netværkstilstand"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Tillader, at en applikation viser tilstanden for alle netværk."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"fuld internetadgang"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Tillader, at en applikation opretter netværks-sockets."</string>
@@ -481,11 +482,11 @@
     <string name="permdesc_nfc" msgid="9171401851954407226">"Tillader, at en applikation kommunikerer med tags, kort og læsere i Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"deaktiver tastaturlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Tillader, at en applikation deaktiverer tastaturlåsen og al associeret adgangskodesikkerhed. Et legitimt eksempel på dette er, at telefonen deaktiverer tastaturlåsen, når der modtages et indgående telefonopkald, og genaktiverer tastaturlåsen, når opkaldet er afsluttet."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"læs indstillinger for synkronisering"</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"læse indstillinger for synkronisering"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Tillader, at en applikation læser synkroniseringsindstillingerne, f.eks. om kontakter skal synkroniseres."</string>
-    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"skriv indstillinger for synkronisering"</string>
+    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"skrive indstillinger for synkronisering"</string>
     <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Tillader, at en applikation ændrer indstillingerne for synkronisering, f.eks. kontakter skal synkroniseres."</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"læs synkroniseringsstatistikker"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"læse synkroniseringsstatistikker"</string>
     <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Tillader, at en applikation læser synkroniseringsstatistikker, f.eks. oversigten over forrige synkroniseringer."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"læs abonnerede feeds"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Tillader, at en applikation får detaljer om de aktuelt synkroniserede feeds."</string>
@@ -666,7 +667,8 @@
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Beklager! Prøv igen"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Oplader, <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Opladt."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4776086376723437514) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Tilslut din oplader."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Der er ikke noget SIM-kort."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Der er ikke noget SIM-kort i tabletcomputeren."</string>
@@ -715,8 +717,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (7618670480400517084) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabrikstest mislykkedes"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Handlingen FACTORY_TEST understøttes kun af pakker installeret i /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Der blev ikke fundet nogen pakke, som leverer handlingen FACTORY_TEST."</string>
@@ -728,7 +732,8 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dobbeltklik for at zoome ind eller ud."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"AutoFyld"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Opsætning af AutoFyld"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <!-- no translation found for autofill_address_name_separator (6351406739503217766) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -744,9 +749,9 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Sogn"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Område"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirat"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"læs browserens oversigt og bogmærker"</string>
+    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"læse browserens oversigt og bogmærker"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Tillader, at applikationen læser alle de webadresser, browseren har besøgt, og alle browserens bogmærker."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skriv browserens oversigt og bogmærker"</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skrive i browserens oversigt og bogmærker"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Tillader, at en applikation ændrer browseroversigten eller bogmærker, der er gemt på din tabletcomputer. Ondsindede applikationer kan bruge dette til at slette eller ændre din browsers data."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Tillader, at en applikation ændrer browseroversigten eller bogmærker, der er gemt på din telefon. Ondsindede applikationer kan bruge dette til at slette eller ændre din browsers data."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"angiv alarm i alarmprogram"</string>
@@ -754,11 +759,15 @@
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tilføj telefonsvarer"</string>
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Tillader, at applikationen kan føje meddelelser til din telefonsvarers indbakke."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Skift browsertilladelser for geografisk placering"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Giver en applikation tilladelse til at ændre browserens tilladelser for geografisk placering. Skadelige applikationer kan bruge dette til at tillade, at placeringsoplysninger sendes til vilkårlige websteder."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Giver en applikation tilladelse til at ændre browserens tilladelser for geografisk placering. Skadelige applikationer kan bruge dette til at tillade, at placeringsoplysninger sendes til vilkårlige websites."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"bekræft pakker"</string>
     <string name="permdesc_packageVerificationAgent" msgid="6033195477325381106">"Tillader, at applikationen bekræfter, at en pakke kan installeres."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"bind til en bekræftelse af pakker"</string>
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Giver indehaveren ret til at sende anmodninger om bekræftelse af pakker. Dette bør aldrig være nødvendigt for almindelige applikationer."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"adgang til serielle porte"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Tillader, at indehaveren kan få adgang til serielle porte ved hjælp af SerialManager API."</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"undgå automatiske enhedsopdateringer"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Giver indehaveren ret til at give systemet oplysninger om, hvornår det vil være et godt tidspunkt for en ikke-interaktiv genstart at opgradere enheden."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>
