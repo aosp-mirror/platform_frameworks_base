@@ -26113,17 +26113,36 @@ package android.widget {
     ctor public CalendarView(android.content.Context, android.util.AttributeSet);
     ctor public CalendarView(android.content.Context, android.util.AttributeSet, int);
     method public long getDate();
+    method public int getDateTextAppearance();
     method public int getFirstDayOfWeek();
+    method public int getFocusedMonthDateColor();
     method public long getMaxDate();
     method public long getMinDate();
+    method public android.graphics.drawable.Drawable getSelectedDateVerticalBar();
+    method public int getSelectedWeekBackgroundColor();
     method public boolean getShowWeekNumber();
+    method public int getShownWeekCount();
+    method public int getUnfocusedMonthDateColor();
+    method public int getWeekDayTextAppearance();
+    method public int getWeekNumberColor();
+    method public int getWeekSeparatorLineColor();
     method public void setDate(long);
     method public void setDate(long, boolean, boolean);
+    method public void setDateTextAppearance(int);
     method public void setFirstDayOfWeek(int);
+    method public void setFocusedMonthDateColor(int);
     method public void setMaxDate(long);
     method public void setMinDate(long);
     method public void setOnDateChangeListener(android.widget.CalendarView.OnDateChangeListener);
+    method public void setSelectedDateVerticalBar(int);
+    method public void setSelectedDateVerticalBar(android.graphics.drawable.Drawable);
+    method public void setSelectedWeekBackgroundColor(int);
     method public void setShowWeekNumber(boolean);
+    method public void setShownWeekCount(int);
+    method public void setUnfocusedMonthDateColor(int);
+    method public void setWeekDayTextAppearance(int);
+    method public void setWeekNumberColor(int);
+    method public void setWeekSeparatorLineColor(int);
   }
 
   public static abstract interface CalendarView.OnDateChangeListener {

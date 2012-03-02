@@ -3593,15 +3593,15 @@
         <attr name="shownWeekCount" format="integer"/>
         <!-- The background color for the selected week. -->
         <attr name="selectedWeekBackgroundColor" format="color|reference" />
-        <!-- The color for the dates of the selected month. -->
+        <!-- The color for the dates of the focused month. -->
         <attr name="focusedMonthDateColor" format="color|reference" />
         <!-- The color for the dates of an unfocused month. -->
         <attr name="unfocusedMonthDateColor" format="color|reference" />
         <!-- The color for the week numbers. -->
         <attr name="weekNumberColor" format="color|reference" />
-        <!-- The color for the sepatator line between weeks. -->
+        <!-- The color for the separator line between weeks. -->
         <attr name="weekSeparatorLineColor" format="color|reference" />
-        <!-- Drawable for the vertical bar shown at the beggining and at the end of a selected date. -->
+        <!-- Drawable for the vertical bar shown at the beginning and at the end of the selected date. -->
         <attr name="selectedDateVerticalBar" format="reference" />
         <!-- The text appearance for the week day abbreviation of the calendar header. -->
         <attr name="weekDayTextAppearance" format="reference" />
