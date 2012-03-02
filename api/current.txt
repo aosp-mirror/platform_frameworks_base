@@ -15088,7 +15088,7 @@ package android.os {
     field public static final android.os.Parcelable.Creator STRING_CREATOR;
   }
 
-  public class ParcelFileDescriptor implements android.os.Parcelable {
+  public class ParcelFileDescriptor implements java.io.Closeable android.os.Parcelable {
     ctor public ParcelFileDescriptor(android.os.ParcelFileDescriptor);
     method public static android.os.ParcelFileDescriptor adoptFd(int);
     method public void close() throws java.io.IOException;

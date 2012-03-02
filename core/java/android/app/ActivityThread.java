@@ -102,6 +102,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import libcore.io.IoUtils;
+
 import dalvik.system.CloseGuard;
 
 final class SuperNotCalledException extends AndroidRuntimeException {
@@ -2357,41 +2359,47 @@ public final class ActivityThread {
     }
 
     private void handleDumpService(DumpComponentInfo info) {
-        Service s = mServices.get(info.token);
-        if (s != null) {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
-            s.dump(info.fd.getFileDescriptor(), pw, info.args);
-            pw.flush();
-            try {
-                info.fd.close();
-            } catch (IOException e) {
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            Service s = mServices.get(info.token);
+            if (s != null) {
+                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
+                s.dump(info.fd.getFileDescriptor(), pw, info.args);
+                pw.flush();
             }
+        } finally {
+            IoUtils.closeQuietly(info.fd);
+            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 
     private void handleDumpActivity(DumpComponentInfo info) {
-        ActivityClientRecord r = mActivities.get(info.token);
-        if (r != null && r.activity != null) {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
-            r.activity.dump(info.prefix, info.fd.getFileDescriptor(), pw, info.args);
-            pw.flush();
-            try {
-                info.fd.close();
-            } catch (IOException e) {
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            ActivityClientRecord r = mActivities.get(info.token);
+            if (r != null && r.activity != null) {
+                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
+                r.activity.dump(info.prefix, info.fd.getFileDescriptor(), pw, info.args);
+                pw.flush();
             }
+        } finally {
+            IoUtils.closeQuietly(info.fd);
+            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 
     private void handleDumpProvider(DumpComponentInfo info) {
-        ProviderClientRecord r = mLocalProviders.get(info.token);
-        if (r != null && r.mLocalProvider != null) {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
-            r.mLocalProvider.dump(info.fd.getFileDescriptor(), pw, info.args);
-            pw.flush();
-            try {
-                info.fd.close();
-            } catch (IOException e) {
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            ProviderClientRecord r = mLocalProviders.get(info.token);
+            if (r != null && r.mLocalProvider != null) {
+                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
+                r.mLocalProvider.dump(info.fd.getFileDescriptor(), pw, info.args);
+                pw.flush();
             }
+        } finally {
+            IoUtils.closeQuietly(info.fd);
+            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 
