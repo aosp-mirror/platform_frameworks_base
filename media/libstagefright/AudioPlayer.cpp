@@ -110,13 +110,18 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
     success = format->findInt32(kKeySampleRate, &mSampleRate);
     CHECK(success);
 
-    int32_t numChannels;
+    int32_t numChannels, channelMask;
     success = format->findInt32(kKeyChannelCount, &numChannels);
     CHECK(success);
 
+    if(!format->findInt32(kKeyChannelMask, &channelMask)) {
+        ALOGW("source format didn't specify channel mask, using channel order");
+        channelMask = CHANNEL_MASK_USE_CHANNEL_ORDER;
+    }
+
     if (mAudioSink.get() != NULL) {
         status_t err = mAudioSink->open(
-                mSampleRate, numChannels, AUDIO_FORMAT_PCM_16_BIT,
+                mSampleRate, numChannels, channelMask, AUDIO_FORMAT_PCM_16_BIT,
                 DEFAULT_AUDIOSINK_BUFFERCOUNT,
                 &AudioPlayer::AudioSinkCallback, this);
         if (err != OK) {
@@ -137,11 +142,15 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
 
         mAudioSink->start();
     } else {
+        // playing to an AudioTrack, set up mask if necessary
+        audio_channel_mask_t audioMask = channelMask == CHANNEL_MASK_USE_CHANNEL_ORDER ?
+                audio_channel_mask_from_count(numChannels) : channelMask;
+        if (0 == audioMask) {
+            return BAD_VALUE;
+        }
+
         mAudioTrack = new AudioTrack(
-                AUDIO_STREAM_MUSIC, mSampleRate, AUDIO_FORMAT_PCM_16_BIT,
-                (numChannels == 2)
-                    ? AUDIO_CHANNEL_OUT_STEREO
-                    : AUDIO_CHANNEL_OUT_MONO,
+                AUDIO_STREAM_MUSIC, mSampleRate, AUDIO_FORMAT_PCM_16_BIT, audioMask,
                 0, 0, &AudioCallback, this, 0);
 
         if ((err = mAudioTrack->initCheck()) != OK) {
