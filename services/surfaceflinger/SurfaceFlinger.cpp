@@ -460,6 +460,7 @@ void SurfaceFlinger::onMessageReceived(int32_t what)
 
 void SurfaceFlinger::postFramebuffer()
 {
+    ATRACE_CALL();
     // mSwapRegion can be empty here is some cases, for instance if a hidden
     // or fully transparent window is updating.
     // in that case, we need to flip anyways to not risk a deadlock with
@@ -504,6 +505,8 @@ void SurfaceFlinger::handleConsoleEvents()
 
 void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
 {
+    ATRACE_CALL();
+
     Mutex::Autolock _l(mStateLock);
     const nsecs_t now = systemTime();
     mDebugInTransaction = now;
@@ -601,6 +604,8 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
 void SurfaceFlinger::computeVisibleRegions(
     const LayerVector& currentLayers, Region& dirtyRegion, Region& opaqueRegion)
 {
+    ATRACE_CALL();
+
     const GraphicPlane& plane(graphicPlane(0));
     const Transform& planeTransform(plane.transform());
     const DisplayHardware& hw(plane.displayHardware());
@@ -841,6 +846,8 @@ void SurfaceFlinger::handleWorkList()
 
 void SurfaceFlinger::handleRepaint()
 {
+    ATRACE_CALL();
+
     // compute the invalid region
     mSwapRegion.orSelf(mDirtyRegion);
 
