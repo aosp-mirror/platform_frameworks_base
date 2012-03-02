@@ -207,7 +207,9 @@ private:
     // call in any IAudioFlinger method that accesses mPrimaryHardwareDev
     status_t                initCheck() const { return mPrimaryHardwareDev == NULL ? NO_INIT : NO_ERROR; }
 
+    // RefBase
     virtual     void        onFirstRef();
+
     audio_hw_device_t*      findSuitableHwDev_l(uint32_t devices);
     void                    purgeStaleEffects_l();
 
@@ -581,6 +583,10 @@ private:
             MIXER_TRACKS_READY      // at least one active track, and at least one track has data
             // standby mode does not have an enum value
             // suspend by audio policy manager is orthogonal to mixer state
+#if 1
+            // FIXME remove these hacks for threadLoop_prepareTracks_l
+            , MIXER_CONTINUE        // "continue;"
+#endif
         };
 
         // playback track
@@ -793,7 +799,32 @@ private:
 
         // Thread virtuals
         virtual     status_t    readyToRun();
+        virtual     bool        threadLoop();
+
+        // RefBase
         virtual     void        onFirstRef();
+
+protected:
+        // Code snippets that were lifted up out of threadLoop()
+        virtual     void        threadLoop_mix() = 0;
+        virtual     void        threadLoop_sleepTime() = 0;
+        virtual     void        threadLoop_write();
+        virtual     void        threadLoop_standby();
+
+        // Non-trivial for DUPLICATING only
+        virtual     void        updateWaitTime() { }
+
+        // Non-trivial for DIRECT only
+        virtual     void        applyVolume() { }
+
+        // FIXME merge these
+        // Non-trivial for MIXER and DUPLICATING only
+        virtual     mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove) { return MIXER_IDLE; }
+        // Non-trivial for DIRECT only
+        virtual     mixer_state threadLoop_prepareTracks_l(sp<Track>& trackToRemove)
+                                                                { return MIXER_IDLE; }
+
+public:
 
         virtual     status_t    initCheck() const { return (mOutput == NULL) ? NO_INIT : NO_ERROR; }
 
@@ -897,6 +928,30 @@ private:
         int                             mNumWrites;
         int                             mNumDelayedWrites;
         bool                            mInWrite;
+
+        // FIXME rename these former local variables of threadLoop to standard "m" names
+        nsecs_t                         standbyTime;
+        size_t                          mixBufferSize;
+        uint32_t                        activeSleepTime;
+        uint32_t                        idleSleepTime;
+        uint32_t                        sleepTime;
+        // mixerStatus was local to the while !exitingPending loop
+        mixer_state                     mixerStatus;
+
+        // FIXME move these declarations into the specific sub-class that needs them
+        // MIXER only
+        bool                            longStandbyExit;
+        uint32_t                        sleepTimeShift;
+        // MIXER and DUPLICATING only
+        mixer_state mPrevMixerStatus; // previous status returned by prepareTracks_l()
+        // DIRECT only
+        nsecs_t                         standbyDelay;
+        // activeTrack was local to the while !exitingPending loop
+        sp<Track>                       activeTrack;
+        // DUPLICATING only
+        SortedVector < sp<OutputTrack> >  outputTracks;
+        uint32_t                        writeFrames;
+        SortedVector < sp<OutputTrack> >  mOutputTracks;
     };
 
     class MixerThread : public PlaybackThread {
@@ -909,7 +964,6 @@ private:
         virtual             ~MixerThread();
 
         // Thread virtuals
-        virtual     bool        threadLoop();
 
                     void        invalidateTracks(audio_stream_type_t streamType);
         virtual     bool        checkForNewParameters_l();
@@ -920,14 +974,17 @@ private:
                     // pending set of tracks to remove via Vector 'tracksToRemove'.  The caller is
                     // responsible for clearing or destroying this Vector later on, when it
                     // is safe to do so. That will drop the final ref count and destroy the tracks.
-                    mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove);
+        virtual     mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove);
         virtual     int         getTrackName_l();
         virtual     void        deleteTrackName_l(int name);
         virtual     uint32_t    idleSleepTimeUs();
         virtual     uint32_t    suspendSleepTimeUs();
 
+        // threadLoop snippets
+        virtual     void        threadLoop_mix();
+        virtual     void        threadLoop_sleepTime();
+
                     AudioMixer* mAudioMixer;
-                    mixer_state mPrevMixerStatus; // previous status returned by prepareTracks_l()
     };
 
     class DirectOutputThread : public PlaybackThread {
@@ -938,7 +995,6 @@ private:
         virtual                 ~DirectOutputThread();
 
         // Thread virtuals
-        virtual     bool        threadLoop();
 
         virtual     bool        checkForNewParameters_l();
 
@@ -949,8 +1005,11 @@ private:
         virtual     uint32_t    idleSleepTimeUs();
         virtual     uint32_t    suspendSleepTimeUs();
 
-    private:
-        void applyVolume(uint16_t leftVol, uint16_t rightVol, bool ramp);
+        // threadLoop snippets
+        virtual     mixer_state threadLoop_prepareTracks_l(sp<Track>& trackToRemove);
+        virtual     void        threadLoop_mix();
+        virtual     void        threadLoop_sleepTime();
+        virtual     void        applyVolume();
 
         // volumes last sent to audio HAL with stream->set_volume()
         // FIXME use standard representation and names
@@ -958,6 +1017,12 @@ private:
         float mRightVolFloat;
         uint16_t mLeftVolShort;
         uint16_t mRightVolShort;
+
+        // FIXME rename these former local variables of threadLoop to standard names
+        // next 3 were local to the while !exitingPending loop
+        bool rampVolume;
+        uint16_t leftVol;
+        uint16_t rightVol;
     };
 
     class DuplicatingThread : public MixerThread {
@@ -967,7 +1032,6 @@ private:
         virtual                 ~DuplicatingThread();
 
         // Thread virtuals
-        virtual     bool        threadLoop();
                     void        addOutputTrack(MixerThread* thread);
                     void        removeOutputTrack(MixerThread* thread);
                     uint32_t    waitTimeMs() { return mWaitTimeMs; }
@@ -976,9 +1040,15 @@ private:
 
     private:
                     bool        outputsReady(const SortedVector<sp<OutputTrack> > &outputTracks);
-                    void        updateWaitTime();
+    protected:
+        // threadLoop snippets
+        virtual     void        threadLoop_mix();
+        virtual     void        threadLoop_sleepTime();
+        virtual     void        threadLoop_write();
+        virtual     void        threadLoop_standby();
+        virtual     void        updateWaitTime();
+    private:
 
-        SortedVector < sp<OutputTrack> >  mOutputTracks;
                     uint32_t    mWaitTimeMs;
     };
 
@@ -1086,8 +1156,11 @@ private:
                         uint32_t device);
                 virtual     ~RecordThread();
 
+        // Thread
         virtual bool        threadLoop();
         virtual status_t    readyToRun();
+
+        // RefBase
         virtual void        onFirstRef();
 
         virtual status_t    initCheck() const { return (mInput == NULL) ? NO_INIT : NO_ERROR; }
