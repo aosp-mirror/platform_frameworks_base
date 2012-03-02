@@ -3392,7 +3392,7 @@
         <attr name="minDate" format="string" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" format="string" />
-        <!-- @hide The layout of the time picker. -->
+        <!-- @hide The layout of the date picker. -->
         <attr name="internalLayout" format="reference"  />
     </declare-styleable>
 
@@ -3636,7 +3636,7 @@
 
     <declare-styleable name="TimePicker">
         <!-- @hide The layout of the time picker. -->
-        <attr name="layout" />
+        <attr name="internalLayout" />
     </declare-styleable>
 
     <!-- ========================= -->

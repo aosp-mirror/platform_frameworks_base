@@ -528,7 +528,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.TimePicker">
-        <item name="android:layout">@android:layout/time_picker</item>
+        <item name="android:internalLayout">@android:layout/time_picker</item>
     </style>
 
     <style name="Widget.DatePicker">
@@ -1661,7 +1661,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.TimePicker" parent="Widget.TimePicker">
-        <item name="android:layout">@android:layout/time_picker_holo</item>
+        <item name="android:internalLayout">@android:layout/time_picker_holo</item>
     </style>
 
     <style name="Widget.Holo.DatePicker" parent="Widget.DatePicker">
