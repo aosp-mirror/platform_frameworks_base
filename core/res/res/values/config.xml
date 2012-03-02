@@ -665,9 +665,15 @@
          Choices are: FULL, NORMAL, OFF. -->
     <string name="db_sync_mode">FULL</string>
 
-    <!-- The Write-Ahead Log auto-checkpoint interval in database pages.
-         The log is checkpointed automatically whenever it exceeds this many pages. -->
-    <integer name="db_wal_autocheckpoint">1</integer>
+    <!-- The Write-Ahead Log auto-checkpoint interval in database pages (typically 1 to 4KB).
+         The log is checkpointed automatically whenever it exceeds this many pages.
+         When a database is reopened, its journal mode is set back to the default
+         journal mode, which may cause a checkpoint operation to occur.  Checkpoints
+         can also happen at other times when transactions are committed.
+         The bigger the WAL file, the longer a checkpoint operation takes, so we try
+         to keep the WAL file relatively small to avoid long delays.
+         The size of the WAL file is also constrained by 'db_journal_size_limit'. -->
+    <integer name="db_wal_autocheckpoint">100</integer>
 
     <!-- Max space (in MB) allocated to DownloadManager to store the downloaded
          files if they are to be stored in DownloadManager's data dir,
