@@ -64,7 +64,10 @@ public class WifiMonitor {
        "pre-shared key may be incorrect";
 
     /* WPS events */
+    private static final String WPS_SUCCESS_STR = "WPS-SUCCESS";
+    private static final String WPS_FAIL_STR    = "WPS-FAIL";
     private static final String WPS_OVERLAP_STR = "WPS-OVERLAP-DETECTED";
+    private static final String WPS_TIMEOUT_STR = "WPS-TIMEOUT";
 
     /**
      * Names of events from wpa_supplicant (minus the prefix). In the
@@ -221,10 +224,16 @@ public class WifiMonitor {
     public static final int SUPPLICANT_STATE_CHANGE_EVENT        = BASE + 6;
     /* Password failure and EAP authentication failure */
     public static final int AUTHENTICATION_FAILURE_EVENT         = BASE + 7;
-    /* WPS overlap detected */
-    public static final int WPS_OVERLAP_EVENT                    = BASE + 8;
+    /* WPS success detected */
+    public static final int WPS_SUCCESS_EVENT                    = BASE + 8;
+    /* WPS failure detected */
+    public static final int WPS_FAIL_EVENT                       = BASE + 9;
+     /* WPS overlap detected */
+    public static final int WPS_OVERLAP_EVENT                    = BASE + 10;
+     /* WPS timeout detected */
+    public static final int WPS_TIMEOUT_EVENT                    = BASE + 11;
     /* Driver was hung */
-    public static final int DRIVER_HUNG_EVENT                    = BASE + 9;
+    public static final int DRIVER_HUNG_EVENT                    = BASE + 12;
 
     /* P2P events */
     public static final int P2P_DEVICE_FOUND_EVENT               = BASE + 21;
@@ -304,8 +313,14 @@ public class WifiMonitor {
                     if (eventStr.startsWith(WPA_EVENT_PREFIX_STR) &&
                             0 < eventStr.indexOf(PASSWORD_MAY_BE_INCORRECT_STR)) {
                         mStateMachine.sendMessage(AUTHENTICATION_FAILURE_EVENT);
+                    } else if (eventStr.startsWith(WPS_SUCCESS_STR)) {
+                        mStateMachine.sendMessage(WPS_SUCCESS_EVENT);
+                    } else if (eventStr.startsWith(WPS_FAIL_STR)) {
+                        mStateMachine.sendMessage(WPS_FAIL_EVENT);
                     } else if (eventStr.startsWith(WPS_OVERLAP_STR)) {
                         mStateMachine.sendMessage(WPS_OVERLAP_EVENT);
+                    } else if (eventStr.startsWith(WPS_TIMEOUT_STR)) {
+                        mStateMachine.sendMessage(WPS_TIMEOUT_EVENT);
                     } else if (eventStr.startsWith(P2P_EVENT_PREFIX_STR)) {
                         handleP2pEvents(eventStr);
                     } else if (eventStr.startsWith(HOST_AP_EVENT_PREFIX_STR)) {

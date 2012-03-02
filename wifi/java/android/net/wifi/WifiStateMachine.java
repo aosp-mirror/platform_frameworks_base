@@ -184,7 +184,6 @@ public class WifiStateMachine extends StateMachine {
     private WifiInfo mWifiInfo;
     private NetworkInfo mNetworkInfo;
     private SupplicantStateTracker mSupplicantStateTracker;
-    private WpsStateMachine mWpsStateMachine;
     private DhcpStateMachine mDhcpStateMachine;
 
     private AlarmManager mAlarmManager;
@@ -275,16 +274,14 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_ENABLE_NETWORK                   = BASE + 54;
     /* Enable all networks */
     static final int CMD_ENABLE_ALL_NETWORKS              = BASE + 55;
-    /* Disable a network. The device does not attempt a connection to the given network. */
-    static final int CMD_DISABLE_NETWORK                  = BASE + 56;
     /* Blacklist network. De-prioritizes the given BSSID for connection. */
-    static final int CMD_BLACKLIST_NETWORK                = BASE + 57;
+    static final int CMD_BLACKLIST_NETWORK                = BASE + 56;
     /* Clear the blacklist network list */
-    static final int CMD_CLEAR_BLACKLIST                  = BASE + 58;
+    static final int CMD_CLEAR_BLACKLIST                  = BASE + 57;
     /* Save configuration */
-    static final int CMD_SAVE_CONFIG                      = BASE + 59;
+    static final int CMD_SAVE_CONFIG                      = BASE + 58;
     /* Get configured networks*/
-    static final int CMD_GET_CONFIGURED_NETWORKS          = BASE + 60;
+    static final int CMD_GET_CONFIGURED_NETWORKS          = BASE + 59;
 
     /* Supplicant commands after driver start*/
     /* Initiate a scan */
@@ -328,28 +325,7 @@ public class WifiStateMachine extends StateMachine {
     static final int MULTICAST_V6  = 1;
     static final int MULTICAST_V4  = 0;
 
-    /* Connect to a specified network (network id
-     * or WifiConfiguration) This involves increasing
-     * the priority of the network, enabling the network
-     * (while disabling others) and issuing a reconnect.
-     * Note that CMD_RECONNECT just does a reconnect to
-     * an existing network. All the networks get enabled
-     * upon a successful connection or a failure.
-     */
-    static final int CMD_CONNECT_NETWORK                  = BASE + 86;
-    /* Save the specified network. This involves adding
-     * an enabled network (if new) and updating the
-     * config and issuing a save on supplicant config.
-     */
-    static final int CMD_SAVE_NETWORK                     = BASE + 87;
-    /* Delete the specified network. This involves
-     * removing the network and issuing a save on
-     * supplicant config.
-     */
-    static final int CMD_FORGET_NETWORK                   = BASE + 88;
-    /* Start Wi-Fi protected setup */
-    static final int CMD_START_WPS                        = BASE + 89;
-    /* Set the frequency band */
+   /* Set the frequency band */
     static final int CMD_SET_FREQUENCY_BAND               = BASE + 90;
     /* Enable background scan for configured networks */
     static final int CMD_ENABLE_BACKGROUND_SCAN           = BASE + 91;
@@ -357,12 +333,6 @@ public class WifiStateMachine extends StateMachine {
     /* Commands from/to the SupplicantStateTracker */
     /* Reset the supplicant state tracker */
     static final int CMD_RESET_SUPPLICANT_STATE           = BASE + 111;
-
-    /* Commands/events reported by WpsStateMachine */
-    /* Indicates the completion of WPS activity */
-    static final int WPS_COMPLETED_EVENT                  = BASE + 121;
-    /* Reset the WPS state machine */
-    static final int CMD_RESET_WPS_STATE                  = BASE + 122;
 
     /* P2p commands */
     public static final int CMD_ENABLE_P2P                = BASE + 131;
@@ -476,7 +446,7 @@ public class WifiStateMachine extends StateMachine {
     /* Network is not connected, supplicant assoc+auth is not complete */
     private State mDisconnectedState = new DisconnectedState();
     /* Waiting for WPS to be completed*/
-    private State mWaitForWpsCompletionState = new WaitForWpsCompletionState();
+    private State mWpsRunningState = new WpsRunningState();
 
     /* Soft ap is starting up */
     private State mSoftApStartingState = new SoftApStartingState();
@@ -570,7 +540,6 @@ public class WifiStateMachine extends StateMachine {
         mWifiInfo = new WifiInfo();
         mSupplicantStateTracker = new SupplicantStateTracker(context, this, mWifiConfigStore,
                 getHandler());
-        mWpsStateMachine = new WpsStateMachine(context, this, mWifiConfigStore, getHandler());
         mLinkProperties = new LinkProperties();
 
         WifiApConfigStore wifiApConfigStore = WifiApConfigStore.makeWifiApConfigStore(
@@ -639,7 +608,7 @@ public class WifiStateMachine extends StateMachine {
                             addState(mConnectedState, mL2ConnectedState);
                         addState(mDisconnectingState, mConnectModeState);
                         addState(mDisconnectedState, mConnectModeState);
-                        addState(mWaitForWpsCompletionState, mConnectModeState);
+                        addState(mWpsRunningState, mConnectModeState);
                 addState(mDriverStoppingState, mSupplicantStartedState);
                 addState(mDriverStoppedState, mSupplicantStartedState);
             addState(mSupplicantStoppingState, mDefaultState);
@@ -908,9 +877,8 @@ public class WifiStateMachine extends StateMachine {
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
     public boolean syncDisableNetwork(AsyncChannel channel, int netId) {
-        Message resultMsg = channel.sendMessageSynchronously(CMD_DISABLE_NETWORK, netId,
-                WifiConfiguration.DISABLED_UNKNOWN_REASON);
-        boolean result = (resultMsg.arg1 != FAILURE);
+        Message resultMsg = channel.sendMessageSynchronously(WifiManager.DISABLE_NETWORK, netId);
+        boolean result = (resultMsg.arg1 != WifiManager.DISABLE_NETWORK_FAILED);
         resultMsg.recycle();
         return result;
     }
@@ -931,39 +899,6 @@ public class WifiStateMachine extends StateMachine {
      */
     public void clearBlacklist() {
         sendMessage(obtainMessage(CMD_CLEAR_BLACKLIST));
-    }
-
-    public void connectNetwork(int netId) {
-        sendMessage(obtainMessage(CMD_CONNECT_NETWORK, netId, 0));
-    }
-
-    public void connectNetwork(WifiConfiguration wifiConfig) {
-        /* arg1 is used to indicate netId, force a netId value of
-         * WifiConfiguration.INVALID_NETWORK_ID when we are passing
-         * a configuration since the default value of 0 is a valid netId
-         */
-        sendMessage(obtainMessage(CMD_CONNECT_NETWORK, WifiConfiguration.INVALID_NETWORK_ID,
-                0, wifiConfig));
-    }
-
-    public void saveNetwork(WifiConfiguration wifiConfig) {
-        sendMessage(obtainMessage(CMD_SAVE_NETWORK, wifiConfig));
-    }
-
-    public void forgetNetwork(int netId) {
-        sendMessage(obtainMessage(CMD_FORGET_NETWORK, netId, 0));
-    }
-
-    public void disableNetwork(Messenger replyTo, int netId, int reason) {
-        Message message = obtainMessage(CMD_DISABLE_NETWORK, netId, reason);
-        message.replyTo = replyTo;
-        sendMessage(message);
-    }
-
-    public void startWps(Messenger replyTo, WpsInfo config) {
-        Message msg = obtainMessage(CMD_START_WPS, config);
-        msg.replyTo = replyTo;
-        sendMessage(msg);
     }
 
     public void enableRssiPolling(boolean enabled) {
@@ -1563,13 +1498,6 @@ public class WifiStateMachine extends StateMachine {
         mContext.sendStickyBroadcast(intent);
     }
 
-    private void sendErrorBroadcast(int errorCode) {
-        Intent intent = new Intent(WifiManager.ERROR_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.putExtra(WifiManager.EXTRA_ERROR_CODE, errorCode);
-        mContext.sendBroadcast(intent);
-    }
-
     private void sendLinkConfigurationChangedBroadcast() {
         Intent intent = new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -1626,7 +1554,6 @@ public class WifiStateMachine extends StateMachine {
         }
 
         mSupplicantStateTracker.sendMessage(Message.obtain(message));
-        mWpsStateMachine.sendMessage(Message.obtain(message));
 
         return state;
     }
@@ -1836,14 +1763,13 @@ public class WifiStateMachine extends StateMachine {
                     /* Synchronous call returns */
                 case CMD_PING_SUPPLICANT:
                 case CMD_ENABLE_NETWORK:
-                case CMD_DISABLE_NETWORK:
                 case CMD_ADD_OR_UPDATE_NETWORK:
                 case CMD_REMOVE_NETWORK:
                 case CMD_SAVE_CONFIG:
-                    mReplyChannel.replyToMessage(message, message.what, FAILURE);
+                    replyToMessage(message, message.what, FAILURE);
                     break;
                 case CMD_GET_CONFIGURED_NETWORKS:
-                    mReplyChannel.replyToMessage(message, message.what,
+                    replyToMessage(message, message.what,
                             mWifiConfigStore.getConfiguredNetworks());
                     break;
                 case CMD_ENABLE_RSSI_POLL:
@@ -1886,9 +1812,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
-                case CMD_CONNECT_NETWORK:
-                case CMD_SAVE_NETWORK:
-                case CMD_FORGET_NETWORK:
                 case CMD_RSSI_POLL:
                 case CMD_ENABLE_ALL_NETWORKS:
                 case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
@@ -1905,10 +1828,25 @@ public class WifiStateMachine extends StateMachine {
                     setWifiEnabled(false);
                     setWifiEnabled(true);
                     break;
-                case CMD_START_WPS:
-                    /* Return failure when the state machine cannot handle WPS initiation*/
-                    mReplyChannel.replyToMessage(message, WifiManager.CMD_WPS_COMPLETED,
-                                new WpsResult(Status.FAILURE));
+                case WifiManager.CONNECT_NETWORK:
+                    replyToMessage(message, WifiManager.CONNECT_NETWORK_FAILED,
+                            WifiManager.BUSY);
+                    break;
+                case WifiManager.FORGET_NETWORK:
+                    replyToMessage(message, WifiManager.FORGET_NETWORK_FAILED,
+                            WifiManager.BUSY);
+                    break;
+                case WifiManager.SAVE_NETWORK:
+                    replyToMessage(message, WifiManager.SAVE_NETWORK_FAILED,
+                            WifiManager.BUSY);
+                    break;
+                case WifiManager.START_WPS:
+                    replyToMessage(message, WifiManager.WPS_FAILED,
+                            WifiManager.BUSY);
+                    break;
+                case WifiManager.DISABLE_NETWORK:
+                    replyToMessage(message, WifiManager.DISABLE_NETWORK_FAILED,
+                            WifiManager.BUSY);
                     break;
                 default:
                     loge("Error! unhandled message" + message);
@@ -2222,7 +2160,6 @@ public class WifiStateMachine extends StateMachine {
                     /* Reset the supplicant state to indicate the supplicant
                      * state is not known at this time */
                     mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
-                    mWpsStateMachine.sendMessage(CMD_RESET_WPS_STATE);
                     /* Initialize data structures */
                     mLastBssid = null;
                     mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
@@ -2306,7 +2243,6 @@ public class WifiStateMachine extends StateMachine {
                     handleNetworkDisconnect();
                     sendSupplicantConnectionChangedBroadcast(false);
                     mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
-                    mWpsStateMachine.sendMessage(CMD_RESET_WPS_STATE);
                     transitionTo(mDriverLoadedState);
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
@@ -2318,20 +2254,20 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_PING_SUPPLICANT:
                     boolean ok = mWifiNative.ping();
-                    mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
+                    replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ADD_OR_UPDATE_NETWORK:
                     config = (WifiConfiguration) message.obj;
-                    mReplyChannel.replyToMessage(message, CMD_ADD_OR_UPDATE_NETWORK,
+                    replyToMessage(message, CMD_ADD_OR_UPDATE_NETWORK,
                             mWifiConfigStore.addOrUpdateNetwork(config));
                     break;
                 case CMD_REMOVE_NETWORK:
                     ok = mWifiConfigStore.removeNetwork(message.arg1);
-                    mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
+                    replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ENABLE_NETWORK:
                     ok = mWifiConfigStore.enableNetwork(message.arg1, message.arg2 == 1);
-                    mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
+                    replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ENABLE_ALL_NETWORKS:
                     long time =  android.os.SystemClock.elapsedRealtime();
@@ -2340,9 +2276,14 @@ public class WifiStateMachine extends StateMachine {
                         mLastEnableAllNetworksTime = time;
                     }
                     break;
-                case CMD_DISABLE_NETWORK:
-                    ok = mWifiConfigStore.disableNetwork(message.arg1, message.arg2);
-                    mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
+                case WifiManager.DISABLE_NETWORK:
+                    if (mWifiConfigStore.disableNetwork(message.arg1,
+                            WifiConfiguration.DISABLED_UNKNOWN_REASON) == true) {
+                        replyToMessage(message, WifiManager.DISABLE_NETWORK_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiManager.DISABLE_NETWORK_FAILED,
+                                WifiManager.ERROR);
+                    }
                     break;
                 case CMD_BLACKLIST_NETWORK:
                     mWifiNative.addToBlacklist((String)message.obj);
@@ -2352,7 +2293,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_SAVE_CONFIG:
                     ok = mWifiConfigStore.saveConfig();
-                    mReplyChannel.replyToMessage(message, CMD_SAVE_CONFIG, ok ? SUCCESS : FAILURE);
+                    replyToMessage(message, CMD_SAVE_CONFIG, ok ? SUCCESS : FAILURE);
 
                     // Inform the backup manager about a data change
                     IBackupManager ibm = IBackupManager.Stub.asInterface(
@@ -2373,12 +2314,25 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_SCAN_MODE:
                     mIsScanMode = (message.arg1 == SCAN_ONLY_MODE);
                     break;
-                case CMD_SAVE_NETWORK:
+                case WifiManager.SAVE_NETWORK:
                     config = (WifiConfiguration) message.obj;
-                    mWifiConfigStore.saveNetwork(config);
+                    NetworkUpdateResult result = mWifiConfigStore.saveNetwork(config);
+                    if (result.getNetworkId() != WifiConfiguration.INVALID_NETWORK_ID) {
+                        replyToMessage(message, WifiManager.SAVE_NETWORK_SUCCEEDED);
+                    } else {
+                        loge("Failed to save network");
+                        replyToMessage(message, WifiManager.SAVE_NETWORK_FAILED,
+                                WifiManager.ERROR);
+                    }
                     break;
-                case CMD_FORGET_NETWORK:
-                    mWifiConfigStore.forgetNetwork(message.arg1);
+                case WifiManager.FORGET_NETWORK:
+                    if (mWifiConfigStore.forgetNetwork(message.arg1)) {
+                        replyToMessage(message, WifiManager.FORGET_NETWORK_SUCCEEDED);
+                    } else {
+                        loge("Failed to forget network");
+                        replyToMessage(message, WifiManager.FORGET_NETWORK_FAILED,
+                                WifiManager.ERROR);
+                    }
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2417,7 +2371,6 @@ public class WifiStateMachine extends StateMachine {
             setWifiState(WIFI_STATE_DISABLING);
             sendSupplicantConnectionChangedBroadcast(false);
             mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
-            mWpsStateMachine.sendMessage(CMD_RESET_WPS_STATE);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2810,10 +2763,6 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
                     mSupplicantStateTracker.sendMessage(WifiMonitor.AUTHENTICATION_FAILURE_EVENT);
                     break;
-                case WifiMonitor.WPS_OVERLAP_EVENT:
-                    /* We just need to broadcast the error */
-                    sendErrorBroadcast(WifiManager.WPS_OVERLAP_ERROR);
-                    break;
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     SupplicantState state = handleSupplicantStateChange(message);
                     // Due to a WEXT bug, during the time of driver start/stop
@@ -2850,7 +2799,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_REASSOCIATE:
                     mWifiNative.reassociate();
                     break;
-                case CMD_CONNECT_NETWORK:
+                case WifiManager.CONNECT_NETWORK:
                     int netId = message.arg1;
                     WifiConfiguration config = (WifiConfiguration) message.obj;
 
@@ -2868,15 +2817,44 @@ public class WifiStateMachine extends StateMachine {
                     }
 
                     /* The state tracker handles enabling networks upon completion/failure */
-                    mSupplicantStateTracker.sendMessage(CMD_CONNECT_NETWORK);
+                    mSupplicantStateTracker.sendMessage(WifiManager.CONNECT_NETWORK);
 
-                    mWifiNative.reconnect();
+                    if (mWifiNative.reconnect()) {
+                        replyToMessage(message, WifiManager.CONNECT_NETWORK_SUCCEEDED);
+                    } else {
+                        loge("Failed to initiate connection");
+                        replyToMessage(message, WifiManager.CONNECT_NETWORK_FAILED,
+                                WifiManager.ERROR);
+                    }
+
                     /* Expect a disconnection from the old connection */
                     transitionTo(mDisconnectingState);
                     break;
-                case CMD_START_WPS:
-                    mWpsStateMachine.sendMessage(Message.obtain(message));
-                    transitionTo(mWaitForWpsCompletionState);
+                case WifiManager.START_WPS:
+                    WpsInfo wpsInfo = (WpsInfo) message.obj;
+                    WpsResult result;
+                    switch (wpsInfo.setup) {
+                        case WpsInfo.PBC:
+                            result = mWifiConfigStore.startWpsPbc(wpsInfo);
+                            break;
+                        case WpsInfo.KEYPAD:
+                            result = mWifiConfigStore.startWpsWithPinFromAccessPoint(wpsInfo);
+                            break;
+                        case WpsInfo.DISPLAY:
+                            result = mWifiConfigStore.startWpsWithPinFromDevice(wpsInfo);
+                            break;
+                        default:
+                            result = new WpsResult(Status.FAILURE);
+                            Log.e(TAG, "Invalid setup for WPS");
+                            break;
+                    }
+                    if (result.status == Status.SUCCESS) {
+                        replyToMessage(message, WifiManager.START_WPS_SUCCEEDED, result);
+                        transitionTo(mWpsRunningState);
+                    } else {
+                        Log.e(TAG, "Failed to start WPS with config " + wpsInfo.toString());
+                        replyToMessage(message, WifiManager.WPS_FAILED, WifiManager.ERROR);
+                    }
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                     /* Set the scan setting back to "connect" mode */
@@ -2909,7 +2887,6 @@ public class WifiStateMachine extends StateMachine {
             return HANDLED;
         }
     }
-
 
     class L2ConnectedState extends State {
         @Override
@@ -2964,13 +2941,13 @@ public class WifiStateMachine extends StateMachine {
                     /* Have the parent state handle the rest */
                     return NOT_HANDLED;
                     /* Ignore connection to same network */
-                case CMD_CONNECT_NETWORK:
+                case WifiManager.CONNECT_NETWORK:
                     int netId = message.arg1;
                     if (mWifiInfo.getNetworkId() == netId) {
                         break;
                     }
                     return NOT_HANDLED;
-                case CMD_SAVE_NETWORK:
+                case WifiManager.SAVE_NETWORK:
                     WifiConfiguration config = (WifiConfiguration) message.obj;
                     NetworkUpdateResult result = mWifiConfigStore.saveNetwork(config);
                     if (mWifiInfo.getNetworkId() == result.getNetworkId()) {
@@ -2983,6 +2960,14 @@ public class WifiStateMachine extends StateMachine {
                             configureLinkProperties();
                             sendLinkConfigurationChangedBroadcast();
                         }
+                    }
+
+                    if (result.getNetworkId() != WifiConfiguration.INVALID_NETWORK_ID) {
+                        replyToMessage(message, WifiManager.SAVE_NETWORK_SUCCEEDED);
+                    } else {
+                        loge("Failed to save network");
+                        replyToMessage(message, WifiManager.SAVE_NETWORK_FAILED,
+                                WifiManager.ERROR);
                     }
                     break;
                     /* Ignore */
@@ -3073,7 +3058,7 @@ public class WifiStateMachine extends StateMachine {
                   handleFailedIpConfiguration();
                   transitionTo(mDisconnectingState);
                   break;
-             case CMD_SAVE_NETWORK:
+             case WifiManager.SAVE_NETWORK:
                   deferMessage(message);
                   break;
                   /* Defer any power mode changes since we must keep active power mode at DHCP */
@@ -3309,42 +3294,68 @@ public class WifiStateMachine extends StateMachine {
         }
     }
 
-    class WaitForWpsCompletionState extends State {
+    class WpsRunningState extends State {
+        //Tracks the source to provide a reply
+        private Message mSourceMessage;
         @Override
         public void enter() {
             if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+            mSourceMessage = Message.obtain(getCurrentMessage());
         }
         @Override
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
+                case WifiMonitor.WPS_SUCCESS_EVENT:
+                    replyToMessage(mSourceMessage, WifiManager.WPS_COMPLETED);
+                    mSourceMessage.recycle();
+                    mSourceMessage = null;
+                    transitionTo(mDisconnectedState);
+                    break;
+                case WifiMonitor.WPS_OVERLAP_EVENT:
+                    replyToMessage(mSourceMessage, WifiManager.WPS_FAILED,
+                            WifiManager.WPS_OVERLAP_ERROR);
+                    mSourceMessage.recycle();
+                    mSourceMessage = null;
+                    transitionTo(mDisconnectedState);
+                    break;
+                case WifiMonitor.WPS_FAIL_EVENT:
+                case WifiMonitor.WPS_TIMEOUT_EVENT:
+                    replyToMessage(mSourceMessage, WifiManager.WPS_FAILED, WifiManager.ERROR);
+                    mSourceMessage.recycle();
+                    mSourceMessage = null;
+                    transitionTo(mDisconnectedState);
+                    break;
+                case WifiManager.START_WPS:
+                    replyToMessage(message, WifiManager.WPS_FAILED, WifiManager.IN_PROGRESS);
+                    break;
                 /* Defer all commands that can cause connections to a different network
                  * or put the state machine out of connect mode
                  */
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
-                case CMD_CONNECT_NETWORK:
+                case WifiManager.CONNECT_NETWORK:
                 case CMD_ENABLE_NETWORK:
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
-                case WifiMonitor.NETWORK_CONNECTION_EVENT: /* Handled after IP & proxy update */
+                case WifiMonitor.NETWORK_CONNECTION_EVENT: /* Handled after exiting WPS state */
                     deferMessage(message);
                     break;
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                     if (DBG) log("Network connection lost");
                     handleNetworkDisconnect();
                     break;
-                case WPS_COMPLETED_EVENT:
-                    /* we are still disconnected until we see a network connection
-                     * notification */
-                    transitionTo(mDisconnectedState);
-                    break;
                 default:
                     return NOT_HANDLED;
             }
             EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
+        }
+
+        public void exit() {
+            mWifiConfigStore.enableAllNetworks();
+            mWifiConfigStore.loadConfiguredNetworks();
         }
     }
 
@@ -3603,6 +3614,43 @@ public class WifiStateMachine extends StateMachine {
             EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
+    }
+
+    //State machine initiated requests can have replyTo set to null indicating
+    //there are no recepients, we ignore those reply actions
+    private void replyToMessage(Message msg, int what) {
+        if (msg.replyTo == null) return;
+        Message dstMsg = obtainMessageWithArg2(msg);
+        dstMsg.what = what;
+        mReplyChannel.replyToMessage(msg, dstMsg);
+    }
+
+    private void replyToMessage(Message msg, int what, int arg1) {
+        if (msg.replyTo == null) return;
+        Message dstMsg = obtainMessageWithArg2(msg);
+        dstMsg.what = what;
+        dstMsg.arg1 = arg1;
+        mReplyChannel.replyToMessage(msg, dstMsg);
+    }
+
+    private void replyToMessage(Message msg, int what, Object obj) {
+        if (msg.replyTo == null) return;
+        Message dstMsg = obtainMessageWithArg2(msg);
+        dstMsg.what = what;
+        dstMsg.obj = obj;
+        mReplyChannel.replyToMessage(msg, dstMsg);
+    }
+
+    /**
+     * arg2 on the source message has a unique id that needs to be retained in replies
+     * to match the request
+     *
+     * see WifiManager for details
+     */
+    private Message obtainMessageWithArg2(Message srcMsg) {
+        Message msg = Message.obtain();
+        msg.arg2 = srcMsg.arg2;
+        return msg;
     }
 
     private void log(String s) {
