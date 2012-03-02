@@ -736,6 +736,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 // handle.
                 // The selection handle is vertically offset by 1/4 of the
                 // line height.
+                ensureSelectionHandles();
                 y = cursorRect.bottom - (cursorRect.height() / 4) +
                         mSelectHandleCenter.getIntrinsicHeight();
             }
@@ -5232,7 +5233,19 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
+    private void ensureSelectionHandles() {
+        if (mSelectHandleCenter == null) {
+            mSelectHandleCenter = mContext.getResources().getDrawable(
+                    com.android.internal.R.drawable.text_select_handle_middle);
+            mSelectHandleLeft = mContext.getResources().getDrawable(
+                    com.android.internal.R.drawable.text_select_handle_left);
+            mSelectHandleRight = mContext.getResources().getDrawable(
+                    com.android.internal.R.drawable.text_select_handle_right);
+        }
+    }
+
     private void drawTextSelectionHandles(Canvas canvas) {
+        ensureSelectionHandles();
         int[] handles = new int[4];
         getSelectionHandles(handles);
         int start_x = contentToViewDimension(handles[0]);
@@ -5241,10 +5254,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         int end_y = contentToViewDimension(handles[3]);
 
         if (mIsCaretSelection) {
-            if (mSelectHandleCenter == null) {
-                mSelectHandleCenter = mContext.getResources().getDrawable(
-                        com.android.internal.R.drawable.text_select_handle_middle);
-            }
             // Caret handle is centered
             start_x -= (mSelectHandleCenter.getIntrinsicWidth() / 2);
             mSelectHandleCenter.setBounds(start_x, start_y,
@@ -5252,19 +5261,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     start_y + mSelectHandleCenter.getIntrinsicHeight());
             mSelectHandleCenter.draw(canvas);
         } else {
-            if (mSelectHandleLeft == null) {
-                mSelectHandleLeft = mContext.getResources().getDrawable(
-                        com.android.internal.R.drawable.text_select_handle_left);
-            }
             // Magic formula copied from TextView
             start_x -= (mSelectHandleLeft.getIntrinsicWidth() * 3) / 4;
             mSelectHandleLeft.setBounds(start_x, start_y,
                     start_x + mSelectHandleLeft.getIntrinsicWidth(),
                     start_y + mSelectHandleLeft.getIntrinsicHeight());
-            if (mSelectHandleRight == null) {
-                mSelectHandleRight = mContext.getResources().getDrawable(
-                        com.android.internal.R.drawable.text_select_handle_right);
-            }
             end_x -= mSelectHandleRight.getIntrinsicWidth() / 4;
             mSelectHandleRight.setBounds(end_x, end_y,
                     end_x + mSelectHandleRight.getIntrinsicWidth(),
