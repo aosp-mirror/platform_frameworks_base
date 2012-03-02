@@ -59,7 +59,7 @@ public class ConnectionUtil {
     private static final int WAIT_FOR_SCAN_RESULT = 10 * 1000; // 10 seconds
     private static final int WIFI_SCAN_TIMEOUT = 50 * 1000;
     public static final int SHORT_TIMEOUT = 5 * 1000;
-    public static final int LONG_TIMEOUT = 120 * 1000; // 2 minutes
+    public static final int LONG_TIMEOUT = 5 * 60 * 1000; // 5 minutes
     private ConnectivityReceiver mConnectivityReceiver = null;
     private WifiReceiver mWifiReceiver = null;
     private DownloadReceiver mDownloadReceiver = null;
@@ -459,7 +459,13 @@ public class ConnectionUtil {
                 if (mNetworkInfo == null) {
                     Log.v(LOG_TAG, "Do not have networkInfo! Force fetch of network info.");
                     mNetworkInfo = mCM.getActiveNetworkInfo();
-                    Assert.assertNotNull(mNetworkInfo);
+                }
+                // Still null after force fetch? Maybe the network did not have time to be brought
+                // up yet.
+                if (mNetworkInfo == null) {
+                    Log.v(LOG_TAG, "Failed to force fetch networkInfo. " +
+                            "The network is still not ready. Wait for the next broadcast");
+                    continue;
                 }
                 if ((mNetworkInfo.getType() != networkType) ||
                         (mNetworkInfo.getState() != expectedState)) {
