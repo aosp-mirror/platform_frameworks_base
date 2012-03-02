@@ -315,7 +315,7 @@ public class TextureView extends View {
     }
 
     @Override
-    HardwareLayer getHardwareLayer() {
+    HardwareLayer getHardwareLayer(boolean immediateRefresh) {
         if (mLayer == null) {
             if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
                 return null;

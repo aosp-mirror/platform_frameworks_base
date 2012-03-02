@@ -2364,6 +2364,24 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
         return;
     }
 
+    if (layer->deferredUpdateScheduled && layer->renderer && layer->displayList) {
+        OpenGLRenderer* renderer = layer->renderer;
+        Rect& dirty = layer->dirtyRect;
+
+        interrupt();
+        renderer->setViewport(layer->layer.getWidth(), layer->layer.getHeight());
+        renderer->prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, !layer->isBlend());
+        renderer->drawDisplayList(layer->displayList, layer->getWidth(), layer->getHeight(),
+                dirty, DisplayList::kReplayFlag_ClipChildren);
+        renderer->finish();
+        resume();
+
+        dirty.setEmpty();
+        layer->deferredUpdateScheduled = false;
+        layer->renderer = NULL;
+        layer->displayList = NULL;
+    }
+
     mCaches.activeTexture(0);
 
     int alpha;
