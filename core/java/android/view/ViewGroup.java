@@ -4920,9 +4920,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void resetResolvedLayoutDirection() {
-        super.resetResolvedLayoutDirection();
-
+    public void onResolvedLayoutDirectionReset() {
         // Take care of resetting the children resolution too
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
@@ -4934,7 +4932,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void onResetResolvedTextDirection() {
+    public void onResolvedTextDirectionReset() {
         // Take care of resetting the children resolution too
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {

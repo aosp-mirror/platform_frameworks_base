@@ -8715,7 +8715,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void onResolveTextDirection() {
+    public void onResolvedTextDirectionChanged() {
         if (hasPasswordTransformationMethod()) {
             // TODO: take care of the content direction to show the password text and dots justified
             // to the left or to the right

@@ -143,7 +143,7 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     @Override
-    public void onResolvePadding(int layoutDirection) {
+    public void onPaddingChanged(int layoutDirection) {
         int newPadding = (mCheckMarkDrawable != null) ?
                 mCheckMarkWidth + mBasePadding : mBasePadding;
         mNeedRequestlayout |= (mPaddingRight != newPadding);
