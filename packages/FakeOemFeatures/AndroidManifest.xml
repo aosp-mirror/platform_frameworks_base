@@ -15,9 +15,9 @@
 
         <service android:name=".FakeCoreService" android:process=":core"
                 android:label="Fake OEM Core Service" />
-        <service android:name=".FakeCoreService2" android:process=":core"
+        <service android:name=".FakeCoreService2" android:process=":core2"
                 android:label="Fake OEM Core Service Also" />
-        <service android:name=".FakeCoreService3" android:process=":core"
+        <service android:name=".FakeCoreService3" android:process=":core3"
                 android:label="Fake OEM Core Service Me Too" />
         <service android:name=".FakeBackgroundService" android:process=":background"
                 android:label="Fake OEM Bg Service" />
