@@ -414,7 +414,7 @@ package android {
     field public static final int ems = 16843096; // 0x1010158
     field public static final deprecated int enabled = 16842766; // 0x101000e
     field public static final int endColor = 16843166; // 0x101019e
-    field public static final int endYear = 16843133; // 0x101017d
+    field public static final deprecated int endYear = 16843133; // 0x101017d
     field public static final int enterFadeDuration = 16843532; // 0x101030c
     field public static final int entries = 16842930; // 0x10100b2
     field public static final int entryValues = 16843256; // 0x10101f8
@@ -888,7 +888,7 @@ package android {
     field public static final int starStyle = 16842882; // 0x1010082
     field public static final int startColor = 16843165; // 0x101019d
     field public static final int startOffset = 16843198; // 0x10101be
-    field public static final int startYear = 16843132; // 0x101017c
+    field public static final deprecated int startYear = 16843132; // 0x101017c
     field public static final int stateNotNeeded = 16842774; // 0x1010016
     field public static final int state_above_anchor = 16842922; // 0x10100aa
     field public static final int state_accelerated = 16843547; // 0x101031b
