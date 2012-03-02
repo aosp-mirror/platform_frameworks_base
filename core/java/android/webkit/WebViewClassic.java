@@ -348,8 +348,7 @@ import java.util.regex.Pattern;
  *
  * @hide
  */
-// TODO: Remove duplicated API documentation and @hide from fields and methods, and
-// checkThread() call. (All left in for now to ease branch merging.)
+// TODO: Remove @hide from fields and methods.
 // TODO: Check if any WebView published API methods are called from within here, and if so
 // we should bounce the call out via the proxy to enable any sub-class to override it.
 @Widget
@@ -1464,8 +1463,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void init(Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
-        checkThread();
-
         Context context = mContext;
 
         // Used by the chrome stack to find application paths
@@ -1969,7 +1966,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void setHorizontalScrollbarOverlay(boolean overlay) {
-        checkThread();
         mOverlayHorizontalScrollbar = overlay;
     }
 
@@ -1978,7 +1974,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void setVerticalScrollbarOverlay(boolean overlay) {
-        checkThread();
         mOverlayVerticalScrollbar = overlay;
     }
 
@@ -1987,7 +1982,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean overlayHorizontalScrollbar() {
-        checkThread();
         return mOverlayHorizontalScrollbar;
     }
 
@@ -1996,7 +1990,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean overlayVerticalScrollbar() {
-        checkThread();
         return mOverlayVerticalScrollbar;
     }
 
@@ -2039,7 +2032,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public int getVisibleTitleHeight() {
         // Actually, this method returns the height of the embedded title bar if one is set via the
         // hidden setEmbeddedTitleBar method.
-        checkThread();
         return getVisibleTitleHeightImpl();
     }
 
@@ -2085,7 +2077,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public SslCertificate getCertificate() {
-        checkThread();
         return mCertificate;
     }
 
@@ -2094,7 +2085,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void setCertificate(SslCertificate certificate) {
-        checkThread();
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "setCertificate=" + certificate);
         }
@@ -2111,7 +2101,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void savePassword(String host, String username, String password) {
-        checkThread();
         mDatabase.setUsernamePassword(host, username, password);
     }
 
@@ -2121,7 +2110,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     public void setHttpAuthUsernamePassword(String host, String realm,
             String username, String password) {
-        checkThread();
         mDatabase.setHttpAuthUsernamePassword(host, realm, username, password);
     }
 
@@ -2130,7 +2118,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public String[] getHttpAuthUsernamePassword(String host, String realm) {
-        checkThread();
         return mDatabase.getHttpAuthUsernamePassword(host, realm);
     }
 
@@ -2170,7 +2157,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void destroy() {
-        checkThread();
         destroyImpl();
     }
 
@@ -2203,7 +2189,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Deprecated
     public static void enablePlatformNotifications() {
-        checkThread();
         synchronized (WebViewClassic.class) {
             sNotificationsEnabled = true;
             Context context = JniUtil.getContext();
@@ -2217,7 +2202,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Deprecated
     public static void disablePlatformNotifications() {
-        checkThread();
         synchronized (WebViewClassic.class) {
             sNotificationsEnabled = false;
             Context context = JniUtil.getContext();
@@ -2234,7 +2218,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * @hide This is an implementation detail.
      */
     public void setJsFlags(String flags) {
-        checkThread();
         mWebViewCore.sendMessage(EventHub.SET_JS_FLAGS, flags);
     }
 
@@ -2243,7 +2226,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void setNetworkAvailable(boolean networkUp) {
-        checkThread();
         mWebViewCore.sendMessage(EventHub.SET_NETWORK_STATE,
                 networkUp ? 1 : 0, 0);
     }
@@ -2253,7 +2235,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * {@hide}
      */
     public void setNetworkType(String type, String subtype) {
-        checkThread();
         Map<String, String> map = new HashMap<String, String>();
         map.put("type", type);
         map.put("subtype", subtype);
@@ -2265,7 +2246,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public WebBackForwardList saveState(Bundle outState) {
-        checkThread();
         if (outState == null) {
             return null;
         }
@@ -2317,7 +2297,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     @Deprecated
     public boolean savePicture(Bundle b, final File dest) {
-        checkThread();
         if (dest == null || b == null) {
             return false;
         }
@@ -2379,7 +2358,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     @Deprecated
     public boolean restorePicture(Bundle b, File src) {
-        checkThread();
         if (src == null || b == null) {
             return false;
         }
@@ -2471,7 +2449,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public WebBackForwardList restoreState(Bundle inState) {
-        checkThread();
         WebBackForwardList returnList = null;
         if (inState == null) {
             return returnList;
@@ -2528,7 +2505,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
-        checkThread();
         loadUrlImpl(url, additionalHttpHeaders);
     }
 
@@ -2546,7 +2522,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void loadUrl(String url) {
-        checkThread();
         loadUrlImpl(url);
     }
 
@@ -2562,7 +2537,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void postUrl(String url, byte[] postData) {
-        checkThread();
         if (URLUtil.isNetworkUrl(url)) {
             switchOutDrawHistory();
             WebViewCore.PostUrlData arg = new WebViewCore.PostUrlData();
@@ -2580,7 +2554,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void loadData(String data, String mimeType, String encoding) {
-        checkThread();
         loadDataImpl(data, mimeType, encoding);
     }
 
@@ -2601,7 +2574,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     public void loadDataWithBaseURL(String baseUrl, String data,
             String mimeType, String encoding, String historyUrl) {
-        checkThread();
 
         if (baseUrl != null && baseUrl.toLowerCase().startsWith("data:")) {
             loadDataImpl(data, mimeType, encoding);
@@ -2623,7 +2595,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void saveWebArchive(String filename) {
-        checkThread();
         saveWebArchiveImpl(filename, false, null);
     }
 
@@ -2645,7 +2616,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void saveWebArchive(String basename, boolean autoname, ValueCallback<String> callback) {
-        checkThread();
         saveWebArchiveImpl(basename, autoname, callback);
     }
 
@@ -2660,7 +2630,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void stopLoading() {
-        checkThread();
         // TODO: should we clear all the messages in the queue before sending
         // STOP_LOADING?
         switchOutDrawHistory();
@@ -2672,7 +2641,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void reload() {
-        checkThread();
         clearHelpers();
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.RELOAD);
@@ -2683,7 +2651,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean canGoBack() {
-        checkThread();
         WebBackForwardList l = mCallbackProxy.getBackForwardList();
         synchronized (l) {
             if (l.getClearPending()) {
@@ -2699,7 +2666,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void goBack() {
-        checkThread();
         goBackOrForwardImpl(-1);
     }
 
@@ -2708,7 +2674,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean canGoForward() {
-        checkThread();
         WebBackForwardList l = mCallbackProxy.getBackForwardList();
         synchronized (l) {
             if (l.getClearPending()) {
@@ -2724,7 +2689,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void goForward() {
-        checkThread();
         goBackOrForwardImpl(1);
     }
 
@@ -2733,7 +2697,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean canGoBackOrForward(int steps) {
-        checkThread();
         WebBackForwardList l = mCallbackProxy.getBackForwardList();
         synchronized (l) {
             if (l.getClearPending()) {
@@ -2750,7 +2713,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void goBackOrForward(int steps) {
-        checkThread();
         goBackOrForwardImpl(steps);
     }
 
@@ -2771,7 +2733,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean isPrivateBrowsingEnabled() {
-        checkThread();
         return getSettings().isPrivateBrowsingEnabled();
     }
 
@@ -2793,7 +2754,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean pageUp(boolean top) {
-        checkThread();
         if (mNativeClass == 0) {
             return false;
         }
@@ -2818,7 +2778,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean pageDown(boolean bottom) {
-        checkThread();
         if (mNativeClass == 0) {
             return false;
         }
@@ -2842,7 +2801,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void clearView() {
-        checkThread();
         mContentWidth = 0;
         mContentHeight = 0;
         setBaseLayer(0, null, false, false);
@@ -2854,7 +2812,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public Picture capturePicture() {
-        checkThread();
         if (mNativeClass == 0) return null;
         Picture result = new Picture();
         nativeCopyBaseContentToPicture(result);
@@ -2866,7 +2823,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public float getScale() {
-        checkThread();
         return mZoomManager.getScale();
     }
 
@@ -2884,7 +2840,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void setInitialScale(int scaleInPercent) {
-        checkThread();
         mZoomManager.setInitialScaleInPercent(scaleInPercent);
     }
 
@@ -2893,7 +2848,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void invokeZoomPicker() {
-        checkThread();
         if (!getSettings().supportZoom()) {
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return;
@@ -2907,7 +2861,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public HitTestResult getHitTestResult() {
-        checkThread();
         return mInitialHitTestResult;
     }
 
@@ -2943,7 +2896,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void requestFocusNodeHref(Message hrefMsg) {
-        checkThread();
         if (hrefMsg == null) {
             return;
         }
@@ -2966,7 +2918,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void requestImageRef(Message msg) {
-        checkThread();
         if (0 == mNativeClass) return; // client isn't initialized
         String url = mFocusedNode != null ? mFocusedNode.mImageUrl : null;
         Bundle data = msg.getData();
@@ -3471,7 +3422,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public String getUrl() {
-        checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getUrl() : null;
     }
@@ -3481,7 +3431,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public String getOriginalUrl() {
-        checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getOriginalUrl() : null;
     }
@@ -3491,7 +3440,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public String getTitle() {
-        checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getTitle() : null;
     }
@@ -3501,7 +3449,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public Bitmap getFavicon() {
-        checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getFavicon() : null;
     }
@@ -3520,7 +3467,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public int getProgress() {
-        checkThread();
         return mCallbackProxy.getProgress();
     }
 
@@ -3529,7 +3475,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public int getContentHeight() {
-        checkThread();
         return mContentHeight;
     }
 
@@ -3553,7 +3498,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void pauseTimers() {
-        checkThread();
         mWebViewCore.sendMessage(EventHub.PAUSE_TIMERS);
     }
 
@@ -3562,7 +3506,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void resumeTimers() {
-        checkThread();
         mWebViewCore.sendMessage(EventHub.RESUME_TIMERS);
     }
 
@@ -3571,7 +3514,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void onPause() {
-        checkThread();
         if (!mIsPaused) {
             mIsPaused = true;
             mWebViewCore.sendMessage(EventHub.ON_PAUSE);
@@ -3610,7 +3552,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void onResume() {
-        checkThread();
         if (mIsPaused) {
             mIsPaused = false;
             mWebViewCore.sendMessage(EventHub.ON_RESUME);
@@ -3642,7 +3583,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void freeMemory() {
-        checkThread();
         mWebViewCore.sendMessage(EventHub.FREE_MEMORY);
     }
 
@@ -3651,7 +3591,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void clearCache(boolean includeDiskFiles) {
-        checkThread();
         // Note: this really needs to be a static method as it clears cache for all
         // WebView. But we need mWebViewCore to send message to WebCore thread, so
         // we can't make this static.
@@ -3664,7 +3603,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void clearFormData() {
-        checkThread();
         if (mAutoCompletePopup != null) {
             mAutoCompletePopup.clearAdapter();
         }
@@ -3675,7 +3613,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void clearHistory() {
-        checkThread();
         mCallbackProxy.getBackForwardList().setClearPending();
         mWebViewCore.sendMessage(EventHub.CLEAR_HISTORY);
     }
@@ -3685,7 +3622,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void clearSslPreferences() {
-        checkThread();
         mWebViewCore.sendMessage(EventHub.CLEAR_SSL_PREF_TABLE);
     }
 
@@ -3694,7 +3630,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public WebBackForwardList copyBackForwardList() {
-        checkThread();
         return mCallbackProxy.getBackForwardList().clone();
     }
 
@@ -3714,7 +3649,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void findNext(boolean forward) {
-        checkThread();
         if (0 == mNativeClass) return; // client isn't initialized
         mWebViewCore.sendMessage(EventHub.FIND_NEXT, forward ? 1 : 0);
     }
@@ -3735,7 +3669,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private int findAllBody(String find, boolean isAsync) {
-        checkThread();
         if (0 == mNativeClass) return 0; // client isn't initialized
         mLastFind = find;
         if (find == null) return 0;
@@ -3772,7 +3705,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * @return boolean True if the find dialog is shown, false otherwise.
      */
     public boolean showFindDialog(String text, boolean showIme) {
-        checkThread();
         FindActionModeCallback callback = new FindActionModeCallback(mContext);
         if (mWebView.getParent() == null || mWebView.startActionMode(callback) == null) {
             // Could not start the action mode, so end Find on page
@@ -3841,7 +3773,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * @return the address, or if no address is found, return null.
      */
     public static String findAddress(String addr) {
-        checkThread();
         return findAddress(addr, false);
     }
 
@@ -3876,7 +3807,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void clearMatches() {
-        checkThread();
         if (mNativeClass == 0)
             return;
         mWebViewCore.removeMessages(EventHub.FIND_ALL);
@@ -3906,7 +3836,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void documentHasImages(Message response) {
-        checkThread();
         if (response == null) {
             return;
         }
@@ -4340,7 +4269,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void setWebViewClient(WebViewClient client) {
-        checkThread();
         mCallbackProxy.setWebViewClient(client);
     }
 
@@ -4359,7 +4287,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void setDownloadListener(DownloadListener listener) {
-        checkThread();
         mCallbackProxy.setDownloadListener(listener);
     }
 
@@ -4368,7 +4295,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void setWebChromeClient(WebChromeClient client) {
-        checkThread();
         mCallbackProxy.setWebChromeClient(client);
     }
 
@@ -4407,7 +4333,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     @Deprecated
     public void setPictureListener(PictureListener listener) {
-        checkThread();
         mPictureListener = listener;
     }
 
@@ -4432,7 +4357,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void addJavascriptInterface(Object object, String name) {
-        checkThread();
         if (object == null) {
             return;
         }
@@ -4447,7 +4371,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void removeJavascriptInterface(String interfaceName) {
-        checkThread();
         if (mWebViewCore != null) {
             WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
             arg.mInterfaceName = interfaceName;
@@ -4462,7 +4385,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public WebSettingsClassic getSettings() {
-        checkThread();
         return (mWebViewCore != null) ? mWebViewCore.getSettings() : null;
     }
 
@@ -4471,7 +4393,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Deprecated
     public static synchronized PluginList getPluginList() {
-        checkThread();
         return new PluginList();
     }
 
@@ -4480,7 +4401,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Deprecated
     public void refreshPlugins(boolean reloadOpenPages) {
-        checkThread();
     }
 
     //-------------------------------------------------------------------------
@@ -5510,7 +5430,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     @Deprecated
     public void emulateShiftHeld() {
-        checkThread();
     }
 
     /**
@@ -6861,7 +6780,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private DrawData mLoadedPicture;
 
     public void setMapTrackballToArrowKeys(boolean setMap) {
-        checkThread();
         mMapTrackballToArrowKeys = setMap;
     }
 
@@ -7088,7 +7006,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     public void flingScroll(int vx, int vy) {
-        checkThread();
         mScroller.fling(getScrollX(), getScrollY(), vx, vy, 0, computeMaxScrollX(), 0,
                 computeMaxScrollY(), mOverflingDistance, mOverflingDistance);
         invalidate();
@@ -7210,7 +7127,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     @Deprecated
     public View getZoomControls() {
-        checkThread();
         if (!getSettings().supportZoom()) {
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return null;
@@ -7239,7 +7155,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean canZoomIn() {
-        checkThread();
         return mZoomManager.canZoomIn();
     }
 
@@ -7248,7 +7163,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean canZoomOut() {
-        checkThread();
         return mZoomManager.canZoomOut();
     }
 
@@ -7257,7 +7171,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean zoomIn() {
-        checkThread();
         return mZoomManager.zoomIn();
     }
 
@@ -7266,7 +7179,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public boolean zoomOut() {
-        checkThread();
         return mZoomManager.zoomOut();
     }
 
@@ -9351,18 +9263,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     /* package */ ViewManager getViewManager() {
         return mViewManager;
-    }
-
-    private static void checkThread() {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            Throwable throwable = new Throwable(
-                    "Warning: A WebView method was called on thread '" +
-                    Thread.currentThread().getName() + "'. " +
-                    "All WebView methods must be called on the UI thread. " +
-                    "Future versions of WebView may not support use on other threads.");
-            Log.w(LOGTAG, Log.getStackTraceString(throwable));
-            StrictMode.onWebViewMethodCalledOnWrongThread(throwable);
-        }
     }
 
     /** @hide send content invalidate */
