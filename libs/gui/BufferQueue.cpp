@@ -828,6 +828,7 @@ status_t BufferQueue::acquire(BufferItem *buffer) {
         buffer->mTransform = mSlots[buf].mTransform;
         buffer->mScalingMode = mSlots[buf].mScalingMode;
         buffer->mFrameNumber = mSlots[buf].mFrameNumber;
+        buffer->mTimestamp = mSlots[buf].mTimestamp;
         buffer->mBuf = buf;
         mSlots[buf].mAcquireCalled = true;
 
