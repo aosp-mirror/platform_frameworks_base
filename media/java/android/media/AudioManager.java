@@ -616,16 +616,15 @@ public class AudioManager {
      * Adjusts the master volume for the device's audio amplifier.
      * <p>
      *
-     * @param direction The direction to adjust the volume. One of
-     *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
-     *            {@link #ADJUST_SAME}.
+     * @param steps The number of volume steps to adjust. A positive
+     *            value will raise the volume.
      * @param flags One or more flags.
      * @hide
      */
-    public void adjustMasterVolume(int direction, int flags) {
+    public void adjustMasterVolume(int steps, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustMasterVolume(direction, flags);
+            service.adjustMasterVolume(steps, flags);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustMasterVolume", e);
         }

@@ -153,6 +153,9 @@ public class AudioService extends IAudioService.Stub {
     // but to support integer based AudioManager API we translate it to 0 - 100
     private static final int MAX_MASTER_VOLUME = 100;
 
+    // Maximum volume adjust steps allowed in a single batch call.
+    private static final int MAX_BATCH_VOLUME_ADJUST_STEPS = 4;
+
     /* Sound effect file names  */
     private static final String SOUND_EFFECTS_PATH = "/media/audio/ui/";
     private static final String[] SOUND_EFFECT_FILES = new String[] {
@@ -592,38 +595,19 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** @see AudioManager#adjustMasterVolume(int) */
-    public void adjustMasterVolume(int direction, int flags) {
-        ensureValidDirection(direction);
+    public void adjustMasterVolume(int steps, int flags) {
+        ensureValidSteps(steps);
         int volume = Math.round(AudioSystem.getMasterVolume() * MAX_MASTER_VOLUME);
         int delta = 0;
-
-        if (direction == AudioManager.ADJUST_RAISE) {
-            // This is the default value if we make it to the end
-            delta = mMasterVolumeRamp[1];
-            // If we're raising the volume move down the ramp array until we
-            // find the volume we're above and use that groups delta.
-            for (int i = mMasterVolumeRamp.length - 1; i > 1; i -= 2) {
-                if (volume >= mMasterVolumeRamp[i - 1]) {
-                    delta = mMasterVolumeRamp[i];
-                    break;
-                }
-            }
-        } else if (direction == AudioManager.ADJUST_LOWER){
-            int length = mMasterVolumeRamp.length;
-            // This is the default value if we make it to the end
-            delta = -mMasterVolumeRamp[length - 1];
-            // If we're lowering the volume move up the ramp array until we
-            // find the volume we're below and use the group below it's delta
-            for (int i = 2; i < length; i += 2) {
-                if (volume <= mMasterVolumeRamp[i]) {
-                    delta = -mMasterVolumeRamp[i - 1];
-                    break;
-                }
-            }
+        int numSteps = Math.abs(steps);
+        int direction = steps > 0 ? AudioManager.ADJUST_RAISE : AudioManager.ADJUST_LOWER;
+        for (int i = 0; i < numSteps; ++i) {
+            delta = findVolumeDelta(direction, volume);
+            volume += delta;
         }
 
-//        Log.d(TAG, "adjustMasterVolume volume: " + volume + " delta: " + delta + " direction: " + direction);
-        setMasterVolume(volume + delta, flags);
+        //Log.d(TAG, "adjustMasterVolume volume: " + volume + " steps: " + steps);
+        setMasterVolume(volume, flags);
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
@@ -656,6 +640,41 @@ public class AudioService extends IAudioService.Stub {
         index = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
 
         sendVolumeUpdate(streamType, oldIndex, index, flags);
+    }
+
+    private int findVolumeDelta(int direction, int volume) {
+        int delta = 0;
+        if (direction == AudioManager.ADJUST_RAISE) {
+            if (volume == MAX_MASTER_VOLUME) {
+                return 0;
+            }
+            // This is the default value if we make it to the end
+            delta = mMasterVolumeRamp[1];
+            // If we're raising the volume move down the ramp array until we
+            // find the volume we're above and use that groups delta.
+            for (int i = mMasterVolumeRamp.length - 1; i > 1; i -= 2) {
+                if (volume >= mMasterVolumeRamp[i - 1]) {
+                    delta = mMasterVolumeRamp[i];
+                    break;
+                }
+            }
+        } else if (direction == AudioManager.ADJUST_LOWER){
+            if (volume == 0) {
+                return 0;
+            }
+            int length = mMasterVolumeRamp.length;
+            // This is the default value if we make it to the end
+            delta = -mMasterVolumeRamp[length - 1];
+            // If we're lowering the volume move up the ramp array until we
+            // find the volume we're below and use the group below it's delta
+            for (int i = 2; i < length; i += 2) {
+                if (volume <= mMasterVolumeRamp[i]) {
+                    delta = -mMasterVolumeRamp[i - 1];
+                    break;
+                }
+            }
+        }
+        return delta;
     }
 
     // UI update and Broadcast Intent
@@ -1863,6 +1882,12 @@ public class AudioService extends IAudioService.Stub {
     private void ensureValidDirection(int direction) {
         if (direction < AudioManager.ADJUST_LOWER || direction > AudioManager.ADJUST_RAISE) {
             throw new IllegalArgumentException("Bad direction " + direction);
+        }
+    }
+
+    private void ensureValidSteps(int steps) {
+        if (Math.abs(steps) > MAX_BATCH_VOLUME_ADJUST_STEPS) {
+            throw new IllegalArgumentException("Bad volume adjust steps " + steps);
         }
     }
 
