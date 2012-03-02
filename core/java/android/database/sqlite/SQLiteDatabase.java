@@ -36,6 +36,7 @@ import android.util.Printer;
 import dalvik.system.CloseGuard;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -675,6 +676,40 @@ public class SQLiteDatabase extends SQLiteClosable {
     public static SQLiteDatabase openOrCreateDatabase(String path, CursorFactory factory,
             DatabaseErrorHandler errorHandler) {
         return openDatabase(path, factory, CREATE_IF_NECESSARY, errorHandler);
+    }
+
+    /**
+     * Deletes a database including its journal file and other auxiliary files
+     * that may have been created by the database engine.
+     *
+     * @param file The database file path.
+     * @return True if the database was successfully deleted.
+     */
+    public static boolean deleteDatabase(File file) {
+        if (file == null) {
+            throw new IllegalArgumentException("file must not be null");
+        }
+
+        boolean deleted = false;
+        deleted |= file.delete();
+        deleted |= new File(file.getPath() + "-journal").delete();
+        deleted |= new File(file.getPath() + "-shm").delete();
+        deleted |= new File(file.getPath() + "-wal").delete();
+
+        File dir = file.getParentFile();
+        if (dir != null) {
+            final String prefix = file.getName() + "-mj";
+            final FileFilter filter = new FileFilter() {
+                @Override
+                public boolean accept(File candidate) {
+                    return candidate.getName().startsWith(prefix);
+                }
+            };
+            for (File masterJournal : dir.listFiles(filter)) {
+                deleted |= masterJournal.delete();
+            }
+        }
+        return deleted;
     }
 
     /**
