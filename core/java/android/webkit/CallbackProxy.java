@@ -155,6 +155,12 @@ class CallbackProxy extends Handler {
         mBackForwardList = new WebBackForwardList(this);
     }
 
+    protected void shutdown() {
+        setWebViewClient(null);
+        setWebChromeClient(null);
+        removeCallbacksAndMessages(null);
+    }
+
     /**
      * Set the WebViewClient.
      * @param client An implementation of WebViewClient.
