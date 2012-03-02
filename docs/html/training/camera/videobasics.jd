@@ -107,7 +107,7 @@ public static boolean isIntentAvailable(Context context, String action) {
 <p>The Android Camera application returns the video in the {@link android.content.Intent} delivered
 to {@link android.app.Activity#onActivityResult onActivityResult()} as a {@link
 android.net.Uri} pointing to the video location in storage. The following code
-retrieves this image and displays it in a {@link android.widget.VideoView}.</p>
+retrieves this video and displays it in a {@link android.widget.VideoView}.</p>
 
 <pre>
 private void handleCameraVideo(Intent intent) {

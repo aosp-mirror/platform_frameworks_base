@@ -442,7 +442,7 @@ use or does not exist will cause your application to be shut down by the system.
 the first, back-facing camera on a device with more than one camera.</p>
 
 <h3 id="check-camera-features">Checking camera features</h3>
-<p>Once you obtain access to a camera, you can get further information about its capabilties using
+<p>Once you obtain access to a camera, you can get further information about its capabilities using
 the {@link android.hardware.Camera#getParameters() Camera.getParameters()} method and checking the
 returned {@link android.hardware.Camera.Parameters} object for supported capabilities. When using
 API Level 9 or higher, use the {@link android.hardware.Camera#getCameraInfo(int,
@@ -677,8 +677,8 @@ button {@link android.view.View.OnClickListener}.</p>
 <pre>
 // Add a listener to the Capture button
 Button captureButton = (Button) findViewById(id.button_capture);
-    captureButton.setOnClickListener(
-        new View.OnClickListener() {
+captureButton.setOnClickListener(
+    new View.OnClickListener() {
         &#64;Override
         public void onClick(View v) {
             // get an image from the camera
