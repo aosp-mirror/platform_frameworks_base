@@ -13,14 +13,14 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
                                 <a href="{@docRoot}design/index.html">
-                                  <img src="{@docRoot}images/home/android-design.png"
-alt="Android Design" width="160px" style="padding:10px 33px 5px"/>
+                                  <img src="{@docRoot}images/home/play_logo.png"
+alt="Google Play" width="120px" style="padding:10px 52px"/>
                                 </a>
                                   <div id="announcement" style="width:275px">
-    <p>Introducing <b>Android Design</b>: The place to learn about principles, building blocks, and patterns
-      for creating world-class Android user interfaces. Whether you're a UI professional or a developer
-      playing that role, these docs show you how to make good design decisions, big and small.</p>
-    <p><a href="{@docRoot}design/index.html">Android Design &raquo;</a></p>
+    <p>Introducing <strong>Google Play</strong>: An integrated digital content destination where
+users buy and enjoy all of their favorite content in one place. It's the new destination for
+Android apps!</p>
+    <p><a href="http://android-developers.blogspot.com/">Read more &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->
                         </div><!-- end topAnnouncement -->
