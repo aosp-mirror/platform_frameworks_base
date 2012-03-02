@@ -856,6 +856,17 @@ public final class CalendarContract {
         public static final String EVENT_COLOR_KEY = "eventColor_index";
 
         /**
+         * This will be {@link #EVENT_COLOR} if it is not null; otherwise, this will be
+         * {@link Calendars#CALENDAR_COLOR}.
+         * Read-only value. To modify, write to {@link #EVENT_COLOR} or
+         * {@link Calendars#CALENDAR_COLOR} directly.
+         *<P>
+         *     Type: INTEGER
+         *</P>
+         */
+        public static final String DISPLAY_COLOR = "displayColor";
+
+        /**
          * The event status. Column name.
          * <P>Type: INTEGER (one of {@link #STATUS_TENTATIVE}...)</P>
          */

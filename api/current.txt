@@ -16002,6 +16002,7 @@ package android.provider {
     field public static final java.lang.String CALENDAR_ID = "calendar_id";
     field public static final java.lang.String CAN_INVITE_OTHERS = "canInviteOthers";
     field public static final java.lang.String DESCRIPTION = "description";
+    field public static final java.lang.String DISPLAY_COLOR = "displayColor";
     field public static final java.lang.String DTEND = "dtend";
     field public static final java.lang.String DTSTART = "dtstart";
     field public static final java.lang.String DURATION = "duration";
