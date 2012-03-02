@@ -37,7 +37,7 @@ import java.util.ArrayList;
  * Version of WindowToken that is specifically for a particular application (or
  * really activity) that is displaying windows.
  */
-class AppWindowToken extends WindowToken {
+class AppWindowToken extends WindowToken implements WindowManagerService.StepAnimator {
     // Non-null only for application tokens.
     final IApplicationToken appToken;
 
@@ -195,8 +195,28 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    @Override
+    public boolean stepAnimation(long currentTime) {
+        if (animation == null) {
+            return false;
+        }
+        transformation.clear();
+        final boolean more = animation.getTransformation(currentTime, transformation);
+        if (WindowManagerService.DEBUG_ANIM) Slog.v(
+            WindowManagerService.TAG, "Stepped animation in " + this +
+            ": more=" + more + ", xform=" + transformation);
+        if (!more) {
+            animation = null;
+            if (WindowManagerService.DEBUG_ANIM) Slog.v(
+                WindowManagerService.TAG, "Finished animation in " + this +
+                " @ " + currentTime);
+        }
+        hasTransformation = more;
+        return more;
+    }
+
     // This must be called while inside a transaction.
-    boolean stepAnimationLocked(long currentTime, int dw, int dh) {
+    boolean startAndFinishAnimationLocked(long currentTime, int dw, int dh) {
         if (!service.mDisplayFrozen && service.mPolicy.isScreenOnFully()) {
             // We will run animations as long as the display isn't frozen.
 
@@ -219,21 +239,8 @@ class AppWindowToken extends WindowToken {
                     animation.setStartTime(currentTime);
                     animating = true;
                 }
-                transformation.clear();
-                final boolean more = animation.getTransformation(
-                    currentTime, transformation);
-                if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                    WindowManagerService.TAG, "Stepped animation in " + this +
-                    ": more=" + more + ", xform=" + transformation);
-                if (more) {
-                    // we're done!
-                    hasTransformation = true;
-                    return true;
-                }
-                if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                    WindowManagerService.TAG, "Finished animation in " + this +
-                    " @ " + currentTime);
-                animation = null;
+                // we're done!
+                return true;
             }
         } else if (animation != null) {
             // If the display is frozen, and there is a pending animation,
@@ -369,6 +376,7 @@ class AppWindowToken extends WindowToken {
         return null;
     }
 
+    @Override
     void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);
         if (appToken != null) {

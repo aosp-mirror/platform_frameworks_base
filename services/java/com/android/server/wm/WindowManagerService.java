@@ -617,6 +617,18 @@ public class WindowManagerService extends IWindowManager.Stub
     final AnimationRunnable mAnimationRunnable = new AnimationRunnable();
     boolean mAnimationScheduled;
 
+    interface StepAnimator {
+        /**
+         * Continue the stepping of an ongoing animation. When the animation completes this method
+         * must disable the animation on the StepAnimator. 
+         * @param currentTime Animation time in milliseconds. Use SystemClock.uptimeMillis().
+         * @return True if the animation is still going on, false if the animation has completed
+         *      and stepAnimation has cleared the animation locally.
+         */
+        boolean stepAnimation(long currentTime);
+    }
+    final ArrayList<StepAnimator> mStepAnimators = new ArrayList<StepAnimator>();
+    
     final class DragInputEventReceiver extends InputEventReceiver {
         public DragInputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
@@ -7615,37 +7627,53 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
+     * Run through each of the animating objects saved in mStepAnimators.
+     */
+    private void stepAnimations() {
+        final long currentTime = SystemClock.uptimeMillis();
+        for (final StepAnimator stepAnimator : mStepAnimators) {
+            final boolean more = stepAnimator.stepAnimation(currentTime);
+            if (DEBUG_ANIM) {
+                Slog.v(TAG, "stepAnimations: " + currentTime + ": Stepped " + stepAnimator
+                        + (more ? " more" : " done"));
+            }
+        }
+    }
+    
+    /**
      * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
      * Update animations of all applications, including those associated with exiting/removed apps.
      *
      * @param currentTime The time which animations use for calculating transitions.
      * @param innerDw Width of app window.
      * @param innerDh Height of app window.
-     * @return true if rotation has stopped, false otherwise
      */
     private void updateWindowsAppsAndRotationAnimationsLocked(long currentTime,
                                                           int innerDw, int innerDh) {
         int i;
-        for (i = mWindows.size() - 1; i >= 0; i--) {
-            mInnerFields.mAnimating |= mWindows.get(i).stepAnimationLocked(currentTime);
-        }
-
         final int NAT = mAppTokens.size();
         for (i=0; i<NAT; i++) {
-            mInnerFields.mAnimating |=
-                    mAppTokens.get(i).stepAnimationLocked(currentTime, innerDw, innerDh);
+            final AppWindowToken appToken = mAppTokens.get(i);
+            if (appToken.startAndFinishAnimationLocked(currentTime, innerDw, innerDh)) {
+                mStepAnimators.add(appToken);
+                mInnerFields.mAnimating = true;
+            }
         }
         final int NEAT = mExitingAppTokens.size();
         for (i=0; i<NEAT; i++) {
-            mInnerFields.mAnimating |=
-                    mExitingAppTokens.get(i).stepAnimationLocked(currentTime, innerDw, innerDh);
+            final AppWindowToken appToken = mAppTokens.get(i);
+            if (appToken.startAndFinishAnimationLocked(currentTime, innerDw, innerDh)) {
+                mStepAnimators.add(appToken);
+                mInnerFields.mAnimating = true;
+            }
         }
 
         if (mScreenRotationAnimation != null) {
             if (mScreenRotationAnimation.isAnimating()) {
-                if (mScreenRotationAnimation.stepAnimation(currentTime)) {
+                if (mScreenRotationAnimation.startAndFinishAnimationLocked(currentTime)) {
                     mInnerFields.mUpdateRotation = false;
                     mInnerFields.mAnimating = true;
+                    mStepAnimators.add(mScreenRotationAnimation);
                 } else {
                     mInnerFields.mUpdateRotation = true;
                     mScreenRotationAnimation.kill();
@@ -7704,7 +7732,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 final boolean wasAnimating = w.mWasAnimating;
-                final boolean nowAnimating = w.mLocalAnimating;
+                
+                
+                final boolean nowAnimating = w.startAndFinishAnimationLocked(currentTime);
+                if (nowAnimating) {
+                    mStepAnimators.add(w);
+                    mInnerFields.mAnimating = true;
+                }
 
                 if (DEBUG_WALLPAPER) {
                     Slog.v(TAG, w + ": wasAnimating=" + wasAnimating +
@@ -8290,6 +8324,10 @@ public class WindowManagerService extends IWindowManager.Stub
         // difficult because we do need to resize surfaces in some
         // cases while they are hidden such as when first showing a
         // window.
+        
+        if (mScreenRotationAnimation != null) {
+            mScreenRotationAnimation.updateSurfaces();
+        }
         boolean displayed = false;
 
         w.computeShownFrameLocked();
@@ -8562,7 +8600,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // so we want to leave all of them as unblurred (for
             // performance reasons).
             mInnerFields.mObscured = true;
-        } else if (canBeSeen && (attrFlags & FLAG_BLUR_BEHIND | FLAG_DIM_BEHIND) != 0) {
+        } else if (canBeSeen && (attrFlags & (FLAG_BLUR_BEHIND | FLAG_DIM_BEHIND)) != 0) {
             if (localLOGV) Slog.v(TAG, "Win " + w
                     + ": blurring=" + mInnerFields.mBlurring
                     + " obscured=" + mInnerFields.mObscured);
@@ -8735,6 +8773,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInnerFields.mWindowAnimationBackground = null;
                 mInnerFields.mWindowAnimationBackgroundColor = 0;
 
+                mStepAnimators.clear();
                 changes = updateWindowsAndWallpaperLocked(currentTime, dw, dh, innerDw, innerDh);
 
                 if (mInnerFields.mTokenMayBeDrawn) {
@@ -8782,9 +8821,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Update animations of all applications, including those
             // associated with exiting/removed apps
-            mInnerFields.mAnimating = false;
 
             updateWindowsAppsAndRotationAnimationsLocked(currentTime, innerDw, innerDh);
+            
+            stepAnimations();
 
             // THIRD LOOP: Update the surfaces of all windows.
 
@@ -9667,8 +9707,8 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.println();
             pw.println("  Application tokens in Z order:");
             for (int i=mAppTokens.size()-1; i>=0; i--) {
-                pw.print("  App #"); pw.print(i); pw.print(": ");
-                        pw.println(mAppTokens.get(i));
+                pw.print("  App #"); pw.print(i); pw.println(": ");
+                        mAppTokens.get(i).dump(pw, "    ");
             }
         }
         if (mFinishedStarting.size() > 0) {

@@ -29,7 +29,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
-class ScreenRotationAnimation {
+class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
     static final String TAG = "ScreenRotationAnimation";
     static final boolean DEBUG_STATE = false;
     static final boolean DEBUG_TRANSFORMS = false;
@@ -97,6 +97,12 @@ class ScreenRotationAnimation {
     final Matrix mSnapshotFinalMatrix = new Matrix();
     final Matrix mTmpMatrix = new Matrix();
     final float[] mTmpFloats = new float[9];
+    private boolean mMoreRotateEnter;
+    private boolean mMoreRotateExit;
+    private boolean mMoreFinishEnter;
+    private boolean mMoreFinishExit;
+    private boolean mMoreStartEnter;
+    private boolean mMoreStartExit;
 
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mSurface="); pw.print(mSurface);
@@ -456,7 +462,144 @@ class ScreenRotationAnimation {
                 && mRotateEnterAnimation != null || mRotateExitAnimation != null;
     }
 
+    @Override
     public boolean stepAnimation(long now) {
+
+        if (mFinishAnimReady && mFinishAnimStartTime < 0) {
+            if (DEBUG_STATE) Slog.v(TAG, "Step: finish anim now ready");
+            mFinishAnimStartTime = now;
+        }
+
+        // If the start animation is no longer running, we want to keep its
+        // transformation intact until the finish animation also completes.
+
+        mMoreStartExit = false;
+        if (mStartExitAnimation != null) {
+            mStartExitTransformation.clear();
+            mMoreStartExit = mStartExitAnimation.getTransformation(now, mStartExitTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped start exit: " + mStartExitTransformation);
+            if (!mMoreStartExit) {
+                if (DEBUG_STATE) Slog.v(TAG, "Start exit animation done!");
+                mStartExitAnimation.cancel();
+                mStartExitAnimation = null;
+            }
+        }
+
+        mMoreStartEnter = false;
+        if (mStartEnterAnimation != null) {
+            mStartEnterTransformation.clear();
+            mMoreStartEnter = mStartEnterAnimation.getTransformation(now, mStartEnterTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped start enter: " + mStartEnterTransformation);
+            if (!mMoreStartEnter) {
+                if (DEBUG_STATE) Slog.v(TAG, "Start enter animation done!");
+                mStartEnterAnimation.cancel();
+                mStartEnterAnimation = null;
+            }
+        }
+
+        long finishNow = mFinishAnimReady ? (now - mFinishAnimStartTime) : 0;
+        if (DEBUG_STATE) Slog.v(TAG, "Step: finishNow=" + finishNow);
+
+        mFinishExitTransformation.clear();
+        mMoreFinishExit = false;
+        if (mFinishExitAnimation != null) {
+            mMoreFinishExit = mFinishExitAnimation.getTransformation(finishNow, mFinishExitTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped finish exit: " + mFinishExitTransformation);
+            if (!mMoreStartExit && !mMoreFinishExit) {
+                if (DEBUG_STATE) Slog.v(TAG, "Finish exit animation done, clearing start/finish anims!");
+                mStartExitTransformation.clear();
+                mFinishExitAnimation.cancel();
+                mFinishExitAnimation = null;
+                mFinishExitTransformation.clear();
+            }
+        }
+
+        mFinishEnterTransformation.clear();
+        mMoreFinishEnter = false;
+        if (mFinishEnterAnimation != null) {
+            mMoreFinishEnter = mFinishEnterAnimation.getTransformation(finishNow, mFinishEnterTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped finish enter: " + mFinishEnterTransformation);
+            if (!mMoreStartEnter && !mMoreFinishEnter) {
+                if (DEBUG_STATE) Slog.v(TAG, "Finish enter animation done, clearing start/finish anims!");
+                mStartEnterTransformation.clear();
+                mFinishEnterAnimation.cancel();
+                mFinishEnterAnimation = null;
+                mFinishEnterTransformation.clear();
+            }
+        }
+
+        mRotateExitTransformation.clear();
+        mMoreRotateExit = false;
+        if (mRotateExitAnimation != null) {
+            mMoreRotateExit = mRotateExitAnimation.getTransformation(now, mRotateExitTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate exit: " + mRotateExitTransformation);
+        }
+
+        if (!mMoreFinishExit && !mMoreRotateExit) {
+            if (DEBUG_STATE) Slog.v(TAG, "Rotate exit animation done!");
+            mRotateExitAnimation.cancel();
+            mRotateExitAnimation = null;
+            mRotateExitTransformation.clear();
+        }
+
+        mRotateEnterTransformation.clear();
+        mMoreRotateEnter = false;
+        if (mRotateEnterAnimation != null) {
+            mMoreRotateEnter = mRotateEnterAnimation.getTransformation(now, mRotateEnterTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate enter: " + mRotateEnterTransformation);
+        }
+
+        if (!mMoreFinishEnter && !mMoreRotateEnter) {
+            if (DEBUG_STATE) Slog.v(TAG, "Rotate enter animation done!");
+            mRotateEnterAnimation.cancel();
+            mRotateEnterAnimation = null;
+            mRotateEnterTransformation.clear();
+        }
+
+        mExitTransformation.set(mRotateExitTransformation);
+        mExitTransformation.compose(mStartExitTransformation);
+        mExitTransformation.compose(mFinishExitTransformation);
+
+        mEnterTransformation.set(mRotateEnterTransformation);
+        mEnterTransformation.compose(mStartEnterTransformation);
+        mEnterTransformation.compose(mFinishEnterTransformation);
+
+        if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final exit: " + mExitTransformation);
+        if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final enter: " + mEnterTransformation);
+
+        final boolean more = mMoreStartEnter || mMoreStartExit || mMoreFinishEnter
+                || mMoreFinishExit || mMoreRotateEnter || mMoreRotateExit || !mFinishAnimReady;
+
+        mSnapshotFinalMatrix.setConcat(mExitTransformation.getMatrix(), mSnapshotInitialMatrix);
+
+        if (DEBUG_STATE) Slog.v(TAG, "Step: more=" + more);
+
+        return more;
+    }
+
+    void updateSurfaces() {
+        if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
+            if (mSurface != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Exit animations done, hiding screenshot surface");
+                mSurface.hide();
+            }
+        }
+
+        if (!mMoreStartEnter && !mMoreFinishEnter && !mMoreRotateEnter) {
+            if (mBlackFrame != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Enter animations done, hiding black frame");
+                mBlackFrame.hide();
+            }
+        } else {
+            if (mBlackFrame != null) {
+                mBlackFrame.setMatrix(mEnterTransformation.getMatrix());
+            }
+        }
+
+        setSnapshotTransform(mSnapshotFinalMatrix, mExitTransformation.getAlpha());
+    }
+    
+    public boolean startAndFinishAnimationLocked(long now) {
         if (!isAnimating()) {
             if (DEBUG_STATE) Slog.v(TAG, "Step: no animations running");
             return false;
@@ -484,136 +627,8 @@ class ScreenRotationAnimation {
             }
             mAnimRunning = true;
         }
-
-        if (mFinishAnimReady && mFinishAnimStartTime < 0) {
-            if (DEBUG_STATE) Slog.v(TAG, "Step: finish anim now ready");
-            mFinishAnimStartTime = now;
-        }
-
-        // If the start animation is no longer running, we want to keep its
-        // transformation intact until the finish animation also completes.
-
-        boolean moreStartExit = false;
-        if (mStartExitAnimation != null) {
-            mStartExitTransformation.clear();
-            moreStartExit = mStartExitAnimation.getTransformation(now, mStartExitTransformation);
-            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped start exit: " + mStartExitTransformation);
-            if (!moreStartExit) {
-                if (DEBUG_STATE) Slog.v(TAG, "Start exit animation done!");
-                mStartExitAnimation.cancel();
-                mStartExitAnimation = null;
-            }
-        }
-
-        boolean moreStartEnter = false;
-        if (mStartEnterAnimation != null) {
-            mStartEnterTransformation.clear();
-            moreStartEnter = mStartEnterAnimation.getTransformation(now, mStartEnterTransformation);
-            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped start enter: " + mStartEnterTransformation);
-            if (!moreStartEnter) {
-                if (DEBUG_STATE) Slog.v(TAG, "Start enter animation done!");
-                mStartEnterAnimation.cancel();
-                mStartEnterAnimation = null;
-            }
-        }
-
-        long finishNow = mFinishAnimReady ? (now - mFinishAnimStartTime) : 0;
-        if (DEBUG_STATE) Slog.v(TAG, "Step: finishNow=" + finishNow);
-
-        mFinishExitTransformation.clear();
-        boolean moreFinishExit = false;
-        if (mFinishExitAnimation != null) {
-            moreFinishExit = mFinishExitAnimation.getTransformation(finishNow, mFinishExitTransformation);
-            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped finish exit: " + mFinishExitTransformation);
-            if (!moreStartExit && !moreFinishExit) {
-                if (DEBUG_STATE) Slog.v(TAG, "Finish exit animation done, clearing start/finish anims!");
-                mStartExitTransformation.clear();
-                mFinishExitAnimation.cancel();
-                mFinishExitAnimation = null;
-                mFinishExitTransformation.clear();
-            }
-        }
-
-        mFinishEnterTransformation.clear();
-        boolean moreFinishEnter = false;
-        if (mFinishEnterAnimation != null) {
-            moreFinishEnter = mFinishEnterAnimation.getTransformation(finishNow, mFinishEnterTransformation);
-            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped finish enter: " + mFinishEnterTransformation);
-            if (!moreStartEnter && !moreFinishEnter) {
-                if (DEBUG_STATE) Slog.v(TAG, "Finish enter animation done, clearing start/finish anims!");
-                mStartEnterTransformation.clear();
-                mFinishEnterAnimation.cancel();
-                mFinishEnterAnimation = null;
-                mFinishEnterTransformation.clear();
-            }
-        }
-
-        mRotateExitTransformation.clear();
-        boolean moreRotateExit = false;
-        if (mRotateExitAnimation != null) {
-            moreRotateExit = mRotateExitAnimation.getTransformation(now, mRotateExitTransformation);
-            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate exit: " + mRotateExitTransformation);
-        }
-
-        if (!moreFinishExit && !moreRotateExit) {
-            if (DEBUG_STATE) Slog.v(TAG, "Rotate exit animation done!");
-            mRotateExitAnimation.cancel();
-            mRotateExitAnimation = null;
-            mRotateExitTransformation.clear();
-        }
-
-        mRotateEnterTransformation.clear();
-        boolean moreRotateEnter = false;
-        if (mRotateEnterAnimation != null) {
-            moreRotateEnter = mRotateEnterAnimation.getTransformation(now, mRotateEnterTransformation);
-            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate enter: " + mRotateEnterTransformation);
-        }
-
-        if (!moreFinishEnter && !moreRotateEnter) {
-            if (DEBUG_STATE) Slog.v(TAG, "Rotate enter animation done!");
-            mRotateEnterAnimation.cancel();
-            mRotateEnterAnimation = null;
-            mRotateEnterTransformation.clear();
-        }
-
-        mExitTransformation.set(mRotateExitTransformation);
-        mExitTransformation.compose(mStartExitTransformation);
-        mExitTransformation.compose(mFinishExitTransformation);
-
-        mEnterTransformation.set(mRotateEnterTransformation);
-        mEnterTransformation.compose(mStartEnterTransformation);
-        mEnterTransformation.compose(mFinishEnterTransformation);
-
-        if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final exit: " + mExitTransformation);
-        if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final enter: " + mEnterTransformation);
-
-        if (!moreStartExit && !moreFinishExit && !moreRotateExit) {
-            if (mSurface != null) {
-                if (DEBUG_STATE) Slog.v(TAG, "Exit animations done, hiding screenshot surface");
-                mSurface.hide();
-            }
-        }
-
-        if (!moreStartEnter && !moreFinishEnter && !moreRotateEnter) {
-            if (mBlackFrame != null) {
-                if (DEBUG_STATE) Slog.v(TAG, "Enter animations done, hiding black frame");
-                mBlackFrame.hide();
-            }
-        } else {
-            if (mBlackFrame != null) {
-                mBlackFrame.setMatrix(mEnterTransformation.getMatrix());
-            }
-        }
-
-        mSnapshotFinalMatrix.setConcat(mExitTransformation.getMatrix(), mSnapshotInitialMatrix);
-        setSnapshotTransform(mSnapshotFinalMatrix, mExitTransformation.getAlpha());
-
-        final boolean more = moreStartEnter || moreStartExit || moreFinishEnter || moreFinishExit
-                || moreRotateEnter || moreRotateExit || !mFinishAnimReady;
-
-        if (DEBUG_STATE) Slog.v(TAG, "Step: more=" + more);
-
-        return more;
+        
+        return true;
     }
 
     public Transformation getEnterTransformation() {
