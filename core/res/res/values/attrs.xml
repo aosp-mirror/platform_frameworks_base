@@ -3376,9 +3376,13 @@
     </declare-styleable>
 
     <declare-styleable name="DatePicker">
-        <!-- The first year (inclusive), for example "1940". -->
+        <!-- The first year (inclusive), for example "1940".
+             {@deprecated Use minDate instead.}
+         -->
         <attr name="startYear" format="integer" />
-        <!-- The last year (inclusive), for example "2010". -->
+        <!-- The last year (inclusive), for example "2010".
+             {@deprecated Use maxDate instead.}
+         -->
         <attr name="endYear" format="integer" />
         <!-- Whether the spinners are shown. -->
         <attr name="spinnersShown" format="boolean" />
@@ -3389,7 +3393,7 @@
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" format="string" />
         <!-- @hide The layout of the time picker. -->
-        <attr name="layout" />
+        <attr name="internalLayout" format="reference"  />
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
