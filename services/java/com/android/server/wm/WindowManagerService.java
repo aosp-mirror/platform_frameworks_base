@@ -7661,7 +7661,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         final int NEAT = mExitingAppTokens.size();
         for (i=0; i<NEAT; i++) {
-            final AppWindowToken appToken = mAppTokens.get(i);
+            final AppWindowToken appToken = mExitingAppTokens.get(i);
             if (appToken.startAndFinishAnimationLocked(currentTime, innerDw, innerDh)) {
                 mStepAnimators.add(appToken);
                 mInnerFields.mAnimating = true;
