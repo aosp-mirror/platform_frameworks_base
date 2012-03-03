@@ -1833,19 +1833,19 @@ public final class MediaStore {
             public static final String LANGUAGE = "language";
 
             /**
-             * The latitude where the image was captured.
+             * The latitude where the video was captured.
              * <P>Type: DOUBLE</P>
              */
             public static final String LATITUDE = "latitude";
 
             /**
-             * The longitude where the image was captured.
+             * The longitude where the video was captured.
              * <P>Type: DOUBLE</P>
              */
             public static final String LONGITUDE = "longitude";
 
             /**
-             * The date & time that the image was taken in units
+             * The date & time that the video was taken in units
              * of milliseconds since jan 1, 1970.
              * <P>Type: INTEGER</P>
              */
