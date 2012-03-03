@@ -7669,7 +7669,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (mScreenRotationAnimation != null) {
-            if (mScreenRotationAnimation.isAnimating()) {
+            if (mScreenRotationAnimation.isAnimating() ||
+                    mScreenRotationAnimation.mFinishAnimReady) {
                 if (mScreenRotationAnimation.startAndFinishAnimationLocked(currentTime)) {
                     mInnerFields.mUpdateRotation = false;
                     mInnerFields.mAnimating = true;

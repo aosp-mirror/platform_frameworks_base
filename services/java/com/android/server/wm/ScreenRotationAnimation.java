@@ -602,6 +602,7 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
     public boolean startAndFinishAnimationLocked(long now) {
         if (!isAnimating()) {
             if (DEBUG_STATE) Slog.v(TAG, "Step: no animations running");
+            mFinishAnimReady = false;
             return false;
         }
 
