@@ -74,7 +74,7 @@ Android Market you have access to a suite of developer tools that let you analyz
 identify market trends, and control who your applications are being distributed to. You also have
 access to several revenue-enhancing features, such as <a
 href="{@docRoot}guide/market/billing/index.html">in-app billing</a> and
-<a href="{@docRoot}guide/publishing/licensing.html">application licensing</a>.</p>
+<a href="{@docRoot}guide/market/licensing/index.html">application licensing</a>.</p>
 
 <p>Before you can publish applications on Android Market, you need to <a
 href="http://market.android.com/publish">register</a> as an Android Market developer. During the
@@ -254,7 +254,7 @@ higher.</p>
 
 <p>For complete information about Android Market Licensing Service and how to
 use it in your application, read <a
-href="{@docRoot}guide/publishing/licensing.html">Application Licensing</a>.</p>
+href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a>.</p>
 
 <h2 id="marketinappbilling">Using Android Market In-app Billing</h2>
 
