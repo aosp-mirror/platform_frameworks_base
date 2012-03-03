@@ -1,0 +1,178 @@
+page.title=Running Your App
+parent.title=Building Your First App
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Creating a Project
+previous.link=creating-project.html
+next.title=Building a Simple User Interface
+next.link=building-ui.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+ 
+<h2>This lesson teaches you to</h2>
+
+<ol>
+  <li><a href="#RealDevice">Run on a Real Device</a></li>
+  <li><a href="#Emulator">Run on the Emulator</a></li>
+</ol>
+
+<h2>You should also read</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a></li>
+  <li><a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a></li>
+  <li><a href="{@docRoot}guide/developing/projects/index.html">Managing Projects</a></li>
+</ul>
+ 
+ 
+</div> 
+</div> 
+
+
+<p>If you followed the <a href="{@docRoot}creating-project.html">previous lesson</a> to create an
+Android project, it includes a default set of "Hello World" source files that allow you to
+run the app right away.</p>
+
+<p>How you run your app depends on two things: whether you have a real Android-powered device and
+whether you’re using Eclipse. This lesson shows you how to install and run your app on a
+real device and on the Android emulator, and in both cases with either Eclipse or the command line
+tools.</p>
+
+<p>Before you run your app, you should be aware of a few directories and files in the Android
+project:</p>
+
+<dl>
+  <dt><code>AndroidManifest.xml</code></dt>
+  <dd>This manifest file describes the fundamental characteristics of the app and defines each of
+its components. You'll learn about various declarations in this file as you read more training
+classes.</dd>
+  <dt><code>src/</code></dt>
+  <dd>Directory for your app's main source files. By default, it includes an {@link
+android.app.Activity} class that runs when your app is launched using the app icon.</dd>
+  <dt><code>res/</code></dt>
+  <dd>Contains several sub-directories for app resources. Here are just a few:
+    <dl style="margin-top:1em">
+      <dt><code>drawable-hdpi/</code></dt>
+        <dd>Directory for drawable objects (such as bitmaps) that are designed for high-density
+(hdpi) screens. Other drawable directories contain assets designed for other screen densities.</dd>
+      <dt><code>layout/</code></dt>
+        <dd>Directory for files that define your app's user interface.</dd>
+      <dt><code>values/</code></dt>
+        <dd>Directory for other various XML files that contain a collection of resources, such as
+string and color definitions.</dd>
+    </dl>  
+  </dd>
+</dl>
+
+<p>When you build and run the default Android project, the default {@link android.app.Activity}
+class in the <code>src/</code> directory starts and loads a layout file from the
+<code>layout/</code> directory, which includes a "Hello World" message. Not real exciting, but it's
+important that you understand how to build and run your app before adding real functionality to
+the app.</p>
+
+
+
+<h2 id="RealDevice">Run on a Real Device</h2>
+
+<p>Whether you’re using Eclipse or the command line, you need to:</p>
+
+<ol>
+  <li>Plug in your Android-powered device to your machine with a USB cable.
+If you’re developing on Windows, you might need to install the appropriate USB driver for your
+device. For help installing drivers, see the <a href=”{@docRoot}sdk/oem-usb.html”>OEM USB
+Drivers</a> document.</li>
+  <li>Ensure that <strong>USB debugging</strong> is enabled in the device Settings (open Settings
+and navitage to <strong>Applications > Development</strong> on most devices, or select
+<strong>Developer options</strong> on Android 4.0 and higher).</li>
+</ol>
+
+<p>To run the app from Eclipse, open one of your project's files and click
+<strong>Run</strong> from the toolbar. Eclipse installs the app on your connected device and starts
+it.</p>
+
+
+<p>Or to run your app from a command line:</p>
+
+<ol>
+  <li>Change directories to the root of your Android project and execute:
+<pre class="no-pretty-print">ant debug</pre></li>
+  <li>Make sure the Android SDK <code>platform-tools/</code> directory is included in your
+<code>PATH</code> environment variable, then execute:
+<pre class="no-pretty-print">adb install bin/MyFirstApp-debug.apk</pre></li>
+  <li>On your device, locate <em>MyFirstActivity</em> and open it.</li>
+</ol>
+
+<p>To start adding stuff to the app, continue to the <a href="building-ui.html">next
+lesson</a>.</p>
+
+
+
+<h2 id="Emulator">Run on the Emulator</h2>
+
+<p>Whether you’re using Eclipse or the command line, you need to first create an <a
+href="{@docRoot}guide/developing/devices/index.html">Android Virtual
+Device</a> (AVD). An AVD is a
+device configuration for the Android emulator that allows you to model
+different device configurations.</p>
+
+<div class="figure" style="width:457px">
+  <img src="{@docRoot}images/screens_support/avds-config.png" alt="" />
+  <p class="img-caption"><strong>Figure 1.</strong> The AVD Manager showing a few virtual
+devices.</p>
+</div>
+
+<p>To create an AVD:</p>
+<ol>
+  <li>Launch the Android Virtual Device Manager:
+    <ol type="a">
+      <li>In Eclipse, select <strong>Window > AVD Manager</strong>, or click the <em>AVD
+Manager</em> icon in the Eclipse toolbar.</li>
+      <li>From the command line, change directories to <code>&lt;sdk>/tools/</code> and execute:
+<pre class="no-pretty-print">./android avd</pre></li>
+    </ol>
+  </li>
+  <li>In the <em>Android Virtual Device Device Manager</em> panel, click <strong>New</strong>.</li>
+  <li>Fill in the details for the AVD.
+Give it a name, a platform target, an SD card size, and a skin (HVGA is default).</li>
+  <li>Click <strong>Create AVD</strong>.</li>
+  <li>Select the new AVD from the <em>Android Virtual Device Manager</em> and click
+<strong>Start</strong>.</li>
+  <li>After the emulator boots up, unlock the emulator screen.</li>
+</ol>
+
+<p>To run the app from Eclipse, open one of your project's files and click
+<strong>Run</strong> from the toolbar. Eclipse installs the app on your AVD and starts it.</p>
+
+
+<p>Or to run your app from the command line:</p>
+
+<ol>
+  <li>Change directories to the root of your Android project and execute:
+<pre class="no-pretty-print">ant debug</pre></li>
+  <li>Make sure the Android SDK <code>platform-tools/</code> directory is included in your
+<code>PATH</code> environment
+variable, then execute:
+<pre class="no-pretty-print">adb install bin/MyFirstApp-debug.apk</pre></li>
+  <li>On the emulator, locate <em>MyFirstActivity</em> and open it.</li>
+</ol>
+
+
+<p>To start adding stuff to the app, continue to the <a href="building-ui.html">next
+lesson</a>.</p>
+
+
+
+
+
+
+
+
+
+
+

@@ -51,7 +51,7 @@ as shown in the diagram below. This hierarchy tree can be as simple or complex a
 can build it up using Android's set of predefined widgets and layouts, or with custom Views that you 
 create yourself.</p>
 
-<img src="{@docRoot}images/viewgroup.png" alt="" width="312" height="211" align="center"/>
+<img src="{@docRoot}images/viewgroup.png" alt="" />
 
 <p>
 In order to attach the view hierarchy tree to the screen for rendering, your Activity must call the
