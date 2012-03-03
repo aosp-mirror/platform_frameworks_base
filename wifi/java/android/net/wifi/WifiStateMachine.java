@@ -1844,6 +1844,10 @@ public class WifiStateMachine extends StateMachine {
                     replyToMessage(message, WifiManager.WPS_FAILED,
                             WifiManager.BUSY);
                     break;
+                case WifiManager.CANCEL_WPS:
+                    replyToMessage(message, WifiManager.CANCEL_WPS_FAILED,
+                            WifiManager.BUSY);
+                    break;
                 case WifiManager.DISABLE_NETWORK:
                     replyToMessage(message, WifiManager.DISABLE_NETWORK_FAILED,
                             WifiManager.BUSY);
@@ -3321,14 +3325,29 @@ public class WifiStateMachine extends StateMachine {
                     transitionTo(mDisconnectedState);
                     break;
                 case WifiMonitor.WPS_FAIL_EVENT:
+                    //arg1 has the reason for the failure
+                    replyToMessage(mSourceMessage, WifiManager.WPS_FAILED, message.arg1);
+                    mSourceMessage.recycle();
+                    mSourceMessage = null;
+                    transitionTo(mDisconnectedState);
+                    break;
                 case WifiMonitor.WPS_TIMEOUT_EVENT:
-                    replyToMessage(mSourceMessage, WifiManager.WPS_FAILED, WifiManager.ERROR);
+                    replyToMessage(mSourceMessage, WifiManager.WPS_FAILED,
+                            WifiManager.WPS_TIMED_OUT);
                     mSourceMessage.recycle();
                     mSourceMessage = null;
                     transitionTo(mDisconnectedState);
                     break;
                 case WifiManager.START_WPS:
                     replyToMessage(message, WifiManager.WPS_FAILED, WifiManager.IN_PROGRESS);
+                    break;
+                case WifiManager.CANCEL_WPS:
+                    if (mWifiNative.cancelWps()) {
+                        replyToMessage(message, WifiManager.CANCEL_WPS_SUCCEDED);
+                    } else {
+                        replyToMessage(message, WifiManager.CANCEL_WPS_FAILED, WifiManager.ERROR);
+                    }
+                    transitionTo(mDisconnectedState);
                     break;
                 /* Defer all commands that can cause connections to a different network
                  * or put the state machine out of connect mode
@@ -3346,6 +3365,11 @@ public class WifiStateMachine extends StateMachine {
                     if (DBG) log("Network connection lost");
                     handleNetworkDisconnect();
                     break;
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
+                    //Throw away supplicant state changes when WPS is running.
+                    //We will start getting supplicant state changes once we get
+                    //a WPS success or failure
+                    break;
                 default:
                     return NOT_HANDLED;
             }
@@ -3353,6 +3377,7 @@ public class WifiStateMachine extends StateMachine {
             return HANDLED;
         }
 
+        @Override
         public void exit() {
             mWifiConfigStore.enableAllNetworks();
             mWifiConfigStore.loadConfiguredNetworks();

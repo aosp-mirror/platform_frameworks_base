@@ -1069,15 +1069,22 @@ public class WifiManager {
     public static final int START_WPS_SUCCEEDED             = BASE + 11;
     /** @hide */
     public static final int WPS_FAILED                      = BASE + 12;
-   /** @hide */
+    /** @hide */
     public static final int WPS_COMPLETED                   = BASE + 13;
 
     /** @hide */
-    public static final int DISABLE_NETWORK                 = BASE + 14;
+    public static final int CANCEL_WPS                      = BASE + 14;
     /** @hide */
-    public static final int DISABLE_NETWORK_FAILED          = BASE + 15;
+    public static final int CANCEL_WPS_FAILED               = BASE + 15;
     /** @hide */
-    public static final int DISABLE_NETWORK_SUCCEEDED       = BASE + 16;
+    public static final int CANCEL_WPS_SUCCEDED             = BASE + 16;
+
+    /** @hide */
+    public static final int DISABLE_NETWORK                 = BASE + 17;
+    /** @hide */
+    public static final int DISABLE_NETWORK_FAILED          = BASE + 18;
+    /** @hide */
+    public static final int DISABLE_NETWORK_SUCCEEDED       = BASE + 19;
 
     /* For system use only */
     /** @hide */
@@ -1091,14 +1098,14 @@ public class WifiManager {
      * Indicates that the operation failed due to an internal error.
      * @hide
      */
-    public static final int ERROR               = 0;
+    public static final int ERROR                       = 0;
 
     /**
      * Passed with {@link ActionListener#onFailure}.
      * Indicates that the operation is already in progress
      * @hide
      */
-    public static final int IN_PROGRESS         = 1;
+    public static final int IN_PROGRESS                 = 1;
 
     /**
      * Passed with {@link ActionListener#onFailure}.
@@ -1106,11 +1113,19 @@ public class WifiManager {
      * unable to service the request
      * @hide
      */
-    public static final int BUSY                = 2;
+    public static final int BUSY                        = 2;
 
     /* WPS specific errors */
     /** WPS overlap detected {@hide} */
-    public static final int WPS_OVERLAP_ERROR   = 3;
+    public static final int WPS_OVERLAP_ERROR           = 3;
+    /** WEP on WPS is prohibited {@hide} */
+    public static final int WPS_WEP_PROHIBITED          = 4;
+    /** TKIP only prohibited {@hide} */
+    public static final int WPS_TKIP_ONLY_PROHIBITED    = 5;
+    /** Authentication failure on WPS {@hide} */
+    public static final int WPS_AUTH_FAILURE            = 6;
+    /** WPS timed out {@hide} */
+    public static final int WPS_TIMED_OUT               = 7;
 
     /** Interface for callback invocation when framework channel is lost {@hide} */
     public interface ChannelListener {
@@ -1165,6 +1180,7 @@ public class WifiManager {
         private SparseArray<Object> mListenerMap = new SparseArray<Object>();
         private Object mListenerMapLock = new Object();
         private int mListenerKey = 0;
+        private static final int INVALID_KEY = -1;
 
         AsyncChannel mAsyncChannel;
         WifiHandler mHandler;
@@ -1187,6 +1203,7 @@ public class WifiManager {
                     case WifiManager.CONNECT_NETWORK_FAILED:
                     case WifiManager.FORGET_NETWORK_FAILED:
                     case WifiManager.SAVE_NETWORK_FAILED:
+                    case WifiManager.CANCEL_WPS_FAILED:
                     case WifiManager.DISABLE_NETWORK_FAILED:
                         if (listener != null) {
                             ((ActionListener) listener).onFailure(message.arg1);
@@ -1196,6 +1213,7 @@ public class WifiManager {
                     case WifiManager.CONNECT_NETWORK_SUCCEEDED:
                     case WifiManager.FORGET_NETWORK_SUCCEEDED:
                     case WifiManager.SAVE_NETWORK_SUCCEEDED:
+                    case WifiManager.CANCEL_WPS_SUCCEDED:
                     case WifiManager.DISABLE_NETWORK_SUCCEEDED:
                         if (listener != null) {
                             ((ActionListener) listener).onSuccess();
@@ -1229,16 +1247,19 @@ public class WifiManager {
         }
 
         int putListener(Object listener) {
-            if (listener == null) return 0;
+            if (listener == null) return INVALID_KEY;
             int key;
             synchronized (mListenerMapLock) {
-                key = mListenerKey++;
+                do {
+                    key = mListenerKey++;
+                } while (key == INVALID_KEY);
                 mListenerMap.put(key, listener);
             }
             return key;
         }
 
         Object removeListener(int key) {
+            if (key == INVALID_KEY) return null;
             synchronized (mListenerMapLock) {
                 Object listener = mListenerMap.get(key);
                 mListenerMap.remove(key);
@@ -1386,6 +1407,21 @@ public class WifiManager {
 
         c.mAsyncChannel.sendMessage(START_WPS, 0, c.putListener(listener), config);
     }
+
+    /**
+     * Cancel any ongoing Wi-fi Protected Setup
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callbacks on success or failure. Can be null.
+     * @hide
+     */
+    public void cancelWps(Channel c, ActionListener listener) {
+        if (c == null) throw new IllegalArgumentException("Channel needs to be initialized");
+
+        c.mAsyncChannel.sendMessage(CANCEL_WPS, 0, c.putListener(listener));
+    }
+
+
 
     /**
      * Get a reference to WifiService handler. This is used by a client to establish

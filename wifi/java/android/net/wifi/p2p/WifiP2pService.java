@@ -996,7 +996,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case PEER_CONNECTION_USER_ACCEPT:
                     if (mSavedPeerConfig.wps.setup == WpsInfo.PBC) {
-                        mWifiNative.startWpsPbc();
+                        mWifiNative.startWpsPbc(null);
                     } else {
                         mWifiNative.startWpsPinKeypad(mSavedPeerConfig.wps.pin);
                     }
