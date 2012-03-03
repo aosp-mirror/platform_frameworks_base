@@ -15,6 +15,7 @@
  */
 
 package android.os;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -28,7 +29,7 @@ import java.net.Socket;
  * The FileDescriptor returned by {@link Parcel#readFileDescriptor}, allowing
  * you to close it when done with it.
  */
-public class ParcelFileDescriptor implements Parcelable {
+public class ParcelFileDescriptor implements Parcelable, Closeable {
     private final FileDescriptor mFileDescriptor;
     private boolean mClosed;
     //this field is to create wrapper for ParcelFileDescriptor using another
