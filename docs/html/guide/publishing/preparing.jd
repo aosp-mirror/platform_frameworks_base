@@ -291,7 +291,8 @@ current user has purchased it. Using Android Market Licensing is optional even i
 releasing your app through Android Market.</p>
 
 <p>For more information about Android Market Licensing Service and how to use it in your
-application, see <a href="{@docRoot}guide/publishing/licensing.html">Application Licensing</a>.</p>
+application, see <a href="{@docRoot}guide/market/licensing/index.html">Application
+Licensing</a>.</p>
 
 <h2 id="publishing-build">Building Your Application for Release</h2>
 
