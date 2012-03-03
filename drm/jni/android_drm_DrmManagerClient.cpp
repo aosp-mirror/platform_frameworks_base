@@ -57,29 +57,16 @@ public:
 };
 
 String8 Utility::getStringValue(JNIEnv* env, jobject object, const char* fieldName) {
-    String8 dataString("");
-
     /* Look for the instance field with the name fieldName */
     jfieldID fieldID
         = env->GetFieldID(env->GetObjectClass(object), fieldName , "Ljava/lang/String;");
 
     if (NULL != fieldID) {
         jstring valueString = (jstring) env->GetObjectField(object, fieldID);
-
-        if (NULL != valueString && valueString != env->NewStringUTF("")) {
-            char* bytes = const_cast< char* > (env->GetStringUTFChars(valueString, NULL));
-
-            const int length = strlen(bytes) + 1;
-            char *data = new char[length];
-            strncpy(data, bytes, length);
-            dataString = String8(data);
-
-            env->ReleaseStringUTFChars(valueString, bytes);
-            delete [] data; data = NULL;
-        } else {
-            ALOGV("Failed to retrieve the data from the field %s", fieldName);
-        }
+        return Utility::getStringValue(env, valueString);
     }
+
+    String8 dataString("");
     return dataString;
 }
 
@@ -102,24 +89,16 @@ String8 Utility::getStringValue(JNIEnv* env, jstring string) {
 
 char* Utility::getByteArrayValue(
             JNIEnv* env, jobject object, const char* fieldName, int* dataLength) {
-    char* data = NULL;
+
     *dataLength = 0;
 
     jfieldID fieldID = env->GetFieldID(env->GetObjectClass(object), fieldName , "[B");
 
     if (NULL != fieldID) {
         jbyteArray byteArray = (jbyteArray) env->GetObjectField(object, fieldID);
-        if (NULL != byteArray) {
-            jint length = env->GetArrayLength(byteArray);
-
-            *dataLength = length;
-            if (0 < *dataLength) {
-                data = new char[length];
-                env->GetByteArrayRegion(byteArray, (jint)0, length, (jbyte *) data);
-            }
-        }
+        return Utility::getByteArrayValue(env, byteArray, dataLength);
     }
-    return data;
+    return NULL;
 }
 
 char* Utility::getByteArrayValue(JNIEnv* env, jbyteArray byteArray, int* dataLength) {
@@ -419,7 +398,7 @@ static jint android_drm_DrmManagerClient_saveRights(
                                 Utility::getStringValue(env, contentPath));
     }
 
-    delete mData; mData = NULL;
+    delete[] mData; mData = NULL;
     ALOGV("saveRights - Exit");
     return result;
 }
@@ -510,7 +489,7 @@ static jobject android_drm_DrmManagerClient_processDrmInfo(
                 processedData, env->NewStringUTF(pDrmInfoStatus->mimeType.string()));
     }
 
-    delete mData; mData = NULL;
+    delete[] mData; mData = NULL;
     delete pDrmInfoStatus; pDrmInfoStatus = NULL;
 
     ALOGV("processDrmInfo - Exit");
@@ -675,7 +654,7 @@ static jobject android_drm_DrmManagerClient_convertData(
                              statusCode, dataArray, pDrmConvertedStatus->offset);
     }
 
-    delete mData; mData = NULL;
+    delete[] mData; mData = NULL;
     delete pDrmConvertedStatus; pDrmConvertedStatus = NULL;
 
     ALOGV("convertData - Exit");
