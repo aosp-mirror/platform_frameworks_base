@@ -451,8 +451,24 @@
       <li><a href="<?cs var:toroot ?>guide/publishing/publishing.html">
           <span class="en">Publishing on Android Market</span>
           </a></li>
-      <li><a href="<?cs var:toroot ?>guide/publishing/licensing.html">
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/market/licensing/index.html">
           <span class="en">Application Licensing</span></a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot?>guide/market/licensing/overview.html">
+              <span class="en">Licensing Overview</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/licensing/setting-up.html">
+              <span class="en">Setting Up for Licensing</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/licensing/adding-licensing.html">
+              <span class="en">Adding Licensing to Your App</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/licensing/licensing-reference.html">
+              <span class="en">Licensing Reference</span></a>
+          </li>
+        </ul>
       </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot?>guide/market/billing/index.html">
@@ -484,6 +500,10 @@
       </li>
       <li><a href="<?cs var:toroot ?>guide/market/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>
+      </li>
+      <li><a href="<?cs var:toroot ?>guide/market/expansion-files.html">
+          <span class="en">APK Expansion Files</span></a>
+          <span class="new">new!</span>
       </li>
     </ul>
   </li>
