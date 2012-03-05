@@ -66,7 +66,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"ቅጽበታዊ ገጽ እይታ እየተቀመጠ ነው::"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ቅጽበታዊ ገጽ እይታ ተቀርጿል"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"ያንተን ቅጽበታዊ ገጽ እይታ ለማየት ንካ"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"የአንተን ቅጽበታዊ ገጽ እይታ ለማየት ንካ"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ቅጽበታዊ ገጽ እይታ መቅረጽ አልተቻለም::"</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"የማያ ፎቶማስቀመጥ አልተቻለም። ማከማቻም አገልግሎት ላይ ሊሆን ይችላል።"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"የUSB ፋይል ሰደዳ አማራጮች"</string>
