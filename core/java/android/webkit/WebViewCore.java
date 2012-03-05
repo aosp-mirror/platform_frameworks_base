@@ -610,15 +610,9 @@ public final class WebViewCore {
     private native void nativeSetFocusControllerActive(int nativeClass,
             boolean active);
 
-    private native void nativeSaveDocumentState(int nativeClass, int frame);
+    private native void nativeSaveDocumentState(int nativeClass);
 
-    private native void nativeMoveFocus(int nativeClass, int framePtr,
-            int nodePointer);
-    private native void nativeMoveMouse(int nativeClass, int framePtr, int x,
-            int y);
-
-    private native void nativeMoveMouseIfLatest(int nativeClass,
-            int moveGeneration, int framePtr, int x, int y);
+    private native void nativeMoveMouse(int nativeClass, int x, int y);
 
     private native String nativeRetrieveHref(int nativeClass, int x, int y);
     private native String nativeRetrieveAnchorText(int nativeClass,
@@ -632,15 +626,11 @@ public final class WebViewCore {
             int[] idArray, int[] xArray, int[] yArray, int count,
             int actionIndex, int metaState);
 
-    private native void nativeUpdateFrameCache(int nativeClass);
-
     private native void nativeSetBackgroundColor(int nativeClass, int color);
 
     private native void nativeDumpDomTree(int nativeClass, boolean useFile);
 
     private native void nativeDumpRenderTree(int nativeClass, boolean useFile);
-
-    private native void nativeDumpNavTree(int nativeClass);
 
     private native void nativeSetJsFlags(int nativeClass, String flags);
 
@@ -799,21 +789,6 @@ public final class WebViewCore {
         String mHistoryUrl;
     }
 
-    static class CursorData {
-        CursorData() {}
-        CursorData(int frame, int node, int x, int y) {
-            mFrame = frame;
-            mNode = node;
-            mX = x;
-            mY = y;
-        }
-        int mMoveGeneration;
-        int mFrame;
-        int mNode;
-        int mX;
-        int mY;
-    }
-
     static class JSInterfaceData {
         Object mObject;
         String mInterfaceName;
@@ -970,8 +945,8 @@ public final class WebViewCore {
 
         static final String[] HandlerDebugString = {
             "REVEAL_SELECTION", // 96
-            "REQUEST_LABEL", // 97
-            "UPDATE_FRAME_CACHE_IF_LOADING", // = 98
+            "", // 97
+            "", // = 98
             "SCROLL_TEXT_INPUT", // = 99
             "LOAD_URL", // = 100;
             "STOP_LOADING", // = 101;
@@ -990,7 +965,7 @@ public final class WebViewCore {
             "REPLACE_TEXT", // = 114;
             "PASS_TO_JS", // = 115;
             "SET_GLOBAL_BOUNDS", // = 116;
-            "UPDATE_CACHE_AND_TEXT_ENTRY", // = 117;
+            "", // = 117;
             "CLICK", // = 118;
             "SET_NETWORK_STATE", // = 119;
             "DOC_HAS_IMAGES", // = 120;
@@ -1008,8 +983,8 @@ public final class WebViewCore {
             "POST_URL", // = 132;
             "SPLIT_PICTURE_SET", // = 133;
             "CLEAR_CONTENT", // = 134;
-            "SET_MOVE_MOUSE", // = 135;
-            "SET_MOVE_MOUSE_IF_LATEST", // = 136;
+            "", // = 135;
+            "", // = 136;
             "REQUEST_CURSOR_HREF", // = 137;
             "ADD_JS_INTERFACE", // = 138;
             "LOAD_DATA", // = 139;
@@ -1040,8 +1015,6 @@ public final class WebViewCore {
     public class EventHub {
         // Message Ids
         static final int REVEAL_SELECTION = 96;
-        static final int REQUEST_LABEL = 97;
-        static final int UPDATE_FRAME_CACHE_IF_LOADING = 98;
         static final int SCROLL_TEXT_INPUT = 99;
         static final int LOAD_URL = 100;
         static final int STOP_LOADING = 101;
@@ -1060,7 +1033,6 @@ public final class WebViewCore {
         static final int REPLACE_TEXT = 114;
         static final int PASS_TO_JS = 115;
         static final int SET_GLOBAL_BOUNDS = 116;
-        static final int UPDATE_CACHE_AND_TEXT_ENTRY = 117;
         static final int CLICK = 118;
         static final int SET_NETWORK_STATE = 119;
         static final int DOC_HAS_IMAGES = 120;
@@ -1070,7 +1042,6 @@ public final class WebViewCore {
         static final int SINGLE_LISTBOX_CHOICE = 124;
         public static final int MESSAGE_RELAY = 125;
         static final int SET_BACKGROUND_COLOR = 126;
-        static final int SET_MOVE_FOCUS = 127;
         static final int SAVE_DOCUMENT_STATE = 128;
         static final int DELETE_SURROUNDING_TEXT = 129;
 
@@ -1082,7 +1053,6 @@ public final class WebViewCore {
 
         // UI nav messages
         static final int SET_MOVE_MOUSE = 135;
-        static final int SET_MOVE_MOUSE_IF_LATEST = 136;
         static final int REQUEST_CURSOR_HREF = 137;
         static final int ADD_JS_INTERFACE = 138;
         static final int LOAD_DATA = 139;
@@ -1102,7 +1072,6 @@ public final class WebViewCore {
         static final int ON_PAUSE = 143;
         static final int ON_RESUME = 144;
         static final int FREE_MEMORY = 145;
-        static final int VALID_NODE_BOUNDS = 146;
 
         // Load and save web archives
         static final int SAVE_WEBARCHIVE = 147;
@@ -1122,7 +1091,6 @@ public final class WebViewCore {
         // debugging
         static final int DUMP_DOMTREE = 170;
         static final int DUMP_RENDERTREE = 171;
-        static final int DUMP_NAVTREE = 172;
 
         static final int SET_JS_FLAGS = 174;
         static final int CONTENT_INVALIDATE_ALL = 175;
@@ -1201,7 +1169,7 @@ public final class WebViewCore {
         private EventHub() {}
 
         private static final int FIRST_PACKAGE_MSG_ID = REVEAL_SELECTION;
-        private static final int LAST_PACKAGE_MSG_ID = VALID_NODE_BOUNDS;
+        private static final int LAST_PACKAGE_MSG_ID = REMOVE_JS_INTERFACE;
 
         /**
          * Transfer all messages to the newly created webcore thread handler.
@@ -1268,23 +1236,6 @@ public final class WebViewCore {
 
                         case REVEAL_SELECTION:
                             nativeRevealSelection(mNativeClass);
-                            break;
-
-                        case REQUEST_LABEL:
-                            if (mWebView != null) {
-                                int nodePointer = msg.arg2;
-                                String label = nativeRequestLabel(mNativeClass,
-                                        msg.arg1, nodePointer);
-                                if (label != null && label.length() > 0) {
-                                    Message.obtain(mWebView.mPrivateHandler,
-                                            WebViewClassic.RETURN_LABEL, nodePointer,
-                                            0, label).sendToTarget();
-                                }
-                            }
-                            break;
-
-                        case UPDATE_FRAME_CACHE_IF_LOADING:
-                            nativeUpdateFrameCacheIfLoading(mNativeClass);
                             break;
 
                         case SCROLL_TEXT_INPUT:
@@ -1387,8 +1338,8 @@ public final class WebViewCore {
                             // note: these are in document coordinates
                             // (inv-zoom)
                             Point pt = (Point) msg.obj;
-                            nativeSetScrollOffset(mNativeClass, msg.arg1,
-                                    msg.arg2 == 1, pt.x, pt.y);
+                            nativeSetScrollOffset(mNativeClass,
+                                    msg.arg1 == 1, pt.x, pt.y);
                             break;
 
                         case SET_GLOBAL_BOUNDS:
@@ -1492,8 +1443,7 @@ public final class WebViewCore {
                         }
 
                         case SAVE_DOCUMENT_STATE: {
-                            CursorData cDat = (CursorData) msg.obj;
-                            nativeSaveDocumentState(mNativeClass, cDat.mFrame);
+                            nativeSaveDocumentState(mNativeClass);
                             break;
                         }
 
@@ -1568,22 +1518,8 @@ public final class WebViewCore {
                             mBrowserFrame.documentAsText((Message) msg.obj);
                             break;
 
-                        case SET_MOVE_FOCUS:
-                            CursorData focusData = (CursorData) msg.obj;
-                            nativeMoveFocus(mNativeClass, focusData.mFrame, focusData.mNode);
-                            break;
-
                         case SET_MOVE_MOUSE:
-                            CursorData cursorData = (CursorData) msg.obj;
-                            nativeMoveMouse(mNativeClass,
-                                     cursorData.mFrame, cursorData.mX, cursorData.mY);
-                            break;
-
-                        case SET_MOVE_MOUSE_IF_LATEST:
-                            CursorData cData = (CursorData) msg.obj;
-                            nativeMoveMouseIfLatest(mNativeClass,
-                                    cData.mMoveGeneration,
-                                    cData.mFrame, cData.mX, cData.mY);
+                            nativeMoveMouse(mNativeClass, msg.arg1, msg.arg2);
                             break;
 
                         case REQUEST_CURSOR_HREF: {
@@ -1596,15 +1532,6 @@ public final class WebViewCore {
                             hrefMsg.sendToTarget();
                             break;
                         }
-
-                        case UPDATE_CACHE_AND_TEXT_ENTRY:
-                            nativeUpdateFrameCache(mNativeClass);
-                            // FIXME: this should provide a minimal rectangle
-                            if (mWebView != null) {
-                                mWebView.getWebView().postInvalidate();
-                            }
-                            sendUpdateTextEntry();
-                            break;
 
                         case DOC_HAS_IMAGES:
                             Message imageResult = (Message) msg.obj;
@@ -1661,10 +1588,6 @@ public final class WebViewCore {
                             nativeDumpRenderTree(mNativeClass, msg.arg1 == 1);
                             break;
 
-                        case DUMP_NAVTREE:
-                            nativeDumpNavTree(mNativeClass);
-                            break;
-
                         case SET_JS_FLAGS:
                             nativeSetJsFlags(mNativeClass, (String)msg.obj);
                             break;
@@ -1710,21 +1633,6 @@ public final class WebViewCore {
                         case POPULATE_VISITED_LINKS:
                             nativeProvideVisitedHistory(mNativeClass, (String[])msg.obj);
                             break;
-
-                        case VALID_NODE_BOUNDS: {
-                            MotionUpData motionUpData = (MotionUpData) msg.obj;
-                            if (!nativeValidNodeAndBounds(
-                                    mNativeClass, motionUpData.mFrame,
-                                    motionUpData.mNode, motionUpData.mBounds)) {
-                                nativeUpdateFrameCache(mNativeClass);
-                            }
-                            Message message = mWebView.mPrivateHandler
-                                    .obtainMessage(WebViewClassic.DO_MOTION_UP,
-                                    motionUpData.mX, motionUpData.mY);
-                            mWebView.mPrivateHandler.sendMessageAtFrontOfQueue(
-                                    message);
-                            break;
-                        }
 
                         case HIDE_FULLSCREEN:
                             nativeFullScreenPluginHidden(mNativeClass, msg.arg1);
@@ -2123,8 +2031,6 @@ public final class WebViewCore {
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "viewSizeChanged");
             contentDraw();
         }
-        mEventHub.sendMessage(Message.obtain(null,
-                EventHub.UPDATE_CACHE_AND_TEXT_ENTRY));
     }
 
     // Calculate width to be used in webkit window.
@@ -2143,13 +2049,6 @@ public final class WebViewCore {
             }
         }
         return width;
-    }
-
-    private void sendUpdateTextEntry() {
-        if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebViewClassic.UPDATE_TEXT_ENTRY_MSG_ID).sendToTarget();
-        }
     }
 
     // Utility method for exceededDatabaseQuota and reachedMaxAppCacheSize
@@ -2454,7 +2353,6 @@ public final class WebViewCore {
 
     // called by JNI
     private void sendNotifyProgressFinished() {
-        sendUpdateTextEntry();
         contentDraw();
     }
 
@@ -2507,10 +2405,8 @@ public final class WebViewCore {
         }
 
         // remove the touch highlight when moving to a new page
-        if (WebViewClassic.sDisableNavcache) {
-            mWebView.mPrivateHandler.sendEmptyMessage(
-                    WebViewClassic.HIT_TEST_RESULT);
-        }
+        mWebView.mPrivateHandler.sendEmptyMessage(
+                WebViewClassic.HIT_TEST_RESULT);
 
         // reset the scroll position, the restored offset and scales
         mRestoredX = mRestoredY = 0;
@@ -2862,7 +2758,6 @@ public final class WebViewCore {
                 findText).sendToTarget();
     }
 
-    private native void nativeUpdateFrameCacheIfLoading(int nativeClass);
     private native void nativeRevealSelection(int nativeClass);
     private native String nativeRequestLabel(int nativeClass, int framePtr,
             int nodePtr);
@@ -2873,7 +2768,7 @@ public final class WebViewCore {
             float xPercent, int y);
 
     // these must be in document space (i.e. not scaled/zoomed).
-    private native void nativeSetScrollOffset(int nativeClass, int gen,
+    private native void nativeSetScrollOffset(int nativeClass,
             boolean sendScrollEvent, int dx, int dy);
 
     private native void nativeSetGlobalBounds(int nativeClass, int x, int y,
@@ -3068,11 +2963,8 @@ public final class WebViewCore {
     }
 
     // called by JNI
-    @SuppressWarnings("unused")
     private void selectAt(int x, int y) {
-        if (mWebView != null) {
-            mWebView.mPrivateHandler.obtainMessage(WebViewClassic.SELECT_AT, x, y).sendToTarget();
-        }
+        // TODO: Figure out what to do with this (b/6111818)
     }
 
     private void useMockDeviceOrientation() {
@@ -3107,8 +2999,6 @@ public final class WebViewCore {
     private native void nativeFreeMemory(int nativeClass);
     private native void nativeFullScreenPluginHidden(int nativeClass, int npp);
     private native void nativePluginSurfaceReady(int nativeClass);
-    private native boolean nativeValidNodeAndBounds(int nativeClass, int frame,
-            int node, Rect bounds);
 
     private native WebKitHitTest nativeHitTest(int nativeClass, int x, int y,
             int slop, boolean moveMouse);

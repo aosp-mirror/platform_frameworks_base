@@ -643,20 +643,6 @@ class ZoomManager {
         // remove the zoom control after double tap
         dismissZoomPicker();
 
-        /*
-         * If the double tap was on a plugin then either zoom to maximize the
-         * plugin on the screen or scale to overview mode.
-         */
-        Rect pluginBounds = mWebView.getPluginBounds(mAnchorX, mAnchorY);
-        if (pluginBounds != null) {
-            if (mWebView.isRectFitOnScreen(pluginBounds)) {
-                zoomToOverview();
-            } else {
-                mWebView.centerFitRect(pluginBounds);
-            }
-            return;
-        }
-
         final float newTextWrapScale;
         if (settings.getUseFixedViewport()) {
             newTextWrapScale = Math.max(mActualScale, getReadingLevelScale());
