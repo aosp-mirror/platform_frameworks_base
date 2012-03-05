@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;未命名&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"..."</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -313,10 +313,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"啟用或停用應用程式元件"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"允許應用程式啟用或停用其他應用程式的元件。請注意，惡意應用程式可能利用此功能停用重要的平板電腦功能。這項權限可能導致應用程式元件無法使用、不一致或不穩定，請務必謹慎使用。"</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"允許應用程式啟用或停用其他應用程式的元件。請注意，惡意應用程式可能利用此功能停用重要的手機功能。這項權限可能導致應用程式元件無法使用、不一致或不穩定，請務必謹慎使用。"</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"授予或撤銷權限"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"允許應用程式授予或撤銷本身或其他應用程式的特定權限。注意，惡意應用程式可能藉此存取您未授予權限的功能。"</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"設定偏好的應用程式"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"允許應用程式修改您偏好的應用程式。請注意，惡意應用程式可能利用此功能擅自竄改執行的應用程式，並冒充現有的程式收集您的私人資料。"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"編輯全域系統設定"</string>
@@ -673,7 +671,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超過人臉解鎖嘗試次數上限"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"充電中 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"充電完成。"</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"請連接充電器。"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"沒有 SIM  卡。"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板電腦中沒有 SIM 卡。"</string>
@@ -722,8 +720,8 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"出廠測試失敗"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"只有安裝在 /system/app 裡的程式才能支援 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"找不到提供 FACTORY_TEST 的程式。"</string>
@@ -735,7 +733,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"提示：輕按兩下即可縮放。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動填入功能"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"設定自動填入功能"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <!-- no translation found for autofill_address_name_separator (6350145154779706772) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -770,6 +769,8 @@
     <string name="permdesc_serialPort" msgid="2991639985224598193">"允許應用程式使用 SerialManager API 存取序列埠。"</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"從外部存取內容供應端"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"允許應用程式透過文字指令介面存取內容供應端 (一般應用程式不需這項權限)。"</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"不建議自動更新裝置"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"允許應用程式提供資訊，建議系統何時適合透過非互動方式重新啟動並升級裝置。"</string>
     <string name="save_password_message" msgid="767344687139195790">"是否記住此密碼？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"現在不要"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"記住"</string>
@@ -1008,8 +1009,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日期設定"</string>
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"預設值"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"新增："</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"無須許可"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>" 隱藏"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"顯示全部"</b></string>

@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;शीर्षक-रहित&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -314,7 +314,7 @@
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"एप्‍लिकेशन को यह बदलने देता है कि किसी अन्‍य एप्‍लिकेशन का घटक सक्षम है या नहीं. दुर्भावनापूर्ण एप्‍लिकेशन महत्‍वपूर्ण फ़ोन क्षमताओं को अक्षम करने में इसका उपयोग कर सकते हैं. इस अनुमति का उपयोग सावधानी के साथ करना चाहिए, क्योंकि इससे एप्‍लिकेशन घटकों के अनुपयोगी, असंगत, या अस्‍थिर स्‍थिति में जाने की संभावना है."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"एप्‍लिकेशन को यह बदलने देता है कि किसी अन्‍य एप्‍लिकेशन का घटक सक्षम है या नहीं. दुर्भावनापूर्ण एप्‍लिकेशन महत्‍वपूर्ण फ़ोन क्षमताओं को अक्षम करने में इसका उपयोग कर सकते हैं. इस अनुमति का उपयोग सावधानी के साथ करना चाहिए, क्योंकि इससे एप्‍लिकेशन घटकों के अनुपयोगी, असंगत, या अस्‍थिर स्‍थिति में जाने की संभावना है."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"अनुमति दें या रद्द करें"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"एप्लिकेशन को उसके या अन्य एप्लिकेशन के लिए विशेष अनुमतियां देने या रद्द करने देता है. दुर्भावनापूर्ण एप्लिकेशन इसका उपयोग उन विशेषताओं तक पहुंचने के लिए कर सकते हैं जो आपने उन्हें नहीं दी हैं."</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"एप्लिकेशन को उसके या अन्य एप्लिकेशन के लिए विशेष अनुमतियां देने या रद्द करने देता है. दुर्भावनापूर्ण एप्लिकेशन इसका उपयोग उन सुविधाओं तक पहुंचने के लिए कर सकते हैं जो आपने उन्हें नहीं दी हैं."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"पसंदीदा एप्‍लिकेशन सेट करें"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"एप्लिकेशन को आपके पसंदीदा एप्लिकेशन को संशोधित करने देता है. दुर्भावनापूर्ण एप्लिकेशन आपसे निजी डेटा एकत्रित करने के लिए आपके मौजूदा एप्लिकेशन को स्पूफ़ करके, चलाए जाने वाले एप्लिकेशन को चुपचाप बदल सकते हैं."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"वैश्विक सिस्‍टम सेटिंग संशोधित करें"</string>
@@ -671,7 +671,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"फेस अनलॉक के अधिकतम प्रयासों की सीमा पार हो गई"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"चार्ज हो रही है, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"चार्ज हो चुकी है."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"अपना चार्जर कनेक्‍ट करें."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"कोई सिम कार्ड नहीं है."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"टेबलेट में कोई सिम कार्ड नहीं है."</string>
@@ -720,8 +720,8 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"फ़ैक्‍ट्री परीक्षण विफल"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST क्रिया केवल /system/app में इंस्‍टॉल किए गए पैकेज के लिए समर्थित है."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"ऐसा कोई पैकेज नहीं मिला था जो FACTORY_TEST कार्रवाई प्रदान करता हो."</string>
@@ -733,7 +733,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"युक्ति: ज़ूम इन और आउट करने के लिए डबल-टैप करें."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्‍वत: भरण"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"स्वत: भरण सेट करें"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -768,6 +768,8 @@
     <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API का उपयोग करके धारक को सीरियल पोर्ट पर पहुंच प्रदान करता है."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"बाह्य रूप से सामग्री प्रदाताओं पर पहुंच"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"धारक को शेल से सामग्री प्रदाताओं तक पहुंचने देता है. सामान्य एप्लिकेशन के लिए कभी भी आवश्यकता नहीं होनी चाहिए."</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"स्वचालित उपकरण अपडेट का समर्थन न करें"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"धारक को उपकरण अपग्रेड करने के लिए, गैर-सहभागी रीबूट के ठीक समय के बारे में सिस्टम पर जानकारी प्रस्तुत करने देता है."</string>
     <string name="save_password_message" msgid="767344687139195790">"क्‍या आप चाहते हैं कि ब्राउज़र पासवर्ड को याद रखे?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"अभी नहीं"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"याद रखें"</string>

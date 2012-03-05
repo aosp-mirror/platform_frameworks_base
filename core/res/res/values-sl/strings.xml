@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Brez naslova&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -314,7 +314,7 @@
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Programu omogoča, da spremeni, ali je komponenta drugega programa omogočena ali ne. Zlonamerni programi lahko to uporabijo za onemogočanje pomembnih zmožnosti tabličnega računalnika. Pri dodeljevanju dovoljenja je treba biti previden, saj lahko komponente programa nastavite tako, da jih ni mogoče uporabiti, da niso dosledne ali da niso stabilne."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Programu omogoča, da spremeni, ali je komponenta drugega programa omogočena ali ne. Zlonamerni programi lahko to uporabijo za onemogočanje pomembnih zmožnosti telefona. Pri dodeljevanju dovoljenja je treba biti previden, saj lahko komponente programa nastavite tako, da jih ni mogoče uporabiti, da niso dosledne ali da niso stabilne."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"dodeljevanje ali preklic dovoljenj"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Programu omogoča dodeljevanje ali preklic posebnih dovoljenj zanj ali za druge programe. Zlonamerni programi lahko to uporabijo za dostop do funkcij, za katere jim niste dodelili pravic."</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Aplikaciji omogoča dodeljevanje ali preklic posebnih dovoljenj zanjo ali za druge aplikacije. Zlonamerne aplikacije lahko to uporabijo za dostop do funkcij, za katere jim niste dodelili pravic."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"nastavitev prednostnih programov"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Programu omogoča spreminjanje priljubljenih programov. Zlonamerni programi lahko s tem neopazno spremenijo programe, ki se izvajajo, tako da se izdajajo za obstoječe programe in zbirajo osebne podatke."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"spreminjanje splošnih nastavitev sistema"</string>
@@ -671,7 +671,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Presegli ste dovoljeno število poskusov odklepanja z obrazom"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Polnjenje (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Napolnjeno."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Priključite napajalnik."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Ni kartice SIM."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tabličnem računalniku ni kartice SIM."</string>
@@ -720,8 +720,8 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Tovarniški preskus ni uspel"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Dejanje FACTORY_TEST je podprto le za pakete, nameščene v razdelku /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Ni bilo najdenega paketa, ki omogoča dejanje FACTORY_TEST."</string>
@@ -733,7 +733,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Nasvet: Tapnite dvakrat, če želite povečati ali pomanjšati."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Samoizp."</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Nastavi samoizp."</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -768,6 +768,8 @@
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Imetniku omogoča, da z API-jem za SerialManager dostopa do serijskih vrat."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"zunanji dostop do ponudnikov vsebine"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Omogoča imetniku, da dostopa do ponudnikov vsebine iz lupine. Nikoli naj ne bi bilo potrebno za običajne programe"</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"odvrnitev samodejnih posodobitev naprave"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Dovoli, da lastnik sistemu ponudi informacije o tem, kdaj je primeren čas za neinteraktiven vnovični zagon, s katerim nadgradi napravo."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ali želite, da si brskalnik zapomni to geslo?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ne zdaj"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapomni si"</string>
