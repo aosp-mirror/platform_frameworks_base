@@ -19,11 +19,7 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:shareInterpolator="false">
-    <scale android:fromXScale="1.0" android:toXScale="0.9"
-            android:fromYScale="1.0" android:toYScale="0.9"
-            android:pivotX="50%" android:pivotY="50%"
+    <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
             android:interpolator="@interpolator/decelerate_quint"
-            android:fillEnabled="true"
-            android:fillBefore="true" android:fillAfter="true"
-            android:duration="@android:integer/config_mediumAnimTime"/>
+            android:duration="@android:integer/config_shortAnimTime" />
 </set>

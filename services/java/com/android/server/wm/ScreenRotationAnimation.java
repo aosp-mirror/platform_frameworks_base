@@ -59,6 +59,8 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
     final Transformation mStartExitTransformation = new Transformation();
     Animation mStartEnterAnimation;
     final Transformation mStartEnterTransformation = new Transformation();
+    Animation mStartFrameAnimation;
+    final Transformation mStartFrameTransformation = new Transformation();
 
     // The finishing animation for the exiting and entering elements.  This
     // animation needs to undo the transformation of the starting animation.
@@ -68,6 +70,8 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
     final Transformation mFinishExitTransformation = new Transformation();
     Animation mFinishEnterAnimation;
     final Transformation mFinishEnterTransformation = new Transformation();
+    Animation mFinishFrameAnimation;
+    final Transformation mFinishFrameTransformation = new Transformation();
 
     // The current active animation to move from the old to the new rotated
     // state.  Which animation is run here will depend on the old and new
@@ -76,6 +80,8 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
     final Transformation mRotateExitTransformation = new Transformation();
     Animation mRotateEnterAnimation;
     final Transformation mRotateEnterTransformation = new Transformation();
+    Animation mRotateFrameAnimation;
+    final Transformation mRotateFrameTransformation = new Transformation();
 
     // A previously running rotate animation.  This will be used if we need
     // to switch to a new rotation before finishing the previous one.
@@ -83,32 +89,42 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
     final Transformation mLastRotateExitTransformation = new Transformation();
     Animation mLastRotateEnterAnimation;
     final Transformation mLastRotateEnterTransformation = new Transformation();
+    Animation mLastRotateFrameAnimation;
+    final Transformation mLastRotateFrameTransformation = new Transformation();
 
     // Complete transformations being applied.
     final Transformation mExitTransformation = new Transformation();
     final Transformation mEnterTransformation = new Transformation();
+    final Transformation mFrameTransformation = new Transformation();
 
     boolean mStarted;
     boolean mAnimRunning;
     boolean mFinishAnimReady;
     long mFinishAnimStartTime;
 
+    final Matrix mFrameInitialMatrix = new Matrix();
     final Matrix mSnapshotInitialMatrix = new Matrix();
     final Matrix mSnapshotFinalMatrix = new Matrix();
     final Matrix mTmpMatrix = new Matrix();
     final float[] mTmpFloats = new float[9];
     private boolean mMoreRotateEnter;
     private boolean mMoreRotateExit;
+    private boolean mMoreRotateFrame;
     private boolean mMoreFinishEnter;
     private boolean mMoreFinishExit;
+    private boolean mMoreFinishFrame;
     private boolean mMoreStartEnter;
     private boolean mMoreStartExit;
+    private boolean mMoreStartFrame;
 
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mSurface="); pw.print(mSurface);
                 pw.print(" mWidth="); pw.print(mWidth);
                 pw.print(" mHeight="); pw.println(mHeight);
         pw.print(prefix); pw.print("mBlackFrame="); pw.println(mBlackFrame);
+        if (mBlackFrame != null) {
+            mBlackFrame.printTo(prefix + "  ", pw);
+        }
         pw.print(prefix); pw.print("mSnapshotRotation="); pw.print(mSnapshotRotation);
                 pw.print(" mSnapshotDeltaRotation="); pw.print(mSnapshotDeltaRotation);
                 pw.print(" mCurRotation="); pw.println(mCurRotation);
@@ -123,21 +139,29 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
                 pw.print(" "); mStartExitTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mStartEnterAnimation="); pw.print(mStartEnterAnimation);
                 pw.print(" "); mStartEnterTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mStartFrameAnimation="); pw.print(mStartFrameAnimation);
+                pw.print(" "); mStartFrameTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mFinishExitAnimation="); pw.print(mFinishExitAnimation);
                 pw.print(" "); mFinishExitTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mFinishEnterAnimation="); pw.print(mFinishEnterAnimation);
                 pw.print(" "); mFinishEnterTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mFinishFrameAnimation="); pw.print(mFinishFrameAnimation);
+                pw.print(" "); mFinishFrameTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mRotateExitAnimation="); pw.print(mRotateExitAnimation);
                 pw.print(" "); mRotateExitTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mRotateEnterAnimation="); pw.print(mRotateEnterAnimation);
                 pw.print(" "); mRotateEnterTransformation.printShortString(pw); pw.println();
-        pw.print(prefix); pw.print("mLastRotateExitAnimation=");
-                pw.print(mLastRotateExitAnimation);
-                pw.print(" "); mLastRotateExitTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mRotateFrameAnimation="); pw.print(mRotateFrameAnimation);
+                pw.print(" "); mRotateFrameTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mExitTransformation=");
                 mExitTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mEnterTransformation=");
                 mEnterTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mFrameTransformation=");
+                mEnterTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mFrameInitialMatrix=");
+                mFrameInitialMatrix.printShortString(pw);
+                pw.println();
         pw.print(prefix); pw.print("mSnapshotInitialMatrix=");
                 mSnapshotInitialMatrix.printShortString(pw);
                 pw.print(" mSnapshotFinalMatrix="); mSnapshotFinalMatrix.printShortString(pw);
@@ -178,7 +202,7 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
                     mSurface = null;
                     return;
                 }
-                mSurface.setLayer(FREEZE_LAYER + 1);
+                mSurface.setLayer(FREEZE_LAYER);
                 mSurface.show();
             } catch (Surface.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate freeze surface", e);
@@ -299,10 +323,14 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
                     com.android.internal.R.anim.screen_rotate_start_exit);
             mStartEnterAnimation = AnimationUtils.loadAnimation(mContext,
                     com.android.internal.R.anim.screen_rotate_start_enter);
+            mStartFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                    com.android.internal.R.anim.screen_rotate_start_frame);
             mFinishExitAnimation = AnimationUtils.loadAnimation(mContext,
                     com.android.internal.R.anim.screen_rotate_finish_exit);
             mFinishEnterAnimation = AnimationUtils.loadAnimation(mContext,
                     com.android.internal.R.anim.screen_rotate_finish_enter);
+            mFinishFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                    com.android.internal.R.anim.screen_rotate_finish_frame);
         }
 
         if (DEBUG_STATE) Slog.v(TAG, "Rotation delta: " + delta + " finalWidth="
@@ -315,24 +343,32 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
                         com.android.internal.R.anim.screen_rotate_0_exit);
                 mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_0_enter);
+                mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                        com.android.internal.R.anim.screen_rotate_0_frame);
                 break;
             case Surface.ROTATION_90:
                 mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_plus_90_exit);
                 mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_plus_90_enter);
+                mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                        com.android.internal.R.anim.screen_rotate_plus_90_frame);
                 break;
             case Surface.ROTATION_180:
                 mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_180_exit);
                 mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_180_enter);
+                mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                        com.android.internal.R.anim.screen_rotate_180_frame);
                 break;
             case Surface.ROTATION_270:
                 mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_minus_90_exit);
                 mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_minus_90_enter);
+                mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                        com.android.internal.R.anim.screen_rotate_minus_90_frame);
                 break;
         }
 
@@ -346,13 +382,18 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
                     mOriginalWidth, mOriginalHeight);
             mStartExitAnimation.initialize(finalWidth, finalHeight,
                     mOriginalWidth, mOriginalHeight);
+            mStartFrameAnimation.initialize(finalWidth, finalHeight,
+                    mOriginalWidth, mOriginalHeight);
             mFinishEnterAnimation.initialize(finalWidth, finalHeight,
                     mOriginalWidth, mOriginalHeight);
             mFinishExitAnimation.initialize(finalWidth, finalHeight,
                     mOriginalWidth, mOriginalHeight);
+            mFinishFrameAnimation.initialize(finalWidth, finalHeight,
+                    mOriginalWidth, mOriginalHeight);
         }
         mRotateEnterAnimation.initialize(finalWidth, finalHeight, mOriginalWidth, mOriginalHeight);
         mRotateExitAnimation.initialize(finalWidth, finalHeight, mOriginalWidth, mOriginalHeight);
+        mRotateFrameAnimation.initialize(finalWidth, finalHeight, mOriginalWidth, mOriginalHeight);
         mAnimRunning = false;
         mFinishAnimReady = false;
         mFinishAnimStartTime = -1;
@@ -362,15 +403,21 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
             mStartExitAnimation.scaleCurrentDuration(animationScale);
             mStartEnterAnimation.restrictDuration(maxAnimationDuration);
             mStartEnterAnimation.scaleCurrentDuration(animationScale);
+            mStartFrameAnimation.restrictDuration(maxAnimationDuration);
+            mStartFrameAnimation.scaleCurrentDuration(animationScale);
             mFinishExitAnimation.restrictDuration(maxAnimationDuration);
             mFinishExitAnimation.scaleCurrentDuration(animationScale);
             mFinishEnterAnimation.restrictDuration(maxAnimationDuration);
             mFinishEnterAnimation.scaleCurrentDuration(animationScale);
+            mFinishFrameAnimation.restrictDuration(maxAnimationDuration);
+            mFinishFrameAnimation.scaleCurrentDuration(animationScale);
         }
         mRotateExitAnimation.restrictDuration(maxAnimationDuration);
         mRotateExitAnimation.scaleCurrentDuration(animationScale);
         mRotateEnterAnimation.restrictDuration(maxAnimationDuration);
         mRotateEnterAnimation.scaleCurrentDuration(animationScale);
+        mRotateFrameAnimation.restrictDuration(maxAnimationDuration);
+        mRotateFrameAnimation.scaleCurrentDuration(animationScale);
 
         if (mBlackFrame == null) {
             if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
@@ -378,10 +425,20 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
                     ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
             Surface.openTransaction();
 
+            // Compute the transformation matrix that must be applied
+            // the the black frame to make it stay in the initial position
+            // before the new screen rotation.  This is different than the
+            // snapshot transformation because the snapshot is always based
+            // of the native orientation of the screen, not the orientation
+            // we were last in.
+            createRotationMatrix(delta, mOriginalWidth, mOriginalHeight, mFrameInitialMatrix);
+
             try {
-                Rect outer = new Rect(-finalWidth*1, -finalHeight*1, finalWidth*2, finalHeight*2);
-                Rect inner = new Rect(0, 0, finalWidth, finalHeight);
-                mBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER);
+                Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
+                        mOriginalWidth*2, mOriginalHeight*2);
+                Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
+                mBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 1);
+                mBlackFrame.setMatrix(mFrameInitialMatrix);
             } catch (Surface.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
@@ -438,13 +495,21 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
             mStartEnterAnimation.cancel();
             mStartEnterAnimation = null;
         }
+        if (mStartFrameAnimation != null) {
+            mStartFrameAnimation.cancel();
+            mStartFrameAnimation = null;
+        }
         if (mFinishExitAnimation != null) {
             mFinishExitAnimation.cancel();
             mFinishExitAnimation = null;
         }
-        if (mStartEnterAnimation != null) {
-            mStartEnterAnimation.cancel();
-            mStartEnterAnimation = null;
+        if (mFinishEnterAnimation != null) {
+            mFinishEnterAnimation.cancel();
+            mFinishEnterAnimation = null;
+        }
+        if (mFinishFrameAnimation != null) {
+            mFinishFrameAnimation.cancel();
+            mFinishFrameAnimation = null;
         }
         if (mRotateExitAnimation != null) {
             mRotateExitAnimation.cancel();
@@ -454,12 +519,19 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
             mRotateEnterAnimation.cancel();
             mRotateEnterAnimation = null;
         }
+        if (mRotateFrameAnimation != null) {
+            mRotateFrameAnimation.cancel();
+            mRotateFrameAnimation = null;
+        }
     }
 
     public boolean isAnimating() {
         return mStartEnterAnimation != null || mStartExitAnimation != null
-                && mFinishEnterAnimation != null || mFinishExitAnimation != null
-                && mRotateEnterAnimation != null || mRotateExitAnimation != null;
+                || mStartFrameAnimation != null
+                || mFinishEnterAnimation != null || mFinishExitAnimation != null
+                || mFinishFrameAnimation != null
+                || mRotateEnterAnimation != null || mRotateExitAnimation != null
+                || mRotateFrameAnimation != null;
     }
 
     @Override
@@ -497,6 +569,18 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
             }
         }
 
+        mMoreStartFrame = false;
+        if (mStartFrameAnimation != null) {
+            mStartFrameTransformation.clear();
+            mMoreStartFrame = mStartFrameAnimation.getTransformation(now, mStartFrameTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped start frame: " + mStartFrameTransformation);
+            if (!mMoreStartFrame) {
+                if (DEBUG_STATE) Slog.v(TAG, "Start frame animation done!");
+                mStartFrameAnimation.cancel();
+                mStartFrameAnimation = null;
+            }
+        }
+
         long finishNow = mFinishAnimReady ? (now - mFinishAnimStartTime) : 0;
         if (DEBUG_STATE) Slog.v(TAG, "Step: finishNow=" + finishNow);
 
@@ -528,18 +612,31 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
             }
         }
 
+        mFinishFrameTransformation.clear();
+        mMoreFinishFrame = false;
+        if (mFinishFrameAnimation != null) {
+            mMoreFinishFrame = mFinishFrameAnimation.getTransformation(finishNow, mFinishFrameTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped finish frame: " + mFinishFrameTransformation);
+            if (!mMoreStartFrame && !mMoreFinishFrame) {
+                if (DEBUG_STATE) Slog.v(TAG, "Finish frame animation done, clearing start/finish anims!");
+                mStartFrameTransformation.clear();
+                mFinishFrameAnimation.cancel();
+                mFinishFrameAnimation = null;
+                mFinishFrameTransformation.clear();
+            }
+        }
+
         mRotateExitTransformation.clear();
         mMoreRotateExit = false;
         if (mRotateExitAnimation != null) {
             mMoreRotateExit = mRotateExitAnimation.getTransformation(now, mRotateExitTransformation);
             if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate exit: " + mRotateExitTransformation);
-        }
-
-        if (!mMoreFinishExit && !mMoreRotateExit) {
-            if (DEBUG_STATE) Slog.v(TAG, "Rotate exit animation done!");
-            mRotateExitAnimation.cancel();
-            mRotateExitAnimation = null;
-            mRotateExitTransformation.clear();
+            if (!mMoreFinishExit && !mMoreRotateExit) {
+                if (DEBUG_STATE) Slog.v(TAG, "Rotate exit animation done!");
+                mRotateExitAnimation.cancel();
+                mRotateExitAnimation = null;
+                mRotateExitTransformation.clear();
+            }
         }
 
         mRotateEnterTransformation.clear();
@@ -547,13 +644,25 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
         if (mRotateEnterAnimation != null) {
             mMoreRotateEnter = mRotateEnterAnimation.getTransformation(now, mRotateEnterTransformation);
             if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate enter: " + mRotateEnterTransformation);
+            if (!mMoreFinishEnter && !mMoreRotateEnter) {
+                if (DEBUG_STATE) Slog.v(TAG, "Rotate enter animation done!");
+                mRotateEnterAnimation.cancel();
+                mRotateEnterAnimation = null;
+                mRotateEnterTransformation.clear();
+            }
         }
 
-        if (!mMoreFinishEnter && !mMoreRotateEnter) {
-            if (DEBUG_STATE) Slog.v(TAG, "Rotate enter animation done!");
-            mRotateEnterAnimation.cancel();
-            mRotateEnterAnimation = null;
-            mRotateEnterTransformation.clear();
+        mRotateFrameTransformation.clear();
+        mMoreRotateFrame = false;
+        if (mRotateFrameAnimation != null) {
+            mMoreRotateFrame = mRotateFrameAnimation.getTransformation(now, mRotateFrameTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate frame: " + mRotateFrameTransformation);
+            if (!mMoreFinishFrame && !mMoreRotateFrame) {
+                if (DEBUG_STATE) Slog.v(TAG, "Rotate frame animation done!");
+                mRotateFrameAnimation.cancel();
+                mRotateFrameAnimation = null;
+                mRotateFrameTransformation.clear();
+            }
         }
 
         mExitTransformation.set(mRotateExitTransformation);
@@ -564,11 +673,22 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
         mEnterTransformation.compose(mStartEnterTransformation);
         mEnterTransformation.compose(mFinishEnterTransformation);
 
+        //mFrameTransformation.set(mRotateExitTransformation);
+        //mFrameTransformation.compose(mStartExitTransformation);
+        //mFrameTransformation.compose(mFinishExitTransformation);
+        mFrameTransformation.set(mRotateFrameTransformation);
+        mFrameTransformation.compose(mStartFrameTransformation);
+        mFrameTransformation.compose(mFinishFrameTransformation);
+        mFrameTransformation.getMatrix().preConcat(mFrameInitialMatrix);
+
         if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final exit: " + mExitTransformation);
         if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final enter: " + mEnterTransformation);
+        if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final frame: " + mFrameTransformation);
 
-        final boolean more = mMoreStartEnter || mMoreStartExit || mMoreFinishEnter
-                || mMoreFinishExit || mMoreRotateEnter || mMoreRotateExit || !mFinishAnimReady;
+        final boolean more = mMoreStartEnter || mMoreStartExit || mMoreStartFrame
+                || mMoreFinishEnter || mMoreFinishExit || mMoreFinishFrame
+                || mMoreRotateEnter || mMoreRotateExit || mMoreRotateFrame
+                || !mFinishAnimReady;
 
         mSnapshotFinalMatrix.setConcat(mExitTransformation.getMatrix(), mSnapshotInitialMatrix);
 
@@ -585,14 +705,14 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
             }
         }
 
-        if (!mMoreStartEnter && !mMoreFinishEnter && !mMoreRotateEnter) {
+        if (!mMoreStartFrame && !mMoreFinishFrame && !mMoreRotateFrame) {
             if (mBlackFrame != null) {
-                if (DEBUG_STATE) Slog.v(TAG, "Enter animations done, hiding black frame");
+                if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, hiding black frame");
                 mBlackFrame.hide();
             }
         } else {
             if (mBlackFrame != null) {
-                mBlackFrame.setMatrix(mEnterTransformation.getMatrix());
+                mBlackFrame.setMatrix(mFrameTransformation.getMatrix());
             }
         }
 
@@ -614,17 +734,26 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
             if (mStartExitAnimation != null) {
                 mStartExitAnimation.setStartTime(now);
             }
+            if (mStartFrameAnimation != null) {
+                mStartFrameAnimation.setStartTime(now);
+            }
             if (mFinishEnterAnimation != null) {
                 mFinishEnterAnimation.setStartTime(0);
             }
             if (mFinishExitAnimation != null) {
                 mFinishExitAnimation.setStartTime(0);
             }
+            if (mFinishFrameAnimation != null) {
+                mFinishFrameAnimation.setStartTime(0);
+            }
             if (mRotateEnterAnimation != null) {
                 mRotateEnterAnimation.setStartTime(now);
             }
             if (mRotateExitAnimation != null) {
                 mRotateExitAnimation.setStartTime(now);
+            }
+            if (mRotateFrameAnimation != null) {
+                mRotateFrameAnimation.setStartTime(now);
             }
             mAnimRunning = true;
         }
