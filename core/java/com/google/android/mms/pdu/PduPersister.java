@@ -513,6 +513,9 @@ public class PduPersister {
         PduCacheEntry cacheEntry;
         synchronized(PDU_CACHE_INSTANCE) {
             if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
+                if (LOCAL_LOGV) {
+                    Log.v(TAG, "load: " + uri + " blocked by isUpdating()");
+                }
                 try {
                     PDU_CACHE_INSTANCE.wait();
                 } catch (InterruptedException e) {
@@ -840,6 +843,9 @@ public class PduPersister {
             // If the cache item is getting updated, wait until it's done updating before
             // purging it.
             if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
+                if (LOCAL_LOGV) {
+                    Log.v(TAG, "updateHeaders: " + uri + " blocked by isUpdating()");
+                }
                 try {
                     PDU_CACHE_INSTANCE.wait();
                 } catch (InterruptedException e) {
@@ -1002,6 +1008,9 @@ public class PduPersister {
             PduCacheEntry cacheEntry;
             synchronized(PDU_CACHE_INSTANCE) {
                 if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
+                    if (LOCAL_LOGV) {
+                        Log.v(TAG, "updateParts: " + uri + " blocked by isUpdating()");
+                    }
                     try {
                         PDU_CACHE_INSTANCE.wait();
                     } catch (InterruptedException e) {
@@ -1097,6 +1106,9 @@ public class PduPersister {
             // If the cache item is getting updated, wait until it's done updating before
             // purging it.
             if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
+                if (LOCAL_LOGV) {
+                    Log.v(TAG, "persist: " + uri + " blocked by isUpdating()");
+                }
                 try {
                     PDU_CACHE_INSTANCE.wait();
                 } catch (InterruptedException e) {
