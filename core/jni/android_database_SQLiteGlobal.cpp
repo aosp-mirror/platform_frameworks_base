@@ -37,7 +37,7 @@ static const int SOFT_HEAP_LIMIT = 8 * 1024 * 1024;
 // Called each time a message is logged.
 static void sqliteLogCallback(void* data, int iErrCode, const char* zMsg) {
     bool verboseLog = !!data;
-    if (iErrCode == 0 || iErrCode == SQLITE_CONSTRAINT) {
+    if (iErrCode == 0 || iErrCode == SQLITE_CONSTRAINT || iErrCode == SQLITE_SCHEMA) {
         if (verboseLog) {
             ALOGV(LOG_VERBOSE, SQLITE_LOG_TAG, "(%d) %s\n", iErrCode, zMsg);
         }
