@@ -512,6 +512,7 @@ public final class LoadedApk {
 
     public void removeContextRegistrations(Context context,
             String who, String what) {
+        final boolean reportRegistrationLeaks = StrictMode.vmRegistrationLeaksEnabled();
         HashMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher> rmap =
             mReceivers.remove(context);
         if (rmap != null) {
@@ -525,6 +526,9 @@ public final class LoadedApk {
                         "call to unregisterReceiver()?");
                 leak.setStackTrace(rd.getLocation().getStackTrace());
                 Slog.e(ActivityThread.TAG, leak.getMessage(), leak);
+                if (reportRegistrationLeaks) {
+                    StrictMode.onIntentReceiverLeaked(leak);
+                }
                 try {
                     ActivityManagerNative.getDefault().unregisterReceiver(
                             rd.getIIntentReceiver());
@@ -546,6 +550,9 @@ public final class LoadedApk {
                         + sd.getServiceConnection() + " that was originally bound here");
                 leak.setStackTrace(sd.getLocation().getStackTrace());
                 Slog.e(ActivityThread.TAG, leak.getMessage(), leak);
+                if (reportRegistrationLeaks) {
+                    StrictMode.onServiceConnectionLeaked(leak);
+                }
                 try {
                     ActivityManagerNative.getDefault().unbindService(
                             sd.getIServiceConnection());
