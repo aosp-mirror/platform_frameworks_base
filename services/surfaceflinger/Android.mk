@@ -51,11 +51,6 @@ LOCAL_SHARED_LIBRARIES := \
 # this is only needed for DDMS debugging
 LOCAL_SHARED_LIBRARIES += libdvm libandroid_runtime
 
-LOCAL_C_INCLUDES := \
-	$(call include-path-for, corecg graphics)
-
-LOCAL_C_INCLUDES += hardware/libhardware/modules/gralloc
-
 LOCAL_MODULE:= libsurfaceflinger
 
 include $(BUILD_SHARED_LIBRARY)

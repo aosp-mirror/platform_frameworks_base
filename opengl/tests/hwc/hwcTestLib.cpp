@@ -25,7 +25,7 @@
 
 #include <arpa/inet.h> // For ntohl() and htonl()
 
-#include <hwc/hwcTestLib.h>
+#include "hwcTestLib.h"
 
 #include "EGLUtils.h"
 

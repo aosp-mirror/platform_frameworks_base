@@ -106,7 +106,7 @@
 #include <hardware/hwcomposer.h>
 
 #include <glTestLib.h>
-#include <hwc/hwcTestLib.h>
+#include "hwcTestLib.h"
 
 using namespace std;
 using namespace android;
