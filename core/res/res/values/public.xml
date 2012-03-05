@@ -2913,6 +2913,7 @@
   <public type="attr" name="windowEnableSplitTouch" id="0x01010317" />
   <public type="attr" name="indeterminateProgressStyle" id="0x01010318" />
   <public type="attr" name="progressBarPadding" id="0x01010319" />
+  <!-- @deprecated Not used by the framework. -->
   <public type="attr" name="animationResolution" id="0x0101031a" />
   <public type="attr" name="state_accelerated" id="0x0101031b" />
   <public type="attr" name="baseline" id="0x0101031c" />

@@ -9162,7 +9162,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 int top = getExtendedPaddingTop() + getVerticalOffset(true);
 
                 if (delayed) {
-                    TextView.this.postInvalidateDelayed(16, // 60 Hz update
+                    TextView.this.postInvalidateOnAnimation(
                             left + (int) TEMP_RECTF.left, top + (int) TEMP_RECTF.top,
                             left + (int) TEMP_RECTF.right, top + (int) TEMP_RECTF.bottom);
                 } else {

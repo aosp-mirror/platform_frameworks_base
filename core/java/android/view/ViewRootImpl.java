@@ -3992,19 +3992,115 @@ public final class ViewRootImpl implements ViewParent,
     }
     WindowInputEventReceiver mInputEventReceiver;
 
+    final class InvalidateOnAnimationRunnable implements Runnable {
+        private boolean mPosted;
+        private ArrayList<View> mViews = new ArrayList<View>();
+        private ArrayList<AttachInfo.InvalidateInfo> mViewRects =
+                new ArrayList<AttachInfo.InvalidateInfo>();
+        private View[] mTempViews;
+        private AttachInfo.InvalidateInfo[] mTempViewRects;
+
+        public void addView(View view) {
+            synchronized (this) {
+                mViews.add(view);
+                postIfNeededLocked();
+            }
+        }
+
+        public void addViewRect(AttachInfo.InvalidateInfo info) {
+            synchronized (this) {
+                mViewRects.add(info);
+                postIfNeededLocked();
+            }
+        }
+
+        public void removeView(View view) {
+            synchronized (this) {
+                mViews.remove(view);
+
+                for (int i = mViewRects.size(); i-- > 0; ) {
+                    AttachInfo.InvalidateInfo info = mViewRects.get(i);
+                    if (info.target == view) {
+                        mViewRects.remove(i);
+                        info.release();
+                    }
+                }
+
+                if (mPosted && mViews.isEmpty() && mViewRects.isEmpty()) {
+                    mChoreographer.removeAnimationCallback(this);
+                    mPosted = false;
+                }
+            }
+        }
+
+        @Override
+        public void run() {
+            final int viewCount;
+            final int viewRectCount;
+            synchronized (this) {
+                mPosted = false;
+
+                viewCount = mViews.size();
+                if (viewCount != 0) {
+                    mTempViews = mViews.toArray(mTempViews != null
+                            ? mTempViews : new View[viewCount]);
+                    mViews.clear();
+                }
+
+                viewRectCount = mViewRects.size();
+                if (viewRectCount != 0) {
+                    mTempViewRects = mViewRects.toArray(mTempViewRects != null
+                            ? mTempViewRects : new AttachInfo.InvalidateInfo[viewRectCount]);
+                    mViewRects.clear();
+                }
+            }
+
+            for (int i = 0; i < viewCount; i++) {
+                mTempViews[i].invalidate();
+            }
+
+            for (int i = 0; i < viewRectCount; i++) {
+                final View.AttachInfo.InvalidateInfo info = mTempViewRects[i];
+                info.target.invalidate(info.left, info.top, info.right, info.bottom);
+                info.release();
+            }
+        }
+
+        private void postIfNeededLocked() {
+            if (!mPosted) {
+                mChoreographer.postAnimationCallback(this);
+                mPosted = true;
+            }
+        }
+    }
+    final InvalidateOnAnimationRunnable mInvalidateOnAnimationRunnable =
+            new InvalidateOnAnimationRunnable();
+
     public void dispatchInvalidateDelayed(View view, long delayMilliseconds) {
         Message msg = mHandler.obtainMessage(MSG_INVALIDATE, view);
         mHandler.sendMessageDelayed(msg, delayMilliseconds);
-    }
-
-    public void cancelInvalidate(View view) {
-        mHandler.removeMessages(MSG_INVALIDATE, view);
     }
 
     public void dispatchInvalidateRectDelayed(AttachInfo.InvalidateInfo info,
             long delayMilliseconds) {
         final Message msg = mHandler.obtainMessage(MSG_INVALIDATE_RECT, info);
         mHandler.sendMessageDelayed(msg, delayMilliseconds);
+    }
+
+    public void dispatchInvalidateOnAnimation(View view) {
+        mInvalidateOnAnimationRunnable.addView(view);
+    }
+
+    public void dispatchInvalidateRectOnAnimation(AttachInfo.InvalidateInfo info) {
+        mInvalidateOnAnimationRunnable.addViewRect(info);
+    }
+
+    public void cancelInvalidate(View view) {
+        mHandler.removeMessages(MSG_INVALIDATE, view);
+        // fixme: might leak the AttachInfo.InvalidateInfo objects instead of returning
+        // them to the pool
+        mHandler.removeMessages(MSG_INVALIDATE_RECT, view);
+        mInvalidateOnAnimationRunnable.removeView(view);
     }
 
     public void dispatchKey(KeyEvent event) {

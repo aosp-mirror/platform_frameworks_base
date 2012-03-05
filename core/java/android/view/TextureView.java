@@ -334,7 +334,7 @@ public class TextureView extends View {
                     synchronized (mLock) {
                         mUpdateLayer = true;
                     }
-                    postInvalidateDelayed(0);
+                    postInvalidate();
                 }
             };
             mSurface.setOnFrameAvailableListener(mUpdateListener);
