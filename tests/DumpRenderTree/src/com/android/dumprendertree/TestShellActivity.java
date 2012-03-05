@@ -25,9 +25,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Environment;
@@ -200,8 +197,6 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
         mResultFile = intent.getStringExtra(RESULT_FILE);
         mTimeoutInMillis = intent.getIntExtra(TIMEOUT_IN_MILLIS, 0);
-        mGetDrawtime = intent.getBooleanExtra(GET_DRAW_TIME, false);
-        mSaveImagePath = intent.getStringExtra(SAVE_IMAGE);
         mStopOnRefError = intent.getBooleanExtra(STOP_ON_REF_ERROR, false);
         setTitle("Test " + mCurrentTestNumber + " of " + mTotalTestCount);
         float ratio = (float)mCurrentTestNumber / mTotalTestCount;
@@ -309,6 +304,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         if (mResultFile == null || mResultFile.length() == 0) {
             finished();
             return;
+        }
+
+        if (mCallback != null) {
+            mCallback.dumpResult(webkitData);
         }
 
         try {
@@ -564,18 +563,6 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         public void onPageFinished(WebView view, String url) {
             Log.v(LOGTAG, "onPageFinished, url=" + url);
             mPageFinished = true;
-            // get page draw time
-            if (FsUtils.isTestPageUrl(url)) {
-                if (mGetDrawtime) {
-                    long[] times = new long[DRAW_RUNS];
-                    times = getDrawWebViewTime(mWebView, DRAW_RUNS);
-                    FsUtils.writeDrawTime(DRAW_TIME_LOG, url, times);
-                }
-                if (mSaveImagePath != null) {
-                    String name = FsUtils.getLastSegmentInPath(url);
-                    drawPageToFile(mSaveImagePath + "/" + name + ".png", mWebView);
-                }
-            }
 
             // Calling finished() will check if we've met all the conditions for completing
             // this test and move to the next one if we are ready. Otherwise we ask WebCore to
@@ -830,45 +817,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mEventSender.clearTouchMetaState();
         mPageFinished = false;
         mDumpWebKitData = false;
-        mGetDrawtime = false;
-        mSaveImagePath = null;
         setDefaultWebSettings(mWebView);
         mIsGeolocationPermissionSet = false;
         mPendingGeolocationPermissionCallbacks = null;
         CookieManager.getInstance().removeAllCookie();
-    }
-
-    private long[] getDrawWebViewTime(WebView view, int count) {
-        if (count == 0)
-            return null;
-        long[] ret = new long[count];
-        long start;
-        Canvas canvas = new Canvas();
-        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Config.ARGB_8888);
-        canvas.setBitmap(bitmap);
-        for (int i = 0; i < count; i++) {
-            start = System.currentTimeMillis();
-            view.draw(canvas);
-            ret[i] = System.currentTimeMillis() - start;
-        }
-        return ret;
-    }
-
-    private void drawPageToFile(String fileName, WebView view) {
-        Canvas canvas = new Canvas();
-        Bitmap bitmap = Bitmap.createBitmap(view.getContentWidth(), view.getContentHeight(),
-                Config.ARGB_8888);
-        canvas.setBitmap(bitmap);
-        WebViewClassic.fromWebView(view).drawPage(canvas);
-        try {
-            FileOutputStream fos = new FileOutputStream(fileName);
-            if(!bitmap.compress(CompressFormat.PNG, 90, fos)) {
-                Log.w(LOGTAG, "Failed to compress and save image.");
-            }
-        } catch (IOException ioe) {
-            Log.e(LOGTAG, "", ioe);
-        }
-        bitmap.recycle();
     }
 
     private boolean canMoveToNextTest() {
@@ -922,9 +874,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private String mResultFile;
     private int mTimeoutInMillis;
     private String mUiAutoTestPath;
-    private String mSaveImagePath;
     private BufferedReader mTestListReader;
-    private boolean mGetDrawtime;
     private int mTotalTestCount;
     private int mCurrentTestNumber;
     private boolean mStopOnRefError;

@@ -19,6 +19,7 @@ package com.android.dumprendertree;
 import com.android.dumprendertree.forwarder.AdbUtils;
 import com.android.dumprendertree.forwarder.ForwardServer;
 
+import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
@@ -106,8 +107,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         freeMem();
 
         // Run tests
-        runTestAndWaitUntilDone(activity, runner.mTestPath, runner.mTimeoutInMillis,
-                runner.mGetDrawTime, runner.mSaveImagePath);
+        runTestAndWaitUntilDone(activity, runner.mTestPath, runner.mTimeoutInMillis);
 
         getInstrumentation().runOnMainSync(new Runnable() {
 
@@ -215,9 +215,9 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
     }
 
     // A convenient method to be called by another activity.
-    private void runTestAndWaitUntilDone(TestShellActivity activity, String url, int timeout,
-            boolean getDrawTime, String saveImagePath) {
+    private void runTestAndWaitUntilDone(TestShellActivity activity, String url, int timeout) {
         activity.setCallback(new TestShellCallback() {
+            @Override
             public void finished() {
                 synchronized (LoadTestsAutoTest.this) {
                     mFinished = true;
@@ -225,7 +225,28 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
                 }
             }
 
+            @Override
             public void timedOut(String url) {
+            }
+
+            @Override
+            public void dumpResult(String webViewDump) {
+                String lines[] = webViewDump.split("\\r?\\n");
+                for (String line : lines) {
+                    line = line.trim();
+                    // parse for a line like this:
+                    // totals:   9620.00 11947.00    10099.75    380.38
+                    // and return the 3rd number, which is mean
+                    if (line.startsWith("totals:")) {
+                        line = line.substring(7).trim(); // strip "totals:"
+                        String[] numbers = line.split("\\s+");
+                        if (numbers.length == 4) {
+                            Bundle b = new Bundle();
+                            b.putString("mean", numbers[2]);
+                            getInstrumentation().sendStatus(Activity.RESULT_FIRST_USER, b);
+                        }
+                    }
+                }
             }
         });
 
@@ -236,9 +257,6 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         intent.putExtra(TestShellActivity.TEST_URL, url);
         intent.putExtra(TestShellActivity.TIMEOUT_IN_MILLIS, timeout);
         intent.putExtra(TestShellActivity.RESULT_FILE, LOAD_TEST_RESULT);
-        intent.putExtra(TestShellActivity.GET_DRAW_TIME, getDrawTime);
-        if (saveImagePath != null)
-            intent.putExtra(TestShellActivity.SAVE_IMAGE, saveImagePath);
         activity.startActivity(intent);
 
         // Wait until done.
