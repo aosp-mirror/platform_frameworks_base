@@ -26,8 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <!-- no translation found for fileSizeSuffix (7036352716466529565) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;χωρίς τίτλο&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -667,8 +666,7 @@
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Προσπαθήστε αργότερα"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Φόρτιση, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Φορτίστηκε."</string>
-    <!-- no translation found for lockscreen_battery_short (4776086376723437514) -->
-    <skip />
+    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Συνδέστε τον φορτιστή."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Δεν υπάρχει κάρτα SIM."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Δεν υπάρχει κάρτα SIM στο tablet."</string>
@@ -717,10 +715,8 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ΑΒΓ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for hour_ampm (7618670480400517084) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (5117798389811605468) -->
-    <skip />
+    <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Η εργοστασιακή δοκιμή απέτυχε"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Η ενέργεια FACTORY_TEST υποστηρίζεται μόνο για πακέτα που είναι εγκατεστημένα στον κατάλογο /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Δεν βρέθηκε πακέτο που να παρέχει την ενέργεια FACTORY_TEST."</string>
@@ -732,8 +728,7 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"Συμβουλή: διπλό άγγιγμα για μεγέθυνση και σμίκρυνση."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"Αυτ.συμπ"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Ρύθμ. Αυτ. συμπ."</string>
-    <!-- no translation found for autofill_address_name_separator (6351406739503217766) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
