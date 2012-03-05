@@ -62,6 +62,9 @@ public final class SQLiteDebug {
      */
     public static final boolean DEBUG_LOG_SLOW_QUERIES = Build.IS_DEBUGGABLE;
 
+    private SQLiteDebug() {
+    }
+
     /**
      * Determines whether a query should be logged.
      *

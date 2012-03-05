@@ -25,7 +25,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
  * 
  * @hide
  */
-public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
+public final class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
     private final SQLiteDatabase mDatabase;
     private final String mEditTable; 
     private final String mSql;

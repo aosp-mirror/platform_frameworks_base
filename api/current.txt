@@ -7267,7 +7267,7 @@ package android.database.sqlite {
     method public abstract void setBindArguments(java.lang.String[]);
   }
 
-  public class SQLiteDatabase extends android.database.sqlite.SQLiteClosable {
+  public final class SQLiteDatabase extends android.database.sqlite.SQLiteClosable {
     method public void beginTransaction();
     method public void beginTransactionNonExclusive();
     method public void beginTransactionWithListener(android.database.sqlite.SQLiteTransactionListener);
