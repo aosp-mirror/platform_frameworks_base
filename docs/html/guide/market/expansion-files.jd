@@ -25,8 +25,8 @@ page.title=APK Expansion Files
   <li><a href="#Rules">Rules and Limitations</a></li>
   <li><a href="#Downloading">Downloading the Expansion Files</a>
     <ol>
-      <li><a href="#AboutLibraries">About the Expansion Downloader Library</a></li>
-      <li><a href="#Preparing">Preparing to use the Expansion Downloader Library</a></li>
+      <li><a href="#AboutLibraries">About the Downloader Library</a></li>
+      <li><a href="#Preparing">Preparing to use the Downloader Library</a></li>
       <li><a href="#Permissions">Declaring user permissions</a></li>
       <li><a href="#DownloaderService">Implementing the downloader service</a></li>
       <li><a href="#AlarmReceiver">Implementing the alarm receiver</a></li>
@@ -91,15 +91,19 @@ Conceptually, each expansion file plays a different role:</p>
   <li>The <strong>main</strong> expansion file is the
 primary expansion file for additional resources required by your application.</li>
   <li>The <strong>patch</strong> expansion file is optional and intended for small updates to the
-main expansion file. Using the patch file allows you to deliver updates without requiring that the
-user re-download the main expansion again. Thus, the patch expansion
-contains only the updates to the expansion file data.
-    <p>However, even if your application update requires only a new patch expansion file, you must
+main expansion file.</li>
+</ul>
+
+<p>While you can use the two expansion files any way you wish, we recommend that the main
+expansion file deliver the primary assets and should rarely if ever updated; the patch expansion
+file should be smaller and serve as a “patch carrier,” getting updated with each major
+release or as necessary.</p>
+
+<p>However, even if your application update requires only a new patch expansion file, you still must
 upload a new APK with an updated <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code
 versionCode}</a> in the manifest. (The Android Market
-Developer Console does not allow you to upload an expansion file to an existing APK.)</p></li>
-</ul>
+Developer Console does not allow you to upload an expansion file to an existing APK.)</p>
 
 <p class="note"><strong>Note:</strong> The patch expansion file is semantically the same as the
 main expansion file&mdash;you can use each file any way you want. The system does
@@ -160,12 +164,6 @@ itself, you must save the files to the exact same location.</p>
   <li>{@code &lt;package-name&gt;} is your application's Java-style package name, available
 from {@link android.content.Context#getPackageName()}.</li>
 </ul>
-<p></p>
-
-<p class="note"><strong>Note:</strong>  The location of the shared storage may be
-different on different devices, so you should never refer to the shared storage space using an
-absolute URI path. Always use  {@link android.os.Environment#getExternalStorageDirectory} to
-retrieve the root directory of the shared storage location.</p>
 
 <p>For each application, there are never more than two expansion files in this directory.
 One is the main expansion file and the other is the patch expansion file (if necessary). Previous
@@ -180,7 +178,10 @@ the file instead of requiring you to unpack the data. For example, we've provide
 project called the <a href="#ZipLib">APK Expansion Zip Library</a> that reads your data directly
 from the ZIP file.</p>
 
-<p class="note"><strong>Note:</strong> If you're packaging media files into a ZIP, you can use media
+<p class="note"><strong>Note:</strong> Unlike APK files, any files saved on the shared storage can
+be read by the user and other applications.</p>
+
+<p class="note"><strong>Tip:</strong> If you're packaging media files into a ZIP, you can use media
 playback calls on the files with offset and length controls (such as {@link
 android.media.MediaPlayer#setDataSource(FileDescriptor,long,long) MediaPlayer.setDataSource()} and
 {@link android.media.SoundPool#load(FileDescriptor,long,long,int) SoundPool.load()}) without the
@@ -261,7 +262,7 @@ are on the device upon start-up. If the files are not on the device, use Android
 href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> service to request URLs
 for the expansion files, then download and save them.
     <p>To greatly reduce the amount of code you must write and ensure a good user experience
-during the download, we recommend you use the <a href="AboutLibraries">Expansion Downloader
+during the download, we recommend you use the <a href="AboutLibraries">Downloader
 Library</a> to implement your download behavior.</p>
     <p>If you build your own download service instead of using the library, be aware that you
 must not change the name of the expansion files and must save them to the proper
@@ -344,7 +345,8 @@ href="#StorageLocation">shared storage location</a> (in the
       <li>If the expansion files are there, you're all set and your application can continue.</li>
       <li>If the expansion files are <em>not</em> there:
         <ol>
-          <li>Perform a request using the License Verification Library to get your
+          <li>Perform a request using Android Market's <a
+href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> to get your
 app's expansion file names, sizes, and URLs.</li> 
           <li>Use the URLs provided by Android Market to download the expansion files and save
 the expansion files. You <strong>must</strong> save the files to the <a
@@ -377,33 +379,7 @@ library to perform the request that returns the URL of your expansion files.</p>
 <p class="note"><strong>Note:</strong> Whether your application is free or not, Android Market
 returns the expansion file URLs only if the user acquired your application from Android Market.</p>
 
-<p>To simplify this work for you, we've built the <a href="#AboutLibraries">Expansion Downloader
-Library</a>, which requests the expansion file URLs through the licensing service and
-downloads the expansion files for you. By adding this library and a few code hooks to your
-application, almost all the work to download the expansion files is already coded for you, including
-a status notification that tracks the download progress. As such, in order to provide the best user
-experience with minimal effort on your behalf, we recommend you use the
-Expansion Downloader Library to download your expansion files. The information in the following
-sections explain how to integrate the library into your application.</p>
-
-<p>If you'd rather develop your own solution to download the expansion files using the Android
-Market URLs, you must follow the <a href="{@docRoot}guide/market/licensing/index.html">Application
-Licensing</a> documentation to perform a license request, then retrieve the expansion file names,
-sizes, and URLs from the response extras. You should use the <a href="#ExpansionPolicy">{@code
-APKExpansionPolicy}</a> class (included in the License Verification Library) as your licensing
-policy, which captures the expansion file names, sizes, and URLs from the licensing service..</p>
-
-
-
-<h3 id="AboutLibraries">About the Expansion Downloader Library</h3>
-
-<p>To use APK expansion files with your application and provide the best user experience with
-minimal effort on your behalf, we recommend you use the Android Market Expansion Downloader
-Library.</p>
- 
-<p>As mentioned above, in order to use expansion files hosted by Android Market, you must use
-the Android Market License Verification Library (LVL) to request the URLs from which to download the
-expansion files. In addition to the LVL, you need a set of code that downloads the expansion files
+<p>In addition to the LVL, you need a set of code that downloads the expansion files
 over an HTTP connection and saves them to the proper location on the device's shared storage.
 As you build this procedure into your application, there are several issues you should take into
 consideration:</p>
@@ -422,9 +398,34 @@ indicates the download progress, notifies the user when it's done, and takes the
 your application when selected.</li>
 </ul>
 
-<p>Fortunately, the Android Market Expansion Downloader Library handles all of this work for you
-and also allows your app to pause and resume the download. To implement expansion file downloads
-using the library, all you need to do is:</p>
+
+<p>To simplify this work for you, we've built the <a href="#AboutLibraries">Downloader Library</a>,
+which requests the expansion file URLs through the licensing service, downloads the expansion files,
+performs all of the tasks listed above, and even allows your activity to pause and resume the
+download. By adding the Downloader Library and a few code hooks to your application, almost all the
+work to download the expansion files is already coded for you. As such, in order to provide the best
+user experience with minimal effort on your behalf, we recommend you use the Downloader Library to
+download your expansion files. The information in the following sections explain how to integrate
+the library into your application.</p>
+
+<p>If you'd rather develop your own solution to download the expansion files using the Android
+Market URLs, you must follow the <a href="{@docRoot}guide/market/licensing/index.html">Application
+Licensing</a> documentation to perform a license request, then retrieve the expansion file names,
+sizes, and URLs from the response extras. You should use the <a href="#ExpansionPolicy">{@code
+APKExpansionPolicy}</a> class (included in the License Verification Library) as your licensing
+policy, which captures the expansion file names, sizes, and URLs from the licensing service..</p>
+
+
+
+<h3 id="AboutLibraries">About the Downloader Library</h3>
+
+<p>To use APK expansion files with your application and provide the best user experience with
+minimal effort on your behalf, we recommend you use the Downloader Library that's included in the
+Android Market APK Expansion Library package. This library downloads your expansion files in a
+background service, shows a user notification with the download status, handles network
+connectivity loss, resumes the download when possible, and more.</p>
+
+<p>To implement expansion file downloads using the Downloader Library, all you need to do is:</p>
 
 <ul>
   <li>Extend a special {@link android.app.Service} subclass and {@link
@@ -437,36 +438,39 @@ progress UI.</li>
 receives updates about the download progress.</li>
 </ul>
 
+<p>The following sections explain how to set up your app using the Downloader Library.</p>
 
 
-<h3 id="Preparing">Preparing to use the Expansion Downloader Library</h3>
+<h3 id="Preparing">Preparing to use the Downloader Library</h3>
 
-<p>To use the Expansion Downloader Library, you need to
+<p>To use the Downloader Library, you need to
 download two packages from the SDK Manager and add the appropriate libraries to your
 application.</p>
 
 <p>First, open the Android SDK Manager, expand <em>Extras</em> and download:</p>
 <ul>
   <li><em>Google Market Licensing package</em></li>
-  <li><em>Google Market Expansion Downloader package</em></li>
+  <li><em>Google Market APK Expansion Library package</em></li>
 </ul>
 
 <p>If you're using Eclipse, create a project for each library and add it to your app:</p>
 <ol>
-  <li>Create a new Library Project for the License Verification Library and Expansion Downloader
+  <li>Create a new Library Project for the License Verification Library and Downloader
 Library. For each library:
     <ol>
       <li>Begin a new Android project.</li>
       <li>Select <strong>Create project from existing
-source</strong> and choose the library from the {@code &lt;sdk&gt;/extras/google/} directory.</li>
+source</strong> and choose the library from the {@code &lt;sdk&gt;/extras/google/} directory
+({@code market_licensing/} for the License Verification Library or {@code
+market_apk_expansion/downloader_library/} for the Downloader Library).</li>
       <li>Specify a <em>Project Name</em> such as "Android Market License Library" and "Market
 Downloader
 Library"</li>
       <li>Click <strong>Finish</strong>.</li>
     </ol>
-<p class="note"><strong>Note:</strong> The Expansion Downloader Library depends on the License
+<p class="note"><strong>Note:</strong> The Downloader Library depends on the License
 Verification Library. Be sure to add the License
-Verification Library to the Expansion Downloader Library's project properties (same process as
+Verification Library to the Downloader Library's project properties (same process as
 steps 2 and 3 below).</p>
   </li>
   <li>Right-click the Android project in which you want to use APK expansion files and
@@ -483,29 +487,31 @@ LVL and the Downloader Library to your project. For example:
 <pre class="no-pretty-print">
 android update project --path ~/Android/MyApp \
 --library ~/android_sdk/extras/google/market_licensing \
---library ~/android_sdk/extras/google/market_downloader
+--library ~/android_sdk/extras/google/market_apk_expansion/downloader_library
 </pre>
   </li>
 </ol>
 
-<p>With both the License Verification Library and Expansion Downloader Library added to your
+<p>With both the License Verification Library and Downloader Library added to your
 application, you'll be able to quickly integrate the ability to download expansion files from
 Android Market. The format that you choose for the expansion files and how you read them
 from the shared storage is a separate implementation that you should consider based on your
 application needs.</p>
 
-<p class="note"><strong>Tip:</strong> The Expansion Downloader package includes a sample application
-that shows how to use the Expansion Downloader library in an app. The sample uses a third library
-available in the Expansion Downloader package called the APK Expansion Zip Library. If you plan on
+<p class="note"><strong>Tip:</strong> The APK Expansion Library package includes a sample
+application
+that shows how to use the Downloader Library in an app. The sample uses a third library
+available in the APK Expansion Library package called the APK Expansion Zip Library. If
+you plan on
 using ZIP files for your expansion files, we suggest you also add the APK Expansion Zip Library to
-your application. You might want to use the sample application as a starting point for your
-implementation.</p>
+your application. For more information, see the section below
+about <a href="#ZipLib">Using the APK Expansion Zip Library</a>.</p>
 
 
 
 <h3 id="Permissions">Declaring user permissions</h3>
 
-<p>In order to download the expansion files, the Expansion Downloader Library
+<p>In order to download the expansion files, the Downloader Library
 requires several permissions that you must declare in your application's manifest file. They
 are:</p>
 
@@ -532,13 +538,13 @@ are:</p>
 &lt;/manifest>
 </pre>
 
-<p class="note"><strong>Note:</strong> By default, the Expansion Downloader Library requires API
+<p class="note"><strong>Note:</strong> By default, the Downloader Library requires API
 level 4, but the APK Expansion Zip Library requires API level 5.</p>
 
 
 <h3 id="DownloaderService">Implementing the downloader service</h3>
 
-<p>In order to perform downloads in the background, the Expansion Downloader Library provides its
+<p>In order to perform downloads in the background, the Downloader Library provides its
 own {@link android.app.Service} subclass called {@code DownloaderService} that you should extend. In
 addition to downloading the expansion files for you, the {@code DownloaderService} also:</p>
 
@@ -626,7 +632,7 @@ your downloads.</p>
 {@code DownloaderService} schedules an {@link android.app.AlarmManager#RTC_WAKEUP} alarm that
 delivers an {@link android.content.Intent} to a {@link android.content.BroadcastReceiver} in your
 application. You must define the {@link android.content.BroadcastReceiver} to call an API
-from the Expansion Downloader Library that checks the status of the download and restarts
+from the Downloader Library that checks the status of the download and restarts
 it if necessary.</p>
 
 <p>You simply need to override the {@link android.content.BroadcastReceiver#onReceive
@@ -668,19 +674,19 @@ in your service's {@code getAlarmReceiverClassName()} method (see the previous s
 responsible for verifying whether the expansion files are already on the device and initiating
 the download if they are not.</p>
 
-<p>Starting the download using the Expansion Downloader library requires the following
+<p>Starting the download using the Downloader Library requires the following
 procedures:</p>
 
 <ol>
   <li>Check whether the files have been downloaded.
-    <p>The Expansion Downloader library includes some APIs in the {@code Helper} class to
+    <p>The Downloader Library includes some APIs in the {@code Helper} class to
 help with this process:</p>
   <ul>
     <li>{@code getExtendedAPKFileName(Context, c, boolean mainFile, int
 versionCode)}</li>
     <li>{@code doesFileExist(Context c, String fileName, long fileSize)}</li>
   </ul>
-    <p>For example, the sample app provided in the Expansion Downloader package calls the
+    <p>For example, the sample app provided in the APK Expansion Library package calls the
 following method in the activity's {@link android.app.Activity#onCreate onCreate()} method to check
 whether the expansion files already exist on the device:</p>
 <pre>
@@ -725,7 +731,7 @@ but have not been downloaded.</li>
 same and you normally don't need to be concerned about them. In your main activity that calls {@code
 startDownloadServiceIfRequired()}, you can simply check whether or not the response is {@code
 NO_DOWNLOAD_REQUIRED}. If the response is anything <em>other than</em> {@code NO_DOWNLOAD_REQUIRED},
-the Expansion Downloader library begins the download and you should update your activity UI to
+the Downloader Library begins the download and you should update your activity UI to
 display the download progress (see the next step). If the response <em>is</em> {@code
 NO_DOWNLOAD_REQUIRED}, then the files are available and your application can start.</p>
     <p>For example:</p>
@@ -855,7 +861,7 @@ download begins or completes.
 by one of the {@code IDownloaderClient} class's {@code STATE_*} constants.</p>
       <p>To provide a useful message to your users, you can request a corresponding string
 for each state by calling {@code Helpers.getDownloaderStringResourceIDFromState()}. This
-returns the resource ID for one of the strings bundled with the Expansion Downloader
+returns the resource ID for one of the strings bundled with the Downloader
 Library. For example, the string "Download paused because you are roaming" corresponds to {@code
 STATE_PAUSED_ROAMING}.</p></dd>
   <dt>{@code onDownloadProgress(DownloadProgressInfo progress)}</dt>
@@ -892,14 +898,14 @@ mRemoteService.setDownloadFlags(IDownloaderService.FLAGS_DOWNLOAD_OVER_CELLULAR)
 <h2 id="ExpansionPolicy">Using APKExpansionPolicy</h2>
 
 <p>If you decide to build your own downloader service instead of using the Android Market
-<a href="#AboutLibraries">Expansion Downloader Library</a>, you should still use the {@code
+<a href="#AboutLibraries">Downloader Library</a>, you should still use the {@code
 APKExpansionPolicy} that's provided in the License Verification Library. The {@code
 APKExpansionPolicy} class is nearly identical to {@code ServerManagedPolicy} (available in the
 Android Market License Verification Library) but includes additional handling for the APK expansion
 file response extras.</p>
 
 <p class="note"><strong>Note:</strong> If you <em>do use</em> the <a
-href="#AboutLibraries">Expansion Downloader Library</a> as discussed in the previous section, the
+href="#AboutLibraries">Downloader Library</a> as discussed in the previous section, the
 library performs all interaction with the {@code APKExpansionPolicy} so you don't have to use
 this class directly.</p>
 
@@ -915,7 +921,7 @@ expansion files:</p>
 
 <p>For more information about how to use the {@code APKExpansionPolicy} when you're <em>not</em>
 using the <a
-href="#AboutLibraries">Expansion Downloader Library</a>, see the documentation for <a
+href="#AboutLibraries">Downloader Library</a>, see the documentation for <a
 href="{@docRoot}guide/market/licensing/adding-licensing.html">Adding Licensing to Your App</a>,
 which explains how to implement a license policy such as this one.</p>
 
@@ -1030,8 +1036,10 @@ option to specify the file suffixes that should not be compressed:</p>
 </div>
 </div>
 
-<p>The Android Market Expansion Downloader package includes a library called the APK
-Expansion Zip Library. This is an optional library that helps you read your expansion
+<p>The Android Market APK Expansion Library package includes a library called the APK
+Expansion Zip Library (located in {@code
+&lt;sdk>/extras/google/google_market_apk_expansion/zip_file/}). This is an optional library that
+helps you read your expansion
 files when they're saved as ZIP files. Using this library allows you to easily read resources from
 your ZIP expansion files as a virtual file system.</p>
 
@@ -1080,7 +1088,7 @@ android.content.ContentProvider} that marshals the data from the ZIP files throu
 provider {@link android.net.Uri} in order to provide file access for certain Android APIs that
 expect {@link android.net.Uri} access to media files.
       <p>The sample application available in the
-Expansion Downloader package demonstrates a scenario in which this class is useful
+APK Expansion Library package demonstrates a scenario in which this class is useful
 to specify a video with {@link android.widget.VideoView#setVideoURI
 VideoView.setVideoURI()}. See the sample app's class {@code SampleZipfileProvider} for an
 example of how to extend this class to use in your application.</p></dd>
@@ -1212,7 +1220,8 @@ the Android system nor Android Market perform actual patching between your main 
 files. Your application code must perform any necessary patches itself.</p>
 
 <p>If you use ZIP files as your expansion files, the <a href="#ZipLib">APK Expansion Zip
-Library</a> that's included with the Expansion Downloader package includes the ability to merge your
+Library</a> that's included with the APK Expansion Library package includes the ability to merge
+your
 patch file with the main expansion file.</p>
 
 <p class="note"><strong>Note:</strong> Even if you only need to make changes to the patch
@@ -1234,11 +1243,10 @@ file and one patch expansion file. During an update to a file, Android Market de
 previous version (and so must your application when performing manual updates).</li>
   <li>When adding a patch expansion file, the Android system does not actually patch your
 application or main expansion file. You must design your application to support the patch data.
-However, the Android Market Expansion Downloader package includes a library for using ZIP files
+However, the APK Expansion Library package includes a library for using ZIP files
 as expansion files, which merges the data from the patch file into the main expansion file so
 you can easily read all the expansion file data.</li>
 </ul>
-
 
 
 
