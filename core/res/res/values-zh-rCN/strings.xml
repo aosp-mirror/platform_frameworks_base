@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (9164292791500531949) -->
+    <skip />
     <string name="untitled" msgid="4638956954852782576">"&lt;未命名&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"..."</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -313,10 +314,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"启用或停用应用程序组件"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"允许应用程序启用或停用其他应用程序的组件。恶意应用程序可能借此停用重要的平板电脑功能。请务必谨慎使用此权限，因为这可能导致某些应用程序组件处于无法使用、不一致或不稳定的状态。"</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"允许应用程序启用或停用其他应用程序的组件。恶意应用程序可能借此停用重要的手机功能。请务必谨慎使用此权限，因为这可能导致某些应用程序组件进入无法使用、不一致或不稳定的状态。"</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"授予或撤消权限"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"允许应用针对自身或其他应用授予或撤消特定权限。恶意应用可能会借此访问您未授权它们访问的功能。"</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"设置首选应用程序"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"允许应用程序修改您的首选应用程序。恶意应用程序可能会在后台更改运行的应用程序，欺骗您现有的应用程序，以收集您的私人数据。"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"修改全局系统设置"</string>
@@ -673,7 +672,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超过“人脸解锁”尝试次数上限"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"正在充电，<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"已充满。"</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4477264849386850266) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"连接您的充电器。"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"没有 SIM 卡"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板电脑中没有 SIM 卡。"</string>
@@ -722,8 +722,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="AMPM">%P</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="AMPM">%p</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
+    <!-- no translation found for hour_ampm (4584338083529355982) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (2083465992940444366) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"出厂测试失败"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"只有在 /system/app 中安装的包支持 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"未发现支持 FACTORY_TEST 操作的包。"</string>
@@ -735,7 +737,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"提示：点按两次可放大或缩小。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自动填充"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"设置自动填充"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <!-- no translation found for autofill_address_name_separator (6350145154779706772) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -770,6 +773,10 @@
     <string name="permdesc_serialPort" msgid="2991639985224598193">"允许持有人使用 SerialManager API 访问串行端口。"</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"从外部访问内容提供程序"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"允许持有者通过界面访问内容提供程序。普通应用绝不需要此权限。"</string>
+    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
+    <skip />
+    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"是否希望浏览器记住此密码？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"暂不保存"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"记住"</string>
@@ -1008,8 +1015,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"设置日期"</string>
     <string name="date_time_set" msgid="5777075614321087758">"设置"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"默认"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"新增："</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"不需要任何权限"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"隐藏"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"全部显示"</b></string>

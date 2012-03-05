@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"ТБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"ПБ"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (9164292791500531949) -->
+    <skip />
     <string name="untitled" msgid="4638956954852782576">"&lt;Без заглавие&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
@@ -313,10 +314,8 @@
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"активиране или деактивиране на компоненти на приложенията"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Разрешава на приложението да активира или деактивира компонент на друго приложение. Злонамерените приложения могат да използват това, за да деактивират важни възможности на таблета. С това разрешение трябва да се внимава, тъй като компонентите на приложенията може да бъдат приведени в неизползваемо, несъгласувано или нестабилно състояние."</string>
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Разрешава на приложението да активира или деактивира компонент на друго приложение. Злонамерените приложения могат да използват това, за да деактивират важни възможности на телефона. С това разрешение трябва да се внимава, тъй като компонентите на приложенията може да бъдат приведени в неизползваемо, несъгласувано или нестабилно състояние."</string>
-    <!-- no translation found for permlab_grantRevokePermissions (4627315351093508795) -->
-    <skip />
-    <!-- no translation found for permdesc_grantRevokePermissions (4088642654085850662) -->
-    <skip />
+    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"даване или отмяна на разрешения"</string>
+    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Разрешава на приложението да дава или отменя конкретни разрешения за себе си или други приложения. Злонамерените програми могат да използват това, за да осъществяват неразрешен от вас достъп до функции."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"задаване на предпочитани приложения"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Разрешава на приложението да променя предпочитаните ви приложения. Злонамерените приложения могат скрито да променят приложенията, които се изпълняват, като ги фалшифицират, за да се сдобият с ваши лични данни."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"промяна на глобалните системни настройки"</string>
@@ -673,7 +672,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Максималният брой опити за отключване с лице е надвишен"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Зарежда се, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Зареден."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4477264849386850266) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Свържете зарядното си устройство."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Няма SIM карта."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"В таблета няма SIM карта."</string>
@@ -722,8 +722,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (4584338083529355982) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (2083465992940444366) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"Фабричният тест не бе успешен"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Действието FACTORY_TEST се поддържа само за пакети, инсталирани в /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Не бе намерен пакет, предоставящ действието FACTORY_TEST."</string>
@@ -735,7 +737,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Съвет: Докоснете двукратно, за да увеличите или намалите мащаба."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Автопоп."</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Автопоп.: Настройка"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <!-- no translation found for autofill_address_name_separator (6350145154779706772) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -770,6 +773,10 @@
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Разрешава на притежателя достъп до серийни портове посредством приложния програмен интерфейс (API) SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"външен достъп до доставчиците на съдърж."</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Разрешава на притежателя достъп до доставчиците на съдържание от командния ред. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
+    <skip />
+    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Искате ли браузърът да запомни тази парола?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не сега"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запомняне"</string>
@@ -1008,8 +1015,7 @@
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Задаване на дата"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Задаване"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"По подразбиране"</string>
-    <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
-    <skip />
+    <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"НОВО: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Не се изискват разрешения"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Скриване"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Показване на всички"</b></string>

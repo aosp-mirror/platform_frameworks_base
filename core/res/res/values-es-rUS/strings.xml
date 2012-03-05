@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sin título&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -671,7 +671,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Se superó el máximo de intentos permitido para el desbloqueo facial del dispositivo."</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Cargando <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Cargada."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecta tu cargador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"No hay tarjeta SIM."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No hay tarjeta SIM en el tablet."</string>
@@ -720,8 +720,8 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Error en la prueba de fábrica"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"La acción FACTORY_TEST se admite solamente en paquetes instalados en /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"No se ha encontrado ningún paquete que proporcione la acción FACTORY_TEST ."</string>
@@ -733,7 +733,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Consejo: Toca dos veces para acercar y alejar la imagen."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autocompletar"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Conf. Autocompl."</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -768,6 +768,8 @@
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Permite acceder a puertos serie a través de la API SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"acceder a proveedores externamente"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Permite acceder a los proveedores de contenido desde la interfaz. Las aplicaciones normales nunca deberían necesitarlo."</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"desalentar a las actualizaciones automáticas de dispositivos"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Permite a su titular a ofrecer información al sistema acerca de cuándo sería un buen momento para reiniciar el sistema no interactivo para actualizar el dispositivo."</string>
     <string name="save_password_message" msgid="767344687139195790">"¿Quieres recordar esta contraseña en el navegador?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ahora no."</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Recuerda"</string>

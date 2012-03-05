@@ -26,7 +26,8 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for fileSizeSuffix (9164292791500531949) -->
+    <skip />
     <string name="untitled" msgid="4638956954852782576">"&lt;Titelloos&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -215,10 +216,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Laat die program toe om take na die voorgrond en agtergrond te skuif. Kwaadwillige programme kan hulself sonder jou beheer na vore dwing."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stop lopende programme"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Laat die program toe om take te verwyder en hul programme te dood. Kwaadwillige programme kan die gedrag van ander programme ontwrig."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"stel skermversoenbaarheid"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Laat die program toe om om die skermversoenbaarheid-modus van ander programme te beheer. Kwaadwillige programme kan die gedrag van ander programme breek."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktiveer programontfouting"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Laat die program toe om ontfouting vir \'n ander program af te skakel. Kwaadwillige programme kan dit dalk gebruik om ander programme te dood."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"Verander jou UI-instellings"</string>
@@ -673,7 +672,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maksimum gesigontsluit-pogings oorskry"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Laai, (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Gehef."</string>
-    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_battery_short (4477264849386850266) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Koppel jou herlaaier."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Geen SIM-kaart."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Geen SIM-kaart in tablet nie."</string>
@@ -722,8 +722,10 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for hour_ampm (4584338083529355982) -->
+    <skip />
+    <!-- no translation found for hour_cap_ampm (2083465992940444366) -->
+    <skip />
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabriektoets het gefaal"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Die FACTORY_TEST-handeling word net ondersteun vir pakkette wat in /system/app geïnstalleer is."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Geen pakket is gevind wat die FACTORY_TEST-handeling bied nie."</string>
@@ -735,7 +737,8 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Wenk: Dubbeltik om in en uit te zoem."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Outovul"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Stel outovul op"</string>
-    <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
+    <!-- no translation found for autofill_address_name_separator (6350145154779706772) -->
+    <skip />
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -770,6 +773,8 @@
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Laat die houer toe om toegang te verkry tot reekspoorte wat die SerialManager API gebruik."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"verkry toegang tot inhoud ekstern"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Stel die houer in staat om toegang te verkry tot inhoudverskaffers vanuit die dop. Behoort nooit nodig te wees vir gewone programme nie."</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"ontmoedig outomatiese toestelopdaterings"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Laat die houer toe om inligting aan die stelsel te bied oor wanneer \'n goeie tyd vir \'n nie-interaktiewe herlaai sal wees om die toestel op te gradeer."</string>
     <string name="save_password_message" msgid="767344687139195790">"Wil jy hê die blaaier moet hierdie wagwoord onthou?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nie nou nie"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Onthou"</string>
