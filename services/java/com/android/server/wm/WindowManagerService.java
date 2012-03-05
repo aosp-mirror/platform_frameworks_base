@@ -6347,6 +6347,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mInputMonitor.setEventDispatchingLw(enabled);
         }
+
+        sendScreenStatusToClients();
     }
 
     /**
@@ -6568,6 +6570,20 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void systemReady() {
         mPolicy.systemReady();
+    }
+
+    private void sendScreenStatusToClients() {
+        final ArrayList<WindowState> windows = mWindows;
+        final int count = windows.size();
+        boolean on = mPowerManager.isScreenOn();
+        for (int i = count - 1; i >= 0; i--) {
+            WindowState win = mWindows.get(i);
+            try {
+                win.mClient.dispatchScreenStatus(on);
+            } catch (RemoteException e) {
+                // Ignored
+            }
+        }
     }
 
     // This is an animation that does nothing: it just immediately finishes

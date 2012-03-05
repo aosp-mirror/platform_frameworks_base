@@ -49,6 +49,9 @@ public class BaseIWindow extends IWindow.Stub {
     public void dispatchGetNewSurface() {
     }
 
+    public void dispatchScreenStatus(boolean on) {
+    }
+
     public void windowFocusChanged(boolean hasFocus, boolean touchEnabled) {
     }
 
