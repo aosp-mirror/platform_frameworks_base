@@ -11,7 +11,19 @@ parent.link=index.html
       <li><a href="#running">Running DDMS</a></li>
         <li><a href="#how-ddms-works">How DDMS Interacts with a Debugger</a></li>
 
-        <li><a href="#using-ddms">Using DDMS</a></li>
+        <li><a href="#using-ddms">Using DDMS</a>
+        <ol>
+                <li><a href="#heap">Viewing heap usage for a process</a></li>
+                <li><a href="#alloc">Tracking memory allocation of objects</a></li>
+                <li><a href="#emulator">Working with an emulator or device's file system</a></li>
+                <li><a href="#thread">Examining thread information</a></li>
+                <li><a href="#profiling">Starting method profiling</a></li>
+                <li><a href="#network">Using the Network Traffic tool</a></li>
+                <li><a href="#logcat">Using LogCat</a></li>
+                <li><a href="#ops-location">Emulating phone operations and location</a></li>
+            </ol>
+        
+        </li>
       </ol>
     </div>
   </div>
@@ -90,7 +102,7 @@ parent.link=index.html
   <a href="#running">Running DDMS</a>.
   
   
-  <h3>Viewing heap usage for a process</h3>
+  <h3 id="heap">Viewing heap usage for a process</h3>
 
   <p>DDMS allows you to view how much heap memory a process is using. This information is useful in
   tracking heap usage at a certain point of time during the execution of your application.</p>
@@ -110,7 +122,7 @@ parent.link=index.html
     allocated for a particular memory size in bytes.</li>
   </ol>
 
-  <h3>Tracking memory allocation of objects</h3>
+  <h3 id="alloc">Tracking memory allocation of objects</h3>
 
   <p>DDMS provides a feature to track objects that are being allocated to memory and to see which
   classes and threads are allocating the objects. This allows you to track, in real time, where
@@ -140,7 +152,7 @@ parent.link=index.html
     line number of the code that allocated the object.</li>
   </ol>
 
-  <h3>Working with an emulator or device's file system</h3>
+  <h3 id="emulator">Working with an emulator or device's file system</h3>
 
   <p>DDMS provides a File Explorer tab that allows you to view, copy, and delete files on the
   device. This feature is useful in examining files that are created by your application or if you
@@ -160,7 +172,7 @@ parent.link=index.html
   <!-- Need to elaborate more on where things are stored in the file system,
    databases, apks, user info, files that are important to look at -->
 
-  <h3>Examining thread information</h3>
+  <h3 id="thread">Examining thread information</h3>
 
   <p>The Threads tab in DDMS shows you the currently running threads for a selected process.</p>
 
@@ -204,6 +216,67 @@ parent.link=index.html
     Profiling</strong>.</li>
   </ol>
 
+   <h3 id="network">Using the Network Traffic tool</h3>
+   
+   <p>In Android 4.0, the DDMS (Dalvik Debug Monitor Server) includes a Detailed
+Network Usage tab that makes it possible to track when your application is
+making network requests. Using this tool, you can monitor how and when your app
+transfers data and optimize the underlying code appropriately. You can also
+distinguish between different traffic types by applying a “tag” to network
+sockets before use.</p>
+
+<p>These tags are shown in a stack area chart in DDMS, as shown in figure 2:</p>
+
+<img src="{@docRoot}images/developing/ddms-network.png" />
+<p class="img-caption"><strong>Figure 2.</strong> Network Usage tab.</p>
+
+<p>By monitoring the frequency of your data transfers, and the amount of data
+transferred during each connection, you can identify areas of your application
+that can be made more battery-efficient. Generally, you should look for
+short spikes that can be delayed, or that should cause a later transfer to be
+pre-empted. </p>
+
+<p>To better identify the cause of transfer spikes, the
+{@link android.net.TrafficStats} API allows you
+to tag the data transfers occurring within a thread using {@link
+android.net.TrafficStats#setThreadStatsTag setThreadStatsTag()}, followed
+by manually tagging (and untagging) individual sockets using {@link
+android.net.TrafficStats#tagSocket tagSocket()} and {@link
+android.net.TrafficStats#untagSocket untagSocket()}. For example:</p>
+
+<pre>TrafficStats.setThreadStatsTag(0xF00D);
+TrafficStats.tagSocket(outputSocket);
+// Transfer data using socket
+TrafficStats.untagSocket(outputSocket);</pre>
+
+<p>Alternatively, the Apache {@link org.apache.http.client.HttpClient} and 
+{@link java.net.URLConnection} APIs included in the platform
+automatically tag sockets internally based on the active tag (as 
+identified by 
+{@link android.net.TrafficStats#getThreadStatsTag getThreadStatsTag()}).
+These APIs correctly tag/untag sockets when recycled through
+keep-alive pools. In the following example,  
+{@link android.net.TrafficStats#setThreadStatsTag setThreadStatsTag()} 
+sets the active tag to be {@code 0xF00D}. 
+There can only be one active tag per thread. 
+That is the value that will 
+be returned by {@link android.net.TrafficStats#getThreadStatsTag getThreadStatsTag()}
+and thus used by {@link org.apache.http.client.HttpClient}  
+ to tag sockets. The {@code finally} statement 
+invokes 
+{@link android.net.TrafficStats#clearThreadStatsTag clearThreadStatsTag()} 
+to clear the tag.</p>
+
+<pre>TrafficStats.setThreadStatsTag(0xF00D);
+    try {
+        // Make network request using HttpClient.execute()
+    } finally {
+        TrafficStats.clearThreadStatsTag();
+}</pre>
+
+<p>Socket tagging is supported in Android 4.0, but real-time stats will only be
+displayed on devices running Android 4.0.3 or higher.</p>
+   
   <h3 id="logcat">Using LogCat</h3>
 
   <p>LogCat is integrated into DDMS, and outputs the messages that you print out using the {@link android.util.Log}
@@ -230,7 +303,7 @@ parent.link=index.html
   with the log tags or with the process id that generated the log message. The add filter,
   edit filter, and delete filter buttons let you manage your custom filters.</p>
 
-  <h3>Emulating phone operations and location</h3>
+  <h3 id="ops-location">Emulating phone operations and location</h3>
   <p>The Emulator control tab lets you simulate a
   phone's voice and data network status. This is useful when you want to test your application's
   robustness in differing network environments.</p>
