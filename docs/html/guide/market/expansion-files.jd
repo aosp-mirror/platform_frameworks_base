@@ -700,7 +700,8 @@ boolean expansionFilesDelivered() {
 }        
 </pre>
     <p>In this case, each {@code XAPKFile} object holds the version number and file size of a known
-expansion file and a boolean as to whether it's the main expansion file.</p>
+expansion file and a boolean as to whether it's the main expansion file. (See the sample
+application's {@code SampleDownloaderActivity} class for details.)</p>
     <p>If this method returns false, then the application must begin the download.</p>
   </li>
   <li>Start the download by calling the static method {@code
@@ -870,8 +871,8 @@ which describes various information about the download progress, including estim
 current speed, overall progress, and total so you can update the download progress UI.</dd>
 </dl>
 <p class="note"><strong>Tip:</strong> For examples of these callbacks that update the download
-progress UI, see the {@code SampleDownloaderActivity} in the sample app provided with the Expansion
-Downloader package.</p>
+progress UI, see the {@code SampleDownloaderActivity} in the sample app provided with the
+APK Expansion Library package.</p>
 
 <p>Some public methods for the {@code IDownloaderService} interface you might find useful are:</p>
 
@@ -1125,6 +1126,11 @@ ZipResourceFile expansionFile = new ZipResourceFile(filePathToMyZip);
 InputStream fileStream = expansionFile.getInputStream(pathToFileInsideZip);
 </pre>
 
+<p>For more information about using this library for your expansion files, look at
+the sample application's {@code SampleDownloaderActivity} class, which includes additional code to
+verify the downloaded files using CRC. Beware that if you use this sample as the basis for
+your own implementation, it requires that you <strong>declare the byte size of your expansion
+files</strong> in the {@code xAPKS} array.</p>
 
 
 
