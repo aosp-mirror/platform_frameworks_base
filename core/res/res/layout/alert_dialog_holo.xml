@@ -108,7 +108,7 @@
             android:layoutDirection="locale"
             android:measureWithLargestChild="true">
             <Button android:id="@+id/button2"
-                android:layout_width="0dip"
+                android:layout_width="wrap_content"
                 android:layout_gravity="left"
                 android:layout_weight="1"
                 android:maxLines="2"
@@ -117,7 +117,7 @@
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
                 android:layout_height="wrap_content" />
             <Button android:id="@+id/button3"
-                android:layout_width="0dip"
+                android:layout_width="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_weight="1"
                 android:maxLines="2"
@@ -126,7 +126,7 @@
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
                 android:layout_height="wrap_content" />
             <Button android:id="@+id/button1"
-                android:layout_width="0dip"
+                android:layout_width="wrap_content"
                 android:layout_gravity="right"
                 android:layout_weight="1"
                 android:maxLines="2"
