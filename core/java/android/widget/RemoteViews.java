@@ -1183,7 +1183,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Equivalent to calling ImageView.setImageBitmap
      * 
-     * @param viewId The id of the view whose drawable should change
+     * @param viewId The id of the view whose bitmap should change
      * @param bitmap The new Bitmap for the drawable
      */
     public void setImageViewBitmap(int viewId, Bitmap bitmap) {
@@ -1206,7 +1206,7 @@ public class RemoteViews implements Parcelable, Filter {
      * and {@link Chronometer#start Chronometer.start()} or
      * {@link Chronometer#stop Chronometer.stop()}.
      * 
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the {@link Chronometer} to change
      * @param base The time at which the timer would have read 0:00.  This
      *             time should be based off of
      *             {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()}.
@@ -1227,7 +1227,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * If indeterminate is true, then the values for max and progress are ignored.
      * 
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the {@link ProgressBar} to change
      * @param max The 100% value for the progress bar
      * @param progress The current value of the progress bar.
      * @param indeterminate True if the progress bar is indeterminate, 
@@ -1333,7 +1333,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Equivalent to calling {@link android.widget.TextView#setTextColor(int)}.
      * 
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view whose text color should change
      * @param color Sets the text color for all the states (normal, selected,
      *            focused) to be this color.
      */
@@ -1346,7 +1346,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @param appWidgetId The id of the app widget which contains the specified view. (This
      *      parameter is ignored in this deprecated method)
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the {@link AbsListView}
      * @param intent The intent of the service which will be
      *            providing data to the RemoteViewsAdapter
      * @deprecated This method has been deprecated. See
@@ -1361,7 +1361,7 @@ public class RemoteViews implements Parcelable, Filter {
      * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
      * Can only be used for App Widgets.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the {@link AbsListView}
      * @param intent The intent of the service which will be
      *            providing data to the RemoteViewsAdapter
      */
@@ -1372,7 +1372,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(int, int)}.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view to change
      * @param position Scroll to this adapter position
      */
     public void setScrollPosition(int viewId, int position) {
@@ -1382,7 +1382,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(int, int)}.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view to change
      * @param offset Scroll by this adapter position offset
      */
     public void setRelativeScrollPosition(int viewId, int offset) {
@@ -1392,7 +1392,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one boolean on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1403,7 +1403,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one byte on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1414,7 +1414,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one short on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1425,7 +1425,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one int on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1436,7 +1436,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one long on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1447,7 +1447,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one float on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1458,7 +1458,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one double on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1469,7 +1469,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one char on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1480,7 +1480,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one String on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1491,7 +1491,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one CharSequence on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1502,7 +1502,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one Uri on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1516,7 +1516,7 @@ public class RemoteViews implements Parcelable, Filter {
      * <p class="note">The bitmap will be flattened into the parcel if this object is
      * sent across processes, so it may end up using a lot of memory, and may be fairly slow.</p>
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1527,7 +1527,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Call a method taking one Bundle on a view in the layout for this RemoteViews.
      *
-     * @param viewId The id of the view whose text should change
+     * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
      */
@@ -1536,10 +1536,11 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Call a method taking one Intent on a view in the layout for this RemoteViews.
      *
-     * @param viewId
-     * @param methodName
-     * @param value
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param value The {@link android.content.Intent} to pass the method.
      */
     public void setIntent(int viewId, String methodName, Intent value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.INTENT, value));

@@ -91,31 +91,30 @@ android.widget.Button} element:
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:background="@drawable/android_button" />
+        android:background="@drawable/android_button"
+        android:onClick="onButtonClicked"/>
 </pre>
 	<p>The <code>android:background</code> attribute specifies the drawable resource to use for the
 button background (which, when saved at <code>res/drawable/android.xml</code>, is
 referenced as <code>@drawable/android</code>). This replaces the normal background image
-used for buttons throughout the system. In order for the drawable to change its image based on
-the button state, the image must be applied to the background.</p>
+applied by the system with the drawable created above, which changes its image based on
+the button state.</p>
+    <p>The attribute <code>android:onClick</code> specifies the name of a method in your activity 
+that the system should call when the user clicks the button. You'll create that method next.</p>
 </li>
 
 <li>To make the button do something when pressed, add the following
-code at the end of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method:
+method inside your {@link android.app.Activity} class:
 <pre>
-final Button button = (Button) findViewById(R.id.button);
-button.setOnClickListener(new OnClickListener() {
-    public void onClick(View v) {
-        // Perform action on clicks
-        Toast.makeText(HelloFormStuff.this, "Beep Bop", Toast.LENGTH_SHORT).show();
-    }
-});
+public void onButtonClicked(View v) {
+    // Do something when the button is clicked
+    Toast.makeText(HelloFormStuff.this, "Button clicked", Toast.LENGTH_SHORT).show();
+}
 </pre>
-<p>This captures the {@link android.widget.Button} from the layout, then adds an {@link
-android.view.View.OnClickListener}. The {@link android.view.View.OnClickListener}
-must implement the {@link android.view.View.OnClickListener#onClick(View)} callback method, which
-defines the action to be made when the button is clicked. In this example, a
-{@link android.widget.Toast} message will be displayed.</p>
+<p>When you specify this kind of method, which is used in your layout file with the {@code
+android:onClick} attribute, the method must be <code>public</code>, have a <code>void</code> return
+value, and accept a single {@code android.view.View} parameter. When the system calls this method,
+it passes the {@code android.view.View} that was clicked.</p>
 </li>
 <li>Now run the application.</li>
 </ol>
@@ -183,34 +182,33 @@ element (inside the {@link android.widget.LinearLayout}):
     &lt;CheckBox android:id="@+id/checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="check it out" />
+        android:text="check it out"
+        android:onClick="onCheckboxClicked"/>
 </pre>
+    <p>The attribute <code>android:onClick</code> specifies the name of a method in your activity 
+that the system should call when the user clicks the check box. You'll create that method next.</p>
 </li>
-<li>To do something when the state is changed, add the following code
-to the end of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method:
+<li>To do something when the state is changed, add the following method inside your {@link
+android.app.Activity} class:</p>
+
 <pre>
-final CheckBox checkbox = (CheckBox) findViewById(R.id.checkbox);
-checkbox.setOnClickListener(new OnClickListener() {
-    public void onClick(View v) {
-        // Perform action on clicks, depending on whether it's now checked
-        if (((CheckBox) v).isChecked()) {
-            Toast.makeText(HelloFormStuff.this, "Selected", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(HelloFormStuff.this, "Not selected", Toast.LENGTH_SHORT).show();
-        }
+public void onCheckboxClicked(View v) {
+    // Perform action on clicks, depending on whether it's now checked
+    if (((CheckBox) v).isChecked()) {
+        Toast.makeText(HelloFormStuff.this, "Selected", Toast.LENGTH_SHORT).show();
+    } else {
+        Toast.makeText(HelloFormStuff.this, "Not selected", Toast.LENGTH_SHORT).show();
     }
-});
+}
 </pre>
-<p>This captures the {@link android.widget.CheckBox} element from the layout, then adds an {@link
-android.view.View.OnClickListener}. The {@link android.view.View.OnClickListener} must implement the
-{@link android.view.View.OnClickListener#onClick(View)} callback method, which
-defines the action to be made when the checkbox is clicked. When clicked, {@link
-android.widget.CompoundButton#isChecked()} is called to check the new state of the check box. If it
-has been checked, then a {@link android.widget.Toast} displays the message "Selected", otherwise it
-displays "Not selected". Note that the {@link android.view.View} object that is passed in the {@link
-android.view.View.OnClickListener#onClick(View)} callback must be cast to a {@link
-android.widget.CheckBox} because the {@link android.widget.CompoundButton#isChecked()} method is
-not defined by the parent {@link android.view.View} class. The {@link android.widget.CheckBox}
+
+<p>When you specify this kind of method, which is used in your layout file with the {@code
+android:onClick}
+attribute, the method must be <code>public</code>, have a <code>void</code> return value, and
+accept a single {@code android.view.View} parameter. When the system calls this method, it
+passes the {@code android.view.View} that was clicked. In this example, the {@code
+android.view.View} is cast to a {@link android.widget.CheckBox} to determine whether the widget
+has been checked or unchecked. The {@link android.widget.CheckBox} widget
 handles its own state changes, so you only need to query the current state.</p>
 </li>
 <li>Run it.</li>
@@ -240,44 +238,44 @@ android.widget.LinearLayout}):
       &lt;RadioButton android:id="@+id/radio_red"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:text="Red" />
+          android:text="Red"
+          android:onClick="onRadioButtonClicked"/>
       &lt;RadioButton android:id="@+id/radio_blue"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:text="Blue" />
+          android:text="Blue"
+          android:onClick="onRadioButtonClicked"/>
     &lt;/RadioGroup>
 </pre>
 <p>It's important that the {@link android.widget.RadioButton}s are grouped together by the {@link
 android.widget.RadioGroup} element so that no more than one can be selected at a time. This logic
 is automatically handled by the Android system. When one {@link android.widget.RadioButton} within
 a group is selected, all others are automatically deselected.</p>
+    <p>The attribute <code>android:onClick</code> specifies the name of a method in your activity 
+that the system should call when the user clicks the radio button. You'll create that method
+next.</p>
 </li>
 
-<li>To do something when each {@link android.widget.RadioButton} is selected, you need an
-{@link android.view.View.OnClickListener}. In this case, you want the listener to be re-usable, so
-add the following code to create a new member in the <code>HelloFormStuff</code> Activity:
+<li>To do something when each {@link android.widget.RadioButton} is selected, add the following
+method inside your {@link android.app.Activity} class:</p>
+
 <pre>
-private OnClickListener radio_listener = new OnClickListener() {
-    public void onClick(View v) {
-        // Perform action on clicks
-        RadioButton rb = (RadioButton) v;
-        Toast.makeText(HelloFormStuff.this, rb.getText(), Toast.LENGTH_SHORT).show();
-    }
-};
+public void onRadioButtonClicked(View v) {
+    // Perform action on clicks
+    RadioButton rb = (RadioButton) v;
+    Toast.makeText(HelloFormStuff.this, rb.getText(), Toast.LENGTH_SHORT).show();
+}
 </pre>
-<p>First, the {@link android.view.View} that is passed to the {@link
-android.view.View.OnClickListener#onClick(View)} method is cast into a RadioButton. Then a
-{@link android.widget.Toast} message displays the selected radio button's text.</p>
-<li>Now, at the bottom of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method, add
-the following:
-<pre>
-  final RadioButton radio_red = (RadioButton) findViewById(R.id.radio_red);
-  final RadioButton radio_blue = (RadioButton) findViewById(R.id.radio_blue);
-  radio_red.setOnClickListener(radio_listener);
-  radio_blue.setOnClickListener(radio_listener);
-</pre>
-<p>This captures each of the {@link android.widget.RadioButton}s from the layout and adds the
-newly-created {@link android.view.View.OnClickListener} to each.</p>
+
+<p>When you specify this kind of method, which is used in your layout file with the {@code
+android:onClick}
+attribute, the method must be <code>public</code>, have a <code>void</code> return value, and
+accept a single {@code android.view.View} parameter. When the system calls this method, it
+passes the {@code android.view.View} that was clicked.</p>
+<p>Because each {@link android.widget.RadioButton} widget is grouped into a {@link
+android.widget.RadioGroup}, each widget handles its own state changes when a new button is
+selected.</p>
+</li>
 <li>Run the application.</li>
 </ol>
 
@@ -303,31 +301,35 @@ element (inside the {@link android.widget.LinearLayout}):
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textOn="Vibrate on"
-        android:textOff="Vibrate off"/>
+        android:textOff="Vibrate off"
+        android:onClick="onToggleClicked"/>
 </pre>
   <p>The attributes <code>android:textOn</code> and <code>android:textOff</code> specify the text
 for the button when the button has been toggled on or off. The default values are "ON" and
 "OFF".</p>
+    <p>The attribute <code>android:onClick</code> specifies the name of a method in your activity 
+that the system should call when the user clicks the button. You'll create that method next.</p>
 </li>
-<li>To do something when the state is changed, add the following code
-to the end of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method:
+<li>To do something when the user clicks the button, add the following
+method inside your {@link android.app.Activity} class:</p>
+
 <pre>
-final ToggleButton togglebutton = (ToggleButton) findViewById(R.id.togglebutton);
-togglebutton.setOnClickListener(new OnClickListener() {
-    public void onClick(View v) {
-        // Perform action on clicks
-        if (togglebutton.isChecked()) {
-            Toast.makeText(HelloFormStuff.this, "Checked", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(HelloFormStuff.this, "Not checked", Toast.LENGTH_SHORT).show();
-        }
+public void onToggleClicked(View v) {
+    // Perform action on clicks
+    if (((ToggleButton) v).isChecked()) {
+        Toast.makeText(HelloFormStuff.this, "Toggle on", Toast.LENGTH_SHORT).show();
+    } else {
+        Toast.makeText(HelloFormStuff.this, "Toggle off", Toast.LENGTH_SHORT).show();
     }
-});
+}
 </pre>
-<p>This captures the {@link android.widget.ToggleButton} element from the layout, then adds an
-{@link android.view.View.OnClickListener}. The {@link android.view.View.OnClickListener} must
-implement the {@link android.view.View.OnClickListener#onClick(View)} callback method, which
-defines the action to perform when the button is clicked. In this example, the callback
+
+<p>When you specify this kind of method, which is used in your layout file with the {@code
+android:onClick}
+attribute, the method must be <code>public</code>, have a <code>void</code> return value, and
+accept a single {@code android.view.View} parameter. When the system calls this method, it
+passes the {@code android.view.View} that was clicked.</p>
+<p>In this example, the callback
 method checks the new state of the button, then shows a {@link android.widget.Toast} message that
 indicates the current state.</p>
 

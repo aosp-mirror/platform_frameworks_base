@@ -208,7 +208,7 @@ public int size() {
   new class constructor:
 <pre>
 public HelloItemizedOverlay(Drawable defaultMarker, Context context) {
-  super(defaultMarker);
+  super(boundCenterBottom(defaultMarker));
   mContext = context;
 }
 </pre>
