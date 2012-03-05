@@ -129,7 +129,7 @@ handset design.</p>
 
 <p>For example&mdash;to continue with the news application example&mdash;the application can embed
 two fragments in <em>Activity A</em>, when running on a tablet-sized device. However, on a
-handset-sized screen, there's not be enough room for both fragments, so <em>Activity A</em> includes
+handset-sized screen, there's not enough room for both fragments, so <em>Activity A</em> includes
 only the fragment for the list of articles, and when the user selects an article, it starts
 <em>Activity B</em>, which includes the second fragment to read the article. Thus, the application
 supports both tablets and handsets by reusing fragments in different combinations, as illustrated in
