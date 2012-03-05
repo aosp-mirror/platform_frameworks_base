@@ -119,15 +119,15 @@ public:
 
     static const char* OP_NAMES[];
 
-    void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
-
     ANDROID_API size_t getSize();
+    ANDROID_API static void destroyDisplayListDeferred(DisplayList* displayList);
+    ANDROID_API static void outputLogBuffer(int fd);
+
+    void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
     bool replay(OpenGLRenderer& renderer, Rect& dirty, int32_t flags, uint32_t level = 0);
 
     void output(OpenGLRenderer& renderer, uint32_t level = 0);
-
-    ANDROID_API static void outputLogBuffer(int fd);
 
     void setRenderable(bool renderable) {
         mIsRenderable = renderable;
