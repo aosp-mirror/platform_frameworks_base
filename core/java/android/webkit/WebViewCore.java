@@ -1252,6 +1252,12 @@ public final class WebViewCore {
                             // Time to take down the world. Cancel all pending
                             // loads and destroy the native view and frame.
                             synchronized (WebViewCore.this) {
+                                mCallbackProxy.shutdown();
+                                // Wake up the WebCore thread just in case it is waiting for a
+                                // JavaScript dialog.
+                                synchronized (mCallbackProxy) {
+                                    mCallbackProxy.notify();
+                                }
                                 mBrowserFrame.destroy();
                                 mBrowserFrame = null;
                                 mSettings.onDestroyed();

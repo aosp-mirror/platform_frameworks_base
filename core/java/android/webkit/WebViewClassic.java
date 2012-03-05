@@ -2121,10 +2121,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
         if (mNativeClass != 0) nativeStopGL();
         if (mWebViewCore != null) {
-            // Set the handlers to null before destroying WebViewCore so no
-            // more messages will be posted.
-            mCallbackProxy.setWebViewClient(null);
-            mCallbackProxy.setWebChromeClient(null);
             // Tell WebViewCore to destroy itself
             synchronized (this) {
                 WebViewCore webViewCore = mWebViewCore;
@@ -2133,12 +2129,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
             // Remove any pending messages that might not be serviced yet.
             mPrivateHandler.removeCallbacksAndMessages(null);
-            mCallbackProxy.removeCallbacksAndMessages(null);
-            // Wake up the WebCore thread just in case it is waiting for a
-            // JavaScript dialog.
-            synchronized (mCallbackProxy) {
-                mCallbackProxy.notify();
-            }
         }
         if (mNativeClass != 0) {
             nativeDestroy();
