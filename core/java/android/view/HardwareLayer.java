@@ -19,6 +19,7 @@ package android.view;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 
 /**
  * A hardware layer can be used to render graphics operations into a hardware
@@ -163,4 +164,13 @@ abstract class HardwareLayer {
      * @param matrix The transform to apply to the layer.
      */
     abstract void setTransform(Matrix matrix);
+
+    /**
+     * Specifies the display list to use to refresh the layer.
+     * 
+     * @param displayList The display list containing the drawing commands to
+     *                    execute in this layer
+     * @param dirtyRect The dirty region of the layer that needs to be redrawn
+     */
+    abstract void redraw(DisplayList displayList, Rect dirtyRect);
 }

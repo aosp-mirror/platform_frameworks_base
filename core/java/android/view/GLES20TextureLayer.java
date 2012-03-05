@@ -18,6 +18,7 @@ package android.view;
 
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 
 /**
@@ -80,5 +81,9 @@ class GLES20TextureLayer extends GLES20Layer {
     @Override
     void setTransform(Matrix matrix) {
         GLES20Canvas.nSetTextureLayerTransform(mLayer, matrix.native_instance);
+    }
+
+    @Override
+    void redraw(DisplayList displayList, Rect dirtyRect) {
     }
 }

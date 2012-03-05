@@ -10123,7 +10123,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * dynamic.
      */
     boolean hasStaticLayer() {
-        return mLayerType == LAYER_TYPE_NONE;
+        return true;
     }
 
     /**
@@ -10170,7 +10170,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 if (mAttachInfo.mHardwareRenderer != null &&
                         mAttachInfo.mHardwareRenderer.isEnabled() &&
                         mAttachInfo.mHardwareRenderer.validate()) {
-                    getHardwareLayer();
+                    getHardwareLayer(true);
                 }
                 break;
             case LAYER_TYPE_SOFTWARE:
@@ -10192,7 +10192,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @return A HardwareLayer ready to render, or null if an error occurred.
      */
-    HardwareLayer getHardwareLayer() {
+    HardwareLayer getHardwareLayer(boolean immediateRefresh) {
         if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null ||
                 !mAttachInfo.mHardwareRenderer.isEnabled()) {
             return null;
@@ -10222,41 +10222,32 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 return null;
             }
 
-            HardwareCanvas currentCanvas = mAttachInfo.mHardwareCanvas;
-            final HardwareCanvas canvas = mHardwareLayer.start(currentCanvas);
-
-            // Make sure all the GPU resources have been properly allocated
-            if (canvas == null) {
-                mHardwareLayer.end(currentCanvas);
-                return null;
-            }
-
-            mAttachInfo.mHardwareCanvas = canvas;
-            try {
-                canvas.setViewport(width, height);
-                canvas.onPreDraw(mLocalDirtyRect);
+            if (!immediateRefresh) {
+                mHardwareLayer.redraw(getDisplayList(), mLocalDirtyRect);
                 mLocalDirtyRect.setEmpty();
-
-                final int restoreCount = canvas.save();
-
-                computeScroll();
-                canvas.translate(-mScrollX, -mScrollY);
-
-                mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
-
-                // Fast path for layouts with no backgrounds
-                if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                    mPrivateFlags &= ~DIRTY_MASK;
-                    dispatchDraw(canvas);
-                } else {
-                    draw(canvas);
+            } else {
+                HardwareCanvas currentCanvas = mAttachInfo.mHardwareCanvas;
+                final HardwareCanvas canvas = mHardwareLayer.start(currentCanvas);
+    
+                // Make sure all the GPU resources have been properly allocated
+                if (canvas == null) {
+                    mHardwareLayer.end(currentCanvas);
+                    return null;
                 }
-
-                canvas.restoreToCount(restoreCount);
-            } finally {
-                canvas.onPostDraw();
-                mHardwareLayer.end(currentCanvas);
-                mAttachInfo.mHardwareCanvas = currentCanvas;
+    
+                mAttachInfo.mHardwareCanvas = canvas;
+                try {
+                    canvas.setViewport(width, height);
+                    canvas.onPreDraw(mLocalDirtyRect);
+                    mLocalDirtyRect.setEmpty();
+                    
+                    canvas.drawDisplayList(getDisplayList(), mRight - mLeft, mBottom - mTop, null,
+                            DisplayList.FLAG_CLIP_CHILDREN);
+                } finally {
+                    canvas.onPostDraw();
+                    mHardwareLayer.end(currentCanvas);
+                    mAttachInfo.mHardwareCanvas = currentCanvas;
+                }
             }
         }
 
@@ -11224,7 +11215,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (hasNoCache) {
             boolean layerRendered = false;
             if (layerType == LAYER_TYPE_HARDWARE) {
-                final HardwareLayer layer = getHardwareLayer();
+                final HardwareLayer layer = getHardwareLayer(false);
                 if (layer != null && layer.isValid()) {
                     mLayerPaint.setAlpha((int) (alpha * 255));
                     ((HardwareCanvas) canvas).drawHardwareLayer(layer, 0, 0, mLayerPaint);

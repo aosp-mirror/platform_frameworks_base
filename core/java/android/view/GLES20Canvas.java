@@ -157,6 +157,8 @@ class GLES20Canvas extends HardwareCanvas {
     static native void nDestroyLayer(int layerId);
     static native void nDestroyLayerDeferred(int layerId);
     static native void nFlushLayer(int layerId);
+    static native void nUpdateRenderLayer(int layerId, int renderer, int displayList,
+            int left, int top, int right, int bottom);
     static native boolean nCopyLayer(int layerId, int bitmap);
 
     ///////////////////////////////////////////////////////////////////////////
@@ -190,6 +192,13 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native int nGetMaximumTextureWidth();
     private static native int nGetMaximumTextureHeight();
+
+    /**
+     * Returns the native OpenGLRenderer object.
+     */
+    int getRenderer() {
+        return mRenderer;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Setup

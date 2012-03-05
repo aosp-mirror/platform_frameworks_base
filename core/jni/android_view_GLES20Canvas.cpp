@@ -770,6 +770,12 @@ static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject cl
     LayerRenderer::updateTextureLayer(layer, width, height, isOpaque, renderTarget, transform);
 }
 
+static void android_view_GLES20Canvas_updateRenderLayer(JNIEnv* env, jobject clazz,
+        Layer* layer, OpenGLRenderer* renderer, DisplayList* displayList,
+        jint left, jint top, jint right, jint bottom) {
+    layer->updateDeferred(renderer, displayList, left, top, right, bottom);
+}
+
 static void android_view_GLES20Canvas_setTextureLayerTransform(JNIEnv* env, jobject clazz,
         Layer* layer, SkMatrix* matrix) {
 
@@ -953,12 +959,14 @@ static JNINativeMethod gMethods[] = {
     { "nCreateTextureLayer",     "(Z[I)I",     (void*) android_view_GLES20Canvas_createTextureLayer },
     { "nUpdateTextureLayer",     "(IIIZLandroid/graphics/SurfaceTexture;)V",
                                                (void*) android_view_GLES20Canvas_updateTextureLayer },
-    { "nSetTextureLayerTransform", "(II)V",    (void*) android_view_GLES20Canvas_setTextureLayerTransform },
+    { "nUpdateRenderLayer",      "(IIIIIII)V", (void*) android_view_GLES20Canvas_updateRenderLayer },
     { "nDestroyLayer",           "(I)V",       (void*) android_view_GLES20Canvas_destroyLayer },
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },
     { "nFlushLayer",             "(I)V",       (void*) android_view_GLES20Canvas_flushLayer },
     { "nDrawLayer",              "(IIFFI)V",   (void*) android_view_GLES20Canvas_drawLayer },
     { "nCopyLayer",              "(II)Z",      (void*) android_view_GLES20Canvas_copyLayer },
+
+    { "nSetTextureLayerTransform", "(II)V",    (void*) android_view_GLES20Canvas_setTextureLayerTransform },
 
     { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_GLES20Canvas_getMaxTextureWidth },
     { "nGetMaximumTextureHeight", "()I",       (void*) android_view_GLES20Canvas_getMaxTextureHeight },
