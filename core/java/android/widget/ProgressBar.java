@@ -39,6 +39,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.view.Choreographer;
 import android.view.Gravity;
 import android.view.RemotableViewMethod;
 import android.view.View;
@@ -189,7 +190,6 @@ import android.widget.RemoteViews.RemoteView;
 @RemoteView
 public class ProgressBar extends View {
     private static final int MAX_LEVEL = 10000;
-    private static final int ANIMATION_RESOLUTION = 200;
     private static final int TIMEOUT_SEND_ACCESSIBILITY_EVENT = 200;
 
     int mMinWidth;
@@ -216,11 +216,8 @@ public class ProgressBar extends View {
     private RefreshProgressRunnable mRefreshProgressRunnable;
     private long mUiThreadId;
     private boolean mShouldStartAnimationDrawable;
-    private long mLastDrawTime;
 
     private boolean mInDrawing;
-
-    private int mAnimationResolution;
 
     private AccessibilityEventSender mAccessibilityEventSender;
 
@@ -298,9 +295,6 @@ public class ProgressBar extends View {
 
         setIndeterminate(mOnlyIndeterminate || a.getBoolean(
                 R.styleable.ProgressBar_indeterminate, mIndeterminate));
-
-        mAnimationResolution = a.getInteger(R.styleable.ProgressBar_animationResolution,
-                ANIMATION_RESOLUTION);
 
         a.recycle();
     }
@@ -988,10 +982,7 @@ public class ProgressBar extends View {
                 } finally {
                     mInDrawing = false;
                 }
-                if (SystemClock.uptimeMillis() - mLastDrawTime >= mAnimationResolution) {
-                    mLastDrawTime = SystemClock.uptimeMillis();
-                    postInvalidateDelayed(mAnimationResolution);
-                }
+                postInvalidateOnAnimation();
             }
             d.draw(canvas);
             canvas.restore();

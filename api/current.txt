@@ -247,7 +247,7 @@ package android {
     field public static final int animationCache = 16842989; // 0x10100ed
     field public static final int animationDuration = 16843026; // 0x1010112
     field public static final int animationOrder = 16843214; // 0x10101ce
-    field public static final int animationResolution = 16843546; // 0x101031a
+    field public static final deprecated int animationResolution = 16843546; // 0x101031a
     field public static final int antialias = 16843034; // 0x101011a
     field public static final int anyDensity = 16843372; // 0x101026c
     field public static final int apiKey = 16843281; // 0x1010211

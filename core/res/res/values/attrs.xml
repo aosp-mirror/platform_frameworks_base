@@ -2864,7 +2864,8 @@
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" />
         <attr name="interpolator" format="reference" />
-        <!-- Timeout between frames of animation in milliseconds -->
+        <!-- Timeout between frames of animation in milliseconds
+             {@deprecated Not used by the framework.} -->
         <attr name="animationResolution" format="integer" />
     </declare-styleable>
 
