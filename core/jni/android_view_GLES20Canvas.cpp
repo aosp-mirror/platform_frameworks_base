@@ -679,7 +679,7 @@ static void android_view_GLES20Canvas_resetDisplayListRenderer(JNIEnv* env,
 
 static void android_view_GLES20Canvas_destroyDisplayList(JNIEnv* env,
         jobject clazz, DisplayList* displayList) {
-    delete displayList;
+    DisplayList::destroyDisplayListDeferred(displayList);
 }
 
 static bool android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,

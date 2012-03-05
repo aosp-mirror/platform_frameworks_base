@@ -20,6 +20,7 @@
 #include <utils/String8.h>
 
 #include "Caches.h"
+#include "DisplayListRenderer.h"
 #include "Properties.h"
 #include "LayerRenderer.h"
 
@@ -199,11 +200,23 @@ void Caches::clearGarbage() {
         LayerRenderer::destroyLayer(layer);
     }
     mLayerGarbage.clear();
+
+    count = mDisplayListGarbage.size();
+    for (size_t i = 0; i < count; i++) {
+        DisplayList* displayList = mDisplayListGarbage.itemAt(i);
+        delete displayList;
+    }
+    mDisplayListGarbage.clear();
 }
 
 void Caches::deleteLayerDeferred(Layer* layer) {
     Mutex::Autolock _l(mGarbageLock);
     mLayerGarbage.push(layer);
+}
+
+void Caches::deleteDisplayListDeferred(DisplayList* displayList) {
+    Mutex::Autolock _l(mGarbageLock);
+    mDisplayListGarbage.push(displayList);
 }
 
 void Caches::flush(FlushMode mode) {
