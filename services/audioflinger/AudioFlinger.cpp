@@ -1919,10 +1919,10 @@ uint32_t AudioFlinger::PlaybackThread::activeSleepTimeUs()
 
 AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output,
         audio_io_handle_t id, uint32_t device, type_t type)
-    :   PlaybackThread(audioFlinger, output, id, device, type),
-        mAudioMixer(new AudioMixer(mFrameCount, mSampleRate)),
-        mPrevMixerStatus(MIXER_IDLE)
+    :   PlaybackThread(audioFlinger, output, id, device, type)
 {
+    mAudioMixer = new AudioMixer(mFrameCount, mSampleRate);
+    mPrevMixerStatus = MIXER_IDLE;
     // FIXME - Current mixer implementation only supports stereo output
     if (mChannelCount == 1) {
         ALOGE("Invalid audio hardware channel count");
@@ -1991,44 +1991,67 @@ void AudioFlinger::PlaybackThread::checkSilentMode_l()
     }
 }
 
-bool AudioFlinger::MixerThread::threadLoop()
+bool AudioFlinger::PlaybackThread::threadLoop()
 {
-    // DirectOutputThread has single trackToRemove instead of Vector
+    // MIXER || DUPLICATING
     Vector< sp<Track> > tracksToRemove;
-    // DirectOutputThread has activeTrack here
-    nsecs_t standbyTime = systemTime();
-    size_t mixBufferSize = mFrameCount * mFrameSize;
 
+    // DIRECT
+    sp<Track> trackToRemove;
+
+    standbyTime = systemTime();
+    mixBufferSize = mFrameCount * mFrameSize;
+
+    // MIXER
     // FIXME: Relaxed timing because of a certain device that can't meet latency
     // Should be reduced to 2x after the vendor fixes the driver issue
     // increase threshold again due to low power audio mode. The way this warning threshold is
     // calculated and its usefulness should be reconsidered anyway.
     nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 15;
     nsecs_t lastWarning = 0;
-    bool longStandbyExit = false;
+if (mType == MIXER) {
+    longStandbyExit = false;
+}
 
-    uint32_t activeSleepTime = activeSleepTimeUs();
-    uint32_t idleSleepTime = idleSleepTimeUs();
-    uint32_t sleepTime = idleSleepTime;
+    // DUPLICATING
+    // FIXME could this be made local to while loop?
+    writeFrames = 0;
 
-    uint32_t sleepTimeShift = 0;
+    activeSleepTime = activeSleepTimeUs();
+    idleSleepTime = idleSleepTimeUs();
+    sleepTime = idleSleepTime;
+
+if (mType == MIXER) {
+    sleepTimeShift = 0;
+}
+
+    // MIXER
     CpuStats cpuStats;
 
-    // DirectOutputThread has shorter standbyDelay
+    // DIRECT
+if (mType == DIRECT) {
+    // use shorter standby delay as on normal output to release
+    // hardware resources as soon as possible
+    standbyDelay = microseconds(activeSleepTime*2);
+}
 
     acquireWakeLock();
 
     while (!exitPending())
     {
+if (mType == MIXER) {
         cpuStats.sample();
-
-        // DirectOutputThread has rampVolume, leftVol, rightVol
+}
 
         Vector< sp<EffectChain> > effectChains;
 
         processConfigEvents();
 
-        mixer_state mixerStatus = MIXER_IDLE;
+if (mType == DIRECT) {
+        activeTrack.clear();
+}
+
+        mixerStatus = MIXER_IDLE;
         { // scope for mLock
 
             Mutex::Autolock _l(mLock);
@@ -2036,23 +2059,46 @@ bool AudioFlinger::MixerThread::threadLoop()
             if (checkForNewParameters_l()) {
                 mixBufferSize = mFrameCount * mFrameSize;
 
+if (mType == MIXER) {
                 // FIXME: Relaxed timing because of a certain device that can't meet latency
                 // Should be reduced to 2x after the vendor fixes the driver issue
                 // increase threshold again due to low power audio mode. The way this warning
                 // threshold is calculated and its usefulness should be reconsidered anyway.
                 maxPeriod = seconds(mFrameCount) / mSampleRate * 15;
+}
+
+if (mType == DUPLICATING) {
+                updateWaitTime();
+}
 
                 activeSleepTime = activeSleepTimeUs();
                 idleSleepTime = idleSleepTimeUs();
-                // DirectOutputThread updates standbyDelay also
+
+if (mType == DIRECT) {
+                standbyDelay = microseconds(activeSleepTime*2);
+}
+
             }
+
+if (mType == DUPLICATING) {
+#if 0   // see earlier FIXME
+            // Now that this is a field instead of local variable,
+            // clear it so it is empty the first time through the loop,
+            // and later an assignment could combine the clear with the loop below
+            outputTracks.clear();
+#endif
+            for (size_t i = 0; i < mOutputTracks.size(); i++) {
+                outputTracks.add(mOutputTracks[i]);
+            }
+}
 
             // put audio hardware into standby after short delay
             if (CC_UNLIKELY((!mActiveTracks.size() && systemTime() > standbyTime) ||
                         mSuspended > 0)) {
                 if (!mStandby) {
-                    ALOGV("Audio hardware entering standby, mixer %p, suspend count %u", this, mSuspended);
-                    mOutput->stream->common.standby(&mOutput->stream->common);
+
+                    threadLoop_standby();
+
                     mStandby = true;
                     mBytesWritten = 0;
                 }
@@ -2060,6 +2106,10 @@ bool AudioFlinger::MixerThread::threadLoop()
                 if (!mActiveTracks.size() && mConfigEvents.isEmpty()) {
                     // we're about to wait, flush the binder command buffer
                     IPCThreadState::self()->flushCommands();
+
+if (mType == DUPLICATING) {
+                    outputTracks.clear();
+}
 
                     if (exitPending()) break;
 
@@ -2070,17 +2120,41 @@ bool AudioFlinger::MixerThread::threadLoop()
                     ALOGV("Thread %p type %d TID %d waking up", this, mType, gettid());
                     acquireWakeLock_l();
 
+if (mType == MIXER || mType == DUPLICATING) {
                     mPrevMixerStatus = MIXER_IDLE;
+}
+
                     checkSilentMode_l();
 
+if (mType == MIXER || mType == DUPLICATING) {
                     standbyTime = systemTime() + mStandbyTimeInNsecs;
+}
+
+if (mType == DIRECT) {
+                    standbyTime = systemTime() + standbyDelay;
+}
+
                     sleepTime = idleSleepTime;
+
+if (mType == MIXER) {
                     sleepTimeShift = 0;
+}
+
                     continue;
                 }
             }
 
+// FIXME merge these
+if (mType == MIXER || mType == DUPLICATING) {
             mixerStatus = prepareTracks_l(&tracksToRemove);
+}
+if (mType == DIRECT) {
+            mixerStatus = threadLoop_prepareTracks_l(trackToRemove);
+            // see FIXME in AudioFlinger.h
+            if (mixerStatus == MIXER_CONTINUE) {
+                continue;
+            }
+}
 
             // prevent any changes in effect chain list and in each effect chain
             // during mixing and effect process as the audio buffers could be deleted
@@ -2088,7 +2162,130 @@ bool AudioFlinger::MixerThread::threadLoop()
             lockEffectChains_l(effectChains);
         }
 
+if (mType == DIRECT) {
+        // For DirectOutputThread, this test is equivalent to "activeTrack != 0"
+}
+
         if (CC_LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
+            threadLoop_mix();
+        } else {
+            threadLoop_sleepTime();
+        }
+
+        if (mSuspended > 0) {
+            sleepTime = suspendSleepTimeUs();
+        }
+
+        // only process effects if we're going to write
+        if (sleepTime == 0) {
+
+            if (mixerStatus == MIXER_TRACKS_READY) {
+
+                // Non-trivial for DIRECT only
+                applyVolume();
+
+            }
+
+            for (size_t i = 0; i < effectChains.size(); i ++) {
+                effectChains[i]->process_l();
+            }
+        }
+
+        // enable changes in effect chain
+        unlockEffectChains(effectChains);
+
+        // sleepTime == 0 means we must write to audio hardware
+        if (sleepTime == 0) {
+
+            threadLoop_write();
+
+if (mType == MIXER) {
+            // write blocked detection
+            nsecs_t now = systemTime();
+            nsecs_t delta = now - mLastWriteTime;
+            if (!mStandby && delta > maxPeriod) {
+                mNumDelayedWrites++;
+                if ((now - lastWarning) > kWarningThrottleNs) {
+                    ALOGW("write blocked for %llu msecs, %d delayed writes, thread %p",
+                            ns2ms(delta), mNumDelayedWrites, this);
+                    lastWarning = now;
+                }
+                // FIXME this is broken: longStandbyExit should be handled out of the if() and with
+                // a different threshold. Or completely removed for what it is worth anyway...
+                if (mStandby) {
+                    longStandbyExit = true;
+                }
+            }
+}
+
+            mStandby = false;
+        } else {
+            usleep(sleepTime);
+        }
+
+        // finally let go of removed track(s), without the lock held
+        // since we can't guarantee the destructors won't acquire that
+        // same lock.
+
+// FIXME merge these
+if (mType == MIXER) {
+        tracksToRemove.clear();
+}
+if (mType == DIRECT) {
+        trackToRemove.clear();
+        activeTrack.clear();
+}
+if (mType == DUPLICATING) {
+        tracksToRemove.clear();
+        outputTracks.clear();
+}
+
+        // Effect chains will be actually deleted here if they were removed from
+        // mEffectChains list during mixing or effects processing
+        effectChains.clear();
+
+        // FIXME Note that the above .clear() is no longer necessary since effectChains
+        // is now local to this block, but will keep it for now (at least until merge done).
+    }
+
+if (mType == MIXER || mType == DIRECT) {
+    // put output stream into standby mode
+    if (!mStandby) {
+        mOutput->stream->common.standby(&mOutput->stream->common);
+    }
+}
+if (mType == DUPLICATING) {
+    // for DuplicatingThread, standby mode is handled by the outputTracks
+}
+
+    releaseWakeLock();
+
+    ALOGV("Thread %p type %d exiting", this, mType);
+    return false;
+}
+
+// shared by MIXER and DIRECT, overridden by DUPLICATING
+void AudioFlinger::PlaybackThread::threadLoop_write()
+{
+            // FIXME rewrite to reduce number of system calls
+            mLastWriteTime = systemTime();
+            mInWrite = true;
+            mBytesWritten += mixBufferSize;
+            int bytesWritten = (int)mOutput->stream->write(mOutput->stream, mMixBuffer, mixBufferSize);
+            if (bytesWritten < 0) mBytesWritten -= mixBufferSize;
+            mNumWrites++;
+            mInWrite = false;
+}
+
+// shared by MIXER and DIRECT, overridden by DUPLICATING
+void AudioFlinger::PlaybackThread::threadLoop_standby()
+{
+                    ALOGV("Audio hardware entering standby, mixer %p, suspend count %u", this, mSuspended);
+                    mOutput->stream->common.standby(&mOutput->stream->common);
+}
+
+void AudioFlinger::MixerThread::threadLoop_mix()
+{
             // obtain the presentation timestamp of the next output buffer
             int64_t pts;
             status_t status = INVALID_OPERATION;
@@ -2114,7 +2311,10 @@ bool AudioFlinger::MixerThread::threadLoop()
             sleepTime = 0;
             standbyTime = systemTime() + mStandbyTimeInNsecs;
             //TODO: delay standby when effects have a tail
-        } else {
+}
+
+void AudioFlinger::MixerThread::threadLoop_sleepTime()
+{
             // If no tracks are ready, sleep once for the duration of an output
             // buffer size, then write 0s to the output
             if (sleepTime == 0) {
@@ -2140,79 +2340,6 @@ bool AudioFlinger::MixerThread::threadLoop()
                 ALOGV_IF((mBytesWritten == 0 && (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)), "anticipated start");
             }
             // TODO add standby time extension fct of effect tail
-        }
-
-        if (mSuspended > 0) {
-            sleepTime = suspendSleepTimeUs();
-        }
-
-        // only process effects if we're going to write
-        if (sleepTime == 0) {
-
-            // DirectOutputThread adds applyVolume here
-
-            for (size_t i = 0; i < effectChains.size(); i ++) {
-                effectChains[i]->process_l();
-            }
-        }
-
-        // enable changes in effect chain
-        unlockEffectChains(effectChains);
-
-        // sleepTime == 0 means we must write to audio hardware
-        if (sleepTime == 0) {
-            // FIXME Only in MixerThread, and rewrite to reduce number of system calls
-            mLastWriteTime = systemTime();
-            mInWrite = true;
-            mBytesWritten += mixBufferSize;
-            int bytesWritten = (int)mOutput->stream->write(mOutput->stream, mMixBuffer, mixBufferSize);
-            if (bytesWritten < 0) mBytesWritten -= mixBufferSize;
-            mNumWrites++;
-            mInWrite = false;
-
-            // Only in MixerThread: start of write blocked detection
-            nsecs_t now = systemTime();
-            nsecs_t delta = now - mLastWriteTime;
-            if (!mStandby && delta > maxPeriod) {
-                mNumDelayedWrites++;
-                if ((now - lastWarning) > kWarningThrottleNs) {
-                    ALOGW("write blocked for %llu msecs, %d delayed writes, thread %p",
-                            ns2ms(delta), mNumDelayedWrites, this);
-                    lastWarning = now;
-                }
-                if (mStandby) {
-                    longStandbyExit = true;
-                }
-            }
-            // end of write blocked detection
-
-            mStandby = false;
-        } else {
-            usleep(sleepTime);
-        }
-
-        // finally let go of removed track(s), without the lock held
-        // since we can't guarantee the destructors won't acquire that
-        // same lock.
-        tracksToRemove.clear();
-
-        // Effect chains will be actually deleted here if they were removed from
-        // mEffectChains list during mixing or effects processing
-        effectChains.clear();
-
-        // FIXME Note that the above .clear() is no longer necessary since effectChains
-        // is now local to this block, but will keep it for now (at least until merge done).
-    }
-
-    // put output stream into standby mode
-    if (!mStandby) {
-        mOutput->stream->common.standby(&mOutput->stream->common);
-    }
-
-    releaseWakeLock();
-
-    ALOGV("Thread %p type %d exiting", this, mType);
-    return false;
 }
 
 // prepareTracks_l() must be called with ThreadBase::mLock held
@@ -2653,7 +2780,7 @@ AudioFlinger::DirectOutputThread::~DirectOutputThread()
 {
 }
 
-void AudioFlinger::DirectOutputThread::applyVolume(uint16_t leftVol, uint16_t rightVol, bool ramp)
+void AudioFlinger::DirectOutputThread::applyVolume()
 {
     // Do not apply volume on compressed audio
     if (!audio_is_linear_pcm(mFormat)) {
@@ -2672,7 +2799,7 @@ void AudioFlinger::DirectOutputThread::applyVolume(uint16_t leftVol, uint16_t ri
 
     size_t frameCount = mFrameCount;
     int16_t *out = mMixBuffer;
-    if (ramp) {
+    if (rampVolume) {
         if (mChannelCount == 1) {
             int32_t d = ((int32_t)leftVol - (int32_t)mLeftVolShort) << 16;
             int32_t vlInc = d / (int32_t)frameCount;
@@ -2727,103 +2854,19 @@ void AudioFlinger::DirectOutputThread::applyVolume(uint16_t leftVol, uint16_t ri
     mRightVolShort = rightVol;
 }
 
-bool AudioFlinger::DirectOutputThread::threadLoop()
+AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::threadLoop_prepareTracks_l(
+    sp<Track>& trackToRemove
+)
 {
-    // MixerThread has Vector instead of single trackToRemove
-    sp<Track> trackToRemove;
-
-    nsecs_t standbyTime = systemTime();
-    size_t mixBufferSize = mFrameCount * mFrameSize;
-
-    // MixerThread has relaxed timing: maxPeriod, lastWarning, longStandbyExit
-
-    uint32_t activeSleepTime = activeSleepTimeUs();
-    uint32_t idleSleepTime = idleSleepTimeUs();
-    uint32_t sleepTime = idleSleepTime;
-
-    // MixerThread has sleepTimeShift and cpuStats
-
-    // use shorter standby delay as on normal output to release
-    // hardware resources as soon as possible
-    nsecs_t standbyDelay = microseconds(activeSleepTime*2);
-
-    acquireWakeLock();
-
-    while (!exitPending())
-    {
-        // MixerThread has cpuStats.sample()
-
-        bool rampVolume;
-        uint16_t leftVol;
-        uint16_t rightVol;
-
-        Vector< sp<EffectChain> > effectChains;
-
-        processConfigEvents();
-
-        // MixerThread does not have activeTrack here
-        sp<Track> activeTrack;
-
-        mixer_state mixerStatus = MIXER_IDLE;
-        { // scope for the mLock
-
-            Mutex::Autolock _l(mLock);
-
-            if (checkForNewParameters_l()) {
-                mixBufferSize = mFrameCount * mFrameSize;
-
-                // different calculations here
-                standbyDelay = microseconds(activeSleepTime*2);
-
-                activeSleepTime = activeSleepTimeUs();
-                idleSleepTime = idleSleepTimeUs();
-                standbyDelay = microseconds(activeSleepTime*2);
-            }
-
-            // put audio hardware into standby after short delay
-            if (CC_UNLIKELY((!mActiveTracks.size() && systemTime() > standbyTime) ||
-                        mSuspended > 0)) {
-                if (!mStandby) {
-                    ALOGV("Audio hardware entering standby, mixer %p, suspend count %u", this, mSuspended);
-                    mOutput->stream->common.standby(&mOutput->stream->common);
-                    mStandby = true;
-                    mBytesWritten = 0;
-                }
-
-                if (!mActiveTracks.size() && mConfigEvents.isEmpty()) {
-                    // we're about to wait, flush the binder command buffer
-                    IPCThreadState::self()->flushCommands();
-
-                    if (exitPending()) break;
-
-                    releaseWakeLock_l();
-                    // wait until we have something to do...
-                    ALOGV("Thread %p type %d TID %d going to sleep", this, mType, gettid());
-                    mWaitWorkCV.wait(mLock);
-                    ALOGV("Thread %p type %d TID %d waking up", this, mType, gettid());
-                    acquireWakeLock_l();
-
-                    // MixerThread has "mPrevMixerStatus = MIXER_IDLE"
-                    checkSilentMode_l();
-
-                    // MixerThread has different standbyDelay
-                    standbyTime = systemTime() + standbyDelay;
-                    sleepTime = idleSleepTime;
-                    // MixerThread has "sleepTimeShift = 0"
-                    continue;
-                }
-            }
-
-            // MixerThread has "mixerStatus = prepareTracks_l(...)"
-
-            // equivalent to MixerThread's lockEffectChains_l, but without the lock
-            // FIXME - is it OK to omit the lock here?
-            effectChains = mEffectChains;
+// FIXME Temporarily renamed to avoid confusion with the member "mixerStatus"
+mixer_state mixerStatus_ = MIXER_IDLE;
 
             // find out which tracks need to be processed
             if (mActiveTracks.size() != 0) {
                 sp<Track> t = mActiveTracks[0].promote();
-                if (t == 0) continue;
+                // see FIXME in AudioFlinger.h, return MIXER_IDLE might also work
+                if (t == 0) return MIXER_CONTINUE;
+                //if (t == 0) continue;
 
                 Track* const track = t.get();
                 audio_track_cblk_t* cblk = track->cblk();
@@ -2886,9 +2929,9 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                         // Delegate volume control to effect in track effect chain if needed
                         // only one effect chain can be present on DirectOutputThread, so if
                         // there is one, the track is connected to it
-                        if (!effectChains.isEmpty()) {
+                        if (!mEffectChains.isEmpty()) {
                             // Do not ramp volume if volume is controlled by effect
-                            if(effectChains[0]->setVolume_l(&vl, &vr)) {
+                            if (mEffectChains[0]->setVolume_l(&vl, &vr)) {
                                 rampVolume = false;
                             }
                         }
@@ -2909,7 +2952,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     // reset retry count
                     track->mRetryCount = kMaxTrackRetriesDirect;
                     activeTrack = t;
-                    mixerStatus = MIXER_TRACKS_READY;
+                    mixerStatus_ = MIXER_TRACKS_READY;
                 } else {
                     //ALOGV("track %d u=%08x, s=%08x [NOT READY]", track->name(), cblk->user, cblk->server);
                     if (track->isStopped()) {
@@ -2926,7 +2969,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                             ALOGV("BUFFER TIMEOUT: remove(%d) from active list", track->name());
                             trackToRemove = track;
                         } else {
-                            mixerStatus = MIXER_TRACKS_ENABLED;
+                            mixerStatus_ = MIXER_TRACKS_ENABLED;
                         }
                     }
                 }
@@ -2935,21 +2978,21 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             // remove all the tracks that need to be...
             if (CC_UNLIKELY(trackToRemove != 0)) {
                 mActiveTracks.remove(trackToRemove);
-                if (!effectChains.isEmpty()) {
+                if (!mEffectChains.isEmpty()) {
                     ALOGV("stopping track on chain %p for session Id: %d", effectChains[0].get(),
                             trackToRemove->sessionId());
-                    effectChains[0]->decActiveTrackCnt();
+                    mEffectChains[0]->decActiveTrackCnt();
                 }
                 if (trackToRemove->isTerminated()) {
                     removeTrack_l(trackToRemove);
                 }
             }
 
-            lockEffectChains_l(effectChains);
-       }
+return mixerStatus_;
+}
 
-        // For DirectOutputThread, this test is equivalent to "activeTrack != 0"
-        if (CC_LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
+void AudioFlinger::DirectOutputThread::threadLoop_mix()
+{
             AudioBufferProvider::Buffer buffer;
             size_t frameCount = mFrameCount;
             int8_t *curBuf = (int8_t *)mMixBuffer;
@@ -2968,7 +3011,10 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             }
             sleepTime = 0;
             standbyTime = systemTime() + standbyDelay;
-        } else {
+}
+
+void AudioFlinger::DirectOutputThread::threadLoop_sleepTime()
+{
             if (sleepTime == 0) {
                 if (mixerStatus == MIXER_TRACKS_ENABLED) {
                     sleepTime = activeSleepTime;
@@ -2979,68 +3025,6 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                 memset (mMixBuffer, 0, mFrameCount * mFrameSize);
                 sleepTime = 0;
             }
-        }
-
-        if (mSuspended > 0) {
-            sleepTime = suspendSleepTimeUs();
-        }
-
-        // only process effects if we're going to write
-        if (sleepTime == 0) {
-
-            // MixerThread does not have applyVolume
-            if (mixerStatus == MIXER_TRACKS_READY) {
-                applyVolume(leftVol, rightVol, rampVolume);
-            }
-
-            for (size_t i = 0; i < effectChains.size(); i ++) {
-                effectChains[i]->process_l();
-            }
-        }
-
-        // enable changes in effect chain
-        unlockEffectChains(effectChains);
-
-        // sleepTime == 0 means we must write to audio hardware
-        if (sleepTime == 0) {
-            mLastWriteTime = systemTime();
-            mInWrite = true;
-            mBytesWritten += mixBufferSize;
-            int bytesWritten = (int)mOutput->stream->write(mOutput->stream, mMixBuffer, mixBufferSize);
-            if (bytesWritten < 0) mBytesWritten -= mixBufferSize;
-            mNumWrites++;
-            mInWrite = false;
-
-            // MixerThread has write blocked detection here
-
-            mStandby = false;
-        } else {
-            usleep(sleepTime);
-        }
-
-        // finally let go of removed track(s), without the lock held
-        // since we can't guarantee the destructors won't acquire that
-        // same lock.
-        trackToRemove.clear();
-        activeTrack.clear();
-
-        // Effect chains will be actually deleted here if they were removed from
-        // mEffectChains list during mixing or effects processing
-        effectChains.clear();
-
-        // FIXME Note that the above .clear() is no longer necessary since effectChains
-        // is now local to this block, but will keep it for now (at least until merge done).
-    }
-
-    // put output stream into standby mode
-    if (!mStandby) {
-        mOutput->stream->common.standby(&mOutput->stream->common);
-    }
-
-    releaseWakeLock();
-
-    ALOGV("Thread %p type %d exiting", this, mType);
-    return false;
 }
 
 // getTrackName_l() must be called with ThreadBase::mLock held
@@ -3153,96 +3137,8 @@ AudioFlinger::DuplicatingThread::~DuplicatingThread()
     }
 }
 
-bool AudioFlinger::DuplicatingThread::threadLoop()
+void AudioFlinger::DuplicatingThread::threadLoop_mix()
 {
-    Vector< sp<Track> > tracksToRemove;
-    nsecs_t standbyTime = systemTime();
-    size_t mixBufferSize = mFrameCount * mFrameSize;
-
-    // Only in DuplicatingThread
-    SortedVector< sp<OutputTrack> > outputTracks;
-    uint32_t writeFrames = 0;
-
-    uint32_t activeSleepTime = activeSleepTimeUs();
-    uint32_t idleSleepTime = idleSleepTimeUs();
-    uint32_t sleepTime = idleSleepTime;
-
-    acquireWakeLock();
-
-    while (!exitPending())
-    {
-        // MixerThread has cpuStats.sample
-
-        Vector< sp<EffectChain> > effectChains;
-
-        processConfigEvents();
-
-        mixer_state mixerStatus = MIXER_IDLE;
-        { // scope for the mLock
-
-            Mutex::Autolock _l(mLock);
-
-            if (checkForNewParameters_l()) {
-                mixBufferSize = mFrameCount * mFrameSize;
-
-                // Only in DuplicatingThread
-                updateWaitTime();
-
-                activeSleepTime = activeSleepTimeUs();
-                idleSleepTime = idleSleepTimeUs();
-            }
-
-            // Only in DuplicatingThread
-            for (size_t i = 0; i < mOutputTracks.size(); i++) {
-                outputTracks.add(mOutputTracks[i]);
-            }
-
-            // put audio hardware into standby after short delay
-            if (CC_UNLIKELY((!mActiveTracks.size() && systemTime() > standbyTime) ||
-                         mSuspended > 0)) {
-                if (!mStandby) {
-                    // DuplicatingThread implements standby by stopping all tracks
-                    for (size_t i = 0; i < outputTracks.size(); i++) {
-                        outputTracks[i]->stop();
-                    }
-                    mStandby = true;
-                    mBytesWritten = 0;
-                }
-
-                if (!mActiveTracks.size() && mConfigEvents.isEmpty()) {
-                    // we're about to wait, flush the binder command buffer
-                    IPCThreadState::self()->flushCommands();
-                    outputTracks.clear();
-
-                    if (exitPending()) break;
-
-                    releaseWakeLock_l();
-                    // wait until we have something to do...
-                    ALOGV("Thread %p type %d TID %d going to sleep", this, mType, gettid());
-                    mWaitWorkCV.wait(mLock);
-                    ALOGV("Thread %p type %d TID %d waking up", this, mType, gettid());
-                    acquireWakeLock_l();
-
-                    // MixerThread has "mPrevMixerStatus = MIXER_IDLE"
-                    checkSilentMode_l();
-
-                    standbyTime = systemTime() + mStandbyTimeInNsecs;
-                    sleepTime = idleSleepTime;
-                    // MixerThread has sleepTimeShift
-                    continue;
-                }
-            }
-
-            mixerStatus = prepareTracks_l(&tracksToRemove);
-
-            // prevent any changes in effect chain list and in each effect chain
-            // during mixing and effect process as the audio buffers could be deleted
-            // or modified if an effect is created or deleted
-            lockEffectChains_l(effectChains);
-        }
-
-        // Duplicating Thread is completely different here
-        if (CC_LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             // mix buffers...
             if (outputsReady(outputTracks)) {
                 mAudioMixer->process(AudioBufferProvider::kInvalidPTS);
@@ -3251,7 +3147,10 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             }
             sleepTime = 0;
             writeFrames = mFrameCount;
-        } else {
+}
+
+void AudioFlinger::DuplicatingThread::threadLoop_sleepTime()
+{
             if (sleepTime == 0) {
                 if (mixerStatus == MIXER_TRACKS_ENABLED) {
                     sleepTime = activeSleepTime;
@@ -3269,58 +3168,23 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     }
                 }
             }
-        }
+}
 
-        if (mSuspended > 0) {
-            sleepTime = suspendSleepTimeUs();
-        }
-
-        // only process effects if we're going to write
-        if (sleepTime == 0) {
-            for (size_t i = 0; i < effectChains.size(); i ++) {
-                effectChains[i]->process_l();
-            }
-        }
-
-        // enable changes in effect chain
-        unlockEffectChains(effectChains);
-
-        // sleepTime == 0 means we must write to audio hardware
-        if (sleepTime == 0) {
+void AudioFlinger::DuplicatingThread::threadLoop_write()
+{
             standbyTime = systemTime() + mStandbyTimeInNsecs;
             for (size_t i = 0; i < outputTracks.size(); i++) {
                 outputTracks[i]->write(mMixBuffer, writeFrames);
             }
-            mStandby = false;
             mBytesWritten += mixBufferSize;
+}
 
-            // MixerThread has write blocked detection here
-
-        } else {
-            usleep(sleepTime);
-        }
-
-        // finally let go of removed track(s), without the lock held
-        // since we can't guarantee the destructors won't acquire that
-        // same lock.
-        tracksToRemove.clear();
-        outputTracks.clear();
-
-        // Effect chains will be actually deleted here if they were removed from
-        // mEffectChains list during mixing or effects processing
-        effectChains.clear();
-
-        // FIXME Note that the above .clear() is no longer necessary since effectChains
-        // is now local to this block, but will keep it for now (at least until merge done).
-    }
-
-    // MixerThread and DirectOutpuThread have standby here,
-    // but for DuplicatingThread this is handled by the outputTracks
-
-    releaseWakeLock();
-
-    ALOGV("Thread %p type %d exiting", this, mType);
-    return false;
+void AudioFlinger::DuplicatingThread::threadLoop_standby()
+{
+                    // DuplicatingThread implements standby by stopping all tracks
+                    for (size_t i = 0; i < outputTracks.size(); i++) {
+                        outputTracks[i]->stop();
+                    }
 }
 
 void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
