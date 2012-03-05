@@ -19,7 +19,6 @@ package android.database.sqlite;
 import android.content.CancellationSignal;
 import android.content.ContentValues;
 import android.content.OperationCanceledException;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.DatabaseUtils;
@@ -65,7 +64,7 @@ import java.util.WeakHashMap;
  * to the current locale.
  * </p>
  */
-public class SQLiteDatabase extends SQLiteClosable {
+public final class SQLiteDatabase extends SQLiteClosable {
     private static final String TAG = "SQLiteDatabase";
 
     private static final int EVENT_DB_CORRUPT = 75004;
