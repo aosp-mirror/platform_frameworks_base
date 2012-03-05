@@ -1458,7 +1458,8 @@ status_t MediaPlayerService::AudioOutput::getPosition(uint32_t *position)
 }
 
 status_t MediaPlayerService::AudioOutput::open(
-        uint32_t sampleRate, int channelCount, audio_format_t format, int bufferCount,
+        uint32_t sampleRate, int channelCount, audio_channel_mask_t channelMask,
+        audio_format_t format, int bufferCount,
         AudioCallback cb, void *cookie)
 {
     mCallback = cb;
@@ -1470,7 +1471,8 @@ status_t MediaPlayerService::AudioOutput::open(
         bufferCount = mMinBufferCount;
 
     }
-    ALOGV("open(%u, %d, %d, %d, %d)", sampleRate, channelCount, format, bufferCount,mSessionId);
+    ALOGV("open(%u, %d, 0x%x, %d, %d, %d)", sampleRate, channelCount, channelMask,
+            format, bufferCount, mSessionId);
     if (mTrack) close();
     int afSampleRate;
     int afFrameCount;
@@ -1485,13 +1487,21 @@ status_t MediaPlayerService::AudioOutput::open(
 
     frameCount = (sampleRate*afFrameCount*bufferCount)/afSampleRate;
 
+    if (channelMask == CHANNEL_MASK_USE_CHANNEL_ORDER) {
+        channelMask = audio_channel_mask_from_count(channelCount);
+        if (0 == channelMask) {
+            ALOGE("open() error, can\'t derive mask for %d audio channels", channelCount);
+            return NO_INIT;
+        }
+    }
+
     AudioTrack *t;
     if (mCallback != NULL) {
         t = new AudioTrack(
                 mStreamType,
                 sampleRate,
                 format,
-                (channelCount == 2) ? AUDIO_CHANNEL_OUT_STEREO : AUDIO_CHANNEL_OUT_MONO,
+                channelMask,
                 frameCount,
                 0 /* flags */,
                 CallbackWrapper,
@@ -1503,7 +1513,7 @@ status_t MediaPlayerService::AudioOutput::open(
                 mStreamType,
                 sampleRate,
                 format,
-                (channelCount == 2) ? AUDIO_CHANNEL_OUT_STEREO : AUDIO_CHANNEL_OUT_MONO,
+                channelMask,
                 frameCount,
                 0,
                 NULL,
@@ -1751,10 +1761,11 @@ bool CallbackThread::threadLoop() {
 ////////////////////////////////////////////////////////////////////////////////
 
 status_t MediaPlayerService::AudioCache::open(
-        uint32_t sampleRate, int channelCount, audio_format_t format, int bufferCount,
+        uint32_t sampleRate, int channelCount, audio_channel_mask_t channelMask,
+        audio_format_t format, int bufferCount,
         AudioCallback cb, void *cookie)
 {
-    ALOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
+    ALOGV("open(%u, %d, 0x%x, %d, %d)", sampleRate, channelCount, channelMask, format, bufferCount);
     if (mHeap->getHeapID() < 0) {
         return NO_INIT;
     }

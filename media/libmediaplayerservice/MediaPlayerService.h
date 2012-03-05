@@ -85,7 +85,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual int             getSessionId();
 
         virtual status_t        open(
-                uint32_t sampleRate, int channelCount,
+                uint32_t sampleRate, int channelCount, audio_channel_mask_t channelMask,
                 audio_format_t format, int bufferCount,
                 AudioCallback cb, void *cookie);
 
@@ -145,8 +145,8 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual int             getSessionId();
 
         virtual status_t        open(
-                uint32_t sampleRate, int channelCount, audio_format_t format,
-                int bufferCount = 1,
+                uint32_t sampleRate, int channelCount, audio_channel_mask_t channelMask,
+                audio_format_t format, int bufferCount = 1,
                 AudioCallback cb = NULL, void *cookie = NULL);
 
         virtual void            start();
