@@ -78,7 +78,7 @@ preinstalled applications (such as the dialer) that you can access from your
 applications. You can choose what version of the Android system you want to
 run in the emulator by configuring AVDs, and you can also customize the
 mobile device skin and key mappings. When launching the emulator and at runtime,
-you can use a variety of commands and options to control the its behaviors.
+you can use a variety of commands and options to control its behavior.
 </p>
 
 <p>The Android system image distributed in the SDK contains ARM machine code for
