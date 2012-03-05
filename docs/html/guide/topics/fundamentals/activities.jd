@@ -62,7 +62,7 @@ is presented to the user when launching the application for the first time. Each
 activity can then start another activity in order to perform different actions. Each time a new
 activity starts, the previous activity is stopped, but the system preserves the activity
 in a stack (the "back stack"). When a new activity starts, it is pushed onto the back stack and
-takes user focus. The back stack abides to the basic "last in, first out" queue mechanism,
+takes user focus. The back stack abides to the basic "last in, first out" stack mechanism,
 so, when the user is done with the current activity and presses the <em>Back</em> button, it
 is popped from the stack (and destroyed) and the previous activity resumes. (The back stack is
 discussed more in the <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks

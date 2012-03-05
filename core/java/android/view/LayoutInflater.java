@@ -34,8 +34,8 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
 /**
- * This class is used to instantiate layout XML file into its corresponding View
- * objects. It is never be used directly -- use
+ * Instantiates a layout XML file into its corresponding {@link android.view.View}
+ * objects. It is never used directly. Instead, use
  * {@link android.app.Activity#getLayoutInflater()} or
  * {@link Context#getSystemService} to retrieve a standard LayoutInflater instance
  * that is already hooked up to the current context and correctly configured
