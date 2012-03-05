@@ -41,6 +41,8 @@
 #include "rsdVertexArray.h"
 #include "rsdFrameBufferObj.h"
 
+#include <gui/SurfaceTextureClient.h>
+
 using namespace android;
 using namespace android::renderscript;
 
@@ -299,14 +301,15 @@ bool rsdGLInit(const Context *rsc) {
     }
     gGLContextCount++;
 
+    sp<SurfaceTexture> st(new SurfaceTexture(123));
+    sp<SurfaceTextureClient> stc(new SurfaceTextureClient(st));
+    dc->gl.egl.surfaceDefault = eglCreateWindowSurface(dc->gl.egl.display, dc->gl.egl.config,
+                                                       static_cast<ANativeWindow*>(stc.get()),
+                                                       NULL);
 
-    EGLint pbuffer_attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
-    rsc->setWatchdogGL("eglCreatePbufferSurface", __LINE__, __FILE__);
-    dc->gl.egl.surfaceDefault = eglCreatePbufferSurface(dc->gl.egl.display, dc->gl.egl.config,
-                                                        pbuffer_attribs);
-    checkEglError("eglCreatePbufferSurface");
+    checkEglError("eglCreateWindowSurface");
     if (dc->gl.egl.surfaceDefault == EGL_NO_SURFACE) {
-        ALOGE("eglCreatePbufferSurface returned EGL_NO_SURFACE");
+        ALOGE("eglCreateWindowSurface returned EGL_NO_SURFACE");
         rsdGLShutdown(rsc);
         rsc->setWatchdogGL(NULL, 0, NULL);
         return false;
