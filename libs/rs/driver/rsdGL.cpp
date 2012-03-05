@@ -173,15 +173,12 @@ void rsdGLShutdown(const Context *rsc) {
     }
 }
 
-bool rsdGLInit(const Context *rsc) {
-    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
+void getConfigData(const Context *rsc,
+                   EGLint *configAttribs, size_t configAttribsLen,
+                   uint32_t numSamples) {
+    memset(configAttribs, 0, configAttribsLen*sizeof(*configAttribs));
 
-    dc->gl.egl.numConfigs = -1;
-    EGLint configAttribs[128];
     EGLint *configAttribsPtr = configAttribs;
-    EGLint context_attribs2[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-
-    memset(configAttribs, 0, sizeof(configAttribs));
 
     configAttribsPtr[0] = EGL_SURFACE_TYPE;
     configAttribsPtr[1] = EGL_WINDOW_BIT;
@@ -221,8 +218,25 @@ bool rsdGLInit(const Context *rsc) {
         configAttribsPtr += 2;
     }
 
+    if (numSamples > 1) {
+        configAttribsPtr[0] = EGL_SAMPLE_BUFFERS;
+        configAttribsPtr[1] = 1;
+        configAttribsPtr[2] = EGL_SAMPLES;
+        configAttribsPtr[3] = numSamples;
+        configAttribsPtr += 4;
+    }
+
     configAttribsPtr[0] = EGL_NONE;
-    rsAssert(configAttribsPtr < (configAttribs + (sizeof(configAttribs) / sizeof(EGLint))));
+    rsAssert(configAttribsPtr < (configAttribs + configAttribsLen));
+}
+
+bool rsdGLInit(const Context *rsc) {
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
+
+    dc->gl.egl.numConfigs = -1;
+
+    EGLint configAttribs[128];
+    EGLint context_attribs2[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
 
     ALOGV("%p initEGL start", rsc);
     rsc->setWatchdogGL("eglGetDisplay", __LINE__, __FILE__);
@@ -237,8 +251,18 @@ bool rsdGLInit(const Context *rsc) {
 
     EGLint numConfigs = -1, n = 0;
     rsc->setWatchdogGL("eglChooseConfig", __LINE__, __FILE__);
-    ret = eglChooseConfig(dc->gl.egl.display, configAttribs, 0, 0, &numConfigs);
-    checkEglError("eglGetConfigs", ret);
+
+    // Try minding a multisample config that matches the user request
+    uint32_t minSample = rsc->mUserSurfaceConfig.samplesMin;
+    uint32_t prefSample = rsc->mUserSurfaceConfig.samplesPref;
+    for (uint32_t sampleCount = prefSample; sampleCount >= minSample; sampleCount--) {
+        getConfigData(rsc, configAttribs, (sizeof(configAttribs) / sizeof(EGLint)), sampleCount);
+        ret = eglChooseConfig(dc->gl.egl.display, configAttribs, 0, 0, &numConfigs);
+        checkEglError("eglGetConfigs", ret);
+        if (numConfigs > 0) {
+            break;
+        }
+    }
 
     eglSwapInterval(dc->gl.egl.display, 0);
 
