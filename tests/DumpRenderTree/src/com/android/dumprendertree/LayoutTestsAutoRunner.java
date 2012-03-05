@@ -58,26 +58,8 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
             }
         }
 
-        String delay_str = (String) icicle.get("delay");
-        if(delay_str != null) {
-            try {
-                this.mDelay = Integer.parseInt(delay_str);
-            } catch (Exception e) {
-            }
-        }
-
         String r = icicle.getString("rebaseline");
         this.mRebaseline = (r != null && r.toLowerCase().equals("true"));
-
-        String logtime = icicle.getString("logtime");
-        this.mLogtime = (logtime != null
-                && logtime.toLowerCase().equals("true"));
-
-        String drawTime = icicle.getString("drawtime");
-        this.mGetDrawTime = (drawTime != null
-                && drawTime.toLowerCase().equals("true"));
-
-        mSaveImagePath = icicle.getString("saveimage");
 
         mJsEngine = icicle.getString("jsengine");
 
@@ -92,11 +74,7 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
     String mPageCyclerForwardHost;
     String mPageCyclerIteration;
     String mTestPath;
-    String mSaveImagePath;
-    int mTimeoutInMillis;
-    int mDelay;
+    int mTimeoutInMillis = 0;
     boolean mRebaseline;
-    boolean mLogtime;
-    boolean mGetDrawTime;
     String mJsEngine;
 }

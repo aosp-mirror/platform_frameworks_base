@@ -314,6 +314,10 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             public void timedOut(String url) {
                 Log.v(LOGTAG, "layout timeout: " + url);
             }
+
+            @Override
+            public void dumpResult(String webViewDump) {
+            }
         });
 
         String resultFile = getResultFile(test);

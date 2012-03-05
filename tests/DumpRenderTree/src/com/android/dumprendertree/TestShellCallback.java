@@ -18,5 +18,6 @@ package com.android.dumprendertree;
 
 public interface TestShellCallback {
     public void finished();
+    public void dumpResult(String webViewDump);
     public void timedOut(String url);
 }
