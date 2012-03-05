@@ -2235,7 +2235,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
                 if (target != currentValue) {
                     final boolean turningOff = endValue == Power.BRIGHTNESS_OFF;
-                    if (turningOff) {
+                    if (turningOff && ((mask & (SCREEN_ON_BIT | SCREEN_BRIGHT_BIT)) != 0)) {
                         // Cancel all pending animations since we're turning off
                         mScreenBrightnessHandler.removeCallbacksAndMessages(null);
                         screenOffFinishedAnimatingLocked(mScreenOffReason);
