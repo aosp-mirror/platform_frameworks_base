@@ -1,0 +1,59 @@
+page.title=Tabs
+@jd:body
+
+<img src="{@docRoot}design/media/tabs_overview.png">
+
+<p>Tabs in the action bar make it easy to explore and switch between different views or functional
+aspects of your app, or to browse categorized data sets.</p>
+
+
+<h2 id="scrollable">Scrollable Tabs</h2>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<p>Scrolling tab controls can contain a larger number of items than a standard tab control. To navigate
+to the next/previous view, swipe left or right.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <video width="400" class="with-shadow play-on-hover" autoplay>
+      <source src="{@docRoot}design/media/tabs_scrolly.mp4" type="video/mp4">
+      <source src="{@docRoot}design/media/tabs_scrolly.webm" type="video/webm">
+      <source src="{@docRoot}design/media/tabs_scrolly.ogv" type="video/ogg">
+    </video>
+    <div class="figure-caption">
+      Scrolling tabs in Google Play.
+      <div class="video-instructions">&nbsp;</div>
+    </div>
+
+  </div>
+</div>
+
+
+<h2 id="fixed">Fixed Tabs</h2>
+
+
+<p>Fixed tabs display all items concurrently. To navigate to a different view, touch the tab.</p>
+
+<img src="{@docRoot}design/media/tabs_standard.png">
+<div class="figure-caption">
+  Tabs in Holo Dark &amp; Light.
+</div>
+
+<img src="{@docRoot}design/media/tabs_youtube.png">
+<div class="figure-caption">
+  Tabs in the YouTube app.
+</div>
+
+
+
+<h2 id="stacked">Stacked Tabs</h2>
+
+
+<p>If view navigation is essential to your app, you can break out tabs into a separate action bar. This
+permits fast view switching even on narrower screens.</p>
+
+<img src="{@docRoot}design/media/tabs_stacked.png">

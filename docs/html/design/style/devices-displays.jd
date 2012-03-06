@@ -1,0 +1,45 @@
+page.title=Devices and Displays
+@jd:body
+
+<p>Android powers millions of phones, tablets, and other devices in a wide variety of screen sizes and
+form factors. By taking advantage of Android's flexible layout system, you can create apps that
+gracefully scale from large tablets to smaller phones.</p>
+
+<img src="{@docRoot}design/media/devices_displays_main.png">
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+<h4>Be flexible</h4>
+<p>Stretch and compress your layouts to accommodate various heights and widths.</p>
+
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Optimize layouts</h4>
+<p>On larger devices, take advantage of extra screen real estate. Create compound views that combine
+multiple views to reveal more content and ease navigation.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<h4>Assets for all</h4>
+<p>Provide resources for different screen densities (<acronym title="Dots per inch">DPI</acronym>) to
+ensure that your app looks great on any device.</p>
+
+  </div>
+</div>
+
+<div style="text-align:center">
+  <img src="{@docRoot}design/media/devices_displays_density.png">
+</div>
+
+<h4>Strategies</h4>
+<p>So where do you begin when designing for multiple screens? One approach is to work in the base
+standard (medium size, <acronym title="Medium density (160 dpi)">MDPI</acronym>) and scale it up or
+down for the other buckets. Another approach is to start with the device with the largest screen
+size, and then scale down and figure out the UI compromises you'll need to make on smaller screens.</p>
+<p>For more detailed information on this topic, please visit <a href="http://developer.android.com/guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>

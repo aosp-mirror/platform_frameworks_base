@@ -1,0 +1,340 @@
+page.title=Iconography
+@jd:body
+
+<img src="{@docRoot}design/media/iconography_overview.png">
+
+<p>An icon is a graphic that takes up a small portion of screen real estate and provides a quick,
+intuitive representation of an action, a status, or an app.</p>
+
+
+
+<h2 id="launcher">Launcher</h2>
+
+<p>The launcher icon is the visual representation of your app on the Home or All Apps screen. Since the
+user can change the Home screen's wallpaper, make sure that your launcher icon is clearly visible on
+any type of background.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_launcher_size.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_launcher_focal.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_launcher_style.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <h4>Sizes &amp; scale</h4>
+
+    <ul>
+      <li class="no-bullet with-icon tablet">
+        <p>Launcher icons on a mobile device must be <strong>48x48 <acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi screen.">dp</acronym></strong>.</p></li>
+      <li class="no-bullet with-icon web">
+        <p>Launcher icons for display on Google Play must be <strong>512x512 pixels</strong>.</p></li>
+    </ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <h4>Proportions</h4>
+
+    <ul>
+      <li class="no-bullet with-icon tablet">
+        <p>Full asset, <strong>48x48 dp</strong></p>
+      </li>
+    </ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<h4>Style</h4>
+<p>Use a distinct silhouette. Three-dimensional, front view, with a slight perspective as if viewed
+from above, so that users perceive some depth.</p>
+
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+    &nbsp;
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/iconography_launcher_example.png">
+
+  </div>
+  <!-- 2 free columns -->
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-12">
+
+    <img src="{@docRoot}design/media/iconography_launcher_example2.png">
+
+    <div class="vspace size-2">&nbsp;</div>
+
+  </div>
+  <!-- 1 free columns -->
+</div>
+
+
+<h2 id="action-bar">Action Bar</h2>
+
+<p>
+
+Action bar icons are graphic buttons that represent the most important actions people can take
+within your app. Each one should employ a simple metaphor representing a single concept that most
+people can grasp at a glance.
+
+</p>
+<p>
+
+Pre-defined glyphs should be used for certain common actions such as "refresh" and "share." The
+download link below provides a package with icons that are scaled for various screen densities and
+are suitable for use with the Holo Light and Holo Dark themes. The package also includes unstyled
+icons that you can modify to match your theme, in addition to Adobe&reg; Illustrator&reg; source
+files for further customization.
+
+</p>
+<p>
+
+<a href="https://dl-ssl.google.com/android/design/Android_Design_Icons_20120229.zip">Download the Action Bar Icon Pack</a>
+
+</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_actionbar_size.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_actionbar_focal.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_actionbar_style.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <h4>Sizes &amp; scale</h4>
+
+    <ul>
+      <li class="no-bullet with-icon tablet">
+        <p>Action bar icons for phones should be <strong>32x32 <acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi screen.">dp</acronym></strong>.</p></li>
+    </ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <h4>Focal area &amp; proportions</h4>
+
+    <ul>
+      <li class="no-bullet with-icon tablet">
+        <p>Full asset, <strong>32x32 dp</strong></p>
+        <p>Optical square, <strong>24x24 dp</strong></p>
+      </li>
+    </ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<h4>Style</h4>
+<p>Pictographic, flat, not too detailed, with smooth curves or sharp shapes. If the graphic is thin,
+rotate it 45&deg; left or right to fill the focal space. The thickness of the strokes and negative
+spaces should be a minimum of 2 dp.</p>
+
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-3">
+
+<h4>Colors</h4>
+<p>Colors: <strong>#333333</strong><br />
+Enabled: <strong>60%</strong> opacity<br />
+Disabled: <strong>30%</strong> opacity</p>
+<div class="vspace size-1">&nbsp;</div>
+
+<p>Colors: <strong>#FFFFFF</strong><br />
+Enabled: <strong>80%</strong> opacity<br />
+Disabled: <strong>30%</strong> opacity</p>
+
+  </div>
+  <div class="layout-content-col span-9">
+
+    <img src="{@docRoot}design/media/iconography_actionbar_colors.png">
+
+  </div>
+</div>
+
+
+<h2 id="small-contextual">Small / Contextual Icons</h2>
+
+<p>Within the body of your app, use small icons to surface actions and/or provide status for specific
+items. For example, in the Gmail app, each message has a star icon that marks the message as
+important.</p>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_small_size.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_small_focal.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_small_style.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <h4>Sizes &amp; scale</h4>
+
+    <ul>
+      <li class="no-bullet with-icon tablet">
+        <p>Small icons should be <strong>16x16 <acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi screen.">dp</acronym></strong>.</p></li>
+    </ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <h4>Focal area &amp; proportions</h4>
+
+    <ul>
+      <li class="no-bullet with-icon tablet">
+        <p>Full asset, <strong>16x16 dp</strong></p>
+        <p>Optical square, <strong>12x12 dp</strong></p>
+      </li>
+    </ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<h4>Style</h4>
+<p>Neutral, flat, and simple. Filled shapes are easier to see than thin strokes. Use a single visual
+metaphor so that a user can easily recognize and understand its purpose.</p>
+
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_small_colors.png">
+
+    <div class="vspace size-2">&nbsp;</div>
+
+<h4>Colors</h4>
+<p>Use non-neutral colors sparingly and with purpose. For example, Gmail uses yellow in the star icon
+to indicate a bookmarked message. If an icon is actionable, choose a color that contrasts well with
+the background.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/iconography_small_example.png">
+
+  </div>
+  <!-- 2 free columns -->
+</div>
+
+
+<h2 id="notification">Notification Icons</h2>
+
+<p>If your app generates notifications, provide an icon that the system can display in the status bar
+whenever a new notification is available.</p>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_notification_size.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_notification_focal.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_notification_style.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+    <h4>Sizes &amp; scale</h4>
+
+    <ul>
+      <li class="no-bullet with-icon tablet">
+        <p>Notification icons must be <strong>24x24 <acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi screen.">dp</acronym></strong>.</p></li>
+    </ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <h4>Focal area &amp; proportions</h4>
+
+    <ul>
+      <li class="no-bullet with-icon tablet">
+        <p>Full asset, <strong>24x24 dp</strong></p>
+        <p>Optical square, <strong>22x22 dp</strong></p>
+      </li>
+    </ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<h4>Style</h4>
+<p>Keep the style flat and simple, using the same single, visual metaphor as your launcher icon.</p>
+
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+<h4>Colors</h4>
+<p>Notification icons must be entirely white. Also, the system may scale down and/or darken the icons.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/iconography_notification_example.png">
+
+  </div>
+  <!-- 2 free columns -->
+</div>

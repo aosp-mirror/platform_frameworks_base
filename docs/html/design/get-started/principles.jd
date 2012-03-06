@@ -1,0 +1,300 @@
+page.title=Design Principles
+@jd:body
+
+<p>These design principles were developed by and for the Android User Experience Team to keep users'
+best interests in mind. Consider them as you apply your own creativity and design thinking. Deviate
+with purpose.</p>
+
+<h2 id="enchant-me">Enchant Me</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Delight me in surprising ways</h4>
+<p>A beautiful surface, a carefully-placed animation, or a well-timed sound effect is a joy to
+experience. Subtle effects contribute to a feeling of effortlessness and a sense that a powerful
+force is at hand.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_delight.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Real objects are more fun than buttons and menus</h4>
+<p>Allow people to directly touch and manipulate objects in your app. It reduces the cognitive effort
+needed to perform a task while making it more emotionally satisfying.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_real_objects.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Let me make it mine</h4>
+<p>People love to add personal touches because it helps them feel at home and in control. Provide
+sensible, beautiful defaults, but also consider fun, optional customizations that don't hinder
+primary tasks.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_it_mine.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Get to know me</h4>
+<p>Learn peoples' preferences over time. Rather than asking them to make the same choices over and
+over, place previous choices within easy reach.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_get_to_know_me.png">
+
+  </div>
+</div>
+
+<h2 id="simplify-my-life">Simplify My Life</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Keep it brief</h4>
+<p>Use short phrases with simple words. People are likely to skip sentences if they're long.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_keep_it_brief.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Pictures are faster than words</h4>
+<p>Consider using pictures to explain ideas. They get people's attention and can be much more efficient
+than words.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_pictures.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Decide for me but let me have the final say</h4>
+<p>Take your best guess and act rather than asking first. Too many choices and decisions make people
+unhappy. Just in case you get it wrong, allow for 'undo'.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_decide_for_me.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Only show what I need when I need it</h4>
+<p>People get overwhelmed when they see too much at once. Break tasks and information into small,
+digestible chunks. Hide options that aren't essential at the moment, and teach people as they go.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_information_when_need_it.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>I should always know where I am</h4>
+<p>Give people confidence that they know their way around. Make places in your app look distinct and
+use transitions to show relationships among screens. Provide feedback on tasks in progress.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_navigation.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Never lose my stuff</h4>
+<p>Save what people took time to create and let them access it from anywhere. Remember settings,
+personal touches, and creations across phones, tablets, and computers. It makes upgrading the
+easiest thing in the world.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_never_lose_stuff.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>If it looks the same, it should act the same</h4>
+<p>Help people discern functional differences by making them visually distinct rather than subtle.
+Avoid modes, which are places that look similar but act differently on the same input.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_looks_same.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Only interrupt me if it's important</h4>
+<p>Like a good personal assistant, shield people from unimportant minutiae. People want to stay
+focused, and unless it's critical and time-sensitive, an interruption can be taxing and frustrating.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_important_interruption.png">
+
+  </div>
+</div>
+
+<h2 id="make-me-amazing">Make Me Amazing</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Give me tricks that work everywhere</h4>
+<p>People feel great when they figure things out for themselves. Make your app easier to learn by
+leveraging visual patterns and muscle memory from other Android apps. For example, the swipe gesture
+may be a good navigational shortcut.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_tricks.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>It's not my fault</h4>
+<p>Be gentle in how you prompt people to make corrections. They want to feel smart when they use your
+app. If something goes wrong, give clear recovery instructions but spare them the technical details.
+If you can fix it behind the scenes, even better.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_error.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Sprinkle encouragement</h4>
+<p>Break complex tasks into smaller steps that can be easily accomplished. Give feedback on actions,
+even if it's just a subtle glow.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_sprinkle_encouragement.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Do the heavy lifting for me</h4>
+<p>Make novices feel like experts by enabling them to do things they never thought they could. For
+example, shortcuts that combine multiple photo effects can make amateur photographs look amazing in
+only a few steps.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_heavy_lifting.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Make important things fast</h4>
+<p>Not all actions are equal. Decide what's most important in your app and make it easy to find and
+fast to use, like the shutter button in a camera, or the pause button in a music player.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/principles_make_important_fast.png">
+
+  </div>
+</div>
