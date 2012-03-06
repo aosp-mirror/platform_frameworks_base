@@ -620,55 +620,8 @@ static jint android_drm_DrmManagerClient_openConvertSession(
     return convertId;
 }
 
-static jobject android_drm_DrmManagerClient_convertData(
-            JNIEnv* env, jobject thiz, jint uniqueId, jint convertId, jbyteArray inputData) {
-    ALOGV("convertData Enter");
-
-    int dataLength = 0;
-    char* mData = Utility::getByteArrayValue(env, inputData, &dataLength);
-    const DrmBuffer buffer(mData, dataLength);
-
-    DrmConvertedStatus* pDrmConvertedStatus
-            = getDrmManagerClientImpl(env, thiz)->convertData(uniqueId, convertId, &buffer);
-
-    jclass localRef = env->FindClass("android/drm/DrmConvertedStatus");
-
-    jobject drmConvertedStatus = NULL;
-
-    if (NULL != localRef && NULL != pDrmConvertedStatus) {
-        int statusCode = pDrmConvertedStatus->statusCode;
-
-        jbyteArray dataArray = NULL;
-        if (NULL != pDrmConvertedStatus->convertedData) {
-            int length = pDrmConvertedStatus->convertedData->length;
-            dataArray = env->NewByteArray(length);
-            env->SetByteArrayRegion(dataArray, 0, length,
-                            (jbyte*) pDrmConvertedStatus->convertedData->data);
-
-            delete [] pDrmConvertedStatus->convertedData->data;
-            delete pDrmConvertedStatus->convertedData; pDrmConvertedStatus->convertedData = NULL;
-        }
-        jmethodID constructorId = env->GetMethodID(localRef, "<init>", "(I[BI)V");
-        drmConvertedStatus
-            = env->NewObject(localRef, constructorId,
-                             statusCode, dataArray, pDrmConvertedStatus->offset);
-    }
-
-    delete[] mData; mData = NULL;
-    delete pDrmConvertedStatus; pDrmConvertedStatus = NULL;
-
-    ALOGV("convertData - Exit");
-    return drmConvertedStatus;
-}
-
-static jobject android_drm_DrmManagerClient_closeConvertSession(
-            JNIEnv* env, jobject thiz, int uniqueId, jint convertId) {
-
-    ALOGV("closeConvertSession Enter");
-
-    DrmConvertedStatus* pDrmConvertedStatus
-                = getDrmManagerClientImpl(env, thiz)->closeConvertSession(uniqueId, convertId);
-
+static jobject GetConvertedStatus(JNIEnv* env, DrmConvertedStatus* pDrmConvertedStatus) {
+    ALOGV("GetConvertedStatus - Enter");
     jclass localRef = env->FindClass("android/drm/DrmConvertedStatus");
 
     jobject drmConvertedStatus = NULL;
@@ -694,8 +647,40 @@ static jobject android_drm_DrmManagerClient_closeConvertSession(
 
     delete pDrmConvertedStatus; pDrmConvertedStatus = NULL;
 
-    ALOGV("closeConvertSession - Exit");
+    ALOGV("GetConvertedStatus - Exit");
     return drmConvertedStatus;
+}
+
+static jobject android_drm_DrmManagerClient_convertData(
+            JNIEnv* env, jobject thiz, jint uniqueId, jint convertId, jbyteArray inputData) {
+    ALOGV("convertData Enter");
+
+    int dataLength = 0;
+    char* mData = Utility::getByteArrayValue(env, inputData, &dataLength);
+    const DrmBuffer buffer(mData, dataLength);
+
+    DrmConvertedStatus* pDrmConvertedStatus
+            = getDrmManagerClientImpl(env, thiz)->convertData(uniqueId, convertId, &buffer);
+    jobject status = GetConvertedStatus(env, pDrmConvertedStatus);
+
+    delete[] mData;
+    mData = NULL;
+
+    ALOGV("convertData - Exit");
+    return status;
+}
+
+static jobject android_drm_DrmManagerClient_closeConvertSession(
+            JNIEnv* env, jobject thiz, int uniqueId, jint convertId) {
+
+    ALOGV("closeConvertSession Enter");
+
+    DrmConvertedStatus* pDrmConvertedStatus
+                = getDrmManagerClientImpl(env, thiz)->closeConvertSession(uniqueId, convertId);
+    jobject status = GetConvertedStatus(env, pDrmConvertedStatus);
+
+    ALOGV("closeConvertSession - Exit");
+    return status;
 }
 
 static JNINativeMethod nativeMethods[] = {
