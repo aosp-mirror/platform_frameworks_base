@@ -2265,79 +2265,79 @@ if (mType == DUPLICATING) {
 // shared by MIXER and DIRECT, overridden by DUPLICATING
 void AudioFlinger::PlaybackThread::threadLoop_write()
 {
-            // FIXME rewrite to reduce number of system calls
-            mLastWriteTime = systemTime();
-            mInWrite = true;
-            mBytesWritten += mixBufferSize;
-            int bytesWritten = (int)mOutput->stream->write(mOutput->stream, mMixBuffer, mixBufferSize);
-            if (bytesWritten < 0) mBytesWritten -= mixBufferSize;
-            mNumWrites++;
-            mInWrite = false;
+    // FIXME rewrite to reduce number of system calls
+    mLastWriteTime = systemTime();
+    mInWrite = true;
+    mBytesWritten += mixBufferSize;
+    int bytesWritten = (int)mOutput->stream->write(mOutput->stream, mMixBuffer, mixBufferSize);
+    if (bytesWritten < 0) mBytesWritten -= mixBufferSize;
+    mNumWrites++;
+    mInWrite = false;
 }
 
 // shared by MIXER and DIRECT, overridden by DUPLICATING
 void AudioFlinger::PlaybackThread::threadLoop_standby()
 {
-                    ALOGV("Audio hardware entering standby, mixer %p, suspend count %u", this, mSuspended);
-                    mOutput->stream->common.standby(&mOutput->stream->common);
+    ALOGV("Audio hardware entering standby, mixer %p, suspend count %u", this, mSuspended);
+    mOutput->stream->common.standby(&mOutput->stream->common);
 }
 
 void AudioFlinger::MixerThread::threadLoop_mix()
 {
-            // obtain the presentation timestamp of the next output buffer
-            int64_t pts;
-            status_t status = INVALID_OPERATION;
+    // obtain the presentation timestamp of the next output buffer
+    int64_t pts;
+    status_t status = INVALID_OPERATION;
 
-            if (NULL != mOutput->stream->get_next_write_timestamp) {
-                status = mOutput->stream->get_next_write_timestamp(
-                        mOutput->stream, &pts);
-            }
+    if (NULL != mOutput->stream->get_next_write_timestamp) {
+        status = mOutput->stream->get_next_write_timestamp(
+                mOutput->stream, &pts);
+    }
 
-            if (status != NO_ERROR) {
-                pts = AudioBufferProvider::kInvalidPTS;
-            }
+    if (status != NO_ERROR) {
+        pts = AudioBufferProvider::kInvalidPTS;
+    }
 
-            // mix buffers...
-            mAudioMixer->process(pts);
-            // increase sleep time progressively when application underrun condition clears.
-            // Only increase sleep time if the mixer is ready for two consecutive times to avoid
-            // that a steady state of alternating ready/not ready conditions keeps the sleep time
-            // such that we would underrun the audio HAL.
-            if ((sleepTime == 0) && (sleepTimeShift > 0)) {
-                sleepTimeShift--;
-            }
-            sleepTime = 0;
-            standbyTime = systemTime() + mStandbyTimeInNsecs;
-            //TODO: delay standby when effects have a tail
+    // mix buffers...
+    mAudioMixer->process(pts);
+    // increase sleep time progressively when application underrun condition clears.
+    // Only increase sleep time if the mixer is ready for two consecutive times to avoid
+    // that a steady state of alternating ready/not ready conditions keeps the sleep time
+    // such that we would underrun the audio HAL.
+    if ((sleepTime == 0) && (sleepTimeShift > 0)) {
+        sleepTimeShift--;
+    }
+    sleepTime = 0;
+    standbyTime = systemTime() + mStandbyTimeInNsecs;
+    //TODO: delay standby when effects have a tail
 }
 
 void AudioFlinger::MixerThread::threadLoop_sleepTime()
 {
-            // If no tracks are ready, sleep once for the duration of an output
-            // buffer size, then write 0s to the output
-            if (sleepTime == 0) {
-                if (mixerStatus == MIXER_TRACKS_ENABLED) {
-                    sleepTime = activeSleepTime >> sleepTimeShift;
-                    if (sleepTime < kMinThreadSleepTimeUs) {
-                        sleepTime = kMinThreadSleepTimeUs;
-                    }
-                    // reduce sleep time in case of consecutive application underruns to avoid
-                    // starving the audio HAL. As activeSleepTimeUs() is larger than a buffer
-                    // duration we would end up writing less data than needed by the audio HAL if
-                    // the condition persists.
-                    if (sleepTimeShift < kMaxThreadSleepTimeShift) {
-                        sleepTimeShift++;
-                    }
-                } else {
-                    sleepTime = idleSleepTime;
-                }
-            } else if (mBytesWritten != 0 ||
-                       (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)) {
-                memset (mMixBuffer, 0, mixBufferSize);
-                sleepTime = 0;
-                ALOGV_IF((mBytesWritten == 0 && (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)), "anticipated start");
+    // If no tracks are ready, sleep once for the duration of an output
+    // buffer size, then write 0s to the output
+    if (sleepTime == 0) {
+        if (mixerStatus == MIXER_TRACKS_ENABLED) {
+            sleepTime = activeSleepTime >> sleepTimeShift;
+            if (sleepTime < kMinThreadSleepTimeUs) {
+                sleepTime = kMinThreadSleepTimeUs;
             }
-            // TODO add standby time extension fct of effect tail
+            // reduce sleep time in case of consecutive application underruns to avoid
+            // starving the audio HAL. As activeSleepTimeUs() is larger than a buffer
+            // duration we would end up writing less data than needed by the audio HAL if
+            // the condition persists.
+            if (sleepTimeShift < kMaxThreadSleepTimeShift) {
+                sleepTimeShift++;
+            }
+        } else {
+            sleepTime = idleSleepTime;
+        }
+    } else if (mBytesWritten != 0 ||
+               (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)) {
+        memset (mMixBuffer, 0, mixBufferSize);
+        sleepTime = 0;
+        ALOGV_IF((mBytesWritten == 0 && (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)), "anticipated start");
+    }
+    // TODO add standby time extension fct of effect tail
 }
 
 // prepareTracks_l() must be called with ThreadBase::mLock held
@@ -2856,173 +2856,173 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::thre
     sp<Track>& trackToRemove
 )
 {
-// FIXME Temporarily renamed to avoid confusion with the member "mixerStatus"
-mixer_state mixerStatus_ = MIXER_IDLE;
+    // FIXME Temporarily renamed to avoid confusion with the member "mixerStatus"
+    mixer_state mixerStatus_ = MIXER_IDLE;
 
-            // find out which tracks need to be processed
-            if (mActiveTracks.size() != 0) {
-                sp<Track> t = mActiveTracks[0].promote();
-                // see FIXME in AudioFlinger.h, return MIXER_IDLE might also work
-                if (t == 0) return MIXER_CONTINUE;
-                //if (t == 0) continue;
+    // find out which tracks need to be processed
+    if (mActiveTracks.size() != 0) {
+        sp<Track> t = mActiveTracks[0].promote();
+        // see FIXME in AudioFlinger.h, return MIXER_IDLE might also work
+        if (t == 0) return MIXER_CONTINUE;
+        //if (t == 0) continue;
 
-                Track* const track = t.get();
-                audio_track_cblk_t* cblk = track->cblk();
+        Track* const track = t.get();
+        audio_track_cblk_t* cblk = track->cblk();
 
-                // The first time a track is added we wait
-                // for all its buffers to be filled before processing it
-                if (cblk->framesReady() && track->isReady() &&
-                        !track->isPaused() && !track->isTerminated())
-                {
-                    //ALOGV("track %d u=%08x, s=%08x [OK]", track->name(), cblk->user, cblk->server);
+        // The first time a track is added we wait
+        // for all its buffers to be filled before processing it
+        if (cblk->framesReady() && track->isReady() &&
+                !track->isPaused() && !track->isTerminated())
+        {
+            //ALOGV("track %d u=%08x, s=%08x [OK]", track->name(), cblk->user, cblk->server);
 
-                    if (track->mFillingUpStatus == Track::FS_FILLED) {
-                        track->mFillingUpStatus = Track::FS_ACTIVE;
-                        mLeftVolFloat = mRightVolFloat = 0;
-                        mLeftVolShort = mRightVolShort = 0;
-                        if (track->mState == TrackBase::RESUMING) {
-                            track->mState = TrackBase::ACTIVE;
-                            rampVolume = true;
-                        }
-                    } else if (cblk->server != 0) {
-                        // If the track is stopped before the first frame was mixed,
-                        // do not apply ramp
-                        rampVolume = true;
-                    }
-                    // compute volume for this track
-                    float left, right;
-                    if (track->isMuted() || mMasterMute || track->isPausing() ||
-                        mStreamTypes[track->streamType()].mute) {
-                        left = right = 0;
-                        if (track->isPausing()) {
-                            track->setPaused();
-                        }
-                    } else {
-                        float typeVolume = mStreamTypes[track->streamType()].volume;
-                        float v = mMasterVolume * typeVolume;
-                        uint32_t vlr = cblk->getVolumeLR();
-                        float v_clamped = v * (vlr & 0xFFFF);
-                        if (v_clamped > MAX_GAIN) v_clamped = MAX_GAIN;
-                        left = v_clamped/MAX_GAIN;
-                        v_clamped = v * (vlr >> 16);
-                        if (v_clamped > MAX_GAIN) v_clamped = MAX_GAIN;
-                        right = v_clamped/MAX_GAIN;
-                    }
+            if (track->mFillingUpStatus == Track::FS_FILLED) {
+                track->mFillingUpStatus = Track::FS_ACTIVE;
+                mLeftVolFloat = mRightVolFloat = 0;
+                mLeftVolShort = mRightVolShort = 0;
+                if (track->mState == TrackBase::RESUMING) {
+                    track->mState = TrackBase::ACTIVE;
+                    rampVolume = true;
+                }
+            } else if (cblk->server != 0) {
+                // If the track is stopped before the first frame was mixed,
+                // do not apply ramp
+                rampVolume = true;
+            }
+            // compute volume for this track
+            float left, right;
+            if (track->isMuted() || mMasterMute || track->isPausing() ||
+                mStreamTypes[track->streamType()].mute) {
+                left = right = 0;
+                if (track->isPausing()) {
+                    track->setPaused();
+                }
+            } else {
+                float typeVolume = mStreamTypes[track->streamType()].volume;
+                float v = mMasterVolume * typeVolume;
+                uint32_t vlr = cblk->getVolumeLR();
+                float v_clamped = v * (vlr & 0xFFFF);
+                if (v_clamped > MAX_GAIN) v_clamped = MAX_GAIN;
+                left = v_clamped/MAX_GAIN;
+                v_clamped = v * (vlr >> 16);
+                if (v_clamped > MAX_GAIN) v_clamped = MAX_GAIN;
+                right = v_clamped/MAX_GAIN;
+            }
 
-                    if (left != mLeftVolFloat || right != mRightVolFloat) {
-                        mLeftVolFloat = left;
-                        mRightVolFloat = right;
+            if (left != mLeftVolFloat || right != mRightVolFloat) {
+                mLeftVolFloat = left;
+                mRightVolFloat = right;
 
-                        // If audio HAL implements volume control,
-                        // force software volume to nominal value
-                        if (mOutput->stream->set_volume(mOutput->stream, left, right) == NO_ERROR) {
-                            left = 1.0f;
-                            right = 1.0f;
-                        }
+                // If audio HAL implements volume control,
+                // force software volume to nominal value
+                if (mOutput->stream->set_volume(mOutput->stream, left, right) == NO_ERROR) {
+                    left = 1.0f;
+                    right = 1.0f;
+                }
 
-                        // Convert volumes from float to 8.24
-                        uint32_t vl = (uint32_t)(left * (1 << 24));
-                        uint32_t vr = (uint32_t)(right * (1 << 24));
+                // Convert volumes from float to 8.24
+                uint32_t vl = (uint32_t)(left * (1 << 24));
+                uint32_t vr = (uint32_t)(right * (1 << 24));
 
-                        // Delegate volume control to effect in track effect chain if needed
-                        // only one effect chain can be present on DirectOutputThread, so if
-                        // there is one, the track is connected to it
-                        if (!mEffectChains.isEmpty()) {
-                            // Do not ramp volume if volume is controlled by effect
-                            if (mEffectChains[0]->setVolume_l(&vl, &vr)) {
-                                rampVolume = false;
-                            }
-                        }
-
-                        // Convert volumes from 8.24 to 4.12 format
-                        uint32_t v_clamped = (vl + (1 << 11)) >> 12;
-                        if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
-                        leftVol = (uint16_t)v_clamped;
-                        v_clamped = (vr + (1 << 11)) >> 12;
-                        if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
-                        rightVol = (uint16_t)v_clamped;
-                    } else {
-                        leftVol = mLeftVolShort;
-                        rightVol = mRightVolShort;
+                // Delegate volume control to effect in track effect chain if needed
+                // only one effect chain can be present on DirectOutputThread, so if
+                // there is one, the track is connected to it
+                if (!mEffectChains.isEmpty()) {
+                    // Do not ramp volume if volume is controlled by effect
+                    if (mEffectChains[0]->setVolume_l(&vl, &vr)) {
                         rampVolume = false;
                     }
+                }
 
-                    // reset retry count
-                    track->mRetryCount = kMaxTrackRetriesDirect;
-                    activeTrack = t;
-                    mixerStatus_ = MIXER_TRACKS_READY;
+                // Convert volumes from 8.24 to 4.12 format
+                uint32_t v_clamped = (vl + (1 << 11)) >> 12;
+                if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
+                leftVol = (uint16_t)v_clamped;
+                v_clamped = (vr + (1 << 11)) >> 12;
+                if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
+                rightVol = (uint16_t)v_clamped;
+            } else {
+                leftVol = mLeftVolShort;
+                rightVol = mRightVolShort;
+                rampVolume = false;
+            }
+
+            // reset retry count
+            track->mRetryCount = kMaxTrackRetriesDirect;
+            activeTrack = t;
+            mixerStatus_ = MIXER_TRACKS_READY;
+        } else {
+            //ALOGV("track %d u=%08x, s=%08x [NOT READY]", track->name(), cblk->user, cblk->server);
+            if (track->isStopped()) {
+                track->reset();
+            }
+            if (track->isTerminated() || track->isStopped() || track->isPaused()) {
+                // We have consumed all the buffers of this track.
+                // Remove it from the list of active tracks.
+                trackToRemove = track;
+            } else {
+                // No buffers for this track. Give it a few chances to
+                // fill a buffer, then remove it from active list.
+                if (--(track->mRetryCount) <= 0) {
+                    ALOGV("BUFFER TIMEOUT: remove(%d) from active list", track->name());
+                    trackToRemove = track;
                 } else {
-                    //ALOGV("track %d u=%08x, s=%08x [NOT READY]", track->name(), cblk->user, cblk->server);
-                    if (track->isStopped()) {
-                        track->reset();
-                    }
-                    if (track->isTerminated() || track->isStopped() || track->isPaused()) {
-                        // We have consumed all the buffers of this track.
-                        // Remove it from the list of active tracks.
-                        trackToRemove = track;
-                    } else {
-                        // No buffers for this track. Give it a few chances to
-                        // fill a buffer, then remove it from active list.
-                        if (--(track->mRetryCount) <= 0) {
-                            ALOGV("BUFFER TIMEOUT: remove(%d) from active list", track->name());
-                            trackToRemove = track;
-                        } else {
-                            mixerStatus_ = MIXER_TRACKS_ENABLED;
-                        }
-                    }
+                    mixerStatus_ = MIXER_TRACKS_ENABLED;
                 }
             }
+        }
+    }
 
-            // remove all the tracks that need to be...
-            if (CC_UNLIKELY(trackToRemove != 0)) {
-                mActiveTracks.remove(trackToRemove);
-                if (!mEffectChains.isEmpty()) {
-                    ALOGV("stopping track on chain %p for session Id: %d", effectChains[0].get(),
-                            trackToRemove->sessionId());
-                    mEffectChains[0]->decActiveTrackCnt();
-                }
-                if (trackToRemove->isTerminated()) {
-                    removeTrack_l(trackToRemove);
-                }
-            }
+    // remove all the tracks that need to be...
+    if (CC_UNLIKELY(trackToRemove != 0)) {
+        mActiveTracks.remove(trackToRemove);
+        if (!mEffectChains.isEmpty()) {
+            ALOGV("stopping track on chain %p for session Id: %d", effectChains[0].get(),
+                    trackToRemove->sessionId());
+            mEffectChains[0]->decActiveTrackCnt();
+        }
+        if (trackToRemove->isTerminated()) {
+            removeTrack_l(trackToRemove);
+        }
+    }
 
-return mixerStatus_;
+    return mixerStatus_;
 }
 
 void AudioFlinger::DirectOutputThread::threadLoop_mix()
 {
-            AudioBufferProvider::Buffer buffer;
-            size_t frameCount = mFrameCount;
-            int8_t *curBuf = (int8_t *)mMixBuffer;
-            // output audio to hardware
-            while (frameCount) {
-                buffer.frameCount = frameCount;
-                activeTrack->getNextBuffer(&buffer);
-                if (CC_UNLIKELY(buffer.raw == NULL)) {
-                    memset(curBuf, 0, frameCount * mFrameSize);
-                    break;
-                }
-                memcpy(curBuf, buffer.raw, buffer.frameCount * mFrameSize);
-                frameCount -= buffer.frameCount;
-                curBuf += buffer.frameCount * mFrameSize;
-                activeTrack->releaseBuffer(&buffer);
-            }
-            sleepTime = 0;
-            standbyTime = systemTime() + standbyDelay;
+    AudioBufferProvider::Buffer buffer;
+    size_t frameCount = mFrameCount;
+    int8_t *curBuf = (int8_t *)mMixBuffer;
+    // output audio to hardware
+    while (frameCount) {
+        buffer.frameCount = frameCount;
+        activeTrack->getNextBuffer(&buffer);
+        if (CC_UNLIKELY(buffer.raw == NULL)) {
+            memset(curBuf, 0, frameCount * mFrameSize);
+            break;
+        }
+        memcpy(curBuf, buffer.raw, buffer.frameCount * mFrameSize);
+        frameCount -= buffer.frameCount;
+        curBuf += buffer.frameCount * mFrameSize;
+        activeTrack->releaseBuffer(&buffer);
+    }
+    sleepTime = 0;
+    standbyTime = systemTime() + standbyDelay;
 }
 
 void AudioFlinger::DirectOutputThread::threadLoop_sleepTime()
 {
-            if (sleepTime == 0) {
-                if (mixerStatus == MIXER_TRACKS_ENABLED) {
-                    sleepTime = activeSleepTime;
-                } else {
-                    sleepTime = idleSleepTime;
-                }
-            } else if (mBytesWritten != 0 && audio_is_linear_pcm(mFormat)) {
-                memset (mMixBuffer, 0, mFrameCount * mFrameSize);
-                sleepTime = 0;
-            }
+    if (sleepTime == 0) {
+        if (mixerStatus == MIXER_TRACKS_ENABLED) {
+            sleepTime = activeSleepTime;
+        } else {
+            sleepTime = idleSleepTime;
+        }
+    } else if (mBytesWritten != 0 && audio_is_linear_pcm(mFormat)) {
+        memset (mMixBuffer, 0, mFrameCount * mFrameSize);
+        sleepTime = 0;
+    }
 }
 
 // getTrackName_l() must be called with ThreadBase::mLock held
@@ -3137,52 +3137,52 @@ AudioFlinger::DuplicatingThread::~DuplicatingThread()
 
 void AudioFlinger::DuplicatingThread::threadLoop_mix()
 {
-            // mix buffers...
-            if (outputsReady(outputTracks)) {
-                mAudioMixer->process(AudioBufferProvider::kInvalidPTS);
-            } else {
-                memset(mMixBuffer, 0, mixBufferSize);
-            }
-            sleepTime = 0;
-            writeFrames = mFrameCount;
+    // mix buffers...
+    if (outputsReady(outputTracks)) {
+        mAudioMixer->process(AudioBufferProvider::kInvalidPTS);
+    } else {
+        memset(mMixBuffer, 0, mixBufferSize);
+    }
+    sleepTime = 0;
+    writeFrames = mFrameCount;
 }
 
 void AudioFlinger::DuplicatingThread::threadLoop_sleepTime()
 {
-            if (sleepTime == 0) {
-                if (mixerStatus == MIXER_TRACKS_ENABLED) {
-                    sleepTime = activeSleepTime;
-                } else {
-                    sleepTime = idleSleepTime;
-                }
-            } else if (mBytesWritten != 0) {
-                // flush remaining overflow buffers in output tracks
-                for (size_t i = 0; i < outputTracks.size(); i++) {
-                    if (outputTracks[i]->isActive()) {
-                        sleepTime = 0;
-                        writeFrames = 0;
-                        memset(mMixBuffer, 0, mixBufferSize);
-                        break;
-                    }
-                }
+    if (sleepTime == 0) {
+        if (mixerStatus == MIXER_TRACKS_ENABLED) {
+            sleepTime = activeSleepTime;
+        } else {
+            sleepTime = idleSleepTime;
+        }
+    } else if (mBytesWritten != 0) {
+        // flush remaining overflow buffers in output tracks
+        for (size_t i = 0; i < outputTracks.size(); i++) {
+            if (outputTracks[i]->isActive()) {
+                sleepTime = 0;
+                writeFrames = 0;
+                memset(mMixBuffer, 0, mixBufferSize);
+                break;
             }
+        }
+    }
 }
 
 void AudioFlinger::DuplicatingThread::threadLoop_write()
 {
-            standbyTime = systemTime() + mStandbyTimeInNsecs;
-            for (size_t i = 0; i < outputTracks.size(); i++) {
-                outputTracks[i]->write(mMixBuffer, writeFrames);
-            }
-            mBytesWritten += mixBufferSize;
+    standbyTime = systemTime() + mStandbyTimeInNsecs;
+    for (size_t i = 0; i < outputTracks.size(); i++) {
+        outputTracks[i]->write(mMixBuffer, writeFrames);
+    }
+    mBytesWritten += mixBufferSize;
 }
 
 void AudioFlinger::DuplicatingThread::threadLoop_standby()
 {
-                    // DuplicatingThread implements standby by stopping all tracks
-                    for (size_t i = 0; i < outputTracks.size(); i++) {
-                        outputTracks[i]->stop();
-                    }
+    // DuplicatingThread implements standby by stopping all tracks
+    for (size_t i = 0; i < outputTracks.size(); i++) {
+        outputTracks[i]->stop();
+    }
 }
 
 void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
