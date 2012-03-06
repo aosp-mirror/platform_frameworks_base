@@ -52,7 +52,7 @@ Android Market within a 14-day period ending on the data collection date noted b
 <div class="dashboard-panel">
 
 <img alt="" height="250" width="470"
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.1,0.4,0.8,6.6,25.2,0.5,61.4,1.1,2.1,0.4,1.2&chl=Android%201.5|Android%201.6|Android%202.1|Android%202.2|Android%202.3|Android%202.3.3|Android%203.1|Android%203.2|Android%204.0|Android%204.0.3&chco=c4df9b,6fad0c" />
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.4,0.8,6.6,25.2,0.5,61.4,0.1,1.1,2.1,0.4,1.2&chl=Android%201.5|Android%201.6|Android%202.1|Android%202.2|Android%202.3|Android%202.3.3|Android%203.0|Android%203.1|Android%203.2|Android%204.0|Android%204.0.3&chco=c4df9b,6fad0c" />
 
 <table>
 <tr>
