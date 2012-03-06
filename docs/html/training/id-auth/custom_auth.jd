@@ -181,6 +181,6 @@ multiple copies of it taking up space on your user's device.</p>
 <p>One solution is to place the service in one small, special-purpose APK. When
 an app wishes to use your custom account type, it can check the device to see if
 your custom account service is available. If not, it can direct the user to
-Android Market to download the service. This may seem like a great deal of
+Google Play to download the service. This may seem like a great deal of
 trouble at first, but compared with the alternative of re-entering credentials
 for every app that uses your custom account, it's refreshingly easy.</p>

@@ -2605,10 +2605,10 @@ public final class Settings {
 
         /**
          * Whether the package installer should allow installation of apps downloaded from
-         * sources other than the Android Market (vending machine).
+         * sources other than Google Play.
          *
          * 1 = allow installing from other sources
-         * 0 = only allow installing from the Android Market
+         * 0 = only allow installing from Google Play
          */
         public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
 

@@ -45,7 +45,7 @@ support all desired devices with a single APK</li>
 
   <h2>See also</h2>
 <ol>
-  <li><a href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a></li>
+  <li><a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a></li>
   <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
   <li><a href="{@docRoot}sdk/compatibility-library.html">Compatibility
 Package</a></li>
@@ -55,10 +55,10 @@ Package</a></li>
 </div>
 </div>
 
-<p>Multiple APK support is a feature in Android Market that allows you to publish different APKs
+<p>Multiple APK support is a feature on Google Play that allows you to publish different APKs
 for your application that are each targeted to different device configurations. Each APK is a
 complete and independent version of your application, but they share the same application listing on
-Android Market and must share the same package name and be signed with the same release key. This
+Google Play and must share the same package name and be signed with the same release key. This
 feature is useful for cases in which your application cannot reach all desired devices with a single
 APK.</p>
 
@@ -73,8 +73,8 @@ prevent a single APK from working on all devices.</p>
 
 <p>Although <strong>we encourage you to develop and publish a single APK</strong> that supports as
 many device configurations as possible, doing so is sometimes not possible. To help
-you publish your application for as many devices as possible, Android Market allows you to
-publish multiple APKs under the same application listing. Android Market then supplies each APK to
+you publish your application for as many devices as possible, Google Play allows you to
+publish multiple APKs under the same application listing. Google Play then supplies each APK to
 the appropriate devices based on configuration support you've declared in the manifest file of each
 APK.</p>
 
@@ -86,7 +86,7 @@ APK.</p>
   <li>Support different platform versions with each APK.</li>
 </ul>
 
-<p>Currently, these are the only device characteristics that Android Market supports for publishing
+<p>Currently, these are the only device characteristics that Google Play supports for publishing
 multiple APKs as the same application.</p>
 
 <p class="note"><strong>Note:</strong> You should generally use multiple APKs to support
@@ -100,8 +100,8 @@ consider your options before publishing multiple APKs.</p>
 
 <h2 id="Concepts">Publishing Concepts</h2>
 
-<p>Before you start publishing multiple APKs on Android Market, you must understand a few
-concepts regarding how the Android Market publisher site works.</p>
+<p>Before you start publishing multiple APKs on Google Play, you must understand a few
+concepts regarding how the Google Play publisher site works.</p>
 
 <h3 id="Active">Active APKs</h3>
 
@@ -111,20 +111,20 @@ concepts regarding how the Android Market publisher site works.</p>
   <p>When editing your application, there are two buttons on the top-right side of the page. The
 first button is either <strong>Publish</strong> or <strong>Unpublish</strong> and the second
 button is always <strong>Save</strong> (but its behavior changes).</p>
-  <p>When your application is new or you have unpublished it from Market, the first
+  <p>When your application is new or you have unpublished it from Google Play, the first
 button says <strong>Publish</strong>. Clicking it will publish any APKs listed as
-Active, making them available on Android Market. Also while your application is new
+Active, making them available on Google Play. Also while your application is new
 or unpublished, clicking <strong>Save</strong> will save any changes you've made, such
 as information added to the Product details and APKs you've uploaded, but nothing is made visible on
-Android Market&mdash;this allows you to save your changes and sign out of the publisher site before
+Google Play&mdash;this allows you to save your changes and sign out of the publisher site before
 deciding to publish.</p>
  <p>Once you've published your application, the first button changes to
 <strong>Unpublish</strong>. Clicking it in this state unpublishes your application so that none
-of the APKs are available on Android Market. Also while published, the behavior of the
+of the APKs are available on Google Play. Also while published, the behavior of the
 <strong>Save</strong> button is different. In this state, clicking <strong>Save</strong> not
-only saves all your changes, but also publishes them to Android Market. For example, if you've
+only saves all your changes, but also publishes them to Google Play. For example, if you've
 already published your application and then make changes to your product details or activate new
-APKs, clicking <strong>Save</strong> makes all those changes live on Android Market.</p>
+APKs, clicking <strong>Save</strong> makes all those changes live on Google Play.</p>
 </div>
 </div>
 
@@ -135,14 +135,14 @@ moves into the list of <em>Active</em> APKs. This list allows you to preview whi
 you're about to publish.</p>
 
 <p>If there are no errors, any "active" APK will be published to
-Android Market when you click the <strong>Publish</strong> button (if the application is
+Google Play when you click the <strong>Publish</strong> button (if the application is
 unpublished) or when you click the <strong>Save</strong> button (if the application is
 already published).</p>
 
 
 <h3 id="SimpleAndAdvanced">Simple mode and advanced mode</h3>
 
-<p>The Android Market publisher site provides two modes for managing the APKs associated with
+<p>The Google Play publisher site provides two modes for managing the APKs associated with
 your application: <em>simple mode</em> and <em>advanced mode</em>. You can switch between these by
 clicking the
 link at the top-right corner of the <strong>APK files</strong> tab.</p>
@@ -164,21 +164,21 @@ below.</p>
 
 <h2 id="HowItWorks">How Multiple APKs Work</h2>
 
-<p>The concept for using multiple APKs on Android Market is that you have just one entry in
-Android Market for your application, but different devices might download a different APK. This
+<p>The concept for using multiple APKs on Google Play is that you have just one entry in
+Google Play for your application, but different devices might download a different APK. This
 means that:</p>
 
 <ul>
   <li>You maintain only one set of product details (app description, icons, screenshots, etc.).
 This also means you <em>cannot</em> charge a different price for different APKs.</li>
-  <li>All users see only one version of your application on Android Market, so they are not
+  <li>All users see only one version of your application on Google Play, so they are not
 confused by different versions you may have published that are "for tablets" or
 "for phones."</li>
   <li>All user reviews are applied to the same application listing, even though users on different
 devices may have different APKs.</li>
   <li>If you publish different APKs for different versions of Android (for different API levels),
 then when a user's device receives a system update that qualifies them for a different APK you've
-published, Android Market updates the user's application to the APK designed for the higher version
+published, Google Play updates the user's application to the APK designed for the higher version
 of Android. Any system data associated with the application is retained (the same as with normal
 application updates when using a single APK).</li>
 </ul>
@@ -192,8 +192,8 @@ following sections describe more about how it works.</p>
 <h3 id="SupportedFilters">Supported filters</h3>
 
 <p>Which devices receive each APK is determined by <a
-href="{@docRoot}guide/appendix/market-filters.html">Android Market filters</a> that are specified by
-elements in the manifest file of each APK. However, Android Market allows you to publish multiple
+href="{@docRoot}guide/appendix/market-filters.html">Google Play filters</a> that are specified by
+elements in the manifest file of each APK. However, Google Play allows you to publish multiple
 APKs only when each APK uses filters to support a variation of the following
 device characteristics:</p>
 
@@ -229,7 +229,7 @@ with a single APK.</p>
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens&gt;}</a> element are "true" if you do not declare them otherwise. However,
 because the {@code android:xlargeScreens} attribute was added in Android 2.3 (API level
-9), Android Market will assume that it is "false" if your application does not set either <a
+9), Google Play will assume that it is "false" if your application does not set either <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
 android:minSdkVersion}</a> or <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
@@ -266,7 +266,7 @@ with a higher <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min
 android:minSdkVersion}</a> value must have a higher <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code android:versionCode}</a>
 value. This is also true if two APKs overlap their device support based on a different supported
-filter. This ensures that when a device receives a system update, Android Market can offer the user
+filter. This ensures that when a device receives a system update, Google Play can offer the user
 an update for your application (because updates are based on an increase in the app version code).
 This requirement is described further in the section below about <a href="#Rules">Rules for
 multiple APKs</a>.</li>
@@ -286,8 +286,8 @@ higher, as per the previous note).</li>
 </ul>
 
 <p>Other manifest elements that enable <a
-href="{@docRoot}guide/appendix/market-filters.html">Android Market filters</a>&mdash;but are not
-listed above&mdash;are still applied for each APK as usual. However, Android Market does not allow
+href="{@docRoot}guide/appendix/market-filters.html">Google Play filters</a>&mdash;but are not
+listed above&mdash;are still applied for each APK as usual. However, Google Play does not allow
 you to publish multiple APKs based on variations of them. Thus, you cannot publish
 multiple APKs if the above listed filters are the same for each APK (but the APKs differ based on
 other characteristics in the manifest file). For
@@ -312,7 +312,7 @@ android:versionCode}</a> attribute.</li>
 
   <li>Each APK <strong>must not exactly match the configuration support of another APK</strong>.
     <p>That is, each APK must declare slightly different support for at least one of
-the <a href="#MarketFiltersSupported">supported Market filters</a> (listed above).</p>
+the <a href="#SupportedFilters">supported Google Play filters</a> (listed above).</p>
     <p>Usually, you will differentiate your APKs based on a specific characteristic (such as the
 supported texture compression formats), and thus, each APK will declare support for different
 devices. However, it's OK to publish multiple APKs that overlap their support slightly. When two
@@ -330,11 +330,11 @@ application.</li>
   <li>An APK that requires a <strong>higher API level</strong> must have a <strong>higher
 version code</strong>.
     <p>This is true only when either: the APKs differ based <em>only</em> on the
-supported API levels (no other <a href="#SupportedMarketFilters">supported market filters</a>
+supported API levels (no other <a href="#SupportedFilters">supported filters</a>
 distinguish the APKs from each other) <em>or</em> when the APKs do use another supported filter, but
 there is an overlap between the APKs within that filter.</p>
     <p>This is important because a user's device receives an application update from
-Android Market only if the version code for the APK on Android Market is higher than the version
+Google Play only if the version code for the APK on Google Play is higher than the version
 code of the APK currently on the device. This ensures that if a device receives a system update that
 then qualifies it to install the APK for higher API levels, the device receives an application
 update because the version code increases.</p>
@@ -365,7 +365,7 @@ increase from the lower API level to the higher API level.</li>
 
 </ul>
 
-<p>Failure to abide by the above rules results in an error on the Android Market publisher site
+<p>Failure to abide by the above rules results in an error on the Google Play publisher site
 when you activate your APKs&mdash;you will be unable to publish your application until you
 resolve the error.</p>
 
@@ -377,7 +377,7 @@ in warnings rather than errors. Warnings can be caused by the following:</p>
 APKs support the devices that then fall outside the supported range. For example, if an APK
 currently supports small and normal size screens and you change it to support only small screens,
 then you have shrunk the pool of supported devices and some devices will no longer see your
-application in Android Market. You can resolve this by adding another APK that supports normal size
+application on Google Play. You can resolve this by adding another APK that supports normal size
 screens so that all previously-supported devices are still supported.</li>
 
   <li>When there are "overlaps" between two or more APKs. For example, if an APK supports screen
@@ -467,8 +467,8 @@ user visible version assigned to <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vname">{@code android:versionName}</a>),
 so that it's easy for you to associate the version code and version name.</p>
 
-<p class="note"><strong>Note:</strong> When you increase the version code for an APK, Android
-Market will prompt users of the previous version to update the application. Thus, to avoid
+<p class="note"><strong>Note:</strong> When you increase the version code for an APK, Google
+Play will prompt users of the previous version to update the application. Thus, to avoid
 unnecessary updates, you should not increase the version code for APKs that do not actually
 include changes.</p>
 
@@ -507,7 +507,7 @@ configuration support for one or several of the APKs.</p>
 <h2 id="SingleAPK">Using a Single APK Instead</h2>
 
 <p><strong>Creating multiple APKs for your application is not the normal procedure</strong> for
-publishing an application on Android Market. In most cases, you should be able to publish your
+publishing an application on Google Play. In most cases, you should be able to publish your
 application to most users with a single APK and we encourage that you do so. When you encounter
 a situation in which using a single APK becomes difficult, you should carefully consider all your
 options before deciding to publish multiple APKs.</p>
@@ -542,7 +542,7 @@ setup, the user receives your application and it runs using the resources optimi
 For example, on a new tablet, the user receives your application and it runs with your
 tablet-optimized resources. This restore
 process does not work across different APKs, because each APK can potentially have different
-permissions that the user has not agreed to, so Android Market may not restore the application at
+permissions that the user has not agreed to, so Google Play may not restore the application at
 all. (If you use multiple APKs, the user receives either the exact same APK if it's compatible or
 nothing at all and must manually download your application to get the APK designed for the new
 device.)</p></li>
@@ -586,7 +586,7 @@ public void onSurfaceChanged(GL10 gl, int w, int h) {
 
 <h3 id="ScreenOptions">Supporting multiple screens</h3>
 
-<p>Unless your APK file exceeds the Android Market size limit of 50MB, supporting multiple screens
+<p>Unless your APK file exceeds the Google Play size limit of 50MB, supporting multiple screens
 should always be done with a single APK. Since Android 1.6, the Android system manages most of the
 work required for your application to run successfully on a variety of screen sizes and
 densities.</p>

@@ -76,19 +76,19 @@ live wallpapers.</li>
 supported only on Android 2.1 (API level 7) and higher versions of the platform.
 To ensure that your application can only be installed on devices that support
 live wallpapers, remember to add the following to the application's manifest
-before publishing to Android Market:</p>
+before publishing to Google Play:</p>
 
 <ul>
 <li><code>&lt;uses-sdk android:minSdkVersion="7" /&gt;</code>, which indicates
-to Android Market and the platform that your application requires Android 2.1 or
+to Google Play and the platform that your application requires Android 2.1 or
 higher. For more information, see the <a href="{@docRoot}guide/appendix/api-levels.html">API
 Levels</a> and the documentation for the
 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
 element.</li>
 <li><code>&lt;uses-feature android:name="android.software.live_wallpaper" /&gt;</code>,
-which tells Android Market that your application includes a live wallpaper
-Android Market uses this feature as a filter, when presenting users lists of
-available applications. When you declaring this feature, Android Market
+which tells Google Play that your application includes a live wallpaper
+Google Play uses this feature as a filter, when presenting users lists of
+available applications. When you declaring this feature, Google Play
 displays your application only to users whose devices support live wallpapers,
 while hiding it from other devices on which it would not be able to run. For
 more information, see the documentation for the
@@ -98,5 +98,5 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
 element.</li>
 </ul>
 
-<p>Many great live wallpapers are already available on Android Market and
+<p>Many great live wallpapers are already available on Google Play and
 we can't wait to see more!</p>

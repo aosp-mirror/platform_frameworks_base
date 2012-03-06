@@ -18,20 +18,20 @@ parent.link=manifest-intro.html
  <div class="sidebox-wrapper">
   <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
   <div id="qv-sub-rule">
-    <img src="{@docRoot}assets/images/icon_market.jpg"
+    <img src="{@docRoot}assets/images/icon_play.png"
     style="float:left;margin:0;padding:0;">
-    <p style="color:#669999;">Android Market and <code
+    <p style="color:#669999;padding-top:1em;">Google Play and <code
     style="color:#669999;">&lt;supports-gl-texture&gt;</code> elements</p>
-    <p style="margin-top:1em;">Android Market filters applications according
+    <p style="margin-top:1em;">Google Play filters applications according
     to the texture compression formats that they support, to ensure that
     they can be installed only on devices that can handle their textures
     properly. Developers can use texture compression filtering
     as a way of targeting specific device types, based on GPU platform.</p>
     
     <p style="margin-top:1em;" class="caution">For important information about how
-    Android Market uses <code>&lt;supports-gl-texture&gt;</code> elements as
-    the basis for filtering, please read <a href="#market-texture-filtering">Android
-    Market and texture compression filtering</a>, below.</p>
+    Google Play uses <code>&lt;supports-gl-texture&gt;</code> elements as
+    the basis for filtering, please read <a href="#market-texture-filtering">Google
+    Play and texture compression filtering</a>, below.</p>
 </div> 
 </div>
 
@@ -57,7 +57,7 @@ texture compression formats, you can declare multiple
 <p>Declared <code>&lt;supports-gl-texture&gt;</code> elements are informational,
 meaning that the Android system itself does not examine the elements at install
 time to ensure matching support on the device. However, other services
-(such as Android Market) or applications can check your application's
+(such as Google Play) or applications can check your application's
 <code>&lt;supports-gl-texture&gt;</code> declarations as part of handling or
 interacting with your application. For this reason, it's very important that
 you declare all of the texture compression formats (from the list below) that
@@ -141,20 +141,20 @@ and others.</td>
 <dt>see also:</dt>
 <dd>
   <ul>
-    <li><a href="{@docRoot}guide/appendix/market-filters.html">Android Market Filters</a></li>
+    <li><a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a></li>
   </ul>
 </dd>
 
-<h2 id="market-texture-filtering">Android Market and texture compression filtering</h2>
+<h2 id="market-texture-filtering">Google Play and texture compression filtering</h2>
 
-<p>Android Market filters the applications that are visible to users, so that
+<p>Google Play filters the applications that are visible to users, so that
 users can see and download only those applications that are compatible with
-their devices. One of the ways Market filters applications is by texture
+their devices. One of the ways it filters applications is by texture
 compression compatibility, giving you control over the availability of your
 application to various devices, based on the capabilities of their GPUs.</p>
 
 <p>To determine an application's texture compression compatibility with a given
-user's device, Android Market compares:</p>
+user's device, Google Play compares:</p>
 
 <ul>
 <li>Texture compression formats that are supported by the application &mdash;
@@ -164,26 +164,26 @@ an application declares its supported texture compression formats in
 a device reports the formats it supports as read-only system properties.</li>
 </ul>
 
-<p>Each time you upload an application to the Android Market Publisher Site,
-Android Market scans the application's manifest file and looks for any
+<p>Each time you upload an application to the Google Play publisher site,
+Google Play scans the application's manifest file and looks for any
 <code>&lt;supports-gl-texture&gt;</code> elements. It extracts the
 format descriptors from the elements and stores them internally as
 metadata associated with the application <code>.apk</code> and the application
 version. </p>
 
-<p>When a user searches or browses for applications on Android Market,
+<p>When a user searches or browses for applications on Google Play,
 the service compares the texture compression formats supported by the application
 with those supported by the user's device. The comparison is based on the format
 descriptor strings and a match must be exact.</p>
 
 <p>If <em>any</em> of an application's supported texture compression formats is
-also supported by the device, Android Market allows the user to see the
+also supported by the device, Google Play allows the user to see the
 application and potentially download it. Otherwise, if none of the application's
-formats is supported by the device, Android Market filters the application so
+formats is supported by the device, Google Play filters the application so
 that it is not available for download. </p>
 
 <p>If an application does not declare any <code>&lt;supports-gl-texture&gt;</code> elements,
-Android Market does not apply any filtering based on GL texture compression format.</p>
+Google Play does not apply any filtering based on GL texture compression format.</p>
 
 </dl>
 

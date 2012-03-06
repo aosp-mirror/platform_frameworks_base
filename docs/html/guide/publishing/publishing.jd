@@ -1,4 +1,4 @@
-page.title=Publishing on Android Market
+page.title=Publishing on Google Play
 @jd:body
 
 <div id="qv-wrapper">
@@ -7,25 +7,25 @@ page.title=Publishing on Android Market
 <h2>Quickview</h2>
 
 <ul>
-<li>Learn how to publish and update apps on Android Market.</li>
-<li>Find out how to create links to apps that are published on Android Market.</li>
-<li>Learn about Android Market features.</li>
+<li>Learn how to publish and update apps on Google Play.</li>
+<li>Find out how to create links to apps that are published on Google Play.</li>
+<li>Learn about Google Play features.</li>
 </ul>
 
 
 <h2>In this document</h2>
 
 <ol>
-<li><a href="#overview">About Android Market</a>
-<li><A href="#marketpublish">Publishing Apps on Android Market</a></li>
-<li><a href="#marketupgrade">Publishing Updates on Android Market</a></li>
-<li><a href="#marketLicensing">Using Android Market Licensing Service</a></li>
-<li><a href="#marketinappbilling">Using Android Market In-app Billing</a></li>
-<li><a href="#marketintent">Linking to Your Apps on Android Market</a>
+<li><a href="#overview">About Google Play</a>
+<li><A href="#marketpublish">Publishing Apps on Google Play</a></li>
+<li><a href="#marketupgrade">Publishing Updates on Google Play</a></li>
+<li><a href="#marketLicensing">Using Google Play Licensing Service</a></li>
+<li><a href="#marketinappbilling">Using Google Play In-app Billing</a></li>
+<li><a href="#marketintent">Linking to Your Apps on Google Play</a>
   <ol>
     <li><a href="#OpeningDetails">Opening an app's details page</a></li>
     <li><a href="#PerformingSearch">Performing a search</a></li>
-    <li><a href="#BuildaButton">Build an Android Market button</a></li>
+    <li><a href="#BuildaButton">Build a Google Play button</a></li>
     <li><a href="#UriSummary">Summary of URI formats</a></li>
   </ol>
 </li>
@@ -41,9 +41,9 @@ page.title=Publishing on Android Market
 <div id="qv-extra">
   <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
   <div id="qv-sub-rule">
-    <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0 5px;">
-    <h2 style="color:#669999;">Already know about Android Market and want to get started?</h2>
-    <p>Go to <a href="http://market.android.com/publish">Android Market</a>, create a developer
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0 5px;">
+    <h2 style="color:#669999;">Already know about Google Play and want to get started?</h2>
+    <p>Go to <a href="http://play.google.com/apps/publish">Google Play</a>, create a developer
 account, and upload your application. For more information about required assets, listing details,
 and publishing options, see <a
 href="http://market.android.com/support/bin/answer.py?answer=113469">Upload
@@ -55,78 +55,78 @@ Applications</a>.</p>
 </div>
 
 <p>One of the most effective ways to get your application into users' hands is to
-publish it on an application marketplace like Android Market. Publishing on Android Market is a
+publish it on an application marketplace like Google Play. Publishing on Google Play is a
 straightforward process that you can do in just a few simple steps&mdash;register, configure,
 upload, and publish. Registration takes only a few minutes and needs to be done only once.
-The configuration and publishing steps can all be done through the Android Market Developer Console
-after you register as an Android Market developer.</p>
+The configuration and publishing steps can all be done through the Google Play Android Developer Console
+after you register as a Google Play developer.</p>
 
-<p>To start publishing on Android Market, first read this topic and then go to the <a
-href="https://market.android.com/publish/signup">Android Market publisher site</a> and register as
-an Android Market developer.</p>
+<p>To start publishing on Google Play, first read this topic and then go to the <a
+href="https://play.google.com/apps/publish">Google Play Android Developer Console</a> and register as
+a Google Play developer.</p>
 
 
-<h2 id="overview">About Android Market</h2>
+<h2 id="overview">About Google Play</h2>
 
-<p>Android Market is a robust publishing platform that helps you publicize, sell, and distribute
+<p>Google Play is a robust publishing platform that helps you publicize, sell, and distribute
 your Android applications to users around the world. When you release your applications through
-Android Market you have access to a suite of developer tools that let you analyze your sales,
+Google Play you have access to a suite of developer tools that let you analyze your sales,
 identify market trends, and control who your applications are being distributed to. You also have
 access to several revenue-enhancing features, such as <a
 href="{@docRoot}guide/market/billing/index.html">in-app billing</a> and
 <a href="{@docRoot}guide/market/licensing/index.html">application licensing</a>.</p>
 
-<p>Before you can publish applications on Android Market, you need to <a
-href="http://market.android.com/publish">register</a> as an Android Market developer. During the
+<p>Before you can publish applications on Google Play, you need to <a
+href="http://play.google.com/apps/publish">register</a> as a Google Play developer. During the
 registration process you will need to create a developer profile, pay a registration fee, and agree
-to the <a href="http://www.android.com/us/developer-distribution-agreement.html">Android Market
-Developer Distribution Agreement</a>. After you register you can access the Android Market Developer
+to the <a href="http://www.android.com/us/developer-distribution-agreement.html">Google Play
+Developer Distribution Agreement</a>. After you register you can access the Developer
 Console, where you can upload applications, configure publishing options, and monitor publishing
 data. If you want to sell your applications or use the in-app billing feature, you will also need
 to set up a Google Checkout merchant account. For more information about the registration process,
 see <a href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113468">
 Developer Registration</a>.</p>
 
-<h2 id="marketpublish">Publishing Apps on Android Market</h2>
+<h2 id="marketpublish">Publishing Apps on Google Play</h2>
 
-<p>Publishing your application on Android Market is a simple process that involves three basic
+<p>Publishing your application on Google Play is a simple process that involves three basic
 tasks (see figure 1):</p>
 
 <ul>
   <li>Creating various graphical assets that
-accompany your app on Android Market.</li>
-  <li>Using the Android Market <a
-href="http://market.android.com/publish">Developer Console</a> to configure publishing options,
-specify listing details, and upload your app and graphical assets to Android Market.</li>
+accompany your app on Google Play.</li>
+  <li>Using the Google Play <a
+href="http://play.google.com/apps/publish">Developer Console</a> to configure publishing options,
+specify listing details, and upload your app and graphical assets to Google Play.</li>
   <li>Reviewing your publishing settings and changing the release
 status of your app from Unpublished to Published.</li>
 </ul>
 
 <img src="{@docRoot}images/publishing/publishing_android_market.png"
-     alt="Shows the three steps that are required to publish on Android Market"
+     alt="Shows the three steps that are required to publish on Google Play"
      height="168"
      id="figure1" />
 <p class="img-caption">
-  <strong>Figure 1.</strong> To publish apps on Android Market you must first <a
+  <strong>Figure 1.</strong> To publish apps on Google Play you must first <a
 href="{@docRoot}guide/publishing/preparing.html">prepare your app for release</a> and then perform
 three simple tasks.
 </p>
 
 <p class="caution"><strong>Important:</strong> You must <a
 href="{@docRoot}guide/publishing/preparing.html">prepare your application for release</a> before you
-can publish it on Android Market. When you prepare your application for release you configure it for
+can publish it on Google Play. When you prepare your application for release you configure it for
 release and build it in release mode. Building in release mode signs your application's {@code .apk}
-file with your private release key. You cannot publish an application on Android Market unless it is
+file with your private release key. You cannot publish an application on Google Play unless it is
 signed with your own private release key.</p>
 
 <h3>Preparing promotional materials</h3>
 
-<p>To fully leverage the marketing and publicity capabilities of Android Market, you need to create
-several graphical assets that accompany your app on Android Market, such as screenshots, videos,
+<p>To fully leverage the marketing and publicity capabilities of Google Play, you need to create
+several graphical assets that accompany your app on Google Play, such as screenshots, videos,
 promotional graphics, and promotional text. At a minimum you must provide two screenshots of your
 application and a high resolution application icon. The screenshots are displayed on the details
-page for your application in Android Market, and the high resolution application icon is displayed
-in various locations throughout Android Market. The high resolution icon does not replace the
+page for your application on Google Play, and the high resolution application icon is displayed
+in various locations throughout Google Play. The high resolution icon does not replace the
 launcher icon for your application, rather, it serves as a supplemental icon and should look
 the same as your launcher icon. Promotional video,
 graphics, and text are optional, although we strongly recommended that you prepare these for your
@@ -136,8 +136,8 @@ Assets for your Application</a>.</p>
 
 <h3>Configuring options and uploading assets</h3>
 
-<p>Android Market lets you target your application to a worldwide pool of users and devices. To
-reach these users you can use the Android Market Developer Console to configure various publishing
+<p>Google Play lets you target your application to a worldwide pool of users and devices. To
+reach these users you can use the Developer Console to configure various publishing
 options and listing details for your app. For example, you can choose the <a
 href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=138294&topic=
 2365624&ctx=topic">countries</a> you want to reach, the listing languages you want to use, and the
@@ -155,11 +155,11 @@ href="http://grendel.sea.corp.google.com:48014/guide/market/billing/billing_admi
 app.</p>
 
 <p>When you are finished setting publishing options and listing details, you can upload your assets
-and your application to Android Market. You can also upload your application as a draft
+and your application to Google Play. You can also upload your application as a draft
 (unpublished) application, which lets you do final testing before you publish it for final
 release.</p>
 
-<p>To learn more about Android Market publishing settings, see the following resources:</p>
+<p>To learn more about Google Play publishing settings, see the following resources:</p>
 
 <ul>
   <li><a
@@ -181,20 +181,20 @@ pricing, payouts, and exchange rates work.</li>
 <p>When you are satisfied that your publishing settings are correctly configured and your uploaded
 application is ready to be released to the public, you can simply click <strong>Publish</strong> in
 the Developer Console to make your app available for download
-around the world. Keep in mind, it can take several hours for your app to appear on Android
-Market after you click <strong>Publish</strong> in the Developer Console.</p>
+around the world. Keep in mind, it can take several hours for your app to appear on Google
+Play after you click <strong>Publish</strong> in the Developer Console.</p>
 
 <h3>Controlling Distribution to Devices</h3>
 
 <p>If your application targets different device configurations, you can control which Android-powered
-devices have access to your application on Android Market by
-using Android Market filters. Filtering compares device configurations that you declare in your
+devices have access to your application on Google Play by
+using Google Play filters. Filtering compares device configurations that you declare in your
 app's manifest file to the configuration defined by a device. For example, if you declare the camera
-filter in your manifest, only those devices that have a camera will see your app on Android
-Market. Filters must be configured in your application's manifest file when you are <a
+filter in your manifest, only those devices that have a camera will see your app on Google
+Play. Filters must be configured in your application's manifest file when you are <a
 href="{@docRoot}guide/publishing/preparing.html">preparing your app for release</a> (that is, before
-you upload your app to Android Market). For more information, see <a
-href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a>.</p>
+you upload your app to Google Play). For more information, see <a
+href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>.</p>
 
 <p>You can also use the multiple APK feature to distribute different {@code .apk} files under the same
 application listing and the same package name; however, you should use this option only as a last
@@ -205,17 +205,17 @@ few cases, however, a single APK is unable to support all device configurations,
 resources make the APK file too big (greater than 50MB) or other technical challenges prevent a
 single APK from working on all devices. Although we encourage you to develop and publish a single
 APK that supports as many device configurations as possible, doing so is sometimes
-not possible. To help you publish your application for as many devices as possible, Android Market
-allows you to publish multiple APKs under the same application listing. Android Market then supplies
+not possible. To help you publish your application for as many devices as possible, Google Play
+allows you to publish multiple APKs under the same application listing. Google Play then supplies
 each APK to the appropriate devices based on configuration support you've declared in the manifest
 file of each APK. To use this feature, you need to build your separate {@code .apk} files when you are <a
 href="{@docRoot}guide/publishing/preparing.html">preparing your app for release</a> (that is, before
-you upload your app to Android Market). For more information, see <a
+you upload your app to Google Play). For more information, see <a
 href="{@docRoot}guide/market/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
 
-<h2 id="marketupgrade">Publishing Updates on Android Market</h2>
+<h2 id="marketupgrade">Publishing Updates on Google Play</h2>
 
-<p>At any time after publishing an application on Android Market, you can upload
+<p>At any time after publishing an application on Google Play, you can upload
 and publish an update to the same application package. When you publish an
 update to an application, users who have already installed the
 application may receive a notification that an update is
@@ -228,49 +228,49 @@ attributes in the <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html"><code>&lt;manifest&gt;</code></a>
 element of the manifest file. Also, the package name must be the same as the existing version and
 the {@code .apk} file must be signed with the same private key. If the package name and signing
-certificate do <em>not</em> match those of the existing version, Market will
+certificate do <em>not</em> match those of the existing version, Google Play will
 consider it a new application, publish it as such, and will not offer it to existing users as an
 update.</p>
 
-<p>If you plan to publish your application on Android Market, you must make sure
-  that it meets the requirements listed below, which are enforced by the Market
-  server when you upload the application.</p>
+<p>If you plan to publish your application on Google Play, you must make sure
+  that it meets the requirements listed below, which are enforced by Google Play
+  when you upload the application.</p>
 
-<h2 id="marketLicensing">Using Android Market Licensing Service</h2>
+<h2 id="marketLicensing">Using Google Play Licensing Service</h2>
 
-<p>Android Market offers a licensing service that lets you enforce licensing
-policies for paid applications that you publish through Android Market. With
-Android Market Licensing, your applications can query Android Market at runtime
+<p>Google Play offers a licensing service that lets you enforce licensing
+policies for paid applications that you publish through Google Play. With
+Google Play Licensing, your applications can query Google Play at runtime
 to obtain the licensing status for the current user, then allow or disallow
 further use of the application as appropriate. Using the service, you can apply a flexible
 licensing policy on an application-by-application basis&mdash;each
 application can enforce its licensing status in the way most appropriate
 for it. </p>
 
-<p>Any application that you publish through Android Market can use the Android
-Market Licensing Service. The service uses no dedicated framework APIs, so you can
+<p>Any application that you publish through Google Play can use the Google
+Play Licensing Service. The service uses no dedicated framework APIs, so you can
 add licensing to any application that uses a minimum API Level of 3 or
 higher.</p>
 
-<p>For complete information about Android Market Licensing Service and how to
+<p>For complete information about Google Play Licensing Service and how to
 use it in your application, read <a
 href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a>.</p>
 
-<h2 id="marketinappbilling">Using Android Market In-app Billing</h2>
+<h2 id="marketinappbilling">Using Google Play In-app Billing</h2>
 
-<p><a href="{@docRoot}guide/market/billing/billing_overview.html">Android Market In-app Billing</a>
-is an Android Market service that lets you sell digital content in your applications. You can use
+<p><a href="{@docRoot}guide/market/billing/billing_overview.html">Google Play In-app Billing</a>
+is a Google Play service that lets you sell digital content in your applications. You can use
 the service to sell a wide range of content, including downloadable  content such as media files or
 photos, and virtual content such as game levels or potions.</p>
 
-<p>When you use Android Market's in-app billing service to sell an item, Android Market handles all
+<p>When you use Google Play's in-app billing service to sell an item, Google Play handles all
 billing details so your application never has to directly process any financial transactions.
-Android Market uses the same checkout service that is used for application purchases, so your users
+Google Play uses the same checkout service that is used for application purchases, so your users
 experience a consistent and familiar purchase flow (see figure 1). Also, the transaction fee for
 in-app purchases is the same as the transaction fee for application purchases (30%).</p>
 
-<p>Any application that you publish through Android Market can implement in-app billing. No special
-account or registration is required other than an Android Market publisher account and a Google
+<p>Any application that you publish through Google Play can implement in-app billing. No special
+account or registration is required other than a Google Play publisher account and a Google
 Checkout Merchant account. Also, because the service uses no dedicated framework APIs, you can add
 in-app billing to any application that uses a minimum API level of 4 or higher.</p>
 
@@ -282,53 +282,53 @@ also contains examples of the database, user interface, and business logic you m
 implement in-app billing. For more information about the in-app billing feature, see the
 <a href="{@docRoot}guide/market/billing/index.html">In-app Billing documentation</a>.</p>
 
-<h2 id="marketintent">Linking to Your Apps on Android Market</h2>
+<h2 id="marketintent">Linking to Your Apps on Google Play</h2>
 
-<p>To help users discover your published applications, you can use two special Android Market URIs
+<p>To help users discover your published applications, you can use two special Google Play URIs
 that direct users to your application's details page or perform a search for all of your published
-applications in Android Market. You can use these URIs to create a button in your application or a
+applications on Google Play. You can use these URIs to create a button in your application or a
 link on a web page that:</p>
 
 <ul>
-  <li>Opens your application's details page in the Android Market application or web site.</li>
-  <li>Searches for all your published applications in the Android Market application or web
+  <li>Opens your application's details page in the Google Play application or web site.</li>
+  <li>Searches for all your published applications in the Google Play application or web
 site.</li>
 </ul>
 
-<p>You can launch the Android Market application or web site in the following ways:</p>
+<p>You can launch the Google Play application or web site in the following ways:</p>
 <ul>
   <li>Initiate an {@link android.content.Intent} from your application that launches the
-Android Market application on the user's device.</li>
-  <li>Provide a link on a web page that opens the Android Market web site (but will also
-open the Android Market application if clicked from a device).</li>
+Google Play application on the user's device.</li>
+  <li>Provide a link on a web page that opens the Google Play web site (but will also
+open the Google Play application if clicked from a device).</li>
 </ul>
 
 <p>In both cases, whether you want to initiate the action from your application or from a web
 page, the URIs are quite similar. The only difference is the URI prefix.</p>
 
-<p>To open the Android Market application from your application, the prefix for the intent's data
+<p>To open the Google Play application from your application, the prefix for the intent's data
 URI is:</p>
 
 <p style="margin-left:2em"><code>market://</code></p>
 
-<p>To open Android Market from your web site, the prefix for the link URI is:</p>
+<p>To open Google Play store from your web site, the prefix for the link URI is:</p>
 
-<p style="margin-left:2em"><code>http://market.android.com/</code></p>
+<p style="margin-left:2em"><code>http://play.google.com/store/</code></p>
 
 <p>The following sections describe how to create a complete URI for each action.</p>
 
-<p class="note"><strong>Note:</strong> If you create a link to open Android Market from your web
-site and the user selects it from an Android-powered device, the device's Market application will
-resolve the link so the user can use the Market application instead of opening the web
-site. As such, you should always use {@code http://market.android.com/} URIs when creating a link on
+<p class="note"><strong>Note:</strong> If you create a link to open Google Play from your web
+site and the user selects it from an Android-powered device, the device's Google Play application will
+resolve the link so the user can use the Google Play application on the device instead of opening the web
+site. As such, you should always use {@code http://play.google.com/store/...} URIs when creating a link on
 a web page. When pointing to your apps from within your Android app, use the
-{@code market://} URIs in an intent, so that the Market application always opens.</p>
+{@code market://} URIs in an intent, so that the Google Play application always opens.</p>
 
 
 <h3 id="OpeningDetails">Opening an app's details page</h3>
 
 <p>As described above, you can open the details page for a specific application either on the
-Android Market application or the Android Market web site. The details page allows the user to see
+Google Play application or the Google Play web site. The details page allows the user to see
 the application description, screenshots, reviews and more, and choose to install it.</p>
 
 <p>The format for the URI that opens the details page is:</p>
@@ -344,14 +344,14 @@ package}</a> attribute of the <a href="{@docRoot}guide/topics/manifest/manifest-
 
 <h4>Opening the app details page from your Android app</h4>
 
-<p>To open the Android Market details page from your application,
+<p>To open the Google Play details page from your application,
 create an intent with the {@link android.content.Intent#ACTION_VIEW} action and include a data URI
 in this format:</p>
 
 <p style="margin-left:2em"><code>market://details?id=&lt;package_name&gt;</code></p>
 
 <p>For example, here's how you can create an intent and open an application's details page in
-Android Market:</p>
+Google Play:</p>
 
 <pre>
 Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -359,7 +359,7 @@ intent.setData(Uri.parse("market://details?id=com.android.example"));
 startActivity(intent);
 </pre>
 
-<p>This will open the Android Market application on the device to view the {@code
+<p>This will open the Google Play application on the device to view the {@code
 com.android.example} application.</p>
 
 
@@ -369,32 +369,32 @@ com.android.example} application.</p>
 format:</p>
 
 <p style="margin-left:2em">
-  <code>http://market.android.com/details?id=&lt;package_name&gt;</code>
+  <code>http://play.google.com/store/details?id=&lt;package_name&gt;</code>
 </p>
 
-<p>For example, here's a link that opens an application's details page on Android Market:</p>
+<p>For example, here's a link that opens an application's details page on Google Play:</p>
 
 <pre>
-&lt;a href="http://market.android.com/details?id=com.android.example">App Link&lt;/a>
+&lt;a href="http://play.google.com/store/details?id=com.android.example">App Link&lt;/a>
 </pre>
 
-<p>When clicked from a desktop web browser, this opens the Android Market web site to view the
+<p>When clicked from a desktop web browser, this opens the Google Play web site to view the
 {@code com.android.example} application. When clicked from an Android-powered device, users are
-given the option to use either their web browser or the Android Market application to view the
+given the option to use either their web browser or the Google Play application to view the
 application.</p>
 
 
 
 <h3 id="PerformingSearch">Performing a search</h3>
 
-<p>To initiate a search in Android Market, the format for the URI is:</p>
+<p>To initiate a search on Google Play, the format for the URI is:</p>
 
 <p style="margin-left:2em">
   <code>&lt;URI_prefix&gt;<b>search?q=</b>&lt;query&gt;</code>
 </p>
 
-<p>The <code>&lt;query&gt;</code> is a placeholder for the search query to execute in Android
-Market. The query can be a raw text string or you can include a parameter that performs a search
+<p>The <code>&lt;query&gt;</code> is a placeholder for the search query to execute in Google
+Play. The query can be a raw text string or you can include a parameter that performs a search
 based on the publisher name:</p>
 
 <ul>
@@ -410,14 +410,14 @@ by the publisher name:
 
 <h4>Searching from your Android app</h4>
 
-<p>To initiate a search on Android Market from your application, create an intent with the
+<p>To initiate a search on Google Play from your application, create an intent with the
 {@link android.content.Intent#ACTION_VIEW} action and include a data URI in this format:</p>
 
 <p style="margin-left:2em"><code>market://search?q=&lt;query&gt;</code></p>
 
 <p>The query may include the {@code pub:} parameter described above.</p>
 
-<p>For example, here's how you can initiate a search in the Android Market application, based on the
+<p>For example, here's how you can initiate a search in the Google Play application, based on the
 publisher name:</p>
 
 <pre>
@@ -426,43 +426,43 @@ intent.setData(Uri.parse("market://search?q=pub:Your Publisher Name"));
 startActivity(intent);
 </pre>
 
-<p>This opens the Android Market application to perform the search. The search result shows all
+<p>This opens the Google Play application to perform the search. The search result shows all
 applications published by the publisher that are compatible with the current device.</p>
 
 
 <h4>Searching from a web site</h4>
 
-<p>To initiate a search on Android Market from your web site, create a link with a URI in this
+<p>To initiate a search on Google Play from your web site, create a link with a URI in this
 format:</p>
 
 <p style="margin-left:2em">
-  <code>http://market.android.com/search?q=&lt;query&gt;</code>
+  <code>http://play.google.com/store/search?q=&lt;query&gt;</code>
 </p>
 
 <p>The query may include the {@code pub:} parameter described above.</p>
 
-<p>For example, here's a link that initiates a search on Android Market, based on the
+<p>For example, here's a link that initiates a search on Google Play, based on the
 publisher name:</p>
 
 <pre>
-&lt;a href="http://market.android.com/search?q=pub:Your Publisher Name">Search Link&lt;/a>
+&lt;a href="http://play.google.com/store/search?q=pub:Your Publisher Name">Search Link&lt;/a>
 </pre>
 
-<p>When clicked from a desktop web browser, this opens the Android Market web site and performs the
+<p>When clicked from a desktop web browser, this opens the Google Play web site and performs the
 search. When clicked from an Android-powered device, users are given the option to use either their
-web browser or the Android Market application to perform the search.</p>
+web browser or the Google Play application to perform the search.</p>
 
 
 
-<h3 id="BuildaButton">Build an Android Market button</h3>
+<h3 id="BuildaButton">Build a Google Play button</h3>
 
-<p>Use the following form to generate an "Available in Android Market" button that you can use on
+<p>Use the following form to generate an "Available on Google Play" button that you can use on
 your web site. Input either your application's package name or publisher name and the button will
-take users to Android Market to either view your application's information or view a list of
-your published apps. If users click the button while on an Android-powered device, the Android
-Market application will respond to show users your application(s).</p>
+take users to Google Play to either view your application's information or view a list of
+your published apps. If users click the button while on an Android-powered device, the Google
+Play application will respond to show users your application(s).</p>
 
-<p>This form offers four versions of the official "Available in Android Market" button at
+<p>This form offers four versions of the official "Available on Google Play" button at
 recommended sizes. If you want to create a different size, you can download an EPS file for
 the button images from the <a href="http://www.android.com/branding.html">Android Brand
 Guidelines</a>.</p>
@@ -507,18 +507,18 @@ div.button-row input {
 
 // variables for creating 'try it out' demo button
 var imagePath = "http://www.android.com/images/brand/"
-var linkStart = "<a href=\"http://market.android.com/";
+var linkStart = "<a href=\"http://play.google.com/store/";
 var imageStart = "\">\n"
         + "  <img src=\"" + imagePath;
 var imageEnd = ".png\"\n"
-        + "       alt=\"Available in Android Market\" />\n</a>";
+        + "       alt=\"Available on Google Play\" />\n</a>";
 
 // variables for creating code snippet
-var linkStartCode = "&lt;a href=\"http://market.android.com/";
+var linkStartCode = "&lt;a href=\"http://play.google.com/store/";
 var imageStartCode = "\"&gt;\n"
         + "  &lt;img src=\"" + imagePath;
 var imageEndCode = ".png\"\n"
-        + "       alt=\"Available in Android Market\" />\n&lt;/a>";
+        + "       alt=\"Available on Google Play\" />\n&lt;/a>";
 
 /** Generate the HTML snippet and demo based on form values */
 function buildButton(form) {
@@ -658,7 +658,7 @@ style="font-family:monospace;background-color:#efefef;padding:5px;display:none;m
 
 <h3 id="UriSummary">Summary of URI formats</h3>
 
-<p>The table below provides a summary of the URIs currently supported by the Android Market (both on
+<p>The table below provides a summary of the URIs currently supported by the Google Play (both on
 the web and in the Android application), as discussed in the previous sections.</p>
 
 <table>
@@ -670,19 +670,19 @@ the web and in the Android application), as discussed in the previous sections.<
 
 <tr>
 <td>Display the details screen for a specific application</td>
-<td><code>http://market.android.com/details?id=&lt;package_name&gt;</code>
+<td><code>http://play.google.com/store/details?id=&lt;package_name&gt;</code>
 <td><code>market://details?id=&lt;package_name&gt;</code></td>
 </tr>
 
 <tr>
 <td>Search for applications using a general string query.</td>
-<td><code>http://market.android.com/search?q=&lt;query&gt;</code></td>
+<td><code>http://play.google.com/store/search?q=&lt;query&gt;</code></td>
 <td><code>market://search?q=&lt;query&gt;</code></td>
 </tr>
 
 <tr>
 <td>Search for applications by publisher name</td>
-<td><nobr><code>http://market.android.com/search?q=pub:&lt;publisher_name&gt;</code></nobr></td>
+<td><nobr><code>http://play.google.com/store/search?q=pub:&lt;publisher_name&gt;</code></nobr></td>
 <td><nobr><code>market://search?q=pub:&lt;publisher_name&gt;</code></nobr></td>
 </tr>
 

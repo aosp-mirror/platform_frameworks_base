@@ -62,7 +62,7 @@ records video. In this lesson, you make it do this for you.</p>
 </pre>
 
 <p>If your application uses, but does not require a camera in order to function, add {@code
-android:required="false"} to the tag. In doing so, Android Market will allow devices without a
+android:required="false"} to the tag. In doing so, Google Play will allow devices without a
 camera to download your application. It's then your responsibility to check for the availability
 of the camera at runtime by calling {@link
 android.content.pm.PackageManager#hasSystemFeature hasSystemFeature(PackageManager.FEATURE_CAMERA)}.
