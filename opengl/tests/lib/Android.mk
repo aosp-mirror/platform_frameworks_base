@@ -22,7 +22,7 @@ LOCAL_C_INCLUDES += system/extras/tests/include \
     bionic \
     bionic/libstdc++/include \
     external/stlport/stlport \
-    frameworks/base/opengl/tests/include \
+	$(call include-path-for, opengl-tests-includes)
 
 LOCAL_CFLAGS := -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 

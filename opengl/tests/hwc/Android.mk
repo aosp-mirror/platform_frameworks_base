@@ -22,8 +22,7 @@ LOCAL_C_INCLUDES += system/extras/tests/include \
     bionic \
     bionic/libstdc++/include \
     external/stlport/stlport \
-    frameworks/base/opengl/tests \
-    frameworks/base/opengl/tests/include \
+	$(call include-path-for, opengl-tests-includes)
 
 LOCAL_CFLAGS := -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
@@ -51,8 +50,7 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_C_INCLUDES += \
     system/extras/tests/include \
     hardware/libhardware/include \
-    frameworks/base/opengl/tests \
-    frameworks/base/opengl/tests/include \
+	$(call include-path-for, opengl-tests-includes)
 
 LOCAL_CFLAGS := -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
@@ -83,8 +81,7 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_C_INCLUDES += \
     system/extras/tests/include \
     hardware/libhardware/include \
-    frameworks/base/opengl/tests \
-    frameworks/base/opengl/tests/include \
+	$(call include-path-for, opengl-tests-includes)
 
 LOCAL_MODULE:= hwcRects
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/nativeutil
@@ -113,8 +110,7 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_C_INCLUDES += \
     system/extras/tests/include \
     hardware/libhardware/include \
-    frameworks/base/opengl/tests \
-    frameworks/base/opengl/tests/include \
+	$(call include-path-for, opengl-tests-includes)
 
 LOCAL_MODULE:= hwcColorEquiv
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/nativeutil
@@ -143,8 +139,7 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_C_INCLUDES += \
     system/extras/tests/include \
     hardware/libhardware/include \
-    frameworks/base/opengl/tests \
-    frameworks/base/opengl/tests/include \
+	$(call include-path-for, opengl-tests-includes)
 
 LOCAL_MODULE:= hwcCommit
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/nativebenchmark
