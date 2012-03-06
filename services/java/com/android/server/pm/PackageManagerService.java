@@ -7744,6 +7744,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkgSetting.pkg.mSetEnabled = newState;
             } else {
                 // We're dealing with a component level state change
+                // First, verify that this is a valid class name.
+                PackageParser.Package pkg = pkgSetting.pkg;
+                if (pkg == null || !pkg.hasComponentClassName(className)) {
+                    if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+                        throw new IllegalArgumentException("Component class " + className
+                                + " does not exist in " + packageName);
+                    } else {
+                        Slog.w(TAG, "Failed setComponentEnabledSetting: component class "
+                                + className + " does not exist in " + packageName);
+                    }
+                }
                 switch (newState) {
                 case COMPONENT_ENABLED_STATE_ENABLED:
                     if (!pkgSetting.enableComponentLPw(className)) {

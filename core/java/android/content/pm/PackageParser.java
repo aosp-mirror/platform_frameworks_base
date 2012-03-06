@@ -944,7 +944,7 @@ public class PackageParser {
 
                 if (name != null && !pkg.requestedPermissions.contains(name)) {
                     pkg.requestedPermissions.add(name.intern());
-                    pkg.requestedPermissionsRequired.add(required);
+                    pkg.requestedPermissionsRequired.add(required ? Boolean.TRUE : Boolean.FALSE);
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -1239,6 +1239,7 @@ public class PackageParser {
                 }
                 implicitPerms.append(npi.name);
                 pkg.requestedPermissions.add(npi.name);
+                pkg.requestedPermissionsRequired.add(Boolean.TRUE);
             }
         }
         if (implicitPerms != null) {
@@ -3082,7 +3083,36 @@ public class PackageParser {
                 instrumentation.get(i).setPackageName(newName);
             }
         }
-        
+
+        public boolean hasComponentClassName(String name) {
+            for (int i=activities.size()-1; i>=0; i--) {
+                if (name.equals(activities.get(i).className)) {
+                    return true;
+                }
+            }
+            for (int i=receivers.size()-1; i>=0; i--) {
+                if (name.equals(receivers.get(i).className)) {
+                    return true;
+                }
+            }
+            for (int i=providers.size()-1; i>=0; i--) {
+                if (name.equals(providers.get(i).className)) {
+                    return true;
+                }
+            }
+            for (int i=services.size()-1; i>=0; i--) {
+                if (name.equals(services.get(i).className)) {
+                    return true;
+                }
+            }
+            for (int i=instrumentation.size()-1; i>=0; i--) {
+                if (name.equals(instrumentation.get(i).className)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public String toString() {
             return "Package{"
                 + Integer.toHexString(System.identityHashCode(this))
