@@ -35,7 +35,7 @@ previous.link=videobasics.html
 the framework APIs.</p>
 
 <p>Directly controlling a device camera requires a lot more code than requesting pictures or videos
-from existing camera applications. However, if you want to build a specialized camera application or
+from existing camera applications. However, if you want to build a specialized camera application
 or something fully integrated in your app UI, this lesson shows you how.</p>
 
 
@@ -95,7 +95,7 @@ camera sensor is picking up.</p>
 <p>To get started with displaying a preview, you need preview class. The
 preview requires an implementation of the {@code
 android.view.SurfaceHolder.Callback} interface, which is used to pass image
-data from the camera hardware the application.</p>
+data from the camera hardware to the application.</p>
 
 <pre>
 class Preview extends ViewGroup implements SurfaceHolder.Callback {
@@ -214,7 +214,7 @@ takePicture()}.</p>
 
 <h2 id="TaskRestartPreview">Restart the Preview</h2>
 
-<p>After a picture is taken, you must to restart the preview before the user
+<p>After a picture is taken, you must restart the preview before the user
 can take another picture. In this example, the restart is done by overloading
 the shutter button.</p>
 
