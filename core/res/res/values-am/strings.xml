@@ -222,7 +222,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"የመኪና ሁነታ አንቃ"</string>
     <string name="permdesc_enableCarMode" msgid="5673461159384850628">"ትግበራ የመኪና ሁነታ ለማንቃት ይፈቅዳል።"</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"የዳራ ሂደትን አቁም"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"ትግበራ ምንም እንኳ ማህደረ ትውስታ አነስተኛ ባይሆንም ሌላ ትግበራዎች የዳራ ሂደታቸውን ለማቆም ይፈቅዳል።"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"ትግበራ ምንም እንኳን  ማህደረ ትውስታ አነስተኛ ባይሆንም ሌላ ትግበራዎች የዳራ ሂደታቸውን ለማቆም ይፈቅዳል።"</string>
     <string name="permlab_forceStopPackages" msgid="1447830113260156236">"ሌላ ትግበራዎችን በኃይል አቁም"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"ትግበራ ሌሎች ትግበራዎችን በኃይል ለማስቆም ይፈቅዳል።"</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"ትግበራ እንዲዘጋ አስገድድ"</string>
@@ -265,7 +265,7 @@
     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"ትግበራ የራሱን ግቤት ክስተት(ቁልፎች ተጫን፣ወዘተ)ለሌላ ትግበራዎች ለማድረስ ይፈቅዳል። ተንኮል አዘል ትግበራዎች ስልኩን ለመቆጣጠር ይህን መጠቀም ይችላሉ።"</string>
     <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"ትግበራ የራሱን ግቤት ክስተት(ቁልፎች ተጫን፣ወዘተ)ለሌላ ትግበራዎች ለማድረስ ይፈቅዳል። ተንኮል አዘል ትግበራዎች ስልኩን ለመቆጣጠር ይህን መጠቀም ይችላሉ።"</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"የሚተይቡትን እና የሚወስዱትን እርምጃ ይመዝግቡ"</string>
-    <string name="permdesc_readInputState" msgid="5132879321450325445">"ትግበራዎች ከሌላ ትግበራዎች ጋር እንኳ ሲገናኙ የሚጫኑትን ቁልፎች ለመመልከት ይፈቅዳሉ።ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
+    <string name="permdesc_readInputState" msgid="5132879321450325445">"ትግበራዎች ከሌላ ትግበራዎች ጋር እንኳን  ሲገናኙ የሚጫኑትን ቁልፎች ለመመልከት ይፈቅዳሉ።ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"በግቤት ሜተድ ጠርዝ"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"ያዡ ግቤት ሜተዱን ወደ ከፍተኛ-ደረጃ በይነገጽ ለመጠረዝ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"ለፅሁፍ አገልግሎት አሰረ"</string>
@@ -337,7 +337,7 @@
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"ትግበራ በመሣሪያዎ ላይ የተከማቸውን የግል የመገለጫ መረጃ፣ እንደ ስምዎ እና የዕውቂያ መረጃ ለመለወጥ እና ለማከል ይፈቅዳል። ይህ ማለት ትግበራው እርስዎን ለይቶ የመገለጫ መረጃዎን ለሌሎች መላክ ይችላል።"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"የአንተን ማህበራዊ የውይይት ክፍሎች አንብብ"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"መተግበሪያው ከአንተ ጓደኞች ማህበራዊ ዝማኔዎችን እንዲደርስባቸው እና እንዲያመሳስል ይፈቅዳል፡፡ ተንኮል አዘል መተግበሪያዎች ይህን መዳረሻ ባንተና በጓደኞችህ መካከል በማህበራዊ አውታረመረቦች ያሉ የግል ተግባቦቶችን ለመዳረስ ሊጠቀሙበት ይችላሉ፡፡"</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ወደ ያንተ ማህበራዊ የውይይት ክፍሎች ጻፍ"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ወደ የአንተ  ማህበራዊ የውይይት ክፍሎች ጻፍ"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"መተግበሪያው የጓደኞችህን ማህበራዊ ዝማኔዎችን ለማሳየት ይፈቅዳል፡፡ ተንኮል አዘል መተግበሪያዎች ይህን መዳረሻ ጓደኛ መስለው ለመቅረብ እና የይለፍ ቃልና ሌላ ምስጢራዊ መረጃ እንድትሰጡ ለማድረግ ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"የቀን መቁጠሪያ ክስተቶች ተጨማሪ ሚስጥራዊ መረጃ አንብብ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"ትግበራ በጡባዊዎ ላይ የተከማቸውን የቀን መቁጠሪያ ክስተቶች በሙሉ አብረው የሚሰሩትንም ሆነ የጓደኞችዎን ጨምሮ ለማንበብ ይፈቅዳል። ይህን ፈቃድ የያዘ ተንኮል አዘል ትግበራ ከባለቤቱ ዕውቅና ውጪ ከቀን አቆጣጠር ላይ የግል መረጃ ማውጣት ይችላል።\'"</string>

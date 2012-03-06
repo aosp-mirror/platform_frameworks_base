@@ -761,10 +761,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"به دارنده اجازه ایجاد درخواست تأییدکنندگان بسته را می‌دهد. برای برنامه‌های عادی مورد نیاز نیست."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"دسترسی به درگاه‌های سریال"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"به دارنده اجازه می‌دهد با استفاده از SerialManager API به درگاه‌های سریال دسترسی داشته باشد."</string>
-    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
-    <skip />
-    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
-    <skip />
+    <string name="permlab_updateLock" msgid="3527558366616680889">"ترغیب به انجام ندادن به‌روزرسانی‌های خودکار دستگاه"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"به دارنده اجازه می‌دهد اطلاعاتی در مورد زمان مناسب برای یک راه‌اندازی مجدد غیرتعاملی جهت ارتقای دستگاه را به سیستم ارائه دهد."</string>
     <string name="save_password_message" msgid="767344687139195790">"می خواهید مرورگر این رمز ورود را به خاطر داشته باشد؟"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"اکنون خیر"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>

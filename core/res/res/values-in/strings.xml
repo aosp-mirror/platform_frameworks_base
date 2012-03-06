@@ -761,10 +761,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Mengizinkan pemegangnya mengajukan permintaan pemverifikasian paket. Tidak diperlukan untuk aplikasi normal."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"akses port serial"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Memungkinkan pemegangnya mengakses port serial menggunakan API SerialManager."</string>
-    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
-    <skip />
-    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
-    <skip />
+    <string name="permlab_updateLock" msgid="3527558366616680889">"menghindari pembaruan perangkat otomatis"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Memungkinkan pemegang untuk menawarkan informasi ke sistem mengenai kapan waktu yang baik bagi pemulaian ulang non-interaktif untuk meningkatkan versi perangkat."</string>
     <string name="save_password_message" msgid="767344687139195790">"Apakah Anda ingin peramban menyimpan sandi ini?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Tidak sekarang"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
