@@ -23,7 +23,7 @@
 #include <time.h>
 #include <errno.h>
 
-#include "../../utils/tests/TestHelpers.h"
+#include "TestHelpers.h"
 
 namespace android {
 

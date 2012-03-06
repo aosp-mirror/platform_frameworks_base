@@ -23,7 +23,7 @@
 #include <sys/mman.h>
 #include <cutils/ashmem.h>
 
-#include "../../utils/tests/TestHelpers.h"
+#include "TestHelpers.h"
 
 namespace android {
 

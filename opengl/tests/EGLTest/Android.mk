@@ -26,8 +26,8 @@ LOCAL_C_INCLUDES := \
     bionic/libstdc++/include \
     external/gtest/include \
     external/stlport/stlport \
-    frameworks/base/opengl/libs \
-    frameworks/base/opengl/libs/EGL \
+    frameworks/native/opengl/libs \
+    frameworks/native/opengl/libs/EGL \
 
 include $(BUILD_EXECUTABLE)
 
