@@ -371,6 +371,15 @@ public class Build {
 
         /**
          * Next up on Android!
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> Calls to {@link android.content.pm.PackageManager#setComponentEnabledSetting
+         * PackageManager.setComponentEnabledSetting} will now throw an
+         * IllegalArgumentException if the given component class name does not
+         * exist in the application's manifest.
+         * </ul>
          */
         public static final int JELLY_BEAN = CUR_DEVELOPMENT;
     }
