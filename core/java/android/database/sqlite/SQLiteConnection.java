@@ -704,44 +704,49 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             throw new IllegalArgumentException("window must not be null.");
         }
 
-        int actualPos = -1;
-        int countedRows = -1;
-        int filledRows = -1;
-        final int cookie = mRecentOperations.beginOperation("executeForCursorWindow",
-                sql, bindArgs);
+        window.acquireReference();
         try {
-            final PreparedStatement statement = acquirePreparedStatement(sql);
+            int actualPos = -1;
+            int countedRows = -1;
+            int filledRows = -1;
+            final int cookie = mRecentOperations.beginOperation("executeForCursorWindow",
+                    sql, bindArgs);
             try {
-                throwIfStatementForbidden(statement);
-                bindArguments(statement, bindArgs);
-                applyBlockGuardPolicy(statement);
-                attachCancellationSignal(cancellationSignal);
+                final PreparedStatement statement = acquirePreparedStatement(sql);
                 try {
-                    final long result = nativeExecuteForCursorWindow(
-                            mConnectionPtr, statement.mStatementPtr, window.mWindowPtr,
-                            startPos, requiredPos, countAllRows);
-                    actualPos = (int)(result >> 32);
-                    countedRows = (int)result;
-                    filledRows = window.getNumRows();
-                    window.setStartPosition(actualPos);
-                    return countedRows;
+                    throwIfStatementForbidden(statement);
+                    bindArguments(statement, bindArgs);
+                    applyBlockGuardPolicy(statement);
+                    attachCancellationSignal(cancellationSignal);
+                    try {
+                        final long result = nativeExecuteForCursorWindow(
+                                mConnectionPtr, statement.mStatementPtr, window.mWindowPtr,
+                                startPos, requiredPos, countAllRows);
+                        actualPos = (int)(result >> 32);
+                        countedRows = (int)result;
+                        filledRows = window.getNumRows();
+                        window.setStartPosition(actualPos);
+                        return countedRows;
+                    } finally {
+                        detachCancellationSignal(cancellationSignal);
+                    }
                 } finally {
-                    detachCancellationSignal(cancellationSignal);
+                    releasePreparedStatement(statement);
                 }
+            } catch (RuntimeException ex) {
+                mRecentOperations.failOperation(cookie, ex);
+                throw ex;
             } finally {
-                releasePreparedStatement(statement);
+                if (mRecentOperations.endOperationDeferLog(cookie)) {
+                    mRecentOperations.logOperation(cookie, "window='" + window
+                            + "', startPos=" + startPos
+                            + ", actualPos=" + actualPos
+                            + ", filledRows=" + filledRows
+                            + ", countedRows=" + countedRows);
+                }
             }
-        } catch (RuntimeException ex) {
-            mRecentOperations.failOperation(cookie, ex);
-            throw ex;
         } finally {
-            if (mRecentOperations.endOperationDeferLog(cookie)) {
-                mRecentOperations.logOperation(cookie, "window='" + window
-                        + "', startPos=" + startPos
-                        + ", actualPos=" + actualPos
-                        + ", filledRows=" + filledRows
-                        + ", countedRows=" + countedRows);
-            }
+            window.releaseReference();
         }
     }
 

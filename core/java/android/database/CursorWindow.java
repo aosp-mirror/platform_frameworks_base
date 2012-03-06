@@ -169,14 +169,6 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     }
 
     /**
-     * Closes the cursor window and frees its underlying resources when all other
-     * remaining references have been released.
-     */
-    public void close() {
-        releaseReference();
-    }
-
-    /**
      * Clears out the existing contents of the window, making it safe to reuse
      * for new data.
      * <p>
@@ -703,8 +695,13 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mStartPos);
-        nativeWriteToParcel(mWindowPtr, dest);
+        acquireReference();
+        try {
+            dest.writeInt(mStartPos);
+            nativeWriteToParcel(mWindowPtr, dest);
+        } finally {
+            releaseReference();
+        }
 
         if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
             releaseReference();

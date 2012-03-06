@@ -190,13 +190,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     }
 
     /**
-     * Release this program's resources, making it invalid.
-     */
-    public void close() {
-        releaseReference();
-    }
-
-    /**
      * Given an array of String bindArgs, this method binds all of them in one single call.
      *
      * @param bindArgs the String array of bind args, none of which must be null.
