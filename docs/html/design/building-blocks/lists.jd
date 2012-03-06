@@ -1,0 +1,31 @@
+page.title=Lists
+@jd:body
+
+<p>Lists present multiple line items in a vertical arrangement. They can be used for data selection as
+well as drilldown navigation.</p>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row clearfix">
+  <div class="layout-content-col span-9">
+
+    <img src="{@docRoot}design/media/lists_main.png">
+
+  </div>
+  <div class="layout-content-col span-4 with-callouts">
+
+<ol>
+<li>
+<h4>Section Divider</h4>
+<p>Use section dividers to organize the content of your list into groups and facilitate scanning.</p>
+</li>
+<li>
+<h4>Line Items</h4>
+<p>List items can accommodate a wide range of data types in different arrangements, including
+ simple single-line items, multi-line items, and custom items with icons, checkboxes, and action
+ buttons.</p>
+</li>
+</ol>
+
+  </div>
+</div>

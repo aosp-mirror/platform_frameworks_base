@@ -1,0 +1,100 @@
+page.title=Selection
+@jd:body
+
+<p>Android 3.0 introduced the <em>long press</em> gesture&mdash;that is, a touch that's held in the same
+position for a moment&mdash;as the global gesture to select data. This affects the way you should
+handle multi-select and contextual actions in your apps.</p>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>What has changed?</h4>
+<p>In previous versions of Android, the long press gesture was universally used to display contextual
+actions for a given data item in a contextual menu.</p>
+<p>This pattern changed with Android 3.0. The long press gesture is now used to select data, combining
+contextual actions and selection management functions for selected data into a new element called
+the contextual action bar (CAB).</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/selection_context_menu.png">
+    <div class="figure-caption">
+      Traditional use of the long press gesture to show contextual menus.
+    </div>
+
+  </div>
+</div>
+
+<h4>Using the contextual action bar (CAB)</h4>
+<p>The selection CAB is a temporary action bar that overlays your app's current action bar while data
+is selected. It appears after the user long presses on a selectable data item.</p>
+
+<img src="{@docRoot}design/media/selection_cab_big.png">
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<p>From here the user can:</p>
+<ul>
+<li>Select additional data items by touching them.</li>
+<li>Trigger an action from the CAB that applies to all highlighted data items. The CAB then
+  automatically dismisses itself.</li>
+<li>Dismiss the CAB via the navigation bar's Back button or the CAB's checkmark button. This removes
+  the CAB along with all selection highlights.</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/selection_cab_example.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Selecting CAB actions</h4>
+<p>You can decide which actions and elements appear in the CAB. Use the guidelines in the <a href="actionbar.html">Action Bar
+pattern</a> to decide which items to surface at the top level and which to move to the
+action overflow.</p>
+<h4>Dynamically adjust CAB actions</h4>
+<p>In most cases you need to adjust the actions in the CAB dynamically as the user adds more items to
+the selection. Actions that apply to a single selected data item don't necessarily apply to multiple
+selected data items of the same kind.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/selection_adjusting_actions.png">
+    <div class="figure-caption">
+      Adjusting actions in the CAB as additional items are selected.
+    </div>
+
+  </div>
+</div>
+
+<h2 id="checklist">Checklist</h2>
+
+<ul>
+<li>
+<p>Whenever your app supports the selection of multiple data items, make use of the contextual action
+  bar (CAB).</p>
+</li>
+<li>
+<p>Reserve the long press gesture for selection exclusively. Don't use it to display traditional
+  contextual menus.</p>
+</li>
+<li>
+<p>If you don't support multi-selection within a list, long press should do nothing.</p>
+</li>
+<li>
+<p>Plan the actions you want to display inside of a CAB in the same way you would plan the actions
+  inside your app's action bar.</p>
+</li>
+</ul>
