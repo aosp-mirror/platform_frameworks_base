@@ -2074,17 +2074,7 @@ if (mType == DIRECT) {
 
             }
 
-if (mType == DUPLICATING) {
-#if 0   // see earlier FIXME
-            // Now that this is a field instead of local variable,
-            // clear it so it is empty the first time through the loop,
-            // and later an assignment could combine the clear with the loop below
-            outputTracks.clear();
-#endif
-            for (size_t i = 0; i < mOutputTracks.size(); i++) {
-                outputTracks.add(mOutputTracks[i]);
-            }
-}
+            saveOutputTracks();
 
             // put audio hardware into standby after short delay
             if (CC_UNLIKELY((!mActiveTracks.size() && systemTime() > standbyTime) ||
@@ -2101,9 +2091,7 @@ if (mType == DUPLICATING) {
                     // we're about to wait, flush the binder command buffer
                     IPCThreadState::self()->flushCommands();
 
-if (mType == DUPLICATING) {
-                    outputTracks.clear();
-}
+                    clearOutputTracks();
 
                     if (exitPending()) break;
 
@@ -2212,9 +2200,10 @@ if (mType == MIXER) {
 if (mType == DIRECT) {
         activeTrack.clear();
 }
-if (mType == DUPLICATING) {
-        outputTracks.clear();
-}
+        // FIXME I don't understand the need for this here;
+        //       it was in the original code but maybe the
+        //       assignment in saveOutputTracks() makes this unnecessary?
+        clearOutputTracks();
 
         // Effect chains will be actually deleted here if they were removed from
         // mEffectChains list during mixing or effects processing
@@ -3166,6 +3155,16 @@ void AudioFlinger::DuplicatingThread::threadLoop_standby()
     for (size_t i = 0; i < outputTracks.size(); i++) {
         outputTracks[i]->stop();
     }
+}
+
+void AudioFlinger::DuplicatingThread::saveOutputTracks()
+{
+    outputTracks = mOutputTracks;
+}
+
+void AudioFlinger::DuplicatingThread::clearOutputTracks()
+{
+    outputTracks.clear();
 }
 
 void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
