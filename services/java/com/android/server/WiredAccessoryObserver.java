@@ -30,8 +30,11 @@ import android.util.Slog;
 import android.media.AudioManager;
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>WiredAccessoryObserver monitors for a wired headset on the main board or dock.
@@ -39,17 +42,6 @@ import java.io.FileNotFoundException;
 class WiredAccessoryObserver extends UEventObserver {
     private static final String TAG = WiredAccessoryObserver.class.getSimpleName();
     private static final boolean LOG = true;
-    private static final int MAX_AUDIO_PORTS = 3; /* h2w, USB Audio & hdmi */
-    private static final String uEventInfo[][] = { {"DEVPATH=/devices/virtual/switch/h2w",
-                                                    "/sys/class/switch/h2w/state",
-                                                    "/sys/class/switch/h2w/name"},
-                                                   {"DEVPATH=/devices/virtual/switch/usb_audio",
-                                                    "/sys/class/switch/usb_audio/state",
-                                                    "/sys/class/switch/usb_audio/name"},
-                                                   {"DEVPATH=/devices/virtual/switch/hdmi",
-                                                    "/sys/class/switch/hdmi/state",
-                                                    "/sys/class/switch/hdmi/name"} };
-
     private static final int BIT_HEADSET = (1 << 0);
     private static final int BIT_HEADSET_NO_MIC = (1 << 1);
     private static final int BIT_USB_HEADSET_ANLG = (1 << 2);
@@ -60,10 +52,89 @@ class WiredAccessoryObserver extends UEventObserver {
                                                    BIT_HDMI_AUDIO);
     private static final int HEADSETS_WITH_MIC = BIT_HEADSET;
 
+    private static class UEventInfo {
+        private final String mDevName;
+        private final int mState1Bits;
+        private final int mState2Bits;
+
+        public UEventInfo(String devName, int state1Bits, int state2Bits) {
+            mDevName = devName;
+            mState1Bits = state1Bits;
+            mState2Bits = state2Bits;
+        }
+
+        public String getDevName() { return mDevName; }
+
+        public String getDevPath() {
+            return String.format("DEVPATH=/devices/virtual/switch/%s", mDevName);
+        }
+
+        public String getSwitchStatePath() {
+            return String.format("/sys/class/switch/%s/state", mDevName);
+        }
+
+        public boolean checkSwitchExists() {
+            File f = new File(getSwitchStatePath());
+            return ((null != f) && f.exists());
+        }
+
+        public int computeNewHeadsetState(int headsetState, int switchState) {
+            int preserveMask = ~(mState1Bits | mState2Bits);
+            int setBits = ((switchState == 1) ? mState1Bits :
+                          ((switchState == 2) ? mState2Bits : 0));
+
+            return ((headsetState & preserveMask) | setBits);
+        }
+    }
+
+    private static List<UEventInfo> makeObservedUEventList() {
+        List<UEventInfo> retVal = new ArrayList<UEventInfo>();
+        UEventInfo uei;
+
+        // Monitor h2w
+        uei = new UEventInfo("h2w", BIT_HEADSET, BIT_HEADSET_NO_MIC);
+        if (uei.checkSwitchExists()) {
+            retVal.add(uei);
+        } else {
+            Slog.w(TAG, "This kernel does not have wired headset support");
+        }
+
+        // Monitor USB
+        uei = new UEventInfo("usb_audio", BIT_USB_HEADSET_ANLG, BIT_USB_HEADSET_DGTL);
+        if (uei.checkSwitchExists()) {
+            retVal.add(uei);
+        } else {
+            Slog.w(TAG, "This kernel does not have usb audio support");
+        }
+
+        // Monitor HDMI
+        //
+        // If the kernel has support for the "hdmi_audio" switch, use that.  It will be signalled
+        // only when the HDMI driver has a video mode configured, and the downstream sink indicates
+        // support for audio in its EDID.
+        //
+        // If the kernel does not have an "hdmi_audio" switch, just fall back on the older "hdmi"
+        // switch instead.
+        uei = new UEventInfo("hdmi_audio", BIT_HDMI_AUDIO, 0);
+        if (uei.checkSwitchExists()) {
+            retVal.add(uei);
+        } else {
+            uei = new UEventInfo("hdmi", BIT_HDMI_AUDIO, 0);
+            if (uei.checkSwitchExists()) {
+                retVal.add(uei);
+            } else {
+                Slog.w(TAG, "This kernel does not have HDMI audio support");
+            }
+        }
+
+        return retVal;
+    }
+
+    private static List<UEventInfo> uEventInfo = makeObservedUEventList();
+
     private int mHeadsetState;
     private int mPrevHeadsetState;
     private String mHeadsetName;
-    private int switchState;
 
     private final Context mContext;
     private final WakeLock mWakeLock;  // held while there is a pending route change
@@ -85,11 +156,12 @@ class WiredAccessoryObserver extends UEventObserver {
         // one on the board, one on the dock and one on HDMI:
         // observe three UEVENTs
         init();  // set initial status
-        for (int i = 0; i < MAX_AUDIO_PORTS; i++) {
-            startObserving(uEventInfo[i][0]);
+        for (int i = 0; i < uEventInfo.size(); ++i) {
+            UEventInfo uei = uEventInfo.get(i);
+            startObserving(uei.getDevPath());
         }
       }
-  }
+    }
 
     @Override
     public void onUEvent(UEventObserver.UEvent event) {
@@ -106,50 +178,47 @@ class WiredAccessoryObserver extends UEventObserver {
 
     private synchronized final void updateState(String name, int state)
     {
-        if (name.equals("usb_audio")) {
-            switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|BIT_HDMI_AUDIO)) |
-                           ((state == 1) ? BIT_USB_HEADSET_ANLG :
-                                         ((state == 2) ? BIT_USB_HEADSET_DGTL : 0)));
-        } else if (name.equals("hdmi")) {
-            switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
-                                             BIT_USB_HEADSET_DGTL|BIT_USB_HEADSET_ANLG)) |
-                           ((state == 1) ? BIT_HDMI_AUDIO : 0));
-        } else {
-            switchState = ((mHeadsetState & (BIT_HDMI_AUDIO|BIT_USB_HEADSET_ANLG|
-                                             BIT_USB_HEADSET_DGTL)) |
-                            ((state == 1) ? BIT_HEADSET :
-                                          ((state == 2) ? BIT_HEADSET_NO_MIC : 0)));
+        // FIXME:  When ueventd informs of a change in state for a switch, it does not have to be
+        // the case that the name reported by /sys/class/switch/<device>/name is the same as
+        // <device>.  For normal users of the linux switch class driver, it will be.  But it is
+        // technically possible to hook the print_name method in the class driver and return a
+        // different name each and every time the name sysfs entry is queried.
+        //
+        // Right now this is not the case for any of the switch implementations used here.  I'm not
+        // certain anyone would ever choose to implement such a dynamic name, or what it would mean
+        // for the implementation at this level, but if it ever happens, we will need to revisit
+        // this code.
+        for (int i = 0; i < uEventInfo.size(); ++i) {
+            UEventInfo uei = uEventInfo.get(i);
+            if (name.equals(uei.getDevName())) {
+                update(name, uei.computeNewHeadsetState(mHeadsetState, state));
+                return;
+            }
         }
-        update(name, switchState);
     }
 
     private synchronized final void init() {
         char[] buffer = new char[1024];
-
-        String newName = mHeadsetName;
-        int newState = mHeadsetState;
         mPrevHeadsetState = mHeadsetState;
 
         if (LOG) Slog.v(TAG, "init()");
 
-        for (int i = 0; i < MAX_AUDIO_PORTS; i++) {
+        for (int i = 0; i < uEventInfo.size(); ++i) {
+            UEventInfo uei = uEventInfo.get(i);
             try {
-                FileReader file = new FileReader(uEventInfo[i][1]);
+                int curState;
+                FileReader file = new FileReader(uei.getSwitchStatePath());
                 int len = file.read(buffer, 0, 1024);
                 file.close();
-                newState = Integer.valueOf((new String(buffer, 0, len)).trim());
+                curState = Integer.valueOf((new String(buffer, 0, len)).trim());
 
-                file = new FileReader(uEventInfo[i][2]);
-                len = file.read(buffer, 0, 1024);
-                file.close();
-                newName = new String(buffer, 0, len).trim();
-
-                if (newState > 0) {
-                    updateState(newName, newState);
+                if (curState > 0) {
+                    updateState(uei.getDevName(), curState);
                 }
 
             } catch (FileNotFoundException e) {
-                Slog.w(TAG, "This kernel does not have wired headset support");
+                Slog.w(TAG, uei.getSwitchStatePath() +
+                        " not found while attempting to determine initial switch state");
             } catch (Exception e) {
                 Slog.e(TAG, "" , e);
             }
