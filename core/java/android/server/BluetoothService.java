@@ -46,6 +46,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -554,12 +555,15 @@ public class BluetoothService extends IBluetooth.Stub {
     private synchronized void updateSdpRecords() {
         ArrayList<ParcelUuid> uuids = new ArrayList<ParcelUuid>();
 
-        // Add the default records
-        uuids.add(BluetoothUuid.HSP_AG);
-        uuids.add(BluetoothUuid.ObexObjectPush);
+        Resources R = mContext.getResources();
 
-        if (mContext.getResources().
-                getBoolean(com.android.internal.R.bool.config_voice_capable)) {
+        // Add the default records
+        if (R.getBoolean(com.android.internal.R.bool.config_bluetooth_default_profiles)) {
+            uuids.add(BluetoothUuid.HSP_AG);
+            uuids.add(BluetoothUuid.ObexObjectPush);
+        }
+
+        if (R.getBoolean(com.android.internal.R.bool.config_voice_capable)) {
             uuids.add(BluetoothUuid.Handsfree_AG);
             uuids.add(BluetoothUuid.PBAP_PSE);
         }
@@ -567,14 +571,16 @@ public class BluetoothService extends IBluetooth.Stub {
         // Add SDP records for profiles maintained by Android userspace
         addReservedSdpRecords(uuids);
 
-        // Enable profiles maintained by Bluez userspace.
-        setBluetoothTetheringNative(true, BluetoothPanProfileHandler.NAP_ROLE,
-                BluetoothPanProfileHandler.NAP_BRIDGE);
+        if (R.getBoolean(com.android.internal.R.bool.config_bluetooth_default_profiles)) {
+            // Enable profiles maintained by Bluez userspace.
+            setBluetoothTetheringNative(true, BluetoothPanProfileHandler.NAP_ROLE,
+                   BluetoothPanProfileHandler.NAP_BRIDGE);
 
-        // Add SDP records for profiles maintained by Bluez userspace
-        uuids.add(BluetoothUuid.AudioSource);
-        uuids.add(BluetoothUuid.AvrcpTarget);
-        uuids.add(BluetoothUuid.NAP);
+            // Add SDP records for profiles maintained by Bluez userspace
+            uuids.add(BluetoothUuid.AudioSource);
+            uuids.add(BluetoothUuid.AvrcpTarget);
+            uuids.add(BluetoothUuid.NAP);
+        }
 
         // Cannot cast uuids.toArray directly since ParcelUuid is parcelable
         mAdapterUuids = new ParcelUuid[uuids.size()];
