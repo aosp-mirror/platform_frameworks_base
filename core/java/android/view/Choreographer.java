@@ -81,6 +81,8 @@ public final class Choreographer {
     private static final int MSG_DO_ANIMATION = 0;
     private static final int MSG_DO_DRAW = 1;
     private static final int MSG_DO_SCHEDULE_VSYNC = 2;
+    private static final int MSG_POST_DELAYED_ANIMATION = 3;
+    private static final int MSG_POST_DELAYED_DRAW = 4;
 
     private final Object mLock = new Object();
 
@@ -150,7 +152,7 @@ public final class Choreographer {
     }
 
     /**
-     * Posts a callback to run on the next animation cycle and schedules an animation cycle.
+     * Posts a callback to run on the next animation cycle.
      * The callback only runs once and then is automatically removed.
      *
      * @param runnable The callback to run during the next animation cycle.
@@ -161,9 +163,35 @@ public final class Choreographer {
         if (runnable == null) {
             throw new IllegalArgumentException("runnable must not be null");
         }
+        postAnimationCallbackUnchecked(runnable);
+    }
+
+    private void postAnimationCallbackUnchecked(Runnable runnable) {
         synchronized (mLock) {
             mAnimationCallbacks = addCallbackLocked(mAnimationCallbacks, runnable);
             scheduleAnimationLocked();
+        }
+    }
+
+    /**
+     * Posts a callback to run on the next animation cycle following the specified delay.
+     * The callback only runs once and then is automatically removed.
+     *
+     * @param runnable The callback to run during the next animation cycle following
+     * the specified delay.
+     * @param delayMillis The delay time in milliseconds.
+     *
+     * @see #removeAnimationCallback
+     */
+    public void postAnimationCallbackDelayed(Runnable runnable, long delayMillis) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        if (delayMillis <= 0) {
+            postAnimationCallbackUnchecked(runnable);
+        } else {
+            Message msg = mHandler.obtainMessage(MSG_POST_DELAYED_ANIMATION, runnable);
+            mHandler.sendMessageDelayed(msg, delayMillis);
         }
     }
 
@@ -175,6 +203,7 @@ public final class Choreographer {
      * @param runnable The animation callback to remove.
      *
      * @see #postAnimationCallback
+     * @see #postAnimationCallbackDelayed
      */
     public void removeAnimationCallback(Runnable runnable) {
         if (runnable == null) {
@@ -183,10 +212,11 @@ public final class Choreographer {
         synchronized (mLock) {
             mAnimationCallbacks = removeCallbackLocked(mAnimationCallbacks, runnable);
         }
+        mHandler.removeMessages(MSG_POST_DELAYED_ANIMATION, runnable);
     }
 
     /**
-     * Posts a callback to run on the next draw cycle and schedules a draw cycle.
+     * Posts a callback to run on the next draw cycle.
      * The callback only runs once and then is automatically removed.
      *
      * @param runnable The callback to run during the next draw cycle.
@@ -197,9 +227,35 @@ public final class Choreographer {
         if (runnable == null) {
             throw new IllegalArgumentException("runnable must not be null");
         }
+        postDrawCallbackUnchecked(runnable);
+    }
+
+    private void postDrawCallbackUnchecked(Runnable runnable) {
         synchronized (mLock) {
             mDrawCallbacks = addCallbackLocked(mDrawCallbacks, runnable);
             scheduleDrawLocked();
+        }
+    }
+
+    /**
+     * Posts a callback to run on the next draw cycle following the specified delay.
+     * The callback only runs once and then is automatically removed.
+     *
+     * @param runnable The callback to run during the next draw cycle following
+     * the specified delay.
+     * @param delayMillis The delay time in milliseconds.
+     *
+     * @see #removeDrawCallback
+     */
+    public void postDrawCallbackDelayed(Runnable runnable, long delayMillis) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        if (delayMillis <= 0) {
+            postDrawCallbackUnchecked(runnable);
+        } else {
+            Message msg = mHandler.obtainMessage(MSG_POST_DELAYED_DRAW, runnable);
+            mHandler.sendMessageDelayed(msg, delayMillis);
         }
     }
 
@@ -211,6 +267,7 @@ public final class Choreographer {
      * @param runnable The draw callback to remove.
      *
      * @see #postDrawCallback
+     * @see #postDrawCallbackDelayed
      */
     public void removeDrawCallback(Runnable runnable) {
         if (runnable == null) {
@@ -219,6 +276,7 @@ public final class Choreographer {
         synchronized (mLock) {
             mDrawCallbacks = removeCallbackLocked(mDrawCallbacks, runnable);
         }
+        mHandler.removeMessages(MSG_POST_DELAYED_DRAW, runnable);
     }
 
     private void scheduleAnimationLocked() {
@@ -437,6 +495,12 @@ public final class Choreographer {
                     break;
                 case MSG_DO_SCHEDULE_VSYNC:
                     doScheduleVsync();
+                    break;
+                case MSG_POST_DELAYED_ANIMATION:
+                    postAnimationCallbackUnchecked((Runnable)msg.obj);
+                    break;
+                case MSG_POST_DELAYED_DRAW:
+                    postDrawCallbackUnchecked((Runnable)msg.obj);
                     break;
             }
         }
