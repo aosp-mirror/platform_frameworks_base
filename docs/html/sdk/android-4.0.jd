@@ -660,14 +660,14 @@ your application’s package name. When the other device receives the NDEF messa
 application record and multiple applications contain activities that handle the specified intent,
 the system always delivers the message to the activity in your application (based on the matching
 application record). If the target device does not currently have your application installed, the
-system uses the Android application record to launch Android Market and take the user to the
+system uses the Android application record to launch Google Play and take the user to the
 application in order to install it.</p>
 
 <p>If your application doesn’t use NFC APIs to perform NDEF Push messaging, then Android provides a
 default behavior: When your application is in the foreground on one device and Android Beam is
 invoked with another Android-powered device, then the other device receives an NDEF message with an
 Android application record that identifies your application. If the receiving device has the
-application installed, the system launches it; if it’s not installed, Android Market opens and takes
+application installed, the system launches it; if it’s not installed, Google Play opens and takes
 the user to your application in order to install it.</p>
 
 <p>You can read more about Android Beam and other NFC features in the <a

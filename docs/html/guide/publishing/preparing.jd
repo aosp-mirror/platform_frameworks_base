@@ -22,7 +22,7 @@ page.title=Preparing for Release
     <ol>
       <li><a href="{@docRoot}guide/publishing/publishing_overview.html">Publishing Overview</a></li>
       <li><a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a></li>
-      <li><a href="{@docRoot}guide/publishing/publishing.html">Publishing on Android Market</a></li>
+      <li><a href="{@docRoot}guide/publishing/publishing.html">Publishing on Google Play</a></li>
     </ol>
   </div>
 </div>
@@ -39,13 +39,13 @@ similar to the debug build process and can be done using JDK and Android SDK too
 tasks serve as a final check, ensuring that your application performs as expected under real-world
 conditions. When you are finished preparing your application for release you have a signed
 <code>.apk</code> file, which you can distribute directly to users or distribute through an
-application marketplace such as Android Market.</p>
+application marketplace such as Google Play.</p>
 
 <p>This document summarizes the main tasks you need to perform to prepare your application for
 release. The tasks that are described in this document apply to all Android applications regardless
-how they are released or distributed to users. If you are releasing your application through Android
-Market, you should also read <a href="{@docRoot}guide/publishing/publishing.html">Publishing on
-Android Market</a> to be sure your release-ready application satisfies all Android Market
+how they are released or distributed to users. If you are releasing your application through Google
+Play, you should also read <a href="{@docRoot}guide/publishing/publishing.html">Publishing on
+Google Play</a> to be sure your release-ready application satisfies all Google Play
 requirements.</p>
 
 <p class="note"><strong>Note:</strong> As a best practice, your application should meet all of your
@@ -89,9 +89,9 @@ line.</p>
 
 <p>To prepare your application for release you typically perform five main tasks (see figure 2).
 Each main task may include one or more smaller tasks depending on how you are releasing your
-application. For example, if you are releasing your application through Android Market you may want
+application. For example, if you are releasing your application through Google Play you may want
 to add special filtering rules to your manifest while you are configuring your application for
-release. Similarly, to meet Android Market publishing guidelines you may have to prepare screenshots
+release. Similarly, to meet Google Play publishing guidelines you may have to prepare screenshots
 and create promotional text while you are gathering materials for release.</p>
 
 <p>You usually perform the tasks listed in figure 2 after you have throroughly debugged and tested
@@ -137,9 +137,9 @@ key</a>.</p>
 href="{@docRoot}guide/practices/ui_guidelines/icon_design_launcher.html">icon guidelines</a>. Your
 application's icon helps users identify your application on a device's Home
 screen and in the Launcher window. It also appears in Manage Applications, My Downloads, and
-elsewhere. In addition, publishing services such as Android Market display your icon to users.</p>
+elsewhere. In addition, publishing services such as Google Play display your icon to users.</p>
 
-<p class="note"><strong>Note:</strong> If you are releasing your application on Android Market, you
+<p class="note"><strong>Note:</strong> If you are releasing your application on Google Play, you
 need to create a high resolution
   version of your icon. See <a
 href="https://www.google.com/support/androidmarket/developer/bin/answer.py?answer=1078870">Graphic
@@ -154,7 +154,7 @@ with your application.</p>
 <h4>Miscellaneous Materials</h4>
 
 <p>You might also have to prepare promotional and marketing materials to publicize your application.
-For example, if you are releasing your application on Android Market you will need to prepare some
+For example, if you are releasing your application on Google Play you will need to prepare some
 promotional text and you will need to create screenshots of your application. For more
 information, see
 <a href="https://www.google.com/support/androidmarket/developer/bin/answer.py?answer=1078870">
@@ -242,11 +242,11 @@ tasks:</p>
 </ul>
 
 <p>There are several additional manifest elements that you can set if you are releasing your
-application on Android Market. For example, the <code>android:minSdkVersion</code> and
+application on Google Play. For example, the <code>android:minSdkVersion</code> and
 <code>android:targetSdkVersion</code> attributes, which are located in the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"> &lt;uses-sdk&gt;</a> element. For more
-information about these and other Android Market settings, see <a
-href="{@docRoot}/guide//appendix/market-filters.html">Market Filters</a>.</p>
+information about these and other Google Play settings, see <a
+href="{@docRoot}/guide//appendix/market-filters.html">Filters on Google Play</a>.</p>
 
 <h4>Address compatibility issues</h4>
 
@@ -283,16 +283,15 @@ doing the following:</p>
 <p>If your application accesses remote servers or services, make sure you are using the production
 URL or path for the server or service and not a test URL or path.</p>
 
-<h4>Implement Licensing (if you are releasing on Android Market)</h4>
+<h4>Implement Licensing (if you are releasing on Google Play)</h4>
 
-<p>If you are releasing a paid application through Android Market, consider adding support for
-Android Market Licensing. Licensing lets you control access to your application based on whether the
-current user has purchased it. Using Android Market Licensing is optional even if you are
-releasing your app through Android Market.</p>
+<p>If you are releasing a paid application through Google Play, consider adding support for
+Google Play Licensing. Licensing lets you control access to your application based on whether the
+current user has purchased it. Using Google Play Licensing is optional even if you are
+releasing your app through Google Play.</p>
 
-<p>For more information about Android Market Licensing Service and how to use it in your
-application, see <a href="{@docRoot}guide/market/licensing/index.html">Application
-Licensing</a>.</p>
+<p>For more information about Google Play Licensing Service and how to use it in your
+application, see <a href="{@docRoot}guide/market/licensing.html">Application Licensing</a>.</p>
 
 <h2 id="publishing-build">Building Your Application for Release</h2>
 
@@ -353,7 +352,7 @@ a summary of common Android situations that you should consider when you are tes
 done testing and you are satisfied that the release version of your application
 behaves correctly, you can release your application to users. For more information, see
 <a href="{@docRoot}guide/publishing/publishing_overview.html#publishing-release">Releasing Your
-Application to Users</a>. If you are publishing your application on Android Market, see
-<a href="{@docRoot}guide/publishing/publishing.html">Publishing on Android Market</a>.</p>
+Application to Users</a>. If you are publishing your application on Google Play, see
+<a href="{@docRoot}guide/publishing/publishing.html">Publishing on Google Play</a>.</p>
 
 

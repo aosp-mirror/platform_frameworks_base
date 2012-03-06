@@ -1136,7 +1136,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity Action: The user pressed the "Report" button in the crash/ANR dialog.
      * This intent is delivered to the package which installed the application, usually
-     * the Market.
+     * Google Play.
      * <p>Input: No data is specified. The bug report is passed in using
      * an {@link #EXTRA_BUG_REPORT} field.
      * <p>Output: Nothing.

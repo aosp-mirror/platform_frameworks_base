@@ -189,7 +189,7 @@ shown below.
     &lt;uses-feature android:glEsVersion="0x00020000" android:required="true" /&gt;
 </pre>
 
-  <p>Adding this declaration causes the Android Market to restrict your application from being
+  <p>Adding this declaration causes Google Play to restrict your application from being
   installed on devices that do not support OpenGL ES 2.0.</p>
   </li>
   <li><strong>Texture compression requirements</strong> - If your application uses texture
@@ -200,9 +200,9 @@ formats, see <a href="#textures">Texture compression support</a>.
 
 <p>Declaring texture compression requirements in your manifest hides your application from users
 with devices that do not support at least one of your declared compression types. For more
-information on how Android Market filtering works for texture compressions, see the <a
+information on how Google Play filtering works for texture compressions, see the <a
 href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html#market-texture-filtering">
-Android Market and texture compression filtering</a> section of the {@code
+Google Play and texture compression filtering</a> section of the {@code
 &lt;supports-gl-texture&gt;} documentation.</p>
   </li>
 </ul>
@@ -470,7 +470,7 @@ the next section.
 <p class="note"><strong>Note:</strong> Once you decide which texture compression formats your
 application will support, make sure you declare them in your manifest using <a
 href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;
-</a>. Using this declaration enables filtering by external services such as Android Market, so that
+</a>. Using this declaration enables filtering by external services such as Google Play, so that
 your app is installed only on devices that support the formats your app requires. For details, see
 <a
 href="{@docRoot}guide/topics/graphics/opengl.html#manifest">OpenGL manifest declarations</a>.</p>

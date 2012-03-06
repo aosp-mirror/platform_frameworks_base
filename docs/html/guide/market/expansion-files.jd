@@ -8,7 +8,7 @@ page.title=APK Expansion Files
 <ul>
   <li>Recommended for most apps that exceed the 50MB APK limit</li>
   <li>You can provide up to 4GB of additional data for each APK</li>
-  <li>Android Market hosts and serves the expansion files at no charge</li>
+  <li>Google Play hosts and serves the expansion files at no charge</li>
   <li>The files can be any file type you want and are saved to the device's shared storage</li>
 </ul>
 
@@ -61,28 +61,28 @@ APK Support</a></li>
 
 
 
-<p>Android Market currently requires that your APK file be no more than 50MB. For most
+<p>Google Play currently requires that your APK file be no more than 50MB. For most
 applications, this is plenty of space for all the application's code and assets.
 However, some apps need more space for high-fidelity graphics, media files, or other large assets.
 Previously, if your app exceeded 50MB, you had to host and download the additional resources
 yourself when the user opens the app. Hosting and serving the extra files can be costly, and the
 user experience is often less than ideal. To make this process easier for you and more pleasant
-for users, Android Market allows you to attach two large expansion files that supplement your
+for users, Google Play allows you to attach two large expansion files that supplement your
 APK.</p>
 
-<p>Android Market hosts the expansion files for your application and serves them to the device at
+<p>Google Play hosts the expansion files for your application and serves them to the device at
 no cost to you. The expansion files are saved to the device's shared storage location (the
 SD card or USB-mountable partition; also known as the "external" storage) where your app can access
-them. On most devices, Android Market downloads the expansion file(s) at the same time it
+them. On most devices, Google Play downloads the expansion file(s) at the same time it
 downloads the APK, so your application has everything it needs when the user opens it for the
-first time. In some cases, however, your application must download the files from Android Market
+first time. In some cases, however, your application must download the files from Google Play
 when your application starts.</p>
 
 
 
 <h2 id="Overview">Overview</h2>
 
-<p>Each time you upload an APK using the Android Market Developer Console, you have the option to
+<p>Each time you upload an APK using the Google Play Android Developer Console, you have the option to
 add one or two expansion files to the APK. Each file can be up to 2GB and it can be any format you
 choose, but we recommend you use a compressed file to conserve bandwidth during the download.
 Conceptually, each expansion file plays a different role:</p>
@@ -102,7 +102,7 @@ release or as necessary.</p>
 <p>However, even if your application update requires only a new patch expansion file, you still must
 upload a new APK with an updated <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code
-versionCode}</a> in the manifest. (The Android Market
+versionCode}</a> in the manifest. (The
 Developer Console does not allow you to upload an expansion file to an existing APK.)</p>
 
 <p class="note"><strong>Note:</strong> The patch expansion file is semantically the same as the
@@ -115,7 +115,7 @@ yourself or be able to distinguish between the two files.</p>
 <h3 id="Filename">File name format</h3>
 
 <p>Each expansion file you upload can be any format you choose (ZIP, PDF, MP4, etc.). Regardless of
-the file type, Android Market considers them opaque binary blobs and renames the files
+the file type, Google Play considers them opaque binary blobs and renames the files
 using the following scheme:</p>
 
 <pre class="classic no-pretty-print">
@@ -133,7 +133,7 @@ only one main file and one patch file for each APK.</dd>
 <em>first</em> associated (it matches the application's <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code android:versionCode}</a>
 value).
-    <p>"First" is emphasized because although the Android Market Developer Console allows you to
+    <p>"First" is emphasized because although the Developer Console allows you to
 re-use an uploaded expansion file with a new APK, the expansion file's name does not change&mdash;it
 retains the version applied to it when you first uploaded the file.</p></dd>
   <dt>{@code &lt;package-name&gt;}</dt> 
@@ -147,9 +147,9 @@ upload a main expansion file, the file is renamed to:</p>
 
 <h3 id="StorageLocation">Storage location</h3>
 
-<p>When Android Market downloads your expansion files to a device, it saves them to the system's
+<p>When Google Play downloads your expansion files to a device, it saves them to the system's
 shared storage location. To ensure proper behavior, you must not delete, move, or rename the
-expansion files. In the event that your application must perform the download from Android Market
+expansion files. In the event that your application must perform the download from Google Play
 itself, you must save the files to the exact same location.</p>
 
 <p>The specific location for your expansion files is:</p>
@@ -194,27 +194,27 @@ compressed: <br/>
 
 <h3 id="DownloadProcess">Download process</h3>
 
-<p>Most of the time, Android Market downloads and saves your expansion files at the same time it
-downloads the APK to the device. However, in some cases Android Market
+<p>Most of the time, Google Play downloads and saves your expansion files at the same time it
+downloads the APK to the device. However, in some cases Google Play
 cannot download the expansion files or the user might have deleted previously downloaded expansion
 files. To handle these situations, your app must be able to download the files
-itself when the main activity starts, using a URL provided by Android Market.</p>
+itself when the main activity starts, using a URL provided by Google Play.</p>
 
 <p>The download process from a high level looks like this:</p>
 
 <ol>
-  <li>User selects to install your app from Android Market.</li>
-  <li>If Android Market is able to download the expansion files (which is the case for most
+  <li>User selects to install your app from Google Play.</li>
+  <li>If Google Play is able to download the expansion files (which is the case for most
 devices), it downloads them along with the APK.
-     <p>If Android Market is unable to download the expansion files, it downloads the
+     <p>If Google Play is unable to download the expansion files, it downloads the
 APK only.</p>
   </li>
   <li>When the user launches your application, your app must check whether the expansion files are
 already saved on the device.
     <ol>
       <li>If yes, your app is ready to go.</li>
-      <li>If no, your app must download the expansion files over HTTP from Android Market. Your app
-must send a request to the Android Market client using the Android Market's <a
+      <li>If no, your app must download the expansion files over HTTP from Google Play. Your app
+must send a request to the Google Play client using the Google Play's <a
 href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> service, which
 responds with the name, file size, and URL for each expansion file. With this information, you then
 download the files and save them to the proper <a href="#StorageLocation">storage location</a>.</li>
@@ -223,7 +223,7 @@ download the files and save them to the proper <a href="#StorageLocation">storag
 </ol>
 
 <p class="caution"><strong>Caution:</strong> It is critical that you include the necessary code to
-download the expansion files from Android Market in the event that the files are not already on the
+download the expansion files from Google Play in the event that the files are not already on the
 device when your application starts. As discussed in the following section about <a
 href="#Downloading">Downloading the Expansion Files</a>, we've made a library available to you that
 greatly simplifies this process and performs the download from a service with a minimal amount of
@@ -258,7 +258,7 @@ your expansion files, then read them using the <a href="#ZipLib">APK Expansion Z
 Library</a>.</p>
   </li>
   <li>Add logic to your application's main activity that checks whether the expansion files
-are on the device upon start-up. If the files are not on the device, use Android Market's <a
+are on the device upon start-up. If the files are not on the device, use Google Play's <a
 href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> service to request URLs
 for the expansion files, then download and save them.
     <p>To greatly reduce the amount of code you must write and ensure a good user experience
@@ -280,15 +280,15 @@ Your Expansion Files</a>.</p>
 <h2 id="Rules">Rules and Limitations</h2>
 
 <p>Adding APK expansion files is a feature available when you upload your application using the
-Android Market Developer Console. When uploading your application for the first time or updating an
+Developer Console. When uploading your application for the first time or updating an
 application that uses expansion files, you must be aware of the following rules and limitations:</p>
 
 <ol type="I">
   <li>Each expansion file can be no more than 2GB.</li>
-  <li>In order to download your expansion files from Android Market, <strong>the user must have
-acquired your application from Android Market</strong>. Android Market will not
+  <li>In order to download your expansion files from Google Play, <strong>the user must have
+acquired your application from Google Play</strong>. Google Play will not
 provide the URLs for your expansion files if the application was installed by other means.</li>
-  <li>When performing the download from within your application, the URL that Android Market
+  <li>When performing the download from within your application, the URL that Google Play
 provides for each file is unique for every download and each one expires shortly after it is given
 to your application.</li>
   <li>If you update your application with a new APK or upload <a
@@ -313,7 +313,7 @@ versionName}</a>).</p></li>
 directory</strong>. If you must unpack some data, save it into the location specified by {@link
 android.content.Context#getExternalFilesDir getExternalFilesDir()}.</li>
   <li><strong>Do not delete or rename the {@code .obb} expansion file</strong> (unless you're
-performing an update). Doing so will cause Android Market (or your app itself) to repeatedly
+performing an update). Doing so will cause Google Play (or your app itself) to repeatedly
 download the expansion file.</li>
   <li>When updating an expansion file manually, you must delete the previous expansion file.</li>
 </ol>
@@ -328,11 +328,11 @@ download the expansion file.</li>
 
 <h2 id="Downloading">Downloading the Expansion Files</h2>
 
-<p>In most cases, Android Market downloads and saves your expansion files to the device at the same
+<p>In most cases, Google Play downloads and saves your expansion files to the device at the same
 time it installs or updates the APK. This way, the expansion files are available when your
 application launches for the first time. However, in some cases your app must download the
 expansion files itself by requesting them from a URL provided to you in a response
-from Android Market's <a
+from Google Play's <a
 href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> service.</p>
 
 <p>The basic logic you need to download your expansion files is the following:</p>
@@ -345,15 +345,15 @@ href="#StorageLocation">shared storage location</a> (in the
       <li>If the expansion files are there, you're all set and your application can continue.</li>
       <li>If the expansion files are <em>not</em> there:
         <ol>
-          <li>Perform a request using Android Market's <a
+          <li>Perform a request using Google Play's <a
 href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> to get your
 app's expansion file names, sizes, and URLs.</li> 
-          <li>Use the URLs provided by Android Market to download the expansion files and save
+          <li>Use the URLs provided by Google Play to download the expansion files and save
 the expansion files. You <strong>must</strong> save the files to the <a
 href="#StorageLocation">shared storage location</a>
 (<code>Android/obb/&lt;package-name&gt;/</code>) and use the exact file name provided
-by Android Market's response.
-            <p class="note"><strong>Note:</strong> The URL that Android Market provides for your
+by Google Play's response.
+            <p class="note"><strong>Note:</strong> The URL that Google Play provides for your
 expansion files is unique for every download and each one expires shortly after it is given to
 your application.</p>
           </li>
@@ -368,16 +368,16 @@ your application.</p>
 href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> service. It's primarily
 designed for you to enforce
 licensing policies for your application and ensure that the user has the right to
-use your app (he or she rightfully paid for it on Android Market). In order to facilitate the
+use your app (he or she rightfully paid for it on Google Play). In order to facilitate the
 expansion file functionality, the licensing service has been enhanced to provide a response
 to your application that includes the URL of your application's expansion files that are hosted
-on Android Market. So, even if your application is free for users, you need to include the Android
-Market License Verification Library (LVL) to use APK expansion files. Of course, if your application
+on Google Play. So, even if your application is free for users, you need to include the
+License Verification Library (LVL) to use APK expansion files. Of course, if your application
 is free, you don't need to enforce license verification&mdash;you simply need the
 library to perform the request that returns the URL of your expansion files.</p>
 
-<p class="note"><strong>Note:</strong> Whether your application is free or not, Android Market
-returns the expansion file URLs only if the user acquired your application from Android Market.</p>
+<p class="note"><strong>Note:</strong> Whether your application is free or not, Google Play
+returns the expansion file URLs only if the user acquired your application from Google Play.</p>
 
 <p>In addition to the LVL, you need a set of code that downloads the expansion files
 over an HTTP connection and saves them to the proper location on the device's shared storage.
@@ -464,7 +464,7 @@ Library. For each library:
 source</strong> and choose the library from the {@code &lt;sdk&gt;/extras/google/} directory
 ({@code market_licensing/} for the License Verification Library or {@code
 market_apk_expansion/downloader_library/} for the Downloader Library).</li>
-      <li>Specify a <em>Project Name</em> such as "Android Market License Library" and "Market
+      <li>Specify a <em>Project Name</em> such as "Google Play License Library" and "Google Play
 Downloader
 Library"</li>
       <li>Click <strong>Finish</strong>.</li>
@@ -495,7 +495,7 @@ android update project --path ~/Android/MyApp \
 
 <p>With both the License Verification Library and Downloader Library added to your
 application, you'll be able to quickly integrate the ability to download expansion files from
-Android Market. The format that you choose for the expansion files and how you read them
+Google Play. The format that you choose for the expansion files and how you read them
 from the shared storage is a separate implementation that you should consider based on your
 application needs.</p>
 
@@ -518,10 +518,10 @@ are:</p>
 
 <pre>
 &lt;manifest ...>
-    &lt;!-- Required to access Android Market Licensing -->
+    &lt;!-- Required to access Google Play Licensing -->
     &lt;uses-permission android:name="com.android.vending.CHECK_LICENSE" />
 
-    &lt;!-- Required to download files from Android Market -->
+    &lt;!-- Required to download files from Google Play -->
     &lt;uses-permission android:name="android.permission.INTERNET" />
 
     &lt;!-- Required to keep CPU alive while downloading files (NOT to keep screen awake) -->
@@ -570,7 +570,7 @@ DownloaderService} class and override three methods to provide specific applicat
 <dl>
   <dt>{@code getPublicKey()}</dt>
     <dd>This must return a string that is the Base64-encoded RSA public key for your publisher
-account, available from the profile page on the Android Market Developer Console (see <a
+account, available from the profile page on the Developer Console (see <a
 href="{@docRoot}guide/market/licensing/setting-up.html">Setting Up for Licensing</a>).</dd>
   <dt>{@code getSALT()}</dt>
     <dd>This must return an array of random bytes that the licensing {@code Policy} uses to
@@ -589,7 +589,7 @@ restarted (which might happen if the downloader service unexpectedly stops).</dd
 <pre>
 public class SampleDownloaderService extends DownloaderService {
     // You must use the public key belonging to your publisher account
-    public static final String BASE64_PUBLIC_KEY = "YourAndroidMarketLVLKey";
+    public static final String BASE64_PUBLIC_KEY = "YourLVLKey";
     // You should also modify this salt
     public static final byte[] SALT = new byte[] { 1, 42, -12, -1, 54, 98,
             -100, -12, 43, 2, -8, -4, 9, 5, -106, -107, -33, 45, -1, 84
@@ -613,8 +613,8 @@ public class SampleDownloaderService extends DownloaderService {
 </pre>
 
 <p class="caution"><strong>Notice:</strong> You must update the {@code BASE64_PUBLIC_KEY} value
-to be the public key belonging to your publisher account. You can find the key in the Android
-Market Developer Console under your profile information. This is necessary even when testing
+to be the public key belonging to your publisher account. You can find the key in the Developer
+Console under your profile information. This is necessary even when testing
 your downloads.</p>
 
 <p>Remember to declare the service in your manifest file:</p>
@@ -899,11 +899,11 @@ mRemoteService.setDownloadFlags(IDownloaderService.FLAGS_DOWNLOAD_OVER_CELLULAR)
 
 <h2 id="ExpansionPolicy">Using APKExpansionPolicy</h2>
 
-<p>If you decide to build your own downloader service instead of using the Android Market
+<p>If you decide to build your own downloader service instead of using the Google Play
 <a href="#AboutLibraries">Downloader Library</a>, you should still use the {@code
 APKExpansionPolicy} that's provided in the License Verification Library. The {@code
 APKExpansionPolicy} class is nearly identical to {@code ServerManagedPolicy} (available in the
-Android Market License Verification Library) but includes additional handling for the APK expansion
+Google Play License Verification Library) but includes additional handling for the APK expansion
 file response extras.</p>
 
 <p class="note"><strong>Note:</strong> If you <em>do use</em> the <a
@@ -1144,21 +1144,21 @@ expansion files and downloading the files.</p>
 
 <h3 id="TestingReading">Testing file reads</h3>
 
-<p>Before you upload your application to Android Market, you
+<p>Before you upload your application to Google Play, you
 should test your application's ability to read the files from the shared storage. All you need to do
 is add the files to the appropriate location on the device shared storage and launch your
 application:</p>
 
 <ol>
-  <li>On your device, create the appropriate directory on the shared storage where Android
-Market will save your files.
+  <li>On your device, create the appropriate directory on the shared storage where Google
+Play will save your files.
   <p>For example, if your package name is {@code com.example.android}, you need to create
 the directory {@code Android/obb/com.example.android/} on the shared storage space. (Plug in
 your test device to your computer to mount the shared storage and manually create this
 directory.)</p>
   </li>
   <li>Manually add the expansion files to that directory. Be sure that you rename your files to
-match the <a href="#Filename">file name format</a> that Android Market will use.
+match the <a href="#Filename">file name format</a> that Google Play will use.
   <p>For example, regardless of the file type, the main expansion file for the {@code
 com.example.android} application should be {@code main.0300110.com.example.android.obb}.
 The version code can be whatever value you want. Just remember:</p>
@@ -1166,7 +1166,7 @@ The version code can be whatever value you want. Just remember:</p>
     <li>The main expansion file always starts with {@code main} and the patch file starts with
 {@code patch}.</li>
     <li>The package name always matches that of the APK to which the file is attached on
-Android Market.
+Google Play.
   </ul>
   </li>
   <li>Now that the expansion file(s) are on the device, you can install and run your application to
@@ -1176,7 +1176,7 @@ test your expansion file(s).</li>
 <p>Here are some reminders about handling the expansion files:</p>
 <ul>
   <li><strong>Do not delete or rename</strong> the {@code .obb} expansion files (even if you unpack
-the data to a different location). Doing so will cause Android Market (or your app itself) to
+the data to a different location). Doing so will cause Google Play (or your app itself) to
 repeatedly download the expansion file.</li>
   <li><strong>Do not save other data into your <code>obb/</code>
 directory</strong>. If you must unpack some data, save it into the location specified by {@link
@@ -1192,16 +1192,16 @@ opens, it's important that you test this process to be sure your application can
 for the URLs, download the files, and save them to the device.</p>
 
 <p>To test your application's implementation of the manual download procedure, you must upload
-your application to Android Market as a "draft" to make your expansion files available for
+your application to Google Play as a "draft" to make your expansion files available for
 download:</p>
 
 <ol>
-  <li>Upload your APK and corresponding expansion files using the Android Market Developer
+  <li>Upload your APK and corresponding expansion files using the Google Play Developer
 Console.</li>
   <li>Fill in the necessary application details (title, screenshots, etc.). You can come back and
 finalize these details before publishing your application.
   <p>Click the <strong>Save</strong> button. <em>Do not click Publish.</em> This saves
-the application as a draft, such that your application is not published for Android Market users,
+the application as a draft, such that your application is not published for Google Play users,
 but the expansion files are available for you to test the download process.</p></li>
   <li>Install the application on your test device using the Eclipse tools or <a
 href="{@docRoot}guide/developing/tools/adb.html">{@code adb}</a>.</li>
@@ -1216,14 +1216,14 @@ files as soon as the main activity starts.</p>
 
 <h2 id="Updating">Updating Your Application</h2>
 
-<p>One of the great benefits to using expansion files on Android Market is the ability to
-update your application without re-downloading all of the original assets. Because Android Market
+<p>One of the great benefits to using expansion files on Google Play is the ability to
+update your application without re-downloading all of the original assets. Because Google Play
 allows you to provide two expansion files with each APK, you can use the second file as a "patch"
 that provides updates and new assets. Doing so avoids the
 need to re-download the main expansion file which could be large and expensive for users.</p>
 
 <p>The patch expansion file is technically the same as the main expansion file and neither
-the Android system nor Android Market perform actual patching between your main and patch expansion
+the Android system nor Google Play perform actual patching between your main and patch expansion
 files. Your application code must perform any necessary patches itself.</p>
 
 <p>If you use ZIP files as your expansion files, the <a href="#ZipLib">APK Expansion Zip
@@ -1232,13 +1232,13 @@ your
 patch file with the main expansion file.</p>
 
 <p class="note"><strong>Note:</strong> Even if you only need to make changes to the patch
-expansion file, you must still update the APK in order for Android Market to perform an update.
+expansion file, you must still update the APK in order for Google Play to perform an update.
 If you don't require code changes in the application, you should simply update the <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code versionCode}</a> in the
 manifest.</p>
 
 <p>As long as you don't change the main expansion file that's associated with the APK
-in the Android Market Developer Console, users who previously installed your application will not
+in the Developer Console, users who previously installed your application will not
 download the main expansion file. Existing users receive only the updated APK and the new patch
 expansion file (retaining the previous main expansion file).</p>
 
@@ -1246,7 +1246,7 @@ expansion file (retaining the previous main expansion file).</p>
 
 <ul>
   <li>There can be only two expansion files for your application at a time. One main expansion
-file and one patch expansion file. During an update to a file, Android Market deletes the
+file and one patch expansion file. During an update to a file, Google Play deletes the
 previous version (and so must your application when performing manual updates).</li>
   <li>When adding a patch expansion file, the Android system does not actually patch your
 application or main expansion file. You must design your application to support the patch data.

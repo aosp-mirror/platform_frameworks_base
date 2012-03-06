@@ -318,8 +318,8 @@ other two intents, giving the user a better experience.</p>
 </pre>
     </li>
 
-    <li>The <code>uses-feature</code> element so that your application shows up in the Android
-Market only for devices that have NFC hardware:
+    <li>The <code>uses-feature</code> element so that your application shows up in Google
+Play only for devices that have NFC hardware:
       <pre>
 &lt;uses-feature android:name="android.hardware.nfc" android:required="true" /&gt;
 </pre>
@@ -660,7 +660,7 @@ certainty that your application is started when an NFC tag is scanned. An AAR ha
 of an application embedded inside an NDEF record. You can add an AAR to any NDEF record of your NDEF message,
 because Android searches the entire NDEF message for AARs. If it finds an AAR, it starts the application based
 on the package name inside the AAR. If the application is not present on the device,
-Android Market is launched to download the application.</p>
+Google Play is launched to download the application.</p>
 
 <p>AARs are useful if you want to prevent other applications from filtering for the same intent and
 potentially handling specific tags that you have deployed. AARs are only supported at the
@@ -678,7 +678,7 @@ the intent also matches the AAR, start the Activity.</li>
   <li>If the Activity that filters for the intent does not match the
 AAR, if multiple Activities can handle the intent, or if no Activity handles the intent, start the
 application specified by the AAR.</li>
-  <li>If no application can start with the AAR, go to the Android Market to download the
+  <li>If no application can start with the AAR, go to Google Play to download the
 application based on the AAR.</li>
 </ol>
 
@@ -897,7 +897,7 @@ public class Beam extends Activity implements CreateNdefMessageCallback {
 
 <p>Note that this code comments out an AAR, which you can remove. If you enable the AAR, the
 application specified in the AAR always receives the Android Beam message. If the application is not
-present, the Android Market is started to download the application. Therefore, the following intent
+present, Google Play launches to download the application. Therefore, the following intent
 filter is not technically necessary for Android 4.0 devices or later if the AAR is used:
 </p>
 

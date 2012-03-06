@@ -197,7 +197,7 @@ accessories support, for runtime testing against connected devices</li>
 accessories, please see the related <a
 href="{@docRoot}guide/topics/usb/index.html">developer documentation</a>.</p>
 
-<p>Additionally, developers can request filtering on Android Market, such that
+<p>Additionally, developers can request filtering on Google Play, such that
 their applications are not available to users whose devices do not provide the
 appropriate accessory support. To request filtering, add the element below
 to the application manifest:</p>

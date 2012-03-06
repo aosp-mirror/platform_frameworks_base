@@ -52,11 +52,11 @@ home=true
                                       <td colspan="2"><div class="seperator">&nbsp;</div></td>
                               </tr>
                               <tr>
-                                      <td class="imageCell"><a href="http://www.android.com/market.html"><img src="{@docRoot}assets/images/icon_market.jpg" style="padding:0" /></a></td>
+                                      <td class="imageCell"><a href="http://play.google.com/apps/publish"><img src="{@docRoot}assets/images/icon_play.png" style="padding:0" /></a></td>
                                       <td>
                                               <h2 class="green">公開</h2>
                                               <p>Android マーケットは、アプリケーションを携帯端末に配信するためのオープン サービスです。</p>
-                                              <p><a href="http://market.android.com/publish/Home">詳細 &raquo;</a></p>
+                                              <p><a href="http://play.google.com/apps/publish">詳細 &raquo;</a></p>
                                       </td>
                               </tr>
                               <tr>
@@ -148,7 +148,7 @@ home=true
       'name':"Dev Phone 1",
       'img':"devphone-large.png",
       'title':"Android Dev Phone 1",
-      'desc': "<p>この携帯電話を使用することで、開発した Android アプリケーションの実行とデバッグを行うことができます。Android オペレーティングシステムを変更してからリビルドし、携帯電話に書き込むことができます。Android Dev Phone 1 は携帯通信会社に依存しておらず、<a href='http://market.android.com/publish'>Android マーケット</a>に登録済みのデベロッパーなら誰でも購入可能です。</p><p><a href='/guide/developing/device.html#dev-phone-1'>Android Dev Phone 1 の詳細&raquo;</a></p>"
+      'desc': "<p>この携帯電話を使用することで、開発した Android アプリケーションの実行とデバッグを行うことができます。Android オペレーティングシステムを変更してからリビルドし、携帯電話に書き込むことができます。Android Dev Phone 1 は携帯通信会社に依存しておらず、<a href='http://play.google.com/apps/publish'>Android マーケット</a>に登録済みのデベロッパーなら誰でも購入可能です。</p><p><a href='/guide/developing/device.html#dev-phone-1'>Android Dev Phone 1 の詳細&raquo;</a></p>"
     }
 
   }

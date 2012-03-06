@@ -150,7 +150,7 @@ declaring <code>&lt;uses-permission
 android:name="android.permission.INTERNET"&gt;</code> and <code>&lt;uses-permission
 android:name="android.permission.USE_SIP"&gt;</code> in their manifest files.</p>
 
-<p>Additionally, developers can request filtering on Android Market, such that
+<p>Additionally, developers can request filtering on Google Play, such that
 their applications are not discoverable to users whose devices do not include
 the platform’s SIP stack and services. To request filtering, add <code>&lt;uses-feature
 android:name="android.software.sip"
@@ -197,7 +197,7 @@ however, regardless of underlying hardware support.</p>
 declaring <code>&lt;uses-permission
 android:name="android.permission.NFC"&gt;</code> in their manifest files.</p>
 
-<p>Additionally, developers can request filtering on Android Market, such that
+<p>Additionally, developers can request filtering on Google Play, such that
 their applications are not discoverable to users whose devices do not support
 NFC. To request filtering, add
 <code>&lt;uses-feature android:name="android.hardware.nfc"
@@ -219,7 +219,7 @@ code. </p>
 <p>Note that the specific set of hardware sensors available on any given device
 varies at the discretion of the device manufacturer. </p>
 
-<p>Developers can request filtering in Android Market, such that their
+<p>Developers can request filtering on Google Play, such that their
 applications are not discoverable to users whose devices do not offer a
 gyroscope sensor. To do so, add <code>&lt;uses-feature
 android:name="android.hardware.sensor.gyroscope"
@@ -726,7 +726,7 @@ the {@link android.net.sip SIP API} to make or receive internet calls.
 <p>The platform adds several new hardware features that developers can declare
 in their application manifests as being required by their applications. This
 lets developers control how their application is filtered, when published on
-Android Market. </p>
+Google Play. </p>
 
 <ul>
 <li>{@link android.content.pm.PackageManager#FEATURE_AUDIO_LOW_LATENCY

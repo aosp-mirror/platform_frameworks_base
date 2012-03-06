@@ -9,7 +9,7 @@ parent.link=manifest-intro.html
 
 <h2>In this document</h2>
 <ol>
-  <li><a href="#market-feature-filtering">Android Market and Feature-Based Filtering</a>
+  <li><a href="#market-feature-filtering">Google Play and Feature-Based Filtering</a>
     <ol>
       <li><a href="#declared">Filtering based on explicitly declared features</a></li>
       <li><a href="#implicit">Filtering based on implicit features</a></li>
@@ -45,26 +45,26 @@ href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a
  <div class="sidebox-wrapper"> 
   <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png"> 
   <div id="qv-sub-rule"> 
-    <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;">Android Market and <code style="color:#669999;">&lt;uses-feature&gt;</code> elements</p>
-    <p style="margin-top:1em;">Android Market filters the applications that are visible to users, so
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
+    <p style="color:#669999;padding-top:1em;">Google Play and <code style="color:#669999;">&lt;uses-feature&gt;</code> elements</p>
+    <p style="margin-top:1em;">Google Play filters the applications that are visible to users, so
 that users can see and download only those applications that are compatible with their
-devices. One of the ways Market filters applications is by feature compatibility.</p>
+devices. One of the ways it filters applications is by feature compatibility.</p>
 
-<p style="margin-top:1em;">To do this, Market checks the
+<p style="margin-top:1em;">To do this, Google Play checks the
 <code>&lt;uses-feature&gt;</code> elements in each application's manifest, to
-establish the app's feature needs. Market then shows or hides the application to
+establish the app's feature needs. Google Play then shows or hides the application to
 each user, based on a comparison with the features available on the user's
 device. </p>
 
 <p style="margin-top:1em;">By specifying the features that your application requires,
-you enable Android Market to present your application only to users whose
+you enable Google Play to present your application only to users whose
 devices meet the application's feature requirements, rather than presenting it
 to all users. </p>
 
 <p style="margin-top:1em;" class="caution">For important information about how
-Android Market uses features as the basis for filtering, please read <a
-href="#market-feature-filtering">Android Market and Feature-Based Filtering</a>,
+Google Play uses features as the basis for filtering, please read <a
+href="#market-feature-filtering">Google Play and Feature-Based Filtering</a>,
 below.</p>
 </div>
 </div>
@@ -106,7 +106,7 @@ application requires.</p>
 <p>Declared <code>&lt;uses-feature></code> elements are informational only, meaning
 that the Android system itself does not check for matching feature support on
 the device before installing an application. However, other services
-(such as Android Market) or applications may check your application's 
+(such as Google Play) or applications may check your application's 
 <code>&lt;uses-feature></code> declarations as part of handling or interacting
 with your application. For this reason, it's very important that you declare all of
 the features (from the list below) that your application uses. </p>
@@ -207,22 +207,22 @@ can check at run-time whether a higher level of OpenGL ES is available.)</p>
     <li>{@link android.content.pm.FeatureInfo}</li>
     <li>{@link android.content.pm.ConfigurationInfo}</li>
     <li><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html"><code>&lt;uses-permission&gt;</code></a></li>
-    <li><a href="{@docRoot}guide/appendix/market-filters.html">Android Market Filters</a></li>
+    <li><a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a></li>
   </ul>
 </dd>
 
 </dl>
 
 
-<h2 id="market-feature-filtering">Android Market and Feature-Based Filtering</h2>
+<h2 id="market-feature-filtering">Google Play and Feature-Based Filtering</h2>
 
-<p>Android Market filters the applications that are visible to users, so that
+<p>Google Play filters the applications that are visible to users, so that
 users can see and download only those applications that are compatible with
-their devices. One of the ways Market filters applications is by feature
+their devices. One of the ways it filters applications is by feature
 compatibility.</p>
 
 <p>To determine an application's feature compatibility with a given user's
-device, the Android Market service compares:</p>
+device, Google Play compares:</p>
 
 <ul>
 <li>Features required by the application &mdash; an application declares features in
@@ -238,14 +238,14 @@ are listed in the <a href="#features-reference">Features Reference</a> tables at
 the bottom of this document, and in the class documentation for {@link
 android.content.pm.PackageManager}.</p>
 
-<p>When the user launches the Market application, the application queries the
+<p>When the user launches Google Play, the application queries the
 Package Manager for the list of features available on the device by calling
 {@link android.content.pm.PackageManager#getSystemAvailableFeatures()}. The
-Market application then passes the features list up to the Android Market
-service when establishing the session for the user.</p>
+Store application then passes the features list up to Google Play
+when establishing the session for the user.</p>
 
-<p>Each time you upload an application to the Android Market Publisher Site,
-Android Market scans the application's manifest file. It looks for
+<p>Each time you upload an application to the Google Play publisher site,
+Google Play scans the application's manifest file. It looks for
 <code>&lt;uses-feature&gt;</code> elements and evaluates them in combination
 with other elements, in some cases, such as <code>&lt;uses-sdk&gt;</code> and
 <code>&lt;uses-permission&gt;</code> elements. After establishing the
@@ -253,17 +253,17 @@ application's set of required features, it stores that list internally as
 metadata associated with the application <code>.apk</code> and the application
 version. </p>
 
-<p>When a user searches or browses for applications using the Android Market
+<p>When a user searches or browses for applications using the Google Play
 application, the service compares the features needed by each application with
 the features available on the user's device. If all of an application's required
-features are present on the device, Android Market allows the user to see the
+features are present on the device, Google Play allows the user to see the
 application and potentially download it. If any required feature is not
-supported by the device, Android Market filters the application so that it is
+supported by the device, Google Play filters the application so that it is
 not visible to the user and not available for download. </p>
 
 <p>Because the features you declare in <code>&lt;uses-feature&gt;</code>
-elements directly affect how Android Market filters your application, it's
-important to understand how Android Market evaluates the application's manifest
+elements directly affect how Google Play filters your application, it's
+important to understand how Google Play evaluates the application's manifest
 and establishes the set of required features. The sections below provide more
 information. </p>
 
@@ -277,35 +277,35 @@ application absolutely requires the feature and cannot function properly without
 it (<code>"true"</code>), or whether the application prefers to use the feature
 if available, but is designed to run without it (<code>"false"</code>).</p>
 
-<p>Android Market handles explicitly declared features in this way: </p>
+<p>Google Play handles explicitly declared features in this way: </p>
 
 <ul>
-<li>If a feature is explicitly declared as being required, Android Market adds
+<li>If a feature is explicitly declared as being required, Google Play adds
 the feature to the list of required features for the application. It then
 filters the application from users on devices that do not provide that feature.
 For example:
 <pre>&lt;uses-feature android:name="android.hardware.camera" android:required="true" /&gt;</pre></li>
-<li>If a feature is explicitly declared as <em>not</em> being required, Android
-Market <em>does not</em> add the feature to the list of required features. For
+<li>If a feature is explicitly declared as <em>not</em> being required, Google
+Play <em>does not</em> add the feature to the list of required features. For
 that reason, an explicitly declared non-required feature is never considered when
 filtering the application. Even if the device does not provide the declared
-feature, Android Market will still consider the application compatible with the
+feature, Google Play will still consider the application compatible with the
 device and will show it to the user, unless other filtering rules apply. For
 example:
 <pre>&lt;uses-feature android:name="android.hardware.camera" android:required="false" /&gt;</pre></li>
 <li>If a feature is explicitly declared, but without an
-<code>android:required</code> attribute, Android Market assumes that the feature
+<code>android:required</code> attribute, Google Play assumes that the feature
 is required and sets up filtering on it. </li>
 </ul>
 
 <p>In general, if your application is designed to run on Android 1.6 and earlier
 versions, the <code>android:required</code> attribute is not available in the
-API and Android Market assumes that any and all
+API and Google Play assumes that any and all
 <code>&lt;uses-feature&gt;</code> declarations are required. </p>
 
 <p class="note"><strong>Note:</strong> By declaring a feature explicitly and
 including an <code>android:required="false"</code> attribute, you can
-effectively disable all filtering on Android Market for the specified feature.
+effectively disable all filtering on Google Play for the specified feature.
 </p>
 
 
@@ -317,7 +317,7 @@ function properly, but which is <em>not</em> declared in a
 speaking, every application should <em>always</em> declare all features that it
 uses or requires, so the absence of a declaration for a feature used by an
 application should be considered an error. However, as a safeguard for users and
-developers, Android Market looks for implicit features in each application and
+developers, Google Play looks for implicit features in each application and
 sets up filters for those features, just as it would do for an explicitly
 declared feature. </p>
 
@@ -337,25 +337,25 @@ element name or an unrecognized string value for the
 </li>
 </ul>
 
-<p>To account for the cases above, Android Market attempts to discover an
+<p>To account for the cases above, Google Play attempts to discover an
 application's implied feature requirements by examining <em>other elements</em>
 declared in the manifest file, specifically,
 <code>&lt;uses-permission&gt;</code> elements.</p>
 
-<p>If an application requests hardware-related permissions, Android Market
+<p>If an application requests hardware-related permissions, Google Play
 <em>assumes that the application uses the underlying hardware features and
 therefore requires those features</em>, even though there might be no
 corresponding to <code>&lt;uses-feature&gt;</code> declarations. For such
-permissions, Android Market adds the underlying hardware features to the
+permissions, Google Play adds the underlying hardware features to the
 metadata that it stores for the application and sets up filters for them.</p>
 
 <p>For example, if an application requests the <code>CAMERA</code> permission
 but does not declare a <code>&lt;uses-feature&gt;</code> element for
-<code>android.hardware.camera</code>, Android Market considers that the
+<code>android.hardware.camera</code>, Google Play considers that the
 application requires a camera and should not be shown to users whose devices do
 not offer a camera.</p>
 
-<p>If you don't want Android Market to filter based on a specific implied
+<p>If you don't want Google Play to filter based on a specific implied
 feature, you can disable that behavior. To do so, declare the feature explicitly
 in a <code>&lt;uses-feature&gt;</code> element and include an 
 <code>android:required="false"</code> attribute. For example, to disable
@@ -366,30 +366,30 @@ the feature as shown below.</p>
 
 <p class="caution">It's important to understand that the permissions that you
 request in <code>&lt;uses-permission&gt;</code> elements can directly affect how
-Android Market filters your application. The reference section <a
+Google Play filters your application. The reference section <a
 href="#permissions">Permissions that Imply Feature Requirements</a>,
 below, lists the full set of permissions that imply feature requirements and
 therefore trigger filtering.</p>
 
 <h3 id="bt-permission-handling">Special handling for Bluetooth feature</h3>
 
-<p>Android Market applies slightly different rules than described above, when
+<p>Google Play applies slightly different rules than described above, when
 determining filtering for Bluetooth.</p>
 
 <p>If an application declares a Bluetooth permission in a
 <code>&lt;uses-permission&gt;</code> element, but does not explicitly declare
-the Bluetooth feature in a <code>&lt;uses-feature&gt;</code> element, Android
-Market checks the version(s) of the Android platform on which the application is
+the Bluetooth feature in a <code>&lt;uses-feature&gt;</code> element, Google
+Play checks the version(s) of the Android platform on which the application is
 designed to run, as specified in the <code>&lt;uses-sdk&gt;</code> element. </p>
 
-<p>As shown in the table below, Android Market enables filtering for the
+<p>As shown in the table below, Google Play enables filtering for the
 Bluetooth feature only if the application declares its lowest or targeted
-platform as Android 2.0 (API level 5) or higher. However, note that Android
-market applies the normal rules for filtering when the application explicitly
+platform as Android 2.0 (API level 5) or higher. However, note that Google
+Play applies the normal rules for filtering when the application explicitly
 declares the Bluetooth feature in a <code>&lt;uses-feature&gt;</code> element.
 </p>
 
-<p class="caption"><strong>Table 1.</strong> How Android Market determines the
+<p class="caption"><strong>Table 1.</strong> How Google Play determines the
 Bluetooth feature requirement for an application that requests a Bluetooth
 permission but does not declare the Bluetooth feature in a
 <code>&lt;uses-feature&gt;</code> element.</p>
@@ -403,14 +403,14 @@ permission but does not declare the Bluetooth feature in a
 <tr>
 <td><nobr>&lt;=4 (or uses-sdk is not declared)</nobr></td>
 <td>&lt;=4</td>
-<td>Android Market <em>will not</em> filter the application from any devices
+<td>Google Play <em>will not</em> filter the application from any devices
 based on their reported support for the <code>android.hardware.bluetooth</code>
 feature.</td>
 </tr>
 <tr>
 <td>&lt;=4</td>
 <td>&gt;=5</td>
-<td rowspan="2">Android Market filters the application from any devices that
+<td rowspan="2">Google Play filters the application from any devices that
 do not support the <code>android.hardware.bluetooth</code> feature (including
 older releases).</td>
 </tr>
@@ -421,13 +421,13 @@ older releases).</td>
 </table>
 
 <p>The examples below illustrate the different filtering effects, based on how
-Android Market handles the Bluetooth feature. </p>
+Google Play handles the Bluetooth feature. </p>
 
 <dl>
 <dt>In first example, an application that is designed to run on older API levels
 declares a Bluetooth permission, but does not declare the Bluetooth feature in a
 <code>&lt;uses-feature&gt;</code> element.</dt>
-<dd><em>Result:</em> Android Market does not filter the application from any device.</dd>
+<dd><em>Result:</em> Google Play does not filter the application from any device.</dd>
 </dl>
 
 <pre>&lt;manifest ...>
@@ -439,7 +439,7 @@ declares a Bluetooth permission, but does not declare the Bluetooth feature in a
 <dl>
 <dt>In the second example, below, the same application also declares a target
 API level of "5". </dt>
-<dd><em>Result:</em> Android Market now assumes that the feature is required and
+<dd><em>Result:</em> Google Play now assumes that the feature is required and
 will filter the application from all devices that do not report Bluetooth support,
 including devices running older versions of the platform. </dd>
 </dl>
@@ -465,7 +465,7 @@ including devices running older versions of the platform. </dd>
 <dl>
 <dt>Finally, in the case below, the same application adds an
 <code>android:required="false"</code> attribute.</dt>
-<dd><em>Result:</em> Android Market disables filtering based on Bluetooth
+<dd><em>Result:</em> Google Play disables filtering based on Bluetooth
 feature support, for all devices.</dd>
 </dl>
 
@@ -481,10 +481,10 @@ feature support, for all devices.</dd>
 <h3 id="testing">Testing the features required by your application</h3>
 
 <p>You can use the <code>aapt</code> tool, included in the Android SDK, to
-determine how Android Market will filter your application, based on its declared
+determine how Google Play will filter your application, based on its declared
 features and permissions. To do so, run  <code>aapt</code> with the <code>dump
 badging</code> command. This causes <code>aapt</code> to parse your
-application's manifest and apply the same rules as used by Android Market to
+application's manifest and apply the same rules as used by Google Play to
 determine the features that your application requires. </p>
 
 <p>To use the tool, follow these steps: </p>
@@ -529,7 +529,7 @@ densities: '160'
 <h2 id=features-reference>Features Reference</h2>
 
 <p>The tables below provide reference information about hardware and software
-features and the permissions that can imply them on Android Market. </p>
+features and the permissions that can imply them on Google Play. </p>
 
 <h3 id="hw-features">Hardware features</h3>
 
@@ -873,12 +873,12 @@ level 5). Because of this, some apps were able to use the API before they had
 the ability to declare that they require the API via the
 <code>&lt;uses-feature&gt;</code> system. </p>
 
-<p>To prevent those apps from being made available unintentionally,  Android
-Market assumes that certain hardware-related permissions indicate that the
+<p>To prevent those apps from being made available unintentionally,  Google
+Play assumes that certain hardware-related permissions indicate that the
 underlying hardware features are required by default. For instance, applications
 that use Bluetooth must request the <code>BLUETOOTH</code> permission in a
-<code>&lt;uses-permission&gt;</code> element &mdash; for legacy apps, Android
-Market assumes that the permission declaration means that the underlying
+<code>&lt;uses-permission&gt;</code> element &mdash; for legacy apps, Google
+Play assumes that the permission declaration means that the underlying
 <code>android.hardware.bluetooth</code> feature is required by the application
 and sets up filtering based on that feature. </p>
 

@@ -131,11 +131,11 @@ for example:
   <p>For a list of camera features, see the manifest
 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#hw-features">Features
 Reference</a>.</p>
-  <p>Adding camera features to your manifest causes Android Market to prevent your application from
+  <p>Adding camera features to your manifest causes Google Play to prevent your application from
 being installed to devices that do not include a camera or do not support the camera features you
-specify. For more information about using feature-based filtering with Android Market, see <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html#market-feature-filtering">Android
-Market and Feature-Based Filtering</a>.</p>
+specify. For more information about using feature-based filtering with Google Play, see <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#market-feature-filtering">Google
+Play and Feature-Based Filtering</a>.</p>
   <p>If your application <em>can use</em> a camera or camera feature for proper operation, but does
 not <em>require</em> it, you should specify this in the manifest by including the {@code
 android:required} attribute, and setting it to {@code false}:</p>
@@ -1260,7 +1260,7 @@ supported.</p>
 
 <p>If your application requires certain camera features in order to function properly, you can
 require them through additions to your application manifest. When you declare the use of specific
-camera features, such as flash and auto-focus, the Android Market restricts your application from
+camera features, such as flash and auto-focus, Google Play restricts your application from
 being installed on devices which do not support these features. For a list of camera features that
 can be declared in your app manifest, see the manifest
 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#hw-features"> Features
