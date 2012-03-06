@@ -444,12 +444,12 @@
   </li>
 
   <li>
-    <span class="heading">
-      <span class="en">Android Market Topics</span>
-    </span>
+    <h2>
+      <span class="en">Google Play Topics</span>
+    </h2>
     <ul>
       <li><a href="<?cs var:toroot ?>guide/publishing/publishing.html">
-          <span class="en">Publishing on Android Market</span>
+          <span class="en">Publishing on Google Play</span>
           </a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/market/licensing/index.html">
@@ -496,7 +496,7 @@
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/appendix/market-filters.html">
-          <span class="en">Market Filters</span></a>
+          <span class="en">Filters on Google Play</span></a>
       </li>
       <li><a href="<?cs var:toroot ?>guide/market/publishing/multiple-apks.html">
           <span class="en">Multiple APK Support</span></a>

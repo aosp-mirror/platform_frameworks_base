@@ -55,7 +55,7 @@ for you.</p>
 <h2 id="TaskManifest">Request Camera Permission</h2>
 
 <p>If an essential function of your application is taking pictures, then restrict
-its visibility in Android Market to devices that have a camera.  To advertise
+its visibility on Google Play to devices that have a camera.  To advertise
 that your application depends on having a camera, put a <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html"> {@code
 &lt;uses-feature&gt;}</a> tag in your manifest file:</p>
@@ -68,7 +68,7 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html"> {@code
 </pre>
 
 <p>If your application uses, but does not require a camera in order to function, add {@code
-android:required="false"} to the tag. In doing so, Android Market will allow devices without a
+android:required="false"} to the tag. In doing so, Google Play will allow devices without a
 camera to download your application. It's then your responsibility to check for the availability
 of the camera at runtime by calling {@link
 android.content.pm.PackageManager#hasSystemFeature hasSystemFeature(PackageManager.FEATURE_CAMERA)}.

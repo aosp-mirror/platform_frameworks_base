@@ -38,24 +38,24 @@ parent.link=index.html
 </div>
 </div>
 
-<p>Android Market In-app Billing is an Android Market service that provides checkout processing for
+<p>In-app Billing is a Google Play service that provides checkout processing for
 in-app purchases. To use the service, your application sends a billing request for a specific in-app
 product. The service then handles all of the checkout details for the transaction, including
 requesting and validating the form of payment and processing the financial transaction. When the
 checkout process is complete, the service sends your application the purchase details, such as the
 order number, the order date and time, and the price paid. At no point does your application have to
-handle any financial transactions; that role is provided by Android Market's in-app billing
+handle any financial transactions; that role is provided by Google Play's in-app billing
 service.</p>
 
 <h2 id="billing-arch">In-app Billing Architecture</h2>
 
 <p>In-app billing uses an asynchronous message loop to convey billing requests and billing responses
-between your application and the Android Market server. In practice, your application never directly
-communicates with the Android Market server (see figure 1). Instead, your application sends billing
-requests to the Android Market application over interprocess communication (IPC) and receives
-purchase responses from the Android Market application in the form of asynchronous broadcast
-intents. Your application does not manage any network connections between itself and the Android
-Market server or use any special APIs from the Android platform.</p>
+between your application and the Google Play server. In practice, your application never directly
+communicates with the Google Play server (see figure 1). Instead, your application sends billing
+requests to the Google Play application over interprocess communication (IPC) and receives
+purchase responses from the Google Play application in the form of asynchronous broadcast
+intents. Your application does not manage any network connections between itself and the Google
+Play server or use any special APIs from the Android platform.</p>
 
 <p>Some in-app billing implementations may also use a private remote server to deliver content or
 validate transactions, but a remote server is not required to implement in-app billing. A remote
@@ -70,16 +70,16 @@ to security attacks.</p>
 <img src="{@docRoot}images/billing_arch.png" alt="" height="582" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Your application sends and receives billing messages through the
-  Android Market application, which handles all communication with the Android Market server.</p>
+  Google Play application, which handles all communication with the Google Play server.</p>
 </div>
 
 <p>A typical in-app billing implementation relies on three components:</p>
 <ul>
   <li>A {@link android.app.Service} (named <code>BillingService</code> in the sample application),
-  which processes purchase messages from the application and sends billing requests to Android
-  Market's in-app billing service.</li>
+  which processes purchase messages from the application and sends billing requests to the Google
+  Play in-app billing service.</li>
   <li>A {@link android.content.BroadcastReceiver} (named <code>BillingReceiver</code> in the sample
-  application), which receives all asynchronous billing responses from the Android Market
+  application), which receives all asynchronous billing responses from the Google Play
   application.</li>
   <li>A security component (named <code>Security</code> in the sample application), which performs
   security-related tasks, such as signature verification and nonce generation. For more information
@@ -99,19 +99,19 @@ to security attacks.</p>
 
 <p>In addition to these components, your application must provide a way to store information about
 users' purchases and some sort of user interface that lets users select items to purchase. You do
-not need to provide a checkout user interface. When a user initiates an in-app purchase, the Android
-Market application presents the checkout user interface to your user. When the user completes the
+not need to provide a checkout user interface. When a user initiates an in-app purchase, the Google
+Play application presents the checkout user interface to your user. When the user completes the
 checkout process, your application resumes.</p>
 
 <h2 id="billing-msgs">In-app Billing Messages</h2>
 
-<p>When the user initiates a purchase, your application sends billing messages to Android Market's
+<p>When the user initiates a purchase, your application sends billing messages to Google Play's
 in-app billing service (named <code>MarketBillingService</code>) using simple IPC method calls. The
-Android Market application responds to all billing requests synchronously, providing your
-application with status notifications and other information. The Android Market application also
+Google Play application responds to all billing requests synchronously, providing your
+application with status notifications and other information. The Google Play application also
 responds to some billing requests asynchronously, providing your application with error messages and
 detailed transaction information. The following section describes the basic request-response
-messaging that takes place between your application and the Android Market application.</p>
+messaging that takes place between your application and the Google Play application.</p>
 
 <h3 id="billing-request">In-app billing requests</h3>
 
@@ -133,31 +133,31 @@ Service Interface</a>.
 
 <p>One of the most important keys that every request Bundle must have is the
 <code>BILLING_REQUEST</code> key. This key lets you specify the type of billing request you are
-making. Android Market's in-app billing service supports the following five types of billing
+making. Google Play's in-app billing service supports the following five types of billing
 requests:</p>
 
 <ul>
   <li><code>CHECK_BILLING_SUPPORTED</code>
-    <p>This request verifies that the Android Market application supports in-app billing. You
+    <p>This request verifies that the Google Play application supports in-app billing. You
     usually send this request when your application first starts up. This request is useful if you
     want to enable or disable certain UI features that are relevant only to in-app billing.</p>
   </li>
   <li><code>REQUEST_PURCHASE</code>
-    <p>This request sends a purchase message to the Android Market application and is the foundation
+    <p>This request sends a purchase message to the Google Play application and is the foundation
     of in-app billing. You send this request when a user indicates that he or she wants to purchase
-    an item in your application. Android Market then handles the financial transaction by displaying
+    an item in your application. Google Play then handles the financial transaction by displaying
     the checkout user interface.</p>
   </li>
   <li><code>GET_PURCHASE_INFORMATION</code>
     <p>This request retrieves the details of a purchase state change. A purchase changes state when
     a requested purchase is billed successfully or when a user cancels a transaction during
-    checkout. It can also occur when a previous purchase is refunded. Android Market notifies your
+    checkout. It can also occur when a previous purchase is refunded. Google Play notifies your
     application when a purchase changes state, so you only need to send this request when there is
     transaction information to retrieve.</p>
   </li>
   <li><code>CONFIRM_NOTIFICATIONS</code>
     <p>This request acknowledges that your application received the details of a purchase state
-    change. Android Market sends purchase state change notifications to your application until you
+    change. Google Play sends purchase state change notifications to your application until you
     confirm that you received them.</p>
   </li>
   <li><code>RESTORE_TRANSACTIONS</code>
@@ -171,7 +171,7 @@ requests:</p>
 
 <h3 id="billing-response">In-app Billing Responses</h3>
 
-<p>The Android Market application responds to in-app billing requests with both synchronous and
+<p>The Google Play application responds to in-app billing requests with both synchronous and
 asynchronous responses. The synchronous response is a {@link android.os.Bundle} with the following
 three keys:</p>
 
@@ -196,9 +196,9 @@ include the following:</p>
 
 <ul>
     <li><code>com.android.vending.billing.RESPONSE_CODE</code>
-    <p>This response contains an Android Market server response code, and is sent after you make an
+    <p>This response contains a Google Play server response code, and is sent after you make an
     in-app billing request. A server response code can indicate that a billing request was
-    successfully sent to Android Market or it can indicate that some error occurred during a billing
+    successfully sent to Google Play or it can indicate that some error occurred during a billing
     request. This response is <em>not</em> used to report any purchase state changes (such as refund
     or purchase information). For more information about the response codes that are sent with this
     response, see <a
@@ -253,7 +253,7 @@ broadcast intents that are sent for every request.</p>
 <ol>
   <li>Your application sends a purchase request (<code>REQUEST_PURCHASE</code> type), specifying a
   product ID and other parameters.</li>
-  <li>The Android Market application sends your application a Bundle with the following keys:
+  <li>The Google Play application sends your application a Bundle with the following keys:
   <code>RESPONSE_CODE</code>, <code>PURCHASE_INTENT</code>, and <code>REQUEST_ID</code>. The
   <code>PURCHASE_INTENT</code> key provides a {@link android.app.PendingIntent}, which your
   application uses to start the checkout UI for the given product ID.</li>
@@ -262,20 +262,20 @@ broadcast intents that are sent for every request.</p>
     context and not an application context.</p>
   </li>
   <li>When the checkout flow finishes (that is, the user successfully purchases the item or cancels
-  the purchase), Android Market sends your application a notification message (an
+  the purchase), Google Play sends your application a notification message (an
   <code>IN_APP_NOTIFY</code> broadcast intent). The notification message includes a notification ID,
   which references the transaction.</li>
   <li>Your application requests the transaction information by sending a
   <code>GET_PURCHASE_STATE_CHANGED</code> request, specifying the notification ID for the
   transaction.</li>
-  <li>The Android Market application sends a Bundle with a <code>RESPONSE_CODE</code> key and a 
+  <li>The Google Play application sends a Bundle with a <code>RESPONSE_CODE</code> key and a 
   <code>REQUEST_ID</code> key.
-  <li>Android Market sends the transaction information to your application in a
+  <li>Google Play sends the transaction information to your application in a
   <code>PURCHASE_STATE_CHANGED</code> broadcast intent.</li>
   <li>Your application confirms that you received the transaction information for the given
   notification ID by sending a confirmation message (<code>CONFIRM_NOTIFICATIONS</code> type),
   specifying the notification ID for which you received transaction information.</li>
-  <li>The Android Market application sends your application a Bundle with a
+  <li>The Google Play application sends your application a Bundle with a
   <code>RESPONSE_CODE</code> key and a <code>REQUEST_ID</code> key.</li>
 </ol>
 
@@ -284,13 +284,13 @@ broadcast intents that are sent for every request.</p>
   <strong>Figure 2.</strong> Message sequence for a purchase request.
 </p>
 
-<p>Keep in mind, you must send a confirmation when you receive transaction information from Android
-Market (step 8 in figure 2). If you don't send a confirmation message, Android Market will
+<p>Keep in mind, you must send a confirmation when you receive transaction information from Google
+Play (step 8 in figure 2). If you don't send a confirmation message, Google Play will
 continue sending <code>IN_APP_NOTIFY</code> messages for the transactions you have not
 confirmed. As a best practice, you should not send a <code>CONFIRM_NOTIFICATIONS</code> request for
 a purchased item until you have delivered the item to the user. This way, if your application
 crashes or something else prevents your application from delivering the product, your application
-will still receive an <code>IN_APP_NOTIFY</code> broadcast intent from Android Market indicating
+will still receive an <code>IN_APP_NOTIFY</code> broadcast intent from Google Play indicating
 that you need to deliver the product. Also, as a best practice, your application must be able to
 handle <code>IN_APP_NOTIFY</code> messages that contain multiple orders.</p>
 
@@ -307,7 +307,7 @@ broadcast intents that are sent for every request.</p>
 </div>
 
 <p>The request triggers three responses. The first is a {@link android.os.Bundle} with a
-<code>RESPONSE_CODE</code> key and a <code>REQUEST_ID</code> key. Next, the Android Market
+<code>RESPONSE_CODE</code> key and a <code>REQUEST_ID</code> key. Next, the Google Play
 application sends a <code>RESPONSE_CODE</code> broadcast intent, which provides status information
 or error information about the request. As always, the <code>RESPONSE_CODE</code> message references
 a specific request ID, so you can determine which request a <code>RESPONSE_CODE</code> message
@@ -338,18 +338,18 @@ is supported; a <code>RESULT_BILLING_UNAVAILABLE</code> response code indicates 
 is unavailable because the API version you specified is unrecognized or the user is not eligible to
 make in-app purchases (for example, the user resides in a country that does not allow in-app
 billing). A <code>SERVER_ERROR</code> can also be returned, indicating that there was a problem with
-the Android Market server.</p>
+the Google Play server.</p>
 
 <h3 id="billing-action-notify">Handling IN_APP_NOTIFY messages</h3>
 
-<p>Usually, your application receives an <code>IN_APP_NOTIFY</code> broadcast intent from Android
-Market in response to a <code>REQUEST_PURCHASE</code> message (see figure 2). The
+<p>Usually, your application receives an <code>IN_APP_NOTIFY</code> broadcast intent from Google
+Play in response to a <code>REQUEST_PURCHASE</code> message (see figure 2). The
 <code>IN_APP_NOTIFY</code> broadcast intent informs your application that the state of a requested
 purchase has changed. To retrieve the details of that purchase, your application sends a
-<code>GET_PURCHASE_INFORMATION</code> request. Android Market responds with a
+<code>GET_PURCHASE_INFORMATION</code> request. Google Play responds with a
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent, which contains the details of the purchase
 state change. Your application then sends a <code>CONFIRM_NOTIFICATIONS</code> message, informing
-Android Market that you have received the purchase state change information.</p>
+Google Play that you have received the purchase state change information.</p>
 
 <p>In some special cases, you may receive multiple <code>IN_APP_NOTIFY</code> messages even though
 you have confirmed receipt of the purchase information, or you may receive
@@ -358,13 +358,13 @@ purchase. Your application must handle both of these special cases.</p>
 
 <h4>Handling multiple IN_APP_NOTIFY messages</h4>
 
-<p>When Android Market receives a <code>CONFIRM_NOTIFICATIONS</code> message for a given
+<p>When Google Play receives a <code>CONFIRM_NOTIFICATIONS</code> message for a given
 <code>PURCHASE_STATE_CHANGED</code> message, it usually stops sending <code>IN_APP_NOTIFY</code>
-intents for that <code>PURCHASE_STATE_CHANGED</code> message. Sometimes, however, Android
-Market may send repeated <code>IN_APP_NOTIFY</code> intents for a
+intents for that <code>PURCHASE_STATE_CHANGED</code> message. Sometimes, however, Google
+Play may send repeated <code>IN_APP_NOTIFY</code> intents for a
 <code>PURCHASE_STATE_CHANGED</code> message even though your application has sent a
 <code>CONFIRM_NOTIFICATIONS</code> message. This can occur if a device loses network connectivity
-while you are sending the <code>CONFIRM_NOTIFICATIONS</code> message. In this case, Android Market
+while you are sending the <code>CONFIRM_NOTIFICATIONS</code> message. In this case, Google Play
 might not receive your <code>CONFIRM_NOTIFICATIONS</code> message and it could send multiple
 <code>IN_APP_NOTIFY</code> messages until it receives acknowledgement that you received the
 transaction message. Therefore, your application must be able to recognize that the subsequent
@@ -390,7 +390,7 @@ IN_APP_NOTIFY messages.</p>
 
 <p>In the first case, your application may receive an <code>IN_APP_NOTIFY</code> broadcast intent
 when a user has your application installed on two (or more) devices and the user makes an in-app
-purchase from one of the devices. In this case, Android Market sends an <code>IN_APP_NOTIFY</code>
+purchase from one of the devices. In this case, Google Play sends an <code>IN_APP_NOTIFY</code>
 message to the second device, informing the application that there is a purchase state change. Your
 application can handle this message the same way it handles the response from an
 application-initiated <code>REQUEST_PURCHASE</code> message, so that ultimately your application
@@ -400,8 +400,8 @@ href="{@docRoot}guide/market/billing/billing_admin.html#billing-purchase-type">p
 to "managed per user account."</p>
 
 <p>In the second case, your application can receive an <code>IN_APP_NOTIFY</code> broadcast intent
-when Android Market receives a refund notification from Google Checkout. In this case, Android
-Market sends an <code>IN_APP_NOTIFY</code> message to your application. Your application can handle
+when Google Play receives a refund notification from Google Checkout. In this case, Google
+Play sends an <code>IN_APP_NOTIFY</code> message to your application. Your application can handle
 this message the same way it handles responses from an application-initiated
 <code>REQUEST_PURCHASE</code> message so that ultimately your application receives a
 <code>PURCHASE_STATE_CHANGED</code> message that includes information about the item that has been
@@ -417,13 +417,13 @@ information.</p>
 <h2 id="billing-security">Security Controls</h2>
 
 <p>To help ensure the integrity of the transaction information that is sent to your application,
-Android Market signs the JSON string that is contained in the <code>PURCHASE_STATE_CHANGED</code>
-broadcast intent. Android Market uses the private key that is associated with your publisher account
+Google Play signs the JSON string that is contained in the <code>PURCHASE_STATE_CHANGED</code>
+broadcast intent. Google Play uses the private key that is associated with your publisher account
 to create this signature. The publisher site generates an RSA key pair for each publisher account.
 You can find the public key portion of this key pair on your account's profile page. It is the same
-public key that is used with Android Market licensing.</p>
+public key that is used with Google Play licensing.</p>
 
-<p>When Android Market signs a billing response, it includes the signed JSON string (unencrypted)
+<p>When Google Play signs a billing response, it includes the signed JSON string (unencrypted)
 and the signature. When your application receives this signed response you can use the public key
 portion of your RSA key pair to verify the signature. By performing signature verification you can
 help detect responses that have been tampered with or that have been spoofed. You can perform this
@@ -431,9 +431,9 @@ signature verification step in your application; however, if your application co
 remote server then we recommend that you perform the signature verification on that server.</p>
 
 <p>In-app billing also uses nonces (a random number used once) to help verify the integrity of the
-purchase information that's returned from Android Market. Your application must generate a nonce and
+purchase information that's returned from Google Play. Your application must generate a nonce and
 send it with a <code>GET_PURCHASE_INFORMATION</code> request and a <code>RESTORE_TRANSACTIONS</code>
-request. When Android Market receives the request, it adds the nonce to the JSON string that
+request. When Google Play receives the request, it adds the nonce to the JSON string that
 contains the transaction information. The JSON string is then signed and returned to your
 application. When your application receives the JSON string, you need to verify the nonce as well as
 the signature of the JSON string.</p>
@@ -447,20 +447,20 @@ href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and D
 limitations.</p>
 
 <ul>
-  <li>In-app billing can be implemented only in applications that you publish through Android
-  Market.</li>
-  <li>You must have a Google Checkout Merchant account to use Android Market In-app Billing.</li>
+  <li>In-app billing can be implemented only in applications that you publish through Google
+  Play.</li>
+  <li>You must have a Google Checkout Merchant account to use Google Play In-app Billing.</li>
   <li>If your device is running Android 3.0, in-app billing requires version 5.0.12 (or higher) of
   the MyApps application. If your device is running any other version of Android, in-app billing
-  requires version 2.3.4 (or higher) of the Android Market application.</li>
+  requires version 2.3.4 (or higher) of the Google Play application.</li>
   <li>An application can use in-app billing only if the device is running Android 1.6 (API level 4)
   or higher.</li>
   <li>You can use in-app billing to sell only digital content. You cannot use in-app billing to sell
   physical goods, personal services, or anything that requires physical delivery.</li>
-  <li>Android Market does not provide any form of content delivery. You are responsible for
+  <li>Google Play does not provide any form of content delivery. You are responsible for
   delivering the digital content that you sell in your applications.</li>
   <li>You cannot implement in-app billing on a device that never connects to the network. To
-  complete in-app purchase requests, a device must be able to access the Android Market server over
+  complete in-app purchase requests, a device must be able to access the Google Play server over
   the network. </li>
 </ul>
 

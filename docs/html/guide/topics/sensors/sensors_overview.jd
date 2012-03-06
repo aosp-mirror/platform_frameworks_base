@@ -606,7 +606,7 @@ sensor is present on a device so your app can run successfully. You have two opt
 that a given sensor is present on a device:</p>
 <ul>
   <li>Detect sensors at runtime and enable or disable application features as appropriate.</li>
-  <li>Use Android Market filters to target devices with specific sensor configurations.</li>
+  <li>Use Google Play filters to target devices with specific sensor configurations.</li>
 </ul>
 
 <p>Each option is discussed in the following sections.</p>
@@ -633,9 +633,9 @@ whether there's a pressure sensor on a device:</p>
   }
 </pre>
 
-<h4>Using Android Market filters to target specific sensor configurations</h4>
+<h4>Using Google Play filters to target specific sensor configurations</h4>
 
-<p>If you are publishing your application on Android Market you can use the
+<p>If you are publishing your application on Google Play you can use the
   <a href="{@docRoot}guide//topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;
     </code></a> element in your manifest file to filter your application from devices that do not
 have the appropriate sensor configuration for your application. The
@@ -650,7 +650,7 @@ following is an example manifest entry that filters apps that do not have an acc
 </pre>
 
 <p>If you add this element and descriptor to your application's manifest, users will see your
-application on Android Market only if their device has an accelerometer.</p>
+application on Google Play only if their device has an accelerometer.</p>
 
 <p>You should set the descriptor to <code>android:required="true"</code> only if your application
 relies entirely on a specific sensor. If your application uses a sensor for some functionality, but

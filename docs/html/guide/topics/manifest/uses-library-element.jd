@@ -33,7 +33,7 @@ parent.link=manifest-intro.html
     </p>
     <p>
         This element also affects the installation of the application on a particular device and
-        the availability of the application in Android Market:
+        the availability of the application on Google Play:
     </p>
     <dl>
         <dt><em>Installation</em></dt>
@@ -42,11 +42,11 @@ parent.link=manifest-intro.html
             {@code true}, the {@link android.content.pm.PackageManager} framework won't let the user
             install the application unless the library is present on the user's device.
         </dd>
-        <dt><em>Market</em></dt>
+        <dt><em>Google Play</em></dt>
         <dd>
-            Android Market filters applications based on the libraries installed on the
+            Google Play filters applications based on the libraries installed on the
             user's device. For more information about filtering, see the topic
-            <a href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a>.
+            <a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>.
         </dd>
     </dl>
     <p>

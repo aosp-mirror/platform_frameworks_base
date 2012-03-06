@@ -922,7 +922,7 @@ parse mode is also compatible with the {@link org.json}'s default parser.</p>
 
 <p>The <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> 
-manfest element should be used to inform external entities (such as Android Market) of the set of
+manfest element should be used to inform external entities (such as Google Play) of the set of
 hardware and software features on which your application depends. In this release, Android adds the
 following new constants that applications can declare with this element:</p>
 

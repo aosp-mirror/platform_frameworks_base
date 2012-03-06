@@ -14,7 +14,7 @@ page.title=Publishing Overview
     <li><a href="#publishing-prepare">Preparing Your Application for Release</a></li>
     <li><a href="#publishing-release">Releasing Your Application to Users</a>
     <ol>
-      <li><a href="#publishing-market">Releasing on Android Market</a></li>
+      <li><a href="#publishing-market">Releasing on Google Play</a></li>
       <li><a href="#publishing-website">Releasing on your own website</a></li>
       <li><a href="#publishing-email">Releasing through email</a></li>
     </ol>
@@ -23,7 +23,7 @@ page.title=Publishing Overview
   <ol>
     <li><a href="{@docRoot}guide/publishing/preparing.html">Preparing for
     Release</a></li>
-    <li><a href="{@docRoot}guide/publishing/publishing.html">Publishing on Android Market</a></li>
+    <li><a href="{@docRoot}guide/publishing/publishing.html">Publishing on Google Play</a></li>
   </ol>
 </div>
 </div>
@@ -42,7 +42,7 @@ publish an Android application you perform two main tasks:</p>
   </li>
 </ul>
 
-<p>Usually, you release your application through an application marketplace, such as Android Market.
+<p>Usually, you release your application through an application marketplace, such as Google Play.
 However, you can also release applications by sending them directly to users or by letting users
 download them from your own website.</p>
 
@@ -73,7 +73,7 @@ tasks:</p>
     <code>android:versionCode</code> and <code>android:versionName</code> attributes, which are
     located in the
     <a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a>
-    element. You may also have to configure several other settings to meet Android Market
+    element. You may also have to configure several other settings to meet Google Play
     requirements or accomodate whatever method you're using to release your application.</p>
   </li>
   <li>Building and signing a release version of your application.
@@ -114,28 +114,27 @@ application.</p>
 <h2 id="publishing-release">Releasing Your Application to Users</h2>
 
 <p>You can release your Android applications several ways. Usually, you release applications
-through an application marketplace, such as Android Market, but you can also release applications
-on your own website or by sending an application directly to a user. Android Market is the
+through an application marketplace, such as Google Play, but you can also release applications
+on your own website or by sending an application directly to a user. Google Play is the
 recommended marketplace for Android applications and is particularly useful if you want to
 distribute your applications to a large global audience. The other two release methods&mdash;server
 distribution and email distribution&mdash;are useful if you are releasing an application to a small
 group of users (for example, a work group in an enterprise environment), or if you do not want to
 make your application available to the general public.</p>
 
-<h3 id="publishing-market">Releasing Your Applications on Android Market</h3>
+<h3 id="publishing-market">Releasing Your Applications on Google Play</h3>
 
-<p>Android Market is a robust publishing platform that helps you publicize, sell, and distribute
+<p>Google Play is a robust publishing platform that helps you publicize, sell, and distribute
 your Android applications to users around the world. When you release your applications through
-Android Market you have access to a suite of developer tools that let you analyze your sales,
+Google Play you have access to a suite of developer tools that let you analyze your sales,
 identify market trends, and control who your applications are being distributed to. You also have
 access to several revenue-enhancing features that are not available anywhere else, such as <a
 href="{@docRoot}guide/market/billing/index.html">in-app billing</a> and <a
-href="{@docRoot}guide/market/licensing/index.html">application licensing</a>. This rich array of
-tools
-and features, coupled with numerous end-user community features, makes Android Market the premier
+href="{@docRoot}guide/market/licensing.html">application licensing</a>. This rich array of tools
+and features, coupled with numerous end-user community features, makes Google Play the premier
 marketplace for selling and buying Android applications.</p>
 
-<p>Releasing your application on Android Market is a simple process that involves three basic
+<p>Releasing your application on Google Play is a simple process that involves three basic
   steps:</p>
 
 <div class="figure" style="width:275px">
@@ -144,19 +143,19 @@ marketplace for selling and buying Android applications.</p>
        to be installed" />
   <p class="img-caption">
     <strong>Figure 2.</strong> The <strong>Unknown sources</strong> setting lets you install
-    applications that are not published on Android Market .
+    applications that are not published on Google Play .
   </p>
 </div>
 
 <ul>
   <li>Preparing promotional materials.
-    <p>To fully leverage the marketing and publicity capabilities of Android Market, you need to
+    <p>To fully leverage the marketing and publicity capabilities of Google Play, you need to
     create promotional materials for your application, such as screenshots, videos, graphics, and
     promotional text.</p>
   </li>
   <li>Configuring options and uploading assets.
-    <p>Android Market lets you target your application to a worldwide pool of users and devices.
-    By configuring various Android Market settings, you can choose the countries you want to
+    <p>Google Play lets you target your application to a worldwide pool of users and devices.
+    By configuring various Google Play settings, you can choose the countries you want to
     reach, the listing languages you want to use, and the price you want to charge in each
     country. You can also configure listing details such as the application type, category, and
     content rating. When you are done configuring options you can upload your promotional materials
@@ -170,21 +169,21 @@ marketplace for selling and buying Android applications.</p>
   </li>
 </ul>
 
-<p>For information about Android Market, see <a
-href="{@docRoot}guide/publishing/publishing.html#market">Publishing on Android Market</a>. This
-topic provides an introduction to Android Market features and provides a step-by-step guide for
-distributing your applications on Android Market.</p>
+<p>For information about Google Play, see <a
+href="{@docRoot}guide/publishing/publishing.html#market">Publishing on Google Play</a>. This
+topic provides an introduction to Google Play features and provides a step-by-step guide for
+distributing your applications on Google Play.</p>
 
 <h3 id="publishing-website">Releasing your application on your own website</h3>
 
-<p>If you do not want to release your application on an application marketplace like Android Market,
+<p>If you do not want to release your application on an application marketplace like Google Play,
 you can release your application by making it available for download on your own website or server.
 To do this, you must first prepare your application for release (that is, you must build it for
 release and sign it). Then all you need to do is host the release-ready application on your website
 and provide a download link for the application. When users browse to your website with their
 Android-powered devices and download your application, the Android system will automatically start
 installing the application on the device. However, the installation process will start automatically
-only if the user has configured their device to allow the installation of non-Android Market
+only if the user has configured their device to allow the installation of non-Google Play
 applications.</p>
 
 <div class="figure" style="width:275px">
@@ -198,7 +197,7 @@ applications.</p>
 </div>
 
 <p>By default, Android-powered devices allow users to install applications only if the applications
-have been downloaded from Android Market. To allow the installation of applications from other
+have been downloaded from Google Play. To allow the installation of applications from other
 sources, users need to enable the <strong>Unknown sources</strong> setting on their devices, and
 they need to make this configuration change before they download your application to their
 device (see figure 2).</p>
@@ -209,7 +208,7 @@ applications from unknown sources.</p>
 <p>Although it is relatively easy to release your application on your own website, it can be
 inefficient and cumbersome. For example, if you want to monetize your application you will
 have to process and track all financial transactions yourself and you will not be able to use
-Android Market's in-app billing feature to sell in-app products. In addition, you will not be
+Google Play's in-app billing feature to sell in-app products. In addition, you will not be
 able to use the licensing feature to help prevent unauthorized installation and use of your
 application.</p>
 
@@ -223,7 +222,7 @@ button in the email message (see figure 3). Users can install your application b
 button.</p>
 
 <p class="note"><strong>Note:</strong> The <strong>Install Now</strong> button appears only if a
-user has configured their device to allow the installation of non-Android Market applications and
+user has configured their device to allow the installation of non-Google Play applications and
 they open your email with the native Gmail application.</p>
 
 <p>Releasing applications through email is convenient if you are sending your application to

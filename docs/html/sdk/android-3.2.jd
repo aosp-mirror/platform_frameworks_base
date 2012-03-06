@@ -320,7 +320,7 @@ considers the application incompatible with the device, but does not prevent it
 from being installed and run.</li>
 </ul>
 
-<p class="note"><strong>Note:</strong> Android Market does not currently filter
+<p class="note"><strong>Note:</strong> Google Play does not currently filter
 apps based on any of the attributes above. Support for filtering will be
 added in a later platform release. Applications that require
 filtering based on screen size can use the existing <code>&lt;supports-screens&gt;</code>
@@ -526,13 +526,13 @@ automatically by the platform.</p>
 <h3 id="features">New feature constants</h3>
 
 <p>The platform adds new hardware feature constants that you can declare
-in their application manifests, to inform external entities such as Android
-Market of required hardware and software capabilities. You declare these
+in their application manifests, to inform external entities such as Google
+Play of required hardware and software capabilities. You declare these
 and other feature constants in <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
 &lt;uses-feature&gt;}</a> manifest elements.
 
-<p>Android Market filters applications based on their <code>&lt;uses-feature&gt;</code> attributes, to ensure that they are available only to devices on which their requirements are met. </p>
+<p>Google Play filters applications based on their <code>&lt;uses-feature&gt;</code> attributes, to ensure that they are available only to devices on which their requirements are met. </p>
 
 <ul>
 <li>Feature constants for landscape or portrait requirements

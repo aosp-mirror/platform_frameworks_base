@@ -98,7 +98,7 @@ public class ApplicationErrorReport implements Parcelable {
     /**
      * Package name of the application which installed the application this
      * report pertains to.
-     * This identifies which Market the application came from.
+     * This identifies which market the application came from.
      */
     public String installerPackageName;
 

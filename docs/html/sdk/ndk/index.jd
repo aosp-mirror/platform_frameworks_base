@@ -756,7 +756,7 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
             <li>Includes improvements to the <code>cpufeatures</code> helper library that improves reporting
             of the CPU type (some devices previously reported ARMv7 CPU when the device really was an ARMv6). We
             recommend developers that use this library to rebuild their applications then
-            upload to Market to benefit from the improvements.</li>
+            upload to Google Play to benefit from the improvements.</li>
 
             <li>Adds an EGL library that lets you create and manage OpenGL ES textures and
               services.</li>
@@ -832,7 +832,7 @@ float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
             <code>.apk</code>.</li>
 
             <li>To ensure that your applications are available to users only if their devices are
-            capable of running them, Android Market now filters applications based on the
+            capable of running them, Google Play now filters applications based on the
             instruction set information included in your application &mdash; no action is needed on
             your part to enable the filtering. Additionally, the Android system itself also checks
             your application at install time and allows the installation to continue only if the

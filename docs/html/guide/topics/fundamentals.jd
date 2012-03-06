@@ -392,13 +392,13 @@ same features and capabilities. In order to prevent your application from being 
 that lack features needed by your application, it's important that you clearly define a profile for
 the types of devices your application supports by declaring device and software requirements in your
 manifest file. Most of these declarations are informational only and the system does not read
-them, but external services such as Android Market do read them in order to provide filtering
+them, but external services such as Google Play do read them in order to provide filtering
 for users when they search for applications from their device.</p>
 
 <p>For example, if your application requires a camera and uses APIs introduced in Android 2.1 (<a
 href="{@docRoot}guide/appendix/api-levels.html">API Level</a> 7), you should declare these as
 requirements in your manifest file. That way, devices that do <em>not</em> have a camera and have an
-Android version <em>lower</em> than 2.1 cannot install your application from Android Market.</p>
+Android version <em>lower</em> than 2.1 cannot install your application from Google Play.</p>
 
 <p>However, you can also declare that your application uses the camera, but does not
 <em>require</em> it. In that case, your application must perform a check at runtime to determine
@@ -458,12 +458,12 @@ element.</dd>
 </dl>
 
 <p>It's important that you declare all such requirements for your application, because, when you
-distribute your application on Android Market, Market uses these declarations to filter which
+distribute your application on Google Play, the store uses these declarations to filter which
 applications are available on each device. As such, your application should be available only to
 devices that meet all your application requirements.</p>
 
-<p>For more information about how Android Market filters applications based on these (and other)
-requirements, see the <a href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a>
+<p>For more information about how Google Play filters applications based on these (and other)
+requirements, see the <a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>
 document.</p>
 
 
