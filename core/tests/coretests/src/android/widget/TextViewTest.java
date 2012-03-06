@@ -16,25 +16,18 @@
 
 package android.widget;
 
-import android.test.ActivityInstrumentationTestCase2;
+import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.GetChars;
-import android.view.View;
-
-import com.android.frameworks.coretests.R;
 
 /**
  * TextViewTest tests {@link TextView}.
  */
-public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewTestActivity> {
-
-    public TextViewTest() {
-        super(TextViewTestActivity.class);
-    }
+public class TextViewTest extends AndroidTestCase {
 
     @SmallTest
     public void testArray() throws Exception {
-        TextView tv = new TextView(getActivity());
+        TextView tv = new TextView(mContext);
 
         char[] c = new char[] { 'H', 'e', 'l', 'l', 'o', ' ',
                                 'W', 'o', 'r', 'l', 'd', '!' };
@@ -60,182 +53,5 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewTestA
         assertEquals('W', c2[3]);
         assertEquals('o', c2[4]);
         assertEquals('\0', c2[5]);
-    }
-
-    @SmallTest
-    public void testTextDirectionDefault() {
-        TextView tv = new TextView(getActivity());
-        assertEquals(View.TEXT_DIRECTION_INHERIT, tv.getTextDirection());
-    }
-
-    @SmallTest
-    public void testSetGetTextDirection() {
-        TextView tv = new TextView(getActivity());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG);
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_ANY_RTL);
-        assertEquals(View.TEXT_DIRECTION_ANY_RTL, tv.getTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_INHERIT);
-        assertEquals(View.TEXT_DIRECTION_INHERIT, tv.getTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
-        assertEquals(View.TEXT_DIRECTION_LTR, tv.getTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_RTL);
-        assertEquals(View.TEXT_DIRECTION_RTL, tv.getTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LOCALE);
-        assertEquals(View.TEXT_DIRECTION_LOCALE, tv.getTextDirection());
-    }
-
-    @SmallTest
-    public void testGetResolvedTextDirectionLtr() {
-        TextView tv = new TextView(getActivity());
-        tv.setText("this is a test");
-
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG);
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_ANY_RTL);
-        assertEquals(View.TEXT_DIRECTION_ANY_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_INHERIT);
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
-        assertEquals(View.TEXT_DIRECTION_LTR, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_RTL);
-        assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LOCALE);
-        assertEquals(View.TEXT_DIRECTION_LOCALE, tv.getResolvedTextDirection());
-    }
-
-    @SmallTest
-    public void testGetResolvedTextDirectionLtrWithInheritance() {
-        LinearLayout ll = new LinearLayout(getActivity());
-        ll.setTextDirection(View.TEXT_DIRECTION_ANY_RTL);
-
-        TextView tv = new TextView(getActivity());
-        tv.setText("this is a test");
-        ll.addView(tv);
-
-        tv.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG);
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_ANY_RTL);
-        assertEquals(View.TEXT_DIRECTION_ANY_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_INHERIT);
-        assertEquals(View.TEXT_DIRECTION_ANY_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
-        assertEquals(View.TEXT_DIRECTION_LTR, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_RTL);
-        assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LOCALE);
-        assertEquals(View.TEXT_DIRECTION_LOCALE, tv.getResolvedTextDirection());
-    }
-
-    @SmallTest
-    public void testGetResolvedTextDirectionRtl() {
-        TextView tv = new TextView(getActivity());
-        tv.setText("\u05DD\u05DE"); // hebrew
-
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG);
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_ANY_RTL);
-        assertEquals(View.TEXT_DIRECTION_ANY_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_INHERIT);
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
-        assertEquals(View.TEXT_DIRECTION_LTR, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_RTL);
-        assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LOCALE);
-        assertEquals(View.TEXT_DIRECTION_LOCALE, tv.getResolvedTextDirection());
-    }
-
-    @SmallTest
-    public void testGetResolvedTextDirectionRtlWithInheritance() {
-        LinearLayout ll = new LinearLayout(getActivity());
-        ll.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG);
-
-        TextView tv = new TextView(getActivity());
-        tv.setText("\u05DD\u05DE"); // hebrew
-        ll.addView(tv);
-
-        tv.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG);
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_ANY_RTL);
-        assertEquals(View.TEXT_DIRECTION_ANY_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_INHERIT);
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
-        assertEquals(View.TEXT_DIRECTION_LTR, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_RTL);
-        assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LOCALE);
-        assertEquals(View.TEXT_DIRECTION_LOCALE, tv.getResolvedTextDirection());
-
-        // Force to RTL text direction on the layout
-        ll.setTextDirection(View.TEXT_DIRECTION_RTL);
-
-        tv.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG);
-        assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_ANY_RTL);
-        assertEquals(View.TEXT_DIRECTION_ANY_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_INHERIT);
-        assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
-        assertEquals(View.TEXT_DIRECTION_LTR, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_RTL);
-        assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
-
-        tv.setTextDirection(View.TEXT_DIRECTION_LOCALE);
-        assertEquals(View.TEXT_DIRECTION_LOCALE, tv.getResolvedTextDirection());
-    }
-
-    @SmallTest
-    public void testResetTextDirection() {
-        final TextViewTestActivity activity = getActivity();
-
-        final LinearLayout ll = (LinearLayout) activity.findViewById(R.id.textviewtest_layout);
-        final TextView tv = (TextView) activity.findViewById(R.id.textviewtest_textview);
-
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                ll.setTextDirection(View.TEXT_DIRECTION_RTL);
-                tv.setTextDirection(View.TEXT_DIRECTION_INHERIT);
-                assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
-
-                ll.removeView(tv);
-                assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
-            }
-        });
     }
 }
