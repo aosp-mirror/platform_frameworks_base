@@ -1,0 +1,67 @@
+page.title=Touch Feedback
+@jd:body
+
+<div class="layout-content-row" style="margin-bottom: -100px">
+  <div class="layout-content-col span-7">
+
+<p>Use color and illumination to respond to touches, reinforce the resulting behaviors of gestures, and
+indicate what actions are enabled and disabled.</p>
+<p>Whenever a user touches an actionable area in your app, provide a visual response. This lets the
+user know which object was touched and that your app is "listening".</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/touch_feedback_reaction_response.png">
+
+  </div>
+</div>
+
+<h4>States</h4>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<img src="{@docRoot}design/media/touch_feedback_states.png">
+<div class="figure-caption">
+  Most of Android's UI elements have touch-feedback built in, including states that indicate
+  whether touching the element will have any effect.
+</div>
+
+<div class="vspace size-4">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+<h4>Communication</h4>
+<p>When your objects react to more complex gestures, help users understand what the outcome of the
+operation will be. For example, in Recents, when you start swiping a thumbnail left or right, it
+starts to dim. This helps the user understand that swiping will cause the item to be removed.</p>
+
+  </div>
+  <div class="layout-content-col span-9">
+
+    <img src="{@docRoot}design/media/touch_feedback_manipulation.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/touch_feedback_communication.png">
+
+  </div>
+  <div class="layout-content-col span-6">
+
+<div class="vspace size-3">&nbsp;</div>
+
+<h4>Boundaries</h4>
+<p>When users try to scroll past the upper or lower limit of a scrollable area, communicate the
+boundary with a visual cue. For example, if a user attempts to scroll past the first home screen
+panel, the screen content tilts to the right to indicate that further navigation in this direction
+is not possible. Many of Android's scrollable UI widgets (e.g. lists or grid lists) already have
+support for boundary feedback built in. If you are building custom, keep boundary feedback in mind
+and provide it from within your app.</p>
+
+  </div>
+</div>
