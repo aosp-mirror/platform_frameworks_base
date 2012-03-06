@@ -1,0 +1,61 @@
+page.title=Backwards Compatibility
+@jd:body
+
+<p>Significant changes in Android 3.0 included:</p>
+<ul>
+<li>Deprecation of navigation hardware keys (Back, Menu, Search, Home) in favor of handling navigation
+  via virtual controls (Back, Home, Recents).</li>
+<li>Robust pattern for the use of menus in action bars.</li>
+</ul>
+<p>Android 4.0 brings these changes for tablets to the phone platform.</p>
+
+<h2 id="older-hardware">Adapting Android 4.0 to Older Hardware and Apps</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Phones with virtual navigation controls</h4>
+<p>Android apps written for Android 3.0 and later display actions in the action bar. Actions that don't
+fit in the action bar or aren't important enough to be displayed at the top level appear in the
+action overflow.</p>
+<p>Users access the action overflow by touching it in the action bar.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Phones with physical navigation keys</h4>
+<p>Android phones with traditional navigation hardware keys don't display the virtual navigation bar at
+the bottom of the screen. Instead, the action overflow is available from the menu hardware key. The
+resulting actions popup has the same style as in the previous example, but is displayed at the bottom of the screen.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Legacy apps on phones with virtual navigation controls</h4>
+<p>When you run an app that was built for Android 2.3 or earlier on a phone with virtual navigation
+controls, an action overflow control appears at the right side of the virtual navigation bar. You
+can touch the control to display the app's actions in the traditional Android menu styling.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
+
+  </div>
+</div>

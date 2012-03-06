@@ -1,0 +1,32 @@
+page.title=Pickers
+@jd:body
+
+<p>Pickers provide a simple way to select a single value from a set. In addition to touching the
+up/down arrow buttons, it's possible to set the desired value from the keyboard or via a swipe
+gesture.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-2">&nbsp;</div>
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/picker_space.png">
+
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Space considerations</h4>
+<p>Pickers can be used inline on a form, but their relatively large footprint is best suited for
+display in a dialog. For inline display, consider using more compact controls such as text fields or
+spinners.</p>
+
+  </div>
+</div>
+
+<h2 id="date-time">Date and time pickers</h2>
+
+<p>Android provides these as ready-to-use dialogs. Each picker is a dialog with a set of controls for
+entering the parts of the date (month, day, year) or time (hour, minute, AM/PM). Using these in your
+app helps ensure that a user's specification of a data or time input is valid and formatted
+correctly. The format of a time and date picker adjusts automatically to the locale.</p>
+
+<img src="{@docRoot}design/media/picker_datetime.png">

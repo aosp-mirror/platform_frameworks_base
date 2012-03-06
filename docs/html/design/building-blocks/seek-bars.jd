@@ -1,0 +1,36 @@
+page.title=Seek Bars and Sliders
+@jd:body
+
+<p>Interactive sliders make it possible to select a value from a continuous or discrete range of values
+by moving the slider thumb. The smallest value is to the left, the largest to the right. The
+interactive nature of the slider makes it a great choice for settings that reflect intensity levels,
+such as volume, brightness, or color saturation.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-9">
+
+    <img src="{@docRoot}design/media/seekbar_example.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<div class="vspace size-2">&nbsp;</div>
+
+<h4>Example</h4>
+<p>Interactive slider to set the ringer volume. The value can either be set through the hardware volume controls or interactively via a gesture.</p>
+
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-9">
+
+    <img src="{@docRoot}design/media/seekbar_style.png">
+    <div class="figure-caption">
+      Seek bars in Holo Light &amp; Dark
+    </div>
+
+  </div>
+  <div class="layout-content-col span-4">&nbsp;</div>
+</div>
