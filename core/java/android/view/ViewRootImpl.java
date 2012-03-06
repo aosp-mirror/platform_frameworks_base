@@ -876,7 +876,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mFrameScheduled) {
             mFrameScheduled = false;
-            mChoreographer.removeDrawCallback(mFrameRunnable);
+            mChoreographer.removeDrawCallbacks(mFrameRunnable);
         }
     }
 
@@ -4027,7 +4027,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 if (mPosted && mViews.isEmpty() && mViewRects.isEmpty()) {
-                    mChoreographer.removeAnimationCallback(this);
+                    mChoreographer.removeAnimationCallbacks(this);
                     mPosted = false;
                 }
             }
