@@ -139,6 +139,8 @@ public final class WebViewCore {
     private int mHighMemoryUsageThresholdMb;
     private int mHighUsageDeltaMb;
 
+    private int mChromeCanFocusDirection;
+
     // The thread name used to identify the WebCore thread and for use in
     // debugging other classes that require operation within the WebCore thread.
     /* package */ static final String THREAD_NAME = "WebViewCoreThread";
@@ -341,6 +343,58 @@ public final class WebViewCore {
         if (mWebView == null) return;
         mWebView.mPrivateHandler.obtainMessage(WebViewClassic.HIT_TEST_RESULT, hitTest)
                 .sendToTarget();
+    }
+
+    /**
+     * Called by JNI to advance focus to the next view.
+     */
+    private void chromeTakeFocus(int webkitDirection) {
+        if (mWebView == null) return;
+        Message m = mWebView.mPrivateHandler.obtainMessage(
+                WebViewClassic.TAKE_FOCUS);
+        m.arg1 = mapDirection(webkitDirection);
+        m.sendToTarget();
+    }
+
+    /**
+     * Called by JNI to see if we can take focus in the given direction.
+     */
+    private boolean chromeCanTakeFocus(int webkitDirection) {
+        int direction = mapDirection(webkitDirection);
+        return direction == mChromeCanFocusDirection && direction != 0;
+    }
+
+    /**
+     * Maps a Webkit focus direction to a framework one
+     */
+    private int mapDirection(int webkitDirection) {
+        /*
+         * This is WebKit's FocusDirection enum (from FocusDirection.h)
+        enum FocusDirection {
+            FocusDirectionNone = 0,
+            FocusDirectionForward,
+            FocusDirectionBackward,
+            FocusDirectionUp,
+            FocusDirectionDown,
+            FocusDirectionLeft,
+            FocusDirectionRight
+        };
+         */
+        switch (webkitDirection) {
+        case 1:
+            return View.FOCUS_FORWARD;
+        case 2:
+            return View.FOCUS_BACKWARD;
+        case 3:
+            return View.FOCUS_UP;
+        case 4:
+            return View.FOCUS_DOWN;
+        case 5:
+            return View.FOCUS_LEFT;
+        case 6:
+            return View.FOCUS_RIGHT;
+        }
+        return 0;
     }
 
     /**
@@ -1311,11 +1365,11 @@ public final class WebViewCore {
                             break;
 
                         case KEY_DOWN:
-                            key((KeyEvent) msg.obj, true);
+                            key((KeyEvent) msg.obj, msg.arg1, true);
                             break;
 
                         case KEY_UP:
-                            key((KeyEvent) msg.obj, false);
+                            key((KeyEvent) msg.obj, msg.arg1, false);
                             break;
 
                         case KEY_PRESS:
@@ -1950,11 +2004,12 @@ public final class WebViewCore {
         return mBrowserFrame.saveWebArchive(filename, autoname);
     }
 
-    private void key(KeyEvent evt, boolean isDown) {
+    private void key(KeyEvent evt, int canTakeFocusDirection, boolean isDown) {
         if (DebugFlags.WEB_VIEW_CORE) {
             Log.v(LOGTAG, "CORE key at " + System.currentTimeMillis() + ", "
                     + evt);
         }
+        mChromeCanFocusDirection = canTakeFocusDirection;
         int keyCode = evt.getKeyCode();
         int unicodeChar = evt.getUnicodeChar();
 
@@ -1964,18 +2019,18 @@ public final class WebViewCore {
             unicodeChar = evt.getCharacters().codePointAt(0);
         }
 
-        if (!nativeKey(mNativeClass, keyCode, unicodeChar, evt.getRepeatCount(),
+        boolean handled = nativeKey(mNativeClass, keyCode, unicodeChar, evt.getRepeatCount(),
                 evt.isShiftPressed(), evt.isAltPressed(),
-                evt.isSymPressed(), isDown) && keyCode != KeyEvent.KEYCODE_ENTER) {
+                evt.isSymPressed(), isDown);
+        mChromeCanFocusDirection = 0;
+        if (!handled && keyCode != KeyEvent.KEYCODE_ENTER) {
             if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                     && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
-                if (DebugFlags.WEB_VIEW_CORE) {
-                    Log.v(LOGTAG, "key: arrow unused by page: " + keyCode);
-                }
-                if (mWebView != null && evt.isDown()) {
-                    Message.obtain(mWebView.mPrivateHandler,
-                            WebViewClassic.UNHANDLED_NAV_KEY, keyCode,
-                            0).sendToTarget();
+                if (canTakeFocusDirection != 0 && isDown) {
+                    Message m = mWebView.mPrivateHandler.obtainMessage(
+                            WebViewClassic.TAKE_FOCUS);
+                    m.arg1 = canTakeFocusDirection;
+                    m.sendToTarget();
                 }
                 return;
             }
