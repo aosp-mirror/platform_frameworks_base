@@ -34,9 +34,9 @@ Fundamentals</a>.  Then explore other topics &mdash; from
 designing a user interface and setting up resources to storing 
 data and using permissions &mdash; as needed.</dd>
 
-<dt><b>Android Market Topics</b></dt>
-<dd>Documentation for topics that concern publishing and monetizing applications on Android
-Market, such as how to enforce licensing policies and implement in-app billing.</dd>
+<dt><b>Google Play Topics</b></dt>
+<dd>Documentation for topics that concern publishing and monetizing applications on Google Play,
+such as how to enforce licensing policies and implement in-app billing.</dd>
 
 <dt><b>Developing</b></dt>
 <dd>Directions for using Android's development and debugging tools, 
