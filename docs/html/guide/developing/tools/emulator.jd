@@ -516,7 +516,7 @@ the keys of your keyboard. </p>
   </tr>
   <tr>
     <td>Audio volume up button</td>
-    <td>KEYPAD_PLUS, Ctrl-5</td>
+    <td>KEYPAD_PLUS, Ctrl-F5</td>
   </tr>
 
   <tr>
