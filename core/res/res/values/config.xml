@@ -308,6 +308,9 @@
     <!-- If this is true, the screen will fade off. -->
     <bool name="config_animateScreenLights">true</bool>
 
+    <!-- If this is true, key chords can be used to take a screenshot on the device. -->
+    <bool name="config_enableScreenshotChord">true</bool>
+
     <!-- If true, the screen can be rotated via the accelerometer in all 4
          rotations as the default behavior. -->
     <bool name="config_allowAllRotations">false</bool>
