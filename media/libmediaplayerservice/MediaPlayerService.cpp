@@ -325,7 +325,7 @@ status_t MediaPlayerService::AudioOutput::dump(int fd, const Vector<String16>& a
             mStreamType, mLeftVolume, mRightVolume);
     result.append(buffer);
     snprintf(buffer, 255, "  msec per frame(%f), latency (%d)\n",
-            mMsecsPerFrame, mLatency);
+            mMsecsPerFrame, (mTrack != 0) ? mTrack->latency() : -1);
     result.append(buffer);
     snprintf(buffer, 255, "  aux effect id(%d), send level (%f)\n",
             mAuxEffectId, mSendLevel);
@@ -1384,7 +1384,6 @@ MediaPlayerService::AudioOutput::AudioOutput(int sessionId)
     mRightVolume = 1.0;
     mPlaybackRatePermille = 1000;
     mSampleRateHz = 0;
-    mLatency = 0;
     mMsecsPerFrame = 0;
     mAuxEffectId = 0;
     mSendLevel = 0.0;
@@ -1443,7 +1442,8 @@ ssize_t MediaPlayerService::AudioOutput::frameSize() const
 
 uint32_t MediaPlayerService::AudioOutput::latency () const
 {
-    return mLatency;
+    if (mTrack == 0) return 0;
+    return mTrack->latency();
 }
 
 float MediaPlayerService::AudioOutput::msecsPerFrame() const
@@ -1523,7 +1523,6 @@ status_t MediaPlayerService::AudioOutput::open(
 
     mSampleRateHz = sampleRate;
     mMsecsPerFrame = mPlaybackRatePermille / (float) sampleRate;
-    mLatency = t->latency();
     mTrack = t;
 
     status_t res = t->setSampleRate(mPlaybackRatePermille * mSampleRateHz / 1000);

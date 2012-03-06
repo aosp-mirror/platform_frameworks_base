@@ -118,7 +118,6 @@ class MediaPlayerService : public BnMediaPlayerService
         int32_t                 mPlaybackRatePermille;
         uint32_t                mSampleRateHz; // sample rate of the content, as set in open()
         float                   mMsecsPerFrame;
-        uint32_t                mLatency;
         int                     mSessionId;
         float                   mSendLevel;
         int                     mAuxEffectId;
