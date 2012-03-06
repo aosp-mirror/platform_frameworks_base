@@ -32,7 +32,6 @@
 #include <sys/errno.h>
 #include <sys/resource.h>
 #include <sys/types.h>
-#include <cutils/sched_policy.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <grp.h>
