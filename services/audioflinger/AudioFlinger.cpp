@@ -1993,11 +1993,7 @@ void AudioFlinger::PlaybackThread::checkSilentMode_l()
 
 bool AudioFlinger::PlaybackThread::threadLoop()
 {
-    // MIXER || DUPLICATING
     Vector< sp<Track> > tracksToRemove;
-
-    // DIRECT
-    sp<Track> trackToRemove;
 
     standbyTime = systemTime();
     mixBufferSize = mFrameCount * mFrameSize;
@@ -2142,17 +2138,11 @@ if (mType == MIXER) {
                 }
             }
 
-// FIXME merge these
-if (mType == MIXER || mType == DUPLICATING) {
             mixerStatus = prepareTracks_l(&tracksToRemove);
-}
-if (mType == DIRECT) {
-            mixerStatus = threadLoop_prepareTracks_l(trackToRemove);
             // see FIXME in AudioFlinger.h
             if (mixerStatus == MIXER_CONTINUE) {
                 continue;
             }
-}
 
             // prevent any changes in effect chain list and in each effect chain
             // during mixing and effect process as the audio buffers could be deleted
@@ -2224,17 +2214,13 @@ if (mType == MIXER) {
         // finally let go of removed track(s), without the lock held
         // since we can't guarantee the destructors won't acquire that
         // same lock.
+        tracksToRemove.clear();
 
 // FIXME merge these
-if (mType == MIXER) {
-        tracksToRemove.clear();
-}
 if (mType == DIRECT) {
-        trackToRemove.clear();
         activeTrack.clear();
 }
 if (mType == DUPLICATING) {
-        tracksToRemove.clear();
         outputTracks.clear();
 }
 
@@ -2852,10 +2838,12 @@ void AudioFlinger::DirectOutputThread::applyVolume()
     mRightVolShort = rightVol;
 }
 
-AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::threadLoop_prepareTracks_l(
-    sp<Track>& trackToRemove
+AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::prepareTracks_l(
+    Vector< sp<Track> > *tracksToRemove
 )
 {
+    sp<Track> trackToRemove;
+
     // FIXME Temporarily renamed to avoid confusion with the member "mixerStatus"
     mixer_state mixerStatus_ = MIXER_IDLE;
 
@@ -2973,8 +2961,10 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::thre
         }
     }
 
+    // FIXME merge this with similar code for removing multiple tracks
     // remove all the tracks that need to be...
     if (CC_UNLIKELY(trackToRemove != 0)) {
+        tracksToRemove->add(trackToRemove);
         mActiveTracks.remove(trackToRemove);
         if (!mEffectChains.isEmpty()) {
             ALOGV("stopping track on chain %p for session Id: %d", effectChains[0].get(),

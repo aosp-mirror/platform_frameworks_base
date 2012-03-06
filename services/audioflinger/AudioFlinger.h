@@ -584,7 +584,7 @@ private:
             // standby mode does not have an enum value
             // suspend by audio policy manager is orthogonal to mixer state
 #if 1
-            // FIXME remove these hacks for threadLoop_prepareTracks_l
+            // FIXME remove this hack for prepareTracks_l()
             , MIXER_CONTINUE        // "continue;"
 #endif
         };
@@ -817,12 +817,11 @@ protected:
         // Non-trivial for DIRECT only
         virtual     void        applyVolume() { }
 
-        // FIXME merge these
-        // Non-trivial for MIXER and DUPLICATING only
-        virtual     mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove) { return MIXER_IDLE; }
-        // Non-trivial for DIRECT only
-        virtual     mixer_state threadLoop_prepareTracks_l(sp<Track>& trackToRemove)
-                                                                { return MIXER_IDLE; }
+                    // prepareTracks_l reads and writes mActiveTracks, and also returns the
+                    // pending set of tracks to remove via Vector 'tracksToRemove'.  The caller is
+                    // responsible for clearing or destroying this Vector later on, when it
+                    // is safe to do so. That will drop the final ref count and destroy the tracks.
+        virtual     mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove) = 0;
 
 public:
 
@@ -970,10 +969,6 @@ public:
         virtual     status_t    dumpInternals(int fd, const Vector<String16>& args);
 
     protected:
-                    // prepareTracks_l reads and writes mActiveTracks, and also returns the
-                    // pending set of tracks to remove via Vector 'tracksToRemove'.  The caller is
-                    // responsible for clearing or destroying this Vector later on, when it
-                    // is safe to do so. That will drop the final ref count and destroy the tracks.
         virtual     mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove);
         virtual     int         getTrackName_l();
         virtual     void        deleteTrackName_l(int name);
@@ -1006,7 +1001,7 @@ public:
         virtual     uint32_t    suspendSleepTimeUs();
 
         // threadLoop snippets
-        virtual     mixer_state threadLoop_prepareTracks_l(sp<Track>& trackToRemove);
+        virtual     mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove);
         virtual     void        threadLoop_mix();
         virtual     void        threadLoop_sleepTime();
         virtual     void        applyVolume();
