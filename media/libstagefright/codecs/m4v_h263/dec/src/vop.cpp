@@ -1041,7 +1041,7 @@ PV_STATUS DecodeShortHeader(VideoDecData *video, Vop *currVop)
     /* Marker Bit */
     if (!BitstreamRead1Bits(stream))
     {
-        mp4dec_log("DecodeShortHeader(): Market bit wrong.\n");
+        mp4dec_log("DecodeShortHeader(): Marker bit wrong.\n");
         status = PV_FAIL;
         goto return_point;
     }

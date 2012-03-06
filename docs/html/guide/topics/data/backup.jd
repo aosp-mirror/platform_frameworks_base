@@ -900,8 +900,8 @@ href="{@docRoot}guide/developing/tools/bmgr.html">{@code bmgr}</a>.</p>
   <li>Install your application on a suitable Android system image
     <ul>
       <li>If using the emulator, create and use an AVD with Android 2.2 (API Level 8).</li>
-      <li>If using a device, the device must be running Android 2.2 or greater and have Android
-Market built in.</li>
+      <li>If using a device, the device must be running Android 2.2 or greater and have Google
+Play built in.</li>
     </ul>
   </li>
   <li>Ensure that backup is enabled

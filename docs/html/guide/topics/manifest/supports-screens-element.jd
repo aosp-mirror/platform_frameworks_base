@@ -80,7 +80,7 @@ should not use it.</p>
      A small screen is defined as one with a smaller aspect ratio than
      the "normal" (traditional HVGA) screen.  An application that does
      not support small screens <em>will not be available</em> for
-     small screen devices from external services (such as Android Market), because there is little
+     small screen devices from external services (such as Google Play), because there is little
 the platform can do to make such an application work on a smaller screen. This is {@code "true"} by
 default.
   </dd>
@@ -156,8 +156,8 @@ smallest screen width qualifier</a> ({@code sw&lt;N&gt;dp}).</p>
 
   <p class="caution"><strong>Caution:</strong> The Android system does not pay attention to this
 attribute, so it does not affect how your application behaves at runtime. Instead, it is used
-to enable filtering for your application on services such as Android Market. However,
-<strong>Android Market currently does not support this attribute for filtering</strong> (on Android
+to enable filtering for your application on services such as Google Play. However,
+<strong>Google Play currently does not support this attribute for filtering</strong> (on Android
 3.2), so you should continue using the other size attributes if your application does not support
 small screens.</p>
 

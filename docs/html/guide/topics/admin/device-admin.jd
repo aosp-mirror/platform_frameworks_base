@@ -75,8 +75,8 @@ server. </li>
 not currently have an automated provisioning solution. Some of the ways a sysadmin might
 distribute the application to users are as follows:
 <ul>
-<li>Android Market.</li>
-<li>Enabling non-market installation.</li>
+<li>Google Play.</li>
+<li>Enabling installation from another store.</li>
 <li>Distributing the application through other means, such as email or websites.</li>
 
 </ul>

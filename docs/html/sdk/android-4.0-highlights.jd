@@ -529,7 +529,7 @@ use &mdash; there’s no menu to open, application to launch, or pairing needed.
 Just touch one Android-powered phone to another, then tap to send.</p>
 
 <p>For sharing apps, Android Beam pushes a link to the app's details page in
-Android Market. On the other device, the Market app launches and loads the
+Google Play. On the other device, the Google Play client app launches and loads the
 details page, for easy downloading of the app. Individual apps can build on
 Android Beam to add other types of interactions, such as passing game scores,
 initiating a multiplayer game or chat, and more.</p>
@@ -715,7 +715,7 @@ data over Bluetooth, without the need for user-visible pairing.</p>
 
 <p>Even if developers do not add custom interactions based on Android Beam they
 can still benefit from it being deeply integrated into Android. By default the
-system shares the app’s Android Market URL, so it’s easy for the user to
+system shares the app’s Google Play URL, so it’s easy for the user to
 download or purchase the app right away.</p>
 
 

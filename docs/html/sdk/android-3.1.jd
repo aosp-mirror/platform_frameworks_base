@@ -214,7 +214,7 @@ for USB host and open accessory modes on specific devices is determined by
 their manufacturers. In particular, host mode relies on appropriate USB
 controller hardware in the Android-powered device. </p>
 
-<p>Additionally, developers can request filtering on Android Market, such that
+<p>Additionally, developers can request filtering on Google Play, such that
 their applications are not availabe to users whose devices do not provide the
 appropriate USB support. To request filtering, add one or both of the elements
 below to the application manifest, as appropriate: </p>
@@ -908,8 +908,8 @@ desktop).</li>
 <h3 id="features">New feature constants</h3>
 
 <p>The platform adds new hardware feature constants that developers can declare
-in their application manifests, to inform external entities such as Android
-Market of the application's requirement for new hardware capabilities supported
+in their application manifests, to inform external entities such as Google
+Play of the application's requirement for new hardware capabilities supported
 in this version of the platform. Developers declare these and other feature
 constants in <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
@@ -926,11 +926,11 @@ to communicate with external hardware devices connected over USB and function as
 devices.</li>
 </ul>
 
-<p>Android Market filters applications based on features declared in <a
+<p>Google Play filters applications based on features declared in <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
 &lt;uses-feature&gt;}</a> manifest elements. For more information about
 declaring features in an application manifest, read <a
-href="{@docRoot}guide/appendix/market-filters.html">Android Market
+href="{@docRoot}guide/appendix/market-filters.html">Google Play
 Filters</a>.</p>
 
 

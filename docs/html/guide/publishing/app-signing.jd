@@ -82,7 +82,7 @@ run it or debug it on an emulator or device.</p>
 use to build your application. There are two build modes: <em>debug mode</em> and <em>release
 mode</em>. You use debug mode when you are developing and testing your application. You use
 release mode when you want to build a release version of your application that you can
-distribute directly to users or publish on an application marketplace such as Android Market.</p>
+distribute directly to users or publish on an application marketplace such as Google Play.</p>
 
 <p>When you build in <em>debug mode</em> the Android SDK build tools use the Keytool utility
 (included in the JDK) to create a debug key. Because the SDK build tools created the debug key,
@@ -158,10 +158,10 @@ you should ensure that your key's validity period exceeds the expected
 lifespan of <em>all versions of all of the applications</em>, including
 dependent applications that may be added to the suite in the future. </li>
 
-<li>If you plan to publish your application(s) on Android Market, the
+<li>If you plan to publish your application(s) on Google Play, the
 key you use to sign the application(s) must have a validity period
-ending after 22 October 2033. The Market server enforces this requirement
-to ensure that users can seamlessly upgrade Market applications when
+ending after 22 October 2033. Google Play enforces this requirement
+to ensure that users can seamlessly upgrade applications when
 new versions are available. </li>
 </ul>
 
@@ -292,7 +292,7 @@ key is one that:</p>
 with the application</li>
 <li>Has a validity period that exceeds the expected lifespan of the application
 or application suite. A validity period of more than 25 years is recommended.
-<p>If you plan to publish your application(s) on Android Market, note that a
+<p>If you plan to publish your application(s) on Google Play, note that a
 validity period ending after 22 October 2033 is a requirement. You can not upload an
 application if it is signed with a key whose validity expires before that date.
 </p></li>

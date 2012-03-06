@@ -82,7 +82,7 @@ and Interfaces</a>.</p>
 
 <h2 id="manifest-permission">Adding the Licensing Permission</h2>
 
-<p>To use the Android Market application for sending a license check to the
+<p>To use the Google Play application for sending a license check to the
 server, your application must request the proper permission,
 <code>com.android.vending.CHECK_LICENSE</code>. If your application does
 not declare the licensing permission but attempts to initiate a license check,
@@ -101,7 +101,7 @@ android:name="com.android.vending.CHECK_LICENSE"&gt;</code></p>
 <pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android" ..."&gt;
-    &lt;!-- Devices &gt;= 3 have version of Android Market that supports licensing. --&gt;
+    &lt;!-- Devices &gt;= 3 have version of Google Play that supports licensing. --&gt;
     &lt;uses-sdk android:minSdkVersion="3" /&gt;
     &lt;!-- Required permission to check licensing. --&gt;
     &lt;uses-permission android:name="com.android.vending.CHECK_LICENSE" /&gt;
@@ -123,7 +123,7 @@ application's manifest. </p>
 <h2>ServerManagedPolicy</h2>
 
 <p>The LVL includes a complete {@code Policy} implementation called ServerManagedPolicy
-that makes use of license-management settings provided by the Android Market
+that makes use of license-management settings provided by the Google Play
 server. </p>
 
 <p style="margin-top:.5em;">Use of ServerManagedPolicy as the basis for your
@@ -133,7 +133,7 @@ href="#ServerManagedPolicy">ServerManagedPolicy</a> section, below.</p>
 </div>
 </div>
 
-<p>Android Market licensing service does not itself determine whether a
+<p>Google Play licensing service does not itself determine whether a
 given user with a given license should be granted access to your application.
 Rather, that responsibility is left to a {@code Policy} implementation that you provide
 in your application.</p>
@@ -227,7 +227,7 @@ extra is highly recommended. See <a
 href="{@docRoot}guide/market/licensing/licensing-reference.html#extras">Server Response Extras</a>
 for more information.</li>
 <li>Uses an exponential backoff period, if retrying any requests the result in
-errors. Note that the Android Market client automatically retries failed
+errors. Note that the Google Play client automatically retries failed
 requests, so in most cases there is no need for your {@code Policy} to retry them.</li>
 <li>Provides for a "grace period" that allows the user to access your
 application for a limited time or number of uses, while a license check is being
@@ -286,7 +286,7 @@ responses.</p>
 <p>Importantly, a key feature of ServerMangedPolicy is its use of
 server-provided settings as the basis for managing licensing across an
 application's refund period and through varying network and error conditions.
-When an application contacts the Android Market server for a license check, the
+When an application contacts the Google Play server for a license check, the
 server appends several settings as key-value pairs in the extras field of certain
 license response types. For example, the server provides recommended values for the
 application's license validity period, retry grace period, and maximum allowable
@@ -298,7 +298,7 @@ href="{@docRoot}guide/market/licensing/licensing-reference.html#extras">Server R
 Extras</a>.</p>
 
 <p>For convenience, best performance, and the benefit of using license settings
-from the Android Market server, <strong>using ServerManagedPolicy as your
+from the Google Play server, <strong>using ServerManagedPolicy as your
 licensing {@code Policy} is strongly recommended</strong>. </p>
 
 <p>If you are concerned about the security of license response data that is
@@ -446,7 +446,7 @@ the device IMEI or related data, the application will also need to request the
 
 <p>Before requesting new permissions for the <em>sole purpose</em> of acquiring
 device-specific information for use in your {@code Obfuscator}, consider
-how doing so might affect your application or its filtering on Android Market
+how doing so might affect your application or its filtering on Google Play
 (since some permissions can cause the SDK build tools to add
 the associated <code>&lt;uses-feature&gt;</code>).</p>
 
@@ -647,11 +647,11 @@ have determined the exact behaviors you want, you can add more complex handling.
 <li>Display a "Try again" dialog to the user, including a button to initiate a
 new license check if the <code>reason</code> supplied is {@code Policy.RETRY}. </li>
 <li>Display a "Purchase this application" dialog, including a button that
-deep-links the user to the application's details page on Market, from which the
+deep-links the user to the application's details page on Google Play, from which the
 use can purchase the application. For more information on how to set up such
 links, see <a
-href="{@docRoot}guide/publishing/publishing.html#marketintent">Using Intents to
-Launch the Market Application on a Device</a>. </li>
+href="{@docRoot}guide/publishing/publishing.html#marketintent">Linking to your apps
+on Google Play</a>. </li>
 <li>Display a Toast notification that indicates that the features of the
 application are limited because it is not licensed. </li>
 </ul>
@@ -688,7 +688,7 @@ private class MyLicenseCheckerCallback implements LicenseCheckerCallback {
             // Your response should always inform the user that the application
             // is not licensed, but your behavior at that point can vary. You might
             // provide the user a limited access version of your app or you can
-            // take them to Android Market to purchase the app.
+            // take them to Google Play to purchase the app.
             showDialog(DIALOG_GOTOMARKET);
         }
     }
@@ -707,16 +707,16 @@ method should log the error code and call <code>dontAllow()</code>.</p>
 <h3 id="thread-handler">Create a Handler for posting from LicenseCheckerCallback
 to the UI thread</h3>
 
-<p>During a license check, the LVL passes the request to the Android Market
+<p>During a license check, the LVL passes the request to the Google Play
 application, which handles communication with the licensing server. The LVL
 passes the request over asynchronous IPC (using {@link android.os.Binder}) so
 the actual processing and network communication do not take place on a thread
-managed by your application. Similarly, when the Android Market application
+managed by your application. Similarly, when the Google Play application
 receives the result, it invokes a  callback method over IPC, which in turn
 executes in an IPC thread pool in your application's process.</p>
 
 <p>The {@code LicenseChecker} class manages your application's IPC communication with
-the Android Market application, including the call that sends the request and
+the Google Play application, including the call that sends the request and
 the callback that receives the response. {@code LicenseChecker} also tracks open license
 requests and manages their timeouts. </p>
 
@@ -858,14 +858,14 @@ sample application calls <code>checkAccess()</code> from a
 
 <h3 id="account-key">Embed your public key for licensing</h3>
 
-<p>For each publisher account, the Android Market service automatically
+<p>For each publisher account, the Google Play service automatically
 generates a  2048-bit RSA public/private key pair that is used exclusively for
 licensing. The key pair is uniquely associated with the publisher account and is
 shared across all applications that are published through the account. Although
 associated with a publisher account, the key pair is <em>not</em> the same as
 the key that you use to sign your applications (or derived from it).</p>
 
-<p>The Android Market publisher site exposes the public key for licensing to any
+<p>The Google Play publisher site exposes the public key for licensing to any
 developer signed in to the publisher account, but it keeps the private key
 hidden from all users in a secure location. When an application requests a
 license check for an application published in your account, the licensing server
@@ -878,8 +878,8 @@ public key for licensing and copy it into your application. Here's how to find
 your account's public key for licensing:</p>
 
 <ol>
-<li>Go to the Android Market <a
-href="http://market.android.com/publish">publisher site</a> and sign in.
+<li>Go to the Google Play <a
+href="http://play.google.com/apps/publish">publisher site</a> and sign in.
 Make sure that you sign in to the account from which the application you are
 licensing is published (or will be published). </li>
 <li>In the account home page, locate the "Edit profile" link and click it. </li>
@@ -907,7 +907,7 @@ to close IPC connections</h3>
 {@link android.content.Context} changes, add a call to the {@code LicenseChecker}'s
 <code>onDestroy()</code> method from your Activity's
 {@link android.app.Activity#onDestroy()} implementation. The call causes the
-{@code LicenseChecker} to properly close any open IPC connection to the Android Market
+{@code LicenseChecker} to properly close any open IPC connection to the Google Play
 application's ILicensingService and removes any local references to the service
 and handler.</p>
 
@@ -992,13 +992,13 @@ and then recompile it.</p>
 <p>Several obfuscator programs are available for Android applications, including
 <a href="http://proguard.sourceforge.net/">ProGuard</a>, which also offers
 code-optimization features. The use of ProGuard or a similar program to obfuscate
-your code is <em>strongly recommended</em> for all applications that use Android
-Market Licensing. </p>
+your code is <em>strongly recommended</em> for all applications that use Google
+Play Licensing. </p>
 
 <h2 id="app-publishing">Publishing a Licensed Application</h2>
 
 <p>When you are finished testing your license implementation, you are ready to
-publish the application on Android Market. Follow the normal steps to <a
+publish the application on Google Play. Follow the normal steps to <a
 href="{@docRoot}guide/publishing/preparing.html">prepare</a>, <a
 href="{@docRoot}guide/publishing/app-signing.html">sign</a>, and then <a
 href="{@docRoot}guide/publishing/publishing.html">publish the application</a>.
@@ -1021,7 +1021,7 @@ table below. By directing your queries to the correct forum, you can get the
 support you need more quickly. </p>
 
 <p class="table-caption"><strong>Table 2.</strong> Developer support resources
-for Android Market Licensing Service.</p>
+for Google Play Licensing Service.</p>
 
 <table>
 
@@ -1045,8 +1045,8 @@ href="http://stackoverflow.com/questions/tagged/android">http://stackoverflow.co
 </tr>
 <tr>
 <td rowspan="2">Accounts, publishing, and deployment issues</td>
-<td><a href="http://www.google.com/support/forum/p/Android+Market">Android
-Market Help Forum</a></td>
+<td><a href="http://www.google.com/support/forum/p/Android+Market">Google Play
+Help Forum</a></td>
 <td rowspan="2">Publisher accounts, licensing key pair, test accounts, server
 responses, test responses, application deployment and results</td>
 </tr>

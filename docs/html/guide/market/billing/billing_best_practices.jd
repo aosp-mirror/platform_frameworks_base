@@ -32,7 +32,7 @@ parent.link=index.html
 
 <p>As you design your in-app billing implementation, be sure to follow the security and design
 guidelines that are discussed in this document. These guidelines are recommended best practices for
-anyone who is using Android Market's in-app billing service.</p>
+anyone who is using Google Play's in-app billing service.</p>
 
 <h2>Security Best Practices</h2>
 
@@ -92,7 +92,7 @@ replay attacks.</p>
 nonces on the server.</p>
 
 <h4>Take action against trademark and copyright infringement</h4>
-<p>If you see your content being redistributed on Android Market, act quickly and decisively. File a
+<p>If you see your content being redistributed on Google Play, act quickly and decisively. File a
 <a href="http://market.android.com/support/bin/answer.py?hl=en&amp;answer=141511">trademark notice
 of infringement</a> or a <a href="http://www.google.com/android_dmca.html">copyright notice of
 infringement</a>.</p>
@@ -102,7 +102,7 @@ infringement</a>.</p>
 purchase state of the unlocked content whenever a user accesses the content. This allows you to
 revoke use when necessary and minimize piracy.</p>
 
-<h4>Protect your Android Market public key</h4>
+<h4>Protect your Google Play public key</h4>
 <p>To keep your public key safe from malicious users and hackers, do not embed it in any code as a
 literal string. Instead, construct the string at runtime from pieces or use bit manipulation (for
 example, XOR with some other string) to hide the actual key. The key itself is not secret

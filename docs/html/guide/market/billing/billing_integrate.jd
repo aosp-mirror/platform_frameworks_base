@@ -35,8 +35,8 @@ parent.link=index.html
 </div>
 </div>
 
-<p>Android Market In-app Billing provides a straightforward, simple interface for sending in-app
-billing requests and managing in-app billing transactions using Android Market. This document helps
+<p>In-app Billing on Google Play provides a straightforward, simple interface for sending in-app
+billing requests and managing in-app billing transactions using Google Play. This document helps
 you implement in-app billing by stepping through the primary implementation tasks, using the in-app
 billing sample application as an example.</p>
 
@@ -53,23 +53,23 @@ billing.</p>
   <li><a href="#billing-permission">Update your AndroidManifest.xml file</a>.</li>
   <li><a href="#billing-service">Create a Service</a> and bind it to the
   <code>MarketBillingService</code> so your application can send billing requests and receive
-  billing responses from the Android Market application.</li>
+  billing responses from Google Play.</li>
   <li><a href="#billing-broadcast-receiver">Create a BroadcastReceiver</a> to handle broadcast
-  intents from the Android Market application.</li>
+  intents from Google Play.</li>
   <li><a href="#billing-signatures">Create a security processing component</a> to verify the
-  integrity of the transaction messages that are sent by Android Market .</li>
+  integrity of the transaction messages that are sent by Google Play.</li>
   <li><a href="#billing-implement">Modify your application code</a> to support in-app billing.</li>
 </ol>
 
 <h2 id="billing-download">Downloading the Sample Application</h2>
 
 <p>The in-app billing sample application shows you how to perform several tasks that are common to
-all Android Market in-app billing implementations, including:</p>
+all in-app billing implementations, including:</p>
 
 <ul>
-  <li>Sending in-app billing requests to the Android Market application.</li>
-  <li>Handling synchronous responses from the Android Market application.</li>
-  <li>Handling broadcast intents (asynchronous responses) from the Android Market application.</li>
+  <li>Sending in-app billing requests to Google Play.</li>
+  <li>Handling synchronous responses from Google Play.</li>
+  <li>Handling broadcast intents (asynchronous responses) from Google Play.</li>
   <li>Using in-app billing security mechanisms to verify the integrity of billing responses.</li>
   <li>Creating a user interface that lets users select items for purchase.</li>
 </ul>
@@ -109,12 +109,12 @@ history.</td>
 <tr>
   <td>BillingReceiver.java</td>
   <td>A {@link android.content.BroadcastReceiver} that receives asynchronous response messages
-  (broadcast intents) from Android Market. Forwards all messages to the
+  (broadcast intents) from Google Play. Forwards all messages to the
   <code>BillingService</code>.</td>
 </tr>
 <tr>
   <td>BillingService.java</td>
-  <td>A {@link android.app.Service} that sends messages to Android Market on behalf of the
+  <td>A {@link android.app.Service} that sends messages to Google Play on behalf of the
   application by connecting (binding) to the <code>MarketBillingService</code>.</td>
 </tr>
 
@@ -136,8 +136,8 @@ history.</td>
 
 <tr>
 <td>Consts.java</td>
-<td>Defines various Android Market constants and sample application constants. All constants that
-are defined by Android Market must be defined the same way in your application.</td>
+<td>Defines various Google Play constants and sample application constants. All constants that
+are defined by Google Play must be defined the same way in your application.</td>
 </tr>
 
 <tr>
@@ -171,7 +171,7 @@ running the sample application involves three tasks:</p>
 
 <ul>
   <li>Configuring and building the sample application.</li>
-  <li>Uploading the sample application to Android Market.</li>
+  <li>Uploading the sample application to Google Play.</li>
   <li>Setting up test accounts and running the sample application.</li>
 </ul>
 
@@ -186,12 +186,12 @@ your project</a>.</p>
 following:</p>
 
 <ol>
-  <li><strong>Add your Android Market public key to the sample application code.</strong>
+  <li><strong>Add your Google Play public key to the sample application code.</strong>
     <p>This enables the application to verify the signature of the transaction information that is
-    returned from Android Market. To add your public key to the sample application code, do the
+    returned from Google Play. To add your public key to the sample application code, do the
     following:</p>
     <ol>
-      <li>Log in to your Android Market <a href="http://market.android.com/publish">publisher
+      <li>Log in to your Google Play <a href="http://play.google.com/apps/publish">publisher
       account</a>.</li>
       <li>On the upper left part of the page, under your name, click <strong>Edit
       Profile</strong>.</li>
@@ -208,7 +208,7 @@ following:</p>
     </ol>
   </li>
   <li><strong>Change the package name of the sample application.</strong>
-    <p>The current package name is <code>com.example.dungeons</code>. Android Market does not let
+    <p>The current package name is <code>com.example.dungeons</code>. Google Play does not let
     you upload applications with package names that contain <code>com.example</code>, so you must
     change the package name to something else.</p>
   </li>
@@ -221,14 +221,14 @@ following:</p>
 <h3>Uploading the sample application</h3>
 
 <p>After you build a release version of the sample application and sign it, you need to upload it as
-a draft to the Android Market publisher site. You also need to create a product list for the in-app
+a draft to the Google Play publisher site. You also need to create a product list for the in-app
 items that are available for purchase in the sample application. The following instructions show you
 how to do this.</p>
 <ol>
-  <li><strong>Upload the release version of the sample application to Android Market.</strong>
+  <li><strong>Upload the release version of the sample application to Google Play.</strong>
     <p>Do not publish the sample application; leave it as an unpublished draft application. The
     sample application is for demonstration purposes only and should not be made publicly available
-    on Android Market. To learn how to upload an application to Android Market, see <a
+    on Google Play. To learn how to upload an application to Google Play, see <a
     href="http://market.android.com/support/bin/answer.py?answer=113469">Uploading
     applications</a>.</p>
   </li>
@@ -253,7 +253,7 @@ how to do this.</p>
 onto a device to run it. To run the sample application, do the following:</p>
 
 <ol>
-  <li><strong>Make sure you have at least one test account registered under your Android Market
+  <li><strong>Make sure you have at least one test account registered under your Google Play
   publisher account.</strong>
     <p>You cannot purchase items from yourself (Google Checkout prohibits this), so you need to
     create at least one test account that you can use to purchase items in the sample application.
@@ -261,18 +261,18 @@ onto a device to run it. To run the sample application, do the following:</p>
     href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-setup">Setting up Test
     Accounts</a>.</p>
   </li>
-  <li><strong>Verify that your device is running a supported version of the Android Market
+  <li><strong>Verify that your device is running a supported version of the Google Play
   application or the MyApps application.</strong>
     <p>If your device is running Android 3.0, in-app billing requires version 5.0.12 (or higher) of
     the MyApps application. If your device is running any other version of Android, in-app billing
-    requires version 2.3.4 (or higher) of the Android Market application. To learn how to check the
-    version of the Android Market application, see <a
-    href="http://market.android.com/support/bin/answer.py?answer=190860">Updating Android
-    Market</a>.</p>
+    requires version 2.3.4 (or higher) of the Google Play application. To learn how to check the
+    version of the Google Play application, see <a
+    href="http://market.android.com/support/bin/answer.py?answer=190860">Updating Google
+    Play</a>.</p>
   </li>
   <li><strong>Install the application onto your device.</strong>
-    <p>Even though you uploaded the application to Android Market, the application is not published,
-    so you cannot download it from Android Market to a device. Instead, you must install the
+    <p>Even though you uploaded the application to Google Play, the application is not published,
+    so you cannot download it from Google Play to a device. Instead, you must install the
     application onto your device. To learn how to install an application onto a device, see <a
     href="{@docRoot}guide/developing/building/building-cmdline.html#RunningOnDevice">Running on a
     device</a>.</p>
@@ -280,7 +280,7 @@ onto a device to run it. To run the sample application, do the following:</p>
  <li><strong>Make one of your test accounts the primary account on your device.</strong>
     <p>The primary account on your device must be one of the <a
     href="{@docRoot}guide/market/billing/billing_admin.html#billing-testing-setup">test accounts</a>
-    that you registered on the Android Market site. If the primary account on your device is not a
+    that you registered on the Google Play publisher site. If the primary account on your device is not a
     test account, you must do a factory reset of the device and then sign in with one of your test
     accounts. To perform a factory reset, do the following:</p>
     <ol>
@@ -306,7 +306,7 @@ to <code>true</code> in the <code>Consts.java</code> file.</p>
 <h2 id="billing-add-aidl">Adding the AIDL file to your project</h2>
 
 <p>The sample application contains an Android Interface Definition Language (AIDL) file,  which
-defines the interface to Android Market's in-app billing service
+defines the interface to Google Play's in-app billing service
 (<code>MarketBillingService</code>). When you add this file to your project, the Android build
 environment creates an interface file (<code>IMarketBillingService.java</code>). You can then use
 this interface to make billing requests by invoking IPC method calls.</p>
@@ -333,29 +333,29 @@ the <code>gen</code> folder of your project.</p>
 
 <h2 id="billing-permission">Updating Your Application's Manifest</h2>
 
-<p>In-app billing relies on the Android Market application, which handles all communication between
-your application and the Android Market server. To use the Android Market application, your
+<p>In-app billing relies on the Google Play application, which handles all communication between
+your application and the Google Play server. To use the Google Play application, your
 application must request the proper permission. You can do this by adding the
 <code>com.android.vending.BILLING</code> permission to your AndroidManifest.xml file. If your
 application does not declare the in-app billing permission, but attempts to send billing requests,
-Android Market will refuse the requests and respond with a <code>RESULT_DEVELOPER_ERROR</code>
+Google Play will refuse the requests and respond with a <code>RESULT_DEVELOPER_ERROR</code>
 response code.</p>
 
 <p>In addition to the billing permission, you need to declare the {@link
 android.content.BroadcastReceiver} that you will use to receive asynchronous response messages
-(broadcast intents) from Android Market, and you need to declare the {@link android.app.Service}
-that you will use to bind with the <code>IMarketBillingService</code> and send messages to Android
-Market. You must also declare <a
+(broadcast intents) from Google Play, and you need to declare the {@link android.app.Service}
+that you will use to bind with the <code>IMarketBillingService</code> and send messages to Google
+Play. You must also declare <a
 href="{@docRoot}guide/topics/manifest/intent-filter-element.html">intent filters</a> for the {@link
 android.content.BroadcastReceiver} so that the Android system knows how to handle the broadcast
-intents that are sent from the Android Market application.</p>
+intents that are sent from the Google Play application.</p>
 
 <p>For example, here is how the in-app billing sample application declares the billing permission,
 the {@link android.content.BroadcastReceiver}, the {@link android.app.Service}, and the intent
 filters. In the sample application, <code>BillingReceiver</code> is the {@link
-android.content.BroadcastReceiver} that handles broadcast intents from the Android Market
+android.content.BroadcastReceiver} that handles broadcast intents from the Google Play
 application and <code>BillingService</code> is the {@link android.app.Service} that sends requests
-to the Android Market application.</p>
+to the Google Play application.</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -391,11 +391,11 @@ to the Android Market application.</p>
 <h2 id="billing-service">Creating a Local Service</h2>
 
 <p>Your application must have a local {@link android.app.Service} to facilitate messaging between
-your application and Android Market. At a minimum, this service must do the following:</p>
+your application and Google Play. At a minimum, this service must do the following:</p>
 
 <ul>
   <li>Bind to the <code>MarketBillingService</code>.
-  <li>Send billing requests (as IPC method calls) to the Android Market application. The five types
+  <li>Send billing requests (as IPC method calls) to the Google Play application. The five types
   of billing requests include:
     <ul>
       <li><code>CHECK_BILLING_SUPPORTED</code> requests</li>
@@ -474,7 +474,7 @@ The five request types are specified using the <code>BILLING_REQUEST</code> Bund
 key can have the following five values:</p>
 
 <ul>
-  <li><code>CHECK_BILLING_SUPPORTED</code>&mdash;verifies that the Android Market application
+  <li><code>CHECK_BILLING_SUPPORTED</code>&mdash;verifies that the Google Play application
   supports in-app billing.</li>
   <li><code>REQUEST_PURCHASE</code>&mdash;sends a purchase request for an in-app item.</li>
   <li><code>GET_PURCHASE_INFORMATION</code>&mdash;retrieves transaction information for a purchase
@@ -510,7 +510,7 @@ application's main thread.</p>
 
 <h4>Verifying that in-app billing is supported (CHECK_BILLING_SUPPPORTED)</h4>
 
-<p>The following code sample shows how to verify whether the Android Market application supports
+<p>The following code sample shows how to verify whether the Google Play application supports
 in-app billing. In the sample, <code>mService</code> is an instance of the
 <code>MarketBillingService</code> interface.</p>
 
@@ -533,7 +533,7 @@ android.os.Bundle} response, which contains only a single key: <code>RESPONSE_CO
   <li><code>RESULT_BILLING_UNAVAILABLE</code>&mdash;in-app billing is not available because the API
   version you specified is not recognized or the user is not eligible to make in-app purchases (for
   example, the user resides in a country that prohibits in-app purchases).</li>
-  <li><code>RESULT_ERROR</code>&mdash;there was an error connecting with the Android Market
+  <li><code>RESULT_ERROR</code>&mdash;there was an error connecting with the Google Play
   application.</li>
   <li><code>RESULT_DEVELOPER_ERROR</code>&mdash;the application is trying to make an in-app billing
   request but the application has not declared the <code>com.android.vending.BILLING</code>
@@ -546,10 +546,10 @@ android.os.Bundle} response, which contains only a single key: <code>RESPONSE_CO
 
 <p>We recommend that you invoke the <code>CHECK_BILLING_SUPPORTED</code> request within a
 <code>RemoteException</code> block. When your code throws a <code>RemoteException</code> it
-indicates that the remote method call failed, which means that the Android Market application is out
+indicates that the remote method call failed, which means that the Google Play application is out
 of date and needs to be updated. In this case, you can provide users with an error message that
 contains a link to the <a
-href="http://market.android.com/support/bin/answer.py?answer=190860">Updating Android Market</a>
+href="http://market.android.com/support/bin/answer.py?answer=190860">Updating Google Play</a>
 Help topic.</p>
 
 <p>The sample application demonstrates how you can handle this error condition (see
@@ -561,16 +561,16 @@ Help topic.</p>
 
 <ul>
   <li>Send the <code>REQUEST_PURCHASE</code> request.</li>
-  <li>Launch the {@link android.app.PendingIntent} that is returned from the Android Market
+  <li>Launch the {@link android.app.PendingIntent} that is returned from the Google Play
   application.</li>
-  <li>Handle the broadcast intents that are sent by the Android Market application.</li>
+  <li>Handle the broadcast intents that are sent by the Google Play application.</li>
 </ul>
 
 <h5>Making the request</h5>
 
 <p>You must specify four keys in the request {@link android.os.Bundle}. The following code sample
 shows how to set these keys and make a purchase request for a single in-app item. In the sample,
-<code>mProductId</code> is the Android Market product ID of an in-app item (which is listed in the
+<code>mProductId</code> is the Google Play product ID of an in-app item (which is listed in the
 application's <a href="{@docRoot}guide/market/billing/billing_admin.html#billing-list-setup">product
 list</a>), and <code>mService</code> is an instance of the <code>MarketBillingService</code>
 interface.</p>
@@ -644,25 +644,25 @@ void startBuyPageActivity(PendingIntent pendingIntent, Intent intent) {
 context and not an application context. Also, you cannot use the <code>singleTop</code> <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">launch mode</a> to launch the
 pending intent. If you do either of these, the Android system will not attach the pending intent to
-your application process. Instead, it will bring Android Market to the foreground, disrupting your
+your application process. Instead, it will bring Google Play to the foreground, disrupting your
 application.</p>
 
 <h5>Handling broadcast intents</h5>
 
 <p>A <code>REQUEST_PURCHASE</code> request also triggers two asynchronous responses (broadcast
-intents). First, the Android Market application sends a <code>RESPONSE_CODE</code> broadcast intent,
+intents). First, the Google Play application sends a <code>RESPONSE_CODE</code> broadcast intent,
 which provides error information about the request. If the request does not generate an
 error, the <code>RESPONSE_CODE</code> broadcast intent returns <code>RESULT_OK</code>, which
 indicates that the request was successfully sent. (To be clear, a <code>RESULT_OK</code> response
 does not indicate that the requested purchase was successful; it indicates that the request was sent
-successfully to Android Market.)</p>
+successfully to Google Play.)</p>
 
 <p>Next, when the requested transaction changes state (for example, the purchase is successfully
-charged to a credit card or the user cancels the purchase), the Android Market application sends an
+charged to a credit card or the user cancels the purchase), the Google Play application sends an
 <code>IN_APP_NOTIFY</code> broadcast intent. This message contains a notification ID, which you can
 use to retrieve the transaction details for the <code>REQUEST_PURCHASE</code> request.</p>
 
-<p class="note"><strong>Note:</strong> The Android Market application also sends
+<p class="note"><strong>Note:</strong> The Google Play application also sends
 an <code>IN_APP_NOTIFY</code> for refunds. For more information, see <a
 href="{@docRoot}guide/market/billing/billing_overview.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a>.</p>
@@ -670,7 +670,7 @@ IN_APP_NOTIFY messages</a>.</p>
 <p>Because the purchase process is not instantaneous and can take several seconds (or more), you
 must assume that a purchase request is pending from the time you receive a <code>RESULT_OK</code>
 message until you receive an <code>IN_APP_NOTIFY</code> message for the transaction. While the
-transaction is pending, the Android Market checkout UI displays an "Authorizing purchase..."
+transaction is pending, the Google Play checkout UI displays an "Authorizing purchase..."
 notification; however, this notification is dismissed after 60 seconds and you should not rely on
 this notification as your primary means of conveying transaction status to users. Instead, we
 recommend that you do the following:</p>
@@ -693,12 +693,12 @@ status of pending and completed in-app purchases.</p>
 be sure that your pending status UI does not block your application. For example, you should avoid
 using a hovering progress wheel to convey the status of a pending transaction because a pending
 transaction could last a long time, particularly if a device loses network connectivity and cannot
-receive transaction updates from Android Market.</p>
+receive transaction updates from Google Play.</p>
 
 <p class="caution"><strong>Important:</strong> If a user purchases a managed item, you must prevent
 the user from purchasing the item again while the original transaction is pending. If a user
-attempts to purchase a managed item twice, and the first transaction is still pending, Android
-Market will display an error to the user; however, Android Market will not send an error to your
+attempts to purchase a managed item twice, and the first transaction is still pending, Google
+Play will display an error to the user; however, Google Play will not send an error to your
 application notifying you that the second purchase request was canceled. This might cause your
 application to get stuck in a pending state while it waits for an <code>IN_APP_NOTIFY</code> message
 for the second purchase request.</p>
@@ -730,7 +730,7 @@ three keys that are required for all requests: <code>BILLING_REQUEST</code>,
 <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. The additional keys are then added to the
 bundle prior to invoking the <code>sendBillingRequest()</code> method. The
 <code>REQUEST_NONCE</code> key contains a cryptographically secure nonce (number used once) that you
-must generate. The Android Market application returns this nonce with the
+must generate. The Google Play application returns this nonce with the
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent so you can verify the integrity of the
 transaction information. The <code>NOTIFY_IDS</code> key contains an array of notification IDs,
 which you received in the <code>IN_APP_NOTIFY</code> broadcast intent.</p>
@@ -741,9 +741,9 @@ you with the status of the request and the <code>REQUEST_ID</code> key provides 
 request identifier for the request.</p>
 
 <p>A <code>GET_PURCHASE_INFORMATION</code> request also triggers two asynchronous responses
-(broadcast intents). First, the Android Market application sends a <code>RESPONSE_CODE</code>
+(broadcast intents). First, the Google Play application sends a <code>RESPONSE_CODE</code>
 broadcast intent, which provides status and error information about the request. Next, if the
-request was successful, the Android Market application sends a <code>PURCHASE_STATE_CHANGED</code>
+request was successful, the Google Play application sends a <code>PURCHASE_STATE_CHANGED</code>
 broadcast intent. This message contains detailed transaction information. The transaction
 information is contained in a signed JSON string (unencrypted). The message includes the signature
 so you can verify the integrity of the signed string.</p>
@@ -783,8 +783,8 @@ request identifier for the request.</p>
 <code>RESPONSE_CODE</code> broadcast intent. This broadcast intent provides status and error
 information about the request.</p>
 
-<p>You must send a confirmation when you receive transaction information from Android Market. If you
-don't send a confirmation message, Android Market will continue sending
+<p>You must send a confirmation when you receive transaction information from Google Play. If you
+don't send a confirmation message, Google Play will continue sending
 <code>IN_APP_NOTIFY</code> messages for the transactions you have not confirmed. Also,
 your application must be able to handle <code>IN_APP_NOTIFY</code> messages that contain multiple
 orders.</p>
@@ -792,7 +792,7 @@ orders.</p>
 <p>In addition, as a best practice, you should not send a <code>CONFIRM_NOTIFICATIONS</code> request
 for a purchased item until you have delivered the item to the user. This way, if your application
 crashes or something else prevents your application from delivering the product, your application
-will still receive an <code>IN_APP_NOTIFY</code> broadcast intent from Android Market indicating
+will still receive an <code>IN_APP_NOTIFY</code> broadcast intent from Google Play indicating
 that you need to deliver the product.</p>
 
 <h4>Restoring transaction information (RESTORE_TRANSACTIONS)</h4>
@@ -817,7 +817,7 @@ three keys that are required for all requests: <code>BILLING_REQUEST</code>,
 <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. The additional <code>REQUEST_NONCE</code>
 key is then added to the bundle prior to invoking the <code>sendBillingRequest()</code> method. The
 <code>REQUEST_NONCE</code> key contains a cryptographically secure nonce (number used once) that you
-must generate. The Android Market application returns this nonce with the transactions information
+must generate. The Google Play application returns this nonce with the transactions information
 contained in the <code>PURCHASE_STATE_CHANGED</code> broadcast intent so you can verify the
 integrity of the transaction information.</p>
 
@@ -827,9 +827,9 @@ you with the status of the request and the <code>REQUEST_ID</code> key provides 
 request identifier for the request.</p>
 
 <p>A <code>RESTORE_TRANSACTIONS</code> request also triggers two asynchronous responses (broadcast
-intents). First, the Android Market application sends a <code>RESPONSE_CODE</code> broadcast intent,
+intents). First, the Google Play application sends a <code>RESPONSE_CODE</code> broadcast intent,
 which provides status and error information about the request. Next, if the request was successful,
-the Android Market application sends a <code>PURCHASE_STATE_CHANGED</code> broadcast intent. This
+the Google Play application sends a <code>PURCHASE_STATE_CHANGED</code> broadcast intent. This
 message contains the detailed transaction information. The transaction information is contained in a
 signed JSON string (unencrypted). The message includes the signature so you can verify the integrity
 of the signed string.</p>
@@ -842,7 +842,7 @@ application has been removed from a device and reinstalled.</p>
 
 <p>You may also want your {@link android.app.Service} to receive intent messages from your {@link
 android.content.BroadcastReceiver}. You can use these intent messages to convey the information that
-was sent asynchronously from the Android Market application to your {@link
+was sent asynchronously from the Google Play application to your {@link
 android.content.BroadcastReceiver}. To see an example of how you can send and receive these intent
 messages, see the <code>BillingReceiver.java</code> and <code>BillingService.java</code> files in
 the sample application. You can use these samples as a basis for your own implementation. However,
@@ -851,16 +851,16 @@ href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and D
 
 <h2 id="billing-broadcast-receiver">Creating a BroadcastReceiver</h2>
 
-<p>The Android Market application uses broadcast intents to send asynchronous billing responses to
+<p>The Google Play application uses broadcast intents to send asynchronous billing responses to
 your application. To receive these intent messages, you need to create a {@link
 android.content.BroadcastReceiver} that can handle the following intents:</p>
 
 <ul>
   <li>com.android.vending.billing.RESPONSE_CODE
-  <p>This broadcast intent contains an Android Market response code, and is sent after you make an
+  <p>This broadcast intent contains a Google Play response code, and is sent after you make an
   in-app billing request. For more information about the response codes that are sent with this
   response, see <a
-  href="{@docRoot}guide/market/billing/billing_reference.html#billing-codes">Android Market Response
+  href="{@docRoot}guide/market/billing/billing_reference.html#billing-codes">Google Play Response
   Codes for In-app Billing</a>.</p>
   </li>
   <li>com.android.vending.billing.IN_APP_NOTIFY
@@ -895,18 +895,18 @@ sent in response to billing requests.</p>
   <td><code>com.android.vending.billing.RESPONSE_CODE</code></td>
   <td><code>request_id</code></td>
   <td>A <code>long</code> representing a request ID. A request ID identifies a specific billing
-  request and is returned by Android Market at the time a request is made.</td>
+  request and is returned by Google Play at the time a request is made.</td>
 </tr>
 <tr>
   <td><code>com.android.vending.billing.RESPONSE_CODE</code></td>
   <td><code>response_code</code></td>
-  <td>An <code>int</code> representing the actual Android Market server response code.</td>
+  <td>An <code>int</code> representing the actual Google Play server response code.</td>
 </tr>
 <tr>
   <td><code>com.android.vending.billing.IN_APP_NOTIFY</code></td>
   <td><code>notification_id</code></td>
   <td>A <code>String</code> representing the notification ID for a given purchase state change.
-  Android Market notifies you when there is a purchase state change and the notification includes a
+  Google Play notifies you when there is a purchase state change and the notification includes a
   unique notification ID. To get the details of the purchase state change, you send the notification
   ID with the <code>GET_PURCHASE_INFORMATION</code> request.</td>
 </tr>
@@ -933,16 +933,16 @@ public class BillingReceiver extends BroadcastReceiver {
 
   private static final String TAG = "BillingReceiver";
 
-  // Intent actions that we receive in the BillingReceiver from Android Market.
-  // These are defined by Android Market and cannot be changed.
+  // Intent actions that we receive in the BillingReceiver from Google Play.
+  // These are defined by Google Play and cannot be changed.
   // The sample application defines these in the Consts.java file.
   public static final String ACTION_NOTIFY = "com.android.vending.billing.IN_APP_NOTIFY";
   public static final String ACTION_RESPONSE_CODE = "com.android.vending.billing.RESPONSE_CODE";
   public static final String ACTION_PURCHASE_STATE_CHANGED =
     "com.android.vending.billing.PURCHASE_STATE_CHANGED";
 
-  // The intent extras that are passed in an intent from Android Market.
-  // These are defined by Android Market and cannot be changed.
+  // The intent extras that are passed in an intent from Google Play.
+  // These are defined by Google Play and cannot be changed.
   // The sample application defines these in the Consts.java file.
   public static final String NOTIFICATION_ID = "notification_id";
   public static final String INAPP_SIGNED_DATA = "inapp_signed_data";
@@ -974,7 +974,7 @@ public class BillingReceiver extends BroadcastReceiver {
 }
 </pre>
 
-<p>In addition to receiving broadcast intents from the Android Market application, your {@link
+<p>In addition to receiving broadcast intents from the Google Play application, your {@link
 android.content.BroadcastReceiver} must handle the information it received in the broadcast intents.
 Usually, your {@link android.content.BroadcastReceiver} does this by sending the information to a
 local service (discussed in the next section). The <code>BillingReceiver.java</code> file in the
@@ -985,8 +985,8 @@ href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and D
 
 <h2 id="billing-signatures">Verifying Signatures and Nonces</h2>
 
-<p>Android Market's in-app billing service uses two mechanisms to help verify the integrity of the
-transaction information you receive from Android Market: nonces and signatures. A nonce (number used
+<p>Google Play's in-app billing service uses two mechanisms to help verify the integrity of the
+transaction information you receive from Google Play: nonces and signatures. A nonce (number used
 once) is a cryptographically secure number that your application generates and sends with every
 <code>GET_PURCHASE_INFORMATION</code> and <code>RESTORE_TRANSACTIONS</code> request. The nonce is
 returned with the <code>PURCHASE_STATE_CHANGED</code> broadcast intent, enabling you to verify that
@@ -1023,12 +1023,12 @@ implementation, be sure to follow the guidelines in <a
 href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a> and
 obfuscate your code.</p>
 
-<p>You will need to use your Android Market public key to perform the signature verification. The
-following procedure shows you how to retrieve Base64-encoded public key from the Android Market
+<p>You will need to use your Google Play public key to perform the signature verification. The
+following procedure shows you how to retrieve Base64-encoded public key from the Google Play
 publisher site.</p>
 
 <ol>
-  <li>Log in to your <a href="http://market.android.com/publish">publisher account</a>.</li>
+  <li>Log in to your <a href="http://play.google.com/apps/publish">publisher account</a>.</li>
   <li>On the upper left part of the page, under your name, click <strong>Edit profile</strong>.</li>
   <li>On the Edit Profile page, scroll down to the Licensing &amp; In-app Billing panel (see figure
   2).</li>
@@ -1080,8 +1080,8 @@ unmanaged items is important because unmanaged items cannot be restored by using
 
 <h3>Creating a user interface for selecting items</h3>
 
-<p>You must provide users with a means for selecting items that they want to purchase. Android
-Market provides the checkout user interface (which is where the user provides a form of payment and
+<p>You must provide users with a means for selecting items that they want to purchase. Google
+Play provides the checkout user interface (which is where the user provides a form of payment and
 approves the purchase), but your application must provide a control (widget) that invokes the
 <code>sendBillingRequest()</code> method when a user selects an item for purchase.</p>
 
