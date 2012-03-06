@@ -26,8 +26,6 @@
 
 #include "include/TimedEventQueue.h"
 
-#include <cutils/sched_policy.h>
-
 #include <sys/prctl.h>
 #include <sys/time.h>
 
