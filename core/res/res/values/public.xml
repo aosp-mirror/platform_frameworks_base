@@ -88,7 +88,6 @@
   <java-symbol type="id" name="hour" />
   <java-symbol type="id" name="icon" />
   <java-symbol type="id" name="image" />
-  <java-symbol type="id" name="imageButton" />
   <java-symbol type="id" name="increment" />
   <java-symbol type="id" name="internalEmpty" />
   <java-symbol type="id" name="info" />
@@ -173,7 +172,6 @@
   <java-symbol type="id" name="switch_old" />
   <java-symbol type="id" name="switchWidget" />
   <java-symbol type="id" name="text" />
-  <java-symbol type="id" name="textButton" />
   <java-symbol type="id" name="time" />
   <java-symbol type="id" name="time_current" />
   <java-symbol type="id" name="timeDisplayBackground" />

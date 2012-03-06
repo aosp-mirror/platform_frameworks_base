@@ -27,28 +27,26 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
  * @hide
  */
-public class ActionMenuItemView extends LinearLayout
+public class ActionMenuItemView extends TextView
         implements MenuView.ItemView, View.OnClickListener, View.OnLongClickListener,
         ActionMenuView.ActionMenuChildView {
     private static final String TAG = "ActionMenuItemView";
 
     private MenuItemImpl mItemData;
     private CharSequence mTitle;
+    private Drawable mIcon;
     private MenuBuilder.ItemInvoker mItemInvoker;
 
-    private ImageButton mImageButton;
-    private Button mTextButton;
     private boolean mAllowTextWithIcon;
     private boolean mExpandedFormat;
     private int mMinWidth;
+    private int mSavedPaddingLeft;
 
     public ActionMenuItemView(Context context) {
         this(context, null);
@@ -68,17 +66,12 @@ public class ActionMenuItemView extends LinearLayout
         mMinWidth = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.ActionMenuItemView_minWidth, 0);
         a.recycle();
-    }
 
-    @Override
-    public void onFinishInflate() {
-        mImageButton = (ImageButton) findViewById(com.android.internal.R.id.imageButton);
-        mTextButton = (Button) findViewById(com.android.internal.R.id.textButton);
-        mImageButton.setOnClickListener(this);
-        mTextButton.setOnClickListener(this);
-        mImageButton.setOnLongClickListener(this);
         setOnClickListener(this);
         setOnLongClickListener(this);
+
+        // Save the inflated padding for later, we'll need it.
+        mSavedPaddingLeft = getPaddingLeft();
     }
 
     public MenuItemImpl getItemData() {
@@ -94,13 +87,6 @@ public class ActionMenuItemView extends LinearLayout
 
         setVisibility(itemData.isVisible() ? View.VISIBLE : View.GONE);
         setEnabled(itemData.isEnabled());
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        mImageButton.setEnabled(enabled);
-        mTextButton.setEnabled(enabled);
     }
 
     public void onClick(View v) {
@@ -135,26 +121,22 @@ public class ActionMenuItemView extends LinearLayout
     }
 
     private void updateTextButtonVisibility() {
-        boolean visible = !TextUtils.isEmpty(mTextButton.getText());
-        visible &= mImageButton.getDrawable() == null ||
+        boolean visible = !TextUtils.isEmpty(mTitle);
+        visible &= mIcon == null ||
                 (mItemData.showsTextAsAction() && (mAllowTextWithIcon || mExpandedFormat));
 
-        mTextButton.setVisibility(visible ? VISIBLE : GONE);
+        setText(visible ? mTitle : null);
     }
 
     public void setIcon(Drawable icon) {
-        mImageButton.setImageDrawable(icon);
-        if (icon != null) {
-            mImageButton.setVisibility(VISIBLE);
-        } else {
-            mImageButton.setVisibility(GONE);
-        }
+        mIcon = icon;
+        setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
 
         updateTextButtonVisibility();
     }
 
     public boolean hasText() {
-        return mTextButton.getVisibility() != GONE;
+        return !TextUtils.isEmpty(getText());
     }
 
     public void setShortcut(boolean showShortcut, char shortcutKey) {
@@ -163,8 +145,6 @@ public class ActionMenuItemView extends LinearLayout
 
     public void setTitle(CharSequence title) {
         mTitle = title;
-
-        mTextButton.setText(mTitle);
 
         setContentDescription(mTitle);
         updateTextButtonVisibility();
@@ -236,18 +216,31 @@ public class ActionMenuItemView extends LinearLayout
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final boolean textVisible = hasText();
+        if (textVisible) {
+            setPadding(mSavedPaddingLeft, getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        }
+
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        final int specSize = MeasureSpec.getSize(widthMeasureSpec);
+        final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         final int oldMeasuredWidth = getMeasuredWidth();
-        final int targetWidth = widthMode == MeasureSpec.AT_MOST ? Math.min(specSize, mMinWidth)
+        final int targetWidth = widthMode == MeasureSpec.AT_MOST ? Math.min(widthSize, mMinWidth)
                 : mMinWidth;
 
         if (widthMode != MeasureSpec.EXACTLY && mMinWidth > 0 && oldMeasuredWidth < targetWidth) {
             // Remeasure at exactly the minimum width.
             super.onMeasure(MeasureSpec.makeMeasureSpec(targetWidth, MeasureSpec.EXACTLY),
                     heightMeasureSpec);
+        }
+
+        if (!textVisible && mIcon != null) {
+            // TextView won't center compound drawables in both dimensions without
+            // a little coercion. Pad in to center the icon after we've measured.
+            final int w = getMeasuredWidth();
+            final int dw = mIcon.getIntrinsicWidth();
+            setPadding((w - dw) / 2, getPaddingTop(), getPaddingRight(), getPaddingBottom());
         }
     }
 }
