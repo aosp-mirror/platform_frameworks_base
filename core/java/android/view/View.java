@@ -10220,7 +10220,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 if (mAttachInfo.mHardwareRenderer != null &&
                         mAttachInfo.mHardwareRenderer.isEnabled() &&
                         mAttachInfo.mHardwareRenderer.validate()) {
-                    getHardwareLayer(true);
+                    getHardwareLayer();
                 }
                 break;
             case LAYER_TYPE_SOFTWARE:
@@ -10242,7 +10242,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @return A HardwareLayer ready to render, or null if an error occurred.
      */
-    HardwareLayer getHardwareLayer(boolean immediateRefresh) {
+    HardwareLayer getHardwareLayer() {
         if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null ||
                 !mAttachInfo.mHardwareRenderer.isEnabled()) {
             return null;
@@ -10272,33 +10272,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 return null;
             }
 
-            if (!immediateRefresh) {
-                mHardwareLayer.redraw(getDisplayList(), mLocalDirtyRect);
-                mLocalDirtyRect.setEmpty();
-            } else {
-                HardwareCanvas currentCanvas = mAttachInfo.mHardwareCanvas;
-                final HardwareCanvas canvas = mHardwareLayer.start(currentCanvas);
-    
-                // Make sure all the GPU resources have been properly allocated
-                if (canvas == null) {
-                    mHardwareLayer.end(currentCanvas);
-                    return null;
-                }
-    
-                mAttachInfo.mHardwareCanvas = canvas;
-                try {
-                    canvas.setViewport(width, height);
-                    canvas.onPreDraw(mLocalDirtyRect);
-                    mLocalDirtyRect.setEmpty();
-                    
-                    canvas.drawDisplayList(getDisplayList(), mRight - mLeft, mBottom - mTop, null,
-                            DisplayList.FLAG_CLIP_CHILDREN);
-                } finally {
-                    canvas.onPostDraw();
-                    mHardwareLayer.end(currentCanvas);
-                    mAttachInfo.mHardwareCanvas = currentCanvas;
-                }
-            }
+            mHardwareLayer.redraw(getDisplayList(), mLocalDirtyRect);
+            mLocalDirtyRect.setEmpty();
         }
 
         return mHardwareLayer;
@@ -11265,7 +11240,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (hasNoCache) {
             boolean layerRendered = false;
             if (layerType == LAYER_TYPE_HARDWARE) {
-                final HardwareLayer layer = getHardwareLayer(false);
+                final HardwareLayer layer = getHardwareLayer();
                 if (layer != null && layer.isValid()) {
                     mLayerPaint.setAlpha((int) (alpha * 255));
                     ((HardwareCanvas) canvas).drawHardwareLayer(layer, 0, 0, mLayerPaint);
