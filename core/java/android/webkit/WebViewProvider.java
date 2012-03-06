@@ -191,9 +191,13 @@ public interface WebViewProvider {
 
     public WebBackForwardList copyBackForwardList();
 
+    public void setFindListener(FindListener listener);
+
     public void findNext(boolean forward);
 
     public int findAll(String find);
+
+    public void findAllAsync(String find);
 
     public boolean showFindDialog(String text, boolean showIme);
 

@@ -45,7 +45,6 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     private int mNumberOfMatches;
     private int mActiveMatchIndex;
     private ActionMode mActionMode;
-    private String mLastFind;
 
     FindActionModeCallback(Context context) {
         mCustomView = LayoutInflater.from(context).inflate(
@@ -134,13 +133,12 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
             mWebView.clearMatches();
             mMatches.setVisibility(View.GONE);
             mMatchesFound = false;
-            mLastFind = null;
+            mWebView.findAll(null);
         } else {
             mMatchesFound = true;
             mMatches.setVisibility(View.INVISIBLE);
             mNumberOfMatches = 0;
-            mLastFind = find.toString();
-            mWebView.findAllAsync(mLastFind);
+            mWebView.findAllAsync(find.toString());
         }
     }
 
@@ -150,9 +148,8 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mInput.showSoftInput(mEditText, 0);
     }
 
-    public void updateMatchCount(int matchIndex, int matchCount,
-        String findText) {
-        if (mLastFind != null && mLastFind.equals(findText)) {
+    public void updateMatchCount(int matchIndex, int matchCount, boolean isNewFind) {
+        if (!isNewFind) {
             mNumberOfMatches = matchCount;
             mActiveMatchIndex = matchIndex;
             updateMatchesString();

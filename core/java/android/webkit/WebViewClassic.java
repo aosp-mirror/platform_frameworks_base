@@ -1440,6 +1440,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // Used to notify listeners of a new picture.
     private PictureListener mPictureListener;
 
+    // Used to notify listeners about find-on-page results.
+    private FindListener mFindListener;
+
     /**
      * Refer to {@link WebView#requestFocusNodeHref(Message)} for more information
      */
@@ -3695,6 +3698,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
+     * Register the interface to be used when a find-on-page result has become
+     * available. This will replace the current handler.
+     *
+     * @param listener An implementation of FindListener
+     */
+     public void setFindListener(FindListener listener) {
+         checkThread();
+         mFindListener = listener;
+     }
+
+    /**
      * See {@link WebView#findNext(boolean)}
      */
     @Override
@@ -3723,6 +3737,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         checkThread();
         if (0 == mNativeClass) return 0; // client isn't initialized
         mLastFind = find;
+        if (find == null) return 0;
         mWebViewCore.removeMessages(EventHub.FIND_ALL);
         WebViewCore.FindAllRequest request = new
             WebViewCore.FindAllRequest(find);
@@ -8478,10 +8493,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 }
 
                 case UPDATE_MATCH_COUNT: {
-                    if (mFindCallback != null) {
-                        mFindCallback.updateMatchCount(msg.arg1, msg.arg2,
-                            (String) msg.obj);
-                    }
+                    boolean isNewFind = mLastFind == null || !mLastFind.equals(msg.obj);
+                    if (mFindCallback != null)
+                        mFindCallback.updateMatchCount(msg.arg1, msg.arg2, isNewFind);
+                    if (mFindListener != null)
+                        mFindListener.onFindResultReceived(msg.arg1, msg.arg2, true);
                     break;
                 }
                 case CLEAR_CARET_HANDLE:
