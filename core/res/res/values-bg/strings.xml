@@ -26,8 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"ТБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"ПБ"</string>
-    <!-- no translation found for fileSizeSuffix (9164292791500531949) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;неозаглавено&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
@@ -667,8 +666,7 @@
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Съжаляваме, опитайте отново"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Зарежда се, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Зареден."</string>
-    <!-- no translation found for lockscreen_battery_short (4477264849386850266) -->
-    <skip />
+    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Свържете зарядното си устройство."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Няма SIM карта."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"В таблета няма SIM карта."</string>
@@ -717,10 +715,8 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"АБВ"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for hour_ampm (4584338083529355982) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (2083465992940444366) -->
-    <skip />
+    <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Фабричният тест не бе успешен"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Действието FACTORY_TEST се поддържа само за пакети, инсталирани в /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Не бе намерен пакет, предоставящ действието FACTORY_TEST."</string>
@@ -732,8 +728,7 @@
     <string name="double_tap_toast" msgid="1068216937244567247">"Съвет: докоснете двукратно, за да увеличите или намалите мащаба."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"Автоматично попълване"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Настройка"</string>
-    <!-- no translation found for autofill_address_name_separator (6350145154779706772) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -766,10 +761,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Разрешава на притежателя да прави заявки за верификатори на пакета. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"достъп до серийни портове"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Разрешава на притежателя достъп до серийни портове посредством приложния програмен интерфейс (API) SerialManager."</string>
-    <!-- no translation found for permlab_updateLock (3527558366616680889) -->
-    <skip />
-    <!-- no translation found for permdesc_updateLock (1655625832166778492) -->
-    <skip />
+    <string name="permlab_updateLock" msgid="3527558366616680889">"без авт. актуализации на устройството"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Разрешава на притежателя да предложи на системата информация за това, кога ще е възможно неинтерактивно рестартиране за надстройване на устройството."</string>
     <string name="save_password_message" msgid="767344687139195790">"Искате ли браузърът да запомни тази парола?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не сега"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запомняне"</string>
