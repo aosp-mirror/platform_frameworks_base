@@ -2166,14 +2166,6 @@ if (mType == DIRECT) {
 
         // only process effects if we're going to write
         if (sleepTime == 0) {
-
-            if (mixerStatus == MIXER_TRACKS_READY) {
-
-                // Non-trivial for DIRECT only
-                applyVolume();
-
-            }
-
             for (size_t i = 0; i < effectChains.size(); i ++) {
                 effectChains[i]->process_l();
             }
@@ -2999,6 +2991,7 @@ void AudioFlinger::DirectOutputThread::threadLoop_mix()
     }
     sleepTime = 0;
     standbyTime = systemTime() + standbyDelay;
+    applyVolume();
 }
 
 void AudioFlinger::DirectOutputThread::threadLoop_sleepTime()
