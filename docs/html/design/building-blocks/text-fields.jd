@@ -1,0 +1,70 @@
+page.title=Text Fields
+@jd:body
+
+<p>Text fields allow the user to type text into your app. They can be either single line or multi-line.
+Touching a text field places the cursor and automatically displays the keyboard. In addition to
+typing, text fields allow for a variety of other activities, such as text selection (cut, copy,
+paste) and data lookup via auto-completion.</p>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-12">
+
+    <img src="{@docRoot}design/media/text_input_singlevsmultiline.png">
+
+  </div>
+</div>
+
+<h4>Single line and multi line</h4>
+<p>Single-line fields automatically scroll their content to the left as the text input cursor reaches
+the right edge of the input field. Multi-line text fields automatically break to a new line for
+overflow text and scroll vertically when the cursor reaches the lower edge.</p>
+
+<img src="{@docRoot}design/media/text_input_typesandtypedown.png">
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Text field types</h4>
+<p>Text fields can have different types, such as number, message, or email address. The type determines
+what kind of characters are allowed inside the field, and may prompt the virtual keyboard to
+optimize its layout for frequently used characters.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+<h4>Auto-complete text fields</h4>
+<p>Use auto-complete text fields to present real-time completions or search results in popups, so users
+can enter information more accurately and efficiently.</p>
+
+  </div>
+</div>
+
+<h2 id="text-selection">Text Selection</h2>
+
+<p>Users can select any word in a text field with a long press. This action triggers a text selection
+mode that facilitates extending the selection or choosing an action to perform on the selected text.
+Selection mode includes:</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-9">
+
+    <img src="{@docRoot}design/media/text_input_textselection.png">
+
+  </div>
+  <div class="layout-content-col span-4 with-callouts">
+
+<ol>
+<li>
+<h4>Contextual action bar</h4>
+<p>A contextual action bar (CAB) displays the actions available to perform on the selection:
+ typically cut, copy, and paste, but apps can insert additional commands as needed.</p>
+</li>
+<li>
+<h4>Selection handles</h4>
+<p>Selection handles can be dragged to select more or less text while remaining in selection mode.</p>
+</li>
+</ol>
+
+  </div>
+</div>

@@ -1,0 +1,31 @@
+page.title=Switches
+@jd:body
+
+<p>Switches allow the user to select options. There are three kinds of switches: checkboxes, radio
+buttons, and on/off switches.</p>
+<h2 id="checkboxes">Checkboxes</h2>
+
+<p>Checkboxes allow the user to select multiple options from a set. Avoid using a single checkbox to
+turn an option off or on. Instead, use an on/off switch.</p>
+
+<div style="text-align: center">
+  <img src="{@docRoot}design/media/switches_checkboxes.png">
+</div>
+
+<h2 id="radio-buttons">Radio Buttons</h2>
+
+<p>Radio buttons allow the user to select one option from a set. Use radio buttons for exclusive
+selection if you think that the user needs to see all available options side-by-side. Otherwise,
+consider a spinner, which uses less space.</p>
+
+<div style="text-align: center">
+  <img src="{@docRoot}design/media/switches_radios.png">
+</div>
+
+<h2 id="switches">On/off Switches</h2>
+
+<p>On/off switches toggle the state of a single settings option.</p>
+
+<div style="text-align: center">
+  <img src="{@docRoot}design/media/switches_switches.png">
+</div>

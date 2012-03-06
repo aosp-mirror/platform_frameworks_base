@@ -1,0 +1,40 @@
+page.title=Buttons
+@jd:body
+
+<p>A button consists of text and/or an image that clearly communicates what action will occur when the
+user touches it. Android supports two different types of buttons: <em>basic buttons</em> and <em>borderless
+buttons</em>. Both can contain text labels and/or images.</p>
+
+<div style="text-align: center">
+  <img src="{@docRoot}design/media/buttons_basic.png">
+</div>
+
+<h2 id="basic">Basic Buttons</h2>
+
+<p>Basic buttons are traditional buttons with borders and background. Android supports two styles for
+basic buttons: default and small. Default buttons have slightly larger font size and are optimized
+for display outside of form content. Small buttons are intended for display alongside other content.
+They have a smaller font and smaller minimum height. Use small buttons in forms where they need to
+align with other UI elements.</p>
+
+<img src="{@docRoot}design/media/buttons_default_small.png">
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+    <div class="figure-caption">
+      Default buttons in Holo Dark &amp; Light.
+    </div>
+  </div>
+  <div class="layout-content-col span-6">
+    <div class="figure-caption">
+      Small buttons in Holo Dark &amp; Light.
+    </div>
+  </div>
+</div>
+
+<h2 id="borderless">Borderless Buttons</h2>
+
+<p>Borderless buttons resemble basic buttons except that they have no borders or background. You can
+use borderless buttons with both icons and text. Borderless buttons are visually more lightweight
+than basic buttons and integrate nicely with other content.</p>
+
+<img src="{@docRoot}design/media/buttons_borderless.png">

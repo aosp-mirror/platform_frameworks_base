@@ -1,0 +1,80 @@
+page.title=Progress and Activity
+header.title=Feedback
+@jd:body
+
+<p>When an operation of interest to the user is taking place over a relatively long period of time,
+provide visual feedback that it's still happening and in the process of being completed.</p>
+<h2 id="progress">Progress</h2>
+
+<p>If you know the percentage of the operation that has been completed, use a determinate progress bar
+to give the user a sense of how much longer it will take.</p>
+
+<img src="{@docRoot}design/media/progress_download.png">
+
+<p>The progress bar should always travel from 0% to 100% completion. Avoid setting the bar to a lower
+value than a previous value, or using the same progress bar to represent the progress of multiple
+events, since doing so makes the display meaningless. If you're not sure how long a particular
+operation will take, use an indeterminate progress indicator.</p>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<img src="{@docRoot}design/media/progress_themes.png">
+<div class="figure-caption">
+  Progress bar in Holo Dark and Holo Light.
+</div>
+
+<h2 id="activity">Activity</h2>
+
+<p>If you don't know how much longer an operation will continue, use an indeterminate progress
+indicator. There are two styles available: a flat bar and a circle. Use the one that best fits the
+available space.</p>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/progress_activity.png">
+
+  </div>
+  <div class="layout-content-col span-7 with-callouts">
+
+    <ol>
+      <li class="value-1"><h4>Activity bar (shown with the Holo Dark theme)</h4>
+        <p>
+
+An indeterminate activity bar is used at the start of an application download because Google Play hasn't
+been able to contact the server yet, and it's not possible to determine how long it will take for
+the download to begin.
+
+        </p>
+      </li>
+    </ol>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/progress_activity2.png">
+
+  </div>
+  <div class="layout-content-col span-7 with-callouts">
+
+    <ol>
+      <li class="value-2"><h4>Activity circle (shown with the Holo Light theme)</h4>
+        <p>
+
+An indeterminate activity circle is used in the Gmail application when a message is being
+loaded because it's not possible to determine how long it will take to download the email.
+
+        </p>
+      </li>
+    </ol>
+
+  </div>
+</div>
+
+<p>You should only use one activity indicator on screen per activity, and it should appropriately sized
+for the surrounding context. For example, the largest activity circle works well when displayed in a
+blank content area, but not in a smaller dialog box.</p>

@@ -1,0 +1,112 @@
+page.title=Dialogs
+@jd:body
+
+<p>Dialogs prompt the user for decisions or additional information required by the app to continue a
+task. Such requests can range from simple Cancel/OK decisions to more complex layouts asking the
+user to adjust settings or enter text.</p>
+
+<img src="{@docRoot}design/media/dialogs_main.png">
+
+<div class="with-callouts">
+
+<ol>
+<li>
+<h4>Optional title region</h4>
+<p>The title introduces the content of your dialog. It can, for example, identify the name of a
+ setting that the user is about to change, or request a decision.</p>
+</li>
+<li>
+<h4>Content area</h4>
+<p>Dialog content varies widely. For settings dialogs, a dialog may contain UI elements such as
+ sliders, text fields, checkboxes, or radio buttons that allow the user to change app or system
+ settings. In other cases, such as alerts, the content may consist solely of text that provides
+ further context for a user decision.</p>
+</li>
+<li>
+<h4>Action buttons</h4>
+<p>Action buttons are typically Cancel and/or OK, with OK indicating the preferred or most likely
+ action. However, if the options consist of specific actions such as Close or Wait rather than
+ a confirmation or cancellation of the action described in the content, then all the buttons
+ should be active verbs. As a rule, the dismissive action of a dialog is always on the left
+ whereas the affirmative actions are on the right.</p>
+</li>
+</ol>
+
+</div>
+
+<img src="{@docRoot}design/media/dialogs_examples.png">
+<div class="figure-caption">
+  Samples of typical dialog use in Android.
+</div>
+
+<h2 id="alerts">Alerts</h2>
+
+<p>Alerts inform the user about a situation that requires their confirmation or acknowledgement before
+proceeding. They differ slightly in appearance based upon the severity and impact of the message
+conveyed.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/dialogs_w_no_title.png">
+
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Alerts without title bars</h4>
+<p>Most alerts don't need titles. Usually the decision doesn't have a severe impact and can be summed
+up succinctly in a sentence or two. The content area should either ask a question (such as "Delete
+this conversation?") or make a clear statement whose relationship to the action buttons is obvious.</p>
+
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/dialogs_w_title.png">
+
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Alerts with title bars</h4>
+<p>Use alerts with title bars sparingly. They are appropriate only when a high-risk operation involving
+potential loss of data, connectivity, extra charges, and so on requires a clear question or
+statement (the title) and some additional explanation (in the content area).</p>
+<p>Keep the question or statement short: for example, "Erase USB storage?" Avoid apologies. A user
+should be able to skip the content completely and still have a clear idea of what choices are
+available based on the title and the text of the action buttons.</p>
+
+  </div>
+</div>
+
+
+<h2 id="popups">Popups</h2>
+
+<p>Popups are lightweight version of dialogs that require a single selection from the user. Popups
+don't have have explicit buttons that accept or cancel the operation. Instead, making a selection
+advances the workflow, and simply touching outside the popup dismisses it.</p>
+
+<img src="{@docRoot}design/media/dialogs_popups_example.png">
+
+
+<h2 id="toasts">Toasts</h2>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+    <div class="vspace size-6"></div>
+
+<p>Toasts provide lightweight feedback about an operation in a small popup. For example, navigating
+away from an email before you send it triggers a "Draft saved" toast to let you know that you can
+continue editing later. Toasts automatically disappear after a timeout.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/dialogs_toasts.png">
+
+  </div>
+</div>
