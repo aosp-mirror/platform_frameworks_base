@@ -19,6 +19,7 @@
 
 #include <SkBitmap.h>
 
+#include <utils/Mutex.h>
 #include <utils/Vector.h>
 
 #include "Debug.h"
