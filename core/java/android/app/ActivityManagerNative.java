@@ -1126,7 +1126,17 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
-        
+
+        case GET_MY_MEMORY_STATE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            ActivityManager.RunningAppProcessInfo info =
+                    new ActivityManager.RunningAppProcessInfo();
+            getMyMemoryState(info);
+            reply.writeNoException();
+            info.writeToParcel(reply, 0);
+            return true;
+        }
+
         case GET_DEVICE_CONFIGURATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             ConfigurationInfo config = getDeviceConfigurationInfo();
@@ -2973,6 +2983,19 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     
+    public void getMyMemoryState(ActivityManager.RunningAppProcessInfo outInfo)
+            throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_MY_MEMORY_STATE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        outInfo.readFromParcel(reply);
+        reply.recycle();
+        data.recycle();
+    }
+
     public ConfigurationInfo getDeviceConfigurationInfo() throws RemoteException
     {
         Parcel data = Parcel.obtain();

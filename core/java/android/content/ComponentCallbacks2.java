@@ -52,15 +52,49 @@ public interface ComponentCallbacks2 extends ComponentCallbacks {
     static final int TRIM_MEMORY_UI_HIDDEN = 20;
 
     /**
+     * Level for {@link #onTrimMemory(int)}: the process is not an expendable
+     * background process, but the device is running extremely low on memory
+     * and is about to not be able to keep any background processes running.
+     * Your running process should free up as many non-critical resources as it
+     * can to allow that memory to be used elsewhere.  The next thing that
+     * will happen after this is {@link #onLowMemory()} called to report that
+     * nothing at all can be kept in the background, a situation that can start
+     * to notably impact the user.
+     */
+    static final int TRIM_MEMORY_RUNNING_CRITICAL = 15;
+
+    /**
+     * Level for {@link #onTrimMemory(int)}: the process is not an expendable
+     * background process, but the device is running low on memory.
+     * Your running process should free up unneeded resources to allow that
+     * memory to be used elsewhere.
+     */
+    static final int TRIM_MEMORY_RUNNING_LOW = 10;
+
+
+    /**
+     * Level for {@link #onTrimMemory(int)}: the process is not an expendable
+     * background process, but the device is running moderately low on memory.
+     * Your running process may want to release some unneeded resources for
+     * use elsewhere.
+     */
+    static final int TRIM_MEMORY_RUNNING_MODERATE = 5;
+
+    /**
      * Called when the operating system has determined that it is a good
      * time for a process to trim unneeded memory from its process.  This will
      * happen for example when it goes in the background and there is not enough
-     * memory to keep as many background processes running as desired.
+     * memory to keep as many background processes running as desired.  You
+     * should never compare to exact values of the level, since new intermediate
+     * values may be added -- you will typically want to compare if the value
+     * is greater or equal to a level you are interested in.
      * 
      * @param level The context of the trim, giving a hint of the amount of
      * trimming the application may like to perform.  May be
      * {@link #TRIM_MEMORY_COMPLETE}, {@link #TRIM_MEMORY_MODERATE},
-     * {@link #TRIM_MEMORY_BACKGROUND}, or {@link #TRIM_MEMORY_UI_HIDDEN}.
+     * {@link #TRIM_MEMORY_BACKGROUND}, {@link #TRIM_MEMORY_UI_HIDDEN},
+     * {@link #TRIM_MEMORY_RUNNING_CRITICAL}, {@link #TRIM_MEMORY_RUNNING_LOW},
+     * or {@link #TRIM_MEMORY_RUNNING_MODERATE}.
      */
     void onTrimMemory(int level);
 }

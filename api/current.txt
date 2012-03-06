@@ -2722,6 +2722,7 @@ package android.app {
     method public int getLauncherLargeIconSize();
     method public int getMemoryClass();
     method public void getMemoryInfo(android.app.ActivityManager.MemoryInfo);
+    method public static void getMyMemoryState(android.app.ActivityManager.RunningAppProcessInfo);
     method public android.os.Debug.MemoryInfo[] getProcessMemoryInfo(int[]);
     method public java.util.List<android.app.ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
     method public java.util.List<android.app.ActivityManager.RecentTaskInfo> getRecentTasks(int, int) throws java.lang.SecurityException;
@@ -2804,6 +2805,7 @@ package android.app {
     field public int importanceReasonCode;
     field public android.content.ComponentName importanceReasonComponent;
     field public int importanceReasonPid;
+    field public int lastTrimLevel;
     field public int lru;
     field public int pid;
     field public java.lang.String[] pkgList;
@@ -4826,6 +4828,9 @@ package android.content {
     field public static final int TRIM_MEMORY_BACKGROUND = 40; // 0x28
     field public static final int TRIM_MEMORY_COMPLETE = 80; // 0x50
     field public static final int TRIM_MEMORY_MODERATE = 60; // 0x3c
+    field public static final int TRIM_MEMORY_RUNNING_CRITICAL = 15; // 0xf
+    field public static final int TRIM_MEMORY_RUNNING_LOW = 10; // 0xa
+    field public static final int TRIM_MEMORY_RUNNING_MODERATE = 5; // 0x5
     field public static final int TRIM_MEMORY_UI_HIDDEN = 20; // 0x14
   }
 

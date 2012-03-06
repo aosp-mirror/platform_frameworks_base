@@ -1145,7 +1145,14 @@ public class ActivityManager {
          * @hide
          */
         public int flags;
-        
+
+        /**
+         * Last memory trim level reported to the process: corresponds to
+         * the values supplied to {@link android.content.ComponentCallbacks2#onTrimMemory(int)
+         * ComponentCallbacks2.onTrimMemory(int)}.
+         */
+        public int lastTrimLevel;
+
         /**
          * Constant for {@link #importance}: this process is running the
          * foreground UI.
@@ -1212,7 +1219,7 @@ public class ActivityManager {
          * be maintained in the future.
          */
         public int lru;
-        
+
         /**
          * Constant for {@link #importanceReasonCode}: nothing special has
          * been specified for the reason for this level.
@@ -1282,6 +1289,7 @@ public class ActivityManager {
             dest.writeInt(uid);
             dest.writeStringArray(pkgList);
             dest.writeInt(this.flags);
+            dest.writeInt(lastTrimLevel);
             dest.writeInt(importance);
             dest.writeInt(lru);
             dest.writeInt(importanceReasonCode);
@@ -1296,6 +1304,7 @@ public class ActivityManager {
             uid = source.readInt();
             pkgList = source.readStringArray();
             flags = source.readInt();
+            lastTrimLevel = source.readInt();
             importance = source.readInt();
             lru = source.readInt();
             importanceReasonCode = source.readInt();
@@ -1349,7 +1358,25 @@ public class ActivityManager {
             return null;
         }
     }
-    
+
+    /**
+     * Return global memory state information for the calling process.  This
+     * does not fill in all fields of the {@link RunningAppProcessInfo}.  The
+     * only fields that will be filled in are
+     * {@link RunningAppProcessInfo#pid},
+     * {@link RunningAppProcessInfo#uid},
+     * {@link RunningAppProcessInfo#lastTrimLevel},
+     * {@link RunningAppProcessInfo#importance},
+     * {@link RunningAppProcessInfo#lru}, and
+     * {@link RunningAppProcessInfo#importanceReasonCode}.
+     */
+    static public void getMyMemoryState(RunningAppProcessInfo outState) {
+        try {
+            ActivityManagerNative.getDefault().getMyMemoryState(outState);
+        } catch (RemoteException e) {
+        }
+    }
+
     /**
      * Return information about the memory usage of one or more processes.
      * 

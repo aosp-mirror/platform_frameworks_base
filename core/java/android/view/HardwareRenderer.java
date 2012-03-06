@@ -1284,15 +1284,10 @@ public abstract class HardwareRenderer {
                 usePbufferSurface(managedContext.getContext());
             }
 
-            switch (level) {
-                case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
-                case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
-                case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
-                    GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_MODERATE);
-                    break;
-                case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                    GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_FULL);
-                    break;
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
+                GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_FULL);
+            } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+                GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_MODERATE);
             }
         }
 

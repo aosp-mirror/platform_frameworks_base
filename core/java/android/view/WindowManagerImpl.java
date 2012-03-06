@@ -432,29 +432,25 @@ public class WindowManagerImpl implements WindowManager {
      */
     public void trimMemory(int level) {
         if (HardwareRenderer.isAvailable()) {
-            switch (level) {
-                case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
-                    // On low and medium end gfx devices
-                    if (!ActivityManager.isHighEndGfx(getDefaultDisplay())) {
-                        // Destroy all hardware surfaces and resources associated to
-                        // known windows
-                        synchronized (this) {
-                            if (mViews == null) return;
-                            int count = mViews.length;
-                            for (int i = 0; i < count; i++) {
-                                mRoots[i].terminateHardwareResources();
-                            }
+            // On low and medium end gfx devices
+            if (!ActivityManager.isHighEndGfx(getDefaultDisplay())) {
+                if (level >= ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
+                    // Destroy all hardware surfaces and resources associated to
+                    // known windows
+                    synchronized (this) {
+                        if (mViews == null) return;
+                        int count = mViews.length;
+                        for (int i = 0; i < count; i++) {
+                            mRoots[i].terminateHardwareResources();
                         }
-                        // Force a full memory flush
-                        HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
-                        mNeedsEglTerminate = true;
-                        break;
                     }
-                    // high end gfx devices fall through to next case
-                default:
-                    HardwareRenderer.trimMemory(level);
+                    // Force a full memory flush
+                    HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+                    mNeedsEglTerminate = true;
+                    return;
+                }
             }
+            HardwareRenderer.trimMemory(level);
         }
     }
 
