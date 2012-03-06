@@ -34,7 +34,7 @@ To start developing with your device, read <a
 href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a>.</p>
 
 <p class="note"><strong>Note:</strong> If your device is one of the Android Developer Phones
-(purchased from the Android Market publisher site), a Nexus One, or a Nexus S, then you need
+(ADP), a Nexus One, or a Nexus S, then you need
 the <a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a>, instead of an OEM driver. The Galaxy
 Nexus driver, however, is distributed by <a
 href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
