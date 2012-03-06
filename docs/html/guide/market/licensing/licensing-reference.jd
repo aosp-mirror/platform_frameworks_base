@@ -117,7 +117,7 @@ managed by an Obfuscator.</td>
 <tr>
 <td><em>ILicensingService</em></td>
 <td>One-way IPC interface over which a license check request is passed to the
-Android Market client.</td>
+Google Play client.</td>
 </tr>
 <tr>
 <td><em>ILicenseResultListener</em></td>
@@ -137,7 +137,7 @@ codes. By default, the LicenseValidator class in the LVL provides all of the
 necessary handling of these response codes for you. </p>
 
 <p class="table-caption"><strong>Table 2.</strong> Summary of response codes
-returned by the Android Market server in a license response.</p>
+returned by the Google Play server in a license response.</p>
 
 <table>
 
@@ -178,7 +178,7 @@ until upgrade.</p>
 </tr>
 <tr>
 <td>{@code ERROR_CONTACTING_SERVER}</td>
-<td>Local error &mdash; the Android Market application was not able to reach the
+<td>Local error &mdash; the Google Play application was not able to reach the
 licensing server, possibly because of network availability problems. </td>
 <td>No</td>
 <td></td>
@@ -217,12 +217,12 @@ application. </td>
 <tr>
 <td>{@code ERROR_NOT_MARKET_MANAGED}</td>
 <td>Server error &mdash; the application (package name) was not recognized by
-Android Market. </td>
+Google Play. </td>
 <td>No</td>
 <td></td>
 <td><em>Do not retry the license check.</em>
 <p style="margin-top:.5em;">Can indicate that the application was not published
-through Android Market or that there is an development error in the licensing
+through Google Play or that there is an development error in the licensing
 implementation.</p>
 </td>
 </tr>
@@ -233,7 +233,7 @@ implementation.</p>
 href="{@docRoot}guide/market/licensing/setting-up.html#test-env">
 Setting Up The Testing Environment</a>, the response code can be manually
 overridden for the application developer and any registered test users via the
-Android Market publisher site.
+Google Play publisher site.
 <br/><br/>
 Additionally, as noted above, applications that are in draft mode (in other
 words, applications that have been uploaded but have <em>never</em> been
@@ -263,7 +263,7 @@ implementation and an illustration of how to obtain, store, and use the
 settings. </p>
 
 <p class="table-caption"><strong>Table 3.</strong> Summary of
-license-management settings supplied by the Android Market server in a license
+license-management settings supplied by the Google Play server in a license
 response.</p>
 
 <table>
@@ -329,7 +329,7 @@ storage location before downloading.</td>
 
 <h4 id="VT">License validity period</h4>
 
-<p>The Android Market licensing server sets a license validity period for all
+<p>The Google Play licensing server sets a license validity period for all
 downloaded applications. The period expresses the interval of time over which an
 application's license status should be considered as unchanging and cacheable by
 a licensing {@code Policy} in the application. The licensing server includes the
@@ -351,7 +351,7 @@ status instead of sending a new license check to the server.</p>
 
 <p>The licensing server manages the validity period as a means of helping the
 application properly enforce licensing across the refund period offered by
-Android Market for paid applications. It sets the validity period based on
+Google Play for paid applications. It sets the validity period based on
 whether the application was purchased and, if so, how long ago. Specifically,
 the server sets a validity period as follows:</p>
 
@@ -381,15 +381,15 @@ the application. </p>
 
 <p>In some cases, system or network conditions can prevent an application's
 license check from reaching the licensing server, or prevent the server's
-response from reaching the Android Market client application. For example, the
+response from reaching the Google Play client application. For example, the
 user might launch an application when there is no cell network or data
 connection available&mdash;such as when on an airplane&mdash;or when the
 network connection is unstable or the cell signal is weak. </p>
 
-<p>When network problems prevent or interrupt a license check, the Android
-Market client notifies the application by returning a {@code RETRY} response code to
+<p>When network problems prevent or interrupt a license check, the Google
+Play client notifies the application by returning a {@code RETRY} response code to
 the {@code Policy}'s <code>processServerResponse()</code> method. In the case of system
-problems, such as when the application is unable to bind with Android Market's
+problems, such as when the application is unable to bind with Google Play's
 {@code ILicensingService} implementation, the {@code LicenseChecker} library itself calls the
 Policy <code>processServerResonse()</code> method with a {@code RETRY} response code.
 </p>
@@ -397,7 +397,7 @@ Policy <code>processServerResonse()</code> method with a {@code RETRY} response 
 <p>In general, the {@code RETRY} response code is a signal to the application that an
 error has occurred that has prevented a license check from completing.
 
-<p>The Android Market server helps an application to manage licensing under
+<p>The Google Play server helps an application to manage licensing under
 error conditions by setting a retry "grace period" and a recommended maximum
 retries count. The server includes these values in all license check responses,
 appending them as extras under the keys {@code GT} and {@code GR}. </p>

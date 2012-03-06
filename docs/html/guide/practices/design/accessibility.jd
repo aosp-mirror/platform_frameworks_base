@@ -332,11 +332,10 @@ public boolean dispatchPopulateAccessibilityEvent(final AccessibilityEvent event
 
 <p>You can simulate the experience for many users by enabling an accessibility service that speaks
 as you move around the screen.  One such service is <a
-href="https://market.android.com/details?id=com.google.android.marvin.talkback">TalkBack</a>, by the
+href="https://play.google.com/store/details?id=com.google.android.marvin.talkback">TalkBack</a>, by the
 <a href="http://code.google.com/p/eyes-free/">Eyes-Free Project</a>.  It comes preinstalled on many
-Android-powered devices, but is also available for free from <a
-href="https://market.android.com/details?id=com.google.android.marvin.talkback">Android
-Market</a>.</p>
+Android-powered devices, but is also available for free from the <a
+href="https://play.google.com/store/details?id=com.google.android.marvin.talkback">Google Play</a> store.</p>
 
 <p>This service requires that you have a text-to-speech engine installed on your phone.  You can
 verify if you have one installed in the <strong>Text-to-speech</strong> settings menu by selecting

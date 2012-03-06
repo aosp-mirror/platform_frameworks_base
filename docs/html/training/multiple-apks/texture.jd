@@ -40,7 +40,7 @@ Support</a></li>
 </div>
 </div>
 
-<p>When developing your Android application to take advantage of multiple APKs on Android Market, it’s important to adopt some good practices from the get-go, and prevent unnecessary headaches further into the development process.  This lesson shows you how to create multiple APKs of your app, each supporting a different subset of OpenGL texture formats.  You will also gain some tools necessary to make maintaining a multiple APK codebase as painless as possible.</p>
+<p>When developing your Android application to take advantage of multiple APKs on Google Play, it’s important to adopt some good practices from the get-go, and prevent unnecessary headaches further into the development process.  This lesson shows you how to create multiple APKs of your app, each supporting a different subset of OpenGL texture formats.  You will also gain some tools necessary to make maintaining a multiple APK codebase as painless as possible.</p>
 
 
 <h2 id="Confirm">Confirm You Need Multiple APKs</h2>
@@ -158,7 +158,7 @@ initialization procedures that don’t change much from APK to APK.</p>
 
 
 <h2 id="AdjustManifests">Adjust the Manifests</h2>
-<p>When a user downloads an application which uses multiple APKs through Android Market, the correct
+<p>When a user downloads an application which uses multiple APKs through Google Play, the correct
 APK to use is chosen using some simple rules:</p>
 
 <ul>
@@ -246,9 +246,9 @@ following:</p>
 </pre>
 
 <h2 id="PreLaunch">Go Over Pre-launch Checklist</h2>
-<p>Before uploading to Android Market, double-check the following items.  Remember that these are
+<p>Before uploading to Google Play, double-check the following items.  Remember that these are
 specifically relevant to multiple APKs, and in no way represent a complete checklist for all
-applications being uploaded to Android Market.</p>
+applications being uploaded to Google Play.</p>
 
 <ul>
 <li>All APKs must have the same package name</li>
@@ -262,7 +262,7 @@ customizable device emulators in the business sitting on your development machin
 </ul>
 
 <p>It’s also worth inspecting the compiled APK before pushing to market, to make sure there aren’t
-any surprises that could hide your application in Market.  This is actually quite simple using the
+any surprises that could hide your application on Google Play.  This is actually quite simple using the
 "aapt" tool.  Aapt (the Android Asset Packaging Tool) is part of the build process for creating and
 packaging your Android applications, and is also a very handy tool for inspecting them. </p>
 
@@ -290,10 +290,10 @@ densities: '120' '160' '240'
 supports-screens and compatible-screens, and that you don’t have unintended "uses-feature" values
 that were added as a result of permissions you set in the manifest. In the example above, the APK
 will be invisible to most, if not all devices.</p>
-<p>Why?  By adding the required permission SEND_SMS, the feature requirement of android.hardware.telephony was implicitly added.  Since most (if not all) xlarge devices are tablets without telephony hardware in them, Market will filter out this APK in these cases, until future devices come along which are both large enough to report as xlarge screen size, and possess telephony hardware.  
+<p>Why?  By adding the required permission SEND_SMS, the feature requirement of android.hardware.telephony was implicitly added.  Since most (if not all) xlarge devices are tablets without telephony hardware in them, Google Play will filter out this APK in these cases, until future devices come along which are both large enough to report as xlarge screen size, and possess telephony hardware.  
 </p>
 <p>Fortunately this is easily fixed by adding the following to your manifest:</p>
 <pre>
 &lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;
 </pre>
-<p>Once you’ve completed the pre-launch checklist, upload your APKs to Android Market.  It may take a bit for the application to show up when browsing Android Market, but when it does, perform one last check.  Download the application onto any test devices you may have to make sure that the APKs are targeting the intended devices. Congratulations, you’re done!</p>
+<p>Once you’ve completed the pre-launch checklist, upload your APKs to Google Play.  It may take a bit for the application to show up when browsing Google Play, but when it does, perform one last check.  Download the application onto any test devices you may have to make sure that the APKs are targeting the intended devices. Congratulations, you’re done!</p>

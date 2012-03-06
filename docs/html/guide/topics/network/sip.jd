@@ -147,7 +147,7 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a
 </ul>
 
 <p>To control how your application is filtered from devices that do not support
-SIP (for example, in Android Market), add the following to your application's
+SIP (for example, on Google Play), add the following to your application's
 manifest:</p>
 
 <ul>

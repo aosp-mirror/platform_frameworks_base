@@ -30,18 +30,18 @@ page.title=In-app Billing
 </div>
 </div>
 
-<p>Android Market In-app Billing is an Android Market service that lets you sell digital content in
+<p>Google Play In-app Billing is a Google Play service that lets you sell digital content in
 your applications. You can use the service to sell a wide range of content, including downloadable
 content such as media files or photos, and virtual content such as game levels or potions.</p>
 
-<p>When you use Android Market's in-app billing service to sell an item, Android Market handles all
+<p>When you use Google Play's in-app billing service to sell an item, Google Play handles all
 checkout details so your application never has to directly process any financial transactions.
-Android Market uses the same checkout service that is used for application purchases, so your users
+Google Play uses the same checkout service that is used for application purchases, so your users
 experience a consistent and familiar purchase flow (see figure 1). Also, the transaction fee for
 in-app purchases is the same as the transaction fee for application purchases (30%).</p>
 
-<p>Any application that you publish through Android Market can implement in-app billing. No special
-account or registration is required other than an Android Market publisher account and a Google
+<p>Any application that you publish through Google Play can implement in-app billing. No special
+account or registration is required other than a Google Play app publisher account and a Google
 Checkout Merchant account. Also, because the service uses no dedicated framework APIs, you can add
 in-app billing to any application that uses a minimum API level of 4 or higher.</p>
 
@@ -59,11 +59,11 @@ obfuscate the sample code before you use it in a production application. For mor
 <img src="{@docRoot}images/billing_checkout_flow.png" height="382" id="figure1" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Applications initiate in-app billing requests through their own UI
-  (first screen). Android Market responds to the request by providing the checkout user interface
+  (first screen). Google Play responds to the request by providing the checkout user interface
   (middle screen). When checkout is complete, the application resumes.
 </p>
 
-<p>To learn more about Android Market's in-app billing service and start integrating it into your
+<p>To learn more about Google Play's in-app billing service and start integrating it into your
 applications, read the following documents:</p>
 
 <dl>
@@ -88,7 +88,7 @@ applications, read the following documents:</p>
     <dd>Learn how to set up your product list, register test accounts, and handle refunds.</dd>
   <dt><strong><a href="{@docRoot}guide/market/billing/billing_reference.html">In-app Billing
   Reference</a></strong></dt>
-    <dd>Get detailed information about Android Market response codes and the in-app billing
+    <dd>Get detailed information about Google Play response codes and the in-app billing
     interface.</dd>
 </dl>
 

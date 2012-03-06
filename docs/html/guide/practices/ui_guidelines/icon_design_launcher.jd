@@ -49,9 +49,9 @@ across the range of devices on which your application can be installed. See <a
 href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#design-tips">Tips for Designers</a>
 for suggestions on how to work with multiple sets of icons.</p>
 
-<p>A high-resolution version of your application launcher icon is also required by Android Market
+<p>A high-resolution version of your application launcher icon is also required by Google Play
 for use in application listings. For more details on this, see <a
-href="#icons_in_market">Application Icons in Android Market</a> below.</p>
+href="#icons_in_market">Application Icons on Google Play</a> below.</p>
 
 
 <p class="note"><strong>Note:</strong>
@@ -81,7 +81,7 @@ need to review the old guidelines, see the
 
 <ol>
   <li>Promote the brand and tell the story of the app.</li>
-  <li>Help users discover the app in Android Market.</li>
+  <li>Help users discover the app on Google Play.</li>
   <li>Function well in the Launcher.</li>
 </ol>
 
@@ -100,19 +100,19 @@ app is about. Thus, you should:</p>
 </ul>
 
 
-<h3 id="help_users_discover">Help users discover the app in Android Market</h3>
+<h3 id="help_users_discover">Help users discover the app on Google Play</h3>
 
-<p>App launcher icons are the first look that prospective users will get of your app in Android
-Market. A high quality app icon can influence users to find out more as they scroll through lists of
+<p>App launcher icons are the first look that prospective users will get of your app on Google Play.
+A high quality app icon can influence users to find out more as they scroll through lists of
 applications.</p>
 
 <p>Quality matters here. A well-designed icon can be a strong signal that your app
 is of similarly high quality. Consider working with an icon designer to develop the app’s launcher
 icon.</p>
 
-<p class="note"><strong>Note:</strong> Android Market requires a high-resolution version of your
-icon; for more details on this, see <a href="#icons_in_market">Application Icons in Android
-Market</a> below.</p>
+<p class="note"><strong>Note:</strong> Google Play requires a high-resolution version of your
+icon; for more details on this, see <a href="#icons_in_market">Application Icons in Google
+Play</a> below.</p>
 
 
 <h3 id="function_well_in_launcher">Function well in the Launcher</h3>
@@ -239,21 +239,21 @@ This padding can also be used to make room for a subtle drop shadow, which can h
 that launcher icons are legible across on any background color.</p>
 
 
-<h3 id="icons_in_market">Application Icons in Android Market</h3>
+<h3 id="icons_in_market">Application Icons on Google Play</h3>
 
 <p>If you are <a href="{@docRoot}guide/publishing/publishing.html">publishing your application on
-Android Market</a>, you will also need to provide a 512 x 512 pixel, high-resolution application icon
-in the <a href="http://market.android.com/publish">developer console</a> at upload time. This icon
-will be used in various locations in Android Market and does not replace your launcher icon.</p>
+Google Play</a>, you will also need to provide a 512 x 512 pixel, high-resolution application icon
+in the <a href="http://play.google.com/apps/publish">developer console</a> at upload time. This icon
+will be used in various locations on Google Play and does not replace your launcher icon.</p>
 
 <p>For tips and recommendations on creating high-resolution launcher icons that can easily be scaled
 up to 512x512, see <a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#design-tips">
 Tips for Designers</a>.</p>
 
-<p>For information and specifications about high-resolution application icons in Android Market, see
+<p>For information and specifications about high-resolution application icons on Google Play, see
 the following article:</p>
 
 <p style="margin-left:2em"><a href="http://market.android.com/support/bin/answer.py?answer=1078870">
-Graphic Assets for your Application (Android Market Help) &raquo;</a>
+Graphic Assets for your Application (Google Play Help) &raquo;</a>
 
 <br><br>
