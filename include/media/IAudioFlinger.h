@@ -43,6 +43,13 @@ class IAudioFlinger : public IInterface
 public:
     DECLARE_META_INTERFACE(AudioFlinger);
 
+    // or-able bits shared by createTrack and openRecord, but not all combinations make sense
+    enum {
+        TRACK_DEFAULT = 0,
+        TRACK_TIMED   = 1,
+    };
+    typedef uint32_t track_flags_t;
+
     /* create an audio track and registers it with AudioFlinger.
      * return null if the track cannot be created.
      */
@@ -53,10 +60,9 @@ public:
                                 audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
-                                uint32_t flags,
+                                track_flags_t flags,
                                 const sp<IMemory>& sharedBuffer,
                                 audio_io_handle_t output,
-                                bool isTimed,
                                 int *sessionId,
                                 status_t *status) = 0;
 
@@ -67,7 +73,7 @@ public:
                                 audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
-                                uint32_t flags,
+                                track_flags_t flags,
                                 int *sessionId,
                                 status_t *status) = 0;
 

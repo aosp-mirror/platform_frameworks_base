@@ -442,11 +442,9 @@ sp<IAudioTrack> AudioFlinger::createTrack(
         audio_format_t format,
         uint32_t channelMask,
         int frameCount,
-        // FIXME dead, remove from IAudioFlinger
-        uint32_t flags,
+        IAudioFlinger::track_flags_t flags,
         const sp<IMemory>& sharedBuffer,
         audio_io_handle_t output,
-        bool isTimed,
         int *sessionId,
         status_t *status)
 {
@@ -504,6 +502,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
         }
         ALOGV("createTrack() lSessionId: %d", lSessionId);
 
+        bool isTimed = (flags & IAudioFlinger::TRACK_TIMED) != 0;
         track = thread->createTrack_l(client, streamType, sampleRate, format,
                 channelMask, frameCount, sharedBuffer, lSessionId, isTimed, &lStatus);
 
@@ -4677,8 +4676,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         audio_format_t format,
         uint32_t channelMask,
         int frameCount,
-        // FIXME dead, remove from IAudioFlinger
-        uint32_t flags,
+        IAudioFlinger::track_flags_t flags,
         int *sessionId,
         status_t *status)
 {
