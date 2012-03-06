@@ -52,12 +52,12 @@ class ViewStateSerializer {
             throws IOException {
         DataInputStream dis = new DataInputStream(stream);
         int version = dis.readInt();
-        if (version != VERSION) {
+        if (version > VERSION) {
             throw new IOException("Unexpected version: " + version);
         }
         int contentWidth = dis.readInt();
         int contentHeight = dis.readInt();
-        int baseLayer = nativeDeserializeViewState(dis,
+        int baseLayer = nativeDeserializeViewState(version, dis,
                 new byte[WORKING_STREAM_STORAGE]);
 
         final WebViewCore.DrawData draw = new WebViewCore.DrawData();
@@ -76,7 +76,7 @@ class ViewStateSerializer {
             OutputStream stream, byte[] storage);
 
     // Returns a pointer to the BaseLayer
-    private static native int nativeDeserializeViewState(
+    private static native int nativeDeserializeViewState(int version,
             InputStream stream, byte[] storage);
 
     private ViewStateSerializer() {}
