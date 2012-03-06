@@ -57,9 +57,13 @@
 
 #include <audio_utils/primitives.h>
 
-#include <cpustats/ThreadCpuUsage.h>
 #include <powermanager/PowerManager.h>
+
 // #define DEBUG_CPU_USAGE 10  // log statistics every n wall clock seconds
+#ifdef DEBUG_CPU_USAGE
+#include <cpustats/CentralTendencyStatistics.h>
+#include <cpustats/ThreadCpuUsage.h>
+#endif
 
 #include <common_time/cc_helper.h>
 #include <common_time/local_clock.h>
@@ -1939,30 +1943,83 @@ AudioFlinger::MixerThread::~MixerThread()
 
 class CpuStats {
 public:
-    void sample();
+    CpuStats();
+    void sample(const String8 &title);
 #ifdef DEBUG_CPU_USAGE
 private:
-    ThreadCpuUsage mCpu;
+    ThreadCpuUsage mCpuUsage;           // instantaneous thread CPU usage in wall clock ns
+    CentralTendencyStatistics mWcStats; // statistics on thread CPU usage in wall clock ns
+
+    CentralTendencyStatistics mHzStats; // statistics on thread CPU usage in cycles
+
+    int mCpuNum;                        // thread's current CPU number
+    int mCpukHz;                        // frequency of thread's current CPU in kHz
 #endif
 };
 
-void CpuStats::sample() {
+CpuStats::CpuStats()
 #ifdef DEBUG_CPU_USAGE
-    const CentralTendencyStatistics& stats = mCpu.statistics();
-    mCpu.sampleAndEnable();
-    unsigned n = stats.n();
-    // mCpu.elapsed() is expensive, so don't call it every loop
+    : mCpuNum(-1), mCpukHz(-1)
+#endif
+{
+}
+
+void CpuStats::sample(const String8 &title) {
+#ifdef DEBUG_CPU_USAGE
+    // get current thread's delta CPU time in wall clock ns
+    double wcNs;
+    bool valid = mCpuUsage.sampleAndEnable(wcNs);
+
+    // record sample for wall clock statistics
+    if (valid) {
+        mWcStats.sample(wcNs);
+    }
+
+    // get the current CPU number
+    int cpuNum = sched_getcpu();
+
+    // get the current CPU frequency in kHz
+    int cpukHz = mCpuUsage.getCpukHz(cpuNum);
+
+    // check if either CPU number or frequency changed
+    if (cpuNum != mCpuNum || cpukHz != mCpukHz) {
+        mCpuNum = cpuNum;
+        mCpukHz = cpukHz;
+        // ignore sample for purposes of cycles
+        valid = false;
+    }
+
+    // if no change in CPU number or frequency, then record sample for cycle statistics
+    if (valid && mCpukHz > 0) {
+        double cycles = wcNs * cpukHz * 0.000001;
+        mHzStats.sample(cycles);
+    }
+
+    unsigned n = mWcStats.n();
+    // mCpuUsage.elapsed() is expensive, so don't call it every loop
     if ((n & 127) == 1) {
-        long long elapsed = mCpu.elapsed();
+        long long elapsed = mCpuUsage.elapsed();
         if (elapsed >= DEBUG_CPU_USAGE * 1000000000LL) {
             double perLoop = elapsed / (double) n;
             double perLoop100 = perLoop * 0.01;
-            double mean = stats.mean();
-            double stddev = stats.stddev();
-            double minimum = stats.minimum();
-            double maximum = stats.maximum();
-            mCpu.resetStatistics();
-            ALOGI("CPU usage over past %.1f secs (%u mixer loops at %.1f mean ms per loop):\n  us per mix loop: mean=%.0f stddev=%.0f min=%.0f max=%.0f\n  %% of wall: mean=%.1f stddev=%.1f min=%.1f max=%.1f",
+            double perLoop1k = perLoop * 0.001;
+            double mean = mWcStats.mean();
+            double stddev = mWcStats.stddev();
+            double minimum = mWcStats.minimum();
+            double maximum = mWcStats.maximum();
+            double meanCycles = mHzStats.mean();
+            double stddevCycles = mHzStats.stddev();
+            double minCycles = mHzStats.minimum();
+            double maxCycles = mHzStats.maximum();
+            mCpuUsage.resetElapsed();
+            mWcStats.reset();
+            mHzStats.reset();
+            ALOGD("CPU usage for %s over past %.1f secs\n"
+                "  (%u mixer loops at %.1f mean ms per loop):\n"
+                "  us per mix loop: mean=%.0f stddev=%.0f min=%.0f max=%.0f\n"
+                "  %% of wall: mean=%.1f stddev=%.1f min=%.1f max=%.1f\n"
+                "  MHz: mean=%.1f, stddev=%.1f, min=%.1f max=%.1f",
+                    title.string(),
                     elapsed * .000000001, n, perLoop * .000001,
                     mean * .001,
                     stddev * .001,
@@ -1971,7 +2028,12 @@ void CpuStats::sample() {
                     mean / perLoop100,
                     stddev / perLoop100,
                     minimum / perLoop100,
-                    maximum / perLoop100);
+                    maximum / perLoop100,
+                    meanCycles / perLoop1k,
+                    stddevCycles / perLoop1k,
+                    minCycles / perLoop1k,
+                    maxCycles / perLoop1k);
+
         }
     }
 #endif
@@ -2017,16 +2079,14 @@ if (mType == MIXER) {
     sleepTimeShift = 0;
 }
 
-    // MIXER
     CpuStats cpuStats;
+    const String8 myName(String8::format("thread %p type %d TID %d", this, mType, gettid()));
 
     acquireWakeLock();
 
     while (!exitPending())
     {
-if (mType == MIXER) {
-        cpuStats.sample();
-}
+        cpuStats.sample(myName);
 
         Vector< sp<EffectChain> > effectChains;
 
@@ -2063,9 +2123,9 @@ if (mType == MIXER) {
 
                     releaseWakeLock_l();
                     // wait until we have something to do...
-                    ALOGV("Thread %p type %d TID %d going to sleep", this, mType, gettid());
+                    ALOGV("%s going to sleep", myName.string());
                     mWaitWorkCV.wait(mLock);
-                    ALOGV("Thread %p type %d TID %d waking up", this, mType, gettid());
+                    ALOGV("%s waking up", myName.string());
                     acquireWakeLock_l();
 
                     mPrevMixerStatus = MIXER_IDLE;
