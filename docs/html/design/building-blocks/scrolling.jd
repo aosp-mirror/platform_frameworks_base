@@ -1,0 +1,37 @@
+page.title=Scrolling
+@jd:body
+
+<p>Scrolling allows the user to navigate to content in the overflow using a swipe gesture. The
+scrolling speed is proportional to the speed of the gesture.</p>
+<h2 id="indicator">Scroll Indicator</h2>
+
+<p>Appears during scrolling to indicate what portion of the content is currently in view.</p>
+
+<div class="framed-galaxynexus-land-span-13">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/media/scroll_indicator.mp4" type="video/mp4">
+    <source src="{@docRoot}design/media/scroll_indicator.webm" type="video/webm">
+    <source src="{@docRoot}design/media/scroll_indicator.ogv" type="video/ogg">
+  </video>
+</div>
+<div class="figure-caption">
+  <div class="video-instructions">&nbsp;</div>
+</div>
+
+<h2 id="index-scrolling">Index Scrolling</h2>
+
+<p>In addition to traditional scrolling, a long alphabetical list can also offer index scrolling: a way
+to quickly navigate to the items that begin with a particular letter. With index scrolling, a scroll
+indicator appears even when the user isn't scrolling. Touching or dragging it causes the current
+letter to pop up in a prominent way.</p>
+
+<div class="framed-galaxynexus-land-span-13">
+  <video class="play-on-hover" autoplay>
+    <source src="{@docRoot}design/media/scroll_index.mp4" type="video/mp4">
+    <source src="{@docRoot}design/media/scroll_index.webm" type="video/webm">
+    <source src="{@docRoot}design/media/scroll_index.ogv" type="video/ogg">
+  </video>
+</div>
+<div class="figure-caption">
+  <div class="video-instructions">&nbsp;</div>
+</div>

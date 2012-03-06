@@ -1,0 +1,121 @@
+page.title=Downloads
+@jd:body
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-9">
+
+<p>Want everything? We've bundled all the downloads available on Android Design into a single ZIP file.
+You can also download individual files listed below.</p>
+<p>You may use these materials without restriction in your apps and to develop your apps.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<p>
+  <a class="download-button" href="https://dl-ssl.google.com/android/design/Android_Design_Downloads_20120229.zip">Download All</a>
+</p>
+
+  </div>
+</div>
+
+<h2 id="stencils">Stencils and Sources</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<p>Drag and drop your way to beautifully designed Ice Cream Sandwich apps. The stencils feature the
+rich typography, colors, interactive controls, and icons found throughout Android 4.0, along with
+phone and tablet outlines to frame your creations. Source files for icons and controls are also
+available.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_stencils.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<p>
+  <a class="download-button" href="https://dl-ssl.google.com/android/design/Android_Design_Fireworks_Stencil_20120229.png">Adobe&reg; Fireworks&reg; PNG Stencil</a>
+  <a class="download-button" href="https://dl-ssl.google.com/android/design/Android_Design_OmniGraffle_Stencil_20120229.graffle">Omni&reg; OmniGraffle&reg; Stencil</a>
+  <a class="download-button" href="https://dl-ssl.google.com/android/design/Android_Design_Holo_Widgets_20120229.zip">Adobe&reg; Photoshop&reg; Sources</a>
+</p>
+
+  </div>
+</div>
+
+<h2 id="action-bar-icon-pack">Action Bar Icon Pack</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<p>Action bar icons are graphic buttons that represent the most important actions people can take
+within your app. <a href="{@docRoot}design/style/iconography.html">More on Action Bar Iconography</a></p>
+<p>The download package includes icons that are scaled for various screen densities and suitable for
+use with the Holo Light and Holo Dark themes. The package also includes unstyled icons that you can
+modify to match your theme, plus source files.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/iconography_actionbar_style.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<p>
+  <a class="download-button" href="https://dl-ssl.google.com/android/design/Android_Design_Icons_20120229.zip">Action Bar Icon Pack</a>
+</p>
+
+  </div>
+</div>
+
+<h2 id="style">Style</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Roboto</h4>
+<p>Ice Cream Sandwich introduced a new type family named Roboto, created specifically for the
+requirements of UI and high-resolution screens.</p>
+<p><a href="{@docRoot}design/style/typography.html#actionbar">More on Roboto</a></p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_roboto_specimen_preview.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<p>
+  <a class="download-button" href="https://dl-ssl.google.com/android/design/Roboto_Hinted_20111129.zip">Roboto</a>
+  <a class="download-button" href="https://dl-ssl.google.com/android/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a>
+</p>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Color</h4>
+<p>Blue is the standard accent color in Android's color palette. Each color has a corresponding darker
+shade that can be used as a complement when needed.</p>
+<p><a href="{@docRoot}design/style/color.html">More on Color</a></p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_color_swatches.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<p>
+  <a class="download-button" href="https://dl-ssl.google.com/android/design/Android_Design_Color_Swatches_20120229.zip">Color Swatches</a>
+</p>
+
+  </div>
+</div>

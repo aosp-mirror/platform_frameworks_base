@@ -1,0 +1,61 @@
+page.title=Metrics and Grids
+@jd:body
+
+<p>Devices vary not only in physical size, but also in screen density (<acronym title="Dots per
+inch">DPI</acronym>). To simplify the way you design for multiple screens, think of each device as
+falling into a particular size bucket and density bucket. The size buckets are <em>handset</em> (smaller than
+600<acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi
+screen.">dp</acronym>) and <em>tablet</em> (larger than or equal 600dp). The density buckets are <acronym
+title="Low density (120 dpi)">LDPI</acronym>, <acronym title="Medium density (160
+dpi)">MDPI</acronym>, <acronym title="High density (240 dpi)">HDPI</acronym>, and <acronym title
+="Extra-high density (320 dpi)">XHDPI</acronym>. Optimize your application's UI by designing
+alternative layouts for some of the different size buckets, and provide alternative bitmap images
+for different density buckets.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/metrics_diagram.png">
+
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Space considerations</h4>
+<p>Devices vary in the amount of density-independent pixels (dp) they can display.</p>
+<p>To see more, visit the
+<a href="http://developer.android.com/resources/dashboard/screens.html" target="_blank">
+Screen Sizes and Densities Device Dashboard</a>.</p>
+
+  </div>
+</div>
+
+<h2 id="48dp-rhythm">48dp Rhythm</h2>
+
+<p>Touchable UI components are generally laid out along 48dp units.</p>
+
+<img src="{@docRoot}design/media/metrics_48.png">
+
+<div class="vspace size-2">&nbsp;</div>
+
+<h4>Why 48dp?</h4>
+<p>On average, 48dp translate to a physical size of about 9mm (with some variability). This is
+comfortably in the range of recommended target sizes (7-10 mm) for touchscreen objects and users
+will be able to reliably and accurately target them with their fingers.</p>
+<p>If you design your elements to be at least 48dp high and wide you can guarantee that:</p>
+<ul>
+<li>your targets will never be smaller than the minimum recommended target size of 7mm regardless of
+  what screen they are displayed on.</li>
+<li>you strike a good compromise between overall information density on the one hand, and
+  targetability of UI elements on the other.</li>
+</ul>
+
+<img src="{@docRoot}design/media/metrics_closeup.png">
+
+<div class="vspace size-2">&nbsp;</div>
+
+<h4>Mind the gaps</h4>
+<p>Spacing between each UI element is 8dp.</p>
+
+<h2 id="examples">Examples</h2>
+
+<img src="{@docRoot}design/media/metrics_forms.png">

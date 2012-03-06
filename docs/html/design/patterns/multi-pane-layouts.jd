@@ -1,0 +1,110 @@
+page.title=Multi-pane Layouts
+@jd:body
+
+<p>When writing an app for Android, keep in mind that Android devices come in many different screen
+sizes and types. Make sure that your app consistently provides a balanced and aesthetically pleasing
+layout by adjusting its content to varying screen sizes and orientations.</p>
+<p><em>Panels</em> are a great way for your app to achieve this. They allow you to combine multiple views into
+one compound view when a lot of horizontal screen real estate is available and by splitting them up
+when less space is available.</p>
+<h2 id="combining-views">Combining Multiple Views Into One</h2>
+
+<p>On smaller devices your content is typically divided into a master grid or list view and a detail
+view. Touching an item in the master view opens a different screen showing that item's detail
+information.</p>
+
+<img src="{@docRoot}design/media/multipane_views.png">
+
+<p>Because tablets have more screen real estate than phones, you can use panels to combine the related
+list and detail views into a single compound view. This uses the additional space more efficiently
+and makes navigating the app easier. </p>
+
+<img src="{@docRoot}design/media/multipane_view_tablet.png">
+
+<p>In general, use the pane on the right to present more information about the item you selected in the
+left pane. Make sure to keep the item in the left pane selected in order to establish the
+relationship between the panels.</p>
+<h2 id="orientation">Compound Views and Orientation Changes</h2>
+
+<p>Screens should have the same functionality regardless of orientation. If you use a compound view in
+one orientation, don't split it up when the user rotates the screen. There are several techniques
+you can use to adjust the layout after orientation change while keeping functional parity intact.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/multipane_stretch.png">
+    
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Stretch/compress</h4>
+<p>Adjust the column width of your left pane to achieve a balanced layout in both orientations.</p>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/multipane_stack.png">
+    
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Stack</h4>
+<p>Rearrange the panels on your screen to match the orientation.</p>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/multipane_expand.png">
+    
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Expand/collapse</h4>
+<p>When the device rotates, collapse the left pane view to only show the most important information.
+Provide an <em>expand</em> control that allows the user to bring the left pane content back to its original
+width and vice versa.</p>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/multipane_show.png">
+    
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Show/hide</h4>
+<p>After rotating the device, show the right pane in fullscreen view. Use the Up icon in the action bar
+to show the left panel and allow navigation to a different email. Hide the left panel by touching
+the content in the detail panel.</p>
+
+  </div>
+</div>
+
+<h2 id="checklist">Checklist</h2>
+
+<ul>
+<li>
+<p>Plan in advance on how your app scales to different screen sizes and screen orientations.</p>
+</li>
+<li>
+<p>Identify the most appropriate method for the panels in your compound views to reorganize
+  themselves when screen orientation changes.</p>
+</li>
+<li>
+<p>Look for opportunities to consolidate your views into multi-panel compound views.</p>
+</li>
+<li>
+<p>Make sure that your screens provide functional parity after the screen orientation
+  changes.</p>
+</li>
+</ul>

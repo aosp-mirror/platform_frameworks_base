@@ -1,0 +1,74 @@
+page.title=Swipe Views
+@jd:body
+
+<p>Efficient navigation is one of the cornerstones of a well-designed app. While apps are generally
+built in a hierarchical fashion, there are instances where horizontal navigation can flatten
+vertical hierarchies and make access to related data items faster and more enjoyable. Swipe views
+allow the user to efficiently move from item to item using a simple gesture and thereby make
+browsing and consuming data a more fluent experience.</p>
+<h2 id="detail-views">Swiping Between Detail Views</h2>
+
+<p>An app's data is often organized in a master/detail relationship: The user can view a list of
+related data items, such as images, chats, or emails, and then pick one of the items to see the
+detail contents in a separate screen.</p>
+
+<img src="{@docRoot}design/media/swipe_views.png">
+<div class="figure-caption">
+  Master (left) and detail (right) views.
+</div>
+
+<p>On a phone, since the master and detail are on separate screens, this typically requires the user to
+jump back and forth between the list and the detail view, aka "pogo-sticking".</p>
+<p>In cases where users will want to view multiple detail items in succession, avoid pogo-sticking by
+using the swipe gesture to navigate to the next/previous detail view.</p>
+
+<img src="{@docRoot}design/media/swipe_views2.png">
+<div class="figure-caption">
+  Navigating between consecutive Email messages using the swipe gesture.
+</div>
+
+<h2 id="between-tabs">Swiping Between Tabs</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+    <div class="framed-galaxynexus-port-span-5">
+      <video class="play-on-hover" autoplay>
+        <source src="{@docRoot}design/media/swipe_tabs.mp4" type="video/mp4">
+        <source src="{@docRoot}design/media/swipe_tabs.webm" type="video/webm">
+        <source src="{@docRoot}design/media/swipe_tabs.ogv" type="video/ogg">
+      </video>
+    </div>
+    <div class="figure-caption">
+      People app with swipe gesture navigation between top-level screens.
+      <div class="video-instructions">&nbsp;</div>
+    </div>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+<p>If your app uses action bar tabs, use swipe to navigate between the different views.</p>
+<div class="vspace size-2">&nbsp;</div>
+
+<h2 id="checklist">Checklist</h2>
+
+<ul>
+<li>
+<p>Use swipe to quickly navigate between detail views or tabs.</p>
+</li>
+<li>
+<p>Transition between the views as the user performs the swipe gesture. Do not wait for the
+  gesture to complete and then transition between views.</p>
+</li>
+<li>
+<p>If you used buttons in the past for previous/next navigation, replace them with
+  the swipe gesture.</p>
+</li>
+<li>
+<p>Consider adding contextual information in your detail view that informs the user about the
+  relative list position of the currently visible item.</p>
+</li>
+</ul>
+
+  </div>
+</div>
