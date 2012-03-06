@@ -812,7 +812,7 @@ protected:
         virtual     void        threadLoop_standby();
 
         // Non-trivial for DUPLICATING only
-        virtual     void        updateWaitTime() { }
+        virtual     void        updateWaitTime_l() { }
 
         // Non-trivial for DIRECT only
         virtual     void        applyVolume() { }
@@ -1046,7 +1046,9 @@ public:
         virtual     void        threadLoop_sleepTime();
         virtual     void        threadLoop_write();
         virtual     void        threadLoop_standby();
-        virtual     void        updateWaitTime();
+
+        // called from threadLoop, addOutputTrack, removeOutputTrack
+        virtual     void        updateWaitTime_l();
     private:
 
                     uint32_t    mWaitTimeMs;

@@ -2067,9 +2067,7 @@ if (mType == MIXER) {
                 maxPeriod = seconds(mFrameCount) / mSampleRate * 15;
 }
 
-if (mType == DUPLICATING) {
-                updateWaitTime();
-}
+                updateWaitTime_l();
 
                 activeSleepTime = activeSleepTimeUs();
                 idleSleepTime = idleSleepTimeUs();
@@ -3202,7 +3200,7 @@ void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
         thread->setStreamVolume(AUDIO_STREAM_CNT, 1.0f);
         mOutputTracks.add(outputTrack);
         ALOGV("addOutputTrack() track %p, on thread %p", outputTrack, thread);
-        updateWaitTime();
+        updateWaitTime_l();
     }
 }
 
@@ -3213,14 +3211,15 @@ void AudioFlinger::DuplicatingThread::removeOutputTrack(MixerThread *thread)
         if (mOutputTracks[i]->thread() == thread) {
             mOutputTracks[i]->destroy();
             mOutputTracks.removeAt(i);
-            updateWaitTime();
+            updateWaitTime_l();
             return;
         }
     }
     ALOGV("removeOutputTrack(): unkonwn thread: %p", thread);
 }
 
-void AudioFlinger::DuplicatingThread::updateWaitTime()
+// caller must hold mLock
+void AudioFlinger::DuplicatingThread::updateWaitTime_l()
 {
     mWaitTimeMs = UINT_MAX;
     for (size_t i = 0; i < mOutputTracks.size(); i++) {
