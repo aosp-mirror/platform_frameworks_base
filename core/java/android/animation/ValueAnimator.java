@@ -645,7 +645,7 @@ public class ValueAnimator extends Animator {
             // onAnimate to process the next frame of the animations.
             if (!mAnimationScheduled
                     && (!mAnimations.isEmpty() || !mDelayedAnims.isEmpty())) {
-                mChoreographer.postAnimationCallback(this);
+                mChoreographer.postAnimationCallback(this, null);
                 mAnimationScheduled = true;
             }
         }

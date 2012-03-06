@@ -8775,6 +8775,52 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * <p>Causes the Runnable to execute on the next animation time step.
+     * The runnable will be run on the user interface thread.</p>
+     *
+     * <p>This method can be invoked from outside of the UI thread
+     * only when this View is attached to a window.</p>
+     *
+     * @param action The Runnable that will be executed.
+     *
+     * @hide
+     */
+    public void postOnAnimation(Runnable action) {
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            attachInfo.mViewRootImpl.mChoreographer.postAnimationCallback(action, null);
+        } else {
+            // Assume that post will succeed later
+            ViewRootImpl.getRunQueue().post(action);
+        }
+    }
+
+    /**
+     * <p>Causes the Runnable to execute on the next animation time step,
+     * after the specified amount of time elapses.
+     * The runnable will be run on the user interface thread.</p>
+     *
+     * <p>This method can be invoked from outside of the UI thread
+     * only when this View is attached to a window.</p>
+     *
+     * @param action The Runnable that will be executed.
+     * @param delayMillis The delay (in milliseconds) until the Runnable
+     *        will be executed.
+     *
+     * @hide
+     */
+    public void postOnAnimationDelayed(Runnable action, long delayMillis) {
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            attachInfo.mViewRootImpl.mChoreographer.postAnimationCallbackDelayed(
+                    action, null, delayMillis);
+        } else {
+            // Assume that post will succeed later
+            ViewRootImpl.getRunQueue().postDelayed(action, delayMillis);
+        }
+    }
+
+    /**
      * <p>Removes the specified Runnable from the message queue.</p>
      * 
      * <p>This method can be invoked from outside of the UI thread
@@ -8791,6 +8837,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
             attachInfo.mHandler.removeCallbacks(action);
+            attachInfo.mViewRootImpl.mChoreographer.removeAnimationCallbacks(action, null);
         } else {
             // Assume that post will succeed later
             ViewRootImpl.getRunQueue().removeCallbacks(action);
@@ -11837,10 +11884,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void scheduleDrawable(Drawable who, Runnable what, long when) {
         if (verifyDrawable(who) && what != null) {
+            final long delay = when - SystemClock.uptimeMillis();
             if (mAttachInfo != null) {
-                mAttachInfo.mHandler.postAtTime(what, who, when);
+                mAttachInfo.mViewRootImpl.mChoreographer.postAnimationCallbackDelayed(
+                        what, who, Choreographer.subtractFrameDelay(delay));
             } else {
-                ViewRootImpl.getRunQueue().postDelayed(what, when - SystemClock.uptimeMillis());
+                ViewRootImpl.getRunQueue().postDelayed(what, delay);
             }
         }
     }
@@ -11854,7 +11903,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public void unscheduleDrawable(Drawable who, Runnable what) {
         if (verifyDrawable(who) && what != null) {
             if (mAttachInfo != null) {
-                mAttachInfo.mHandler.removeCallbacks(what, who);
+                mAttachInfo.mViewRootImpl.mChoreographer.removeAnimationCallbacks(what, who);
             } else {
                 ViewRootImpl.getRunQueue().removeCallbacks(what);
             }
@@ -11872,7 +11921,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void unscheduleDrawable(Drawable who) {
         if (mAttachInfo != null) {
-            mAttachInfo.mHandler.removeCallbacksAndMessages(who);
+            mAttachInfo.mViewRootImpl.mChoreographer.removeAnimationCallbacks(null, who);
         }
     }
 
