@@ -1018,7 +1018,7 @@ const GLMessage_Function GLMessage::eglGetRenderBufferANDROID;
 const GLMessage_Function GLMessage::eglGetSystemTimeFrequencyNV;
 const GLMessage_Function GLMessage::eglGetSystemTimeNV;
 const GLMessage_Function GLMessage::invalid;
-const GLMessage_Function GLMessage::frameBufferContents;
+const GLMessage_Function GLMessage::glVertexAttribPointerData;
 const GLMessage_Function GLMessage::Function_MIN;
 const GLMessage_Function GLMessage::Function_MAX;
 const int GLMessage::Function_ARRAYSIZE;

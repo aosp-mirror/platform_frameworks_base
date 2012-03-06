@@ -19,6 +19,7 @@
 
 #include <map>
 #include <pthread.h>
+#include <utils/KeyedVector.h>
 
 #include "hooks.h"
 #include "gltrace_transport.h"
@@ -32,6 +33,20 @@ enum FBBinding {CURRENTLY_BOUND_FB, FB0};
 
 class GLTraceState;
 
+class ElementArrayBuffer {
+    GLvoid *mBuf;
+    GLsizeiptr mSize;
+
+public:
+    ElementArrayBuffer():mBuf(NULL), mSize(0) {}
+    ElementArrayBuffer(GLvoid *buf, GLsizeiptr size);
+    ~ElementArrayBuffer();
+
+    void updateSubBuffer(GLintptr offset, const GLvoid* data, GLsizeiptr size);
+    GLvoid *getBuffer();
+    GLsizeiptr getSize();
+};
+
 /** GL Trace Context info associated with each EGLContext */
 class GLTraceContext {
     int mId;                    /* unique context id */
@@ -43,6 +58,9 @@ class GLTraceContext {
 
     BufferedOutputStream *mBufferedOutputStream; /* stream where trace info is sent */
 
+    /* list of element array buffers in use. */
+    DefaultKeyedVector<GLuint, ElementArrayBuffer*> mElementArrayBuffers;
+
     void resizeFBMemory(unsigned minSize);
 public:
     gl_hooks_t *hooks;
@@ -53,6 +71,13 @@ public:
     void getCompressedFB(void **fb, unsigned *fbsize,
                             unsigned *fbwidth, unsigned *fbheight,
                             FBBinding fbToRead);
+
+    // Methods to work with element array buffers
+    void bindBuffer(GLuint bufferId, GLvoid *data, GLsizeiptr size);
+    void getBuffer(GLuint bufferId, GLvoid **data, GLsizeiptr *size);
+    void updateBufferSubData(GLuint bufferId, GLintptr offset, GLvoid *data, GLsizeiptr size);
+    void deleteBuffer(GLuint bufferId);
+
     void traceGLMessage(GLMessage *msg);
 };
 

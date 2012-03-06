@@ -510,7 +510,7 @@ message GLMessage {
         eglGetSystemTimeNV = 2045;
 
         invalid = 3000;
-        frameBufferContents = 3001;
+        glVertexAttribPointerData = 3001;
     }
 
     // A GL call's return data and arguments are formatted into this DataType
