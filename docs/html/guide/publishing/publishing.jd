@@ -320,7 +320,8 @@ URI is:</p>
 <p class="note"><strong>Note:</strong> If you create a link to open Google Play from your web
 site and the user selects it from an Android-powered device, the device's Google Play application will
 resolve the link so the user can use the Google Play application on the device instead of opening the web
-site. As such, you should always use {@code http://play.google.com/store/...} URIs when creating a link on
+site. As such, you should always use {@code http://play.google.com/store/apps/...} URIs when
+creating a link on
 a web page. When pointing to your apps from within your Android app, use the
 {@code market://} URIs in an intent, so that the Google Play application always opens.</p>
 
@@ -333,13 +334,15 @@ the application description, screenshots, reviews and more, and choose to instal
 
 <p>The format for the URI that opens the details page is:</p>
 
-<p style="margin-left:2em"><code>&lt;URI_prefix&gt;<b>details?id=</b>&lt;package_name&gt;</code></p>
+<p style="margin-left:2em"><code>&lt;URI_prefix&gt;<b>apps/details?id=</b>&lt;package_name&gt;</code></p>
 
 <p>The <code>&lt;package_name&gt;</code> is a placeholder for the target application's
 fully-qualified package name, as declared in the <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#package">{@code
 package}</a> attribute of the <a href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code
 &lt;manifest&gt;}</a> element.</p>
+
+<p>For example: <code>http://play.google.com/store/apps/details?id=com.example.myapp</code></p>
 
 
 <h4>Opening the app details page from your Android app</h4>
@@ -355,12 +358,12 @@ Google Play:</p>
 
 <pre>
 Intent intent = new Intent(Intent.ACTION_VIEW);
-intent.setData(Uri.parse("market://details?id=com.android.example"));
+intent.setData(Uri.parse("market://details?id=com.example.android"));
 startActivity(intent);
 </pre>
 
 <p>This will open the Google Play application on the device to view the {@code
-com.android.example} application.</p>
+com.example.android} application.</p>
 
 
 <h4>Opening the app details page from a web site</h4>
@@ -369,17 +372,17 @@ com.android.example} application.</p>
 format:</p>
 
 <p style="margin-left:2em">
-  <code>http://play.google.com/store/details?id=&lt;package_name&gt;</code>
+  <code>http://play.google.com/store/apps/details?id=&lt;package_name&gt;</code>
 </p>
 
 <p>For example, here's a link that opens an application's details page on Google Play:</p>
 
 <pre>
-&lt;a href="http://play.google.com/store/details?id=com.android.example">App Link&lt;/a>
+&lt;a href="http://play.google.com/store/apps/details?id=com.example.android">App Link&lt;/a>
 </pre>
 
 <p>When clicked from a desktop web browser, this opens the Google Play web site to view the
-{@code com.android.example} application. When clicked from an Android-powered device, users are
+{@code com.example.android} application. When clicked from an Android-powered device, users are
 given the option to use either their web browser or the Google Play application to view the
 application.</p>
 
@@ -456,17 +459,16 @@ web browser or the Google Play application to perform the search.</p>
 
 <h3 id="BuildaButton">Build a Google Play button</h3>
 
-<p>Use the following form to generate a "Get it on Google Play" or "Android App
-on Google Play" button that you can use on your web site. Input either your
-application's package name or publisher name and the button will take users to
-Google Play to either view your application's information or view a list of your
-published apps. If users click the button while on an Android-powered device,
-the Google Play application will respond to show users your application(s).</p>
+<p>Use the following form to create a button for your web site that takes users to your application
+on Google Play. Input either your application's package name or your publisher name and the button
+will take users to Google Play to either view your application's information or view a list of your
+published apps. If users click the button while on an Android-powered device, the Google Play
+application will respond to show users your application(s).</p>
 
-<p>This form offers four versions of the official brand badges at
-recommended sizes. <!--If you want to create a different size, you can download an EPS file for
-the button images from the <a href="http://www.android.com/branding.html">Android Brand
-Guidelines</a>.</p>-->
+<p>This form offers two styles of the official brand badge each at recommended sizes. You can pick
+between either "Get it on Google Play" or "Android app on Google Play." You should not modify the
+badge images in any way. For more usage guidelines,
+see the <a href="http://www.android.com/branding.html">Android Brand Guidelines</a>.</p>
 
 <style type="text/css">
 
@@ -510,31 +512,42 @@ div.button-row input {
 var imagePath = "http://www.android.com/images/brand/"
 var linkStart = "<a href=\"http://play.google.com/store/";
 var imageStart = "\">\n"
-        + "  <img src=\"" + imagePath;
-var imageEnd = ".png\"\n"
-        + "       alt=\"Available on Google Play\" />\n</a>";
+        + "  <img alt=\"";
+  // leaves opening for the alt text value
+var imageSrc = "\"\n       src=\"" + imagePath;
+  // leaves opening for the image file name
+var imageEnd = ".png\" />\n</a>";
 
 // variables for creating code snippet
 var linkStartCode = "&lt;a href=\"http://play.google.com/store/";
 var imageStartCode = "\"&gt;\n"
-        + "  &lt;img src=\"" + imagePath;
-var imageEndCode = ".png\"\n"
-        + "       alt=\"Available on Google Play\" />\n&lt;/a>";
+        + "  &lt;img alt=\"";
+  // leaves opening for the alt text value
+var imageSrcCode = "\"\n       src=\"" + imagePath;
+  // leaves opening for the image file name
+var imageEndCode = ".png\" />\n&lt;/a>";
 
 /** Generate the HTML snippet and demo based on form values */
 function buildButton(form) {
-  if (form["package"].value != "com.android.example") {
+  var selectedValue = $('form input[type=radio]:checked').val();
+  var altText = selectedValue.indexOf("get_it") != -1 ? "Get it on Google Play" : "Android app on Google Play";
+
+  if (form["package"].value != "com.example.android") {
     $("#preview").show();
-    $("#snippet").show().html(linkStartCode + "details?id=" + form["package"].value
-            + imageStartCode + $('form input[type=radio]:checked').val() + imageEndCode);
-    $("#button-preview").html(linkStart + "details?id=" + form["package"].value
-            + imageStart + $('form input[type=radio]:checked').val() + imageEnd);
+    $("#snippet").show().html(linkStartCode + "apps/details?id=" + form["package"].value
+            + imageStartCode + altText + imageSrcCode
+            + selectedValue + imageEndCode);
+    $("#button-preview").html(linkStart + "apps/details?id=" + form["package"].value
+            + imageStart + altText + imageSrc
+            + selectedValue + imageEnd);
   } else if (form["publisher"].value != "Example, Inc.") {
     $("#preview").show();
     $("#snippet").show().html(linkStartCode + "search?q=pub:" + form["publisher"].value
-            + imageStartCode + $('form input[type=radio]:checked').val() + imageEndCode);
-    $("#button-preview").html(linkStart + "search?q=pub:" + form["publisher"].value + imageStart +
-    $('form input[type=radio]:checked').val() + imageEnd);
+            + imageStartCode + altText + imageSrcCode
+            + selectedValue + imageEndCode);
+    $("#button-preview").html(linkStart + "search?q=pub:" + form["publisher"].value
+            + imageStart + altText + imageSrc
+            + selectedValue + imageEnd);
   } else {
     alert("Please enter your package name or publisher name");
   }
@@ -598,13 +611,13 @@ $(document).ready(function() {
 <form class="button-form">
   <label class="block" for="package">Package name:</label>
   <input class="text" type="text" id="package" name="package"
-         value="com.android.example"
-         default="com.android.example"
-         onfocus="onInputFocus(this, 'com.android.example')"
-         onblur="onInputBlur(this, 'com.android.example')"
+         value="com.example.android"
+         default="com.example.android"
+         onfocus="onInputFocus(this, 'com.example.android')"
+         onblur="onInputBlur(this, 'com.example.android')"
          onkeyup="return onTextEntered(event, this.parentNode, this)"/>&nbsp;
          <a id="package-clear" style="display:none" href="#"
-            onclick="return clearLabel('package','com.android.example');">clear</a>
+            onclick="return clearLabel('package','com.example.android');">clear</a>
   <p style="clear:both;margin:0">&nbsp;<em>or</em></p>
   <label class="block" style="margin-top:5px" for="publisher">Publisher name:</label>
   <input class="text" type="text" id="publisher" name="publisher"
@@ -619,22 +632,22 @@ $(document).ready(function() {
 
 <div class="button-row">
   <input type="radio" name="buttonStyle" value="get_it_on_play_logo_small" id="ns" checked="checked" />
-    <label for="ns"><img src="http://www.android.com/images/brand/get_it_on_play_logo_small"
-alt="narrow and small logo" /></label>
+    <label for="ns"><img src="http://www.android.com/images/brand/get_it_on_play_logo_small.png"
+alt="Get it on Google Play (small)" /></label>
     &nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_large.png" id="nm" />
+  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_large" id="nm" />
     <label for="nm"><img src="http://www.android.com/images/brand/get_it_on_play_logo_large.png"
-alt="narrow and large logo" /></label>
+alt="Get it on Google Play (large)" /></label>
 </div>
 
 <div class="button-row">
-  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_small.png" id="ws" />
+  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_small" id="ws" />
     <label for="ws"><img src="http://www.android.com/images/brand/android_app_on_play_logo_small.png"
-alt="wide and small logo" /></label>
+alt="Android app on Google Play (small)" /></label>
     &nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_large.png" id="wm" />
+  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_large" id="wm" />
     <label for="wm"><img src="http://www.android.com/images/brand/android_app_on_play_logo_large.png"
-alt="wide and large logo" /></label>
+alt="Android app on Google Play (large)" /></label>
 </div>
 
   <input type="button" onclick="return buildButton(this.parentNode)" value="Build my button"
@@ -644,7 +657,7 @@ style="padding:5px" />
 
 <div id="preview" style="display:none">
   <p>Copy and paste this HTML into your web site:</p>
-  <textarea id="snippet" cols="80" rows="4" onclick="this.select()"
+  <textarea id="snippet" cols="100" rows="5" onclick="this.select()"
 style="font-family:monospace;background-color:#efefef;padding:5px;display:none;margin-bottom:1em">
   </textarea >
 
@@ -671,7 +684,7 @@ the web and in the Android application), as discussed in the previous sections.<
 
 <tr>
 <td>Display the details screen for a specific application</td>
-<td><code>http://play.google.com/store/details?id=&lt;package_name&gt;</code>
+<td><code>http://play.google.com/store/apps/details?id=&lt;package_name&gt;</code>
 <td><code>market://details?id=&lt;package_name&gt;</code></td>
 </tr>
 
