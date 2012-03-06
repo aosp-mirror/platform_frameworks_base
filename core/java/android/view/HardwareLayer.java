@@ -167,7 +167,7 @@ abstract class HardwareLayer {
 
     /**
      * Specifies the display list to use to refresh the layer.
-     * 
+     *
      * @param displayList The display list containing the drawing commands to
      *                    execute in this layer
      * @param dirtyRect The dirty region of the layer that needs to be redrawn
