@@ -310,10 +310,10 @@ status_t AudioFlinger::dumpClients(int fd, const Vector<String16>& args)
     }
 
     result.append("Global session refs:\n");
-    result.append(" session pid cnt\n");
+    result.append(" session pid count\n");
     for (size_t i = 0; i < mAudioSessionRefs.size(); i++) {
         AudioSessionRef *r = mAudioSessionRefs[i];
-        snprintf(buffer, SIZE, " %7d %3d %3d\n", r->sessionid, r->pid, r->cnt);
+        snprintf(buffer, SIZE, " %7d %3d %3d\n", r->mSessionid, r->mPid, r->mCnt);
         result.append(buffer);
     }
     write(fd, result.string(), result.size());
@@ -1036,9 +1036,9 @@ void AudioFlinger::removeNotificationClient(pid_t pid)
     bool removed = false;
     for (size_t i = 0; i< num; ) {
         AudioSessionRef *ref = mAudioSessionRefs.itemAt(i);
-        ALOGV(" pid %d @ %d", ref->pid, i);
-        if (ref->pid == pid) {
-            ALOGV(" removing entry for pid %d session %d", pid, ref->sessionid);
+        ALOGV(" pid %d @ %d", ref->mPid, i);
+        if (ref->mPid == pid) {
+            ALOGV(" removing entry for pid %d session %d", pid, ref->mSessionid);
             mAudioSessionRefs.removeAt(i);
             delete ref;
             removed = true;
@@ -5700,9 +5700,9 @@ void AudioFlinger::acquireAudioSessionId(int audioSession)
     size_t num = mAudioSessionRefs.size();
     for (size_t i = 0; i< num; i++) {
         AudioSessionRef *ref = mAudioSessionRefs.editItemAt(i);
-        if (ref->sessionid == audioSession && ref->pid == caller) {
-            ref->cnt++;
-            ALOGV(" incremented refcount to %d", ref->cnt);
+        if (ref->mSessionid == audioSession && ref->mPid == caller) {
+            ref->mCnt++;
+            ALOGV(" incremented refcount to %d", ref->mCnt);
             return;
         }
     }
@@ -5718,10 +5718,10 @@ void AudioFlinger::releaseAudioSessionId(int audioSession)
     size_t num = mAudioSessionRefs.size();
     for (size_t i = 0; i< num; i++) {
         AudioSessionRef *ref = mAudioSessionRefs.itemAt(i);
-        if (ref->sessionid == audioSession && ref->pid == caller) {
-            ref->cnt--;
-            ALOGV(" decremented refcount to %d", ref->cnt);
-            if (ref->cnt == 0) {
+        if (ref->mSessionid == audioSession && ref->mPid == caller) {
+            ref->mCnt--;
+            ALOGV(" decremented refcount to %d", ref->mCnt);
+            if (ref->mCnt == 0) {
                 mAudioSessionRefs.removeAt(i);
                 delete ref;
                 purgeStaleEffects_l();
@@ -5766,9 +5766,9 @@ void AudioFlinger::purgeStaleEffects_l() {
         bool found = false;
         for (size_t k = 0; k < numsessionrefs; k++) {
             AudioSessionRef *ref = mAudioSessionRefs.itemAt(k);
-            if (ref->sessionid == sessionid) {
+            if (ref->mSessionid == sessionid) {
                 ALOGV(" session %d still exists for %d with %d refs",
-                     sessionid, ref->pid, ref->cnt);
+                     sessionid, ref->mPid, ref->mCnt);
                 found = true;
                 break;
             }
