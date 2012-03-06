@@ -408,8 +408,8 @@ user experience with minimal effort on your behalf, we recommend you use the Dow
 download your expansion files. The information in the following sections explain how to integrate
 the library into your application.</p>
 
-<p>If you'd rather develop your own solution to download the expansion files using the Android
-Market URLs, you must follow the <a href="{@docRoot}guide/market/licensing/index.html">Application
+<p>If you'd rather develop your own solution to download the expansion files using the Google
+Play URLs, you must follow the <a href="{@docRoot}guide/market/licensing/index.html">Application
 Licensing</a> documentation to perform a license request, then retrieve the expansion file names,
 sizes, and URLs from the response extras. You should use the <a href="#ExpansionPolicy">{@code
 APKExpansionPolicy}</a> class (included in the License Verification Library) as your licensing

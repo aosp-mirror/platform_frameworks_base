@@ -9,8 +9,8 @@ disallow further use as appropriate. </p>
 
 <p>Using the service, you can apply a flexible licensing policy on an application-by-application
 basis&mdash;each application can enforce licensing in the way most appropriate for it. If necessary,
-an application can apply custom constraints based on the licensing status obtained from Android
-Market. For example, an application can check the licensing status and then apply custom constraints
+an application can apply custom constraints based on the licensing status obtained from Google Play.
+For example, an application can check the licensing status and then apply custom constraints
 that allow the user to run it unlicensed for a specific validity period. An application can also
 restrict use of the application to a specific device, in addition to any other constraints. </p>
 
