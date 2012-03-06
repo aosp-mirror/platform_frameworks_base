@@ -1,0 +1,29 @@
+page.title=Style
+header.justLinks=1
+footer.hide=1
+@jd:body
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 10px;
+  top: 402px;
+  width: 220px;
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+    Build visually compelling apps that look great on any device. 
+    <br><br>
+    <a href="{@docRoot}design/style/devices-displays.html" class="landing-page-link">Devices and Displays</a>
+  </div>
+
+  <a href="{@docRoot}design/style/devices-displays.html">
+    <img src="{@docRoot}design/media/design_elements_landing.png">
+  </a>
+</div>

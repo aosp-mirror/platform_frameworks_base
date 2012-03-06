@@ -1,0 +1,29 @@
+page.title=
+header.hide=1
+footer.hide=1
+@jd:body
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 10px;
+  top: 472px;
+  width: 280px;
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+    Welcome to <strong>Android Design</strong>, your place for learning how to design exceptional Android apps.
+    <br><br>
+    <a href="{@docRoot}design/get-started/creative-vision.html" class="landing-page-link">Creative Vision</a>
+  </div>
+
+  <a href="{@docRoot}design/get-started/creative-vision.html">
+    <img src="{@docRoot}design/media/index_landing_page.png">
+  </a>
+</div>

@@ -1,0 +1,56 @@
+page.title=Typography
+@jd:body
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/typography_main.png">
+
+  </div>
+  <div class="layout-content-col span-5">
+
+<p>The Android design language relies on traditional typographic tools such as scale, space, rhythm,
+and alignment with an underlying grid. Successful deployment of these tools is essential to help
+users quickly understand a screen of information. To support such use of typography, Ice Cream
+Sandwich introduced a new type family named Roboto, created specifically for the requirements of UI
+and high-resolution screens. The current TextView framework supports regular, bold, italic, and bold
+italic weights by default.</p>
+
+    <img src="{@docRoot}design/media/typography_alphas.png">
+
+<p><a href="https://dl-ssl.google.com/android/design/Roboto_Hinted_20111129.zip">Download Roboto</a></p>
+<p><a href="https://dl-ssl.google.com/android/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a></p>
+
+  </div>
+</div>
+
+<hr>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Default type colors</h4>
+<p>The Android UI uses the following default color styles: <code>textColorPrimary</code> and
+<code>textColorSecondary</code>. For light themes use <code>textColorPrimaryInverse</code> and
+<code>textColorSecondaryInverse</code>. The framework text color styles also support variants for
+touch feedback states when used inside UI elements.</p>
+
+    <img src="{@docRoot}design/media/typography_defaults.png">
+
+  </div>
+  <div class="layout-content-col span-6">
+
+<h4>Typographic Scale</h4>
+<p>Contrast in type sizes can go a long way to create ordered, understandable layouts. However, too
+many different sizes in the same UI can be messy. The Android framework uses the following limited
+set of type sizes:</p>
+
+<img src="{@docRoot}design/media/typography_sizes.png">
+
+<p>Users can select a system-wide scaling factor for text in the Settings app. In order to support
+these accessibility features, type should be specified in scale-independent pixels
+(<acronym title="Scale-independent pixels. One sp is one pixel on a 160 dpi screen if the user's global text scale is set to 100%.">sp</acronym>)
+wherever possible. Layouts supporting scalable types should be tested against these settings.</p>
+
+  </div>
+</div>

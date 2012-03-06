@@ -1,0 +1,48 @@
+page.title=Creative Vision
+@jd:body
+
+<img src="{@docRoot}design/media/creative_vision_main.png">
+
+<div class="vspace size-1">&nbsp;</div>
+
+<p>Ice Cream Sandwich (Android 4.0) marks a major milestone for Android design. We touched nearly every
+pixel of the system as we expanded the new design approaches introduced in Honeycomb tablets to all
+types of mobile devices. Starting with the most basic elements, we introduced a new font, Roboto,
+designed for high-resolution displays. Other big changes include framework-level action bars on
+phones and support for new phones without physical buttons.</p>
+<p>We focused the design work with three overarching goals for our core apps and the system at large.
+As you design apps to work with Android, consider these goals:</p>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+<h4>Enchant me</h4>
+<p>Beauty is more than skin deep. Android apps are sleek and aesthetically pleasing on multiple levels.
+Transitions are fast and clear; layout and typography are crisp and meaningful. App icons are works
+of art in their own right. Just like a well-made tool, your app should strive to combine beauty,
+simplicity and purpose to create a magical experience that is effortless and powerful.</p>
+
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Simplify my life</h4>
+<p>Android apps make life easier and are easy to understand. When people use your app for the first
+time, they should intuitively grasp the most important features. The design work doesn't stop at the
+first use, though. Android apps remove ongoing chores like file management and syncing. Simple tasks
+never require complex procedures, and complex tasks are tailored to the human hand and mind. People
+of all ages and cultures feel firmly in control, and are never overwhelmed by too many choices or
+irrelevant flash.</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<h4>Make me amazing</h4>
+<p>It's not enough to make an app that is easy to use. Android apps empower people to try new things
+and to use apps in inventive new ways. Android lets people combine applications into new workflows
+through multitasking, notifications, and sharing across apps. At the same time, your app should feel
+personal, giving people access to superb technology with clarity and grace.</p>
+
+  </div>
+</div>

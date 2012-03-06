@@ -1,0 +1,29 @@
+page.title=Building Blocks
+header.justLinks=1
+footer.hide=1
+@jd:body
+
+<style>
+#landing-graphic-container {
+  position: relative;
+}
+
+#text-overlay {
+  position: absolute;
+  left: 10px;
+  top: 472px;
+  width: 450px;
+}
+</style>
+
+<div id="landing-graphic-container">
+  <div id="text-overlay">
+    Your inventory of ready-to-use elements for creating outstanding apps.
+    <br><br>
+    <a href="{@docRoot}design/building-blocks/tabs.html" class="landing-page-link">Tabs</a>
+  </div>
+
+  <a href="{@docRoot}design/building-blocks/tabs.html">
+    <img src="{@docRoot}design/media/building_blocks_landing.png">
+  </a>
+</div>
