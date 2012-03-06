@@ -196,7 +196,7 @@ public final class Choreographer {
     }
 
     /**
-     * Removes an animation callback.
+     * Removes animation callbacks for the specified runnable.
      * Does nothing if the specified animation callback has not been posted or has already
      * been removed.
      *
@@ -205,12 +205,12 @@ public final class Choreographer {
      * @see #postAnimationCallback
      * @see #postAnimationCallbackDelayed
      */
-    public void removeAnimationCallback(Runnable runnable) {
+    public void removeAnimationCallbacks(Runnable runnable) {
         if (runnable == null) {
             throw new IllegalArgumentException("runnable must not be null");
         }
         synchronized (mLock) {
-            mAnimationCallbacks = removeCallbackLocked(mAnimationCallbacks, runnable);
+            mAnimationCallbacks = removeCallbacksLocked(mAnimationCallbacks, runnable);
         }
         mHandler.removeMessages(MSG_POST_DELAYED_ANIMATION, runnable);
     }
@@ -260,7 +260,7 @@ public final class Choreographer {
     }
 
     /**
-     * Removes a draw callback.
+     * Removes draw callbacks for the specified runnable.
      * Does nothing if the specified draw callback has not been posted or has already
      * been removed.
      *
@@ -269,12 +269,12 @@ public final class Choreographer {
      * @see #postDrawCallback
      * @see #postDrawCallbackDelayed
      */
-    public void removeDrawCallback(Runnable runnable) {
+    public void removeDrawCallbacks(Runnable runnable) {
         if (runnable == null) {
             throw new IllegalArgumentException("runnable must not be null");
         }
         synchronized (mLock) {
-            mDrawCallbacks = removeCallbackLocked(mDrawCallbacks, runnable);
+            mDrawCallbacks = removeCallbacksLocked(mDrawCallbacks, runnable);
         }
         mHandler.removeMessages(MSG_POST_DELAYED_DRAW, runnable);
     }
@@ -427,7 +427,7 @@ public final class Choreographer {
         return head;
     }
 
-    private Callback removeCallbackLocked(Callback head, Runnable runnable) {
+    private Callback removeCallbacksLocked(Callback head, Runnable runnable) {
         Callback predecessor = null;
         for (Callback callback = head; callback != null;) {
             final Callback next = callback.next;
