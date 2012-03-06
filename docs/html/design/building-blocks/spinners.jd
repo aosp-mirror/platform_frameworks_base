@@ -1,0 +1,37 @@
+page.title=Spinners
+@jd:body
+
+<p>Spinners provide a quick way to select one value from a set. In the default state, a spinner shows
+its currently selected value. Touching the spinner displays a dropdown menu with all other available
+values, from which the user can select a new one.</p>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+    <img src="{@docRoot}design/media/spinners_form.png">
+
+<h4>Spinners in forms</h4>
+<p>Spinners are useful for data picking in forms. They are compact and integrate nicely with other
+components. Use spinners in forms for both simple data input and in combination with other input
+fields. For example, a text field might let you edit an email address for a contact, while its
+associated spinner allows you to select whether it's a Home or Work address.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="{@docRoot}design/media/spinners_actionbar.png">
+
+<h4>Spinners in action bars</h4>
+<p>Use spinners in action bars to switch views. For example, Gmail uses a spinner to permit switching
+between accounts or commonly used labels. Spinners are useful when changing the view is important to
+your app, but not necessarily a frequent occurrence. In cases where view switching is frequent, use
+tabs.</p>
+
+  </div>
+</div>
+
+<img src="{@docRoot}design/media/spinners_hololightanddark.png">
+<div class="figure-caption">
+  Spinners in the Holo Dark and Holo Light themes, in various states.
+</div>

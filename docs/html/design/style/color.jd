@@ -1,0 +1,134 @@
+page.title=Color
+@jd:body
+
+<style>
+  .color-row {
+    width: 740px;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+
+    display: -webkit-box;
+    display:    -moz-box;
+    display:         box;
+
+    -webkit-box-orient: horizontal;
+       -moz-box-orient: horizontal;
+            box-orient: horizontal;
+
+    cursor: pointer;
+
+    -webkit-user-select: none;
+            user-select: none;
+    /* nested user-select in FF is broken as of Jan 2012, don't use it */
+  }
+
+  .color-row-container {
+    line-height: 0; /* to remove more top space in FF for -moz-box elements */
+  }
+
+  .color-row-container + .color-row-container {
+    margin-top: -10px !important;
+  }
+
+  .color-row li {
+    margin-left: 0 !important;
+    position: relative;
+    list-style-type: none;
+    height: 80px;
+    display: block;
+
+    -webkit-box-flex: 1;
+       -moz-box-flex: 1;
+            box-flex: 1;
+  }
+
+  .color-row li:before {
+    display: none;
+  }
+
+  .color-row li.thin {
+    height: 40px;
+  }
+
+  .color-row li span {
+    display: none;
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    margin-left: -2.5em;
+    width: 5em;
+    background-color: #fff;
+    padding: 10px;
+    font-weight: 600;
+    line-height: 20px;
+    text-align: center;
+    box-shadow: 0 5px 5px rgba(0,0,0,0.1);
+    cursor: text;
+
+    -webkit-user-select: text;
+            user-select: text;
+    /* nested user-select in FF is broken as of Jan 2012, don't use it */
+  }
+
+  .color-row li:hover span {
+    display: block;
+  }
+
+  /* triangle callout */
+  .color-row li span:after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: -16px;
+    border: 8px solid transparent;
+    border-top-color: #fff;
+    width: 0;
+    height: 0;
+    margin-left: -8px;
+  }
+</style>
+
+<p>Use color primarily for emphasis. Choose colors that fit with your brand and provide good contrast
+between visual components. Note that red and green may be indistinguishable to color-blind users.</p>
+
+    <div class="color-row-container">
+      <ul class="color-row">
+        <li><span>#33b5e5</span></li>
+        <li><span>#aa66cc</span></li>
+        <li><span>#99cc00</span></li>
+        <li><span>#ffbb33</span></li>
+        <li><span>#ff4444</span></li>
+      </ul>
+    </div>
+
+    <div class="color-row-container">
+      <ul class="color-row">
+        <li class="thin"><span>#0099cc</span></li>
+        <li class="thin"><span>#9933cc</span></li>
+        <li class="thin"><span>#669900</span></li>
+        <li class="thin"><span>#ff8800</span></li>
+        <li class="thin"><span>#cc0000</span></li>
+      </ul>
+    </div>
+
+<h2 id="palette">Palette</h2>
+
+<p>Blue is the standard accent color in Android's color palette. Each color has a corresponding darker
+shade that can be used as a complement when needed.</p>
+<p><a href="https://dl-ssl.google.com/android/design/Android_Design_Color_Swatches_20120229.zip">Download the swatches</a></p>
+
+<img src="{@docRoot}design/media/color_spectrum.png">
+
+<script>
+  $(document).ready(function() {
+    $('.color-row li').each(function() {
+      var color = $(this).text();
+      $(this).css('background-color', color);
+      $(this).find('span')
+          .css('color', color)
+          .text(color.toUpperCase());
+    });
+    
+  });
+</script>
