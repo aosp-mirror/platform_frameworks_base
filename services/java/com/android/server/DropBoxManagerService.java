@@ -28,6 +28,7 @@ import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.Message;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -64,6 +65,9 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
     private static final int DEFAULT_RESERVE_PERCENT = 10;
     private static final int QUOTA_RESCAN_MILLIS = 5000;
 
+    // mHandler 'what' value.
+    private static final int MSG_SEND_BROADCAST = 1;
+
     private static final boolean PROFILE_DUMP = false;
 
     // TODO: This implementation currently uses one file per entry, which is
@@ -88,10 +92,10 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
     private int mCachedQuotaBlocks = 0;  // Space we can use: computed from free space, etc.
     private long mCachedQuotaUptimeMillis = 0;
 
-    // Ensure that all log entries have a unique timestamp
-    private long mLastTimestamp = 0;
-
     private volatile boolean mBooted = false;
+
+    // Provide a way to perform sendBroadcast asynchronously to avoid deadlocks.
+    private final Handler mHandler;
 
     /** Receives events that might indicate a need to clean up files. */
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -143,10 +147,20 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
         mContentResolver.registerContentObserver(
             Settings.Secure.CONTENT_URI, true,
             new ContentObserver(new Handler()) {
+                @Override
                 public void onChange(boolean selfChange) {
                     mReceiver.onReceive(context, (Intent) null);
                 }
             });
+
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == MSG_SEND_BROADCAST) {
+                    mContext.sendBroadcast((Intent)msg.obj, android.Manifest.permission.READ_LOGS);
+                }
+            }
+        };
 
         // The real work gets done lazily in init() -- that way service creation always
         // succeeds, and things like disk problems cause individual method failures.
@@ -157,6 +171,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
         mContext.unregisterReceiver(mReceiver);
     }
 
+    @Override
     public void add(DropBoxManager.Entry entry) {
         File temp = null;
         OutputStream output = null;
@@ -227,14 +242,17 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             long time = createEntry(temp, tag, flags);
             temp = null;
 
-            Intent dropboxIntent = new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
+            final Intent dropboxIntent = new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
             dropboxIntent.putExtra(DropBoxManager.EXTRA_TAG, tag);
             dropboxIntent.putExtra(DropBoxManager.EXTRA_TIME, time);
             if (!mBooted) {
                 dropboxIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             }
-            mContext.sendBroadcast(dropboxIntent, android.Manifest.permission.READ_LOGS);
-
+            // Call sendBroadcast after returning from this call to avoid deadlock. In particular
+            // the caller may be holding the WindowManagerService lock but sendBroadcast requires a
+            // lock in ActivityManagerService. ActivityManagerService has been caught holding that
+            // very lock while waiting for the WindowManagerService lock.
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_SEND_BROADCAST, dropboxIntent));
         } catch (IOException e) {
             Slog.e(TAG, "Can't write: " + tag, e);
         } finally {
