@@ -3093,12 +3093,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             setBackgroundDrawable(background);
         }
 
-        mUserPaddingRelative = (startPadding >= 0 || endPadding >= 0);
-
         // Cache user padding as we cannot fully resolve padding here (we dont have yet the resolved
         // layout direction). Those cached values will be used later during padding resolution.
         mUserPaddingStart = startPadding;
         mUserPaddingEnd = endPadding;
+
+        updateUserPaddingRelative();
 
         if (padding >= 0) {
             leftPadding = padding;
@@ -3144,6 +3144,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         computeOpaqueFlags();
+    }
+
+    private void updateUserPaddingRelative() {
+        mUserPaddingRelative = (mUserPaddingStart >= 0 || mUserPaddingEnd >= 0);
     }
 
     /**
@@ -9599,6 +9603,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         // Set to resolved
         mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED;
         onResolvedLayoutDirectionChanged();
+        // Resolve padding
+        resolvePadding();
     }
 
     /**
@@ -9653,7 +9659,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
 
-        recomputePadding();
+        if(isPaddingRelative()) {
+            setPaddingRelative(mUserPaddingStart, mPaddingTop, mUserPaddingEnd, mUserPaddingBottom);
+        } else {
+            recomputePadding();
+        }
         onPaddingChanged(resolvedLayoutDirection);
     }
 
@@ -12220,15 +12230,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param bottom the bottom padding in pixels
      */
     public void setPadding(int left, int top, int right, int bottom) {
-        boolean changed = false;
-
+        mUserPaddingStart = -1;
+        mUserPaddingEnd = -1;
         mUserPaddingRelative = false;
 
+        internalSetPadding(left, top, right, bottom);
+    }
+
+    private void internalSetPadding(int left, int top, int right, int bottom) {
         mUserPaddingLeft = left;
         mUserPaddingRight = right;
         mUserPaddingBottom = bottom;
 
         final int viewFlags = mViewFlags;
+        boolean changed = false;
 
         // Common case is there are no scroll bars.
         if ((viewFlags & (SCROLLBARS_VERTICAL|SCROLLBARS_HORIZONTAL)) != 0) {
@@ -12297,18 +12312,17 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param bottom the bottom padding in pixels
      */
     public void setPaddingRelative(int start, int top, int end, int bottom) {
-        mUserPaddingRelative = true;
-
         mUserPaddingStart = start;
         mUserPaddingEnd = end;
+        mUserPaddingRelative = true;
 
         switch(getResolvedLayoutDirection()) {
             case LAYOUT_DIRECTION_RTL:
-                setPadding(end, top, start, bottom);
+                internalSetPadding(end, top, start, bottom);
                 break;
             case LAYOUT_DIRECTION_LTR:
             default:
-                setPadding(start, top, end, bottom);
+                internalSetPadding(start, top, end, bottom);
         }
     }
 
