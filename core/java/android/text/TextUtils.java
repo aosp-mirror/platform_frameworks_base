@@ -1091,13 +1091,13 @@ public class TextUtils {
             if (avail < 0) {
                 // it all goes
             } else if (where == TruncateAt.START) {
-                right = len - mt.breakText(0, len, false, avail);
+                right = len - mt.breakText(len, false, avail);
             } else if (where == TruncateAt.END || where == TruncateAt.END_SMALL) {
-                left = mt.breakText(0, len, true, avail);
+                left = mt.breakText(len, true, avail);
             } else {
-                right = len - mt.breakText(0, len, false, avail / 2);
+                right = len - mt.breakText(len, false, avail / 2);
                 avail -= mt.measure(right, len);
-                left = mt.breakText(0, right, true, avail);
+                left = mt.breakText(right, true, avail);
             }
 
             if (callback != null) {
