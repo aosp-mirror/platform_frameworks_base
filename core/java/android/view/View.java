@@ -5247,6 +5247,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 if (mNextFocusForwardId == View.NO_ID) return null;
                 return findViewInsideOutShouldExist(root, mNextFocusForwardId);
             case FOCUS_BACKWARD: {
+                if (mID == View.NO_ID) return null;
                 final int id = mID;
                 return root.findViewByPredicateInsideOut(this, new Predicate<View>() {
                     @Override
