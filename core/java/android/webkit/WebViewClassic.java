@@ -8523,7 +8523,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mFocusedNode.mHasFocus && !mWebView.isInTouchMode()) {
             return !mFocusedNode.mEditable;
         }
-        if (mInitialHitTestResult.getType() == HitTestResult.UNKNOWN_TYPE) {
+        if (mFocusedNode.mHasFocus && mFocusedNode.mEditable) {
             return false;
         }
         long delay = System.currentTimeMillis() - mTouchHighlightRequested;
