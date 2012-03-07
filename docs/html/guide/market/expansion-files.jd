@@ -421,7 +421,7 @@ policy, which captures the expansion file names, sizes, and URLs from the licens
 
 <p>To use APK expansion files with your application and provide the best user experience with
 minimal effort on your behalf, we recommend you use the Downloader Library that's included in the
-Android Market APK Expansion Library package. This library downloads your expansion files in a
+Google Market Apk Expansion package. This library downloads your expansion files in a
 background service, shows a user notification with the download status, handles network
 connectivity loss, resumes the download when possible, and more.</p>
 
@@ -447,10 +447,11 @@ receives updates about the download progress.</li>
 download two packages from the SDK Manager and add the appropriate libraries to your
 application.</p>
 
-<p>First, open the Android SDK Manager, expand <em>Extras</em> and download:</p>
+<p>First, open the <a href="{@docRoot}sdk/adding-components.html">Android SDK Manager</a>, expand
+<em>Extras</em> and download:</p>
 <ul>
   <li><em>Google Market Licensing package</em></li>
-  <li><em>Google Market APK Expansion Library package</em></li>
+  <li><em>Google Market Apk Expansion package</em></li>
 </ul>
 
 <p>If you're using Eclipse, create a project for each library and add it to your app:</p>
@@ -498,10 +499,10 @@ Android Market. The format that you choose for the expansion files and how you r
 from the shared storage is a separate implementation that you should consider based on your
 application needs.</p>
 
-<p class="note"><strong>Tip:</strong> The APK Expansion Library package includes a sample
+<p class="note"><strong>Tip:</strong> The Apk Expansion package includes a sample
 application
 that shows how to use the Downloader Library in an app. The sample uses a third library
-available in the APK Expansion Library package called the APK Expansion Zip Library. If
+available in the Apk Expansion package called the APK Expansion Zip Library. If
 you plan on
 using ZIP files for your expansion files, we suggest you also add the APK Expansion Zip Library to
 your application. For more information, see the section below
@@ -686,7 +687,7 @@ help with this process:</p>
 versionCode)}</li>
     <li>{@code doesFileExist(Context c, String fileName, long fileSize)}</li>
   </ul>
-    <p>For example, the sample app provided in the APK Expansion Library package calls the
+    <p>For example, the sample app provided in the Apk Expansion package calls the
 following method in the activity's {@link android.app.Activity#onCreate onCreate()} method to check
 whether the expansion files already exist on the device:</p>
 <pre>
@@ -872,7 +873,7 @@ current speed, overall progress, and total so you can update the download progre
 </dl>
 <p class="note"><strong>Tip:</strong> For examples of these callbacks that update the download
 progress UI, see the {@code SampleDownloaderActivity} in the sample app provided with the
-APK Expansion Library package.</p>
+Apk Expansion package.</p>
 
 <p>Some public methods for the {@code IDownloaderService} interface you might find useful are:</p>
 
@@ -1037,7 +1038,7 @@ option to specify the file suffixes that should not be compressed:</p>
 </div>
 </div>
 
-<p>The Android Market APK Expansion Library package includes a library called the APK
+<p>The Google Market Apk Expansion package includes a library called the APK
 Expansion Zip Library (located in {@code
 &lt;sdk>/extras/google/google_market_apk_expansion/zip_file/}). This is an optional library that
 helps you read your expansion
@@ -1089,7 +1090,7 @@ android.content.ContentProvider} that marshals the data from the ZIP files throu
 provider {@link android.net.Uri} in order to provide file access for certain Android APIs that
 expect {@link android.net.Uri} access to media files.
       <p>The sample application available in the
-APK Expansion Library package demonstrates a scenario in which this class is useful
+Apk Expansion package demonstrates a scenario in which this class is useful
 to specify a video with {@link android.widget.VideoView#setVideoURI
 VideoView.setVideoURI()}. See the sample app's class {@code SampleZipfileProvider} for an
 example of how to extend this class to use in your application.</p></dd>
@@ -1226,7 +1227,7 @@ the Android system nor Android Market perform actual patching between your main 
 files. Your application code must perform any necessary patches itself.</p>
 
 <p>If you use ZIP files as your expansion files, the <a href="#ZipLib">APK Expansion Zip
-Library</a> that's included with the APK Expansion Library package includes the ability to merge
+Library</a> that's included with the Apk Expansion package includes the ability to merge
 your
 patch file with the main expansion file.</p>
 
@@ -1249,7 +1250,7 @@ file and one patch expansion file. During an update to a file, Android Market de
 previous version (and so must your application when performing manual updates).</li>
   <li>When adding a patch expansion file, the Android system does not actually patch your
 application or main expansion file. You must design your application to support the patch data.
-However, the APK Expansion Library package includes a library for using ZIP files
+However, the Apk Expansion package includes a library for using ZIP files
 as expansion files, which merges the data from the patch file into the main expansion file so
 you can easily read all the expansion file data.</li>
 </ul>
