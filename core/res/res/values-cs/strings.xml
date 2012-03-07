@@ -761,7 +761,7 @@
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Umožňuje držiteli podávat žádosti o ověření balíčků. Běžné aplikace by toto nastavení neměly nikdy potřebovat."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"přístup k sériovým portům"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Umožňuje držiteli přístup k sériovým portům pomocí rozhraní SerialManager API."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"varování před automatickou aktualizací"</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"varovat před automatickou aktualizací"</string>
     <string name="permdesc_updateLock" msgid="1655625832166778492">"Umožňuje držiteli navrhnout systému informace o vhodné době pro upgrade zařízení neinteraktivním restartováním."</string>
     <string name="save_password_message" msgid="767344687139195790">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nyní ne"</string>
