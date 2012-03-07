@@ -212,6 +212,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
 
+    private boolean mSystemReady;
+
     public NetworkStatsService(
             Context context, INetworkManagementService networkManager, IAlarmManager alarmManager) {
         this(context, networkManager, alarmManager, NtpTrustedTime.getInstance(context),
@@ -250,6 +252,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     public void systemReady() {
+        mSystemReady = true;
+
         if (!isBandwidthControlEnabled()) {
             Slog.w(TAG, "bandwidth controls disabled, unable to track stats");
             return;
@@ -336,6 +340,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mUidTagRecorder = null;
 
         mDevStatsCached = null;
+
+        mSystemReady = false;
     }
 
     private void maybeUpgradeLegacyStatsLocked() {
@@ -649,6 +655,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * {@link NetworkIdentitySet}.
      */
     private void updateIfacesLocked() {
+        if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
 
         // take one last stats snapshot before updating iface mapping. this
@@ -737,7 +744,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * {@link NetworkStatsHistory}.
      */
     private void performPollLocked(int flags) {
+        if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "performPollLocked(flags=0x" + Integer.toHexString(flags) + ")");
+
         final long startRealtime = SystemClock.elapsedRealtime();
 
         final boolean persistNetwork = (flags & FLAG_PERSIST_NETWORK) != 0;
