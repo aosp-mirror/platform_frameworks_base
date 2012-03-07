@@ -34,7 +34,6 @@
 #include <sys/resource.h>
 #include <sched.h>
 #include <cutils/properties.h>
-#include <cutils/sched_policy.h>
 #include <sys/syscall.h>
 #include <string.h>
 #include <bcc/bcc.h>

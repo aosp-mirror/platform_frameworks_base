@@ -26,7 +26,6 @@
 
 #include <cutils/properties.h>
 
-#include <cutils/sched_policy.h>
 #include <sys/syscall.h>
 #include <string.h>
 
@@ -354,17 +353,7 @@ void Context::setPriority(int32_t p) {
     // This is probably not what we want for something the user is actively
     // looking at.
     mThreadPriority = p;
-#if 0
-    SchedPolicy pol = SP_FOREGROUND;
-    if (p > 0) {
-        pol = SP_BACKGROUND;
-    }
-    if (!set_sched_policy(mNativeThreadId, pol)) {
-        // success; reset the priority as well
-    }
-#else
     setpriority(PRIO_PROCESS, mNativeThreadId, p);
-#endif
     mHal.funcs.setPriority(this, mThreadPriority);
 }
 
