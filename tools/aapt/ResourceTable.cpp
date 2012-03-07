@@ -2304,10 +2304,8 @@ bool ResourceTable::getAttributeFlags(
 
         const char16_t* end = name + nameLen;
         const char16_t* pos = name;
-        bool failed = false;
-        while (pos < end && !failed) {
+        while (pos < end) {
             const char16_t* start = pos;
-            end++;
             while (pos < end && *pos != '|') {
                 pos++;
             }
@@ -2333,9 +2331,7 @@ bool ResourceTable::getAttributeFlags(
                 // Didn't find this flag identifier.
                 return false;
             }
-            if (pos < end) {
-                pos++;
-            }
+            pos++;
         }
 
         return true;
