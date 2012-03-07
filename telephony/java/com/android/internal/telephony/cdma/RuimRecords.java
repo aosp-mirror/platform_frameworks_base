@@ -31,6 +31,7 @@ import com.android.internal.telephony.AdnRecordLoader;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.IccRefreshResponse;
 import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.MccTable;
 
@@ -61,7 +62,6 @@ public final class RuimRecords extends IccRecords {
 
     // ***** Event Constants
 
-    private static final int EVENT_RUIM_READY = 1;
     private static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 2;
     private static final int EVENT_GET_IMSI_DONE = 3;
     private static final int EVENT_GET_DEVICE_IDENTITY_DONE = 4;
@@ -78,7 +78,7 @@ public final class RuimRecords extends IccRecords {
     private static final int EVENT_RUIM_REFRESH = 31;
 
 
-    RuimRecords(CDMAPhone p) {
+    public RuimRecords(PhoneBase p) {
         super(p);
 
         adnCache = new AdnRecordCache(phone);
@@ -88,8 +88,6 @@ public final class RuimRecords extends IccRecords {
         // recordsToLoad is set to 0 because no requests are made yet
         recordsToLoad = 0;
 
-
-        p.mIccCard.registerForRuimReady(this, EVENT_RUIM_READY, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         // NOTE the EVENT_SMS_ON_RUIM is not registered
         p.mCM.registerForIccRefresh(this, EVENT_RUIM_REFRESH, null);
@@ -102,7 +100,6 @@ public final class RuimRecords extends IccRecords {
     @Override
     public void dispose() {
         //Unregister for all events
-        phone.mIccCard.unregisterForRuimReady(this);
         phone.mCM.unregisterForOffOrNotAvailable( this);
         phone.mCM.unregisterForIccRefresh(this);
     }
@@ -206,10 +203,6 @@ public final class RuimRecords extends IccRecords {
         }
 
         try { switch (msg.what) {
-            case EVENT_RUIM_READY:
-                onRuimReady();
-            break;
-
             case EVENT_RADIO_OFF_OR_NOT_AVAILABLE:
                 onRadioOffOrNotAvailable();
             break;
@@ -349,7 +342,8 @@ public final class RuimRecords extends IccRecords {
                 IccCard.INTENT_VALUE_ICC_LOADED, null);
     }
 
-    private void onRuimReady() {
+    @Override
+    public void onReady() {
         /* broadcast intent ICC_READY here so that we can make sure
           READY is sent before IMSI ready
         */

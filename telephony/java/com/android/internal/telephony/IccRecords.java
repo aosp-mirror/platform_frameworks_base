@@ -102,6 +102,7 @@ public abstract class IccRecords extends Handler implements IccConstants {
     public abstract void dispose();
 
     protected abstract void onRadioOffOrNotAvailable();
+    public abstract void onReady();
 
     //***** Public Methods
     public AdnRecordCache getAdnCache() {

@@ -25,6 +25,7 @@ import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccFileTypeMismatch;
 import com.android.internal.telephony.IccIoResult;
 import com.android.internal.telephony.IccUtils;
+import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.PhoneProxy;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public final class RuimFileHandler extends IccFileHandler {
     //***** Instance Variables
 
     //***** Constructor
-    RuimFileHandler(CDMAPhone phone) {
+    public RuimFileHandler(PhoneBase phone) {
         super(phone);
     }
 

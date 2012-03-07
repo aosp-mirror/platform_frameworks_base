@@ -64,6 +64,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.UUSInfo;
 import com.android.internal.telephony.cat.CatService;
+import com.android.internal.telephony.uicc.UiccController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,9 +150,9 @@ public class CDMAPhone extends PhoneBase {
     }
 
     protected void initSstIcc() {
-        mIccCard = new IccCard(this, LOG_TAG, IccCard.CARD_IS_NOT_3GPP, DBG);
-        mIccRecords = new RuimRecords(this);
-        mIccFileHandler = new RuimFileHandler(this);
+        mIccCard = UiccController.getInstance(this).getIccCard();
+        mIccRecords = mIccCard.getIccRecords();
+        mIccFileHandler = mIccCard.getIccFileHandler();
         // CdmaServiceStateTracker registers with IccCard to know
         // when the Ruim card is ready. So create mIccCard before the ServiceStateTracker
         mSST = new CdmaServiceStateTracker(this);
@@ -242,7 +243,6 @@ public class CDMAPhone extends PhoneBase {
             mSMS.dispose();
             mIccFileHandler.dispose(); // instance of RuimFileHandler
             mIccRecords.dispose();
-            mIccCard.dispose();
             mRuimPhoneBookInterfaceManager.dispose();
             mRuimSmsInterfaceManager.dispose();
             mSubInfo.dispose();

@@ -27,7 +27,7 @@ import android.os.Message;
 public final class CdmaLteUiccFileHandler extends IccFileHandler {
     static final String LOG_TAG = "CDMA";
 
-    CdmaLteUiccFileHandler(CDMALTEPhone phone) {
+    public CdmaLteUiccFileHandler(CDMALTEPhone phone) {
         super(phone);
     }
 
