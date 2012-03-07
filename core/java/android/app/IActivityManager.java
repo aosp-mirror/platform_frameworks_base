@@ -278,12 +278,15 @@ public interface IActivityManager extends IInterface {
      * SIGUSR1 is delivered. All others are ignored.
      */
     public void signalPersistentProcesses(int signal) throws RemoteException;
-    // Retrieve info of applications installed on external media that are currently
-    // running.
+    // Retrieve running application processes in the system
     public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses()
             throws RemoteException;
- // Retrieve running application processes in the system
+    // Retrieve info of applications installed on external media that are currently
+    // running.
     public List<ApplicationInfo> getRunningExternalApplications()
+            throws RemoteException;
+    // Get memory information about the calling process.
+    public void getMyMemoryState(ActivityManager.RunningAppProcessInfo outInfo)
             throws RemoteException;
     // Get device configuration
     public ConfigurationInfo getDeviceConfigurationInfo() throws RemoteException;
@@ -606,4 +609,5 @@ public interface IActivityManager extends IInterface {
     int KILL_ALL_BACKGROUND_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+139;
     int GET_CONTENT_PROVIDER_EXTERNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+140;
     int REMOVE_CONTENT_PROVIDER_EXTERNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+141;
+    int GET_MY_MEMORY_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+142;
 }

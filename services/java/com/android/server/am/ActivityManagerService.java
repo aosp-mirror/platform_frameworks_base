@@ -7952,6 +7952,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private void fillInProcMemInfo(ProcessRecord app,
+            ActivityManager.RunningAppProcessInfo outInfo) {
+        outInfo.pid = app.pid;
+        outInfo.uid = app.info.uid;
+        if (mHeavyWeightProcess == app) {
+            outInfo.flags |= ActivityManager.RunningAppProcessInfo.FLAG_CANT_SAVE_STATE;
+        }
+        if (app.persistent) {
+            outInfo.flags |= ActivityManager.RunningAppProcessInfo.FLAG_PERSISTENT;
+        }
+        outInfo.lastTrimLevel = app.trimMemoryLevel;
+        int adj = app.curAdj;
+        outInfo.importance = oomAdjToImportance(adj, outInfo);
+        outInfo.importanceReasonCode = app.adjTypeCode;
+    }
+
     public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses() {
         enforceNotIsolatedCaller("getRunningAppProcesses");
         // Lazy instantiation of list
@@ -7965,16 +7981,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ActivityManager.RunningAppProcessInfo currApp = 
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.pid, app.getPackageList());
-                    currApp.uid = app.info.uid;
-                    if (mHeavyWeightProcess == app) {
-                        currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_CANT_SAVE_STATE;
-                    }
-                    if (app.persistent) {
-                        currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_PERSISTENT;
-                    }
-                    int adj = app.curAdj;
-                    currApp.importance = oomAdjToImportance(adj, currApp);
-                    currApp.importanceReasonCode = app.adjTypeCode;
+                    fillInProcMemInfo(app, currApp);
                     if (app.adjSource instanceof ProcessRecord) {
                         currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
                         currApp.importanceReasonImportance = oomAdjToImportance(
@@ -8023,6 +8030,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         return retList;
+    }
+
+    @Override
+    public void getMyMemoryState(ActivityManager.RunningAppProcessInfo outInfo) {
+        enforceNotIsolatedCaller("getMyMemoryState");
+        synchronized (this) {
+            ProcessRecord proc;
+            synchronized (mPidsSelfLocked) {
+                proc = mPidsSelfLocked.get(Binder.getCallingPid());
+            }
+            fillInProcMemInfo(proc, outInfo);
+        }
     }
 
     @Override
@@ -8479,8 +8498,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pw.print("    Process "); pw.print(pname);
                             pw.print(" uid "); pw.print(puid);
                             pw.print(": last crashed ");
-                            pw.print((now-uids.valueAt(i)));
-                            pw.println(" ms ago");
+                            TimeUtils.formatDuration(now-uids.valueAt(i), pw);
+                            pw.println(" ago");
                 }
             }
         }
@@ -13982,6 +14001,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (mPreviousProcess != null) minFactor++;
             if (factor < minFactor) factor = minFactor;
             step = 0;
+            int fgTrimLevel;
+            if (numHidden <= (ProcessList.MAX_HIDDEN_APPS/5)) {
+                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
+            } else if (numHidden <= (ProcessList.MAX_HIDDEN_APPS/3)) {
+                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
+            } else {
+                fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
+            }
             int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             for (i=0; i<N; i++) {
                 ProcessRecord app = mLruProcesses.get(i);
@@ -14008,6 +14035,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.trimMemoryLevel = curLevel;
                     step++;
                     if (step >= factor) {
+                        step = 0;
                         switch (curLevel) {
                             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
                                 curLevel = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
@@ -14027,20 +14055,28 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                     app.trimMemoryLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-                } else if ((app.curAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
-                        && app.pendingUiClean) {
-                    if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
-                            && app.thread != null) {
+                } else {
+                    if ((app.curAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
+                            && app.pendingUiClean) {
+                        // If this application is now in the background and it
+                        // had done UI, then give it the special trim level to
+                        // have it free UI resources.
+                        final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
+                        if (app.trimMemoryLevel < level && app.thread != null) {
+                            try {
+                                app.thread.scheduleTrimMemory(level);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                        app.pendingUiClean = false;
+                    }
+                    if (app.trimMemoryLevel < fgTrimLevel && app.thread != null) {
                         try {
-                            app.thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                            app.thread.scheduleTrimMemory(fgTrimLevel);
                         } catch (RemoteException e) {
                         }
                     }
-                    app.trimMemoryLevel = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
-                    app.pendingUiClean = false;
-                } else {
-                    app.trimMemoryLevel = 0;
+                    app.trimMemoryLevel = fgTrimLevel;
                 }
             }
         } else {
@@ -14057,11 +14093,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         } catch (RemoteException e) {
                         }
                     }
-                    app.trimMemoryLevel = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
                     app.pendingUiClean = false;
-                } else {
-                    app.trimMemoryLevel = 0;
                 }
+                app.trimMemoryLevel = 0;
             }
         }
 
