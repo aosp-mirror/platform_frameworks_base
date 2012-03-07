@@ -920,6 +920,10 @@ public:
         // Code snippets that are temporarily lifted up out of threadLoop() until the merge
                     void        checkSilentMode_l();
 
+        // Non-trivial for DUPLICATING only
+        virtual     void        saveOutputTracks() { }
+        virtual     void        clearOutputTracks() { }
+
     private:
 
         friend class AudioFlinger;
@@ -972,9 +976,7 @@ public:
         // activeTrack was local to the while !exitingPending loop
         sp<Track>                       activeTrack;
         // DUPLICATING only
-        SortedVector < sp<OutputTrack> >  outputTracks;
         uint32_t                        writeFrames;
-        SortedVector < sp<OutputTrack> >  mOutputTracks;
     };
 
     class MixerThread : public PlaybackThread {
@@ -1070,9 +1072,13 @@ private:
 
         // called from threadLoop, addOutputTrack, removeOutputTrack
         virtual     void        updateWaitTime_l();
+        virtual     void        saveOutputTracks();
+        virtual     void        clearOutputTracks();
     private:
 
                     uint32_t    mWaitTimeMs;
+        SortedVector < sp<OutputTrack> >  outputTracks;
+        SortedVector < sp<OutputTrack> >  mOutputTracks;
     };
 
               PlaybackThread *checkPlaybackThread_l(audio_io_handle_t output) const;
