@@ -1212,7 +1212,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (imm != null) imm.restartInput(this);
         }
 
-        if (mEditor != null) getEditor().mTextDisplayListIsValid = false;
+        if (mEditor != null) getEditor().invalidateTextDisplayList();
         prepareCursorControllers();
 
         // start or stop the cursor blinking as appropriate
@@ -2328,7 +2328,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setHighlightColor(int color) {
         if (mHighlightColor != color) {
             mHighlightColor = color;
-            if (mEditor != null) getEditor().mTextDisplayListIsValid = false;
+            if (mEditor != null) getEditor().invalidateTextDisplayList();
             invalidate();
         }
     }
@@ -2349,7 +2349,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mShadowDx = dx;
         mShadowDy = dy;
 
-        if (mEditor != null) getEditor().mTextDisplayListIsValid = false;
+        if (mEditor != null) getEditor().invalidateTextDisplayList();
         invalidate();
     }
 
@@ -2841,7 +2841,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         if (inval) {
-            if (mEditor != null) getEditor().mTextDisplayListIsValid = false;
+            if (mEditor != null) getEditor().invalidateTextDisplayList();
             invalidate();
         }
     }
@@ -3334,7 +3334,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Invalidate display list if hint will be used
         if (mEditor != null && mText.length() == 0 && mHint != null) {
-            getEditor().mTextDisplayListIsValid = false;
+            getEditor().invalidateTextDisplayList();
         }
     }
 
@@ -4423,13 +4423,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (dr.mDrawableStart != null) dr.mDrawableStart.mutate().setAlpha(alpha);
                     if (dr.mDrawableEnd != null) dr.mDrawableEnd.mutate().setAlpha(alpha);
                 }
-                if (mEditor != null) getEditor().mTextDisplayListIsValid = false;
+                if (mEditor != null) getEditor().invalidateTextDisplayList();
             }
             return true;
         }
 
         if (mCurrentAlpha != 255) {
-            if (mEditor != null) getEditor().mTextDisplayListIsValid = false;
+            if (mEditor != null) getEditor().invalidateTextDisplayList();
         }
         mCurrentAlpha = 255;
         return false;
@@ -6286,7 +6286,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (changed && mEditor != null) getEditor().mTextDisplayListIsValid = false;
+        if (changed && mEditor != null) getEditor().invalidateTextDisplayList();
     }
 
     private boolean isShowingHint() {
@@ -7124,7 +7124,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 ims.mContentChanged = true;
             }
-            if (mEditor != null) getEditor().mTextDisplayListIsValid = false;
+            if (mEditor != null) getEditor().invalidateTextDisplayList();
         }
 
         if (MetaKeyKeyListener.isMetaTracker(buf, what)) {
@@ -8271,7 +8271,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (getEditor().mPositionListener != null) {
                 getEditor().mPositionListener.onScrollChanged();
             }
-            getEditor().mTextDisplayListIsValid = false;
+            getEditor().invalidateTextDisplayList();
         }
     }
 
@@ -11297,7 +11297,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         InputMethodState mInputMethodState;
 
         DisplayList mTextDisplayList;
-        boolean mTextDisplayListIsValid;
 
         boolean mFrozenWithFocus;
         boolean mSelectionMoved;
@@ -11386,9 +11385,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 removeCallbacks(mShowSuggestionRunnable);
             }
 
-            if (mTextDisplayList != null) {
-                mTextDisplayList.invalidate();
-            }
+            invalidateTextDisplayList();
 
             if (mSpellChecker != null) {
                 mSpellChecker.closeSession();
@@ -11521,7 +11518,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         void sendOnTextChanged(int start, int after) {
             updateSpellCheckSpans(start, start + after, false);
-            mTextDisplayListIsValid = false;
+            invalidateTextDisplayList();
 
             // Hide the controllers as soon as text is modified (typing, procedural...)
             // We do not hide the span controllers, since they can be added when a new text is
@@ -11678,8 +11675,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             layout.drawBackground(canvas, highlight, mHighlightPaint, cursorOffsetVertical,
                     firstLine, lastLine);
 
-            if (mTextDisplayList == null || !mTextDisplayList.isValid() ||
-                    !mTextDisplayListIsValid) {
+            if (mTextDisplayList == null || !mTextDisplayList.isValid()) {
                 if (mTextDisplayList == null) {
                     mTextDisplayList = getHardwareRenderer().createDisplayList("Text");
                 }
@@ -11696,7 +11692,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } finally {
                     hardwareCanvas.onPostDraw();
                     mTextDisplayList.end();
-                    mTextDisplayListIsValid = true;
                 }
             }
             canvas.translate(mScrollX, mScrollY);
@@ -11712,6 +11707,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mCursorDrawable[i].draw(canvas);
             }
             if (translate) canvas.translate(0, -cursorOffsetVertical);
+        }
+
+        private void invalidateTextDisplayList() {
+            if (mTextDisplayList != null) mTextDisplayList.invalidate();
         }
 
         private void updateCursorsPositions() {
