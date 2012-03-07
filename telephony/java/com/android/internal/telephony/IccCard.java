@@ -35,8 +35,15 @@ import android.view.WindowManager;
 
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.CommandsInterface.RadioState;
+import com.android.internal.telephony.gsm.SIMFileHandler;
 import com.android.internal.telephony.gsm.SIMRecords;
+import com.android.internal.telephony.cdma.CDMALTEPhone;
+import com.android.internal.telephony.cdma.CdmaLteUiccFileHandler;
+import com.android.internal.telephony.cdma.CdmaLteUiccRecords;
 import com.android.internal.telephony.cdma.CdmaSubscriptionSourceManager;
+import com.android.internal.telephony.cdma.RuimFileHandler;
+import com.android.internal.telephony.cdma.RuimRecords;
+
 import android.os.SystemProperties;
 
 import com.android.internal.R;
@@ -56,6 +63,8 @@ public class IccCard {
     protected boolean isSubscriptionFromIccCard = true;
     protected CdmaSubscriptionSourceManager mCdmaSSM = null;
     protected PhoneBase mPhone;
+    private IccRecords mIccRecords;
+    private IccFileHandler mIccFileHandler;
     private RegistrantList mAbsentRegistrants = new RegistrantList();
     private RegistrantList mPinLockedRegistrants = new RegistrantList();
     private RegistrantList mNetworkLockedRegistrants = new RegistrantList();
@@ -167,26 +176,46 @@ public class IccCard {
     }
 
     public IccCard(PhoneBase phone, String logTag, Boolean is3gpp, Boolean dbg) {
+        mLogTag = logTag;
+        mDbg = dbg;
+        if (mDbg) log("[IccCard] Creating card type " + (is3gpp ? "3gpp" : "3gpp2"));
         mPhone = phone;
         this.is3gpp = is3gpp;
         mCdmaSSM = CdmaSubscriptionSourceManager.getInstance(mPhone.getContext(),
                 mPhone.mCM, mHandler, EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
+        if (phone.mCM.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE
+                && phone instanceof CDMALTEPhone) {
+            mIccRecords = new CdmaLteUiccRecords(phone);
+            mIccFileHandler = new CdmaLteUiccFileHandler((CDMALTEPhone)phone);
+        } else {
+            mIccRecords = is3gpp ? new SIMRecords(phone) : new RuimRecords(phone);
+            mIccFileHandler = is3gpp ? new SIMFileHandler(phone) : new RuimFileHandler(phone);
+        }
         mPhone.mCM.registerForOffOrNotAvailable(mHandler, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mPhone.mCM.registerForOn(mHandler, EVENT_RADIO_ON, null);
         mPhone.mCM.registerForIccStatusChanged(mHandler, EVENT_ICC_STATUS_CHANGED, null);
-        mLogTag = logTag;
-        mDbg = dbg;
     }
 
     public void dispose() {
+        if (mDbg) log("[IccCard] Disposing card type " + (is3gpp ? "3gpp" : "3gpp2"));
         mPhone.mCM.unregisterForIccStatusChanged(mHandler);
         mPhone.mCM.unregisterForOffOrNotAvailable(mHandler);
         mPhone.mCM.unregisterForOn(mHandler);
         mCdmaSSM.dispose(mHandler);
+        mIccRecords.dispose();
+        mIccFileHandler.dispose();
     }
 
     protected void finalize() {
-        if(mDbg) Log.d(mLogTag, "IccCard finalized");
+        if (mDbg) log("[IccCard] Finalized card type " + (is3gpp ? "3gpp" : "3gpp2"));
+    }
+
+    public IccRecords getIccRecords() {
+        return mIccRecords;
+    }
+
+    public IccFileHandler getIccFileHandler() {
+        return mIccFileHandler;
     }
 
     /**
@@ -540,6 +569,10 @@ public class IccCard {
             mHandler.sendMessage(mHandler.obtainMessage(EVENT_CARD_REMOVED, null));
         } else if (isIccCardAdded) {
             mHandler.sendMessage(mHandler.obtainMessage(EVENT_CARD_ADDED, null));
+        }
+
+        if (oldState != State.READY && newState == State.READY) {
+            mIccRecords.onReady();
         }
     }
 
@@ -932,6 +965,10 @@ public class IccCard {
 
     public String getAid() {
         String aid = "";
+        if (mIccCardStatus == null) {
+            return aid;
+        }
+
         int appIndex = getCurrentApplicationIndex();
 
         if (appIndex >= 0 && appIndex < IccCardStatus.CARD_MAX_APPS) {

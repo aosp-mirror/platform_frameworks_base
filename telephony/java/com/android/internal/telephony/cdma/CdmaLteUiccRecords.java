@@ -436,6 +436,10 @@ public final class CdmaLteUiccRecords extends SIMRecords {
             return true;
         }
 
+        if (phone == null || phone.mIccCard == null) {
+            return false;
+        }
+
         if (phone.mIccCard.isApplicationOnIcc(AppType.APPTYPE_CSIM) &&
             ((mMdn == null) || (mMin == null))) {
             return false;

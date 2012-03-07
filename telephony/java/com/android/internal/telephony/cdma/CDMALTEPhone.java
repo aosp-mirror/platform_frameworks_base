@@ -36,6 +36,7 @@ import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.SMSDispatcher;
 import com.android.internal.telephony.gsm.GsmSMSDispatcher;
 import com.android.internal.telephony.ims.IsimRecords;
+import com.android.internal.telephony.uicc.UiccController;
 
 public class CDMALTEPhone extends CDMAPhone {
     static final String LOG_TAG = "CDMA";
@@ -79,9 +80,9 @@ public class CDMALTEPhone extends CDMAPhone {
 
     @Override
     protected void initSstIcc() {
-        mIccCard = new IccCard(this, LOG_TAG, IccCard.CARD_IS_3GPP, DBG);
-        mIccRecords = new CdmaLteUiccRecords(this);
-        mIccFileHandler = new CdmaLteUiccFileHandler(this);
+        mIccCard = UiccController.getInstance(this).getIccCard();
+        mIccRecords = mIccCard.getIccRecords();
+        mIccFileHandler = mIccCard.getIccFileHandler();
         // CdmaLteServiceStateTracker registers with IccCard to know
         // when the card is ready. So create mIccCard before the ServiceStateTracker
         mSST = new CdmaLteServiceStateTracker(this);
@@ -164,7 +165,7 @@ public class CDMALTEPhone extends CDMAPhone {
         // look for our wrapper within the asyncresult, skip the rest if it
         // is null.
         if (!(ar.userObj instanceof NetworkSelectMessage)) {
-            if (DBG) Log.d(LOG_TAG, "unexpected result from user object.");
+            Log.e(LOG_TAG, "unexpected result from user object.");
             return;
         }
 
@@ -173,7 +174,7 @@ public class CDMALTEPhone extends CDMAPhone {
         // found the object, now we send off the message we had originally
         // attached to the request.
         if (nsm.message != null) {
-            if (DBG) Log.d(LOG_TAG, "sending original message to recipient");
+            if (DBG) log("sending original message to recipient");
             AsyncResult.forMessage(nsm.message, ar.result, ar.exception);
             nsm.message.sendToTarget();
         }
@@ -200,14 +201,15 @@ public class CDMALTEPhone extends CDMAPhone {
                 ContentValues map = new ContentValues();
                 String operatorNumeric = mIccRecords.getOperatorNumeric();
                 map.put(Telephony.Carriers.NUMERIC, operatorNumeric);
-                log("updateCurrentCarrierInProvider from UICC: numeric=" + operatorNumeric);
+                if (DBG) log("updateCurrentCarrierInProvider from UICC: numeric=" +
+                        operatorNumeric);
                 mContext.getContentResolver().insert(uri, map);
                 return true;
             } catch (SQLException e) {
                 Log.e(LOG_TAG, "[CDMALTEPhone] Can't store current operator ret false", e);
             }
         } else {
-            log("updateCurrentCarrierInProvider mIccRecords == null ret false");
+            if (DBG) log("updateCurrentCarrierInProvider mIccRecords == null ret false");
         }
         return false;
     }
@@ -259,7 +261,6 @@ public class CDMALTEPhone extends CDMAPhone {
 
     @Override
     protected void log(String s) {
-        if (DBG)
             Log.d(LOG_TAG, "[CDMALTEPhone] " + s);
     }
 }

@@ -23,22 +23,20 @@ import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccCardApplication;
 import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.IccFileHandler;
-import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneBase;
 
 /**
  * {@hide}
  */
 public final class SIMFileHandler extends IccFileHandler implements IccConstants {
     static final String LOG_TAG = "GSM";
-    private Phone mPhone;
 
     //***** Instance Variables
 
     //***** Constructor
 
-    SIMFileHandler(GSMPhone phone) {
+    public SIMFileHandler(PhoneBase phone) {
         super(phone);
-        mPhone = phone;
     }
 
     public void dispose() {
