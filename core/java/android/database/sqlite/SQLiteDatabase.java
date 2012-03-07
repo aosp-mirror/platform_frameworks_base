@@ -492,9 +492,16 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     private void beginTransaction(SQLiteTransactionListener transactionListener,
             boolean exclusive) {
-        getThreadSession().beginTransaction(exclusive ? SQLiteSession.TRANSACTION_MODE_EXCLUSIVE :
-                SQLiteSession.TRANSACTION_MODE_IMMEDIATE, transactionListener,
-                getThreadDefaultConnectionFlags(false /*readOnly*/), null);
+        acquireReference();
+        try {
+            getThreadSession().beginTransaction(
+                    exclusive ? SQLiteSession.TRANSACTION_MODE_EXCLUSIVE :
+                            SQLiteSession.TRANSACTION_MODE_IMMEDIATE,
+                    transactionListener,
+                    getThreadDefaultConnectionFlags(false /*readOnly*/), null);
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -502,7 +509,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * are committed and rolled back.
      */
     public void endTransaction() {
-        getThreadSession().endTransaction(null);
+        acquireReference();
+        try {
+            getThreadSession().endTransaction(null);
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -515,7 +527,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * transaction is already marked as successful.
      */
     public void setTransactionSuccessful() {
-        getThreadSession().setTransactionSuccessful();
+        acquireReference();
+        try {
+            getThreadSession().setTransactionSuccessful();
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -524,7 +541,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @return True if the current thread is in a transaction.
      */
     public boolean inTransaction() {
-        return getThreadSession().hasTransaction();
+        acquireReference();
+        try {
+            return getThreadSession().hasTransaction();
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -540,7 +562,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @return True if the current thread is holding an active connection to the database.
      */
     public boolean isDbLockedByCurrentThread() {
-        return getThreadSession().hasConnection();
+        acquireReference();
+        try {
+            return getThreadSession().hasConnection();
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -599,7 +626,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     private boolean yieldIfContendedHelper(boolean throwIfUnsafe, long sleepAfterYieldDelay) {
-        return getThreadSession().yieldTransaction(sleepAfterYieldDelay, throwIfUnsafe, null);
+        acquireReference();
+        try {
+            return getThreadSession().yieldTransaction(sleepAfterYieldDelay, throwIfUnsafe, null);
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -788,13 +820,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Close the database.
-     */
-    public void close() {
-        dispose(false);
-    }
-
-    /**
      * Registers a CustomFunction callback as a function that can be called from
      * SQLite database triggers.
      *
@@ -948,8 +973,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * {@link SQLiteStatement}s are not synchronized, see the documentation for more details.
      */
     public SQLiteStatement compileStatement(String sql) throws SQLException {
-        throwIfNotOpen(); // fail fast
-        return new SQLiteStatement(this, sql, null);
+        acquireReference();
+        try {
+            return new SQLiteStatement(this, sql, null);
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -1110,12 +1139,16 @@ public final class SQLiteDatabase extends SQLiteClosable {
             boolean distinct, String table, String[] columns,
             String selection, String[] selectionArgs, String groupBy,
             String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
-        throwIfNotOpen(); // fail fast
-        String sql = SQLiteQueryBuilder.buildQueryString(
-                distinct, table, columns, selection, groupBy, having, orderBy, limit);
+        acquireReference();
+        try {
+            String sql = SQLiteQueryBuilder.buildQueryString(
+                    distinct, table, columns, selection, groupBy, having, orderBy, limit);
 
-        return rawQueryWithFactory(cursorFactory, sql, selectionArgs,
-                findEditTable(table), cancellationSignal);
+            return rawQueryWithFactory(cursorFactory, sql, selectionArgs,
+                    findEditTable(table), cancellationSignal);
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -1260,12 +1293,15 @@ public final class SQLiteDatabase extends SQLiteClosable {
     public Cursor rawQueryWithFactory(
             CursorFactory cursorFactory, String sql, String[] selectionArgs,
             String editTable, CancellationSignal cancellationSignal) {
-        throwIfNotOpen(); // fail fast
-
-        SQLiteCursorDriver driver = new SQLiteDirectCursorDriver(this, sql, editTable,
-                cancellationSignal);
-        return driver.query(cursorFactory != null ? cursorFactory : mCursorFactory,
-                selectionArgs);
+        acquireReference();
+        try {
+            SQLiteCursorDriver driver = new SQLiteDirectCursorDriver(this, sql, editTable,
+                    cancellationSignal);
+            return driver.query(cursorFactory != null ? cursorFactory : mCursorFactory,
+                    selectionArgs);
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -1384,38 +1420,44 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public long insertWithOnConflict(String table, String nullColumnHack,
             ContentValues initialValues, int conflictAlgorithm) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("INSERT");
-        sql.append(CONFLICT_VALUES[conflictAlgorithm]);
-        sql.append(" INTO ");
-        sql.append(table);
-        sql.append('(');
+        acquireReference();
+        try {
+            StringBuilder sql = new StringBuilder();
+            sql.append("INSERT");
+            sql.append(CONFLICT_VALUES[conflictAlgorithm]);
+            sql.append(" INTO ");
+            sql.append(table);
+            sql.append('(');
 
-        Object[] bindArgs = null;
-        int size = (initialValues != null && initialValues.size() > 0) ? initialValues.size() : 0;
-        if (size > 0) {
-            bindArgs = new Object[size];
-            int i = 0;
-            for (String colName : initialValues.keySet()) {
-                sql.append((i > 0) ? "," : "");
-                sql.append(colName);
-                bindArgs[i++] = initialValues.get(colName);
+            Object[] bindArgs = null;
+            int size = (initialValues != null && initialValues.size() > 0)
+                    ? initialValues.size() : 0;
+            if (size > 0) {
+                bindArgs = new Object[size];
+                int i = 0;
+                for (String colName : initialValues.keySet()) {
+                    sql.append((i > 0) ? "," : "");
+                    sql.append(colName);
+                    bindArgs[i++] = initialValues.get(colName);
+                }
+                sql.append(')');
+                sql.append(" VALUES (");
+                for (i = 0; i < size; i++) {
+                    sql.append((i > 0) ? ",?" : "?");
+                }
+            } else {
+                sql.append(nullColumnHack + ") VALUES (NULL");
             }
             sql.append(')');
-            sql.append(" VALUES (");
-            for (i = 0; i < size; i++) {
-                sql.append((i > 0) ? ",?" : "?");
-            }
-        } else {
-            sql.append(nullColumnHack + ") VALUES (NULL");
-        }
-        sql.append(')');
 
-        SQLiteStatement statement = new SQLiteStatement(this, sql.toString(), bindArgs);
-        try {
-            return statement.executeInsert();
+            SQLiteStatement statement = new SQLiteStatement(this, sql.toString(), bindArgs);
+            try {
+                return statement.executeInsert();
+            } finally {
+                statement.close();
+            }
         } finally {
-            statement.close();
+            releaseReference();
         }
     }
 
@@ -1430,12 +1472,17 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *         whereClause.
      */
     public int delete(String table, String whereClause, String[] whereArgs) {
-        SQLiteStatement statement =  new SQLiteStatement(this, "DELETE FROM " + table +
-                (!TextUtils.isEmpty(whereClause) ? " WHERE " + whereClause : ""), whereArgs);
+        acquireReference();
         try {
-            return statement.executeUpdateDelete();
+            SQLiteStatement statement =  new SQLiteStatement(this, "DELETE FROM " + table +
+                    (!TextUtils.isEmpty(whereClause) ? " WHERE " + whereClause : ""), whereArgs);
+            try {
+                return statement.executeUpdateDelete();
+            } finally {
+                statement.close();
+            }
         } finally {
-            statement.close();
+            releaseReference();
         }
     }
 
@@ -1470,38 +1517,43 @@ public final class SQLiteDatabase extends SQLiteClosable {
             throw new IllegalArgumentException("Empty values");
         }
 
-        StringBuilder sql = new StringBuilder(120);
-        sql.append("UPDATE ");
-        sql.append(CONFLICT_VALUES[conflictAlgorithm]);
-        sql.append(table);
-        sql.append(" SET ");
-
-        // move all bind args to one array
-        int setValuesSize = values.size();
-        int bindArgsSize = (whereArgs == null) ? setValuesSize : (setValuesSize + whereArgs.length);
-        Object[] bindArgs = new Object[bindArgsSize];
-        int i = 0;
-        for (String colName : values.keySet()) {
-            sql.append((i > 0) ? "," : "");
-            sql.append(colName);
-            bindArgs[i++] = values.get(colName);
-            sql.append("=?");
-        }
-        if (whereArgs != null) {
-            for (i = setValuesSize; i < bindArgsSize; i++) {
-                bindArgs[i] = whereArgs[i - setValuesSize];
-            }
-        }
-        if (!TextUtils.isEmpty(whereClause)) {
-            sql.append(" WHERE ");
-            sql.append(whereClause);
-        }
-
-        SQLiteStatement statement = new SQLiteStatement(this, sql.toString(), bindArgs);
+        acquireReference();
         try {
-            return statement.executeUpdateDelete();
+            StringBuilder sql = new StringBuilder(120);
+            sql.append("UPDATE ");
+            sql.append(CONFLICT_VALUES[conflictAlgorithm]);
+            sql.append(table);
+            sql.append(" SET ");
+
+            // move all bind args to one array
+            int setValuesSize = values.size();
+            int bindArgsSize = (whereArgs == null) ? setValuesSize : (setValuesSize + whereArgs.length);
+            Object[] bindArgs = new Object[bindArgsSize];
+            int i = 0;
+            for (String colName : values.keySet()) {
+                sql.append((i > 0) ? "," : "");
+                sql.append(colName);
+                bindArgs[i++] = values.get(colName);
+                sql.append("=?");
+            }
+            if (whereArgs != null) {
+                for (i = setValuesSize; i < bindArgsSize; i++) {
+                    bindArgs[i] = whereArgs[i - setValuesSize];
+                }
+            }
+            if (!TextUtils.isEmpty(whereClause)) {
+                sql.append(" WHERE ");
+                sql.append(whereClause);
+            }
+
+            SQLiteStatement statement = new SQLiteStatement(this, sql.toString(), bindArgs);
+            try {
+                return statement.executeUpdateDelete();
+            } finally {
+                statement.close();
+            }
         } finally {
-            statement.close();
+            releaseReference();
         }
     }
 
@@ -1579,24 +1631,29 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     private int executeSql(String sql, Object[] bindArgs) throws SQLException {
-        if (DatabaseUtils.getSqlStatementType(sql) == DatabaseUtils.STATEMENT_ATTACH) {
-            boolean disableWal = false;
-            synchronized (mLock) {
-                if (!mHasAttachedDbsLocked) {
-                    mHasAttachedDbsLocked = true;
-                    disableWal = true;
+        acquireReference();
+        try {
+            if (DatabaseUtils.getSqlStatementType(sql) == DatabaseUtils.STATEMENT_ATTACH) {
+                boolean disableWal = false;
+                synchronized (mLock) {
+                    if (!mHasAttachedDbsLocked) {
+                        mHasAttachedDbsLocked = true;
+                        disableWal = true;
+                    }
+                }
+                if (disableWal) {
+                    disableWriteAheadLogging();
                 }
             }
-            if (disableWal) {
-                disableWriteAheadLogging();
-            }
-        }
 
-        SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs);
-        try {
-            return statement.executeUpdateDelete();
+            SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs);
+            try {
+                return statement.executeUpdateDelete();
+            } finally {
+                statement.close();
+            }
         } finally {
-            statement.close();
+            releaseReference();
         }
     }
 
@@ -1881,26 +1938,32 @@ public final class SQLiteDatabase extends SQLiteClosable {
                 attachedDbs.add(new Pair<String, String>("main", mConfigurationLocked.path));
                 return attachedDbs;
             }
+
+            acquireReference();
         }
 
-        // has attached databases. query sqlite to get the list of attached databases.
-        Cursor c = null;
         try {
-            c = rawQuery("pragma database_list;", null);
-            while (c.moveToNext()) {
-                // sqlite returns a row for each database in the returned list of databases.
-                //   in each row,
-                //       1st column is the database name such as main, or the database
-                //                              name specified on the "ATTACH" command
-                //       2nd column is the database file path.
-                attachedDbs.add(new Pair<String, String>(c.getString(1), c.getString(2)));
+            // has attached databases. query sqlite to get the list of attached databases.
+            Cursor c = null;
+            try {
+                c = rawQuery("pragma database_list;", null);
+                while (c.moveToNext()) {
+                    // sqlite returns a row for each database in the returned list of databases.
+                    //   in each row,
+                    //       1st column is the database name such as main, or the database
+                    //                              name specified on the "ATTACH" command
+                    //       2nd column is the database file path.
+                    attachedDbs.add(new Pair<String, String>(c.getString(1), c.getString(2)));
+                }
+            } finally {
+                if (c != null) {
+                    c.close();
+                }
             }
+            return attachedDbs;
         } finally {
-            if (c != null) {
-                c.close();
-            }
+            releaseReference();
         }
-        return attachedDbs;
     }
 
     /**
@@ -1917,35 +1980,38 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * false otherwise.
      */
     public boolean isDatabaseIntegrityOk() {
-        throwIfNotOpen(); // fail fast
-
-        List<Pair<String, String>> attachedDbs = null;
+        acquireReference();
         try {
-            attachedDbs = getAttachedDbs();
-            if (attachedDbs == null) {
-                throw new IllegalStateException("databaselist for: " + getPath() + " couldn't " +
-                        "be retrieved. probably because the database is closed");
-            }
-        } catch (SQLiteException e) {
-            // can't get attachedDb list. do integrity check on the main database
-            attachedDbs = new ArrayList<Pair<String, String>>();
-            attachedDbs.add(new Pair<String, String>("main", getPath()));
-        }
-
-        for (int i = 0; i < attachedDbs.size(); i++) {
-            Pair<String, String> p = attachedDbs.get(i);
-            SQLiteStatement prog = null;
+            List<Pair<String, String>> attachedDbs = null;
             try {
-                prog = compileStatement("PRAGMA " + p.first + ".integrity_check(1);");
-                String rslt = prog.simpleQueryForString();
-                if (!rslt.equalsIgnoreCase("ok")) {
-                    // integrity_checker failed on main or attached databases
-                    Log.e(TAG, "PRAGMA integrity_check on " + p.second + " returned: " + rslt);
-                    return false;
+                attachedDbs = getAttachedDbs();
+                if (attachedDbs == null) {
+                    throw new IllegalStateException("databaselist for: " + getPath() + " couldn't " +
+                            "be retrieved. probably because the database is closed");
                 }
-            } finally {
-                if (prog != null) prog.close();
+            } catch (SQLiteException e) {
+                // can't get attachedDb list. do integrity check on the main database
+                attachedDbs = new ArrayList<Pair<String, String>>();
+                attachedDbs.add(new Pair<String, String>("main", getPath()));
             }
+
+            for (int i = 0; i < attachedDbs.size(); i++) {
+                Pair<String, String> p = attachedDbs.get(i);
+                SQLiteStatement prog = null;
+                try {
+                    prog = compileStatement("PRAGMA " + p.first + ".integrity_check(1);");
+                    String rslt = prog.simpleQueryForString();
+                    if (!rslt.equalsIgnoreCase("ok")) {
+                        // integrity_checker failed on main or attached databases
+                        Log.e(TAG, "PRAGMA integrity_check on " + p.second + " returned: " + rslt);
+                        return false;
+                    }
+                } finally {
+                    if (prog != null) prog.close();
+                }
+            }
+        } finally {
+            releaseReference();
         }
         return true;
     }
@@ -1953,12 +2019,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
     @Override
     public String toString() {
         return "SQLiteDatabase: " + getPath();
-    }
-
-    private void throwIfNotOpen() {
-        synchronized (mConnectionPoolLocked) {
-            throwIfNotOpenLocked();
-        }
     }
 
     private void throwIfNotOpenLocked() {

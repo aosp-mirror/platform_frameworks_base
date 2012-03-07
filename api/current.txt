@@ -6904,7 +6904,7 @@ package android.database {
     method public boolean onMove(int, int);
   }
 
-  public abstract interface Cursor {
+  public abstract interface Cursor implements java.io.Closeable {
     method public abstract void close();
     method public abstract void copyStringToBuffer(int, android.database.CharArrayBuffer);
     method public abstract deprecated void deactivate();
@@ -6977,7 +6977,6 @@ package android.database {
     ctor public deprecated CursorWindow(boolean);
     method public boolean allocRow();
     method public void clear();
-    method public void close();
     method public void copyStringToBuffer(int, int, android.database.CharArrayBuffer);
     method public int describeContents();
     method public void freeLastRow();
@@ -7236,13 +7235,14 @@ package android.database.sqlite {
     ctor public SQLiteCantOpenDatabaseException(java.lang.String);
   }
 
-  public abstract class SQLiteClosable {
+  public abstract class SQLiteClosable implements java.io.Closeable {
     ctor public SQLiteClosable();
     method public void acquireReference();
+    method public void close();
     method protected abstract void onAllReferencesReleased();
-    method protected void onAllReferencesReleasedFromContainer();
+    method protected deprecated void onAllReferencesReleasedFromContainer();
     method public void releaseReference();
-    method public void releaseReferenceFromContainer();
+    method public deprecated void releaseReferenceFromContainer();
   }
 
   public class SQLiteConstraintException extends android.database.sqlite.SQLiteException {
@@ -7272,7 +7272,6 @@ package android.database.sqlite {
     method public void beginTransactionNonExclusive();
     method public void beginTransactionWithListener(android.database.sqlite.SQLiteTransactionListener);
     method public void beginTransactionWithListenerNonExclusive(android.database.sqlite.SQLiteTransactionListener);
-    method public void close();
     method public android.database.sqlite.SQLiteStatement compileStatement(java.lang.String) throws android.database.SQLException;
     method public static android.database.sqlite.SQLiteDatabase create(android.database.sqlite.SQLiteDatabase.CursorFactory);
     method public int delete(java.lang.String, java.lang.String, java.lang.String[]);
@@ -7415,7 +7414,6 @@ package android.database.sqlite {
     method public void bindNull(int);
     method public void bindString(int, java.lang.String);
     method public void clearBindings();
-    method public void close();
     method public final deprecated int getUniqueId();
     method protected void onAllReferencesReleased();
   }
