@@ -1024,7 +1024,7 @@ bool ToneGenerator::initAudioTrack() {
                       AUDIO_FORMAT_PCM_16_BIT,
                       AUDIO_CHANNEL_OUT_MONO,
                       0,
-                      0,
+                      AUDIO_POLICY_OUTPUT_FLAG_NONE,
                       audioCallback,
                       this,
                       0,

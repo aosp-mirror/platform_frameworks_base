@@ -94,7 +94,7 @@ int JetPlayer::init()
             AUDIO_FORMAT_PCM_16_BIT,
             (pLibConfig->numChannels == 2) ? AUDIO_CHANNEL_OUT_STEREO : AUDIO_CHANNEL_OUT_MONO,
             mTrackBufferSize,
-            0);
+            AUDIO_POLICY_OUTPUT_FLAG_NONE);
 
     // create render and playback thread
     {

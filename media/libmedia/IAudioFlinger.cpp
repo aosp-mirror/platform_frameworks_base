@@ -362,7 +362,7 @@ public:
                             audio_format_t *pFormat,
                             uint32_t *pChannels,
                             uint32_t *pLatencyMs,
-                            uint32_t flags)
+                            audio_policy_output_flags_t flags)
     {
         Parcel data, reply;
         uint32_t devices = pDevices ? *pDevices : 0;
@@ -377,7 +377,7 @@ public:
         data.writeInt32(format);
         data.writeInt32(channels);
         data.writeInt32(latency);
-        data.writeInt32(flags);
+        data.writeInt32((int32_t) flags);
         remote()->transact(OPEN_OUTPUT, data, &reply);
         audio_io_handle_t output = (audio_io_handle_t) reply.readInt32();
         ALOGV("openOutput() returned output, %d", output);
@@ -845,7 +845,7 @@ status_t BnAudioFlinger::onTransact(
             audio_format_t format = (audio_format_t) data.readInt32();
             uint32_t channels = data.readInt32();
             uint32_t latency = data.readInt32();
-            uint32_t flags = data.readInt32();
+            audio_policy_output_flags_t flags = (audio_policy_output_flags_t) data.readInt32();
             audio_io_handle_t output = openOutput(&devices,
                                      &samplingRate,
                                      &format,

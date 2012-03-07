@@ -151,7 +151,7 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
 
         mAudioTrack = new AudioTrack(
                 AUDIO_STREAM_MUSIC, mSampleRate, AUDIO_FORMAT_PCM_16_BIT, audioMask,
-                0, 0, &AudioCallback, this, 0);
+                0, AUDIO_POLICY_OUTPUT_FLAG_NONE, &AudioCallback, this, 0);
 
         if ((err = mAudioTrack->initCheck()) != OK) {
             delete mAudioTrack;

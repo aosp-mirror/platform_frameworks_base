@@ -153,7 +153,7 @@ public:
                                     audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     int channelMask      = 0,
                                     int frameCount       = 0,
-                                    uint32_t flags       = 0,
+                                    audio_policy_output_flags_t flags = AUDIO_POLICY_OUTPUT_FLAG_NONE,
                                     callback_t cbf       = NULL,
                                     void* user           = NULL,
                                     int notificationFrames = 0,
@@ -165,7 +165,7 @@ public:
                                     int format = AUDIO_FORMAT_DEFAULT,
                                     int channelMask      = 0,
                                     int frameCount       = 0,
-                                    uint32_t flags       = 0,
+                                    uint32_t flags       = (uint32_t) AUDIO_POLICY_OUTPUT_FLAG_NONE,
                                     callback_t cbf       = 0,
                                     void* user           = 0,
                                     int notificationFrames = 0,
@@ -185,7 +185,7 @@ public:
                                     audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     int channelMask     = 0,
                                     const sp<IMemory>& sharedBuffer = 0,
-                                    uint32_t flags      = 0,
+                                    audio_policy_output_flags_t flags = AUDIO_POLICY_OUTPUT_FLAG_NONE,
                                     callback_t cbf      = NULL,
                                     void* user          = NULL,
                                     int notificationFrames = 0,
@@ -209,7 +209,7 @@ public:
                             audio_format_t format = AUDIO_FORMAT_DEFAULT,
                             int channelMask     = 0,
                             int frameCount      = 0,
-                            uint32_t flags      = 0,
+                            audio_policy_output_flags_t flags = AUDIO_POLICY_OUTPUT_FLAG_NONE,
                             callback_t cbf      = NULL,
                             void* user          = NULL,
                             int notificationFrames = 0,
@@ -473,7 +473,7 @@ protected:
                                  audio_format_t format,
                                  uint32_t channelMask,
                                  int frameCount,
-                                 uint32_t flags,
+                                 audio_policy_output_flags_t flags,
                                  const sp<IMemory>& sharedBuffer,
                                  audio_io_handle_t output,
                                  bool enforceFrameCount);
@@ -515,7 +515,7 @@ protected:
     uint32_t                mNewPosition;
     uint32_t                mUpdatePeriod;
     bool                    mFlushed; // FIXME will be made obsolete by making flush() synchronous
-    uint32_t                mFlags;
+    audio_policy_output_flags_t mFlags;
     int                     mSessionId;
     int                     mAuxEffectId;
     mutable Mutex           mLock;

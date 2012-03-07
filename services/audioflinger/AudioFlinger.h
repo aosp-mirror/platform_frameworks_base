@@ -143,7 +143,7 @@ public:
                                     audio_format_t *pFormat,
                                     uint32_t *pChannels,
                                     uint32_t *pLatencyMs,
-                                    uint32_t flags);
+                                    audio_policy_output_flags_t flags);
 
     virtual audio_io_handle_t openDuplicateOutput(audio_io_handle_t output1,
                                                   audio_io_handle_t output2);
