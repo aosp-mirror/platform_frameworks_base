@@ -18,5 +18,11 @@
 <resources>
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
+
+    <!-- The width of the view containing non-menu status bar icons -->
+    <dimen name="navigation_key_width">70dip</dimen>
+
+    <!-- The width of the view containing the menu status bar icon -->
+    <dimen name="navigation_menu_key_width">40dip</dimen>
 </resources>
 
