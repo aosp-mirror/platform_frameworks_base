@@ -762,7 +762,7 @@
     <string name="permlab_serialPort" msgid="546083327654631076">"adgang til serielle porte"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Tillader, at indehaveren kan få adgang til serielle porte ved hjælp af SerialManager API."</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"undgå automatiske enhedsopdateringer"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Giver indehaveren ret til at give systemet oplysninger om, hvornår det vil være et godt tidspunkt for en ikke-interaktiv genstart at opgradere enheden."</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Giver indehaveren ret til at give systemet oplysninger om, hvornår det vil være et godt tidspunkt for en ikke-interaktiv genstart for at opgradere enheden."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>
