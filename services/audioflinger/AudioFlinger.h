@@ -1572,12 +1572,11 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
     // for mAudioSessionRefs only
     struct AudioSessionRef {
-        // FIXME rename parameter names when fields get "m" prefix
-        AudioSessionRef(int sessionid_, pid_t pid_) :
-            sessionid(sessionid_), pid(pid_), cnt(1) {}
-        const int sessionid;
-        const pid_t pid;
-        int cnt;
+        AudioSessionRef(int sessionid, pid_t pid) :
+            mSessionid(sessionid), mPid(pid), mCnt(1) {}
+        const int   mSessionid;
+        const pid_t mPid;
+        int         mCnt;
     };
 
     friend class RecordThread;
