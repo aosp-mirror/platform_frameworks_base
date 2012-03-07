@@ -4925,9 +4925,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (layer == 0 || isPictureAfterFirstLayout) {
             mWebViewCore.resumeWebKitDraw();
         } else if (queueFull) {
-            // temporarily disable webkit draw throttling
-            // TODO: re-enable
-            // mWebViewCore.pauseWebKitDraw();
+            mWebViewCore.pauseWebKitDraw();
         }
 
         if (mHTML5VideoViewProxy != null) {
