@@ -21,4 +21,8 @@
     <!-- General -->
     <skip />
     <string name="benchmark">Benchmark</string>
+    <string name="wraplinear">Wrap Linear</string>
+    <string name="clamplinear">Clamp Linear</string>
+    <string name="wrapnearest">Wrap Nearest</string>
+    <string name="clampnearest">Clamp Nearest</string>
 </resources>

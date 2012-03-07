@@ -31,14 +31,40 @@ import android.renderscript.Type;
 import android.renderscript.Type.Builder;
 import android.util.Log;
 import android.view.TextureView;
+import android.view.TextureView.SurfaceTextureListener;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class SampleRSActivity extends Activity
-                              implements TextureView.SurfaceTextureListener
-{
+public class SampleRSActivity extends Activity {
+    class TextureViewUpdater implements TextureView.SurfaceTextureListener {
+        private Allocation mOutPixelsAllocation;
+        private Sampler mSampler;
+
+        TextureViewUpdater(Allocation outAlloc, Sampler sampler) {
+            mOutPixelsAllocation = outAlloc;
+            mSampler = sampler;
+        }
+
+        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        }
+
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+            mOutPixelsAllocation.setSurfaceTexture(surface);
+        }
+
+        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            mOutPixelsAllocation.setSurfaceTexture(surface);
+            filterAlloc(mOutPixelsAllocation, mSampler);
+        }
+
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+            mOutPixelsAllocation.setSurfaceTexture(null);
+            return true;
+        }
+    }
+
     private final String TAG = "Img";
     private Bitmap mBitmapIn;
     private TextureView mDisplayView;
@@ -47,7 +73,6 @@ public class SampleRSActivity extends Activity
 
     private RenderScript mRS;
     private Allocation mInPixelsAllocation;
-    private Allocation mOutPixelsAllocation;
     private ScriptC_sample mScript;
 
     public void onStartTrackingTouch(SeekBar seekBar) {
@@ -74,17 +99,36 @@ public class SampleRSActivity extends Activity
 
         Type.Builder b = new Type.Builder(mRS, Element.RGBA_8888(mRS));
 
-        mOutPixelsAllocation = Allocation.createTyped(mRS, b.setX(32).setY(32).create(),
-                                                      Allocation.USAGE_SCRIPT |
-                                                      Allocation.USAGE_IO_OUTPUT);
-        mDisplayView.setSurfaceTextureListener(this);
+        int usage = Allocation.USAGE_SCRIPT | Allocation.USAGE_IO_OUTPUT;
+
+        int outX = 32;
+        int outY = 32;
+
+        // Wrap Linear
+        Allocation outAlloc = Allocation.createTyped(mRS, b.setX(outX).setY(outY).create(), usage);
+        TextureViewUpdater updater = new TextureViewUpdater(outAlloc, Sampler.WRAP_LINEAR(mRS));
+        TextureView displayView = (TextureView) findViewById(R.id.display);
+        displayView.setSurfaceTextureListener(updater);
+
+        // Clamp Linear
+        outAlloc = Allocation.createTyped(mRS, b.setX(outX).setY(outY).create(), usage);
+        updater = new TextureViewUpdater(outAlloc, Sampler.CLAMP_LINEAR(mRS));
+        displayView = (TextureView) findViewById(R.id.display2);
+        displayView.setSurfaceTextureListener(updater);
+
+        // Wrap Nearest
+        outAlloc = Allocation.createTyped(mRS, b.setX(outX).setY(outY).create(), usage);
+        updater = new TextureViewUpdater(outAlloc, Sampler.WRAP_NEAREST(mRS));
+        displayView = (TextureView) findViewById(R.id.display3);
+        displayView.setSurfaceTextureListener(updater);
+
+        // Clamp Nearest
+        outAlloc = Allocation.createTyped(mRS, b.setX(outX).setY(outY).create(), usage);
+        updater = new TextureViewUpdater(outAlloc, Sampler.CLAMP_NEAREST(mRS));
+        displayView = (TextureView) findViewById(R.id.display4);
+        displayView.setSurfaceTextureListener(updater);
 
         mScript = new ScriptC_sample(mRS, getResources(), R.raw.sample);
-
-        mScript.set_sourceAlloc(mInPixelsAllocation);
-        mScript.set_destAlloc(mOutPixelsAllocation);
-        mScript.set_wrapUV(Sampler.WRAP_LINEAR(mRS));
-        mScript.set_clampUV(Sampler.CLAMP_LINEAR(mRS));
     }
 
     private Bitmap loadBitmap(int resource) {
@@ -98,43 +142,22 @@ public class SampleRSActivity extends Activity
         return b2;
     }
 
-    private void filter() {
+    private synchronized void filterAlloc(Allocation alloc, Sampler sampler) {
         long t = java.lang.System.currentTimeMillis();
-        mScript.forEach_root(mOutPixelsAllocation);
-        mOutPixelsAllocation.ioSendOutput();
+        mScript.invoke_setSampleData(alloc, mInPixelsAllocation, sampler);
+        mScript.forEach_root(alloc);
+        alloc.ioSendOutput();
         mRS.finish();
         t = java.lang.System.currentTimeMillis() - t;
         Log.i(TAG, "Filter time is: " + t + " ms");
     }
 
     public void benchmark(View v) {
-        filter();
+        /*filterAlloc();
         long t = java.lang.System.currentTimeMillis();
-        filter();
+        filterAlloc();
         t = java.lang.System.currentTimeMillis() - t;
         mDisplayView.invalidate();
-        mBenchmarkResult.setText("Result: " + t + " ms");
-    }
-
-
-    @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        mOutPixelsAllocation.setSurfaceTexture(surface);
-        filter();
-    }
-
-    @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        mOutPixelsAllocation.setSurfaceTexture(surface);
-    }
-
-    @Override
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        mOutPixelsAllocation.setSurfaceTexture(null);
-        return true;
-    }
-
-    @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        mBenchmarkResult.setText("Result: " + t + " ms");*/
     }
 }
