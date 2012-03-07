@@ -768,7 +768,7 @@
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Umožňuje držiteli přístup k sériovým portům pomocí rozhraní SerialManager API."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"externí přístup k poskytovatelům obsahu"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Umožňuje držiteli získat z příkazového řádku přístup k poskytovatelům obsahu. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"varování před automatickou aktualizací"</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"varovat před automatickou aktualizací"</string>
     <string name="permdesc_updateLock" msgid="1655625832166778492">"Umožňuje držiteli navrhnout systému informace o vhodné době pro upgrade zařízení neinteraktivním restartováním."</string>
     <string name="save_password_message" msgid="767344687139195790">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nyní ne"</string>

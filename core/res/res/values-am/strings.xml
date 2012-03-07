@@ -341,7 +341,7 @@
     <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"ልክ እንደ አንተ ስም እና የዕውቂያ መረጃ ፣ ባንተ መሳሪያ ወስጥ የተከማቹ የግል መገለጫ መረጃ ለመለወጥ ወይም ለማከል ለመተግበሪያው ይፈቅዳሉ፡፡ይሄም ማለት ሌሎች መተግበሪያዎች ሊለዩህ ይችላሉ እና ለሌሎች የመገለጫ መረጃህን ይልካሉ፡፡"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"የአንተን ማህበራዊ የውይይት ክፍሎች አንብብ"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">" ከአንተ ጓደኞች ማህበራዊ ዝማኔዎችን እንዲደርስባቸው እና እንዲያመሳስል ለመተግበሪያውይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች ይህን መዳረሻ ባንተና በጓደኞችህ መካከል በማህበራዊ አውታረመረቦች ያሉ የግል ተግባቦቶችን ለመዳረስ ሊጠቀሙበት ይችላሉ፡፡"</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ወደ ያንተ ማህበራዊ የውይይት ክፍሎች ጻፍ"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ወደ የአንተ  ማህበራዊ የውይይት ክፍሎች ጻፍ"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3496277176955721451">" የጓደኞችህን ማህበራዊ ዝማኔዎችን ለማሳየት ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች ይህን መዳረሻ ጓደኛ መስለው ለመቅረብ እና የይለፍ ቃልና ሌላ ምስጢራዊ መረጃ እንድትሰጥ ለማድረግ ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"የቀን መቁጠሪያ ክስተቶች ተጨማሪ ሚስጥራዊ መረጃ አንብብ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="2338414551004122687">"በጡባዊ ተኮህ ላይ የተከማቹ ሁሉንም የቀን መቁጠሪያ ክስተቶች መተግበሪያዎቹ እንዲያነቡ ይፈቅዳሉ፡፡ ያለ ባለቤቱ እውቅና ከነዚህ የቀን መቁጠሪያዎች የግል መረጃዎችን ጎጂ መተግበሪያዎች ያወጣሉ፡፡"</string>

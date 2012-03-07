@@ -1088,7 +1088,7 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Utfør"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Ring nummeret"\n"<xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Lag kontakt"\n"med nummeret <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Én eller flere av de følgende appene ber om tillatelse til å få tilgang til kontoen din fra nå av."</string>
+    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Følgende app(er) ber om tilgang til kontoen din fra nå av."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vil du tillate dette?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Tilgangsforespørsel"</string>
     <string name="allow" msgid="7225948811296386551">"Tillat"</string>

@@ -26,8 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"Go"</string>
     <string name="terabyteShort" msgid="231613018159186962">"To"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Po"</string>
-    <!-- no translation found for fileSizeSuffix (9164292791500531949) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sans nom&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -672,8 +671,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Nombre maximal autorisé de tentatives Face Unlock atteint."</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"En charge (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Chargé"</string>
-    <!-- no translation found for lockscreen_battery_short (4477264849386850266) -->
-    <skip />
+    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Branchez votre chargeur."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Aucune carte SIM n\'a été trouvée."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Aucune carte SIM n\'est insérée dans la tablette."</string>
@@ -722,10 +720,8 @@
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <!-- no translation found for hour_ampm (4584338083529355982) -->
-    <skip />
-    <!-- no translation found for hour_cap_ampm (2083465992940444366) -->
-    <skip />
+    <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g> <xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Échec du test usine"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"L\'action FACTORY_TEST est uniquement prise en charge pour les paquets de données installés dans in/system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Impossible de trouver un paquet proposant l\'action FACTORY_TEST."</string>
@@ -737,8 +733,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Conseil : Appuyez deux fois pour faire un zoom avant ou arrière."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Saisie auto"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Conf. saisie auto"</string>
-    <!-- no translation found for autofill_address_name_separator (6350145154779706772) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -870,8 +865,8 @@
     <string name="days" msgid="4774547661021344602">"jours"</string>
     <string name="hour" msgid="2126771916426189481">"heure"</string>
     <string name="hours" msgid="894424005266852993">"heures"</string>
-    <string name="minute" msgid="9148878657703769868">"mn"</string>
-    <string name="minutes" msgid="5646001005827034509">"mn"</string>
+    <string name="minute" msgid="9148878657703769868">"min"</string>
+    <string name="minutes" msgid="5646001005827034509">"min"</string>
     <string name="second" msgid="3184235808021478">"s"</string>
     <string name="seconds" msgid="3161515347216589235">"s"</string>
     <string name="week" msgid="5617961537173061583">"semaine"</string>

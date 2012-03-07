@@ -769,7 +769,7 @@
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"외부에서 콘텐츠 제공자에 액세스"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"권한을 가진 프로그램이 셸에서 콘텐츠 제공자에 액세스하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"지금은 자동 기기 업데이트를 권장하지 않음"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"기기를 스스로 다시 부팅하여 업그레이드해도 괜찮은 시간에 대한 정보를 사용자가 시스템에 제공할 수 있도록 허용합니다."</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"기기를 자동으로 다시 부팅하여 업그레이드해도 괜찮은 시간에 대한 정보를 사용자가 시스템에 제공할 수 있도록 허용합니다."</string>
     <string name="save_password_message" msgid="767344687139195790">"브라우저에 이 비밀번호를 저장하시겠습니까?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"나중에"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"저장"</string>
