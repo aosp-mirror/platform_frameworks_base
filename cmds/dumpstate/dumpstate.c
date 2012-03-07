@@ -86,11 +86,6 @@ static void dumpstate() {
     dump_file("PAGETYPEINFO", "/proc/pagetypeinfo");
     dump_file("BUDDYINFO", "/proc/buddyinfo");
 
-    print_properties();
-
-    /* TODO: Make last_kmsg CAP_SYSLOG protected. b/5555691 */
-    dump_file("LAST KMSG", "/proc/last_kmsg");
-    do_dmesg();
 
     dump_file("KERNEL WAKELOCKS", "/proc/wakelocks");
     dump_file("KERNEL CPUFREQ", "/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
@@ -98,6 +93,19 @@ static void dumpstate() {
     run_command("PROCESSES", 10, "ps", "-P", NULL);
     run_command("PROCESSES AND THREADS", 10, "ps", "-t", "-p", "-P", NULL);
     run_command("LIBRANK", 10, "librank", NULL);
+
+    do_dmesg();
+
+    run_command("LIST OF OPEN FILES", 10, SU_PATH, "root", "lsof", NULL);
+
+    for_each_pid(do_showmap, "SMAPS OF ALL PROCESSES");
+    for_each_pid(show_wchan, "BLOCKED PROCESS WAIT-CHANNELS");
+
+    // dump_file("EVENT LOG TAGS", "/etc/event-log-tags");
+    run_command("SYSTEM LOG", 20, "logcat", "-v", "threadtime", "-d", "*:v", NULL);
+    run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "threadtime", "-d", "*:v", NULL);
+    run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "threadtime", "-d", "*:v", NULL);
+
 
     /* show the traces we collected in main(), if that was done */
     if (dump_traces_path != NULL) {
@@ -124,6 +132,11 @@ static void dumpstate() {
     dump_file("NETWORK ROUTES", "/proc/net/route");
     dump_file("NETWORK ROUTES IPV6", "/proc/net/ipv6_route");
 
+    /* TODO: Make last_kmsg CAP_SYSLOG protected. b/5555691 */
+    dump_file("LAST KMSG", "/proc/last_kmsg");
+    dump_file("LAST PANIC CONSOLE", "/data/dontpanic/apanic_console");
+    dump_file("LAST PANIC THREADS", "/data/dontpanic/apanic_threads");
+
     if (screenshot_path[0]) {
         ALOGI("taking screenshot\n");
         run_command(NULL, 5, SU_PATH, "root", "screenshot", screenshot_path, NULL);
@@ -134,11 +147,7 @@ static void dumpstate() {
             "/data/data/com.android.providers.settings/databases/settings.db",
             "pragma user_version; select * from system; select * from secure;", NULL);
 
-    // dump_file("EVENT LOG TAGS", "/etc/event-log-tags");
-    run_command("SYSTEM LOG", 20, "logcat", "-v", "threadtime", "-d", "*:v", NULL);
-    run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "threadtime", "-d", "*:v", NULL);
-    run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "threadtime", "-d", "*:v", NULL);
-
+    /* The following have a tendency to get wedged when wifi drivers/fw goes belly-up. */
     run_command("NETWORK INTERFACES", 10, SU_PATH, "root", "netcfg", NULL);
     run_command("IP RULES", 10, "ip", "rule", "show", NULL);
     run_command("IP RULES v6", 10, "ip", "-6", "rule", "show", NULL);
@@ -171,29 +180,10 @@ static void dumpstate() {
             SU_PATH, "root", "wlutil", "counters", NULL);
 #endif
 
-    char ril_dumpstate_timeout[PROPERTY_VALUE_MAX] = {0};
-    property_get("ril.dumpstate.timeout", ril_dumpstate_timeout, "30");
-    if (strnlen(ril_dumpstate_timeout, PROPERTY_VALUE_MAX - 1) > 0) {
-        if (0 == strncmp(build_type, "user", PROPERTY_VALUE_MAX - 1)) {
-            // su does not exist on user builds, so try running without it.
-            // This way any implementations of vril-dump that do not require
-            // root can run on user builds.
-            run_command("DUMP VENDOR RIL LOGS", atoi(ril_dumpstate_timeout),
-                    "vril-dump", NULL);
-        } else {
-            run_command("DUMP VENDOR RIL LOGS", atoi(ril_dumpstate_timeout),
-                    SU_PATH, "root", "vril-dump", NULL);
-        }
-    }
+    print_properties();
 
     run_command("VOLD DUMP", 10, "vdc", "dump", NULL);
     run_command("SECURE CONTAINERS", 10, "vdc", "asec", "list", NULL);
-
-    dump_file("BINDER FAILED TRANSACTION LOG", "/sys/kernel/debug/binder/failed_transaction_log");
-    dump_file("BINDER TRANSACTION LOG", "/sys/kernel/debug/binder/transaction_log");
-    dump_file("BINDER TRANSACTIONS", "/sys/kernel/debug/binder/transactions");
-    dump_file("BINDER STATS", "/sys/kernel/debug/binder/stats");
-    dump_file("BINDER STATE", "/sys/kernel/debug/binder/state");
 
     run_command("FILESYSTEMS & FREE SPACE", 10, SU_PATH, "root", "df", NULL);
 
@@ -201,10 +191,6 @@ static void dumpstate() {
     dump_file("PACKAGE UID ERRORS", "/data/system/uiderrors.txt");
 
     run_command("LAST RADIO LOG", 10, "parse_radio_log", "/proc/last_radio_log", NULL);
-    dump_file("LAST PANIC CONSOLE", "/data/dontpanic/apanic_console");
-    dump_file("LAST PANIC THREADS", "/data/dontpanic/apanic_threads");
-
-    for_each_pid(show_wchan, "BLOCKED PROCESS WAIT-CHANNELS");
 
     printf("------ BACKLIGHTS ------\n");
     printf("LCD brightness=");
@@ -219,9 +205,12 @@ static void dumpstate() {
     dump_file(NULL, "/sys/class/leds/lcd-backlight/registers");
     printf("\n");
 
-    run_command("LIST OF OPEN FILES", 10, SU_PATH, "root", "lsof", NULL);
-
-    for_each_pid(do_showmap, "SMAPS OF ALL PROCESSES");
+    /* Binder state is expensive to look at as it uses a lot of memory. */
+    dump_file("BINDER FAILED TRANSACTION LOG", "/sys/kernel/debug/binder/failed_transaction_log");
+    dump_file("BINDER TRANSACTION LOG", "/sys/kernel/debug/binder/transaction_log");
+    dump_file("BINDER TRANSACTIONS", "/sys/kernel/debug/binder/transactions");
+    dump_file("BINDER STATS", "/sys/kernel/debug/binder/stats");
+    dump_file("BINDER STATE", "/sys/kernel/debug/binder/state");
 
 #ifdef BOARD_HAS_DUMPSTATE
     printf("========================================================\n");
@@ -231,6 +220,22 @@ static void dumpstate() {
     dumpstate_board();
     printf("\n");
 #endif
+
+    /* Migrate the ril_dumpstate to a dumpstate_board()? */
+    char ril_dumpstate_timeout[PROPERTY_VALUE_MAX] = {0};
+    property_get("ril.dumpstate.timeout", ril_dumpstate_timeout, "30");
+    if (strnlen(ril_dumpstate_timeout, PROPERTY_VALUE_MAX - 1) > 0) {
+        if (0 == strncmp(build_type, "user", PROPERTY_VALUE_MAX - 1)) {
+            // su does not exist on user builds, so try running without it.
+            // This way any implementations of vril-dump that do not require
+            // root can run on user builds.
+            run_command("DUMP VENDOR RIL LOGS", atoi(ril_dumpstate_timeout),
+                    "vril-dump", NULL);
+        } else {
+            run_command("DUMP VENDOR RIL LOGS", atoi(ril_dumpstate_timeout),
+                    SU_PATH, "root", "vril-dump", NULL);
+        }
+    }
 
     printf("========================================================\n");
     printf("== Android Framework Services\n");
