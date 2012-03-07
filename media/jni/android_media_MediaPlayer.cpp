@@ -36,6 +36,7 @@
 #include "utils/String8.h"
 #include "android_media_Utils.h"
 
+#include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 #include <binder/Parcel.h>
 #include <gui/ISurfaceTexture.h>

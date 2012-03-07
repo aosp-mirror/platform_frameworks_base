@@ -23,6 +23,7 @@
 #include <utils/Log.h>
 #include <androidfw/InputTransport.h>
 #include "android_view_InputChannel.h"
+#include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
 namespace android {

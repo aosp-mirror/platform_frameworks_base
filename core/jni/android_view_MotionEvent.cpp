@@ -21,6 +21,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
 #include <androidfw/Input.h>
+#include "android_os_Parcel.h"
 #include "android_view_MotionEvent.h"
 #include "android_util_Binder.h"
 #include "android/graphics/Matrix.h"

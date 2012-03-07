@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include <androidfw/CursorWindow.h>
+#include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 #include "android_database_SQLiteCommon.h"
 

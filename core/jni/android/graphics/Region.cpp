@@ -19,6 +19,7 @@
 #include "GraphicsJNI.h"
 
 #include <binder/Parcel.h>
+#include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
 #include <jni.h>
