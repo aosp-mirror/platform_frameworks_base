@@ -111,7 +111,7 @@ status_t BufferQueue::setBufferCountServerLocked(int bufferCount) {
         // easy, we just have more buffers
         mBufferCount = bufferCount;
         mServerBufferCount = bufferCount;
-        mDequeueCondition.signal();
+        mDequeueCondition.broadcast();
     } else {
         // we're here because we're either
         // - reducing the number of available buffers
@@ -192,7 +192,7 @@ status_t BufferQueue::setBufferCount(int bufferCount) {
     mClientBufferCount = bufferCount;
     mBufferHasBeenQueued = false;
     mQueue.clear();
-    mDequeueCondition.signal();
+    mDequeueCondition.broadcast();
     return OK;
 }
 
@@ -306,6 +306,7 @@ status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             if (numberOfBuffersNeedsToChange) {
                 // here we're guaranteed that mQueue is empty
                 freeAllBuffersLocked();
+                // XXX: signal?
                 mBufferCount = mServerBufferCount;
                 if (mBufferCount < minBufferCountNeeded)
                     mBufferCount = minBufferCountNeeded;
@@ -496,7 +497,7 @@ status_t BufferQueue::setSynchronousMode(bool enabled) {
         // - if the client set the number of buffers, we're guaranteed that
         // we have at least 3 (because we don't allow less)
         mSynchronousMode = enabled;
-        mDequeueCondition.signal();
+        mDequeueCondition.broadcast();
     }
     return err;
 }
@@ -564,7 +565,7 @@ status_t BufferQueue::queueBuffer(int buf, int64_t timestamp,
         mSlots[buf].mFrameNumber = mFrameCounter;
 
         mBufferHasBeenQueued = true;
-        mDequeueCondition.signal();
+        mDequeueCondition.broadcast();
 
         *outWidth = mDefaultWidth;
         *outHeight = mDefaultHeight;
@@ -601,7 +602,7 @@ void BufferQueue::cancelBuffer(int buf) {
     }
     mSlots[buf].mBufferState = BufferSlot::FREE;
     mSlots[buf].mFrameNumber = 0;
-    mDequeueCondition.signal();
+    mDequeueCondition.broadcast();
 }
 
 status_t BufferQueue::setCrop(const Rect& crop) {
@@ -709,7 +710,7 @@ status_t BufferQueue::disconnect(int api) {
                 mNextCrop.makeInvalid();
                 mNextScalingMode = NATIVE_WINDOW_SCALING_MODE_FREEZE;
                 mNextTransform = 0;
-                mDequeueCondition.signal();
+                mDequeueCondition.broadcast();
             } else {
                 ST_LOGE("disconnect: connected to another api (cur=%d, req=%d)",
                         mConnectedApi, api);
@@ -846,6 +847,7 @@ status_t BufferQueue::acquire(BufferItem *buffer) {
 
         mSlots[buf].mBufferState = BufferSlot::ACQUIRED;
         mQueue.erase(front);
+        mDequeueCondition.broadcast();
 
         ATRACE_INT(mConsumerName.string(), mQueue.size());
     }
@@ -877,7 +879,8 @@ status_t BufferQueue::releaseBuffer(int buf, EGLDisplay display,
             || mSlots[buf].mBufferState == BufferSlot::ACQUIRED) {
         mSlots[buf].mBufferState = BufferSlot::FREE;
     }
-    mDequeueCondition.signal();
+
+    mDequeueCondition.broadcast();
 
     return OK;
 }
@@ -888,7 +891,7 @@ status_t BufferQueue::consumerDisconnect() {
     // is considered abandoned
     mAbandoned = true;
     freeAllBuffersLocked();
-    mDequeueCondition.signal();
+    mDequeueCondition.broadcast();
     return OK;
 }
 
