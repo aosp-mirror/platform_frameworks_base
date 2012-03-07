@@ -143,6 +143,8 @@ public:
      * user                Context for use by the callback receiver.
      */
 
+     // FIXME consider removing this alias and replacing it by audio_in_acoustics_t
+     //       or removing the parameter entirely if it is unused
      enum record_flags {
          RECORD_AGC_ENABLE = AUDIO_IN_ACOUSTICS_AGC_ENABLE,
          RECORD_NS_ENABLE  = AUDIO_IN_ACOUSTICS_NS_ENABLE,
@@ -154,7 +156,7 @@ public:
                                     audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
                                     int frameCount      = 0,
-                                    uint32_t flags      = 0,
+                                    record_flags flags  = (record_flags) 0,
                                     callback_t cbf = NULL,
                                     void* user = NULL,
                                     int notificationFrames = 0,
@@ -180,7 +182,7 @@ public:
                             audio_format_t format = AUDIO_FORMAT_DEFAULT,
                             uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
                             int frameCount      = 0,
-                            uint32_t flags      = 0,
+                            record_flags flags  = (record_flags) 0,
                             callback_t cbf = NULL,
                             void* user = NULL,
                             int notificationFrames = 0,
@@ -383,7 +385,7 @@ private:
     bool                    mMarkerReached;
     uint32_t                mNewPosition;
     uint32_t                mUpdatePeriod;
-    uint32_t                mFlags;
+    record_flags            mFlags;
     uint32_t                mChannelMask;
     audio_io_handle_t       mInput;
     int                     mSessionId;

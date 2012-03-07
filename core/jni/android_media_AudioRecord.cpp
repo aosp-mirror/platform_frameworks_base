@@ -203,7 +203,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         format,        // word length, PCM
         channels,
         frameCount,
-        0,             // flags
+        (AudioRecord::record_flags) 0,  // flags
         recorderCallback,// callback_t
         lpCallbackData,// void* user
         0,             // notificationFrames,
