@@ -34,7 +34,7 @@ interface IBluetooth
     boolean isEnabled();
     int getState();
     boolean enable();
-    boolean disable();
+    boolean disable(boolean persist);
 
     String getAddress();
     ParcelUuid[] getUuids();

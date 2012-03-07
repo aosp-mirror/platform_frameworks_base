@@ -518,7 +518,24 @@ public final class BluetoothAdapter {
      */
     public boolean disable() {
         try {
-            return mService.disable();
+            return mService.disable(true);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
+     * Turn off the local Bluetooth adapter and don't persist the setting.
+     *
+     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission
+     *
+     * @return true to indicate adapter shutdown has begun, or false on
+     *         immediate error
+     * @hide
+     */
+    public boolean disable(boolean persist) {
+        try {
+            return mService.disable(persist);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
