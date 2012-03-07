@@ -769,7 +769,7 @@
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"pristup pružateljima sadržaja izvana"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Omogućuje vlasniku pristup pružateljima sadržaja iz programske ovojnice. Ne bi trebalo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"odvratiti automatska ažuriranja uređaja"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Omogućuje vlasniku davanje informacija sustavu o pogodnom trenutku za nadogradnju uređaja putem ponovnog pokretanja bez interakcije."</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Omogućuje vlasniku davanje informacija sustavu o pogodnom trenutku za nadogradnju uređaja ponovnim pokretanjem bez interakcije."</string>
     <string name="save_password_message" msgid="767344687139195790">"Želite li da preglednik zapamti ovu zaporku?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ne sada"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamti"</string>

@@ -769,7 +769,7 @@
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"adgang til indholdsleverandører eksternt"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Giver indehaveren adgang til indholdsleverandører fra startsiden. Bør aldrig være nødvendigt for normale apps."</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"undgå automatiske enhedsopdateringer"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Giver indehaveren ret til at give systemet oplysninger om, hvornår det vil være et godt tidspunkt for en ikke-interaktiv genstart at opgradere enheden."</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Giver indehaveren ret til at give systemet oplysninger om, hvornår det vil være et godt tidspunkt for en ikke-interaktiv genstart for at opgradere enheden."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>
