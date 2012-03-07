@@ -370,18 +370,13 @@ status_t BufferQueue::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                 }
             }
 
-            // we're in synchronous mode and didn't find a buffer, we need to
-            // wait for some buffers to be consumed
-            tryAgain = mSynchronousMode && (foundSync == INVALID_BUFFER_SLOT);
+            // if no buffer is found, wait for a buffer to be released
+            tryAgain = found == INVALID_BUFFER_SLOT;
             if (tryAgain) {
                 mDequeueCondition.wait(mMutex);
             }
         }
 
-        if (mSynchronousMode && found == INVALID_BUFFER_SLOT) {
-            // foundSync guaranteed to be != INVALID_BUFFER_SLOT
-            found = foundSync;
-        }
 
         if (found == INVALID_BUFFER_SLOT) {
             // This should not happen.
