@@ -1121,7 +1121,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int WEBCORE_INITIALIZED_MSG_ID         = 107;
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 108;
     static final int UPDATE_ZOOM_RANGE                  = 109;
-    static final int UNHANDLED_NAV_KEY                  = 110;
+    static final int TAKE_FOCUS                         = 110;
     static final int CLEAR_TEXT_ENTRY                   = 111;
     static final int UPDATE_TEXT_SELECTION_MSG_ID       = 112;
     static final int SHOW_RECT_MSG_ID                   = 113;
@@ -5309,8 +5309,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             switchOutDrawHistory();
-            letPageHandleNavKey(keyCode, event.getEventTime(), true, event.getMetaState());
-            return true;
         }
 
         if (isEnterActionKey(keyCode)) {
@@ -5342,7 +5340,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         // pass the key to DOM
-        mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
+        sendKeyEvent(event);
         // return true as DOM handles the key
         return true;
     }
@@ -5405,12 +5403,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
         }
 
-        if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
-                && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
-            letPageHandleNavKey(keyCode, event.getEventTime(), false, event.getMetaState());
-            return true;
-        }
-
         if (isEnterActionKey(keyCode)) {
             // remove the long press message first
             mPrivateHandler.removeMessages(LONG_PRESS_CENTER);
@@ -5424,7 +5416,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         // pass the key to DOM
-        mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+        sendKeyEvent(event);
         // return true as DOM handles the key
         return true;
     }
@@ -6956,9 +6948,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 return SoundEffectConstants.NAVIGATION_LEFT;
         }
-        throw new IllegalArgumentException("keyCode must be one of " +
-                "{KEYCODE_DPAD_UP, KEYCODE_DPAD_RIGHT, KEYCODE_DPAD_DOWN, " +
-                "KEYCODE_DPAD_LEFT}.");
+        return 0;
     }
 
     private void doTrackball(long time, int metaState) {
@@ -8232,8 +8222,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 case FORM_DID_BLUR:
                     // TODO: Figure out if this is needed for something (b/6111763)
                     break;
-                case UNHANDLED_NAV_KEY:
-                    // TODO: Support this (b/6109044)
+                case TAKE_FOCUS:
+                    int direction = msg.arg1;
+                    View focusSearch = mWebView.focusSearch(direction);
+                    if (focusSearch != null && focusSearch != mWebView) {
+                        focusSearch.requestFocus();
+                    }
                     break;
                 case CLEAR_TEXT_ENTRY:
                     hideSoftKeyboard();
@@ -9129,14 +9123,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     private void letPageHandleNavKey(int keyCode, long time, boolean down, int metaState) {
         int keyEventAction;
-        int eventHubAction;
         if (down) {
             keyEventAction = KeyEvent.ACTION_DOWN;
-            eventHubAction = EventHub.KEY_DOWN;
-            mWebView.playSoundEffect(keyCodeToSoundsEffect(keyCode));
         } else {
             keyEventAction = KeyEvent.ACTION_UP;
-            eventHubAction = EventHub.KEY_UP;
         }
 
         KeyEvent event = new KeyEvent(time, time, keyEventAction, keyCode,
@@ -9144,7 +9134,41 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 | (metaState & KeyEvent.META_ALT_ON)
                 | (metaState & KeyEvent.META_SYM_ON)
                 , KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0);
-        mWebViewCore.sendMessage(eventHubAction, event);
+        sendKeyEvent(event);
+    }
+
+    private void sendKeyEvent(KeyEvent event) {
+        int direction = 0;
+        switch (event.getKeyCode()) {
+        case KeyEvent.KEYCODE_DPAD_DOWN:
+            direction = View.FOCUS_DOWN;
+            break;
+        case KeyEvent.KEYCODE_DPAD_UP:
+            direction = View.FOCUS_UP;
+            break;
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+            direction = View.FOCUS_LEFT;
+            break;
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+            direction = View.FOCUS_RIGHT;
+            break;
+        case KeyEvent.KEYCODE_TAB:
+            direction = event.isShiftPressed() ? View.FOCUS_BACKWARD : View.FOCUS_FORWARD;
+            break;
+        }
+        if (direction != 0 && mWebView.focusSearch(direction) == null) {
+            // Can't take focus in that direction
+            direction = 0;
+        }
+        int eventHubAction = EventHub.KEY_UP;
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            eventHubAction = EventHub.KEY_DOWN;
+            int sound = keyCodeToSoundsEffect(event.getKeyCode());
+            if (sound != 0) {
+                mWebView.playSoundEffect(sound);
+            }
+        }
+        mWebViewCore.sendMessage(eventHubAction, direction, event);
     }
 
     /**
