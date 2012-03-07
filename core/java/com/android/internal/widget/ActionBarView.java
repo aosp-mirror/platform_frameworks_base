@@ -324,12 +324,30 @@ public class ActionBarView extends AbsActionBarView {
                     if (mSplitView != null) {
                         mSplitView.addView(mMenuView);
                     }
+                    mMenuView.getLayoutParams().width = LayoutParams.MATCH_PARENT;
                 } else {
                     addView(mMenuView);
+                    mMenuView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
                 }
+                mMenuView.requestLayout();
             }
             if (mSplitView != null) {
                 mSplitView.setVisibility(splitActionBar ? VISIBLE : GONE);
+            }
+
+            if (mActionMenuPresenter != null) {
+                if (!splitActionBar) {
+                    mActionMenuPresenter.setExpandedActionViewsExclusive(
+                            getResources().getBoolean(
+                                    com.android.internal.R.bool.action_bar_expanded_action_views_exclusive));
+                } else {
+                    mActionMenuPresenter.setExpandedActionViewsExclusive(false);
+                    // Allow full screen width in split mode.
+                    mActionMenuPresenter.setWidthLimit(
+                            getContext().getResources().getDisplayMetrics().widthPixels, true);
+                    // No limit to the item count; use whatever will fit.
+                    mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
+                }
             }
             super.setSplitActionBar(splitActionBar);
         }

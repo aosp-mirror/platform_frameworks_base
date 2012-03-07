@@ -116,9 +116,9 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         if (!mMaxItemsSet) {
             mMaxItems = mContext.getResources().getInteger(
                     com.android.internal.R.integer.max_action_buttons);
-            if (mMenu != null) {
-                mMenu.onItemsChanged(true);
-            }
+        }
+        if (mMenu != null) {
+            mMenu.onItemsChanged(true);
         }
     }
 
