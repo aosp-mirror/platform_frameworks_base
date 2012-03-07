@@ -233,6 +233,23 @@
           </li>
         </ul>
       </li>
+
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/accessibility/index.html">
+            <span class="en">Implementing Accessibility</span>
+          </a> <span class="new">new!</span></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/accessibility/accessible-app.html">
+            <span class="en">Developing Accessible Applications</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/accessibility/service.html">
+            <span class="en">Developing Accessibility Services</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
     </ul>
   </li>    
       
