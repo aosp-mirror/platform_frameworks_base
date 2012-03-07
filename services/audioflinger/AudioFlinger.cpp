@@ -1619,7 +1619,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         uint32_t strategy = AudioSystem::getStrategyForStream(streamType);
         for (size_t i = 0; i < mTracks.size(); ++i) {
             sp<Track> t = mTracks[i];
-            if (t != 0) {
+            if (t != 0 && !t->isOutputTrack()) {
                 uint32_t actual = AudioSystem::getStrategyForStream(t->streamType());
                 if (sessionId == t->sessionId() && strategy != actual) {
                     ALOGE("createTrack_l() mismatched strategy; expected %u but found %u",
