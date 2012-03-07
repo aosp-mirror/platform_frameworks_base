@@ -1028,7 +1028,6 @@ public:
         virtual     mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove);
         virtual     void        threadLoop_mix();
         virtual     void        threadLoop_sleepTime();
-        virtual     void        applyVolume();
 
         // volumes last sent to audio HAL with stream->set_volume()
         // FIXME use standard representation and names
@@ -1042,6 +1041,9 @@ public:
         bool rampVolume;
         uint16_t leftVol;
         uint16_t rightVol;
+
+private:
+                    void        applyVolume();  // FIXME inline into threadLoop_mix()
     };
 
     class DuplicatingThread : public MixerThread {
