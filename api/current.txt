@@ -27607,9 +27607,12 @@ package android.widget {
     method public final int getAutoLinkMask();
     method public int getCompoundDrawablePadding();
     method public android.graphics.drawable.Drawable[] getCompoundDrawables();
+    method public android.graphics.drawable.Drawable[] getCompoundDrawablesRelative();
     method public int getCompoundPaddingBottom();
+    method public int getCompoundPaddingEnd();
     method public int getCompoundPaddingLeft();
     method public int getCompoundPaddingRight();
+    method public int getCompoundPaddingStart();
     method public int getCompoundPaddingTop();
     method public final int getCurrentHintTextColor();
     method public final int getCurrentTextColor();
@@ -27652,8 +27655,10 @@ package android.widget {
     method public float getTextScaleX();
     method public float getTextSize();
     method public int getTotalPaddingBottom();
+    method public int getTotalPaddingEnd();
     method public int getTotalPaddingLeft();
     method public int getTotalPaddingRight();
+    method public int getTotalPaddingStart();
     method public int getTotalPaddingTop();
     method public final android.text.method.TransformationMethod getTransformationMethod();
     method public android.graphics.Typeface getTypeface();
@@ -27683,6 +27688,9 @@ package android.widget {
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);
     method public void setCompoundDrawables(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    method public void setCompoundDrawablesRelative(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    method public void setCompoundDrawablesRelativeWithIntrinsicBounds(int, int, int, int);
+    method public void setCompoundDrawablesRelativeWithIntrinsicBounds(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCompoundDrawablesWithIntrinsicBounds(int, int, int, int);
     method public void setCompoundDrawablesWithIntrinsicBounds(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCursorVisible(boolean);
