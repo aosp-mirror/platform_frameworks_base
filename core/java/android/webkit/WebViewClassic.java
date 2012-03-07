@@ -5747,6 +5747,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             setFocusControllerActive(false);
             mKeysPressed.clear();
         }
+        if (!mTouchHighlightRegion.isEmpty()) {
+            mWebView.invalidate(mTouchHighlightRegion.getBounds());
+        }
     }
 
     void setGLRectViewport() {
@@ -5956,6 +5959,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public boolean onTouchEvent(MotionEvent ev) {
         if (mNativeClass == 0 || (!mWebView.isClickable() && !mWebView.isLongClickable())) {
             return false;
+        }
+
+        if (!mWebView.isFocused()) {
+            mWebView.requestFocus();
         }
 
         if (DebugFlags.WEB_VIEW) {
@@ -6347,7 +6354,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                if (!mWebView.isFocused()) mWebView.requestFocus();
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent()) {
                     TouchEventData ted = new TouchEventData();
@@ -8519,7 +8525,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return false;
         }
         if (mFocusedNode.mHasFocus && !mWebView.isInTouchMode()) {
-            return !mFocusedNode.mEditable;
+            return mDrawCursorRing && !mFocusedNode.mEditable;
         }
         if (mFocusedNode.mHasFocus && mFocusedNode.mEditable) {
             return false;
