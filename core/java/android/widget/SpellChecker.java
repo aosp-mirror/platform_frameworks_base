@@ -491,8 +491,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 wordStart = regionEnd;
                 // TODO: Find the start position of the sentence.
                 // Set span with the context
-                final int spellCheckStart =  Math.min(
-                        start, Math.max(wordStart, regionEnd - WORD_ITERATOR_INTERVAL));
+                final int spellCheckStart =  Math.max(
+                        0, Math.min(wordStart, regionEnd - WORD_ITERATOR_INTERVAL));
                 if (regionEnd <= spellCheckStart) {
                     return;
                 }
