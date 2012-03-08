@@ -2003,7 +2003,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Indicates that the screen has changed state and is now on.
      *
-     * @see #onScreenStateChanged(int 
+     * @see #onScreenStateChanged(int)
      */
     public static final int SCREEN_STATE_ON = 0x1;
 
