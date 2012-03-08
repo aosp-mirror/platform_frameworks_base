@@ -33,16 +33,16 @@ major version or the sum of the major and minor versions).</p>
  <div class="sidebox-wrapper" xstyle="margin-bottom:2em;margin-top:.5em;width:90%;"> 
   <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png"> 
   <div id="qv-sub-rule"> 
-    <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;">Android Market and &lt;uses-sdk&gt; attributes</p> 
-    <p>Android Market filters the applications that are visible to users, so
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
+    <p style="color:#669999;padding-top:1em;">Google Play and &lt;uses-sdk&gt; attributes</p> 
+    <p style="padding-top:1em;">Google Play filters the applications that are visible to users, so
 that users can only see and download applications that are compatible with their
-devices. One of the ways Market filters applications is by Android
-version-compatibility. To do this, Market checks the <code>&lt;uses-sdk&gt;</code>
+devices. One of the ways it filters applications is by Android
+version-compatibility. To do this, Google Play checks the <code>&lt;uses-sdk&gt;</code>
 attributes in each application's manifest to establish its version-compatibility
 range, then shows or hides the application based on a comparison with the API
 Level of the user's Android system version. For more information, see <a
-href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a>.</p>
+href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>.</p>
   </div>
 </div>
 
@@ -114,7 +114,7 @@ the corresponding platform version.</p>
   updates, consider the following example: </p>
 
   <p>An application declaring <code>maxSdkVersion="5"</code> in its
-  manifest is published on Android Market. A user whose device is running Android
+  manifest is published on Google Play. A user whose device is running Android
   1.6 (API Level 4) downloads and installs the app. After a few weeks, the user
   receives an over-the-air system update to Android 2.0 (API Level 5). After the
   update is installed, the system checks the application's
@@ -143,7 +143,7 @@ the corresponding platform version.</p>
 
   <div class="special">Future versions of Android (beyond Android 2.0.1) will no
 longer check or enforce the <code>maxSdkVersion</code> attribute during
-installation or re-validation. Android Market will continue to use the attribute
+installation or re-validation. Google Play will continue to use the attribute
 as a filter, however, when presenting users with applications available for
 download. </div>
   </dd>

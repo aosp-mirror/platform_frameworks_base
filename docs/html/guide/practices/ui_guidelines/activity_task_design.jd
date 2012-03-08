@@ -886,7 +886,7 @@ href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Fi
   You can perform this test when initializing the user interface.
   For instance, you could disable the user control that initiates
   the Intent object, or display a message to the user that lets them go
-  to a location, such as the Market, to download its application.
+  to a location, such as Google Play, to download its application.
   In this way, your code can start the activity (using either startActivity() 
   or startActivityForResult()) only if the intent has tested to resolve
   to an activity that is actually present.

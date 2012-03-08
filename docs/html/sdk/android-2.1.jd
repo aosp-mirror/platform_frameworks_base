@@ -191,7 +191,7 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-
 &lt;uses-feature android:name="android.software.live_wallpaper" />
 </pre>
 
-<p>When you've published your application, Android Market checks for the
+<p>When you've published your application, Google Play checks for the
 presence of this element and uses it as a filter, ensuring that your application
 is not made available to users whose devices do not support Live Wallpapers.
 </p>

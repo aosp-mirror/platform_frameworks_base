@@ -298,10 +298,10 @@ platforms and one for Android 2.0 and beyond. If so, here's what you'll need to 
       <li>At launch time, check the version of the SDK. The version of the SDK 
 is available as {@link android.os.Build.VERSION#SDK android.os.Build.VERSION.SDK}.</li>
       <li>If the SDK version is greater or equal to 5 (Android 2.0), show a dialog 
-suggesting to the user that it's time to go to Market and find a new version of 
-the app. You can even provide a link to the new app on Market (see <a 
+suggesting to the user that it's time to go to Google Play and find a new version of 
+the app. You can even provide a link to the new app on Google Play (see <a 
 href="{@docRoot}guide/publishing/publishing.html#marketintent">Using Intents 
-to Launch Market</a>). </li>
+to Launch Google Play</a>). </li>
     </ul>
   <li>Change the new application:</li>
     <ul>
@@ -311,14 +311,14 @@ and other new features of Android 2.0. </li>
       <li>Modify that application's AndroidManifest.xml file: </li>
         <ul>
           <li>Give the application a new name and a new package name. Currently 
-Android Market does not allow you to have two applications with the same 
+Google Play does not allow you to have two applications with the same 
 name/package.</li>
           <li>Update (or add) the <code>android:minSdkVersion</code> attribute 
 to the <code>&lt;uses-sdk&gt;</code> element. To use the new Contacts API, 
 you should set the value of the attribute to "5" (or higher, as appropriate).</li>
         </ul>
       </ul>
-    <li>Publish both apps on Market, the old app one as an upgrade and the 
+    <li>Publish both apps on Google Play, the old app one as an upgrade and the 
 other as new. Make sure to explain the difference between the apps in their 
 descriptions.</li>
 </ul>

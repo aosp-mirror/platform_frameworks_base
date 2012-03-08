@@ -31,27 +31,27 @@ environment</a></li>
 </div>
 </div>
 
-<p>Before you start adding license verification to your application, you need to set up your Android
-Market publishing account, your development environment, and test accounts required to verify
+<p>Before you start adding license verification to your application, you need to set up your Google
+Play publishing account, your development environment, and test accounts required to verify
 your implementation.</p>
 
 
 <h2 id="account">Setting Up a Publisher Account</h2>
 
-<p>If you don't already have a publisher account for Android Market, you need to register for one
-using your Google account and agree to the terms of service on the Android Market publisher site:</p>
+<p>If you don't already have a publisher account for Google Play, you need to register for one
+using your Google account and agree to the terms of service on the Google Play publisher site:</p>
 
 <p style="margin-left:2em;"><a
-href="http://market.android.com/publish">http://market.android.com/publish</a>
+href="http://play.google.com/apps/publish">http://play.google.com/apps/publish</a>
 </p>
 
 <p>For more information, see <a
-href="{@docRoot}guide/publishing/publishing.html">Publishing on Android Market</a>.</p>
+href="{@docRoot}guide/publishing/publishing.html">Publishing on Google Play</a>.</p>
 
-<p>If you already have a publisher account on Android Market, use your existing
+<p>If you already have a publisher account on Google Play, use your existing
 account to set up licensing.</p>
 
-<p>Using your publisher account on Android Market, you can:</p>
+<p>Using your publisher account on Google Play, you can:</p>
 
 <ul>
 <li>Obtain a public key for licensing</li>
@@ -63,7 +63,7 @@ publishing the application</li>
 <h4>Administrative settings for licensing</h4>
 
 <p>You can manage several
-administrative controls for Android Market licensing on the publisher site. The controls are available
+administrative controls for Google Play licensing on the publisher site. The controls are available
 in the Edit Profile page, in the "Licensing" panel, shown in figure 1. The controls
 let you: </p>
 
@@ -114,17 +114,17 @@ checking and enforcement. </p>
 
 <p>As described earlier, applications check licensing status not by contacting
 the licensing server directly, but by binding to a service provided by the
-Android Market application and initiating a license check request. The Android
-Market service then handles the direct communication with the licensing server
+Google Play application and initiating a license check request. The Google
+Play service then handles the direct communication with the licensing server
 and finally routes the response back to your application. To debug and test
 licensing in your application, you need to set up a runtime environment that
-includes the necessary Android Market service, so that your application is able
+includes the necessary Google Play service, so that your application is able
 to send license check requests to the licensing server. </p>
 
 <p>There are two types of runtime environment that you can use: </p>
 
 <ul>
-<li>An Android-powered device that includes the Android Market application, or</li>
+<li>An Android-powered device that includes the Google Play application, or</li>
 <li>An Android emulator running the Google APIs Add-on, API level 8 (release 2)
 or higher</li>
 </ul>
@@ -137,12 +137,12 @@ debugging and testing licensing, the device must:</p>
 <ul>
 <li>Run a compatible version of Android 1.5 or later (API level
 3 or higher) platform, <em>and</em> </li>
-<li>Run a system image on which the Android Market client application
+<li>Run a system image on which the Google Play client application
 is preinstalled. </li>
 </ul>
 
-<p>If Android Market is not preinstalled in the system image, your application won't
-be able to communicate with the Android Market licensing server. </p>
+<p>If Google Play is not preinstalled in the system image, your application won't
+be able to communicate with the Google Play licensing server. </p>
 
 <p>For general information about how to set up a device for use in developing
 Android applications, see <a
@@ -154,16 +154,16 @@ href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a>.</p>
 licensing.</p>
 
 <p>Because the Android platforms provided in the Android SDK <em>do
-not</em> include Android Market, you need to download the Google APIs Add-On
+not</em> include Google Play, you need to download the Google APIs Add-On
 platform, API level 8 (or higher), from the SDK repository. After downloading
 the add-on, you need to create an AVD configuration that uses that system image.
 </p>
 
-<p>The Google APIs Add-On does not include the full Android Market client.
+<p>The Google APIs Add-On does not include the full Google Play client.
 However, it does provide: </p>
 
 <ul>
-<li>An Android Market background service that implements the
+<li>An Google Play background service that implements the
 <code>ILicensingService</code> remote interface, so that your application can
 send license checks over the network to the licensing server. </li>
 <li>A set of underlying account services that let you add an a Google account on
@@ -174,8 +174,8 @@ href="#acct-signin">Signing in to an authorized account</a>, below.</p></li>
 </ul>
 
 <p>Several versions of the add-on are available through the SDK Manager, but only
-<strong>Google APIs Add-On, API 8 (release 2) or higher</strong> includes the necessary Android
-Market services.</p>
+<strong>Google APIs Add-On, API 8 (release 2) or higher</strong> includes the necessary Google
+Play services.</p>
 
 
 <img src="{@docRoot}images/licensing_gapis_8.png" alt=""/>
@@ -256,11 +256,11 @@ classes to check and enforce licensing.</li>
 
 <p>To download the LVL component into your development environment, use the
 Android SDK Manager. Launch the Android SDK Manager and then
-select the "Market Licensing" component, as shown in figure 3.
+select the "Google Market Licensing" component, as shown in figure 3.
 Accept the terms and click <strong>Install Selected</strong> to begin the download. </p>
 
 <img src="{@docRoot}images/licensing_package.png" alt=""/>
-<p class="img-caption"><strong>Figure 3.</strong> The Market Licensing package contains the LVL and
+<p class="img-caption"><strong>Figure 3.</strong> The Licensing package contains the LVL and
 the LVL sample application.</p>
 
 <p>When the download is complete, the Android SDK Manager installs both
@@ -297,7 +297,7 @@ system, add and track the sources that are in the working location rather
 than those in default location in the SDK. </p>
 
 <p>Moving the library sources is important is because, when you later update the
-Market licensing package, the SDK installs the new files to the same location as
+Licensing package, the SDK installs the new files to the same location as
 the older files. Moving your working library files to a safe location ensures
 that your work won't be inadvertently overwritten should you download a new
 version of the LVL.</p>
@@ -438,7 +438,7 @@ Setting up a Library Project</a>.</p>
 
 <h2 id="test-env">Setting Up the Testing Environment</h2>
 
-<p>The Android Market publisher site provides configuration tools that let you
+<p>The Google Play publisher site provides configuration tools that let you
 and others test licensing on your application before it is published. As you are
 implementing licensing, you can make use of the publisher site tools to test
 your application's Policy and handling of different licensing responses and
@@ -454,7 +454,7 @@ signed in to the publisher account or a test account.</li>
 <li>An optional set of test accounts that will receive the static test
 response when they check the license of an application that you have uploaded
 (regardless whether the application is published or not).</li>
-<li>A runtime environment for the application that includes the Android Market
+<li>A runtime environment for the application that includes the Google Play
 application or Google APIs Add-On, on which the user is signed in to the
 publisher account or one of the test accounts.</li>
 </ul>
@@ -472,7 +472,7 @@ publisher account or one of the test accounts.</li>
 
 <h3 id="test-response">Setting test responses for license checks</h3>
 
-<p>Android Market provides a configuration setting in your publisher account
+<p>Google Play provides a configuration setting in your publisher account
 that lets you override the normal processing of a license check and return a
 specified static response code. The setting is for testing only and applies
 <em>only</em> to license checks for applications that you have uploaded, made by
@@ -522,7 +522,7 @@ test responses available and their meanings. </p>
 <p>In some cases, you might want to let multiple teams of developers test
 licensing on applications that will ultimately be published through your
 publisher account, but without giving them access to your publisher account's
-sign-in credentials. To meet that need, the Android Market publisher site lets
+sign-in credentials. To meet that need, the Google Play publisher site lets
 you set up one or more optional <em>test accounts</em> &mdash; accounts that are
 authorized to query the licensing server and receive static test responses from
 your publisher account.</p>
@@ -632,11 +632,11 @@ directly. </p>
 environment</h3>
 
 <p>The licensing service is designed to determine whether a given user is
-licensed to use a given application &mdash; during a license check, the Android
-Market application gathers the user ID from the primary account on the system
+licensed to use a given application &mdash; during a license check, the Google
+Play application gathers the user ID from the primary account on the system
 and sends it to the server, together with the package name of the application
 and other information. However, if there is no user information available, the
-license check cannot succeed, so the Android Market application terminates the
+license check cannot succeed, so the Google Play application terminates the
 request and returns an error to the application. </p>
 
 <p>During testing, to ensure that your application can successfully query the

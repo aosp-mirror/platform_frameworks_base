@@ -150,9 +150,9 @@ either internal or external storage through the system settings.</td>
 </tr>
 </table>
 
-<p class="caution"><strong>Caution:</strong> If your application uses the Android Market's Copy 
-  Protection feature, it cannot be installed to a device's SD card. However, if you use Android 
-  Market's <a href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> instead, 
+<p class="caution"><strong>Caution:</strong> If your application uses Google Play's Copy 
+  Protection feature, it cannot be installed to a device's SD card. However, if you use Google 
+  Play's <a href="{@docRoot}guide/market/licensing.html">Application Licensing</a> instead, 
   your application <em>can</em> be installed to internal or external storage, including SD cards.</p>
 
 <p class="note"><strong>Note:</strong> By default, your application will be installed on the

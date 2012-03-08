@@ -27,10 +27,10 @@ specifies a specific screen size-density combination with which the application 
 
   <p>The Android system <em>does not</em> read the {@code &lt;compatible-screens&gt;} manifest
 element (neither at install-time nor at runtime). This element is informational only and may be used
-by external services (such as Android Market) to better understand the application's compatibility
+by external services (such as Google Play) to better understand the application's compatibility
 with specific screen configurations and enable filtering for users. Any screen configuration that is
 <em>not</em> declared in this element is a screen with which the application is <em>not</em>
-compatible. Thus, external services (such as Android Market) should not provide the application to
+compatible. Thus, external services (such as Google Play) should not provide the application to
 devices with such screens.</p>
 
   <p class="caution"><strong>Caution:</strong> Normally, <strong>you should not use this manifest
@@ -48,14 +48,14 @@ should use the <a href="{@docRoot}guide/topics/manifest/supports-screens-element
 only for <em>large</em> and <em>xlarge</em> screen devices, the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens&gt;}</a> element allows you to declare that your application does not
-support <em>small</em> and <em>normal</em> screen sizes. External services (such as Android
-Market) will filter your application accordingly. You can also use the <a
+support <em>small</em> and <em>normal</em> screen sizes. External services (such as Google
+Play) will filter your application accordingly. You can also use the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens&gt;}</a> element to declare whether the system should resize your
 application for different screen sizes.</p>
 
-  <p>Also see the <a href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a>
-document for more information about how Android Market filters applications using this and
+  <p>Also see the <a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>
+document for more information about how Google Play filters applications using this and
 other manifest elements.</p>
 
 </dd>
@@ -138,5 +138,5 @@ entry looks like if your application is compatible with only small and normal sc
 <dt>see also:</dt>
 <dd><a
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></dd>
-<dd><a href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a></dd>
+<dd><a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a></dd>
 </dl>

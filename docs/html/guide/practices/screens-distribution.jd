@@ -37,7 +37,7 @@ href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for And
 configurations of screen size and density, you can instead choose to limit the distribution of your
 application to certain types of screens, such as only tablets and other large devices or only
 handsets and similar-sized devices. To do so, you can enable filtering by external services such as
-Android Market by adding elements to your manifest file that specify the screen configurations your
+Google Play by adding elements to your manifest file that specify the screen configurations your
 application supports.</p>
 
 <p>However, before you decide to restrict your application to certain screen configurations, you
@@ -58,7 +58,7 @@ might discover that your application can't scale up well or perhaps you've decid
 versions of your application for different screen configurations. In such a case, you can use the <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
 &lt;compatible-screens>}</a> element to manage the distribution of your application based on
-combinations of screen size and density. External services such as Android Market use this
+combinations of screen size and density. External services such as Google Play use this
 information to apply filtering to your application, so that only devices that have a screen
 configuration with which you declare compatibility can download your application.</p>
 
@@ -68,7 +68,7 @@ configuration with which you declare compatibility can download your application
 compatible, using both the {@code android:screenSize} and {@code android:screenDensity} attributes.
 Each {@code &lt;screen&gt;} element <strong>must include both attributes</strong> to specify an
 individual screen configuration&mdash;if either attribute is missing, then the element is invalid
-(external services such as Android Market will ignore it).</p>
+(external services such as Google Play will ignore it).</p>
 
 <p>For example, if your application is compatible with only small and normal size screens,
 regardless of screen density, you must specify eight different {@code &lt;screen&gt;} elements,
@@ -173,7 +173,7 @@ Tools for Managing Screen Sizes</a>.</p>
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens>}</a> element for the reverse scenario (when your application is not compatible
 with <em>larger</em> screens) and set the larger screen size attributes to {@code "false"}, then
-external services such as Android Market <strong>do not</strong> apply filtering. Your application
+external services such as Google Play <strong>do not</strong> apply filtering. Your application
 will still be available to larger screens, but when it runs, it will not resize to fit the screen.
 Instead, the system will emulate a handset screen size (about 320dp x 480dp; see <a
 href="{@docRoot}guide/practices/screen-compat-mode.html">Screen Compatibility Mode</a> for more
@@ -197,13 +197,13 @@ configurations.</p>
 
 <h2 id="MultiApks">Publishing Multiple APKs for Different Screens</h2>
 
-<p>Although we recommend that you publish one APK for your application, Android Market allows
+<p>Although we recommend that you publish one APK for your application, Google Play allows
 you to publish multiple APKs for the same
 application when each APK supports a different set of screen configurations (as declared in
 the manifest file). For example, if you want to publish both a handset version and a tablet
 version of your application, but you're unable to make the same APK work for both screen sizes,
 you can actually publish two APKs for the same application listing. Depending on each device's
-screen configuration, Android Market will deliver it the APK that you've declared to support that
+screen configuration, Google Play will deliver it the APK that you've declared to support that
 device's screen.</p>
 
 <p>Beware, however, that publishing multiple APKs for the same application is
@@ -212,5 +212,5 @@ APK that can support a wide range of device configurations</strong>. Supporting 
 sizes, especially, is within reason using a single APK, as long as you follow the guide to
 <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
 
-<p>If you need more information about how to publish multiple APKs on Android Market, read <a
+<p>If you need more information about how to publish multiple APKs on Google Play, read <a
 href="{@docRoot}guide/market/publishing/multiple-apks.html">Multiple APK Support</a>.</p>

@@ -36,20 +36,20 @@ parent.link=index.html
 <p>The following document provides technical reference information for the following:</p>
 
 <ul>
-  <li><a href="#billing-codes">Android Market Server Response Codes for In-app Billing</a></li>
+  <li><a href="#billing-codes">Google Play Server Response Codes for In-app Billing</a></li>
   <li><a href="#billing-interface">In-app Billing Interface Parameters</a></li>
   <li><a href="#billing-intents">In-app Billing Broadcast Intents</a></li>
 </ul>
 
-<h2 id="billing-codes">Android Market Server Response Codes for In-app Billing</h2>
+<h2 id="billing-codes">Google Play Server Response Codes for In-app Billing</h2>
 
-<p>The following table lists all of the server response codes that are sent from Android Market to
-your application. Android Market sends these response codes asynchronously as
+<p>The following table lists all of the server response codes that are sent from Google Play to
+your application. Google Play sends these response codes asynchronously as
 <code>response_code</code> extras in the <code>com.android.vending.billing.RESPONSE_CODE</code>
 broadcast intent. Your application must handle all of these response codes.</p>
 
 <p class="table-caption" id="response-codes-table"><strong>Table 1.</strong> Summary of response
-codes returned by Android Market.</p>
+codes returned by Google Play.</p>
 
 <table>
 
@@ -80,13 +80,13 @@ codes returned by Android Market.</p>
   <td><code>RESULT_BILLING_UNAVAILABLE</code></td>
   <td>3</td>
   <td>Indicates that in-app billing is not available because the <code>API_VERSION</code> that you
-  specified is not recognized by the Android Market application or the user is ineligible for in-app
+  specified is not recognized by the Google Play application or the user is ineligible for in-app
   billing (for example, the user resides in a country that prohibits in-app purchases).</td>
 </tr>
 <tr>
   <td><code>RESULT_ITEM_UNAVAILABLE</code></td>
   <td>4</td>
-  <td>Indicates that Android Market cannot find the requested item in the application's product
+  <td>Indicates that Google Play cannot find the requested item in the application's product
   list. This can happen if the product ID is misspelled in your <code>REQUEST_PURCHASE</code>
   request or if an item is unpublished in the application's product list.</td>
 </tr>
@@ -108,7 +108,7 @@ purchase an item from yourself, which is not allowed by Google Checkout.</td>
 
 <h2 id="billing-interface">In-app Billing Service Interface</h2>
 
-<p>The following section describes the interface for Android Market's in-app billing service. The
+<p>The following section describes the interface for Google Play's in-app billing service. The
 interface is defined in the <code>IMarketBillingService.aidl</code> file, which is included with the
 in-app billing <a
 href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample
@@ -144,7 +144,7 @@ pairs, which are summarized in table 2.</p>
   <td><code>int</code></td>
   <td>1</td>
   <td>Yes</td>
-  <td>The version of Android Market's in-app billing service you are using. The current version is
+  <td>The version of Google Play's in-app billing service you are using. The current version is
   1.</td>
 </tr>
 <tr>
@@ -160,8 +160,8 @@ pairs, which are summarized in table 2.</p>
   <td>Any valid product identifier.</td>
   <td>Required for <code>REQUEST_PURCHASE</code> requests.</td>
   <td>The product ID of the item you are making a billing request for. Every in-app item that you
-  sell using Android Market's in-app billing service must have a unique product ID, which you
-  specify on the Android Market publisher site.</td>
+  sell using Google Play's in-app billing service must have a unique product ID, which you
+  specify on the Google Play publisher site.</td>
 </tr>
 <tr>
   <td><code>NONCE</code></td>
@@ -172,7 +172,7 @@ pairs, which are summarized in table 2.</p>
   <td>A number used once. Your application must generate and send a nonce with each
   <code>GET_PURCHASE_INFORMATION</code> and <code>RESTORE_TRANSACTIONS</code> request. The nonce is
   returned with the <code>PURCHASE_STATE_CHANGED</code> broadcast intent, so you can use this value
-  to verify the integrity of transaction responses form Android Market.</td>
+  to verify the integrity of transaction responses form Google Play.</td>
 </tr>
 <tr>
   <td><code>NOTIFY_IDS</code></td>
@@ -202,20 +202,20 @@ pairs, which are summarized in table 2.</p>
 
 <ul>
   <li><code>CHECK_BILLING_SUPPORTED</code>
-    <p>This request verifies that the Android Market application supports in-app billing. You
+    <p>This request verifies that the Google Play application supports in-app billing. You
     usually send this request when your application first starts up. This request is useful if you
     want to enable or disable certain UI features that are relevant only to in-app billing.</p>
   </li>
   <li><code>REQUEST_PURCHASE</code>
-    <p>This request sends a purchase message to the Android Market application and is the foundation
+    <p>This request sends a purchase message to the Google Play application and is the foundation
     of in-app billing. You send this request when a user indicates that he or she wants to purchase
-    an item in your application. Android Market then handles the financial transaction by displaying
+    an item in your application. Google Play then handles the financial transaction by displaying
     the checkout user interface.</p>
   </li>
   <li><code>GET_PURCHASE_INFORMATION</code>
     <p>This request retrieves the details of a purchase state change. A purchase state change can
     occur when a purchase request is billed successfully or when a user cancels a transaction during
-    checkout. It can also occur when a previous purchase is refunded. Android Market notifies your
+    checkout. It can also occur when a previous purchase is refunded. Google Play notifies your
     application when a purchase changes state, so you only need to send this request when there is
     transaction information to retrieve.</p>
   </li>
@@ -294,8 +294,8 @@ each in-app billing request type.</p>
 
 <h2 id="billing-intents">In-app Billing Broadcast Intents</h2>
 
-<p>The following section describes the in-app billing broadcast intents that are sent by the Android
-Market application. These broadcast intents inform your application about in-app billing actions
+<p>The following section describes the in-app billing broadcast intents that are sent by the Google
+Play application. These broadcast intents inform your application about in-app billing actions
 that have occurred. Your application must implement a {@link android.content.BroadcastReceiver} to
 receive these broadcast intents, such as the <code>BillingReceiver</code> that's shown in the in-app
 billing <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample
@@ -303,21 +303,21 @@ application</a>.</p>
 
 <h4>com.android.vending.billing.RESPONSE_CODE</h4>
 
-<p>This broadcast intent contains an Android Market response code, and is sent after you make an
+<p>This broadcast intent contains a Google Play response code, and is sent after you make an
 in-app billing request. A server response code can indicate that a billing request was successfully
-sent to Android Market or it can indicate that some error occurred during a billing request. This
+sent to Google Play or it can indicate that some error occurred during a billing request. This
 intent is not used to report any purchase state changes (such as refund or purchase information).
 For more information about the response codes that are sent with this response, see <a
-href="#billing-codes">Android Market Response Codes for In-app Billing</a>. The sample application
+href="#billing-codes">Google Play Response Codes for In-app Billing</a>. The sample application
 assigns this broadcast intent to a constant named <code>ACTION_RESPONSE_CODE</code>.</p>
 
 <h5>Extras</h5>
 
 <ul type="none">
   <li><code>request_id</code>&mdash;a <code>long</code> representing a request ID. A request ID
-  identifies a specific billing request and is returned by Android Market at the time a request is
+  identifies a specific billing request and is returned by Google Play at the time a request is
   made.</li>
-  <li><code>response_code</code>&mdash;an <code>int</code> representing the Android Market server
+  <li><code>response_code</code>&mdash;an <code>int</code> representing the Google Play server
   response code.</li>
 </ul>
 
@@ -335,7 +335,7 @@ message details. The sample application assigns this broadcast intent to a const
 
 <ul type="none">
   <li><code>notification_id</code>&mdash;a <code>String</code> representing the notification ID for
-  a given purchase state change. Android Market notifies you when there is a purchase state change
+  a given purchase state change. Google Play notifies you when there is a purchase state change
   and the notification includes a unique notification ID. To get the details of the purchase state
   change, you send the notification ID with the <code>GET_PURCHASE_INFORMATION</code> request.</li>
 </ul>
@@ -375,15 +375,15 @@ a <code>PURCHASE_STATE_CHANGED</code> intent.</p>
 <tr>
   <td>nonce</td>
   <td>A number used once. Your application generates the nonce and sends it with the
-  <code>GET_PURCHASE_INFORMATION</code> request. Android Market sends the nonce back as part of the
+  <code>GET_PURCHASE_INFORMATION</code> request. Google Play sends the nonce back as part of the
   JSON string so you can verify the integrity of the message.</td>
 </tr>
 <tr>
   <td>notificationId</td>
   <td>A unique identifier that is sent with an <code>IN_APP_NOTIFY</code> broadcast intent. Each
   <code>notificationId</code> corresponds to a specify message that is waiting to be retrieved on
-  the Android Market server. Your application sends back the <code>notificationId</code> with the
-  <code>GET_PURCHASE_INFORMATION</code> message so Android Market can determine which messages you
+  the Google Play server. Your application sends back the <code>notificationId</code> with the
+  <code>GET_PURCHASE_INFORMATION</code> message so Google Play can determine which messages you
   are retrieving.</td>
 </tr>
 <tr>
@@ -398,7 +398,7 @@ a <code>PURCHASE_STATE_CHANGED</code> intent.</p>
 <tr>
   <td>productId</td>
   <td>The item's product identifier. Every item has a product ID, which you must specify in the
-  application's product list on the Android Market publisher site.</td>
+  application's product list on the Google Play publisher site.</td>
 </tr>
 <tr>
   <td>purchaseTime</td>

@@ -7,7 +7,7 @@ page.title=Android Compatibility
 <h2>See also</h2>
  <ol>
 <li><a
-href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a></li>
+href="{@docRoot}guide/appendix/market-filters.html">Filtering on Google Play</a></li>
 <li><a
 href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">Providing Alternative Resources</a></li>
 <li><a
@@ -39,7 +39,7 @@ variety of hardware.</p>
 your apps to do that, while at the same time letting you maintain control of
 what types of devices your app is available to. With a bit of forethought and
 some minor changes in your app's manifest file, you can ensure that users
-whose devices can’t run your app will never see it in the Android Market, and
+whose devices can’t run your app will never see it on Google Play, and
 will not get in trouble by downloading it. This page explains how you can
 control which devices have access to your apps, and how to prepare your apps to
 make sure they reach the right audience.</p>
@@ -64,7 +64,7 @@ every class and every API for that API level.</p>
 corresponding hardware or feature. But that’s not a problem: we also designed
 Android to prevent apps from being visible to devices which don’t have features
 the apps require. We’ve built support for this right into the SDK tools, and
-it’s part of the Android platform itself, as well as Android Market.</p>
+it’s part of the Android platform itself, as well as part of Google Play.</p>
 
 <p>As a developer, you have complete control of how and where your apps are
 available. Android provides tools as a first-class part of the platform that let
@@ -79,9 +79,9 @@ only the devices capable of running them.</p>
 <li>You state the features your app requires by declaring <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
 elements its manifest file.</li>
-<li>Devices are required to declare the features they include to Android
-Market.</li>
-<li>Android Market uses your app’s stated requirements to filter it from devices
+<li>Devices are required to declare the features they include to Google
+Play.</li>
+<li>Google Play uses your app’s stated requirements to filter it from devices
 that don’t meet those requirements.</li>
 </ol>
 
@@ -103,24 +103,24 @@ instead use the fine-grained controls Android provides.</p>
  <div class="sidebox-wrapper"> 
   <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png"> 
   <div id="qv-sub-rule"> 
-    <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;">Filtering on Android Market</p>
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
+    <p style="color:#669999;">Filtering on Google Play</p>
 
-    <p>Android Market filters the applications that are visible to users, so
+    <p>Google Play filters the applications that are visible to users, so
 that users can see and download only those applications that are compatible with
 their devices.</p>
 
-    <p style="margin-top:1em;">One of the ways Market filters applications is by
-feature compatibility. To do this, Market checks the
+    <p style="margin-top:1em;">One of the ways Google Play filters applications is by
+feature compatibility. To do this, Google Play checks the
 <code>&lt;uses-feature&gt;</code> elements in each application's manifest, to
-establish the app's feature needs. Market then shows or hides the application to
+establish the app's feature needs. Google Play then shows or hides the application to
 each user, based on a comparison with the features available on the user's
 device. 
 
 <p style="margin-top:1em;">For information about other filters that you can
 use to control the availability of your apps, see the 
-<a href="{@docRoot}guide/appendix/market-filters.html">Market
-Filters</a> document.</p>
+<a href="{@docRoot}guide/appendix/market-filters.html">Filters on Google Play</a>
+document.</p>
   </div> 
 </div>
 
@@ -142,8 +142,8 @@ future versions, new feature IDs will be added as well.</p>
 
 <p>When you write your application, you specify which features your app requires
 by listing their feature IDs in <code>&lt;uses-feature&gt;</code> elements in
-the <code>AndroidManifest.xml</code> file.  This is the information that Android
-Market uses to match your app to devices that can run it. For instance, if you
+the <code>AndroidManifest.xml</code> file.  This is the information that Google
+Play uses to match your app to devices that can run it. For instance, if you
 state that your app requires android.software.live_wallpapers, it won’t be shown
 to devices that don’t support Live Wallpapers.</p>
 
@@ -170,12 +170,12 @@ audience size and minimizing development costs.</p>
 business or legal reasons. For instance, an app that displays train schedules
 for the London Underground is unlikely to be useful to users outside the United
 Kingdom. Other apps might not be permitted in certain countries for business or
-legal reasons. For cases such as these, Android Market itself provides
+legal reasons. For cases such as these, Google Play itself provides
 developers with filtering options that allow them control their app’s
 availability for non-technical reasons.</p>
 
-<p>The help information for Android Market provides full details, but in a
-nutshell, developers can use the Market publisher UI to:</p>
+<p>The help information for Google Play provides full details, but in a
+nutshell, developers can use the Google Play publisher UI to:</p>
 
 <ul>
 <li>List the countries an app is available in.</li>
@@ -185,7 +185,7 @@ nutshell, developers can use the Market publisher UI to:</p>
 <p>Filtering for technical compatibility (such as required hardware components)
 is always based on information contained within your <code>.apk</code> file. But
 filtering for non-technical reasons (such as geographic restrictions) is always
-handled in the Market user interface.</p>
+handled in the Google Play user interface.</p>
 
 <h3 id="futureproofing">Future-proofing</h3>
 
@@ -206,7 +206,7 @@ capability, though a (fixed-focus) camera was still required. Some apps such as
 barcode scanners do not function as well with cameras that do not auto-focus. To
 prevent users from having a bad experience with those apps, existing apps that
 obtain permission to use the Camera were assumed by default to require
-auto-focus. This allowed Android Market to filter those apps from devices that
+auto-focus. This allowed Google Play to filter those apps from devices that
 lack auto-focus.</li>
 
 <li>Android 2.2, meanwhile, allowed the microphone to be optional on some

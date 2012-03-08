@@ -38,19 +38,19 @@ parent.link=index.html
 few administrative tasks, including setting up and maintaining your product list on the publisher
 site, registering test accounts, and handling refunds when necessary.</p>
 
-<p>You must have an Android Market publisher account to register test accounts. And you must have a
+<p>You must have a Google Play publisher account to register test accounts. And you must have a
 Google Checkout merchant account to create a product list and issue refunds to your users. If you
-already have a publisher account on Android Market, you can use your existing account. You do not
+already have a publisher account on Google Play, you can use your existing account. You do not
 need to register for a new account to support in-app billing. If you do not have a publisher
-account, you can register as an Android Market developer and set up a publisher account at the
-Android Market <a href="http://market.android.com/publish">publisher site</a>. If you do not have a
+account, you can register as a Google Play developer and set up a publisher account at the
+Google Play <a href="http://play.google.com/apps/publish">publisher site</a>. If you do not have a
 Google Checkout merchant account, you can register for one at the <a
 href="http://checkout.google.com">Google Checkout site</a>.</p>
 
 <h2 id="billing-list-setup">Creating a Product List</h2>
 
-<p>The Android Market publisher site provides a product list for each of your published
-applications. You can sell an item using Android Market's in-app billing feature only if the item is
+<p>The Google Play publisher site provides a product list for each of your published
+applications. You can sell an item using Google Play's in-app billing feature only if the item is
 listed on an application's product list. Each application has its own product list; you cannot sell
 items that are listed in another application's product list.</p>
 
@@ -77,7 +77,7 @@ storing and delivering the digital content that you sell in your applications.</
 </p>
 
 <p>You can create a product list for any published application or any draft application that's been
-uploaded and saved to the Android Market site. However, you must have a Google Checkout merchant
+uploaded and saved to the Google Play site. However, you must have a Google Checkout merchant
 account and the application's manifest must include the <code>com.android.vending.BILLING</code>
 permission. If an application's manifest does not include this permission, you will be able to edit
 existing items in the product list but you will not be able to add new items to the list. For more
@@ -104,8 +104,8 @@ number of in-app items.</p>
 <p>To add an item to a product list using the In-app Products UI, follow these steps:</p>
 
 <ol>
-  <li><a href="http://market.android.com/publish">Log in</a> to your publisher account.</li>
-  <li>In the <strong>All Android Market listings</strong> panel, under the application name, click
+  <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
+  <li>In the <strong>All Google Play listings</strong> panel, under the application name, click
   <strong>In-app Products</strong>.</li>
   <li>On the In-app Products List page, click <strong>Add in-app product</strong>.</li>
   <li>On the Create New In-app Product page (see figure 3), provide details about the item you are
@@ -137,7 +137,7 @@ number of in-app items.</p>
   <li><strong>Publishing State</strong>
     <p>An item's publishing state can be <strong>Published</strong> or <strong>Unpublished
     </strong>. To be visible to a user during checkout, an item's publishing state must be set to
-    <strong>Published</strong> and the item's application must be published on Android Market.</p>
+    <strong>Published</strong> and the item's application must be published on Google Play.</p>
     <p class="note"><strong>Note:</strong> This is not true for test accounts. An item is visible to
     a test account if the application is not published and the item is published. See <a
     href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-real">Testing In-app
@@ -167,9 +167,9 @@ number of in-app items.</p>
     <p>You must provide a default price in your home currency. You can also provide prices in other
     currencies, but you can do this only if a currency's corresponding country is listed as a
     target country for your application. You can specify target countries on the Edit Application
-    page in the Android Market developer console.</p>
+    page in the Google Play developer console.</p>
     <p>To specify prices in other currencies, you can manually enter the price for each
-    currency or you can click <strong>Auto Fill</strong> and let Android Market do a one-time
+    currency or you can click <strong>Auto Fill</strong> and let Google Play do a one-time
     conversion from your home currency to the currencies you are targeting (see figure 4).</p>
   </li>
 </ul>
@@ -357,8 +357,8 @@ with the <em>locale</em> field.</p>
 <p>To import the items that are specified in your CSV file, do the following:</p>
 
 <ol>
-  <li><a href="http://market.android.com/publish">Log in</a> to your publisher account.</li>
-  <li>In the <strong>All Android Market listings</strong> panel, under the application name, click
+  <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
+  <li>In the <strong>All Google Play listings</strong> panel, under the application name, click
   <strong>In-app Products</strong>.</li>
   <li>On the In-app Products List page, click <strong>Choose File</strong> and select your CSV
 file.
@@ -381,17 +381,17 @@ a product list and you want to start managing the product list through a CSV fil
 
 <h3 id="billing-purchase-type">Choosing a Purchase Type</h3>
 
-<p>An item's purchase type controls how Android Market manages the purchase of the item. There are
+<p>An item's purchase type controls how Google Play manages the purchase of the item. There are
 two purchase types: "managed per user account" and "unmanaged."</p>
 
 <p>Items that are managed per user account can be purchased only once per user account. When an item
-is managed per user account, Android Market permanently stores the transaction information for each
-item on a per-user basis. This enables you to query Android Market with the
+is managed per user account, Google Play permanently stores the transaction information for each
+item on a per-user basis. This enables you to query Google Play with the
 <code>RESTORE_TRANSACTIONS</code> request and restore the state of the items a specific user has
 purchased.</p>
 
-<p>If a user attempts to purchase a managed item that has already been purchased, Android Market
-displays an "Item already purchased" error. This occurs during checkout, when Android Market
+<p>If a user attempts to purchase a managed item that has already been purchased, Google Play
+displays an "Item already purchased" error. This occurs during checkout, when Google Play
 displays the price and description information on the checkout page. When the user dismisses the
 error message, the checkout page disappears and the user returns to your user interface. As a best
 practice, your application should prevent the user from seeing this error. The sample application
@@ -404,10 +404,10 @@ or application features. These items are not transient and usually need to be re
 user reinstalls your application, wipes the data on their device, or installs your application on a
 new device.</p>
 
-<p>Items that are unmanaged do not have their transaction information stored on Android Market,
-which means you cannot query Android Market to retrieve transaction information for items whose
+<p>Items that are unmanaged do not have their transaction information stored on Google Play,
+which means you cannot query Google Play to retrieve transaction information for items whose
 purchase type is listed as unmanaged. You are responsible for managing the transaction information
-of unmanaged items. Also, unmanaged items can be purchased multiple times as far as Android Market
+of unmanaged items. Also, unmanaged items can be purchased multiple times as far as Google Play
 is concerned, so it's also up to you to control how many times an unmanaged item can be
 purchased.</p>
 
@@ -417,10 +417,10 @@ times.</p>
 
 <h2 id="billing-refunds">Handling Refunds</h2>
 
-<p>In-app billing does not allow users to send a refund request to Android Market. Refunds for
+<p>In-app billing does not allow users to send a refund request to Google Play. Refunds for
 in-app purchases must be directed to you (the application developer). You can then process the
-refund through your Google Checkout merchant account. When you do this, Android Market receives a
-refund notification from Google Checkout, and Android Market sends a refund message to your
+refund through your Google Checkout merchant account. When you do this, Google Play receives a
+refund notification from Google Checkout, and Google Play sends a refund message to your
 application. For more information, see <a
 href="{@docRoot}guide/market/billing/billing_overview.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a> and <a
@@ -434,9 +434,9 @@ information.</p>
 
 <h2 id="billing-testing-setup">Setting Up Test Accounts</h2>
 
-<p>The Android Market publisher site lets you set up one or more test accounts. A test account is a
+<p>The Google Play publisher site lets you set up one or more test accounts. A test account is a
 regular Google account that you register on the publisher site as a test account. Test accounts are
-authorized to make in-app purchases from applications that you have uploaded to the Android Market
+authorized to make in-app purchases from applications that you have uploaded to the Google Play
 site but have not yet published.</p>
 
 <p>You can use any Google account as a test account. Test accounts are useful if you want to let
@@ -458,7 +458,7 @@ accounts yourself and distribute the credentials to your developers or testers.<
 <p>To add test accounts to your publisher account, follow these steps:</p>
 
 <ol>
-  <li><a href="http://market.android.com/publish">Log in</a> to your publisher account.</li>
+  <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
   <li>On the upper left part of the page, under your name, click <strong>Edit profile</strong>.</li>
   <li>On the Edit Profile page, scroll down to the Licensing &amp; In-app Billing panel (see figure
   5).</li>
@@ -480,7 +480,7 @@ support resources listed in the following table (see table 2). By directing your
 correct forum, you can get the support you need more quickly.</p>
 
 <p class="table-caption" id="support-table"><strong>Table 2.</strong> Developer support resources
-for Android Market in-app billing.</p>
+for Google Play in-app billing.</p>
 
 <table>
 
@@ -502,8 +502,8 @@ href="http://stackoverflow.com/questions/tagged/android">http://stackoverflow.co
 android</a></td>
 </tr>
 <tr>
-<td>Market billing issue tracker</td>
-<td><a href="http://code.google.com/p/marketbilling/issues/">Market billing
+<td>Billing issue tracker</td>
+<td><a href="http://code.google.com/p/marketbilling/issues/">Billing
 project issue tracker</a></td>
 <td>Bug and issue reports related specifically to in-app billing sample code.</td>
 </tr>
