@@ -4266,6 +4266,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    public void onScreenStateChanged(int screenState) {
+        super.onScreenStateChanged(screenState);
+        if (mEditor != null) getEditor().onScreenStateChanged(screenState);
+    }
+
+    @Override
     protected boolean isPaddingOffsetRequired() {
         return mShadowRadius != 0 || mDrawables != null;
     }
@@ -11384,6 +11390,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             hideControllers();
+        }
+
+        void onScreenStateChanged(int screenState) {
+            switch (screenState) {
+                case SCREEN_STATE_ON:
+                    resumeBlink();
+                    break;
+                case SCREEN_STATE_OFF:
+                    suspendBlink();
+                    break;
+            }
+        }
+
+        private void suspendBlink() {
+            if (mBlink != null) {
+                mBlink.cancel();
+            }
+        }
+
+        private void resumeBlink() {
+            if (mBlink != null) {
+                mBlink.uncancel();
+                makeBlink();
+            }
         }
 
         void adjustInputType(boolean password, boolean passwordInputType,

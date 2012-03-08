@@ -53,7 +53,8 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
-    public void dispatchScreenStatus(boolean on) throws RemoteException {
+    public void dispatchScreenState(boolean on) throws RemoteException {
+        // pass for now.
     }
 
     @Override

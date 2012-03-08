@@ -1994,6 +1994,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public static final int FIND_VIEWS_WITH_ACCESSIBILITY_NODE_PROVIDERS = 0x00000004;
 
     /**
+     * Indicates that the screen has changed state and is now off.
+     *
+     * @see #onScreenStateChanged(int)
+     */
+    public static final int SCREEN_STATE_OFF = 0x0;
+
+    /**
+     * Indicates that the screen has changed state and is now on.
+     *
+     * @see #onScreenStateChanged(int 
+     */
+    public static final int SCREEN_STATE_ON = 0x1;
+
+    /**
      * Controls the over-scroll mode for this view.
      * See {@link #overScrollBy(int, int, int, int, int, int, int, int, boolean)},
      * {@link #OVER_SCROLL_ALWAYS}, {@link #OVER_SCROLL_IF_CONTENT_SCROLLS},
@@ -9601,6 +9615,25 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             InputMethodManager imm = InputMethodManager.peekInstance();
             imm.focusIn(this);
         }
+    }
+
+    /**
+     * @see #onScreenStateChanged(int)
+     */
+    void dispatchScreenStateChanged(int screenState) {
+        onScreenStateChanged(screenState);
+    }
+
+    /**
+     * This method is called whenever the state of the screen this view is
+     * attached to changes. A state change will usually occurs when the screen
+     * turns on or off (whether it happens automatically or the user does it
+     * manually.)
+     *
+     * @param screenState The new state of the screen. Can be either
+     *                    {@link #SCREEN_STATE_ON} or {@link #SCREEN_STATE_OFF}
+     */
+    public void onScreenStateChanged(int screenState) {
     }
 
     /**

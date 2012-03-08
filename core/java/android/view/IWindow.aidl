@@ -49,7 +49,7 @@ oneway interface IWindow {
             boolean reportDraw, in Configuration newConfig);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();
-    void dispatchScreenStatus(boolean on);
+    void dispatchScreenState(boolean on);
 
     /**
      * Tell the window that it is either gaining or losing focus.  Keep it up
