@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.fountain_v11">
+    <uses-sdk android:minSdkVersion="11" />
+    <application 
+        android:label="Fountain_v11"
+        android:icon="@drawable/test_pattern">
+        <activity android:name="Fountain_v11">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
