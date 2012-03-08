@@ -826,6 +826,10 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Widget.IconMenu.Item" parent="TextAppearance.Small">
         <item name="android:textColor">?textColorPrimary</item>
+        <!-- dp is used on purpose here instead of sp; there is not space
+             for larger font sizes based on the user setting. Newer apps
+             should not receive the legacy icon menu panel. -->
+        <item name="android:textSize">14dp</item>
     </style>
 
     <style name="TextAppearance.Widget.EditText">
