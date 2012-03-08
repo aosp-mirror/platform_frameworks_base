@@ -5192,8 +5192,8 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
                     reqFormat == mInput->stream->common.get_format(&mInput->stream->common) &&
                     reqFormat == AUDIO_FORMAT_PCM_16_BIT &&
                     ((int)mInput->stream->common.get_sample_rate(&mInput->stream->common) <= (2 * reqSamplingRate)) &&
-                    (popcount(mInput->stream->common.get_channels(&mInput->stream->common)) < 3) &&
-                    (reqChannelCount < 3)) {
+                    popcount(mInput->stream->common.get_channels(&mInput->stream->common)) <= FCC_2 &&
+                    (reqChannelCount <= FCC_2)) {
                     status = NO_ERROR;
                 }
                 if (status == NO_ERROR) {
@@ -5270,7 +5270,7 @@ void AudioFlinger::RecordThread::readInputParameters()
     mFrameCount = mInputBytes / mFrameSize;
     mRsmpInBuffer = new int16_t[mFrameCount * mChannelCount];
 
-    if (mSampleRate != mReqSampleRate && mChannelCount < 3 && mReqChannelCount < 3)
+    if (mSampleRate != mReqSampleRate && mChannelCount <= FCC_2 && mReqChannelCount <= FCC_2)
     {
         int channelCount;
          // optmization: if mono to mono, use the resampler in stereo to stereo mode to avoid
@@ -5559,7 +5559,7 @@ audio_io_handle_t AudioFlinger::openInput(uint32_t *pDevices,
     if (inStream == NULL && status == BAD_VALUE &&
         reqFormat == format && format == AUDIO_FORMAT_PCM_16_BIT &&
         (samplingRate <= 2 * reqSamplingRate) &&
-        (popcount(channels) < 3) && (popcount(reqChannels) < 3)) {
+        (popcount(channels) <= FCC_2) && (popcount(reqChannels) <= FCC_2)) {
         ALOGV("openInput() reopening with proposed sampling rate and channels");
         status = inHwDev->open_input_stream(inHwDev, *pDevices, &format,
                                             &channels, &samplingRate,
