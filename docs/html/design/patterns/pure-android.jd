@@ -1,0 +1,136 @@
+page.title=Pure Android
+@jd:body
+
+<p>Most developers want to distribute their apps on multiple platforms. As you plan your app for
+Android, keep in mind that different platforms play by different rules and conventions. Design
+decisions that make perfect sense on one platform will look and feel misplaced in the context of a
+different platform. While a "design once, ship anywhere" approach might save you time up-front, you
+run the very real risk of creating inconsistent apps that alienate users. Consider the following
+guidelines to avoid the most common traps and pitfalls.</p>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Don't mimic UI elements from other platforms</h4>
+<p>Platforms typically provide a carefully designed set of UI elements that are themed in a very
+distinctive fashion. For example, some platforms advocate rounded corners for their buttons, others
+use gradients in their title bars. In some cases, elements may have the same purpose, but are
+designed to work a bit differently.</p>
+<p>As you build your app for Android, don't carry over themed UI elements from other platforms and
+don't mimic their specific behaviors. Review the
+<a href="{@docRoot}design/building-blocks/index.html">Building Blocks</a>
+section in this styleguide to learn about Android's most important UI elements
+and the way they look in the system default themes. Also examine Android's platform apps to get a
+sense of how elements are applied in the context of an app. If you want to customize the theme of UI
+elements, customize carefully according to your specific branding - and not according to the
+conventions of a different platform.</p>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/migrating_ui_elements.png">
+    <div class="figure-caption">
+      Sampling of UI elements from Android, iOS and Windows Phone 7.
+    </div>
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Don't carry over platform-specific icons</h4>
+<p>Platforms typically provide sets of icons for common functionality, such as sharing, creating a new
+document or deleting.</p>
+<p>As you are migrating your app to Android, please swap out platform-specific icons with their Android
+counterparts.</p>
+<p>You can find a wide variety of icons for use in your app in the Android SDK.</p>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/migrating_icons.png">
+    <div class="figure-caption">
+      Sampling of icons from Android, iOS and Windows Phone 7.
+    </div>
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Don't use bottom tab bars</h4>
+<p>Other platforms use the bottom tab bar to switch between the app's views. Per platform convention,
+Android's tabs for view control are shown in action bars at the top of the screen instead. In
+addition, Android apps may use a bottom bar to display actions on a split action bar.</p>
+<p>You should follow this guideline to create a consistent experience with other apps on the Android
+platform and to avoid confusion between actions and view switching on Android.</p>
+<p>For more information on how to properly use action bars for view control, see
+<a href="{@docRoot}design/patterns/actionbar.html">Action Bars</a>.</p>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/migrating_ios_dialers.png">
+    <div class="figure-caption">
+      Android dialer with tabs in an action bar vs. bottom tabs in iOS.
+    </div>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Don't use labeled back buttons on action bars</h4>
+<p>Other platforms use an explicit back button with label to allow the user to navigate up the
+application's hierarchy. Instead, Android uses the main action bar's app icon for hierarchical
+navigation and the navigation bar's back button for temporal navigation. For more information,
+please review the <a href="{@docRoot}design/patterns/navigation.html">Navigation</a> pattern.</p>
+<p>Follow this guideline to provide a consistent navigation experience across the platform.</p>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/migrating_ios_galleries.png">
+    <div class="figure-caption">
+      Android action bar with up caret vs. iOS labeled "Back" button.
+    </div>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Don't use right-pointing carets on line items</h4>
+<p>A common pattern on other platforms is the display of right-pointing carets on line items that allow
+the user to drill deeper into additional content.</p>
+<p>Android does not use such indicators on drill-down line items. Avoid them to stay consistent with
+the platform and in order to not have the user guess as to what the meaning of those carets may be.</p>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/migrating_ios_settings.png">
+    <div class="figure-caption">
+      Android settings without right-pointing carets in line items vs. iOS settings.
+    </div>
+
+  </div>
+</div>
+
+<h2 id="device-independence">Device Independence</h2>
+
+<p>Remember that your app will run on a wide variety of different screen sizes. Create visual assets
+for different screen sizes and densities and make use of concepts such as multi-pane layouts to
+appropriately scale your UI on different device form factors.</p>
+<p>For more information, read <a href="{@docRoot}design/style/devices-displays.html">Devices and Displays</a> as
+well as <a href="{@docRoot}design/patterns/multi-pane-layouts.html">Multi-pane Layouts</a> in this design guide.</p>
