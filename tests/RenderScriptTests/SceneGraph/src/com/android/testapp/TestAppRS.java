@@ -65,6 +65,7 @@ public class TestAppRS {
     // Shaders
     private FragmentShader mPaintF;
     private FragmentShader mLightsF;
+    private FragmentShader mLightsDiffF;
     private FragmentShader mAluminumF;
     private FragmentShader mPlasticF;
     private FragmentShader mDiffuseF;
@@ -173,6 +174,11 @@ public class TestAppRS {
         fb.setShader(mRes, R.raw.plastic_lights);
         mLightsF = fb.create();
 
+        fb = new FragmentShader.Builder(mRS);
+        fb.setObjectConst(lightParams.getAllocation().getType());
+        fb.setShader(mRes, R.raw.diffuse_lights);
+        mLightsDiffF = fb.create();
+
         FullscreenBlur.initShaders(mRes, mRS);
     }
 
@@ -203,6 +209,7 @@ public class TestAppRS {
     private void addShadersToScene() {
         mActiveScene.appendShader(mPaintF);
         mActiveScene.appendShader(mLightsF);
+        mActiveScene.appendShader(mLightsDiffF);
         mActiveScene.appendShader(mAluminumF);
         mActiveScene.appendShader(mPlasticF);
         mActiveScene.appendShader(mDiffuseF);
@@ -219,8 +226,12 @@ public class TestAppRS {
         RenderState paint = new RenderState(mGenericV, mPaintF, null, null);
         RenderState aluminum = new RenderState(mGenericV, mAluminumF, null, null);
         RenderState lights = new RenderState(mGenericV, mLightsF, null, null);
+        RenderState diff_lights = new RenderState(mGenericV, mLightsDiffF, null, null);
+        RenderState diff_lights_no_cull = new RenderState(mGenericV, mLightsDiffF, null,
+                                                          ProgramRaster.CULL_NONE(mRS));
         RenderState glassTransp = new RenderState(mGenericV, mPaintF,
                                                   ProgramStore.BLEND_ALPHA_DEPTH_TEST(mRS), null);
+        RenderState texState = new RenderState(mGenericV, mTextureF, null, null);
 
         initRenderPasses();
 
@@ -239,10 +250,12 @@ public class TestAppRS {
         mActiveScene.assignRenderStateToMaterial(glassTransp, "^GlassLight");
 
         mActiveScene.assignRenderStateToMaterial(lights, "^LightBlinn");
+        mActiveScene.assignRenderStateToMaterial(diff_lights, "^LightLambert");
+        mActiveScene.assignRenderStateToMaterial(diff_lights_no_cull, "^LightLambertNoCull");
+        mActiveScene.assignRenderStateToMaterial(texState, "^TextureOnly");
 
         Renderable plane = (Renderable)mActiveScene.getRenderableByName("pPlaneShape1");
         if (plane != null) {
-            RenderState texState = new RenderState(mGenericV, mTextureF, null, null);
             plane.setRenderState(texState);
             plane.setVisible(!mUseBlur);
         }

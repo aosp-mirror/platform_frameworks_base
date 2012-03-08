@@ -59,6 +59,7 @@ public class TestAppView extends RSSurfaceView {
         if (mRS == null) {
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
             sc.setDepth(16, 24);
+            sc.setSamples(1, 2, 1);
             mRS = createRenderScriptGL(sc);
             mRS.setSurface(holder, w, h);
             mRender = new TestAppRS();
