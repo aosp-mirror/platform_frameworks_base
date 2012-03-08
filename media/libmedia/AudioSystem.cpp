@@ -405,9 +405,9 @@ void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {
 }
 
 void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, audio_io_handle_t ioHandle,
-        void *param2) {
+        const void *param2) {
     ALOGV("ioConfigChanged() event %d", event);
-    OutputDescriptor *desc;
+    const OutputDescriptor *desc;
     audio_stream_type_t stream;
 
     if (ioHandle == 0) return;
@@ -417,7 +417,7 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, audio_io_handle
     switch (event) {
     case STREAM_CONFIG_CHANGED:
         if (param2 == NULL) break;
-        stream = *(audio_stream_type_t *)param2;
+        stream = *(const audio_stream_type_t *)param2;
         ALOGV("ioConfigChanged() STREAM_CONFIG_CHANGED stream %d, output %d", stream, ioHandle);
         if (gStreamOutputMap.indexOfKey(stream) >= 0) {
             gStreamOutputMap.replaceValueFor(stream, ioHandle);
@@ -429,7 +429,7 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, audio_io_handle
             break;
         }
         if (param2 == NULL) break;
-        desc = (OutputDescriptor *)param2;
+        desc = (const OutputDescriptor *)param2;
 
         OutputDescriptor *outputDesc =  new OutputDescriptor(*desc);
         gOutputs.add(ioHandle, outputDesc);
@@ -458,7 +458,7 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, audio_io_handle
             break;
         }
         if (param2 == NULL) break;
-        desc = (OutputDescriptor *)param2;
+        desc = (const OutputDescriptor *)param2;
 
         ALOGV("ioConfigChanged() new config for output %d samplingRate %d, format %d channels %d frameCount %d latency %d",
                 ioHandle, desc->samplingRate, desc->format,

@@ -39,18 +39,18 @@ public:
     {
     }
 
-    void ioConfigChanged(int event, audio_io_handle_t ioHandle, void *param2)
+    void ioConfigChanged(int event, audio_io_handle_t ioHandle, const void *param2)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlingerClient::getInterfaceDescriptor());
         data.writeInt32(event);
         data.writeInt32((int32_t) ioHandle);
         if (event == AudioSystem::STREAM_CONFIG_CHANGED) {
-            uint32_t stream = *(uint32_t *)param2;
+            uint32_t stream = *(const uint32_t *)param2;
             ALOGV("ioConfigChanged stream %d", stream);
             data.writeInt32(stream);
         } else if (event != AudioSystem::OUTPUT_CLOSED && event != AudioSystem::INPUT_CLOSED) {
-            AudioSystem::OutputDescriptor *desc = (AudioSystem::OutputDescriptor *)param2;
+            const AudioSystem::OutputDescriptor *desc = (const AudioSystem::OutputDescriptor *)param2;
             data.writeInt32(desc->samplingRate);
             data.writeInt32(desc->format);
             data.writeInt32(desc->channels);
@@ -73,7 +73,7 @@ status_t BnAudioFlingerClient::onTransact(
             CHECK_INTERFACE(IAudioFlingerClient, data, reply);
             int event = data.readInt32();
             audio_io_handle_t ioHandle = (audio_io_handle_t) data.readInt32();
-            void *param2 = NULL;
+            const void *param2 = NULL;
             AudioSystem::OutputDescriptor desc;
             uint32_t stream;
             if (event == AudioSystem::STREAM_CONFIG_CHANGED) {
