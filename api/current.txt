@@ -10782,8 +10782,8 @@ package android.media {
 
   public class MediaActionSound {
     ctor public MediaActionSound();
-    method public void load(int);
-    method public void play(int);
+    method public synchronized void load(int);
+    method public synchronized void play(int);
     method public void release();
     field public static final int FOCUS_COMPLETE = 1; // 0x1
     field public static final int SHUTTER_CLICK = 0; // 0x0
@@ -27511,14 +27511,24 @@ package android.widget {
     ctor public Switch(android.content.Context);
     ctor public Switch(android.content.Context, android.util.AttributeSet);
     ctor public Switch(android.content.Context, android.util.AttributeSet, int);
+    method public int getSwitchMinWidth();
+    method public int getSwitchPadding();
     method public java.lang.CharSequence getTextOff();
     method public java.lang.CharSequence getTextOn();
+    method public android.graphics.drawable.Drawable getThumbDrawable();
+    method public int getThumbTextPadding();
+    method public android.graphics.drawable.Drawable getTrackDrawable();
     method public void onMeasure(int, int);
+    method public void setSwitchMinWidth(int);
+    method public void setSwitchPadding(int);
     method public void setSwitchTextAppearance(android.content.Context, int);
     method public void setSwitchTypeface(android.graphics.Typeface, int);
     method public void setSwitchTypeface(android.graphics.Typeface);
     method public void setTextOff(java.lang.CharSequence);
     method public void setTextOn(java.lang.CharSequence);
+    method public void setThumbDrawable(android.graphics.drawable.Drawable);
+    method public void setThumbTextPadding(int);
+    method public void setTrackDrawable(android.graphics.drawable.Drawable);
   }
 
   public class TabHost extends android.widget.FrameLayout implements android.view.ViewTreeObserver.OnTouchModeChangeListener {
