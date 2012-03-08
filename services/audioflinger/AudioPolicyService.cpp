@@ -432,10 +432,12 @@ uint32_t AudioPolicyService::getStrategyForStream(audio_stream_type_t stream)
     return mpAudioPolicy->get_strategy_for_stream(mpAudioPolicy, stream);
 }
 
-uint32_t AudioPolicyService::getDevicesForStream(audio_stream_type_t stream)
+//audio policy: use audio_device_t appropriately
+
+audio_devices_t AudioPolicyService::getDevicesForStream(audio_stream_type_t stream)
 {
     if (mpAudioPolicy == NULL) {
-        return 0;
+        return (audio_devices_t)0;
     }
     return mpAudioPolicy->get_devices_for_stream(mpAudioPolicy, stream);
 }

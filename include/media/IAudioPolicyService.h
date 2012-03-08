@@ -79,7 +79,7 @@ public:
                                           int *index,
                                           audio_devices_t device) = 0;
     virtual uint32_t getStrategyForStream(audio_stream_type_t stream) = 0;
-    virtual uint32_t getDevicesForStream(audio_stream_type_t stream) = 0;
+    virtual audio_devices_t getDevicesForStream(audio_stream_type_t stream) = 0;
     virtual audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc) = 0;
     virtual status_t registerEffect(effect_descriptor_t *desc,
                                     audio_io_handle_t io,
