@@ -290,7 +290,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     private SpellCheckSpan onGetSuggestionsInternal(
             SuggestionsInfo suggestionsInfo, int offset, int length) {
-        if (suggestionsInfo.getCookie() != mCookie) {
+        if (suggestionsInfo == null || suggestionsInfo.getCookie() != mCookie) {
             return null;
         }
         final Editable editable = (Editable) mTextView.getText();
@@ -335,9 +335,15 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         for (int i = 0; i < results.length; ++i) {
             final SentenceSuggestionsInfo ssi = results[i];
+            if (ssi == null) {
+                continue;
+            }
             SpellCheckSpan spellCheckSpan = null;
             for (int j = 0; j < ssi.getSuggestionsCount(); ++j) {
                 final SuggestionsInfo suggestionsInfo = ssi.getSuggestionsInfoAt(j);
+                if (suggestionsInfo == null) {
+                    continue;
+                }
                 final int offset = ssi.getOffsetAt(j);
                 final int length = ssi.getLengthAt(j);
                 final SpellCheckSpan scs = onGetSuggestionsInternal(
