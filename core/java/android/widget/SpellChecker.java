@@ -494,6 +494,10 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     editable.removeSpan(mRange);
                     return;
                 }
+                // Stop spell checking when there are no characters in the range.
+                if (wordEnd < start) {
+                    return;
+                }
                 wordStart = regionEnd;
                 // TODO: Find the start position of the sentence.
                 // Set span with the context
