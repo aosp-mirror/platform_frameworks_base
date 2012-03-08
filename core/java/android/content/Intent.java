@@ -2688,12 +2688,20 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * If set, the recipient of this Intent will be granted permission to
-     * perform read operations on the Uri in the Intent's data.
+     * perform read operations on the Uri in the Intent's data and any URIs
+     * specified in its ClipData.  When applying to an Intent's ClipData,
+     * all URIs as well as recursive traversals through data or other ClipData
+     * in Intent items will be granted; only the grant flags of the top-level
+     * Intent are used.
      */
     public static final int FLAG_GRANT_READ_URI_PERMISSION = 0x00000001;
     /**
      * If set, the recipient of this Intent will be granted permission to
-     * perform write operations on the Uri in the Intent's data.
+     * perform write operations on the Uri in the Intent's data and any URIs
+     * specified in its ClipData.  When applying to an Intent's ClipData,
+     * all URIs as well as recursive traversals through data or other ClipData
+     * in Intent items will be granted; only the grant flags of the top-level
+     * Intent are used.
      */
     public static final int FLAG_GRANT_WRITE_URI_PERMISSION = 0x00000002;
     /**
@@ -3018,6 +3026,7 @@ public class Intent implements Parcelable, Cloneable {
     private Bundle mExtras;
     private Rect mSourceBounds;
     private Intent mSelector;
+    private ClipData mClipData;
 
     // ---------------------------------------------------------------------
 
@@ -3048,6 +3057,9 @@ public class Intent implements Parcelable, Cloneable {
         }
         if (o.mSelector != null) {
             this.mSelector = new Intent(o.mSelector);
+        }
+        if (o.mClipData != null) {
+            this.mClipData = new ClipData(o.mClipData);
         }
     }
 
@@ -3726,6 +3738,16 @@ public class Intent implements Parcelable, Cloneable {
      */
     public Intent getSelector() {
         return mSelector;
+    }
+
+    /**
+     * Return the {@link ClipData} associated with this Intent.  If there is
+     * none, returns null.  See {@link #setClipData} for more information.
+     *
+     * @see #setClipData;
+     */
+    public ClipData getClipData() {
+        return mClipData;
     }
 
     /**
@@ -4680,6 +4702,37 @@ public class Intent implements Parcelable, Cloneable {
                     "Can't set selector when package name is already set");
         }
         mSelector = selector;
+    }
+
+    /**
+     * Set a {@link ClipData} associated with this Intent.  This replaces any
+     * previously set ClipData.
+     *
+     * <p>The ClipData in an intent is not used for Intent matching or other
+     * such operations.  Semantically it is like extras, used to transmit
+     * additional data with the Intent.  The main feature of using this over
+     * the extras for data is that {@link #FLAG_GRANT_READ_URI_PERMISSION}
+     * and {@link #FLAG_GRANT_WRITE_URI_PERMISSION} will operate on any URI
+     * items included in the clip data.  This is useful, in particular, if
+     * you want to transmit an Intent containing multiple <code>content:</code>
+     * URIs for which the recipient may not have global permission to access the
+     * content provider.
+     *
+     * <p>If the ClipData contains items that are themselves Intents, any
+     * grant flags in those Intents will be ignored.  Only the top-level flags
+     * of the main Intent are respected, and will be applied to all Uri or
+     * Intent items in the clip (or sub-items of the clip).
+     *
+     * <p>The MIME type, label, and icon in the ClipData object are not
+     * directly used by Intent.  Applications should generally rely on the
+     * MIME type of the Intent itself, not what it may find in the ClipData.
+     * A common practice is to construct a ClipData for use with an Intent
+     * with a MIME type of "*\/*".
+     *
+     * @param clip The new clip to set.  May be null to clear the current clip.
+     */
+    public void setClipData(ClipData clip) {
+        mClipData = clip;
     }
 
     /**
@@ -5660,6 +5713,12 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FILL_IN_SELECTOR = 1<<6;
 
     /**
+     * Use with {@link #fillIn} to allow the current ClipData to be
+     * overwritten, even if it is already set.
+     */
+    public static final int FILL_IN_CLIP_DATA = 1<<7;
+
+    /**
      * Copy the contents of <var>other</var> in to this object, but only
      * where fields are not defined by this object.  For purposes of a field
      * being defined, the following pieces of data in the Intent are
@@ -5673,19 +5732,22 @@ public class Intent implements Parcelable, Cloneable {
      * <li> package, as set by {@link #setPackage}.
      * <li> component, as set by {@link #setComponent(ComponentName)} or
      * related methods.
-     * <li> source bounds, as set by {@link #setSourceBounds}
+     * <li> source bounds, as set by {@link #setSourceBounds}.
+     * <li> selector, as set by {@link #setSelector(Intent)}.
+     * <li> clip data, as set by {@link #setClipData(ClipData)}.
      * <li> each top-level name in the associated extras.
      * </ul>
      *
      * <p>In addition, you can use the {@link #FILL_IN_ACTION},
      * {@link #FILL_IN_DATA}, {@link #FILL_IN_CATEGORIES}, {@link #FILL_IN_PACKAGE},
-     * {@link #FILL_IN_COMPONENT}, {@link #FILL_IN_SOURCE_BOUNDS}, and
-     * {@link #FILL_IN_SELECTOR} to override the restriction where the
-     * corresponding field will not be replaced if it is already set.
+     * {@link #FILL_IN_COMPONENT}, {@link #FILL_IN_SOURCE_BOUNDS},
+     * {@link #FILL_IN_SELECTOR}, and {@link #FILL_IN_CLIP_DATA} to override
+     * the restriction where the corresponding field will not be replaced if
+     * it is already set.
      *
-     * <p>Note: The component field will only be copied if {@link #FILL_IN_COMPONENT} is explicitly
-     * specified.  The selector will only be copied if {@link #FILL_IN_SELECTOR} is
-     * explicitly specified.
+     * <p>Note: The component field will only be copied if {@link #FILL_IN_COMPONENT}
+     * is explicitly specified.  The selector will only be copied if
+     * {@link #FILL_IN_SELECTOR} is explicitly specified.
      *
      * <p>For example, consider Intent A with {data="foo", categories="bar"}
      * and Intent B with {action="gotit", data-type="some/thing",
@@ -5741,6 +5803,11 @@ public class Intent implements Parcelable, Cloneable {
                 mPackage = null;
                 changes |= FILL_IN_SELECTOR;
             }
+        }
+        if (other.mClipData != null
+                && (mClipData == null || (flags&FILL_IN_CLIP_DATA) != 0)) {
+            mClipData = other.mClipData;
+            changes |= FILL_IN_CLIP_DATA;
         }
         // Component is special: it can -only- be set if explicitly allowed,
         // since otherwise the sender could force the intent somewhere the
@@ -5938,7 +6005,7 @@ public class Intent implements Parcelable, Cloneable {
         StringBuilder b = new StringBuilder(128);
 
         b.append("Intent { ");
-        toShortString(b, true, true, true);
+        toShortString(b, true, true, true, false);
         b.append(" }");
 
         return b.toString();
@@ -5949,21 +6016,33 @@ public class Intent implements Parcelable, Cloneable {
         StringBuilder b = new StringBuilder(128);
 
         b.append("Intent { ");
-        toShortString(b, false, true, true);
+        toShortString(b, false, true, true, false);
         b.append(" }");
 
         return b.toString();
     }
 
     /** @hide */
-    public String toShortString(boolean secure, boolean comp, boolean extras) {
+    public String toInsecureStringWithClip() {
         StringBuilder b = new StringBuilder(128);
-        toShortString(b, secure, comp, extras);
+
+        b.append("Intent { ");
+        toShortString(b, false, true, true, true);
+        b.append(" }");
+
         return b.toString();
     }
 
     /** @hide */
-    public void toShortString(StringBuilder b, boolean secure, boolean comp, boolean extras) {
+    public String toShortString(boolean secure, boolean comp, boolean extras, boolean clip) {
+        StringBuilder b = new StringBuilder(128);
+        toShortString(b, secure, comp, extras, clip);
+        return b.toString();
+    }
+
+    /** @hide */
+    public void toShortString(StringBuilder b, boolean secure, boolean comp, boolean extras,
+            boolean clip) {
         boolean first = true;
         if (mAction != null) {
             b.append("act=").append(mAction);
@@ -6031,6 +6110,19 @@ public class Intent implements Parcelable, Cloneable {
             first = false;
             b.append("bnds=").append(mSourceBounds.toShortString());
         }
+        if (mClipData != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            if (clip) {
+                b.append("clip={");
+                mClipData.toShortString(b);
+                b.append('}');
+            } else {
+                b.append("(has clip)");
+            }
+        }
         if (extras && mExtras != null) {
             if (!first) {
                 b.append(' ');
@@ -6040,7 +6132,7 @@ public class Intent implements Parcelable, Cloneable {
         }
         if (mSelector != null) {
             b.append(" sel={");
-            mSelector.toShortString(b, secure, comp, extras);
+            mSelector.toShortString(b, secure, comp, extras, clip);
             b.append("}");
         }
     }
@@ -6209,6 +6301,13 @@ public class Intent implements Parcelable, Cloneable {
             out.writeInt(0);
         }
 
+        if (mClipData != null) {
+            out.writeInt(1);
+            mClipData.writeToParcel(out, flags);
+        } else {
+            out.writeInt(0);
+        }
+
         out.writeBundle(mExtras);
     }
 
@@ -6252,6 +6351,10 @@ public class Intent implements Parcelable, Cloneable {
 
         if (in.readInt() != 0) {
             mSelector = new Intent(in);
+        }
+
+        if (in.readInt() != 0) {
+            mClipData = new ClipData(in);
         }
 
         mExtras = in.readBundle();

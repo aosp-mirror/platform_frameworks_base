@@ -153,7 +153,7 @@ public class ClipData implements Parcelable {
     
     final Bitmap mIcon;
 
-    final ArrayList<Item> mItems = new ArrayList<Item>();
+    final ArrayList<Item> mItems;
 
     /**
      * Description of a single item in a ClippedData.
@@ -321,6 +321,33 @@ public class ClipData implements Parcelable {
             return "";
         }
 //END_INCLUDE(coerceToText)
+
+        @Override
+        public String toString() {
+            StringBuilder b = new StringBuilder(128);
+
+            b.append("ClipData.Item { ");
+            toShortString(b);
+            b.append(" }");
+
+            return b.toString();
+        }
+
+        /** @hide */
+        public void toShortString(StringBuilder b) {
+            if (mText != null) {
+                b.append("T:");
+                b.append(mText);
+            } else if (mUri != null) {
+                b.append("U:");
+                b.append(mUri);
+            } else if (mIntent != null) {
+                b.append("I:");
+                mIntent.toShortString(b, true, true, true, true);
+            } else {
+                b.append("NULL");
+            }
+        }
     }
 
     /**
@@ -336,6 +363,7 @@ public class ClipData implements Parcelable {
             throw new NullPointerException("item is null");
         }
         mIcon = null;
+        mItems = new ArrayList<Item>();
         mItems.add(item);
     }
 
@@ -351,7 +379,20 @@ public class ClipData implements Parcelable {
             throw new NullPointerException("item is null");
         }
         mIcon = null;
+        mItems = new ArrayList<Item>();
         mItems.add(item);
+    }
+
+    /**
+     * Create a new clip that is a copy of another clip.  This does a deep-copy
+     * of all items in the clip.
+     *
+     * @param other The existing ClipData that is to be copied.
+     */
+    public ClipData(ClipData other) {
+        mClipDescription = other.mClipDescription;
+        mIcon = other.mIcon;
+        mItems = new ArrayList<Item>(other.mItems);
     }
 
     /**
@@ -475,6 +516,46 @@ public class ClipData implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder(128);
+
+        b.append("ClipData { ");
+        toShortString(b);
+        b.append(" }");
+
+        return b.toString();
+    }
+
+    /** @hide */
+    public void toShortString(StringBuilder b) {
+        boolean first;
+        if (mClipDescription != null) {
+            first = !mClipDescription.toShortString(b);
+        } else {
+            first = true;
+        }
+        if (mIcon != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("I:");
+            b.append(mIcon.getWidth());
+            b.append('x');
+            b.append(mIcon.getHeight());
+        }
+        for (int i=0; i<mItems.size(); i++) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append('{');
+            mItems.get(i).toShortString(b);
+            b.append('}');
+        }
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -515,6 +596,7 @@ public class ClipData implements Parcelable {
         } else {
             mIcon = null;
         }
+        mItems = new ArrayList<Item>();
         final int N = in.readInt();
         for (int i=0; i<N; i++) {
             CharSequence text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
