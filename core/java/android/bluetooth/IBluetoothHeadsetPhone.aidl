@@ -18,6 +18,7 @@ interface IBluetoothHeadsetPhone {
   String getNetworkOperator();
   String getSubscriberNumber();
   boolean listCurrentCalls();
+  boolean queryPhoneState();
 
   // Internal for phone app to call
   void updateBtHandsfreeAfterRadioTechnologyChange();
