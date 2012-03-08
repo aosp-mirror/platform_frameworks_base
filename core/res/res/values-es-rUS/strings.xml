@@ -671,7 +671,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Se superó el máximo de intentos permitido para el desbloqueo facial del dispositivo."</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Cargando <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Cargada."</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecta tu cargador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"No hay tarjeta SIM."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No hay tarjeta SIM en el tablet."</string>
@@ -768,8 +768,8 @@
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Permite acceder a puertos serie a través de la API SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"acceder a proveedores externamente"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Permite acceder a los proveedores de contenido desde la interfaz. Las aplicaciones normales nunca deberían necesitarlo."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"desalentar a las actualizaciones automáticas de dispositivos"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Permite a su titular a ofrecer información al sistema acerca de cuándo sería un buen momento para reiniciar el sistema no interactivo para actualizar el dispositivo."</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"no realizar actualizaciones automáticas"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Permite a su propietario ofrecer información al sistema acerca de cuándo sería adecuado reiniciar el sistema de forma no interactiva y actualizar el dispositivo."</string>
     <string name="save_password_message" msgid="767344687139195790">"¿Quieres recordar esta contraseña en el navegador?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ahora no."</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Recuerda"</string>
