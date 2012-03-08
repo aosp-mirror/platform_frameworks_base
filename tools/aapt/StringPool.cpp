@@ -174,7 +174,9 @@ ssize_t StringPool::add(const String16& ident, const String16& value,
     }
 
     const bool first = vidx < 0;
-    if (first || !mergeDuplicates) {
+    const bool styled = (pos >= 0 && (size_t)pos < mEntryStyleArray.size()) ?
+        mEntryStyleArray[pos].spans.size() : 0;
+    if (first || styled || !mergeDuplicates) {
         pos = mEntryArray.add(eidx);
         if (first) {
             vidx = mValues.add(value, pos);
