@@ -352,4 +352,9 @@ manifest:</p>
 <pre>
 &lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;
 </pre>
+<p>The <code>android.hardware.touchscreen</code> requirement is also implicitly added. If you want your APK to be visible on TVs which are non-touchscreen devices you should add the following to your manifest:</p>
+<pre>
+&lt;uses-feature android:name="android.hardware.touchscreen" android:required="false" /&gt;
+</pre>
+
 <p>Once you’ve completed the pre-launch checklist, upload your APKs to Google Play.  It may take a bit for the application to show up when browsing Google Play, but when it does, perform one last check.  Download the application onto any test devices you may have to make sure that the APKs are targeting the intended devices. Congratulations, you’re done!</p>
