@@ -241,6 +241,7 @@ public class ConnectivityManagerTestActivity extends Activity {
         mCM = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         // Get an instance of WifiManager
         mWifiManager =(WifiManager)getSystemService(Context.WIFI_SERVICE);
+        mContext = this;
         mChannel = mWifiManager.initialize(mContext, mContext.getMainLooper(), null);
 
         initializeNetworkStates();
