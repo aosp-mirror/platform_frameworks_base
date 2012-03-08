@@ -279,6 +279,7 @@ public class AudioSystem
             return DEVICE_OUT_ANLG_DOCK_HEADSET_NAME;
         case DEVICE_OUT_DGTL_DOCK_HEADSET:
             return DEVICE_OUT_DGTL_DOCK_HEADSET_NAME;
+        case DEVICE_IN_DEFAULT:
         default:
             return "";
         }

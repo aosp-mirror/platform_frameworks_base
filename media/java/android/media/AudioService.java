@@ -2035,20 +2035,11 @@ public class AudioService extends IAudioService.Stub {
         }
 
         public void readSettings() {
-            int index = Settings.System.getInt(mContentResolver,
-                            mVolumeIndexSettingName,
-                            AudioManager.DEFAULT_STREAM_VOLUME[mStreamType]);
-
-            mIndex.clear();
-            mIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, index);
-
-            index = Settings.System.getInt(mContentResolver,
-                            mLastAudibleVolumeIndexSettingName,
-                            (index > 0) ? index : AudioManager.DEFAULT_STREAM_VOLUME[mStreamType]);
-            mLastAudibleIndex.clear();
-            mLastAudibleIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, index);
+            boolean checkSilentVolume = (mRingerMode == AudioManager.RINGER_MODE_NORMAL) &&
+                                            isStreamAffectedByRingerMode(mStreamType);
 
             int remainingDevices = AudioSystem.DEVICE_OUT_ALL;
+
             for (int i = 0; remainingDevices != 0; i++) {
                 int device = (1 << i);
                 if ((device & remainingDevices) == 0) {
@@ -2057,17 +2048,58 @@ public class AudioService extends IAudioService.Stub {
                 remainingDevices &= ~device;
 
                 // retrieve current volume for device
-                String name = getSettingNameForDevice(false, device);
-                index = Settings.System.getInt(mContentResolver, name, -1);
+                String name = getSettingNameForDevice(false /* lastAudible */, device);
+                // if no volume stored for current stream and device, use default volume if default
+                // device, continue otherwise
+                int defaultIndex = (device == AudioSystem.DEVICE_OUT_DEFAULT) ?
+                                        AudioManager.DEFAULT_STREAM_VOLUME[mStreamType] : -1;
+                int index = Settings.System.getInt(mContentResolver, name, defaultIndex);
                 if (index == -1) {
                     continue;
                 }
-                mIndex.put(device, getValidIndex(10 * index));
 
                 // retrieve last audible volume for device
-                name = getSettingNameForDevice(true, device);
-                index = Settings.System.getInt(mContentResolver, name, -1);
-                mLastAudibleIndex.put(device, getValidIndex(10 * index));
+                name = getSettingNameForDevice(true  /* lastAudible */, device);
+                // use stored last audible index if present, otherwise use current index if not 0
+                // or default index
+                defaultIndex = (index > 0) ?
+                                    index : AudioManager.DEFAULT_STREAM_VOLUME[mStreamType];
+                int lastAudibleIndex = Settings.System.getInt(mContentResolver, name, defaultIndex);
+
+                // a last audible index of 0 is never stored, except on non-voice capable devices
+                // (e.g. tablets) for the music stream type, where the music stream volume can reach
+                // 0 without the device being in silent mode
+                if ((lastAudibleIndex == 0) &&
+                        (mVoiceCapable ||
+                         (STREAM_VOLUME_ALIAS[mStreamType] != AudioSystem.STREAM_MUSIC))) {
+                    lastAudibleIndex = AudioManager.DEFAULT_STREAM_VOLUME[mStreamType];
+                    // Correct the data base
+                    sendMsg(mAudioHandler,
+                            MSG_PERSIST_VOLUME,
+                            SENDMSG_QUEUE,
+                            PERSIST_LAST_AUDIBLE,
+                            device,
+                            this,
+                            PERSIST_DELAY);
+                }
+                mLastAudibleIndex.put(device, getValidIndex(10 * lastAudibleIndex));
+                // the initial index should never be 0 for a stream affected by ringer mode if not
+                // in silent or vibrate mode.
+                // this is permitted on tablets for music stream type.
+                if (checkSilentVolume && (index == 0) &&
+                        (mVoiceCapable ||
+                         (STREAM_VOLUME_ALIAS[mStreamType] != AudioSystem.STREAM_MUSIC))) {
+                    index = lastAudibleIndex;
+                    // Correct the data base
+                    sendMsg(mAudioHandler,
+                            MSG_PERSIST_VOLUME,
+                            SENDMSG_QUEUE,
+                            PERSIST_CURRENT,
+                            device,
+                            this,
+                            PERSIST_DELAY);
+                }
+                mIndex.put(device, getValidIndex(10 * index));
             }
         }
 
