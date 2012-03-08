@@ -456,16 +456,17 @@ web browser or the Google Play application to perform the search.</p>
 
 <h3 id="BuildaButton">Build a Google Play button</h3>
 
-<p>Use the following form to generate an "Available on Google Play" button that you can use on
-your web site. Input either your application's package name or publisher name and the button will
-take users to Google Play to either view your application's information or view a list of
-your published apps. If users click the button while on an Android-powered device, the Google
-Play application will respond to show users your application(s).</p>
+<p>Use the following form to generate a "Get it on Google Play" or "Android App
+on Google Play" button that you can use on your web site. Input either your
+application's package name or publisher name and the button will take users to
+Google Play to either view your application's information or view a list of your
+published apps. If users click the button while on an Android-powered device,
+the Google Play application will respond to show users your application(s).</p>
 
-<p>This form offers four versions of the official "Available on Google Play" button at
-recommended sizes. If you want to create a different size, you can download an EPS file for
+<p>This form offers four versions of the official brand badges at
+recommended sizes. <!--If you want to create a different size, you can download an EPS file for
 the button images from the <a href="http://www.android.com/branding.html">Android Brand
-Guidelines</a>.</p>
+Guidelines</a>.</p>-->
 
 <style type="text/css">
 
@@ -617,22 +618,22 @@ $(document).ready(function() {
          <br/><br/>
 
 <div class="button-row">
-  <input type="radio" name="buttonStyle" value="45_avail_market_logo1" id="ns" checked="checked" />
-    <label for="ns"><img src="http://www.android.com/images/brand/45_avail_market_logo1.png"
+  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_small" id="ns" checked="checked" />
+    <label for="ns"><img src="http://www.android.com/images/brand/get_it_on_play_logo_small"
 alt="narrow and small logo" /></label>
     &nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="radio" name="buttonStyle" value="60_avail_market_logo1" id="nm" />
-    <label for="nm"><img src="http://www.android.com/images/brand/60_avail_market_logo1.png"
+  <input type="radio" name="buttonStyle" value="get_it_on_play_logo_large.png" id="nm" />
+    <label for="nm"><img src="http://www.android.com/images/brand/get_it_on_play_logo_large.png"
 alt="narrow and large logo" /></label>
 </div>
 
 <div class="button-row">
-  <input type="radio" name="buttonStyle" value="45_avail_market_logo2" id="ws" />
-    <label for="ws"><img src="http://www.android.com/images/brand/45_avail_market_logo2.png"
+  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_small.png" id="ws" />
+    <label for="ws"><img src="http://www.android.com/images/brand/android_app_on_play_logo_small.png"
 alt="wide and small logo" /></label>
     &nbsp;&nbsp;&nbsp;&nbsp;
-  <input type="radio" name="buttonStyle" value="60_avail_market_logo2" id="wm" />
-    <label for="wm"><img src="http://www.android.com/images/brand/60_avail_market_logo2.png"
+  <input type="radio" name="buttonStyle" value="android_app_on_play_logo_large.png" id="wm" />
+    <label for="wm"><img src="http://www.android.com/images/brand/android_app_on_play_logo_large.png"
 alt="wide and large logo" /></label>
 </div>
 
