@@ -761,9 +761,12 @@ public final class ViewRootImpl implements ViewParent,
         scheduleTraversals();
     }
 
-    void handleScreenStatusChange(boolean on) {
+    void handleScreenStateChange(boolean on) {
         if (on != mAttachInfo.mScreenOn) {
             mAttachInfo.mScreenOn = on;
+            if (mView != null) {
+                mView.dispatchScreenStateChanged(on ? View.SCREEN_STATE_ON : View.SCREEN_STATE_OFF);
+            }
             if (on) {
                 mFullRedrawNeeded = true;
                 scheduleTraversals();
@@ -2500,7 +2503,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID = 21;
     private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT = 22;
     private final static int MSG_PROCESS_INPUT_EVENTS = 23;
-    private final static int MSG_DISPATCH_SCREEN_STATUS = 24;
+    private final static int MSG_DISPATCH_SCREEN_STATE = 24;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2757,9 +2760,9 @@ public final class ViewRootImpl implements ViewParent,
                         .findAccessibilityNodeInfosByTextUiThread(msg);
                 }
             } break;
-            case MSG_DISPATCH_SCREEN_STATUS: {
+            case MSG_DISPATCH_SCREEN_STATE: {
                 if (mView != null) {
-                    handleScreenStatusChange(msg.arg1 == 1);
+                    handleScreenStateChange(msg.arg1 == 1);
                 }
             } break;
             }
@@ -4142,8 +4145,8 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    public void dispatchScreenStatusChange(boolean on) {
-        Message msg = mHandler.obtainMessage(MSG_DISPATCH_SCREEN_STATUS);
+    public void dispatchScreenStateChange(boolean on) {
+        Message msg = mHandler.obtainMessage(MSG_DISPATCH_SCREEN_STATE);
         msg.arg1 = on ? 1 : 0;
         mHandler.sendMessage(msg);
     }
@@ -4349,13 +4352,13 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        public void dispatchScreenStatus(boolean on) {
+        public void dispatchScreenState(boolean on) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchScreenStatusChange(on);
+                viewAncestor.dispatchScreenStateChange(on);
             }
         }
-        
+
         public void dispatchGetNewSurface() {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {

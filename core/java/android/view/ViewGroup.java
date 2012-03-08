@@ -2254,6 +2254,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    void dispatchScreenStateChanged(int screenState) {
+        super.dispatchScreenStateChanged(screenState);
+
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            children[i].dispatchScreenStateChanged(screenState);
+        }
+    }
+
+    @Override
     boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         boolean handled = super.dispatchPopulateAccessibilityEventInternal(event);
         if (handled) {

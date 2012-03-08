@@ -6579,7 +6579,7 @@ public class WindowManagerService extends IWindowManager.Stub
         for (int i = count - 1; i >= 0; i--) {
             WindowState win = mWindows.get(i);
             try {
-                win.mClient.dispatchScreenStatus(on);
+                win.mClient.dispatchScreenState(on);
             } catch (RemoteException e) {
                 // Ignored
             }

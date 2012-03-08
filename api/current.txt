@@ -23374,6 +23374,7 @@ package android.view {
     method public void onResolvedTextDirectionReset();
     method protected void onRestoreInstanceState(android.os.Parcelable);
     method protected android.os.Parcelable onSaveInstanceState();
+    method public void onScreenStateChanged(int);
     method protected void onScrollChanged(int, int, int, int);
     method protected boolean onSetAlpha(int);
     method protected void onSizeChanged(int, int, int, int);
@@ -23583,6 +23584,8 @@ package android.view {
     field public static final android.util.Property ROTATION_Y;
     field public static final android.util.Property SCALE_X;
     field public static final android.util.Property SCALE_Y;
+    field public static final int SCREEN_STATE_OFF = 2; // 0x2
+    field public static final int SCREEN_STATE_ON = 1; // 0x1
     field public static final int SCROLLBARS_INSIDE_INSET = 16777216; // 0x1000000
     field public static final int SCROLLBARS_INSIDE_OVERLAY = 0; // 0x0
     field public static final int SCROLLBARS_OUTSIDE_INSET = 50331648; // 0x3000000
