@@ -185,10 +185,14 @@ public class MediaActionSound {
     };
 
     /**
-     * Free up all audio resources used by this MediaActionSound instance
+     * Free up all audio resources used by this MediaActionSound instance. Do
+     * not call any other methods on a MediaActionSound instance after calling
+     * release().
      */
     public void release() {
-        mSoundPool.release();
-        mSoundPool = null;
+        if (mSoundPool != null) {
+            mSoundPool.release();
+            mSoundPool = null;
+        }
     }
 }
