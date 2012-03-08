@@ -43,6 +43,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
 import android.provider.Settings;
@@ -206,6 +207,9 @@ public class UsbDeviceManager {
     }
 
      private static String addFunction(String functions, String function) {
+         if ("none".equals(functions)) {
+             return function;
+         }
         if (!containsFunction(functions, function)) {
             if (functions.length() > 0) {
                 functions += ",";
@@ -221,6 +225,9 @@ public class UsbDeviceManager {
             if (function.equals(split[i])) {
                 split[i] = null;
             }
+        }
+        if (split.length == 1 && split[0] == null) {
+            return "none";
         }
         StringBuilder builder = new StringBuilder();
          for (int i = 0; i < split.length; i++) {
@@ -365,11 +372,7 @@ public class UsbDeviceManager {
             for (int i = 0; i < 20; i++) {
                 // State transition is done when sys.usb.state is set to the new configuration
                 if (state.equals(SystemProperties.get("sys.usb.state"))) return true;
-                try {
-                    // try again in 50ms
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                }
+                SystemClock.sleep(50);
             }
             Slog.e(TAG, "waitForState(" + state + ") FAILED");
             return false;
