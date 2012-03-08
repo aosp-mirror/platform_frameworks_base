@@ -2043,10 +2043,6 @@ if (mType == MIXER) {
 
         processConfigEvents();
 
-if (mType == DIRECT) {
-        activeTrack.clear();
-}
-
         mixerStatus = MIXER_IDLE;
         { // scope for mLock
 
@@ -2138,10 +2134,6 @@ if (mType == MIXER) {
             lockEffectChains_l(effectChains);
         }
 
-if (mType == DIRECT) {
-        // For DirectOutputThread, this test is equivalent to "activeTrack != 0"
-}
-
         if (CC_LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             threadLoop_mix();
         } else {
@@ -2196,10 +2188,6 @@ if (mType == MIXER) {
         // same lock.
         tracksToRemove.clear();
 
-// FIXME merge these
-if (mType == DIRECT) {
-        activeTrack.clear();
-}
         // FIXME I don't understand the need for this here;
         //       it was in the original code but maybe the
         //       assignment in saveOutputTracks() makes this unnecessary?
@@ -2918,7 +2906,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::prep
 
             // reset retry count
             track->mRetryCount = kMaxTrackRetriesDirect;
-            activeTrack = t;
+            mActiveTrack = t;
             mixerStatus_ = MIXER_TRACKS_READY;
         } else {
             //ALOGV("track %d u=%08x, s=%08x [NOT READY]", track->name(), cblk->user, cblk->server);
@@ -2968,7 +2956,7 @@ void AudioFlinger::DirectOutputThread::threadLoop_mix()
     // output audio to hardware
     while (frameCount) {
         buffer.frameCount = frameCount;
-        activeTrack->getNextBuffer(&buffer);
+        mActiveTrack->getNextBuffer(&buffer);
         if (CC_UNLIKELY(buffer.raw == NULL)) {
             memset(curBuf, 0, frameCount * mFrameSize);
             break;
@@ -2976,10 +2964,11 @@ void AudioFlinger::DirectOutputThread::threadLoop_mix()
         memcpy(curBuf, buffer.raw, buffer.frameCount * mFrameSize);
         frameCount -= buffer.frameCount;
         curBuf += buffer.frameCount * mFrameSize;
-        activeTrack->releaseBuffer(&buffer);
+        mActiveTrack->releaseBuffer(&buffer);
     }
     sleepTime = 0;
     standbyTime = systemTime() + standbyDelay;
+    mActiveTrack.clear();
     applyVolume();
 }
 
