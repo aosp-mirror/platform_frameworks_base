@@ -113,8 +113,7 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
             }
         };
 
-        accountManagerService.getAuthTokenLabel(
-                response, mAccount, mAuthTokenType);
+        accountManagerService.getAuthTokenLabel(response, mAccount, mAuthTokenType, mUid);
 
         findViewById(R.id.allow_button).setOnClickListener(this);
         findViewById(R.id.deny_button).setOnClickListener(this);

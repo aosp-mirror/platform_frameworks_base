@@ -1821,6 +1821,10 @@ final class ActivityStack {
             if (below != null && below.finishing) {
                 continue;
             }
+            // Don't check any lower in the stack if we're crossing a user boundary.
+            if (below != null && below.userId != taskTop.userId) {
+                break;
+            }
             if (target == null) {
                 target = below;
                 targetI = i;

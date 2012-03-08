@@ -4297,7 +4297,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 int uid = AppGlobals.getPackageManager()
                         .getPackageUid(rec.key.packageName);
-                if (uid != Binder.getCallingUid()) {
+                if (!UserId.isSameApp(uid, Binder.getCallingUid())) {
                     String msg = "Permission Denial: cancelIntentSender() from pid="
                         + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid()
