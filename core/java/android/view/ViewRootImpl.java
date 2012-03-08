@@ -46,6 +46,7 @@ import android.os.LatencyTimer;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -390,6 +391,9 @@ public final class ViewRootImpl implements ViewParent,
         mProfileRendering = Boolean.parseBoolean(
                 SystemProperties.get(PROPERTY_PROFILE_RENDERING, "false"));
         mChoreographer = Choreographer.getInstance();
+
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mAttachInfo.mScreenOn = powerManager.isScreenOn();
     }
 
     /**
@@ -755,6 +759,16 @@ public final class ViewRootImpl implements ViewParent,
         mNewSurfaceNeeded = true;
         mFullRedrawNeeded = true;
         scheduleTraversals();
+    }
+
+    void handleScreenStatusChange(boolean on) {
+        if (on != mAttachInfo.mScreenOn) {
+            mAttachInfo.mScreenOn = on;
+            if (on) {
+                mFullRedrawNeeded = true;
+                scheduleTraversals();
+            }
+        }
     }
 
     /**
@@ -1886,6 +1900,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void performDraw() {
+        if (!mAttachInfo.mScreenOn) return;
+
         final long drawStartTime;
         if (ViewDebug.DEBUG_LATENCY) {
             drawStartTime = System.nanoTime();
@@ -2018,8 +2034,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (!dirty.isEmpty() || mIsAnimating) {
-            if (mAttachInfo.mHardwareRenderer != null
-                    && mAttachInfo.mHardwareRenderer.isEnabled()) {
+            if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
                 // Draw with hardware renderer.
                 mIsAnimating = false;
                 mHardwareYOffset = yoff;
@@ -2485,6 +2500,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID = 21;
     private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT = 22;
     private final static int MSG_PROCESS_INPUT_EVENTS = 23;
+    private final static int MSG_DISPATCH_SCREEN_STATUS = 24;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2739,6 +2755,11 @@ public final class ViewRootImpl implements ViewParent,
                 if (mView != null) {
                     getAccessibilityInteractionController()
                         .findAccessibilityNodeInfosByTextUiThread(msg);
+                }
+            } break;
+            case MSG_DISPATCH_SCREEN_STATUS: {
+                if (mView != null) {
+                    handleScreenStatusChange(msg.arg1 == 1);
                 }
             } break;
             }
@@ -4121,6 +4142,12 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
+    public void dispatchScreenStatusChange(boolean on) {
+        Message msg = mHandler.obtainMessage(MSG_DISPATCH_SCREEN_STATUS);
+        msg.arg1 = on ? 1 : 0;
+        mHandler.sendMessage(msg);
+    }
+
     public void dispatchGetNewSurface() {
         Message msg = mHandler.obtainMessage(MSG_DISPATCH_GET_NEW_SURFACE);
         mHandler.sendMessage(msg);
@@ -4322,6 +4349,13 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        public void dispatchScreenStatus(boolean on) {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.dispatchScreenStatusChange(on);
+            }
+        }
+        
         public void dispatchGetNewSurface() {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {

@@ -14871,6 +14871,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         boolean mHardwareAccelerationRequested;
         HardwareRenderer mHardwareRenderer;
 
+        boolean mScreenOn;
+
         /**
          * Scale factor used by the compatibility mode
          */
