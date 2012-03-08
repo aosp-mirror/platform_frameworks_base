@@ -117,6 +117,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int InterfaceTxThrottleResult = 219;
         public static final int QuotaCounterResult        = 220;
         public static final int TetheringStatsResult      = 221;
+        public static final int DnsProxyQueryResult       = 222;
 
         public static final int InterfaceChange           = 600;
         public static final int BandwidthControl          = 601;
