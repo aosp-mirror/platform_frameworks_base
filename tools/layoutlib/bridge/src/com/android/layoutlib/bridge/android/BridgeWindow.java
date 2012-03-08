@@ -39,6 +39,7 @@ public final class BridgeWindow implements IWindow {
     public void dispatchGetNewSurface() throws RemoteException {
         // pass for now.
     }
+
     @Override
     public void executeCommand(String arg0, String arg1, ParcelFileDescriptor arg2)
             throws RemoteException {
@@ -49,6 +50,10 @@ public final class BridgeWindow implements IWindow {
     public void resized(int arg0, int arg1, Rect arg2, Rect arg3, boolean arg4, Configuration arg5)
             throws RemoteException {
         // pass for now.
+    }
+
+    @Override
+    public void dispatchScreenStatus(boolean on) throws RemoteException {
     }
 
     @Override
