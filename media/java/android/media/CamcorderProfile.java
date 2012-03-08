@@ -67,6 +67,8 @@ public class CamcorderProfile
 
     /**
      * Quality level corresponding to the 480p (720 x 480) resolution.
+     * Note that the horizontal resolution for 480p can also be other
+     * values, such as 640 or 704, instead of 720.
      */
     public static final int QUALITY_480P = 4;
 
@@ -76,7 +78,10 @@ public class CamcorderProfile
     public static final int QUALITY_720P = 5;
 
     /**
-     * Quality level corresponding to the 1080p (1920 x 1088) resolution.
+     * Quality level corresponding to the 1080p (1920 x 1080) resolution.
+     * Note that the vertical resolution for 1080p can also be 1088,
+     * instead of 1080 (used by some vendors to avoid cropping during
+     * video playback).
      */
     public static final int QUALITY_1080P = 6;
 
