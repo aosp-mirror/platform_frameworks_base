@@ -2290,8 +2290,8 @@ final class ActivityStack {
         }
 
         if (err == START_SUCCESS) {
-            Slog.i(TAG, "START {" + intent.toShortString(true, true, true) + "} from pid "
-                    + (callerApp != null ? callerApp.pid : callingPid));
+            Slog.i(TAG, "START {" + intent.toShortString(true, true, true, false)
+                    + "} from pid " + (callerApp != null ? callerApp.pid : callingPid));
         }
 
         ActivityRecord sourceRecord = null;

@@ -49,10 +49,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.WallpaperManager;
 import android.app.backup.IBackupManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -4657,9 +4657,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * if callingUid is not allowed to do this.  Returns the uid of the target
      * if the URI permission grant should be performed; returns -1 if it is not
      * needed (for example targetPkg already has permission to access the URI).
+     * If you already know the uid of the target, you can supply it in
+     * lastTargetUid else set that to -1.
      */
     int checkGrantUriPermissionLocked(int callingUid, String targetPkg,
-            Uri uri, int modeFlags) {
+            Uri uri, int modeFlags, int lastTargetUid) {
         modeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         if (modeFlags == 0) {
@@ -4698,8 +4700,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             return -1;
         }
 
-        int targetUid;
-        if (targetPkg != null) {
+        int targetUid = lastTargetUid;
+        if (targetUid < 0 && targetPkg != null) {
             try {
                 targetUid = pm.getPackageUid(targetPkg);
                 if (targetUid < 0) {
@@ -4710,8 +4712,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             } catch (RemoteException ex) {
                 return -1;
             }
-        } else {
-            targetUid = -1;
         }
 
         if (targetUid >= 0) {
@@ -4783,7 +4783,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Uri uri, int modeFlags) {
         enforceNotIsolatedCaller("checkGrantUriPermission");
         synchronized(this) {
-            return checkGrantUriPermissionLocked(callingUid, targetPkg, uri, modeFlags);
+            return checkGrantUriPermissionLocked(callingUid, targetPkg, uri, modeFlags, -1);
         }
     }
 
@@ -4830,13 +4830,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void grantUriPermissionLocked(int callingUid,
-            String targetPkg, Uri uri, int modeFlags, UriPermissionOwner owner) {
+    void grantUriPermissionLocked(int callingUid, String targetPkg, Uri uri,
+            int modeFlags, UriPermissionOwner owner) {
         if (targetPkg == null) {
             throw new NullPointerException("targetPkg");
         }
 
-        int targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, uri, modeFlags);
+        int targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, uri, modeFlags, -1);
         if (targetUid < 0) {
             return;
         }
@@ -4844,13 +4844,26 @@ public final class ActivityManagerService extends ActivityManagerNative
         grantUriPermissionUncheckedLocked(targetUid, targetPkg, uri, modeFlags, owner);
     }
 
+    static class NeededUriGrants extends ArrayList<Uri> {
+        final String targetPkg;
+        final int targetUid;
+        final int flags;
+
+        NeededUriGrants(String _targetPkg, int _targetUid, int _flags) {
+            targetPkg = _targetPkg;
+            targetUid = _targetUid;
+            flags = _flags;
+        }
+    }
+
     /**
      * Like checkGrantUriPermissionLocked, but takes an Intent.
      */
-    int checkGrantUriPermissionFromIntentLocked(int callingUid,
-            String targetPkg, Intent intent) {
+    NeededUriGrants checkGrantUriPermissionFromIntentLocked(int callingUid,
+            String targetPkg, Intent intent, int mode, NeededUriGrants needed) {
         if (DEBUG_URI_PERMISSION) Slog.v(TAG,
-                "Checking URI perm to " + (intent != null ? intent.getData() : null)
+                "Checking URI perm to data=" + (intent != null ? intent.getData() : null)
+                + " clip=" + (intent != null ? intent.getClipData() : null)
                 + " from " + intent + "; flags=0x"
                 + Integer.toHexString(intent != null ? intent.getFlags() : 0));
 
@@ -4859,33 +4872,74 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (intent == null) {
-            return -1;
+            return null;
         }
         Uri data = intent.getData();
-        if (data == null) {
-            return -1;
+        ClipData clip = intent.getClipData();
+        if (data == null && clip == null) {
+            return null;
         }
-        return checkGrantUriPermissionLocked(callingUid, targetPkg, data,
-                intent.getFlags());
+        if (data != null) {
+            int target = checkGrantUriPermissionLocked(callingUid, targetPkg, data,
+                mode, needed != null ? needed.targetUid : -1);
+            if (target > 0) {
+                if (needed == null) {
+                    needed = new NeededUriGrants(targetPkg, target, mode);
+                }
+                needed.add(data);
+            }
+        }
+        if (clip != null) {
+            for (int i=0; i<clip.getItemCount(); i++) {
+                Uri uri = clip.getItemAt(i).getUri();
+                if (uri != null) {
+                    int target = -1;
+                    target = checkGrantUriPermissionLocked(callingUid, targetPkg, uri,
+                            mode, needed != null ? needed.targetUid : -1);
+                    if (target > 0) {
+                        if (needed == null) {
+                            needed = new NeededUriGrants(targetPkg, target, mode);
+                        }
+                        needed.add(uri);
+                    }
+                } else {
+                    Intent clipIntent = clip.getItemAt(i).getIntent();
+                    if (clipIntent != null) {
+                        NeededUriGrants newNeeded = checkGrantUriPermissionFromIntentLocked(
+                                callingUid, targetPkg, clipIntent, mode, needed);
+                        if (newNeeded != null) {
+                            needed = newNeeded;
+                        }
+                    }
+                }
+            }
+        }
+
+        return needed;
     }
 
     /**
      * Like grantUriPermissionUncheckedLocked, but takes an Intent.
      */
-    void grantUriPermissionUncheckedFromIntentLocked(int targetUid,
-            String targetPkg, Intent intent, UriPermissionOwner owner) {
-        grantUriPermissionUncheckedLocked(targetUid, targetPkg, intent.getData(),
-                intent.getFlags(), owner);
+    void grantUriPermissionUncheckedFromIntentLocked(NeededUriGrants needed,
+            UriPermissionOwner owner) {
+        if (needed != null) {
+            for (int i=0; i<needed.size(); i++) {
+                grantUriPermissionUncheckedLocked(needed.targetUid, needed.targetPkg,
+                        needed.get(i), needed.flags, owner);
+            }
+        }
     }
 
     void grantUriPermissionFromIntentLocked(int callingUid,
             String targetPkg, Intent intent, UriPermissionOwner owner) {
-        int targetUid = checkGrantUriPermissionFromIntentLocked(callingUid, targetPkg, intent);
-        if (targetUid < 0) {
+        NeededUriGrants needed = checkGrantUriPermissionFromIntentLocked(callingUid, targetPkg,
+                intent, intent.getFlags(), null);
+        if (needed == null) {
             return;
         }
 
-        grantUriPermissionUncheckedFromIntentLocked(targetUid, targetPkg, intent, owner);
+        grantUriPermissionUncheckedFromIntentLocked(needed, owner);
     }
 
     public void grantUriPermission(IApplicationThread caller, String targetPkg,
@@ -5406,7 +5460,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     stopServiceLocked(sr);
                 } else {
                     sr.pendingStarts.add(new ServiceRecord.StartItem(sr, true,
-                            sr.makeNextStartId(), baseIntent, -1));
+                            sr.makeNextStartId(), baseIntent, null));
                     if (sr.app != null && sr.app.thread != null) {
                         sendServiceArgsLocked(sr, false);
                     }
@@ -9044,7 +9098,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     for (int i=0; i<N; i++) {
                         sb.setLength(0);
                         sb.append("    Intent: ");
-                        intents.get(i).toShortString(sb, false, true, false);
+                        intents.get(i).toShortString(sb, false, true, false, false);
                         pw.println(sb.toString());
                         Bundle bundle = intents.get(i).getExtras();
                         if (bundle != null) {
@@ -9129,7 +9183,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         ConnectionRecord conn = clist.get(i);
                                         pw.print("      ");
                                         pw.print(conn.binding.intent.intent.getIntent()
-                                                .toShortString(false, false, false));
+                                                .toShortString(false, false, false, false));
                                         pw.print(" -> ");
                                         ProcessRecord proc = conn.binding.client;
                                         pw.println(proc != null ? proc.toShortString() : "null");
@@ -9380,7 +9434,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Complete + brief == give a summary.  Isn't that obvious?!?
                     if (lastTask.intent != null) {
                         pw.print(prefix); pw.print("  ");
-                                pw.println(lastTask.intent.toInsecureString());
+                                pw.println(lastTask.intent.toInsecureStringWithClip());
                     }
                 }
             }
@@ -10692,9 +10746,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 si.deliveredTime = SystemClock.uptimeMillis();
                 r.deliveredStarts.add(si);
                 si.deliveryCount++;
-                if (si.targetPermissionUid >= 0 && si.intent != null) {
-                    grantUriPermissionUncheckedFromIntentLocked(si.targetPermissionUid,
-                            r.packageName, si.intent, si.getUriPermissionsLocked());
+                if (si.neededGrants != null) {
+                    grantUriPermissionUncheckedFromIntentLocked(si.neededGrants,
+                            si.getUriPermissionsLocked());
                 }
                 bumpServiceExecutingLocked(r, "start");
                 if (!oomAdjusted) {
@@ -10772,7 +10826,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean created = false;
         try {
             mStringBuilder.setLength(0);
-            r.intent.getIntent().toShortString(mStringBuilder, true, false, true);
+            r.intent.getIntent().toShortString(mStringBuilder, true, false, true, false);
             EventLog.writeEvent(EventLogTags.AM_CREATE_SERVICE,
                     System.identityHashCode(r), r.shortName,
                     mStringBuilder.toString(), r.app.pid);
@@ -10798,7 +10852,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // be called.
         if (r.startRequested && r.callStart && r.pendingStarts.size() == 0) {
             r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
-                    null, -1));
+                    null, null));
         }
         
         sendServiceArgsLocked(r, true);
@@ -11170,15 +11224,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                         ? res.permission : "private to package");
             }
             ServiceRecord r = res.record;
-            int targetPermissionUid = checkGrantUriPermissionFromIntentLocked(
-                    callingUid, r.packageName, service);
+            NeededUriGrants neededGrants = checkGrantUriPermissionFromIntentLocked(
+                    callingUid, r.packageName, service, service.getFlags(), null);
             if (unscheduleServiceRestartLocked(r)) {
                 if (DEBUG_SERVICE) Slog.v(TAG, "START SERVICE WHILE RESTART PENDING: " + r);
             }
             r.startRequested = true;
             r.callStart = false;
             r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
-                    service, targetPermissionUid));
+                    service, neededGrants));
             r.lastActivity = SystemClock.uptimeMillis();
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startRunningLocked();

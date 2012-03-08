@@ -127,26 +127,27 @@ final class ActivityRecord {
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);
                 pw.print(" processName="); pw.println(processName);
         pw.print(prefix); pw.print("launchedFromUid="); pw.print(launchedFromUid);
-        pw.print(prefix); pw.print("userId="); pw.print(userId);
-                pw.print(" app="); pw.println(app);
-        pw.print(prefix); pw.println(intent.toInsecureString());
+                pw.print(" userId="); pw.println(userId);
+        pw.print(prefix); pw.print("app="); pw.println(app);
+        pw.print(prefix); pw.println(intent.toInsecureStringWithClip());
         pw.print(prefix); pw.print("frontOfTask="); pw.print(frontOfTask);
                 pw.print(" task="); pw.println(task);
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
         pw.print(prefix); pw.print("realActivity=");
                 pw.println(realActivity.flattenToShortString());
-        pw.print(prefix); pw.print("base="); pw.print(baseDir);
-                if (!resDir.equals(baseDir)) pw.print(" res="); pw.print(resDir);
-                pw.print(" data="); pw.println(dataDir);
-        pw.print(prefix); pw.print("labelRes=0x");
-                pw.print(Integer.toHexString(labelRes));
-                pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
-                pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
+        pw.print(prefix); pw.print("baseDir="); pw.println(baseDir);
+        if (!resDir.equals(baseDir)) {
+            pw.print(prefix); pw.print("resDir="); pw.println(resDir);
+        }
+        pw.print(prefix); pw.print("dataDir="); pw.println(dataDir);
         pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
                 pw.print(" componentSpecified="); pw.print(componentSpecified);
                 pw.print(" isHomeActivity="); pw.println(isHomeActivity);
+        pw.print(prefix); pw.print("compat="); pw.print(compat);
+                pw.print(" labelRes=0x"); pw.print(Integer.toHexString(labelRes));
+                pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
+                pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
         pw.print(prefix); pw.print("config="); pw.println(configuration);
-        pw.print(prefix); pw.print("compat="); pw.println(compat);
         if (resultTo != null || resultWho != null) {
             pw.print(prefix); pw.print("resultTo="); pw.print(resultTo);
                     pw.print(" resultWho="); pw.print(resultWho);
@@ -193,13 +194,11 @@ final class ActivityRecord {
                     TimeUtils.formatDuration(launchTime, pw); pw.print(" startTime=");
                     TimeUtils.formatDuration(startTime, pw); pw.println("");
         }
-        if (lastVisibleTime != 0) {
-            pw.print(prefix); pw.print("lastVisibleTime=");
-                    TimeUtils.formatDuration(lastVisibleTime, pw); pw.println("");
-        }
-        if (waitingVisible || nowVisible) {
+        if (lastVisibleTime != 0 || waitingVisible || nowVisible) {
             pw.print(prefix); pw.print("waitingVisible="); pw.print(waitingVisible);
-                    pw.print(" nowVisible="); pw.println(nowVisible);
+                    pw.print(" nowVisible="); pw.print(nowVisible);
+                    pw.print("lastVisibleTime=");
+                    TimeUtils.formatDuration(lastVisibleTime, pw); pw.println("");
         }
         if (configDestroy || configChangeFlags != 0) {
             pw.print(prefix); pw.print("configDestroy="); pw.print(configDestroy);

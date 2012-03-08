@@ -570,7 +570,18 @@ import java.util.HashMap;
  * tag.  By doing so, other applications will need to declare a corresponding
  * {@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
  * element in their own manifest to be able to start that activity.
- * 
+ *
+ * <p>When starting an Activity you can set {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
+ * Intent.FLAG_GRANT_READ_URI_PERMISSION} and/or {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION
+ * Intent.FLAG_GRANT_WRITE_URI_PERMISSION} on the Intent.  This will grant the
+ * Activity access to the specific URIs in the Intent.  Access will remain
+ * until the Activity has finished (it will remain across the hosting
+ * process being killed and other temporary destruction).  As of
+ * {@link android.os.Build.VERSION_CODES#GINGERBREAD}, if the Activity
+ * was already created and a new Intent is being delivered to
+ * {@link #onNewIntent(Intent)}, any newly granted URI permissions will be added
+ * to the existing ones it holds.
+ *
  * <p>See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
  * document for more information on permissions and security in general.
  * 
@@ -3549,7 +3560,16 @@ public class Activity extends ContextThemeWrapper
     /**
      * Call this to set the result that your activity will return to its
      * caller.
-     * 
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#GINGERBREAD}, the Intent
+     * you supply here can have {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
+     * Intent.FLAG_GRANT_READ_URI_PERMISSION} and/or {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION
+     * Intent.FLAG_GRANT_WRITE_URI_PERMISSION} set.  This will grant the
+     * Activity receiving the result access to the specific URIs in the Intent.
+     * Access will remain until the Activity has finished (it will remain across the hosting
+     * process being killed and other temporary destruction) and will be added
+     * to any existing set of URI permissions it already holds.
+     *
      * @param resultCode The result code to propagate back to the originating
      *                   activity, often RESULT_CANCELED or RESULT_OK
      * @param data The data to propagate back to the originating activity.

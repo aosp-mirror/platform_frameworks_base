@@ -111,14 +111,14 @@ class TaskRecord extends ThumbnailHolder {
         if (intent != null) {
             StringBuilder sb = new StringBuilder(128);
             sb.append(prefix); sb.append("intent={");
-            intent.toShortString(sb, false, true, false);
+            intent.toShortString(sb, false, true, false, true);
             sb.append('}');
             pw.println(sb.toString());
         }
         if (affinityIntent != null) {
             StringBuilder sb = new StringBuilder(128);
             sb.append(prefix); sb.append("affinityIntent={");
-            affinityIntent.toShortString(sb, false, true, false);
+            affinityIntent.toShortString(sb, false, true, false, true);
             sb.append('}');
             pw.println(sb.toString());
         }

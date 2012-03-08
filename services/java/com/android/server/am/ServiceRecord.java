@@ -106,7 +106,7 @@ class ServiceRecord extends Binder {
         final boolean taskRemoved;
         final int id;
         final Intent intent;
-        final int targetPermissionUid;
+        final ActivityManagerService.NeededUriGrants neededGrants;
         long deliveredTime;
         int deliveryCount;
         int doneExecutingCount;
@@ -115,12 +115,12 @@ class ServiceRecord extends Binder {
         String stringName;      // caching of toString
 
         StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id, Intent _intent,
-                int _targetPermissionUid) {
+                ActivityManagerService.NeededUriGrants _neededGrants) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
             intent = _intent;
-            targetPermissionUid = _targetPermissionUid;
+            neededGrants = _neededGrants;
         }
 
         UriPermissionOwner getUriPermissionsLocked() {
@@ -177,9 +177,9 @@ class ServiceRecord extends Binder {
             pw.print(prefix); pw.print("  intent=");
                     if (si.intent != null) pw.println(si.intent.toString());
                     else pw.println("null");
-            if (si.targetPermissionUid >= 0) {
-                pw.print(prefix); pw.print("  targetPermissionUid=");
-                        pw.println(si.targetPermissionUid);
+            if (si.neededGrants != null) {
+                pw.print(prefix); pw.print("  neededGrants=");
+                        pw.println(si.neededGrants);
             }
             if (si.uriPermissions != null) {
                 if (si.uriPermissions.readUriPermissions != null) {
@@ -196,7 +196,7 @@ class ServiceRecord extends Binder {
     
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("intent={");
-                pw.print(intent.getIntent().toShortString(false, true, false));
+                pw.print(intent.getIntent().toShortString(false, true, false, true));
                 pw.println('}');
         pw.print(prefix); pw.print("packageName="); pw.println(packageName);
         pw.print(prefix); pw.print("processName="); pw.println(processName);

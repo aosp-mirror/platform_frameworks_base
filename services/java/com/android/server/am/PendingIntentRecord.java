@@ -152,7 +152,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
             return "Key{" + typeName() + " pkg=" + packageName
                 + " intent="
                 + (requestIntent != null
-                        ? requestIntent.toShortString(false, true, false) : "<null>")
+                        ? requestIntent.toShortString(false, true, false, false) : "<null>")
                 + " flags=0x" + Integer.toHexString(flags) + "}";
         }
         
@@ -320,7 +320,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
         }
         if (key.requestIntent != null) {
             pw.print(prefix); pw.print("requestIntent=");
-                    pw.println(key.requestIntent.toShortString(false, true, true));
+                    pw.println(key.requestIntent.toShortString(false, true, true, true));
         }
         if (sent || canceled) {
             pw.print(prefix); pw.print("sent="); pw.print(sent);

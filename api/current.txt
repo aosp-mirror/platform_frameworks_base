@@ -4761,6 +4761,7 @@ package android.content {
   public class ClipData implements android.os.Parcelable {
     ctor public ClipData(java.lang.CharSequence, java.lang.String[], android.content.ClipData.Item);
     ctor public ClipData(android.content.ClipDescription, android.content.ClipData.Item);
+    ctor public ClipData(android.content.ClipData);
     method public void addItem(android.content.ClipData.Item);
     method public int describeContents();
     method public android.content.ClipDescription getDescription();
@@ -5378,6 +5379,7 @@ package android.content {
     method public java.lang.CharSequence[] getCharSequenceArrayExtra(java.lang.String);
     method public java.util.ArrayList<java.lang.CharSequence> getCharSequenceArrayListExtra(java.lang.String);
     method public java.lang.CharSequence getCharSequenceExtra(java.lang.String);
+    method public android.content.ClipData getClipData();
     method public android.content.ComponentName getComponent();
     method public android.net.Uri getData();
     method public java.lang.String getDataString();
@@ -5461,6 +5463,7 @@ package android.content {
     method public android.content.Intent setClass(android.content.Context, java.lang.Class<?>);
     method public android.content.Intent setClassName(android.content.Context, java.lang.String);
     method public android.content.Intent setClassName(java.lang.String, java.lang.String);
+    method public void setClipData(android.content.ClipData);
     method public android.content.Intent setComponent(android.content.ComponentName);
     method public android.content.Intent setData(android.net.Uri);
     method public android.content.Intent setDataAndNormalize(android.net.Uri);
@@ -5646,6 +5649,7 @@ package android.content {
     field public static final java.lang.String EXTRA_UID = "android.intent.extra.UID";
     field public static final int FILL_IN_ACTION = 1; // 0x1
     field public static final int FILL_IN_CATEGORIES = 4; // 0x4
+    field public static final int FILL_IN_CLIP_DATA = 128; // 0x80
     field public static final int FILL_IN_COMPONENT = 8; // 0x8
     field public static final int FILL_IN_DATA = 2; // 0x2
     field public static final int FILL_IN_PACKAGE = 16; // 0x10

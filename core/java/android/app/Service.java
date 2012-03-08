@@ -163,7 +163,19 @@ import java.io.PrintWriter;
  * {@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
  * element in their own manifest to be able to start, stop, or bind to
  * the service.
- * 
+ *
+ * <p>As of {@link android.os.Build.VERSION_CODES#GINGERBREAD}, when using
+ * {@link Context#startService(Intent) Context.startService(Intent)}, you can
+ * also set {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
+ * Intent.FLAG_GRANT_READ_URI_PERMISSION} and/or {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION
+ * Intent.FLAG_GRANT_WRITE_URI_PERMISSION} on the Intent.  This will grant the
+ * Service temporary access to the specific URIs in the Intent.  Access will
+ * remain until the Service has called {@link #stopSelf(int)} for that start
+ * command or a later one, or until the Service has been completely stopped.
+ * This works for granting access to the other apps that have not requested
+ * the permission protecting the Service, or even when the Service is not
+ * exported at all.
+ *
  * <p>In addition, a service can protect individual IPC calls into it with
  * permissions, by calling the
  * {@link #checkCallingPermission}

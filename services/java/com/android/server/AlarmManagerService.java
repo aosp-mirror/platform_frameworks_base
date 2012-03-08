@@ -477,7 +477,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
                         : bs.filterStats.entrySet()) {
                     pw.print("    "); pw.print(fe.getValue().count);
                             pw.print(" alarms: ");
-                            pw.println(fe.getKey().getIntent().toShortString(false, true, false));
+                            pw.println(fe.getKey().getIntent().toShortString(
+                                    false, true, false, true));
                 }
             }
         }

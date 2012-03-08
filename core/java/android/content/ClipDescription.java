@@ -184,6 +184,39 @@ public class ClipDescription implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder(128);
+
+        b.append("ClipDescription { ");
+        toShortString(b);
+        b.append(" }");
+
+        return b.toString();
+    }
+
+    /** @hide */
+    public boolean toShortString(StringBuilder b) {
+        boolean first = true;
+        for (int i=0; i<mMimeTypes.length; i++) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append(mMimeTypes[i]);
+        }
+        if (mLabel != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append('"');
+            b.append(mLabel);
+            b.append('"');
+        }
+        return !first;
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
