@@ -281,9 +281,6 @@ public class SpellCheckerSession {
                         if (DBG) {
                             Log.w(TAG, "Get suggestions from the spell checker.");
                         }
-                        if (scp.mTextInfos.length != 1) {
-                            throw new IllegalArgumentException();
-                        }
                         try {
                             session.onGetSentenceSuggestionsMultiple(
                                     scp.mTextInfos, scp.mSuggestionsLimit);
