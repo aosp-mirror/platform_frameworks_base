@@ -35,7 +35,8 @@
 static void usage(const char *me) {
     fprintf(stderr, "usage: %s [-a] use audio\n"
                     "\t\t[-v] use video\n"
-                    "\t\t[-p] playback\n", me);
+                    "\t\t[-p] playback\n"
+                    "\t\t[-S] allocate buffers from a surface\n", me);
 
     exit(1);
 }
@@ -49,6 +50,9 @@ struct CodecState {
     Vector<sp<ABuffer> > mInBuffers;
     Vector<sp<ABuffer> > mOutBuffers;
     bool mSawOutputEOS;
+    int64_t mNumBuffersDecoded;
+    int64_t mNumBytesDecoded;
+    bool mIsAudio;
 };
 
 }  // namespace android
@@ -57,8 +61,11 @@ static int decode(
         const android::sp<android::ALooper> &looper,
         const char *path,
         bool useAudio,
-        bool useVideo) {
+        bool useVideo,
+        const android::sp<android::Surface> &surface) {
     using namespace android;
+
+    static int64_t kTimeout = 500ll;
 
     sp<NuMediaExtractor> extractor = new NuMediaExtractor;
     if (extractor->setDataSource(path) != OK) {
@@ -78,11 +85,12 @@ static int decode(
         AString mime;
         CHECK(format->findString("mime", &mime));
 
-        if (useAudio && !haveAudio
-                && !strncasecmp(mime.c_str(), "audio/", 6)) {
+        bool isAudio = !strncasecmp(mime.c_str(), "audio/", 6);
+        bool isVideo = !strncasecmp(mime.c_str(), "video/", 6);
+
+        if (useAudio && !haveAudio && isAudio) {
             haveAudio = true;
-        } else if (useVideo && !haveVideo
-                && !strncasecmp(mime.c_str(), "video/", 6)) {
+        } else if (useVideo && !haveVideo && isVideo) {
             haveVideo = true;
         } else {
             continue;
@@ -96,13 +104,17 @@ static int decode(
         CodecState *state =
             &stateByTrack.editValueAt(stateByTrack.add(i, CodecState()));
 
+        state->mNumBytesDecoded = 0;
+        state->mNumBuffersDecoded = 0;
+        state->mIsAudio = isAudio;
+
         state->mCodec = MediaCodec::CreateByType(
                 looper, mime.c_str(), false /* encoder */);
 
         CHECK(state->mCodec != NULL);
 
         err = state->mCodec->configure(
-                format, NULL /* surfaceTexture */, 0 /* flags */);
+                format, isVideo ? surface : NULL, 0 /* flags */);
 
         CHECK_EQ(err, (status_t)OK);
 
@@ -122,6 +134,8 @@ static int decode(
 
     CHECK(!stateByTrack.isEmpty());
 
+    int64_t startTimeUs = ALooper::GetNowUs();
+
     for (size_t i = 0; i < stateByTrack.size(); ++i) {
         CodecState *state = &stateByTrack.editValueAt(i);
 
@@ -137,13 +151,7 @@ static int decode(
 
         while (state->mCSDIndex < state->mCSD.size()) {
             size_t index;
-            status_t err = codec->dequeueInputBuffer(&index);
-
-            if (err == -EAGAIN) {
-                usleep(10000);
-                continue;
-            }
-
+            status_t err = codec->dequeueInputBuffer(&index, -1ll);
             CHECK_EQ(err, (status_t)OK);
 
             const sp<ABuffer> &srcBuffer =
@@ -179,7 +187,7 @@ static int decode(
 
                     for (;;) {
                         size_t index;
-                        err = state->mCodec->dequeueInputBuffer(&index);
+                        err = state->mCodec->dequeueInputBuffer(&index, kTimeout);
 
                         if (err == -EAGAIN) {
                             continue;
@@ -204,7 +212,7 @@ static int decode(
                 CodecState *state = &stateByTrack.editValueFor(trackIndex);
 
                 size_t index;
-                err = state->mCodec->dequeueInputBuffer(&index);
+                err = state->mCodec->dequeueInputBuffer(&index, kTimeout);
 
                 if (err == OK) {
                     ALOGV("filling input buffer %d", index);
@@ -261,11 +269,14 @@ static int decode(
             uint32_t flags;
             status_t err = state->mCodec->dequeueOutputBuffer(
                     &index, &offset, &size, &presentationTimeUs, &flags,
-                    10000ll);
+                    kTimeout);
 
             if (err == OK) {
                 ALOGV("draining output buffer %d, time = %lld us",
                       index, presentationTimeUs);
+
+                ++state->mNumBuffersDecoded;
+                state->mNumBytesDecoded += size;
 
                 err = state->mCodec->releaseOutputBuffer(index);
                 CHECK_EQ(err, (status_t)OK);
@@ -292,10 +303,27 @@ static int decode(
         }
     }
 
+    int64_t elapsedTimeUs = ALooper::GetNowUs() - startTimeUs;
+
     for (size_t i = 0; i < stateByTrack.size(); ++i) {
         CodecState *state = &stateByTrack.editValueAt(i);
 
         CHECK_EQ((status_t)OK, state->mCodec->release());
+
+        if (state->mIsAudio) {
+            printf("track %d: %lld bytes received. %.2f KB/sec\n",
+                   i,
+                   state->mNumBytesDecoded,
+                   state->mNumBytesDecoded * 1E6 / 1024 / elapsedTimeUs);
+        } else {
+            printf("track %d: %lld frames decoded, %.2f fps. %lld bytes "
+                   "received. %.2f KB/sec\n",
+                   i,
+                   state->mNumBuffersDecoded,
+                   state->mNumBuffersDecoded * 1E6 / elapsedTimeUs,
+                   state->mNumBytesDecoded,
+                   state->mNumBytesDecoded * 1E6 / 1024 / elapsedTimeUs);
+        }
     }
 
     return 0;
@@ -309,9 +337,10 @@ int main(int argc, char **argv) {
     bool useAudio = false;
     bool useVideo = false;
     bool playback = false;
+    bool useSurface = false;
 
     int res;
-    while ((res = getopt(argc, argv, "havp")) >= 0) {
+    while ((res = getopt(argc, argv, "havpS")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -328,6 +357,12 @@ int main(int argc, char **argv) {
             case 'p':
             {
                 playback = true;
+                break;
+            }
+
+            case 'S':
+            {
+                useSurface = true;
                 break;
             }
 
@@ -358,8 +393,12 @@ int main(int argc, char **argv) {
     sp<ALooper> looper = new ALooper;
     looper->start();
 
-    if (playback) {
-        sp<SurfaceComposerClient> composerClient = new SurfaceComposerClient;
+    sp<SurfaceComposerClient> composerClient;
+    sp<SurfaceControl> control;
+    sp<Surface> surface;
+
+    if (playback || (useSurface && useVideo)) {
+        composerClient = new SurfaceComposerClient;
         CHECK_EQ(composerClient->initCheck(), (status_t)OK);
 
         ssize_t displayWidth = composerClient->getDisplayWidth(0);
@@ -367,14 +406,13 @@ int main(int argc, char **argv) {
 
         ALOGV("display is %ld x %ld\n", displayWidth, displayHeight);
 
-        sp<SurfaceControl> control =
-            composerClient->createSurface(
-                    String8("A Surface"),
-                    0,
-                    displayWidth,
-                    displayHeight,
-                    PIXEL_FORMAT_RGB_565,
-                    0);
+        control = composerClient->createSurface(
+                String8("A Surface"),
+                0,
+                displayWidth,
+                displayHeight,
+                PIXEL_FORMAT_RGB_565,
+                0);
 
         CHECK(control != NULL);
         CHECK(control->isValid());
@@ -384,9 +422,11 @@ int main(int argc, char **argv) {
         CHECK_EQ(control->show(), (status_t)OK);
         SurfaceComposerClient::closeGlobalTransaction();
 
-        sp<Surface> surface = control->getSurface();
+        surface = control->getSurface();
         CHECK(surface != NULL);
+    }
 
+    if (playback) {
         sp<SimplePlayer> player = new SimplePlayer;
         looper->registerHandler(player);
 
@@ -396,10 +436,12 @@ int main(int argc, char **argv) {
         sleep(60);
         player->stop();
         player->reset();
-
-        composerClient->dispose();
     } else {
-        decode(looper, argv[0], useAudio, useVideo);
+        decode(looper, argv[0], useAudio, useVideo, surface);
+    }
+
+    if (playback || (useSurface && useVideo)) {
+        composerClient->dispose();
     }
 
     looper->stop();
