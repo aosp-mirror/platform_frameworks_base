@@ -2079,6 +2079,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         invalidate();
     }
 
+    @Override
+    public void setPaddingRelative(int start, int top, int end, int bottom) {
+        if (start != getPaddingStart() ||
+            end != getPaddingEnd() ||
+            top != mPaddingTop ||
+            bottom != mPaddingBottom) {
+            nullLayouts();
+        }
+
+        // the super call will requestLayout()
+        super.setPaddingRelative(start, top, end, bottom);
+        invalidate();
+    }
+
     /**
      * Gets the autolink mask of the text.  See {@link
      * android.text.util.Linkify#ALL Linkify.ALL} and peers for

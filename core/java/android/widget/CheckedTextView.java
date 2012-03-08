@@ -161,6 +161,12 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     @Override
+    public void setPaddingRelative(int start, int top, int end, int bottom) {
+        super.setPaddingRelative(start, top, end, bottom);
+        mBasePadding = getPaddingEnd();
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
