@@ -183,7 +183,7 @@ class HTML5Audio extends Handler
         resetMediaPlayer();
         mContext = webViewCore.getContext();
         mIsPrivateBrowsingEnabledGetter = new IsPrivateBrowsingEnabledGetter(
-                webViewCore.getContext().getMainLooper(), webViewCore.getWebView());
+                webViewCore.getContext().getMainLooper(), webViewCore.getWebViewClassic());
     }
 
     private void resetMediaPlayer() {

@@ -724,7 +724,7 @@ class HTML5VideoViewProxy extends Handler
      * @return a new HTML5VideoViewProxy object.
      */
     public static HTML5VideoViewProxy getInstance(WebViewCore webViewCore, int nativePtr) {
-        return new HTML5VideoViewProxy(webViewCore.getWebView(), nativePtr);
+        return new HTML5VideoViewProxy(webViewCore.getWebViewClassic(), nativePtr);
     }
 
     /* package */ WebViewClassic getWebView() {

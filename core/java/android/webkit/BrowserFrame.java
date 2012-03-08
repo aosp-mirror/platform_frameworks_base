@@ -448,7 +448,7 @@ class BrowserFrame extends Handler {
         // loadType is not used yet
         if (isMainFrame) {
             mCommitted = true;
-            mWebViewCore.getWebView().mViewManager.postResetStateAll();
+            mWebViewCore.getWebViewClassic().mViewManager.postResetStateAll();
         }
     }
 
@@ -910,7 +910,7 @@ class BrowserFrame extends Handler {
      * Close this frame and window.
      */
     private void closeWindow(WebViewCore w) {
-        mCallbackProxy.onCloseWindow(w.getWebView());
+        mCallbackProxy.onCloseWindow(w.getWebViewClassic());
     }
 
     // XXX: Must match PolicyAction in FrameLoaderTypes.h in webcore

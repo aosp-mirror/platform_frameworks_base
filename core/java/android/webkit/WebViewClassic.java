@@ -7299,10 +7299,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
-    void sendPluginDrawMsg() {
-        mWebViewCore.sendMessage(EventHub.PLUGIN_SURFACE_READY);
-    }
-
     /*
      * Return true if the rect (e.g. plugin) is fully visible and maximized
      * inside the WebView.
