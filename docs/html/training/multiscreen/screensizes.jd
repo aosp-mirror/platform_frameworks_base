@@ -164,14 +164,14 @@ to implement these layouts, you could have the following files:</p>
 
 {@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
 </li>
-  <li><code>res/layout-xlarge/main.xml</code>, two-pane layout:
+  <li><code>res/layout-large/main.xml</code>, two-pane layout:
 
 {@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
 </li>
 </ul>
 
-<p>Notice the <code>xlarge</code> qualifier in the directory name of the second layout. This layout
-will be selected on devices with screens classified as extra-large (for example, 10" tablets). The
+<p>Notice the <code>large</code> qualifier in the directory name of the second layout. This layout
+will be selected on devices with screens classified as large (for example, 7" tablets and above). The
 other layout (without qualifiers) will be selected for smaller devices.</p>
 
 
@@ -188,7 +188,7 @@ though they are all considered to be "large" screens. That's why Android introdu
 width given in dp. For example, the typical 7" tablet has a minimum width of
 600 dp, so if you want your UI to have two panes on those screens (but a single
 list on smaller screens), you can use the same two layouts from the previous section for single
-and two-pane layouts, but instead of the <code>xlarge</code> size qualifier, use
+and two-pane layouts, but instead of the <code>large</code> size qualifier, use
 <code>sw600dp</code> to indicate the two-pane layout is for screens on which the smallest-width
 is 600 dp:</p>
 
@@ -209,9 +209,9 @@ while smaller screens will select the <code>layout/main.xml</code> (single-pane)
 layout.</p>
 
 <p>However, this won't work well on pre-3.2 devices, because they don't
-recognize <code>sw600dp</code> as a size qualifier, so you still have to use the <code>xlarge</code>
+recognize <code>sw600dp</code> as a size qualifier, so you still have to use the <code>large</code>
 qualifier as well. So, you should have a file named 
-<code>res/layout-xlarge/main.xml</code>
+<code>res/layout-large/main.xml</code>
 which is identical to <code>res/layout-sw600dp/main.xml</code>. In the next section
 you'll see a technique that allows you to avoid duplicating the layout files this way.</p>
 
@@ -222,20 +222,20 @@ you'll see a technique that allows you to avoid duplicating the layout files thi
 Therefore, you should also still use the abstract size bins (small, normal,
 large and xlarge) to be compatible with earlier versions. For example, if you
 want to design your UI so that it shows a single-pane UI on phones but a
-multi-pane UI on 7" tablets and larger devices, you'd have to supply these
+multi-pane UI on 7" tablets, TVs and other large devices, you'd have to supply these
 files:</p>
 
 <p><ul>
 <li><code>res/layout/main.xml:</code> single-pane layout</li>
-<li><code>res/layout-xlarge:</code> multi-pane layout</li>
+<li><code>res/layout-large:</code> multi-pane layout</li>
 <li><code>res/layout-sw600dp:</code> multi-pane layout</li>
 </ul></p>
 
 <p>The last two files are identical, because one of them will be matched by
-Android 3.2 devices, and the other one is for the benefit of tablets with
+Android 3.2 devices, and the other one is for the benefit of tablets and TVs with
 earlier versions of Android.</p>
 
-<p>To avoid this duplication of the same file for tablets (and the maintenance
+<p>To avoid this duplication of the same file for tablets and TVs (and the maintenance
 headache resulting from it), you can use alias files. For example, you can define the following
 layouts:</p>
 
@@ -247,7 +247,7 @@ layouts:</p>
 <p>And add these two files:</p>
 
 <p><ul>
-<li><code>res/values-xlarge/layout.xml</code>:
+<li><code>res/values-large/layout.xml</code>:
 <pre>
 &lt;resources>
     &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
@@ -267,9 +267,9 @@ layouts:</p>
 
 <p>These latter two files have identical content, but they don’t actually define
 the layout. They merely set up {@code main} to be an alias to {@code main_twopanes}. Since
-these files have <code>xlarge</code> and <code>sw600dp</code> selectors, they are
-applied to tablets regardless of Android version (pre-3.2 tablets match
-{@code xlarge}, and post-3.2 will match <code>sw600dp</code>).</p>
+these files have <code>large</code> and <code>sw600dp</code> selectors, they are
+applied to tablets and TVs regardless of Android version (pre-3.2 tablets and TVs match
+{@code large}, and post-3.2 will match <code>sw600dp</code>).</p>
 
 
 <h2 id="TaskUseOriQuali">Use Orientation Qualifiers</h2> 
@@ -285,6 +285,7 @@ behaves in each screen size and orientation:</p>
 <li><b>7" tablet, landscape:</b> dual pane, wide, with action bar</li>
 <li><b>10" tablet, portrait:</b> dual pane, narrow, with action bar</li>
 <li><b>10" tablet, landscape:</b> dual pane, wide, with action bar</li>
+<li><b>TV, landscape:</b> dual pane, wide, with action bar</li>
 </ul></p>
 
 <p>So each of these layouts is defined in an XML file in the 
@@ -319,11 +320,11 @@ all}
 {@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-port/layouts.xml
 all}
 
-<p><code>res/values-xlarge-land/layouts.xml</code>:</p>
-{@sample development/samples/training/multiscreen/newsreader/res/values-xlarge-land/layouts.xml all}
+<p><code>res/values-large-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-land/layouts.xml all}
 
-<p><code>res/values-xlarge-port/layouts.xml</code>:</p>
-{@sample development/samples/training/multiscreen/newsreader/res/values-xlarge-port/layouts.xml all}
+<p><code>res/values-large-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-large-port/layouts.xml all}
 
 
 
