@@ -1080,6 +1080,8 @@ public class ListPopupWindow {
             if (!mDropDownVerticalOffsetSet) {
                 mDropDownVerticalOffset = -mTempRect.top;
             }
+        } else {
+            mTempRect.setEmpty();
         }
 
         // Max height available on the screen for a popup.
@@ -1092,7 +1094,25 @@ public class ListPopupWindow {
             return maxHeight + padding;
         }
 
-        final int listContent = mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
+        final int childWidthSpec;
+        switch (mDropDownWidth) {
+            case ViewGroup.LayoutParams.WRAP_CONTENT:
+                childWidthSpec = MeasureSpec.makeMeasureSpec(
+                        mContext.getResources().getDisplayMetrics().widthPixels -
+                        (mTempRect.left + mTempRect.right),
+                        MeasureSpec.AT_MOST);
+                break;
+            case ViewGroup.LayoutParams.MATCH_PARENT:
+                childWidthSpec = MeasureSpec.makeMeasureSpec(
+                        mContext.getResources().getDisplayMetrics().widthPixels -
+                        (mTempRect.left + mTempRect.right),
+                        MeasureSpec.EXACTLY);
+                break;
+            default:
+                childWidthSpec = MeasureSpec.makeMeasureSpec(mDropDownWidth, MeasureSpec.EXACTLY);
+                break;
+        }
+        final int listContent = mDropDownList.measureHeightOfChildren(childWidthSpec,
                 0, ListView.NO_POSITION, maxHeight - otherHeights, -1);
         // add padding only if the list has items in it, that way we don't show
         // the popup if it is not needed
