@@ -56,13 +56,13 @@ suggestions on how to work with multiple sets of icons.</p>
 
 
 
-<h2 id="market">Application Icons in Android Market</h2>
+<h2 id="market">Application Icons on Google Play</h2>
 
 <p>If you are <a href="{@docRoot}guide/publishing/publishing.html">publishing
-your application on Android Market</a>, you will also need to provide a 512x512
+your application on Google Play</a>, you will also need to provide a 512x512
 pixel, high-resolution application icon in the <a
-href="http://market.android.com/publish">developer console</a> at upload-time.
-This icon will be used in various locations in Android Market and does
+href="http://play.google.com/apps/publish">developer console</a> at upload-time.
+This icon will be used in various locations on Google Play and does
 not replace your launcher icon.</p>
 
 <p>For tips and recommendations on creating high-resolution launcher icons that
@@ -71,11 +71,11 @@ can easily be scaled up to 512x512, see
 Tips for Designers</a>.</p>
 
 <p>For information and specifications about high-resolution application
-icons in Android Market, see the following article:</p>
+icons on Google Play, see the following article:</p>
 
 <p style="margin-left:2em"><a
 href="http://market.android.com/support/bin/answer.py?answer=1078870">
-  Graphic Assets for your Application (Android Market Help) &raquo;</a>
+  Graphic Assets for your Application (Google Play Help) &raquo;</a>
 
 
 

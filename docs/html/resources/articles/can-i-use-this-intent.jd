@@ -68,4 +68,4 @@ but it only lets you react to the problem, you cannot predict it and update the
 UI accordingly to prevent the user from doing something that won't work. The
 technique described here can also be used at startup time to ask the user
 whether he'd like to install the missing package, you can then simply redirect
-him to the Android Market by using the appropriate URI.</p>
+him to Google Play by using the appropriate URI.</p>

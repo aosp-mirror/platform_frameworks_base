@@ -59,11 +59,11 @@ alt="Android Design" width="160px" style="padding:10px 33px 5px"/>
                                       <td colspan="2"><div class="seperator">&nbsp;</div></td>
                               </tr>
                               <tr>
-                                      <td class="imageCell"><a href="http://market.android.com/publish"><img src="{@docRoot}assets/images/icon_market.jpg" style="padding:0" /></a></td>
+                                      <td class="imageCell"><a href="http://play.google.com/apps/publish"><img src="{@docRoot}assets/images/icon_play.png" style="padding:0" /></a></td>
                                       <td>
                                               <h2 class="green">Publish</h2>
-                                              <p>Android Market is an open service that lets you distribute your apps to handsets.</p>
-                                              <p><a href="http://market.android.com/publish">Learn more &raquo;</a></p>
+                                              <p>Google Play is an open service that lets you distribute your apps to devices.</p>
+                                              <p><a href="http://play.google.com/apps/publish">Learn more &raquo;</a></p>
                                       </td>
                               </tr>
                               <tr>
@@ -182,8 +182,8 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
       'desc': "<p>Run and debug your Android applications directly on one of these "
  + "devices. Modify and rebuild the Android operating system, and flash it onto "
  + "the phone. The Android Dev Phones are carrier-independent, and available for "
- + "purchase by developers through their Android Market publisher accounts.</p><p> "
- + "<a href='http://market.android.com/publish'>Visit Android Market "
+ + "purchase by developers through their Google Play publisher accounts.</p><p> "
+ + "<a href='http://play.google.com/apps/publish'>Visit Google Play "
  + "to learn more &raquo;</a></p>"
     },
     */

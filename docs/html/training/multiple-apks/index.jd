@@ -16,7 +16,7 @@ next.link=api.html
 
 <ul>
   <li>Android 1.0 and higher</li>
-  <li>You must have an <a href="http://market.android.com/publish">Android Market</a> publisher
+  <li>You must have an <a href="http://play.google.com/apps/publish">Google Play</a> publisher
 account</li>
 </ul>
 
@@ -30,7 +30,7 @@ Support</a></li>
 </div>
 </div>
 
-<p>Multiple APK support is a feature in Android Market that allows you to publish multiple APKs
+<p>Multiple APK support is a feature of Google Play that allows you to publish multiple APKs
 under the same application listing.  Each APK is a complete instance of your application, optimized
 to target specific device configurations.  Each APK can target a specific set of GL
 textures, API levels, screen sizes, or some combination thereof.</p>
@@ -39,7 +39,7 @@ textures, API levels, screen sizes, or some combination thereof.</p>
 configuration variables.  Each lesson covers basics about how to organize your codebase and target
 the right devices, as well as the smart way to avoid pitfalls such as unnecessary redundancy across
 your codebase, and making mistakes in your manifest that could render an APK invisible to all
-devices in Android Market.  By going through any of these lessons, you'll know how to develop
+devices on Google Play.  By going through any of these lessons, you'll know how to develop
 multiple APKs the smart way, make sure they're targeting the devices you want them to,
 and know how to catch mistakes <em>before</em> your app goes live.</p>
 

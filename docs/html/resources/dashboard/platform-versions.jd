@@ -47,7 +47,7 @@ platform version, see <a href="{@docRoot}guide/appendix/api-levels.html">API Lev
 <h3 id="Current">Current Distribution</h3>
 
 <p>The following pie chart and table is based on the number of Android devices that have accessed
-Android Market within a 14-day period ending on the data collection date noted below.</p>
+Google Play within a 14-day period ending on the data collection date noted below.</p>
 
 <div class="dashboard-panel">
 
@@ -103,7 +103,7 @@ then it is currently compatible with the percentage of devices indicated on the 
 line for that version meets the y-axis on the right.</p>
 
 <p>Each dataset in the timeline is based on the number of Android devices that accessed
-Android Market within a 14-day period ending on the date indicated on the x-axis.</p>
+Google Play within a 14-day period ending on the date indicated on the x-axis.</p>
 
 <div class="dashboard-panel">
 

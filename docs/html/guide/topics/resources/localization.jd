@@ -186,7 +186,7 @@ speak.  </p>
 	and can include other types of resources such as animations. 
 <br>
   <code>&nbsp;&nbsp;&nbsp;&nbsp;res/drawable/</code>(required directory holding at least
-  one graphic file, for the application's icon in the Market)<br>
+  one graphic file, for the application's icon on Google Play)<br>
   <code>&nbsp;&nbsp;&nbsp;&nbsp;res/layout/</code> (required directory holding an XML
   file that defines the default layout)<br>
   <code>&nbsp;&nbsp;&nbsp;&nbsp;res/anim/</code> (required if you have any 
@@ -507,7 +507,7 @@ the new locale. </p>
 
 <h2 id="publishing">Publishing Localized Applications</h2>
 
-<p>The Android Market is
+<p>The Google Play is
   the main application distribution system for Android devices. To publish a 
   localized application, you need to sign your application, version it, and go
 through all the other steps described in <a
@@ -521,7 +521,7 @@ different locale, follow these guidelines:</p>
 href="{@docRoot}guide/publishing/app-signing.html#strategies">Signing
 Strategies</a>. </li>
   <li>Give each .apk file a different application name. Currently it is
-impossible to put two applications into the Android Market that have exactly the
+impossible to publish two applications on Google Play that have exactly the
 same name.</li>
 <li>Include a complete set of default resources in each .apk file.</li>
 </ul>
@@ -638,7 +638,7 @@ border="0"></td>
   <tr>
     <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
 border="0"></td>
-    <td>Upload your .apk file or files to Market, selecting the appropriate
+    <td>Upload your .apk file or files to Google Play, selecting the appropriate
 languages as
     you upload. (For more details, see <a
 href="{@docRoot}guide/publishing/publishing.html">Publishing Your

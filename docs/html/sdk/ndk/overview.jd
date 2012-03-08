@@ -535,7 +535,7 @@ later)</li>
     <li>Additionally, an application using the OpenGL ES APIs should declare a
     <code>&lt;uses-feature&gt;</code> element in its manifest, with an
     <code>android:glEsVersion</code> attribute that specifies the minimum OpenGl ES version
-    required by the application. This ensures that Android Market will show your application only
+    required by the application. This ensures that Google Play will show your application only
     to users whose devices are capable of supporting your application. For example:
       <pre style="margin:1em;">
 &lt;manifest&gt;

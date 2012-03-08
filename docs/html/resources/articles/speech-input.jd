@@ -9,7 +9,7 @@ on. </p>
 
 <p>Speech input adds another dimension to staying in touch.
 Google's Voice Search application, which is pre-installed on many Android devices
-and available in Android Market, provides powerful features like "search by voice"
+and available on Google Play, provides powerful features like "search by voice"
 and Voice Actions like "Navigate to." Further
 enhancing the voice experience, Android 2.1 introduces a <a
 href="http://www.youtube.com/watch?v=laOlkD8LmZw">
@@ -21,7 +21,7 @@ any context in which you would normally type. </p>
 <p> We believe speech can
 fundamentally change the mobile experience. We would like to invite every
 Android application developer to consider integrating speech input capabilities
-via the Android SDK.  One of our favorite apps in the Market that integrates
+via the Android SDK.  One of our favorite apps on Google Play that integrates
 speech input is <a href="http://www.handcent.com/">Handcent SMS</a>, 
 because you can dictate a reply to any SMS with a
 quick tap on the SMS popup window. Here is Speech input integrated into

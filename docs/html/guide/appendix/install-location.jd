@@ -172,9 +172,9 @@ persist after external storage is remounted.</dd>
 before the external storage is mounted to the device. If your application is installed on the
 external storage, it can never receive this broadcast.</dd>
   <dt>Copy Protection</dt>
-    <dd>Your application cannot be installed to a device's SD card if it uses Android Market's 
-      Copy Protection feature. However, if you use Android Market's 
-      <a href="{@docRoot}guide/market/licensing/index.html">Application Licensing</a> instead, your 
+    <dd>Your application cannot be installed to a device's SD card if it uses Google Play's 
+      Copy Protection feature. However, if you use Google Play's 
+      <a href="{@docRoot}guide/market/licensing.html">Application Licensing</a> instead, your 
       application <em>can</em> be installed to internal or external storage, including SD cards.</dd>
 </dl>
 
