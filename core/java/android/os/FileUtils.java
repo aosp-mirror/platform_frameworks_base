@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
+import libcore.io.Os;
+import libcore.io.StructStat;
 
 /**
  * Tools for managing files.  Not for public consumption.
@@ -52,8 +54,10 @@ public class FileUtils {
     
     /**
      * File status information. This class maps directly to the POSIX stat structure.
+     * @deprecated use {@link StructStat} instead.
      * @hide
      */
+    @Deprecated
     public static final class FileStatus {
         public int dev;
         public int ino;
@@ -77,7 +81,9 @@ public class FileUtils {
      * exists. 
      * @return true if the file exists and false if it does not exist. If you do not have 
      * permission to stat the file, then this method will return false.
+     * @deprecated use {@link Os#stat(String)} instead.
      */
+    @Deprecated
     public static boolean getFileStatus(String path, FileStatus status) {
         StrictMode.noteDiskRead();
         return getFileStatusNative(path, status);
@@ -90,6 +96,10 @@ public class FileUtils {
 
     public static native int setPermissions(String file, int mode, int uid, int gid);
 
+    /**
+     * @deprecated use {@link Os#stat(String)} instead.
+     */
+    @Deprecated
     public static native int getPermissions(String file, int[] outPermissions);
 
     public static native int setUMask(int mask);
