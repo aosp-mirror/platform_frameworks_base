@@ -973,8 +973,6 @@ public:
         mixer_state mPrevMixerStatus; // previous status returned by prepareTracks_l()
         // DIRECT only
         nsecs_t                         standbyDelay;
-        // activeTrack was local to the while !exitingPending loop
-        sp<Track>                       activeTrack;
         // DUPLICATING only
         uint32_t                        writeFrames;
     };
@@ -1046,6 +1044,9 @@ public:
 
 private:
                     void        applyVolume();  // FIXME inline into threadLoop_mix()
+
+        // prepareTracks_l() tells threadLoop_mix() the name of the single active track
+        sp<Track>               mActiveTrack;
     };
 
     class DuplicatingThread : public MixerThread {
