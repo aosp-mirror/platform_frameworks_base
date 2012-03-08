@@ -44,7 +44,11 @@ public:
             uint32_t dimX;
             uint32_t dimY;
             uint32_t dimZ;
-            bool dimLOD;
+            uint32_t *lodDimX;
+            uint32_t *lodDimY;
+            uint32_t *lodDimZ;
+            uint32_t *lodOffset;
+            uint32_t lodCount;
             bool faces;
         };
         State state;
@@ -62,15 +66,24 @@ public:
     uint32_t getDimX() const {return mHal.state.dimX;}
     uint32_t getDimY() const {return mHal.state.dimY;}
     uint32_t getDimZ() const {return mHal.state.dimZ;}
-    uint32_t getDimLOD() const {return mHal.state.dimLOD;}
+    bool getDimLOD() const {return mDimLOD;}
     bool getDimFaces() const {return mHal.state.faces;}
 
-    uint32_t getLODDimX(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mX;}
-    uint32_t getLODDimY(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mY;}
-    uint32_t getLODDimZ(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mZ;}
-
+    uint32_t getLODDimX(uint32_t lod) const {
+        rsAssert(lod < mHal.state.lodCount);
+        return mHal.state.lodDimX[lod];
+    }
+    uint32_t getLODDimY(uint32_t lod) const {
+        rsAssert(lod < mHal.state.lodCount);
+        return mHal.state.lodDimY[lod];
+    }
+    uint32_t getLODDimZ(uint32_t lod) const {
+        rsAssert(lod < mHal.state.lodCount);
+        return mHal.state.lodDimZ[lod];
+    }
     uint32_t getLODOffset(uint32_t lod) const {
-        rsAssert(lod < mLODCount); return mLODs[lod].mOffset;
+        rsAssert(lod < mHal.state.lodCount);
+        return mHal.state.lodOffset[lod];
     }
     uint32_t getLODOffset(uint32_t lod, uint32_t x) const;
     uint32_t getLODOffset(uint32_t lod, uint32_t x, uint32_t y) const;
@@ -79,7 +92,7 @@ public:
     uint32_t getLODFaceOffset(uint32_t lod, RsAllocationCubemapFace face,
                               uint32_t x, uint32_t y) const;
 
-    uint32_t getLODCount() const {return mLODCount;}
+    uint32_t getLODCount() const {return mHal.state.lodCount;}
     bool getIsNp2() const;
 
     void clear();
@@ -106,14 +119,8 @@ public:
     }
 
 protected:
-    struct LOD {
-        size_t mX;
-        size_t mY;
-        size_t mZ;
-        size_t mOffset;
-    };
-
     void makeLODTable();
+    bool mDimLOD;
 
     // Internal structure from most to least significant.
     // * Array dimensions
@@ -127,9 +134,6 @@ protected:
 
     size_t mMipChainSizeBytes;
     size_t mTotalSizeBytes;
-    LOD *mLODs;
-    uint32_t mLODCount;
-
 protected:
     virtual void preDestroy() const;
     virtual ~Type();
