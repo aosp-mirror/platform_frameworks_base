@@ -1462,7 +1462,9 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
         // Assumes constructor is called by AudioFlinger with it's mLock held,
         // but it would be safer to explicitly pass initial masterVolume as parameter
         mMasterVolume(audioFlinger->masterVolumeSW_l()),
-        mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
+        mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false),
+        // mMixerStatus
+        mPrevMixerStatus(MIXER_IDLE)
 {
     snprintf(mName, kNameLength, "AudioOut_%X", id);
 
@@ -1922,7 +1924,6 @@ AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, Aud
     :   PlaybackThread(audioFlinger, output, id, device, type)
 {
     mAudioMixer = new AudioMixer(mFrameCount, mSampleRate);
-    mPrevMixerStatus = MIXER_IDLE;
     // FIXME - Current mixer implementation only supports stereo output
     if (mChannelCount == 1) {
         ALOGE("Invalid audio hardware channel count");
@@ -2043,7 +2044,7 @@ if (mType == MIXER) {
 
         processConfigEvents();
 
-        mixerStatus = MIXER_IDLE;
+        mMixerStatus = MIXER_IDLE;
         { // scope for mLock
 
             Mutex::Autolock _l(mLock);
@@ -2098,9 +2099,7 @@ if (mType == DIRECT) {
                     ALOGV("Thread %p type %d TID %d waking up", this, mType, gettid());
                     acquireWakeLock_l();
 
-if (mType == MIXER || mType == DUPLICATING) {
                     mPrevMixerStatus = MIXER_IDLE;
-}
 
                     checkSilentMode_l();
 
@@ -2122,11 +2121,11 @@ if (mType == MIXER) {
                 }
             }
 
-            mixerStatus = prepareTracks_l(&tracksToRemove);
-            // see FIXME in AudioFlinger.h
-            if (mixerStatus == MIXER_CONTINUE) {
-                continue;
-            }
+            mixer_state newMixerStatus = prepareTracks_l(&tracksToRemove);
+            // Shift in the new status; this could be a queue if it's
+            // useful to filter the mixer status over several cycles.
+            mPrevMixerStatus = mMixerStatus;
+            mMixerStatus = newMixerStatus;
 
             // prevent any changes in effect chain list and in each effect chain
             // during mixing and effect process as the audio buffers could be deleted
@@ -2134,7 +2133,7 @@ if (mType == MIXER) {
             lockEffectChains_l(effectChains);
         }
 
-        if (CC_LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
+        if (CC_LIKELY(mMixerStatus == MIXER_TRACKS_READY)) {
             threadLoop_mix();
         } else {
             threadLoop_sleepTime();
@@ -2271,7 +2270,7 @@ void AudioFlinger::MixerThread::threadLoop_sleepTime()
     // If no tracks are ready, sleep once for the duration of an output
     // buffer size, then write 0s to the output
     if (sleepTime == 0) {
-        if (mixerStatus == MIXER_TRACKS_ENABLED) {
+        if (mMixerStatus == MIXER_TRACKS_ENABLED) {
             sleepTime = activeSleepTime >> sleepTimeShift;
             if (sleepTime < kMinThreadSleepTimeUs) {
                 sleepTime = kMinThreadSleepTimeUs;
@@ -2287,10 +2286,10 @@ void AudioFlinger::MixerThread::threadLoop_sleepTime()
             sleepTime = idleSleepTime;
         }
     } else if (mBytesWritten != 0 ||
-               (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)) {
+               (mMixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)) {
         memset (mMixBuffer, 0, mixBufferSize);
         sleepTime = 0;
-        ALOGV_IF((mBytesWritten == 0 && (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)), "anticipated start");
+        ALOGV_IF((mBytesWritten == 0 && (mMixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)), "anticipated start");
     }
     // TODO add standby time extension fct of effect tail
 }
@@ -2546,7 +2545,6 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
         memset(mMixBuffer, 0, mFrameCount * mChannelCount * sizeof(int16_t));
     }
 
-    mPrevMixerStatus = mixerStatus;
     return mixerStatus;
 }
 
@@ -2813,15 +2811,13 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::prep
 {
     sp<Track> trackToRemove;
 
-    // FIXME Temporarily renamed to avoid confusion with the member "mixerStatus"
-    mixer_state mixerStatus_ = MIXER_IDLE;
+    mixer_state mixerStatus = MIXER_IDLE;
 
     // find out which tracks need to be processed
     if (mActiveTracks.size() != 0) {
         sp<Track> t = mActiveTracks[0].promote();
-        // see FIXME in AudioFlinger.h, return MIXER_IDLE might also work
-        if (t == 0) return MIXER_CONTINUE;
-        //if (t == 0) continue;
+        // The track died recently
+        if (t == 0) return MIXER_IDLE;
 
         Track* const track = t.get();
         audio_track_cblk_t* cblk = track->cblk();
@@ -2907,7 +2903,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::prep
             // reset retry count
             track->mRetryCount = kMaxTrackRetriesDirect;
             mActiveTrack = t;
-            mixerStatus_ = MIXER_TRACKS_READY;
+            mixerStatus = MIXER_TRACKS_READY;
         } else {
             //ALOGV("track %d u=%08x, s=%08x [NOT READY]", track->name(), cblk->user, cblk->server);
             if (track->isStopped()) {
@@ -2924,7 +2920,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::prep
                     ALOGV("BUFFER TIMEOUT: remove(%d) from active list", track->name());
                     trackToRemove = track;
                 } else {
-                    mixerStatus_ = MIXER_TRACKS_ENABLED;
+                    mixerStatus = MIXER_TRACKS_ENABLED;
                 }
             }
         }
@@ -2945,7 +2941,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::prep
         }
     }
 
-    return mixerStatus_;
+    return mixerStatus;
 }
 
 void AudioFlinger::DirectOutputThread::threadLoop_mix()
@@ -2975,7 +2971,7 @@ void AudioFlinger::DirectOutputThread::threadLoop_mix()
 void AudioFlinger::DirectOutputThread::threadLoop_sleepTime()
 {
     if (sleepTime == 0) {
-        if (mixerStatus == MIXER_TRACKS_ENABLED) {
+        if (mMixerStatus == MIXER_TRACKS_ENABLED) {
             sleepTime = activeSleepTime;
         } else {
             sleepTime = idleSleepTime;
@@ -3111,7 +3107,7 @@ void AudioFlinger::DuplicatingThread::threadLoop_mix()
 void AudioFlinger::DuplicatingThread::threadLoop_sleepTime()
 {
     if (sleepTime == 0) {
-        if (mixerStatus == MIXER_TRACKS_ENABLED) {
+        if (mMixerStatus == MIXER_TRACKS_ENABLED) {
             sleepTime = activeSleepTime;
         } else {
             sleepTime = idleSleepTime;

@@ -607,10 +607,6 @@ private:
             MIXER_TRACKS_READY      // at least one active track, and at least one track has data
             // standby mode does not have an enum value
             // suspend by audio policy manager is orthogonal to mixer state
-#if 1
-            // FIXME remove this hack for prepareTracks_l()
-            , MIXER_CONTINUE        // "continue;"
-#endif
         };
 
         // playback track
@@ -962,15 +958,15 @@ public:
         uint32_t                        activeSleepTime;
         uint32_t                        idleSleepTime;
         uint32_t                        sleepTime;
-        // mixerStatus was local to the while !exitingPending loop
-        mixer_state                     mixerStatus;
+
+        // mixer status returned by prepareTracks_l()
+        mixer_state                     mMixerStatus;       // current cycle
+        mixer_state                     mPrevMixerStatus;   // previous cycle
 
         // FIXME move these declarations into the specific sub-class that needs them
         // MIXER only
         bool                            longStandbyExit;
         uint32_t                        sleepTimeShift;
-        // MIXER and DUPLICATING only
-        mixer_state mPrevMixerStatus; // previous status returned by prepareTracks_l()
         // DIRECT only
         nsecs_t                         standbyDelay;
         // DUPLICATING only
