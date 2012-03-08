@@ -1357,14 +1357,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Construct a new WebView with layout parameters, a default style and a set
-     * of custom Javscript interfaces to be added to the WebView at initialization
-     * time. This guarantees that these interfaces will be available when the JS
-     * context is initialized.
-     * @param javaScriptInterfaces is a Map of interface names, as keys, and
-     * object implementing those interfaces, as values.
-     * @param privateBrowsing If true the web view will be initialized in private mode.
-     * @hide This is an implementation detail.
+     * See {@link WebViewProvider#init(Map, boolean)}
      */
     @Override
     public void init(Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
@@ -1867,36 +1860,36 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Specify whether the horizontal scrollbar has overlay style.
-     * @param overlay TRUE if horizontal scrollbar should have overlay style.
+     * See {@link WebView#setHorizontalScrollbarOverlay(boolean)}
      */
+    @Override
     public void setHorizontalScrollbarOverlay(boolean overlay) {
         checkThread();
         mOverlayHorizontalScrollbar = overlay;
     }
 
     /**
-     * Specify whether the vertical scrollbar has overlay style.
-     * @param overlay TRUE if vertical scrollbar should have overlay style.
+     * See {@link WebView#setVerticalScrollbarOverlay(boolean)
      */
+    @Override
     public void setVerticalScrollbarOverlay(boolean overlay) {
         checkThread();
         mOverlayVerticalScrollbar = overlay;
     }
 
     /**
-     * Return whether horizontal scrollbar has overlay style
-     * @return TRUE if horizontal scrollbar has overlay style.
+     * See {@link WebView#overlayHorizontalScrollbar()}
      */
+    @Override
     public boolean overlayHorizontalScrollbar() {
         checkThread();
         return mOverlayHorizontalScrollbar;
     }
 
     /**
-     * Return whether vertical scrollbar has overlay style
-     * @return TRUE if vertical scrollbar has overlay style.
+     * See {@link WebView#overlayVerticalScrollbar()}
      */
+    @Override
     public boolean overlayVerticalScrollbar() {
         checkThread();
         return mOverlayVerticalScrollbar;
@@ -1934,11 +1927,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Return the visible height (in pixels) of the embedded title bar (if any).
-     *
-     * @return This method is obsolete and always returns 0.
-     * @deprecated This method is now obsolete.
+     * See {@link WebView#getVisibleTitleHeight()}
      */
+    @Override
     @Deprecated
     public int getVisibleTitleHeight() {
         // Actually, this method returns the height of the embedded title bar if one is set via the
@@ -1985,17 +1976,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * @return The SSL certificate for the main top-level page or null if
-     * there is no certificate (the site is not secure).
+     * See {@link WebView#getCertificate()}
      */
+    @Override
     public SslCertificate getCertificate() {
         checkThread();
         return mCertificate;
     }
 
     /**
-     * Sets the SSL certificate for the main top-level page.
+     * See {@link WebView#setCertificate(SslCertificate)}
      */
+    @Override
     public void setCertificate(SslCertificate certificate) {
         checkThread();
         if (DebugFlags.WEB_VIEW) {
@@ -2010,26 +2002,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     //-------------------------------------------------------------------------
 
     /**
-     * Save the username and password for a particular host in the WebView's
-     * internal database.
-     * @param host The host that required the credentials.
-     * @param username The username for the given host.
-     * @param password The password for the given host.
+     * See {@link WebView#savePassword(String, String, String)}
      */
+    @Override
     public void savePassword(String host, String username, String password) {
         checkThread();
         mDatabase.setUsernamePassword(host, username, password);
     }
 
     /**
-     * Set the HTTP authentication credentials for a given host and realm.
-     *
-     * @param host The host for the credentials.
-     * @param realm The realm for the credentials.
-     * @param username The username for the password. If it is null, it means
-     *                 password can't be saved.
-     * @param password The password
+     * See {@link WebView#setHttpAuthUsernamePassword(String, String, String, String)}
      */
+    @Override
     public void setHttpAuthUsernamePassword(String host, String realm,
             String username, String password) {
         checkThread();
@@ -2037,14 +2021,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Retrieve the HTTP authentication username and password for a given
-     * host & realm pair
-     *
-     * @param host The host for which the credentials apply.
-     * @param realm The realm for which the credentials apply.
-     * @return String[] if found, String[0] is username, which can be null and
-     *         String[1] is password. Return null if it can't find anything.
+     * See {@link WebView#getHttpAuthUsernamePassword(String, String)}
      */
+    @Override
     public String[] getHttpAuthUsernamePassword(String host, String realm) {
         checkThread();
         return mDatabase.getHttpAuthUsernamePassword(host, realm);
@@ -2082,10 +2061,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Destroy the internal state of the WebView. This method should be called
-     * after the WebView has been removed from the view system. No other
-     * methods may be called on a WebView after destroy.
+     * See {@link WebView#destroy()}
      */
+    @Override
     public void destroy() {
         checkThread();
         destroyImpl();
@@ -2115,10 +2093,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Enables platform notifications of data state and proxy changes.
-     * Notifications are enabled by default.
-     *
-     * @deprecated This method is now obsolete.
+     * See {@link WebView#enablePlatformNotifications()}
      */
     @Deprecated
     public static void enablePlatformNotifications() {
@@ -2132,10 +2107,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Disables platform notifications of data state and proxy changes.
-     * Notifications are enabled by default.
-     *
-     * @deprecated This method is now obsolete.
+     * See {@link WebView#disablePlatformNotifications()}
      */
     @Deprecated
     public static void disablePlatformNotifications() {
@@ -2161,11 +2133,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Inform WebView of the network state. This is used to set
-     * the JavaScript property window.navigator.isOnline and
-     * generates the online/offline event as specified in HTML5, sec. 5.7.7
-     * @param networkUp boolean indicating if network is available
+     * See {@link WebView#setNetworkAvailable(boolean)}
      */
+    @Override
     public void setNetworkAvailable(boolean networkUp) {
         checkThread();
         mWebViewCore.sendMessage(EventHub.SET_NETWORK_STATE,
@@ -2183,19 +2153,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         map.put("subtype", subtype);
         mWebViewCore.sendMessage(EventHub.SET_NETWORK_TYPE, map);
     }
+
     /**
-     * Save the state of this WebView used in
-     * {@link android.app.Activity#onSaveInstanceState}. Please note that this
-     * method no longer stores the display data for this WebView. The previous
-     * behavior could potentially leak files if {@link #restoreState} was never
-     * called. See {@link #savePicture} and {@link #restorePicture} for saving
-     * and restoring the display data.
-     * @param outState The Bundle to store the WebView state.
-     * @return The same copy of the back/forward list used to save the state. If
-     *         saveState fails, the returned list will be null.
-     * @see #savePicture
-     * @see #restorePicture
+     * See {@link WebView#saveState(Bundle)}
      */
+    @Override
     public WebBackForwardList saveState(Bundle outState) {
         checkThread();
         if (outState == null) {
@@ -2244,14 +2206,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Save the current display data to the Bundle given. Used in conjunction
-     * with {@link #saveState}.
-     * @param b A Bundle to store the display data.
-     * @param dest The file to store the serialized picture data. Will be
-     *             overwritten with this WebView's picture data.
-     * @return True if the picture was successfully saved.
-     * @deprecated This method is now obsolete.
+     * See {@link WebView#savePicture(Bundle, File)}
      */
+    @Override
     @Deprecated
     public boolean savePicture(Bundle b, final File dest) {
         checkThread();
@@ -2311,15 +2268,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Restore the display data that was save in {@link #savePicture}. Used in
-     * conjunction with {@link #restoreState}.
-     *
-     * Note that this will not work if the WebView is hardware accelerated.
-     * @param b A Bundle containing the saved display data.
-     * @param src The file where the picture data was stored.
-     * @return True if the picture was successfully restored.
-     * @deprecated This method is now obsolete.
+     * See {@link WebView#restorePicture(Bundle, File)};
      */
+    @Override
     @Deprecated
     public boolean restorePicture(Bundle b, File src) {
         checkThread();
@@ -2402,7 +2353,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * Clears the view state set with {@link #loadViewState(InputStream)}.
      * This WebView will then switch to showing the content from webkit
-     * @hide
      */
     public void clearViewState() {
         mBlockWebkitViewMessages = false;
@@ -2411,19 +2361,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Restore the state of this WebView from the given map used in
-     * {@link android.app.Activity#onRestoreInstanceState}. This method should
-     * be called to restore the state of the WebView before using the object. If
-     * it is called after the WebView has had a chance to build state (load
-     * pages, create a back/forward list, etc.) there may be undesirable
-     * side-effects. Please note that this method no longer restores the
-     * display data for this WebView. See {@link #savePicture} and {@link
-     * #restorePicture} for saving and restoring the display data.
-     * @param inState The incoming Bundle of state.
-     * @return The restored back/forward list or null if restoreState failed.
-     * @see #savePicture
-     * @see #restorePicture
+     * See {@link WebView#restoreState(Bundle)}
      */
+    @Override
     public WebBackForwardList restoreState(Bundle inState) {
         checkThread();
         WebBackForwardList returnList = null;
@@ -2478,15 +2418,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Load the given URL with the specified additional HTTP headers.
-     * @param url The URL of the resource to load.
-     * @param additionalHttpHeaders The additional headers to be used in the
-     *            HTTP request for this URL, specified as a map from name to
-     *            value. Note that if this map contains any of the headers
-     *            that are set by default by the WebView, such as those
-     *            controlling caching, accept types or the User-Agent, their
-     *            values may be overriden by the WebView's defaults.
+     * See {@link WebView#loadUrl(String, Map)}
      */
+    @Override
     public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
         checkThread();
         loadUrlImpl(url, additionalHttpHeaders);
@@ -2502,9 +2436,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Load the given URL.
-     * @param url The URL of the resource to load.
+     * See {@link WebView#loadUrl(String)}
      */
+    @Override
     public void loadUrl(String url) {
         checkThread();
         loadUrlImpl(url);
@@ -2518,13 +2452,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Load the url with postData using "POST" method into the WebView. If url
-     * is not a network url, it will be loaded with {link
-     * {@link #loadUrl(String)} instead.
-     *
-     * @param url The url of the resource to load.
-     * @param postData The data will be passed to "POST" request.
+     * See {@link WebView#postUrl(String, byte[])}
      */
+    @Override
     public void postUrl(String url, byte[] postData) {
         checkThread();
         if (URLUtil.isNetworkUrl(url)) {
@@ -2540,31 +2470,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Load the given data into the WebView using a 'data' scheme URL.
-     * <p>
-     * Note that JavaScript's same origin policy means that script running in a
-     * page loaded using this method will be unable to access content loaded
-     * using any scheme other than 'data', including 'http(s)'. To avoid this
-     * restriction, use {@link
-     * #loadDataWithBaseURL(String,String,String,String,String)
-     * loadDataWithBaseURL()} with an appropriate base URL.
-     * <p>
-     * If the value of the encoding parameter is 'base64', then the data must
-     * be encoded as base64. Otherwise, the data must use ASCII encoding for
-     * octets inside the range of safe URL characters and use the standard %xx
-     * hex encoding of URLs for octets outside that range. For example,
-     * '#', '%', '\', '?' should be replaced by %23, %25, %27, %3f respectively.
-     * <p>
-     * The 'data' scheme URL formed by this method uses the default US-ASCII
-     * charset. If you need need to set a different charset, you should form a
-     * 'data' scheme URL which explicitly specifies a charset parameter in the
-     * mediatype portion of the URL and call {@link #loadUrl(String)} instead.
-     * Note that the charset obtained from the mediatype portion of a data URL
-     * always overrides that specified in the HTML or XML document itself.
-     * @param data A String of data in the given encoding.
-     * @param mimeType The MIME type of the data, e.g. 'text/html'.
-     * @param encoding The encoding of the data.
+     * See {@link WebView#loadData(String, String, String)}
      */
+    @Override
     public void loadData(String data, String mimeType, String encoding) {
         checkThread();
         loadDataImpl(data, mimeType, encoding);
@@ -2582,27 +2490,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Load the given data into the WebView, using baseUrl as the base URL for
-     * the content. The base URL is used both to resolve relative URLs and when
-     * applying JavaScript's same origin policy. The historyUrl is used for the
-     * history entry.
-     * <p>
-     * Note that content specified in this way can access local device files
-     * (via 'file' scheme URLs) only if baseUrl specifies a scheme other than
-     * 'http', 'https', 'ftp', 'ftps', 'about' or 'javascript'.
-     * <p>
-     * If the base URL uses the data scheme, this method is equivalent to
-     * calling {@link #loadData(String,String,String) loadData()} and the
-     * historyUrl is ignored.
-     * @param baseUrl URL to use as the page's base URL. If null defaults to
-     *            'about:blank'
-     * @param data A String of data in the given encoding.
-     * @param mimeType The MIMEType of the data, e.g. 'text/html'. If null,
-     *            defaults to 'text/html'.
-     * @param encoding The encoding of the data.
-     * @param historyUrl URL to use as the history entry, if null defaults to
-     *            'about:blank'.
+     * See {@link WebView#loadDataWithBaseURL(String, String, String, String, String)}
      */
+    @Override
     public void loadDataWithBaseURL(String baseUrl, String data,
             String mimeType, String encoding, String historyUrl) {
         checkThread();
@@ -2623,10 +2513,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Saves the current view as a web archive.
-     *
-     * @param filename The filename where the archive should be placed.
+     * See {@link WebView#saveWebArchive(String)}
      */
+    @Override
     public void saveWebArchive(String filename) {
         checkThread();
         saveWebArchiveImpl(filename, false, null);
@@ -2646,17 +2535,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Saves the current view as a web archive.
-     *
-     * @param basename The filename where the archive should be placed.
-     * @param autoname If false, takes basename to be a file. If true, basename
-     *                 is assumed to be a directory in which a filename will be
-     *                 chosen according to the url of the current page.
-     * @param callback Called after the web archive has been saved. The
-     *                 parameter for onReceiveValue will either be the filename
-     *                 under which the file was saved, or null if saving the
-     *                 file failed.
+     * See {@link WebView#saveWebArchive(String, boolean, ValueCallback)}
      */
+    @Override
     public void saveWebArchive(String basename, boolean autoname, ValueCallback<String> callback) {
         checkThread();
         saveWebArchiveImpl(basename, autoname, callback);
@@ -2669,8 +2550,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Stop the current load.
+     * See {@link WebView#stopLoading()}
      */
+    @Override
     public void stopLoading() {
         checkThread();
         // TODO: should we clear all the messages in the queue before sending
@@ -2680,8 +2562,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Reload the current url.
+     * See {@link WebView#reload()}
      */
+    @Override
     public void reload() {
         checkThread();
         clearHelpers();
@@ -2690,9 +2573,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Return true if this WebView has a back history item.
-     * @return True iff this WebView has a back history item.
+     * See {@link WebView#canGoBack()}
      */
+    @Override
     public boolean canGoBack() {
         checkThread();
         WebBackForwardList l = mCallbackProxy.getBackForwardList();
@@ -2706,17 +2589,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Go back in the history of this WebView.
+     * See {@link WebView#goBack()}
      */
+    @Override
     public void goBack() {
         checkThread();
         goBackOrForwardImpl(-1);
     }
 
     /**
-     * Return true if this WebView has a forward history item.
-     * @return True iff this Webview has a forward history item.
+     * See {@link WebView#canGoForward()}
      */
+    @Override
     public boolean canGoForward() {
         checkThread();
         WebBackForwardList l = mCallbackProxy.getBackForwardList();
@@ -2730,19 +2614,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Go forward in the history of this WebView.
+     * See {@link WebView#goForward()}
      */
+    @Override
     public void goForward() {
         checkThread();
         goBackOrForwardImpl(1);
     }
 
     /**
-     * Return true if the page can go back or forward the given
-     * number of steps.
-     * @param steps The negative or positive number of steps to move the
-     *              history.
+     * See {@link WebView#canGoBackOrForward(int)}
      */
+    @Override
     public boolean canGoBackOrForward(int steps) {
         checkThread();
         WebBackForwardList l = mCallbackProxy.getBackForwardList();
@@ -2757,12 +2640,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Go to the history item that is the number of steps away from
-     * the current item. Steps is negative if backward and positive
-     * if forward.
-     * @param steps The number of steps to take back or forward in the back
-     *              forward list.
+     * See {@link WebView#goBackOrForward(int)}
      */
+    @Override
     public void goBackOrForward(int steps) {
         checkThread();
         goBackOrForwardImpl(steps);
@@ -2781,8 +2661,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Returns true if private browsing is enabled in this WebView.
+     * See {@link WebView#isPrivateBrowsingEnabled()}
      */
+    @Override
     public boolean isPrivateBrowsingEnabled() {
         checkThread();
         return getSettings().isPrivateBrowsingEnabled();
@@ -2802,10 +2683,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Scroll the contents of the view up by half the view size
-     * @param top true to jump to the top of the page
-     * @return true if the page was scrolled
+     * See {@link WebView#pageUp(boolean)}
      */
+    @Override
     public boolean pageUp(boolean top) {
         checkThread();
         if (mNativeClass == 0) {
@@ -2828,10 +2708,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Scroll the contents of the view down by half the page size
-     * @param bottom true to jump to bottom of page
-     * @return true if the page was scrolled
+     * See {@link WebView#pageDown(boolean)}
      */
+    @Override
     public boolean pageDown(boolean bottom) {
         checkThread();
         if (mNativeClass == 0) {
@@ -2853,9 +2732,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Clear the view so that onDraw() will draw nothing but white background,
-     * and onMeasure() will return 0 if MeasureSpec is not MeasureSpec.EXACTLY
+     * See {@link WebView#clearView()}
      */
+    @Override
     public void clearView() {
         checkThread();
         mContentWidth = 0;
@@ -2865,14 +2744,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Return a new picture that captures the current display of the webview.
-     * This is a copy of the display, and will be unaffected if the webview
-     * later loads a different URL.
-     *
-     * @return a picture containing the current contents of the view. Note this
-     *         picture is of the entire document, and is not restricted to the
-     *         bounds of the view.
+     * See {@link WebView#capturePicture()}
      */
+    @Override
     public Picture capturePicture() {
         checkThread();
         if (mNativeClass == 0) return null;
@@ -2882,9 +2756,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Return the current scale of the WebView
-     * @return The current scale.
+     * See {@link WebView#getScale()}
      */
+    @Override
     public float getScale() {
         checkThread();
         return mZoomManager.getScale();
@@ -2900,25 +2774,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Set the initial scale for the WebView. 0 means default. If
-     * {@link WebSettings#getUseWideViewPort()} is true, it zooms out all the
-     * way. Otherwise it starts with 100%. If initial scale is greater than 0,
-     * WebView starts with this value as initial scale.
-     * Please note that unlike the scale properties in the viewport meta tag,
-     * this method doesn't take the screen density into account.
-     *
-     * @param scaleInPercent The initial scale in percent.
+     * See {@link WebView#setInitialScale(int)}
      */
+    @Override
     public void setInitialScale(int scaleInPercent) {
         checkThread();
         mZoomManager.setInitialScaleInPercent(scaleInPercent);
     }
 
     /**
-     * Invoke the graphical zoom picker widget for this WebView. This will
-     * result in the zoom widget appearing on the screen to control the zoom
-     * level of this WebView.
+     * See {@link WebView#invokeZoomPicker()}
      */
+    @Override
     public void invokeZoomPicker() {
         checkThread();
         if (!getSettings().supportZoom()) {
@@ -2930,23 +2797,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Return a HitTestResult based on the current cursor node. If a HTML::a tag
-     * is found and the anchor has a non-JavaScript url, the HitTestResult type
-     * is set to SRC_ANCHOR_TYPE and the url is set in the "extra" field. If the
-     * anchor does not have a url or if it is a JavaScript url, the type will
-     * be UNKNOWN_TYPE and the url has to be retrieved through
-     * {@link #requestFocusNodeHref} asynchronously. If a HTML::img tag is
-     * found, the HitTestResult type is set to IMAGE_TYPE and the url is set in
-     * the "extra" field. A type of
-     * SRC_IMAGE_ANCHOR_TYPE indicates an anchor with a url that has an image as
-     * a child node. If a phone number is found, the HitTestResult type is set
-     * to PHONE_TYPE and the phone number is set in the "extra" field of
-     * HitTestResult. If a map address is found, the HitTestResult type is set
-     * to GEO_TYPE and the address is set in the "extra" field of HitTestResult.
-     * If an email address is found, the HitTestResult type is set to EMAIL_TYPE
-     * and the email is set in the "extra" field of HitTestResult. Otherwise,
-     * HitTestResult type is set to UNKNOWN_TYPE.
+     * See {@link WebView#getHitTestResult()}
      */
+    @Override
     public HitTestResult getHitTestResult() {
         checkThread();
         return mInitialHitTestResult;
@@ -2980,19 +2833,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Request the anchor or image element URL at the last tapped point.
-     * If hrefMsg is null, this method returns immediately and does not
-     * dispatch hrefMsg to its target. If the tapped point hits an image,
-     * an anchor, or an image in an anchor, the message associates
-     * strings in named keys in its data. The value paired with the key
-     * may be an empty string.
-     *
-     * @param hrefMsg This message will be dispatched with the result of the
-     *                request. The message data contains three keys:
-     *                - "url" returns the anchor's href attribute.
-     *                - "title" returns the anchor's text.
-     *                - "src" returns the image's src attribute.
+     * See {@link WebView#requestFocusNodeHref(Message)}
      */
+    @Override
     public void requestFocusNodeHref(Message hrefMsg) {
         checkThread();
         if (hrefMsg == null) {
@@ -3013,12 +2856,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Request the url of the image last touched by the user. msg will be sent
-     * to its target with a String representing the url as its object.
-     *
-     * @param msg This message will be dispatched with the result of the request
-     *            as the data member with "url" as key. The result can be null.
+     * See {@link WebView#requestImageRef(Message)}
      */
+    @Override
     public void requestImageRef(Message msg) {
         checkThread();
         if (0 == mNativeClass) return; // client isn't initialized
@@ -3521,11 +3361,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Get the url for the current page. This is not always the same as the url
-     * passed to WebViewClient.onPageStarted because although the load for
-     * that url has begun, the current page may not have changed.
-     * @return The url for the current page.
+     * See {@link WebView#getUrl()}
      */
+    @Override
     public String getUrl() {
         checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
@@ -3533,13 +3371,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Get the original url for the current page. This is not always the same
-     * as the url passed to WebViewClient.onPageStarted because although the
-     * load for that url has begun, the current page may not have changed.
-     * Also, there may have been redirects resulting in a different url to that
-     * originally requested.
-     * @return The url that was originally requested for the current page.
+     * See {@link WebView#getOriginalUrl()}
      */
+    @Override
     public String getOriginalUrl() {
         checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
@@ -3547,10 +3381,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Get the title for the current page. This is the title of the current page
-     * until WebViewClient.onReceivedTitle is called.
-     * @return The title for the current page.
+     * See {@link WebView#getTitle()}
      */
+    @Override
     public String getTitle() {
         checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
@@ -3558,10 +3391,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Get the favicon for the current page. This is the favicon of the current
-     * page until WebViewClient.onReceivedIcon is called.
-     * @return The favicon for the current page.
+     * See {@link WebView#getFavicon()}
      */
+    @Override
     public Bitmap getFavicon() {
         checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
@@ -3569,37 +3401,36 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Get the touch icon url for the apple-touch-icon <link> element, or
-     * a URL on this site's server pointing to the standard location of a
-     * touch icon.
-     * @hide
+     * See {@link WebView#getTouchIconUrl()}
      */
+    @Override
     public String getTouchIconUrl() {
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getTouchIconUrl() : null;
     }
 
     /**
-     * Get the progress for the current page.
-     * @return The progress for the current page between 0 and 100.
+     * See {@link WebView#getProgress()}
      */
+    @Override
     public int getProgress() {
         checkThread();
         return mCallbackProxy.getProgress();
     }
 
     /**
-     * @return the height of the HTML content.
+     * See {@link WebView#getContentHeight()}
      */
+    @Override
     public int getContentHeight() {
         checkThread();
         return mContentHeight;
     }
 
     /**
-     * @return the width of the HTML content.
-     * @hide
+     * See {@link WebView#getContentWidth()}
      */
+    @Override
     public int getContentWidth() {
         return mContentWidth;
     }
@@ -3612,32 +3443,27 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Pause all layout, parsing, and JavaScript timers for all webviews. This
-     * is a global requests, not restricted to just this webview. This can be
-     * useful if the application has been paused.
+     * See {@link WebView#pauseTimers()}
      */
+    @Override
     public void pauseTimers() {
         checkThread();
         mWebViewCore.sendMessage(EventHub.PAUSE_TIMERS);
     }
 
     /**
-     * Resume all layout, parsing, and JavaScript timers for all webviews.
-     * This will resume dispatching all timers.
+     * See {@link WebView#resumeTimers()}
      */
+    @Override
     public void resumeTimers() {
         checkThread();
         mWebViewCore.sendMessage(EventHub.RESUME_TIMERS);
     }
 
     /**
-     * Call this to pause any extra processing associated with this WebView and
-     * its associated DOM, plugins, JavaScript etc. For example, if the WebView
-     * is taken offscreen, this could be called to reduce unnecessary CPU or
-     * network traffic. When the WebView is again "active", call onResume().
-     *
-     * Note that this differs from pauseTimers(), which affects all WebViews.
+     * See {@link WebView#onPause()}
      */
+    @Override
     public void onPause() {
         checkThread();
         if (!mIsPaused) {
@@ -3674,8 +3500,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Call this to resume a WebView after a previous call to onPause().
+     * See {@link WebView#onResume()}
      */
+    @Override
     public void onResume() {
         checkThread();
         if (mIsPaused) {
@@ -3697,29 +3524,26 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Returns true if the view is paused, meaning onPause() was called. Calling
-     * onResume() sets the paused state back to false.
-     * @hide
+     * See {@link WebView#isPaused()}
      */
+    @Override
     public boolean isPaused() {
         return mIsPaused;
     }
 
     /**
-     * Call this to inform the view that memory is low so that it can
-     * free any available memory.
+     * See {@link WebView#freeMemory()}
      */
+    @Override
     public void freeMemory() {
         checkThread();
         mWebViewCore.sendMessage(EventHub.FREE_MEMORY);
     }
 
     /**
-     * Clear the resource cache. Note that the cache is per-application, so
-     * this will clear the cache for all WebViews used.
-     *
-     * @param includeDiskFiles If false, only the RAM cache is cleared.
+     * See {@link WebView#clearCache(boolean)}
      */
+    @Override
     public void clearCache(boolean includeDiskFiles) {
         checkThread();
         // Note: this really needs to be a static method as it clears cache for all
@@ -3730,17 +3554,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Make sure that clearing the form data removes the adapter from the
-     * currently focused textfield if there is one.
+     * See {@link WebView#clearFormData()}
      */
+    @Override
     public void clearFormData() {
         checkThread();
         // TODO: Implement b/6083041
     }
 
     /**
-     * Tell the WebView to clear its internal back/forward list.
+     * See {@link WebView#clearHistory()}
      */
+    @Override
     public void clearHistory() {
         checkThread();
         mCallbackProxy.getBackForwardList().setClearPending();
@@ -3748,46 +3573,37 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Clear the SSL preferences table stored in response to proceeding with SSL
-     * certificate errors.
+     * See {@link WebView#clearSslPreferences()}
      */
+    @Override
     public void clearSslPreferences() {
         checkThread();
         mWebViewCore.sendMessage(EventHub.CLEAR_SSL_PREF_TABLE);
     }
 
     /**
-     * Return the WebBackForwardList for this WebView. This contains the
-     * back/forward list for use in querying each item in the history stack.
-     * This is a copy of the private WebBackForwardList so it contains only a
-     * snapshot of the current state. Multiple calls to this method may return
-     * different objects. The object returned from this method will not be
-     * updated to reflect any new state.
+     * See {@link WebView#copyBackForwardList()}
      */
+    @Override
     public WebBackForwardList copyBackForwardList() {
         checkThread();
         return mCallbackProxy.getBackForwardList().clone();
     }
 
-    /*
-     * Highlight and scroll to the next occurance of String in findAll.
-     * Wraps the page infinitely, and scrolls.  Must be called after
-     * calling findAll.
-     *
-     * @param forward Direction to search.
+    /**
+     * See {@link WebView#findNext(boolean)}
      */
+    @Override
     public void findNext(boolean forward) {
         checkThread();
         if (0 == mNativeClass) return; // client isn't initialized
         mWebViewCore.sendMessage(EventHub.FIND_NEXT, forward ? 1 : 0);
     }
 
-    /*
-     * Find all instances of find on the page and highlight them.
-     * @param find  String to find.
-     * @return int  The number of occurances of the String "find"
-     *              that were found.
+    /**
+     * See {@link WebView#findAll(String)}
      */
+    @Override
     public int findAll(String find) {
         return findAllBody(find, false);
     }
@@ -3935,9 +3751,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return WebViewCore.nativeFindAddress(addr, caseInsensitive);
     }
 
-    /*
-     * Clear the highlighting surrounding text matches created by findAll.
+    /**
+     * See {@link WebView#clearMatches()}
      */
+    @Override
     public void clearMatches() {
         checkThread();
         if (mNativeClass == 0)
@@ -3965,11 +3782,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Query the document to see if it contains any image references. The
-     * message object will be dispatched with arg1 being set to 1 if images
-     * were found and 0 if the document does not reference any images.
-     * @param response The message that will be dispatched with the result.
+     * See {@link WebView#documentHasImages(Message)}
      */
+    @Override
     public void documentHasImages(Message response) {
         checkThread();
         if (response == null) {
@@ -4396,10 +4211,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Set the WebViewClient that will receive various notifications and
-     * requests. This will replace the current handler.
-     * @param client An implementation of WebViewClient.
+     * See {@link WebView#setWebViewClient(WebViewClient)}
      */
+    @Override
     public void setWebViewClient(WebViewClient client) {
         checkThread();
         mCallbackProxy.setWebViewClient(client);
@@ -4416,22 +4230,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Register the interface to be used when content can not be handled by
-     * the rendering engine, and should be downloaded instead. This will replace
-     * the current handler.
-     * @param listener An implementation of DownloadListener.
+     * See {@link WebView#setDownloadListener(DownloadListener)}
      */
+    @Override
     public void setDownloadListener(DownloadListener listener) {
         checkThread();
         mCallbackProxy.setDownloadListener(listener);
     }
 
     /**
-     * Set the chrome handler. This is an implementation of WebChromeClient for
-     * use in handling JavaScript dialogs, favicons, titles, and the progress.
-     * This will replace the current handler.
-     * @param client An implementation of WebChromeClient.
+     * See {@link WebView#setWebChromeClient(WebChromeClient)}
      */
+    @Override
     public void setWebChromeClient(WebChromeClient client) {
         checkThread();
         mCallbackProxy.setWebChromeClient(client);
@@ -4467,11 +4277,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Set the Picture listener. This is an interface used to receive
-     * notifications of a new Picture.
-     * @param listener An implementation of WebView.PictureListener.
-     * @deprecated This method is now obsolete.
+     * See {@link WebView#setPictureListener(PictureListener)}
      */
+    @Override
     @Deprecated
     public void setPictureListener(PictureListener listener) {
         checkThread();
@@ -4495,31 +4303,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * This method injects the supplied Java object into the WebView. The
-     * object is injected into the JavaScript context of the main frame, using
-     * the supplied name. This allows the Java object to be accessed from
-     * JavaScript. Note that that injected objects will not appear in
-     * JavaScript until the page is next (re)loaded. For example:
-     * <pre> webView.addJavascriptInterface(new Object(), "injectedObject");
-     * webView.loadData("<!DOCTYPE html><title></title>", "text/html", null);
-     * webView.loadUrl("javascript:alert(injectedObject.toString())");</pre>
-     * <p><strong>IMPORTANT:</strong>
-     * <ul>
-     * <li> addJavascriptInterface() can be used to allow JavaScript to control
-     * the host application. This is a powerful feature, but also presents a
-     * security risk. Use of this method in a WebView containing untrusted
-     * content could allow an attacker to manipulate the host application in
-     * unintended ways, executing Java code with the permissions of the host
-     * application. Use extreme care when using this method in a WebView which
-     * could contain untrusted content.
-     * <li> JavaScript interacts with Java object on a private, background
-     * thread of the WebView. Care is therefore required to maintain thread
-     * safety.</li>
-     * </ul></p>
-     * @param object The Java object to inject into the WebView's JavaScript
-     *               context. Null values are ignored.
-     * @param name The name used to expose the instance in JavaScript.
+     * See {@link WebView#addJavascriptInterface(Object, String)}
      */
+    @Override
     public void addJavascriptInterface(Object object, String name) {
         checkThread();
         if (object == null) {
@@ -4532,9 +4318,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Removes a previously added JavaScript interface with the given name.
-     * @param interfaceName The name of the interface to remove.
+     * See {@link WebView#removeJavascriptInterface(String)}
      */
+    @Override
     public void removeJavascriptInterface(String interfaceName) {
         checkThread();
         if (mWebViewCore != null) {
@@ -4545,33 +4331,28 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Return the WebSettings object used to control the settings for this
-     * WebView.
-     * @return A WebSettings object that can be used to control this WebView's
-     *         settings.
+     * See {@link WebView#getSettings()}
+     * Note this returns WebSettingsClassic, a sub-class of WebSettings, which can be used
+     * to access extension APIs.
      */
+    @Override
     public WebSettingsClassic getSettings() {
         checkThread();
         return (mWebViewCore != null) ? mWebViewCore.getSettings() : null;
     }
 
-   /**
-    * Return the list of currently loaded plugins.
-    * @return The list of currently loaded plugins.
-    *
-    * @hide
-    * @deprecated This was used for Gears, which has been deprecated.
-    */
+    /**
+     * See {@link WebView#getPluginList()}
+     */
     @Deprecated
     public static synchronized PluginList getPluginList() {
         checkThread();
         return new PluginList();
     }
 
-   /**
-    * @hide
-    * @deprecated This was used for Gears, which has been deprecated.
-    */
+    /**
+     * See {@link WebView#refreshPlugins(boolean)}
+     */
     @Deprecated
     public void refreshPlugins(boolean reloadOpenPages) {
         checkThread();
@@ -5501,10 +5282,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Use this method to put the WebView into text selection mode.
-     * Do not rely on this functionality; it will be deprecated in the future.
-     * @deprecated This method is now obsolete.
+     * See {@link WebView#emulateShiftHeld()}
      */
+    @Override
     @Deprecated
     public void emulateShiftHeld() {
         checkThread();
@@ -7175,18 +6955,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Returns a view containing zoom controls i.e. +/- buttons. The caller is
-     * in charge of installing this view to the view hierarchy. This view will
-     * become visible when the user starts scrolling via touch and fade away if
-     * the user does not interact with it.
-     * <p/>
-     * API version 3 introduces a built-in zoom mechanism that is shown
-     * automatically by the MapView. This is the preferred approach for
-     * showing the zoom UI.
-     *
-     * @deprecated The built-in zoom mechanism is preferred, see
-     *             {@link WebSettings#setBuiltInZoomControls(boolean)}.
+     * See {@link WebView#getZoomControls()}
      */
+    @Override
     @Deprecated
     public View getZoomControls() {
         checkThread();
@@ -7214,34 +6985,36 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * @return TRUE if the WebView can be zoomed in.
+     * See {@link WebView#canZoomIn()}
      */
+    @Override
     public boolean canZoomIn() {
         checkThread();
         return mZoomManager.canZoomIn();
     }
 
     /**
-     * @return TRUE if the WebView can be zoomed out.
+     * See {@link WebView#canZoomOut()}
      */
+    @Override
     public boolean canZoomOut() {
         checkThread();
         return mZoomManager.canZoomOut();
     }
 
     /**
-     * Perform zoom in in the webview
-     * @return TRUE if zoom in succeeds. FALSE if no zoom changes.
+     * See {@link WebView#zoomIn()}
      */
+    @Override
     public boolean zoomIn() {
         checkThread();
         return mZoomManager.zoomIn();
     }
 
     /**
-     * Perform zoom out in the webview
-     * @return TRUE if zoom out succeeds. FALSE if no zoom changes.
+     * See {@link WebView#zoomOut()}
      */
+    @Override
     public boolean zoomOut() {
         checkThread();
         return mZoomManager.zoomOut();
@@ -9186,9 +8959,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Set the background color. It's white by default. Pass
-     * zero to make the view transparent.
-     * @param color   the ARGB color described by Color.java
+     * See {@link WebView#setBackgroundColor(int)}
      */
     @Override
     public void setBackgroundColor(int color) {
@@ -9197,8 +8968,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * @deprecated This method is now obsolete.
+     * See {@link WebView#debugDump()}
      */
+    @Override
     @Deprecated
     public void debugDump() {
     }
