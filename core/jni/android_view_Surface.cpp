@@ -888,7 +888,7 @@ void nativeClassInit(JNIEnv* env, jclass clazz)
     no.native_region = env->GetFieldID(region, "mNativeRegion", "I");
 
     jclass parcel = env->FindClass("android/os/Parcel");
-    no.native_parcel = env->GetFieldID(parcel, "mObject", "I");
+    no.native_parcel = env->GetFieldID(parcel, "mNativePtr", "I");
 
     jclass rect = env->FindClass("android/graphics/Rect");
     ro.l = env->GetFieldID(rect, "left", "I");

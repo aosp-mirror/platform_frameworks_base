@@ -180,9 +180,14 @@ public final class Parcel {
     private static final String TAG = "Parcel";
 
     @SuppressWarnings({"UnusedDeclaration"})
-    private int mObject; // used by native code
-    @SuppressWarnings({"UnusedDeclaration"})
-    private int mOwnObject; // used by native code
+    private int mNativePtr; // used by native code
+
+    /**
+     * Flag indicating if {@link #mNativePtr} was allocated by this object,
+     * indicating that we're responsible for its lifecycle.
+     */
+    private boolean mOwnsNativeParcelObject;
+
     private RuntimeException mStack;
 
     private static final int POOL_SIZE = 6;
@@ -224,6 +229,48 @@ public final class Parcel {
     private static final int EX_ILLEGAL_STATE = -5;
     private static final int EX_HAS_REPLY_HEADER = -128;  // special; see below
 
+    private static native int nativeDataSize(int nativePtr);
+    private static native int nativeDataAvail(int nativePtr);
+    private static native int nativeDataPosition(int nativePtr);
+    private static native int nativeDataCapacity(int nativePtr);
+    private static native void nativeSetDataSize(int nativePtr, int size);
+    private static native void nativeSetDataPosition(int nativePtr, int pos);
+    private static native void nativeSetDataCapacity(int nativePtr, int size);
+
+    private static native boolean nativePushAllowFds(int nativePtr, boolean allowFds);
+    private static native void nativeRestoreAllowFds(int nativePtr, boolean lastValue);
+
+    private static native void nativeWriteByteArray(int nativePtr, byte[] b, int offset, int len);
+    private static native void nativeWriteInt(int nativePtr, int val);
+    private static native void nativeWriteLong(int nativePtr, long val);
+    private static native void nativeWriteFloat(int nativePtr, float val);
+    private static native void nativeWriteDouble(int nativePtr, double val);
+    private static native void nativeWriteString(int nativePtr, String val);
+    private static native void nativeWriteStrongBinder(int nativePtr, IBinder val);
+    private static native void nativeWriteFileDescriptor(int nativePtr, FileDescriptor val);
+
+    private static native byte[] nativeCreateByteArray(int nativePtr);
+    private static native int nativeReadInt(int nativePtr);
+    private static native long nativeReadLong(int nativePtr);
+    private static native float nativeReadFloat(int nativePtr);
+    private static native double nativeReadDouble(int nativePtr);
+    private static native String nativeReadString(int nativePtr);
+    private static native IBinder nativeReadStrongBinder(int nativePtr);
+    private static native FileDescriptor nativeReadFileDescriptor(int nativePtr);
+
+    private static native int nativeCreate();
+    private static native void nativeFreeBuffer(int nativePtr);
+    private static native void nativeDestroy(int nativePtr);
+
+    private static native byte[] nativeMarshall(int nativePtr);
+    private static native void nativeUnmarshall(
+            int nativePtr, byte[] data, int offest, int length);
+    private static native void nativeAppendFrom(
+            int thisNativePtr, int otherNativePtr, int offset, int length);
+    private static native boolean nativeHasFileDescriptors(int nativePtr);
+    private static native void nativeWriteInterfaceToken(int nativePtr, String interfaceName);
+    private static native void nativeEnforceInterface(int nativePtr, String interfaceName);
+
     public final static Parcelable.Creator<String> STRING_CREATOR
              = new Parcelable.Creator<String>() {
         public String createFromParcel(Parcel source) {
@@ -262,7 +309,15 @@ public final class Parcel {
     public final void recycle() {
         if (DEBUG_RECYCLE) mStack = null;
         freeBuffer();
-        final Parcel[] pool = mOwnObject != 0 ? sOwnedPool : sHolderPool;
+
+        final Parcel[] pool;
+        if (mOwnsNativeParcelObject) {
+            pool = sOwnedPool;
+        } else {
+            mNativePtr = 0;
+            pool = sHolderPool;
+        }
+
         synchronized (pool) {
             for (int i=0; i<POOL_SIZE; i++) {
                 if (pool[i] == null) {
@@ -276,19 +331,25 @@ public final class Parcel {
     /**
      * Returns the total amount of data contained in the parcel.
      */
-    public final native int dataSize();
+    public final int dataSize() {
+        return nativeDataSize(mNativePtr);
+    }
 
     /**
      * Returns the amount of data remaining to be read from the
      * parcel.  That is, {@link #dataSize}-{@link #dataPosition}.
      */
-    public final native int dataAvail();
+    public final int dataAvail() {
+        return nativeDataAvail(mNativePtr);
+    }
 
     /**
      * Returns the current position in the parcel data.  Never
      * more than {@link #dataSize}.
      */
-    public final native int dataPosition();
+    public final int dataPosition() {
+        return nativeDataPosition(mNativePtr);
+    }
 
     /**
      * Returns the total amount of space in the parcel.  This is always
@@ -296,7 +357,9 @@ public final class Parcel {
      * amount of room left until the parcel needs to re-allocate its
      * data buffer.
      */
-    public final native int dataCapacity();
+    public final int dataCapacity() {
+        return nativeDataCapacity(mNativePtr);
+    }
 
     /**
      * Change the amount of data in the parcel.  Can be either smaller or
@@ -305,14 +368,18 @@ public final class Parcel {
      *
      * @param size The new number of bytes in the Parcel.
      */
-    public final native void setDataSize(int size);
+    public final void setDataSize(int size) {
+        nativeSetDataSize(mNativePtr, size);
+    }
 
     /**
      * Move the current read/write position in the parcel.
      * @param pos New offset in the parcel; must be between 0 and
      * {@link #dataSize}.
      */
-    public final native void setDataPosition(int pos);
+    public final void setDataPosition(int pos) {
+        nativeSetDataPosition(mNativePtr, pos);
+    }
 
     /**
      * Change the capacity (current available space) of the parcel.
@@ -321,13 +388,19 @@ public final class Parcel {
      * less than {@link #dataSize} -- that is, you can not drop existing data
      * with this method.
      */
-    public final native void setDataCapacity(int size);
+    public final void setDataCapacity(int size) {
+        nativeSetDataCapacity(mNativePtr, size);
+    }
 
     /** @hide */
-    public final native boolean pushAllowFds(boolean allowFds);
+    public final boolean pushAllowFds(boolean allowFds) {
+        return nativePushAllowFds(mNativePtr, allowFds);
+    }
 
     /** @hide */
-    public final native void restoreAllowFds(boolean lastValue);
+    public final void restoreAllowFds(boolean lastValue) {
+        nativeRestoreAllowFds(mNativePtr, lastValue);
+    }
 
     /**
      * Returns the raw bytes of the parcel.
@@ -340,27 +413,40 @@ public final class Parcel {
      * such does not attempt to maintain compatibility with data created
      * in different versions of the platform.
      */
-    public final native byte[] marshall();
+    public final byte[] marshall() {
+        return nativeMarshall(mNativePtr);
+    }
 
     /**
      * Set the bytes in data to be the raw bytes of this Parcel.
      */
-    public final native void unmarshall(byte[] data, int offest, int length);
+    public final void unmarshall(byte[] data, int offest, int length) {
+        nativeUnmarshall(mNativePtr, data, offest, length);
+    }
 
-    public final native void appendFrom(Parcel parcel, int offset, int length);
+    public final void appendFrom(Parcel parcel, int offset, int length) {
+        nativeAppendFrom(mNativePtr, parcel.mNativePtr, offset, length);
+    }
 
     /**
      * Report whether the parcel contains any marshalled file descriptors.
      */
-    public final native boolean hasFileDescriptors();
+    public final boolean hasFileDescriptors() {
+        return nativeHasFileDescriptors(mNativePtr);
+    }
 
     /**
      * Store or read an IBinder interface token in the parcel at the current
      * {@link #dataPosition}.  This is used to validate that the marshalled
      * transaction is intended for the target interface.
      */
-    public final native void writeInterfaceToken(String interfaceName);
-    public final native void enforceInterface(String interfaceName);
+    public final void writeInterfaceToken(String interfaceName) {
+        nativeWriteInterfaceToken(mNativePtr, interfaceName);
+    }
+
+    public final void enforceInterface(String interfaceName) {
+        nativeEnforceInterface(mNativePtr, interfaceName);
+    }
 
     /**
      * Write a byte array into the parcel at the current {@link #dataPosition},
@@ -384,40 +470,48 @@ public final class Parcel {
             return;
         }
         Arrays.checkOffsetAndCount(b.length, offset, len);
-        writeNative(b, offset, len);
+        nativeWriteByteArray(mNativePtr, b, offset, len);
     }
-
-    private native void writeNative(byte[] b, int offset, int len);
 
     /**
      * Write an integer value into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.
      */
-    public final native void writeInt(int val);
+    public final void writeInt(int val) {
+        nativeWriteInt(mNativePtr, val);
+    }
 
     /**
      * Write a long integer value into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.
      */
-    public final native void writeLong(long val);
+    public final void writeLong(long val) {
+        nativeWriteLong(mNativePtr, val);
+    }
 
     /**
      * Write a floating point value into the parcel at the current
      * dataPosition(), growing dataCapacity() if needed.
      */
-    public final native void writeFloat(float val);
+    public final void writeFloat(float val) {
+        nativeWriteFloat(mNativePtr, val);
+    }
 
     /**
      * Write a double precision floating point value into the parcel at the
      * current dataPosition(), growing dataCapacity() if needed.
      */
-    public final native void writeDouble(double val);
+    public final void writeDouble(double val) {
+        nativeWriteDouble(mNativePtr, val);
+    }
 
     /**
      * Write a string value into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.
      */
-    public final native void writeString(String val);
+    public final void writeString(String val) {
+        nativeWriteString(mNativePtr, val);
+    }
 
     /**
      * Write a CharSequence value into the parcel at the current dataPosition(),
@@ -432,7 +526,9 @@ public final class Parcel {
      * Write an object into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.
      */
-    public final native void writeStrongBinder(IBinder val);
+    public final void writeStrongBinder(IBinder val) {
+        nativeWriteStrongBinder(mNativePtr, val);
+    }
 
     /**
      * Write an object into the parcel at the current dataPosition(),
@@ -452,7 +548,9 @@ public final class Parcel {
      * accepts contextual flags and will close the original file descriptor
      * if {@link Parcelable#PARCELABLE_WRITE_RETURN_VALUE} is set.</p>
      */
-    public final native void writeFileDescriptor(FileDescriptor val);
+    public final void writeFileDescriptor(FileDescriptor val) {
+        nativeWriteFileDescriptor(mNativePtr, val);
+    }
 
     /**
      * Write an byte value into the parcel at the current dataPosition(),
@@ -1341,29 +1439,39 @@ public final class Parcel {
     /**
      * Read an integer value from the parcel at the current dataPosition().
      */
-    public final native int readInt();
+    public final int readInt() {
+        return nativeReadInt(mNativePtr);
+    }
 
     /**
      * Read a long integer value from the parcel at the current dataPosition().
      */
-    public final native long readLong();
+    public final long readLong() {
+        return nativeReadLong(mNativePtr);
+    }
 
     /**
      * Read a floating point value from the parcel at the current
      * dataPosition().
      */
-    public final native float readFloat();
+    public final float readFloat() {
+        return nativeReadFloat(mNativePtr);
+    }
 
     /**
      * Read a double precision floating point value from the parcel at the
      * current dataPosition().
      */
-    public final native double readDouble();
+    public final double readDouble() {
+        return nativeReadDouble(mNativePtr);
+    }
 
     /**
      * Read a string value from the parcel at the current dataPosition().
      */
-    public final native String readString();
+    public final String readString() {
+        return nativeReadString(mNativePtr);
+    }
 
     /**
      * Read a CharSequence value from the parcel at the current dataPosition().
@@ -1376,17 +1484,18 @@ public final class Parcel {
     /**
      * Read an object from the parcel at the current dataPosition().
      */
-    public final native IBinder readStrongBinder();
+    public final IBinder readStrongBinder() {
+        return nativeReadStrongBinder(mNativePtr);
+    }
 
     /**
      * Read a FileDescriptor from the parcel at the current dataPosition().
      */
     public final ParcelFileDescriptor readFileDescriptor() {
-        FileDescriptor fd = internalReadFileDescriptor();
+        FileDescriptor fd = nativeReadFileDescriptor(mNativePtr);
         return fd != null ? new ParcelFileDescriptor(fd) : null;
     }
 
-    private native FileDescriptor internalReadFileDescriptor();
     /*package*/ static native FileDescriptor openFileDescriptor(String file,
             int mode) throws FileNotFoundException;
     /*package*/ static native FileDescriptor dupFileDescriptor(FileDescriptor orig)
@@ -1471,7 +1580,9 @@ public final class Parcel {
     /**
      * Read and return a byte[] object from the parcel.
      */
-    public final native byte[] createByteArray();
+    public final byte[] createByteArray() {
+        return nativeCreateByteArray(mNativePtr);
+    }
 
     /**
      * Read a byte[] object from the parcel and copy it into the
@@ -2065,12 +2176,37 @@ public final class Parcel {
         return new Parcel(obj);
     }
 
-    private Parcel(int obj) {
+    private Parcel(int nativePtr) {
         if (DEBUG_RECYCLE) {
             mStack = new RuntimeException();
         }
         //Log.i(TAG, "Initializing obj=0x" + Integer.toHexString(obj), mStack);
-        init(obj);
+        init(nativePtr);
+    }
+
+    private void init(int nativePtr) {
+        if (nativePtr != 0) {
+            mNativePtr = nativePtr;
+            mOwnsNativeParcelObject = false;
+        } else {
+            mNativePtr = nativeCreate();
+            mOwnsNativeParcelObject = true;
+        }
+    }
+
+    private void freeBuffer() {
+        if (mOwnsNativeParcelObject) {
+            nativeFreeBuffer(mNativePtr);
+        }
+    }
+
+    private void destroy() {
+        if (mNativePtr != 0) {
+            if (mOwnsNativeParcelObject) {
+                nativeDestroy(mNativePtr);
+            }
+            mNativePtr = 0;
+        }
     }
 
     @Override
@@ -2082,10 +2218,6 @@ public final class Parcel {
         }
         destroy();
     }
-
-    private native void freeBuffer();
-    private native void init(int obj);
-    private native void destroy();
 
     /* package */ void readMapInternal(Map outVal, int N,
         ClassLoader loader) {
