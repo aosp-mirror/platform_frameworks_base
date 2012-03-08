@@ -4361,9 +4361,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // is used in the view system.
             return;
         }
-        int vx = contentToViewX(cx);
-        int vy = contentToViewY(cy);
-        pinScrollTo(vx, vy, true, 0);
+        int vx = contentToViewDimension(cx - mScrollOffset.x);
+        int vy = contentToViewDimension(cy - mScrollOffset.y);
+        pinScrollBy(vx, vy, true, 0);
     }
 
     /**
