@@ -18,6 +18,8 @@ package android.net.http;
 
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -128,10 +130,13 @@ public class CertificateChainValidator {
      */
     public static void handleTrustStorageUpdate() {
 
-        X509TrustManager x509TrustManager = SSLParametersImpl.getDefaultTrustManager();
-        if( x509TrustManager instanceof TrustManagerImpl ) {
-            TrustManagerImpl trustManager = (TrustManagerImpl) x509TrustManager;
-            trustManager.handleTrustStorageUpdate();
+        try {
+            X509TrustManager x509TrustManager = SSLParametersImpl.getDefaultTrustManager();
+            if( x509TrustManager instanceof TrustManagerImpl ) {
+                TrustManagerImpl trustManager = (TrustManagerImpl) x509TrustManager;
+                trustManager.handleTrustStorageUpdate();
+            }
+        } catch (KeyManagementException ignored) {
         }
     }
 
@@ -165,7 +170,7 @@ public class CertificateChainValidator {
         try {
             SSLParametersImpl.getDefaultTrustManager().checkServerTrusted(chain, authType);
             return null;  // No errors.
-        } catch (CertificateException e) {
+        } catch (GeneralSecurityException e) {
             if (HttpLog.LOGV) {
                 HttpLog.v("failed to validate the certificate chain, error: " +
                     e.getMessage());
