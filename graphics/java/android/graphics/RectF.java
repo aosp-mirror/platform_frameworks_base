@@ -84,7 +84,7 @@ public class RectF implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Rect r = (Rect) o;
+        RectF r = (RectF) o;
         return left == r.left && top == r.top && right == r.right && bottom == r.bottom;
     }
 
