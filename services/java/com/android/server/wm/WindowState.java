@@ -304,6 +304,11 @@ final class WindowState implements WindowManagerPolicy.WindowState,
     int mAnimDw;
     int mAnimDh;
 
+    static final int ANIM_STATE_IDLE = 0;
+    static final int ANIM_STATE_RUNNING = 1;
+    static final int ANIM_STATE_STOPPING = 2;
+    int mAnimState = ANIM_STATE_IDLE;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
            int viewVisibility) {
@@ -640,6 +645,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
             mLocalAnimating = false;
             mAnimation.cancel();
             mAnimation = null;
+            mAnimState = ANIM_STATE_IDLE;
         }
     }
 
@@ -651,6 +657,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
             mAnimation.cancel();
             mAnimation = null;
             destroySurfaceLocked();
+            mAnimState = ANIM_STATE_IDLE;
         }
         mExiting = false;
     }
@@ -968,6 +975,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
                         mAnimation = null;
                         // Make sure we clean up the animation.
                         mAnimating = true;
+                        mAnimState = ANIM_STATE_IDLE;
                     }
                     mService.mFinishedStarting.add(mAppToken);
                     mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
@@ -980,7 +988,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
 
     @Override
     public boolean stepAnimation(long currentTime) {
-        if ((mAnimation == null) || !mLocalAnimating) {
+        if ((mAnimation == null) || !mLocalAnimating || (mAnimState != ANIM_STATE_RUNNING)) {
             return false;
         }
         mTransformation.clear();
@@ -989,8 +997,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
             WindowManagerService.TAG, "Stepped animation in " + this +
             ": more=" + more + ", xform=" + mTransformation);
         if (!more) {
-            mAnimation.cancel();
-            mAnimation = null;
+            mAnimState = ANIM_STATE_STOPPING;
         }
         return more;
     }
@@ -1018,8 +1025,10 @@ final class WindowState implements WindowManagerPolicy.WindowState,
                     mAnimation.setStartTime(currentTime);
                     mLocalAnimating = true;
                     mAnimating = true;
+                    mAnimState = ANIM_STATE_RUNNING;
                 }
-                if ((mAnimation != null) && mLocalAnimating) {
+                if ((mAnimation != null) && mLocalAnimating && 
+                        (mAnimState != ANIM_STATE_STOPPING)) {
                     return true;
                 }
                 if (WindowManagerService.DEBUG_ANIM) Slog.v(
@@ -1120,6 +1129,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
             mAppToken.updateReportedVisibilityLocked();
         }
 
+        mAnimState = ANIM_STATE_IDLE;
         return false;
     }
 
@@ -1305,12 +1315,15 @@ final class WindowState implements WindowManagerPolicy.WindowState,
             }
 
             if (WindowManagerService.localLOGV) Slog.v(
-                WindowManagerService.TAG, "Continuing animation in " + this +
+                WindowManagerService.TAG, "computeShownFrameLocked: Animating " + this +
                 ": " + mShownFrame +
-                ", alpha=" + mTransformation.getAlpha());
+                ", alpha=" + mTransformation.getAlpha() + ", mShownAlpha=" + mShownAlpha);
             return;
         }
 
+        if (WindowManagerService.localLOGV) Slog.v(
+            WindowManagerService.TAG, "computeShownFrameLocked: " + this +
+            " not attached, mAlpha=" + mAlpha);
         mShownFrame.set(mFrame);
         if (mXOffset != 0 || mYOffset != 0) {
             mShownFrame.offset(mXOffset, mYOffset);
@@ -1428,13 +1441,11 @@ final class WindowState implements WindowManagerPolicy.WindowState,
                 mService.mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             return false;
         }
-        final AppWindowToken atoken = mAppToken;
-        final boolean animating = atoken != null
-                ? (atoken.animation != null) : false;
         return mSurface != null && mPolicyVisibility && !mDestroying
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
                                 && !mRootToken.hidden)
-                        || mAnimation != null || animating);
+                        || mAnimation != null
+                        || ((mAppToken != null) && (mAppToken.animation != null)));
     }
 
     /** Is the window or its container currently animating? */
