@@ -769,7 +769,7 @@
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"verkry toegang tot inhoud ekstern"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Stel die houer in staat om toegang te verkry tot inhoudverskaffers vanuit die dop. Behoort nooit nodig te wees vir gewone programme nie."</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"ontmoedig outomatiese toestelopdaterings"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Laat die houer toe om inligting aan die stelsel te bied oor wanneer \'n goeie tyd vir \'n nie-interaktiewe herlaai sal wees om die toestel op te gradeer."</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Laat die houer toe om inligting aan die stelsel te bied oor wanneer \'n goeie tyd vir \'n nie-interaktiewe herselflaai sal wees om die toestel op te gradeer."</string>
     <string name="save_password_message" msgid="767344687139195790">"Wil jy hê die blaaier moet hierdie wagwoord onthou?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nie nou nie"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Onthou"</string>
@@ -1172,14 +1172,6 @@
     <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Trek \'n dag af."</string>
     <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Tel \'n jaar by"</string>
     <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Trek \'n jaar af"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"gekontroleer"</string>
-    <string name="checkbox_not_checked" msgid="5174639551134444056">"nie gekontroleer nie"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"gekies"</string>
-    <string name="radiobutton_not_selected" msgid="2908760184307722393">"nie gekies nie"</string>
-    <string name="switch_on" msgid="551417728476977311">"aan"</string>
-    <string name="switch_off" msgid="7249798614327155088">"af"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"gedruk"</string>
-    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"nie gedruk nie"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Kanselleer"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Vee uit"</string>
