@@ -372,6 +372,12 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
                 break;
         }
 
+        // Compute partial steps between original and final sizes.  These
+        // are used for the dimensions of the exiting and entering elements,
+        // so they are never stretched too significantly.
+        final int halfWidth = (finalWidth + mOriginalWidth) / 2;
+        final int halfHeight = (finalHeight + mOriginalHeight) / 2;
+
         // Initialize the animations.  This is a hack, redefining what "parent"
         // means to allow supplying the last and next size.  In this definition
         // "%p" is the original (let's call it "previous") size, and "%" is the
@@ -379,14 +385,14 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
         if (firstStart) {
             if (DEBUG_STATE) Slog.v(TAG, "Initializing start and finish animations");
             mStartEnterAnimation.initialize(finalWidth, finalHeight,
-                    mOriginalWidth, mOriginalHeight);
-            mStartExitAnimation.initialize(finalWidth, finalHeight,
+                    halfWidth, halfHeight);
+            mStartExitAnimation.initialize(halfWidth, halfHeight,
                     mOriginalWidth, mOriginalHeight);
             mStartFrameAnimation.initialize(finalWidth, finalHeight,
                     mOriginalWidth, mOriginalHeight);
             mFinishEnterAnimation.initialize(finalWidth, finalHeight,
-                    mOriginalWidth, mOriginalHeight);
-            mFinishExitAnimation.initialize(finalWidth, finalHeight,
+                    halfWidth, halfHeight);
+            mFinishExitAnimation.initialize(halfWidth, halfHeight,
                     mOriginalWidth, mOriginalHeight);
             mFinishFrameAnimation.initialize(finalWidth, finalHeight,
                     mOriginalWidth, mOriginalHeight);
