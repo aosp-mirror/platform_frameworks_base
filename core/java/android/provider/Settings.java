@@ -3129,6 +3129,14 @@ public final class Settings {
                 "wifi_watchdog_arp_interval_ms";
 
         /**
+         * ms delay interval between rssi polling when the signal is known to be weak
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS =
+                "wifi_watchdog_rssi_fetch_interval_ms";
+
+
+        /**
          * ms delay before rechecking a connect SSID for walled garden with a http download.
          * @hide
          */

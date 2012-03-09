@@ -93,17 +93,36 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final String TAG = "WifiWatchdogStateMachine";
     private static final String WALLED_GARDEN_NOTIFICATION_ID = "WifiWatchdog.walledgarden";
 
+    /* RSSI Levels as used by notification icon
+       Level 4  -55 <= RSSI
+       Level 3  -66 <= RSSI < -55
+       Level 2  -77 <= RSSI < -67
+       Level 1  -88 <= RSSI < -78
+       Level 0         RSSI < -88 */
+
     /* Wi-fi connection is considered poor below this
        RSSI level threshold and the watchdog report it
        to the WifiStateMachine */
-    private static final int RSSI_LEVEL_CUTOFF = 1;
+    private static final int RSSI_LEVEL_CUTOFF = 0;
     /* Wi-fi connection is monitored actively below this
        threshold */
-    private static final int RSSI_LEVEL_MONITOR = 2;
+    private static final int RSSI_LEVEL_MONITOR = 1;
+    /* RSSI threshold during monitoring below which network is avoided */
+    private static final int RSSI_MONITOR_THRESHOLD = -84;
+    /* Number of times RSSI is measured to be low before being avoided */
+    private static final int RSSI_MONITOR_COUNT = 5;
+    private int mRssiMonitorCount = 0;
+
+    /* Avoid flapping */
+    private static final int MIN_INTERVAL_AVOID_BSSID_MS = 60 * 1000;
+    private String mLastAvoidedBssid;
+    /* a -ve interval to allow avoidance at boot */
+    private long mLastBssidAvoidedTime = -MIN_INTERVAL_AVOID_BSSID_MS;
 
     private int mCurrentSignalLevel;
 
     private static final long DEFAULT_ARP_CHECK_INTERVAL_MS = 2 * 60 * 1000;
+    private static final long DEFAULT_RSSI_FETCH_INTERVAL_MS = 1000;
     private static final long DEFAULT_WALLED_GARDEN_INTERVAL_MS = 30 * 60 * 1000;
 
     private static final int DEFAULT_NUM_ARP_PINGS = 5;
@@ -143,10 +162,14 @@ public class WifiWatchdogStateMachine extends StateMachine {
     /* Internal messages */
     private static final int CMD_ARP_CHECK                          = BASE + 11;
     private static final int CMD_DELAYED_WALLED_GARDEN_CHECK        = BASE + 12;
+    private static final int CMD_RSSI_FETCH                         = BASE + 13;
 
     /* Notifications to WifiStateMachine */
     static final int POOR_LINK_DETECTED                             = BASE + 21;
     static final int GOOD_LINK_DETECTED                             = BASE + 22;
+    static final int RSSI_FETCH                                     = BASE + 23;
+    static final int RSSI_FETCH_SUCCEEDED                           = BASE + 24;
+    static final int RSSI_FETCH_FAILED                              = BASE + 25;
 
     private static final int SINGLE_ARP_CHECK = 0;
     private static final int FULL_ARP_CHECK   = 1;
@@ -167,11 +190,15 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private WalledGardenCheckState mWalledGardenCheckState = new WalledGardenCheckState();
     /* Online and watching link connectivity */
     private OnlineWatchState mOnlineWatchState = new OnlineWatchState();
+    /* RSSI level is at RSSI_LEVEL_MONITOR and needs close monitoring */
+    private RssiMonitoringState mRssiMonitoringState = new RssiMonitoringState();
     /* Online and doing nothing */
     private OnlineState mOnlineState = new OnlineState();
 
     private int mArpToken = 0;
     private long mArpCheckIntervalMs;
+    private int mRssiFetchToken = 0;
+    private long mRssiFetchIntervalMs;
     private long mWalledGardenIntervalMs;
     private int mNumArpPings;
     private int mMinArpResponses;
@@ -219,6 +246,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 addState(mConnectedState, mWatchdogEnabledState);
                     addState(mWalledGardenCheckState, mConnectedState);
                     addState(mOnlineWatchState, mConnectedState);
+                    addState(mRssiMonitoringState, mOnlineWatchState);
                     addState(mOnlineState, mConnectedState);
 
         if (isWatchdogEnabled()) {
@@ -239,6 +267,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         // Disable for wifi only devices.
         if (Settings.Secure.getString(contentResolver, Settings.Secure.WIFI_WATCHDOG_ON) == null
                 && sWifiOnly) {
+            log("Disabling watchog for wi-fi only device");
             putSettingsBoolean(contentResolver, Settings.Secure.WIFI_WATCHDOG_ON, false);
         }
         WifiWatchdogStateMachine wwsm = new WifiWatchdogStateMachine(context);
@@ -361,6 +390,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         pw.println("mLinkProperties: [" + mLinkProperties + "]");
         pw.println("mCurrentSignalLevel: [" + mCurrentSignalLevel + "]");
         pw.println("mArpCheckIntervalMs: [" + mArpCheckIntervalMs+ "]");
+        pw.println("mRssiFetchIntervalMs: [" + mRssiFetchIntervalMs + "]");
         pw.println("mWalledGardenIntervalMs: [" + mWalledGardenIntervalMs + "]");
         pw.println("mNumArpPings: [" + mNumArpPings + "]");
         pw.println("mMinArpResponses: [" + mMinArpResponses + "]");
@@ -371,7 +401,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     private boolean isWatchdogEnabled() {
-        return getSettingsBoolean(mContentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
+        boolean ret = getSettingsBoolean(mContentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
+        if (DBG) log("watchdog enabled " + ret);
+        return ret;
     }
 
     private void updateSettings() {
@@ -380,6 +412,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mArpCheckIntervalMs = Secure.getLong(mContentResolver,
                 Secure.WIFI_WATCHDOG_ARP_CHECK_INTERVAL_MS,
                 DEFAULT_ARP_CHECK_INTERVAL_MS);
+        mRssiFetchIntervalMs = Secure.getLong(mContentResolver,
+                Secure.WIFI_WATCHDOG_RSSI_FETCH_INTERVAL_MS,
+                DEFAULT_RSSI_FETCH_INTERVAL_MS);
         mNumArpPings = Secure.getInt(mContentResolver,
                 Secure.WIFI_WATCHDOG_NUM_ARP_PINGS,
                 DEFAULT_NUM_ARP_PINGS);
@@ -436,6 +471,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
     class DefaultState extends State {
         @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+        }
+
+        @Override
         public boolean processMessage(Message msg) {
             switch (msg.what) {
                 case EVENT_WATCHDOG_SETTINGS_CHANGE:
@@ -445,13 +485,15 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     }
                     break;
                 case EVENT_RSSI_CHANGE:
-                    mCurrentSignalLevel = WifiManager.calculateSignalLevel(msg.arg1,
-                            WifiManager.RSSI_LEVELS);
+                    mCurrentSignalLevel = calculateSignalLevel(msg.arg1);
                     break;
                 case EVENT_WIFI_RADIO_STATE_CHANGE:
                 case EVENT_NETWORK_STATE_CHANGE:
                 case CMD_ARP_CHECK:
                 case CMD_DELAYED_WALLED_GARDEN_CHECK:
+                case CMD_RSSI_FETCH:
+                case RSSI_FETCH_SUCCEEDED:
+                case RSSI_FETCH_FAILED:
                     //ignore
                     break;
                 default:
@@ -463,6 +505,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     class WatchdogDisabledState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+        }
+
         @Override
         public boolean processMessage(Message msg) {
             switch (msg.what) {
@@ -493,7 +540,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log("WifiWatchdogService enabled");
-       }
+        }
 
         @Override
         public boolean processMessage(Message msg) {
@@ -506,6 +553,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     Intent intent = (Intent) msg.obj;
                     NetworkInfo networkInfo = (NetworkInfo)
                             intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+
+                    if (DBG) log("network state change " + networkInfo.getDetailedState());
 
                     switch (networkInfo.getDetailedState()) {
                         case VERIFYING_POOR_LINK:
@@ -557,6 +606,10 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     class NotConnectedState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+        }
     }
 
     class VerifyingLinkState extends State {
@@ -568,7 +621,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         }
 
         private void handleRssiChange() {
-            if (mCurrentSignalLevel <= RSSI_LEVEL_CUTOFF) {
+            if (mCurrentSignalLevel <= RSSI_LEVEL_MONITOR) {
                 //stay here
                 if (DBG) log("enter VerifyingLinkState, stay level: " + mCurrentSignalLevel);
             } else {
@@ -587,11 +640,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     }
                     break;
                 case EVENT_RSSI_CHANGE:
-                    int signalLevel = WifiManager.calculateSignalLevel(msg.arg1,
-                            WifiManager.RSSI_LEVELS);
-                    if (DBG) log("RSSI change old: " + mCurrentSignalLevel + "new: " + signalLevel);
-                    mCurrentSignalLevel = signalLevel;
-
+                    mCurrentSignalLevel = calculateSignalLevel(msg.arg1);
                     handleRssiChange();
                     break;
                 case CMD_ARP_CHECK:
@@ -680,11 +729,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
         private void handleRssiChange() {
             if (mCurrentSignalLevel <= RSSI_LEVEL_CUTOFF) {
-                if (DBG) log("Transition out, below cut off level: " + mCurrentSignalLevel);
-                mWsmChannel.sendMessage(POOR_LINK_DETECTED);
+                sendPoorLinkDetected();
             } else if (mCurrentSignalLevel <= RSSI_LEVEL_MONITOR) {
-                if (DBG) log("Start monitoring, level: " + mCurrentSignalLevel);
-                sendMessage(obtainMessage(CMD_ARP_CHECK, ++mArpToken, 0));
+                transitionTo(mRssiMonitoringState);
+            } else {
+                //stay here
             }
         }
 
@@ -692,30 +741,14 @@ public class WifiWatchdogStateMachine extends StateMachine {
         public boolean processMessage(Message msg) {
             switch (msg.what) {
                 case EVENT_RSSI_CHANGE:
-                    int signalLevel = WifiManager.calculateSignalLevel(msg.arg1,
-                            WifiManager.RSSI_LEVELS);
-                    if (DBG) log("RSSI change old: " + mCurrentSignalLevel + "new: " + signalLevel);
-                    mCurrentSignalLevel = signalLevel;
-
-                    handleRssiChange();
-
-                    break;
-                case CMD_ARP_CHECK:
-                    if (msg.arg1 == mArpToken) {
-                        if (doArpTest(SINGLE_ARP_CHECK) != true) {
-                            if (DBG) log("single ARP fail, full ARP check");
-                            //do a full test
-                            if (doArpTest(FULL_ARP_CHECK) != true) {
-                                if (DBG) log("notify full ARP fail, level: " + mCurrentSignalLevel);
-                                mWsmChannel.sendMessage(POOR_LINK_DETECTED);
-                            }
-                        }
-
-                        if (mCurrentSignalLevel <= RSSI_LEVEL_MONITOR) {
-                            if (DBG) log("Continue ARP check, rssi level: " + mCurrentSignalLevel);
-                            sendMessageDelayed(obtainMessage(CMD_ARP_CHECK, ++mArpToken, 0),
-                                    mArpCheckIntervalMs);
-                        }
+                    mCurrentSignalLevel = calculateSignalLevel(msg.arg1);
+                    //Ready to avoid bssid again ?
+                    long time = android.os.SystemClock.elapsedRealtime();
+                    if (time - mLastBssidAvoidedTime  > MIN_INTERVAL_AVOID_BSSID_MS) {
+                        handleRssiChange();
+                    } else {
+                        if (DBG) log("Early to avoid " + mWifiInfo + " time: " + time +
+                                " last avoided: " + mLastBssidAvoidedTime);
                     }
                     break;
                 default:
@@ -725,10 +758,65 @@ public class WifiWatchdogStateMachine extends StateMachine {
         }
     }
 
+    class RssiMonitoringState extends State {
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+            sendMessage(obtainMessage(CMD_RSSI_FETCH, ++mRssiFetchToken, 0));
+        }
+
+        public boolean processMessage(Message msg) {
+            switch (msg.what) {
+                case EVENT_RSSI_CHANGE:
+                    mCurrentSignalLevel = calculateSignalLevel(msg.arg1);
+                    if (mCurrentSignalLevel <= RSSI_LEVEL_CUTOFF) {
+                        sendPoorLinkDetected();
+                    } else if (mCurrentSignalLevel <= RSSI_LEVEL_MONITOR) {
+                        //stay here;
+                    } else {
+                        //We dont need frequent RSSI monitoring any more
+                        transitionTo(mOnlineWatchState);
+                    }
+                    break;
+                case CMD_RSSI_FETCH:
+                    if (msg.arg1 == mRssiFetchToken) {
+                        mWsmChannel.sendMessage(RSSI_FETCH);
+                        sendMessageDelayed(obtainMessage(CMD_RSSI_FETCH, ++mRssiFetchToken, 0),
+                                mRssiFetchIntervalMs);
+                    }
+                    break;
+                case RSSI_FETCH_SUCCEEDED:
+                    int rssi = msg.arg1;
+                    if (DBG) log("RSSI_FETCH_SUCCEEDED: " + rssi);
+                    if (msg.arg1 < RSSI_MONITOR_THRESHOLD) {
+                        mRssiMonitorCount++;
+                    } else {
+                        mRssiMonitorCount = 0;
+                    }
+
+                    if (mRssiMonitorCount > RSSI_MONITOR_COUNT) {
+                        sendPoorLinkDetected();
+                        ++mRssiFetchToken;
+                    }
+                    break;
+                case RSSI_FETCH_FAILED:
+                    //can happen if we are waiting to get a disconnect notification
+                    if (DBG) log("RSSI_FETCH_FAILED");
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+   }
+
     /* Child state of ConnectedState indicating that we are online
      * and there is nothing to do
      */
     class OnlineState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+        }
     }
 
     private boolean shouldCheckWalledGarden() {
@@ -794,6 +882,20 @@ public class WifiWatchdogStateMachine extends StateMachine {
         return success;
     }
 
+    private int calculateSignalLevel(int rssi) {
+        int signalLevel = WifiManager.calculateSignalLevel(rssi,
+                WifiManager.RSSI_LEVELS);
+        if (DBG) log("RSSI current: " + mCurrentSignalLevel + "new: " + rssi + ", " + signalLevel);
+        return signalLevel;
+    }
+
+    private void sendPoorLinkDetected() {
+        if (DBG) log("send POOR_LINK_DETECTED " + mWifiInfo);
+        mWsmChannel.sendMessage(POOR_LINK_DETECTED);
+        mLastAvoidedBssid = mWifiInfo.getBSSID();
+        mLastBssidAvoidedTime = android.os.SystemClock.elapsedRealtime();
+    }
+
     /**
      * Convenience function for retrieving a single secure settings value
      * as a string with a default value.
@@ -844,11 +946,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
         return Settings.Secure.putInt(cr, name, value ? 1 : 0);
     }
 
-    private void log(String s) {
+    private static void log(String s) {
         Log.d(TAG, s);
     }
 
-    private void loge(String s) {
+    private static void loge(String s) {
         Log.e(TAG, s);
     }
 }
