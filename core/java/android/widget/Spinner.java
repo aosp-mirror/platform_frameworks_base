@@ -223,7 +223,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * Set the background drawable for the spinner's popup window of choices.
      * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
      *
-     * @param background Resource ID of a background drawable
+     * @param resId Resource ID of a background drawable
      *
      * @attr ref android.R.styleable#Spinner_popupBackground
      */

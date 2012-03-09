@@ -361,7 +361,7 @@ public class Switch extends CompoundButton {
     /**
      * Set the drawable used for the track that the switch slides within.
      *
-     * @param track Resource ID of a track drawable
+     * @param resId Resource ID of a track drawable
      *
      * @attr ref android.R.styleable#Switch_track
      */
@@ -397,7 +397,7 @@ public class Switch extends CompoundButton {
      * Set the drawable used for the switch "thumb" - the piece that the user
      * can physically touch and drag along the track.
      *
-     * @param thumb Resource ID of a thumb drawable
+     * @param resId Resource ID of a thumb drawable
      *
      * @attr ref android.R.styleable#Switch_thumb
      */
