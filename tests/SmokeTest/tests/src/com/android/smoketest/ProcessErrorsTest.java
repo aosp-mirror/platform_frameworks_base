@@ -16,8 +16,6 @@
 
 package com.android.smoketest;
 
-import com.android.internal.os.RuntimeInit;
-
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.content.Context;
@@ -42,9 +40,17 @@ import java.util.Set;
 public class ProcessErrorsTest extends AndroidTestCase {
     
     private static final String TAG = "ProcessErrorsTest";
-    
+
+    private final Intent mHomeIntent;
+
     protected ActivityManager mActivityManager;
     protected PackageManager mPackageManager;
+
+    public ProcessErrorsTest() {
+        mHomeIntent = new Intent(Intent.ACTION_MAIN);
+        mHomeIntent.addCategory(Intent.CATEGORY_HOME);
+        mHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
 
     @Override
     public void setUp() throws Exception {
@@ -59,7 +65,7 @@ public class ProcessErrorsTest extends AndroidTestCase {
         assertNotNull(mPackageManager);
     }
 
-    public void testNoProcessErrors() throws Exception {
+    public void testNoProcessErrorsAfterBoot() throws Exception {
         final String reportMsg = checkForProcessErrors();
         if (reportMsg != null) {
             Log.w(TAG, reportMsg);
@@ -72,13 +78,77 @@ public class ProcessErrorsTest extends AndroidTestCase {
     private String checkForProcessErrors() throws Exception {
         List<ProcessErrorStateInfo> errList;
         errList = mActivityManager.getProcessesInErrorState();
-        
+
         // note: this contains information about each process that is currently in an error
-        // condition.  if the list is empty (null) then "we're good".  
-        
+        // condition.  if the list is empty (null) then "we're good".
+
         // if the list is non-empty, then it's useful to report the contents of the list
         final String reportMsg = reportListContents(errList);
         return reportMsg;
+    }
+
+    /**
+     * A helper function to query the provided {@link PackageManager} for a list of Activities that
+     * can be launched from Launcher.
+     */
+    static List<ResolveInfo> getLauncherActivities(PackageManager pm) {
+        final Intent launchable = new Intent(Intent.ACTION_MAIN);
+        launchable.addCategory(Intent.CATEGORY_LAUNCHER);
+        final List<ResolveInfo> activities = pm.queryIntentActivities(launchable, 0);
+        return activities;
+    }
+
+    /**
+     * A helper function to create an {@link Intent} to run, given a {@link ResolveInfo} specifying
+     * an activity to be launched.
+     */
+    static Intent intentForActivity(ResolveInfo app) {
+        // build an Intent to launch the specified app
+        final ComponentName component = new ComponentName(app.activityInfo.packageName,
+                app.activityInfo.name);
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setComponent(component);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        return intent;
+    }
+
+    /**
+     * A method to run the specified Activity and return a {@link Collection} of the Activities that
+     * were in an error state, as listed by {@link ActivityManager.getProcessesInErrorState()}.
+     * <p />
+     * The method will launch the app, wait for 7 seconds, check for apps in the error state, send
+     * the Home intent, wait for 2 seconds, and then return.
+     */
+    public Collection<ProcessErrorStateInfo> runOneActivity(ResolveInfo app) {
+        final long appLaunchWait = 7000;
+        final long homeLaunchWait = 2000;
+
+        Log.i(TAG, String.format("Running activity %s/%s", app.activityInfo.packageName,
+                app.activityInfo.name));
+
+        // launch app, and wait 7 seconds for it to start/settle
+        final Intent intent = intentForActivity(app);
+        getContext().startActivity(intent);
+        try {
+            Thread.sleep(appLaunchWait);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
+        // See if there are any errors
+        final Collection<ProcessErrorStateInfo> errProcs =
+                mActivityManager.getProcessesInErrorState();
+
+        // Send the "home" intent and wait 2 seconds for us to get there
+        getContext().startActivity(mHomeIntent);
+        try {
+            Thread.sleep(homeLaunchWait);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
+        return errProcs;
     }
 
     /**
@@ -89,46 +159,12 @@ public class ProcessErrorsTest extends AndroidTestCase {
      * FIXME: first app doesn't go away.
      */
     public void testRunAllActivities() throws Exception {
-        final Intent home = new Intent(Intent.ACTION_MAIN);
-        home.addCategory(Intent.CATEGORY_HOME);
-        home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        final Intent launchable = new Intent(Intent.ACTION_MAIN);
-        launchable.addCategory(Intent.CATEGORY_LAUNCHER);
-        final List<ResolveInfo> activities = mPackageManager.queryIntentActivities(launchable, 0);
         final Set<ProcessError> errSet = new HashSet<ProcessError>();
 
-        for (ResolveInfo info : activities) {
-            Log.i(TAG, String.format("Got %s/%s", info.activityInfo.packageName,
-                    info.activityInfo.name));
-
-            // build an Intent to launch the app
-            final ComponentName component = new ComponentName(info.activityInfo.packageName,
-                    info.activityInfo.name);
-            final Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.setComponent(component);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            // launch app, and wait 7 seconds for it to start/settle
-            getContext().startActivity(intent);
-            try {
-                Thread.sleep(7000);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-
-            // See if there are any errors
-            Collection<ProcessErrorStateInfo> procs = mActivityManager.getProcessesInErrorState();
-            if (procs != null) {
-                errSet.addAll(ProcessError.fromCollection(procs));
-            }
-
-            // Send the "home" intent and wait 2 seconds for us to get there
-            getContext().startActivity(home);
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                // ignore
+        for (ResolveInfo app : getLauncherActivities(mPackageManager)) {
+            final Collection<ProcessErrorStateInfo> errProcs = runOneActivity(app);
+            if (errProcs != null) {
+                errSet.addAll(ProcessError.fromCollection(errProcs));
             }
         }
 
@@ -138,7 +174,7 @@ public class ProcessErrorsTest extends AndroidTestCase {
         }
     }
 
-    private String reportWrappedListContents(Collection<ProcessError> errList) {
+    String reportWrappedListContents(Collection<ProcessError> errList) {
         List<ProcessErrorStateInfo> newList = new ArrayList<ProcessErrorStateInfo>(errList.size());
         for (ProcessError err : errList) {
             newList.add(err.info);
@@ -186,7 +222,7 @@ public class ProcessErrorsTest extends AndroidTestCase {
      * A {@link ProcessErrorStateInfo} wrapper class that hashes how we want (so that equivalent
      * crashes are considered equal).
      */
-    private static class ProcessError {
+    static class ProcessError {
         public final ProcessErrorStateInfo info;
 
         public ProcessError(ProcessErrorStateInfo newInfo) {
