@@ -1687,7 +1687,9 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
             // The configuration closest to the actual size is best.
             // We assume that larger configs have already been filtered
             // out at this point.  That means we just want the largest one.
-            return smallestScreenWidthDp >= o.smallestScreenWidthDp;
+            if (smallestScreenWidthDp != o.smallestScreenWidthDp) {
+                return smallestScreenWidthDp > o.smallestScreenWidthDp;
+            }
         }
 
         if (screenSizeDp || o.screenSizeDp) {
@@ -1711,7 +1713,9 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
             //ALOGI("Comparing this %dx%d to other %dx%d in %dx%d: myDelta=%d otherDelta=%d",
             //    screenWidthDp, screenHeightDp, o.screenWidthDp, o.screenHeightDp,
             //    requested->screenWidthDp, requested->screenHeightDp, myDelta, otherDelta);
-            return (myDelta <= otherDelta);
+            if (myDelta != otherDelta) {
+                return myDelta < otherDelta;
+            }
         }
 
         if (screenLayout || o.screenLayout) {
@@ -1738,7 +1742,9 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
                     if (mySL == 0) return false;
                     return true;
                 }
-                return fixedMySL >= fixedOSL;
+                if (fixedMySL != fixedOSL) {
+                    return fixedMySL > fixedOSL;
+                }
             }
             if (((screenLayout^o.screenLayout) & MASK_SCREENLONG) != 0
                     && (requested->screenLayout & MASK_SCREENLONG)) {
@@ -1857,7 +1863,9 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
                 myDelta += requested->screenHeight - screenHeight;
                 otherDelta += requested->screenHeight - o.screenHeight;
             }
-            return (myDelta <= otherDelta);
+            if (myDelta != otherDelta) {
+                return myDelta < otherDelta;
+            }
         }
 
         if (version || o.version) {
@@ -2150,7 +2158,7 @@ String8 ResTable_config::toString() const {
                 res.append("nodpi");
                 break;
             default:
-                res.appendFormat("density=%d", dtohs(density));
+                res.appendFormat("%ddpi", dtohs(density));
                 break;
         }
     }
@@ -2440,7 +2448,7 @@ status_t ResTable::Theme::applyStyle(uint32_t resID, bool force)
     uint32_t bagTypeSpecFlags = 0;
     mTable.lock();
     const ssize_t N = mTable.getBagLocked(resID, &bag, &bagTypeSpecFlags);
-    TABLE_NOISY(LOGV("Applying style 0x%08x to theme %p, count=%d", resID, this, N));
+    TABLE_NOISY(ALOGV("Applying style 0x%08x to theme %p, count=%d", resID, this, N));
     if (N < 0) {
         mTable.unlock();
         return N;
@@ -2506,7 +2514,7 @@ status_t ResTable::Theme::applyStyle(uint32_t resID, bool force)
             continue;
         }
         theme_entry* curEntry = curEntries + e;
-        TABLE_NOISY(LOGV("Attr 0x%08x: type=0x%x, data=0x%08x; curType=0x%x",
+        TABLE_NOISY(ALOGV("Attr 0x%08x: type=0x%x, data=0x%08x; curType=0x%x",
                    attrRes, bag->map.value.dataType, bag->map.value.data,
              curEntry->value.dataType));
         if (force || curEntry->value.dataType == Res_value::TYPE_NULL) {
@@ -2577,22 +2585,22 @@ ssize_t ResTable::Theme::getAttribute(uint32_t resID, Res_value* outValue,
         const uint32_t t = Res_GETTYPE(resID);
         const uint32_t e = Res_GETENTRY(resID);
 
-        TABLE_THEME(LOGI("Looking up attr 0x%08x in theme %p", resID, this));
+        TABLE_THEME(ALOGI("Looking up attr 0x%08x in theme %p", resID, this));
 
         if (p >= 0) {
             const package_info* const pi = mPackages[p];
-            TABLE_THEME(LOGI("Found package: %p", pi));
+            TABLE_THEME(ALOGI("Found package: %p", pi));
             if (pi != NULL) {
-                TABLE_THEME(LOGI("Desired type index is %ld in avail %d", t, pi->numTypes));
+                TABLE_THEME(ALOGI("Desired type index is %ld in avail %d", t, pi->numTypes));
                 if (t < pi->numTypes) {
                     const type_info& ti = pi->types[t];
-                    TABLE_THEME(LOGI("Desired entry index is %ld in avail %d", e, ti.numEntries));
+                    TABLE_THEME(ALOGI("Desired entry index is %ld in avail %d", e, ti.numEntries));
                     if (e < ti.numEntries) {
                         const theme_entry& te = ti.entries[e];
                         if (outTypeSpecFlags != NULL) {
                             *outTypeSpecFlags |= te.typeSpecFlags;
                         }
-                        TABLE_THEME(LOGI("Theme value: type=0x%x, data=0x%08x",
+                        TABLE_THEME(ALOGI("Theme value: type=0x%x, data=0x%08x",
                                 te.value.dataType, te.value.data));
                         const uint8_t type = te.value.dataType;
                         if (type == Res_value::TYPE_ATTRIBUTE) {
@@ -2627,7 +2635,7 @@ ssize_t ResTable::Theme::resolveAttributeReference(Res_value* inOutValue,
     if (inOutValue->dataType == Res_value::TYPE_ATTRIBUTE) {
         uint32_t newTypeSpecFlags;
         blockIndex = getAttribute(inOutValue->data, inOutValue, &newTypeSpecFlags);
-        TABLE_THEME(LOGI("Resolving attr reference: blockIndex=%d, type=0x%x, data=%p\n",
+        TABLE_THEME(ALOGI("Resolving attr reference: blockIndex=%d, type=0x%x, data=%p\n",
              (int)blockIndex, (int)inOutValue->dataType, (void*)inOutValue->data));
         if (inoutTypeSpecFlags != NULL) *inoutTypeSpecFlags |= newTypeSpecFlags;
         //printf("Retrieved attribute new type=0x%x\n", inOutValue->dataType);
@@ -2772,7 +2780,7 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
     header->size = dtohl(header->header->header.size);
     //ALOGI("Got size 0x%x, again size 0x%x, raw size 0x%x\n", header->size,
     //     dtohl(header->header->header.size), header->header->header.size);
-    LOAD_TABLE_NOISY(LOGV("Loading ResTable @%p:\n", header->header));
+    LOAD_TABLE_NOISY(ALOGV("Loading ResTable @%p:\n", header->header));
     LOAD_TABLE_NOISY(printHexData(2, header->header, header->size < 256 ? header->size : 256,
                                   16, 16, 0, false, printToLogFunc));
     if (dtohs(header->header->header.headerSize) > header->size
@@ -2802,7 +2810,7 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
         if (err != NO_ERROR) {
             return (mError=err);
         }
-        TABLE_NOISY(LOGV("Chunk: type=0x%x, headerSize=0x%x, size=0x%x, pos=%p\n",
+        TABLE_NOISY(ALOGV("Chunk: type=0x%x, headerSize=0x%x, size=0x%x, pos=%p\n",
                      dtohs(chunk->type), dtohs(chunk->headerSize), dtohl(chunk->size),
                      (void*)(((const uint8_t*)chunk) - ((const uint8_t*)header->header))));
         const size_t csize = dtohl(chunk->size);
@@ -2856,7 +2864,7 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
         ALOGW("No string values found in resource table!");
     }
 
-    TABLE_NOISY(LOGV("Returning from add with mError=%d\n", mError));
+    TABLE_NOISY(ALOGV("Returning from add with mError=%d\n", mError));
     return mError;
 }
 
@@ -3127,7 +3135,7 @@ ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
         if (newIndex == BAD_INDEX) {
             return BAD_INDEX;
         }
-        TABLE_THEME(LOGI("Resolving reference %p: newIndex=%d, type=0x%x, data=%p\n",
+        TABLE_THEME(ALOGI("Resolving reference %p: newIndex=%d, type=0x%x, data=%p\n",
              (void*)lastRef, (int)newIndex, (int)value->dataType, (void*)value->data));
         //printf("Getting reference 0x%08x: newIndex=%d\n", value->data, newIndex);
         if (inoutTypeSpecFlags != NULL) *inoutTypeSpecFlags |= newFlags;
@@ -3268,7 +3276,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
     // This is what we are building.
     bag_set* set = NULL;
 
-    TABLE_NOISY(LOGI("Building bag: %p\n", (void*)resID));
+    TABLE_NOISY(ALOGI("Building bag: %p\n", (void*)resID));
     
     ResTable_config bestConfig;
     memset(&bestConfig, 0, sizeof(bestConfig));
@@ -3338,7 +3346,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         
         size_t N = count;
 
-        TABLE_NOISY(LOGI("Found map: size=%p parent=%p count=%d\n",
+        TABLE_NOISY(ALOGI("Found map: size=%p parent=%p count=%d\n",
                          entrySize, parent, count));
 
         // If this map inherits from another, we need to start
@@ -3357,9 +3365,9 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
             if (NP > 0) {
                 memcpy(set+1, parentBag, NP*sizeof(bag_entry));
                 set->numAttrs = NP;
-                TABLE_NOISY(LOGI("Initialized new bag with %d inherited attributes.\n", NP));
+                TABLE_NOISY(ALOGI("Initialized new bag with %d inherited attributes.\n", NP));
             } else {
-                TABLE_NOISY(LOGI("Initialized new bag with no inherited attributes.\n"));
+                TABLE_NOISY(ALOGI("Initialized new bag with no inherited attributes.\n"));
                 set->numAttrs = 0;
             }
             set->availAttrs = NT;
@@ -3386,7 +3394,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         bag_entry* entries = (bag_entry*)(set+1);
         size_t curEntry = 0;
         uint32_t pos = 0;
-        TABLE_NOISY(LOGI("Starting with set %p, entries=%p, avail=%d\n",
+        TABLE_NOISY(ALOGI("Starting with set %p, entries=%p, avail=%d\n",
                      set, entries, set->availAttrs));
         while (pos < count) {
             TABLE_NOISY(printf("Now at %p\n", (void*)curOff));
@@ -3465,7 +3473,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
             *outTypeSpecFlags = set->typeSpecFlags;
         }
         *outBag = (bag_entry*)(set+1);
-        TABLE_NOISY(LOGI("Returning %d attrs\n", set->numAttrs));
+        TABLE_NOISY(ALOGI("Returning %d attrs\n", set->numAttrs));
         return set->numAttrs;
     }
     return BAD_INDEX;
@@ -3474,27 +3482,10 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
 void ResTable::setParameters(const ResTable_config* params)
 {
     mLock.lock();
-    TABLE_GETENTRY(LOGI("Setting parameters: imsi:%d/%d lang:%c%c cnt:%c%c "
-                        "orien:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d sw%ddp w%ddp h%ddp\n",
-                       params->mcc, params->mnc,
-                       params->language[0] ? params->language[0] : '-',
-                       params->language[1] ? params->language[1] : '-',
-                       params->country[0] ? params->country[0] : '-',
-                       params->country[1] ? params->country[1] : '-',
-                       params->orientation,
-                       params->touchscreen,
-                       params->density,
-                       params->keyboard,
-                       params->inputFlags,
-                       params->navigation,
-                       params->screenWidth,
-                       params->screenHeight,
-                       params->smallestScreenWidthDp,
-                       params->screenWidthDp,
-                       params->screenHeightDp));
+    TABLE_GETENTRY(ALOGI("Setting parameters: %s\n", params->toString().string()));
     mParams = *params;
     for (size_t i=0; i<mPackageGroups.size(); i++) {
-        TABLE_NOISY(LOGI("CLEARING BAGS FOR GROUP %d!", i));
+        TABLE_NOISY(ALOGI("CLEARING BAGS FOR GROUP %d!", i));
         mPackageGroups[i]->clearBagCache();
     }
     mLock.unlock();
@@ -4840,13 +4831,13 @@ ssize_t ResTable::getEntry(
         ResTable_config thisConfig;
         thisConfig.copyFromDtoH(thisType->config);
 
-        TABLE_GETENTRY(LOGI("Match entry 0x%x in type 0x%x (sz 0x%x): %s\n",
+        TABLE_GETENTRY(ALOGI("Match entry 0x%x in type 0x%x (sz 0x%x): %s\n",
                            entryIndex, typeIndex+1, dtohl(thisType->config.size),
                            thisConfig.toString().string()));
         
         // Check to make sure this one is valid for the current parameters.
         if (config && !thisConfig.match(*config)) {
-            TABLE_GETENTRY(LOGI("Does not match config!\n"));
+            TABLE_GETENTRY(ALOGI("Does not match config!\n"));
             continue;
         }
         
@@ -4859,7 +4850,7 @@ ssize_t ResTable::getEntry(
         
         uint32_t thisOffset = dtohl(eindex[entryIndex]);
         if (thisOffset == ResTable_type::NO_ENTRY) {
-            TABLE_GETENTRY(LOGI("Skipping because it is not defined!\n"));
+            TABLE_GETENTRY(ALOGI("Skipping because it is not defined!\n"));
             continue;
         }
         
@@ -4868,7 +4859,7 @@ ssize_t ResTable::getEntry(
             // we will skip it.  We check starting with things we most care
             // about to those we least care about.
             if (!thisConfig.isBetterThan(bestConfig, config)) {
-                TABLE_GETENTRY(LOGI("This config is worse than last!\n"));
+                TABLE_GETENTRY(ALOGI("This config is worse than last!\n"));
                 continue;
             }
         }
@@ -4876,12 +4867,12 @@ ssize_t ResTable::getEntry(
         type = thisType;
         offset = thisOffset;
         bestConfig = thisConfig;
-        TABLE_GETENTRY(LOGI("Best entry so far -- using it!\n"));
+        TABLE_GETENTRY(ALOGI("Best entry so far -- using it!\n"));
         if (!config) break;
     }
     
     if (type == NULL) {
-        TABLE_GETENTRY(LOGI("No value found for requested entry!\n"));
+        TABLE_GETENTRY(ALOGI("No value found for requested entry!\n"));
         return BAD_INDEX;
     }
     
@@ -5024,7 +5015,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     const uint8_t* endPos = ((const uint8_t*)pkg) + dtohs(pkg->header.size);
     while (((const uint8_t*)chunk) <= (endPos-sizeof(ResChunk_header)) &&
            ((const uint8_t*)chunk) <= (endPos-dtohl(chunk->size))) {
-        TABLE_NOISY(LOGV("PackageChunk: type=0x%x, headerSize=0x%x, size=0x%x, pos=%p\n",
+        TABLE_NOISY(ALOGV("PackageChunk: type=0x%x, headerSize=0x%x, size=0x%x, pos=%p\n",
                          dtohs(chunk->type), dtohs(chunk->headerSize), dtohl(chunk->size),
                          (void*)(((const uint8_t*)chunk) - ((const uint8_t*)header->header))));
         const size_t csize = dtohl(chunk->size);
