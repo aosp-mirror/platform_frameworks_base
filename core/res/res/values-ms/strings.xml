@@ -762,7 +762,7 @@
     <string name="permlab_serialPort" msgid="546083327654631076">"akses port bersiri"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Membenarkan pemegang mengakses port bersiri menggunakan API SerialManager."</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"tidak menggalakkan kemas kini peranti automatik"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Membenarkan pemegang untuk menawarkan maklumat kepada sistem tentang bila akan menjadi masa yang baik untuk but semula bukan interaktif untuk menaik taraf peranti."</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Membenarkan aplikasi untuk menawarkan maklumat kepada sistem tentang bila akan menjadi masa yang baik untuk but semula bukan interaktif untuk menaik taraf peranti."</string>
     <string name="save_password_message" msgid="767344687139195790">"Adakah anda mahu penyemak imbas mengingati kata laluan ini?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Bukan sekarang"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>

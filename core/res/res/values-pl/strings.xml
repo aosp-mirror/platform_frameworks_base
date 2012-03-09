@@ -761,8 +761,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Zezwala na wysyłanie żądań weryfikacji pakietu. To uprawnienie nie powinno być potrzebne zwykłym aplikacjom."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"dostęp do portów szeregowych"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Umożliwia posiadaczowi dostęp do portów szeregowych przy użyciu interfejsu API narzędzia SerialManager."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"odradź automatyczne aktualizacje urządzenia"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Umożliwia posiadaczowi poinformowanie systemu, kiedy będzie dobry moment na nieinteraktywne uruchomienie ponowne wymagane do uaktualnienia urządzenia."</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"odradzanie automatycznych aktualizacji urządzenia"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Umożliwia posiadaczowi poinformowanie systemu, kiedy będzie dobry moment na ponowne uruchomienie wymagane do uaktualnienia urządzenia."</string>
     <string name="save_password_message" msgid="767344687139195790">"Czy chcesz, aby zapamiętać to hasło w przeglądarce?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nie teraz"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamiętaj"</string>
