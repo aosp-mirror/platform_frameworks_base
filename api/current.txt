@@ -16567,6 +16567,7 @@ package android.provider {
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone_v2";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/phone_v2";
     field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String NORMALIZED_NUMBER = "data4";
     field public static final java.lang.String NUMBER = "data1";
     field public static final int TYPE_ASSISTANT = 19; // 0x13
     field public static final int TYPE_CALLBACK = 8; // 0x8
@@ -16927,6 +16928,7 @@ package android.provider {
 
   protected static abstract interface ContactsContract.PhoneLookupColumns {
     field public static final java.lang.String LABEL = "label";
+    field public static final java.lang.String NORMALIZED_NUMBER = "normalized_number";
     field public static final java.lang.String NUMBER = "number";
     field public static final java.lang.String TYPE = "type";
   }
