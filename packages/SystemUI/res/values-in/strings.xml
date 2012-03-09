@@ -26,7 +26,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Hapus dari daftar"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info apl"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Tidak ada apl terbaru"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Singkirkan aplikasi terbaru"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Tutup aplikasi terbaru"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 apl terbaru"</item>
     <item quantity="other" msgid="1040784359794890744">"%d apl terbaru"</item>
