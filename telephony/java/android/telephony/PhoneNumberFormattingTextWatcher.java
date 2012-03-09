@@ -39,30 +39,6 @@ import java.util.Locale;
  * The formatting will be restarted once the text is cleared.
  */
 public class PhoneNumberFormattingTextWatcher implements TextWatcher {
-    /**
-     * One or more characters were removed from the end.
-     */
-    private final static int STATE_REMOVE_LAST = 0;
-
-    /**
-     * One or more characters were appended.
-     */
-    private final static int STATE_APPEND = 1;
-
-    /**
-     * One or more digits were changed in the beginning or the middle of text.
-     */
-    private final static int STATE_MODIFY_DIGITS = 2;
-
-    /**
-     * The changes other than the above.
-     */
-    private final static int STATE_OTHER = 3;
-
-    /**
-     * The state of this change could be one value of the above
-     */
-    private int mState;
 
     /**
      * Indicates the change was caused by ourselves.
@@ -97,46 +73,30 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
         mFormatter = PhoneNumberUtil.getInstance().getAsYouTypeFormatter(countryCode);
     }
 
+    @Override
     public void beforeTextChanged(CharSequence s, int start, int count,
             int after) {
         if (mSelfChange || mStopFormatting) {
             return;
         }
-        if (count == 0 && s.length() == start) {
-            // Append one or more new chars
-            mState = STATE_APPEND;
-        } else if (after == 0 && start + count == s.length() && count > 0) {
-            // Remove one or more chars from the end of string.
-            mState = STATE_REMOVE_LAST;
-        } else if (count > 0 && !hasSeparator(s, start, count)) {
-            // Remove the dialable chars in the begin or middle of text.
-            mState = STATE_MODIFY_DIGITS;
-        } else {
-            mState = STATE_OTHER;
+        // If the user manually deleted any non-dialable characters, stop formatting
+        if (count > 0 && hasSeparator(s, start, count)) {
+            stopFormatting();
         }
     }
 
+    @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (mSelfChange || mStopFormatting) {
             return;
         }
-        if (mState == STATE_OTHER) {
-            if (count > 0 && !hasSeparator(s, start, count)) {
-                // User inserted the dialable characters in the middle of text.
-                mState = STATE_MODIFY_DIGITS;
-            }
-        }
-        // Check whether we should stop formatting.
-        if (mState == STATE_APPEND && count > 0 && hasSeparator(s, start, count)) {
-            // User appended the non-dialable character, stop formatting.
-            stopFormatting();
-        } else if (mState == STATE_OTHER) {
-            // User must insert or remove the non-dialable characters in the begin or middle of
-            // number, stop formatting.
+        // If the user inserted any non-dialable characters, stop formatting
+        if (count > 0 && hasSeparator(s, start, count)) {
             stopFormatting();
         }
     }
 
+    @Override
     public synchronized void afterTextChanged(Editable s) {
         if (mStopFormatting) {
             // Restart the formatting when all texts were clear.

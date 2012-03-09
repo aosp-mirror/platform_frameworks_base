@@ -182,14 +182,17 @@ public class PhoneNumberWatcherTest extends AndroidTestCase {
 
     public void testTextChangedByOtherTextWatcher() {
         final TextWatcher cleanupTextWatcher = new TextWatcher() {
+            @Override
             public void afterTextChanged(Editable s) {
                 s.clear();
             }
 
+            @Override
             public void beforeTextChanged(CharSequence s, int start, int count,
                     int after) {
             }
 
+            @Override
             public void onTextChanged(CharSequence s, int start, int before,
                     int count) {
             }
@@ -206,6 +209,81 @@ public class PhoneNumberWatcherTest extends AndroidTestCase {
         number.setSpan(cleanupTextWatcher, 0, number.length(), 0);
         textWatcher.afterTextChanged(number);
         assertEquals(expected1, number.toString());
+    }
+
+    /**
+     * Test the case where some other component is auto-completing what the user is typing
+     */
+    public void testAutoCompleteWithFormattedNumber() {
+        String init = "650-1";
+        String expected = "+1-650-123-4567"; // Different formatting than ours
+        testReplacement(init, expected, expected);
+    }
+
+    /**
+     * Test the case where some other component is auto-completing what the user is typing
+     */
+    public void testAutoCompleteWithFormattedNameAndNumber() {
+        String init = "650-1";
+        String expected = "Test User <650-123-4567>";
+        testReplacement(init, expected, expected);
+    }
+
+    /**
+     * Test the case where some other component is auto-completing what the user is typing
+     */
+    public void testAutoCompleteWithNumericNameAndNumber() {
+        String init = "650";
+        String expected = "2nd Test User <650-123-4567>";
+        testReplacement(init, expected, expected);
+    }
+
+    /**
+     * Test the case where some other component is auto-completing what the user is typing
+     */
+    public void testAutoCompleteWithUnformattedNumber() {
+        String init = "650-1";
+        String expected = "6501234567";
+        testReplacement(init, expected, expected);
+    }
+
+    /**
+     * Test the case where some other component is auto-completing what the user is typing, where
+     * the deleted text doesn't have any formatting and neither does the replacement text: in this
+     * case the replacement text should be formatted by the PhoneNumberFormattingTextWatcher.
+     */
+    public void testAutoCompleteUnformattedWithUnformattedNumber() {
+        String init = "650";
+        String replacement = "6501234567";
+        String expected = "(650) 123-4567";
+        testReplacement(init, replacement, expected);
+
+        String init2 = "650";
+        String replacement2 = "16501234567";
+        String expected2 = "1 650-123-4567";
+        testReplacement(init2, replacement2, expected2);
+    }
+
+    /**
+     * Helper method for testing replacing the entire string with another string
+     * @param init The initial string
+     * @param expected
+     */
+    private void testReplacement(String init, String replacement, String expected) {
+        TextWatcher textWatcher = getTextWatcher();
+
+        SpannableStringBuilder number = new SpannableStringBuilder(init);
+
+        // Replace entire text with the given values
+        textWatcher.beforeTextChanged(number, 0, init.length(), replacement.length());
+        number.replace(0, init.length(), replacement, 0, replacement.length());
+        Selection.setSelection(number, replacement.length()); // move the cursor to the end
+        textWatcher.onTextChanged(number, 0, init.length(), replacement.length());
+        textWatcher.afterTextChanged(number);
+
+        assertEquals(expected, number.toString());
+        // the cursor should be still at the end
+        assertEquals(expected.length(), Selection.getSelectionEnd(number));
     }
 
     private TextWatcher getTextWatcher() {
