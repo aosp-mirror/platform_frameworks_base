@@ -56,9 +56,10 @@ AudioSource::AudioSource(
 
     ALOGV("sampleRate: %d, channels: %d", sampleRate, channels);
     CHECK(channels == 1 || channels == 2);
-    uint32_t flags = AudioRecord::RECORD_AGC_ENABLE |
+    AudioRecord::record_flags flags = (AudioRecord::record_flags)
+                    (AudioRecord::RECORD_AGC_ENABLE |
                      AudioRecord::RECORD_NS_ENABLE  |
-                     AudioRecord::RECORD_IIR_ENABLE;
+                     AudioRecord::RECORD_IIR_ENABLE);
     mRecord = new AudioRecord(
                 inputSource, sampleRate, AUDIO_FORMAT_PCM_16_BIT,
                 channels > 1? AUDIO_CHANNEL_IN_STEREO: AUDIO_CHANNEL_IN_MONO,
