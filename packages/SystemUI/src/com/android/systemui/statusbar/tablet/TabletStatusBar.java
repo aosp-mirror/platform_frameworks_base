@@ -121,6 +121,8 @@ public class TabletStatusBar extends StatusBar implements
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
     int mIconHPadding = -1;
+    int mNavIconWidth = -1;
+    int mMenuNavIconWidth = -1;
     private int mMaxNotificationIcons = 5;
 
     H mHandler = new H();
@@ -410,6 +412,26 @@ public class TabletStatusBar extends StatusBar implements
             com.android.internal.R.dimen.system_bar_icon_size);
         int newIconHPadding = res.getDimensionPixelSize(
             R.dimen.status_bar_icon_padding);
+        int newNavIconWidth = res.getDimensionPixelSize(R.dimen.navigation_key_width);
+        int newMenuNavIconWidth = res.getDimensionPixelSize(R.dimen.navigation_menu_key_width);
+
+        if (mNavigationArea != null && newNavIconWidth != mNavIconWidth) {
+            mNavIconWidth = newNavIconWidth;
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                     mNavIconWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+            mBackButton.setLayoutParams(lp);
+            mHomeButton.setLayoutParams(lp);
+            mRecentButton.setLayoutParams(lp);
+        }
+
+        if (mNavigationArea != null && newMenuNavIconWidth != mMenuNavIconWidth) {
+            mMenuNavIconWidth = newMenuNavIconWidth;
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                     mMenuNavIconWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+            mMenuButton.setLayoutParams(lp);
+        }
 
         if (newIconHPadding != mIconHPadding || newIconSize != mIconSize) {
 //            Slog.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
