@@ -1535,7 +1535,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     final boolean isWallpaperVisible(WindowState wallpaperTarget) {
-        if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper vis: target obscured="
+        if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + ", obscured="
                 + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
                 + " anim=" + ((wallpaperTarget != null && wallpaperTarget.mAppToken != null)
                         ? wallpaperTarget.mAppToken.animation : null)
@@ -8239,6 +8239,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (!w.mAnimating) {
                             // We set the animation above so it
                             // is not yet running.
+                            // TODO(cmautner): We lose the enter animation when this occurs.
                             w.clearAnimation();
                         }
                     }
@@ -8342,9 +8343,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // cases while they are hidden such as when first showing a
         // window.
         
-        if (mScreenRotationAnimation != null) {
-            mScreenRotationAnimation.updateSurfaces();
-        }
         boolean displayed = false;
 
         w.computeShownFrameLocked();
@@ -8851,6 +8849,10 @@ public class WindowManagerService extends IWindowManager.Stub
             mInnerFields.mBlurring = false;
             mInnerFields.mDimming = false;
             mInnerFields.mSyswin = false;
+
+            if (mScreenRotationAnimation != null) {
+                mScreenRotationAnimation.updateSurfaces();
+            }
 
             final int N = mWindows.size();
 
