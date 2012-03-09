@@ -3934,6 +3934,24 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Convenience method for sending a {@link AccessibilityEvent#TYPE_ANNOUNCEMENT}
+     * {@link AccessibilityEvent} to make an announcement which is related to some
+     * sort of a context change for which none of the events representing UI transitions
+     * is a good fit. For example, announcing a new page in a book. If accessibility
+     * is not enabled this method does nothing.
+     *
+     * @param text The announcement text.
+     */
+    public void announceForAccessibility(CharSequence text) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            AccessibilityEvent event = AccessibilityEvent.obtain(
+                    AccessibilityEvent.TYPE_ANNOUNCEMENT);
+            event.getText().add(text);
+            sendAccessibilityEventUnchecked(event);
+        }
+    }
+
+    /**
      * @see #sendAccessibilityEvent(int)
      *
      * Note: Called from the default {@link AccessibilityDelegate}.

@@ -429,6 +429,26 @@ import java.util.List;
  * view.</br>
  * </p>
  * <p>
+ * <b>MISCELLANEOUS TYPES</b></br>
+ * </p>
+ * <p>
+ * <b>Announcement</b> - represents the event of an application making an
+ * announcement. Usually this announcement is related to some sort of a context
+ * change for which none of the events representing UI transitions is a good fit.
+ * For example, announcing a new page in a book.</br>
+ * <em>Type:</em> {@link #TYPE_ANNOUNCEMENT}</br>
+ * <em>Properties:</em></br>
+ * <ul>
+ *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the announcement.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ * </ul>
+ * </p>
+ * <p>
  * <b>Security note</b>
  * <p>
  * Since an event contains the text of its source privacy can be compromised by leaking
@@ -538,6 +558,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_VIEW_TEXT_SELECTION_CHANGED = 0x00002000;
 
     /**
+     * Represents the event of an application making an announcement.
+     */
+    public static final int TYPE_ANNOUNCEMENT = 0x00004000;
+
+    /**
      * Mask for {@link AccessibilityEvent} all types.
      *
      * @see #TYPE_VIEW_CLICKED
@@ -554,6 +579,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #TYPE_WINDOW_CONTENT_CHANGED
      * @see #TYPE_VIEW_SCROLLED
      * @see #TYPE_VIEW_TEXT_SELECTION_CHANGED
+     * @see #TYPE_ANNOUNCEMENT
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
@@ -984,6 +1010,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 return "TYPE_VIEW_TEXT_SELECTION_CHANGED";
             case TYPE_VIEW_SCROLLED:
                 return "TYPE_VIEW_SCROLLED";
+            case TYPE_ANNOUNCEMENT:
+                return "TYPE_ANNOUNCEMENT";
             default:
                 return null;
         }

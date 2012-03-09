@@ -23101,6 +23101,7 @@ package android.view {
     method public void addOnLayoutChangeListener(android.view.View.OnLayoutChangeListener);
     method public void addTouchables(java.util.ArrayList<android.view.View>);
     method public android.view.ViewPropertyAnimator animate();
+    method public void announceForAccessibility(java.lang.CharSequence);
     method protected boolean awakenScrollBars();
     method protected boolean awakenScrollBars(int);
     method protected boolean awakenScrollBars(int, boolean);
@@ -24322,6 +24323,7 @@ package android.view.accessibility {
     field public static final int INVALID_POSITION = -1; // 0xffffffff
     field public static final deprecated int MAX_TEXT_LENGTH = 500; // 0x1f4
     field public static final int TYPES_ALL_MASK = -1; // 0xffffffff
+    field public static final int TYPE_ANNOUNCEMENT = 16384; // 0x4000
     field public static final int TYPE_NOTIFICATION_STATE_CHANGED = 64; // 0x40
     field public static final int TYPE_TOUCH_EXPLORATION_GESTURE_END = 1024; // 0x400
     field public static final int TYPE_TOUCH_EXPLORATION_GESTURE_START = 512; // 0x200
