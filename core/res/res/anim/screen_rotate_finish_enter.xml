@@ -26,7 +26,6 @@
             android:fillEnabled="true"
             android:fillBefore="true" android:fillAfter="true"
             android:duration="@android:integer/config_shortAnimTime"/>
-    <!--
     <scale android:fromXScale="100%p" android:toXScale="100%"
             android:fromYScale="100%p" android:toYScale="100%"
             android:pivotX="50%" android:pivotY="50%"
@@ -34,5 +33,4 @@
             android:fillEnabled="true"
             android:fillBefore="true" android:fillAfter="true"
             android:duration="@android:integer/config_mediumAnimTime" />
-    -->
 </set>

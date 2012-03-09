@@ -19,8 +19,8 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:shareInterpolator="false">
-    <scale android:fromXScale="1.0" android:toXScale="1.0"
-            android:fromYScale="1.0" android:toYScale="1.0"
+    <scale android:fromXScale="1.0" android:toXScale="1.1111111111111"
+            android:fromYScale="1.0" android:toYScale="1.1111111111111"
             android:pivotX="50%" android:pivotY="50%"
             android:interpolator="@interpolator/accelerate_decelerate"
             android:fillEnabled="true"
