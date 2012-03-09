@@ -828,9 +828,6 @@ protected:
         virtual     void        threadLoop_write();
         virtual     void        threadLoop_standby();
 
-        // Non-trivial for DIRECT only
-        virtual     void        applyVolume() { }
-
                     // prepareTracks_l reads and writes mActiveTracks, and also returns the
                     // pending set of tracks to remove via Vector 'tracksToRemove'.  The caller is
                     // responsible for clearing or destroying this Vector later on, when it
@@ -1041,8 +1038,6 @@ public:
         uint16_t rightVol;
 
 private:
-                    void        applyVolume();  // FIXME inline into threadLoop_mix()
-
         // prepareTracks_l() tells threadLoop_mix() the name of the single active track
         sp<Track>               mActiveTrack;
     };

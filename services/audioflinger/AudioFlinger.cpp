@@ -2729,80 +2729,6 @@ AudioFlinger::DirectOutputThread::~DirectOutputThread()
 {
 }
 
-void AudioFlinger::DirectOutputThread::applyVolume()
-{
-    // Do not apply volume on compressed audio
-    if (!audio_is_linear_pcm(mFormat)) {
-        return;
-    }
-
-    // convert to signed 16 bit before volume calculation
-    if (mFormat == AUDIO_FORMAT_PCM_8_BIT) {
-        size_t count = mFrameCount * mChannelCount;
-        uint8_t *src = (uint8_t *)mMixBuffer + count-1;
-        int16_t *dst = mMixBuffer + count-1;
-        while(count--) {
-            *dst-- = (int16_t)(*src--^0x80) << 8;
-        }
-    }
-
-    size_t frameCount = mFrameCount;
-    int16_t *out = mMixBuffer;
-    if (rampVolume) {
-        if (mChannelCount == 1) {
-            int32_t d = ((int32_t)leftVol - (int32_t)mLeftVolShort) << 16;
-            int32_t vlInc = d / (int32_t)frameCount;
-            int32_t vl = ((int32_t)mLeftVolShort << 16);
-            do {
-                out[0] = clamp16(mul(out[0], vl >> 16) >> 12);
-                out++;
-                vl += vlInc;
-            } while (--frameCount);
-
-        } else {
-            int32_t d = ((int32_t)leftVol - (int32_t)mLeftVolShort) << 16;
-            int32_t vlInc = d / (int32_t)frameCount;
-            d = ((int32_t)rightVol - (int32_t)mRightVolShort) << 16;
-            int32_t vrInc = d / (int32_t)frameCount;
-            int32_t vl = ((int32_t)mLeftVolShort << 16);
-            int32_t vr = ((int32_t)mRightVolShort << 16);
-            do {
-                out[0] = clamp16(mul(out[0], vl >> 16) >> 12);
-                out[1] = clamp16(mul(out[1], vr >> 16) >> 12);
-                out += 2;
-                vl += vlInc;
-                vr += vrInc;
-            } while (--frameCount);
-        }
-    } else {
-        if (mChannelCount == 1) {
-            do {
-                out[0] = clamp16(mul(out[0], leftVol) >> 12);
-                out++;
-            } while (--frameCount);
-        } else {
-            do {
-                out[0] = clamp16(mul(out[0], leftVol) >> 12);
-                out[1] = clamp16(mul(out[1], rightVol) >> 12);
-                out += 2;
-            } while (--frameCount);
-        }
-    }
-
-    // convert back to unsigned 8 bit after volume calculation
-    if (mFormat == AUDIO_FORMAT_PCM_8_BIT) {
-        size_t count = mFrameCount * mChannelCount;
-        int16_t *src = mMixBuffer;
-        uint8_t *dst = (uint8_t *)mMixBuffer;
-        while(count--) {
-            *dst++ = (uint8_t)(((int32_t)*src++ + (1<<7)) >> 8)^0x80;
-        }
-    }
-
-    mLeftVolShort = leftVol;
-    mRightVolShort = rightVol;
-}
-
 AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::prepareTracks_l(
     Vector< sp<Track> > *tracksToRemove
 )
@@ -2963,7 +2889,79 @@ void AudioFlinger::DirectOutputThread::threadLoop_mix()
     sleepTime = 0;
     standbyTime = systemTime() + standbyDelay;
     mActiveTrack.clear();
-    applyVolume();
+
+    // apply volume
+
+    // Do not apply volume on compressed audio
+    if (!audio_is_linear_pcm(mFormat)) {
+        return;
+    }
+
+    // convert to signed 16 bit before volume calculation
+    if (mFormat == AUDIO_FORMAT_PCM_8_BIT) {
+        size_t count = mFrameCount * mChannelCount;
+        uint8_t *src = (uint8_t *)mMixBuffer + count-1;
+        int16_t *dst = mMixBuffer + count-1;
+        while(count--) {
+            *dst-- = (int16_t)(*src--^0x80) << 8;
+        }
+    }
+
+    frameCount = mFrameCount;
+    int16_t *out = mMixBuffer;
+    if (rampVolume) {
+        if (mChannelCount == 1) {
+            int32_t d = ((int32_t)leftVol - (int32_t)mLeftVolShort) << 16;
+            int32_t vlInc = d / (int32_t)frameCount;
+            int32_t vl = ((int32_t)mLeftVolShort << 16);
+            do {
+                out[0] = clamp16(mul(out[0], vl >> 16) >> 12);
+                out++;
+                vl += vlInc;
+            } while (--frameCount);
+
+        } else {
+            int32_t d = ((int32_t)leftVol - (int32_t)mLeftVolShort) << 16;
+            int32_t vlInc = d / (int32_t)frameCount;
+            d = ((int32_t)rightVol - (int32_t)mRightVolShort) << 16;
+            int32_t vrInc = d / (int32_t)frameCount;
+            int32_t vl = ((int32_t)mLeftVolShort << 16);
+            int32_t vr = ((int32_t)mRightVolShort << 16);
+            do {
+                out[0] = clamp16(mul(out[0], vl >> 16) >> 12);
+                out[1] = clamp16(mul(out[1], vr >> 16) >> 12);
+                out += 2;
+                vl += vlInc;
+                vr += vrInc;
+            } while (--frameCount);
+        }
+    } else {
+        if (mChannelCount == 1) {
+            do {
+                out[0] = clamp16(mul(out[0], leftVol) >> 12);
+                out++;
+            } while (--frameCount);
+        } else {
+            do {
+                out[0] = clamp16(mul(out[0], leftVol) >> 12);
+                out[1] = clamp16(mul(out[1], rightVol) >> 12);
+                out += 2;
+            } while (--frameCount);
+        }
+    }
+
+    // convert back to unsigned 8 bit after volume calculation
+    if (mFormat == AUDIO_FORMAT_PCM_8_BIT) {
+        size_t count = mFrameCount * mChannelCount;
+        int16_t *src = mMixBuffer;
+        uint8_t *dst = (uint8_t *)mMixBuffer;
+        while(count--) {
+            *dst++ = (uint8_t)(((int32_t)*src++ + (1<<7)) >> 8)^0x80;
+        }
+    }
+
+    mLeftVolShort = leftVol;
+    mRightVolShort = rightVol;
 }
 
 void AudioFlinger::DirectOutputThread::threadLoop_sleepTime()
