@@ -1852,6 +1852,9 @@ public class WifiStateMachine extends StateMachine {
                     replyToMessage(message, WifiManager.DISABLE_NETWORK_FAILED,
                             WifiManager.BUSY);
                     break;
+                case WifiWatchdogStateMachine.RSSI_FETCH:
+                    replyToMessage(message, WifiWatchdogStateMachine.RSSI_FETCH_FAILED);
+                    break;
                 default:
                     loge("Error! unhandled message" + message);
                     break;
@@ -2997,6 +3000,12 @@ public class WifiStateMachine extends StateMachine {
                         sendMessageDelayed(obtainMessage(CMD_RSSI_POLL,
                                 mRssiPollToken, 0), POLL_RSSI_INTERVAL_MSECS);
                     }
+                    break;
+                case WifiWatchdogStateMachine.RSSI_FETCH:
+                    eventLoggingEnabled = false;
+                    fetchRssiAndLinkSpeedNative();
+                    replyToMessage(message, WifiWatchdogStateMachine.RSSI_FETCH_SUCCEEDED,
+                            mWifiInfo.getRssi());
                     break;
                 default:
                     return NOT_HANDLED;
