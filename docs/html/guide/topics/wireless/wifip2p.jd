@@ -333,7 +333,7 @@ protected void onCreate(Bundle savedInstanceState){
     ...
     mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
     mChannel = mManager.initialize(this, getMainLooper(), null);
-    Receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
+    mReceiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
     ...
 }
 </pre>
@@ -364,13 +364,13 @@ protected void onCreate(Bundle savedInstanceState){
 &#064;Override
 protected void onResume() {
     super.onResume();
-    registerReceiver(receiver, intentFilter);
+    registerReceiver(mReceiver, mIntentFilter);
 }
 /* unregister the broadcast receiver */
 &#064;Override
 protected void onPause() {
     super.onPause();
-    unregisterReceiver(receiver);
+    unregisterReceiver(mReceiver);
 }
 </pre>
 
