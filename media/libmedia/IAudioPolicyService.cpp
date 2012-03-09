@@ -267,13 +267,13 @@ public:
         return reply.readInt32();
     }
 
-    virtual uint32_t getDevicesForStream(audio_stream_type_t stream)
+    virtual audio_devices_t getDevicesForStream(audio_stream_type_t stream)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
         data.writeInt32(static_cast <uint32_t>(stream));
         remote()->transact(GET_DEVICES_FOR_STREAM, data, &reply);
-        return (uint32_t) reply.readInt32();
+        return (audio_devices_t) reply.readInt32();
     }
 
     virtual audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc)

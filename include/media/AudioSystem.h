@@ -185,7 +185,7 @@ public:
                                          audio_devices_t device);
 
     static uint32_t getStrategyForStream(audio_stream_type_t stream);
-    static uint32_t getDevicesForStream(audio_stream_type_t stream);
+    static audio_devices_t getDevicesForStream(audio_stream_type_t stream);
 
     static audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc);
     static status_t registerEffect(effect_descriptor_t *desc,
