@@ -762,7 +762,7 @@
     <string name="permlab_serialPort" msgid="546083327654631076">"kry toegang tot reekspoorte"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Laat die houer toe om toegang te verkry tot reekspoorte wat die SerialManager API gebruik."</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"ontmoedig outomatiese toestelopdaterings"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Laat die houer toe om inligting aan die stelsel te bied oor wanneer \'n goeie tyd vir \'n nie-interaktiewe herlaai sal wees om die toestel op te gradeer."</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Laat die houer toe om inligting aan die stelsel te bied oor wanneer \'n goeie tyd vir \'n nie-interaktiewe herselflaai sal wees om die toestel op te gradeer."</string>
     <string name="save_password_message" msgid="767344687139195790">"Wil jy hê die blaaier moet hierdie wagwoord onthou?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nie nou nie"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Onthou"</string>
