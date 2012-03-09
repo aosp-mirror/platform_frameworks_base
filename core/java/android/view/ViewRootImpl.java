@@ -884,7 +884,7 @@ public final class ViewRootImpl implements ViewParent,
     void scheduleFrame() {
         if (!mFrameScheduled) {
             mFrameScheduled = true;
-            mChoreographer.postDrawCallback(mFrameRunnable);
+            mChoreographer.postDrawCallback(mFrameRunnable, null);
         }
     }
 
@@ -893,7 +893,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mFrameScheduled) {
             mFrameScheduled = false;
-            mChoreographer.removeDrawCallbacks(mFrameRunnable);
+            mChoreographer.removeDrawCallbacks(mFrameRunnable, null);
         }
     }
 
@@ -4051,7 +4051,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 if (mPosted && mViews.isEmpty() && mViewRects.isEmpty()) {
-                    mChoreographer.removeAnimationCallbacks(this);
+                    mChoreographer.removeAnimationCallbacks(this, null);
                     mPosted = false;
                 }
             }
@@ -4092,7 +4092,7 @@ public final class ViewRootImpl implements ViewParent,
 
         private void postIfNeededLocked() {
             if (!mPosted) {
-                mChoreographer.postAnimationCallback(this);
+                mChoreographer.postAnimationCallback(this, null);
                 mPosted = true;
             }
         }

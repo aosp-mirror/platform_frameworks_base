@@ -81,8 +81,8 @@ public final class Choreographer {
     private static final int MSG_DO_ANIMATION = 0;
     private static final int MSG_DO_DRAW = 1;
     private static final int MSG_DO_SCHEDULE_VSYNC = 2;
-    private static final int MSG_POST_DELAYED_ANIMATION = 3;
-    private static final int MSG_POST_DELAYED_DRAW = 4;
+    private static final int MSG_DO_SCHEDULE_ANIMATION = 3;
+    private static final int MSG_DO_SCHEDULE_DRAW = 4;
 
     private final Object mLock = new Object();
 
@@ -152,134 +152,158 @@ public final class Choreographer {
     }
 
     /**
+     * Subtracts typical frame delay time from a delay interval in milliseconds.
+     *
+     * This method can be used to compensate for animation delay times that have baked
+     * in assumptions about the frame delay.  For example, it's quite common for code to
+     * assume a 60Hz frame time and bake in a 16ms delay.  When we call
+     * {@link #postAnimationCallbackDelayed} we want to know how long to wait before
+     * posting the animation callback but let the animation timer take care of the remaining
+     * frame delay time.
+     *
+     * This method is somewhat conservative about how much of the frame delay it
+     * subtracts.  It uses the same value returned by {@link #getFrameDelay} which by
+     * default is 10ms even though many parts of the system assume 16ms.  Consequently,
+     * we might still wait 6ms before posting an animation callback that we want to run
+     * on the next frame, but this is much better than waiting a whole 16ms and likely
+     * missing the deadline.
+     *
+     * @param delayMillis The original delay time including an assumed frame delay.
+     * @return The adjusted delay time with the assumed frame delay subtracted out.
+     */
+    public static long subtractFrameDelay(long delayMillis) {
+        final long frameDelay = sFrameDelay;
+        return delayMillis <= frameDelay ? 0 : delayMillis - frameDelay;
+    }
+
+    /**
      * Posts a callback to run on the next animation cycle.
      * The callback only runs once and then is automatically removed.
      *
-     * @param runnable The callback to run during the next animation cycle.
+     * @param action The callback action to run during the next animation cycle.
+     * @param token The callback token, or null if none.
      *
      * @see #removeAnimationCallback
      */
-    public void postAnimationCallback(Runnable runnable) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
-        }
-        postAnimationCallbackUnchecked(runnable);
-    }
-
-    private void postAnimationCallbackUnchecked(Runnable runnable) {
-        synchronized (mLock) {
-            mAnimationCallbacks = addCallbackLocked(mAnimationCallbacks, runnable);
-            scheduleAnimationLocked();
-        }
+    public void postAnimationCallback(Runnable action, Object token) {
+        postAnimationCallbackDelayed(action, token, 0);
     }
 
     /**
      * Posts a callback to run on the next animation cycle following the specified delay.
      * The callback only runs once and then is automatically removed.
      *
-     * @param runnable The callback to run during the next animation cycle following
+     * @param action The callback action to run during the next animation cycle after
      * the specified delay.
+     * @param token The callback token, or null if none.
      * @param delayMillis The delay time in milliseconds.
      *
      * @see #removeAnimationCallback
      */
-    public void postAnimationCallbackDelayed(Runnable runnable, long delayMillis) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
+    public void postAnimationCallbackDelayed(Runnable action, Object token, long delayMillis) {
+        if (action == null) {
+            throw new IllegalArgumentException("action must not be null");
         }
-        if (delayMillis <= 0) {
-            postAnimationCallbackUnchecked(runnable);
-        } else {
-            Message msg = mHandler.obtainMessage(MSG_POST_DELAYED_ANIMATION, runnable);
-            mHandler.sendMessageDelayed(msg, delayMillis);
+
+        synchronized (mLock) {
+            final long now = SystemClock.uptimeMillis();
+            final long dueTime = now + delayMillis;
+            mAnimationCallbacks = addCallbackLocked(mAnimationCallbacks, dueTime, action, token);
+
+            if (dueTime <= now) {
+                scheduleAnimationLocked(now);
+            } else {
+                Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_ANIMATION, action);
+                mHandler.sendMessageAtTime(msg, dueTime);
+            }
         }
     }
 
     /**
-     * Removes animation callbacks for the specified runnable.
-     * Does nothing if the specified animation callback has not been posted or has already
-     * been removed.
+     * Removes animation callbacks that have the specified action and token.
      *
-     * @param runnable The animation callback to remove.
+     * @param action The action property of the callbacks to remove, or null to remove
+     * callbacks with any action.
+     * @param token The token property of the callbacks to remove, or null to remove
+     * callbacks with any token.
      *
      * @see #postAnimationCallback
      * @see #postAnimationCallbackDelayed
      */
-    public void removeAnimationCallbacks(Runnable runnable) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
-        }
+    public void removeAnimationCallbacks(Runnable action, Object token) {
         synchronized (mLock) {
-            mAnimationCallbacks = removeCallbacksLocked(mAnimationCallbacks, runnable);
+            mAnimationCallbacks = removeCallbacksLocked(mAnimationCallbacks, action, token);
+            if (action != null && token == null) {
+                mHandler.removeMessages(MSG_DO_SCHEDULE_ANIMATION, action);
+            }
         }
-        mHandler.removeMessages(MSG_POST_DELAYED_ANIMATION, runnable);
     }
 
     /**
      * Posts a callback to run on the next draw cycle.
      * The callback only runs once and then is automatically removed.
      *
-     * @param runnable The callback to run during the next draw cycle.
+     * @param action The callback action to run during the next draw cycle.
+     * @param token The callback token, or null if none.
      *
      * @see #removeDrawCallback
      */
-    public void postDrawCallback(Runnable runnable) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
-        }
-        postDrawCallbackUnchecked(runnable);
-    }
-
-    private void postDrawCallbackUnchecked(Runnable runnable) {
-        synchronized (mLock) {
-            mDrawCallbacks = addCallbackLocked(mDrawCallbacks, runnable);
-            scheduleDrawLocked();
-        }
+    public void postDrawCallback(Runnable action, Object token) {
+        postDrawCallbackDelayed(action, token, 0);
     }
 
     /**
      * Posts a callback to run on the next draw cycle following the specified delay.
      * The callback only runs once and then is automatically removed.
      *
-     * @param runnable The callback to run during the next draw cycle following
+     * @param action The callback action to run during the next animation cycle after
      * the specified delay.
+     * @param token The callback token, or null if none.
      * @param delayMillis The delay time in milliseconds.
      *
      * @see #removeDrawCallback
      */
-    public void postDrawCallbackDelayed(Runnable runnable, long delayMillis) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
+    public void postDrawCallbackDelayed(Runnable action, Object token, long delayMillis) {
+        if (action == null) {
+            throw new IllegalArgumentException("action must not be null");
         }
-        if (delayMillis <= 0) {
-            postDrawCallbackUnchecked(runnable);
-        } else {
-            Message msg = mHandler.obtainMessage(MSG_POST_DELAYED_DRAW, runnable);
-            mHandler.sendMessageDelayed(msg, delayMillis);
+
+        synchronized (mLock) {
+            final long now = SystemClock.uptimeMillis();
+            final long dueTime = now + delayMillis;
+            mDrawCallbacks = addCallbackLocked(mDrawCallbacks, dueTime, action, token);
+            scheduleDrawLocked(now);
+
+            if (dueTime <= now) {
+                scheduleDrawLocked(now);
+            } else {
+                Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_DRAW, action);
+                mHandler.sendMessageAtTime(msg, dueTime);
+            }
         }
     }
 
     /**
-     * Removes draw callbacks for the specified runnable.
-     * Does nothing if the specified draw callback has not been posted or has already
-     * been removed.
+     * Removes draw callbacks that have the specified action and token.
      *
-     * @param runnable The draw callback to remove.
+     * @param action The action property of the callbacks to remove, or null to remove
+     * callbacks with any action.
+     * @param token The token property of the callbacks to remove, or null to remove
+     * callbacks with any token.
      *
      * @see #postDrawCallback
      * @see #postDrawCallbackDelayed
      */
-    public void removeDrawCallbacks(Runnable runnable) {
-        if (runnable == null) {
-            throw new IllegalArgumentException("runnable must not be null");
-        }
+    public void removeDrawCallbacks(Runnable action, Object token) {
         synchronized (mLock) {
-            mDrawCallbacks = removeCallbacksLocked(mDrawCallbacks, runnable);
+            mDrawCallbacks = removeCallbacksLocked(mDrawCallbacks, action, token);
+            if (action != null && token == null) {
+                mHandler.removeMessages(MSG_DO_SCHEDULE_DRAW, action);
+            }
         }
-        mHandler.removeMessages(MSG_POST_DELAYED_DRAW, runnable);
     }
 
-    private void scheduleAnimationLocked() {
+    private void scheduleAnimationLocked(long now) {
         if (!mAnimationScheduled) {
             mAnimationScheduled = true;
             if (USE_VSYNC) {
@@ -291,14 +315,13 @@ public final class Choreographer {
                 // otherwise post a message to schedule the vsync from the UI thread
                 // as soon as possible.
                 if (isRunningOnLooperThreadLocked()) {
-                    doScheduleVsyncLocked();
+                    scheduleVsyncLocked();
                 } else {
                     Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_VSYNC);
                     msg.setAsynchronous(true);
                     mHandler.sendMessageAtFrontOfQueue(msg);
                 }
             } else {
-                final long now = SystemClock.uptimeMillis();
                 final long nextAnimationTime = Math.max(mLastAnimationTime + sFrameDelay, now);
                 if (DEBUG) {
                     Log.d(TAG, "Scheduling animation in " + (nextAnimationTime - now) + " ms.");
@@ -310,18 +333,18 @@ public final class Choreographer {
         }
     }
 
-    private void scheduleDrawLocked() {
+    private void scheduleDrawLocked(long now) {
         if (!mDrawScheduled) {
             mDrawScheduled = true;
             if (USE_ANIMATION_TIMER_FOR_DRAW) {
-                scheduleAnimationLocked();
+                scheduleAnimationLocked(now);
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "Scheduling draw immediately.");
                 }
                 Message msg = mHandler.obtainMessage(MSG_DO_DRAW);
                 msg.setAsynchronous(true);
-                mHandler.sendMessage(msg);
+                mHandler.sendMessageAtTime(msg, now);
             }
         }
     }
@@ -336,7 +359,7 @@ public final class Choreographer {
 
     void doAnimationInner() {
         final long start;
-        final Callback callbacks;
+        Callback callbacks;
         synchronized (mLock) {
             if (!mAnimationScheduled) {
                 return; // no work to do
@@ -351,7 +374,23 @@ public final class Choreographer {
             mLastAnimationTime = start;
 
             callbacks = mAnimationCallbacks;
-            mAnimationCallbacks = null;
+            if (callbacks != null) {
+                if (callbacks.dueTime > start) {
+                    callbacks = null;
+                } else {
+                    Callback predecessor = callbacks;
+                    Callback successor = predecessor.next;
+                    while (successor != null) {
+                        if (successor.dueTime > start) {
+                            predecessor.next = null;
+                            break;
+                        }
+                        predecessor = successor;
+                        successor = successor.next;
+                    }
+                    mAnimationCallbacks = successor;
+                }
+            }
         }
 
         if (callbacks != null) {
@@ -368,7 +407,7 @@ public final class Choreographer {
 
     void doDraw() {
         final long start;
-        final Callback callbacks;
+        Callback callbacks;
         synchronized (mLock) {
             if (!mDrawScheduled) {
                 return; // no work to do
@@ -383,7 +422,23 @@ public final class Choreographer {
             mLastDrawTime = start;
 
             callbacks = mDrawCallbacks;
-            mDrawCallbacks = null;
+            if (callbacks != null) {
+                if (callbacks.dueTime > start) {
+                    callbacks = null;
+                } else {
+                    Callback predecessor = callbacks;
+                    Callback successor = predecessor.next;
+                    while (successor != null) {
+                        if (successor.dueTime > start) {
+                            predecessor.next = null;
+                            break;
+                        }
+                        predecessor = successor;
+                        successor = successor.next;
+                    }
+                    mDrawCallbacks = successor;
+                }
+            }
         }
 
         if (callbacks != null) {
@@ -400,38 +455,66 @@ public final class Choreographer {
 
     void doScheduleVsync() {
         synchronized (mLock) {
-            doScheduleVsyncLocked();
+            if (mAnimationScheduled) {
+                scheduleVsyncLocked();
+            }
         }
     }
 
-    private void doScheduleVsyncLocked() {
-        if (mAnimationScheduled) {
-            mDisplayEventReceiver.scheduleVsync();
+    void doScheduleAnimation() {
+        synchronized (mLock) {
+            final long now = SystemClock.uptimeMillis();
+            if (mAnimationCallbacks != null && mAnimationCallbacks.dueTime <= now) {
+                scheduleAnimationLocked(now);
+            }
         }
+    }
+
+    void doScheduleDraw() {
+        synchronized (mLock) {
+            final long now = SystemClock.uptimeMillis();
+            if (mDrawCallbacks != null && mDrawCallbacks.dueTime <= now) {
+                scheduleDrawLocked(now);
+            }
+        }
+    }
+
+    private void scheduleVsyncLocked() {
+        mDisplayEventReceiver.scheduleVsync();
     }
 
     private boolean isRunningOnLooperThreadLocked() {
         return Looper.myLooper() == mLooper;
     }
 
-    private Callback addCallbackLocked(Callback head, Runnable runnable) {
-        Callback callback = obtainCallbackLocked(runnable);
+    private Callback addCallbackLocked(Callback head,
+            long dueTime, Runnable action, Object token) {
+        Callback callback = obtainCallbackLocked(dueTime, action, token);
         if (head == null) {
             return callback;
         }
-        Callback tail = head;
-        while (tail.next != null) {
-            tail = tail.next;
+        Callback entry = head;
+        if (dueTime < entry.dueTime) {
+            callback.next = entry;
+            return callback;
         }
-        tail.next = callback;
+        while (entry.next != null) {
+            if (dueTime < entry.next.dueTime) {
+                callback.next = entry.next;
+                break;
+            }
+            entry = entry.next;
+        }
+        entry.next = callback;
         return head;
     }
 
-    private Callback removeCallbacksLocked(Callback head, Runnable runnable) {
+    private Callback removeCallbacksLocked(Callback head, Runnable action, Object token) {
         Callback predecessor = null;
         for (Callback callback = head; callback != null;) {
             final Callback next = callback.next;
-            if (callback.runnable == runnable) {
+            if ((action == null || callback.action == action)
+                    && (token == null || callback.token == token)) {
                 if (predecessor != null) {
                     predecessor.next = next;
                 } else {
@@ -448,7 +531,7 @@ public final class Choreographer {
 
     private void runCallbacks(Callback head) {
         while (head != null) {
-            head.runnable.run();
+            head.action.run();
             head = head.next;
         }
     }
@@ -461,7 +544,7 @@ public final class Choreographer {
         }
     }
 
-    private Callback obtainCallbackLocked(Runnable runnable) {
+    private Callback obtainCallbackLocked(long dueTime, Runnable action, Object token) {
         Callback callback = mCallbackPool;
         if (callback == null) {
             callback = new Callback();
@@ -469,12 +552,15 @@ public final class Choreographer {
             mCallbackPool = callback.next;
             callback.next = null;
         }
-        callback.runnable = runnable;
+        callback.dueTime = dueTime;
+        callback.action = action;
+        callback.token = token;
         return callback;
     }
 
     private void recycleCallbackLocked(Callback callback) {
-        callback.runnable = null;
+        callback.action = null;
+        callback.token = null;
         callback.next = mCallbackPool;
         mCallbackPool = callback;
     }
@@ -496,11 +582,11 @@ public final class Choreographer {
                 case MSG_DO_SCHEDULE_VSYNC:
                     doScheduleVsync();
                     break;
-                case MSG_POST_DELAYED_ANIMATION:
-                    postAnimationCallbackUnchecked((Runnable)msg.obj);
+                case MSG_DO_SCHEDULE_ANIMATION:
+                    doScheduleAnimation();
                     break;
-                case MSG_POST_DELAYED_DRAW:
-                    postDrawCallbackUnchecked((Runnable)msg.obj);
+                case MSG_DO_SCHEDULE_DRAW:
+                    doScheduleDraw();
                     break;
             }
         }
@@ -519,6 +605,8 @@ public final class Choreographer {
 
     private static final class Callback {
         public Callback next;
-        public Runnable runnable;
+        public long dueTime;
+        public Runnable action;
+        public Object token;
     }
 }
