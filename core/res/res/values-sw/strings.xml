@@ -761,8 +761,8 @@
     <string name="permdesc_bindPackageVerifier" msgid="2409521927385789318">"Inaruhusu mmiliki kufanya maombi ya furushi la vibainishi. Kamwe hazitaitajika kwa programu za kawaida."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"kituo tambulishi cha ufikivu"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Inaruhusu mmiliki kufikia vituo tambulishi kwa kutumia KisimamiziTambulishi cha API."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"katisha tamaa usasishaji kifaa kiotomatiki"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Inaruhusu mmiliki kutoa maelezo kwa mfumo kuhusu ni lini itakuwa wakati mzuri wa uwashaji upya usiotagusana ili kuboresha kifaa."</string>
+    <string name="permlab_updateLock" msgid="3527558366616680889">"pinga usasishaji kifaa kiotomatiki"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Inaruhusu mmiliki kutoa maelezo kwa mfumo kuhusu ni lini itakuwa wakati mzuri wa uwashaji upya usiotagusana ili kupandisha gredi kifaa."</string>
     <string name="save_password_message" msgid="767344687139195790">"Unataka kuvinjari ili ukumbuke nenosiri hili?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Si Sasa"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Kumbuka"</string>
