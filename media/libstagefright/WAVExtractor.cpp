@@ -28,14 +28,21 @@
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 #include <utils/String8.h>
+#include <cutils/bitops.h>
+
+#define CHANNEL_MASK_USE_CHANNEL_ORDER 0
 
 namespace android {
 
 enum {
-    WAVE_FORMAT_PCM = 1,
-    WAVE_FORMAT_ALAW = 6,
-    WAVE_FORMAT_MULAW = 7,
+    WAVE_FORMAT_PCM        = 0x0001,
+    WAVE_FORMAT_ALAW       = 0x0006,
+    WAVE_FORMAT_MULAW      = 0x0007,
+    WAVE_FORMAT_EXTENSIBLE = 0xFFFE
 };
+
+static const char* WAVEEXT_SUBFORMAT = "\x00\x00\x00\x00\x10\x00\x80\x00\x00\xAA\x00\x38\x9B\x71";
+
 
 static uint32_t U32_LE_AT(const uint8_t *ptr) {
     return ptr[3] << 24 | ptr[2] << 16 | ptr[1] << 8 | ptr[0];
@@ -84,7 +91,8 @@ private:
 
 WAVExtractor::WAVExtractor(const sp<DataSource> &source)
     : mDataSource(source),
-      mValidFormat(false) {
+      mValidFormat(false),
+      mChannelMask(CHANNEL_MASK_USE_CHANNEL_ORDER) {
     mInitCheck = init();
 }
 
@@ -161,21 +169,37 @@ status_t WAVExtractor::init() {
                 return NO_INIT;
             }
 
-            uint8_t formatSpec[16];
-            if (mDataSource->readAt(offset, formatSpec, 16) < 16) {
+            uint8_t formatSpec[40];
+            if (mDataSource->readAt(offset, formatSpec, 2) < 2) {
                 return NO_INIT;
             }
 
             mWaveFormat = U16_LE_AT(formatSpec);
             if (mWaveFormat != WAVE_FORMAT_PCM
                     && mWaveFormat != WAVE_FORMAT_ALAW
-                    && mWaveFormat != WAVE_FORMAT_MULAW) {
+                    && mWaveFormat != WAVE_FORMAT_MULAW
+                    && mWaveFormat != WAVE_FORMAT_EXTENSIBLE) {
                 return ERROR_UNSUPPORTED;
             }
 
+            uint8_t fmtSize = 16;
+            if (mWaveFormat == WAVE_FORMAT_EXTENSIBLE) {
+                fmtSize = 40;
+            }
+            if (mDataSource->readAt(offset, formatSpec, fmtSize) < fmtSize) {
+                return NO_INIT;
+            }
+
             mNumChannels = U16_LE_AT(&formatSpec[2]);
-            if (mNumChannels != 1 && mNumChannels != 2) {
-                return ERROR_UNSUPPORTED;
+            if (mWaveFormat != WAVE_FORMAT_EXTENSIBLE) {
+                if (mNumChannels != 1 && mNumChannels != 2) {
+                    ALOGW("More than 2 channels (%d) in non-WAVE_EXT, unknown channel mask",
+                            mNumChannels);
+                }
+            } else {
+                if (mNumChannels < 1 && mNumChannels > 8) {
+                    return ERROR_UNSUPPORTED;
+                }
             }
 
             mSampleRate = U32_LE_AT(&formatSpec[4]);
@@ -186,7 +210,8 @@ status_t WAVExtractor::init() {
 
             mBitsPerSample = U16_LE_AT(&formatSpec[14]);
 
-            if (mWaveFormat == WAVE_FORMAT_PCM) {
+            if (mWaveFormat == WAVE_FORMAT_PCM
+                    || mWaveFormat == WAVE_FORMAT_EXTENSIBLE) {
                 if (mBitsPerSample != 8 && mBitsPerSample != 16
                     && mBitsPerSample != 24) {
                     return ERROR_UNSUPPORTED;
@@ -195,6 +220,42 @@ status_t WAVExtractor::init() {
                 CHECK(mWaveFormat == WAVE_FORMAT_MULAW
                         || mWaveFormat == WAVE_FORMAT_ALAW);
                 if (mBitsPerSample != 8) {
+                    return ERROR_UNSUPPORTED;
+                }
+            }
+
+            if (mWaveFormat == WAVE_FORMAT_EXTENSIBLE) {
+                uint16_t validBitsPerSample = U16_LE_AT(&formatSpec[18]);
+                if (validBitsPerSample != mBitsPerSample) {
+                    ALOGE("validBits(%d) != bitsPerSample(%d) are not supported",
+                            validBitsPerSample, mBitsPerSample);
+                    return ERROR_UNSUPPORTED;
+                }
+
+                mChannelMask = U32_LE_AT(&formatSpec[20]);
+                ALOGV("numChannels=%d channelMask=0x%x", mNumChannels, mChannelMask);
+                if ((mChannelMask >> 18) != 0) {
+                    ALOGE("invalid channel mask 0x%x", mChannelMask);
+                    return ERROR_MALFORMED;
+                }
+
+                if ((mChannelMask != CHANNEL_MASK_USE_CHANNEL_ORDER)
+                        && (popcount(mChannelMask) != mNumChannels)) {
+                    ALOGE("invalid number of channels (%d) in channel mask (0x%x)",
+                            popcount(mChannelMask), mChannelMask);
+                    return ERROR_MALFORMED;
+                }
+
+                // In a WAVE_EXT header, the first two bytes of the GUID stored at byte 24 contain
+                // the sample format, using the same definitions as a regular WAV header
+                mWaveFormat = U16_LE_AT(&formatSpec[24]);
+                if (mWaveFormat != WAVE_FORMAT_PCM
+                        && mWaveFormat != WAVE_FORMAT_ALAW
+                        && mWaveFormat != WAVE_FORMAT_MULAW) {
+                    return ERROR_UNSUPPORTED;
+                }
+                if (memcmp(&formatSpec[26], WAVEEXT_SUBFORMAT, 14)) {
+                    ALOGE("unsupported GUID");
                     return ERROR_UNSUPPORTED;
                 }
             }
@@ -224,6 +285,7 @@ status_t WAVExtractor::init() {
                 }
 
                 mTrackMeta->setInt32(kKeyChannelCount, mNumChannels);
+                mTrackMeta->setInt32(kKeyChannelMask, mChannelMask);
                 mTrackMeta->setInt32(kKeySampleRate, mSampleRate);
 
                 size_t bytesPerSample = mBitsPerSample >> 3;
