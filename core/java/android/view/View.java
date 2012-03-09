@@ -8852,13 +8852,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         (for instance, if the Runnable was not in the queue already.)
      */
     public boolean removeCallbacks(Runnable action) {
-        final AttachInfo attachInfo = mAttachInfo;
-        if (attachInfo != null) {
-            attachInfo.mHandler.removeCallbacks(action);
-            attachInfo.mViewRootImpl.mChoreographer.removeAnimationCallbacks(action, null);
-        } else {
-            // Assume that post will succeed later
-            ViewRootImpl.getRunQueue().removeCallbacks(action);
+        if (action != null) {
+            final AttachInfo attachInfo = mAttachInfo;
+            if (attachInfo != null) {
+                attachInfo.mHandler.removeCallbacks(action);
+                attachInfo.mViewRootImpl.mChoreographer.removeAnimationCallbacks(action, null);
+            } else {
+                // Assume that post will succeed later
+                ViewRootImpl.getRunQueue().removeCallbacks(action);
+            }
         }
         return true;
     }
@@ -11963,7 +11965,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #drawableStateChanged
      */
     public void unscheduleDrawable(Drawable who) {
-        if (mAttachInfo != null) {
+        if (mAttachInfo != null && who != null) {
             mAttachInfo.mViewRootImpl.mChoreographer.removeAnimationCallbacks(null, who);
         }
     }

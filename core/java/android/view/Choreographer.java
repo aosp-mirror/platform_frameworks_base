@@ -92,8 +92,8 @@ public final class Choreographer {
 
     private Callback mCallbackPool;
 
-    private Callback mAnimationCallbacks;
-    private Callback mDrawCallbacks;
+    private final CallbackQueue mAnimationCallbackQueue = new CallbackQueue();
+    private final CallbackQueue mDrawCallbackQueue = new CallbackQueue();
 
     private boolean mAnimationScheduled;
     private boolean mDrawScheduled;
@@ -205,10 +205,15 @@ public final class Choreographer {
             throw new IllegalArgumentException("action must not be null");
         }
 
+        if (DEBUG) {
+            Log.d(TAG, "PostAnimationCallback: " + action + ", token=" + token
+                    + ", delayMillis=" + delayMillis);
+        }
+
         synchronized (mLock) {
             final long now = SystemClock.uptimeMillis();
             final long dueTime = now + delayMillis;
-            mAnimationCallbacks = addCallbackLocked(mAnimationCallbacks, dueTime, action, token);
+            mAnimationCallbackQueue.addCallbackLocked(dueTime, action, token);
 
             if (dueTime <= now) {
                 scheduleAnimationLocked(now);
@@ -231,8 +236,12 @@ public final class Choreographer {
      * @see #postAnimationCallbackDelayed
      */
     public void removeAnimationCallbacks(Runnable action, Object token) {
+        if (DEBUG) {
+            Log.d(TAG, "RemoveAnimationCallbacks: " + action + ", token=" + token);
+        }
+
         synchronized (mLock) {
-            mAnimationCallbacks = removeCallbacksLocked(mAnimationCallbacks, action, token);
+            mAnimationCallbackQueue.removeCallbacksLocked(action, token);
             if (action != null && token == null) {
                 mHandler.removeMessages(MSG_DO_SCHEDULE_ANIMATION, action);
             }
@@ -268,10 +277,15 @@ public final class Choreographer {
             throw new IllegalArgumentException("action must not be null");
         }
 
+        if (DEBUG) {
+            Log.d(TAG, "PostDrawCallback: " + action + ", token=" + token
+                    + ", delayMillis=" + delayMillis);
+        }
+
         synchronized (mLock) {
             final long now = SystemClock.uptimeMillis();
             final long dueTime = now + delayMillis;
-            mDrawCallbacks = addCallbackLocked(mDrawCallbacks, dueTime, action, token);
+            mDrawCallbackQueue.addCallbackLocked(dueTime, action, token);
             scheduleDrawLocked(now);
 
             if (dueTime <= now) {
@@ -295,8 +309,12 @@ public final class Choreographer {
      * @see #postDrawCallbackDelayed
      */
     public void removeDrawCallbacks(Runnable action, Object token) {
+        if (DEBUG) {
+            Log.d(TAG, "RemoveDrawCallbacks: " + action + ", token=" + token);
+        }
+
         synchronized (mLock) {
-            mDrawCallbacks = removeCallbacksLocked(mDrawCallbacks, action, token);
+            mDrawCallbackQueue.removeCallbacksLocked(action, token);
             if (action != null && token == null) {
                 mHandler.removeMessages(MSG_DO_SCHEDULE_DRAW, action);
             }
@@ -373,24 +391,7 @@ public final class Choreographer {
             }
             mLastAnimationTime = start;
 
-            callbacks = mAnimationCallbacks;
-            if (callbacks != null) {
-                if (callbacks.dueTime > start) {
-                    callbacks = null;
-                } else {
-                    Callback predecessor = callbacks;
-                    Callback successor = predecessor.next;
-                    while (successor != null) {
-                        if (successor.dueTime > start) {
-                            predecessor.next = null;
-                            break;
-                        }
-                        predecessor = successor;
-                        successor = successor.next;
-                    }
-                    mAnimationCallbacks = successor;
-                }
-            }
+            callbacks = mAnimationCallbackQueue.extractDueCallbacksLocked(start);
         }
 
         if (callbacks != null) {
@@ -421,24 +422,7 @@ public final class Choreographer {
             }
             mLastDrawTime = start;
 
-            callbacks = mDrawCallbacks;
-            if (callbacks != null) {
-                if (callbacks.dueTime > start) {
-                    callbacks = null;
-                } else {
-                    Callback predecessor = callbacks;
-                    Callback successor = predecessor.next;
-                    while (successor != null) {
-                        if (successor.dueTime > start) {
-                            predecessor.next = null;
-                            break;
-                        }
-                        predecessor = successor;
-                        successor = successor.next;
-                    }
-                    mDrawCallbacks = successor;
-                }
-            }
+            callbacks = mDrawCallbackQueue.extractDueCallbacksLocked(start);
         }
 
         if (callbacks != null) {
@@ -464,7 +448,7 @@ public final class Choreographer {
     void doScheduleAnimation() {
         synchronized (mLock) {
             final long now = SystemClock.uptimeMillis();
-            if (mAnimationCallbacks != null && mAnimationCallbacks.dueTime <= now) {
+            if (mAnimationCallbackQueue.hasDueCallbacksLocked(now)) {
                 scheduleAnimationLocked(now);
             }
         }
@@ -473,7 +457,7 @@ public final class Choreographer {
     void doScheduleDraw() {
         synchronized (mLock) {
             final long now = SystemClock.uptimeMillis();
-            if (mDrawCallbacks != null && mDrawCallbacks.dueTime <= now) {
+            if (mDrawCallbackQueue.hasDueCallbacksLocked(now)) {
                 scheduleDrawLocked(now);
             }
         }
@@ -487,50 +471,12 @@ public final class Choreographer {
         return Looper.myLooper() == mLooper;
     }
 
-    private Callback addCallbackLocked(Callback head,
-            long dueTime, Runnable action, Object token) {
-        Callback callback = obtainCallbackLocked(dueTime, action, token);
-        if (head == null) {
-            return callback;
-        }
-        Callback entry = head;
-        if (dueTime < entry.dueTime) {
-            callback.next = entry;
-            return callback;
-        }
-        while (entry.next != null) {
-            if (dueTime < entry.next.dueTime) {
-                callback.next = entry.next;
-                break;
-            }
-            entry = entry.next;
-        }
-        entry.next = callback;
-        return head;
-    }
-
-    private Callback removeCallbacksLocked(Callback head, Runnable action, Object token) {
-        Callback predecessor = null;
-        for (Callback callback = head; callback != null;) {
-            final Callback next = callback.next;
-            if ((action == null || callback.action == action)
-                    && (token == null || callback.token == token)) {
-                if (predecessor != null) {
-                    predecessor.next = next;
-                } else {
-                    head = next;
-                }
-                recycleCallbackLocked(callback);
-            } else {
-                predecessor = callback;
-            }
-            callback = next;
-        }
-        return head;
-    }
-
     private void runCallbacks(Callback head) {
         while (head != null) {
+            if (DEBUG) {
+                Log.d(TAG, "RunCallback: " + head.action + ", token=" + head.token
+                        + ", waitMillis=" + (SystemClock.uptimeMillis() - head.dueTime));
+            }
             head.action.run();
             head = head.next;
         }
@@ -608,5 +554,74 @@ public final class Choreographer {
         public long dueTime;
         public Runnable action;
         public Object token;
+    }
+
+    private final class CallbackQueue {
+        private Callback mHead;
+
+        public boolean hasDueCallbacksLocked(long now) {
+            return mHead != null && mHead.dueTime <= now;
+        }
+
+        public Callback extractDueCallbacksLocked(long now) {
+            Callback callbacks = mHead;
+            if (callbacks == null || callbacks.dueTime > now) {
+                return null;
+            }
+
+            Callback last = callbacks;
+            Callback next = last.next;
+            while (next != null) {
+                if (next.dueTime > now) {
+                    last.next = null;
+                    break;
+                }
+                last = next;
+                next = next.next;
+            }
+            mHead = next;
+            return callbacks;
+        }
+
+        public void addCallbackLocked(long dueTime, Runnable action, Object token) {
+            Callback callback = obtainCallbackLocked(dueTime, action, token);
+            Callback entry = mHead;
+            if (entry == null) {
+                mHead = callback;
+                return;
+            }
+            if (dueTime < entry.dueTime) {
+                callback.next = entry;
+                mHead = callback;
+                return;
+            }
+            while (entry.next != null) {
+                if (dueTime < entry.next.dueTime) {
+                    callback.next = entry.next;
+                    break;
+                }
+                entry = entry.next;
+            }
+            entry.next = callback;
+        }
+
+        public void removeCallbacksLocked(Runnable action, Object token) {
+            Callback predecessor = null;
+            for (Callback callback = mHead; callback != null;) {
+                final Callback next = callback.next;
+                if ((action == null || callback.action == action)
+                        && (token == null || callback.token == token)) {
+                    if (predecessor != null) {
+                        predecessor.next = next;
+                    } else {
+                        mHead = next;
+                    }
+                    recycleCallbackLocked(callback);
+                } else {
+                    predecessor = callback;
+                }
+                callback = next;
+            }
+        }
     }
 }
