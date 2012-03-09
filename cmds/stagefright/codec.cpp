@@ -49,6 +49,7 @@ struct CodecState {
     size_t mCSDIndex;
     Vector<sp<ABuffer> > mInBuffers;
     Vector<sp<ABuffer> > mOutBuffers;
+    bool mSignalledInputEOS;
     bool mSawOutputEOS;
     int64_t mNumBuffersDecoded;
     int64_t mNumBytesDecoded;
@@ -127,6 +128,7 @@ static int decode(
         }
 
         state->mCSDIndex = 0;
+        state->mSignalledInputEOS = false;
         state->mSawOutputEOS = false;
 
         ALOGV("got %d pieces of codec specific data.", state->mCSD.size());
@@ -180,33 +182,7 @@ static int decode(
             status_t err = extractor->getSampleTrackIndex(&trackIndex);
 
             if (err != OK) {
-                ALOGV("signalling EOS.");
-
-                for (size_t i = 0; i < stateByTrack.size(); ++i) {
-                    CodecState *state = &stateByTrack.editValueAt(i);
-
-                    for (;;) {
-                        size_t index;
-                        err = state->mCodec->dequeueInputBuffer(&index, kTimeout);
-
-                        if (err == -EAGAIN) {
-                            continue;
-                        }
-
-                        CHECK_EQ(err, (status_t)OK);
-
-                        err = state->mCodec->queueInputBuffer(
-                                index,
-                                0 /* offset */,
-                                0 /* size */,
-                                0ll /* timeUs */,
-                                MediaCodec::BUFFER_FLAG_EOS);
-
-                        CHECK_EQ(err, (status_t)OK);
-                        break;
-                    }
-                }
-
+                ALOGV("saw input eos");
                 sawInputEOS = true;
             } else {
                 CodecState *state = &stateByTrack.editValueFor(trackIndex);
@@ -238,6 +214,33 @@ static int decode(
                     extractor->advance();
                 } else {
                     CHECK_EQ(err, -EAGAIN);
+                }
+            }
+        } else {
+            for (size_t i = 0; i < stateByTrack.size(); ++i) {
+                CodecState *state = &stateByTrack.editValueAt(i);
+
+                if (!state->mSignalledInputEOS) {
+                    size_t index;
+                    status_t err =
+                        state->mCodec->dequeueInputBuffer(&index, kTimeout);
+
+                    if (err == OK) {
+                        ALOGV("signalling input EOS on track %d", i);
+
+                        err = state->mCodec->queueInputBuffer(
+                                index,
+                                0 /* offset */,
+                                0 /* size */,
+                                0ll /* timeUs */,
+                                MediaCodec::BUFFER_FLAG_EOS);
+
+                        CHECK_EQ(err, (status_t)OK);
+
+                        state->mSignalledInputEOS = true;
+                    } else {
+                        CHECK_EQ(err, -EAGAIN);
+                    }
                 }
             }
         }
