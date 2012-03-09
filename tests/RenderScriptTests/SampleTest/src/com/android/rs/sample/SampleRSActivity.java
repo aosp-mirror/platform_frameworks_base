@@ -18,6 +18,7 @@ package com.android.rs.sample;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.SurfaceTexture;
@@ -66,13 +67,14 @@ public class SampleRSActivity extends Activity {
     }
 
     private final String TAG = "Img";
-    private Bitmap mBitmapIn;
-    private TextureView mDisplayView;
+    private Bitmap mBitmapTwoByTwo;
+    private Bitmap mBitmapCity;
 
     private TextView mBenchmarkResult;
 
     private RenderScript mRS;
-    private Allocation mInPixelsAllocation;
+    private Allocation mTwoByTwoAlloc;
+    private Allocation mCityAlloc;
     private ScriptC_sample mScript;
 
     public void onStartTrackingTouch(SeekBar seekBar) {
@@ -86,14 +88,18 @@ public class SampleRSActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.rs);
 
-        mBitmapIn = loadBitmap(R.drawable.twobytwo);
-        mDisplayView = (TextureView) findViewById(R.id.display);
+        mBitmapTwoByTwo = loadBitmap(R.drawable.twobytwo);
+        mBitmapCity = loadBitmap(R.drawable.city);
 
         mBenchmarkResult = (TextView) findViewById(R.id.benchmarkText);
         mBenchmarkResult.setText("Result: not run");
 
         mRS = RenderScript.create(this);
-        mInPixelsAllocation = Allocation.createFromBitmap(mRS, mBitmapIn,
+        mTwoByTwoAlloc = Allocation.createFromBitmap(mRS, mBitmapTwoByTwo,
+                                                          Allocation.MipmapControl.MIPMAP_NONE,
+                                                          Allocation.USAGE_SCRIPT);
+
+        mCityAlloc = Allocation.createFromBitmap(mRS, mBitmapCity,
                                                           Allocation.MipmapControl.MIPMAP_NONE,
                                                           Allocation.USAGE_SCRIPT);
 
@@ -101,8 +107,8 @@ public class SampleRSActivity extends Activity {
 
         int usage = Allocation.USAGE_SCRIPT | Allocation.USAGE_IO_OUTPUT;
 
-        int outX = 32;
-        int outY = 32;
+        int outX = 256;
+        int outY = 256;
 
         // Wrap Linear
         Allocation outAlloc = Allocation.createTyped(mRS, b.setX(outX).setY(outY).create(), usage);
@@ -144,7 +150,7 @@ public class SampleRSActivity extends Activity {
 
     private synchronized void filterAlloc(Allocation alloc, Sampler sampler) {
         long t = java.lang.System.currentTimeMillis();
-        mScript.invoke_setSampleData(alloc, mInPixelsAllocation, sampler);
+        mScript.invoke_setSampleData(alloc, mTwoByTwoAlloc, sampler);
         mScript.forEach_root(alloc);
         alloc.ioSendOutput();
         mRS.finish();
