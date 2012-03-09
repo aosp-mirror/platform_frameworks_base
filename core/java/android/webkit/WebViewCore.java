@@ -1244,6 +1244,23 @@ public final class WebViewCore {
                                 + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
                                 + " obj=" + msg.obj);
                     }
+                    switch (msg.what) {
+                    case PAUSE_TIMERS:
+                        mSavedPriority = Process.getThreadPriority(mTid);
+                        Process.setThreadPriority(mTid,
+                            Process.THREAD_PRIORITY_BACKGROUND);
+                        pauseTimers();
+                        if (mNativeClass != 0) {
+                            nativeCloseIdleConnections(mNativeClass);
+                        }
+                        return;
+
+                    case RESUME_TIMERS:
+                        Process.setThreadPriority(mTid, mSavedPriority);
+                        resumeTimers();
+                        return;
+                    }
+
                     if (mWebView == null || mNativeClass == 0) {
                         if (DebugFlags.WEB_VIEW_CORE) {
                             Log.w(LOGTAG, "Rejecting message " + msg.what
@@ -1252,8 +1269,6 @@ public final class WebViewCore {
                         return;
                     }
                     if (mDestroying == true
-                            && msg.what != EventHub.RESUME_TIMERS
-                            && msg.what != EventHub.PAUSE_TIMERS
                             && msg.what != EventHub.DESTROY) {
                         if (DebugFlags.WEB_VIEW_CORE) {
                             Log.v(LOGTAG, "Rejecting message " + msg.what
@@ -1419,18 +1434,6 @@ public final class WebViewCore {
                             restoreState(msg.arg1);
                             break;
 
-                        case PAUSE_TIMERS:
-                            mSavedPriority = Process.getThreadPriority(mTid);
-                            Process.setThreadPriority(mTid,
-                                    Process.THREAD_PRIORITY_BACKGROUND);
-                            pauseTimers();
-                            nativeCloseIdleConnections(mNativeClass);
-                            break;
-
-                        case RESUME_TIMERS:
-                            Process.setThreadPriority(mTid, mSavedPriority);
-                            resumeTimers();
-                            break;
 
                         case ON_PAUSE:
                             nativePause(mNativeClass);
@@ -1961,12 +1964,10 @@ public final class WebViewCore {
      */
     void destroy() {
         synchronized (mEventHub) {
-            // Do not call removeMessages as then we risk removing PAUSE_TIMERS
-            // or RESUME_TIMERS messages, which we must still handle as they
-            // are per process. DESTROY will instead trigger a white list in
-            // mEventHub, skipping any remaining messages in the queue
+            // send DESTROY to front of queue
+            // PAUSE/RESUME timers will still be processed even if they get handled later
             mEventHub.mDestroying = true;
-            mEventHub.sendMessage(
+            mEventHub.sendMessageAtFrontOfQueue(
                     Message.obtain(null, EventHub.DESTROY));
             mEventHub.blockMessages();
         }

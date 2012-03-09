@@ -76,6 +76,8 @@ class CallbackProxy extends Handler {
     private volatile WebBackForwardListClient mWebBackForwardListClient;
     // Used to call startActivity during url override.
     private final Context mContext;
+    // block messages flag for destroy
+    private boolean mBlockMessages;
 
     // Message IDs
     private static final int PAGE_STARTED                         = 100;
@@ -155,10 +157,18 @@ class CallbackProxy extends Handler {
         mBackForwardList = new WebBackForwardList(this);
     }
 
+    protected synchronized void blockMessages() {
+        mBlockMessages = true;
+    }
+
+    protected synchronized boolean messagesBlocked() {
+        return mBlockMessages;
+    }
+
     protected void shutdown() {
+        removeCallbacksAndMessages(null);
         setWebViewClient(null);
         setWebChromeClient(null);
-        removeCallbacksAndMessages(null);
     }
 
     /**
@@ -265,6 +275,7 @@ class CallbackProxy extends Handler {
         // in the UI thread. The WebViewClient and WebChromeClient functions
         // that check for a non-null callback are ok because java ensures atomic
         // 32-bit reads and writes.
+        if (messagesBlocked()) return;
         switch (msg.what) {
             case PAGE_STARTED:
                 String startedUrl = msg.getData().getString("url");

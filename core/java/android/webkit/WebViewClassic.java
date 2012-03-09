@@ -2070,6 +2070,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private void destroyImpl() {
+        mCallbackProxy.blockMessages();
         clearHelpers();
         if (mListBoxDialog != null) {
             mListBoxDialog.dismiss();
