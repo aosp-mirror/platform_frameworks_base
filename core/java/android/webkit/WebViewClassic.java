@@ -4081,6 +4081,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // helper to pin the scrollTo parameters (already in view coordinates)
     // returns true if the scroll was changed
     private boolean pinScrollTo(int x, int y, boolean animate, int animationDuration) {
+        abortAnimation();
         x = pinLocX(x);
         y = pinLocY(y);
         int dx = x - getScrollX();
@@ -4089,7 +4090,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if ((dx | dy) == 0) {
             return false;
         }
-        abortAnimation();
         if (animate) {
             //        Log.d(LOGTAG, "startScroll: " + dx + " " + dy);
             mScroller.startScroll(getScrollX(), getScrollY(), dx, dy,
