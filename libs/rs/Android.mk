@@ -1,6 +1,41 @@
 
 LOCAL_PATH:=$(call my-dir)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := libRSDriver
+
+LOCAL_SRC_FILES:= \
+	driver/rsdAllocation.cpp \
+	driver/rsdBcc.cpp \
+	driver/rsdCore.cpp \
+	driver/rsdFrameBuffer.cpp \
+	driver/rsdFrameBufferObj.cpp \
+	driver/rsdGL.cpp \
+	driver/rsdMesh.cpp \
+	driver/rsdMeshObj.cpp \
+	driver/rsdPath.cpp \
+	driver/rsdProgram.cpp \
+	driver/rsdProgramRaster.cpp \
+	driver/rsdProgramStore.cpp \
+	driver/rsdRuntimeMath.cpp \
+	driver/rsdRuntimeStubs.cpp \
+	driver/rsdSampler.cpp \
+	driver/rsdShader.cpp \
+	driver/rsdShaderCache.cpp \
+	driver/rsdVertexArray.cpp
+
+LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2
+LOCAL_SHARED_LIBRARIES += libbcc libbcinfo libgui
+
+LOCAL_C_INCLUDES += external/zlib dalvik
+LOCAL_C_INCLUDES += frameworks/compile/libbcc/include
+
+LOCAL_CFLAGS += -Werror -Wall -Wno-unused-parameter -Wno-unused-variable
+
+LOCAL_LDLIBS := -lpthread -ldl
+LOCAL_MODULE_TAGS := optional
+
+include $(BUILD_STATIC_LIBRARY)
 
 # Build rsg-generator ====================
 include $(CLEAR_VARS)
@@ -22,19 +57,6 @@ include $(BUILD_HOST_EXECUTABLE)
 
 # TODO: This should go into build/core/config.mk
 RSG_GENERATOR:=$(LOCAL_BUILT_MODULE)
-
-# include $(CLEAR_VARS)
-# input_data_file := $(LOCAL_PATH)/rslib.bc
-# slangdata_output_var_name := rs_runtime_lib_bc
-# LOCAL_MODULE := librslib_rt
-
-# LOCAL_MODULE_CLASS := STATIC_LIBRARIES
-
-# LOCAL_MODULE_TAGS := optional
-# include frameworks/compile/slang/SlangData.mk
-# include $(BUILD_STATIC_LIBRARY)
-
-# Build render script lib ====================
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libRS
@@ -110,24 +132,6 @@ LOCAL_SRC_FILES:= \
 	rsStream.cpp \
 	rsThreadIO.cpp \
 	rsType.cpp \
-	driver/rsdAllocation.cpp \
-	driver/rsdBcc.cpp \
-	driver/rsdCore.cpp \
-	driver/rsdFrameBuffer.cpp \
-	driver/rsdFrameBufferObj.cpp \
-	driver/rsdGL.cpp \
-	driver/rsdMesh.cpp \
-	driver/rsdMeshObj.cpp \
-	driver/rsdPath.cpp \
-	driver/rsdProgram.cpp \
-	driver/rsdProgramRaster.cpp \
-	driver/rsdProgramStore.cpp \
-	driver/rsdRuntimeMath.cpp \
-	driver/rsdRuntimeStubs.cpp \
-	driver/rsdSampler.cpp \
-	driver/rsdShader.cpp \
-	driver/rsdShaderCache.cpp \
-	driver/rsdVertexArray.cpp \
 	RenderScript.cpp \
 	BaseObj.cpp \
 	Element.cpp \
@@ -136,9 +140,10 @@ LOCAL_SRC_FILES:= \
 	Script.cpp \
 	ScriptC.cpp
 
-LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc libbcinfo libgui
+LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libbcc
+LOCAL_SHARED_LIBRARIES += libui libbcinfo libgui
 
-LOCAL_STATIC_LIBRARIES := libdex libft2
+LOCAL_STATIC_LIBRARIES := libdex libft2 libRSDriver
 
 LOCAL_C_INCLUDES += external/freetype/include external/zlib dalvik
 LOCAL_C_INCLUDES += frameworks/compile/libbcc/include
