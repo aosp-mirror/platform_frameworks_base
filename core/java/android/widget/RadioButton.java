@@ -78,16 +78,6 @@ public class RadioButton extends CompoundButton {
     }
 
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
-        if (isChecked()) {
-            event.getText().add(mContext.getString(R.string.radiobutton_selected));
-        } else {
-            event.getText().add(mContext.getString(R.string.radiobutton_not_selected));
-        }
-    }
-
-    @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         event.setClassName(RadioButton.class.getName());
