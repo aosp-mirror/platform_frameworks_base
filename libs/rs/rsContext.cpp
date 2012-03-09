@@ -18,6 +18,7 @@
 #include "rsDevice.h"
 #include "rsContext.h"
 #include "rsThreadIO.h"
+#include "rsMesh.h"
 #include <ui/FramebufferNativeWindow.h>
 #include <gui/DisplayEventReceiver.h>
 

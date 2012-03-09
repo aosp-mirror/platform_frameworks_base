@@ -20,10 +20,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "rsDefines.h"
 
 //
@@ -60,10 +56,6 @@ RsContext rsContextCreateGL(RsDevice dev, uint32_t version, uint32_t sdkVersion,
                             RsSurfaceConfig sc, uint32_t dpi);
 
 #include "rsgApiFuncDecl.h"
-
-#ifdef __cplusplus
-};
-#endif
 
 #endif // RENDER_SCRIPT_H
 

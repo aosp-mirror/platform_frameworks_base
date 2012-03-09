@@ -187,7 +187,7 @@ void printApiCpp(FILE *f) {
     fprintf(f, "#include \"rsDevice.h\"\n");
     fprintf(f, "#include \"rsContext.h\"\n");
     fprintf(f, "#include \"rsThreadIO.h\"\n");
-    //fprintf(f, "#include \"rsgApiStructs.h\"\n");
+    fprintf(f, "#include \"rsgApiStructs.h\"\n");
     fprintf(f, "#include \"rsgApiFuncDecl.h\"\n");
     fprintf(f, "#include \"rsFifo.h\"\n");
     fprintf(f, "\n");
@@ -408,6 +408,7 @@ void printPlaybackCpp(FILE *f) {
     fprintf(f, "#include \"rsDevice.h\"\n");
     fprintf(f, "#include \"rsContext.h\"\n");
     fprintf(f, "#include \"rsThreadIO.h\"\n");
+    fprintf(f, "#include \"rsgApiStructs.h\"\n");
     fprintf(f, "#include \"rsgApiFuncDecl.h\"\n");
     fprintf(f, "\n");
     fprintf(f, "namespace android {\n");

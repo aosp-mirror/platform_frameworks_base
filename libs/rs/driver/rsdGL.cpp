@@ -37,6 +37,7 @@
 
 #include <malloc.h>
 #include "rsContext.h"
+#include "rsDevice.h"
 #include "rsdShaderCache.h"
 #include "rsdVertexArray.h"
 #include "rsdFrameBufferObj.h"

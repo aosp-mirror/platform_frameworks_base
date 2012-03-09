@@ -18,18 +18,10 @@
 #define ANDROID_RS_CONTEXT_H
 
 #include "rsUtils.h"
-#include "rsType.h"
-#include "rsAllocation.h"
-#include "rsMesh.h"
-
 #include "rs_hal.h"
 
-#include "rsMutex.h"
 #include "rsThreadIO.h"
-#include "rsMatrix4x4.h"
-#include "rsDevice.h"
 #include "rsScriptC.h"
-#include "rsAdapter.h"
 #include "rsSampler.h"
 #include "rsFont.h"
 #include "rsPath.h"
@@ -39,12 +31,12 @@
 #include "rsProgramVertex.h"
 #include "rsFBOCache.h"
 
-#include "rsgApiStructs.h"
-
 // ---------------------------------------------------------------------------
 namespace android {
 
 namespace renderscript {
+
+class Device;
 
 #if 0
 #define CHECK_OBJ(o) { \

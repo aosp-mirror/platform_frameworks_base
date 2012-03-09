@@ -15,8 +15,8 @@
  */
 
 #include "rsContext.h"
-
 #include "rsThreadIO.h"
+#include "rsgApiStructs.h"
 
 #include <unistd.h>
 #include <sys/types.h>

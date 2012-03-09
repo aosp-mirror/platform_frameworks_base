@@ -16,6 +16,7 @@
 
 #include "rsContext.h"
 #include "rsProgramVertex.h"
+#include "rsMatrix4x4.h"
 
 using namespace android;
 using namespace android::renderscript;
