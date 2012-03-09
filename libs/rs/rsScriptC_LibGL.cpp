@@ -19,6 +19,8 @@
 #include "rsMatrix4x4.h"
 #include "rsMatrix3x3.h"
 #include "rsMatrix2x2.h"
+#include "rsMesh.h"
+#include "rsgApiStructs.h"
 
 #include "utils/Timers.h"
 #include "driver/rsdVertexArray.h"

@@ -19,6 +19,7 @@
 #include "rs.h"
 #include "rsFont.h"
 #include "rsProgramFragment.h"
+#include "rsMesh.h"
 #include <cutils/properties.h>
 
 #ifndef ANDROID_RS_SERIALIZE

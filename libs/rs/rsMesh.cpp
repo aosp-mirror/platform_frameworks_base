@@ -15,6 +15,7 @@
  */
 
 #include "rsContext.h"
+#include "rsMesh.h"
 #include "rs.h"
 
 using namespace android;

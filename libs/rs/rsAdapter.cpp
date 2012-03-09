@@ -16,6 +16,7 @@
  */
 
 #include "rsContext.h"
+#include "rsAdapter.h"
 
 using namespace android;
 using namespace android::renderscript;
