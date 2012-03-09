@@ -203,8 +203,8 @@ import java.util.HashMap;
  * with the user.  Between these two methods you can maintain resources that
  * are needed to show the activity to the user.  For example, you can register
  * a {@link android.content.BroadcastReceiver} in onStart() to monitor for changes
- * that impact your UI, and unregister it in onStop() when the user an no
- * longer see what you are displaying.  The onStart() and onStop() methods
+ * that impact your UI, and unregister it in onStop() when the user no
+ * longer sees what you are displaying.  The onStart() and onStop() methods
  * can be called multiple times, as the activity becomes visible and hidden
  * to the user.
  * 

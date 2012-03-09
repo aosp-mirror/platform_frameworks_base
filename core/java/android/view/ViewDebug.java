@@ -264,7 +264,7 @@ public class ViewDebug {
 
     /**
      * Defines a mapping from an int value to a String. Such a mapping can be used
-     * in a @ExportedProperty to provide more meaningful values to the end user.
+     * in an @ExportedProperty to provide more meaningful values to the end user.
      *
      * @see android.view.ViewDebug.ExportedProperty
      */
@@ -287,8 +287,8 @@ public class ViewDebug {
     }
 
     /**
-     * Defines a mapping from an flag to a String. Such a mapping can be used
-     * in a @ExportedProperty to provide more meaningful values to the end user.
+     * Defines a mapping from a flag to a String. Such a mapping can be used
+     * in an @ExportedProperty to provide more meaningful values to the end user.
      *
      * @see android.view.ViewDebug.ExportedProperty
      */

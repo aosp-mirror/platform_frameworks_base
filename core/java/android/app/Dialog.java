@@ -591,7 +591,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
-     * Called when an key shortcut event is not handled by any of the views in the Dialog.
+     * Called when a key shortcut event is not handled by any of the views in the Dialog.
      * Override this method to implement global key shortcuts for the Dialog.
      * Key shortcuts can also be implemented by setting the
      * {@link MenuItem#setShortcut(char, char) shortcut} property of menu items.

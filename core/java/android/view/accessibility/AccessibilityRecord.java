@@ -632,7 +632,7 @@ public class AccessibilityRecord {
     void enforceNotSealed() {
         if (isSealed()) {
             throw new IllegalStateException("Cannot perform this "
-                    + "action on an sealed instance.");
+                    + "action on a sealed instance.");
         }
     }
 

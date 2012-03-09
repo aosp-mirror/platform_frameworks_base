@@ -165,7 +165,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             = "android.app.action.ACTION_PASSWORD_EXPIRING";
 
     /**
-     * Name under which an DevicePolicy component publishes information
+     * Name under which a DevicePolicy component publishes information
      * about itself.  This meta-data must reference an XML resource containing
      * a device-admin tag.  XXX TO DO: describe syntax.
      */

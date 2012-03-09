@@ -11076,13 +11076,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
     
     /**
-     * <p>Indicates whether this view is attached to an hardware accelerated
+     * <p>Indicates whether this view is attached to a hardware accelerated
      * window or not.</p>
      *
      * <p>Even if this method returns true, it does not mean that every call
      * to {@link #draw(android.graphics.Canvas)} will be made with an hardware
      * accelerated {@link android.graphics.Canvas}. For instance, if this view
-     * is drawn onto an offscren {@link android.graphics.Bitmap} and its
+     * is drawn onto an offscreen {@link android.graphics.Bitmap} and its
      * window is hardware accelerated,
      * {@link android.graphics.Canvas#isHardwareAccelerated()} will likely
      * return false, and this method will return true.</p>
@@ -13145,7 +13145,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Creates an string of whitespaces used for indentation.
+     * Creates a string of whitespaces used for indentation.
      *
      * @param depth the indentation level
      * @return a String containing (depth * 2 + 3) * 2 white spaces

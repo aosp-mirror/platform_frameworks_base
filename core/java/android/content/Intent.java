@@ -843,10 +843,10 @@ public class Intent implements Parcelable, Cloneable {
      * just say what kind of data is desired, not a URI of existing data from
      * which the user can pick.  A ACTION_GET_CONTENT could allow the user to
      * create the data as it runs (for example taking a picture or recording a
-     * sound), let them browser over the web and download the desired data,
+     * sound), let them browse over the web and download the desired data,
      * etc.
      * <p>
-     * There are two main ways to use this action: if you want an specific kind
+     * There are two main ways to use this action: if you want a specific kind
      * of data, such as a person contact, you set the MIME type to the kind of
      * data you want and launch it with {@link Context#startActivity(Intent)}.
      * The system will then launch the best application to select that kind
@@ -864,12 +864,12 @@ public class Intent implements Parcelable, Cloneable {
      * broad MIME type (such as image/* or {@literal *}/*), resulting in a
      * broad range of content types the user can select from.
      * <p>
-     * When using such a broad GET_CONTENT action, it is often desireable to
+     * When using such a broad GET_CONTENT action, it is often desirable to
      * only pick from data that can be represented as a stream.  This is
      * accomplished by requiring the {@link #CATEGORY_OPENABLE} in the Intent.
      * <p>
      * Callers can optionally specify {@link #EXTRA_LOCAL_ONLY} to request that
-     * the launched content chooser only return results representing data that
+     * the launched content chooser only returns results representing data that
      * is locally available on the device.  For example, if this extra is set
      * to true then an image picker should not show any pictures that are available
      * from a remote server but not already on the local device (thus requiring
@@ -1908,14 +1908,14 @@ public class Intent implements Parcelable, Cloneable {
     // location; they are not general-purpose actions.
 
     /**
-     * Broadcast Action: An GTalk connection has been established.
+     * Broadcast Action: A GTalk connection has been established.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_GTALK_SERVICE_CONNECTED =
             "android.intent.action.GTALK_CONNECTED";
 
     /**
-     * Broadcast Action: An GTalk connection has been disconnected.
+     * Broadcast Action: A GTalk connection has been disconnected.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_GTALK_SERVICE_DISCONNECTED =
@@ -2200,7 +2200,7 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_SELECTED_ALTERNATIVE = "android.intent.category.SELECTED_ALTERNATIVE";
     /**
-     * Intended to be used as a tab inside of an containing TabActivity.
+     * Intended to be used as a tab inside of a containing TabActivity.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_TAB = "android.intent.category.TAB";
@@ -2256,7 +2256,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String CATEGORY_UNIT_TEST = "android.intent.category.UNIT_TEST";
     /**
-     * To be used as an sample code example (not part of the normal user
+     * To be used as a sample code example (not part of the normal user
      * experience).
      */
     public static final String CATEGORY_SAMPLE_CODE = "android.intent.category.SAMPLE_CODE";
@@ -2506,7 +2506,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_KEY_CONFIRM = "android.intent.extra.KEY_CONFIRM";
 
     /**
-     * Used as an boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED} or
+     * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED} or
      * {@link android.content.Intent#ACTION_PACKAGE_CHANGED} intents to override the default action
      * of restarting the application.
      */
@@ -3704,7 +3704,7 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
-     * Check if an category exists in the intent.
+     * Check if a category exists in the intent.
      *
      * @param category The category to check.
      *
@@ -4623,7 +4623,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Add a new category to the intent.  Categories provide additional detail
-     * about the action the intent is perform.  When resolving an intent, only
+     * about the action the intent performs.  When resolving an intent, only
      * activities that provide <em>all</em> of the requested categories will be
      * used.
      *
@@ -4646,7 +4646,7 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
-     * Remove an category from an intent.
+     * Remove a category from an intent.
      *
      * @param category The category to remove.
      *

@@ -268,7 +268,7 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
     /**
      * Called by bindView() to set the text for a TextView but only if
      * there is no existing ViewBinder or if the existing ViewBinder cannot
-     * handle binding to an TextView.
+     * handle binding to a TextView.
      *
      * @param v TextView to receive text
      * @param text the text to be set for the TextView

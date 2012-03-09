@@ -104,7 +104,7 @@ import com.android.internal.os.HandlerCaller;
  * </ul>
  * <h3>Retrieving window content</h3>
  * <p>
- * An service can specify in its declaration that it can retrieve the active window
+ * A service can specify in its declaration that it can retrieve the active window
  * content which is represented as a tree of {@link AccessibilityNodeInfo}. Note that
  * declaring this capability requires that the service declares its configuration via
  * an XML resource referenced by {@link #SERVICE_META_DATA}.

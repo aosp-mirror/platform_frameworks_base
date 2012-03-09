@@ -917,7 +917,7 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Call an provider-defined method.  This can be used to implement
+     * Call a provider-defined method.  This can be used to implement
      * read or write interfaces which are cheaper than using a Cursor and/or
      * do not fit into the traditional table model.
      *

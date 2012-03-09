@@ -1412,7 +1412,7 @@ public class ScrollView extends FrameLayout {
         }
         mChildToScrollTo = null;
 
-        // Calling this with the present values causes it to re-clam them
+        // Calling this with the present values causes it to re-claim them
         scrollTo(mScrollX, mScrollY);
     }
 
@@ -1436,7 +1436,7 @@ public class ScrollView extends FrameLayout {
     }
 
     /**
-     * Return true if child is an descendant of parent, (or equal to the parent).
+     * Return true if child is a descendant of parent, (or equal to the parent).
      */
     private boolean isViewDescendantOf(View child, View parent) {
         if (child == parent) {

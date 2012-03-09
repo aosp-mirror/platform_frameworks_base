@@ -2173,7 +2173,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * This is called when, while currently displayed in extract mode, the
      * current input target changes.  The default implementation will
      * auto-hide the IME if the new target is not a full editor, since this
-     * can be an confusing experience for the user.
+     * can be a confusing experience for the user.
      */
     public void onExtractingInputChanged(EditorInfo ei) {
         if (ei.inputType == InputType.TYPE_NULL) {

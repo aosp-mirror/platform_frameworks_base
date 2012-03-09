@@ -1017,7 +1017,7 @@ public class ListPopupWindow {
 
             View hintView = mPromptView;
             if (hintView != null) {
-                // if an hint has been specified, we accomodate more space for it and
+                // if a hint has been specified, we accomodate more space for it and
                 // add a text view in the drop down menu, at the bottom of the list
                 LinearLayout hintContainer = new LinearLayout(context);
                 hintContainer.setOrientation(LinearLayout.VERTICAL);

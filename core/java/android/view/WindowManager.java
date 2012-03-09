@@ -787,10 +787,10 @@ public interface WindowManager extends ViewManager {
          * hardware accelerated.  This is used for the starting preview windows
          * in the system process, which don't need to have the overhead of
          * hardware acceleration (they are just a static rendering), but should
-         * be rendered as much to match the actual window of the app even if it
+         * be rendered as such to match the actual window of the app even if it
          * is hardware accelerated.
          * Even if the window isn't hardware accelerated, still do its rendering
-         * as if it is.
+         * as if it was.
          * Like {@link #FLAG_HARDWARE_ACCELERATED} except for trusted system windows
          * that need hardware acceleration (e.g. LockScreen), where hardware acceleration
          * is generally disabled. This flag must be specified in addition to 
@@ -803,7 +803,7 @@ public interface WindowManager extends ViewManager {
 
         /**
          * In the system process, we globally do not use hardware acceleration
-         * because there are many threads doing UI there and they an conflict.
+         * because there are many threads doing UI there and they conflict.
          * If certain parts of the UI that really do want to use hardware
          * acceleration, this flag can be set to force it.  This is basically
          * for the lock screen.  Anyone else using it, you are probably wrong.
@@ -814,7 +814,7 @@ public interface WindowManager extends ViewManager {
 
         /**
          * By default, wallpapers are sent new offsets when the wallpaper is scrolled. Wallpapers
-         * may elect to skp these notifications if they are no doing anything productive with
+         * may elect to skip these notifications if they are not doing anything productive with
          * them (they do not affect the wallpaper scrolling operation) by calling
          * {@link
          * android.service.wallpaper.WallpaperService.Engine#setOffsetNotificationsEnabled(boolean)}.

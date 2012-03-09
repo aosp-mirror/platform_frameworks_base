@@ -458,7 +458,7 @@ public final class Parcel {
     }
 
     /**
-     * Write an byte array into the parcel at the current {@link #dataPosition},
+     * Write a byte array into the parcel at the current {@link #dataPosition},
      * growing {@link #dataCapacity} if needed.
      * @param b Bytes to place into the parcel.
      * @param offset Index of first byte to be written.
@@ -553,7 +553,7 @@ public final class Parcel {
     }
 
     /**
-     * Write an byte value into the parcel at the current dataPosition(),
+     * Write a byte value into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.
      */
     public final void writeByte(byte val) {

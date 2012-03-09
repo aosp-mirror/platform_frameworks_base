@@ -84,7 +84,7 @@ public class Contacts {
     @Deprecated
     public static final int KIND_ORGANIZATION = 4;
     /**
-     * Signifies an Phone row that is stored in the Phones table
+     * Signifies a Phone row that is stored in the Phones table
      * @deprecated see {@link android.provider.ContactsContract}
      */
     @Deprecated

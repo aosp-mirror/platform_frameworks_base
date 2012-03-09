@@ -1389,7 +1389,7 @@ public class HorizontalScrollView extends FrameLayout {
         }
         mChildToScrollTo = null;
 
-        // Calling this with the present values causes it to re-clam them
+        // Calling this with the present values causes it to re-claim them
         scrollTo(mScrollX, mScrollY);
     }
 
@@ -1412,7 +1412,7 @@ public class HorizontalScrollView extends FrameLayout {
     }
 
     /**
-     * Return true if child is an descendant of parent, (or equal to the parent).
+     * Return true if child is a descendant of parent, (or equal to the parent).
      */
     private boolean isViewDescendantOf(View child, View parent) {
         if (child == parent) {
@@ -1427,7 +1427,7 @@ public class HorizontalScrollView extends FrameLayout {
      * Fling the scroll view
      *
      * @param velocityX The initial velocity in the X direction. Positive
-     *                  numbers mean that the finger/curor is moving down the screen,
+     *                  numbers mean that the finger/cursor is moving down the screen,
      *                  which means we want to scroll towards the left.
      */
     public void fling(int velocityX) {
