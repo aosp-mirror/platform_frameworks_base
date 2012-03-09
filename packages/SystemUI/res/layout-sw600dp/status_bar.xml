@@ -54,7 +54,7 @@
                 android:clipToPadding="false"
                 >
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                    android:layout_width="80dip"
+                    android:layout_width="@dimen/navigation_key_width"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_back"
                     systemui:keyCode="4"
@@ -62,7 +62,7 @@
                     systemui:glowBackground="@drawable/ic_sysbar_highlight"
                     />
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
-                    android:layout_width="80dip"
+                    android:layout_width="@dimen/navigation_key_width"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_home"
                     systemui:keyCode="3"
@@ -70,14 +70,14 @@
                     systemui:glowBackground="@drawable/ic_sysbar_highlight"
                     />
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
-                    android:layout_width="80dip"
+                    android:layout_width="@dimen/navigation_key_width"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_recent"
                     android:contentDescription="@string/accessibility_recent"
                     systemui:glowBackground="@drawable/ic_sysbar_highlight"
                     />
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-                    android:layout_width="80dip"
+                    android:layout_width="@dimen/navigation_menu_key_width"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_menu"
                     systemui:keyCode="82"

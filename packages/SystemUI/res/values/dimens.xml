@@ -91,4 +91,9 @@
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
 
+    <!-- The width of the view containing non-menu status bar icons -->
+    <dimen name="navigation_key_width">80dip</dimen>
+
+    <!-- The width of the view containing the menu status bar icon -->
+    <dimen name="navigation_menu_key_width">40dip</dimen>
 </resources>
