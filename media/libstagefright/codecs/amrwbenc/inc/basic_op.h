@@ -29,11 +29,7 @@
 #define MIN_16 (Word16)-32768	/* 0x8000 */
 
 
-#ifdef LINUX
-#define  static_vo  static __inline__
-#else
 #define  static_vo  static __inline
-#endif
 
 #define saturate(L_var1) (((L_var1) > 0X00007fffL) ? (MAX_16): (((L_var1) < (Word32) 0xffff8000L) ? (MIN_16): ((L_var1) & 0xffff)))
 
