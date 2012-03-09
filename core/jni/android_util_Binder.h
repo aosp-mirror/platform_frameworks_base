@@ -15,6 +15,9 @@
 ** limitations under the License.
 */
 
+#ifndef ANDROID_UTIL_BINDER_H
+#define ANDROID_UTIL_BINDER_H
+
 #include <binder/IBinder.h>
 
 #include "jni.h"
@@ -25,10 +28,13 @@ namespace android {
 extern jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val);
 extern sp<IBinder> ibinderForJavaObject(JNIEnv* env, jobject obj);
 
-// Conversion from Java Parcel Object to C++ Parcel instance.
-// Note: does not type checking; must guarantee jobject is a Java Parcel
-extern Parcel* parcelForJavaObject(JNIEnv* env, jobject obj);
-
 extern jobject newParcelFileDescriptor(JNIEnv* env, jobject fileDesc);
 
+extern void set_dalvik_blockguard_policy(JNIEnv* env, jint strict_policy);
+
+extern void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
+        bool canThrowRemoteException = false);
+
 }
+
+#endif

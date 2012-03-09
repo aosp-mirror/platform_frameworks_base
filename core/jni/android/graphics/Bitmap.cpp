@@ -7,6 +7,7 @@
 #include "SkUnPreMultiply.h"
 
 #include <binder/Parcel.h>
+#include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 #include "android_nio_utils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
