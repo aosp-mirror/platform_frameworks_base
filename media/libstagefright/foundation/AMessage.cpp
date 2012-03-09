@@ -74,6 +74,7 @@ void AMessage::freeItem(Item *item) {
 
         case kTypeObject:
         case kTypeMessage:
+        case kTypeBuffer:
         {
             if (item->u.refValue != NULL) {
                 item->u.refValue->decStrong(this);
@@ -292,6 +293,7 @@ sp<AMessage> AMessage::dup() const {
             }
 
             case kTypeObject:
+            case kTypeBuffer:
             {
                 to->u.refValue = from->u.refValue;
                 to->u.refValue->incStrong(msg.get());
@@ -395,6 +397,10 @@ AString AMessage::debugString(int32_t indent) const {
             case kTypeObject:
                 tmp = StringPrintf(
                         "RefBase *%s = %p", item.mName, item.u.refValue);
+                break;
+            case kTypeBuffer:
+                tmp = StringPrintf(
+                        "ABuffer *%s = %p", item.mName, item.u.refValue);
                 break;
             case kTypeMessage:
                 tmp = StringPrintf(
