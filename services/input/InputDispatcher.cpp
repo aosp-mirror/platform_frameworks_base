@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "InputDispatcher"
+#define ATRACE_TAG ATRACE_TAG_INPUT
 
 //#define LOG_NDEBUG 0
 
@@ -44,6 +45,7 @@
 
 #include "InputDispatcher.h"
 
+#include <utils/Trace.h>
 #include <cutils/log.h>
 #include <androidfw/PowerManager.h>
 
@@ -280,6 +282,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
         } else {
             // Inbound queue has at least one entry.
             mPendingEvent = mInboundQueue.dequeueAtHead();
+            traceInboundQueueLengthLocked();
         }
 
         // Poke user activity for this event.
@@ -379,6 +382,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
 bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
     bool needWake = mInboundQueue.isEmpty();
     mInboundQueue.enqueueAtTail(entry);
+    traceInboundQueueLengthLocked();
 
     switch (entry->type) {
     case EventEntry::TYPE_KEY: {
@@ -572,6 +576,7 @@ void InputDispatcher::drainInboundQueueLocked() {
         EventEntry* entry = mInboundQueue.dequeueAtHead();
         releaseInboundEventLocked(entry);
     }
+    traceInboundQueueLengthLocked();
 }
 
 void InputDispatcher::releasePendingEventLocked() {
@@ -1867,6 +1872,7 @@ void InputDispatcher::enqueueDispatchEntryLocked(
 
     // Enqueue the dispatch entry.
     connection->outboundQueue.enqueueAtTail(dispatchEntry);
+    traceOutboundQueueLengthLocked(connection);
 }
 
 void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
@@ -1978,7 +1984,9 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 
         // Re-enqueue the event on the wait queue.
         connection->outboundQueue.dequeue(dispatchEntry);
+        traceOutboundQueueLengthLocked(connection);
         connection->waitQueue.enqueueAtTail(dispatchEntry);
+        traceWaitQueueLengthLocked(connection);
     }
 }
 
@@ -2009,7 +2017,9 @@ void InputDispatcher::abortBrokenDispatchCycleLocked(nsecs_t currentTime,
 
     // Clear the dispatch queues.
     drainDispatchQueueLocked(&connection->outboundQueue);
+    traceOutboundQueueLengthLocked(connection);
     drainDispatchQueueLocked(&connection->waitQueue);
+    traceWaitQueueLengthLocked(connection);
 
     // The connection appears to be unrecoverably broken.
     // Ignore already broken or zombie connections.
@@ -3311,8 +3321,10 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
         // a few things.
         if (dispatchEntry == connection->findWaitQueueEntry(seq)) {
             connection->waitQueue.dequeue(dispatchEntry);
+            traceWaitQueueLengthLocked(connection);
             if (restartEvent && connection->status == Connection::STATUS_NORMAL) {
                 connection->outboundQueue.enqueueAtHead(dispatchEntry);
+                traceOutboundQueueLengthLocked(connection);
             } else {
                 releaseDispatchEntryLocked(dispatchEntry);
             }
@@ -3496,6 +3508,28 @@ void InputDispatcher::initializeKeyEvent(KeyEvent* event, const KeyEntry* entry)
 void InputDispatcher::updateDispatchStatisticsLocked(nsecs_t currentTime, const EventEntry* entry,
         int32_t injectionResult, nsecs_t timeSpentWaitingForApplication) {
     // TODO Write some statistics about how long we spend waiting.
+}
+
+void InputDispatcher::traceInboundQueueLengthLocked() {
+    if (ATRACE_ENABLED()) {
+        ATRACE_INT("iq", mInboundQueue.count());
+    }
+}
+
+void InputDispatcher::traceOutboundQueueLengthLocked(const sp<Connection>& connection) {
+    if (ATRACE_ENABLED()) {
+        char counterName[40];
+        snprintf(counterName, sizeof(counterName), "oq:%s", connection->getWindowName());
+        ATRACE_INT(counterName, connection->outboundQueue.count());
+    }
+}
+
+void InputDispatcher::traceWaitQueueLengthLocked(const sp<Connection>& connection) {
+    if (ATRACE_ENABLED()) {
+        char counterName[40];
+        snprintf(counterName, sizeof(counterName), "wq:%s", connection->getWindowName());
+        ATRACE_INT(counterName, connection->waitQueue.count());
+    }
 }
 
 void InputDispatcher::dump(String8& dump) {
@@ -4012,6 +4046,16 @@ InputDispatcher::Connection::Connection(const sp<InputChannel>& inputChannel,
 }
 
 InputDispatcher::Connection::~Connection() {
+}
+
+const char* InputDispatcher::Connection::getWindowName() const {
+    if (inputWindowHandle != NULL) {
+        return inputWindowHandle->getName().string();
+    }
+    if (monitor) {
+        return "monitor";
+    }
+    return "?";
 }
 
 const char* InputDispatcher::Connection::getStatusLabel() const {
