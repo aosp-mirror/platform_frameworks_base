@@ -59,7 +59,7 @@ import java.util.Arrays;
  * "Account & Sync" settings page and one user of the android:smallIcon is the Contact Application's
  * tab panels.
  * <p>
- * The preferences attribute points to an PreferenceScreen xml hierarchy that contains
+ * The preferences attribute points to a PreferenceScreen xml hierarchy that contains
  * a list of PreferenceScreens that can be invoked to manage the authenticator. An example is:
  * <pre>
  * &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"&gt;

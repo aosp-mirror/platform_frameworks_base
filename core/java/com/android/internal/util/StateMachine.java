@@ -1195,7 +1195,7 @@ public class StateMachine {
     }
 
     /**
-     * Constructor creates an StateMachine using the looper.
+     * Constructor creates a StateMachine using the looper.
      *
      * @param name of the state machine
      */

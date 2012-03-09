@@ -64,7 +64,7 @@ public class SslError {
     public static final int SSL_MAX_ERROR = 6;
 
     /**
-     * The SSL error set bitfield (each individual error is an bit index;
+     * The SSL error set bitfield (each individual error is a bit index;
      * multiple individual errors can be OR-ed)
      */
     int mErrors;

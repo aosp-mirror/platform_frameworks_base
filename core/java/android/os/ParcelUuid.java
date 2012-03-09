@@ -42,7 +42,7 @@ public final class ParcelUuid implements Parcelable {
      *
      * @param uuid
      *            the UUID string to parse.
-     * @return an ParcelUuid instance.
+     * @return a ParcelUuid instance.
      * @throws NullPointerException
      *             if {@code uuid} is {@code null}.
      * @throws IllegalArgumentException

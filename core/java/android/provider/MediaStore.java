@@ -192,7 +192,7 @@ public final class MediaStore {
 
     /**
      * Standard Intent action that can be sent to have the camera application
-     * capture an video and return it.
+     * capture a video and return it.
      * <p>
      * The caller may pass in an extra EXTRA_VIDEO_QUALITY to control the video quality.
      * <p>
@@ -441,12 +441,12 @@ public final class MediaStore {
             public static final int MEDIA_TYPE_AUDIO = 2;
 
             /**
-             * Constant for the {@link #MEDIA_TYPE} column indicating that file is an video file.
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file is a video file.
              */
             public static final int MEDIA_TYPE_VIDEO = 3;
 
             /**
-             * Constant for the {@link #MEDIA_TYPE} column indicating that file is an playlist file.
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file is a playlist file.
              */
             public static final int MEDIA_TYPE_PLAYLIST = 4;
         }

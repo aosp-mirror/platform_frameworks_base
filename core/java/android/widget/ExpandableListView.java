@@ -740,7 +740,7 @@ public class ExpandableListView extends ListView {
     
     /**
      * Converts a flat list position (the raw position of an item (child or group)
-     * in the list) to an group and/or child position (represented in a
+     * in the list) to a group and/or child position (represented in a
      * packed position). This is useful in situations where the caller needs to
      * use the underlying {@link ListView}'s methods. Use
      * {@link ExpandableListView#getPackedPositionType} ,

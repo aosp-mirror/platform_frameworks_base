@@ -17,7 +17,7 @@
 package android.bluetooth;
 
 /**
- * The result of execution of an single AT command.<p>
+ * The result of execution of a single AT command.<p>
  *
  *
  * This class can represent the final response to an AT command line, and also

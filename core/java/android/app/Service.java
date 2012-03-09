@@ -453,7 +453,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     
     /**
      * Called by the system to notify a Service that it is no longer used and is being removed.  The
-     * service should clean up an resources it holds (threads, registered
+     * service should clean up any resources it holds (threads, registered
      * receivers, etc) at this point.  Upon return, there will be no more calls
      * in to this Service object and it is effectively dead.  Do not call this method directly.
      */

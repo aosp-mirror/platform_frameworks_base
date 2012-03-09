@@ -193,7 +193,7 @@ public final class BluetoothDevice implements Parcelable {
     public static final String EXTRA_RSSI = "android.bluetooth.device.extra.RSSI";
 
     /**
-     * Used as an Parcelable {@link BluetoothClass} extra field in {@link
+     * Used as a Parcelable {@link BluetoothClass} extra field in {@link
      * #ACTION_FOUND} and {@link #ACTION_CLASS_CHANGED} intents.
      */
     public static final String EXTRA_CLASS = "android.bluetooth.device.extra.CLASS";

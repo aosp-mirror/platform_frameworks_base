@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * This class is used to specify meta information of an spell checker.
+ * This class is used to specify meta information of a spell checker.
  */
 public final class SpellCheckerInfo implements Parcelable {
     private static final String TAG = SpellCheckerInfo.class.getSimpleName();
@@ -53,7 +53,7 @@ public final class SpellCheckerInfo implements Parcelable {
     private final String mSettingsActivityName;
 
     /**
-     * The array of the subtypes.
+     * The array of subtypes.
      */
     private final ArrayList<SpellCheckerSubtype> mSubtypes = new ArrayList<SpellCheckerSubtype>();
 

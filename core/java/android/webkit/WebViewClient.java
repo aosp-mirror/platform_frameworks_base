@@ -204,7 +204,7 @@ public class WebViewClient {
 
     /**
      * Notify the host application that an SSL error occurred while loading a
-     * resource, but the WebView but chose to proceed anyway based on a
+     * resource, but the WebView chose to proceed anyway based on a
      * decision retained from a previous response to onReceivedSslError().
      * @hide
      */
@@ -220,7 +220,7 @@ public class WebViewClient {
      * default behavior is to cancel, returning no client certificate.
      *
      * @param view The WebView that is initiating the callback.
-     * @param handler An ClientCertRequestHandler object that will
+     * @param handler A ClientCertRequestHandler object that will
      *            handle the user's response.
      * @param host_and_port The host and port of the requesting server.
      *
@@ -266,7 +266,7 @@ public class WebViewClient {
      * Notify the host application that a key was not handled by the WebView.
      * Except system keys, WebView always consumes the keys in the normal flow
      * or if shouldOverrideKeyEvent returns true. This is called asynchronously
-     * from where the key is dispatched. It gives the host application an chance
+     * from where the key is dispatched. It gives the host application a chance
      * to handle the unhandled key events.
      *
      * @param view The WebView that is initiating the callback.

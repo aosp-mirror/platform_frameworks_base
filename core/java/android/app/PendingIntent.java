@@ -351,7 +351,7 @@ public final class PendingIntent implements Parcelable {
 
     /**
      * Cancel a currently active PendingIntent.  Only the original application
-     * owning an PendingIntent can cancel it.
+     * owning a PendingIntent can cancel it.
      */
     public void cancel() {
         try {

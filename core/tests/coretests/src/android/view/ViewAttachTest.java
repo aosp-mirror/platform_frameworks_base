@@ -29,12 +29,12 @@ public class ViewAttachTest extends
 
     /**
      * Make sure that onAttachedToWindow and onDetachedToWindow is called in the
-     * correct order The ViewAttachTestActivity contains a view that will throw
-     * an RuntimeException if onDetachedToWindow and onAttachedToWindow is
+     * correct order. The ViewAttachTestActivity contains a view that will throw
+     * a RuntimeException if onDetachedToWindow and onAttachedToWindow are
      * called in the wrong order.
      *
      * 1. Initiate the activity 2. Perform a series of orientation changes to
-     * the activity (this will force the View hierarchy to be rebuild,
+     * the activity (this will force the View hierarchy to be rebuilt,
      * generating onAttachedToWindow and onDetachedToWindow)
      *
      * Expected result: No RuntimeException is thrown from the TestView in

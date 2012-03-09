@@ -1270,7 +1270,7 @@ public abstract class Context {
     /**
      * Connect to an application service, creating it if needed.  This defines
      * a dependency between your application and the service.  The given
-     * <var>conn</var> will receive the service object when its created and be
+     * <var>conn</var> will receive the service object when it is created and be
      * told if it dies and restarts.  The service will be considered required
      * by the system only for as long as the calling context exists.  For
      * example, if this Context is an Activity that is stopped, the service will
@@ -1279,15 +1279,15 @@ public abstract class Context {
      * <p>This function will throw {@link SecurityException} if you do not
      * have permission to bind to the given service.
      *
-     * <p class="note">Note: this method <em>can not be called from an
+     * <p class="note">Note: this method <em>can not be called from a
      * {@link BroadcastReceiver} component</em>.  A pattern you can use to
-     * communicate from an BroadcastReceiver to a Service is to call
+     * communicate from a BroadcastReceiver to a Service is to call
      * {@link #startService} with the arguments containing the command to be
      * sent, with the service calling its
      * {@link android.app.Service#stopSelf(int)} method when done executing
      * that command.  See the API demo App/Service/Service Start Arguments
      * Controller for an illustration of this.  It is okay, however, to use
-     * this method from an BroadcastReceiver that has been registered with
+     * this method from a BroadcastReceiver that has been registered with
      * {@link #registerReceiver}, since the lifetime of this BroadcastReceiver
      * is tied to another object (the one that registered it).</p>
      *

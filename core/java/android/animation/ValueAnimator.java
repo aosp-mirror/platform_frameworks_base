@@ -400,7 +400,7 @@ public class ValueAnimator extends Animator {
 
     /**
      * Sets the values, per property, being animated between. This function is called internally
-     * by the constructors of ValueAnimator that take a list of values. But an ValueAnimator can
+     * by the constructors of ValueAnimator that take a list of values. But a ValueAnimator can
      * be constructed without values and this method can be called to set the values manually
      * instead.
      *

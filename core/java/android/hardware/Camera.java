@@ -1358,7 +1358,7 @@ public class Camera {
     /**
      * Returns an empty {@link Parameters} for testing purpose.
      *
-     * @return an Parameter object.
+     * @return a Parameter object.
      *
      * @hide
      */
@@ -3127,7 +3127,7 @@ public class Camera {
         public void getFocusDistances(float[] output) {
             if (output == null || output.length != 3) {
                 throw new IllegalArgumentException(
-                        "output must be an float array with three elements.");
+                        "output must be a float array with three elements.");
             }
             splitFloat(get(KEY_FOCUS_DISTANCES), output);
         }

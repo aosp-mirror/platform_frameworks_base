@@ -182,7 +182,7 @@ public final class URLUtil {
     }
 
     /**
-     * @return True iff the url is an proxy url to allow cookieless network 
+     * @return True iff the url is a proxy url to allow cookieless network
      * requests from a file url.
      * @deprecated Cookieless proxy is no longer supported.
      */

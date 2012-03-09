@@ -119,7 +119,7 @@ public abstract class PackageManager {
      * {@link PackageInfo} flag: return the
      * {@link PackageInfo#gids group ids} that are associated with an
      * application.
-     * This applies for any API returning an PackageInfo class, either
+     * This applies for any API returning a PackageInfo class, either
      * directly or nested inside of another.
      */
     public static final int GET_GIDS                    = 0x00000100;
@@ -142,7 +142,7 @@ public abstract class PackageManager {
      * {@link ProviderInfo} flag: return the
      * {@link ProviderInfo#uriPermissionPatterns URI permission patterns}
      * that are associated with a content provider.
-     * This applies for any API returning an ProviderInfo class, either
+     * This applies for any API returning a ProviderInfo class, either
      * directly or nested inside of another.
      */
     public static final int GET_URI_PERMISSION_PATTERNS  = 0x00000800;
