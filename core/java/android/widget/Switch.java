@@ -359,6 +359,17 @@ public class Switch extends CompoundButton {
     }
 
     /**
+     * Set the drawable used for the track that the switch slides within.
+     *
+     * @param track Resource ID of a track drawable
+     *
+     * @attr ref android.R.styleable#Switch_track
+     */
+    public void setTrackResource(int resId) {
+        setTrackDrawable(getContext().getResources().getDrawable(resId));
+    }
+
+    /**
      * Get the drawable used for the track that the switch slides within.
      *
      * @return Track drawable
@@ -380,6 +391,18 @@ public class Switch extends CompoundButton {
     public void setThumbDrawable(Drawable thumb) {
         mThumbDrawable = thumb;
         requestLayout();
+    }
+
+    /**
+     * Set the drawable used for the switch "thumb" - the piece that the user
+     * can physically touch and drag along the track.
+     *
+     * @param thumb Resource ID of a thumb drawable
+     *
+     * @attr ref android.R.styleable#Switch_thumb
+     */
+    public void setThumbResource(int resId) {
+        setThumbDrawable(getContext().getResources().getDrawable(resId));
     }
 
     /**
