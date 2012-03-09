@@ -123,6 +123,12 @@ void WVMExtractor::setAdaptiveStreamingMode(bool adaptive) {
     }
 }
 
+void WVMExtractor::setUID(uid_t uid) {
+    if (mImpl != NULL) {
+        mImpl->setUID(uid);
+    }
+}
+
 bool SniffWVM(
     const sp<DataSource> &source, String8 *mimeType, float *confidence,
         sp<AMessage> *) {
