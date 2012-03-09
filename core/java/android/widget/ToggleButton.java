@@ -154,16 +154,6 @@ public class ToggleButton extends CompoundButton {
     }
 
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
-        if (isChecked()) {
-            event.getText().add(mContext.getString(R.string.togglebutton_pressed));
-        } else {
-            event.getText().add(mContext.getString(R.string.togglebutton_not_pressed));
-        }
-    }
-
-    @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         event.setClassName(ToggleButton.class.getName());
