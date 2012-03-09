@@ -279,15 +279,15 @@ private:
 
     class InputDesc {
     public:
-        InputDesc() {}
-        virtual ~InputDesc() {}
-        int mSessionId;
+        InputDesc(int session) : mSessionId(session) {}
+        /*virtual*/ ~InputDesc() {}
+        const int mSessionId;
         Vector< sp<AudioEffect> >mEffects;
     };
 
     static const char * const kInputSourceNames[AUDIO_SOURCE_CNT -1];
 
-    void setPreProcessorEnabled(InputDesc *inputDesc, bool enabled);
+    void setPreProcessorEnabled(const InputDesc *inputDesc, bool enabled);
     status_t loadPreProcessorConfig(const char *path);
     status_t loadEffects(cnode *root, Vector <EffectDesc *>& effects);
     EffectDesc *loadEffect(cnode *root);

@@ -298,8 +298,7 @@ audio_io_handle_t AudioPolicyService::getInput(audio_source_t inputSource,
     ssize_t idx = mInputs.indexOfKey(input);
     InputDesc *inputDesc;
     if (idx < 0) {
-        inputDesc = new InputDesc();
-        inputDesc->mSessionId = audioSession;
+        inputDesc = new InputDesc(audioSession);
         mInputs.add(input, inputDesc);
     } else {
         inputDesc = mInputs.valueAt(idx);
@@ -358,7 +357,6 @@ void AudioPolicyService::releaseInput(audio_io_handle_t input)
     }
     InputDesc *inputDesc = mInputs.valueAt(index);
     setPreProcessorEnabled(inputDesc, false);
-    inputDesc->mEffects.clear();
     delete inputDesc;
     mInputs.removeItemsAt(index);
 }
@@ -602,9 +600,9 @@ status_t AudioPolicyService::dumpPermissionDenial(int fd)
     return NO_ERROR;
 }
 
-void AudioPolicyService::setPreProcessorEnabled(InputDesc *inputDesc, bool enabled)
+void AudioPolicyService::setPreProcessorEnabled(const InputDesc *inputDesc, bool enabled)
 {
-    Vector<sp<AudioEffect> > fxVector = inputDesc->mEffects;
+    const Vector<sp<AudioEffect> > &fxVector = inputDesc->mEffects;
     for (size_t i = 0; i < fxVector.size(); i++) {
         fxVector.itemAt(i)->setEnabled(enabled);
     }
