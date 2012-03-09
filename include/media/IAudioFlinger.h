@@ -77,6 +77,8 @@ public:
     virtual     int         channelCount(audio_io_handle_t output) const = 0;
     virtual     audio_format_t format(audio_io_handle_t output) const = 0;
     virtual     size_t      frameCount(audio_io_handle_t output) const = 0;
+
+    // return estimated latency in milliseconds
     virtual     uint32_t    latency(audio_io_handle_t output) const = 0;
 
     /* set/get the audio hardware state. This will probably be used by
