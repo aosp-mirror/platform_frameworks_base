@@ -671,7 +671,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Du har overskredet grensen for opplåsingsforsøk med Ansiktslås"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Lader, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Fullt ladet"</string>
-    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Koble til en batterilader."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Mangler SIM-kort."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nettbrettet mangler SIM-kort."</string>

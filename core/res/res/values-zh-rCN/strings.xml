@@ -769,7 +769,7 @@
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"从外部访问内容提供程序"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"允许持有者通过界面访问内容提供程序。普通应用绝不需要此权限。"</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"阻止自动设备更新"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"允许持有人向系统提供相关信息，以确定什么时候适合执行非交互式重新启动来升级设备。"</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"允许应用向系统提供相关信息，以确定何时适合执行非交互式重启以升级设备。"</string>
     <string name="save_password_message" msgid="767344687139195790">"是否希望浏览器记住此密码？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"暂不保存"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"记住"</string>

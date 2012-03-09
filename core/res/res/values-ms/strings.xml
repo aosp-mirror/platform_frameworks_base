@@ -769,7 +769,7 @@
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"akses pembekal kandungan secara luaran"</string>
     <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Membolehkan pemegang mengakses pembekal kandungan dari luar. Tidak akan sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_updateLock" msgid="3527558366616680889">"tidak menggalakkan kemas kini peranti automatik"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Membenarkan pemegang untuk menawarkan maklumat kepada sistem tentang bila akan menjadi masa yang baik untuk but semula bukan interaktif untuk menaik taraf peranti."</string>
+    <string name="permdesc_updateLock" msgid="1655625832166778492">"Membenarkan aplikasi untuk menawarkan maklumat kepada sistem tentang bila akan menjadi masa yang baik untuk but semula bukan interaktif untuk menaik taraf peranti."</string>
     <string name="save_password_message" msgid="767344687139195790">"Adakah anda mahu penyemak imbas mengingati kata laluan ini?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Bukan sekarang"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
