@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "rs.h"
 #include "rsDevice.h"
 #include "rsContext.h"
 #include "rsThreadIO.h"

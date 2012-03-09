@@ -18,7 +18,7 @@
 #define ANDROID_RS_MESH_H
 
 
-#include "rs.h"
+#include "rsObjectBase.h"
 
 // ---------------------------------------------------------------------------
 namespace android {

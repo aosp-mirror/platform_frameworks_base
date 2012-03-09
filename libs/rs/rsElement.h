@@ -19,6 +19,7 @@
 
 #include "rsComponent.h"
 #include "rsUtils.h"
+#include "rsDefines.h"
 #include "rsObjectBase.h"
 
 // ---------------------------------------------------------------------------

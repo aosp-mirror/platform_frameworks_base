@@ -18,7 +18,6 @@
 #define ANDROID_RS_SAMPLER_H
 
 #include "rsAllocation.h"
-#include "rs.h"
 
 // ---------------------------------------------------------------------------
 namespace android {

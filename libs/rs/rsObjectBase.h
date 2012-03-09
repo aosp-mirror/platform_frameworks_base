@@ -18,6 +18,7 @@
 #define ANDROID_RS_OBJECT_BASE_H
 
 #include "rsUtils.h"
+#include "rsDefines.h"
 
 #define RS_OBJECT_DEBUG 0
 

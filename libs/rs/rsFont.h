@@ -17,7 +17,6 @@
 #ifndef ANDROID_RS_FONT_H
 #define ANDROID_RS_FONT_H
 
-#include "rs.h"
 #include "rsStream.h"
 #include <utils/String8.h>
 #include <utils/Vector.h>
