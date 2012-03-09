@@ -269,7 +269,8 @@ class WifiConfigStore {
             }
         }
         WifiNative.saveConfigCommand();
-        sendConfiguredNetworksChangedBroadcast();
+        sendConfiguredNetworksChangedBroadcast(config, result.isNewNetwork() ?
+                WifiManager.CHANGE_REASON_ADDED : WifiManager.CHANGE_REASON_CONFIG_CHANGE);
         return result;
     }
 
@@ -281,15 +282,18 @@ class WifiConfigStore {
     static void forgetNetwork(int netId) {
         if (WifiNative.removeNetworkCommand(netId)) {
             WifiNative.saveConfigCommand();
+            WifiConfiguration target = null;
             synchronized (sConfiguredNetworks) {
                 WifiConfiguration config = sConfiguredNetworks.get(netId);
                 if (config != null) {
-                    sConfiguredNetworks.remove(netId);
+                    target = sConfiguredNetworks.remove(netId);
                     sNetworkIds.remove(configKey(config));
                 }
             }
-            writeIpAndProxyConfigurations();
-            sendConfiguredNetworksChangedBroadcast();
+            if (target != null) {
+                writeIpAndProxyConfigurations();
+                sendConfiguredNetworksChangedBroadcast(target, WifiManager.CHANGE_REASON_REMOVED);
+            }
         } else {
             loge("Failed to remove network " + netId);
         }
@@ -305,7 +309,11 @@ class WifiConfigStore {
      */
     static int addOrUpdateNetwork(WifiConfiguration config) {
         NetworkUpdateResult result = addOrUpdateNetworkNative(config);
-        sendConfiguredNetworksChangedBroadcast();
+        if (result.getNetworkId() != WifiConfiguration.INVALID_NETWORK_ID) {
+            sendConfiguredNetworksChangedBroadcast(sConfiguredNetworks.get(result.getNetworkId()),
+                    result.isNewNetwork ? WifiManager.CHANGE_REASON_ADDED :
+                        WifiManager.CHANGE_REASON_CONFIG_CHANGE);
+        }
         return result.getNetworkId();
     }
 
@@ -319,16 +327,19 @@ class WifiConfigStore {
      */
     static boolean removeNetwork(int netId) {
         boolean ret = WifiNative.removeNetworkCommand(netId);
+        WifiConfiguration config = null;
         synchronized (sConfiguredNetworks) {
             if (ret) {
-                WifiConfiguration config = sConfiguredNetworks.get(netId);
+                config = sConfiguredNetworks.get(netId);
                 if (config != null) {
-                    sConfiguredNetworks.remove(netId);
+                    config = sConfiguredNetworks.remove(netId);
                     sNetworkIds.remove(configKey(config));
                 }
             }
         }
-        sendConfiguredNetworksChangedBroadcast();
+        if (config != null) {
+            sendConfiguredNetworksChangedBroadcast(config, WifiManager.CHANGE_REASON_REMOVED);
+        }
         return ret;
     }
 
@@ -338,11 +349,23 @@ class WifiConfigStore {
      * API. The more powerful selectNetwork()/saveNetwork() is used by the
      * state machine for connecting to a network
      *
-     * @param netId network to be removed
+     * @param netId network to be enabled
      */
     static boolean enableNetwork(int netId, boolean disableOthers) {
         boolean ret = enableNetworkWithoutBroadcast(netId, disableOthers);
-        sendConfiguredNetworksChangedBroadcast();
+        if (disableOthers) {
+            sendConfiguredNetworksChangedBroadcast();
+        } else {
+            WifiConfiguration enabledNetwork = null;
+            synchronized(sConfiguredNetworks) {
+                enabledNetwork = sConfiguredNetworks.get(netId);
+            }
+            // check just in case the network was removed by someone else.
+            if (enabledNetwork != null) {
+                sendConfiguredNetworksChangedBroadcast(enabledNetwork,
+                        WifiManager.CHANGE_REASON_CONFIG_CHANGE);
+            }
+        }
         return ret;
     }
 
@@ -375,15 +398,20 @@ class WifiConfigStore {
      */
     static boolean disableNetwork(int netId, int reason) {
         boolean ret = WifiNative.disableNetworkCommand(netId);
+        WifiConfiguration network = null;
         synchronized (sConfiguredNetworks) {
             WifiConfiguration config = sConfiguredNetworks.get(netId);
             /* Only change the reason if the network was not previously disabled */
             if (config != null && config.status != Status.DISABLED) {
                 config.status = Status.DISABLED;
                 config.disableReason = reason;
+                network = config;
             }
         }
-        sendConfiguredNetworksChangedBroadcast();
+        if (network != null) {
+            sendConfiguredNetworksChangedBroadcast(network,
+                    WifiManager.CHANGE_REASON_CONFIG_CHANGE);
+        }
         return ret;
     }
 
@@ -545,9 +573,29 @@ class WifiConfigStore {
         return false;
     }
 
+    /**
+     * Should be called when a single network configuration is made.
+     * @param network The network configuration that changed.
+     * @param reason The reason for the change, should be one of WifiManager.CHANGE_REASON_ADDED,
+     * WifiManager.CHANGE_REASON_REMOVED, or WifiManager.CHANGE_REASON_CHANGE.
+     */
+    private static void sendConfiguredNetworksChangedBroadcast(WifiConfiguration network,
+            int reason) {
+        Intent intent = new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(WifiManager.EXTRA_MULTIPLE_NETWORKS_CHANGED, false);
+        intent.putExtra(WifiManager.EXTRA_WIFI_CONFIGURATION, network);
+        intent.putExtra(WifiManager.EXTRA_CHANGE_REASON, reason);
+        sContext.sendBroadcast(intent);
+    }
+
+    /**
+     * Should be called when multiple network configuration changes are made.
+     */
     private static void sendConfiguredNetworksChangedBroadcast() {
         Intent intent = new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(WifiManager.EXTRA_MULTIPLE_NETWORKS_CHANGED, true);
         sContext.sendBroadcast(intent);
     }
 
@@ -1078,6 +1126,7 @@ class WifiConfigStore {
         }
 
         NetworkUpdateResult result = writeIpAndProxyConfigurationsOnChange(sConfig, config);
+        result.setIsNewNetwork(newNetwork);
         result.setNetworkId(netId);
         return result;
     }
@@ -1177,7 +1226,8 @@ class WifiConfigStore {
         if (ipChanged || proxyChanged) {
             currentConfig.linkProperties = linkProperties;
             writeIpAndProxyConfigurations();
-            sendConfiguredNetworksChangedBroadcast();
+            sendConfiguredNetworksChangedBroadcast(currentConfig,
+                    WifiManager.CHANGE_REASON_CONFIG_CHANGE);
         }
         return new NetworkUpdateResult(ipChanged, proxyChanged);
     }

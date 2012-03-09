@@ -308,11 +308,52 @@ public class WifiManager {
 
     /**
      * Broadcast intent action indicating that the configured networks changed.
-     * This can be as a result of adding/updating/deleting a network
+     * This can be as a result of adding/updating/deleting a network. If
+     * {@link #EXTRA_MULTIPLE_NETWORKS_CHANGED} is set to true the new configuration
+     * can be retreived with the {@link #EXTRA_WIFI_CONFIGURATION} extra. If multiple
+     * Wi-Fi configurations changed, {@link #EXTRA_WIFI_CONFIGURATION} will not be present.
      * @hide
      */
     public static final String CONFIGURED_NETWORKS_CHANGED_ACTION =
         "android.net.wifi.CONFIGURED_NETWORKS_CHANGE";
+    /**
+     * The lookup key for a (@link android.net.wifi.WifiConfiguration} object representing
+     * the changed Wi-Fi configuration when the {@link #CONFIGURED_NETWORKS_CHANGED_ACTION}
+     * broadcast is sent.
+     * @hide
+     */
+    public static final String EXTRA_WIFI_CONFIGURATION = "wifiConfiguration";
+    /**
+     * Multiple network configurations have changed.
+     * @see #CONFIGURED_NETWORKS_CHANGED_ACTION
+     *
+     * @hide
+     */
+    public static final String EXTRA_MULTIPLE_NETWORKS_CHANGED = "multipleChanges";
+    /**
+     * The lookup key for an integer indicating the reason a Wi-Fi network configuration
+     * has changed. Only present if {@link #EXTRA_MULTIPLE_NETWORKS_CHANGED} is {@code false}
+     * @see #CONFIGURED_NETWORKS_CHANGED_ACTION
+     * @hide
+     */
+    public static final String EXTRA_CHANGE_REASON = "changeReason";
+    /**
+     * The configuration is new and was added.
+     * @hide
+     */
+    public static final int CHANGE_REASON_ADDED = 0;
+    /**
+     * The configuration was removed and is no longer present in the system's list of
+     * configured networks.
+     * @hide
+     */
+    public static final int CHANGE_REASON_REMOVED = 1;
+    /**
+     * The configuration has changed as a result of explicit action or because the system
+     * took an automated action such as disabling a malfunctioning configuration.
+     * @hide
+     */
+    public static final int CHANGE_REASON_CONFIG_CHANGE = 2;
     /**
      * An access point scan has completed, and results are available from the supplicant.
      * Call {@link #getScanResults()} to obtain the results.
