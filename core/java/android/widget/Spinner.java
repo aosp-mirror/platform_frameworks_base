@@ -26,6 +26,7 @@ import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -202,6 +203,130 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
     }
 
+    /**
+     * Set the background drawable for the spinner's popup window of choices.
+     * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
+     *
+     * @param background Background drawable
+     *
+     * @attr ref android.R.styleable#Spinner_popupBackground
+     */
+    public void setPopupBackgroundDrawable(Drawable background) {
+        if (!(mPopup instanceof DropdownPopup)) {
+            Log.e(TAG, "setPopupBackgroundDrawable: incompatible spinner mode; ignoring...");
+            return;
+        }
+        ((DropdownPopup) mPopup).setBackgroundDrawable(background);
+    }
+
+    /**
+     * Set the background drawable for the spinner's popup window of choices.
+     * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
+     *
+     * @param background Resource ID of a background drawable
+     *
+     * @attr ref android.R.styleable#Spinner_popupBackground
+     */
+    public void setPopupBackgroundResource(int resId) {
+        setPopupBackgroundDrawable(getContext().getResources().getDrawable(resId));
+    }
+
+    /**
+     * Get the background drawable for the spinner's popup window of choices.
+     * Only valid in {@link #MODE_DROPDOWN}; other modes will return null.
+     *
+     * @return background Background drawable
+     *
+     * @attr ref android.R.styleable#Spinner_popupBackground
+     */
+    public Drawable getPopupBackground() {
+        return mPopup.getBackground();
+    }
+
+    /**
+     * Set a vertical offset in pixels for the spinner's popup window of choices.
+     * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
+     *
+     * @param pixels Vertical offset in pixels
+     *
+     * @attr ref android.R.styleable#Spinner_dropDownVerticalOffset
+     */
+    public void setDropDownVerticalOffset(int pixels) {
+        mPopup.setVerticalOffset(pixels);
+    }
+
+    /**
+     * Get the configured vertical offset in pixels for the spinner's popup window of choices.
+     * Only valid in {@link #MODE_DROPDOWN}; other modes will return 0.
+     *
+     * @return Vertical offset in pixels
+     *
+     * @attr ref android.R.styleable#Spinner_dropDownVerticalOffset
+     */
+    public int getDropDownVerticalOffset() {
+        return mPopup.getVerticalOffset();
+    }
+
+    /**
+     * Set a horizontal offset in pixels for the spinner's popup window of choices.
+     * Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.
+     *
+     * @param pixels Horizontal offset in pixels
+     *
+     * @attr ref android.R.styleable#Spinner_dropDownHorizontalOffset
+     */
+    public void setDropDownHorizontalOffset(int pixels) {
+        mPopup.setHorizontalOffset(pixels);
+    }
+
+    /**
+     * Get the configured horizontal offset in pixels for the spinner's popup window of choices.
+     * Only valid in {@link #MODE_DROPDOWN}; other modes will return 0.
+     *
+     * @return Horizontal offset in pixels
+     *
+     * @attr ref android.R.styleable#Spinner_dropDownHorizontalOffset
+     */
+    public int getDropDownHorizontalOffset() {
+        return mPopup.getHorizontalOffset();
+    }
+
+    /**
+     * Set the width of the spinner's popup window of choices in pixels. This value
+     * may also be set to {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * to match the width of the Spinner itself, or
+     * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} to wrap to the measured size
+     * of contained dropdown list items.
+     *
+     * <p>Only valid in {@link #MODE_DROPDOWN}; this method is a no-op in other modes.</p>
+     *
+     * @param pixels Width in pixels, WRAP_CONTENT, or MATCH_PARENT
+     *
+     * @attr ref android.R.styleable#Spinner_dropDownWidth
+     */
+    public void setDropDownWidth(int pixels) {
+        if (!(mPopup instanceof DropdownPopup)) {
+            Log.e(TAG, "Cannot set dropdown width for MODE_DIALOG, ignoring");
+            return;
+        }
+        mDropDownWidth = pixels;
+    }
+
+    /**
+     * Get the configured width of the spinner's popup window of choices in pixels.
+     * The returned value may also be {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+     * meaning the popup window will match the width of the Spinner itself, or
+     * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} to wrap to the measured size
+     * of contained dropdown list items.
+     *
+     * @return Width in pixels, WRAP_CONTENT, or MATCH_PARENT
+     *
+     * @attr ref android.R.styleable#Spinner_dropDownWidth
+     */
+    public int getDropDownWidth() {
+        return mDropDownWidth;
+    }
+
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
@@ -229,6 +354,16 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             mGravity = gravity;
             requestLayout();
         }
+    }
+
+    /**
+     * Describes how the selected item view is positioned. The default is determined by the
+     * current theme.
+     *
+     * @return A {@link android.view.Gravity Gravity} value
+     */
+    public int getGravity() {
+        return mGravity;
     }
 
     @Override
@@ -675,6 +810,13 @@ public class Spinner extends AbsSpinner implements OnClickListener {
          */
         public void setPromptText(CharSequence hintText);
         public CharSequence getHintText();
+
+        public void setBackgroundDrawable(Drawable bg);
+        public void setVerticalOffset(int px);
+        public void setHorizontalOffset(int px);
+        public Drawable getBackground();
+        public int getVerticalOffset();
+        public int getHorizontalOffset();
     }
     
     private class DialogPopup implements SpinnerPopup, DialogInterface.OnClickListener {
@@ -718,6 +860,36 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 performItemClick(null, which, mListAdapter.getItemId(which));
             }
             dismiss();
+        }
+
+        @Override
+        public void setBackgroundDrawable(Drawable bg) {
+            Log.e(TAG, "Cannot set popup background for MODE_DIALOG, ignoring");
+        }
+
+        @Override
+        public void setVerticalOffset(int px) {
+            Log.e(TAG, "Cannot set vertical offset for MODE_DIALOG, ignoring");
+        }
+
+        @Override
+        public void setHorizontalOffset(int px) {
+            Log.e(TAG, "Cannot set horizontal offset for MODE_DIALOG, ignoring");
+        }
+
+        @Override
+        public Drawable getBackground() {
+            return null;
+        }
+
+        @Override
+        public int getVerticalOffset() {
+            return 0;
+        }
+
+        @Override
+        public int getHorizontalOffset() {
+            return 0;
         }
     }
     

@@ -27495,9 +27495,19 @@ package android.widget {
     ctor public Spinner(android.content.Context, android.util.AttributeSet);
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int);
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int, int);
+    method public int getDropDownHorizontalOffset();
+    method public int getDropDownVerticalOffset();
+    method public int getDropDownWidth();
+    method public int getGravity();
+    method public android.graphics.drawable.Drawable getPopupBackground();
     method public java.lang.CharSequence getPrompt();
     method public void onClick(android.content.DialogInterface, int);
+    method public void setDropDownHorizontalOffset(int);
+    method public void setDropDownVerticalOffset(int);
+    method public void setDropDownWidth(int);
     method public void setGravity(int);
+    method public void setPopupBackgroundDrawable(android.graphics.drawable.Drawable);
+    method public void setPopupBackgroundResource(int);
     method public void setPrompt(java.lang.CharSequence);
     method public void setPromptId(int);
     field public static final int MODE_DIALOG = 0; // 0x0
@@ -27534,8 +27544,10 @@ package android.widget {
     method public void setTextOff(java.lang.CharSequence);
     method public void setTextOn(java.lang.CharSequence);
     method public void setThumbDrawable(android.graphics.drawable.Drawable);
+    method public void setThumbResource(int);
     method public void setThumbTextPadding(int);
     method public void setTrackDrawable(android.graphics.drawable.Drawable);
+    method public void setTrackResource(int);
   }
 
   public class TabHost extends android.widget.FrameLayout implements android.view.ViewTreeObserver.OnTouchModeChangeListener {
