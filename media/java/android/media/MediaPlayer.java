@@ -813,6 +813,13 @@ public class MediaPlayer
      *
      * @param path the path of the file, or the http/rtsp URL of the stream you want to play
      * @throws IllegalStateException if it is called in an invalid state
+     *
+     * <p>When <code>path</code> refers to a local file, the file may actually be opened by a
+     * process other than the calling application.  This implies that the pathname
+     * should be an absolute path (as any other process runs with unspecified current working
+     * directory), and that the pathname should reference a world-readable file.
+     * As an alternative, the application could first open the file for reading,
+     * and then use the file descriptor form {@link #setDataSource(FileDescriptor)}.
      */
     public native void setDataSource(String path)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
