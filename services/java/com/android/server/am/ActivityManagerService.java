@@ -4934,7 +4934,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     void grantUriPermissionFromIntentLocked(int callingUid,
             String targetPkg, Intent intent, UriPermissionOwner owner) {
         NeededUriGrants needed = checkGrantUriPermissionFromIntentLocked(callingUid, targetPkg,
-                intent, intent.getFlags(), null);
+                intent, intent != null ? intent.getFlags() : 0, null);
         if (needed == null) {
             return;
         }
