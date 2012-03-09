@@ -17,7 +17,6 @@
 #ifndef ANDROID_RS_FILE_A3D_H
 #define ANDROID_RS_FILE_A3D_H
 
-#include "rs.h"
 #include "rsMesh.h"
 
 #include <androidfw/Asset.h>

@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "RenderScript.h"
+#include "rs.h"
 
 bool RenderScript::gInitialized = false;
 pthread_mutex_t RenderScript::gInitMutex = PTHREAD_MUTEX_INITIALIZER;

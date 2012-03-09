@@ -22,7 +22,7 @@
 #include <utils/String8.h>
 #include <utils/Vector.h>
 
-#include "rs.h"
+#include "rsDefines.h"
 
 class Element;
 class Type;

@@ -16,7 +16,7 @@
  */
 
 #include "rsContext.h"
-
+#include "rs.h"
 #include "rsFont.h"
 #include "rsProgramFragment.h"
 #include <cutils/properties.h>

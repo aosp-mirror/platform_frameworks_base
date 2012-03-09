@@ -16,7 +16,7 @@
 
 #include "rsContext.h"
 #include "rsSampler.h"
-
+#include "rs.h"
 
 using namespace android;
 using namespace android::renderscript;

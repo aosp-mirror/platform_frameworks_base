@@ -18,6 +18,7 @@
 #define ANDROID_COMPONENT_H
 
 #include "rsUtils.h"
+#include "rsDefines.h"
 
 // ---------------------------------------------------------------------------
 namespace android {

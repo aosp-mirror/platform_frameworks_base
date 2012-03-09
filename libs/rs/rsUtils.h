@@ -34,8 +34,6 @@
 
 #include <math.h>
 
-#include "rs.h"
-
 namespace android {
 namespace renderscript {
 

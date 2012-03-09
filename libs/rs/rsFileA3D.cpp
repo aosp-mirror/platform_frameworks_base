@@ -20,7 +20,7 @@
 
 #include "rsMesh.h"
 #include "rsAnimation.h"
-
+#include "rs.h"
 
 using namespace android;
 using namespace android::renderscript;
