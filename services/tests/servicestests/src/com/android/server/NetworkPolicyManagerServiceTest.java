@@ -32,6 +32,7 @@ import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+import static android.text.format.Time.TIMEZONE_UTC;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
@@ -439,7 +440,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-11-05T00:00:00.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 5, 1024L, 1024L, false);
+                sTemplateWifi, 5, TIMEZONE_UTC, 1024L, 1024L, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
@@ -450,7 +451,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-10-20T00:00:00.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 20, 1024L, 1024L, false);
+                sTemplateWifi, 20, TIMEZONE_UTC, 1024L, 1024L, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
@@ -461,7 +462,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-01-30T00:00:00.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 30, 1024L, 1024L, false);
+                sTemplateWifi, 30, TIMEZONE_UTC, 1024L, 1024L, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
@@ -472,14 +473,53 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-02-28T23:59:59.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 30, 1024L, 1024L, false);
+                sTemplateWifi, 30, TIMEZONE_UTC, 1024L, 1024L, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
 
+    public void testCycleBoundaryLeapYear() throws Exception {
+        final NetworkPolicy policy = new NetworkPolicy(
+                sTemplateWifi, 29, TIMEZONE_UTC, 1024L, 1024L, false);
+
+        assertTimeEquals(parseTime("2012-01-29T00:00:00.000Z"),
+                computeNextCycleBoundary(parseTime("2012-01-14T00:00:00.000Z"), policy));
+        assertTimeEquals(parseTime("2012-02-29T00:00:00.000Z"),
+                computeNextCycleBoundary(parseTime("2012-02-14T00:00:00.000Z"), policy));
+        assertTimeEquals(parseTime("2012-02-29T00:00:00.000Z"),
+                computeLastCycleBoundary(parseTime("2012-03-14T00:00:00.000Z"), policy));
+        assertTimeEquals(parseTime("2012-03-29T00:00:00.000Z"),
+                computeNextCycleBoundary(parseTime("2012-03-14T00:00:00.000Z"), policy));
+
+        assertTimeEquals(parseTime("2007-01-29T00:00:00.000Z"),
+                computeNextCycleBoundary(parseTime("2007-01-14T00:00:00.000Z"), policy));
+        assertTimeEquals(parseTime("2007-02-28T23:59:59.000Z"),
+                computeNextCycleBoundary(parseTime("2007-02-14T00:00:00.000Z"), policy));
+        assertTimeEquals(parseTime("2007-02-28T23:59:59.000Z"),
+                computeLastCycleBoundary(parseTime("2007-03-14T00:00:00.000Z"), policy));
+        assertTimeEquals(parseTime("2007-03-29T00:00:00.000Z"),
+                computeNextCycleBoundary(parseTime("2007-03-14T00:00:00.000Z"), policy));
+    }
+
+    public void testNextCycleTimezoneAfterUtc() throws Exception {
+        // US/Central is UTC-6
+        final NetworkPolicy policy = new NetworkPolicy(
+                sTemplateWifi, 10, "US/Central", 1024L, 1024L, false);
+        assertTimeEquals(parseTime("2012-01-10T06:00:00.000Z"),
+                computeNextCycleBoundary(parseTime("2012-01-05T00:00:00.000Z"), policy));
+    }
+
+    public void testNextCycleTimezoneBeforeUtc() throws Exception {
+        // Israel is UTC+2
+        final NetworkPolicy policy = new NetworkPolicy(
+                sTemplateWifi, 10, "Israel", 1024L, 1024L, false);
+        assertTimeEquals(parseTime("2012-01-09T22:00:00.000Z"),
+                computeNextCycleBoundary(parseTime("2012-01-05T00:00:00.000Z"), policy));
+    }
+
     public void testNextCycleSane() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, false);
+                sTemplateWifi, 31, TIMEZONE_UTC, WARNING_DISABLED, LIMIT_DISABLED, false);
         final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
 
         // walk forwards, ensuring that cycle boundaries don't get stuck
@@ -494,7 +534,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     public void testLastCycleSane() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, false);
+                sTemplateWifi, 31, TIMEZONE_UTC, WARNING_DISABLED, LIMIT_DISABLED, false);
         final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
 
         // walk backwards, ensuring that cycle boundaries look sane
@@ -552,7 +592,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         replay();
         setNetworkPolicies(new NetworkPolicy(
-                sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, false));
+                sTemplateWifi, CYCLE_DAY, TIMEZONE_UTC, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, false));
         future.get();
         verifyAndReset();
     }
@@ -609,8 +649,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             future = expectMeteredIfacesChanged();
 
             replay();
-            setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES,
-                    2 * MB_IN_BYTES, false));
+            setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, TIMEZONE_UTC, 1
+                    * MB_IN_BYTES, 2 * MB_IN_BYTES, false));
             future.get();
             verifyAndReset();
         }
@@ -740,8 +780,9 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             future = expectMeteredIfacesChanged(TEST_IFACE);
 
             replay();
-            setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, WARNING_DISABLED,
-                    LIMIT_DISABLED, true));
+            setNetworkPolicies(new NetworkPolicy(
+                    sTemplateWifi, CYCLE_DAY, TIMEZONE_UTC, WARNING_DISABLED, LIMIT_DISABLED,
+                    true));
             future.get();
             verifyAndReset();
         }

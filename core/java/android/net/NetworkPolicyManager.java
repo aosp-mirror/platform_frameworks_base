@@ -131,7 +131,7 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static long computeLastCycleBoundary(long currentTime, NetworkPolicy policy) {
-        final Time now = new Time(Time.TIMEZONE_UTC);
+        final Time now = new Time(policy.cycleTimezone);
         now.set(currentTime);
 
         // first, find cycle boundary for current month
@@ -157,7 +157,7 @@ public class NetworkPolicyManager {
 
     /** {@hide} */
     public static long computeNextCycleBoundary(long currentTime, NetworkPolicy policy) {
-        final Time now = new Time(Time.TIMEZONE_UTC);
+        final Time now = new Time(policy.cycleTimezone);
         now.set(currentTime);
 
         // first, find cycle boundary for current month
@@ -183,7 +183,7 @@ public class NetworkPolicyManager {
 
     /**
      * Snap to the cycle day for the current month given; when cycle day doesn't
-     * exist, it snaps to 1st of following month.
+     * exist, it snaps to last second of current month.
      *
      * @hide
      */
