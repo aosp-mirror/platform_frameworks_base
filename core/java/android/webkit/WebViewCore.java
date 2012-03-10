@@ -954,14 +954,15 @@ public final class WebViewCore {
         public TextFieldInitData(int fieldPointer,
                 String text, int type, boolean isSpellCheckEnabled,
                 boolean autoComplete, boolean isTextFieldNext,
-                String name, String label, int maxLength,
-                Rect nodeBounds, int nodeLayerId) {
+                boolean isTextFieldPrev, String name, String label,
+                int maxLength, Rect nodeBounds, int nodeLayerId) {
             mFieldPointer = fieldPointer;
             mText = text;
             mType = type;
             mIsAutoCompleteEnabled = autoComplete;
             mIsSpellCheckEnabled = isSpellCheckEnabled;
             mIsTextFieldNext = isTextFieldNext;
+            mIsTextFieldPrev = isTextFieldPrev;
             mName = name;
             mLabel = label;
             mMaxLength = maxLength;
@@ -973,6 +974,7 @@ public final class WebViewCore {
         int mType;
         boolean mIsSpellCheckEnabled;
         boolean mIsTextFieldNext;
+        boolean mIsTextFieldPrev;
         boolean mIsAutoCompleteEnabled;
         String mName;
         String mLabel;
@@ -2798,7 +2800,7 @@ public final class WebViewCore {
     // called by JNI
     private void initEditField(int pointer, String text, int inputType,
             boolean isSpellCheckEnabled, boolean isAutoCompleteEnabled,
-            boolean nextFieldIsText, String name,
+            boolean nextFieldIsText, boolean prevFieldIsText, String name,
             String label, int start, int end, int selectionPtr, int maxLength,
             Rect nodeRect, int nodeLayer) {
         if (mWebView == null) {
@@ -2806,7 +2808,8 @@ public final class WebViewCore {
         }
         TextFieldInitData initData = new TextFieldInitData(pointer,
                 text, inputType, isSpellCheckEnabled, isAutoCompleteEnabled,
-                nextFieldIsText, name, label, maxLength, nodeRect, nodeLayer);
+                nextFieldIsText, prevFieldIsText, name, label, maxLength,
+                nodeRect, nodeLayer);
         Message.obtain(mWebView.mPrivateHandler,
                 WebViewClassic.INIT_EDIT_FIELD, initData).sendToTarget();
         Message.obtain(mWebView.mPrivateHandler,
