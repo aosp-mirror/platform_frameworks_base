@@ -7239,7 +7239,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 viewToContentX(getScrollX() + getWidth()
                 - mWebView.getVerticalScrollbarWidth()),
                 viewToContentY(getScrollY() + getViewHeightWithTitle()));
-        content = nativeSubtractLayers(content);
         int screenTop = contentToViewY(content.top);
         int screenBottom = contentToViewY(content.bottom);
         int height = screenBottom - screenTop;
@@ -9135,7 +9134,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private native void     nativeCopyBaseContentToPicture(Picture pict);
     private native boolean  nativeHasContent();
     private native void     nativeStopGL();
-    private native Rect     nativeSubtractLayers(Rect content);
     private native void     nativeDiscardAllTextures();
     private native void     nativeTileProfilingStart();
     private native float    nativeTileProfilingStop();
