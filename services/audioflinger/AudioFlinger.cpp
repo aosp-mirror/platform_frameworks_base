@@ -5356,7 +5356,7 @@ audio_io_handle_t AudioFlinger::openOutput(uint32_t *pDevices,
                                 audio_format_t *pFormat,
                                 uint32_t *pChannels,
                                 uint32_t *pLatencyMs,
-                                uint32_t flags)
+                                audio_policy_output_flags_t flags)
 {
     status_t status;
     PlaybackThread *thread = NULL;

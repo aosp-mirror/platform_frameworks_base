@@ -28,6 +28,7 @@
 #include <media/IAudioRecord.h>
 #include <media/IAudioFlingerClient.h>
 #include <system/audio.h>
+#include <system/audio_policy.h>
 #include <hardware/audio_effect.h>
 #include <media/IEffect.h>
 #include <media/IEffectClient.h>
@@ -121,7 +122,7 @@ public:
                                     audio_format_t *pFormat,
                                     uint32_t *pChannels,
                                     uint32_t *pLatencyMs,
-                                    uint32_t flags) = 0;
+                                    audio_policy_output_flags_t flags) = 0;
     virtual audio_io_handle_t openDuplicateOutput(audio_io_handle_t output1,
                                     audio_io_handle_t output2) = 0;
     virtual status_t closeOutput(audio_io_handle_t output) = 0;

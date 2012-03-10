@@ -92,7 +92,7 @@ AudioTrack::AudioTrack(
         audio_format_t format,
         int channelMask,
         int frameCount,
-        uint32_t flags,
+        audio_policy_output_flags_t flags,
         callback_t cbf,
         void* user,
         int notificationFrames,
@@ -119,10 +119,11 @@ AudioTrack::AudioTrack(
         int notificationFrames,
         int sessionId)
     : mStatus(NO_INIT),
+      mIsTimed(false),
       mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
     mStatus = set((audio_stream_type_t)streamType, sampleRate, (audio_format_t)format, channelMask,
-            frameCount, flags, cbf, user, notificationFrames,
+            frameCount, (audio_policy_output_flags_t)flags, cbf, user, notificationFrames,
             0, false, sessionId);
 }
 
@@ -132,7 +133,7 @@ AudioTrack::AudioTrack(
         audio_format_t format,
         int channelMask,
         const sp<IMemory>& sharedBuffer,
-        uint32_t flags,
+        audio_policy_output_flags_t flags,
         callback_t cbf,
         void* user,
         int notificationFrames,
@@ -172,7 +173,7 @@ status_t AudioTrack::set(
         audio_format_t format,
         int channelMask,
         int frameCount,
-        uint32_t flags,
+        audio_policy_output_flags_t flags,
         callback_t cbf,
         void* user,
         int notificationFrames,
@@ -221,7 +222,7 @@ status_t AudioTrack::set(
 
     // force direct flag if format is not linear PCM
     if (!audio_is_linear_pcm(format)) {
-        flags |= AUDIO_POLICY_OUTPUT_FLAG_DIRECT;
+        flags = (audio_policy_output_flags_t) (flags | AUDIO_POLICY_OUTPUT_FLAG_DIRECT);
     }
 
     if (!audio_is_output_channel(channelMask)) {
@@ -233,7 +234,7 @@ status_t AudioTrack::set(
     audio_io_handle_t output = AudioSystem::getOutput(
                                     streamType,
                                     sampleRate, format, channelMask,
-                                    (audio_policy_output_flags_t)flags);
+                                    flags);
 
     if (output == 0) {
         ALOGE("Could not get audio output for stream type %d", streamType);
@@ -707,7 +708,7 @@ audio_io_handle_t AudioTrack::getOutput()
 audio_io_handle_t AudioTrack::getOutput_l()
 {
     return AudioSystem::getOutput(mStreamType,
-            mCblk->sampleRate, mFormat, mChannelMask, (audio_policy_output_flags_t)mFlags);
+            mCblk->sampleRate, mFormat, mChannelMask, mFlags);
 }
 
 int AudioTrack::getSessionId() const
@@ -734,7 +735,7 @@ status_t AudioTrack::createTrack_l(
         audio_format_t format,
         uint32_t channelMask,
         int frameCount,
-        uint32_t flags,
+        audio_policy_output_flags_t flags,
         const sp<IMemory>& sharedBuffer,
         audio_io_handle_t output,
         bool enforceFrameCount)
