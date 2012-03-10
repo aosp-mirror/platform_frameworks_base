@@ -1189,7 +1189,7 @@ void OpenGLRenderer::setupDrawPointUniforms() {
 }
 
 void OpenGLRenderer::setupDrawColorUniforms() {
-    if (mColorSet || (mShader && mSetShaderColor)) {
+    if ((mColorSet && !mShader) || (mShader && mSetShaderColor)) {
         mCaches.currentProgram->setColor(mColorR, mColorG, mColorB, mColorA);
     }
 }
