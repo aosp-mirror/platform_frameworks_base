@@ -35,23 +35,13 @@ import junit.framework.TestSuite;
  */
 
 public class ConnectivityManagerTestRunner extends InstrumentationTestRunner {
-    public String TEST_SSID = null;
+    public boolean mWifiOnlyFlag = false;
+    public String mTestSsid = null;
 
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
-        if (!UtilHelper.isWifiOnly(getContext())) {
-            suite.addTestSuite(ConnectivityManagerMobileTest.class);
-        } else {
-            // create a new test suite
-            suite.setName("ConnectivityManagerWifiOnlyFunctionalTests");
-            String[] methodNames = {"testConnectToWifi", "testConnectToWifWithKnownAP",
-                    "testDisconnectWifi", "testWifiStateChange"};
-            Class<ConnectivityManagerMobileTest> testClass = ConnectivityManagerMobileTest.class;
-            for (String method: methodNames) {
-                suite.addTest(TestSuite.createTest(testClass, method));
-            }
-        }
+        suite.addTestSuite(ConnectivityManagerMobileTest.class);
         suite.addTestSuite(WifiConnectionTest.class);
         return suite;
     }
@@ -66,7 +56,11 @@ public class ConnectivityManagerTestRunner extends InstrumentationTestRunner {
         super.onCreate(icicle);
         String testSSID = (String) icicle.get("ssid");
         if (testSSID != null) {
-            TEST_SSID = testSSID;
+            mTestSsid = testSSID;
+        }
+        String wifiOnlyFlag = (String) icicle.get("wifi-only");
+        if (wifiOnlyFlag != null) {
+            mWifiOnlyFlag = true;
         }
     }
 }
