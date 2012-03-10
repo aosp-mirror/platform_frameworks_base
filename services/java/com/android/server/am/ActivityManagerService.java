@@ -746,6 +746,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     ParcelFileDescriptor mProfileFd;
     int mProfileType = 0;
     boolean mAutoStopProfiler = false;
+    String mOpenGlTraceApp = null;
 
     final RemoteCallbackList<IProcessObserver> mProcessObservers
             = new RemoteCallbackList<IProcessObserver>();
@@ -2263,7 +2264,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded, boolean debug,
-            String profileFile, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+            boolean openglTrace, String profileFile, ParcelFileDescriptor profileFd,
+            boolean autoStopProfiler) {
         enforceNotIsolatedCaller("startActivity");
         int userId = 0;
         if (intent.getCategories() != null && intent.getCategories().contains(Intent.CATEGORY_HOME)) {
@@ -2281,24 +2283,25 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho, requestCode, onlyIfNeeded,
-                debug, profileFile, profileFd, autoStopProfiler, null, null, userId);
+                debug, openglTrace, profileFile, profileFd, autoStopProfiler, null, null, userId);
     }
 
     public final WaitResult startActivityAndWait(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded, boolean debug,
-            String profileFile, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+            boolean openglTrace, String profileFile, ParcelFileDescriptor profileFd,
+            boolean autoStopProfiler) {
         enforceNotIsolatedCaller("startActivityAndWait");
         WaitResult res = new WaitResult();
         int userId = Binder.getOrigCallingUser();
         mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho,
-                requestCode, onlyIfNeeded, debug, profileFile, profileFd, autoStopProfiler,
+                requestCode, onlyIfNeeded, debug, openglTrace, profileFile, profileFd, autoStopProfiler,
                 res, null, userId);
         return res;
     }
-    
+
     public final int startActivityWithConfig(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
@@ -2308,7 +2311,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int ret = mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho,
                 requestCode, onlyIfNeeded,
-                debug, null, null, false, null, config, Binder.getOrigCallingUser());
+                debug, false, null, null, false, null, config, Binder.getOrigCallingUser());
         return ret;
     }
 
@@ -2451,7 +2454,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         int ret = mMainStack.startActivityMayWait(null, uid, intent, resolvedType,
-                null, 0, resultTo, resultWho, requestCode, onlyIfNeeded, false,
+                null, 0, resultTo, resultWho, requestCode, onlyIfNeeded, false, false,
                 null, null, false, null, null, userId);
         return ret;
     }
@@ -3833,6 +3836,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 profileFd = mProfileFd;
                 profileAutoStop = mAutoStopProfiler;
             }
+            boolean enableOpenGlTrace = false;
+            if (mOpenGlTraceApp != null && mOpenGlTraceApp.equals(processName)) {
+                enableOpenGlTrace = true;
+                mOpenGlTraceApp = null;
+            }
 
             // If the app is being launched for restore or full backup, set it up specially
             boolean isRestrictedBackupMode = false;
@@ -3858,8 +3866,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             thread.bindApplication(processName, appInfo, providers,
                     app.instrumentationClass, profileFile, profileFd, profileAutoStop,
-                    app.instrumentationArguments, app.instrumentationWatcher, testMode, 
-                    isRestrictedBackupMode || !normalMode, app.persistent,
+                    app.instrumentationArguments, app.instrumentationWatcher, testMode,
+                    enableOpenGlTrace, isRestrictedBackupMode || !normalMode, app.persistent,
                     new Configuration(mConfiguration), app.compat, getCommonServicesLocked(),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, true);
@@ -6671,6 +6679,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    void setOpenGlTraceApp(ApplicationInfo app, String processName) {
+        synchronized (this) {
+            boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+            if (!isDebuggable) {
+                if ((app.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                    throw new SecurityException("Process not debuggable: " + app.packageName);
+                }
+            }
+
+            mOpenGlTraceApp = processName;
+        }
+    }
+
     void setProfileApp(ApplicationInfo app, String processName, String profileFile,
             ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
         synchronized (this) {
@@ -8624,6 +8645,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  mDebugApp=" + mDebugApp + "/orig=" + mOrigDebugApp
                     + " mDebugTransient=" + mDebugTransient
                     + " mOrigWaitForDebugger=" + mOrigWaitForDebugger);
+        }
+        if (mOpenGlTraceApp != null) {
+            pw.println("  mOpenGlTraceApp=" + mOpenGlTraceApp);
         }
         if (mProfileApp != null || mProfileProc != null || mProfileFile != null
                 || mProfileFd != null) {

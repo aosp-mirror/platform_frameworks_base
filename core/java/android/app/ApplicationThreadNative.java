@@ -267,6 +267,7 @@ public abstract class ApplicationThreadNative extends Binder
             IBinder binder = data.readStrongBinder();
             IInstrumentationWatcher testWatcher = IInstrumentationWatcher.Stub.asInterface(binder);
             int testMode = data.readInt();
+            boolean openGlTrace = data.readInt() != 0;
             boolean restrictedBackupMode = (data.readInt() != 0);
             boolean persistent = (data.readInt() != 0);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
@@ -275,11 +276,11 @@ public abstract class ApplicationThreadNative extends Binder
             Bundle coreSettings = data.readBundle();
             bindApplication(packageName, info,
                             providers, testName, profileName, profileFd, autoStopProfiler,
-                            testArgs, testWatcher, testMode, restrictedBackupMode, persistent,
-                            config, compatInfo, services, coreSettings);
+                            testArgs, testWatcher, testMode, openGlTrace, restrictedBackupMode,
+                            persistent, config, compatInfo, services, coreSettings);
             return true;
         }
-        
+
         case SCHEDULE_EXIT_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -849,8 +850,9 @@ class ApplicationThreadProxy implements IApplicationThread {
     public final void bindApplication(String packageName, ApplicationInfo info,
             List<ProviderInfo> providers, ComponentName testName, String profileName,
             ParcelFileDescriptor profileFd, boolean autoStopProfiler, Bundle testArgs,
-            IInstrumentationWatcher testWatcher, int debugMode, boolean restrictedBackupMode,
-            boolean persistent, Configuration config, CompatibilityInfo compatInfo,
+            IInstrumentationWatcher testWatcher, int debugMode, boolean openGlTrace,
+            boolean restrictedBackupMode, boolean persistent,
+            Configuration config, CompatibilityInfo compatInfo,
             Map<String, IBinder> services, Bundle coreSettings) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -874,6 +876,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeBundle(testArgs);
         data.writeStrongInterface(testWatcher);
         data.writeInt(debugMode);
+        data.writeInt(openGlTrace ? 1 : 0);
         data.writeInt(restrictedBackupMode ? 1 : 0);
         data.writeInt(persistent ? 1 : 0);
         config.writeToParcel(data, 0);

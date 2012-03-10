@@ -120,17 +120,19 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             Uri[] grantedUriPermissions = data.createTypedArray(Uri.CREATOR);
             int grantedMode = data.readInt();
             IBinder resultTo = data.readStrongBinder();
-            String resultWho = data.readString();    
+            String resultWho = data.readString();
             int requestCode = data.readInt();
             boolean onlyIfNeeded = data.readInt() != 0;
             boolean debug = data.readInt() != 0;
+            boolean openglTrace = data.readInt() != 0;
             String profileFile = data.readString();
             ParcelFileDescriptor profileFd = data.readInt() != 0
                     ? data.readFileDescriptor() : null;
             boolean autoStopProfiler = data.readInt() != 0;
             int result = startActivity(app, intent, resolvedType,
                     grantedUriPermissions, grantedMode, resultTo, resultWho,
-                    requestCode, onlyIfNeeded, debug, profileFile, profileFd, autoStopProfiler);
+                    requestCode, onlyIfNeeded, debug, openglTrace,
+                    profileFile, profileFd, autoStopProfiler);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -146,17 +148,19 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             Uri[] grantedUriPermissions = data.createTypedArray(Uri.CREATOR);
             int grantedMode = data.readInt();
             IBinder resultTo = data.readStrongBinder();
-            String resultWho = data.readString();    
+            String resultWho = data.readString();
             int requestCode = data.readInt();
             boolean onlyIfNeeded = data.readInt() != 0;
             boolean debug = data.readInt() != 0;
+            boolean openglTrace = data.readInt() != 0;
             String profileFile = data.readString();
             ParcelFileDescriptor profileFd = data.readInt() != 0
                     ? data.readFileDescriptor() : null;
             boolean autoStopProfiler = data.readInt() != 0;
             WaitResult result = startActivityAndWait(app, intent, resolvedType,
                     grantedUriPermissions, grantedMode, resultTo, resultWho,
-                    requestCode, onlyIfNeeded, debug, profileFile, profileFd, autoStopProfiler);
+                    requestCode, onlyIfNeeded, debug, openglTrace,
+                    profileFile, profileFd, autoStopProfiler);
             reply.writeNoException();
             result.writeToParcel(reply, 0);
             return true;
@@ -1607,17 +1611,17 @@ class ActivityManagerProxy implements IActivityManager
     {
         mRemote = remote;
     }
-    
+
     public IBinder asBinder()
     {
         return mRemote;
     }
-    
+
     public int startActivity(IApplicationThread caller, Intent intent,
             String resolvedType, Uri[] grantedUriPermissions, int grantedMode,
             IBinder resultTo, String resultWho,
             int requestCode, boolean onlyIfNeeded,
-            boolean debug, String profileFile, ParcelFileDescriptor profileFd,
+            boolean debug, boolean openglTrace, String profileFile, ParcelFileDescriptor profileFd,
             boolean autoStopProfiler) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -1632,6 +1636,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(requestCode);
         data.writeInt(onlyIfNeeded ? 1 : 0);
         data.writeInt(debug ? 1 : 0);
+        data.writeInt(openglTrace ? 1 : 0);
         data.writeString(profileFile);
         if (profileFd != null) {
             data.writeInt(1);
@@ -1651,7 +1656,7 @@ class ActivityManagerProxy implements IActivityManager
             String resolvedType, Uri[] grantedUriPermissions, int grantedMode,
             IBinder resultTo, String resultWho,
             int requestCode, boolean onlyIfNeeded,
-            boolean debug, String profileFile, ParcelFileDescriptor profileFd,
+            boolean debug, boolean openglTrace, String profileFile, ParcelFileDescriptor profileFd,
             boolean autoStopProfiler) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -1666,6 +1671,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(requestCode);
         data.writeInt(onlyIfNeeded ? 1 : 0);
         data.writeInt(debug ? 1 : 0);
+        data.writeInt(openglTrace ? 1 : 0);
         data.writeString(profileFile);
         if (profileFd != null) {
             data.writeInt(1);

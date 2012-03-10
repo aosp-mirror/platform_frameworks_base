@@ -3388,17 +3388,16 @@ public class Activity extends ContextThemeWrapper
                 intent.setAllowFds(false);
                 result = ActivityManagerNative.getDefault()
                     .startActivity(mMainThread.getApplicationThread(),
-                            intent, intent.resolveTypeIfNeeded(
-                                    getContentResolver()),
+                            intent, intent.resolveTypeIfNeeded(getContentResolver()),
                             null, 0,
-                            mToken, mEmbeddedID, requestCode, true, false,
-                            null, null, false);
+                            mToken, mEmbeddedID, requestCode, true /* onlyIfNeeded */,
+                            false, false, null, null, false);
             } catch (RemoteException e) {
                 // Empty
             }
-            
+
             Instrumentation.checkStartActivityResult(result, intent);
-            
+
             if (requestCode >= 0) {
                 // If this start is requesting a result, we can avoid making
                 // the activity visible until the result is received.  Setting

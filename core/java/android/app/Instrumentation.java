@@ -1384,7 +1384,7 @@ public class Instrumentation {
                 .startActivity(whoThread, intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         null, 0, token, target != null ? target.mEmbeddedID : null,
-                        requestCode, false, false, null, null, false);
+                        requestCode, false, false, false, null, null, false);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
         }
@@ -1482,7 +1482,8 @@ public class Instrumentation {
                 .startActivity(whoThread, intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         null, 0, token, target != null ? target.mWho : null,
-                        requestCode, false, false, null, null, false);
+                        requestCode, false, false /* debug */, false /* openglTrace */,
+                        null, null, false);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
         }

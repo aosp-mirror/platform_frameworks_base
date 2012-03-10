@@ -3832,7 +3832,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         int result = ActivityManagerNative.getDefault()
                                 .startActivity(null, dock,
                                         dock.resolveTypeIfNeeded(mContext.getContentResolver()),
-                                        null, 0, null, null, 0, true /* onlyIfNeeded*/, false,
+                                        null, 0, null, null, 0, true /* onlyIfNeeded*/,
+                                        false /* debug */, false /* openglTrace */,
                                         null, null, false);
                         if (result == IActivityManager.START_RETURN_INTENT_TO_CALLER) {
                             return false;
@@ -3842,7 +3843,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 int result = ActivityManagerNative.getDefault()
                         .startActivity(null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                                null, 0, null, null, 0, true /* onlyIfNeeded*/, false,
+                                null, 0, null, null, 0, true /* onlyIfNeeded*/,
+                                false /* debug */, false /* openglTrace */,
                                 null, null, false);
                 if (result == IActivityManager.START_RETURN_INTENT_TO_CALLER) {
                     return false;
