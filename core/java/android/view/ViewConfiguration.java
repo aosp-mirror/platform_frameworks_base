@@ -305,8 +305,9 @@ public class ViewConfiguration {
         mScaledTouchExplorationTapSlop = (int) (density * TOUCH_EXPLORATION_TAP_SLOP + 0.5f);
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
 
+        final Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
         // Size of the screen in bytes, in ARGB_8888 format
-        mMaximumDrawingCacheSize = 4 * metrics.widthPixels * metrics.heightPixels;
+        mMaximumDrawingCacheSize = 4 * display.getRawWidth() * display.getRawHeight();
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
