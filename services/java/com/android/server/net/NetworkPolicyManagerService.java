@@ -156,6 +156,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_ADDED_RESTRICT_BACKGROUND = 3;
     private static final int VERSION_ADDED_METERED = 4;
     private static final int VERSION_SPLIT_SNOOZE = 5;
+    private static final int VERSION_ADDED_TIMEZONE = 6;
 
     // @VisibleForTesting
     public static final int TYPE_WARNING = 0x1;
@@ -171,6 +172,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_NETWORK_TEMPLATE = "networkTemplate";
     private static final String ATTR_SUBSCRIBER_ID = "subscriberId";
     private static final String ATTR_CYCLE_DAY = "cycleDay";
+    private static final String ATTR_CYCLE_TIMEZONE = "cycleTimezone";
     private static final String ATTR_WARNING_BYTES = "warningBytes";
     private static final String ATTR_LIMIT_BYTES = "limitBytes";
     private static final String ATTR_LAST_SNOOZE = "lastSnooze";
@@ -922,13 +924,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     com.android.internal.R.integer.config_networkPolicyDefaultWarning)
                     * MB_IN_BYTES;
 
-            final Time time = new Time(Time.TIMEZONE_UTC);
+            final Time time = new Time();
             time.setToNow();
+
             final int cycleDay = time.monthDay;
+            final String cycleTimezone = time.timezone;
 
             final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
-            mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay, warningBytes,
-                    LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER, true));
+            mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay, cycleTimezone,
+                    warningBytes, LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER, true));
             writePolicyLocked();
         }
     }
@@ -964,6 +968,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final int networkTemplate = readIntAttribute(in, ATTR_NETWORK_TEMPLATE);
                         final String subscriberId = in.getAttributeValue(null, ATTR_SUBSCRIBER_ID);
                         final int cycleDay = readIntAttribute(in, ATTR_CYCLE_DAY);
+                        final String cycleTimezone;
+                        if (version >= VERSION_ADDED_TIMEZONE) {
+                            cycleTimezone = in.getAttributeValue(null, ATTR_CYCLE_TIMEZONE);
+                        } else {
+                            cycleTimezone = Time.TIMEZONE_UTC;
+                        }
                         final long warningBytes = readLongAttribute(in, ATTR_WARNING_BYTES);
                         final long limitBytes = readLongAttribute(in, ATTR_LIMIT_BYTES);
                         final long lastLimitSnooze;
@@ -998,8 +1008,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final NetworkTemplate template = new NetworkTemplate(
                                 networkTemplate, subscriberId);
                         mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay,
-                                warningBytes, limitBytes, lastWarningSnooze, lastLimitSnooze,
-                                metered));
+                                cycleTimezone, warningBytes, limitBytes, lastWarningSnooze,
+                                lastLimitSnooze, metered));
 
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
@@ -1054,7 +1064,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             out.startDocument(null, true);
 
             out.startTag(null, TAG_POLICY_LIST);
-            writeIntAttribute(out, ATTR_VERSION, VERSION_SPLIT_SNOOZE);
+            writeIntAttribute(out, ATTR_VERSION, VERSION_ADDED_TIMEZONE);
             writeBooleanAttribute(out, ATTR_RESTRICT_BACKGROUND, mRestrictBackground);
 
             // write all known network policies
@@ -1068,6 +1078,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     out.attribute(null, ATTR_SUBSCRIBER_ID, subscriberId);
                 }
                 writeIntAttribute(out, ATTR_CYCLE_DAY, policy.cycleDay);
+                out.attribute(null, ATTR_CYCLE_TIMEZONE, policy.cycleTimezone);
                 writeLongAttribute(out, ATTR_WARNING_BYTES, policy.warningBytes);
                 writeLongAttribute(out, ATTR_LIMIT_BYTES, policy.limitBytes);
                 writeLongAttribute(out, ATTR_LAST_WARNING_SNOOZE, policy.lastWarningSnooze);
