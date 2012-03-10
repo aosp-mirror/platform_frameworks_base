@@ -193,9 +193,6 @@ public class ImageView extends View {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public int getResolvedLayoutDirection(Drawable dr) {
         return (dr == mDrawable) ?
