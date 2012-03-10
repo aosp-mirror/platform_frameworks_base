@@ -10782,8 +10782,8 @@ package android.media {
 
   public class MediaActionSound {
     ctor public MediaActionSound();
-    method public void load(int);
-    method public void play(int);
+    method public synchronized void load(int);
+    method public synchronized void play(int);
     method public void release();
     field public static final int FOCUS_COMPLETE = 1; // 0x1
     field public static final int SHUTTER_CLICK = 0; // 0x0
@@ -22096,8 +22096,11 @@ package android.view {
   public class Gravity {
     ctor public Gravity();
     method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect);
+    method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect, int);
     method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect);
+    method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect, int);
     method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect);
+    method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect, int);
     method public static int getAbsoluteGravity(int, int);
     method public static boolean isHorizontal(int);
     method public static boolean isVertical(int);
