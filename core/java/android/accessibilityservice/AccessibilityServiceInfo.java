@@ -503,26 +503,38 @@ public class AccessibilityServiceInfo implements Parcelable {
     public static String feedbackTypeToString(int feedbackType) {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
-        while (feedbackType > 0) {
+        while (feedbackType != 0) {
             final int feedbackTypeFlag = 1 << Integer.numberOfTrailingZeros(feedbackType);
             feedbackType &= ~feedbackTypeFlag;
-            if (builder.length() > 1) {
-                builder.append(", ");
-            }
             switch (feedbackTypeFlag) {
                 case FEEDBACK_AUDIBLE:
+                    if (builder.length() > 1) {
+                        builder.append(", ");
+                    }
                     builder.append("FEEDBACK_AUDIBLE");
                     break;
                 case FEEDBACK_HAPTIC:
+                    if (builder.length() > 1) {
+                        builder.append(", ");
+                    }
                     builder.append("FEEDBACK_HAPTIC");
                     break;
                 case FEEDBACK_GENERIC:
+                    if (builder.length() > 1) {
+                        builder.append(", ");
+                    }
                     builder.append("FEEDBACK_GENERIC");
                     break;
                 case FEEDBACK_SPOKEN:
+                    if (builder.length() > 1) {
+                        builder.append(", ");
+                    }
                     builder.append("FEEDBACK_SPOKEN");
                     break;
                 case FEEDBACK_VISUAL:
+                    if (builder.length() > 1) {
+                        builder.append(", ");
+                    }
                     builder.append("FEEDBACK_VISUAL");
                     break;
             }
