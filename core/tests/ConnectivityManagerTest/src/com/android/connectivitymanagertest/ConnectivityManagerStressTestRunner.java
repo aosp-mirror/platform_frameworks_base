@@ -42,17 +42,13 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     public int mSleepTime = 2 * 60 * 1000;
     public String mReconnectSsid = "securenetdhcp";
     public String mReconnectPassword = "androidwifi";
+    public boolean mWifiOnlyFlag = false;
 
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
-        if (!UtilHelper.isWifiOnly(getContext())) {
-            suite.addTestSuite(WifiApStress.class);
-            suite.addTestSuite(WifiStressTest.class);
-        } else {
-            // only the wifi stress tests
-            suite.addTestSuite(WifiStressTest.class);
-        }
+        suite.addTestSuite(WifiApStress.class);
+        suite.addTestSuite(WifiStressTest.class);
         return suite;
     }
 
@@ -64,13 +60,11 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        if (!UtilHelper.isWifiOnly(getContext())) {
-            String valueStr = (String) icicle.get("softap_iterations");
-            if (valueStr != null) {
-                int iteration = Integer.parseInt(valueStr);
-                if (iteration > 0) {
-                    mSoftapIterations = iteration;
-                }
+        String valueStr = (String) icicle.get("softap_iterations");
+        if (valueStr != null) {
+            int iteration = Integer.parseInt(valueStr);
+            if (iteration > 0) {
+                mSoftapIterations = iteration;
             }
         }
 
@@ -106,6 +100,11 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
             if (sleepTime > 0) {
                 mSleepTime = 1000 * sleepTime;
             }
+        }
+
+        String wifiOnlyFlag = (String) icicle.get("wifi-only");
+        if (wifiOnlyFlag != null) {
+            mWifiOnlyFlag = true;
         }
     }
 }
