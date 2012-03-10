@@ -4376,9 +4376,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public int getResolvedLayoutDirection(Drawable who) {
         if (who == null) return View.LAYOUT_DIRECTION_LTR;

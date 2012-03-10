@@ -9061,6 +9061,7 @@ package android.graphics.drawable {
     method public int getMinimumWidth();
     method public abstract int getOpacity();
     method public boolean getPadding(android.graphics.Rect);
+    method public int getResolvedLayoutDirectionSelf();
     method public int[] getState();
     method public android.graphics.Region getTransparentRegion();
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
@@ -9093,6 +9094,10 @@ package android.graphics.drawable {
     method public abstract void invalidateDrawable(android.graphics.drawable.Drawable);
     method public abstract void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
     method public abstract void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
+  }
+
+  public static abstract interface Drawable.Callback2 implements android.graphics.drawable.Drawable.Callback {
+    method public abstract int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
   }
 
   public static abstract class Drawable.ConstantState {
@@ -10782,8 +10787,8 @@ package android.media {
 
   public class MediaActionSound {
     ctor public MediaActionSound();
-    method public void load(int);
-    method public void play(int);
+    method public synchronized void load(int);
+    method public synchronized void play(int);
     method public void release();
     field public static final int FOCUS_COMPLETE = 1; // 0x1
     field public static final int SHUTTER_CLICK = 0; // 0x0
@@ -23105,7 +23110,7 @@ package android.view {
     method public void recycle();
   }
 
-  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.graphics.drawable.Drawable.Callback2 android.view.KeyEvent.Callback {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, android.util.AttributeSet);
     ctor public View(android.content.Context, android.util.AttributeSet, int);
