@@ -1072,8 +1072,8 @@
     <string name="ime_action_done" msgid="8971516117910934605">"ተከናውኗል"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"ያለፈው"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"አከናውን"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"የደወሉት ቁጥር"\n"<xliff:g id="NUMBER">%s</xliff:g>በመጠቀም ላይ"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">\n"በመጠቀም<xliff:g id="NUMBER">%s</xliff:g>ዕውቂያ ፍጠር"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"<xliff:g id="NUMBER">%s</xliff:g>ን በመጠቀም "\n" ደውል"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g>ን በመጠቀም "\n" ዕውቂያ ፍጠር"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"የሚከተለው ወይም ተጨማሪ ትግበራዎች ወደ መለያዎ ለመድረስ  አሁን እና ወደፊት ፈቃድ ይጠይቃል።"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"ይህን ጥየቃ መፍቀድ ይፈልጋሉ?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"የድረስ መጠይቅ"</string>
