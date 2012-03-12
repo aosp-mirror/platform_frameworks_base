@@ -1071,7 +1071,6 @@ void DisplayListRenderer::prepareDirty(float left, float top,
 void DisplayListRenderer::finish() {
     insertRestoreToCount();
     insertTranlate();
-    OpenGLRenderer::finish();
 }
 
 void DisplayListRenderer::interrupt() {
