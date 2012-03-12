@@ -639,6 +639,13 @@
         android:label="@string/permgrouplab_storage"
         android:description="@string/permgroupdesc_storage" />
 
+    <!-- Allows an application to read from external storage -->
+    <permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:permissionGroup="android.permission-group.STORAGE"
+        android:label="@string/permlab_sdcardRead"
+        android:description="@string/permdesc_sdcardRead"
+        android:protectionLevel="dangerous" />
+
     <!-- Allows an application to write to external storage -->
     <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.STORAGE"

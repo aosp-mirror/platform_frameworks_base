@@ -636,6 +636,9 @@ int doDump(Bundle* bundle)
             bool hasWriteExternalStoragePermission = false;
             bool hasReadPhoneStatePermission = false;
 
+            // If an app requests write storage, they will also get read storage.
+            bool hasReadExternalStoragePermission = false;
+
             // This next group of variables is used to implement a group of
             // backward-compatibility heuristics necessitated by the addition of
             // some new uses-feature constants in 2.1 and 2.2. In most cases, the
@@ -999,6 +1002,8 @@ int doDump(Bundle* bundle)
                                 hasTelephonyPermission = true;
                             } else if (name == "android.permission.WRITE_EXTERNAL_STORAGE") {
                                 hasWriteExternalStoragePermission = true;
+                            } else if (name == "android.permission.READ_EXTERNAL_STORAGE") {
+                                hasReadExternalStoragePermission = true;
                             } else if (name == "android.permission.READ_PHONE_STATE") {
                                 hasReadPhoneStatePermission = true;
                             }
@@ -1163,10 +1168,17 @@ int doDump(Bundle* bundle)
             if (targetSdk < 4) {
                 if (!hasWriteExternalStoragePermission) {
                     printf("uses-permission:'android.permission.WRITE_EXTERNAL_STORAGE'\n");
+                    hasWriteExternalStoragePermission = true;
                 }
                 if (!hasReadPhoneStatePermission) {
                     printf("uses-permission:'android.permission.READ_PHONE_STATE'\n");
                 }
+            }
+
+            // If the application has requested WRITE_EXTERNAL_STORAGE, we will
+            // force them to always take READ_EXTERNAL_STORAGE as well.
+            if (!hasReadExternalStoragePermission && hasWriteExternalStoragePermission) {
+                printf("uses-permission:'android.permission.READ_EXTERNAL_STORAGE'\n");
             }
 
             /* The following blocks handle printing "inferred" uses-features, based

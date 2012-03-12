@@ -89,11 +89,25 @@ public class PackageParser {
             this.fileVersion = fileVersion;
         }
     }
-    
+
+    /** @hide */
+    public static class SplitPermissionInfo {
+        public final String rootPerm;
+        public final String[] newPerms;
+
+        public SplitPermissionInfo(String rootPerm, String[] newPerms) {
+            this.rootPerm = rootPerm;
+            this.newPerms = newPerms;
+        }
+    }
+
     /**
      * List of new permissions that have been added since 1.0.
      * NOTE: These must be declared in SDK version order, with permissions
      * added to older SDKs appearing before those added to newer SDKs.
+     * If sdkVersion is 0, then this is not a permission that we want to
+     * automatically add to older apps, but we do want to allow it to be
+     * granted during a platform update.
      * @hide
      */
     public static final PackageParser.NewPermissionInfo NEW_PERMISSIONS[] =
@@ -102,6 +116,17 @@ public class PackageParser {
                     android.os.Build.VERSION_CODES.DONUT, 0),
             new PackageParser.NewPermissionInfo(android.Manifest.permission.READ_PHONE_STATE,
                     android.os.Build.VERSION_CODES.DONUT, 0)
+    };
+
+    /**
+     * List of permissions that have been split into more granular or dependent
+     * permissions.
+     * @hide
+     */
+    public static final PackageParser.SplitPermissionInfo SPLIT_PERMISSIONS[] =
+        new PackageParser.SplitPermissionInfo[] {
+            new PackageParser.SplitPermissionInfo(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    new String[] { android.Manifest.permission.READ_EXTERNAL_STORAGE })
     };
 
     private String mArchiveSourcePath;
@@ -1245,7 +1270,23 @@ public class PackageParser {
         if (implicitPerms != null) {
             Slog.i(TAG, implicitPerms.toString());
         }
-        
+
+        final int NS = PackageParser.SPLIT_PERMISSIONS.length;
+        for (int is=0; is<NS; is++) {
+            final PackageParser.SplitPermissionInfo spi
+                    = PackageParser.SPLIT_PERMISSIONS[is];
+            if (!pkg.requestedPermissions.contains(spi.rootPerm)) {
+                break;
+            }
+            for (int in=0; in<spi.newPerms.length; in++) {
+                final String perm = spi.newPerms[in];
+                if (!pkg.requestedPermissions.contains(perm)) {
+                    pkg.requestedPermissions.add(perm);
+                    pkg.requestedPermissionsRequired.add(Boolean.TRUE);
+                }
+            }
+        }
+
         if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
                 && pkg.applicationInfo.targetSdkVersion
                         >= android.os.Build.VERSION_CODES.DONUT)) {
