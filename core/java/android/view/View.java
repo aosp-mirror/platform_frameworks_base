@@ -336,9 +336,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Padding can be used to offset the content of the view by a specific amount of
  * pixels. For instance, a left padding of 2 will push the view's content by
  * 2 pixels to the right of the left edge. Padding can be set using the
- * {@link #setPadding(int, int, int, int)} method and queried by calling
- * {@link #getPaddingLeft()}, {@link #getPaddingTop()},
- * {@link #getPaddingRight()}, {@link #getPaddingBottom()}.
+ * {@link #setPadding(int, int, int, int)} or {@link #setPaddingRelative(int, int, int, int)}
+ * method and queried by calling {@link #getPaddingLeft()}, {@link #getPaddingTop()},
+ * {@link #getPaddingRight()}, {@link #getPaddingBottom()}, {@link #getPaddingStart()},
+ * {@link #getPaddingEnd()}.
  * </p>
  *
  * <p>
@@ -12473,9 +12474,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Returns the start padding of this view. If there are inset and enabled
-     * scrollbars, this value may include the space required to display the
-     * scrollbars as well.
+     * Returns the start padding of this view depending on its resolved layout direction.
+     * If there are inset and enabled scrollbars, this value may include the space
+     * required to display the scrollbars as well.
      *
      * @return the start padding in pixels
      */
@@ -12496,9 +12497,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Returns the end padding of this view. If there are inset and enabled
-     * scrollbars, this value may include the space required to display the
-     * scrollbars as well.
+     * Returns the end padding of this view depending on its resolved layout direction.
+     * If there are inset and enabled scrollbars, this value may include the space
+     * required to display the scrollbars as well.
      *
      * @return the end padding in pixels
      */
