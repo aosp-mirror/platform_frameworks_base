@@ -339,10 +339,10 @@ public final class WebViewCore {
     /**
      * Called by JNI when the focus node changed.
      */
-    private void focusNodeChanged(WebKitHitTest hitTest) {
+    private void focusNodeChanged(int nodePointer, WebKitHitTest hitTest) {
         if (mWebView == null) return;
-        mWebView.mPrivateHandler.obtainMessage(WebViewClassic.HIT_TEST_RESULT, hitTest)
-                .sendToTarget();
+        mWebView.mPrivateHandler.obtainMessage(WebViewClassic.FOCUS_NODE_CHANGED,
+                nodePointer, 0, hitTest).sendToTarget();
     }
 
     /**
@@ -953,22 +953,32 @@ public final class WebViewCore {
     static class TextFieldInitData {
         public TextFieldInitData(int fieldPointer,
                 String text, int type, boolean isSpellCheckEnabled,
-                boolean isTextFieldNext, String label, int maxLength) {
+                boolean autoComplete, boolean isTextFieldNext,
+                String name, String label, int maxLength,
+                Rect nodeBounds, int nodeLayerId) {
             mFieldPointer = fieldPointer;
             mText = text;
             mType = type;
+            mIsAutoCompleteEnabled = autoComplete;
             mIsSpellCheckEnabled = isSpellCheckEnabled;
             mIsTextFieldNext = isTextFieldNext;
+            mName = name;
             mLabel = label;
             mMaxLength = maxLength;
+            mNodeBounds = nodeBounds;
+            mNodeLayerId = nodeLayerId;
         }
         int mFieldPointer;
         String mText;
         int mType;
         boolean mIsSpellCheckEnabled;
         boolean mIsTextFieldNext;
+        boolean mIsAutoCompleteEnabled;
+        String mName;
         String mLabel;
         int mMaxLength;
+        Rect mNodeBounds;
+        int mNodeLayerId;
     }
 
     // mAction of TouchEventData can be MotionEvent.getAction() which uses the
@@ -2787,14 +2797,16 @@ public final class WebViewCore {
 
     // called by JNI
     private void initEditField(int pointer, String text, int inputType,
-            boolean isSpellCheckEnabled, boolean nextFieldIsText,
-            String label, int start, int end, int selectionPtr, int maxLength) {
+            boolean isSpellCheckEnabled, boolean isAutoCompleteEnabled,
+            boolean nextFieldIsText, String name,
+            String label, int start, int end, int selectionPtr, int maxLength,
+            Rect nodeRect, int nodeLayer) {
         if (mWebView == null) {
             return;
         }
         TextFieldInitData initData = new TextFieldInitData(pointer,
-                text, inputType, isSpellCheckEnabled, nextFieldIsText, label,
-                maxLength);
+                text, inputType, isSpellCheckEnabled, isAutoCompleteEnabled,
+                nextFieldIsText, name, label, maxLength, nodeRect, nodeLayer);
         Message.obtain(mWebView.mPrivateHandler,
                 WebViewClassic.INIT_EDIT_FIELD, initData).sendToTarget();
         Message.obtain(mWebView.mPrivateHandler,
