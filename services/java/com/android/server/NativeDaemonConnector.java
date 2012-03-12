@@ -200,17 +200,15 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     /**
      * Make command for daemon, escaping arguments as needed.
-     *
-     * @return the final command.
      */
-    private StringBuilder makeCommand(String cmd, Object... args)
+    private void makeCommand(StringBuilder builder, String cmd, Object... args)
             throws NativeDaemonConnectorException {
         // TODO: eventually enforce that cmd doesn't contain arguments
         if (cmd.indexOf('\0') >= 0) {
             throw new IllegalArgumentException("unexpected command: " + cmd);
         }
 
-        final StringBuilder builder = new StringBuilder(cmd);
+        builder.append(cmd);
         for (Object arg : args) {
             final String argString = String.valueOf(arg);
             if (argString.indexOf('\0') >= 0) {
@@ -220,34 +218,6 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             builder.append(' ');
             appendEscaped(builder, argString);
         }
-
-        return builder;
-    }
-
-    private int sendCommand(StringBuilder builder)
-            throws NativeDaemonConnectorException {
-
-        int sequenceNumber = mSequenceNumber.incrementAndGet();
-
-        builder.insert(0, Integer.toString(sequenceNumber) + " ");
-
-        log("SND -> {" + builder.toString() + "}");
-
-        builder.append('\0');
-
-        synchronized (mDaemonLock) {
-            if (mOutputStream == null) {
-                throw new NativeDaemonConnectorException("missing output stream");
-            } else {
-                try {
-                    mOutputStream.write(builder.toString().getBytes(Charsets.UTF_8));
-                } catch (IOException e) {
-                    throw new NativeDaemonConnectorException("problem sending command", e);
-                }
-            }
-        }
-
-        return sequenceNumber;
     }
 
     /**
@@ -325,25 +295,46 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     public NativeDaemonEvent[] execute(int timeout, String cmd, Object... args)
             throws NativeDaemonConnectorException {
         final ArrayList<NativeDaemonEvent> events = Lists.newArrayList();
-        final StringBuilder sentCommand = makeCommand(cmd, args);
-        final int cmdNumber = sendCommand(sentCommand);
+
+        final int sequenceNumber = mSequenceNumber.incrementAndGet();
+        final StringBuilder cmdBuilder =
+                new StringBuilder(Integer.toString(sequenceNumber)).append(' ');
+
+        makeCommand(cmdBuilder, cmd, args);
+
+        final String logCmd = cmdBuilder.toString(); /* includes cmdNum, cmd, args */
+        log("SND -> {" + logCmd + "}");
+
+        cmdBuilder.append('\0');
+        final String sentCmd = cmdBuilder.toString(); /* logCmd + \0 */
+
+        synchronized (mDaemonLock) {
+            if (mOutputStream == null) {
+                throw new NativeDaemonConnectorException("missing output stream");
+            } else {
+                try {
+                    mOutputStream.write(sentCmd.getBytes(Charsets.UTF_8));
+                } catch (IOException e) {
+                    throw new NativeDaemonConnectorException("problem sending command", e);
+                }
+            }
+        }
 
         NativeDaemonEvent event = null;
-        cmd = sentCommand.toString();
         do {
-            event = mResponseQueue.remove(cmdNumber, timeout, cmd);
+            event = mResponseQueue.remove(sequenceNumber, timeout, sentCmd);
             if (event == null) {
-                loge("timed-out waiting for response to " + cmdNumber + " " + cmd);
-                throw new NativeDaemonFailureException(cmd, event);
+                loge("timed-out waiting for response to " + logCmd);
+                throw new NativeDaemonFailureException(logCmd, event);
             }
             events.add(event);
         } while (event.isClassContinue());
 
         if (event.isClassClientError()) {
-            throw new NativeDaemonArgumentException(cmd, event);
+            throw new NativeDaemonArgumentException(logCmd, event);
         }
         if (event.isClassServerError()) {
-            throw new NativeDaemonFailureException(cmd, event);
+            throw new NativeDaemonFailureException(logCmd, event);
         }
 
         return events.toArray(new NativeDaemonEvent[events.size()]);
