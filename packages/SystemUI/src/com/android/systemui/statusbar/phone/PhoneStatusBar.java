@@ -32,6 +32,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.Configuration;
+import android.inputmethodservice.InputMethodService;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -228,6 +229,8 @@ public class PhoneStatusBar extends StatusBar {
     int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
 
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+
+    private int mNavigationIconHints = 0;
 
     private class ExpandedDialog extends Dialog {
         ExpandedDialog(Context context) {
@@ -1541,6 +1544,17 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     @Override // CommandQueue
+    public void setNavigationIconHints(int hints) {
+        if (hints == mNavigationIconHints) return;
+
+        mNavigationIconHints = hints;
+
+        if (mNavigationBarView != null) {
+            mNavigationBarView.setNavigationIconHints(hints);
+        }
+    }
+
+    @Override // CommandQueue
     public void setSystemUiVisibility(int vis) {
         final int old = mSystemUiVisibility;
         final int diff = vis ^ old;
@@ -1590,8 +1604,16 @@ public class PhoneStatusBar extends StatusBar {
         if (showMenu) setLightsOn(true);
     }
 
-    // Not supported
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) { }
+    @Override
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+        boolean altBack = (backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS)
+            || ((vis & InputMethodService.IME_VISIBLE) != 0);
+
+        mCommandQueue.setNavigationIconHints(
+                altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
+                        : (mNavigationIconHints & ~StatusBarManager.NAVIGATION_HINT_BACK_ALT));
+    }
+
     @Override
     public void setHardKeyboardStatus(boolean available, boolean enabled) { }
 
