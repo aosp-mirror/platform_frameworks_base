@@ -153,7 +153,8 @@ public class Gravity
      *                container.
      * @param layoutDirection The layout direction.
      *
-     * @hide
+     * @see {@link View#LAYOUT_DIRECTION_LTR}
+     * @see {@link View#LAYOUT_DIRECTION_RTL}
      */
     public static void apply(int gravity, int w, int h, Rect container,
             Rect outRect, int layoutDirection) {
@@ -268,6 +269,37 @@ public class Gravity
     }
 
     /**
+     * Apply a gravity constant to an object.
+     *
+     * @param gravity The desired placement of the object, as defined by the
+     *                constants in this class.
+     * @param w The horizontal size of the object.
+     * @param h The vertical size of the object.
+     * @param container The frame of the containing space, in which the object
+     *                  will be placed.  Should be large enough to contain the
+     *                  width and height of the object.
+     * @param xAdj Offset to apply to the X axis.  If gravity is LEFT this
+     *             pushes it to the right; if gravity is RIGHT it pushes it to
+     *             the left; if gravity is CENTER_HORIZONTAL it pushes it to the
+     *             right or left; otherwise it is ignored.
+     * @param yAdj Offset to apply to the Y axis.  If gravity is TOP this pushes
+     *             it down; if gravity is BOTTOM it pushes it up; if gravity is
+     *             CENTER_VERTICAL it pushes it down or up; otherwise it is
+     *             ignored.
+     * @param outRect Receives the computed frame of the object in its
+     *                container.
+     * @param layoutDirection The layout direction.
+     *
+     * @see {@link View#LAYOUT_DIRECTION_LTR}
+     * @see {@link View#LAYOUT_DIRECTION_RTL}
+     */
+    public static void apply(int gravity, int w, int h, Rect container,
+                             int xAdj, int yAdj, Rect outRect, int layoutDirection) {
+        int absGravity = getAbsoluteGravity(gravity, layoutDirection);
+        apply(absGravity, w, h, container, xAdj, yAdj, outRect);
+    }
+
+    /**
      * Apply additional gravity behavior based on the overall "display" that an
      * object exists in.  This can be used after
      * {@link #apply(int, int, int, Rect, int, int, Rect)} to place the object
@@ -320,7 +352,32 @@ public class Gravity
             }
         }
     }
-    
+
+    /**
+     * Apply additional gravity behavior based on the overall "display" that an
+     * object exists in.  This can be used after
+     * {@link #apply(int, int, int, Rect, int, int, Rect)} to place the object
+     * within a visible display.  By default this moves or clips the object
+     * to be visible in the display; the gravity flags
+     * {@link #DISPLAY_CLIP_HORIZONTAL} and {@link #DISPLAY_CLIP_VERTICAL}
+     * can be used to change this behavior.
+     *
+     * @param gravity Gravity constants to modify the placement within the
+     * display.
+     * @param display The rectangle of the display in which the object is
+     * being placed.
+     * @param inoutObj Supplies the current object position; returns with it
+     * modified if needed to fit in the display.
+     * @param layoutDirection The layout direction.
+     *
+     * @see {@link View#LAYOUT_DIRECTION_LTR}
+     * @see {@link View#LAYOUT_DIRECTION_RTL}
+     */
+    public static void applyDisplay(int gravity, Rect display, Rect inoutObj, int layoutDirection) {
+        int absGravity = getAbsoluteGravity(gravity, layoutDirection);
+        applyDisplay(absGravity, display, inoutObj);
+    }
+
     /**
      * <p>Indicate whether the supplied gravity has a vertical pull.</p>
      *

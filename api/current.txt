@@ -22105,8 +22105,11 @@ package android.view {
   public class Gravity {
     ctor public Gravity();
     method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect);
+    method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect, int);
     method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect);
+    method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect, int);
     method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect);
+    method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect, int);
     method public static int getAbsoluteGravity(int, int);
     method public static boolean isHorizontal(int);
     method public static boolean isVertical(int);
