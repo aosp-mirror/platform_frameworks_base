@@ -29,7 +29,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
-class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
+class ScreenRotationAnimation {
     static final String TAG = "ScreenRotationAnimation";
     static final boolean DEBUG_STATE = false;
     static final boolean DEBUG_TRANSFORMS = false;
@@ -540,8 +540,7 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
                 || mRotateFrameAnimation != null;
     }
 
-    @Override
-    public boolean stepAnimation(long now) {
+    private boolean stepAnimation(long now) {
 
         if (mFinishAnimReady && mFinishAnimStartTime < 0) {
             if (DEBUG_STATE) Slog.v(TAG, "Step: finish anim now ready");
@@ -725,7 +724,7 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
         setSnapshotTransform(mSnapshotFinalMatrix, mExitTransformation.getAlpha());
     }
     
-    public boolean startAndFinishAnimationLocked(long now) {
+    public boolean stepAnimationLocked(long now) {
         if (!isAnimating()) {
             if (DEBUG_STATE) Slog.v(TAG, "Step: no animations running");
             mFinishAnimReady = false;
@@ -763,8 +762,8 @@ class ScreenRotationAnimation implements WindowManagerService.StepAnimator {
             }
             mAnimRunning = true;
         }
-        
-        return true;
+
+        return stepAnimation(now);
     }
 
     public Transformation getEnterTransformation() {

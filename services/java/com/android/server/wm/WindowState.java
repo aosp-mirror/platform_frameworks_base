@@ -54,8 +54,7 @@ import java.util.ArrayList;
 /**
  * A window in the window manager.
  */
-final class WindowState implements WindowManagerPolicy.WindowState,
-        WindowManagerService.StepAnimator {
+final class WindowState implements WindowManagerPolicy.WindowState {
     static final boolean DEBUG_VISIBILITY = WindowManagerService.DEBUG_VISIBILITY;
     static final boolean SHOW_TRANSACTIONS = WindowManagerService.SHOW_TRANSACTIONS;
     static final boolean SHOW_LIGHT_TRANSACTIONS = WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
@@ -995,8 +994,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
         return true;
     }
 
-    @Override
-    public boolean stepAnimation(long currentTime) {
+    private boolean stepAnimation(long currentTime) {
         if ((mAnimation == null) || !mLocalAnimating || (mAnimState != ANIM_STATE_RUNNING)) {
             return false;
         }
@@ -1013,7 +1011,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
 
     // This must be called while inside a transaction.  Returns true if
     // there is more animation to run.
-    boolean startAndFinishAnimationLocked(long currentTime) {
+    boolean stepAnimationLocked(long currentTime) {
         // Save the animation state as it was before this step so WindowManagerService can tell if
         // we just started or just stopped animating by comparing mWasAnimating with isAnimating().
         mWasAnimating = mAnimating;
@@ -1038,7 +1036,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
                 }
                 if ((mAnimation != null) && mLocalAnimating && 
                         (mAnimState != ANIM_STATE_STOPPING)) {
-                    return true;
+                    return stepAnimation(currentTime);
                 }
                 if (WindowManagerService.DEBUG_ANIM) Slog.v(
                     WindowManagerService.TAG, "Finished animation in " + this +
@@ -1133,6 +1131,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
         }
 
         finishExit();
+        mService.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 
         if (mAppToken != null) {
             mAppToken.updateReportedVisibilityLocked();
@@ -1608,6 +1607,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
 
     boolean showLw(boolean doAnimation, boolean requestAnim) {
         if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
+            // Already showing.
             return false;
         }
         if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Policy visibility true: " + this);
@@ -1647,6 +1647,7 @@ final class WindowState implements WindowManagerPolicy.WindowState,
         boolean current = doAnimation ? mPolicyVisibilityAfterAnim
                 : mPolicyVisibility;
         if (!current) {
+            // Already hiding.
             return false;
         }
         if (doAnimation) {

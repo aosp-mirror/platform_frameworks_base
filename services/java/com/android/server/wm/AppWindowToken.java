@@ -27,6 +27,7 @@ import android.util.Slog;
 import android.view.IApplicationToken;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
@@ -37,7 +38,7 @@ import java.util.ArrayList;
  * Version of WindowToken that is specifically for a particular application (or
  * really activity) that is displaying windows.
  */
-class AppWindowToken extends WindowToken implements WindowManagerService.StepAnimator {
+class AppWindowToken extends WindowToken {
     // Non-null only for application tokens.
     final IApplicationToken appToken;
 
@@ -195,8 +196,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.StepAni
         }
     }
 
-    @Override
-    public boolean stepAnimation(long currentTime) {
+
+    private boolean stepAnimation(long currentTime) {
         if (animation == null) {
             return false;
         }
@@ -216,7 +217,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.StepAni
     }
 
     // This must be called while inside a transaction.
-    boolean startAndFinishAnimationLocked(long currentTime, int dw, int dh) {
+    boolean stepAnimationLocked(long currentTime, int dw, int dh) {
         if (!service.mDisplayFrozen && service.mPolicy.isScreenOnFully()) {
             // We will run animations as long as the display isn't frozen.
 
@@ -240,7 +241,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.StepAni
                     animating = true;
                 }
                 // we're done!
-                return true;
+                return stepAnimation(currentTime);
             }
         } else if (animation != null) {
             // If the display is frozen, and there is a pending animation,
@@ -255,6 +256,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.StepAni
             return false;
         }
 
+        service.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
         clearAnimation();
         animating = false;
         if (animLayerAdjustment != 0) {
