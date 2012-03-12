@@ -257,14 +257,14 @@ ObjectBaseRef<Type> Type::getTypeRef(Context *rsc, const Element *e,
 
 ObjectBaseRef<Type> Type::cloneAndResize1D(Context *rsc, uint32_t dimX) const {
     return getTypeRef(rsc, mElement.get(), dimX,
-                      mHal.state.dimY, mHal.state.dimZ, mHal.state.lodCount, mHal.state.faces);
+                      getDimY(), getDimZ(), getDimLOD(), getDimFaces());
 }
 
 ObjectBaseRef<Type> Type::cloneAndResize2D(Context *rsc,
                               uint32_t dimX,
                               uint32_t dimY) const {
     return getTypeRef(rsc, mElement.get(), dimX, dimY,
-                      mHal.state.dimZ, mHal.state.lodCount, mHal.state.faces);
+                      getDimZ(), getDimLOD(), getDimFaces());
 }
 
 
