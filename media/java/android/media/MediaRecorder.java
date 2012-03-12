@@ -582,6 +582,7 @@ public class MediaRecorder
      * Currently not implemented. It does nothing.
      * @deprecated Time lapse mode video recording using camera still image capture
      * is not desirable, and will not be supported.
+     * @hide
      */
     public void setAuxiliaryOutputFile(FileDescriptor fd)
     {
@@ -592,6 +593,7 @@ public class MediaRecorder
      * Currently not implemented. It does nothing.
      * @deprecated Time lapse mode video recording using camera still image capture
      * is not desirable, and will not be supported.
+     * @hide
      */
     public void setAuxiliaryOutputFile(String path)
     {
