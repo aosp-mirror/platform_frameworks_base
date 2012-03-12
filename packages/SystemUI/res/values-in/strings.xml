@@ -39,7 +39,7 @@
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> tersisa"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Pengisian daya USB tidak didukung."\n"Gunakan hanya pengisi daya yang disediakan."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Penggunaan baterai"</string>
-    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Pengaturan"</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Setelan"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Mode pesawat"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Putar layar secara otomatis"</string>
@@ -118,7 +118,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Penambatan bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode pesawat."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterai <xliff:g id="NUMBER">%d</xliff:g> persen."</string>
-    <string name="accessibility_settings_button" msgid="799583911231893380">"Pengaturan sistem."</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"Setelan sistem."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Pemberitahuan."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Menghapus pemberitahuan."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS diaktifkan."</string>
