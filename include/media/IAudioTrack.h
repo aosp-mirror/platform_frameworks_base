@@ -32,7 +32,7 @@ namespace android {
 
 class IAudioTrack : public IInterface
 {
-public: 
+public:
     DECLARE_META_INTERFACE(AudioTrack);
 
     /* Get this track's control block */
@@ -45,7 +45,7 @@ public:
     virtual status_t    start(pid_t tid) = 0;
 
     /* Stop a track. If set, the callback will cease being called and
-     * obtainBuffer will return an error. Buffers that are already released 
+     * obtainBuffer will return an error. Buffers that are already released
      * will continue to be processed, unless/until flush() is called.
      */
     virtual void        stop() = 0;
@@ -59,9 +59,9 @@ public:
      * While muted, the callback, if set, is still called.
      */
     virtual void        mute(bool) = 0;
-    
+
     /* Pause a track. If set, the callback will cease being called and
-     * obtainBuffer will return an error. Buffers that are already released 
+     * obtainBuffer will return an error. Buffers that are already released
      * will continue to be processed, unless/until flush() is called.
      */
     virtual void        pause() = 0;

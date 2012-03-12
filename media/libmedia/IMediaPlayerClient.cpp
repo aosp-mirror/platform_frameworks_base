@@ -56,7 +56,7 @@ IMPLEMENT_META_INTERFACE(MediaPlayerClient, "android.media.IMediaPlayerClient");
 status_t BnMediaPlayerClient::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
         case NOTIFY: {
             CHECK_INTERFACE(IMediaPlayerClient, data, reply);
             int msg = data.readInt32();

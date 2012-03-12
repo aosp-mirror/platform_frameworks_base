@@ -1099,12 +1099,12 @@ int MediaProfiles::getCamcorderProfileParamByName(const char *name,
                                                   camcorder_quality quality) const
 {
     ALOGV("getCamcorderProfileParamByName: %s for camera %d, quality %d",
-         name, cameraId, quality);
+        name, cameraId, quality);
 
     int index = getCamcorderProfileIndex(cameraId, quality);
     if (index == -1) {
         ALOGE("The given camcorder profile camera %d quality %d is not found",
-             cameraId, quality);
+            cameraId, quality);
         return -1;
     }
 

@@ -227,7 +227,7 @@ void AudioResamplerOrder1::resampleStereo16(int32_t* out, size_t outFrameCount,
             mX0L = mBuffer.i16[mBuffer.frameCount*2-2];
             mX0R = mBuffer.i16[mBuffer.frameCount*2-1];
             provider->releaseBuffer(&mBuffer);
-             // mBuffer.frameCount == 0 now so we reload a new buffer
+            // mBuffer.frameCount == 0 now so we reload a new buffer
         }
 
         int16_t *in = mBuffer.i16;

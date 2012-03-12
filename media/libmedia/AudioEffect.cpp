@@ -174,7 +174,7 @@ AudioEffect::~AudioEffect()
             mIEffect->disconnect();
             mIEffect->asBinder()->unlinkToDeath(mIEffectClient);
         }
-         IPCThreadState::self()->flushCommands();
+        IPCThreadState::self()->flushCommands();
     }
     mIEffect.clear();
     mIEffectClient.clear();
@@ -480,4 +480,3 @@ status_t AudioEffect::guidToString(const effect_uuid_t *guid, char *str, size_t 
 
 
 }; // namespace android
-

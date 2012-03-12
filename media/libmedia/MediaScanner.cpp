@@ -54,7 +54,7 @@ const char *MediaScanner::locale() const {
 void MediaScanner::loadSkipList() {
     mSkipList = (char *)malloc(PROPERTY_VALUE_MAX * sizeof(char));
     if (mSkipList) {
-      property_get("testing.mediascanner.skiplist", mSkipList, "");
+        property_get("testing.mediascanner.skiplist", mSkipList, "");
     }
     if (!mSkipList || (strlen(mSkipList) == 0)) {
         free(mSkipList);
@@ -135,8 +135,8 @@ MediaScanResult MediaScanner::doProcessDirectory(
     struct dirent* entry;
 
     if (shouldSkipDirectory(path)) {
-      ALOGD("Skipping: %s", path);
-      return MEDIA_SCAN_RESULT_OK;
+        ALOGD("Skipping: %s", path);
+        return MEDIA_SCAN_RESULT_OK;
     }
 
     // Treat all files as non-media in directories that contain a  ".nomedia" file

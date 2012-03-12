@@ -26,7 +26,7 @@
 namespace android {
 
 // A simple buffer to hold binary data
-class MediaAlbumArt 
+class MediaAlbumArt
 {
 public:
     MediaAlbumArt(): mSize(0), mData(0) {}
@@ -57,9 +57,9 @@ public:
         fclose(in);
     }
 
-    MediaAlbumArt(const MediaAlbumArt& copy) { 
-        mSize = copy.mSize; 
-        mData = NULL;  // initialize it first 
+    MediaAlbumArt(const MediaAlbumArt& copy) {
+        mSize = copy.mSize;
+        mData = NULL;  // initialize it first
         if (mSize > 0 && copy.mData != NULL) {
            mData = new uint8_t[copy.mSize];
            if (mData != NULL) {
@@ -89,7 +89,7 @@ class VideoFrame
 {
 public:
     VideoFrame(): mWidth(0), mHeight(0), mDisplayWidth(0), mDisplayHeight(0), mSize(0), mData(0) {}
- 
+
     VideoFrame(const VideoFrame& copy) {
         mWidth = copy.mWidth;
         mHeight = copy.mHeight;

@@ -311,8 +311,8 @@ private:
 
     mutable Mutex mLock;    // prevents concurrent access to AudioPolicy manager functions changing
                             // device connection state  or routing
-    sp <AudioCommandThread> mAudioCommandThread;    // audio commands thread
-    sp <AudioCommandThread> mTonePlaybackThread;     // tone playback thread
+    sp<AudioCommandThread> mAudioCommandThread;     // audio commands thread
+    sp<AudioCommandThread> mTonePlaybackThread;     // tone playback thread
     struct audio_policy_device *mpAudioPolicyDev;
     struct audio_policy *mpAudioPolicy;
     KeyedVector< audio_source_t, InputSourceDesc* > mInputSources;

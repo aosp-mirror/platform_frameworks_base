@@ -222,7 +222,7 @@ void AudioResamplerSinc::resample(int32_t* out, size_t outFrameCount,
                 } else {
                     read<CHANNELS>(impulse, phaseFraction, mBuffer.i16, inputIndex);
                 }
-           }
+            }
         }
         int16_t *in = mBuffer.i16;
         const size_t frameCount = mBuffer.frameCount;
@@ -247,7 +247,7 @@ void AudioResamplerSinc::resample(int32_t* out, size_t outFrameCount,
                 if (inputIndex >= frameCount)
                     break;  // need a new buffer
                 read<CHANNELS>(impulse, phaseFraction, in, inputIndex);
-            } else if(phaseIndex == 2) {    // maximum value
+            } else if (phaseIndex == 2) {    // maximum value
                 inputIndex++;
                 if (inputIndex >= frameCount)
                     break;  // 0 frame available, 2 frames needed

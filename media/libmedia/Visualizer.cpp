@@ -66,7 +66,7 @@ status_t Visualizer::setEnabled(bool enabled)
             }
         }
         t->mLock.lock();
-     }
+    }
 
     status_t status = AudioEffect::setEnabled(enabled);
 
@@ -320,4 +320,3 @@ void Visualizer::CaptureThread::onFirstRef()
 }
 
 }; // namespace android
-

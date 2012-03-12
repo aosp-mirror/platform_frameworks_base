@@ -365,7 +365,7 @@ IMPLEMENT_META_INTERFACE(AudioPolicyService, "android.media.IAudioPolicyService"
 status_t BnAudioPolicyService::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
         case SET_DEVICE_CONNECTION_STATE: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
             audio_devices_t device =

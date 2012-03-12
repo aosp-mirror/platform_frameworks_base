@@ -195,8 +195,8 @@ status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
             (mCurrentState != MEDIA_PLAYER_STATE_ERROR) &&
             ((mCurrentState & MEDIA_PLAYER_IDLE) != MEDIA_PLAYER_IDLE);
     if ((mPlayer != NULL) && hasBeenInitialized) {
-         ALOGV("invoke %d", request.dataSize());
-         return  mPlayer->invoke(request, reply);
+        ALOGV("invoke %d", request.dataSize());
+        return  mPlayer->invoke(request, reply);
     }
     ALOGE("invoke failed: wrong state %X", mCurrentState);
     return INVALID_OPERATION;
@@ -556,9 +556,9 @@ status_t MediaPlayer::setAudioSessionId(int sessionId)
         return BAD_VALUE;
     }
     if (sessionId != mAudioSessionId) {
-      AudioSystem::releaseAudioSessionId(mAudioSessionId);
-      AudioSystem::acquireAudioSessionId(sessionId);
-      mAudioSessionId = sessionId;
+        AudioSystem::releaseAudioSessionId(mAudioSessionId);
+        AudioSystem::acquireAudioSessionId(sessionId);
+        mAudioSessionId = sessionId;
     }
     return NO_ERROR;
 }
@@ -610,7 +610,7 @@ status_t MediaPlayer::getParameter(int key, Parcel *reply)
     ALOGV("MediaPlayer::getParameter(%d)", key);
     Mutex::Autolock _l(mLock);
     if (mPlayer != NULL) {
-         return  mPlayer->getParameter(key, reply);
+        return  mPlayer->getParameter(key, reply);
     }
     ALOGV("getParameter: no active player");
     return INVALID_OPERATION;
@@ -658,7 +658,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2, const Parcel *obj)
     // and seekTo within the same process.
     // FIXME: Remember, this is a hack, it's not even a hack that is applied
     // consistently for all use-cases, this needs to be revisited.
-     if (mLockThreadId != getThreadId()) {
+    if (mLockThreadId != getThreadId()) {
         mLock.lock();
         locked = true;
     }

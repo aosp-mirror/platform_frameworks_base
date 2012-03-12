@@ -56,4 +56,3 @@ public:
 }; // namespace android
 
 #endif // ANDROID_IMEDIAMETADATARETRIEVER_H
-

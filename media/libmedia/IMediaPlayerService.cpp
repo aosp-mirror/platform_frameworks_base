@@ -132,7 +132,7 @@ IMPLEMENT_META_INTERFACE(MediaPlayerService, "android.media.IMediaPlayerService"
 status_t BnMediaPlayerService::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
         case CREATE: {
             CHECK_INTERFACE(IMediaPlayerService, data, reply);
             pid_t pid = data.readInt32();

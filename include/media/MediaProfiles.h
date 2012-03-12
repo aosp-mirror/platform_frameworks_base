@@ -516,4 +516,3 @@ private:
 }; // namespace android
 
 #endif // ANDROID_MEDIAPROFILES_H
-

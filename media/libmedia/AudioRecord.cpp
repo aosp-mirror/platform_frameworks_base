@@ -293,13 +293,13 @@ status_t AudioRecord::start()
                 return WOULD_BLOCK;
             }
         }
-     }
+    }
 
     AutoMutex lock(mLock);
     // acquire a strong reference on the IAudioRecord and IMemory so that they cannot be destroyed
     // while we are accessing the cblk
-    sp <IAudioRecord> audioRecord = mAudioRecord;
-    sp <IMemory> iMem = mCblkMemory;
+    sp<IAudioRecord> audioRecord = mAudioRecord;
+    sp<IMemory> iMem = mCblkMemory;
     audio_track_cblk_t* cblk = mCblk;
     if (mActive == 0) {
         mActive = 1;
@@ -638,8 +638,8 @@ ssize_t AudioRecord::read(void* buffer, size_t userSize)
     mLock.lock();
     // acquire a strong reference on the IAudioRecord and IMemory so that they cannot be destroyed
     // while we are accessing the cblk
-    sp <IAudioRecord> audioRecord = mAudioRecord;
-    sp <IMemory> iMem = mCblkMemory;
+    sp<IAudioRecord> audioRecord = mAudioRecord;
+    sp<IMemory> iMem = mCblkMemory;
     mLock.unlock();
 
     do {
@@ -684,8 +684,8 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
     mLock.lock();
     // acquire a strong reference on the IAudioRecord and IMemory so that they cannot be destroyed
     // while we are accessing the cblk
-    sp <IAudioRecord> audioRecord = mAudioRecord;
-    sp <IMemory> iMem = mCblkMemory;
+    sp<IAudioRecord> audioRecord = mAudioRecord;
+    sp<IMemory> iMem = mCblkMemory;
     audio_track_cblk_t* cblk = mCblk;
     mLock.unlock();
 
@@ -806,7 +806,7 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
         }
     }
     ALOGV("restoreRecord_l() status %d mActive %d cblk %p, old cblk %p flags %08x old flags %08x",
-         result, mActive, mCblk, cblk, mCblk->flags, cblk->flags);
+        result, mActive, mCblk, cblk, mCblk->flags, cblk->flags);
 
     if (result == NO_ERROR) {
         // from now on we switch to the newly created cblk
@@ -843,4 +843,3 @@ status_t AudioRecord::ClientRecordThread::readyToRun()
 // -------------------------------------------------------------------------
 
 }; // namespace android
-

@@ -268,8 +268,8 @@ const ToneGenerator::ToneDescriptor ToneGenerator::sToneDescriptors[] = {
           repeatCnt: 0,
           repeatSegment: 0 },                            // TONE_CDMA_CALL_SIGNAL_ISDN_SP_PRI
         { segments: { { duration: 0,  waveFreq: { 0 }, 0, 0} },
-           repeatCnt: 0,
-           repeatSegment: 0 },                            // TONE_CDMA_CALL_SIGNAL_ISDN_PAT3
+          repeatCnt: 0,
+          repeatSegment: 0 },                            // TONE_CDMA_CALL_SIGNAL_ISDN_PAT3
         { segments: { { duration: 32, waveFreq: { 2091, 0 }, 0, 0 },
                       { duration: 64, waveFreq: { 2556, 0 }, 4, 0 },
                       { duration: 20, waveFreq: { 2091, 0 }, 0, 0 },
@@ -1015,7 +1015,7 @@ bool ToneGenerator::initAudioTrack() {
         mpAudioTrack = NULL;
     }
 
-   // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
+    // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
     mpAudioTrack = new AudioTrack();
     ALOGV("Create Track: %p", mpAudioTrack);
 
@@ -1284,9 +1284,9 @@ audioCallback_EndLoop:
             ALOGV("Cbk starting track");
             lpToneGen->mState = TONE_PLAYING;
             lSignal = true;
-           break;
+            break;
         case TONE_PLAYING:
-           break;
+            break;
         default:
             // Force loop exit
             lNumSmp = 0;
@@ -1578,4 +1578,3 @@ void ToneGenerator::WaveGenerator::getSamples(short *outBuffer,
 }
 
 }  // end namespace android
-

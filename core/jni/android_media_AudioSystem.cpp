@@ -268,7 +268,7 @@ static JNINativeMethod gMethods[] = {
 int register_android_media_AudioSystem(JNIEnv *env)
 {
     AudioSystem::setErrorCallback(android_media_AudioSystem_error_callback);
-    
+
     return AndroidRuntime::registerNativeMethods(env,
                 kClassPathName, gMethods, NELEM(gMethods));
 }
