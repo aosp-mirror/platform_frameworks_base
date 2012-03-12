@@ -1907,12 +1907,12 @@ public class Camera {
          * @param value the String value of the parameter
          */
         public void set(String key, String value) {
-            if (key.indexOf('=') != -1 || key.indexOf(';') != -1) {
-                Log.e(TAG, "Key \"" + key + "\" contains invalid character (= or ;)");
+            if (key.indexOf('=') != -1 || key.indexOf(';') != -1 || key.indexOf(0) != -1) {
+                Log.e(TAG, "Key \"" + key + "\" contains invalid character (= or ; or \\0)");
                 return;
             }
-            if (value.indexOf('=') != -1 || value.indexOf(';') != -1) {
-                Log.e(TAG, "Value \"" + value + "\" contains invalid character (= or ;)");
+            if (value.indexOf('=') != -1 || value.indexOf(';') != -1 || value.indexOf(0) != -1) {
+                Log.e(TAG, "Value \"" + value + "\" contains invalid character (= or ; or \\0)");
                 return;
             }
 
