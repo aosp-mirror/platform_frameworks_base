@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.content.res.AssetManager;
+import android.util.SparseArray;
 
 import java.io.File;
 
@@ -43,9 +44,11 @@ public class Typeface {
     /** The NORMAL style of the default monospace typeface. */
     public static final Typeface MONOSPACE;
 
-    /* package */ static Typeface[] sDefaults;
-    
-    /* package */ int native_instance;
+    static Typeface[] sDefaults;
+    private static final SparseArray<SparseArray<Typeface>> sTypefaceCache =
+            new SparseArray<SparseArray<Typeface>>(3);
+
+    int native_instance;
 
     // Style
     public static final int NORMAL = 0;
@@ -53,19 +56,21 @@ public class Typeface {
     public static final int ITALIC = 2;
     public static final int BOLD_ITALIC = 3;
 
+    private int mStyle = 0;
+
     /** Returns the typeface's intrinsic style attributes */
     public int getStyle() {
-        return nativeGetStyle(native_instance);
+        return mStyle;
     }
 
     /** Returns true if getStyle() has the BOLD bit set. */
     public final boolean isBold() {
-        return (getStyle() & BOLD) != 0;
+        return (mStyle & BOLD) != 0;
     }
 
     /** Returns true if getStyle() has the ITALIC bit set. */
     public final boolean isItalic() {
-        return (getStyle() & ITALIC) != 0;
+        return (mStyle & ITALIC) != 0;
     }
 
     /**
@@ -97,9 +102,32 @@ public class Typeface {
     public static Typeface create(Typeface family, int style) {
         int ni = 0;        
         if (family != null) {
+            // Return early if we're asked for the same face/style
+            if (family.mStyle == style) {
+                return family;
+            }
+
             ni = family.native_instance;
         }
-        return new Typeface(nativeCreateFromTypeface(ni, style));
+
+        Typeface typeface;
+        SparseArray<Typeface> styles = sTypefaceCache.get(ni);
+
+        if (styles != null) {
+            typeface = styles.get(style);
+            if (typeface != null) {
+                return typeface;
+            }
+        }
+
+        typeface = new Typeface(nativeCreateFromTypeface(ni, style));
+        if (styles == null) {
+            styles = new SparseArray<Typeface>(4);
+            sTypefaceCache.put(ni, styles);
+        }
+        styles.put(style, typeface);
+
+        return typeface;
     }
 
     /**
@@ -143,15 +171,17 @@ public class Typeface {
 
     // don't allow clients to call this directly
     private Typeface(int ni) {
-        if (0 == ni) {
+        if (ni == 0) {
             throw new RuntimeException("native typeface cannot be made");
         }
+
         native_instance = ni;
+        mStyle = nativeGetStyle(ni);
     }
     
     static {
-        DEFAULT         = create((String)null, 0);
-        DEFAULT_BOLD    = create((String)null, Typeface.BOLD);
+        DEFAULT         = create((String) null, 0);
+        DEFAULT_BOLD    = create((String) null, Typeface.BOLD);
         SANS_SERIF      = create("sans-serif", 0);
         SERIF           = create("serif", 0);
         MONOSPACE       = create("monospace", 0);
@@ -159,14 +189,34 @@ public class Typeface {
         sDefaults = new Typeface[] {
             DEFAULT,
             DEFAULT_BOLD,
-            create((String)null, Typeface.ITALIC),
-            create((String)null, Typeface.BOLD_ITALIC),
+            create((String) null, Typeface.ITALIC),
+            create((String) null, Typeface.BOLD_ITALIC),
         };
     }
 
     protected void finalize() throws Throwable {
-        super.finalize();
-        nativeUnref(native_instance);
+        try {
+            nativeUnref(native_instance);
+        } finally {
+            super.finalize();
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Typeface typeface = (Typeface) o;
+
+        return mStyle == typeface.mStyle && native_instance == typeface.native_instance;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = native_instance;
+        result = 31 * result + mStyle;
+        return result;
     }
 
     private static native int  nativeCreate(String familyName, int style);
