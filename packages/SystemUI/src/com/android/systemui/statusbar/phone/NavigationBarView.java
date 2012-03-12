@@ -304,6 +304,8 @@ public class NavigationBarView extends LinearLayout {
         if (DEBUG) {
             Slog.d(TAG, "reorient(): rot=" + mDisplay.getRotation());
         }
+
+        setNavigationIconHints(mNavigationIconHints, true);
     }
 
     @Override
