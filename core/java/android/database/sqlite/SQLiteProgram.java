@@ -64,19 +64,19 @@ public abstract class SQLiteProgram extends SQLiteClosable {
                 break;
         }
 
-        if (mNumParameters != 0) {
-            mBindArgs = new Object[mNumParameters];
-        } else {
-            mBindArgs = null;
+        if (bindArgs != null && bindArgs.length > mNumParameters) {
+            throw new IllegalArgumentException("Too many bind arguments.  "
+                    + bindArgs.length + " arguments were provided but the statement needs "
+                    + mNumParameters + " arguments.");
         }
 
-        if (bindArgs != null) {
-            if (bindArgs.length > mNumParameters) {
-                throw new IllegalArgumentException("Too many bind arguments.  "
-                        + bindArgs.length + " arguments were provided but the statement needs "
-                        + mNumParameters + " arguments.");
+        if (mNumParameters != 0) {
+            mBindArgs = new Object[mNumParameters];
+            if (bindArgs != null) {
+                System.arraycopy(bindArgs, 0, mBindArgs, 0, bindArgs.length);
             }
-            System.arraycopy(bindArgs, 0, mBindArgs, 0, bindArgs.length);
+        } else {
+            mBindArgs = null;
         }
     }
 
