@@ -18,19 +18,29 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.smoketest.tests">
 
-    <!-- We add an application tag here just so that we can indicate that
-         this package needs to link against the android.test library,
-         which is needed when building test cases. -->    
+    <!--
+    We add an application tag here just so that we can indicate that this package needs to link
+    against the android.test library, which is needed when building test cases.
+    -->
     <application>
         <uses-library android:name="android.test.runner" />
     </application>
 
     <!--
-    This declares that this app uses the instrumentation test runner targeting
-    the package of com.android.smoketest.  To run the tests use the command:
-    "adb shell am instrument -w com.android.smoketest.tests/android.test.InstrumentationTestRunner"
+    This declares that this app uses the instrumentation test runner targeting the package of
+    com.android.smoketest.  To run the tests use the command:
+    `adb shell am instrument -w com.android.smoketest.tests/android.test.InstrumentationTestRunner`
     -->
     <instrumentation android:name="android.test.InstrumentationTestRunner"
+                     android:targetPackage="com.android.smoketest"
+                     android:label="System Smoke Tests"/>
+
+    <!--
+    This declares a method to run the instrumentation with a special runner, which will run each
+    app as a separate testcase.  To do so, use the command:
+    `adb shell am instrument -w com.android.smoketest.tests/com.android.smoketest.SmokeTestRunner`
+    -->
+    <instrumentation android:name="com.android.smoketest.SmokeTestRunner"
                      android:targetPackage="com.android.smoketest"
                      android:label="System Smoke Tests"/>
 
