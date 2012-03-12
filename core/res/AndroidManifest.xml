@@ -248,6 +248,21 @@
         android:label="@string/permlab_writeContacts"
         android:description="@string/permdesc_writeContacts" />
 
+    <!-- Allows an application to read the user's call log. -->
+    <permission android:name="android.permission.READ_CALL_LOG"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_readCallLog"
+        android:description="@string/permdesc_readCallLog" />
+
+    <!-- Allows an application to write (but not read) the user's
+         contacts data. -->
+    <permission android:name="android.permission.WRITE_CALL_LOG"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_writeCallLog"
+        android:description="@string/permdesc_writeCallLog" />
+
 
     <!-- Allows an application to read the user's personal profile data. -->
     <permission android:name="android.permission.READ_PROFILE"
