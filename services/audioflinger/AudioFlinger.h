@@ -826,7 +826,7 @@ private:
                         audio_io_handle_t id, uint32_t device, type_t type);
         virtual             ~PlaybackThread();
 
-        virtual     status_t    dump(int fd, const Vector<String16>& args);
+                    status_t    dump(int fd, const Vector<String16>& args);
 
         // Thread virtuals
         virtual     status_t    readyToRun();
@@ -855,7 +855,8 @@ public:
 
         virtual     status_t    initCheck() const { return (mOutput == NULL) ? NO_INIT : NO_ERROR; }
 
-        virtual     uint32_t    latency() const;
+                    // return estimated latency in milliseconds, as reported by HAL
+                    uint32_t    latency() const;
 
                     void        setMasterVolume(float value);
                     void        setMasterMute(bool muted);
@@ -886,7 +887,7 @@ public:
                     bool        isSuspended() const { return (mSuspended > 0); }
         virtual     String8     getParameters(const String8& keys);
         virtual     void        audioConfigChanged_l(int event, int param = 0);
-        virtual     status_t    getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames);
+                    status_t    getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames);
                     int16_t     *mixBuffer() const { return mMixBuffer; };
 
         virtual     void detachAuxEffect_l(int effectId);
