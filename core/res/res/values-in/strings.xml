@@ -68,7 +68,7 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nomor penelepon bawaan tidak dibatasi. Panggilan selanjutnya: Dibatasi"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nomor penelepon bawaan tidak dibatasi. Panggilan selanjutnya: Tidak dibatasi"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Layanan tidak diperlengkapi."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"Anda tidak dapat mengubah pengaturan nomor penelepon."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Anda tidak dapat mengubah setelan nomor penelepon."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Akses terbatas berubah"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Layanan data dicekal."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Layanan darurat dicekal."</string>
@@ -219,7 +219,7 @@
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Memungkinkan apl mengontrol mode kompatibilitas layar aplikasi lain. Aplikasi berbahaya dapat merusak perilaku aplikasi lain."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"mengaktifkan debugging apl"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Mengizinkan apl mengaktifkan debugging untuk apl lain. Apl berbahaya dapat menggunakan cara ini untuk menutup apl lain."</string>
-    <string name="permlab_changeConfiguration" msgid="8214475779521218295">"ubah pengaturan UI Anda"</string>
+    <string name="permlab_changeConfiguration" msgid="8214475779521218295">"ubah setelan UI Anda"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Mengizinkan apl mengubah konfigurasi saat ini, misalnya lokal atau ukuran fon keseluruhan."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktifkan mode mobil"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Mengizinkan apl mengaktifkan mode mobil."</string>
@@ -317,10 +317,10 @@
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Memungkinkan aplikasi memberikan atau mencabut izin khusus untuk aplikasi tersebut atau aplikasi lainnya. Aplikasi berbahaya dapat menggunakannya untuk mengakses fitur yang tidak Anda beri izin."</string>
     <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"menyetel apl yang disukai"</string>
     <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Mengizinkan apl memodifikasi apl pilihan Anda. Apl berbahaya dapat diam-diam mengubah apl yang berjalan, menipu apl yang ada untuk mengumpulkan data pribadi dari Anda."</string>
-    <string name="permlab_writeSettings" msgid="1365523497395143704">"ubah pengaturan sistem global"</string>
-    <string name="permdesc_writeSettings" msgid="7775723441558907181">"Mengizinkan apl memodifikasi data pengaturan sistem. Apl berbahaya dapat merusak konfigurasi sistem anda."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"ubah pengaturan sistem aman"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Mengizinkan apl memodifikasi data pengaturan aman sistem. Tidak untuk digunakan oleh apl normal."</string>
+    <string name="permlab_writeSettings" msgid="1365523497395143704">"ubah setelan sistem global"</string>
+    <string name="permdesc_writeSettings" msgid="7775723441558907181">"Mengizinkan apl memodifikasi data setelan sistem. Apl berbahaya dapat merusak konfigurasi sistem anda."</string>
+    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"ubah setelan sistem aman"</string>
+    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Mengizinkan apl memodifikasi data setelan aman sistem. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"ubah peta layanan Google"</string>
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Mengizinkan apl memodifikasi peta layanan Google. Tidak untuk digunakan oleh apl normal."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"mulai secara otomatis pada saat boot"</string>
@@ -364,8 +364,8 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Mengizinkan apl menggunakan fitur tingkat rendah SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"baca buffer frame"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Mengizinkan apl membaca konten penyangga frame."</string>
-    <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ubah pengaturan audio Anda"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="7343951185408396919">"Mengizinkan apl memodifikasi pengaturan audio global, misalnya volume dan perutean."</string>
+    <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ubah setelan audio Anda"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="7343951185408396919">"Mengizinkan apl memodifikasi setelan audio global, misalnya volume dan perutean."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rekam audio"</string>
     <string name="permdesc_recordAudio" msgid="2387462233976248635">"Mengizinkan apl mengakses jalur rekaman audio."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
@@ -434,8 +434,8 @@
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Mengizinkan apl menyetel wallpaper sistem."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"atur petunjuk ukuran wallpaper"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Mengizinkan apl menyetel petunjuk ukuran wallpaper sistem."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"setel ulang sistem ke pengaturan bawaan pabrik"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Mengizinkan apl menyetel ulang sistem ke pengaturan pabrik sepenuhnya, menghapus semua data, konfigurasi, dan apl yang terpasang."</string>
+    <string name="permlab_masterClear" msgid="2315750423139697397">"setel ulang sistem ke setelan bawaan pabrik"</string>
+    <string name="permdesc_masterClear" msgid="3665380492633910226">"Mengizinkan apl menyetel ulang sistem ke setelan pabrik sepenuhnya, menghapus semua data, konfigurasi, dan apl yang terpasang."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"atur waktu"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Mengizinkan apl mengubah waktu pada jam tablet."</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Mengizinkan apl mengubah waktu pada jam ponsel."</string>
@@ -457,14 +457,14 @@
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Mengizinkan apl melihat keadaan semua jaringan."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"akses internet penuh"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Mengizinkan apl membuat soket jaringan."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"mengubah/mencegat lalu lintas dan pengaturan jaringan"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Mengizinkan apl mengubah pengaturan jaringan dan mencegat serta memeriksa semua lalu lintas jaringan, misalnya mengubah proxy dan port APN apa saja. Apl berbahaya dapat memantau, mengalihkan, atau mengubah paket jaringan tanpa sepengetahuan Anda."</string>
+    <string name="permlab_writeApnSettings" msgid="505660159675751896">"mengubah/mencegat lalu lintas dan setelan jaringan"</string>
+    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Mengizinkan apl mengubah setelan jaringan dan mencegat serta memeriksa semua lalu lintas jaringan, misalnya mengubah proxy dan port APN apa saja. Apl berbahaya dapat memantau, mengalihkan, atau mengubah paket jaringan tanpa sepengetahuan Anda."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ubah konektivitas jaringan"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Mengizinkan apl mengubah keadaan konektivitas jaringan."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"mengubah konektivitas yang tertambat"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Mengizinkan apl mengubah status konektivitas jaringan yang tertambat."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"mengubah pengaturan penggunaan data latar belakang"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Mengizinkan apl mengubah pengaturan penggunaan data latar belakang."</string>
+    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"mengubah setelan penggunaan data latar belakang"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Mengizinkan apl mengubah setelan penggunaan data latar belakang."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"lihat kondisi Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"Mengizinkan apl melihat informasi tentang keadaan Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"ubah status Wi-Fi"</string>
@@ -485,10 +485,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Mengizinkan apl berkomunikasi dengan tag, kartu, dan alat pembaca Komunikasi Nirkabel Jarak Dekat (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"nonaktifkan kunci tombol"</string>
     <string name="permdesc_disableKeyguard" msgid="6231611286892232626">"Mengizinkan apl menonaktifkan kunci tombol dan segala keamanan sandi yang terkait. Contoh nyata dari hal ini adalah ponsel menonaktifkan kunci tombol saat menerima panggilan telepon masuk, kemudian mengaktifkan kembali kunci tombol ketika panggilan selesai."</string>
-    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"baca pengaturan sinkron"</string>
-    <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Mengizinkan apl membaca pengaturan sinkronisasi, misalnya apakah sinkronisasi untuk apl Orang diaktifkan atau tidak."</string>
-    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"tuliskan pengaturan sinkronisasi"</string>
-    <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Mengizinkan apl memodifikasi pengaturan sinkronisasi, seperti apakah sinkronisasi untuk apl Orang diaktifkan atau tidak."</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"baca setelan sinkron"</string>
+    <string name="permdesc_readSyncSettings" msgid="5464056785274229278">"Mengizinkan apl membaca setelan sinkronisasi, misalnya apakah sinkronisasi untuk apl Orang diaktifkan atau tidak."</string>
+    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"tuliskan setelan sinkronisasi"</string>
+    <string name="permdesc_writeSyncSettings" msgid="1466056564502117130">"Mengizinkan apl memodifikasi setelan sinkronisasi, seperti apakah sinkronisasi untuk apl Orang diaktifkan atau tidak."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"statistika baca sinkron"</string>
     <string name="permdesc_readSyncStats" msgid="3801971839939951678">"Mengizinkan apl membaca statistik sinkronisasi; mis., riwayat sinkronisasi yang telah terjadi."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"baca umpan langganan"</string>
@@ -695,10 +695,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah mengetik PIN. "\n\n"Coba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> detik."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci tablet menggunakan info masuk Google."\n\n"Coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Anda telah <xliff:g id="NUMBER_0">%d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci ponsel menggunakan info masuk Google."\n\n"Coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, tablet akan disetel ulang ke pengaturan bawaan pabrik dan semua data pengguna hilang."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, ponsel akan disetel ulang ke pengaturan bawaan pabrik dan semua data pengguna hilang."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini tablet akan disetel ulang ke pengaturan bawaan pabrik."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini ponsel akan disetel ulang ke pengaturan bawaan pabrik."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, tablet akan disetel ulang ke setelan bawaan pabrik dan semua data pengguna hilang."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, ponsel akan disetel ulang ke setelan bawaan pabrik dan semua data pengguna hilang."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini tablet akan disetel ulang ke setelan bawaan pabrik."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini ponsel akan disetel ulang ke setelan bawaan pabrik."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Coba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> detik."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Lupa pola?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Pembuka kunci akun"</string>
@@ -910,7 +910,7 @@
     <string name="capital_off" msgid="6815870386972805832">"MATI"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Tindakan lengkap menggunakan"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gunakan secara bawaan untuk tindakan ini."</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Menghapus bawaan di Pengaturan sistem &gt; Apl &gt; Terunduh."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Menghapus bawaan di Setelan sistem &gt; Apl &gt; Terunduh."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Pilih tindakan"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Pilih apl untuk perangkat USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Tidak ada apl yang dapat melakukan tindakan ini."</string>
@@ -931,7 +931,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah diluncurkan aslinya."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Selalu tampilkan"</string>
-    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktifkan kembali dialog ini di Pengaturan sistem &gt; Apl &gt; Terunduh."</string>
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktifkan kembali dialog ini di Setelan sistem &gt; Apl &gt; Terunduh."</string>
     <string name="smv_application" msgid="3307209192155442829">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar kebijakan StrictMode yang diberlakukannya sendiri."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar kebijakan StrictMode yang diberlakukan secara otomatis."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android sedang meningkatkan versi..."</string>
@@ -983,7 +983,7 @@
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Memulai Wi-Fi Langsung. Opsi ini akan mematikan hotspot/klien Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Tidak dapat memulai Wi-Fi Langsung."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Langsung aktif"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Sentuh untuk pengaturan"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Sentuh untuk setelan"</string>
     <string name="accept" msgid="1645267259272829559">"Terima"</string>
     <string name="decline" msgid="2112225451706137894">"Tolak"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Undangan terkirim"</string>
@@ -1027,7 +1027,7 @@
     <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Sebelum mematikan penyimpanan USB, lepaskan (\"keluarkan\") penyimpanan USB Anda dari komputer."</string>
     <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Sebelum mematikan penyimpanan USB, lepaskan (\"keluarkan\") kartu SD Android dari komputer."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Matikan penyimpanan USB"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Terjadi masalah saat mematikan penyimpanan USB. Periksa apakah Anda telah melepaskan inang USB, lalu coba sekali lagi."</string>
+    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Terjadi masalah saat mematikan penyimpanan USB. Periksa apakah Anda telah melepaskan host USB, lalu coba sekali lagi."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Hidupkan penyimpanan USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Jika Anda menyalakan penyimpanan USB, beberapa apl yang Anda gunakan akan berhenti dan mungkin tidak dapat dibuka hingga penyimpanan USB dimatikan."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operasi USB gagal"</string>
@@ -1172,6 +1172,14 @@
     <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Hari pengurangan"</string>
     <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Tahun penambahan"</string>
     <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Tahun pengurangan"</string>
+    <string name="checkbox_checked" msgid="7222044992652711167">"dicentang"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"tidak diperiksa"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"dipilih"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"tidak dipilih"</string>
+    <string name="switch_on" msgid="551417728476977311">"nyala"</string>
+    <string name="switch_off" msgid="7249798614327155088">"mati"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"ditekan"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"tidak ditekan"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Batal"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Hapus"</string>

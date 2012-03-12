@@ -1172,6 +1172,14 @@
     <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Endre dag (bakover)"</string>
     <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Endre år (fremover)"</string>
     <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Endre år (bakover)"</string>
+    <string name="checkbox_checked" msgid="7222044992652711167">"valgt"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"ikke valgt"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"valgt"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"ikke valgt"</string>
+    <string name="switch_on" msgid="551417728476977311">"på"</string>
+    <string name="switch_off" msgid="7249798614327155088">"av"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"trykket"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"ikke trykket"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Avbryt"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Slett"</string>

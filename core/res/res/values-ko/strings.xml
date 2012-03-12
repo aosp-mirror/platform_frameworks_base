@@ -1172,6 +1172,14 @@
     <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"\'날짜\'를 줄입니다."</string>
     <string name="date_picker_increment_year_button" msgid="3058553394722295105">"\'연도\'를 올립니다."</string>
     <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"\'연도\'를 줄입니다."</string>
+    <string name="checkbox_checked" msgid="7222044992652711167">"확인"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"선택 안함"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"선택됨"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"선택 안함"</string>
+    <string name="switch_on" msgid="551417728476977311">"켜짐"</string>
+    <string name="switch_off" msgid="7249798614327155088">"꺼짐"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"누름"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"누르지 않음"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt 키"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"취소"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete 키"</string>

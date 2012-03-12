@@ -1086,8 +1086,8 @@
     <string name="ime_action_done" msgid="8971516117910934605">"ተከናውኗል"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"ያለፈው"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"አከናውን"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"የደወሉት ቁጥር"\n"<xliff:g id="NUMBER">%s</xliff:g>በመጠቀም ላይ"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">\n"በመጠቀም<xliff:g id="NUMBER">%s</xliff:g>ዕውቂያ ፍጠር"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"<xliff:g id="NUMBER">%s</xliff:g>ን በመጠቀም "\n" ደውል"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g>ን በመጠቀም "\n" ዕውቂያ ፍጠር"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"የሚከተለው ወይም ተጨማሪ መተግበሪያዎች ወደ መለያህ ለመድረስ አሁን እና ወደፊት ፈቃድ ትጠይቃለህ።"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"ይህን ጥየቃ መፍቀድ ይፈልጋሉ?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"የመድረሻ ጥያቄ"</string>
@@ -1172,6 +1172,14 @@
     <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"ቀን ቀንስ"</string>
     <string name="date_picker_increment_year_button" msgid="3058553394722295105">"አመት ጨምር"</string>
     <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"አመት ቀንስ"</string>
+    <string name="checkbox_checked" msgid="7222044992652711167">"ታይቷል"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"አልተፈተሸም"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"የተመረጠ"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"አልተመረጠም"</string>
+    <string name="switch_on" msgid="551417728476977311">"በ:"</string>
+    <string name="switch_off" msgid="7249798614327155088">"ውጪ"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"ተጭኗል"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"አልተጫነም።"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ተወው"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ሰርዝ"</string>
