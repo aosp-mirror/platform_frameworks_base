@@ -28,14 +28,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
@@ -50,11 +47,9 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -68,25 +63,24 @@ import android.widget.RemoteViews;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
-import com.android.systemui.SwipeHelper;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.IntruderAlertView;
 import com.android.systemui.statusbar.policy.DateView;
+import com.android.systemui.statusbar.policy.IntruderAlertView;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
 public class PhoneStatusBar extends BaseStatusBar {
     static final String TAG = "PhoneStatusBar";
@@ -832,73 +826,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
-        StatusBarNotification sbn = entry.notification;
-        // XXX: temporary: while testing big notifications, auto-expand all of them
-        final boolean big = (sbn.notification.bigContentView != null);
-        RemoteViews remoteViews = big ? sbn.notification.bigContentView
-                                      : sbn.notification.contentView;
-        if (remoteViews == null) {
-            return false;
-        }
-
-        // create the row view
-        LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
-        ViewGroup.LayoutParams lp = row.getLayoutParams();
-        if (big) {
-            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        } else {
-            lp.height = mContext.getResources().getDimensionPixelSize(R.dimen.notification_height);
-        }
-        row.setLayoutParams(lp);
-        View vetoButton = updateNotificationVetoButton(row, sbn);
-        vetoButton.setContentDescription(mContext.getString(
-                R.string.accessibility_remove_notification));
-
-        // NB: the large icon is now handled entirely by the template
-
-        // bind the click event to the content area
-        ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
-        // XXX: update to allow controls within notification views
-        content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-//        content.setOnFocusChangeListener(mFocusChangeListener);
-        PendingIntent contentIntent = sbn.notification.contentIntent;
-        if (contentIntent != null) {
-            final View.OnClickListener listener = new NotificationClicker(contentIntent,
-                    sbn.pkg, sbn.tag, sbn.id);
-            content.setOnClickListener(listener);
-        } else {
-            content.setOnClickListener(null);
-        }
-
-        View expanded = null;
-        Exception exception = null;
-        try {
-            expanded = remoteViews.apply(mContext, content);
-        }
-        catch (RuntimeException e) {
-            exception = e;
-        }
-        if (expanded == null) {
-            final String ident = sbn.pkg + "/0x" + Integer.toHexString(sbn.id);
-            Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
-            return false;
-        } else {
-            content.addView(expanded);
-            row.setDrawingCacheEnabled(true);
-        }
-
-        applyLegacyRowBackground(sbn, content);
-
-        entry.row = row;
-        entry.content = content;
-        entry.expanded = expanded;
-
-        return true;
-    }
-
     StatusBarNotification removeNotificationViews(IBinder key) {
         NotificationData.Entry entry = mNotificationData.remove(key);
         if (entry == null) {
@@ -1520,10 +1447,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void setHardKeyboardStatus(boolean available, boolean enabled) { }
 
-    public NotificationClicker makeClicker(PendingIntent intent, String pkg, String tag, int id) {
-        return new NotificationClicker(intent, pkg, tag, id);
-    }
-
     private class NotificationClicker implements View.OnClickListener {
         private PendingIntent mIntent;
         private String mPkg;
@@ -1538,12 +1461,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         public void onClick(View v) {
-            if (DEBUG) {
-                Slog.v(TAG, "NotificationClicker: intent=" + mIntent
-                        + " pkg=" + mPkg
-                        + " tag=" + mTag
-                        + " id=" + mId);
-            }
             try {
                 // The intent we are sending is for the application, which
                 // won't have permission to immediately start an activity after
@@ -1972,24 +1889,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (DEBUG) {
                 Slog.d(TAG, "updateExpandedSize: height=" + mExpandedParams.height + " " +
                     (mExpandedVisible ? "VISIBLE":"INVISIBLE"));
-            }
-        }
-    }
-
-    /**
-     * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
-     * This was added last-minute and is inconsistent with the way the rest of the notifications
-     * are handled, because the notification isn't really cancelled.  The lights are just
-     * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
-     * this is what he wants. (see bug 1131461)
-     */
-    void visibilityChanged(boolean visible) {
-        if (mPanelSlightlyVisible != visible) {
-            mPanelSlightlyVisible = visible;
-            try {
-                mBarService.onPanelRevealed();
-            } catch (RemoteException ex) {
-                // Won't fail unless the world has ended.
             }
         }
     }

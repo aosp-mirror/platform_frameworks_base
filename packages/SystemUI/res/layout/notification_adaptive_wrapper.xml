@@ -13,25 +13,8 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:internal="http://schemas.android.com/apk/prv/res/android"
+<SizeAdaptiveLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@android:color/background_dark"
-    android:id="@+id/status_bar_latest_event_content"
+    android:id="@+id/notification_adaptive_wrapper"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    internal:layout_minHeight="65dp"
-    internal:layout_maxHeight="unbounded"
-    >
-    <ImageView
-        android:id="@+id/big_picture"
-        android:layout_width="match_parent"
-        android:layout_height="192dp"
-        android:scaleType="centerCrop"
-        />
-    <include layout="@layout/notification_template_base" 
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="192dp"
-        />
-</FrameLayout>
+    android:layout_height="wrap_content" />

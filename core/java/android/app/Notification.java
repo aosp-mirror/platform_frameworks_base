@@ -1681,7 +1681,7 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
-            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(R.layout.notification_template_base);
+            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(R.layout.notification_template_big_text);
 
             contentView.setTextViewText(R.id.big_text, mBigText);
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);

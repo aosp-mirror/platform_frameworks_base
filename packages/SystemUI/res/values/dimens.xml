@@ -55,6 +55,13 @@
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
+    <!-- Height of a small notification in the status bar -->
+    <dimen name="notification_min_height">@android:dimen/notification_large_icon_height</dimen>
+
+    <!-- Height of a small notification in the status bar -->
+    <!-- TODO: change this back to 256dp once we deal with actions. -->
+    <dimen name="notification_max_height">320dp</dimen>
+
     <!-- size at which Notification icons will be drawn in the status bar -->
     <dimen name="status_bar_icon_drawing_size">18dip</dimen>
 

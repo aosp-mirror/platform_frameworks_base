@@ -1088,6 +1088,7 @@
   <java-symbol type="layout" name="notification_intruder_content" />
   <java-symbol type="layout" name="notification_template_base" />
   <java-symbol type="layout" name="notification_template_big_picture" />
+  <java-symbol type="layout" name="notification_template_big_text" />
   <java-symbol type="layout" name="notification_template_part_time" />
   <java-symbol type="layout" name="notification_template_part_chronometer" />
   <java-symbol type="layout" name="notification_template_inbox" />

@@ -1,6 +1,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/notification_height"
+    android:layout_height="wrap_content"
     >
 
     <Button
@@ -21,7 +21,14 @@
         android:focusable="true"
         android:clickable="true"
         android:background="@drawable/notification_row_bg"
-        />
+        >
+
+        <com.android.internal.widget.SizeAdaptiveLayout android:id="@+id/adaptive"
+           android:background="@android:color/background_dark"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content" />
+
+    </com.android.systemui.statusbar.LatestItemView>
 
     <View
         android:layout_width="match_parent"

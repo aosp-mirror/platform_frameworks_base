@@ -29,7 +29,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 
-public class SwipeHelper {
+public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_INVALIDATE = false;

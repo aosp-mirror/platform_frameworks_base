@@ -18,9 +18,14 @@ package com.android.systemui.statusbar;
 
 import java.util.ArrayList;
 
+import android.app.ActivityManagerNative;
+import android.app.KeyguardManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -34,15 +39,18 @@ import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.widget.LinearLayout;
+import android.widget.RemoteViews;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
+import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.recent.RecentTasksLoader;
@@ -66,12 +74,15 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected IStatusBarService mBarService;
     protected H mHandler = createHandler();
 
+    // used to notify status bar for suppressing notification LED
+    protected boolean mPanelSlightlyVisible;
+
     // Recent apps
     protected RecentsPanelView mRecentsPanel;
     protected RecentTasksLoader mRecentTasksLoader;
 
     // UI-specific methods
-    
+
     /**
      * Create all windows necessary for the status bar (including navigation, overlay panels, etc)
      * and add them to the window manager.
@@ -81,15 +92,15 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
     private IWindowManager mWindowManager;
 
-    
+
     public IWindowManager getWindowManager() {
         return mWindowManager;
     }
-    
+
     public Display getDisplay() {
         return mDisplay;
     }
-    
+
     public IStatusBarService getStatusBarService() {
         return mBarService;
     }
@@ -109,7 +120,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         ArrayList<IBinder> notificationKeys = new ArrayList<IBinder>();
         ArrayList<StatusBarNotification> notifications = new ArrayList<StatusBarNotification>();
         mCommandQueue = new CommandQueue(this, iconList);
-        
+
         int[] switches = new int[7];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
         try {
@@ -118,7 +129,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
-        
+
         createAndAddWindows();
 
         disable(switches[0]);
@@ -152,7 +163,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         if (DEBUG) {
             Slog.d(TAG, String.format(
-                    "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x", 
+                    "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
                    iconList.size(),
                    switches[0],
                    switches[1],
@@ -161,7 +172,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                    ));
         }
     }
-    
+
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
         if (n.isClearable()) {
@@ -183,7 +194,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         return vetoButton;
     }
-    
+
 
     protected void applyLegacyRowBackground(StatusBarNotification sbn, View content) {
         if (sbn.notification.contentView.getLayoutId() !=
@@ -323,4 +334,178 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
     }
+
+    protected void workAroundBadLayerDrawableOpacity(View v) {
+    }
+
+    protected  boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
+        int minHeight =
+                mContext.getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+        int maxHeight =
+                mContext.getResources().getDimensionPixelSize(R.dimen.notification_max_height);
+        StatusBarNotification sbn = entry.notification;
+        RemoteViews oneU = sbn.notification.contentView;
+        RemoteViews large = sbn.notification.bigContentView;
+        if (oneU == null) {
+            return false;
+        }
+
+        // create the row view
+        LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
+        // XXX: temporary: while testing big notifications, auto-expand all of them
+        ViewGroup.LayoutParams lp = row.getLayoutParams();
+        if (sbn.notification.bigContentView != null) {
+            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        } else {
+            lp.height = minHeight;
+        }
+        row.setLayoutParams(lp);
+        workAroundBadLayerDrawableOpacity(row);
+        View vetoButton = updateNotificationVetoButton(row, sbn);
+        vetoButton.setContentDescription(mContext.getString(
+                R.string.accessibility_remove_notification));
+
+        // NB: the large icon is now handled entirely by the template
+
+        // bind the click event to the content area
+        ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
+        ViewGroup adaptive = (ViewGroup)row.findViewById(R.id.adaptive);
+        // XXX: update to allow controls within notification views
+        content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+//        content.setOnFocusChangeListener(mFocusChangeListener);
+        PendingIntent contentIntent = sbn.notification.contentIntent;
+        if (contentIntent != null) {
+            final View.OnClickListener listener = new NotificationClicker(contentIntent,
+                    sbn.pkg, sbn.tag, sbn.id);
+            content.setOnClickListener(listener);
+        } else {
+            content.setOnClickListener(null);
+        }
+
+        View expandedOneU = null;
+        View expandedLarge = null;
+        Exception exception = null;
+        try {
+            expandedOneU = oneU.apply(mContext, adaptive);
+            if (large != null) {
+                expandedLarge = large.apply(mContext, adaptive);
+            }
+        }
+        catch (RuntimeException e) {
+            exception = e;
+        }
+        if (expandedOneU == null && expandedLarge == null) {
+            final String ident = sbn.pkg + "/0x" + Integer.toHexString(sbn.id);
+            Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
+            return false;
+        } else {
+            if (expandedOneU != null) {
+                SizeAdaptiveLayout.LayoutParams params =
+                        new SizeAdaptiveLayout.LayoutParams(expandedOneU.getLayoutParams());
+                params.minHeight = minHeight;
+                params.maxHeight = minHeight;
+                adaptive.addView(expandedOneU, params);
+            }
+            if (expandedLarge != null) {
+                SizeAdaptiveLayout.LayoutParams params =
+                        new SizeAdaptiveLayout.LayoutParams(expandedLarge.getLayoutParams());
+                params.minHeight = minHeight+1;
+                params.maxHeight = SizeAdaptiveLayout.LayoutParams.UNBOUNDED;
+                adaptive.addView(expandedLarge, params);
+            }
+            row.setDrawingCacheEnabled(true);
+        }
+
+        applyLegacyRowBackground(sbn, content);
+
+        entry.row = row;
+        entry.content = content;
+        entry.expanded = expandedOneU;
+        entry.expandedLarge = expandedOneU;
+
+        return true;
+    }
+
+    public NotificationClicker makeClicker(PendingIntent intent, String pkg, String tag, int id) {
+        return new NotificationClicker(intent, pkg, tag, id);
+    }
+
+    private class NotificationClicker implements View.OnClickListener {
+        private PendingIntent mIntent;
+        private String mPkg;
+        private String mTag;
+        private int mId;
+
+        NotificationClicker(PendingIntent intent, String pkg, String tag, int id) {
+            mIntent = intent;
+            mPkg = pkg;
+            mTag = tag;
+            mId = id;
+        }
+
+        public void onClick(View v) {
+            try {
+                // The intent we are sending is for the application, which
+                // won't have permission to immediately start an activity after
+                // the user switches to home.  We know it is safe to do at this
+                // point, so make sure new activity switches are now allowed.
+                ActivityManagerNative.getDefault().resumeAppSwitches();
+                // Also, notifications can be launched from the lock screen,
+                // so dismiss the lock screen when the activity starts.
+                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            } catch (RemoteException e) {
+            }
+
+            if (mIntent != null) {
+                int[] pos = new int[2];
+                v.getLocationOnScreen(pos);
+                Intent overlay = new Intent();
+                overlay.setSourceBounds(
+                        new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
+                try {
+                    mIntent.send(mContext, 0, overlay);
+                } catch (PendingIntent.CanceledException e) {
+                    // the stack trace isn't very helpful here.  Just log the exception message.
+                    Slog.w(TAG, "Sending contentIntent failed: " + e);
+                }
+
+                KeyguardManager kgm =
+                    (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+                if (kgm != null) kgm.exitKeyguardSecurely(null);
+            }
+
+            try {
+                mBarService.onNotificationClick(mPkg, mTag, mId);
+            } catch (RemoteException ex) {
+                // system process is dead if we're here.
+            }
+
+            // close the shade if it was open
+            animateCollapse();
+            visibilityChanged(false);
+
+            // If this click was on the intruder alert, hide that instead
+//            mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
+        }
+    }
+    /**
+     * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
+     * This was added last-minute and is inconsistent with the way the rest of the notifications
+     * are handled, because the notification isn't really cancelled.  The lights are just
+     * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
+     * this is what he wants. (see bug 1131461)
+     */
+    protected void visibilityChanged(boolean visible) {
+        if (mPanelSlightlyVisible != visible) {
+            mPanelSlightlyVisible = visible;
+            try {
+                mBarService.onPanelRevealed();
+            } catch (RemoteException ex) {
+                // Won't fail unless the world has ended.
+            }
+        }
+    }
+
 }

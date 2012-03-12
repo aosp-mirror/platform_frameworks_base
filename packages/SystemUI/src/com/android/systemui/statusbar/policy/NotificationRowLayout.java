@@ -34,12 +34,17 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.android.systemui.ExpandHelper;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 
 import java.util.HashMap;
 
-public class NotificationRowLayout extends LinearLayout implements SwipeHelper.Callback {
+public class NotificationRowLayout 
+        extends LinearLayout 
+        implements SwipeHelper.Callback, ExpandHelper.Callback 
+{
     private static final String TAG = "NotificationRowLayout";
     private static final boolean DEBUG = false;
     private static final boolean SLOW_ANIMATIONS = DEBUG;
@@ -55,6 +60,9 @@ public class NotificationRowLayout extends LinearLayout implements SwipeHelper.C
     HashMap<View, ValueAnimator> mDisappearingViews = new HashMap<View, ValueAnimator>();
 
     private SwipeHelper mSwipeHelper;
+    private ExpandHelper mExpandHelper;
+
+    private Gefingerpoken mCurrentHelper;
 
     // Flag set during notification removal animation to avoid causing too much work until
     // animation is done
@@ -70,6 +78,8 @@ public class NotificationRowLayout extends LinearLayout implements SwipeHelper.C
         setLayoutTransition(new LayoutTransition());
         
         setOrientation(LinearLayout.VERTICAL);
+
+        setMotionEventSplittingEnabled(false);
 
         if (DEBUG) {
             setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
@@ -89,23 +99,61 @@ public class NotificationRowLayout extends LinearLayout implements SwipeHelper.C
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
+        mExpandHelper = new ExpandHelper(mContext, this, minHeight, maxHeight);
     }
 
     public void setAnimateBounds(boolean anim) {
         mAnimateBounds = anim;
     }
 
+    private void logLayoutTransition() {
+        Log.v(TAG, "layout " +
+              (getLayoutTransition().isChangingLayout() ? "is " : "is not ") +
+              "in transition and animations " +
+              (getLayoutTransition().isRunning() ? "are " : "are not ") +
+              "running.");
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
-        return mSwipeHelper.onInterceptTouchEvent(ev) ||
-            super.onInterceptTouchEvent(ev);
+        if (DEBUG) logLayoutTransition();
+
+        MotionEvent cancellation = MotionEvent.obtain(ev);
+        cancellation.setAction(MotionEvent.ACTION_CANCEL);
+
+        if (mSwipeHelper.onInterceptTouchEvent(ev)) {
+            if (DEBUG) Log.v(TAG, "will swipe");
+            mCurrentHelper = mSwipeHelper;
+            mExpandHelper.onInterceptTouchEvent(cancellation);
+            return true;
+        } else if (mExpandHelper.onInterceptTouchEvent(ev)) {
+            if (DEBUG) Log.v(TAG, "will stretch");
+            mCurrentHelper = mExpandHelper;
+            mSwipeHelper.onInterceptTouchEvent(cancellation);
+            return true;
+        } else {
+            mCurrentHelper = null;
+            if (super.onInterceptTouchEvent(ev)) {
+                if (DEBUG) Log.v(TAG, "intercepting ourselves");
+                mSwipeHelper.onInterceptTouchEvent(cancellation);
+                mExpandHelper.onInterceptTouchEvent(cancellation);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        return mSwipeHelper.onTouchEvent(ev) ||
-            super.onTouchEvent(ev);
+        if (DEBUG) Log.v(TAG, "onTouchEvent()");
+        if (DEBUG) logLayoutTransition();
+        if (mCurrentHelper != null) {
+            return mCurrentHelper.onTouchEvent(ev);
+        }
+        return super.onTouchEvent(ev);
     }
 
     public boolean canChildBeDismissed(View v) {
@@ -130,10 +178,12 @@ public class NotificationRowLayout extends LinearLayout implements SwipeHelper.C
     }
 
     public View getChildAtPosition(MotionEvent ev) {
+        return getChildAtPosition(ev.getX(), ev.getY());
+    }
+    public View getChildAtPosition(float touchX, float touchY) {
         // find the view under the pointer, accounting for GONE views
         final int count = getChildCount();
         int y = 0;
-        int touchY = (int) ev.getY();
         int childIdx = 0;
         View slidingChild;
         for (; childIdx < count; childIdx++) {
@@ -188,6 +238,7 @@ public class NotificationRowLayout extends LinearLayout implements SwipeHelper.C
     @Override
     public void onDraw(android.graphics.Canvas c) {
         super.onDraw(c);
+        if (DEBUG) logLayoutTransition();
         if (DEBUG) {
             //Slog.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
             //        + getMeasuredHeight() + "px");
