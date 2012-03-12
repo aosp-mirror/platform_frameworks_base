@@ -99,7 +99,7 @@ public class GridView extends AbsListView {
     private final Rect mTempRect = new Rect();
 
     public GridView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public GridView(Context context, AttributeSet attrs) {
