@@ -20,7 +20,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AbsoluteLayout;
@@ -92,7 +91,6 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
                     state.handleUpEvent(event);
                 }
                 if (event.isTracking() && !event.isCanceled()) {
-                    Log.v("AutoCompletePopup", "dismiss popup 2");
                     mPopup.dismiss();
                     return true;
                 }
@@ -107,7 +105,6 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     public void setFocused(boolean isFocused) {
         mIsFocused = isFocused;
         if (!mIsFocused) {
-            Log.v("AutoCompletePopup", "dismiss popup 3");
             mPopup.dismiss();
         }
     }
@@ -126,7 +123,6 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     public void clearAdapter() {
         mAdapter = null;
         mFilter = null;
-        Log.v("AutoCompletePopup", "dismiss popup 4");
         mPopup.dismiss();
         mPopup.setAdapter(null);
     }
@@ -150,7 +146,6 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     }
 
     public void resetRect() {
-        Log.v("AutoCompletePopup", "resetRect: " + mNodeBounds);
         int left = mWebView.contentToViewX(mNodeBounds.left);
         int right = mWebView.contentToViewX(mNodeBounds.right);
         int width = right - left;
@@ -175,13 +170,10 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
                 lp.height = height;
             }
         }
-        Log.v("AutoCompletePopup", "resetRect layout " + lp.x + ", " + lp.y +
-                ", " + lp.width + ", " + lp.height);
         if (needsUpdate) {
             mAnchor.setLayoutParams(lp);
         }
         if (mPopup.isShowing()) {
-            Log.v("AutoCompletePopup", "showing popup again");
             mPopup.show(); // update its position
         }
     }
@@ -222,7 +214,6 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
                 pushTextToInputConnection();
             }
         }
-        Log.v("AutoCompletePopup", "dismiss popup 5");
         mPopup.dismiss();
     }
 
@@ -240,7 +231,6 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     @Override
     public void onFilterComplete(int count) {
         if (!mIsFocused) {
-            Log.v("AutoCompletePopup", "dismiss popup 1");
             mPopup.dismiss();
             return;
         }
@@ -252,11 +242,9 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
                 // Make sure the list does not obscure the IME when shown for the first time.
                 mPopup.setInputMethodMode(ListPopupWindow.INPUT_METHOD_NEEDED);
             }
-            Log.v("AutoCompletePopup", "showing popup");
             mPopup.show();
             mPopup.getListView().setOverScrollMode(View.OVER_SCROLL_ALWAYS);
         } else {
-            Log.v("AutoCompletePopup", "dismiss popup");
             mPopup.dismiss();
         }
     }
