@@ -35,7 +35,6 @@
 #include "FwdLockConv.h"
 #include "FwdLockFile.h"
 #include "FwdLockGlue.h"
-#include "FwdLockEngineConst.h"
 #include "MimeTypeUtil.h"
 
 #undef LOG_TAG
@@ -160,6 +159,48 @@ android::status_t FwdLockEngine::onTerminate(int uniqueId) {
     return DRM_NO_ERROR;
 }
 
+const String8 FwdLockEngine::FileSuffixes[] = {
+    String8(".fl"),
+    String8(".dm"),
+};
+
+const String8 FwdLockEngine::MimeTypes[] = {
+    String8("application/x-android-drm-fl"),
+    String8("application/vnd.oma.drm.message"),
+};
+
+const String8 FwdLockEngine::Description("OMA V1 Forward Lock");
+
+void FwdLockEngine::AddSupportedMimeTypes(DrmSupportInfo *info) {
+    for (size_t i = 0, n = sizeof(MimeTypes)/sizeof(MimeTypes[0]); i < n; ++i) {
+        info->addMimeType(MimeTypes[i]);
+    }
+}
+
+void FwdLockEngine::AddSupportedFileSuffixes(DrmSupportInfo *info) {
+    for (size_t i = 0, n = sizeof(FileSuffixes)/sizeof(FileSuffixes[0]); i < n; ++i) {
+        info->addFileSuffix(FileSuffixes[i]);
+    }
+}
+
+bool FwdLockEngine::IsMimeTypeSupported(const String8& mime) {
+    for (size_t i = 0, n = sizeof(MimeTypes)/sizeof(MimeTypes[0]); i < n; ++i) {
+        if (mime == MimeTypes[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool FwdLockEngine::IsFileSuffixSupported(const String8& suffix) {
+    for (size_t i = 0, n = sizeof(FileSuffixes)/sizeof(FileSuffixes[0]); i < n; ++i) {
+        if (suffix == FileSuffixes[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 DrmSupportInfo* FwdLockEngine::onGetSupportInfo(int uniqueId) {
     DrmSupportInfo* pSupportInfo = new DrmSupportInfo();
 
@@ -167,12 +208,9 @@ DrmSupportInfo* FwdLockEngine::onGetSupportInfo(int uniqueId) {
 
     // fill all Forward Lock mimetypes and extensions
     if (NULL != pSupportInfo) {
-        pSupportInfo->addMimeType(String8(FWDLOCK_MIMETYPE_FL));
-        pSupportInfo->addFileSuffix(String8(FWDLOCK_DOTEXTENSION_FL));
-        pSupportInfo->addMimeType(String8(FWDLOCK_MIMETYPE_DM));
-        pSupportInfo->addFileSuffix(String8(FWDLOCK_DOTEXTENSION_DM));
-
-        pSupportInfo->setDescription(String8(FWDLOCK_DESCRIPTION));
+        AddSupportedMimeTypes(pSupportInfo);
+        AddSupportedFileSuffixes(pSupportInfo);
+        pSupportInfo->setDescription(Description);
     }
 
     return pSupportInfo;
@@ -182,14 +220,8 @@ bool FwdLockEngine::onCanHandle(int uniqueId, const String8& path) {
     bool result = false;
 
     String8 extString = path.getPathExtension();
-
     extString.toLower();
-
-    if ((extString == String8(FWDLOCK_DOTEXTENSION_FL)) ||
-        (extString == String8(FWDLOCK_DOTEXTENSION_DM))) {
-        result = true;
-    }
-    return result;
+    return IsFileSuffixSupported(extString);
 }
 
 DrmInfoStatus* FwdLockEngine::onProcessDrmInfo(int uniqueId, const DrmInfo* drmInfo) {
@@ -308,8 +340,7 @@ int FwdLockEngine::onGetDrmObjectType(int uniqueId,
     *    (regardless of the relation between them to make it compatible with other DRM Engines)
     */
     if (((0 == path.length()) || onCanHandle(uniqueId, path)) &&
-        ((0 == mimeType.length()) || ((mimeStr == String8(FWDLOCK_MIMETYPE_FL)) ||
-        (mimeStr == String8(FWDLOCK_MIMETYPE_DM)))) && (mimeType != path) ) {
+        ((0 == mimeType.length()) || IsMimeTypeSupported(mimeType)) && (mimeType != path) ) {
             return DrmObjectType::CONTENT;
     }
 

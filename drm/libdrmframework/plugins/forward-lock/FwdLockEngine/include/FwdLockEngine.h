@@ -499,6 +499,14 @@ ssize_t onPread(int uniqueId,
 
 private:
 
+    static const String8 Description;
+    static const String8 FileSuffixes[];
+    static const String8 MimeTypes[];
+    static bool IsFileSuffixSupported(const String8& suffix);
+    static bool IsMimeTypeSupported(const String8& mime);
+    static void AddSupportedMimeTypes(DrmSupportInfo *info);
+    static void AddSupportedFileSuffixes(DrmSupportInfo *info);
+
 /**
  * Session Class for Forward Lock Conversion. An object of this class is created
  * for every conversion.
