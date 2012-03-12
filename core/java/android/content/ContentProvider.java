@@ -16,6 +16,8 @@
 
 package android.content;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.content.pm.PackageManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
@@ -30,6 +32,7 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserId;
 import android.util.Log;
 
 import java.io.File;
@@ -267,90 +270,116 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return CancellationSignal.createTransport();
         }
 
-        private void enforceReadPermission(Uri uri) {
-            final int uid = Binder.getCallingUid();
-            if (uid == mMyUid) {
-                return;
-            }
-            
+        private boolean hasReadPermission(Uri uri) {
             final Context context = getContext();
-            final String rperm = getReadPermission();
             final int pid = Binder.getCallingPid();
-            if (mExported && (rperm == null
-                    || context.checkPermission(rperm, pid, uid)
-                    == PackageManager.PERMISSION_GRANTED)) {
-                return;
-            }
-            
-            PathPermission[] pps = getPathPermissions();
-            if (pps != null) {
-                final String path = uri.getPath();
-                int i = pps.length;
-                while (i > 0) {
-                    i--;
-                    final PathPermission pp = pps[i];
-                    final String pprperm = pp.getReadPermission();
-                    if (pprperm != null && pp.match(path)) {
-                        if (context.checkPermission(pprperm, pid, uid)
-                                == PackageManager.PERMISSION_GRANTED) {
-                            return;
+            final int uid = Binder.getCallingUid();
+
+            if (uid == mMyUid) {
+                return true;
+
+            } else if (mExported) {
+                final String componentPerm = getReadPermission();
+                if (componentPerm != null
+                        && (context.checkPermission(componentPerm, pid, uid) == PERMISSION_GRANTED)) {
+                    return true;
+                }
+
+                // track if unprotected read is allowed; any denied
+                // <path-permission> below removes this ability
+                boolean allowDefaultRead = (componentPerm == null);
+
+                final PathPermission[] pps = getPathPermissions();
+                if (pps != null) {
+                    final String path = uri.getPath();
+                    for (PathPermission pp : pps) {
+                        final String pathPerm = pp.getReadPermission();
+                        if (pathPerm != null && pp.match(path)) {
+                            if (context.checkPermission(pathPerm, pid, uid) == PERMISSION_GRANTED) {
+                                return true;
+                            } else {
+                                // any denied <path-permission> means we lose
+                                // default <provider> access.
+                                allowDefaultRead = false;
+                            }
                         }
                     }
                 }
+
+                // if we passed <path-permission> checks above, and no default
+                // <provider> permission, then allow access.
+                if (allowDefaultRead) return true;
             }
-            
-            if (context.checkUriPermission(uri, pid, uid,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    == PackageManager.PERMISSION_GRANTED) {
+
+            // last chance, check against any uri grants
+            if (context.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    == PERMISSION_GRANTED) {
+                return true;
+            }
+
+            return false;
+        }
+
+        private void enforceReadPermission(Uri uri) {
+            if (hasReadPermission(uri)) {
                 return;
             }
-            
+
             String msg = "Permission Denial: reading "
                     + ContentProvider.this.getClass().getName()
                     + " uri " + uri + " from pid=" + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + rperm;
+                    + " requires " + getReadPermission();
             throw new SecurityException(msg);
         }
 
         private boolean hasWritePermission(Uri uri) {
+            final Context context = getContext();
+            final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
+
             if (uid == mMyUid) {
                 return true;
-            }
-            
-            final Context context = getContext();
-            final String wperm = getWritePermission();
-            final int pid = Binder.getCallingPid();
-            if (mExported && (wperm == null
-                    || context.checkPermission(wperm, pid, uid)
-                    == PackageManager.PERMISSION_GRANTED)) {
-                return true;
-            }
-            
-            PathPermission[] pps = getPathPermissions();
-            if (pps != null) {
-                final String path = uri.getPath();
-                int i = pps.length;
-                while (i > 0) {
-                    i--;
-                    final PathPermission pp = pps[i];
-                    final String ppwperm = pp.getWritePermission();
-                    if (ppwperm != null && pp.match(path)) {
-                        if (context.checkPermission(ppwperm, pid, uid)
-                                == PackageManager.PERMISSION_GRANTED) {
-                            return true;
+
+            } else if (mExported) {
+                final String componentPerm = getWritePermission();
+                if (componentPerm != null
+                        && (context.checkPermission(componentPerm, pid, uid) == PERMISSION_GRANTED)) {
+                    return true;
+                }
+
+                // track if unprotected write is allowed; any denied
+                // <path-permission> below removes this ability
+                boolean allowDefaultWrite = (componentPerm == null);
+
+                final PathPermission[] pps = getPathPermissions();
+                if (pps != null) {
+                    final String path = uri.getPath();
+                    for (PathPermission pp : pps) {
+                        final String pathPerm = pp.getWritePermission();
+                        if (pathPerm != null && pp.match(path)) {
+                            if (context.checkPermission(pathPerm, pid, uid) == PERMISSION_GRANTED) {
+                                return true;
+                            } else {
+                                // any denied <path-permission> means we lose
+                                // default <provider> access.
+                                allowDefaultWrite = false;
+                            }
                         }
                     }
                 }
+
+                // if we passed <path-permission> checks above, and no default
+                // <provider> permission, then allow access.
+                if (allowDefaultWrite) return true;
             }
-            
-            if (context.checkUriPermission(uri, pid, uid,
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    == PackageManager.PERMISSION_GRANTED) {
+
+            // last chance, check against any uri grants
+            if (context.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    == PERMISSION_GRANTED) {
                 return true;
             }
-            
+
             return false;
         }
         
