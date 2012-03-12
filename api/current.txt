@@ -8035,6 +8035,9 @@ package android.graphics {
     ctor public Camera();
     method public void applyToCanvas(android.graphics.Canvas);
     method public float dotWithNormal(float, float, float);
+    method public float getLocationX();
+    method public float getLocationY();
+    method public float getLocationZ();
     method public void getMatrix(android.graphics.Matrix);
     method public void restore();
     method public void rotate(float, float, float);
@@ -23196,6 +23199,7 @@ package android.view {
     method public final int getBottom();
     method protected float getBottomFadingEdgeStrength();
     method protected int getBottomPaddingOffset();
+    method public float getCameraDistance();
     method public java.lang.CharSequence getContentDescription();
     method public final android.content.Context getContext();
     method protected android.view.ContextMenu.ContextMenuInfo getContextMenuInfo();

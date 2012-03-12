@@ -11703,8 +11703,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     firstLine, lastLine);
 
             if (mTextDisplayList == null || !mTextDisplayList.isValid()) {
+                boolean displayListCreated = false;
                 if (mTextDisplayList == null) {
                     mTextDisplayList = getHardwareRenderer().createDisplayList("Text");
+                    displayListCreated = true;
                 }
 
                 final HardwareCanvas hardwareCanvas = mTextDisplayList.start();
@@ -11719,6 +11721,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } finally {
                     hardwareCanvas.onPostDraw();
                     mTextDisplayList.end();
+                    if (displayListCreated && USE_DISPLAY_LIST_PROPERTIES) {
+                        mTextDisplayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
+                    }
                 }
             }
             canvas.translate(mScrollX, mScrollY);

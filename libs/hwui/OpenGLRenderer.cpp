@@ -1323,14 +1323,26 @@ void OpenGLRenderer::finishDrawTexture() {
 
 bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
         Rect& dirty, int32_t flags, uint32_t level) {
-    if (quickReject(0.0f, 0.0f, width, height)) {
+    float top = 0;
+    float left = 0;
+    float right = width;
+    float bottom = height;
+    if (USE_DISPLAY_LIST_PROPERTIES) {
+        Rect transformedRect;
+        displayList->transformRect(left, top, right, bottom, transformedRect);
+        left = transformedRect.left;
+        top = transformedRect.top;
+        right = transformedRect.right;
+        bottom = transformedRect.bottom;
+    }
+    if (quickReject(left, top, right, bottom)) {
         return false;
     }
 
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList && displayList->isRenderable()) {
-        return displayList->replay(*this, dirty, flags, level);
+        return displayList->replay(*this, width, height, dirty, flags, level);
     }
 
     return false;
@@ -2174,13 +2186,12 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         return;
     }
 
+    if (length < 0.0f) length = paint->measureText(text, bytesCount);
     switch (paint->getTextAlign()) {
         case SkPaint::kCenter_Align:
-            if (length < 0.0f) length = paint->measureText(text, bytesCount);
             x -= length / 2.0f;
             break;
         case SkPaint::kRight_Align:
-            if (length < 0.0f) length = paint->measureText(text, bytesCount);
             x -= length;
             break;
         default:
@@ -2189,7 +2200,6 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     SkPaint::FontMetrics metrics;
     paint->getFontMetrics(&metrics, 0.0f);
-    // If no length was specified, just perform the hit test on the Y axis
     if (quickReject(x, y + metrics.fTop, x + length, y + metrics.fBottom)) {
         return;
     }

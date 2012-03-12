@@ -53,6 +53,7 @@ LOCAL_SRC_FILES:= \
 	android_view_KeyEvent.cpp \
 	android_view_KeyCharacterMap.cpp \
 	android_view_HardwareRenderer.cpp \
+	android_view_GLES20DisplayList.cpp \
 	android_view_GLES20Canvas.cpp \
 	android_view_MotionEvent.cpp \
 	android_view_PointerIcon.cpp \

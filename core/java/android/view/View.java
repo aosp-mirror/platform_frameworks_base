@@ -1498,6 +1498,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     static final ThreadLocal<Rect> sThreadLocal = new ThreadLocal<Rect>();
 
     /**
+     * Temporary flag, used to enable processing of View properties in the native DisplayList
+     * object instead of during draw(). Soon to be enabled by default for hardware-accelerated
+     * apps.
+     * @hide
+     */
+    protected static final boolean USE_DISPLAY_LIST_PROPERTIES = false;
+
+    /**
      * Map used to store views' tags.
      */
     private SparseArray<Object> mKeyedTags;
@@ -7284,6 +7292,24 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Gets the distance along the Z axis from the camera to this view.
+     *
+     * @see #setCameraDistance(float)
+     *
+     * @return The distance along the Z axis.
+     */
+    public float getCameraDistance() {
+        ensureTransformationInfo();
+        final float dpi = mResources.getDisplayMetrics().densityDpi;
+        final TransformationInfo info = mTransformationInfo;
+        if (info.mCamera == null) {
+            info.mCamera = new Camera();
+            info.matrix3D = new Matrix();
+        }
+        return -(info.mCamera.getLocationZ() * dpi);
+    }
+
+    /**
      * <p>Sets the distance along the Z axis (orthogonal to the X/Y plane on which
      * views are drawn) from the camera to this view. The camera's distance
      * affects 3D transformations, for instance rotations around the X and Y
@@ -7338,6 +7364,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         info.mMatrixDirty = true;
 
         invalidate(false);
+        if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+            mDisplayList.setCameraDistance(distance);
+        }
     }
 
     /**
@@ -7379,6 +7408,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setRotation(rotation);
+            }
         }
     }
 
@@ -7426,6 +7458,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setRotationY(rotationY);
+            }
         }
     }
 
@@ -7473,6 +7508,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setRotationX(rotationX);
+            }
         }
     }
 
@@ -7512,6 +7550,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setScaleX(scaleX);
+            }
         }
     }
 
@@ -7551,6 +7592,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setScaleY(scaleY);
+            }
         }
     }
 
@@ -7596,6 +7640,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setPivotX(pivotX);
+            }
         }
     }
 
@@ -7640,6 +7687,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setPivotY(pivotY);
+            }
         }
     }
 
@@ -7686,6 +7736,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             } else {
                 mPrivateFlags &= ~ALPHA_SET;
                 invalidate(false);
+                if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                    mDisplayList.setAlpha(alpha);
+                }
             }
         }
     }
@@ -7710,6 +7763,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 return true;
             } else {
                 mPrivateFlags &= ~ALPHA_SET;
+                if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                    mDisplayList.setAlpha(alpha);
+                }
             }
         }
         return false;
@@ -7759,6 +7815,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             int oldHeight = mBottom - mTop;
 
             mTop = top;
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setTop(mTop);
+            }
 
             onSizeChanged(width, mBottom - mTop, width, oldHeight);
 
@@ -7825,6 +7884,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             int oldHeight = mBottom - mTop;
 
             mBottom = bottom;
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setBottom(mBottom);
+            }
 
             onSizeChanged(width, mBottom - mTop, width, oldHeight);
 
@@ -7885,6 +7947,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             int height = mBottom - mTop;
 
             mLeft = left;
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setLeft(left);
+            }
 
             onSizeChanged(mRight - mLeft, height, oldWidth, height);
 
@@ -7898,6 +7963,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
             mBackgroundSizeChanged = true;
             invalidateParentIfNeeded();
+            if (USE_DISPLAY_LIST_PROPERTIES) {
+
+            }
         }
     }
 
@@ -7942,6 +8010,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             int height = mBottom - mTop;
 
             mRight = right;
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setRight(mRight);
+            }
 
             onSizeChanged(mRight - mLeft, height, oldWidth, height);
 
@@ -8038,6 +8109,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setTranslationX(translationX);
+            }
         }
     }
 
@@ -8075,6 +8149,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             info.mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setTranslationY(translationY);
+            }
         }
     }
 
@@ -8207,6 +8284,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             mTop += offset;
             mBottom += offset;
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.offsetTopBottom(offset);
+            }
 
             if (!matrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
@@ -8248,6 +8328,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             mLeft += offset;
             mRight += offset;
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.offsetLeftRight(offset);
+            }
 
             if (!matrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
@@ -10384,7 +10467,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 return null;
             }
 
-            mHardwareLayer.redraw(getDisplayList(), mLocalDirtyRect);
+            mHardwareLayer.redraw(getHardwareLayerDisplayList(mHardwareLayer), mLocalDirtyRect);
             mLocalDirtyRect.setEmpty();
         }
 
@@ -10536,6 +10619,129 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Returns a DisplayList. If the incoming displayList is null, one will be created.
+     * Otherwise, the same display list will be returned (after having been rendered into
+     * along the way, depending on the invalidation state of the view).
+     *
+     * @param displayList The previous version of this displayList, could be null.
+     * @param isLayer Whether the requester of the display list is a layer. If so,
+     * the view will avoid creating a layer inside the resulting display list.
+     * @return A new or reused DisplayList object.
+     */
+    private DisplayList getDisplayList(DisplayList displayList, boolean isLayer) {
+        if (!canHaveDisplayList()) {
+            return null;
+        }
+
+        if (((mPrivateFlags & DRAWING_CACHE_VALID) == 0 ||
+                displayList == null || !displayList.isValid() ||
+                (!isLayer && mRecreateDisplayList))) {
+            // Don't need to recreate the display list, just need to tell our
+            // children to restore/recreate theirs
+            if (displayList != null && displayList.isValid() &&
+                    !isLayer && !mRecreateDisplayList) {
+                mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
+                mPrivateFlags &= ~DIRTY_MASK;
+                dispatchGetDisplayList();
+
+                return displayList;
+            }
+
+            if (!isLayer) {
+                // If we got here, we're recreating it. Mark it as such to ensure that
+                // we copy in child display lists into ours in drawChild()
+                mRecreateDisplayList = true;
+            }
+            if (displayList == null) {
+                final String name = getClass().getSimpleName();
+                displayList = mAttachInfo.mHardwareRenderer.createDisplayList(name);
+                // If we're creating a new display list, make sure our parent gets invalidated
+                // since they will need to recreate their display list to account for this
+                // new child display list.
+                invalidateParentCaches();
+            }
+
+            boolean caching = false;
+            final HardwareCanvas canvas = displayList.start();
+            int restoreCount = 0;
+            int width = mRight - mLeft;
+            int height = mBottom - mTop;
+
+            try {
+                canvas.setViewport(width, height);
+                // The dirty rect should always be null for a display list
+                canvas.onPreDraw(null);
+                int layerType = (
+                        !(mParent instanceof ViewGroup) || ((ViewGroup)mParent).mDrawLayers) ?
+                        getLayerType() : LAYER_TYPE_NONE;
+                if (!isLayer && layerType == LAYER_TYPE_HARDWARE && USE_DISPLAY_LIST_PROPERTIES) {
+                    final HardwareLayer layer = getHardwareLayer();
+                    if (layer != null && layer.isValid()) {
+                        canvas.drawHardwareLayer(layer, 0, 0, mLayerPaint);
+                    } else {
+                        canvas.saveLayer(0, 0,
+                                mRight - mLeft, mBottom - mTop, mLayerPaint,
+                                Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+                    }
+                    caching = true;
+                } else {
+
+                    computeScroll();
+
+                    if (!USE_DISPLAY_LIST_PROPERTIES) {
+                        restoreCount = canvas.save();
+                    }
+                    canvas.translate(-mScrollX, -mScrollY);
+                    if (!isLayer) {
+                        mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
+                        mPrivateFlags &= ~DIRTY_MASK;
+                    }
+
+                    // Fast path for layouts with no backgrounds
+                    if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+                        dispatchDraw(canvas);
+                    } else {
+                        draw(canvas);
+                    }
+                }
+            } finally {
+                if (USE_DISPLAY_LIST_PROPERTIES) {
+                    canvas.restoreToCount(restoreCount);
+                }
+                canvas.onPostDraw();
+
+                displayList.end();
+                if (USE_DISPLAY_LIST_PROPERTIES) {
+                    displayList.setCaching(caching);
+                }
+                if (isLayer && USE_DISPLAY_LIST_PROPERTIES) {
+                    displayList.setLeftTopRightBottom(0, 0, width, height);
+                } else {
+                    setDisplayListProperties(displayList);
+                }
+            }
+        } else if (!isLayer) {
+            mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
+            mPrivateFlags &= ~DIRTY_MASK;
+        }
+
+        return displayList;
+    }
+
+    /**
+     * Get the DisplayList for the HardwareLayer
+     *
+     * @param layer The HardwareLayer whose DisplayList we want
+     * @return A DisplayList fopr the specified HardwareLayer
+     */
+    private DisplayList getHardwareLayerDisplayList(HardwareLayer layer) {
+        DisplayList displayList = getDisplayList(layer.getDisplayList(), true);
+        layer.setDisplayList(displayList);
+        return displayList;
+    }
+
+
+    /**
      * <p>Returns a display list that can be used to draw this view again
      * without executing its draw method.</p>
      *
@@ -10544,70 +10750,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     public DisplayList getDisplayList() {
-        if (!canHaveDisplayList()) {
-            return null;
-        }
-
-        if (((mPrivateFlags & DRAWING_CACHE_VALID) == 0 ||
-                mDisplayList == null || !mDisplayList.isValid() ||
-                mRecreateDisplayList)) {
-            // Don't need to recreate the display list, just need to tell our
-            // children to restore/recreate theirs
-            if (mDisplayList != null && mDisplayList.isValid() &&
-                    !mRecreateDisplayList) {
-                mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
-                mPrivateFlags &= ~DIRTY_MASK;
-                dispatchGetDisplayList();
-
-                return mDisplayList;
-            }
-
-            // If we got here, we're recreating it. Mark it as such to ensure that
-            // we copy in child display lists into ours in drawChild()
-            mRecreateDisplayList = true;
-            if (mDisplayList == null) {
-                final String name = getClass().getSimpleName();
-                mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList(name);
-                // If we're creating a new display list, make sure our parent gets invalidated
-                // since they will need to recreate their display list to account for this
-                // new child display list.
-                invalidateParentCaches();
-            }
-
-            final HardwareCanvas canvas = mDisplayList.start();
-            int restoreCount = 0;
-            try {
-                int width = mRight - mLeft;
-                int height = mBottom - mTop;
-
-                canvas.setViewport(width, height);
-                // The dirty rect should always be null for a display list
-                canvas.onPreDraw(null);
-
-                computeScroll();
-
-                restoreCount = canvas.save();
-                canvas.translate(-mScrollX, -mScrollY);
-                mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
-                mPrivateFlags &= ~DIRTY_MASK;
-
-                // Fast path for layouts with no backgrounds
-                if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                    dispatchDraw(canvas);
-                } else {
-                    draw(canvas);
-                }
-            } finally {
-                canvas.restoreToCount(restoreCount);
-                canvas.onPostDraw();
-
-                mDisplayList.end();
-            }
-        } else {
-            mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
-            mPrivateFlags &= ~DIRTY_MASK;
-        }
-
+        mDisplayList = getDisplayList(mDisplayList, false);
         return mDisplayList;
     }
 
@@ -11152,19 +11295,57 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         return more;
     }
 
+    void setDisplayListProperties() {
+        setDisplayListProperties(mDisplayList);
+    }
+
+    /**
+     * This method is called by getDisplayList() when a display list is created or re-rendered.
+     * It sets or resets the current value of all properties on that display list (resetting is
+     * necessary when a display list is being re-created, because we need to make sure that
+     * previously-set transform values
+     */
+    void setDisplayListProperties(DisplayList displayList) {
+        if (USE_DISPLAY_LIST_PROPERTIES && displayList != null) {
+            displayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
+            if (mParent instanceof ViewGroup) {
+                displayList.setClipChildren(
+                        (((ViewGroup)mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);
+            }
+            if (mAttachInfo != null && mAttachInfo.mScalingRequired &&
+                    mAttachInfo.mApplicationScale != 1.0f) {
+                displayList.setApplicationScale(1f / mAttachInfo.mApplicationScale);
+            }
+            if (mTransformationInfo != null) {
+                displayList.setTransformationInfo(mTransformationInfo.mAlpha,
+                        mTransformationInfo.mTranslationX, mTransformationInfo.mTranslationY,
+                        mTransformationInfo.mRotation, mTransformationInfo.mRotationX,
+                        mTransformationInfo.mRotationY, mTransformationInfo.mScaleX,
+                        mTransformationInfo.mScaleY);
+                displayList.setCameraDistance(getCameraDistance());
+                if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == PIVOT_EXPLICITLY_SET) {
+                    displayList.setPivotX(getPivotX());
+                    displayList.setPivotY(getPivotY());
+                }
+            }
+        }
+    }
+
     /**
      * This method is called by ViewGroup.drawChild() to have each child view draw itself.
      * This draw() method is an implementation detail and is not intended to be overridden or
      * to be called from anywhere else other than ViewGroup.drawChild().
      */
     boolean draw(Canvas canvas, ViewGroup parent, long drawingTime) {
+        boolean useDisplayListProperties = USE_DISPLAY_LIST_PROPERTIES && mAttachInfo != null &&
+                mAttachInfo.mHardwareAccelerated;
         boolean more = false;
         final boolean childHasIdentityMatrix = hasIdentityMatrix();
         final int flags = parent.mGroupFlags;
 
-        if ((flags & parent.FLAG_CLEAR_TRANSFORMATION) == parent.FLAG_CLEAR_TRANSFORMATION) {
+        if ((flags & ViewGroup.FLAG_CLEAR_TRANSFORMATION) == ViewGroup.FLAG_CLEAR_TRANSFORMATION) {
             parent.mChildTransformation.clear();
-            parent.mGroupFlags &= ~parent.FLAG_CLEAR_TRANSFORMATION;
+            parent.mGroupFlags &= ~ViewGroup.FLAG_CLEAR_TRANSFORMATION;
         }
 
         Transformation transformToApply = null;
@@ -11175,8 +11356,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         int layerType = parent.mDrawLayers ? getLayerType() : LAYER_TYPE_NONE;
 
         final boolean hardwareAccelerated = canvas.isHardwareAccelerated();
-        if ((flags & parent.FLAG_CHILDREN_DRAWN_WITH_CACHE) == parent.FLAG_CHILDREN_DRAWN_WITH_CACHE ||
-                (flags & parent.FLAG_ALWAYS_DRAWN_WITH_CACHE) == parent.FLAG_ALWAYS_DRAWN_WITH_CACHE) {
+        if ((flags & ViewGroup.FLAG_CHILDREN_DRAWN_WITH_CACHE) != 0 ||
+                (flags & ViewGroup.FLAG_ALWAYS_DRAWN_WITH_CACHE) != 0) {
             caching = true;
             if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
         } else {
@@ -11188,8 +11369,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             more = drawAnimation(parent, drawingTime, a, scalingRequired);
             concatMatrix = a.willChangeTransformationMatrix();
             transformToApply = parent.mChildTransformation;
-        } else if ((flags & parent.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
-                parent.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) {
+        } else if ((flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
             final boolean hasTransform =
                     parent.getChildStaticTransformation(this, parent.mChildTransformation);
             if (hasTransform) {
@@ -11239,6 +11419,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                         buildDrawingCache(true);
                         cache = getDrawingCache(true);
                         break;
+                    case LAYER_TYPE_HARDWARE:
+                        if (useDisplayListProperties) {
+                            hasDisplayList = canHaveDisplayList();
+                        }
+                        break;
                     case LAYER_TYPE_NONE:
                         // Delay getting the display list until animation-driven alpha values are
                         // set up and possibly passed on to the view
@@ -11247,24 +11432,33 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 }
             }
         }
+        useDisplayListProperties &= hasDisplayList;
 
         final boolean hasNoCache = cache == null || hasDisplayList;
         final boolean offsetForScroll = cache == null && !hasDisplayList &&
                 layerType != LAYER_TYPE_HARDWARE;
 
-        final int restoreTo = canvas.save();
+        int restoreTo = -1;
+        if (!useDisplayListProperties) {
+            restoreTo = canvas.save();
+        }
         if (offsetForScroll) {
             canvas.translate(mLeft - sx, mTop - sy);
         } else {
-            canvas.translate(mLeft, mTop);
+            if (!useDisplayListProperties) {
+                canvas.translate(mLeft, mTop);
+            }
             if (scalingRequired) {
+                if (useDisplayListProperties) {
+                    restoreTo = canvas.save();
+                }
                 // mAttachInfo cannot be null, otherwise scalingRequired == false
                 final float scale = 1.0f / mAttachInfo.mApplicationScale;
                 canvas.scale(scale, scale);
             }
         }
 
-        float alpha = getAlpha();
+        float alpha = useDisplayListProperties ? 1 : getAlpha();
         if (transformToApply != null || alpha < 1.0f || !hasIdentityMatrix()) {
             if (transformToApply != null || !childHasIdentityMatrix) {
                 int transX = 0;
@@ -11279,20 +11473,22 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     if (concatMatrix) {
                         // Undo the scroll translation, apply the transformation matrix,
                         // then redo the scroll translate to get the correct result.
-                        canvas.translate(-transX, -transY);
-                        canvas.concat(transformToApply.getMatrix());
-                        canvas.translate(transX, transY);
-                        parent.mGroupFlags |= parent.FLAG_CLEAR_TRANSFORMATION;
+                        if (!hasDisplayList) {
+                            canvas.translate(-transX, -transY);
+                            canvas.concat(transformToApply.getMatrix());
+                            canvas.translate(transX, transY);
+                        }
+                        parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
                     }
 
                     float transformAlpha = transformToApply.getAlpha();
                     if (transformAlpha < 1.0f) {
                         alpha *= transformToApply.getAlpha();
-                        parent.mGroupFlags |= parent.FLAG_CLEAR_TRANSFORMATION;
+                        parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
                     }
                 }
 
-                if (!childHasIdentityMatrix) {
+                if (!childHasIdentityMatrix && !useDisplayListProperties) {
                     canvas.translate(-transX, -transY);
                     canvas.concat(getMatrix());
                     canvas.translate(transX, transY);
@@ -11300,20 +11496,22 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
 
             if (alpha < 1.0f) {
-                parent.mGroupFlags |= parent.FLAG_CLEAR_TRANSFORMATION;
+                parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
                 if (hasNoCache) {
                     final int multipliedAlpha = (int) (255 * alpha);
                     if (!onSetAlpha(multipliedAlpha)) {
                         int layerFlags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
-                        if ((flags & parent.FLAG_CLIP_CHILDREN) == parent.FLAG_CLIP_CHILDREN ||
+                        if ((flags & ViewGroup.FLAG_CLIP_CHILDREN) != 0 ||
                                 layerType != LAYER_TYPE_NONE) {
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
                         if (layerType == LAYER_TYPE_NONE) {
-                            final int scrollX = hasDisplayList ? 0 : sx;
-                            final int scrollY = hasDisplayList ? 0 : sy;
-                            canvas.saveLayerAlpha(scrollX, scrollY, scrollX + mRight - mLeft,
-                                    scrollY + mBottom - mTop, multipliedAlpha, layerFlags);
+                            if (!useDisplayListProperties) {
+                                final int scrollX = hasDisplayList ? 0 : sx;
+                                final int scrollY = hasDisplayList ? 0 : sy;
+                                canvas.saveLayerAlpha(scrollX, scrollY, scrollX + mRight - mLeft,
+                                        scrollY + mBottom - mTop, multipliedAlpha, layerFlags);
+                            }
                         }
                     } else {
                         // Alpha is handled by the child directly, clobber the layer's alpha
@@ -11326,7 +11524,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             mPrivateFlags &= ~ALPHA_SET;
         }
 
-        if ((flags & parent.FLAG_CLIP_CHILDREN) == parent.FLAG_CLIP_CHILDREN) {
+        if ((flags & ViewGroup.FLAG_CLIP_CHILDREN) == ViewGroup.FLAG_CLIP_CHILDREN &&
+                !useDisplayListProperties) {
             if (offsetForScroll) {
                 canvas.clipRect(sx, sy, sx + (mRight - mLeft), sy + (mBottom - mTop));
             } else {
@@ -11351,7 +11550,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         if (hasNoCache) {
             boolean layerRendered = false;
-            if (layerType == LAYER_TYPE_HARDWARE) {
+            if (layerType == LAYER_TYPE_HARDWARE && !useDisplayListProperties) {
                 final HardwareLayer layer = getHardwareLayer();
                 if (layer != null && layer.isValid()) {
                     mLayerPaint.setAlpha((int) (alpha * 255));
@@ -11397,11 +11596,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 }
                 if (alpha < 1.0f) {
                     cachePaint.setAlpha((int) (alpha * 255));
-                    parent.mGroupFlags |= parent.FLAG_ALPHA_LOWER_THAN_ONE;
-                } else if  ((flags & parent.FLAG_ALPHA_LOWER_THAN_ONE) ==
-                        parent.FLAG_ALPHA_LOWER_THAN_ONE) {
+                    parent.mGroupFlags |= ViewGroup.FLAG_ALPHA_LOWER_THAN_ONE;
+                } else if  ((flags & ViewGroup.FLAG_ALPHA_LOWER_THAN_ONE) != 0) {
                     cachePaint.setAlpha(255);
-                    parent.mGroupFlags &= ~parent.FLAG_ALPHA_LOWER_THAN_ONE;
+                    parent.mGroupFlags &= ~ViewGroup.FLAG_ALPHA_LOWER_THAN_ONE;
                 }
             } else {
                 cachePaint = mLayerPaint;
@@ -11410,7 +11608,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
         }
 
-        canvas.restoreToCount(restoreTo);
+        if (restoreTo >= 0) {
+            canvas.restoreToCount(restoreTo);
+        }
 
         if (a != null && !more) {
             if (!hardwareAccelerated && !a.getFillAfter()) {
@@ -11868,6 +12068,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             mTop = top;
             mRight = right;
             mBottom = bottom;
+            if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                mDisplayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
+            }
 
             mPrivateFlags |= HAS_BOUNDS;
 

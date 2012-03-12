@@ -866,6 +866,8 @@ public class ViewPropertyAnimator {
                 info.mAlpha = value;
                 break;
         }
+        // TODO: optimize to set only the properties that have changed
+        mView.setDisplayListProperties();
     }
 
     /**
