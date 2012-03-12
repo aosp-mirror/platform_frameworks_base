@@ -73,7 +73,7 @@ class AudioFlinger :
     public BinderService<AudioFlinger>,
     public BnAudioFlinger
 {
-    friend class BinderService<AudioFlinger>;
+    friend class BinderService<AudioFlinger>;   // for AudioFlinger()
 public:
     static const char* getServiceName() { return "media.audio_flinger"; }
 
@@ -342,13 +342,6 @@ private:
                     int         sessionId() const { return mSessionId; }
 
         protected:
-            friend class ThreadBase;
-            friend class RecordHandle;
-            friend class PlaybackThread;
-            friend class RecordThread;
-            friend class MixerThread;
-            friend class DirectOutputThread;
-
                                 TrackBase(const TrackBase&);
                                 TrackBase& operator = (const TrackBase&);
 
@@ -534,15 +527,7 @@ private:
                     // check if some effects must be suspended when an effect chain is added
                     void checkSuspendOnAddEffectChain_l(const sp<EffectChain>& chain);
 
-        friend class AudioFlinger;
-        friend class Track;
-        friend class TrackBase;
-        friend class PlaybackThread;
-        friend class MixerThread;
-        friend class DirectOutputThread;
-        friend class DuplicatingThread;
-        friend class RecordThread;
-        friend class RecordTrack;
+        friend class AudioFlinger;      // for mEffectChains
 
                     const type_t            mType;
 
@@ -657,8 +642,7 @@ private:
                     int         auxEffectId() const { return mAuxEffectId; }
 
         protected:
-            friend class ThreadBase;
-            friend class TrackHandle;
+            // for numerous
             friend class PlaybackThread;
             friend class MixerThread;
             friend class DirectOutputThread;
@@ -687,7 +671,9 @@ private:
                 return (mStreamType == AUDIO_STREAM_CNT);
             }
 
+        public:
             virtual bool isTimedTrack() const { return false; }
+        protected:
 
             // we don't really need a lock for these
             volatile bool       mMute;
@@ -934,13 +920,7 @@ public:
 
     private:
 
-        friend class AudioFlinger;
-        friend class OutputTrack;
-        friend class Track;
-        friend class TrackBase;
-        friend class MixerThread;
-        friend class DirectOutputThread;
-        friend class DuplicatingThread;
+        friend class AudioFlinger;      // for numerous
 
         PlaybackThread(const Client&);
         PlaybackThread& operator = (const PlaybackThread&);
@@ -1125,8 +1105,6 @@ private:
               PlaybackThread *primaryPlaybackThread_l() const;
               uint32_t primaryOutputDevice_l() const;
 
-    friend class AudioBuffer;
-
     // server side of the client's IAudioTrack
     class TrackHandle : public android::BnAudioTrack {
     public:
@@ -1150,10 +1128,6 @@ private:
     private:
         const sp<PlaybackThread::Track> mTrack;
     };
-
-    friend class Client;
-    friend class PlaybackThread::Track;
-
 
                 void        removeClient_l(pid_t pid);
                 void        removeNotificationClient(pid_t pid);
@@ -1185,8 +1159,7 @@ private:
                     void        dump(char* buffer, size_t size);
 
         private:
-            friend class AudioFlinger;
-            friend class RecordThread;
+            friend class AudioFlinger;  // for mState
 
                                 RecordTrack(const RecordTrack&);
                                 RecordTrack& operator = (const RecordTrack&);
@@ -1368,8 +1341,7 @@ private:
         status_t         dump(int fd, const Vector<String16>& args);
 
     protected:
-        friend class EffectHandle;
-        friend class AudioFlinger;
+        friend class AudioFlinger;      // for mHandles
         bool                mPinned;
 
         // Maximum time allocated to effect engines to complete the turn off sequence
@@ -1453,8 +1425,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         void dump(char* buffer, size_t size);
 
     protected:
-        friend class AudioFlinger;
-        friend class EffectModule;
+        friend class AudioFlinger;          // for mEffect, mHasControl, mEnabled
         EffectHandle(const EffectHandle&);
         EffectHandle& operator =(const EffectHandle&);
 
@@ -1552,7 +1523,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         status_t dump(int fd, const Vector<String16>& args);
 
     protected:
-        friend class AudioFlinger;
+        friend class AudioFlinger;  // for mThread, mEffects
         EffectChain(const EffectChain&);
         EffectChain& operator =(const EffectChain&);
 
@@ -1627,9 +1598,6 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         const pid_t mPid;
         int         mCnt;
     };
-
-    friend class RecordThread;
-    friend class PlaybackThread;
 
     enum master_volume_support {
         // MVS_NONE:
