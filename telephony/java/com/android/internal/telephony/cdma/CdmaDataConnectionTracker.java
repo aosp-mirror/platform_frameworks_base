@@ -226,7 +226,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     internalDataEnabled &&
                     desiredPowerState &&
                     !mPendingRestartRadio &&
-                    !mCdmaPhone.needsOtaServiceProvisioning();
+                    ((mPhone.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE) ||
+                            !mCdmaPhone.needsOtaServiceProvisioning());
         if (!allowed && DBG) {
             String reason = "";
             if (!((psState == ServiceState.STATE_IN_SERVICE) || mAutoAttachOnCreation)) {
