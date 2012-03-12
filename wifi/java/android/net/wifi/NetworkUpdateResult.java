@@ -22,6 +22,7 @@ class NetworkUpdateResult {
     int netId;
     boolean ipChanged;
     boolean proxyChanged;
+    boolean isNewNetwork = false;
 
     public NetworkUpdateResult(int id) {
         netId = id;
@@ -57,5 +58,13 @@ class NetworkUpdateResult {
 
     public boolean hasProxyChanged() {
         return proxyChanged;
+    }
+
+    public boolean isNewNetwork() {
+        return isNewNetwork;
+    }
+
+    public void setIsNewNetwork(boolean isNew) {
+        isNewNetwork = isNew;
     }
 }
