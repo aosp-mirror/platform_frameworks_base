@@ -21642,6 +21642,10 @@ package android.util {
     method public android.util.JsonWriter value(java.lang.Number) throws java.io.IOException;
   }
 
+  public class LocaleUtil {
+    method public static int getLayoutDirectionFromLocale(java.util.Locale);
+  }
+
   public final class Log {
     method public static int d(java.lang.String, java.lang.String);
     method public static int d(java.lang.String, java.lang.String, java.lang.Throwable);
