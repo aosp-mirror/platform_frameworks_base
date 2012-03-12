@@ -101,20 +101,47 @@ status_t JMediaExtractor::readSampleData(
 
     void *dst = env->GetDirectBufferAddress(byteBuf);
 
+    jlong dstSize;
+    jbyteArray byteArray = NULL;
+
     if (dst == NULL) {
-        // XXX if dst is NULL also fall back to "array()"
-        return INVALID_OPERATION;
+        jclass byteBufClass = env->FindClass("java/nio/ByteBuffer");
+        CHECK(byteBufClass != NULL);
+
+        jmethodID arrayID =
+            env->GetMethodID(byteBufClass, "array", "()[B");
+        CHECK(arrayID != NULL);
+
+        byteArray =
+            (jbyteArray)env->CallObjectMethod(byteBuf, arrayID);
+
+        if (byteArray == NULL) {
+            return INVALID_OPERATION;
+        }
+
+        jboolean isCopy;
+        dst = env->GetByteArrayElements(byteArray, &isCopy);
+
+        dstSize = env->GetArrayLength(byteArray);
+    } else {
+        dstSize = env->GetDirectBufferCapacity(byteBuf);
     }
 
-    jlong dstSize = env->GetDirectBufferCapacity(byteBuf);
-
     if (dstSize < offset) {
+        if (byteArray != NULL) {
+            env->ReleaseByteArrayElements(byteArray, (jbyte *)dst, 0);
+        }
+
         return -ERANGE;
     }
 
     sp<ABuffer> buffer = new ABuffer((char *)dst + offset, dstSize - offset);
 
     status_t err = mImpl->readSampleData(buffer);
+
+    if (byteArray != NULL) {
+        env->ReleaseByteArrayElements(byteArray, (jbyte *)dst, 0);
+    }
 
     if (err != OK) {
         return err;

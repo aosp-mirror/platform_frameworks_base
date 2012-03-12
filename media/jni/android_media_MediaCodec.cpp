@@ -134,7 +134,7 @@ status_t JMediaCodec::dequeueOutputBuffer(
     uint32_t flags;
     status_t err;
     if ((err = mCodec->dequeueOutputBuffer(
-                    index, &size, &offset, &timeUs, &flags, timeoutUs)) != OK) {
+                    index, &offset, &size, &timeUs, &flags, timeoutUs)) != OK) {
         return err;
     }
 

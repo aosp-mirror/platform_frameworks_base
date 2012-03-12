@@ -92,14 +92,12 @@ public class MediaCodec
      *                  "width"         - Integer
      *                  "height"        - Integer
      *                  optional "max-input-size"       - Integer
-     *                  optional "csd-0", "csd-1" ...   - ByteBuffer
      *
      *                Audio formats have the following fields:
      *                  "mime"          - String
      *                  "channel-count" - Integer
      *                  "sample-rate"   - Integer
      *                  optional "max-input-size"       - Integer
-     *                  optional "csd-0", "csd-1" ...   - ByteBuffer
      *
      *                If the format is used to configure an encoder, additional
      *                fields must be included:
@@ -114,7 +112,7 @@ public class MediaCodec
      *
      *  @param surface Specify a surface on which to render the output of this
      *                 decoder.
-     *  @param flags   Specify {@see #CONFIGURE_FLAG_ENCODE} to configure the
+     *  @param flags   Specify {@link #CONFIGURE_FLAG_ENCODE} to configure the
      *                 component as an encoder.
     */
     public void configure(
@@ -155,6 +153,19 @@ public class MediaCodec
 
     /** After filling a range of the input buffer at the specified index
      *  submit it to the component.
+     *
+     *  Many decoders require the actual compressed data stream to be
+     *  preceded by "codec specific data", i.e. setup data used to initialize
+     *  the codec such as PPS/SPS in the case of AVC video or code tables
+     *  in the case of vorbis audio.
+     *  The class MediaExtractor provides codec specific data as part of
+     *  the returned track format in entries named "csd-0", "csd-1" ...
+     *
+     *  These buffers should be submitted using the flag {@link #FLAG_CODECCONFIG}.
+     *
+     *  To indicate that this is the final piece of input data (or rather that
+     *  no more input data follows unless the decoder is subsequently flushed)
+     *  specify the flag {@link FLAG_EOS}.
     */
     public native final void queueInputBuffer(
             int index,
@@ -184,15 +195,25 @@ public class MediaCodec
     public native final void releaseOutputBuffer(int index, boolean render);
 
     /** Call this after dequeueOutputBuffer signals a format change by returning
-     *  {@see #INFO_OUTPUT_FORMAT_CHANGED}
+     *  {@link #INFO_OUTPUT_FORMAT_CHANGED}
      */
     public native final Map<String, Object> getOutputFormat();
 
+    /** Call this after start() returns.
+     */
+    public ByteBuffer[] getInputBuffers() {
+        return getBuffers(true /* input */);
+    }
+
     /** Call this after start() returns and whenever dequeueOutputBuffer
      *  signals an output buffer change by returning
-     *  {@see #INFO_OUTPUT_BUFFERS_CHANGED}
+     *  {@link #INFO_OUTPUT_BUFFERS_CHANGED}
      */
-    public native final ByteBuffer[] getBuffers(boolean input);
+    public ByteBuffer[] getOutputBuffers() {
+        return getBuffers(false /* input */);
+    }
+
+    private native final ByteBuffer[] getBuffers(boolean input);
 
     private static native final void native_init();
 

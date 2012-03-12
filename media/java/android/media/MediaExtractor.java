@@ -56,7 +56,7 @@ public class MediaExtractor
     public native boolean advance();
 
     // Retrieve the current encoded sample and store it in the byte buffer
-    // starting at the given offset.
+    // starting at the given offset. Returns the sample size.
     public native int readSampleData(ByteBuffer byteBuf, int offset);
 
     // Returns the track index the current sample originates from.
