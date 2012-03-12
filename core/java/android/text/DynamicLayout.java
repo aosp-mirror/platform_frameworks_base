@@ -20,6 +20,8 @@ import android.graphics.Paint;
 import android.text.style.UpdateLayout;
 import android.text.style.WrapTogetherSpan;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -30,8 +32,7 @@ import java.lang.ref.WeakReference;
  * {@link android.graphics.Canvas#drawText(java.lang.CharSequence, int, int, float, float, android.graphics.Paint)
  *  Canvas.drawText()} directly.</p>
  */
-public class DynamicLayout
-extends Layout
+public class DynamicLayout extends Layout
 {
     private static final int PRIORITY = 128;
 
@@ -115,6 +116,10 @@ extends Layout
         }
 
         mObjects = new PackedObjectVector<Directions>(1);
+
+        mBlockEnds = new int[] { 0 };
+        mBlockIndices = new int[] { INVALID_BLOCK_INDEX };
+        mNumberOfBlocks = 1;
 
         mIncludePad = includepad;
 
@@ -295,9 +300,9 @@ extends Layout
             n--;
 
         // remove affected lines from old layout
-
         mInts.deleteAt(startline, endline - startline);
         mObjects.deleteAt(startline, endline - startline);
+        updateBlocks(startline, endline - 1, n);
 
         // adjust offsets in layout for new height and offsets
 
@@ -361,6 +366,124 @@ extends Layout
             sStaticLayout = reflowed;
             reflowed.finish();
         }
+    }
+
+    /**
+     * This method is called every time the layout is reflowed after an edition.
+     * It updates the internal block data structure. The text is split in blocks
+     * of contiguous lines, with at least one block for the entire text.
+     * When a range of lines is edited, new blocks (from 0 to 3 depending on the
+     * overlap structure) will replace the set of overlapping blocks.
+     * Blocks are listed in order and are represented by their ending line number.
+     * An index is associated to each block (which will be used by display lists),
+     * this class simply invalidates the index of blocks overlapping a modification.
+     *
+     * @param startLine the first line of the range of modified lines
+     * @param endLine the last line of the range, possibly equal to startLine, lower
+     * than getLineCount()
+     * @param newLineCount the number of lines that will replace the range, possibly 0
+     */
+    private void updateBlocks(int startLine, int endLine, int newLineCount) {
+        int firstBlock = -1;
+        int lastBlock = -1;
+        for (int i = 0; i < mNumberOfBlocks; i++) {
+            if (mBlockEnds[i] >= startLine) {
+                firstBlock = i;
+                break;
+            }
+        }
+        for (int i = firstBlock; i < mNumberOfBlocks; i++) {
+            if (mBlockEnds[i] >= endLine) {
+                lastBlock = i;
+                break;
+            }
+        }
+        final int lastBlockEndLine = mBlockEnds[lastBlock];
+
+        boolean createBlockBefore = startLine > (firstBlock == 0 ? 0 :
+                mBlockEnds[firstBlock - 1] + 1);
+        boolean createBlock = newLineCount > 0;
+        boolean createBlockAfter = endLine < mBlockEnds[lastBlock];
+
+        int numAddedBlocks = 0;
+        if (createBlockBefore) numAddedBlocks++;
+        if (createBlock) numAddedBlocks++;
+        if (createBlockAfter) numAddedBlocks++;
+
+        final int numRemovedBlocks = lastBlock - firstBlock + 1;
+        final int newNumberOfBlocks = mNumberOfBlocks + numAddedBlocks - numRemovedBlocks;
+
+        if (newNumberOfBlocks == 0) {
+            // Even when text is empty, there is actually one line and hence one block
+            mBlockEnds[0] = 0;
+            mBlockIndices[0] = INVALID_BLOCK_INDEX;
+            mNumberOfBlocks = 1;
+            return;
+        }
+
+        if (newNumberOfBlocks > mBlockEnds.length) {
+            final int newSize = ArrayUtils.idealIntArraySize(newNumberOfBlocks);
+            int[] blockEnds = new int[newSize];
+            int[] blockIndices = new int[newSize];
+            System.arraycopy(mBlockEnds, 0, blockEnds, 0, firstBlock);
+            System.arraycopy(mBlockIndices, 0, blockIndices, 0, firstBlock);
+            System.arraycopy(mBlockEnds, lastBlock + 1,
+                    blockEnds, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
+            System.arraycopy(mBlockIndices, lastBlock + 1,
+                    blockIndices, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
+            mBlockEnds = blockEnds;
+            mBlockIndices = blockIndices;
+        } else {
+            System.arraycopy(mBlockEnds, lastBlock + 1,
+                    mBlockEnds, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
+            System.arraycopy(mBlockIndices, lastBlock + 1,
+                    mBlockIndices, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
+        }
+
+        mNumberOfBlocks = newNumberOfBlocks;
+        final int deltaLines = newLineCount - (endLine - startLine + 1);
+        for (int i = firstBlock + numAddedBlocks; i < mNumberOfBlocks; i++) {
+            mBlockEnds[i] += deltaLines;
+        }
+
+        int blockIndex = firstBlock;
+        if (createBlockBefore) {
+            mBlockEnds[blockIndex] = startLine - 1;
+            mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
+            blockIndex++;
+        }
+
+        if (createBlock) {
+            mBlockEnds[blockIndex] = startLine + newLineCount - 1;
+            mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
+            blockIndex++;
+        }
+
+        if (createBlockAfter) {
+            mBlockEnds[blockIndex] = lastBlockEndLine + deltaLines;
+            mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public int[] getBlockEnds() {
+        return mBlockEnds;
+    }
+
+    /**
+     * @hide
+     */
+    public int[] getBlockIndices() {
+        return mBlockIndices;
+    }
+
+    /**
+     * @hide
+     */
+    public int getNumberOfBlocks() {
+        return mNumberOfBlocks;
     }
 
     @Override
@@ -428,6 +551,7 @@ extends Layout
         }
 
         public void beforeTextChanged(CharSequence s, int where, int before, int after) {
+            // Intentionally empty
         }
 
         public void onTextChanged(CharSequence s, int where, int before, int after) {
@@ -435,6 +559,7 @@ extends Layout
         }
 
         public void afterTextChanged(Editable s) {
+            // Intentionally empty
         }
 
         public void onSpanAdded(Spannable s, Object o, int start, int end) {
@@ -485,6 +610,20 @@ extends Layout
 
     private PackedIntVector mInts;
     private PackedObjectVector<Directions> mObjects;
+
+    /*
+     * Value used in mBlockIndices when a block has been created or recycled and indicating that its
+     * display list needs to be re-created.
+     * @hide
+     */
+    public static final int INVALID_BLOCK_INDEX = -1;
+    // Stores the line numbers of the last line of each block
+    private int[] mBlockEnds;
+    // The indices of this block's display list in TextView's internal display list array or
+    // INVALID_BLOCK_INDEX if this block has been invalidated during an edition
+    private int[] mBlockIndices;
+    // Number of items actually currently being used in the above 2 arrays
+    private int mNumberOfBlocks;
 
     private int mTopPadding, mBottomPadding;
 
