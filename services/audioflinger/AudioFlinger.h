@@ -222,6 +222,8 @@ private:
     audio_hw_device_t*      findSuitableHwDev_l(uint32_t devices);
     void                    purgeStaleEffects_l();
 
+    // standby delay for MIXER and DUPLICATING playback threads is read from property
+    // ro.audio.flinger_standbytime_ms or defaults to kDefaultStandbyTimeInNsecs
     static nsecs_t          mStandbyTimeInNsecs;
 
     // Internal dump utilites.
@@ -840,9 +842,6 @@ protected:
         virtual     void        threadLoop_write();
         virtual     void        threadLoop_standby();
 
-        // Non-trivial for DUPLICATING only
-        virtual     void        updateWaitTime_l() { }
-
         // Non-trivial for DIRECT only
         virtual     void        applyVolume() { }
 
@@ -929,6 +928,9 @@ public:
         virtual     void        saveOutputTracks() { }
         virtual     void        clearOutputTracks() { }
 
+        // Cache various calculated values, at threadLoop() entry and after a parameter change
+        virtual     void        cacheParameters_l();
+
     private:
 
         friend class AudioFlinger;
@@ -964,8 +966,11 @@ public:
         // FIXME rename these former local variables of threadLoop to standard "m" names
         nsecs_t                         standbyTime;
         size_t                          mixBufferSize;
+
+        // cached copies of activeSleepTimeUs() and idleSleepTimeUs() made by cacheParameters_l()
         uint32_t                        activeSleepTime;
         uint32_t                        idleSleepTime;
+
         uint32_t                        sleepTime;
 
         // mixer status returned by prepareTracks_l()
@@ -976,8 +981,13 @@ public:
         // MIXER only
         bool                            longStandbyExit;
         uint32_t                        sleepTimeShift;
-        // DIRECT only
+
+        // same as AudioFlinger::mStandbyTimeInNsecs except for DIRECT which uses a shorter value
         nsecs_t                         standbyDelay;
+
+        // MIXER only
+        nsecs_t                         maxPeriod;
+
         // DUPLICATING only
         uint32_t                        writeFrames;
     };
@@ -1003,6 +1013,7 @@ public:
         virtual     void        deleteTrackName_l(int name);
         virtual     uint32_t    idleSleepTimeUs();
         virtual     uint32_t    suspendSleepTimeUs();
+        virtual     void        cacheParameters_l();
 
         // threadLoop snippets
         virtual     void        threadLoop_mix();
@@ -1028,6 +1039,7 @@ public:
         virtual     uint32_t    activeSleepTimeUs();
         virtual     uint32_t    idleSleepTimeUs();
         virtual     uint32_t    suspendSleepTimeUs();
+        virtual     void        cacheParameters_l();
 
         // threadLoop snippets
         virtual     mixer_state prepareTracks_l(Vector< sp<Track> > *tracksToRemove);
@@ -1075,9 +1087,12 @@ private:
         virtual     void        threadLoop_sleepTime();
         virtual     void        threadLoop_write();
         virtual     void        threadLoop_standby();
+        virtual     void        cacheParameters_l();
 
+    private:
         // called from threadLoop, addOutputTrack, removeOutputTrack
         virtual     void        updateWaitTime_l();
+    protected:
         virtual     void        saveOutputTracks();
         virtual     void        clearOutputTracks();
     private:
