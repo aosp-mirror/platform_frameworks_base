@@ -805,6 +805,7 @@ private:
 
         inline const char* getInputChannelName() const { return inputChannel->getName().string(); }
 
+        const char* getWindowName() const;
         const char* getStatusLabel() const;
 
         DispatchEntry* findWaitQueueEntry(uint32_t seq);
@@ -1069,6 +1070,9 @@ private:
     // Statistics gathering.
     void updateDispatchStatisticsLocked(nsecs_t currentTime, const EventEntry* entry,
             int32_t injectionResult, nsecs_t timeSpentWaitingForApplication);
+    void traceInboundQueueLengthLocked();
+    void traceOutboundQueueLengthLocked(const sp<Connection>& connection);
+    void traceWaitQueueLengthLocked(const sp<Connection>& connection);
 };
 
 /* Enqueues and dispatches input events, endlessly. */

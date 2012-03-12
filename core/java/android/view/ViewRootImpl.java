@@ -51,6 +51,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -960,7 +961,12 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        performTraversals();
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "performTraversals");
+        try {
+            performTraversals();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
 
         if (ViewDebug.DEBUG_LATENCY) {
             long now = System.nanoTime();
@@ -1919,7 +1925,13 @@ public final class ViewRootImpl implements ViewParent,
 
         final boolean fullRedrawNeeded = mFullRedrawNeeded;
         mFullRedrawNeeded = false;
-        draw(fullRedrawNeeded);
+
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
+        try {
+            draw(fullRedrawNeeded);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
 
         if (ViewDebug.DEBUG_LATENCY) {
             long now = System.nanoTime();
@@ -2897,17 +2909,22 @@ public final class ViewRootImpl implements ViewParent,
             q.mDeliverTimeNanos = System.nanoTime();
         }
 
-        if (q.mEvent instanceof KeyEvent) {
-            deliverKeyEvent(q);
-        } else {
-            final int source = q.mEvent.getSource();
-            if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-                deliverPointerEvent(q);
-            } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-                deliverTrackballEvent(q);
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent");
+        try {
+            if (q.mEvent instanceof KeyEvent) {
+                deliverKeyEvent(q);
             } else {
-                deliverGenericMotionEvent(q);
+                final int source = q.mEvent.getSource();
+                if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                    deliverPointerEvent(q);
+                } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                    deliverTrackballEvent(q);
+                } else {
+                    deliverGenericMotionEvent(q);
+                }
             }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
     }
 

@@ -69,6 +69,7 @@ LOCAL_SRC_FILES:= \
 	android_os_StatFs.cpp \
 	android_os_SystemClock.cpp \
 	android_os_SystemProperties.cpp \
+	android_os_Trace.cpp \
 	android_os_UEventObserver.cpp \
 	android_net_LocalSocketImpl.cpp \
 	android_net_NetUtils.cpp \
