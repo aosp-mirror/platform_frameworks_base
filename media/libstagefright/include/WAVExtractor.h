@@ -47,6 +47,7 @@ private:
     bool mValidFormat;
     uint16_t mWaveFormat;
     uint16_t mNumChannels;
+    uint32_t mChannelMask;
     uint32_t mSampleRate;
     uint16_t mBitsPerSample;
     off64_t mDataOffset;
