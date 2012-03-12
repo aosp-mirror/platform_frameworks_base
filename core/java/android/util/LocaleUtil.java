@@ -24,7 +24,6 @@ import libcore.icu.ICU;
 /**
  * Various utilities for Locales
  *
- * @hide
  */
 public class LocaleUtil {
 
@@ -41,9 +40,7 @@ public class LocaleUtil {
      * {@link View#LAYOUT_DIRECTION_LTR} or
      * {@link View#LAYOUT_DIRECTION_RTL}.
      *
-     * Be careful: this code will need to be changed when vertical scripts will be supported
-     *
-     * @hide
+     * Be careful: this code will need to be updated when vertical scripts will be supported
      */
     public static int getLayoutDirectionFromLocale(Locale locale) {
         if (locale != null && !locale.equals(Locale.ROOT)) {
@@ -69,7 +66,7 @@ public class LocaleUtil {
      * {@link View#LAYOUT_DIRECTION_LTR} or
      * {@link View#LAYOUT_DIRECTION_RTL}.
      *
-     * Be careful: this code will need to be changed when vertical scripts will be supported
+     * Be careful: this code will need to be updated when vertical scripts will be supported
      *
      * @hide
      */
