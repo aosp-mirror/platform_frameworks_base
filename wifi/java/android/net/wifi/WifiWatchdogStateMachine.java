@@ -113,11 +113,14 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final int RSSI_MONITOR_COUNT = 5;
     private int mRssiMonitorCount = 0;
 
-    /* Avoid flapping */
-    private static final int MIN_INTERVAL_AVOID_BSSID_MS = 60 * 1000;
-    private String mLastAvoidedBssid;
-    /* a -ve interval to allow avoidance at boot */
-    private long mLastBssidAvoidedTime = -MIN_INTERVAL_AVOID_BSSID_MS;
+    /* Avoid flapping. The interval is changed over time as long as we continue to avoid
+     * under the max interval after which we reset the interval again */
+    private static final int MIN_INTERVAL_AVOID_BSSID_MS[] = {0, 30 * 1000, 60 * 1000,
+            5 * 60 * 1000, 30 * 60 * 1000};
+    /* Index into the interval array MIN_INTERVAL_AVOID_BSSID_MS */
+    private int mMinIntervalArrayIndex = 0;
+
+    private long mLastBssidAvoidedTime;
 
     private int mCurrentSignalLevel;
 
@@ -744,11 +747,13 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     mCurrentSignalLevel = calculateSignalLevel(msg.arg1);
                     //Ready to avoid bssid again ?
                     long time = android.os.SystemClock.elapsedRealtime();
-                    if (time - mLastBssidAvoidedTime  > MIN_INTERVAL_AVOID_BSSID_MS) {
+                    if (time - mLastBssidAvoidedTime  > MIN_INTERVAL_AVOID_BSSID_MS[
+                            mMinIntervalArrayIndex]) {
                         handleRssiChange();
                     } else {
                         if (DBG) log("Early to avoid " + mWifiInfo + " time: " + time +
-                                " last avoided: " + mLastBssidAvoidedTime);
+                                " last avoided: " + mLastBssidAvoidedTime +
+                                " mMinIntervalArrayIndex: " + mMinIntervalArrayIndex);
                     }
                     break;
                 default:
@@ -892,7 +897,20 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private void sendPoorLinkDetected() {
         if (DBG) log("send POOR_LINK_DETECTED " + mWifiInfo);
         mWsmChannel.sendMessage(POOR_LINK_DETECTED);
-        mLastAvoidedBssid = mWifiInfo.getBSSID();
+
+        long time = android.os.SystemClock.elapsedRealtime();
+        if (time - mLastBssidAvoidedTime  > MIN_INTERVAL_AVOID_BSSID_MS[
+                MIN_INTERVAL_AVOID_BSSID_MS.length - 1]) {
+            mMinIntervalArrayIndex = 1;
+            if (DBG) log("set mMinIntervalArrayIndex to 1");
+        } else {
+
+            if (mMinIntervalArrayIndex < MIN_INTERVAL_AVOID_BSSID_MS.length - 1) {
+                mMinIntervalArrayIndex++;
+            }
+            if (DBG) log("mMinIntervalArrayIndex: " + mMinIntervalArrayIndex);
+        }
+
         mLastBssidAvoidedTime = android.os.SystemClock.elapsedRealtime();
     }
 
