@@ -61,12 +61,12 @@ LOCAL_SRC_FILES := \
 
 LOCAL_C_INCLUDES := \
         frameworks/base/media/libstagefright/include \
-        frameworks/base/include/media/stagefright/openmax \
+        frameworks/base/media/libstagefright/codecs/amrwb/src \
+        frameworks/native/include/media/openmax \
         $(LOCAL_PATH)/src \
         $(LOCAL_PATH)/include \
         $(LOCAL_PATH)/../common/include \
-        $(LOCAL_PATH)/../common \
-        frameworks/base/media/libstagefright/codecs/amrwb/src \
+        $(LOCAL_PATH)/../common
 
 LOCAL_CFLAGS := -DOSCL_IMPORT_REF=
 

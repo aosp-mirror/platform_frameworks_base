@@ -24,8 +24,8 @@
 #include <OMX_Component.h>
 
 #include <binder/IMemory.h>
+#include <HardwareAPI.h>
 #include <media/stagefright/foundation/ADebug.h>
-#include <media/stagefright/HardwareAPI.h>
 #include <media/stagefright/MediaErrors.h>
 
 namespace android {

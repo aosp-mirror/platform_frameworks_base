@@ -14,7 +14,8 @@ LOCAL_SRC_FILES:=                     \
 
 LOCAL_C_INCLUDES += \
         frameworks/base/media/libstagefright \
-        $(TOP)/frameworks/base/include/media/stagefright/openmax
+        $(TOP)/frameworks/native/include/media/hardware \
+        $(TOP)/frameworks/native/include/media/openmax
 
 LOCAL_SHARED_LIBRARIES :=               \
         libbinder                       \

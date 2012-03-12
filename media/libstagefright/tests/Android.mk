@@ -38,7 +38,7 @@ LOCAL_C_INCLUDES := \
     external/stlport/stlport \
 	frameworks/base/media/libstagefright \
 	frameworks/base/media/libstagefright/include \
-	$(TOP)/frameworks/base/include/media/stagefright/openmax \
+	$(TOP)/frameworks/native/include/media/openmax \
 
 include $(BUILD_EXECUTABLE)
 

@@ -40,9 +40,9 @@ LOCAL_C_INCLUDES := \
     $(TOP)/external/skia/include/utils \
     $(TOP)/external/skia/include/effects \
     $(TOP)/frameworks/base/media/libstagefright \
-    $(TOP)/frameworks/base/include/media/stagefright/openmax \
     $(TOP)/frameworks/base/include/ \
-    $(TOP)/frameworks/base/
+    $(TOP)/frameworks/base/ \
+    $(TOP)/frameworks/native/include/media/openmax
 
 LOCAL_MODULE := jpeg_bench
 

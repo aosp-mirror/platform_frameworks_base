@@ -12,11 +12,11 @@ LOCAL_SRC_FILES:=                       \
         StreamingSource.cpp             \
 
 LOCAL_C_INCLUDES := \
-        $(TOP)/frameworks/base/include/media/stagefright/openmax        \
+	$(TOP)/frameworks/base/media/libstagefright/httplive            \
 	$(TOP)/frameworks/base/media/libstagefright/include             \
-        $(TOP)/frameworks/base/media/libstagefright/mpeg2ts             \
-        $(TOP)/frameworks/base/media/libstagefright/httplive            \
-        $(TOP)/frameworks/base/media/libstagefright/rtsp                \
+	$(TOP)/frameworks/base/media/libstagefright/mpeg2ts             \
+	$(TOP)/frameworks/base/media/libstagefright/rtsp                \
+	$(TOP)/frameworks/native/include/media/openmax
 
 LOCAL_MODULE:= libstagefright_nuplayer
 

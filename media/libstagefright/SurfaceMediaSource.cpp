@@ -20,8 +20,8 @@
 #include <media/stagefright/SurfaceMediaSource.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MediaDefs.h>
-#include <media/stagefright/openmax/OMX_IVCommon.h>
-#include <media/stagefright/MetadataBufferType.h>
+#include <OMX_IVCommon.h>
+#include <MetadataBufferType.h>
 
 #include <ui/GraphicBuffer.h>
 #include <gui/ISurfaceComposer.h>

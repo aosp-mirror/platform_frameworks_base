@@ -47,7 +47,7 @@ LOCAL_C_INCLUDES += \
     frameworks/base/media/libstagefright/codecs/amrnb/common \
     frameworks/base/media/libstagefright/codecs/amrnb/common/include \
     frameworks/base/media/mtp \
-    frameworks/base/include/media/stagefright/openmax \
+    frameworks/native/include/media/openmax \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, corecg graphics)

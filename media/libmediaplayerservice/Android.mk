@@ -36,13 +36,13 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_nuplayer                 \
         libstagefright_rtsp                     \
 
-LOCAL_C_INCLUDES :=                                                 \
+LOCAL_C_INCLUDES :=                                               \
 	$(JNI_H_INCLUDE)                                                \
 	$(call include-path-for, graphics corecg)                       \
-	$(TOP)/frameworks/base/include/media/stagefright/openmax \
 	$(TOP)/frameworks/base/media/libstagefright/include             \
 	$(TOP)/frameworks/base/media/libstagefright/rtsp                \
-        $(TOP)/external/tremolo/Tremolo \
+	$(TOP)/frameworks/native/include/media/openmax                  \
+	$(TOP)/external/tremolo/Tremolo
 
 LOCAL_MODULE:= libmediaplayerservice
 

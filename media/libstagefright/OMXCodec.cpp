@@ -27,9 +27,9 @@
 #include <binder/IServiceManager.h>
 #include <binder/MemoryDealer.h>
 #include <binder/ProcessState.h>
+#include <HardwareAPI.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/IMediaPlayerService.h>
-#include <media/stagefright/HardwareAPI.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDefs.h>

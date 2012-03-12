@@ -125,9 +125,9 @@ LOCAL_SRC_FILES := \
         SoftAMRWBEncoder.cpp
 
 LOCAL_C_INCLUDES := \
-        frameworks/base/media/libstagefright/include \
-        frameworks/base/include/media/stagefright/openmax \
+	frameworks/base/media/libstagefright/include \
 	frameworks/base/media/libstagefright/codecs/common/include \
+	frameworks/native/include/media/openmax
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_amrwbenc
