@@ -951,36 +951,19 @@ public final class WebViewCore {
     }
 
     static class TextFieldInitData {
-        public TextFieldInitData(int fieldPointer,
-                String text, int type, boolean isSpellCheckEnabled,
-                boolean autoComplete, boolean isTextFieldNext,
-                boolean isTextFieldPrev, String name, String label,
-                int maxLength, Rect nodeBounds, int nodeLayerId) {
-            mFieldPointer = fieldPointer;
-            mText = text;
-            mType = type;
-            mIsAutoCompleteEnabled = autoComplete;
-            mIsSpellCheckEnabled = isSpellCheckEnabled;
-            mIsTextFieldNext = isTextFieldNext;
-            mIsTextFieldPrev = isTextFieldPrev;
-            mName = name;
-            mLabel = label;
-            mMaxLength = maxLength;
-            mNodeBounds = nodeBounds;
-            mNodeLayerId = nodeLayerId;
-        }
-        int mFieldPointer;
-        String mText;
-        int mType;
-        boolean mIsSpellCheckEnabled;
-        boolean mIsTextFieldNext;
-        boolean mIsTextFieldPrev;
-        boolean mIsAutoCompleteEnabled;
-        String mName;
-        String mLabel;
-        int mMaxLength;
-        Rect mNodeBounds;
-        int mNodeLayerId;
+        public int mFieldPointer;
+        public String mText;
+        public int mType;
+        public boolean mIsSpellCheckEnabled;
+        public boolean mIsTextFieldNext;
+        public boolean mIsTextFieldPrev;
+        public boolean mIsAutoCompleteEnabled;
+        public String mName;
+        public String mLabel;
+        public int mMaxLength;
+        public Rect mNodeBounds;
+        public int mNodeLayerId;
+        public Rect mContentRect;
     }
 
     // mAction of TouchEventData can be MotionEvent.getAction() which uses the
@@ -1931,6 +1914,11 @@ public final class WebViewCore {
         mEventHub.sendMessage(Message.obtain(null, what));
     }
 
+    void sendMessageAtFrontOfQueue(int what, int arg1, int arg2, Object obj) {
+        mEventHub.sendMessageAtFrontOfQueue(Message.obtain(
+                null, what, arg1, arg2, obj));
+    }
+
     void sendMessage(int what, Object obj) {
         mEventHub.sendMessage(Message.obtain(null, what, obj));
     }
@@ -2798,23 +2786,17 @@ public final class WebViewCore {
     }
 
     // called by JNI
-    private void initEditField(int pointer, String text, int inputType,
-            boolean isSpellCheckEnabled, boolean isAutoCompleteEnabled,
-            boolean nextFieldIsText, boolean prevFieldIsText, String name,
-            String label, int start, int end, int selectionPtr, int maxLength,
-            Rect nodeRect, int nodeLayer) {
+    private void initEditField(int start, int end, int selectionPtr,
+            TextFieldInitData initData) {
         if (mWebView == null) {
             return;
         }
-        TextFieldInitData initData = new TextFieldInitData(pointer,
-                text, inputType, isSpellCheckEnabled, isAutoCompleteEnabled,
-                nextFieldIsText, prevFieldIsText, name, label, maxLength,
-                nodeRect, nodeLayer);
         Message.obtain(mWebView.mPrivateHandler,
                 WebViewClassic.INIT_EDIT_FIELD, initData).sendToTarget();
         Message.obtain(mWebView.mPrivateHandler,
-                WebViewClassic.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
-                0, new TextSelectionData(start, end, selectionPtr))
+                WebViewClassic.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID,
+                initData.mFieldPointer, 0,
+                new TextSelectionData(start, end, selectionPtr))
                 .sendToTarget();
     }
 

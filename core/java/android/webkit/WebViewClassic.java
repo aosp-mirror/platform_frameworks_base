@@ -71,6 +71,8 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.HardwareCanvas;
@@ -114,6 +116,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.OverScroller;
 import android.widget.PopupWindow;
+import android.widget.Scroller;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -802,6 +805,51 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
+    private class TextScrollListener extends SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2,
+                float velocityX, float velocityY) {
+            int maxScrollX = mEditTextContent.width() -
+                    mEditTextBounds.width();
+            int maxScrollY = mEditTextContent.height() -
+                    mEditTextBounds.height();
+
+            int contentVelocityX = viewToContentDimension((int)-velocityX);
+            int contentVelocityY = viewToContentDimension((int)-velocityY);
+            mEditTextScroller.fling(-mEditTextContent.left,
+                    -mEditTextContent.top,
+                    contentVelocityX, contentVelocityY,
+                    0, maxScrollX, 0, maxScrollY);
+            return true;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                float distanceX, float distanceY) {
+            // Scrollable edit text. Scroll it.
+            int newScrollX = deltaToTextScroll(
+                    -mEditTextContent.left, mEditTextContent.width(),
+                    mEditTextBounds.width(),
+                    (int) distanceX);
+            int newScrollY = deltaToTextScroll(
+                    -mEditTextContent.top, mEditTextContent.height(),
+                    mEditTextBounds.height(),
+                    (int) distanceY);
+            scrollEditText(newScrollX, newScrollY);
+            return true;
+        }
+
+        private int deltaToTextScroll(int oldScroll, int contentSize,
+                int boundsSize, int delta) {
+            int newScroll = oldScroll +
+                    viewToContentDimension(delta);
+            int maxScroll = contentSize - boundsSize;
+            newScroll = Math.min(maxScroll, newScroll);
+            newScroll = Math.max(0, newScroll);
+            return newScroll;
+        }
+    }
+
     // The listener to capture global layout change event.
     private InnerGlobalLayoutListener mGlobalLayoutListener = null;
 
@@ -829,7 +877,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     WebViewInputConnection mInputConnection = null;
     private int mFieldPointer;
     private PastePopupWindow mPasteWindow;
-    AutoCompletePopup mAutoCompletePopup;
+    private AutoCompletePopup mAutoCompletePopup;
+    private GestureDetector mGestureDetector;
+    Rect mEditTextBounds = new Rect();
+    Rect mEditTextContent = new Rect();
+    int mEditTextLayerId;
+    boolean mIsEditingText = false;
 
     private static class OnTrimMemoryListener implements ComponentCallbacks2 {
         private static OnTrimMemoryListener sInstance = null;
@@ -985,6 +1038,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     // true when the touch movement exceeds the slop
     private boolean mConfirmMove;
+    private boolean mTouchInEditText;
 
     // if true, touch events will be first processed by WebCore, if prevent
     // default is not set, the UI will continue handle them.
@@ -1033,6 +1087,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // pages with the space bar, in pixels.
     private static final int PAGE_SCROLL_OVERLAP = 24;
 
+    // Time between successive calls to text scroll fling animation
+    private static final int TEXT_SCROLL_ANIMATION_DELAY_MS = 16;
+
     /**
      * These prevent calling requestLayout if either dimension is fixed. This
      * depends on the layout parameters and the measure specs.
@@ -1066,6 +1123,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     // Used by OverScrollGlow
     OverScroller mScroller;
+    Scroller mEditTextScroller;
 
     private boolean mInOverScrollMode = false;
     private static Paint mOverScrollBackground;
@@ -1195,6 +1253,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int RELOCATE_AUTO_COMPLETE_POPUP       = 146;
     static final int FOCUS_NODE_CHANGED                 = 147;
     static final int AUTOFILL_FORM                      = 148;
+    static final int ANIMATE_TEXT_SCROLL                = 149;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -1429,6 +1488,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         mAutoFillData = new WebViewCore.AutoFillData();
+        mGestureDetector = new GestureDetector(mContext, new TextScrollListener());
+        mEditTextScroller = new Scroller(context);
     }
 
     // === START: WebView Proxy binding ===
@@ -3915,8 +3976,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 mSelectCursorExtent.offset(dx, dy);
             }
         }
-        if (mAutoCompletePopup != null) {
-            mAutoCompletePopup.scrollDelta(mCurrentScrollingLayerId, dx, dy);
+        if (mAutoCompletePopup != null &&
+                mCurrentScrollingLayerId == mEditTextLayerId) {
+            mEditTextBounds.offset(dx, dy);
+            mAutoCompletePopup.resetRect();
         }
         nativeScrollLayer(mCurrentScrollingLayerId, x, y);
         mScrollingLayerRect.left = x;
@@ -5943,6 +6006,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 mPreventDefault = PREVENT_DEFAULT_NO;
                 mConfirmMove = false;
                 mInitialHitTestResult = null;
+                if (!mEditTextScroller.isFinished()) {
+                    mEditTextScroller.abortAnimation();
+                }
                 if (!mScroller.isFinished()) {
                     // stop the current scroll animation, but if this is
                     // the start of a fling, allow it to add to the current
@@ -6080,6 +6146,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                 }
                 startTouch(x, y, eventTime);
+                if (mIsEditingText) {
+                    mTouchInEditText = mEditTextBounds.contains(contentX, contentY);
+                    mGestureDetector.onTouchEvent(ev);
+                }
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -6112,6 +6182,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         mLastTouchY = y;
                         invalidate();
                     }
+                    break;
+                } else if (mConfirmMove && mTouchInEditText) {
+                    ViewParent parent = mWebView.getParent();
+                    if (parent != null) {
+                        parent.requestDisallowInterceptTouchEvent(true);
+                    }
+                    mGestureDetector.onTouchEvent(ev);
                     break;
                 }
 
@@ -6282,6 +6359,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 break;
             }
             case MotionEvent.ACTION_UP: {
+                mGestureDetector.onTouchEvent(ev);
+                if (mTouchInEditText && mConfirmMove) {
+                    break; // We've been scrolling the edit text.
+                }
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent()) {
                     TouchEventData ted = new TouchEventData();
@@ -8328,8 +8409,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     break;
 
                 case FOCUS_NODE_CHANGED:
-                    if (mAutoCompletePopup != null) {
-                        mAutoCompletePopup.setFocused(msg.arg1 == mFieldPointer);
+                    mIsEditingText = (msg.arg1 == mFieldPointer);
+                    if (mAutoCompletePopup != null && !mIsEditingText) {
+                        mAutoCompletePopup.clearAdapter();
                     }
                     // fall through to HIT_TEST_RESULT
                 case HIT_TEST_RESULT:
@@ -8375,11 +8457,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         mFieldPointer = initData.mFieldPointer;
                         mInputConnection.initEditorInfo(initData);
                         mInputConnection.setTextAndKeepSelection(initData.mText);
-                        nativeMapLayerRect(mNativeClass, initData.mNodeLayerId,
-                                initData.mNodeBounds);
-                        mAutoCompletePopup.setNodeBounds(initData.mNodeBounds,
-                                initData.mNodeLayerId);
-                        mAutoCompletePopup.setText(mInputConnection.getEditable());
+                        mEditTextBounds.set(initData.mNodeBounds);
+                        mEditTextLayerId = initData.mNodeLayerId;
+                        nativeMapLayerRect(mNativeClass, mEditTextLayerId,
+                                mEditTextBounds);
+                        mEditTextContent.set(initData.mContentRect);
+                        relocateAutoCompletePopup();
                     }
                     break;
 
@@ -8415,6 +8498,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 case AUTOFILL_FORM:
                     mWebViewCore.sendMessage(EventHub.AUTOFILL_FORM,
                             msg.arg1, /* unused */0);
+                    break;
+
+                case ANIMATE_TEXT_SCROLL:
+                    computeEditTextScroll();
                     break;
 
                 default:
@@ -8728,6 +8815,25 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             selectionDone();
         }
         invalidate();
+    }
+
+    private void computeEditTextScroll() {
+        if (mEditTextScroller.computeScrollOffset()) {
+            scrollEditText(mEditTextScroller.getCurrX(),
+                    mEditTextScroller.getCurrY());
+        }
+    }
+
+    private void scrollEditText(int scrollX, int scrollY) {
+        // Scrollable edit text. Scroll it.
+        float maxScrollX = (float)(mEditTextContent.width() -
+                mEditTextBounds.width());
+        float scrollPercentX = ((float)scrollX)/maxScrollX;
+        mEditTextContent.offsetTo(-scrollX, -scrollY);
+        mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SCROLL_TEXT_INPUT, 0,
+                scrollY, (Float)scrollPercentX);
+        mPrivateHandler.sendEmptyMessageDelayed(ANIMATE_TEXT_SCROLL,
+                TEXT_SCROLL_ANIMATION_DELAY_MS);
     }
 
     // Class used to use a dropdown for a <select> element

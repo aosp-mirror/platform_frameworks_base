@@ -16,7 +16,6 @@
 package android.webkit;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
@@ -41,13 +40,10 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     private boolean mIsAutoFillProfileSet;
     private Handler mHandler;
     private int mQueryId;
-    private Rect mNodeBounds = new Rect();
-    private int mNodeLayerId;
     private ListPopupWindow mPopup;
     private Filter mFilter;
     private CharSequence mText;
     private ListAdapter mAdapter;
-    private boolean mIsFocused;
     private View mAnchor;
     private WebViewClassic.WebViewInputConnection mInputConnection;
     private WebViewClassic mWebView;
@@ -102,13 +98,6 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
         return false;
     }
 
-    public void setFocused(boolean isFocused) {
-        mIsFocused = isFocused;
-        if (!mIsFocused) {
-            mPopup.dismiss();
-        }
-    }
-
     public void setText(CharSequence text) {
         mText = text;
         if (mFilter != null) {
@@ -139,20 +128,14 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
         resetRect();
     }
 
-    public void setNodeBounds(Rect nodeBounds, int layerId) {
-        mNodeBounds.set(nodeBounds);
-        mNodeLayerId = layerId;
-        resetRect();
-    }
-
     public void resetRect() {
-        int left = mWebView.contentToViewX(mNodeBounds.left);
-        int right = mWebView.contentToViewX(mNodeBounds.right);
+        int left = mWebView.contentToViewX(mWebView.mEditTextBounds.left);
+        int right = mWebView.contentToViewX(mWebView.mEditTextBounds.right);
         int width = right - left;
         mPopup.setWidth(width);
 
-        int bottom = mWebView.contentToViewY(mNodeBounds.bottom);
-        int top = mWebView.contentToViewY(mNodeBounds.top);
+        int bottom = mWebView.contentToViewY(mWebView.mEditTextBounds.bottom);
+        int top = mWebView.contentToViewY(mWebView.mEditTextBounds.top);
         int height = bottom - top;
 
         AbsoluteLayout.LayoutParams lp =
@@ -175,13 +158,6 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
         }
         if (mPopup.isShowing()) {
             mPopup.show(); // update its position
-        }
-    }
-
-    public void scrollDelta(int layerId, int dx, int dy) {
-        if (layerId == mNodeLayerId) {
-            mNodeBounds.offset(dx, dy);
-            resetRect();
         }
     }
 
@@ -230,11 +206,6 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
 
     @Override
     public void onFilterComplete(int count) {
-        if (!mIsFocused) {
-            mPopup.dismiss();
-            return;
-        }
-
         boolean showDropDown = (count > 0) &&
                 (mInputConnection.getIsAutoFillable() || mText.length() > 0);
         if (showDropDown) {
