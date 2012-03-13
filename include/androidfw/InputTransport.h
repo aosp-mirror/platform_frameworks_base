@@ -292,7 +292,29 @@ public:
      */
     status_t sendFinishedSignal(uint32_t seq, bool handled);
 
-    /* Returns true if there is a pending batch. */
+    /* Returns true if there is a deferred event waiting.
+     *
+     * Should be called after calling consume() to determine whether the consumer
+     * has a deferred event to be processed.  Deferred events are somewhat special in
+     * that they have already been removed from the input channel.  If the input channel
+     * becomes empty, the client may need to do extra work to ensure that it processes
+     * the deferred event despite the fact that the inptu channel's file descriptor
+     * is not readable.
+     *
+     * One option is simply to call consume() in a loop until it returns WOULD_BLOCK.
+     * This guarantees that all deferred events will be processed.
+     *
+     * Alternately, the caller can call hasDeferredEvent() to determine whether there is
+     * a deferred event waiting and then ensure that its event loop wakes up at least
+     * one more time to consume the deferred event.
+     */
+    bool hasDeferredEvent() const;
+
+    /* Returns true if there is a pending batch.
+     *
+     * Should be called after calling consume() with consumeBatches == false to determine
+     * whether consume() should be called again later on with consumeBatches == true.
+     */
     bool hasPendingBatch() const;
 
 private:

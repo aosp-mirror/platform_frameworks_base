@@ -616,6 +616,26 @@ private:
 };
 
 /*
+ * An input event factory implementation that maintains a pool of input events.
+ */
+class PooledInputEventFactory : public InputEventFactoryInterface {
+public:
+    PooledInputEventFactory(size_t maxPoolSize = 20);
+    virtual ~PooledInputEventFactory();
+
+    virtual KeyEvent* createKeyEvent();
+    virtual MotionEvent* createMotionEvent();
+
+    void recycle(InputEvent* event);
+
+private:
+    const size_t mMaxPoolSize;
+
+    Vector<KeyEvent*> mKeyEventPool;
+    Vector<MotionEvent*> mMotionEventPool;
+};
+
+/*
  * Calculates the velocity of pointer movements over time.
  */
 class VelocityTracker {
