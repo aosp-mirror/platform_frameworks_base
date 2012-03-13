@@ -465,9 +465,9 @@ private:
                     // ThreadBase mutex before processing the mixer and effects. This guarantees the
                     // integrity of the chains during the process.
                     // Also sets the parameter 'effectChains' to current value of mEffectChains.
-                    void lockEffectChains_l(Vector<sp <EffectChain> >& effectChains);
+                    void lockEffectChains_l(Vector< sp<EffectChain> >& effectChains);
                     // unlock effect chains after process
-                    void unlockEffectChains(const Vector<sp<EffectChain> >& effectChains);
+                    void unlockEffectChains(const Vector< sp<EffectChain> >& effectChains);
                     // set audio mode to all effect chains
                     void setMode(audio_mode_t mode);
                     // get effect module with corresponding ID on specified audio session
@@ -1056,7 +1056,7 @@ private:
         virtual     uint32_t    activeSleepTimeUs();
 
     private:
-                    bool        outputsReady(const SortedVector<sp<OutputTrack> > &outputTracks);
+                    bool        outputsReady(const SortedVector< sp<OutputTrack> > &outputTracks);
     protected:
         // threadLoop snippets
         virtual     void        threadLoop_mix();
@@ -1504,7 +1504,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
         uint32_t strategy() const { return mStrategy; }
         void setStrategy(uint32_t strategy)
-                 { mStrategy = strategy; }
+                { mStrategy = strategy; }
 
         // suspend effect of the given type
         void setEffectSuspended_l(const effect_uuid_t *type,
@@ -1544,7 +1544,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
         wp<ThreadBase> mThread;     // parent mixer thread
         Mutex mLock;                // mutex protecting effect list
-        Vector<sp<EffectModule> > mEffects; // list of effect modules
+        Vector< sp<EffectModule> > mEffects; // list of effect modules
         int mSessionId;             // audio session ID
         int16_t *mInBuffer;         // chain input buffer
         int16_t *mOutBuffer;        // chain output buffer

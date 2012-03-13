@@ -649,7 +649,7 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
     mLock.lock();
     while (!exitPending())
     {
-        while(!mAudioCommands.isEmpty()) {
+        while (!mAudioCommands.isEmpty()) {
             nsecs_t curTime = systemTime();
             // commands are sorted by increasing time stamp: execute them from index 0 and up
             if (mAudioCommands[0]->mTime <= curTime) {
@@ -693,16 +693,16 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                     delete data;
                     }break;
                 case SET_PARAMETERS: {
-                     ParametersData *data = (ParametersData *)command->mParam;
-                     ALOGV("AudioCommandThread() processing set parameters string %s, io %d",
-                             data->mKeyValuePairs.string(), data->mIO);
-                     command->mStatus = AudioSystem::setParameters(data->mIO, data->mKeyValuePairs);
-                     if (command->mWaitStatus) {
-                         command->mCond.signal();
-                         mWaitWorkCV.wait(mLock);
-                     }
-                     delete data;
-                     }break;
+                    ParametersData *data = (ParametersData *)command->mParam;
+                    ALOGV("AudioCommandThread() processing set parameters string %s, io %d",
+                            data->mKeyValuePairs.string(), data->mIO);
+                    command->mStatus = AudioSystem::setParameters(data->mIO, data->mKeyValuePairs);
+                    if (command->mWaitStatus) {
+                        command->mCond.signal();
+                        mWaitWorkCV.wait(mLock);
+                    }
+                    delete data;
+                    }break;
                 case SET_VOICE_VOLUME: {
                     VoiceVolumeData *data = (VoiceVolumeData *)command->mParam;
                     ALOGV("AudioCommandThread() processing set voice volume volume %f",
@@ -916,19 +916,19 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
             AudioParameter param = AudioParameter(data->mKeyValuePairs);
             AudioParameter param2 = AudioParameter(data2->mKeyValuePairs);
             for (size_t j = 0; j < param.size(); j++) {
-               String8 key;
-               String8 value;
-               param.getAt(j, key, value);
-               for (size_t k = 0; k < param2.size(); k++) {
-                  String8 key2;
-                  String8 value2;
-                  param2.getAt(k, key2, value2);
-                  if (key2 == key) {
-                      param2.remove(key2);
-                      ALOGV("Filtering out parameter %s", key2.string());
-                      break;
-                  }
-               }
+                String8 key;
+                String8 value;
+                param.getAt(j, key, value);
+                for (size_t k = 0; k < param2.size(); k++) {
+                    String8 key2;
+                    String8 value2;
+                    param2.getAt(k, key2, value2);
+                    if (key2 == key) {
+                        param2.remove(key2);
+                        ALOGV("Filtering out parameter %s", key2.string());
+                        break;
+                    }
+                }
             }
             // if all keys have been filtered out, remove the command.
             // otherwise, update the key value pairs
@@ -1020,7 +1020,7 @@ int AudioPolicyService::startTone(audio_policy_tone_t tone,
         ALOGE("startTone: illegal tone requested (%d)", tone);
     if (stream != AUDIO_STREAM_VOICE_CALL)
         ALOGE("startTone: illegal stream (%d) requested for tone %d", stream,
-             tone);
+            tone);
     mTonePlaybackThread->startToneCommand(ToneGenerator::TONE_SUP_CALL_WAITING,
                                           AUDIO_STREAM_VOICE_CALL);
     return 0;

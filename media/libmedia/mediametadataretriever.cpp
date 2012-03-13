@@ -45,7 +45,7 @@ const sp<IMediaPlayerService>& MediaMetadataRetriever::getService()
             }
             ALOGW("MediaPlayerService not published, waiting...");
             usleep(500000); // 0.5 s
-        } while(true);
+        } while (true);
         if (sDeathNotifier == NULL) {
             sDeathNotifier = new DeathNotifier();
         }

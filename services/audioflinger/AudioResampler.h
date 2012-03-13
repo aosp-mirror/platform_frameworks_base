@@ -33,7 +33,7 @@ public:
     //  HIGH_QUALITY: fixed multi-tap FIR (e.g. 48KHz->44.1KHz)
     // NOTE: high quality SRC will only be supported for
     // certain fixed rate conversions. Sample rate cannot be
-    // changed dynamically. 
+    // changed dynamically.
     enum src_quality {
         DEFAULT=0,
         LOW_QUALITY=1,

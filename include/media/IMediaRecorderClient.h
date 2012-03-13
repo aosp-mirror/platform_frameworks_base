@@ -45,4 +45,3 @@ public:
 }; // namespace android
 
 #endif // ANDROID_IMEDIARECORDERCLIENT_H
-

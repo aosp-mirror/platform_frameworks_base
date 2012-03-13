@@ -289,7 +289,7 @@ IMPLEMENT_META_INTERFACE(MediaRecorder, "android.media.IMediaRecorder");
 status_t BnMediaRecorder::onTransact(
                                      uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
         case RELEASE: {
             ALOGV("RELEASE");
             CHECK_INTERFACE(IMediaRecorder, data, reply);

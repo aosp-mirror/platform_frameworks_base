@@ -43,10 +43,10 @@ IMediaDeathNotifier::getMediaPlayerService()
             binder = sm->getService(String16("media.player"));
             if (binder != 0) {
                 break;
-             }
-             ALOGW("Media player service not published, waiting...");
-             usleep(500000); // 0.5 s
-        } while(true);
+            }
+            ALOGW("Media player service not published, waiting...");
+            usleep(500000); // 0.5 s
+        } while (true);
 
         if (sDeathNotifier == NULL) {
         sDeathNotifier = new DeathNotifier();

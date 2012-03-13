@@ -72,7 +72,7 @@ status_t AudioTrack::getMinFrameCount(
     if (minBufCount < 2) minBufCount = 2;
 
     *frameCount = (sampleRate == 0) ? afFrameCount * minBufCount :
-              afFrameCount * minBufCount * sampleRate / afSampleRate;
+            afFrameCount * minBufCount * sampleRate / afSampleRate;
     return NO_ERROR;
 }
 
@@ -352,13 +352,13 @@ void AudioTrack::start()
                 return;
             }
         }
-     }
+    }
 
     AutoMutex lock(mLock);
     // acquire a strong reference on the IMemory and IAudioTrack so that they cannot be destroyed
     // while we are accessing the cblk
-    sp <IAudioTrack> audioTrack = mAudioTrack;
-    sp <IMemory> iMem = mCblkMemory;
+    sp<IAudioTrack> audioTrack = mAudioTrack;
+    sp<IMemory> iMem = mCblkMemory;
     audio_track_cblk_t* cblk = mCblk;
 
     if (!mActive) {
@@ -743,8 +743,8 @@ status_t AudioTrack::createTrack_l(
     status_t status;
     const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
     if (audioFlinger == 0) {
-       ALOGE("Could not get audioflinger");
-       return NO_INIT;
+        ALOGE("Could not get audioflinger");
+        return NO_INIT;
     }
 
     int afSampleRate;
@@ -830,7 +830,7 @@ status_t AudioTrack::createTrack_l(
         mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
     } else {
         mCblk->buffers = sharedBuffer->pointer();
-         // Force buffer full condition as data is already present in shared memory
+        // Force buffer full condition as data is already present in shared memory
         mCblk->stepUser(mCblk->frameCount);
     }
 
@@ -991,8 +991,8 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
     // acquire a strong reference on the IMemory and IAudioTrack so that they cannot be destroyed
     // while we are accessing the cblk
     mLock.lock();
-    sp <IAudioTrack> audioTrack = mAudioTrack;
-    sp <IMemory> iMem = mCblkMemory;
+    sp<IAudioTrack> audioTrack = mAudioTrack;
+    sp<IMemory> iMem = mCblkMemory;
     mLock.unlock();
 
     ssize_t written = 0;
@@ -1095,8 +1095,8 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
     mLock.lock();
     // acquire a strong reference on the IMemory and IAudioTrack so that they cannot be destroyed
     // while we are accessing the cblk
-    sp <IAudioTrack> audioTrack = mAudioTrack;
-    sp <IMemory> iMem = mCblkMemory;
+    sp<IAudioTrack> audioTrack = mAudioTrack;
+    sp<IMemory> iMem = mCblkMemory;
     audio_track_cblk_t* cblk = mCblk;
     bool active = mActive;
     mLock.unlock();
@@ -1224,7 +1224,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
 
     if (!(android_atomic_or(CBLK_RESTORING_ON, &cblk->flags) & CBLK_RESTORING_MSK)) {
         ALOGW("dead IAudioTrack, creating a new one from %s TID %d",
-             fromStart ? "start()" : "obtainBuffer()", gettid());
+            fromStart ? "start()" : "obtainBuffer()", gettid());
 
         // signal old cblk condition so that other threads waiting for available buffers stop
         // waiting now
@@ -1310,7 +1310,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
         }
     }
     ALOGV("restoreTrack_l() status %d mActive %d cblk %p, old cblk %p flags %08x old flags %08x",
-         result, mActive, mCblk, cblk, mCblk->flags, cblk->flags);
+        result, mActive, mCblk, cblk, mCblk->flags, cblk->flags);
 
     if (result == NO_ERROR) {
         // from now on we switch to the newly created cblk

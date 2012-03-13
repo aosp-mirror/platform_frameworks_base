@@ -45,4 +45,3 @@ public:
 }; // namespace android
 
 #endif // ANDROID_IMEDIAPLAYERCLIENT_H
-

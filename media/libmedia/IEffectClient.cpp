@@ -94,7 +94,7 @@ IMPLEMENT_META_INTERFACE(EffectClient, "android.media.IEffectClient");
 status_t BnEffectClient::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
         case CONTROL_STATUS_CHANGED: {
             ALOGV("CONTROL_STATUS_CHANGED");
             CHECK_INTERFACE(IEffectClient, data, reply);
@@ -142,4 +142,3 @@ status_t BnEffectClient::onTransact(
 // ----------------------------------------------------------------------------
 
 }; // namespace android
-

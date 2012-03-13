@@ -228,4 +228,3 @@ void MediaScannerClient::endFile()
 }
 
 }  // namespace android
-

@@ -74,14 +74,14 @@ int JetPlayer::init()
 
     // init the EAS library
     result = EAS_Init(&mEasData);
-    if( result != EAS_SUCCESS) {
+    if (result != EAS_SUCCESS) {
         ALOGE("JetPlayer::init(): Error initializing Sonivox EAS library, aborting.");
         mState = EAS_STATE_ERROR;
         return result;
     }
     // init the JET library with the default app event controller range
     result = JET_Init(mEasData, NULL, sizeof(S_JET_CONFIG));
-    if( result != EAS_SUCCESS) {
+    if (result != EAS_SUCCESS) {
         ALOGE("JetPlayer::init(): Error initializing JET library, aborting.");
         mState = EAS_STATE_ERROR;
         return result;
@@ -151,7 +151,7 @@ int JetPlayer::release()
         mAudioBuffer = NULL;
     }
     mEasData = NULL;
-    
+
     return EAS_SUCCESS;
 }
 
@@ -166,7 +166,7 @@ int JetPlayer::render() {
     ALOGV("JetPlayer::render(): entering");
 
     // allocate render buffer
-    mAudioBuffer = 
+    mAudioBuffer =
         new EAS_PCM[pLibConfig->mixBufferSize * pLibConfig->numChannels * MIX_NUM_BUFFERS];
 
     // signal main thread that we started
@@ -177,8 +177,8 @@ int JetPlayer::render() {
         mCondition.signal();
     }
 
-   while (1) {
-    
+    while (1) {
+
         mMutex.lock(); // [[[[[[[[ LOCK ---------------------------------------
 
         if (mEasData == NULL) {
@@ -186,20 +186,20 @@ int JetPlayer::render() {
             ALOGV("JetPlayer::render(): NULL EAS data, exiting render.");
             goto threadExit;
         }
-            
+
         // nothing to render, wait for client thread to wake us up
         while (!mRender)
         {
             ALOGV("JetPlayer::render(): signal wait");
-            if (audioStarted) { 
-                mAudioTrack->pause(); 
+            if (audioStarted) {
+                mAudioTrack->pause();
                 // we have to restart the playback once we start rendering again
                 audioStarted = false;
             }
             mCondition.wait(mMutex);
             ALOGV("JetPlayer::render(): signal rx'd");
         }
-        
+
         // render midi data into the input buffer
         int num_output = 0;
         EAS_PCM* p = mAudioBuffer;
@@ -210,8 +210,8 @@ int JetPlayer::render() {
             }
             p += count * pLibConfig->numChannels;
             num_output += count * pLibConfig->numChannels * sizeof(EAS_PCM);
-            
-             // send events that were generated (if any) to the event callback
+
+            // send events that were generated (if any) to the event callback
             fireEventsFromJetQueue();
         }
 
@@ -265,9 +265,9 @@ threadExit:
 // precondition: mMutex locked
 void JetPlayer::fireUpdateOnStatusChange()
 {
-    if(  (mJetStatus.currentUserID      != mPreviousJetStatus.currentUserID)
+    if ( (mJetStatus.currentUserID      != mPreviousJetStatus.currentUserID)
        ||(mJetStatus.segmentRepeatCount != mPreviousJetStatus.segmentRepeatCount) ) {
-        if(mEventCallback)  {
+        if (mEventCallback)  {
             mEventCallback(
                 JetPlayer::JET_USERID_UPDATE,
                 mJetStatus.currentUserID,
@@ -278,8 +278,8 @@ void JetPlayer::fireUpdateOnStatusChange()
         mPreviousJetStatus.segmentRepeatCount = mJetStatus.segmentRepeatCount;
     }
 
-    if(mJetStatus.numQueuedSegments != mPreviousJetStatus.numQueuedSegments) {
-        if(mEventCallback)  {
+    if (mJetStatus.numQueuedSegments != mPreviousJetStatus.numQueuedSegments) {
+        if (mEventCallback)  {
             mEventCallback(
                 JetPlayer::JET_NUMQUEUEDSEGMENT_UPDATE,
                 mJetStatus.numQueuedSegments,
@@ -289,8 +289,8 @@ void JetPlayer::fireUpdateOnStatusChange()
         mPreviousJetStatus.numQueuedSegments  = mJetStatus.numQueuedSegments;
     }
 
-    if(mJetStatus.paused != mPreviousJetStatus.paused) {
-        if(mEventCallback)  {
+    if (mJetStatus.paused != mPreviousJetStatus.paused) {
+        if (mEventCallback)  {
             mEventCallback(JetPlayer::JET_PAUSE_UPDATE,
                 mJetStatus.paused,
                 -1,
@@ -307,7 +307,7 @@ void JetPlayer::fireUpdateOnStatusChange()
 // precondition: mMutex locked
 void JetPlayer::fireEventsFromJetQueue()
 {
-    if(!mEventCallback) {
+    if (!mEventCallback) {
         // no callback, just empty the event queue
         while (JET_GetEvent(mEasData, NULL, NULL)) { }
         return;
@@ -341,7 +341,7 @@ int JetPlayer::loadFromFile(const char* path)
     mEasJetFileLoc->offset = 0;
 
     EAS_RESULT result = JET_OpenFile(mEasData, mEasJetFileLoc);
-    if(result != EAS_SUCCESS)
+    if (result != EAS_SUCCESS)
         mState = EAS_STATE_ERROR;
     else
         mState = EAS_STATE_OPEN;
@@ -353,7 +353,7 @@ int JetPlayer::loadFromFile(const char* path)
 int JetPlayer::loadFromFD(const int fd, const long long offset, const long long length)
 {
     ALOGV("JetPlayer::loadFromFD(): fd=%d offset=%lld length=%lld", fd, offset, length);
-    
+
     Mutex::Autolock lock(mMutex);
 
     mEasJetFileLoc = (EAS_FILE_LOCATOR) malloc(sizeof(EAS_FILE));
@@ -361,9 +361,9 @@ int JetPlayer::loadFromFD(const int fd, const long long offset, const long long 
     mEasJetFileLoc->offset = offset;
     mEasJetFileLoc->length = length;
     mEasJetFileLoc->path = NULL;
-    
+
     EAS_RESULT result = JET_OpenFile(mEasData, mEasJetFileLoc);
-    if(result != EAS_SUCCESS)
+    if (result != EAS_SUCCESS)
         mState = EAS_STATE_ERROR;
     else
         mState = EAS_STATE_OPEN;
@@ -392,7 +392,7 @@ int JetPlayer::play()
 
     JET_Status(mEasData, &mJetStatus);
     this->dumpJetStatus(&mJetStatus);
-    
+
     fireUpdateOnStatusChange();
 
     // wake up render thread
@@ -468,7 +468,7 @@ void JetPlayer::dump()
 
 void JetPlayer::dumpJetStatus(S_JET_STATUS* pJetStatus)
 {
-    if(pJetStatus!=NULL)
+    if (pJetStatus!=NULL)
         ALOGV(">> current JET player status: userID=%d segmentRepeatCount=%d numQueuedSegments=%d paused=%d",
                 pJetStatus->currentUserID, pJetStatus->segmentRepeatCount,
                 pJetStatus->numQueuedSegments, pJetStatus->paused);
@@ -478,4 +478,3 @@ void JetPlayer::dumpJetStatus(S_JET_STATUS* pJetStatus)
 
 
 } // end namespace android
-

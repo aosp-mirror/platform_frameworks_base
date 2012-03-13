@@ -129,7 +129,7 @@ IMPLEMENT_META_INTERFACE(Effect, "android.media.IEffect");
 status_t BnEffect::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
         case ENABLE: {
             ALOGV("ENABLE");
             CHECK_INTERFACE(IEffect, data, reply);
@@ -186,10 +186,10 @@ status_t BnEffect::onTransact(
         } break;
 
         case GET_CBLK: {
-             CHECK_INTERFACE(IEffect, data, reply);
-             reply->writeStrongBinder(getCblk()->asBinder());
-             return NO_ERROR;
-         } break;
+            CHECK_INTERFACE(IEffect, data, reply);
+            reply->writeStrongBinder(getCblk()->asBinder());
+            return NO_ERROR;
+        } break;
 
         default:
             return BBinder::onTransact(code, data, reply, flags);
@@ -199,4 +199,3 @@ status_t BnEffect::onTransact(
 // ----------------------------------------------------------------------------
 
 }; // namespace android
-

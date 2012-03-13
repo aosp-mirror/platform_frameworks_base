@@ -57,7 +57,7 @@ namespace media {
 
 Metadata::Metadata(Parcel *p)
     :mData(p),
-     mBegin(p->dataPosition()) { }
+      mBegin(p->dataPosition()) { }
 
 Metadata::~Metadata() { }
 

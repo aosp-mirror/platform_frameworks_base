@@ -622,11 +622,11 @@ public:
         sp<IEffect> effect;
 
         if (pDesc == NULL) {
-             return effect;
-             if (status) {
-                 *status = BAD_VALUE;
-             }
-         }
+            return effect;
+            if (status) {
+                *status = BAD_VALUE;
+            }
+        }
 
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(pid);
@@ -679,7 +679,7 @@ IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
 status_t BnAudioFlinger::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
         case CREATE_TRACK: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             pid_t pid = data.readInt32();
@@ -745,7 +745,7 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32( latency((audio_io_handle_t) data.readInt32()) );
             return NO_ERROR;
         } break;
-         case SET_MASTER_VOLUME: {
+        case SET_MASTER_VOLUME: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             reply->writeInt32( setMasterVolume(data.readFloat()) );
             return NO_ERROR;
@@ -815,14 +815,14 @@ status_t BnAudioFlinger::onTransact(
             String8 keyValuePairs(data.readString8());
             reply->writeInt32(setParameters(ioHandle, keyValuePairs));
             return NO_ERROR;
-         } break;
+        } break;
         case GET_PARAMETERS: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             audio_io_handle_t ioHandle = (audio_io_handle_t) data.readInt32();
             String8 keys(data.readString8());
             reply->writeString8(getParameters(ioHandle, keys));
             return NO_ERROR;
-         } break;
+        } break;
 
         case REGISTER_CLIENT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);

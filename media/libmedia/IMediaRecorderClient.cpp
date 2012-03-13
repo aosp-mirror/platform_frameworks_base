@@ -53,7 +53,7 @@ IMPLEMENT_META_INTERFACE(MediaRecorderClient, "android.media.IMediaRecorderClien
 status_t BnMediaRecorderClient::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
         case NOTIFY: {
             CHECK_INTERFACE(IMediaRecorderClient, data, reply);
             int msg = data.readInt32();

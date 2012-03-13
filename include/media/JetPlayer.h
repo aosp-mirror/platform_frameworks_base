@@ -40,13 +40,13 @@ public:
     static const int JET_NUMQUEUEDSEGMENT_UPDATE = 3;
     static const int JET_PAUSE_UPDATE            = 4;
 
-    JetPlayer(jobject javaJetPlayer, 
-            int maxTracks = 32, 
+    JetPlayer(jobject javaJetPlayer,
+            int maxTracks = 32,
             int trackBufferSize = 1200);
     ~JetPlayer();
     int init();
     int release();
-    
+
     int loadFromFile(const char* url);
     int loadFromFD(const int fd, const long long offset, const long long length);
     int closeFile();
@@ -60,7 +60,7 @@ public:
     int clearQueue();
 
     void setEventCallback(jetevent_callback callback);
-    
+
     int getMaxTracks() { return mMaxTracks; };
 
 
@@ -88,7 +88,7 @@ private:
     int                 mMaxTracks; // max number of MIDI tracks, usually 32
     EAS_DATA_HANDLE     mEasData;
     EAS_FILE_LOCATOR    mEasJetFileLoc;
-    EAS_PCM*            mAudioBuffer;// EAS renders the MIDI data into this buffer, 
+    EAS_PCM*            mAudioBuffer;// EAS renders the MIDI data into this buffer,
     AudioTrack*         mAudioTrack; // and we play it in this audio track
     int                 mTrackBufferSize;
     S_JET_STATUS        mJetStatus;

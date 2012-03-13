@@ -68,7 +68,7 @@ IMPLEMENT_META_INTERFACE(AudioFlingerClient, "android.media.IAudioFlingerClient"
 status_t BnAudioFlingerClient::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
     case IO_CONFIG_CHANGED: {
             CHECK_INTERFACE(IAudioFlingerClient, data, reply);
             int event = data.readInt32();

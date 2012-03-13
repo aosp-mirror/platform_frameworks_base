@@ -59,14 +59,14 @@ const sp<IAudioFlinger>& AudioSystem::get_audio_flinger()
                 break;
             ALOGW("AudioFlinger not published, waiting...");
             usleep(500000); // 0.5 s
-        } while(true);
+        } while (true);
         if (gAudioFlingerClient == NULL) {
             gAudioFlingerClient = new AudioFlingerClient();
         } else {
             if (gAudioErrorCallback) {
                 gAudioErrorCallback(NO_ERROR);
             }
-         }
+        }
         binder->linkToDeath(gAudioFlingerClient);
         gAudioFlinger = interface_cast<IAudioFlinger>(binder);
         gAudioFlinger->registerClient(gAudioFlingerClient);
@@ -482,7 +482,7 @@ void AudioSystem::setErrorCallback(audio_error_callback cb) {
 }
 
 bool AudioSystem::routedToA2dpOutput(audio_stream_type_t streamType) {
-    switch(streamType) {
+    switch (streamType) {
     case AUDIO_STREAM_MUSIC:
     case AUDIO_STREAM_VOICE_CALL:
     case AUDIO_STREAM_BLUETOOTH_SCO:
@@ -512,7 +512,7 @@ const sp<IAudioPolicyService>& AudioSystem::get_audio_policy_service()
                 break;
             ALOGW("AudioPolicyService not published, waiting...");
             usleep(500000); // 0.5 s
-        } while(true);
+        } while (true);
         if (gAudioPolicyServiceClient == NULL) {
             gAudioPolicyServiceClient = new AudioPolicyServiceClient();
         }
@@ -768,4 +768,3 @@ void AudioSystem::AudioPolicyServiceClient::binderDied(const wp<IBinder>& who) {
 }
 
 }; // namespace android
-

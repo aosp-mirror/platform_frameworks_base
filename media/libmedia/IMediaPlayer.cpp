@@ -319,7 +319,7 @@ IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
 status_t BnMediaPlayer::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    switch(code) {
+    switch (code) {
         case DISCONNECT: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             disconnect();
