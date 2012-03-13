@@ -47,11 +47,11 @@ template <typename T> class CircularBuffer {
     size_t mFillCount;
 };
 
-class AAH_TXSender : public virtual RefBase {
+class AAH_TXGroup : public virtual RefBase {
   public:
-    ~AAH_TXSender();
+    ~AAH_TXGroup();
 
-    static sp<AAH_TXSender> GetInstance();
+    static sp<AAH_TXGroup> GetInstance();
 
     ALooper::handler_id handlerID() { return mReflector->id(); }
 
@@ -80,10 +80,10 @@ class AAH_TXSender : public virtual RefBase {
     static const char* kSendPacketTRTPPacket;
 
   private:
-    AAH_TXSender();
+    AAH_TXGroup();
 
     static Mutex sLock;
-    static wp<AAH_TXSender> sInstance;
+    static wp<AAH_TXGroup> sInstance;
     static uint32_t sNextEpoch;
     static bool sNextEpochValid;
 
@@ -101,7 +101,7 @@ class AAH_TXSender : public virtual RefBase {
         uint32_t epoch;
     };
 
-    friend class AHandlerReflector<AAH_TXSender>;
+    friend class AHandlerReflector<AAH_TXGroup>;
     void onMessageReceived(const sp<AMessage>& msg);
     void onSendPacket(const sp<AMessage>& msg);
     void doSendPacket_l(const sp<TRTPPacket>& packet,
@@ -111,7 +111,7 @@ class AAH_TXSender : public virtual RefBase {
     bool shouldSendHeartbeats_l();
 
     sp<ALooper> mLooper;
-    sp<AHandlerReflector<AAH_TXSender> > mReflector;
+    sp<AHandlerReflector<AAH_TXGroup> > mReflector;
 
     int mSocket;
     nsecs_t mLastSentPacketTime;
@@ -126,9 +126,9 @@ class AAH_TXSender : public virtual RefBase {
 
     class RetryReceiver : public Thread {
       private:
-        friend class AAH_TXSender;
+        friend class AAH_TXGroup;
 
-        RetryReceiver(AAH_TXSender* sender);
+        RetryReceiver(AAH_TXGroup* sender);
         virtual ~RetryReceiver();
         virtual bool threadLoop();
         void handleRetryRequest();
@@ -138,7 +138,7 @@ class AAH_TXSender : public virtual RefBase {
         static const uint32_t kFastStartRequestID;
         static const uint32_t kRetryNakID;
 
-        AAH_TXSender* mSender;
+        AAH_TXGroup* mSender;
         PipeEvent mWakeupEvent;
     };
 

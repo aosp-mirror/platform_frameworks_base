@@ -28,7 +28,7 @@
 #include <utils/String8.h>
 #include <utils/threads.h>
 
-#include "aah_tx_sender.h"
+#include "aah_tx_group.h"
 
 namespace android {
 
@@ -113,7 +113,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     void postPumpAudioEvent_l(int64_t delayUs);
     void onBufferingUpdate();
     void onPumpAudio();
-    void queuePacketToSender_l(const sp<TRTPPacket>& packet);
+    void queuePacket_l(const sp<TRTPPacket>& packet);
 
     Mutex mLock;
 
@@ -153,7 +153,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     int64_t mDurationUs;
     int64_t mBitrate;
 
-    sp<AAH_TXSender> mAAH_Sender;
+    sp<AAH_TXGroup>  mAAH_TXGroup;
     LinearTransform  mCurrentClockTransform;
     bool             mCurrentClockTransformValid;
     int64_t          mLastQueuedMediaTimePTS;
@@ -162,7 +162,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     CCHelper         mCCHelper;
 
     Mutex mEndpointLock;
-    AAH_TXSender::Endpoint mEndpoint;
+    AAH_TXGroup::Endpoint mEndpoint;
     bool mEndpointValid;
     bool mEndpointRegistered;
     uint16_t mProgramID;
