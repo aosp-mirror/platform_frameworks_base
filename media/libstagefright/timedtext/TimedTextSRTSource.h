@@ -31,43 +31,43 @@ class MediaBuffer;
 class Parcel;
 
 class TimedTextSRTSource : public TimedTextSource {
- public:
-  TimedTextSRTSource(const sp<DataSource>& dataSource);
-  virtual status_t start();
-  virtual status_t stop();
-  virtual status_t read(
-          int64_t *timeUs,
-          Parcel *parcel,
-          const MediaSource::ReadOptions *options = NULL);
+public:
+    TimedTextSRTSource(const sp<DataSource>& dataSource);
+    virtual status_t start();
+    virtual status_t stop();
+    virtual status_t read(
+            int64_t *timeUs,
+            Parcel *parcel,
+            const MediaSource::ReadOptions *options = NULL);
 
- protected:
-  virtual ~TimedTextSRTSource();
+protected:
+    virtual ~TimedTextSRTSource();
 
- private:
-  sp<DataSource> mSource;
+private:
+    sp<DataSource> mSource;
 
-  struct TextInfo {
-      int64_t endTimeUs;
-      // The offset of the text in the original file.
-      off64_t offset;
-      int textLen;
-  };
+    struct TextInfo {
+        int64_t endTimeUs;
+        // The offset of the text in the original file.
+        off64_t offset;
+        int textLen;
+    };
 
-  int mIndex;
-  KeyedVector<int64_t, TextInfo> mTextVector;
+    int mIndex;
+    KeyedVector<int64_t, TextInfo> mTextVector;
 
-  void reset();
-  status_t scanFile();
-  status_t getNextSubtitleInfo(
-          off64_t *offset, int64_t *startTimeUs, TextInfo *info);
-  status_t readNextLine(off64_t *offset, AString *data);
-  status_t getText(
-          const MediaSource::ReadOptions *options,
-          AString *text, int64_t *startTimeUs, int64_t *endTimeUs);
-  status_t extractAndAppendLocalDescriptions(
-          int64_t timeUs, const AString &text, Parcel *parcel);
+    void reset();
+    status_t scanFile();
+    status_t getNextSubtitleInfo(
+            off64_t *offset, int64_t *startTimeUs, TextInfo *info);
+    status_t readNextLine(off64_t *offset, AString *data);
+    status_t getText(
+            const MediaSource::ReadOptions *options,
+            AString *text, int64_t *startTimeUs, int64_t *endTimeUs);
+    status_t extractAndAppendLocalDescriptions(
+            int64_t timeUs, const AString &text, Parcel *parcel);
 
-  DISALLOW_EVIL_CONSTRUCTORS(TimedTextSRTSource);
+    DISALLOW_EVIL_CONSTRUCTORS(TimedTextSRTSource);
 };
 
 }  // namespace android

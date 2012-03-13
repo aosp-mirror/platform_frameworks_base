@@ -28,26 +28,26 @@ class MediaBuffer;
 class Parcel;
 
 class TimedText3GPPSource : public TimedTextSource {
- public:
-  TimedText3GPPSource(const sp<MediaSource>& mediaSource);
-  virtual status_t start() { return mSource->start(); }
-  virtual status_t stop() { return mSource->stop(); }
-  virtual status_t read(
-          int64_t *timeUs,
-          Parcel *parcel,
-          const MediaSource::ReadOptions *options = NULL);
-  virtual status_t extractGlobalDescriptions(Parcel *parcel);
+public:
+    TimedText3GPPSource(const sp<MediaSource>& mediaSource);
+    virtual status_t start() { return mSource->start(); }
+    virtual status_t stop() { return mSource->stop(); }
+    virtual status_t read(
+            int64_t *timeUs,
+            Parcel *parcel,
+            const MediaSource::ReadOptions *options = NULL);
+    virtual status_t extractGlobalDescriptions(Parcel *parcel);
 
- protected:
-  virtual ~TimedText3GPPSource();
+protected:
+    virtual ~TimedText3GPPSource();
 
- private:
-  sp<MediaSource> mSource;
+private:
+    sp<MediaSource> mSource;
 
-  status_t extractAndAppendLocalDescriptions(
-        int64_t timeUs, const MediaBuffer *textBuffer, Parcel *parcel);
+    status_t extractAndAppendLocalDescriptions(
+            int64_t timeUs, const MediaBuffer *textBuffer, Parcel *parcel);
 
-  DISALLOW_EVIL_CONSTRUCTORS(TimedText3GPPSource);
+    DISALLOW_EVIL_CONSTRUCTORS(TimedText3GPPSource);
 };
 
 }  // namespace android
