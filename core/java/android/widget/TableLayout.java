@@ -232,6 +232,8 @@ public class TableLayout extends LinearLayout {
      * <p>Indicates whether all columns are shrinkable or not.</p>
      *
      * @return true if all columns are shrinkable, false otherwise
+     *
+     * @attr ref android.R.styleable#TableLayout_shrinkColumns
      */
     public boolean isShrinkAllColumns() {
         return mShrinkAllColumns;
@@ -252,6 +254,8 @@ public class TableLayout extends LinearLayout {
      * <p>Indicates whether all columns are stretchable or not.</p>
      *
      * @return true if all columns are stretchable, false otherwise
+     *
+     * @attr ref android.R.styleable#TableLayout_stretchColumns
      */
     public boolean isStretchAllColumns() {
         return mStretchAllColumns;

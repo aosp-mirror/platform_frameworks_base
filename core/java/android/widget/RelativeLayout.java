@@ -219,6 +219,20 @@ public class RelativeLayout extends ViewGroup {
     }
 
     /**
+     * Describes how the child views are positioned.
+     *
+     * @return the gravity.
+     *
+     * @see #setGravity(int)
+     * @see android.view.Gravity
+     *
+     * @attr ref android.R.styleable#RelativeLayout_gravity
+     */
+    public int getGravity() {
+        return mGravity;
+    }
+
+    /**
      * Describes how the child views are positioned. Defaults to
      * <code>Gravity.LEFT | Gravity.TOP</code>.
      *
