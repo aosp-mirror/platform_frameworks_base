@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (C) 2006 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -363,40 +363,67 @@ public abstract class Layout {
         // direction of the layout or line.  XXX: Should they?
         // They are evaluated at each line.
         if (mSpannedText) {
-            int previousLineBottom = getLineTop(firstLine);
-            int previousLineEnd = getLineStart(firstLine);
-            ParagraphStyle[] spans = NO_PARA_SPANS;
-            TextPaint paint = mPaint;
-            CharSequence buf = mText;
-            int spanEnd = 0;
-            final int width = mWidth;
-            Spanned sp = (Spanned) buf;
-            int textLength = buf.length();
-            for (int i = firstLine; i <= lastLine; i++) {
-                int start = previousLineEnd;
-                int end = getLineStart(i + 1);
-                previousLineEnd = end;
+            if (lineBackgroundSpans == null) {
+                lineBackgroundSpans = new SpanSet<LineBackgroundSpan>(LineBackgroundSpan.class);
+            }
 
-                int ltop = previousLineBottom;
-                int lbottom = getLineTop(i + 1);
-                previousLineBottom = lbottom;
-                int lbaseline = lbottom - getLineDescent(i);
+            Spanned buffer = (Spanned) mText;
+            int textLength = buffer.length();
+            lineBackgroundSpans.init(buffer, 0, textLength);
 
-                if (start >= spanEnd) {
-                    // These should be infrequent, so we'll use this so that
-                    // we don't have to check as often.
-                    spanEnd = sp.nextSpanTransition(start, textLength, LineBackgroundSpan.class);
-                    // All LineBackgroundSpans on a line contribute to its background.
-                    spans = getParagraphSpans(sp, start, end, LineBackgroundSpan.class);
-                }
+            if (lineBackgroundSpans.numberOfSpans > 0) {
+                int previousLineBottom = getLineTop(firstLine);
+                int previousLineEnd = getLineStart(firstLine);
+                ParagraphStyle[] spans = NO_PARA_SPANS;
+                int spansLength = 0;
+                TextPaint paint = mPaint;
+                int spanEnd = 0;
+                final int width = mWidth;
+                for (int i = firstLine; i <= lastLine; i++) {
+                    int start = previousLineEnd;
+                    int end = getLineStart(i + 1);
+                    previousLineEnd = end;
 
-                for (int n = 0; n < spans.length; n++) {
-                    LineBackgroundSpan back = (LineBackgroundSpan) spans[n];
-                    back.drawBackground(canvas, paint, 0, width,
-                            ltop, lbaseline, lbottom,
-                            buf, start, end, i);
+                    int ltop = previousLineBottom;
+                    int lbottom = getLineTop(i + 1);
+                    previousLineBottom = lbottom;
+                    int lbaseline = lbottom - getLineDescent(i);
+
+                    if (start >= spanEnd) {
+                        // These should be infrequent, so we'll use this so that
+                        // we don't have to check as often.
+                        spanEnd = lineBackgroundSpans.getNextTransition(start, textLength);
+                        // All LineBackgroundSpans on a line contribute to its background.
+                        spansLength = 0;
+                        // Duplication of the logic of getParagraphSpans
+                        if (start != end || start == 0) {
+                            // Equivalent to a getSpans(start, end), but filling the 'spans' local
+                            // array instead to reduce memory allocation
+                            for (int j = 0; j < lineBackgroundSpans.numberOfSpans; j++) {
+                                // equal test is valid since both intervals are not empty by construction
+                                if (lineBackgroundSpans.spanStarts[j] >= end ||
+                                        lineBackgroundSpans.spanEnds[j] <= start) continue;
+                                if (spansLength == spans.length) {
+                                    // The spans array needs to be expanded
+                                    int newSize = ArrayUtils.idealObjectArraySize(2 * spansLength);
+                                    ParagraphStyle[] newSpans = new ParagraphStyle[newSize];
+                                    System.arraycopy(spans, 0, newSpans, 0, spansLength);
+                                    spans = newSpans;
+                                }
+                                spans[spansLength++] = lineBackgroundSpans.spans[j];
+                            }
+                        }
+                    }
+
+                    for (int n = 0; n < spansLength; n++) {
+                        LineBackgroundSpan lineBackgroundSpan = (LineBackgroundSpan) spans[n];
+                        lineBackgroundSpan.drawBackground(canvas, paint, 0, width,
+                                ltop, lbaseline, lbottom,
+                                buffer, start, end, i);
+                    }
                 }
             }
+            lineBackgroundSpans.recycle();
         }
 
         // There can be a highlight even without spans if we are drawing
@@ -1830,6 +1857,7 @@ public abstract class Layout {
     private static final Rect sTempRect = new Rect();
     private boolean mSpannedText;
     private TextDirectionHeuristic mTextDir;
+    private SpanSet<LineBackgroundSpan> lineBackgroundSpans;
 
     public static final int DIR_LEFT_TO_RIGHT = 1;
     public static final int DIR_RIGHT_TO_LEFT = -1;
