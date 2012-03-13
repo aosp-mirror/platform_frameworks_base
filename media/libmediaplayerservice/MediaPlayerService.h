@@ -31,6 +31,7 @@
 #include <media/IMediaPlayerService.h>
 #include <media/MediaPlayerInterface.h>
 #include <media/Metadata.h>
+#include <media/stagefright/foundation/ABase.h>
 
 #include <system/audio.h>
 
@@ -69,7 +70,9 @@ class MediaPlayerService : public BnMediaPlayerService
 
     class AudioOutput : public MediaPlayerBase::AudioSink
     {
-    public:
+        class CallbackData;
+
+     public:
                                 AudioOutput(int sessionId);
         virtual                 ~AudioOutput();
 
@@ -104,14 +107,21 @@ class MediaPlayerService : public BnMediaPlayerService
 
         static bool             isOnEmulator();
         static int              getMinBufferCount();
+                void            setNextOutput(const sp<AudioOutput>& nextOutput);
+                void            switchToNextOutput();
+        virtual bool            needsTrailingPadding() { return mNextOutput == NULL; }
+
     private:
         static void             setMinBufferCount();
         static void             CallbackWrapper(
                 int event, void *me, void *info);
 
         AudioTrack*             mTrack;
+        AudioTrack*             mRecycledTrack;
+        sp<AudioOutput>         mNextOutput;
         AudioCallback           mCallback;
         void *                  mCallbackCookie;
+        CallbackData *          mCallbackData;
         audio_stream_type_t     mStreamType;
         float                   mLeftVolume;
         float                   mRightVolume;
@@ -124,7 +134,38 @@ class MediaPlayerService : public BnMediaPlayerService
         static bool             mIsOnEmulator;
         static int              mMinBufferCount;  // 12 for emulator; otherwise 4
 
-    };
+        // CallbackData is what is passed to the AudioTrack as the "user" data.
+        // We need to be able to target this to a different Output on the fly,
+        // so we can't use the Output itself for this.
+        class CallbackData {
+        public:
+            CallbackData(AudioOutput *cookie) {
+                mData = cookie;
+                mSwitching = false;
+            }
+            AudioOutput *   getOutput() { return mData;}
+            void            setOutput(AudioOutput* newcookie) { mData = newcookie; }
+            // lock/unlock are used by the callback before accessing the payload of this object
+            void            lock() { mLock.lock(); }
+            void            unlock() { mLock.unlock(); }
+            // beginTrackSwitch/endTrackSwitch are used when this object is being handed over
+            // to the next sink.
+            void            beginTrackSwitch() { mLock.lock(); mSwitching = true; }
+            void            endTrackSwitch() {
+                if (mSwitching) {
+                    mLock.unlock();
+                }
+                mSwitching = false;
+            }
+        private:
+            AudioOutput *   mData;
+            mutable Mutex   mLock;
+            bool            mSwitching;
+            DISALLOW_EVIL_CONSTRUCTORS(CallbackData);
+        };
+
+    }; // AudioOutput
+
 
     class AudioCache : public MediaPlayerBase::AudioSink
     {
@@ -184,7 +225,7 @@ class MediaPlayerService : public BnMediaPlayerService
         bool                mCommandComplete;
 
         sp<Thread>          mCallbackThread;
-    };
+    }; // AudioCache
 
 public:
     static  void                instantiate();
@@ -278,6 +319,7 @@ private:
         virtual status_t        setParameter(int key, const Parcel &request);
         virtual status_t        getParameter(int key, Parcel *reply);
         virtual status_t        setRetransmitEndpoint(const struct sockaddr_in* endpoint);
+        virtual status_t        setNextPlayer(const sp<IMediaPlayer>& player);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
 
@@ -350,6 +392,7 @@ private:
                     sp<IBinder>                 mConnectedWindowBinder;
                     struct sockaddr_in          mRetransmitEndpoint;
                     bool                        mRetransmitEndpointValid;
+                    sp<Client>                  mNextClient;
 
         // Metadata filters.
         media::Metadata::Filter mMetadataAllow;  // protected by mLock
@@ -364,7 +407,7 @@ private:
 #if CALLBACK_ANTAGONIZER
                     Antagonizer*                mAntagonizer;
 #endif
-    };
+    }; // Client
 
 // ----------------------------------------------------------------------------
 

@@ -1068,6 +1068,20 @@ status_t MediaPlayerService::Client::getDuration(int *msec)
     return ret;
 }
 
+status_t MediaPlayerService::Client::setNextPlayer(const sp<IMediaPlayer>& player) {
+    ALOGV("setNextPlayer");
+    Mutex::Autolock l(mLock);
+    sp<Client> c = static_cast<Client*>(player.get());
+    mNextClient = c;
+    if (mAudioOutput != NULL && c != NULL) {
+        mAudioOutput->setNextOutput(c->mAudioOutput);
+    } else {
+        ALOGE("no current audio output");
+    }
+    return OK;
+}
+
+
 status_t MediaPlayerService::Client::seekTo(int msec)
 {
     ALOGV("[%d] seekTo(%d)", mConnId, msec);
@@ -1188,6 +1202,15 @@ void MediaPlayerService::Client::notify(
         void* cookie, int msg, int ext1, int ext2, const Parcel *obj)
 {
     Client* client = static_cast<Client*>(cookie);
+
+    {
+        Mutex::Autolock l(client->mLock);
+        if (msg == MEDIA_PLAYBACK_COMPLETE && client->mNextClient != NULL) {
+            client->mAudioOutput->switchToNextOutput();
+            client->mNextClient->start();
+            client->mNextClient->mClient->notify(MEDIA_INFO, MEDIA_INFO_STARTED_AS_NEXT, 0, obj);
+        }
+    }
 
     if (MEDIA_INFO == msg &&
         MEDIA_INFO_METADATA_UPDATE == ext1) {
@@ -1376,9 +1399,11 @@ Exit:
 MediaPlayerService::AudioOutput::AudioOutput(int sessionId)
     : mCallback(NULL),
       mCallbackCookie(NULL),
+      mCallbackData(NULL),
       mSessionId(sessionId) {
     ALOGV("AudioOutput(%d)", sessionId);
     mTrack = 0;
+    mRecycledTrack = 0;
     mStreamType = AUDIO_STREAM_MUSIC;
     mLeftVolume = 1.0;
     mRightVolume = 1.0;
@@ -1393,6 +1418,8 @@ MediaPlayerService::AudioOutput::AudioOutput(int sessionId)
 MediaPlayerService::AudioOutput::~AudioOutput()
 {
     close();
+    delete mRecycledTrack;
+    delete mCallbackData;
 }
 
 void MediaPlayerService::AudioOutput::setMinBufferCount()
@@ -1473,7 +1500,6 @@ status_t MediaPlayerService::AudioOutput::open(
     }
     ALOGV("open(%u, %d, 0x%x, %d, %d, %d)", sampleRate, channelCount, channelMask,
             format, bufferCount, mSessionId);
-    if (mTrack) close();
     int afSampleRate;
     int afFrameCount;
     int frameCount;
@@ -1494,9 +1520,48 @@ status_t MediaPlayerService::AudioOutput::open(
             return NO_INIT;
         }
     }
+    if (mRecycledTrack) {
+        // check if the existing track can be reused as-is, or if a new track needs to be created.
+
+        bool reuse = true;
+        if ((mCallbackData == NULL && mCallback != NULL) ||
+                (mCallbackData != NULL && mCallback == NULL)) {
+            // recycled track uses callbacks but the caller wants to use writes, or vice versa
+            ALOGV("can't chain callback and write");
+            reuse = false;
+        } else if ((mRecycledTrack->getSampleRate() != sampleRate) ||
+                (mRecycledTrack->channelCount() != channelCount) ||
+                (mRecycledTrack->frameCount() != frameCount)) {
+            ALOGV("samplerate, channelcount or framecount differ");
+            reuse = false;
+        }
+        if (reuse) {
+            ALOGV("chaining to next output");
+            close();
+            mTrack = mRecycledTrack;
+            mRecycledTrack = NULL;
+            if (mCallbackData != NULL) {
+                mCallbackData->setOutput(this);
+            }
+            return OK;
+        }
+
+        // if we're not going to reuse the track, unblock and flush it
+        if (mCallbackData != NULL) {
+            mCallbackData->setOutput(NULL);
+            mCallbackData->endTrackSwitch();
+        }
+        mRecycledTrack->flush();
+        delete mRecycledTrack;
+        mRecycledTrack = NULL;
+        delete mCallbackData;
+        mCallbackData = NULL;
+        close();
+    }
 
     AudioTrack *t;
     if (mCallback != NULL) {
+        mCallbackData = new CallbackData(this);
         t = new AudioTrack(
                 mStreamType,
                 sampleRate,
@@ -1505,7 +1570,7 @@ status_t MediaPlayerService::AudioOutput::open(
                 frameCount,
                 AUDIO_POLICY_OUTPUT_FLAG_NONE,
                 CallbackWrapper,
-                this,
+                mCallbackData,
                 0,
                 mSessionId);
     } else {
@@ -1546,6 +1611,9 @@ status_t MediaPlayerService::AudioOutput::open(
 void MediaPlayerService::AudioOutput::start()
 {
     ALOGV("start");
+    if (mCallbackData != NULL) {
+        mCallbackData->endTrackSwitch();
+    }
     if (mTrack) {
         mTrack->setVolume(mLeftVolume, mRightVolume);
         mTrack->setAuxEffectSendLevel(mSendLevel);
@@ -1553,7 +1621,26 @@ void MediaPlayerService::AudioOutput::start()
     }
 }
 
+void MediaPlayerService::AudioOutput::setNextOutput(const sp<AudioOutput>& nextOutput) {
+    mNextOutput = nextOutput;
+}
 
+
+void MediaPlayerService::AudioOutput::switchToNextOutput() {
+    ALOGV("switchToNextOutput");
+    if (mNextOutput != NULL) {
+        if (mCallbackData != NULL) {
+            mCallbackData->beginTrackSwitch();
+        }
+        delete mNextOutput->mCallbackData;
+        mNextOutput->mCallbackData = mCallbackData;
+        mCallbackData = NULL;
+        mNextOutput->mRecycledTrack = mTrack;
+        mTrack = NULL;
+        mNextOutput->mSampleRateHz = mSampleRateHz;
+        mNextOutput->mMsecsPerFrame = mMsecsPerFrame;
+    }
+}
 
 ssize_t MediaPlayerService::AudioOutput::write(const void* buffer, size_t size)
 {
@@ -1646,13 +1733,22 @@ void MediaPlayerService::AudioOutput::CallbackWrapper(
         return;
     }
 
-    AudioOutput *me = (AudioOutput *)cookie;
+    CallbackData *data = (CallbackData*)cookie;
+    data->lock();
+    AudioOutput *me = data->getOutput();
     AudioTrack::Buffer *buffer = (AudioTrack::Buffer *)info;
+    if (me == NULL) {
+        // no output set, likely because the track was scheduled to be reused
+        // by another player, but the format turned out to be incompatible.
+        data->unlock();
+        buffer->size = 0;
+        return;
+    }
 
     size_t actualSize = (*me->mCallback)(
             me, buffer->raw, buffer->size, me->mCallbackCookie);
 
-    if (actualSize == 0 && buffer->size > 0) {
+    if (actualSize == 0 && buffer->size > 0 && me->mNextOutput == NULL) {
         // We've reached EOS but the audio track is not stopped yet,
         // keep playing silence.
 
@@ -1661,6 +1757,7 @@ void MediaPlayerService::AudioOutput::CallbackWrapper(
     }
 
     buffer->size = actualSize;
+    data->unlock();
 }
 
 int MediaPlayerService::AudioOutput::getSessionId()

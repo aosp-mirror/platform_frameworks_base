@@ -55,6 +55,7 @@ enum {
     SET_PARAMETER,
     GET_PARAMETER,
     SET_RETRANSMIT_ENDPOINT,
+    SET_NEXT_PLAYER,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -307,7 +308,15 @@ public:
         if (OK != err) {
             return err;
         }
+        return reply.readInt32();
+    }
 
+    status_t setNextPlayer(const sp<IMediaPlayer>& player) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        sp<IBinder> b(player->asBinder());
+        data.writeStrongBinder(b);
+        remote()->transact(SET_NEXT_PLAYER, data, &reply);
         return reply.readInt32();
     }
 };
@@ -489,7 +498,11 @@ status_t BnMediaPlayer::onTransact(
             } else {
                 reply->writeInt32(setRetransmitEndpoint(NULL));
             }
-
+            return NO_ERROR;
+        } break;
+        case SET_NEXT_PLAYER: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            reply->writeInt32(setNextPlayer(interface_cast<IMediaPlayer>(data.readStrongBinder())));
             return NO_ERROR;
         } break;
         default:

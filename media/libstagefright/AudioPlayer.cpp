@@ -419,7 +419,11 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
                          timeToCompletionUs, timeToCompletionUs / 1E6);
 
                     postEOS = true;
-                    postEOSDelayUs = timeToCompletionUs + mLatencyUs;
+                    if (mAudioSink->needsTrailingPadding()) {
+                        postEOSDelayUs = timeToCompletionUs + mLatencyUs;
+                    } else {
+                        postEOSDelayUs = 0;
+                    }
                 }
 
                 mReachedEOS = true;

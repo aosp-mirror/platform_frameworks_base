@@ -788,4 +788,11 @@ void MediaPlayer::died()
 
 }
 
+status_t MediaPlayer::setNextMediaPlayer(const sp<MediaPlayer>& next) {
+    if (mPlayer == NULL) {
+        return NO_INIT;
+    }
+    return mPlayer->setNextPlayer(next == NULL ? NULL : next->mPlayer);
+}
+
 }; // namespace android
