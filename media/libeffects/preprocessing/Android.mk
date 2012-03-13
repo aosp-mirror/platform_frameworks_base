@@ -14,7 +14,7 @@ LOCAL_C_INCLUDES += \
     external/webrtc/src \
     external/webrtc/src/modules/interface \
     external/webrtc/src/modules/audio_processing/interface \
-    system/media/audio_effects/include
+    $(call include-path-for, audio-effects)
 
 LOCAL_C_INCLUDES += $(call include-path-for, speex)
 

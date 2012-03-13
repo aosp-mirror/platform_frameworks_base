@@ -60,7 +60,7 @@ LOCAL_C_INCLUDES := \
     $(TOP)/frameworks/native/include/media/openmax \
     external/icu4c/common \
     external/expat/lib \
-    system/media/audio_effects/include \
-    system/media/audio_utils/include
+    $(call include-path-for, audio-effects) \
+    $(call include-path-for, audio-utils)
 
 include $(BUILD_SHARED_LIBRARY)
