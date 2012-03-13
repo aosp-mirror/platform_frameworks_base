@@ -2828,7 +2828,8 @@ final class ActivityStack {
     }
 
     ActivityInfo resolveActivity(Intent intent, String resolvedType, boolean debug,
-            String profileFile, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+            boolean openglTrace, String profileFile, ParcelFileDescriptor profileFd,
+            boolean autoStopProfiler) {
         // Collect information about the target of the Intent.
         ActivityInfo aInfo;
         try {
@@ -2857,6 +2858,12 @@ final class ActivityStack {
                 }
             }
 
+            if (openglTrace) {
+                if (!aInfo.processName.equals("system")) {
+                    mService.setOpenGlTraceApp(aInfo.applicationInfo, aInfo.processName);
+                }
+            }
+
             if (profileFile != null) {
                 if (!aInfo.processName.equals("system")) {
                     mService.setProfileApp(aInfo.applicationInfo, aInfo.processName,
@@ -2871,7 +2878,7 @@ final class ActivityStack {
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded,
-            boolean debug, String profileFile, ParcelFileDescriptor profileFd,
+            boolean debug, boolean openglTrace, String profileFile, ParcelFileDescriptor profileFd,
             boolean autoStopProfiler,
             WaitResult outResult, Configuration config, int userId) {
         // Refuse possible leaked file descriptors
@@ -2884,7 +2891,7 @@ final class ActivityStack {
         intent = new Intent(intent);
 
         // Collect information about the target of the Intent.
-        ActivityInfo aInfo = resolveActivity(intent, resolvedType, debug,
+        ActivityInfo aInfo = resolveActivity(intent, resolvedType, debug, openglTrace,
                 profileFile, profileFd, autoStopProfiler);
         aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
@@ -3074,7 +3081,7 @@ final class ActivityStack {
                     intent = new Intent(intent);
 
                     // Collect information about the target of the Intent.
-                    ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i], false,
+                    ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i], false, false,
                             null, null, false);
                     // TODO: New, check if this is correct
                     aInfo = mService.getActivityInfoForUser(aInfo, userId);

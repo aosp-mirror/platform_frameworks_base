@@ -376,6 +376,7 @@ public final class ActivityThread {
         Bundle instrumentationArgs;
         IInstrumentationWatcher instrumentationWatcher;
         int debugMode;
+        boolean enableOpenGlTrace;
         boolean restrictedBackupMode;
         boolean persistent;
         Configuration config;
@@ -676,8 +677,8 @@ public final class ActivityThread {
                 ComponentName instrumentationName, String profileFile,
                 ParcelFileDescriptor profileFd, boolean autoStopProfiler,
                 Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
-                int debugMode, boolean isRestrictedBackupMode, boolean persistent,
-                Configuration config, CompatibilityInfo compatInfo,
+                int debugMode, boolean enableOpenGlTrace, boolean isRestrictedBackupMode,
+                boolean persistent, Configuration config, CompatibilityInfo compatInfo,
                 Map<String, IBinder> services, Bundle coreSettings) {
 
             if (services != null) {
@@ -695,6 +696,7 @@ public final class ActivityThread {
             data.instrumentationArgs = instrumentationArgs;
             data.instrumentationWatcher = instrumentationWatcher;
             data.debugMode = debugMode;
+            data.enableOpenGlTrace = enableOpenGlTrace;
             data.restrictedBackupMode = isRestrictedBackupMode;
             data.persistent = persistent;
             data.config = config;
@@ -3910,6 +3912,11 @@ public final class ActivityThread {
                 Slog.w(TAG, "Application " + data.info.getPackageName()
                       + " can be debugged on port 8100...");
             }
+        }
+
+        // Enable OpenGL tracing if required
+        if (data.enableOpenGlTrace) {
+            GLUtils.enableTracing();
         }
 
         /**

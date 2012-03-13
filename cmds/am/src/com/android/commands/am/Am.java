@@ -61,6 +61,8 @@ public class Am {
     private boolean mWaitOption = false;
     private boolean mStopOption = false;
 
+    private boolean mOpenglTraceOption = false;
+
     private int mRepeat = 0;
 
     private String mProfileFile;
@@ -151,6 +153,7 @@ public class Am {
         mDebugOption = false;
         mWaitOption = false;
         mStopOption = false;
+        mOpenglTraceOption = false;
         mRepeat = 0;
         mProfileFile = null;
         Uri data = null;
@@ -307,6 +310,8 @@ public class Am {
                 mRepeat = Integer.parseInt(nextArgRequired());
             } else if (opt.equals("-S")) {
                 mStopOption = true;
+            } else if (opt.equals("--opengl-trace")) {
+                mOpenglTraceOption = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -440,17 +445,19 @@ public class Am {
                     return;
                 }
             }
-    
+
             IActivityManager.WaitResult result = null;
             int res;
             if (mWaitOption) {
                 result = mAm.startActivityAndWait(null, intent, mimeType,
-                            null, 0, null, null, 0, false, mDebugOption,
+                            null, 0, null, null, 0, false,
+                            mDebugOption, mOpenglTraceOption,
                             mProfileFile, fd, mProfileAutoStop);
                 res = result.result;
             } else {
                 res = mAm.startActivity(null, intent, mimeType,
-                        null, 0, null, null, 0, false, mDebugOption,
+                        null, 0, null, null, 0, false,
+                        mDebugOption, mOpenglTraceOption,
                         mProfileFile, fd, mProfileAutoStop);
             }
             PrintStream out = mWaitOption ? System.out : System.err;
@@ -1277,7 +1284,7 @@ public class Am {
         System.err.println(
                 "usage: am [subcommand] [options]\n" +
                 "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
-                "               [--R COUNT] [-S] <INTENT>\n" +
+                "               [--R COUNT] [-S] [--opengl-trace] <INTENT>\n" +
                 "       am startservice <INTENT>\n" +
                 "       am force-stop <PACKAGE>\n" +
                 "       am kill <PACKAGE>\n" +
@@ -1304,6 +1311,7 @@ public class Am {
                 "    -R: repeat the activity launch <COUNT> times.  Prior to each repeat,\n" +
                 "        the top activity will be finished.\n" +
                 "    -S: force stop the target app before starting the activity\n" +
+                "    --opengl-trace: enable tracing of OpenGL functions\n" +
                 "\n" +
                 "am startservice: start a Service.\n" +
                 "\n" +

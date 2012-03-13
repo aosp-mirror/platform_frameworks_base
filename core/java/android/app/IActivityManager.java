@@ -84,12 +84,12 @@ public interface IActivityManager extends IInterface {
     public int startActivity(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo, String resultWho, int requestCode,
-            boolean onlyIfNeeded, boolean debug, String profileFile,
+            boolean onlyIfNeeded, boolean debug, boolean openglTrace, String profileFile,
             ParcelFileDescriptor profileFd, boolean autoStopProfiler) throws RemoteException;
     public WaitResult startActivityAndWait(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo, String resultWho, int requestCode,
-            boolean onlyIfNeeded, boolean debug, String profileFile,
+            boolean onlyIfNeeded, boolean debug, boolean openglTrace, String profileFile,
             ParcelFileDescriptor profileFd, boolean autoStopProfiler) throws RemoteException;
     public int startActivityWithConfig(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
