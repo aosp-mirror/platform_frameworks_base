@@ -960,6 +960,11 @@ public abstract class HardwareRenderer {
                                 Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- getDisplayList() took " +
                                         total + "ms");
                             }
+                            if (View.USE_DISPLAY_LIST_PROPERTIES) {
+                                Log.d("DLProperties", "getDisplayList():\t" +
+                                        mProfileData[mProfileCurrentFrame]);
+                            }
+
                         }
 
                         if (displayList != null) {

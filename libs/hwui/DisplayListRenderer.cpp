@@ -671,18 +671,6 @@ void DisplayList::outputViewProperties(OpenGLRenderer& renderer, char* indent) {
         if (mLeft != 0 || mTop != 0) {
             ALOGD("%s%s %d, %d", indent, "Translate", mLeft, mTop);
         }
-        if (mAlpha < 1) {
-            // TODO: should be able to store the size of a DL at record time and not
-            // have to pass it into this call. In fact, this information might be in the
-            // location/size info that we store with the new native transform data.
-            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipChildren) {
-                flags |= SkCanvas::kClipToLayer_SaveFlag;
-            }
-            ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
-                    (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
-                    mMultipliedAlpha, flags);
-        }
         if (mMatrixFlags != 0) {
             if (mMatrixFlags == TRANSLATION) {
                 ALOGD("%s%s %f, %f", indent, "Translate", mTranslationX, mTranslationY);
@@ -695,6 +683,18 @@ void DisplayList::outputViewProperties(OpenGLRenderer& renderer, char* indent) {
                         mTransformMatrix->get(6), mTransformMatrix->get(7),
                         mTransformMatrix->get(8));
             }
+        }
+        if (mAlpha < 1) {
+            // TODO: should be able to store the size of a DL at record time and not
+            // have to pass it into this call. In fact, this information might be in the
+            // location/size info that we store with the new native transform data.
+            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
+            if (mClipChildren) {
+                flags |= SkCanvas::kClipToLayer_SaveFlag;
+            }
+            ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
+                    (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
+                    mMultipliedAlpha, flags);
         }
         if (mClipChildren) {
             ALOGD("%s%s %.2f, %.2f, %.2f, %.2f", indent, "ClipRect", 0.0f, 0.0f,
@@ -724,20 +724,6 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t width, ui
                     mApplicationScale, mApplicationScale);
             renderer.scale(mApplicationScale, mApplicationScale);
         }
-        if (mAlpha < 1 && !mCaching) {
-            // TODO: should be able to store the size of a DL at record time and not
-            // have to pass it into this call. In fact, this information might be in the
-            // location/size info that we store with the new native transform data.
-            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipChildren) {
-                flags |= SkCanvas::kClipToLayer_SaveFlag;
-            }
-            DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
-                    (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
-                    mMultipliedAlpha, flags);
-            renderer.saveLayerAlpha(0, 0, mRight - mLeft, mBottom - mTop,
-                    mMultipliedAlpha, flags);
-        }
         if (mMatrixFlags != 0) {
             if (mMatrixFlags == TRANSLATION) {
                 DISPLAY_LIST_LOGD("%s%s %f, %f", indent, "Translate", mTranslationX, mTranslationY);
@@ -753,6 +739,20 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t width, ui
                         mTransformMatrix->get(8));
                 renderer.concatMatrix(mTransformMatrix);
             }
+        }
+        if (mAlpha < 1 && !mCaching) {
+            // TODO: should be able to store the size of a DL at record time and not
+            // have to pass it into this call. In fact, this information might be in the
+            // location/size info that we store with the new native transform data.
+            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
+            if (mClipChildren) {
+                flags |= SkCanvas::kClipToLayer_SaveFlag;
+            }
+            DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
+                    (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
+                    mMultipliedAlpha, flags);
+            renderer.saveLayerAlpha(0, 0, mRight - mLeft, mBottom - mTop,
+                    mMultipliedAlpha, flags);
         }
         if (mClipChildren) {
             DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f", indent, "ClipRect", 0.0f, 0.0f,

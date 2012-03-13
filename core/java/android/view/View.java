@@ -1503,7 +1503,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * apps.
      * @hide
      */
-    protected static final boolean USE_DISPLAY_LIST_PROPERTIES = false;
+    public static final boolean USE_DISPLAY_LIST_PROPERTIES = false;
 
     /**
      * Map used to store views' tags.
@@ -7349,8 +7349,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #setRotationY(float) 
      */
     public void setCameraDistance(float distance) {
-        invalidateParentCaches();
-        invalidate(false);
+        invalidateViewProperty(true, false);
 
         ensureTransformationInfo();
         final float dpi = mResources.getDisplayMetrics().densityDpi;
@@ -7363,7 +7362,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         info.mCamera.setLocation(0.0f, 0.0f, -Math.abs(distance) / dpi);
         info.mMatrixDirty = true;
 
-        invalidate(false);
+        invalidateViewProperty(false, false);
         if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
             mDisplayList.setCameraDistance(distance);
         }
@@ -7401,13 +7400,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         ensureTransformationInfo();
         final TransformationInfo info = mTransformationInfo;
         if (info.mRotation != rotation) {
-            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate(false);
+            invalidateViewProperty(true, false);
             info.mRotation = rotation;
             info.mMatrixDirty = true;
-            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate(false);
+            invalidateViewProperty(false, true);
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.setRotation(rotation);
             }
@@ -7451,13 +7448,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         ensureTransformationInfo();
         final TransformationInfo info = mTransformationInfo;
         if (info.mRotationY != rotationY) {
-            invalidateParentCaches();
-            // Double-invalidation is necessary to capture view's old and new areas
-            invalidate(false);
+            invalidateViewProperty(true, false);
             info.mRotationY = rotationY;
             info.mMatrixDirty = true;
-            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate(false);
+            invalidateViewProperty(false, true);
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.setRotationY(rotationY);
             }
@@ -7501,13 +7495,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         ensureTransformationInfo();
         final TransformationInfo info = mTransformationInfo;
         if (info.mRotationX != rotationX) {
-            invalidateParentCaches();
-            // Double-invalidation is necessary to capture view's old and new areas
-            invalidate(false);
+            invalidateViewProperty(true, false);
             info.mRotationX = rotationX;
             info.mMatrixDirty = true;
-            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate(false);
+            invalidateViewProperty(false, true);
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.setRotationX(rotationX);
             }
@@ -7543,13 +7534,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         ensureTransformationInfo();
         final TransformationInfo info = mTransformationInfo;
         if (info.mScaleX != scaleX) {
-            invalidateParentCaches();
-            // Double-invalidation is necessary to capture view's old and new areas
-            invalidate(false);
+            invalidateViewProperty(true, false);
             info.mScaleX = scaleX;
             info.mMatrixDirty = true;
-            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate(false);
+            invalidateViewProperty(false, true);
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.setScaleX(scaleX);
             }
@@ -7585,13 +7573,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         ensureTransformationInfo();
         final TransformationInfo info = mTransformationInfo;
         if (info.mScaleY != scaleY) {
-            invalidateParentCaches();
-            // Double-invalidation is necessary to capture view's old and new areas
-            invalidate(false);
+            invalidateViewProperty(true, false);
             info.mScaleY = scaleY;
             info.mMatrixDirty = true;
-            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate(false);
+            invalidateViewProperty(false, true);
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.setScaleY(scaleY);
             }
@@ -7633,13 +7618,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
         final TransformationInfo info = mTransformationInfo;
         if (info.mPivotX != pivotX) {
-            invalidateParentCaches();
-            // Double-invalidation is necessary to capture view's old and new areas
-            invalidate(false);
+            invalidateViewProperty(true, false);
             info.mPivotX = pivotX;
             info.mMatrixDirty = true;
-            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate(false);
+            invalidateViewProperty(false, true);
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.setPivotX(pivotX);
             }
@@ -7680,13 +7662,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
         final TransformationInfo info = mTransformationInfo;
         if (info.mPivotY != pivotY) {
-            invalidateParentCaches();
-            // Double-invalidation is necessary to capture view's old and new areas
-            invalidate(false);
+            invalidateViewProperty(true, false);
             info.mPivotY = pivotY;
             info.mMatrixDirty = true;
-            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate(false);
+            invalidateViewProperty(false, true);
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.setPivotY(pivotY);
             }
@@ -7728,14 +7707,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         ensureTransformationInfo();
         if (mTransformationInfo.mAlpha != alpha) {
             mTransformationInfo.mAlpha = alpha;
-            invalidateParentCaches();
             if (onSetAlpha((int) (alpha * 255))) {
                 mPrivateFlags |= ALPHA_SET;
                 // subclass is handling alpha - don't optimize rendering cache invalidation
+                invalidateParentCaches();
                 invalidate(true);
             } else {
                 mPrivateFlags &= ~ALPHA_SET;
-                invalidate(false);
+                invalidateViewProperty(true, false);
                 if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                     mDisplayList.setAlpha(alpha);
                 }
@@ -8102,13 +8081,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         ensureTransformationInfo();
         final TransformationInfo info = mTransformationInfo;
         if (info.mTranslationX != translationX) {
-            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate(false);
+            invalidateViewProperty(true, false);
             info.mTranslationX = translationX;
             info.mMatrixDirty = true;
-            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate(false);
+            invalidateViewProperty(false, true);
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.setTranslationX(translationX);
             }
@@ -8142,13 +8119,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         ensureTransformationInfo();
         final TransformationInfo info = mTransformationInfo;
         if (info.mTranslationY != translationY) {
-            invalidateParentCaches();
-            // Double-invalidation is necessary to capture view's old and new areas
-            invalidate(false);
+            invalidateViewProperty(true, false);
             info.mTranslationY = translationY;
             info.mMatrixDirty = true;
-            mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate(false);
+            invalidateViewProperty(false, true);
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.setTranslationY(translationY);
             }
@@ -8260,39 +8234,43 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             final boolean matrixIsIdentity = mTransformationInfo == null
                     || mTransformationInfo.mMatrixIsIdentity;
             if (matrixIsIdentity) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
-                    int minTop;
-                    int maxBottom;
-                    int yLoc;
-                    if (offset < 0) {
-                        minTop = mTop + offset;
-                        maxBottom = mBottom;
-                        yLoc = offset;
-                    } else {
-                        minTop = mTop;
-                        maxBottom = mBottom + offset;
-                        yLoc = 0;
+                if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                    invalidateViewProperty(false, false);
+                } else {
+                    final ViewParent p = mParent;
+                    if (p != null && mAttachInfo != null) {
+                        final Rect r = mAttachInfo.mTmpInvalRect;
+                        int minTop;
+                        int maxBottom;
+                        int yLoc;
+                        if (offset < 0) {
+                            minTop = mTop + offset;
+                            maxBottom = mBottom;
+                            yLoc = offset;
+                        } else {
+                            minTop = mTop;
+                            maxBottom = mBottom + offset;
+                            yLoc = 0;
+                        }
+                        r.set(0, yLoc, mRight - mLeft, maxBottom - minTop);
+                        p.invalidateChild(this, r);
                     }
-                    r.set(0, yLoc, mRight - mLeft, maxBottom - minTop);
-                    p.invalidateChild(this, r);
                 }
             } else {
-                invalidate(false);
+                invalidateViewProperty(false, false);
             }
 
             mTop += offset;
             mBottom += offset;
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.offsetTopBottom(offset);
+                invalidateViewProperty(false, false);
+            } else {
+                if (!matrixIsIdentity) {
+                    invalidateViewProperty(false, true);
+                }
+                invalidateParentIfNeeded();
             }
-
-            if (!matrixIsIdentity) {
-                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate(false);
-            }
-            invalidateParentIfNeeded();
         }
     }
 
@@ -8307,36 +8285,40 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             final boolean matrixIsIdentity = mTransformationInfo == null
                     || mTransformationInfo.mMatrixIsIdentity;
             if (matrixIsIdentity) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
-                    int minLeft;
-                    int maxRight;
-                    if (offset < 0) {
-                        minLeft = mLeft + offset;
-                        maxRight = mRight;
-                    } else {
-                        minLeft = mLeft;
-                        maxRight = mRight + offset;
+                if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
+                    invalidateViewProperty(false, false);
+                } else {
+                    final ViewParent p = mParent;
+                    if (p != null && mAttachInfo != null) {
+                        final Rect r = mAttachInfo.mTmpInvalRect;
+                        int minLeft;
+                        int maxRight;
+                        if (offset < 0) {
+                            minLeft = mLeft + offset;
+                            maxRight = mRight;
+                        } else {
+                            minLeft = mLeft;
+                            maxRight = mRight + offset;
+                        }
+                        r.set(0, 0, maxRight - minLeft, mBottom - mTop);
+                        p.invalidateChild(this, r);
                     }
-                    r.set(0, 0, maxRight - minLeft, mBottom - mTop);
-                    p.invalidateChild(this, r);
                 }
             } else {
-                invalidate(false);
+                invalidateViewProperty(false, false);
             }
 
             mLeft += offset;
             mRight += offset;
             if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
                 mDisplayList.offsetLeftRight(offset);
+                invalidateViewProperty(false, false);
+            } else {
+                if (!matrixIsIdentity) {
+                    invalidateViewProperty(false, true);
+                }
+                invalidateParentIfNeeded();
             }
-
-            if (!matrixIsIdentity) {
-                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate(false);
-            }
-            invalidateParentIfNeeded();
         }
     }
 
@@ -8737,6 +8719,62 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 // our own bounds
                 p.invalidateChild(this, r);
             }
+        }
+    }
+
+    /**
+     * Quick invalidation for View property changes (alpha, translationXY, etc.). We don't want to
+     * set any flags or handle all of the cases handled by the default invalidation methods.
+     * Instead, we just want to schedule a traversal in ViewRootImpl with the appropriate
+     * dirty rect. This method calls into fast invalidation methods in ViewGroup that
+     * walk up the hierarchy, transforming the dirty rect as necessary.
+     *
+     * The method also handles normal invalidation logic if display list properties are not
+     * being used in this view. The invalidateParent and forceRedraw flags are used by that
+     * backup approach, to handle these cases used in the various property-setting methods.
+     *
+     * @param invalidateParent Force a call to invalidateParentCaches() if display list properties
+     * are not being used in this view
+     * @param forceRedraw Mark the view as DRAWN to force the invalidation to propagate, if display
+     * list properties are not being used in this view
+     */
+    void invalidateViewProperty(boolean invalidateParent, boolean forceRedraw) {
+        if (!USE_DISPLAY_LIST_PROPERTIES || mDisplayList == null ||
+                (mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION) {
+            if (invalidateParent) {
+                invalidateParentCaches();
+            }
+            if (forceRedraw) {
+                mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
+            }
+            invalidate(false);
+        } else {
+            final AttachInfo ai = mAttachInfo;
+            final ViewParent p = mParent;
+            if (p != null && ai != null) {
+                final Rect r = ai.mTmpInvalRect;
+                r.set(0, 0, mRight - mLeft, mBottom - mTop);
+                if (mParent instanceof ViewGroup) {
+                    ((ViewGroup) mParent).invalidateChildFast(this, r);
+                } else {
+                    mParent.invalidateChild(this, r);
+                }
+            }
+        }
+    }
+
+    /**
+     * Utility method to transform a given Rect by the current matrix of this view.
+     */
+    void transformRect(final Rect rect) {
+        if (!getMatrix().isIdentity()) {
+            RectF boundingRect = mAttachInfo.mTmpTransformRect;
+            boundingRect.set(rect);
+            getMatrix().mapRect(boundingRect);
+            rect.set((int) (boundingRect.left - 0.5f),
+                    (int) (boundingRect.top - 0.5f),
+                    (int) (boundingRect.right + 0.5f),
+                    (int) (boundingRect.bottom + 0.5f));
         }
     }
 
