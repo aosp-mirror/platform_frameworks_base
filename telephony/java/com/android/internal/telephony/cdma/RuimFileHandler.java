@@ -19,6 +19,8 @@ package com.android.internal.telephony.cdma;
 import android.os.*;
 import android.util.Log;
 
+import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.IccException;
 import com.android.internal.telephony.IccFileHandler;
@@ -39,8 +41,8 @@ public final class RuimFileHandler extends IccFileHandler {
     //***** Instance Variables
 
     //***** Constructor
-    public RuimFileHandler(PhoneBase phone) {
-        super(phone);
+    public RuimFileHandler(IccCard card, String aid, CommandsInterface ci) {
+        super(card, aid, ci);
     }
 
     public void dispose() {
@@ -58,9 +60,9 @@ public final class RuimFileHandler extends IccFileHandler {
         Message response = obtainMessage(EVENT_READ_ICON_DONE, fileid, 0,
                 onLoaded);
 
-        phone.mCM.iccIOForApp(COMMAND_GET_RESPONSE, fileid, "img", 0, 0,
+        mCi.iccIOForApp(COMMAND_GET_RESPONSE, fileid, "img", 0, 0,
                 GET_RESPONSE_EF_IMG_SIZE_BYTES, null, null,
-                phone.getIccCard().getAid(), response);
+                mAid, response);
     }
 
     @Override

@@ -186,10 +186,12 @@ public class IccCard {
         if (phone.mCM.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE
                 && phone instanceof CDMALTEPhone) {
             mIccRecords = new CdmaLteUiccRecords(phone);
-            mIccFileHandler = new CdmaLteUiccFileHandler((CDMALTEPhone)phone);
+            mIccFileHandler = new CdmaLteUiccFileHandler(this, "", mPhone.mCM);
         } else {
             mIccRecords = is3gpp ? new SIMRecords(phone) : new RuimRecords(phone);
-            mIccFileHandler = is3gpp ? new SIMFileHandler(phone) : new RuimFileHandler(phone);
+            // Correct aid will be set later (when GET_SIM_STATUS returns)
+            mIccFileHandler = is3gpp ? new SIMFileHandler(this, "", mPhone.mCM) :
+                                       new RuimFileHandler(this, "", mPhone.mCM);
         }
         mPhone.mCM.registerForOffOrNotAvailable(mHandler, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mPhone.mCM.registerForOn(mHandler, EVENT_RADIO_ON, null);
@@ -572,6 +574,7 @@ public class IccCard {
         }
 
         if (oldState != State.READY && newState == State.READY) {
+            mIccFileHandler.setAid(getAid());
             mIccRecords.onReady();
         }
     }
