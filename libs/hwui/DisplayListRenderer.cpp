@@ -140,17 +140,19 @@ void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
 void DisplayList::clearResources() {
     sk_free((void*) mReader.base());
 
-    if (mTransformMatrix) {
-        delete mTransformMatrix;
-        mTransformMatrix = NULL;
-    }
-    if (mTransformCamera) {
-        delete mTransformCamera;
-        mTransformCamera = NULL;
-    }
-    if (mTransformMatrix3D) {
-        delete mTransformMatrix3D;
-        mTransformMatrix3D = NULL;
+    if (USE_DISPLAY_LIST_PROPERTIES) {
+        if (mTransformMatrix) {
+            delete mTransformMatrix;
+            mTransformMatrix = NULL;
+        }
+        if (mTransformCamera) {
+            delete mTransformCamera;
+            mTransformCamera = NULL;
+        }
+        if (mTransformMatrix3D) {
+            delete mTransformMatrix3D;
+            mTransformMatrix3D = NULL;
+        }
     }
 
     Caches& caches = Caches::getInstance();
