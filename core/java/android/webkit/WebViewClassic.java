@@ -548,9 +548,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             if (!initData.mIsSpellCheckEnabled) {
                 inputType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
             }
-            if (WebTextView.TEXT_AREA != type
-                    && initData.mIsTextFieldNext) {
-                imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
+            if (WebTextView.TEXT_AREA != type) {
+                if (initData.mIsTextFieldNext) {
+                    imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
+                }
+                if (initData.mIsTextFieldPrev) {
+                    imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_PREVIOUS;
+                }
             }
             switch (type) {
                 case WebTextView.NORMAL_TEXT_FIELD:
