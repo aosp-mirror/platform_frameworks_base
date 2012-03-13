@@ -48,6 +48,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserId;
 import android.os.storage.IMountService;
 import android.os.storage.IMountServiceListener;
 import android.os.storage.IMountShutdownObserver;
@@ -1674,7 +1675,7 @@ class MountService extends IMountService.Stub
             return false;
         }
 
-        final int packageUid = mPms.getPackageUid(packageName);
+        final int packageUid = mPms.getPackageUid(packageName, UserId.getUserId(callerUid));
 
         if (DEBUG_OBB) {
             Slog.d(TAG, "packageName = " + packageName + ", packageUid = " +

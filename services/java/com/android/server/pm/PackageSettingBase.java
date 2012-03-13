@@ -20,6 +20,8 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import java.io.File;
 import java.util.HashSet;
@@ -62,20 +64,22 @@ class PackageSettingBase extends GrantedPermissions {
 
     // Whether this package is currently stopped, thus can not be
     // started until explicitly launched by the user.
-    public boolean stopped;
+    private SparseArray<Boolean> stopped = new SparseArray<Boolean>();
 
     // Set to true if we have never launched this app.
-    public boolean notLaunched;
+    private SparseArray<Boolean> notLaunched = new SparseArray<Boolean>();
 
     /* Explicitly disabled components */
-    HashSet<String> disabledComponents = new HashSet<String>(0);
+    private SparseArray<HashSet<String>> disabledComponents = new SparseArray<HashSet<String>>();
     /* Explicitly enabled components */
-    HashSet<String> enabledComponents = new HashSet<String>(0);
-    int enabled = COMPONENT_ENABLED_STATE_DEFAULT;
+    private SparseArray<HashSet<String>> enabledComponents = new SparseArray<HashSet<String>>();
+    /* Enabled state */
+    private SparseIntArray enabled = new SparseIntArray();
+
     int installStatus = PKG_INSTALL_COMPLETE;
 
     PackageSettingBase origPackage;
-    
+
     /* package name of the app that installed this package */
     String installerPackageName;
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
@@ -111,14 +115,12 @@ class PackageSettingBase extends GrantedPermissions {
 
         permissionsFixed = base.permissionsFixed;
         haveGids = base.haveGids;
-        stopped = base.stopped;
         notLaunched = base.notLaunched;
 
-        disabledComponents = (HashSet<String>) base.disabledComponents.clone();
-
-        enabledComponents = (HashSet<String>) base.enabledComponents.clone();
-
-        enabled = base.enabled;
+        disabledComponents = (SparseArray<HashSet<String>>) base.disabledComponents.clone();
+        enabledComponents = (SparseArray<HashSet<String>>) base.enabledComponents.clone();
+        enabled = (SparseIntArray) base.enabled.clone();
+        stopped = (SparseArray<Boolean>) base.stopped.clone();
         installStatus = base.installStatus;
 
         origPackage = base.origPackage;
@@ -177,28 +179,95 @@ class PackageSettingBase extends GrantedPermissions {
         installStatus = base.installStatus;
     }
 
-    boolean enableComponentLPw(String componentClassName) {
-        boolean changed = disabledComponents.remove(componentClassName);
-        changed |= enabledComponents.add(componentClassName);
+    void setEnabled(int state, int userId) {
+        enabled.put(userId, state);
+    }
+
+    int getEnabled(int userId) {
+        return enabled.get(userId, COMPONENT_ENABLED_STATE_DEFAULT);
+    }
+
+    boolean getStopped(int userId) {
+        return stopped.get(userId, false);
+    }
+
+    void setStopped(boolean stop, int userId) {
+        stopped.put(userId, stop);
+    }
+
+    boolean getNotLaunched(int userId) {
+        return notLaunched.get(userId, false);
+    }
+
+    void setNotLaunched(boolean stop, int userId) {
+        notLaunched.put(userId, stop);
+    }
+
+    HashSet<String> getEnabledComponents(int userId) {
+        return getComponentHashSet(enabledComponents, userId);
+    }
+
+    HashSet<String> getDisabledComponents(int userId) {
+        return getComponentHashSet(disabledComponents, userId);
+    }
+
+    void setEnabledComponents(HashSet<String> components, int userId) {
+        enabledComponents.put(userId, components);
+    }
+
+    void setDisabledComponents(HashSet<String> components, int userId) {
+        disabledComponents.put(userId, components);
+    }
+
+    private HashSet<String> getComponentHashSet(SparseArray<HashSet<String>> setArray, int userId) {
+        HashSet<String> set = setArray.get(userId);
+        if (set == null) {
+            set = new HashSet<String>(1);
+            setArray.put(userId, set);
+        }
+        return set;
+    }
+
+    void addDisabledComponent(String componentClassName, int userId) {
+        HashSet<String> disabled = getComponentHashSet(disabledComponents, userId);
+        disabled.add(componentClassName);
+    }
+
+    void addEnabledComponent(String componentClassName, int userId) {
+        HashSet<String> enabled = getComponentHashSet(enabledComponents, userId);
+        enabled.add(componentClassName);
+    }
+
+    boolean enableComponentLPw(String componentClassName, int userId) {
+        HashSet<String> disabled = getComponentHashSet(disabledComponents, userId);
+        HashSet<String> enabled = getComponentHashSet(enabledComponents, userId);
+        boolean changed = disabled.remove(componentClassName);
+        changed |= enabled.add(componentClassName);
         return changed;
     }
 
-    boolean disableComponentLPw(String componentClassName) {
-        boolean changed = enabledComponents.remove(componentClassName);
-        changed |= disabledComponents.add(componentClassName);
+    boolean disableComponentLPw(String componentClassName, int userId) {
+        HashSet<String> disabled = getComponentHashSet(disabledComponents, userId);
+        HashSet<String> enabled = getComponentHashSet(enabledComponents, userId);
+        boolean changed = enabled.remove(componentClassName);
+        changed |= disabled.add(componentClassName);
         return changed;
     }
 
-    boolean restoreComponentLPw(String componentClassName) {
-        boolean changed = enabledComponents.remove(componentClassName);
-        changed |= disabledComponents.remove(componentClassName);
+    boolean restoreComponentLPw(String componentClassName, int userId) {
+        HashSet<String> disabled = getComponentHashSet(disabledComponents, userId);
+        HashSet<String> enabled = getComponentHashSet(enabledComponents, userId);
+        boolean changed = enabled.remove(componentClassName);
+        changed |= disabled.remove(componentClassName);
         return changed;
     }
 
-    int getCurrentEnabledStateLPr(String componentName) {
-        if (enabledComponents.contains(componentName)) {
+    int getCurrentEnabledStateLPr(String componentName, int userId) {
+        HashSet<String> disabled = getComponentHashSet(disabledComponents, userId);
+        HashSet<String> enabled = getComponentHashSet(enabledComponents, userId);
+        if (enabled.contains(componentName)) {
             return COMPONENT_ENABLED_STATE_ENABLED;
-        } else if (disabledComponents.contains(componentName)) {
+        } else if (disabled.contains(componentName)) {
             return COMPONENT_ENABLED_STATE_DISABLED;
         } else {
             return COMPONENT_ENABLED_STATE_DEFAULT;

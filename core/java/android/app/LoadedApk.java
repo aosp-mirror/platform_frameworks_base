@@ -194,7 +194,7 @@ public final class LoadedApk {
         ApplicationInfo ai = null;
         try {
             ai = ActivityThread.getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_SHARED_LIBRARY_FILES);
+                    PackageManager.GET_SHARED_LIBRARY_FILES, UserId.myUserId());
         } catch (RemoteException e) {
             throw new AssertionError(e);
         }
@@ -351,7 +351,7 @@ public final class LoadedApk {
         IPackageManager pm = ActivityThread.getPackageManager();
         android.content.pm.PackageInfo pi;
         try {
-            pi = pm.getPackageInfo(mPackageName, 0);
+            pi = pm.getPackageInfo(mPackageName, 0, UserId.myUserId());
         } catch (RemoteException e) {
             throw new AssertionError(e);
         }

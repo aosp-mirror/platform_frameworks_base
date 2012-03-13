@@ -121,7 +121,7 @@ public class CompatModePackages {
     public void handlePackageAddedLocked(String packageName, boolean updated) {
         ApplicationInfo ai = null;
         try {
-            ai = AppGlobals.getPackageManager().getApplicationInfo(packageName, 0);
+            ai = AppGlobals.getPackageManager().getApplicationInfo(packageName, 0, 0);
         } catch (RemoteException e) {
         }
         if (ai == null) {
@@ -220,7 +220,7 @@ public class CompatModePackages {
     public int getPackageScreenCompatModeLocked(String packageName) {
         ApplicationInfo ai = null;
         try {
-            ai = AppGlobals.getPackageManager().getApplicationInfo(packageName, 0);
+            ai = AppGlobals.getPackageManager().getApplicationInfo(packageName, 0, 0);
         } catch (RemoteException e) {
         }
         if (ai == null) {
@@ -232,7 +232,7 @@ public class CompatModePackages {
     public void setPackageScreenCompatModeLocked(String packageName, int mode) {
         ApplicationInfo ai = null;
         try {
-            ai = AppGlobals.getPackageManager().getApplicationInfo(packageName, 0);
+            ai = AppGlobals.getPackageManager().getApplicationInfo(packageName, 0, 0);
         } catch (RemoteException e) {
         }
         if (ai == null) {
@@ -365,7 +365,7 @@ public class CompatModePackages {
                 }
                 ApplicationInfo ai = null;
                 try {
-                    ai = pm.getApplicationInfo(pkg, 0);
+                    ai = pm.getApplicationInfo(pkg, 0, 0);
                 } catch (RemoteException e) {
                 }
                 if (ai == null) {

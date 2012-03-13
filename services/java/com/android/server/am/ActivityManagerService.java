@@ -1079,7 +1079,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     int uid = msg.arg1;
                     boolean restart = (msg.arg2 == 1);
                     String pkg = (String) msg.obj;
-                    forceStopPackageLocked(pkg, uid, restart, false, true, false);
+                    forceStopPackageLocked(pkg, uid, restart, false, true, false,
+                            UserId.getUserId(uid));
                 }
             } break;
             case FINALIZE_PENDING_INTENT_MSG: {
@@ -1289,7 +1290,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             ApplicationInfo info =
                 mSelf.mContext.getPackageManager().getApplicationInfo(
-                        "android", STOCK_PM_FLAGS);
+                            "android", STOCK_PM_FLAGS);
             mSystemThread.installSystemApplicationInfo(info);
        
             synchronized (mSelf) {
@@ -2369,7 +2370,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 List<ResolveInfo> resolves =
                     AppGlobals.getPackageManager().queryIntentActivities(
                             intent, r.resolvedType,
-                            PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS);
+                            PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS,
+                            UserId.getCallingUserId());
 
                 // Look for the original activity in the list...
                 final int N = resolves != null ? resolves.size() : 0;
@@ -3291,7 +3293,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int pkgUid = -1;
             synchronized(this) {
                 try {
-                    pkgUid = pm.getPackageUid(packageName);
+                    pkgUid = pm.getPackageUid(packageName, userId);
                 } catch (RemoteException e) {
                 }
                 if (pkgUid == -1) {
@@ -3312,7 +3314,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             
             try {
                 //clear application user data
-                pm.clearApplicationUserData(packageName, observer);
+                pm.clearApplicationUserData(packageName, observer, userId);
                 Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                         Uri.fromParts("package", packageName, null));
                 intent.putExtra(Intent.EXTRA_UID, pkgUid);
@@ -3339,13 +3341,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
         
+        int userId = UserId.getCallingUserId();
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
             int pkgUid = -1;
             synchronized(this) {
                 try {
-                    pkgUid = pm.getPackageUid(packageName);
+                    pkgUid = pm.getPackageUid(packageName, userId);
                 } catch (RemoteException e) {
                 }
                 if (pkgUid == -1) {
@@ -3412,16 +3415,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        final int userId = Binder.getOrigCallingUser();
+        final int userId = UserId.getCallingUserId();
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
             int pkgUid = -1;
             synchronized(this) {
                 try {
-                    pkgUid = pm.getPackageUid(packageName);
-                    // Convert the uid to the one for the calling user
-                    pkgUid = UserId.getUid(userId, pkgUid);
+                    pkgUid = pm.getPackageUid(packageName, userId);
                 } catch (RemoteException e) {
                 }
                 if (pkgUid == -1) {
@@ -3430,7 +3431,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 forceStopPackageLocked(packageName, pkgUid);
                 try {
-                    pm.setPackageStoppedState(packageName, true);
+                    pm.setPackageStoppedState(packageName, true, userId);
                 } catch (RemoteException e) {
                 } catch (IllegalArgumentException e) {
                     Slog.w(TAG, "Failed trying to unstop package "
@@ -3545,7 +3546,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void forceStopPackageLocked(final String packageName, int uid) {
-        forceStopPackageLocked(packageName, uid, false, false, true, false);
+        forceStopPackageLocked(packageName, uid, false, false, true, false, UserId.getUserId(uid));
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         if (!mProcessesReady) {
@@ -3602,13 +3603,13 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final boolean forceStopPackageLocked(String name, int uid,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
-            boolean evenPersistent) {
+            boolean evenPersistent, int userId) {
         int i;
         int N;
 
         if (uid < 0) {
             try {
-                uid = AppGlobals.getPackageManager().getPackageUid(name);
+                uid = AppGlobals.getPackageManager().getPackageUid(name, userId);
             } catch (RemoteException e) {
             }
         }
@@ -3659,7 +3660,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
-        int userId = UserId.getUserId(uid);
         for (ServiceRecord service : mServiceMap.getAllServices(userId)) {
             if (service.packageName.equals(name)
                     && (service.app == null || evenPersistent || !service.app.persistent)) {
@@ -4107,11 +4107,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (pkgs != null) {
                     for (String pkg : pkgs) {
                         synchronized (ActivityManagerService.this) {
-                          if (forceStopPackageLocked(pkg, -1, false, false, false, false)) {
-                              setResultCode(Activity.RESULT_OK);
-                              return;
-                          }
-                       }
+                            if (forceStopPackageLocked(pkg, -1, false, false, false, false, 0)) {
+                                setResultCode(Activity.RESULT_OK);
+                                return;
+                            }
+                        }
                     }
                 }
             }
@@ -4290,8 +4290,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
                     int uid = AppGlobals.getPackageManager()
-                            .getPackageUid(packageName);
-                    if (UserId.getAppId(callingUid) != uid) {
+                            .getPackageUid(packageName, UserId.getUserId(callingUid));
+                    if (!UserId.isSameApp(callingUid, uid)) {
                         String msg = "Permission Denial: getIntentSender() from pid="
                             + Binder.getCallingPid()
                             + ", uid=" + Binder.getCallingUid()
@@ -4386,7 +4386,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             PendingIntentRecord rec = (PendingIntentRecord)sender;
             try {
                 int uid = AppGlobals.getPackageManager()
-                        .getPackageUid(rec.key.packageName);
+                        .getPackageUid(rec.key.packageName, UserId.getCallingUserId());
                 if (!UserId.isSameApp(uid, Binder.getCallingUid())) {
                     String msg = "Permission Denial: cancelIntentSender() from pid="
                         + Binder.getCallingPid()
@@ -4796,7 +4796,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             try {
                 pi = pm.resolveContentProvider(name,
-                        PackageManager.GET_URI_PERMISSION_PATTERNS);
+                        PackageManager.GET_URI_PERMISSION_PATTERNS, UserId.getUserId(callingUid));
             } catch (RemoteException ex) {
             }
         }
@@ -4808,7 +4808,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int targetUid = lastTargetUid;
         if (targetUid < 0 && targetPkg != null) {
             try {
-                targetUid = pm.getPackageUid(targetPkg);
+                targetUid = pm.getPackageUid(targetPkg, UserId.getUserId(callingUid));
                 if (targetUid < 0) {
                     if (DEBUG_URI_PERMISSION) Slog.v(TAG,
                             "Can't grant URI permission no uid for: " + targetPkg);
@@ -5100,14 +5100,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         final String authority = uri.getAuthority();
         ProviderInfo pi = null;
-        ContentProviderRecord cpr = mProviderMap.getProviderByName(authority,
-                UserId.getUserId(callingUid));
+        int userId = UserId.getUserId(callingUid);
+        ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, userId);
         if (cpr != null) {
             pi = cpr.info;
         } else {
             try {
                 pi = pm.resolveContentProvider(authority,
-                        PackageManager.GET_URI_PERMISSION_PATTERNS);
+                        PackageManager.GET_URI_PERMISSION_PATTERNS, userId);
             } catch (RemoteException ex) {
             }
         }
@@ -5202,7 +5202,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else {
                 try {
                     pi = pm.resolveContentProvider(authority,
-                            PackageManager.GET_URI_PERMISSION_PATTERNS);
+                            PackageManager.GET_URI_PERMISSION_PATTERNS, r.userId);
                 } catch (RemoteException ex) {
                 }
             }
@@ -5480,12 +5480,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // Check whether this activity is currently available.
                         try {
                             if (rti.origActivity != null) {
-                                if (pm.getActivityInfo(rti.origActivity, 0) == null) {
+                                if (pm.getActivityInfo(rti.origActivity, 0, callingUserId)
+                                        == null) {
                                     continue;
                                 }
                             } else if (rti.baseIntent != null) {
                                 if (pm.queryIntentActivities(rti.baseIntent,
-                                        null, 0) == null) {
+                                        null, 0, callingUserId) == null) {
                                     continue;
                                 }
                             }
@@ -6132,15 +6133,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     cpi = AppGlobals.getPackageManager().
                         resolveContentProvider(name,
-                                STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS);
+                            STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS, userId);
                 } catch (RemoteException ex) {
                 }
                 if (cpi == null) {
                     return null;
                 }
 
-                cpi.applicationInfo = getAppInfoForUser(cpi.applicationInfo,
-                        Binder.getOrigCallingUser());
+                cpi.applicationInfo = getAppInfoForUser(cpi.applicationInfo, userId);
 
                 String msg;
                 if ((msg=checkContentProviderPermissionLocked(cpi, r)) != null) {
@@ -6157,7 +6157,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 ComponentName comp = new ComponentName(cpi.packageName, cpi.name);
-                cpr = mProviderMap.getProviderByClass(comp, Binder.getOrigCallingUser());
+                cpr = mProviderMap.getProviderByClass(comp, userId);
                 final boolean firstClass = cpr == null;
                 if (firstClass) {
                     try {
@@ -6165,13 +6165,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                             AppGlobals.getPackageManager().
                                 getApplicationInfo(
                                         cpi.applicationInfo.packageName,
-                                        STOCK_PM_FLAGS);
+                                        STOCK_PM_FLAGS, userId);
                         if (ai == null) {
                             Slog.w(TAG, "No package info for content provider "
                                     + cpi.name);
                             return null;
                         }
-                        ai = getAppInfoForUser(ai, Binder.getOrigCallingUser());
+                        ai = getAppInfoForUser(ai, userId);
                         cpr = new ContentProviderRecord(this, cpi, ai, comp);
                     } catch (RemoteException ex) {
                         // pm is in same process, this will never happen.
@@ -6212,7 +6212,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // Content provider is now in use, its package can't be stopped.
                         try {
                             AppGlobals.getPackageManager().setPackageStoppedState(
-                                    cpr.appInfo.packageName, false);
+                                    cpr.appInfo.packageName, false, userId);
                         } catch (RemoteException e) {
                         } catch (IllegalArgumentException e) {
                             Slog.w(TAG, "Failed trying to unstop package "
@@ -6546,7 +6546,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // This package really, really can not be stopped.
         try {
             AppGlobals.getPackageManager().setPackageStoppedState(
-                    info.packageName, false);
+                    info.packageName, false, UserId.getUserId(app.uid));
         } catch (RemoteException e) {
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
@@ -6778,7 +6778,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mDebugTransient = !persistent;
             if (packageName != null) {
                 final long origId = Binder.clearCallingIdentity();
-                forceStopPackageLocked(packageName, -1, false, false, true, true);
+                forceStopPackageLocked(packageName, -1, false, false, true, true, 0);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -7137,7 +7137,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 List<ResolveInfo> ris = null;
                 try {
                     ris = AppGlobals.getPackageManager().queryIntentReceivers(
-                                intent, null, 0);
+                            intent, null, 0, 0);
                 } catch (RemoteException e) {
                 }
                 if (ris != null) {
@@ -7803,7 +7803,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (String pkg : process.pkgList) {
                 sb.append("Package: ").append(pkg);
                 try {
-                    PackageInfo pi = pm.getPackageInfo(pkg, 0);
+                    PackageInfo pi = pm.getPackageInfo(pkg, 0, 0);
                     if (pi != null) {
                         sb.append(" v").append(pi.versionCode);
                         if (pi.versionName != null) {
@@ -8201,7 +8201,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             IPackageManager pm = AppGlobals.getPackageManager();
             for (String pkg : extList) {
                 try {
-                    ApplicationInfo info = pm.getApplicationInfo(pkg, 0);
+                    ApplicationInfo info = pm.getApplicationInfo(pkg, 0, UserId.getCallingUserId());
                     if ((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
                         retList.add(info);
                     }
@@ -10682,21 +10682,21 @@ public final class ActivityManagerService extends ActivityManagerNative
     };
 
     private ServiceLookupResult findServiceLocked(Intent service,
-            String resolvedType) {
+            String resolvedType, int userId) {
         ServiceRecord r = null;
         if (service.getComponent() != null) {
-            r = mServiceMap.getServiceByName(service.getComponent(), Binder.getOrigCallingUser());
+            r = mServiceMap.getServiceByName(service.getComponent(), userId);
         }
         if (r == null) {
             Intent.FilterComparison filter = new Intent.FilterComparison(service);
-            r = mServiceMap.getServiceByIntent(filter, Binder.getOrigCallingUser());
+            r = mServiceMap.getServiceByIntent(filter, userId);
         }
 
         if (r == null) {
             try {
                 ResolveInfo rInfo =
                     AppGlobals.getPackageManager().resolveService(
-                            service, resolvedType, 0);
+                                service, resolvedType, 0, userId);
                 ServiceInfo sInfo =
                     rInfo != null ? rInfo.serviceInfo : null;
                 if (sInfo == null) {
@@ -10767,7 +10767,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 ResolveInfo rInfo =
                     AppGlobals.getPackageManager().resolveService(
-                            service, resolvedType, STOCK_PM_FLAGS);
+                                service, resolvedType, STOCK_PM_FLAGS, userId);
                 ServiceInfo sInfo =
                     rInfo != null ? rInfo.serviceInfo : null;
                 if (sInfo == null) {
@@ -11132,7 +11132,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Service is now being launched, its package can't be stopped.
         try {
             AppGlobals.getPackageManager().setPackageStoppedState(
-                    r.packageName, false);
+                    r.packageName, false, r.userId);
         } catch (RemoteException e) {
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
@@ -11437,7 +11437,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             // If this service is active, make sure it is stopped.
-            ServiceLookupResult r = findServiceLocked(service, resolvedType);
+            ServiceLookupResult r = findServiceLocked(service, resolvedType,
+                    callerApp == null ? UserId.getCallingUserId() : callerApp.userId);
             if (r != null) {
                 if (r.record != null) {
                     final long origId = Binder.clearCallingIdentity();
@@ -11465,7 +11466,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         IBinder ret = null;
 
         synchronized(this) {
-            ServiceLookupResult r = findServiceLocked(service, resolvedType);
+            ServiceLookupResult r = findServiceLocked(service, resolvedType,
+                    UserId.getCallingUserId());
             
             if (r != null) {
                 // r.record is null if findServiceLocked() failed the caller permission check
@@ -12094,7 +12096,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Backup agent is now in use, its package can't be stopped.
             try {
                 AppGlobals.getPackageManager().setPackageStoppedState(
-                        app.packageName, false);
+                        app.packageName, false, UserId.getUserId(app.uid));
             } catch (RemoteException e) {
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Failed trying to unstop package "
@@ -12458,7 +12460,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         String list[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                         if (list != null && (list.length > 0)) {
                             for (String pkg : list) {
-                                forceStopPackageLocked(pkg, -1, false, true, true, false);
+                                forceStopPackageLocked(pkg, -1, false, true, true, false, userId);
                             }
                             sendPackageBroadcastLocked(
                                     IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list);
@@ -12469,7 +12471,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
                             if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
                                 forceStopPackageLocked(ssp,
-                                        intent.getIntExtra(Intent.EXTRA_UID, -1), false, true, true, false);
+                                        intent.getIntExtra(Intent.EXTRA_UID, -1), false, true, true,
+                                        false, userId);
                             }
                             if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                                 sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
@@ -12586,7 +12589,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (intent.getComponent() != null) {
                 // Broadcast is going to one specific receiver class...
                 ActivityInfo ai = AppGlobals.getPackageManager().
-                    getReceiverInfo(intent.getComponent(), STOCK_PM_FLAGS);
+                        getReceiverInfo(intent.getComponent(), STOCK_PM_FLAGS, userId);
                 if (ai != null) {
                     receivers = new ArrayList();
                     ResolveInfo ri = new ResolveInfo();
@@ -12594,15 +12597,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     receivers.add(ri);
                 }
             } else {
-                // TODO: Apply userId
                 // Need to resolve the intent to interested receivers...
                 if ((intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                          == 0) {
                     receivers =
                         AppGlobals.getPackageManager().queryIntentReceivers(
-                                intent, resolvedType, STOCK_PM_FLAGS);
+                                    intent, resolvedType, STOCK_PM_FLAGS, userId);
                 }
-                registeredReceivers = mReceiverResolver.queryIntent(intent, resolvedType, false);
+                registeredReceivers = mReceiverResolver.queryIntent(intent, resolvedType, false,
+                        userId);
             }
         } catch (RemoteException ex) {
             // pm is in same process, this will never happen.
@@ -12893,7 +12896,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ii = mContext.getPackageManager().getInstrumentationInfo(
                     className, STOCK_PM_FLAGS);
                 ai = mContext.getPackageManager().getApplicationInfo(
-                    ii.targetPackage, STOCK_PM_FLAGS);
+                        ii.targetPackage, STOCK_PM_FLAGS);
             } catch (PackageManager.NameNotFoundException e) {
             }
             if (ii == null) {
@@ -12921,9 +12924,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new SecurityException(msg);
             }
 
+            int userId = UserId.getCallingUserId();
             final long origId = Binder.clearCallingIdentity();
             // Instrumentation can kill and relaunch even persistent processes
-            forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true);
+            forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, userId);
             ProcessRecord app = addAppLocked(ai, false);
             app.instrumentationClass = className;
             app.instrumentationInfo = ai;
@@ -12978,11 +12982,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.instrumentationProfileFile = null;
         app.instrumentationArguments = null;
 
-        forceStopPackageLocked(app.processName, -1, false, false, true, true);
+        forceStopPackageLocked(app.processName, -1, false, false, true, true, app.userId);
     }
 
     public void finishInstrumentation(IApplicationThread target,
             int resultCode, Bundle results) {
+        int userId = UserId.getCallingUserId();
         // Refuse possible leaked file descriptors
         if (results != null && results.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");

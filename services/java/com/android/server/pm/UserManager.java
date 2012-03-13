@@ -73,6 +73,9 @@ public class UserManager {
     UserManager(File dataDir, File baseUserPath) {
         mUsersDir = new File(dataDir, USER_INFO_DIR);
         mUsersDir.mkdirs();
+        // Make zeroth user directory, for services to migrate their files to that location
+        File userZeroDir = new File(mUsersDir, "0");
+        userZeroDir.mkdirs();
         mBaseUserPath = baseUserPath;
         FileUtils.setPermissions(mUsersDir.toString(),
                 FileUtils.S_IRWXU|FileUtils.S_IRWXG

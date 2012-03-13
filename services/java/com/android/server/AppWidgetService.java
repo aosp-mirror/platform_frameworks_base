@@ -325,9 +325,10 @@ class AppWidgetService extends IAppWidgetService.Stub
                     service.onConfigurationChanged();
                 }
             } else {
-                // TODO: Verify that this only needs to be delivered for the related user and not
-                // all the users
-                getImplForUser().onBroadcastReceived(intent);
+                for (int i = 0; i < mAppWidgetServices.size(); i++) {
+                    AppWidgetServiceImpl service = mAppWidgetServices.valueAt(i);
+                    service.onBroadcastReceived(intent);
+                }
             }
         }
     };
