@@ -100,6 +100,8 @@ final class WindowState implements WindowManagerPolicy.WindowState,
      */
     int mRequestedWidth;
     int mRequestedHeight;
+    int mLastRequestedWidth;
+    int mLastRequestedHeight;
 
     int mLayer;
     int mAnimLayer;
@@ -391,6 +393,8 @@ final class WindowState implements WindowManagerPolicy.WindowState,
         mSurface = null;
         mRequestedWidth = 0;
         mRequestedHeight = 0;
+        mLastRequestedWidth = 0;
+        mLastRequestedHeight = 0;
         mXOffset = 0;
         mYOffset = 0;
         mLayer = 0;
@@ -456,6 +460,11 @@ final class WindowState implements WindowManagerPolicy.WindowState,
             //Slog.i(TAG, "Window " + this + " content frame from " + mParentFrame
             //        + " to " + pf);
             mParentFrame.set(pf);
+            mContentChanged = true;
+        }
+        if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
+            mLastRequestedWidth = mRequestedWidth;
+            mLastRequestedHeight = mRequestedHeight;
             mContentChanged = true;
         }
 
@@ -1701,6 +1710,10 @@ final class WindowState implements WindowManagerPolicy.WindowState,
         pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
                 pw.print(" h="); pw.print(mRequestedHeight);
                 pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
+        if (mRequestedWidth != mLastRequestedWidth || mRequestedHeight != mLastRequestedHeight) {
+            pw.print(prefix); pw.print("LastRequested w="); pw.print(mLastRequestedWidth);
+                    pw.print(" h="); pw.println(mLastRequestedHeight);
+        }
         if (mAttachedWindow != null || mLayoutAttached) {
             pw.print(prefix); pw.print("mAttachedWindow="); pw.print(mAttachedWindow);
                     pw.print(" mLayoutAttached="); pw.println(mLayoutAttached);
