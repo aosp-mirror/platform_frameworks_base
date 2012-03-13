@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"允许应用程序读取用户可能在用户词典中已存储的任意私有字词、名称和短语。"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"写入用户定义的词典"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用程序向用户词典中写入新词。"</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"修改/删除 USB 存储设备内容"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"修改/删除 SD 卡中的内容"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"允许应用程序写入 USB 存储设备。"</string>

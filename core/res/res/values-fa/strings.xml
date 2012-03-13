@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"به برنامه اجازه می‎دهد هر گونه کلمه، نام، عبارت خصوصی را که کاربر در فرهنگ لغت خود ذخیره کرده است بخواند."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"نوشتن در فرهنگ لغت تعریف شده از سوی کاربر"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"به برنامه اجازه می‎دهد تا کلمات جدید را در فهرست کاربر بنویسد."</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"اصلاح/حذف محتواهای حافظه USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"اصلاح کردن/حذف محتویات کارت SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"به برنامه اجازه می‎دهد تا در حافظه USB بنویسد."</string>

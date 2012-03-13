@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Pinapayagan ang app na magbasa ng anumang pribadong mga salita, pangalan at parirala na maaaring inimbak ng user sa diksyunaryo ng user."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"magsulat sa diksyunaryong tinukoy ng user"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Pinapayagan ang app na magsulat ng mga bagong salita sa diksyunaryo ng user."</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"baguhin/tanggalin laman ng USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"baguhin/tanggalin ang mga nilalaman ng SD card"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Pinapayagan ang app na magsulat sa USB storage."</string>

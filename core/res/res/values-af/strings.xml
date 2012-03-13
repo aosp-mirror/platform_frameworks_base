@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Laat die program toe om enige private woorde, name en frases te lees wat die gebruiker in die gebruikerwoordeboek gestoor het."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"skryf na gebruikergedefinieerde woordeboek"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Laat die program toe om nuwe woorde in die gebruikerwoordeboek te skryf."</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"verander/vee uit USB-berging se inhoud"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"wysig/vee uit SD-kaart se inhoud"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Laat die program toe om die USB-geheue te skryf."</string>

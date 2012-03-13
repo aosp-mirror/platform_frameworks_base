@@ -764,6 +764,14 @@
     <skip />
     <!-- no translation found for permdesc_writeDictionary (8185385716255065291) -->
     <skip />
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <!-- no translation found for permlab_sdcardWrite (85430876310764752) -->
     <skip />
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modifitgar/stizzar cuntegns da la carta SD"</string>

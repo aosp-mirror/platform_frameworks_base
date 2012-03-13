@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Ermöglicht der App, alle privaten Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"In benutzerdefiniertes Wörterbuch schreiben"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Ermöglicht der App, dem Nutzerwörterbuch neue Einträge hinzuzufügen"</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"USB-Speicherinhalt ändern/löschen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SD-Karten-Inhalt ändern/löschen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Ermöglicht der App, in den USB-Speicher zu schreiben"</string>

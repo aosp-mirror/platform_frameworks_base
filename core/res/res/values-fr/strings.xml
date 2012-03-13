@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Permet à l\'application de lire tous les mots, noms et expressions privés que l\'utilisateur a pu enregistrer dans son dictionnaire personnel."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"enregistrer dans le dictionnaire défini par l\'utilisateur"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permet à l\'application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"Modifier/Supprimer contenu mémoire USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modifier/supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permet à l\'application de modifier le contenu de la mémoire de stockage USB."</string>
