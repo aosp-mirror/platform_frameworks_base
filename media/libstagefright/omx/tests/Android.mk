@@ -10,7 +10,7 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_C_INCLUDES := \
 	$(JNI_H_INCLUDE) \
 	frameworks/base/media/libstagefright \
-	$(TOP)/frameworks/base/include/media/stagefright/openmax
+	$(TOP)/frameworks/native/include/media/openmax
 
 LOCAL_MODULE := omx_tests
 

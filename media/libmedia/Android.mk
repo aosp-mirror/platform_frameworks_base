@@ -57,7 +57,7 @@ LOCAL_MODULE:= libmedia
 LOCAL_C_INCLUDES := \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, graphics corecg) \
-    $(TOP)/frameworks/base/include/media/stagefright/openmax \
+    $(TOP)/frameworks/native/include/media/openmax \
     external/icu4c/common \
     external/expat/lib \
     system/media/audio_effects/include \

@@ -57,8 +57,9 @@ LOCAL_SRC_FILES:=                         \
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
-        $(TOP)/frameworks/base/include/media/stagefright/openmax \
         $(TOP)/frameworks/base/include/media/stagefright/timedtext \
+        $(TOP)/frameworks/native/include/media/hardware \
+        $(TOP)/frameworks/native/include/media/openmax \
         $(TOP)/external/expat/lib \
         $(TOP)/external/flac/include \
         $(TOP)/external/tremolo \

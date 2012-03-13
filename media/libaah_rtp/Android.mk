@@ -21,9 +21,9 @@ LOCAL_SRC_FILES := \
 
 LOCAL_C_INCLUDES := \
     frameworks/base/include \
-    frameworks/base/include/media/stagefright/openmax \
     frameworks/base/media \
-    frameworks/base/media/libstagefright
+    frameworks/base/media/libstagefright \
+    frameworks/native/include/media/openmax
 
 LOCAL_SHARED_LIBRARIES := \
     libcommon_time_client \

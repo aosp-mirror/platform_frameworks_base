@@ -26,7 +26,7 @@
 #include <expat.h>
 #include <media/MediaProfiles.h>
 #include <media/stagefright/foundation/ADebug.h>
-#include <media/stagefright/openmax/OMX_Video.h>
+#include <OMX_Video.h>
 
 namespace android {
 

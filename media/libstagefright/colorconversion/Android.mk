@@ -6,7 +6,7 @@ LOCAL_SRC_FILES:=                     \
         SoftwareRenderer.cpp
 
 LOCAL_C_INCLUDES := \
-        $(TOP)/frameworks/base/include/media/stagefright/openmax \
+        $(TOP)/frameworks/native/include/media/openmax \
         $(TOP)/hardware/msm7k
 
 LOCAL_MODULE:= libstagefright_color_conversion
