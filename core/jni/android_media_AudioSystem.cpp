@@ -16,16 +16,16 @@
 */
 
 #define LOG_TAG "AudioSystem"
-#include "utils/Log.h"
+#include <utils/Log.h>
 
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
 
-#include "jni.h"
-#include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include <jni.h>
+#include <JNIHelp.h>
+#include <android_runtime/AndroidRuntime.h>
 
 #include <media/AudioSystem.h>
 

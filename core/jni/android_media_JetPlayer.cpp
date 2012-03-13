@@ -22,12 +22,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "jni.h"
-#include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include <jni.h>
+#include <JNIHelp.h>
+#include <android_runtime/AndroidRuntime.h>
 
-#include "utils/Log.h"
-#include "media/JetPlayer.h"
+#include <utils/Log.h>
+#include <media/JetPlayer.h>
 
 
 using namespace android;

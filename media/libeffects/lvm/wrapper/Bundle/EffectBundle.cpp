@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <new>
-#include <EffectBundle.h>
+#include "EffectBundle.h"
 
 
 // effect_handle_t interface implementation for bass boost

@@ -23,13 +23,13 @@
 #include <fcntl.h>
 #include <math.h>
 
-#include "jni.h"
-#include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include <jni.h>
+#include <JNIHelp.h>
+#include <android_runtime/AndroidRuntime.h>
 
-#include "utils/Log.h"
-#include "media/AudioRecord.h"
-#include "media/mediarecorder.h"
+#include <utils/Log.h>
+#include <media/AudioRecord.h>
+#include <media/mediarecorder.h>
 
 #include <cutils/bitops.h>
 
