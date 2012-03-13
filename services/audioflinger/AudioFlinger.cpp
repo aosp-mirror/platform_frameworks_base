@@ -723,8 +723,9 @@ float AudioFlinger::masterVolume_l() const
         AutoMutex lock(mHardwareLock);
 
         mHardwareStatus = AUDIO_HW_GET_MASTER_VOLUME;
-        assert(NULL != mPrimaryHardwareDev);
-        assert(NULL != mPrimaryHardwareDev->get_master_volume);
+        ALOG_ASSERT((NULL != mPrimaryHardwareDev) &&
+                    (NULL != mPrimaryHardwareDev->get_master_volume),
+                "can't get master volume");
 
         mPrimaryHardwareDev->get_master_volume(mPrimaryHardwareDev, &ret_val);
         mHardwareStatus = AUDIO_HW_IDLE;
@@ -2855,7 +2856,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::DirectOutputThread::prep
         tracksToRemove->add(trackToRemove);
         mActiveTracks.remove(trackToRemove);
         if (!mEffectChains.isEmpty()) {
-            ALOGV("stopping track on chain %p for session Id: %d", effectChains[0].get(),
+            ALOGV("stopping track on chain %p for session Id: %d", mEffectChains[0].get(),
                     trackToRemove->sessionId());
             mEffectChains[0]->decActiveTrackCnt();
         }
@@ -3884,7 +3885,7 @@ status_t AudioFlinger::PlaybackThread::TimedTrack::getNextBuffer(
         {
             Mutex::Autolock mttLock(mMediaTimeTransformLock);
 
-            assert(mMediaTimeTransformValid);
+            ALOG_ASSERT(mMediaTimeTransformValid, "media time transform invalid");
 
             if (mMediaTimeTransform.a_to_b_denom == 0) {
                 // the transform represents a pause, so yield silence
@@ -5486,7 +5487,7 @@ status_t AudioFlinger::closeOutput(audio_io_handle_t output)
 
     if (thread->type() != ThreadBase::DUPLICATING) {
         AudioStreamOut *out = thread->clearOutput();
-        assert(out != NULL);
+        ALOG_ASSERT(out != NULL, "out shouldn't be NULL");
         // from now on thread->mOutput is NULL
         out->hwDev->close_output_stream(out->hwDev, out->stream);
         delete out;
@@ -5629,7 +5630,7 @@ status_t AudioFlinger::closeInput(audio_io_handle_t input)
     // but the ThreadBase container still exists.
 
     AudioStreamIn *in = thread->clearInput();
-    assert(in != NULL);
+    ALOG_ASSERT(in != NULL, "in shouldn't be NULL");
     // from now on thread->mInput is NULL
     in->hwDev->close_input_stream(in->hwDev, in->stream);
     delete in;

@@ -18,7 +18,6 @@
 #define LOG_TAG "AudioMixer"
 //#define LOG_NDEBUG 0
 
-#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
@@ -29,6 +28,7 @@
 
 #include <cutils/bitops.h>
 #include <cutils/compiler.h>
+#include <utils/Debug.h>
 
 #include <system/audio.h>
 
@@ -46,7 +46,7 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
     :   mTrackNames(0), mSampleRate(sampleRate)
 {
     // AudioMixer is not yet capable of multi-channel beyond stereo
-    assert(2 == MAX_NUM_CHANNELS);
+    COMPILE_TIME_ASSERT_FUNCTION_SCOPE(2 == MAX_NUM_CHANNELS);
     
     LocalClock lc;
 
@@ -124,7 +124,7 @@ void AudioMixer::invalidateState(uint32_t mask)
 void AudioMixer::deleteTrackName(int name)
 {
     name -= TRACK0;
-    assert(uint32_t(name) < MAX_NUM_TRACKS);
+    ALOG_ASSERT(uint32_t(name) < MAX_NUM_TRACKS, "bad track name %d", name);
     ALOGV("deleteTrackName(%d)", name);
     track_t& track(mState.tracks[ name ]);
     if (track.enabled) {
@@ -146,7 +146,7 @@ void AudioMixer::deleteTrackName(int name)
 void AudioMixer::enable(int name)
 {
     name -= TRACK0;
-    assert(uint32_t(name) < MAX_NUM_TRACKS);
+    ALOG_ASSERT(uint32_t(name) < MAX_NUM_TRACKS, "bad track name %d", name);
     track_t& track = mState.tracks[name];
 
     if (!track.enabled) {
@@ -159,7 +159,7 @@ void AudioMixer::enable(int name)
 void AudioMixer::disable(int name)
 {
     name -= TRACK0;
-    assert(uint32_t(name) < MAX_NUM_TRACKS);
+    ALOG_ASSERT(uint32_t(name) < MAX_NUM_TRACKS, "bad track name %d", name);
     track_t& track = mState.tracks[name];
 
     if (track.enabled) {
@@ -172,7 +172,7 @@ void AudioMixer::disable(int name)
 void AudioMixer::setParameter(int name, int target, int param, void *value)
 {
     name -= TRACK0;
-    assert(uint32_t(name) < MAX_NUM_TRACKS);
+    ALOG_ASSERT(uint32_t(name) < MAX_NUM_TRACKS, "bad track name %d", name);
     track_t& track = mState.tracks[name];
 
     int valueInt = (int)value;
@@ -185,8 +185,9 @@ void AudioMixer::setParameter(int name, int target, int param, void *value)
         case CHANNEL_MASK: {
             uint32_t mask = (uint32_t)value;
             if (track.channelMask != mask) {
-                uint8_t channelCount = popcount(mask);
-                assert((channelCount <= MAX_NUM_CHANNELS) && (channelCount));
+                uint32_t channelCount = popcount(mask);
+                ALOG_ASSERT((channelCount <= MAX_NUM_CHANNELS) && (channelCount),
+                        "bad channel count %u", channelCount);
                 track.channelMask = mask;
                 track.channelCount = channelCount;
                 ALOGV("setParameter(TRACK, CHANNEL_MASK, %x)", mask);
@@ -208,15 +209,14 @@ void AudioMixer::setParameter(int name, int target, int param, void *value)
             }
             break;
         default:
-            // bad param
-            assert(false);
+            LOG_FATAL("bad param");
         }
         break;
 
     case RESAMPLE:
         switch (param) {
         case SAMPLE_RATE:
-            assert(valueInt > 0);
+            ALOG_ASSERT(valueInt > 0, "bad sample rate %d", valueInt);
             if (track.setResampler(uint32_t(valueInt), mSampleRate)) {
                 ALOGV("setParameter(RESAMPLE, SAMPLE_RATE, %u)",
                         uint32_t(valueInt));
@@ -228,8 +228,7 @@ void AudioMixer::setParameter(int name, int target, int param, void *value)
             invalidateState(1 << name);
             break;
         default:
-            // bad param
-            assert(false);
+            LOG_FATAL("bad param");
         }
         break;
 
@@ -257,7 +256,7 @@ void AudioMixer::setParameter(int name, int target, int param, void *value)
             }
             break;
         case AUXLEVEL:
-            //assert(0 <= valueInt && valueInt <= MAX_GAIN_INT);
+            //ALOG_ASSERT(0 <= valueInt && valueInt <= MAX_GAIN_INT, "bad aux level %d", valueInt);
             if (track.auxLevel != valueInt) {
                 ALOGV("setParameter(VOLUME, AUXLEVEL: %04x)", valueInt);
                 track.prevAuxLevel = track.auxLevel << 16;
@@ -277,14 +276,12 @@ void AudioMixer::setParameter(int name, int target, int param, void *value)
             }
             break;
         default:
-            // bad param
-            assert(false);
+            LOG_FATAL("bad param");
         }
         break;
 
     default:
-        // bad target
-        assert(false);
+        LOG_FATAL("bad target");
     }
 }
 
@@ -335,7 +332,7 @@ size_t AudioMixer::getUnreleasedFrames(int name) const
 void AudioMixer::setBufferProvider(int name, AudioBufferProvider* bufferProvider)
 {
     name -= TRACK0;
-    assert(uint32_t(name) < MAX_NUM_TRACKS);
+    ALOG_ASSERT(uint32_t(name) < MAX_NUM_TRACKS, "bad track name %d", name);
     mState.tracks[name].bufferProvider = bufferProvider;
 }
 
@@ -979,9 +976,9 @@ void AudioMixer::process__OneTrack16BitsStereoNoResampling(state_t* state,
     // This method is only called when state->enabledTracks has exactly
     // one bit set.  The asserts below would verify this, but are commented out
     // since the whole point of this method is to optimize performance.
-    //assert(0 != state->enabledTracks);
+    //ALOG_ASSERT(0 != state->enabledTracks, "no tracks enabled");
     const int i = 31 - __builtin_clz(state->enabledTracks);
-    //assert((1 << i) == state->enabledTracks);
+    //ALOG_ASSERT((1 << i) == state->enabledTracks, "more than 1 track enabled");
     const track_t& t = state->tracks[i];
 
     AudioBufferProvider::Buffer& b(t.buffer);
