@@ -63,10 +63,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Penolakan panggilan yang tidak diinginkan"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Pengiriman nomor panggilan"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Jangan ganggu"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nomor penelepon bawaan \"dibatasi\". Panggilan selanjutnya: Dibatasi"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nomor pengguna bawaan \"dibatasi\". Panggilan selanjutnya: Tidak dibatasi."</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nomor penelepon bawaan tidak dibatasi. Panggilan selanjutnya: Dibatasi"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nomor penelepon bawaan tidak dibatasi. Panggilan selanjutnya: Tidak dibatasi"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nomor penelepon default \"dibatasi\". Panggilan selanjutnya: Dibatasi"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nomor pengguna default \"dibatasi\". Panggilan selanjutnya: Tidak dibatasi."</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nomor penelepon default tidak dibatasi. Panggilan selanjutnya: Dibatasi"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nomor penelepon default tidak dibatasi. Panggilan selanjutnya: Tidak dibatasi"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Layanan tidak diperlengkapi."</string>
     <string name="CLIRPermanent" msgid="5460892159398802465">"Setelan nomor penelepon tidak dapat diubah."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Akses terbatas berubah"</string>
@@ -430,7 +430,7 @@
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Mengizinkan aplikasi mengatur wallpaper sistem."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"atur petunjuk ukuran wallpaper"</string>
     <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Mengizinkan aplikasi mengatur petunjuk ukuran wallpaper sistem."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"setel ulang sistem ke setelan bawaan pabrik"</string>
+    <string name="permlab_masterClear" msgid="2315750423139697397">"setel ulang sistem ke setelan default pabrik"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Mengizinkan aplikasi menyetel ulang sistem sepenuhnya ke setelan pabriknya, menghapus semua data, konfigurasi, dan aplikasi yang terpasang."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"atur waktu"</string>
     <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Izinkan aplikasi mengubah waktu jam pada tablet."</string>
@@ -690,10 +690,10 @@
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Anda telah salah memasukkan PIN <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Coba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> detik."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Anda telah salah menggambar pola pembuka kunci <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya yang gagal, Anda akan diminta membuka kunci tablet menggunakan info masuk Google."\n\n" Harap masuk lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Anda telah salah menggambar pola pembuka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, Anda akan diminta membuka kunci ponsel menggunakan info masuk Google."\n\n" Harap coba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> detik."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, tablet akan disetel ulang ke setelan bawaan pabrik dan semua data pengguna hilang."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, ponsel akan disetel ulang ke setelan bawaan pabrik dan semua data pengguna hilang."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini tablet akan disetel ulang ke setelan bawaan pabrik."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini ponsel akan disetel ulang ke setelan bawaan pabrik."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, tablet akan disetel ulang ke setelan default pabrik dan semua data pengguna hilang."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Setelah <xliff:g id="NUMBER_1">%d</xliff:g> upaya gagal lagi, ponsel akan disetel ulang ke setelan default pabrik dan semua data pengguna hilang."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Anda telah gagal mencoba membuka gembok tablet sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini tablet akan disetel ulang ke setelan default pabrik."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Anda telah gagal mencoba membuka gembok ponsel sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Kini ponsel akan disetel ulang ke setelan default pabrik."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Coba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> detik."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Lupa pola?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Pembuka kunci akun"</string>
@@ -902,8 +902,8 @@
     <string name="capital_on" msgid="1544682755514494298">"HIDUP"</string>
     <string name="capital_off" msgid="6815870386972805832">"MATI"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Tindakan lengkap menggunakan"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Gunakan secara bawaan untuk tindakan ini."</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Bersihkan bawaan pada Setelan Beranda &gt; Aplikasi &gt; Kelola aplikasi."</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Gunakan secara default untuk tindakan ini."</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Bersihkan default pada Setelan Beranda &gt; Aplikasi &gt; Kelola aplikasi."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Pilih tindakan"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Pilih sebuah aplikasi untuk perangkat USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Tidak ada aplikasi dapat melakukan tindakan ini."</string>
@@ -953,8 +953,8 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volume panggilan"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volume media"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume pemberitahuan"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Nada dering bawaan"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Nada dering bawaan (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Nada dering default"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Nada dering default (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Senyap"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Nada dering"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Nada dering tidak dikenal"</string>
@@ -994,7 +994,7 @@
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Setel waktu"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Setel tanggal"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Setel"</string>
-    <string name="default_permission_group" msgid="2690160991405646128">"Bawaan"</string>
+    <string name="default_permission_group" msgid="2690160991405646128">"Default"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Tidak perlu izin"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Sembunyikan"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Tampilkan semua"</b></string>
@@ -1061,8 +1061,8 @@
     <string name="activity_list_empty" msgid="4168820609403385789">"Tidak ditemukan aktivitas yang sesuai"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"perbarui statistik penggunaan komponen"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Mengizinkan modifikasi statistik penggunaan komponen yang dikumpulkan. Tidak untuk digunakan pada aplikasi normal."</string>
-    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Mengizinkan penjalanan layanan kontainer bawaan untuk menyalin isi. Tidak untuk penggunaan aplikasi normal."</string>
-    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Mengizinkan penjalanan layanan kontainer bawaan untuk menyalin isi. Tidak untuk penggunaan aplikasi normal."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Mengizinkan penjalanan layanan kontainer default untuk menyalin isi. Tidak untuk penggunaan aplikasi normal."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Mengizinkan penjalanan layanan kontainer default untuk menyalin isi. Tidak untuk penggunaan aplikasi normal."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Ketuk dua kali untuk kontrol perbesar/perkecil"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Galat mengembangkan widget"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Buka"</string>
