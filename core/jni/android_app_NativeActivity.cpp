@@ -162,12 +162,12 @@ int32_t AInputQueue::hasEvents() {
 int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
     *outEvent = NULL;
 
-    bool finishNow = false;
-
     char byteread;
     ssize_t nRead = read(mDispatchKeyRead, &byteread, 1);
+
+    Mutex::Autolock _l(mLock);
+
     if (nRead == 1) {
-        mLock.lock();
         if (mDispatchingKeys.size() > 0) {
             KeyEvent* kevent = mDispatchingKeys[0];
             *outEvent = kevent;
@@ -178,6 +178,8 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
             inflight.finishSeq = 0;
             mInFlightEvents.push(inflight);
         }
+
+        bool finishNow = false;
         if (mFinishPreDispatches.size() > 0) {
             finish_pre_dispatch finish(mFinishPreDispatches[0]);
             mFinishPreDispatches.removeAt(0);
@@ -193,7 +195,6 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
                 ALOGW("getEvent couldn't find inflight for seq %d", finish.seq);
             }
         }
-        mLock.unlock();
 
         if (finishNow) {
             finishEvent(*outEvent, true, false);
@@ -206,13 +207,18 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
 
     uint32_t consumerSeq;
     InputEvent* myEvent = NULL;
-    status_t res = mConsumer.consume(this, true /*consumeBatches*/, &consumerSeq, &myEvent);
+    status_t res = mConsumer.consume(&mPooledInputEventFactory, true /*consumeBatches*/,
+            &consumerSeq, &myEvent);
     if (res != android::OK) {
         if (res != android::WOULD_BLOCK) {
             ALOGW("channel '%s' ~ Failed to consume input event.  status=%d",
                     mConsumer.getChannel()->getName().string(), res);
         }
         return -1;
+    }
+
+    if (mConsumer.hasDeferredEvent()) {
+        wakeupDispatchLocked();
     }
 
     in_flight_event inflight;
@@ -255,7 +261,8 @@ void AInputQueue::finishEvent(AInputEvent* event, bool handled, bool didDefaultH
         return;
     }
 
-    mLock.lock();
+    Mutex::Autolock _l(mLock);
+
     const size_t N = mInFlightEvents.size();
     for (size_t i=0; i<N; i++) {
         const in_flight_event& inflight(mInFlightEvents[i]);
@@ -267,111 +274,82 @@ void AInputQueue::finishEvent(AInputEvent* event, bool handled, bool didDefaultH
                             mConsumer.getChannel()->getName().string(), res);
                 }
             }
-            if (static_cast<InputEvent*>(event)->getType() == AINPUT_EVENT_TYPE_KEY) {
-                mAvailKeyEvents.push(static_cast<KeyEvent*>(event));
-            } else {
-                mAvailMotionEvents.push(static_cast<MotionEvent*>(event));
-            }
+            mPooledInputEventFactory.recycle(static_cast<InputEvent*>(event));
             mInFlightEvents.removeAt(i);
-            mLock.unlock();
             return;
         }
     }
-    mLock.unlock();
-    
+
     ALOGW("finishEvent called for unknown event: %p", event);
 }
 
 void AInputQueue::dispatchEvent(android::KeyEvent* event) {
-    mLock.lock();
+    Mutex::Autolock _l(mLock);
+
     LOG_TRACE("dispatchEvent: dispatching=%d write=%d\n", mDispatchingKeys.size(),
             mDispatchKeyWrite);
     mDispatchingKeys.add(event);
-    wakeupDispatch();
-    mLock.unlock();
+    wakeupDispatchLocked();
 }
 
 void AInputQueue::finishPreDispatch(int seq, bool handled) {
-    mLock.lock();
+    Mutex::Autolock _l(mLock);
+
     LOG_TRACE("finishPreDispatch: seq=%d handled=%d\n", seq, handled ? 1 : 0);
     finish_pre_dispatch finish;
     finish.seq = seq;
     finish.handled = handled;
     mFinishPreDispatches.add(finish);
-    wakeupDispatch();
-    mLock.unlock();
+    wakeupDispatchLocked();
 }
 
 KeyEvent* AInputQueue::consumeUnhandledEvent() {
-    KeyEvent* event = NULL;
+    Mutex::Autolock _l(mLock);
 
-    mLock.lock();
+    KeyEvent* event = NULL;
     if (mUnhandledKeys.size() > 0) {
         event = mUnhandledKeys[0];
         mUnhandledKeys.removeAt(0);
     }
-    mLock.unlock();
 
     LOG_TRACE("consumeUnhandledEvent: KeyEvent=%p", event);
-
     return event;
 }
 
 KeyEvent* AInputQueue::consumePreDispatchingEvent(int* outSeq) {
-    KeyEvent* event = NULL;
+    Mutex::Autolock _l(mLock);
 
-    mLock.lock();
+    KeyEvent* event = NULL;
     if (mPreDispatchingKeys.size() > 0) {
         const in_flight_event& inflight(mPreDispatchingKeys[0]);
         event = static_cast<KeyEvent*>(inflight.event);
         *outSeq = inflight.seq;
         mPreDispatchingKeys.removeAt(0);
     }
-    mLock.unlock();
 
     LOG_TRACE("consumePreDispatchingEvent: KeyEvent=%p", event);
-
     return event;
 }
 
 KeyEvent* AInputQueue::createKeyEvent() {
-    mLock.lock();
-    KeyEvent* event;
-    if (mAvailKeyEvents.size() <= 0) {
-        event = new KeyEvent();
-    } else {
-        event = mAvailKeyEvents.top();
-        mAvailKeyEvents.pop();
-    }
-    mLock.unlock();
-    return event;
-}
+    Mutex::Autolock _l(mLock);
 
-MotionEvent* AInputQueue::createMotionEvent() {
-    mLock.lock();
-    MotionEvent* event;
-    if (mAvailMotionEvents.size() <= 0) {
-        event = new MotionEvent();
-    } else {
-        event = mAvailMotionEvents.top();
-        mAvailMotionEvents.pop();
-    }
-    mLock.unlock();
-    return event;
+    return mPooledInputEventFactory.createKeyEvent();
 }
 
 void AInputQueue::doUnhandledKey(KeyEvent* keyEvent) {
-    mLock.lock();
+    Mutex::Autolock _l(mLock);
+
     LOG_TRACE("Unhandled key: pending=%d write=%d\n", mUnhandledKeys.size(), mWorkWrite);
     if (mUnhandledKeys.size() <= 0 && mWorkWrite >= 0) {
         write_work(mWorkWrite, CMD_DEF_KEY);
     }
     mUnhandledKeys.add(keyEvent);
-    mLock.unlock();
 }
 
 bool AInputQueue::preDispatchKey(KeyEvent* keyEvent) {
-    mLock.lock();
+    Mutex::Autolock _l(mLock);
+
     LOG_TRACE("preDispatch key: pending=%d write=%d\n", mPreDispatchingKeys.size(), mWorkWrite);
     const size_t N = mInFlightEvents.size();
     for (size_t i=0; i<N; i++) {
@@ -380,7 +358,6 @@ bool AInputQueue::preDispatchKey(KeyEvent* keyEvent) {
             if (inflight.seq >= 0) {
                 // This event has already been pre-dispatched!
                 LOG_TRACE("Event already pre-dispatched!");
-                mLock.unlock();
                 return false;
             }
             mSeq++;
@@ -391,7 +368,6 @@ bool AInputQueue::preDispatchKey(KeyEvent* keyEvent) {
                 write_work(mWorkWrite, CMD_DEF_KEY);
             }
             mPreDispatchingKeys.add(inflight);
-            mLock.unlock();
             return true;
         }
     }
@@ -400,7 +376,7 @@ bool AInputQueue::preDispatchKey(KeyEvent* keyEvent) {
     return false;
 }
 
-void AInputQueue::wakeupDispatch() {
+void AInputQueue::wakeupDispatchLocked() {
 restart:
     char dummy = 0;
     int res = write(mDispatchKeyWrite, &dummy, sizeof(dummy));

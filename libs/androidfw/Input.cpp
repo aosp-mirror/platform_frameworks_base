@@ -683,6 +683,58 @@ bool MotionEvent::isTouchEvent(int32_t source, int32_t action) {
 }
 
 
+// --- PooledInputEventFactory ---
+
+PooledInputEventFactory::PooledInputEventFactory(size_t maxPoolSize) :
+        mMaxPoolSize(maxPoolSize) {
+}
+
+PooledInputEventFactory::~PooledInputEventFactory() {
+    for (size_t i = 0; i < mKeyEventPool.size(); i++) {
+        delete mKeyEventPool.itemAt(i);
+    }
+    for (size_t i = 0; i < mMotionEventPool.size(); i++) {
+        delete mMotionEventPool.itemAt(i);
+    }
+}
+
+KeyEvent* PooledInputEventFactory::createKeyEvent() {
+    if (!mKeyEventPool.isEmpty()) {
+        KeyEvent* event = mKeyEventPool.top();
+        mKeyEventPool.pop();
+        return event;
+    }
+    return new KeyEvent();
+}
+
+MotionEvent* PooledInputEventFactory::createMotionEvent() {
+    if (!mMotionEventPool.isEmpty()) {
+        MotionEvent* event = mMotionEventPool.top();
+        mMotionEventPool.pop();
+        return event;
+    }
+    return new MotionEvent();
+}
+
+void PooledInputEventFactory::recycle(InputEvent* event) {
+    switch (event->getType()) {
+    case AINPUT_EVENT_TYPE_KEY:
+        if (mKeyEventPool.size() < mMaxPoolSize) {
+            mKeyEventPool.push(static_cast<KeyEvent*>(event));
+            return;
+        }
+        break;
+    case AINPUT_EVENT_TYPE_MOTION:
+        if (mMotionEventPool.size() < mMaxPoolSize) {
+            mMotionEventPool.push(static_cast<MotionEvent*>(event));
+            return;
+        }
+        break;
+    }
+    delete event;
+}
+
+
 // --- VelocityTracker ---
 
 const uint32_t VelocityTracker::DEFAULT_DEGREE;

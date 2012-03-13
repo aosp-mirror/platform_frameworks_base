@@ -527,6 +527,10 @@ status_t InputConsumer::sendUnchainedFinishedSignal(uint32_t seq, bool handled) 
     return mChannel->sendMessage(&msg);
 }
 
+bool InputConsumer::hasDeferredEvent() const {
+    return mMsgDeferred;
+}
+
 bool InputConsumer::hasPendingBatch() const {
     return !mBatches.isEmpty();
 }

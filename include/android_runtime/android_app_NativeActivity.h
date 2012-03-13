@@ -65,7 +65,7 @@ extern void android_NativeActivity_hideSoftInput(
  *      b. Java sends event through default key handler.
  *      c. event is finished.
  */
-struct AInputQueue : public android::InputEventFactoryInterface {
+struct AInputQueue {
 public:
     /* Creates a consumer associated with an input channel. */
     explicit AInputQueue(const android::sp<android::InputChannel>& channel, int workWrite);
@@ -96,16 +96,16 @@ public:
     android::KeyEvent* consumeUnhandledEvent();
     android::KeyEvent* consumePreDispatchingEvent(int* outSeq);
 
-    virtual android::KeyEvent* createKeyEvent();
-    virtual android::MotionEvent* createMotionEvent();
+    android::KeyEvent* createKeyEvent();
 
     int mWorkWrite;
 
 private:
     void doUnhandledKey(android::KeyEvent* keyEvent);
     bool preDispatchKey(android::KeyEvent* keyEvent);
-    void wakeupDispatch();
+    void wakeupDispatchLocked();
 
+    android::PooledInputEventFactory mPooledInputEventFactory;
     android::InputConsumer mConsumer;
     android::sp<android::Looper> mLooper;
 
@@ -126,11 +126,6 @@ private:
     android::Mutex mLock;
 
     int mSeq;
-
-    // Cache of previously allocated key events.
-    android::Vector<android::KeyEvent*> mAvailKeyEvents;
-    // Cache of previously allocated motion events.
-    android::Vector<android::MotionEvent*> mAvailMotionEvents;
 
     // All input events that are actively being processed.
     android::Vector<in_flight_event> mInFlightEvents;
