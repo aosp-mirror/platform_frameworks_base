@@ -81,6 +81,9 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
 
     private final static String TAG = "CountryDetector";
 
+    /** Whether to dump the state of the country detector service to bugreports */
+    private static final boolean DEBUG = false;
+
     private final HashMap<IBinder, Receiver> mReceivers;
     private final Context mContext;
     private ComprehensiveCountryDetector mCountryDetector;
@@ -206,8 +209,10 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
         return mSystemReady;
     }
 
+    @SuppressWarnings("unused")
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        if (!DEBUG) return;
         try {
             final Printer p = new PrintWriterPrinter(fout);
             p.println("CountryDetectorService state:");
