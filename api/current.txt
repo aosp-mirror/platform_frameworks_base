@@ -75,6 +75,7 @@ package android {
     field public static final deprecated java.lang.String PERSISTENT_ACTIVITY = "android.permission.PERSISTENT_ACTIVITY";
     field public static final java.lang.String PROCESS_OUTGOING_CALLS = "android.permission.PROCESS_OUTGOING_CALLS";
     field public static final java.lang.String READ_CALENDAR = "android.permission.READ_CALENDAR";
+    field public static final java.lang.String READ_CALL_LOG = "android.permission.READ_CALL_LOG";
     field public static final java.lang.String READ_CONTACTS = "android.permission.READ_CONTACTS";
     field public static final java.lang.String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     field public static final java.lang.String READ_FRAME_BUFFER = "android.permission.READ_FRAME_BUFFER";
@@ -121,6 +122,7 @@ package android {
     field public static final java.lang.String WAKE_LOCK = "android.permission.WAKE_LOCK";
     field public static final java.lang.String WRITE_APN_SETTINGS = "android.permission.WRITE_APN_SETTINGS";
     field public static final java.lang.String WRITE_CALENDAR = "android.permission.WRITE_CALENDAR";
+    field public static final java.lang.String WRITE_CALL_LOG = "android.permission.WRITE_CALL_LOG";
     field public static final java.lang.String WRITE_CONTACTS = "android.permission.WRITE_CONTACTS";
     field public static final java.lang.String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     field public static final java.lang.String WRITE_GSERVICES = "android.permission.WRITE_GSERVICES";
