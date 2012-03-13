@@ -30,8 +30,6 @@ import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 
-import java.lang.reflect.Array;
-
 /**
  * Represents a line of styled text, for measuring in visual order and
  * for rendering.
@@ -858,78 +856,6 @@ class TextLine {
         }
 
         return runIsRtl ? -ret : ret;
-    }
-
-    private static class SpanSet<E> {
-        int numberOfSpans;
-        E[] spans;
-        int[] spanStarts;
-        int[] spanEnds;
-        int[] spanFlags;
-        final Class<? extends E> classType;
-
-        SpanSet(Class<? extends E> type) {
-            classType = type;
-            numberOfSpans = 0;
-        }
-
-        @SuppressWarnings("unchecked")
-        public void init(Spanned spanned, int start, int limit) {
-            final E[] allSpans = spanned.getSpans(start, limit, classType);
-            final int length = allSpans.length;
-
-            if (length > 0 && (spans == null || spans.length < length)) {
-                // These arrays may end up being too large because of empty spans
-                spans = (E[]) Array.newInstance(classType, length);
-                spanStarts = new int[length];
-                spanEnds = new int[length];
-                spanFlags = new int[length];
-            }
-
-            numberOfSpans = 0;
-            for (int i = 0; i < length; i++) {
-                final E span = allSpans[i];
-
-                final int spanStart = spanned.getSpanStart(span);
-                final int spanEnd = spanned.getSpanEnd(span);
-                if (spanStart == spanEnd) continue;
-
-                final int spanFlag = spanned.getSpanFlags(span);
-
-                spans[numberOfSpans] = span;
-                spanStarts[numberOfSpans] = spanStart;
-                spanEnds[numberOfSpans] = spanEnd;
-                spanFlags[numberOfSpans] = spanFlag;
-
-                numberOfSpans++;
-            }
-        }
-
-        public boolean hasSpansIntersecting(int start, int end) {
-            for (int i = 0; i < numberOfSpans; i++) {
-                // equal test is valid since both intervals are not empty by construction
-                if (spanStarts[i] >= end || spanEnds[i] <= start) continue;
-                return true;
-            }
-            return false;
-        }
-
-        int getNextTransition(int start, int limit) {
-            for (int i = 0; i < numberOfSpans; i++) {
-                final int spanStart = spanStarts[i];
-                final int spanEnd = spanEnds[i];
-                if (spanStart > start && spanStart < limit) limit = spanStart;
-                if (spanEnd > start && spanEnd < limit) limit = spanEnd;
-            }
-            return limit;
-        }
-
-        public void recycle() {
-            // The spans array is guaranteed to be not null when numberOfSpans is > 0
-            for (int i = 0; i < numberOfSpans; i++) {
-                spans[i] = null; // prevent a leak: no reference kept when TextLine is recycled
-            }
-        }
     }
 
     /**
