@@ -15,10 +15,6 @@
 #include <utils/Log.h>
 
 #include <SurfaceFlinger.h>
-#include <AudioFlinger.h>
-#include <CameraService.h>
-#include <AudioPolicyService.h>
-#include <MediaPlayerService.h>
 #include <SensorService.h>
 
 #include <android_runtime/AndroidRuntime.h>
