@@ -26489,6 +26489,7 @@ package android.widget {
     ctor public FrameLayout(android.content.Context, android.util.AttributeSet, int);
     method public deprecated boolean getConsiderGoneChildrenWhenMeasuring();
     method public android.graphics.drawable.Drawable getForeground();
+    method public int getForegroundGravity();
     method public boolean getMeasureAllChildren();
     method protected void onLayout(boolean, int, int, int, int);
     method public void setForeground(android.graphics.drawable.Drawable);
@@ -26717,6 +26718,7 @@ package android.widget {
     ctor public LinearLayout(android.content.Context, android.util.AttributeSet);
     ctor public LinearLayout(android.content.Context, android.util.AttributeSet, int);
     method public int getBaselineAlignedChildIndex();
+    method public android.graphics.drawable.Drawable getDividerDrawable();
     method public int getDividerPadding();
     method public int getOrientation();
     method public int getShowDividers();
@@ -27141,6 +27143,7 @@ package android.widget {
     ctor public RelativeLayout(android.content.Context);
     ctor public RelativeLayout(android.content.Context, android.util.AttributeSet);
     ctor public RelativeLayout(android.content.Context, android.util.AttributeSet, int);
+    method public int getGravity();
     method protected void onLayout(boolean, int, int, int, int);
     method public void setGravity(int);
     method public void setHorizontalGravity(int);

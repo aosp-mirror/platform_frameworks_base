@@ -235,9 +235,24 @@ public class LinearLayout extends ViewGroup {
     }
 
     /**
+     * @return the divider Drawable that will divide each item.
+     *
+     * @see #setDividerDrawable(Drawable)
+     *
+     * @attr ref android.R.styleable#LinearLayout_divider
+     */
+    public Drawable getDividerDrawable() {
+        return mDivider;
+    }
+
+    /**
      * Set a drawable to be used as a divider between items.
+     *
      * @param divider Drawable that will divide each item.
+     *
      * @see #setShowDividers(int)
+     *
+     * @attr ref android.R.styleable#LinearLayout_divider
      */
     public void setDividerDrawable(Drawable divider) {
         if (divider == mDivider) {
@@ -398,6 +413,8 @@ public class LinearLayout extends ViewGroup {
      * 
      * @return True to measure children with a weight using the minimum
      *         size of the largest child, false otherwise.
+     *
+     * @attr ref android.R.styleable#LinearLayout_measureWithLargestChild
      */
     public boolean isMeasureWithLargestChildEnabled() {
         return mUseLargestChild;
@@ -412,6 +429,8 @@ public class LinearLayout extends ViewGroup {
      * 
      * @param enabled True to measure children with a weight using the
      *        minimum size of the largest child, false otherwise.
+     *
+     * @attr ref android.R.styleable#LinearLayout_measureWithLargestChild
      */
     @android.view.RemotableViewMethod
     public void setMeasureWithLargestChildEnabled(boolean enabled) {

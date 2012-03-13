@@ -122,9 +122,24 @@ public class FrameLayout extends ViewGroup {
     }
 
     /**
+     * Describes how the foreground is positioned.
+     *
+     * @return foreground gravity.
+     *
+     * @see #setForegroundGravity(int)
+     *
+     * @attr ref android.R.styleable#FrameLayout_foregroundGravity
+     */
+    public int getForegroundGravity() {
+        return mForegroundGravity;
+    }
+
+    /**
      * Describes how the foreground is positioned. Defaults to START and TOP.
      *
      * @param foregroundGravity See {@link android.view.Gravity}
+     *
+     * @see #getForegroundGravity()
      *
      * @attr ref android.R.styleable#FrameLayout_foregroundGravity
      */
