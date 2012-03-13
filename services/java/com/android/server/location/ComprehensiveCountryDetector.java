@@ -202,7 +202,7 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
         if (mDebugLogs.size() >= MAX_LENGTH_DEBUG_LOGS) {
             mDebugLogs.poll();
         }
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
+        if (DEBUG) {
             Slog.d(TAG, country.toString());
         }
         mDebugLogs.add(country);
@@ -394,7 +394,7 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
     private void notifyIfCountryChanged(final Country country, final Country detectedCountry) {
         if (detectedCountry != null && mListener != null
                 && (country == null || !country.equals(detectedCountry))) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Slog.d(TAG, "" + country + " --> " + detectedCountry);
             }
             notifyListener(detectedCountry);
