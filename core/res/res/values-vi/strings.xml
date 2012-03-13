@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Cho phép ứng dụng đọc bất kỳ từ, tên và cụm từ riêng nào mà người dùng có thể đã lưu trữ trong từ điển của người dùng."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"ghi vào từ điển do người dùng xác định"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Cho phép ứng dụng ghi từ mới vào từ điển của người dùng."</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"sửa đổi/xóa nội dung bộ nhớ USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"sửa đổi/xóa nội dung thẻ SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Cho phép ứng dụng ghi vào bộ lưu trữ USB."</string>

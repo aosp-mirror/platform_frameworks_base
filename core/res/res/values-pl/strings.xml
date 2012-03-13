@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Pozwala aplikacji na odczytywanie wszelkich prywatnych słów, nazw i wyrażeń zapisanych w słowniku użytkownika."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"zapisywanie w słowniku zdefiniowanym przez użytkownika"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Pozwala aplikacji na zapisywanie nowych słów do słownika użytkownika."</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"Modyfikowanie/usuwanie z nośnika USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modyfikowanie/usuwanie zawartości karty SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Pozwala aplikacji na zapis w pamięci USB."</string>

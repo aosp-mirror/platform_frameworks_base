@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Permet que l\'aplicació llegeixi les paraules, els noms i les frases privats que l\'usuari pot haver emmagatzemat al seu diccionari."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"escriu al diccionari definit per l\'usuari"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permet que l\'aplicació escrigui paraules noves al diccionari de l\'usuari."</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modificar/esborrar contingut USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modificar/esborrar contingut de la targeta SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permet que l\'aplicació escrigui a l\'emmagatzematge USB."</string>

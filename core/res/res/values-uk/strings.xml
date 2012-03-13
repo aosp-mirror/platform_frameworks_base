@@ -499,6 +499,14 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Дозволяє програмі читати будь-які особисті вислови, назви та фрази, які користувач міг зберегти у своєму словнику."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"писати у вказаний користувачем словник"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозволяє програмі писати нові слова в словник користувача."</string>
+    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
+    <skip />
+    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
+    <skip />
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"змінювати/видаляти вміст носія USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"змінювати/видал. вміст карти SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозволяє програмі писати на носій USB"</string>
