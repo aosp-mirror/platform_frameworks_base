@@ -33,7 +33,8 @@ public:
     virtual status_t start() { return mSource->start(); }
     virtual status_t stop() { return mSource->stop(); }
     virtual status_t read(
-            int64_t *timeUs,
+            int64_t *startTimeUs,
+            int64_t *endTimeUs,
             Parcel *parcel,
             const MediaSource::ReadOptions *options = NULL);
     virtual status_t extractGlobalDescriptions(Parcel *parcel);

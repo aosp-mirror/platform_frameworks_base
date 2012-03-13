@@ -67,6 +67,7 @@ private:
     void doRead(MediaSource::ReadOptions* options = NULL);
     void onTextEvent();
     void postTextEvent(const sp<ParcelEvent>& parcel = NULL, int64_t timeUs = -1);
+    void postTextEventDelayUs(const sp<ParcelEvent>& parcel = NULL, int64_t delayUs = -1);
     void notifyError(int error = 0);
     void notifyListener(const Parcel *parcel = NULL);
 

@@ -31,6 +31,7 @@
 namespace android {
 
 static const int64_t kAdjustmentProcessingTimeUs = 100000ll;
+static const int64_t kWaitTimeUsToRetryRead = 100000ll;
 
 TimedTextPlayer::TimedTextPlayer(const wp<MediaPlayerBase> &listener)
     : mListener(listener),
@@ -139,13 +140,25 @@ void TimedTextPlayer::doSeekAndRead(int64_t seekTimeUs) {
 }
 
 void TimedTextPlayer::doRead(MediaSource::ReadOptions* options) {
-    int64_t timeUs = 0;
+    int64_t startTimeUs = 0;
+    int64_t endTimeUs = 0;
     sp<ParcelEvent> parcelEvent = new ParcelEvent();
-    status_t err = mSource->read(&timeUs, &(parcelEvent->parcel), options);
-    if (err != OK) {
+    status_t err = mSource->read(&startTimeUs, &endTimeUs,
+                                 &(parcelEvent->parcel), options);
+    if (err == WOULD_BLOCK) {
+        postTextEventDelayUs(NULL, kWaitTimeUsToRetryRead);
+        return;
+    } else if (err != OK) {
         notifyError(err);
-    } else {
-        postTextEvent(parcelEvent, timeUs);
+        return;
+    }
+
+    postTextEvent(parcelEvent, startTimeUs);
+    if (endTimeUs > 0) {
+        CHECK_GE(endTimeUs, startTimeUs);
+        // send an empty timed text to clear the subtitle when it reaches to the
+        // end time.
+        postTextEvent(NULL, endTimeUs);
     }
 }
 
@@ -162,6 +175,13 @@ void TimedTextPlayer::postTextEvent(const sp<ParcelEvent>& parcel, int64_t timeU
         } else {
             delayUs = timeUs - positionUs - kAdjustmentProcessingTimeUs;
         }
+        postTextEventDelayUs(parcel, delayUs);
+    }
+}
+
+void TimedTextPlayer::postTextEventDelayUs(const sp<ParcelEvent>& parcel, int64_t delayUs) {
+    sp<MediaPlayerBase> listener = mListener.promote();
+    if (listener != NULL) {
         sp<AMessage> msg = new AMessage(kWhatSendSubtitle, id());
         msg->setInt32("generation", mSendSubtitleGeneration);
         if (parcel != NULL) {

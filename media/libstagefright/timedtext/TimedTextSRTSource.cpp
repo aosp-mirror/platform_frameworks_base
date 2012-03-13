@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include <binder/Parcel.h>
+#include <media/stagefright/foundation/ADebug.h>  // for CHECK_xx
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaDefs.h>  // for MEDIA_MIMETYPE_xxx
@@ -63,19 +64,18 @@ status_t TimedTextSRTSource::stop() {
 }
 
 status_t TimedTextSRTSource::read(
-        int64_t *timeUs,
+        int64_t *startTimeUs,
+        int64_t *endTimeUs,
         Parcel *parcel,
         const MediaSource::ReadOptions *options) {
-    int64_t endTimeUs;
     AString text;
-    status_t err = getText(options, &text, timeUs, &endTimeUs);
+    status_t err = getText(options, &text, startTimeUs, endTimeUs);
     if (err != OK) {
         return err;
     }
 
-    if (*timeUs > 0) {
-        extractAndAppendLocalDescriptions(*timeUs, text, parcel);
-    }
+    CHECK_GE(*startTimeUs, 0);
+    extractAndAppendLocalDescriptions(*startTimeUs, text, parcel);
     return OK;
 }
 

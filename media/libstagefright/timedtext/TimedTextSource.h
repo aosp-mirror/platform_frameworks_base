@@ -43,7 +43,8 @@ class TimedTextSource : public RefBase {
   virtual status_t stop() = 0;
   // Returns subtitle parcel and its start time.
   virtual status_t read(
-          int64_t *timeUs,
+          int64_t *startTimeUs,
+          int64_t *endTimeUs,
           Parcel *parcel,
           const MediaSource::ReadOptions *options = NULL) = 0;
   virtual status_t extractGlobalDescriptions(Parcel *parcel) {

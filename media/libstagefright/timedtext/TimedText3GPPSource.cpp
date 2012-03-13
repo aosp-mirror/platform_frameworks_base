@@ -39,19 +39,21 @@ TimedText3GPPSource::~TimedText3GPPSource() {
 }
 
 status_t TimedText3GPPSource::read(
-        int64_t *timeUs, Parcel *parcel, const MediaSource::ReadOptions *options) {
+        int64_t *startTimeUs, int64_t *endTimeUs, Parcel *parcel,
+        const MediaSource::ReadOptions *options) {
     MediaBuffer *textBuffer = NULL;
     status_t err = mSource->read(&textBuffer, options);
     if (err != OK) {
         return err;
     }
     CHECK(textBuffer != NULL);
-    textBuffer->meta_data()->findInt64(kKeyTime, timeUs);
-    // TODO: this is legacy code. when 'timeUs' can be <= 0?
-    if (*timeUs > 0) {
-        extractAndAppendLocalDescriptions(*timeUs, textBuffer, parcel);
-    }
+    textBuffer->meta_data()->findInt64(kKeyTime, startTimeUs);
+    CHECK_GE(*startTimeUs, 0);
+    extractAndAppendLocalDescriptions(*startTimeUs, textBuffer, parcel);
     textBuffer->release();
+    // endTimeUs is a dummy parameter for 3gpp timed text format.
+    // Set a negative value to it to mark it is unavailable.
+    *endTimeUs = -1;
     return OK;
 }
 
