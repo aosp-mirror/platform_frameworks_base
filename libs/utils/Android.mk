@@ -51,30 +51,41 @@ commonSources:= \
 	ZipUtils.cpp \
 	misc.cpp
 
-
-# For the host
-# =====================================================
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES:= $(commonSources)
-
-LOCAL_MODULE:= libutils
-
-LOCAL_CFLAGS += -DLIBUTILS_NATIVE=1 $(TOOL_CFLAGS)
-LOCAL_C_INCLUDES += external/zlib
+host_commonCflags := -DLIBUTILS_NATIVE=1 $(TOOL_CFLAGS)
 
 ifeq ($(HOST_OS),windows)
 ifeq ($(strip $(USE_CYGWIN),),)
 # Under MinGW, ctype.h doesn't need multi-byte support
-LOCAL_CFLAGS += -DMB_CUR_MAX=1
+host_commonCflags += -DMB_CUR_MAX=1
 endif
 endif
+
+host_commonLdlibs :=
 
 ifeq ($(TARGET_OS),linux)
-LOCAL_LDLIBS += -lrt -ldl
+host_commonLdlibs += -lrt -ldl
 endif
 
+
+# For the host
+# =====================================================
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES:= $(commonSources)
+LOCAL_MODULE:= libutils
+LOCAL_CFLAGS += $(host_commonCflags)
+LOCAL_LDLIBS += $(host_commonLdlibs)
+LOCAL_C_INCLUDES += external/zlib
+include $(BUILD_HOST_STATIC_LIBRARY)
+
+
+# For the host, 64-bit
+# =====================================================
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES:= $(commonSources)
+LOCAL_MODULE:= lib64utils
+LOCAL_CFLAGS += $(host_commonCflags) -m64
+LOCAL_LDLIBS += $(host_commonLdlibs)
+LOCAL_C_INCLUDES += external/zlib
 include $(BUILD_HOST_STATIC_LIBRARY)
 
 
