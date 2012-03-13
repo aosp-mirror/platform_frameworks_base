@@ -56,8 +56,8 @@
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Tidak ada apl terpasang yang bekerja dengan aksesori USB ini. Pelajari lebih lanjut tentang aksesori ini di <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Aksesori USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Lihat"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Gunakan secara bawaan untuk perangkat USB ini"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Gunakan secara bawaan untuk aksesori USB ini"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Gunakan secara default untuk perangkat USB ini"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Gunakan secara default untuk aksesori USB ini"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Perbesar utk mengisi layar"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rentangkn utk mngisi layar"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Perbesar/perkecil untuk kompatibilitas"</string>
