@@ -11,12 +11,12 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libbinder
 
-base := $(LOCAL_PATH)/../..
-
+# FIXME The duplicate audioflinger is temporary
 LOCAL_C_INCLUDES := \
-    $(base)/services/audioflinger \
-    $(base)/services/camera/libcameraservice \
-    $(base)/media/libmediaplayerservice
+    frameworks/native/services/audioflinger \
+    frameworks/base/services/audioflinger \
+    frameworks/base/services/camera/libcameraservice \
+    frameworks/base/media/libmediaplayerservice
 
 LOCAL_MODULE:= mediaserver
 
