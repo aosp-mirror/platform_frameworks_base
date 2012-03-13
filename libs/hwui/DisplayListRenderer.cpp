@@ -16,11 +16,11 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include <SkCamera.h>
 
 #include "DisplayListLogBuffer.h"
 #include "DisplayListRenderer.h"
 #include "Caches.h"
-#include "SkCamera.h"
 
 namespace android {
 namespace uirenderer {
