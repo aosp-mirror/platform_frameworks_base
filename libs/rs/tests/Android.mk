@@ -22,9 +22,15 @@ LOCAL_MODULE:= rstest-compute
 
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_C_INCLUDES +=  .. \
-	frameworks/base/libs/rs \
-	out/target/product/stingray/obj/SHARED_LIBRARIES/libRS_intermediates	
+intermediates := $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,TARGET,)
+librs_generated_headers := \
+    $(intermediates)/rsgApiStructs.h \
+    $(intermediates)/rsgApiFuncDecl.h
+LOCAL_GENERATED_SOURCES := $(librs_generated_headers)
+
+LOCAL_C_INCLUDES += frameworks/base/libs/rs
+LOCAL_C_INCLUDES += $(intermediates)
+
 
 include $(BUILD_EXECUTABLE)
 
