@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import com.android.internal.R;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
@@ -55,6 +57,7 @@ import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -4543,76 +4546,91 @@ public final class ActivityManagerService extends ActivityManagerNative
         throw new SecurityException(msg);
     }
 
-    private final boolean checkHoldingPermissionsLocked(IPackageManager pm,
-            ProviderInfo pi, Uri uri, int uid, int modeFlags) {
-        boolean readPerm = (modeFlags&Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0;
-        boolean writePerm = (modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0;
+    /**
+     * Determine if UID is holding permissions required to access {@link Uri} in
+     * the given {@link ProviderInfo}. Final permission checking is always done
+     * in {@link ContentProvider}.
+     */
+    private final boolean checkHoldingPermissionsLocked(
+            IPackageManager pm, ProviderInfo pi, Uri uri, int uid, int modeFlags) {
         if (DEBUG_URI_PERMISSION) Slog.v(TAG,
                 "checkHoldingPermissionsLocked: uri=" + uri + " uid=" + uid);
+
+        if (pi.applicationInfo.uid == uid) {
+            return true;
+        } else if (!pi.exported) {
+            return false;
+        }
+
+        boolean readMet = (modeFlags & Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0;
+        boolean writeMet = (modeFlags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0;
         try {
-            // Is the component private from the target uid?
-            final boolean prv = !pi.exported && pi.applicationInfo.uid != uid;
-
-            // Acceptable if the there is no read permission needed from the
-            // target or the target is holding the read permission.
-            if (!readPerm) {
-                if ((!prv && pi.readPermission == null) ||
-                        (pm.checkUidPermission(pi.readPermission, uid)
-                                == PackageManager.PERMISSION_GRANTED)) {
-                    readPerm = true;
-                }
+            // check if target holds top-level <provider> permissions
+            if (!readMet && pi.readPermission != null
+                    && (pm.checkUidPermission(pi.readPermission, uid) == PERMISSION_GRANTED)) {
+                readMet = true;
+            }
+            if (!writeMet && pi.writePermission != null
+                    && (pm.checkUidPermission(pi.writePermission, uid) == PERMISSION_GRANTED)) {
+                writeMet = true;
             }
 
-            // Acceptable if the there is no write permission needed from the
-            // target or the target is holding the read permission.
-            if (!writePerm) {
-                if (!prv && (pi.writePermission == null) ||
-                        (pm.checkUidPermission(pi.writePermission, uid)
-                                == PackageManager.PERMISSION_GRANTED)) {
-                    writePerm = true;
-                }
-            }
+            // track if unprotected read/write is allowed; any denied
+            // <path-permission> below removes this ability
+            boolean allowDefaultRead = pi.readPermission == null;
+            boolean allowDefaultWrite = pi.writePermission == null;
 
-            // Acceptable if there is a path permission matching the URI that
-            // the target holds the permission on.
-            PathPermission[] pps = pi.pathPermissions;
-            if (pps != null && (!readPerm || !writePerm)) {
+            // check if target holds any <path-permission> that match uri
+            final PathPermission[] pps = pi.pathPermissions;
+            if (pps != null) {
                 final String path = uri.getPath();
                 int i = pps.length;
-                while (i > 0 && (!readPerm || !writePerm)) {
+                while (i > 0 && (!readMet || !writeMet)) {
                     i--;
                     PathPermission pp = pps[i];
-                    if (!readPerm) {
-                        final String pprperm = pp.getReadPermission();
-                        if (DEBUG_URI_PERMISSION) Slog.v(TAG, "Checking read perm for "
-                                + pprperm + " for " + pp.getPath()
-                                + ": match=" + pp.match(path)
-                                + " check=" + pm.checkUidPermission(pprperm, uid));
-                        if (pprperm != null && pp.match(path) &&
-                                (pm.checkUidPermission(pprperm, uid)
-                                        == PackageManager.PERMISSION_GRANTED)) {
-                            readPerm = true;
+                    if (pp.match(path)) {
+                        if (!readMet) {
+                            final String pprperm = pp.getReadPermission();
+                            if (DEBUG_URI_PERMISSION) Slog.v(TAG, "Checking read perm for "
+                                    + pprperm + " for " + pp.getPath()
+                                    + ": match=" + pp.match(path)
+                                    + " check=" + pm.checkUidPermission(pprperm, uid));
+                            if (pprperm != null) {
+                                if (pm.checkUidPermission(pprperm, uid) == PERMISSION_GRANTED) {
+                                    readMet = true;
+                                } else {
+                                    allowDefaultRead = false;
+                                }
+                            }
                         }
-                    }
-                    if (!writePerm) {
-                        final String ppwperm = pp.getWritePermission();
-                        if (DEBUG_URI_PERMISSION) Slog.v(TAG, "Checking write perm "
-                                + ppwperm + " for " + pp.getPath()
-                                + ": match=" + pp.match(path)
-                                + " check=" + pm.checkUidPermission(ppwperm, uid));
-                        if (ppwperm != null && pp.match(path) &&
-                                (pm.checkUidPermission(ppwperm, uid)
-                                        == PackageManager.PERMISSION_GRANTED)) {
-                            writePerm = true;
+                        if (!writeMet) {
+                            final String ppwperm = pp.getWritePermission();
+                            if (DEBUG_URI_PERMISSION) Slog.v(TAG, "Checking write perm "
+                                    + ppwperm + " for " + pp.getPath()
+                                    + ": match=" + pp.match(path)
+                                    + " check=" + pm.checkUidPermission(ppwperm, uid));
+                            if (ppwperm != null) {
+                                if (pm.checkUidPermission(ppwperm, uid) == PERMISSION_GRANTED) {
+                                    writeMet = true;
+                                } else {
+                                    allowDefaultWrite = false;
+                                }
+                            }
                         }
                     }
                 }
             }
+
+            // grant unprotected <provider> read/write, if not blocked by
+            // <path-permission> above
+            if (allowDefaultRead) readMet = true;
+            if (allowDefaultWrite) writeMet = true;
+
         } catch (RemoteException e) {
             return false;
         }
 
-        return readPerm && writePerm;
+        return readMet && writeMet;
     }
 
     private final boolean checkUriPermissionLocked(Uri uri, int uid,
@@ -5819,6 +5837,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         return providers;
     }
 
+    /**
+     * Check if {@link ProcessRecord} has a possible chance at accessing the
+     * given {@link ProviderInfo}. Final permission checking is always done
+     * in {@link ContentProvider}.
+     */
     private final String checkContentProviderPermissionLocked(
             ProviderInfo cpi, ProcessRecord r) {
         final int callingPid = (r != null) ? r.pid : Binder.getCallingPid();
