@@ -91,7 +91,9 @@ void DisplayList::outputLogBuffer(int fd) {
     fflush(file);
 }
 
-DisplayList::DisplayList(const DisplayListRenderer& recorder) {
+DisplayList::DisplayList(const DisplayListRenderer& recorder) :
+    mTransformMatrix(NULL), mTransformCamera(NULL), mTransformMatrix3D(NULL) {
+
     initFromDisplayListRenderer(recorder);
 }
 
@@ -124,9 +126,6 @@ void DisplayList::initProperties() {
     mWidth = 0;
     mHeight = 0;
     mPivotExplicitlySet = false;
-    mTransformMatrix = NULL;
-    mTransformCamera = NULL;
-    mTransformMatrix3D = NULL;
     mCaching = false;
 }
 
