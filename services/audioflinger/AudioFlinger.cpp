@@ -1463,7 +1463,7 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
         // but it would be safer to explicitly pass initial masterVolume as parameter
         mMasterVolume(audioFlinger->masterVolumeSW_l()),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false),
-        // mMixerStatus
+        mMixerStatus(MIXER_IDLE),
         mPrevMixerStatus(MIXER_IDLE),
         standbyDelay(AudioFlinger::mStandbyTimeInNsecs)
 {
@@ -2031,7 +2031,6 @@ if (mType == MIXER) {
 
         processConfigEvents();
 
-        mMixerStatus = MIXER_IDLE;
         { // scope for mLock
 
             Mutex::Autolock _l(mLock);
