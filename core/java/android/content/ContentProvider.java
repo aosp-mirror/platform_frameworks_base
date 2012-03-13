@@ -270,19 +270,24 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return CancellationSignal.createTransport();
         }
 
-        private boolean hasReadPermission(Uri uri) {
+        private void enforceReadPermission(Uri uri) throws SecurityException {
             final Context context = getContext();
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
+            String missingPerm = null;
 
             if (uid == mMyUid) {
-                return true;
+                return;
+            }
 
-            } else if (mExported) {
+            if (mExported) {
                 final String componentPerm = getReadPermission();
-                if (componentPerm != null
-                        && (context.checkPermission(componentPerm, pid, uid) == PERMISSION_GRANTED)) {
-                    return true;
+                if (componentPerm != null) {
+                    if (context.checkPermission(componentPerm, pid, uid) == PERMISSION_GRANTED) {
+                        return;
+                    } else {
+                        missingPerm = componentPerm;
+                    }
                 }
 
                 // track if unprotected read is allowed; any denied
@@ -296,11 +301,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                         final String pathPerm = pp.getReadPermission();
                         if (pathPerm != null && pp.match(path)) {
                             if (context.checkPermission(pathPerm, pid, uid) == PERMISSION_GRANTED) {
-                                return true;
+                                return;
                             } else {
                                 // any denied <path-permission> means we lose
                                 // default <provider> access.
                                 allowDefaultRead = false;
+                                missingPerm = pathPerm;
                             }
                         }
                     }
@@ -308,44 +314,41 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
                 // if we passed <path-permission> checks above, and no default
                 // <provider> permission, then allow access.
-                if (allowDefaultRead) return true;
+                if (allowDefaultRead) return;
             }
 
             // last chance, check against any uri grants
             if (context.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     == PERMISSION_GRANTED) {
-                return true;
-            }
-
-            return false;
-        }
-
-        private void enforceReadPermission(Uri uri) {
-            if (hasReadPermission(uri)) {
                 return;
             }
 
-            String msg = "Permission Denial: reading "
-                    + ContentProvider.this.getClass().getName()
-                    + " uri " + uri + " from pid=" + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + getReadPermission();
-            throw new SecurityException(msg);
+            final String failReason = mExported
+                    ? " requires " + missingPerm + ", or grantUriPermission()"
+                    : " requires the provider be exported, or grantUriPermission()";
+            throw new SecurityException("Permission Denial: reading "
+                    + ContentProvider.this.getClass().getName() + " uri " + uri + " from pid=" + pid
+                    + ", uid=" + uid + failReason);
         }
 
-        private boolean hasWritePermission(Uri uri) {
+        private void enforceWritePermission(Uri uri) throws SecurityException {
             final Context context = getContext();
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
+            String missingPerm = null;
 
             if (uid == mMyUid) {
-                return true;
+                return;
+            }
 
-            } else if (mExported) {
+            if (mExported) {
                 final String componentPerm = getWritePermission();
-                if (componentPerm != null
-                        && (context.checkPermission(componentPerm, pid, uid) == PERMISSION_GRANTED)) {
-                    return true;
+                if (componentPerm != null) {
+                    if (context.checkPermission(componentPerm, pid, uid) == PERMISSION_GRANTED) {
+                        return;
+                    } else {
+                        missingPerm = componentPerm;
+                    }
                 }
 
                 // track if unprotected write is allowed; any denied
@@ -359,11 +362,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                         final String pathPerm = pp.getWritePermission();
                         if (pathPerm != null && pp.match(path)) {
                             if (context.checkPermission(pathPerm, pid, uid) == PERMISSION_GRANTED) {
-                                return true;
+                                return;
                             } else {
                                 // any denied <path-permission> means we lose
                                 // default <provider> access.
                                 allowDefaultWrite = false;
+                                missingPerm = pathPerm;
                             }
                         }
                     }
@@ -371,32 +375,23 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
                 // if we passed <path-permission> checks above, and no default
                 // <provider> permission, then allow access.
-                if (allowDefaultWrite) return true;
+                if (allowDefaultWrite) return;
             }
 
             // last chance, check against any uri grants
             if (context.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     == PERMISSION_GRANTED) {
-                return true;
-            }
-
-            return false;
-        }
-        
-        private void enforceWritePermission(Uri uri) {
-            if (hasWritePermission(uri)) {
                 return;
             }
-            
-            String msg = "Permission Denial: writing "
-                    + ContentProvider.this.getClass().getName()
-                    + " uri " + uri + " from pid=" + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + getWritePermission();
-            throw new SecurityException(msg);
+
+            final String failReason = mExported
+                    ? " requires " + missingPerm + ", or grantUriPermission()"
+                    : " requires the provider be exported, or grantUriPermission()";
+            throw new SecurityException("Permission Denial: writing "
+                    + ContentProvider.this.getClass().getName() + " uri " + uri + " from pid=" + pid
+                    + ", uid=" + uid + failReason);
         }
     }
-
 
     /**
      * Retrieves the Context this provider is running in.  Only available once
