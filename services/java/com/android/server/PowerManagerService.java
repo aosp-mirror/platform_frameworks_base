@@ -1858,6 +1858,7 @@ public class PowerManagerService extends IPowerManager.Stub
                 } else {
                     // Update the lights *before* taking care of turning the
                     // screen off, so we can initiate any animations that are desired.
+                    mScreenOffReason = reason;
                     if (stateChanged) {
                         updateLightsLocked(newState, 0);
                     }
@@ -1876,7 +1877,6 @@ public class PowerManagerService extends IPowerManager.Stub
                         Binder.restoreCallingIdentity(identity);
                     }
                     mPowerState &= ~SCREEN_ON_BIT;
-                    mScreenOffReason = reason;
                     if (!mScreenBrightnessAnimator.isAnimating()) {
                         err = screenOffFinishedAnimatingLocked(reason);
                     } else {
