@@ -742,7 +742,8 @@ class BrowserFrame extends Handler {
             url = url.replaceFirst(ANDROID_ASSET, "");
             try {
                 AssetManager assets = mContext.getAssets();
-                return assets.open(url, AssetManager.ACCESS_STREAMING);
+                Uri uri = Uri.parse(url);
+                return assets.open(uri.getPath(), AssetManager.ACCESS_STREAMING);
             } catch (IOException e) {
                 return null;
             }
