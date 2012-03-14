@@ -335,6 +335,18 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"نوشتن اطلاعات تماس"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"به برنامه اجازه می‎دهد داده‎های مخاطب ذخیره شده در رایانه لوحی را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا داده‎های تماس شما را تغییر دهند یا پاک کنند."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"به برنامه اجازه می‎دهد تا داده‎های مخاطب (آدرس) را که در تلفن ذخیره شده تغییر دهد. برنامه‎های مخرب می‎توانند از این استفاده کنند تا داده‎های تماس شما را پاک کنند یا تغییر دهند."</string>
+    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
+    <skip />
+    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
+    <skip />
     <string name="permlab_readProfile" msgid="6824681438529842282">"خواندن داده‌های نمایه شما"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"به برنامه اجازه می‎دهد اطلاعات نمایه شخصی ذخیره شده در دستگاه شما را بخواند. یعنی برنامه می‎تواند شما را شناسایی کند و اطلاعات نمایه شما را به دیگران ارسال کند."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"نوشتن در داده‌های نمایه شما"</string>

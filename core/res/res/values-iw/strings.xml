@@ -335,6 +335,18 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"כתוב נתונים של אנשי קשר"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"מאפשר ליישום לשנות את פרטי הקשר (כתובת) המאוחסנים בטבלט. יישומים זדוניים עלולים להשתמש בכך כדי למחוק או לשנות את פרטי הקשר שלך."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"מאפשר ליישום לשנות את פרטי הקשר (כתובת) המאוחסנים בטלפון. יישומים זדוניים עלולים להשתמש בכך כדי למחוק או לשנות את פרטי הקשר שלך."</string>
+    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
+    <skip />
+    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
+    <skip />
     <string name="permlab_readProfile" msgid="6824681438529842282">"קרא את נתוני הפרופיל שלך"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"מאפשר ליישום לקרוא נתונים בפרטי הפרופיל האישי המאוחסנים במכשיר, כגון שמך ופרטי הקשר שלך. משמעות הדבר שהיישום יוכל לזהות אותך ולשלוח את מידע הפרופיל שלך לאנשים אחרים."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"כתוב בנתוני הפרופיל שלך"</string>
@@ -499,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"מאפשר ליישום לקרוא מילים, שמות וביטויים פרטיים שהמשתמש אחסן במילון המשתמש."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"כתיבה למילון בהגדרת המשתמש"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"מאפשר ליישום לכתוב מילים חדשות במילון המשתמש."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"קריאת תוכן אחסון USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"קריאת תוכן כרטיס SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"מאפשר ליישום לקרוא את התוכן של אחסון USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"מאפשר ליישום לקרוא את התוכן של כרטיס SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"שנה/מחק תוכן באמצעי אחסון מסוג USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"שנה/מחק תוכן של כרטיס SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"מאפשר ליישום לכתוב להתקן האחסון מסוג USB."</string>

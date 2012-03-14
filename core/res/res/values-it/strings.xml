@@ -335,6 +335,18 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"scrittura dati di contatto"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Consente all\'applicazione di modificare i dati di contatto (indirizzi) memorizzati sul tablet. Le applicazioni dannose potrebbero farne uso per cancellare o modificare i tuoi dati di contatto."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Consente all\'applicazione di modificare i dati di contatto (indirizzi) memorizzati sul telefono. Le applicazioni dannose potrebbero farne uso per cancellare o modificare i tuoi dati di contatto."</string>
+    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
+    <skip />
+    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
+    <skip />
     <string name="permlab_readProfile" msgid="6824681438529842282">"lettura dei tuoi dati profilo"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Consente all\'applicazione di leggere informazioni del profilo personale memorizzate sul dispositivo, come il tuo nome e le tue informazioni di contatto. Ciò significa che l\'applicazione può identificarti e inviare le tue informazioni di profilo ad altri."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"scrittura dati del profilo"</string>
@@ -499,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Consente all\'applicazione di leggere parole, frasi e nomi privati che l\'utente potrebbe aver memorizzato nel dizionario utente."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"scrittura nel dizionario definito dall\'utente"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Consente all\'applicazione di scrivere nuove parole nel dizionario utente."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"lettura contenuti archivio USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"lettura dei contenuti della scheda SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Consente di leggere l\'archivio USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Consente all\'applicazione di leggere contenuti della scheda SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modifica/eliminaz. contenuti archivio USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modificare/eliminare i contenuti della scheda SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Consente all\'applicazione di scrivere nell\'archivio USB."</string>
