@@ -826,7 +826,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
     while (!mReader.eof()) {
         int op = mReader.readInt();
         if (op & OP_MAY_BE_SKIPPED_MASK) {
-            int32_t skip = mReader.readInt() * 4;
+            int32_t skip = mReader.readInt();
             if (CC_LIKELY(flags & kReplayFlag_ClipChildren)) {
                 mReader.skip(skip);
                 DISPLAY_LIST_LOGD("%s%s skipping %d bytes", (char*) indent,

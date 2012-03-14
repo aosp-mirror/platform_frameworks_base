@@ -656,9 +656,8 @@ private:
         if (reject) {
             mWriter.writeInt(OP_MAY_BE_SKIPPED_MASK | drawOp);
             mWriter.writeInt(0xdeaddead);
-            uint32_t* location = reject ?
-                    mWriter.peek32(mWriter.size() - sizeof(int32_t)) : NULL;
-            return location;
+            mBufferSize = mWriter.size();
+            return mWriter.peek32(mBufferSize - sizeof(int32_t));
         }
         mWriter.writeInt(drawOp);
         return NULL;
@@ -666,8 +665,7 @@ private:
 
     inline void addSkip(uint32_t* location) {
         if (location) {
-            *location = (int32_t) (mWriter.peek32(
-                    mWriter.size() - sizeof(int32_t)) - location);
+            *location = (int32_t) (mWriter.size() - mBufferSize);
         }
     }
 
@@ -822,6 +820,7 @@ private:
     Vector<SkMatrix*> mMatrices;
 
     SkWriter32 mWriter;
+    uint32_t mBufferSize;
 
     int mRestoreSaveCount;
 
