@@ -1,0 +1,197 @@
+page.title=Setting Up the Search Interface
+trainingnavtop=true
+next.title=Storing and Searching for Data
+next.link=search.html
+
+@jd:body
+
+  <div id="tb-wrapper">
+    <div id="tb">
+      <h2>This lesson teaches you to</h2>
+
+      <ul>
+        <li><a href="{@docRoot}training/search/setup.html#add-sv">Add the Search View to the Action
+        Bar</a></li>
+
+        <li><a href="{@docRoot}training/search/setup.html#create-sc">Create a Searchable
+        Configuration</a></li>
+
+        <li><a href="{@docRoot}training/search/setup.html#create-sa">Create a Searchable
+        Activity</a></li>
+      </ul>
+
+      <h2>You should also read:</h2>
+
+      <ul>
+        <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <p>Beginning in Android 3.0, using the {@link android.widget.SearchView} widget as an item in
+  the action bar is the preferred way to provide search in your app. Like with all items in
+  the action bar, you can define the {@link android.widget.SearchView} to show at all times, only
+  when there is room, or as a collapsible action, which displays the {@link
+  android.widget.SearchView} as an icon initially, then takes up the entire action bar as a search
+  field when the user clicks the icon.</p>
+
+  <p class="note"><strong>Note:</strong> Later in this class, you will learn how to make your
+  app compatible down to Android 2.1 (API level 7) for devices that do not support
+  {@link android.widget.SearchView}.</p>
+
+  <h2 id="add-sv">Add the Search View to the Action Bar</h2>
+
+  <p>To add a {@link android.widget.SearchView} widget to the action bar, create a file named
+  <code>res/menu/options_menu.xml</code> in your project and add the following code to the file.
+  This code defines how to create the search item, such as the icon to use and the title of the
+  item. The <code>collapseActionView</code> attribute allows your {@link android.widget.SearchView}
+  to expand to take up the whole action bar and collapse back down into a
+  normal action bar item when not in use. Because of the limited action bar space on handset devices,
+  using the <code>collapsibleActionView</code> attribute is recommended to provide a better
+  user experience.</p>
+  <pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/search"
+          android:title="@string/search_title"
+          android:icon="@drawable/ic_search"
+          android:showAsAction="collapseActionView|ifRoom"
+          android:actionViewClass="android.widget.SearchView" /&gt;
+&lt;/menu&gt;
+</pre>
+
+  <p class="note"><strong>Note:</strong> If you already have an existing XML file for your menu
+  items, you can add the <code>&lt;item&gt;</code> element to that file instead.</p>
+
+  <p>To display the {@link android.widget.SearchView} in the action bar, inflate the XML menu
+  resource (<code>res/menu/options_menu.xml</code>) in the {@link
+  android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()} method of your activity:</p>
+  <pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.options_menu, menu);
+
+    return true;
+}
+</pre>
+
+  <p>If you run your app now, the {@link android.widget.SearchView} appears in your app's action
+  bar, but it isn't functional. You now need to define <em>how</em> the {@link
+  android.widget.SearchView} behaves.</p>
+
+  <h2 id="create-sc">Create a Searchable Configuration</h2>
+
+  <p>A <a href="http://developer.android.com/guide/topics/search/searchable-config.html">searchable
+  configuration</a> defines how the {@link android.widget.SearchView} behaves and is defined in a
+  <code>res/xml/searchable.xml</code> file. At a minimum, a searchable configuration must contain
+  an <code>android:label</code> attribute that has the same value as the
+  <code>android:label</code> attribute of the <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a> or
+  <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a> element in your Android manifest.
+  However, we also recommend adding an <code>android:hint</code> attribute to give the user an idea of what to enter into the search
+  box:</p>
+  <pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+&lt;searchable xmlns:android="http://schemas.android.com/apk/res/android"
+        android:label="@string/app_name"
+        android:hint="@string/search_hint" /&gt;
+</pre>
+
+  <p>In your application's manifest file, declare a <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">
+  <code>&lt;meta-data&gt;</code></a> element that points to the <code>res/xml/searchable.xml</code> file,
+  so that your application knows where to find it. Declare the element in an <code>&lt;activity&gt;</code>
+  that you want to display the {@link android.widget.SearchView} in:</p>
+  <pre>
+&lt;activity ... &gt;
+    ...
+    &lt;meta-data android:name="android.app.searchable"
+            android:resource="@xml/searchable" /&gt;
+
+&lt;/activity&gt;
+</pre>
+
+  <p>In the {@link android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()} method that you
+  created before, associate the searchable configuration with the {@link android.widget.SearchView}
+  by calling {@link android.widget.SearchView#setSearchableInfo}:</p>
+  <pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.options_menu, menu);
+
+    // Associate searchable configuration with the SearchView
+    SearchManager searchManager =
+           (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+    SearchView searchView =
+            (SearchView) menu.findItem(R.id.search).getActionView();
+    searchView.setSearchableInfo(
+            searchManager.getSearchableInfo(getComponentName()));
+
+    return true;
+}
+</pre>
+
+  <p>The call to {@link android.app.SearchManager#getSearchableInfo getSearchableInfo()} obtains a
+  {@link android.app.SearchableInfo} object that is created from the searchable configuration XML
+  file. When the searchable configuration is correctly associated with your {@link
+  android.widget.SearchView}, the {@link android.widget.SearchView} starts an activity with the
+  {@link android.content.Intent#ACTION_SEARCH} intent when a user submits a query. You now need an
+  activity that can filter for this intent and handle the search query.</p>
+
+  <h2 id="create-sa">Create a Searchable Activity</h2>
+
+  <p>A {@link android.widget.SearchView} tries to start an activity with the {@link
+  android.content.Intent#ACTION_SEARCH} when a user submits a search query. A searchable activity
+  filters for the {@link android.content.Intent#ACTION_SEARCH} intent and searches for the query in
+  some sort of data set. To create a searchable activity, declare an activity of your choice to
+  filter for the {@link android.content.Intent#ACTION_SEARCH} intent:</p>
+  <pre>
+&lt;activity android:name=".SearchResultsActivity" ... &gt;
+    ...
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.SEARCH" /&gt;
+    &lt;/intent-filter&gt;
+    ...
+&lt;/activity&gt;
+</pre>
+
+  <p>In your searchable activity, handle the {@link android.content.Intent#ACTION_SEARCH} intent by
+  checking for it in your {@link android.app.Activity#onCreate onCreate()} method.</p>
+
+  <p class="note"><strong>Note:</strong> If your searchable activity launches in single top mode
+  (<code>android:launchMode="singleTop"</code>), also handle the {@link
+  android.content.Intent#ACTION_SEARCH} intent in the {@link android.app.Activity#onNewIntent
+  onNewIntent()} method. In single top mode, only one instance of your activity is created and
+  subsequent calls to start your activity do not create a new activity on the
+  stack. This launch mode is useful so users can perform searches from the same activity
+  without creating a new activity instance every time.</p>
+  <pre>
+public class SearchResultsActivity extends Activity {
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        ...
+        handleIntent(getIntent());
+    }
+
+    &#64;Override
+    protected void onNewIntent(Intent intent) {
+        ...
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //use the query to search your data somehow
+        }
+    }
+    ...
+}
+</pre>
+
+  <p>If you run your app now, the {@link android.widget.SearchView} can accept the user's query and
+  start your searchable activity with the {@link android.content.Intent#ACTION_SEARCH} intent. It
+  is now up to you to figure out how to store and search your data given a query.</p>
