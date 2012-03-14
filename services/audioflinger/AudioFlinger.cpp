@@ -37,8 +37,12 @@
 #include <cutils/properties.h>
 #include <cutils/compiler.h>
 
+#undef ADD_BATTERY_DATA
+
+#ifdef ADD_BATTERY_DATA
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaDeathNotifier.h>
+#endif
 
 #include <private/media/AudioTrackShared.h>
 #include <private/media/AudioEffectShared.h>
@@ -105,6 +109,7 @@ nsecs_t AudioFlinger::mStandbyTimeInNsecs = kDefaultStandbyTimeInNsecs;
 
 // ----------------------------------------------------------------------------
 
+#ifdef ADD_BATTERY_DATA
 // To collect the amplifier usage
 static void addBatteryData(uint32_t params) {
     sp<IMediaPlayerService> service = IMediaDeathNotifier::getMediaPlayerService();
@@ -115,6 +120,7 @@ static void addBatteryData(uint32_t params) {
 
     service->addBatteryData(params);
 }
+#endif
 
 static int load_audio_interface(const char *if_name, const hw_module_t **mod,
                                 audio_hw_device_t **dev)
@@ -2612,6 +2618,7 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
             }
         }
         if (param.getInt(String8(AudioParameter::keyRouting), value) == NO_ERROR) {
+#ifdef ADD_BATTERY_DATA
             // when changing the audio output device, call addBatteryData to notify
             // the change
             if ((int)mDevice != value) {
@@ -2632,6 +2639,7 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
                     addBatteryData(params);
                 }
             }
+#endif
 
             // forward device change to effects that have requested to be
             // aware of attached audio device.
@@ -3454,8 +3462,10 @@ void AudioFlinger::PlaybackThread::Track::destroy()
                 if (mState == ACTIVE || mState == RESUMING) {
                     AudioSystem::stopOutput(thread->id(), mStreamType, mSessionId);
 
+#ifdef ADD_BATTERY_DATA
                     // to track the speaker usage
                     addBatteryData(IMediaPlayerService::kBatteryDataAudioFlingerStop);
+#endif
                 }
                 AudioSystem::releaseOutput(thread->id());
             }
@@ -3572,10 +3582,12 @@ status_t AudioFlinger::PlaybackThread::Track::start(pid_t tid)
             status = AudioSystem::startOutput(thread->id(), mStreamType, mSessionId);
             thread->mLock.lock();
 
+#ifdef ADD_BATTERY_DATA
             // to track the speaker usage
             if (status == NO_ERROR) {
                 addBatteryData(IMediaPlayerService::kBatteryDataAudioFlingerStart);
             }
+#endif
         }
         if (status == NO_ERROR) {
             PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
@@ -3610,8 +3622,10 @@ void AudioFlinger::PlaybackThread::Track::stop()
             AudioSystem::stopOutput(thread->id(), mStreamType, mSessionId);
             thread->mLock.lock();
 
+#ifdef ADD_BATTERY_DATA
             // to track the speaker usage
             addBatteryData(IMediaPlayerService::kBatteryDataAudioFlingerStop);
+#endif
         }
     }
 }
@@ -3630,8 +3644,10 @@ void AudioFlinger::PlaybackThread::Track::pause()
                 AudioSystem::stopOutput(thread->id(), mStreamType, mSessionId);
                 thread->mLock.lock();
 
+#ifdef ADD_BATTERY_DATA
                 // to track the speaker usage
                 addBatteryData(IMediaPlayerService::kBatteryDataAudioFlingerStop);
+#endif
             }
         }
     }
