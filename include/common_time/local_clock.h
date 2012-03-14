@@ -28,7 +28,7 @@ namespace android {
 
 class LocalClock {
   public:
-     LocalClock();
+    LocalClock();
 
     bool initCheck();
 

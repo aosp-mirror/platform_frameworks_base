@@ -1588,7 +1588,7 @@ void AudioFlinger::PlaybackThread::onFirstRef()
 }
 
 // PlaybackThread::createTrack_l() must be called with AudioFlinger::mLock held
-sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTrack_l(
+sp<AudioFlinger::PlaybackThread::Track> AudioFlinger::PlaybackThread::createTrack_l(
         const sp<AudioFlinger::Client>& client,
         audio_stream_type_t streamType,
         uint32_t sampleRate,
@@ -2337,7 +2337,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
     size_t tracksWithEffect = 0;
 
     float masterVolume = mMasterVolume;
-    bool  masterMute = mMasterMute;
+    bool masterMute = mMasterMute;
 
     if (masterMute) {
         masterVolume = 0;
@@ -2376,7 +2376,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
                 // +1 for rounding and +1 for additional sample needed for interpolation
                 minFrames = (mFrameCount * t->sampleRate()) / mSampleRate + 1 + 1;
                 // add frames already consumed but not yet released by the resampler
-                // because cblk->framesReady() will  include these frames
+                // because cblk->framesReady() will include these frames
                 minFrames += mAudioMixer->getUnreleasedFrames(track->name());
                 // the minimum track buffer size is normally twice the number of frames necessary
                 // to fill one buffer and the resampler should not leave more than one buffer worth
@@ -2514,6 +2514,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
 
             // reset retry count
             track->mRetryCount = kMaxTrackRetries;
+
             // If one track is ready, set the mixer ready if:
             //  - the mixer was not ready during previous round OR
             //  - no other track is not ready
@@ -3372,19 +3373,19 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
         }
     } else {
         mCblk = (audio_track_cblk_t *)(new uint8_t[size]);
-            // construct the shared structure in-place.
-            new(mCblk) audio_track_cblk_t();
-            // clear all buffers
-            mCblk->frameCount = frameCount;
-            mCblk->sampleRate = sampleRate;
-            mChannelCount = channelCount;
-            mChannelMask = channelMask;
-            mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
-            memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
-            // Force underrun condition to avoid false underrun callback until first data is
-            // written to buffer (other flags are cleared)
-            mCblk->flags = CBLK_UNDERRUN_ON;
-            mBufferEnd = (uint8_t *)mBuffer + bufferSize;
+        // construct the shared structure in-place.
+        new(mCblk) audio_track_cblk_t();
+        // clear all buffers
+        mCblk->frameCount = frameCount;
+        mCblk->sampleRate = sampleRate;
+        mChannelCount = channelCount;
+        mChannelMask = channelMask;
+        mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
+        memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
+        // Force underrun condition to avoid false underrun callback until first data is
+        // written to buffer (other flags are cleared)
+        mCblk->flags = CBLK_UNDERRUN_ON;
+        mBufferEnd = (uint8_t *)mBuffer + bufferSize;
     }
 }
 

@@ -169,7 +169,7 @@ public:
                                     callback_t cbf       = 0,
                                     void* user           = 0,
                                     int notificationFrames = 0,
-                                    int sessionId = 0);
+                                    int sessionId        = 0);
 
     /* Creates an audio track and registers it with AudioFlinger. With this constructor,
      * the PCM data to be rendered by AudioTrack is passed in a shared memory buffer
@@ -215,7 +215,7 @@ public:
                             int notificationFrames = 0,
                             const sp<IMemory>& sharedBuffer = 0,
                             bool threadCanCallJava = false,
-                            int sessionId = 0);
+                            int sessionId       = 0);
 
 
     /* Result of constructing the AudioTrack. This must be checked
@@ -468,6 +468,7 @@ protected:
 
             // body of AudioTrackThread::threadLoop()
             bool processAudioBuffer(const sp<AudioTrackThread>& thread);
+
             status_t createTrack_l(audio_stream_type_t streamType,
                                  uint32_t sampleRate,
                                  audio_format_t format,
