@@ -159,11 +159,13 @@ android::status_t FwdLockEngine::onTerminate(int uniqueId) {
     return DRM_NO_ERROR;
 }
 
+// make sure that lower-case letters are used.
 const String8 FwdLockEngine::FileSuffixes[] = {
     String8(".fl"),
     String8(".dm"),
 };
 
+// make sure that lower-case letters are used.
 const String8 FwdLockEngine::MimeTypes[] = {
     String8("application/x-android-drm-fl"),
     String8("application/vnd.oma.drm.message"),
@@ -184,8 +186,10 @@ void FwdLockEngine::AddSupportedFileSuffixes(DrmSupportInfo *info) {
 }
 
 bool FwdLockEngine::IsMimeTypeSupported(const String8& mime) {
+    String8 tmp(mime);
+    tmp.toLower();
     for (size_t i = 0, n = sizeof(MimeTypes)/sizeof(MimeTypes[0]); i < n; ++i) {
-        if (mime == MimeTypes[i]) {
+        if (tmp == MimeTypes[i]) {
             return true;
         }
     }
@@ -193,8 +197,10 @@ bool FwdLockEngine::IsMimeTypeSupported(const String8& mime) {
 }
 
 bool FwdLockEngine::IsFileSuffixSupported(const String8& suffix) {
+    String8 tmp(suffix);
+    tmp.toLower();
     for (size_t i = 0, n = sizeof(FileSuffixes)/sizeof(FileSuffixes[0]); i < n; ++i) {
-        if (suffix == FileSuffixes[i]) {
+        if (tmp == FileSuffixes[i]) {
             return true;
         }
     }
@@ -220,7 +226,6 @@ bool FwdLockEngine::onCanHandle(int uniqueId, const String8& path) {
     bool result = false;
 
     String8 extString = path.getPathExtension();
-    extString.toLower();
     return IsFileSuffixSupported(extString);
 }
 
@@ -330,8 +335,6 @@ int FwdLockEngine::onGetDrmObjectType(int uniqueId,
     String8 mimeStr = String8(mimeType);
 
     LOG_VERBOSE("FwdLockEngine::onGetDrmObjectType");
-
-    mimeStr.toLower();
 
     /* Checks whether
     * 1. path and mime type both are not empty strings (meaning unavailable) else content is unknown
