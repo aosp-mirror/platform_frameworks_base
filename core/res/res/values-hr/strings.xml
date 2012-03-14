@@ -335,6 +335,18 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"pisanje kontaktnih podataka"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Omogućuje aplikaciji da promijeni kontaktne podatke (adrese) pohranjene na tabletnom računalu. Zlonamjerne aplikacije mogu na taj način izbrisati ili promijeniti vaše kontaktne podatke."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Omogućuje aplikaciji da promijeni kontaktne podatke (adrese) pohranjene na telefonu. Zlonamjerne aplikacije mogu na taj način izbrisati ili promijeniti vaše kontaktne podatke."</string>
+    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
+    <skip />
+    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
+    <skip />
     <string name="permlab_readProfile" msgid="6824681438529842282">"čitanje podataka vašeg profila"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Omogućuje aplikaciji čitanje osobnih podataka profila pohranjenih na uređaju, kao što su vaše ime ili kontaktni podaci. To znači da vas aplikacija može identificirati i slati informacije s vašeg profila drugima."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"pisanje u podatke profila"</string>

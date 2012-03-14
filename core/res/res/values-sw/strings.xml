@@ -335,6 +335,18 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"andika data ya anwani"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Inaruhusu programu kurekebisha data ya mwasiliani(anwani) iliyohifadhiwa kwenye kompyuta yako ki. programu hasidi zinaweza tumia hii kufuta au kurekebisha data yako ya mwasiliani."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Inaruhusu programu kurekebisha data ya mwasiliani(anwani) iliyohifadhiwa kwenye simu yako. Programu hasidi zinaweza kutumia hii kufuta au kurekebisha data yako ya mwasiliani."</string>
+    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
+    <skip />
+    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
+    <skip />
     <string name="permlab_readProfile" msgid="6824681438529842282">"soma data ya maelezo yako mafupi"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Inaruhusu programu kusoma maelezo mafupi ya kibinafsi yaliyohifadhiwa kwenye kifaa chako, kama vile jina lako na taarifa ya kuwasiliana. Hii ina maanisha programu inaweza kukutambua na kutuma taarifa yako fupi ya kibinafsi kwa wengine."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"andika kwenye data ya maelezo yako mafupi"</string>

@@ -335,6 +335,18 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"escrever dados de contacto"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Permite que a aplicação modifique os dados de contacto (endereço) armazenados no tablet. As aplicações maliciosas podem utilizar isto para apagar ou modificar os dados dos seus contactos."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Permite que uma aplicação modifique os dados de contacto (endereço) armazenados no telemóvel. As aplicações maliciosas podem utilizar isto para apagar ou modificar os dados dos seus contactos."</string>
+    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
+    <skip />
+    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
+    <skip />
+    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
+    <skip />
+    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
+    <skip />
     <string name="permlab_readProfile" msgid="6824681438529842282">"ler os dados do perfil"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Permite que a aplicação leia dados de perfil pessoais armazenados no seu aparelho, como o seu nome e dados de contacto. Isto significa que outras aplicações podem identificá-lo e enviar os seus dados de perfil a terceiros."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"escrever nos dados do seu perfil"</string>
