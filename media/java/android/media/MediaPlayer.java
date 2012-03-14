@@ -1170,7 +1170,6 @@ public class MediaPlayer
      *
      * @param next the player to start after this one completes playback.
      *
-     * @hide
      */
     public native void setNextMediaPlayer(MediaPlayer next);
 
