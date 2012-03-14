@@ -30,29 +30,29 @@ class Allocation;
 class Script : public BaseObj {
 protected:
     Script(void *id, RenderScript *rs);
-    void forEach(uint32_t slot, const Allocation *in, const Allocation *out, const void *v, size_t);
-    void bindAllocation(const Allocation *va, uint32_t slot);
-    void setVar(uint32_t index, const void *, size_t len);
-    void setVar(uint32_t index, const BaseObj *o);
-    void invoke(uint32_t slot, const void *v, size_t len);
+    void forEach(uint32_t slot, const Allocation *in, const Allocation *out, const void *v, size_t) const;
+    void bindAllocation(const Allocation *va, uint32_t slot) const;
+    void setVar(uint32_t index, const void *, size_t len) const;
+    void setVar(uint32_t index, const BaseObj *o) const;
+    void invoke(uint32_t slot, const void *v, size_t len) const;
 
 
-    void invoke(uint32_t slot) {
+    void invoke(uint32_t slot) const {
         invoke(slot, NULL, 0);
     }
-    void setVar(uint32_t index, float v) {
+    void setVar(uint32_t index, float v) const {
         setVar(index, &v, sizeof(v));
     }
-    void setVar(uint32_t index, double v) {
+    void setVar(uint32_t index, double v) const {
         setVar(index, &v, sizeof(v));
     }
-    void setVar(uint32_t index, int32_t v) {
+    void setVar(uint32_t index, int32_t v) const {
         setVar(index, &v, sizeof(v));
     }
-    void setVar(uint32_t index, int64_t v) {
+    void setVar(uint32_t index, int64_t v) const {
         setVar(index, &v, sizeof(v));
     }
-    void setVar(uint32_t index, bool v) {
+    void setVar(uint32_t index, bool v) const {
         setVar(index, &v, sizeof(v));
     }
 

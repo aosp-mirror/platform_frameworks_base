@@ -25,12 +25,12 @@
 #include "Allocation.h"
 #include "Script.h"
 
-void Script::invoke(uint32_t slot, const void *v, size_t len) {
+void Script::invoke(uint32_t slot, const void *v, size_t len) const {
     rsScriptInvokeV(mRS->mContext, getID(), slot, v, len);
 }
 
 void Script::forEach(uint32_t slot, const Allocation *ain, const Allocation *aout,
-                       const void *usr, size_t usrLen) {
+                       const void *usr, size_t usrLen) const {
     if ((ain == NULL) && (aout == NULL)) {
         mRS->throwError("At least one of ain or aout is required to be non-null.");
     }
@@ -44,16 +44,16 @@ Script::Script(void *id, RenderScript *rs) : BaseObj(id, rs) {
 }
 
 
-void Script::bindAllocation(const Allocation *va, uint32_t slot) {
+void Script::bindAllocation(const Allocation *va, uint32_t slot) const {
     rsScriptBindAllocation(mRS->mContext, getID(), BaseObj::getObjID(va), slot);
 }
 
 
-void Script::setVar(uint32_t index, const BaseObj *o) {
+void Script::setVar(uint32_t index, const BaseObj *o) const {
     rsScriptSetVarObj(mRS->mContext, getID(), index, (o == NULL) ? 0 : o->getID());
 }
 
-void Script::setVar(uint32_t index, const void *v, size_t len) {
+void Script::setVar(uint32_t index, const void *v, size_t len) const {
     rsScriptSetVarV(mRS->mContext, getID(), index, v, len);
 }
 

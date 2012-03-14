@@ -22,11 +22,11 @@
 #include "ScriptC.h"
 
 ScriptC::ScriptC(RenderScript *rs,
-                 const char *codeTxt, size_t codeLength,
+                 const void *codeTxt, size_t codeLength,
                  const char *cachedName, size_t cachedNameLength,
                  const char *cacheDir, size_t cacheDirLength)
 : Script(NULL, rs) {
     mID = rsScriptCCreate(rs->mContext, cachedName, cachedNameLength,
-                          cacheDir, cacheDirLength, codeTxt, codeLength);
+                          cacheDir, cacheDirLength, (const char *)codeTxt, codeLength);
 }
 

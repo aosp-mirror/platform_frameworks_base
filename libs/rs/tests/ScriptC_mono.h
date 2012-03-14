@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,42 @@
  * limitations under the License.
  */
 
+
+/*
+ * This file is auto-generated. DO NOT MODIFY!
+ * The source Renderscript file: mono.rs
+ */
+
+
 #include "ScriptC.h"
 
 class ScriptC_mono : protected ScriptC {
+private:
+    int32_t __gInt;
+    bool __gBool;
 public:
     ScriptC_mono(RenderScript *rs, const char *cacheDir, size_t cacheDirLength);
-
-    void forEach_root(const Allocation *ain, const Allocation *aout);
-
+    virtual ~ScriptC_mono();
+    
+    void set_gInt(int32_t v) {
+        setVar(0, v);
+        __gInt = v;
+    }
+    int32_t get_gInt() const {
+        return __gInt;
+    }
+    
+    float get_cFloat() const {
+        return 1.2f;
+    }
+    
+    void set_gBool(bool v) {
+        setVar(2, v);
+        __gBool = v;
+    }
+    bool get_gBool() const {
+        return __gBool;
+    }
+    
+    void forEach_root(const Allocation *ain, const Allocation *aout) const;
 };
-
