@@ -10,8 +10,8 @@ previous.link=search.html
       <h2>This lesson teaches you to</h2>
 
       <ul>
-        <li><a href="{@docRoot}training/search/backward-compat.html#set-sdk">Set Minimum and Target
-        SDK Values</a></li>
+        <li><a href="{@docRoot}training/search/backward-compat.html#set-sdk">Set Minimum
+        and Target API levels</a></li>
 
         <li><a href="{@docRoot}training/search/backward-compat.html#provide-sd">Provide the Search
         Dialog for Older Devices</a></li>
