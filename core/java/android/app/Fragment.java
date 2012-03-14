@@ -961,27 +961,55 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, true);
         return mLoaderManager;
     }
-    
+
     /**
      * Call {@link Activity#startActivity(Intent)} on the fragment's
      * containing Activity.
      */
     public void startActivity(Intent intent) {
+        startActivity(intent, null);
+    }
+    
+    /**
+     * Call {@link Activity#startActivity(Intent, Bundle)} on the fragment's
+     * containing Activity.
+     */
+    public void startActivity(Intent intent, Bundle options) {
         if (mActivity == null) {
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
-        mActivity.startActivityFromFragment(this, intent, -1);
+        if (options != null) {
+            mActivity.startActivityFromFragment(this, intent, -1, options);
+        } else {
+            // Note we want to go through this call for compatibility with
+            // applications that may have overridden the method.
+            mActivity.startActivityFromFragment(this, intent, -1);
+        }
     }
-    
+
     /**
      * Call {@link Activity#startActivityForResult(Intent, int)} on the fragment's
      * containing Activity.
      */
     public void startActivityForResult(Intent intent, int requestCode) {
+        startActivityForResult(intent, requestCode, null);
+    }
+
+    /**
+     * Call {@link Activity#startActivityForResult(Intent, int, Bundle)} on the fragment's
+     * containing Activity.
+     */
+    public void startActivityForResult(Intent intent, int requestCode, Bundle options) {
         if (mActivity == null) {
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
-        mActivity.startActivityFromFragment(this, intent, requestCode);
+        if (options != null) {
+            mActivity.startActivityFromFragment(this, intent, requestCode, options);
+        } else {
+            // Note we want to go through this call for compatibility with
+            // applications that may have overridden the method.
+            mActivity.startActivityFromFragment(this, intent, requestCode, options);
+        }
     }
     
     /**

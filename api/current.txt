@@ -2688,13 +2688,20 @@ package android.app {
     method public final deprecated boolean showDialog(int, android.os.Bundle);
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback);
     method public void startActivityForResult(android.content.Intent, int);
+    method public void startActivityForResult(android.content.Intent, int, android.os.Bundle);
     method public void startActivityFromChild(android.app.Activity, android.content.Intent, int);
+    method public void startActivityFromChild(android.app.Activity, android.content.Intent, int, android.os.Bundle);
     method public void startActivityFromFragment(android.app.Fragment, android.content.Intent, int);
+    method public void startActivityFromFragment(android.app.Fragment, android.content.Intent, int, android.os.Bundle);
     method public boolean startActivityIfNeeded(android.content.Intent, int);
+    method public boolean startActivityIfNeeded(android.content.Intent, int, android.os.Bundle);
     method public void startIntentSenderForResult(android.content.IntentSender, int, android.content.Intent, int, int, int) throws android.content.IntentSender.SendIntentException;
+    method public void startIntentSenderForResult(android.content.IntentSender, int, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
     method public void startIntentSenderFromChild(android.app.Activity, android.content.IntentSender, int, android.content.Intent, int, int, int) throws android.content.IntentSender.SendIntentException;
+    method public void startIntentSenderFromChild(android.app.Activity, android.content.IntentSender, int, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
     method public deprecated void startManagingCursor(android.database.Cursor);
     method public boolean startNextMatchingActivity(android.content.Intent);
+    method public boolean startNextMatchingActivity(android.content.Intent, android.os.Bundle);
     method public void startSearch(java.lang.String, boolean, android.os.Bundle, boolean);
     method public deprecated void stopManagingCursor(android.database.Cursor);
     method public void takeKeyEvents(boolean);
@@ -3320,7 +3327,9 @@ package android.app {
     method public void setTargetFragment(android.app.Fragment, int);
     method public void setUserVisibleHint(boolean);
     method public void startActivity(android.content.Intent);
+    method public void startActivity(android.content.Intent, android.os.Bundle);
     method public void startActivityForResult(android.content.Intent, int);
+    method public void startActivityForResult(android.content.Intent, int, android.os.Bundle);
     method public void unregisterForContextMenu(android.view.View);
   }
 
@@ -5149,9 +5158,12 @@ package android.content {
     method public abstract deprecated void setWallpaper(android.graphics.Bitmap) throws java.io.IOException;
     method public abstract deprecated void setWallpaper(java.io.InputStream) throws java.io.IOException;
     method public abstract void startActivities(android.content.Intent[]);
+    method public abstract void startActivities(android.content.Intent[], android.os.Bundle);
     method public abstract void startActivity(android.content.Intent);
+    method public abstract void startActivity(android.content.Intent, android.os.Bundle);
     method public abstract boolean startInstrumentation(android.content.ComponentName, java.lang.String, android.os.Bundle);
     method public abstract void startIntentSender(android.content.IntentSender, android.content.Intent, int, int, int) throws android.content.IntentSender.SendIntentException;
+    method public abstract void startIntentSender(android.content.IntentSender, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
     method public abstract android.content.ComponentName startService(android.content.Intent);
     method public abstract boolean stopService(android.content.Intent);
     method public abstract void unbindService(android.content.ServiceConnection);
@@ -5274,9 +5286,12 @@ package android.content {
     method public void setWallpaper(android.graphics.Bitmap) throws java.io.IOException;
     method public void setWallpaper(java.io.InputStream) throws java.io.IOException;
     method public void startActivities(android.content.Intent[]);
+    method public void startActivities(android.content.Intent[], android.os.Bundle);
     method public void startActivity(android.content.Intent);
+    method public void startActivity(android.content.Intent, android.os.Bundle);
     method public boolean startInstrumentation(android.content.ComponentName, java.lang.String, android.os.Bundle);
     method public void startIntentSender(android.content.IntentSender, android.content.Intent, int, int, int) throws android.content.IntentSender.SendIntentException;
+    method public void startIntentSender(android.content.IntentSender, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
     method public android.content.ComponentName startService(android.content.Intent);
     method public boolean stopService(android.content.Intent);
     method public void unbindService(android.content.ServiceConnection);
@@ -19926,9 +19941,12 @@ package android.test.mock {
     method public void setWallpaper(android.graphics.Bitmap) throws java.io.IOException;
     method public void setWallpaper(java.io.InputStream) throws java.io.IOException;
     method public void startActivities(android.content.Intent[]);
+    method public void startActivities(android.content.Intent[], android.os.Bundle);
     method public void startActivity(android.content.Intent);
+    method public void startActivity(android.content.Intent, android.os.Bundle);
     method public boolean startInstrumentation(android.content.ComponentName, java.lang.String, android.os.Bundle);
     method public void startIntentSender(android.content.IntentSender, android.content.Intent, int, int, int) throws android.content.IntentSender.SendIntentException;
+    method public void startIntentSender(android.content.IntentSender, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
     method public android.content.ComponentName startService(android.content.Intent);
     method public boolean stopService(android.content.Intent);
     method public void unbindService(android.content.ServiceConnection);

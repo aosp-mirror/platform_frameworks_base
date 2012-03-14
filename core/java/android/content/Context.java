@@ -818,6 +818,19 @@ public abstract class Context {
     public abstract void clearWallpaper() throws IOException;
 
     /**
+     * Same as {@link #startActivity(Intent, Bundle)} with no options
+     * specified.
+     *
+     * @param intent The description of the activity to start.
+     *
+     * @throws ActivityNotFoundException
+     *
+     * @see {@link #startActivity(Intent, Bundle)}
+     * @see PackageManager#resolveActivity
+     */
+    public abstract void startActivity(Intent intent);
+
+    /**
      * Launch a new activity.  You will not receive any information about when
      * the activity exits.
      *
@@ -832,12 +845,28 @@ public abstract class Context {
      * if there was no Activity found to run the given Intent.
      *
      * @param intent The description of the activity to start.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
      *
      * @throws ActivityNotFoundException
      *
+     * @see {@link #startActivity(Intent)}
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivity(Intent intent);
+    public abstract void startActivity(Intent intent, Bundle options);
+
+    /**
+     * Same as {@link #startActivities(Intent[], Bundle)} with no options
+     * specified.
+     *
+     * @param intents An array of Intents to be started.
+     *
+     * @throws ActivityNotFoundException
+     *
+     * @see {@link #startActivities(Intent[], Bundle)}
+     * @see PackageManager#resolveActivity
+     */
+    public abstract void startActivities(Intent[] intents);
 
     /**
      * Launch multiple new activities.  This is generally the same as calling
@@ -854,15 +883,38 @@ public abstract class Context {
      * list may be on it, some not), so you probably want to avoid such situations.
      *
      * @param intents An array of Intents to be started.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
      *
      * @throws ActivityNotFoundException
      *
+     * @see {@link #startActivities(Intent[])}
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivities(Intent[] intents);
+    public abstract void startActivities(Intent[] intents, Bundle options);
 
     /**
-     * Like {@link #startActivity(Intent)}, but taking a IntentSender
+     * Same as {@link #startIntentSender(IntentSender, Intent, int, int, int, Bundle)}
+     * with no options specified.
+     *
+     * @param intent The IntentSender to launch.
+     * @param fillInIntent If non-null, this will be provided as the
+     * intent parameter to {@link IntentSender#sendIntent}.
+     * @param flagsMask Intent flags in the original IntentSender that you
+     * would like to change.
+     * @param flagsValues Desired values for any bits set in
+     * <var>flagsMask</var>
+     * @param extraFlags Always set to 0.
+     *
+     * @see #startActivity(Intent)
+     * @see #startIntentSender(IntentSender, Intent, int, int, int, Bundle)
+     */
+    public abstract void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException;
+
+    /**
+     * Like {@link #startActivity(Intent, Bundle)}, but taking a IntentSender
      * to start.  If the IntentSender is for an activity, that activity will be started
      * as if you had called the regular {@link #startActivity(Intent)}
      * here; otherwise, its associated action will be executed (such as
@@ -877,10 +929,15 @@ public abstract class Context {
      * @param flagsValues Desired values for any bits set in
      * <var>flagsMask</var>
      * @param extraFlags Always set to 0.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
+     *
+     * @see #startActivity(Intent, Bundle)
+     * @see #startIntentSender(IntentSender, Intent, int, int, int)
      */
     public abstract void startIntentSender(IntentSender intent,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
-            throws IntentSender.SendIntentException;
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
+            Bundle options) throws IntentSender.SendIntentException;
 
     /**
      * Broadcast the given intent to all interested BroadcastReceivers.  This

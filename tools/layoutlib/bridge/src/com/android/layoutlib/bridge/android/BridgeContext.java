@@ -1234,13 +1234,24 @@ public final class BridgeContext extends Context {
     @Override
     public void startActivity(Intent arg0) {
         // TODO Auto-generated method stub
+    }
 
+    @Override
+    public void startActivity(Intent arg0, Bundle arg1) {
+        // TODO Auto-generated method stub
     }
 
     @Override
     public void startIntentSender(IntentSender intent,
             Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
             throws IntentSender.SendIntentException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
+            Bundle options) throws IntentSender.SendIntentException {
         // TODO Auto-generated method stub
     }
 
@@ -1282,6 +1293,12 @@ public final class BridgeContext extends Context {
 
     @Override
     public void startActivities(Intent[] arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void startActivities(Intent[] arg0, Bundle arg1) {
         // TODO Auto-generated method stub
 
     }

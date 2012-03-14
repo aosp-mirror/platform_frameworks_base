@@ -17,8 +17,8 @@
 package com.android.internal.policy.impl;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.IActivityManager;
 import android.app.IUiModeManager;
 import android.app.ProgressDialog;
 import android.app.UiModeManager;
@@ -3832,10 +3832,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         int result = ActivityManagerNative.getDefault()
                                 .startActivity(null, dock,
                                         dock.resolveTypeIfNeeded(mContext.getContentResolver()),
-                                        null, 0, null, null, 0, true /* onlyIfNeeded*/,
-                                        false /* debug */, false /* openglTrace */,
-                                        null, null, false);
-                        if (result == IActivityManager.START_RETURN_INTENT_TO_CALLER) {
+                                        null, null, 0,
+                                        ActivityManager.START_FLAG_ONLY_IF_NEEDED,
+                                        null, null, null);
+                        if (result == ActivityManager.START_RETURN_INTENT_TO_CALLER) {
                             return false;
                         }
                     }
@@ -3843,10 +3843,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 int result = ActivityManagerNative.getDefault()
                         .startActivity(null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                                null, 0, null, null, 0, true /* onlyIfNeeded*/,
-                                false /* debug */, false /* openglTrace */,
-                                null, null, false);
-                if (result == IActivityManager.START_RETURN_INTENT_TO_CALLER) {
+                                null, null, 0,
+                                ActivityManager.START_FLAG_ONLY_IF_NEEDED,
+                                null, null, null);
+                if (result == ActivityManager.START_RETURN_INTENT_TO_CALLER) {
                     return false;
                 }
             } catch (RemoteException ex) {

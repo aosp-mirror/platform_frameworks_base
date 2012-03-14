@@ -50,57 +50,24 @@ import java.util.List;
  * {@hide}
  */
 public interface IActivityManager extends IInterface {
-    /**
-     * Returned by startActivity() if the start request was canceled because
-     * app switches are temporarily canceled to ensure the user's last request
-     * (such as pressing home) is performed.
-     */
-    public static final int START_SWITCHES_CANCELED = 4;
-    /**
-     * Returned by startActivity() if an activity wasn't really started, but
-     * the given Intent was given to the existing top activity.
-     */
-    public static final int START_DELIVERED_TO_TOP = 3;
-    /**
-     * Returned by startActivity() if an activity wasn't really started, but
-     * a task was simply brought to the foreground.
-     */
-    public static final int START_TASK_TO_FRONT = 2;
-    /**
-     * Returned by startActivity() if the caller asked that the Intent not
-     * be executed if it is the recipient, and that is indeed the case.
-     */
-    public static final int START_RETURN_INTENT_TO_CALLER = 1;
-    /**
-     * Activity was started successfully as normal.
-     */
-    public static final int START_SUCCESS = 0;
-    public static final int START_INTENT_NOT_RESOLVED = -1;
-    public static final int START_CLASS_NOT_FOUND = -2;
-    public static final int START_FORWARD_AND_REQUEST_CONFLICT = -3;
-    public static final int START_PERMISSION_DENIED = -4;
-    public static final int START_NOT_ACTIVITY = -5;
-    public static final int START_CANCELED = -6;
     public int startActivity(IApplicationThread caller,
-            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
-            int grantedMode, IBinder resultTo, String resultWho, int requestCode,
-            boolean onlyIfNeeded, boolean debug, boolean openglTrace, String profileFile,
-            ParcelFileDescriptor profileFd, boolean autoStopProfiler) throws RemoteException;
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho,
+            int requestCode, int flags, String profileFile,
+            ParcelFileDescriptor profileFd, Bundle options) throws RemoteException;
     public WaitResult startActivityAndWait(IApplicationThread caller,
-            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
-            int grantedMode, IBinder resultTo, String resultWho, int requestCode,
-            boolean onlyIfNeeded, boolean debug, boolean openglTrace, String profileFile,
-            ParcelFileDescriptor profileFd, boolean autoStopProfiler) throws RemoteException;
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho,
+            int requestCode, int flags, String profileFile,
+            ParcelFileDescriptor profileFd, Bundle options) throws RemoteException;
     public int startActivityWithConfig(IApplicationThread caller,
-            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
-            int grantedMode, IBinder resultTo, String resultWho, int requestCode,
-            boolean onlyIfNeeded, boolean debug, Configuration newConfig) throws RemoteException;
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho,
+            int requestCode, int startFlags, Configuration newConfig,
+            Bundle options) throws RemoteException;
     public int startActivityIntentSender(IApplicationThread caller,
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
-            int flagsMask, int flagsValues) throws RemoteException;
+            int flagsMask, int flagsValues, Bundle options) throws RemoteException;
     public boolean startNextMatchingActivity(IBinder callingActivity,
-            Intent intent) throws RemoteException;
+            Intent intent, Bundle options) throws RemoteException;
     public boolean finishActivity(IBinder token, int code, Intent data)
             throws RemoteException;
     public void finishSubActivity(IBinder token, String resultWho, int requestCode) throws RemoteException;
@@ -109,8 +76,6 @@ public interface IActivityManager extends IInterface {
             IIntentReceiver receiver, IntentFilter filter,
             String requiredPermission) throws RemoteException;
     public void unregisterReceiver(IIntentReceiver receiver) throws RemoteException;
-    public static final int BROADCAST_SUCCESS = 0;
-    public static final int BROADCAST_STICKY_CANT_HAVE_PERMISSION = -1;
     public int broadcastIntent(IApplicationThread caller, Intent intent,
             String resolvedType, IIntentReceiver resultTo, int resultCode,
             String resultData, Bundle map, String requiredPermission,
@@ -201,10 +166,6 @@ public interface IActivityManager extends IInterface {
     public ComponentName getActivityClassForToken(IBinder token) throws RemoteException;
     public String getPackageForToken(IBinder token) throws RemoteException;
 
-    public static final int INTENT_SENDER_BROADCAST = 1;
-    public static final int INTENT_SENDER_ACTIVITY = 2;
-    public static final int INTENT_SENDER_ACTIVITY_RESULT = 3;
-    public static final int INTENT_SENDER_SERVICE = 4;
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes,
@@ -302,7 +263,7 @@ public interface IActivityManager extends IInterface {
     
     public int startActivityInPackage(int uid,
             Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, boolean onlyIfNeeded)
+            String resultWho, int requestCode, int startFlags, Bundle options)
             throws RemoteException;
 
     public void killApplicationWithUid(String pkg, int uid) throws RemoteException;
@@ -342,9 +303,11 @@ public interface IActivityManager extends IInterface {
         ParcelFileDescriptor fd) throws RemoteException;
 
     public int startActivities(IApplicationThread caller,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo) throws RemoteException;
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo,
+            Bundle options) throws RemoteException;
     public int startActivitiesInPackage(int uid,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo) throws RemoteException;
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo,
+            Bundle options) throws RemoteException;
 
     public int getFrontActivityScreenCompatMode() throws RemoteException;
     public void setFrontActivityScreenCompatMode(int mode) throws RemoteException;

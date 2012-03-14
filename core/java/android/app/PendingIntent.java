@@ -195,7 +195,7 @@ public final class PendingIntent implements Parcelable {
             intent.setAllowFds(false);
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
-                    IActivityManager.INTENT_SENDER_ACTIVITY, packageName,
+                    ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null, flags);
             return target != null ? new PendingIntent(target) : null;
@@ -256,7 +256,7 @@ public final class PendingIntent implements Parcelable {
         try {
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
-                    IActivityManager.INTENT_SENDER_ACTIVITY, packageName,
+                    ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, intents, resolvedTypes, flags);
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
@@ -292,7 +292,7 @@ public final class PendingIntent implements Parcelable {
             intent.setAllowFds(false);
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
-                    IActivityManager.INTENT_SENDER_BROADCAST, packageName,
+                    ActivityManager.INTENT_SENDER_BROADCAST, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null, flags);
             return target != null ? new PendingIntent(target) : null;
@@ -330,7 +330,7 @@ public final class PendingIntent implements Parcelable {
             intent.setAllowFds(false);
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
-                    IActivityManager.INTENT_SENDER_SERVICE, packageName,
+                    ActivityManager.INTENT_SENDER_SERVICE, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null, flags);
             return target != null ? new PendingIntent(target) : null;

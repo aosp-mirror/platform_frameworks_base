@@ -852,6 +852,11 @@ class ContextImpl extends Context {
 
     @Override
     public void startActivity(Intent intent) {
+        startActivity(intent, null);
+    }
+
+    @Override
+    public void startActivity(Intent intent, Bundle options) {
         if ((intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
             throw new AndroidRuntimeException(
                     "Calling startActivity() from outside of an Activity "
@@ -860,11 +865,16 @@ class ContextImpl extends Context {
         }
         mMainThread.getInstrumentation().execStartActivity(
             getOuterContext(), mMainThread.getApplicationThread(), null,
-            (Activity)null, intent, -1);
+            (Activity)null, intent, -1, options);
     }
 
     @Override
     public void startActivities(Intent[] intents) {
+        startActivities(intents, null);
+    }
+
+    @Override
+    public void startActivities(Intent[] intents, Bundle options) {
         if ((intents[0].getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
             throw new AndroidRuntimeException(
                     "Calling startActivities() from outside of an Activity "
@@ -873,12 +883,19 @@ class ContextImpl extends Context {
         }
         mMainThread.getInstrumentation().execStartActivities(
             getOuterContext(), mMainThread.getApplicationThread(), null,
-            (Activity)null, intents);
+            (Activity)null, intents, options);
     }
 
     @Override
     public void startIntentSender(IntentSender intent,
             Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException {
+        startIntentSender(intent, fillInIntent, flagsMask, flagsValues, extraFlags, null);
+    }
+
+    @Override
+    public void startIntentSender(IntentSender intent, Intent fillInIntent,
+            int flagsMask, int flagsValues, int extraFlags, Bundle options)
             throws IntentSender.SendIntentException {
         try {
             String resolvedType = null;
@@ -889,8 +906,8 @@ class ContextImpl extends Context {
             int result = ActivityManagerNative.getDefault()
                 .startActivityIntentSender(mMainThread.getApplicationThread(), intent,
                         fillInIntent, resolvedType, null, null,
-                        0, flagsMask, flagsValues);
-            if (result == IActivityManager.START_CANCELED) {
+                        0, flagsMask, flagsValues, options);
+            if (result == ActivityManager.START_CANCELED) {
                 throw new IntentSender.SendIntentException();
             }
             Instrumentation.checkStartActivityResult(result, null);
