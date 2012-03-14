@@ -105,9 +105,8 @@ void AAH_DecoderPump::queueToRenderer(MediaBuffer* decoded_sample) {
                 AudioTrack::getMinFrameCount(&frameCount,
                         AUDIO_STREAM_DEFAULT,
                         static_cast<int>(format_sample_rate_));
-                int ch_format = (format_channels_ == 1)
-                    ? AUDIO_CHANNEL_OUT_MONO
-                    : AUDIO_CHANNEL_OUT_STEREO;
+                audio_channel_mask_t ch_format =
+                        audio_channel_out_mask_from_count(format_channels_);
 
                 res = renderer_->set(AUDIO_STREAM_DEFAULT,
                         format_sample_rate_,

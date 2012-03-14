@@ -32,9 +32,7 @@ int main() {
     sp<MediaSource> source = new AudioSource(
             AUDIO_SOURCE_DEFAULT,
             kSampleRate,
-            kNumChannels == 1
-                ? AUDIO_CHANNEL_IN_MONO
-                : AUDIO_CHANNEL_IN_STEREO);
+            audio_channel_in_mask_from_count(kNumChannels));
 #endif
 
     sp<MetaData> meta = new MetaData;
