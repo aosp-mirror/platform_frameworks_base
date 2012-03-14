@@ -12,10 +12,8 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                <a href="{@docRoot}design/index.html">
                                   <img src="{@docRoot}images/home/play_logo.png"
 alt="Google Play" width="120px" style="padding:10px 52px"/>
-                                </a>
                                   <div id="announcement" style="width:275px">
     <p>Introducing <strong>Google Play</strong>: An integrated digital content destination where
 users buy and enjoy all of their favorite content in one place. It's the new destination for
