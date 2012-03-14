@@ -24,8 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <new>
-#include <EffectReverb.h>
-#include <LVREV.h>
+#include "EffectReverb.h"
+// from Reverb/lib
+#include "LVREV.h"
 
 // effect_handle_t interface implementation for reverb
 extern "C" const struct effect_interface_s gReverbInterface;

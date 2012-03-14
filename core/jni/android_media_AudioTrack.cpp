@@ -22,13 +22,13 @@
 #include <fcntl.h>
 #include <math.h>
 
-#include "jni.h"
-#include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include <jni.h>
+#include <JNIHelp.h>
+#include <android_runtime/AndroidRuntime.h>
 
-#include "utils/Log.h"
-#include "media/AudioSystem.h"
-#include "media/AudioTrack.h"
+#include <utils/Log.h>
+#include <media/AudioSystem.h>
+#include <media/AudioTrack.h>
 
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>

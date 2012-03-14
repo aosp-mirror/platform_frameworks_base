@@ -16,16 +16,18 @@
 */
 
 #define LOG_TAG "mediaserver"
+//#define LOG_NDEBUG 0
 
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
 
-#include <AudioFlinger.h>
-#include <CameraService.h>
-#include <MediaPlayerService.h>
-#include <AudioPolicyService.h>
+// from LOCAL_C_INCLUDES
+#include "AudioFlinger.h"
+#include "CameraService.h"
+#include "MediaPlayerService.h"
+#include "AudioPolicyService.h"
 
 using namespace android;
 
