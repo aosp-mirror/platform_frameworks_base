@@ -143,15 +143,6 @@ public class ProcessErrorsTest extends AndroidTestCase {
             // ignore
         }
 
-        // See if there are any errors
-        final Collection<ProcessError> errProcs =
-                ProcessError.fromCollection(mActivityManager.getProcessesInErrorState());
-        // Take the difference between the error processes we see now, and the ones that were
-        // present when we started
-        if (errProcs != null && preErrProcs != null) {
-            errProcs.removeAll(preErrProcs);
-        }
-
         // Send the "home" intent and wait 2 seconds for us to get there
         getContext().startActivity(mHomeIntent);
         try {
@@ -160,15 +151,22 @@ public class ProcessErrorsTest extends AndroidTestCase {
             // ignore
         }
 
+        // See if there are any errors.  We wait until down here to give ANRs as much time as
+        // possible to occur.
+        final Collection<ProcessError> errProcs =
+                ProcessError.fromCollection(mActivityManager.getProcessesInErrorState());
+        // Take the difference between the error processes we see now, and the ones that were
+        // present when we started
+        if (errProcs != null && preErrProcs != null) {
+            errProcs.removeAll(preErrProcs);
+        }
+
         return errProcs;
     }
 
     /**
      * A test that runs all Launcher-launchable activities and verifies that no ANRs or crashes
      * happened while doing so.
-     * <p />
-     * FIXME: Doesn't detect multiple crashing apps properly, since the crash dialog for the
-     * FIXME: first app doesn't go away.
      */
     public void testRunAllActivities() throws Exception {
         final Set<ProcessError> errSet = new HashSet<ProcessError>();
@@ -181,7 +179,7 @@ public class ProcessErrorsTest extends AndroidTestCase {
         }
 
         if (!errSet.isEmpty()) {
-            fail(String.format("Got %d errors: %s", errSet.size(),
+            fail(String.format("Got %d errors:\n%s", errSet.size(),
                     reportWrappedListContents(errSet)));
         }
     }
@@ -212,19 +210,21 @@ public class ProcessErrorsTest extends AndroidTestCase {
             String condition;
             switch (entry.condition) {
             case ActivityManager.ProcessErrorStateInfo.CRASHED:
-                condition = "CRASHED";
+                condition = "a CRASH";
                 break;
             case ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING:
-                condition = "ANR";
+                condition = "an ANR";
                 break;
             default:
-                condition = "<unknown>";
+                condition = "an unknown error";
                 break;
             }
 
-            builder.append("Process error ").append(condition).append(" ");
-            builder.append(" ").append(entry.shortMsg);
-            builder.append(" detected in ").append(entry.processName).append(" ").append(entry.tag);
+            builder.append(String.format("Process %s encountered %s (%s)", entry.processName,
+                    condition, entry.shortMsg));
+            if (entry.condition == ActivityManager.ProcessErrorStateInfo.CRASHED) {
+                builder.append(String.format(" with stack trace:\n%s\n", entry.stackTrace));
+            }
             builder.append("\n");
         }
         return builder.toString();

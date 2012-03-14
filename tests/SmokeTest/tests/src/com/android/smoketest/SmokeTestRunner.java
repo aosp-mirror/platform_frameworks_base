@@ -79,7 +79,7 @@ public class SmokeTestRunner extends InstrumentationTestRunner {
                     }
 
                     if (!errSet.isEmpty()) {
-                        fail(String.format("Got %d errors: %s", errSet.size(),
+                        fail(String.format("Got %d errors:\n%s", errSet.size(),
                                 reportWrappedListContents(errSet)));
                     }
                 }
