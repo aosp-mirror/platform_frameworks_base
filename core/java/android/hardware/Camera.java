@@ -437,6 +437,13 @@ public class Camera {
      * instances of the same camera, or across multiple runs of the same
      * program.
      *
+     * <p>If you are using the preview data to create video or still images,
+     * strongly consider using {@link android.media.MediaActionSound} to
+     * properly indicate image capture or recording start/stop to the user.</p>
+     *
+     * @see android.media.MediaActionSound
+     * @see android.graphics.SurfaceTexture
+     * @see android.view.TextureView
      * @param surfaceTexture the {@link SurfaceTexture} to which the preview
      *     images are to be sent or null to remove the current preview surface
      *     texture
@@ -512,13 +519,19 @@ public class Camera {
     public native final boolean previewEnabled();
 
     /**
-     * Installs a callback to be invoked for every preview frame in addition
+     * <p>Installs a callback to be invoked for every preview frame in addition
      * to displaying them on the screen.  The callback will be repeatedly called
      * for as long as preview is active.  This method can be called at any time,
-     * even while preview is live.  Any other preview callbacks are overridden.
+     * even while preview is live.  Any other preview callbacks are
+     * overridden.</p>
+     *
+     * <p>If you are using the preview data to create video or still images,
+     * strongly consider using {@link android.media.MediaActionSound} to
+     * properly indicate image capture or recording start/stop to the user.</p>
      *
      * @param cb a callback object that receives a copy of each preview frame,
      *     or null to stop receiving callbacks.
+     * @see android.media.MediaActionSound
      */
     public final void setPreviewCallback(PreviewCallback cb) {
         mPreviewCallback = cb;
@@ -530,13 +543,18 @@ public class Camera {
     }
 
     /**
-     * Installs a callback to be invoked for the next preview frame in addition
-     * to displaying it on the screen.  After one invocation, the callback is
-     * cleared. This method can be called any time, even when preview is live.
-     * Any other preview callbacks are overridden.
+     * <p>Installs a callback to be invoked for the next preview frame in
+     * addition to displaying it on the screen.  After one invocation, the
+     * callback is cleared. This method can be called any time, even when
+     * preview is live.  Any other preview callbacks are overridden.</p>
+     *
+     * <p>If you are using the preview data to create video or still images,
+     * strongly consider using {@link android.media.MediaActionSound} to
+     * properly indicate image capture or recording start/stop to the user.</p>
      *
      * @param cb a callback object that receives a copy of the next preview frame,
      *     or null to stop receiving callbacks.
+     * @see android.media.MediaActionSound
      */
     public final void setOneShotPreviewCallback(PreviewCallback cb) {
         mPreviewCallback = cb;
@@ -548,24 +566,30 @@ public class Camera {
     private native final void setHasPreviewCallback(boolean installed, boolean manualBuffer);
 
     /**
-     * Installs a callback to be invoked for every preview frame, using buffers
-     * supplied with {@link #addCallbackBuffer(byte[])}, in addition to
+     * <p>Installs a callback to be invoked for every preview frame, using
+     * buffers supplied with {@link #addCallbackBuffer(byte[])}, in addition to
      * displaying them on the screen.  The callback will be repeatedly called
-     * for as long as preview is active and buffers are available.
-     * Any other preview callbacks are overridden.
+     * for as long as preview is active and buffers are available.  Any other
+     * preview callbacks are overridden.</p>
      *
      * <p>The purpose of this method is to improve preview efficiency and frame
      * rate by allowing preview frame memory reuse.  You must call
      * {@link #addCallbackBuffer(byte[])} at some point -- before or after
-     * calling this method -- or no callbacks will received.
+     * calling this method -- or no callbacks will received.</p>
      *
-     * The buffer queue will be cleared if this method is called with a null
+     * <p>The buffer queue will be cleared if this method is called with a null
      * callback, {@link #setPreviewCallback(Camera.PreviewCallback)} is called,
-     * or {@link #setOneShotPreviewCallback(Camera.PreviewCallback)} is called.
+     * or {@link #setOneShotPreviewCallback(Camera.PreviewCallback)} is
+     * called.</p>
+     *
+     * <p>If you are using the preview data to create video or still images,
+     * strongly consider using {@link android.media.MediaActionSound} to
+     * properly indicate image capture or recording start/stop to the user.</p>
      *
      * @param cb a callback object that receives a copy of the preview frame,
      *     or null to stop receiving callbacks and clear the buffer queue.
      * @see #addCallbackBuffer(byte[])
+     * @see android.media.MediaActionSound
      */
     public final void setPreviewCallbackWithBuffer(PreviewCallback cb) {
         mPreviewCallback = cb;
@@ -834,10 +858,15 @@ public class Camera {
      * the focus position. Applications must call cancelAutoFocus to reset the
      * focus.</p>
      *
+     * <p>If autofocus is successful, consider using
+     * {@link android.media.MediaActionSound} to properly play back an autofocus
+     * success sound to the user.</p>
+     *
      * @param cb the callback to run
      * @see #cancelAutoFocus()
      * @see android.hardware.Camera.Parameters#setAutoExposureLock(boolean)
      * @see android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)
+     * @see android.media.MediaActionSound
      */
     public final void autoFocus(AutoFocusCallback cb)
     {
