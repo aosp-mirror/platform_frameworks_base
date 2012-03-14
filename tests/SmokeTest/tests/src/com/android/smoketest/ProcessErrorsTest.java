@@ -120,12 +120,19 @@ public class ProcessErrorsTest extends AndroidTestCase {
      * The method will launch the app, wait for 7 seconds, check for apps in the error state, send
      * the Home intent, wait for 2 seconds, and then return.
      */
-    public Collection<ProcessErrorStateInfo> runOneActivity(ResolveInfo app) {
+    public Collection<ProcessError> runOneActivity(ResolveInfo app) {
         final long appLaunchWait = 7000;
         final long homeLaunchWait = 2000;
 
         Log.i(TAG, String.format("Running activity %s/%s", app.activityInfo.packageName,
                 app.activityInfo.name));
+
+        // We check for any Crash or ANR dialogs that are already up, and we ignore them.  This is
+        // so that we don't report crashes that were caused by prior apps (which those particular
+        // tests should have caught and reported already).  Otherwise, test failures would cascade
+        // from the initial broken app to many/all of the tests following that app's launch.
+        final Collection<ProcessError> preErrProcs =
+                ProcessError.fromCollection(mActivityManager.getProcessesInErrorState());
 
         // launch app, and wait 7 seconds for it to start/settle
         final Intent intent = intentForActivity(app);
@@ -137,8 +144,13 @@ public class ProcessErrorsTest extends AndroidTestCase {
         }
 
         // See if there are any errors
-        final Collection<ProcessErrorStateInfo> errProcs =
-                mActivityManager.getProcessesInErrorState();
+        final Collection<ProcessError> errProcs =
+                ProcessError.fromCollection(mActivityManager.getProcessesInErrorState());
+        // Take the difference between the error processes we see now, and the ones that were
+        // present when we started
+        if (errProcs != null && preErrProcs != null) {
+            errProcs.removeAll(preErrProcs);
+        }
 
         // Send the "home" intent and wait 2 seconds for us to get there
         getContext().startActivity(mHomeIntent);
@@ -162,9 +174,9 @@ public class ProcessErrorsTest extends AndroidTestCase {
         final Set<ProcessError> errSet = new HashSet<ProcessError>();
 
         for (ResolveInfo app : getLauncherActivities(mPackageManager)) {
-            final Collection<ProcessErrorStateInfo> errProcs = runOneActivity(app);
+            final Collection<ProcessError> errProcs = runOneActivity(app);
             if (errProcs != null) {
-                errSet.addAll(ProcessError.fromCollection(errProcs));
+                errSet.addAll(errProcs);
             }
         }
 
@@ -231,6 +243,10 @@ public class ProcessErrorsTest extends AndroidTestCase {
 
         public static Collection<ProcessError> fromCollection(Collection<ProcessErrorStateInfo> in)
                 {
+            if (in == null) {
+                return null;
+            }
+
             List<ProcessError> out = new ArrayList<ProcessError>(in.size());
             for (ProcessErrorStateInfo info : in) {
                 out.add(new ProcessError(info));

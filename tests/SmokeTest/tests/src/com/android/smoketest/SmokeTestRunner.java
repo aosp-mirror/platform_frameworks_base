@@ -73,9 +73,9 @@ public class SmokeTestRunner extends InstrumentationTestRunner {
                 @Override
                 public void runTest() throws Exception {
                     final Set<ProcessError> errSet = new HashSet<ProcessError>();
-                    final Collection<ProcessErrorStateInfo> errProcs = runOneActivity(app);
+                    final Collection<ProcessError> errProcs = runOneActivity(app);
                     if (errProcs != null) {
-                        errSet.addAll(ProcessError.fromCollection(errProcs));
+                        errSet.addAll(errProcs);
                     }
 
                     if (!errSet.isEmpty()) {
