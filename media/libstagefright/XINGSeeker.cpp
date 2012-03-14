@@ -24,7 +24,7 @@ namespace android {
 static bool parse_xing_header(
         const sp<DataSource> &source, off64_t first_frame_pos,
         int32_t *frame_number = NULL, int32_t *byte_number = NULL,
-        unsigned char *table_of_contents = NULL,
+        unsigned char *table_of_contents = NULL, bool *toc_is_valid = NULL,
         int32_t *quality_indicator = NULL, int64_t *duration = NULL);
 
 // static
@@ -36,7 +36,7 @@ sp<XINGSeeker> XINGSeeker::CreateFromSource(
 
     if (!parse_xing_header(
                 source, first_frame_pos,
-                NULL, &seeker->mSizeBytes, seeker->mTableOfContents,
+                NULL, &seeker->mSizeBytes, seeker->mTOC, &seeker->mTOCValid,
                 NULL, &seeker->mDurationUs)) {
         return NULL;
     }
@@ -60,7 +60,7 @@ bool XINGSeeker::getDuration(int64_t *durationUs) {
 }
 
 bool XINGSeeker::getOffsetForTime(int64_t *timeUs, off64_t *pos) {
-    if (mSizeBytes == 0 || mTableOfContents[0] <= 0 || mDurationUs < 0) {
+    if (mSizeBytes == 0 || !mTOCValid || mDurationUs < 0) {
         return false;
     }
 
@@ -76,10 +76,10 @@ bool XINGSeeker::getOffsetForTime(int64_t *timeUs, off64_t *pos) {
         if ( a == 0 ) {
             fa = 0.0f;
         } else {
-            fa = (float)mTableOfContents[a-1];
+            fa = (float)mTOC[a-1];
         }
         if ( a < 99 ) {
-            fb = (float)mTableOfContents[a];
+            fb = (float)mTOC[a];
         } else {
             fb = 256.0f;
         }
@@ -94,7 +94,8 @@ bool XINGSeeker::getOffsetForTime(int64_t *timeUs, off64_t *pos) {
 static bool parse_xing_header(
         const sp<DataSource> &source, off64_t first_frame_pos,
         int32_t *frame_number, int32_t *byte_number,
-        unsigned char *table_of_contents, int32_t *quality_indicator,
+        unsigned char *table_of_contents, bool *toc_valid,
+        int32_t *quality_indicator,
         int64_t *duration) {
     if (frame_number) {
         *frame_number = 0;
@@ -102,8 +103,8 @@ static bool parse_xing_header(
     if (byte_number) {
         *byte_number = 0;
     }
-    if (table_of_contents) {
-        table_of_contents[0] = 0;
+    if (toc_valid) {
+        *toc_valid = false;
     }
     if (quality_indicator) {
         *quality_indicator = 0;
@@ -199,9 +200,12 @@ static bool parse_xing_header(
         offset += 4;
     }
     if (flags & 0x0004) {  // TOC field is present
-       if (table_of_contents) {
+        if (table_of_contents) {
             if (source->readAt(offset + 1, table_of_contents, 99) < 99) {
                 return false;
+            }
+            if (toc_valid) {
+                *toc_valid = true;
             }
         }
         offset += 100;
