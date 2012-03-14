@@ -2079,6 +2079,7 @@
             <!-- Locale -->
             <enum name="locale" value="3" />
         </attr>
+
         <!-- Direction of the text. A heuristic is used to determine the resolved text direction
              of paragraphs. -->
          <attr name="textDirection" format="integer">
@@ -2098,6 +2099,29 @@
             <enum name="rtl" value="4" />
             <!-- The paragraph direction is coming from the system Locale. -->
             <enum name="locale" value="5" />
+        </attr>
+
+        <!-- Alignment of the text. A heuristic is used to determine the resolved
+            text alignment. -->
+        <attr name="textAlignment" format="integer">
+            <!-- Default -->
+            <enum name="inherit" value="0" />
+            <!-- Default for the root view. The gravity determines the alignment, ALIGN_NORMAL,
+                ALIGN_CENTER, or ALIGN_OPPOSITE, which are relative to each paragraph’s
+                text direction -->
+            <enum name="gravity" value="1" />
+            <!-- Align to the start of the paragraph, e.g. ALIGN_NORMAL. -->
+            <enum name="textStart" value="2" />
+            <!-- Align to the end of the paragraph, e.g. ALIGN_OPPOSITE. -->
+            <enum name="textEnd" value="3" />
+            <!-- Center the paragraph, e.g. ALIGN_CENTER. -->
+            <enum name="center" value="4" />
+            <!-- Align to the start of the view, which is ALIGN_LEFT if the view’s resolved
+                layoutDirection is LTR, and ALIGN_RIGHT otherwise. -->
+            <enum name="viewStart" value="5" />
+            <!-- Align to the end of the view, which is ALIGN_RIGHT if the view’s resolved
+                layoutDirection is LTR, and ALIGN_LEFT otherwise -->
+            <enum name="viewEnd" value="6" />
         </attr>
     </declare-styleable>
 

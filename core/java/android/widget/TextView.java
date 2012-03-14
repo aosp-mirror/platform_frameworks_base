@@ -5340,24 +5340,63 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                       physicalWidth, false);
     }
 
+    @Override
+    public void onResolvedLayoutDirectionReset() {
+        if (mLayoutAlignment != null) {
+            int resolvedTextAlignment = getResolvedTextAlignment();
+            if (resolvedTextAlignment == TEXT_ALIGNMENT_VIEW_START ||
+                 resolvedTextAlignment == TEXT_ALIGNMENT_VIEW_END) {
+                mLayoutAlignment = null;
+            }
+        }
+    }
+
     private Layout.Alignment getLayoutAlignment() {
         if (mLayoutAlignment == null) {
-            switch (mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) {
-                case Gravity.START:
+            int textAlign = getResolvedTextAlignment();
+            switch (textAlign) {
+                case TEXT_ALIGNMENT_GRAVITY:
+                    switch (mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) {
+                        case Gravity.START:
+                            mLayoutAlignment = Layout.Alignment.ALIGN_NORMAL;
+                            break;
+                        case Gravity.END:
+                            mLayoutAlignment = Layout.Alignment.ALIGN_OPPOSITE;
+                            break;
+                        case Gravity.LEFT:
+                            mLayoutAlignment = Layout.Alignment.ALIGN_LEFT;
+                            break;
+                        case Gravity.RIGHT:
+                            mLayoutAlignment = Layout.Alignment.ALIGN_RIGHT;
+                            break;
+                        case Gravity.CENTER_HORIZONTAL:
+                            mLayoutAlignment = Layout.Alignment.ALIGN_CENTER;
+                            break;
+                        default:
+                            mLayoutAlignment = Layout.Alignment.ALIGN_NORMAL;
+                            break;
+                    }
+                    break;
+                case TEXT_ALIGNMENT_TEXT_START:
                     mLayoutAlignment = Layout.Alignment.ALIGN_NORMAL;
                     break;
-                case Gravity.END:
+                case TEXT_ALIGNMENT_TEXT_END:
                     mLayoutAlignment = Layout.Alignment.ALIGN_OPPOSITE;
                     break;
-                case Gravity.LEFT:
-                    mLayoutAlignment = Layout.Alignment.ALIGN_LEFT;
-                    break;
-                case Gravity.RIGHT:
-                    mLayoutAlignment = Layout.Alignment.ALIGN_RIGHT;
-                    break;
-                case Gravity.CENTER_HORIZONTAL:
+                case TEXT_ALIGNMENT_CENTER:
                     mLayoutAlignment = Layout.Alignment.ALIGN_CENTER;
                     break;
+                case TEXT_ALIGNMENT_VIEW_START:
+                    mLayoutAlignment = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+                            Layout.Alignment.ALIGN_RIGHT : Layout.Alignment.ALIGN_LEFT;
+                    break;
+                case TEXT_ALIGNMENT_VIEW_END:
+                    mLayoutAlignment = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+                            Layout.Alignment.ALIGN_LEFT : Layout.Alignment.ALIGN_RIGHT;
+                    break;
+                case TEXT_ALIGNMENT_INHERIT:
+                    // This should never happen as we have already resolved the text alignment
+                    // but better safe than sorry so we just fall through
                 default:
                     mLayoutAlignment = Layout.Alignment.ALIGN_NORMAL;
                     break;
