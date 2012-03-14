@@ -17,16 +17,17 @@
 #ifndef _THREAD_CPU_USAGE_H
 #define _THREAD_CPU_USAGE_H
 
-#include <cpustats/CentralTendencyStatistics.h>
+#include <fcntl.h>
+#include <pthread.h>
 
-// Track CPU usage for the current thread, and maintain statistics on
-// the CPU usage.  Units are in per-thread CPU ns, as reported by
+namespace android {
+
+// Track CPU usage for the current thread.
+// Units are in per-thread CPU ns, as reported by
 // clock_gettime(CLOCK_THREAD_CPUTIME_ID).  Simple usage: for cyclic
 // threads where you want to measure the execution time of the whole
 // cycle, just call sampleAndEnable() at the start of each cycle.
-// Then call statistics() to get the results, and resetStatistics()
-// to start a new set of measurements.
-// For acyclic threads, or for cyclic threads where you want to measure
+// For acyclic threads, or for cyclic threads where you want to measure/track
 // only part of each cycle, call enable(), disable(), and/or setEnabled()
 // to demarcate the region(s) of interest, and then call sample() periodically.
 // This class is not thread-safe for concurrent calls from multiple threads;
@@ -44,13 +45,17 @@ public:
         // mPreviousTs
         // mMonotonicTs
         mMonotonicKnown(false)
-        // mStatistics
-        { }
+        {
+            (void) pthread_once(&sOnceControl, &init);
+            for (int i = 0; i < sKernelMax; ++i) {
+                mCurrentkHz[i] = (uint32_t) ~0;   // unknown
+            }
+        }
 
     ~ThreadCpuUsage() { }
 
     // Return whether currently tracking CPU usage by current thread
-    bool isEnabled()    { return mIsEnabled; }
+    bool isEnabled() const  { return mIsEnabled; }
 
     // Enable tracking of CPU usage by current thread;
     // any CPU used from this point forward will be tracked.
@@ -66,39 +71,52 @@ public:
     // This method is intended to be used for safe nested enable/disabling.
     bool setEnabled(bool isEnabled);
 
-    // Add a sample point for central tendency statistics, and also
-    // enable tracking if needed.  If tracking has never been enabled, then
-    // enables tracking but does not add a sample (it is not possible to add
-    // a sample the first time because no previous).  Otherwise if tracking is
-    // enabled, then adds a sample for tracked CPU ns since the previous
+    // Add a sample point, and also enable tracking if needed.
+    // If tracking has never been enabled, then this call enables tracking but
+    // does _not_ add a sample -- it is not possible to add a sample the
+    // first time because there is no previous point to subtract from.
+    // Otherwise, if tracking is enabled,
+    // then adds a sample for tracked CPU ns since the previous
     // sample, or since the first call to sampleAndEnable(), enable(), or
     // setEnabled(true).  If there was a previous sample but tracking is
     // now disabled, then adds a sample for the tracked CPU ns accumulated
     // up until the most recent disable(), resets this accumulator, and then
     // enables tracking.  Calling this method rather than enable() followed
     // by sample() avoids a race condition for the first sample.
-    void sampleAndEnable();
+    // Returns true if the sample 'ns' is valid, or false if invalid.
+    // Note that 'ns' is an output parameter passed by reference.
+    // The caller does not need to initialize this variable.
+    // The units are CPU nanoseconds consumed by current thread.
+    bool sampleAndEnable(double& ns);
 
-    // Add a sample point for central tendency statistics, but do not
+    // Add a sample point, but do not
     // change the tracking enabled status.  If tracking has either never been
     // enabled, or has never been enabled since the last sample, then log a warning
     // and don't add sample.  Otherwise, adds a sample for tracked CPU ns since
     // the previous sample or since the first call to sampleAndEnable(),
     // enable(), or setEnabled(true) if no previous sample.
-    void sample();
+    // Returns true if the sample is valid, or false if invalid.
+    // Note that 'ns' is an output parameter passed by reference.
+    // The caller does not need to initialize this variable.
+    // The units are CPU nanoseconds consumed by current thread.
+    bool sample(double& ns);
 
-    // Return the elapsed delta wall clock ns since initial enable or statistics reset,
+    // Return the elapsed delta wall clock ns since initial enable or reset,
     // as reported by clock_gettime(CLOCK_MONOTONIC).
     long long elapsed() const;
 
-    // Reset statistics and elapsed.  Has no effect on tracking or accumulator.
-    void resetStatistics();
+    // Reset elapsed wall clock.  Has no effect on tracking or accumulator.
+    void resetElapsed();
 
-    // Return a const reference to the central tendency statistics.
-    // Note that only the const methods can be called on this object.
-    const CentralTendencyStatistics& statistics() const {
-        return mStatistics;
-    }
+    // Return current clock frequency for specified CPU, in kHz.
+    // You can get your CPU number using sched_getcpu(2).  Note that, unless CPU affinity
+    // has been configured appropriately, the CPU number can change.
+    // Also note that, unless the CPU governor has been configured appropriately,
+    // the CPU frequency can change.  And even if the CPU frequency is locked down
+    // to a particular value, that the frequency might still be adjusted
+    // to prevent thermal overload.  Therefore you should poll for your thread's
+    // current CPU number and clock frequency periodically.
+    uint32_t getCpukHz(int cpuNum);
 
 private:
     bool mIsEnabled;                // whether tracking is currently enabled
@@ -107,7 +125,15 @@ private:
     struct timespec mPreviousTs;    // most recent thread CPU time, valid only if mIsEnabled is true
     struct timespec mMonotonicTs;   // most recent monotonic time
     bool mMonotonicKnown;           // whether mMonotonicTs has been set
-    CentralTendencyStatistics mStatistics;
+
+    static const int MAX_CPU = 8;
+    static int sScalingFds[MAX_CPU];// file descriptor per CPU for reading scaling_cur_freq
+    uint32_t mCurrentkHz[MAX_CPU];  // current CPU frequency in kHz, not static to avoid a race
+    static pthread_once_t sOnceControl;
+    static int sKernelMax;          // like MAX_CPU, but determined at runtime == cpu/kernel_max + 1
+    static void init();
 };
+
+}   // namespace android
 
 #endif //  _THREAD_CPU_USAGE_H
