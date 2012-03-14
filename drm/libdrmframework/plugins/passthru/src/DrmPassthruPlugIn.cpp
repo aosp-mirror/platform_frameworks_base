@@ -279,8 +279,14 @@ status_t DrmPassthruPlugIn::onDecrypt(int uniqueId, DecryptHandle* decryptHandle
      * memory has to be allocated by the caller.
      */
     if (NULL != (*decBuffer) && 0 < (*decBuffer)->length) {
-        memcpy((*decBuffer)->data, encBuffer->data, encBuffer->length);
-        (*decBuffer)->length = encBuffer->length;
+        if ((*decBuffer)->length >= encBuffer->length) {
+            memcpy((*decBuffer)->data, encBuffer->data, encBuffer->length);
+            (*decBuffer)->length = encBuffer->length;
+        } else {
+            ALOGE("decBuffer size (%d) too small to hold %d bytes",
+                (*decBuffer)->length, encBuffer->length);
+            return DRM_ERROR_UNKNOWN;
+        }
     }
     return DRM_NO_ERROR;
 }
