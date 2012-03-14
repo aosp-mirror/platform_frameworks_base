@@ -57,16 +57,13 @@ public class Am {
     private int mNextArg;
     private String mCurArgData;
 
-    private boolean mDebugOption = false;
+    private int mStartFlags = 0;
     private boolean mWaitOption = false;
     private boolean mStopOption = false;
-
-    private boolean mOpenglTraceOption = false;
 
     private int mRepeat = 0;
 
     private String mProfileFile;
-    private boolean mProfileAutoStop;
 
     // These are magic strings understood by the Eclipse plugin.
     private static final String FATAL_ERROR_CODE = "Error type 1";
@@ -150,10 +147,9 @@ public class Am {
         Intent baseIntent = intent;
         boolean hasIntentInfo = false;
 
-        mDebugOption = false;
+        mStartFlags = 0;
         mWaitOption = false;
         mStopOption = false;
-        mOpenglTraceOption = false;
         mRepeat = 0;
         mProfileFile = null;
         Uri data = null;
@@ -297,21 +293,21 @@ public class Am {
                 intent.setDataAndType(data, type);
                 intent = new Intent();
             } else if (opt.equals("-D")) {
-                mDebugOption = true;
+                mStartFlags |= ActivityManager.START_FLAG_DEBUG;
             } else if (opt.equals("-W")) {
                 mWaitOption = true;
             } else if (opt.equals("-P")) {
                 mProfileFile = nextArgRequired();
-                mProfileAutoStop = true;
+                mStartFlags |= ActivityManager.START_FLAG_AUTO_STOP_PROFILER;
             } else if (opt.equals("--start-profiler")) {
                 mProfileFile = nextArgRequired();
-                mProfileAutoStop = false;
+                mStartFlags &= ~ActivityManager.START_FLAG_AUTO_STOP_PROFILER;
             } else if (opt.equals("-R")) {
                 mRepeat = Integer.parseInt(nextArgRequired());
             } else if (opt.equals("-S")) {
                 mStopOption = true;
             } else if (opt.equals("--opengl-trace")) {
-                mOpenglTraceOption = true;
+                mStartFlags |= ActivityManager.START_FLAG_OPENGL_TRACES;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -450,64 +446,60 @@ public class Am {
             int res;
             if (mWaitOption) {
                 result = mAm.startActivityAndWait(null, intent, mimeType,
-                            null, 0, null, null, 0, false,
-                            mDebugOption, mOpenglTraceOption,
-                            mProfileFile, fd, mProfileAutoStop);
+                            null, null, 0, mStartFlags, mProfileFile, fd, null);
                 res = result.result;
             } else {
                 res = mAm.startActivity(null, intent, mimeType,
-                        null, 0, null, null, 0, false,
-                        mDebugOption, mOpenglTraceOption,
-                        mProfileFile, fd, mProfileAutoStop);
+                        null, null, 0, mStartFlags, mProfileFile, fd, null);
             }
             PrintStream out = mWaitOption ? System.out : System.err;
             boolean launched = false;
             switch (res) {
-                case IActivityManager.START_SUCCESS:
+                case ActivityManager.START_SUCCESS:
                     launched = true;
                     break;
-                case IActivityManager.START_SWITCHES_CANCELED:
+                case ActivityManager.START_SWITCHES_CANCELED:
                     launched = true;
                     out.println(
                             "Warning: Activity not started because the "
                             + " current activity is being kept for the user.");
                     break;
-                case IActivityManager.START_DELIVERED_TO_TOP:
+                case ActivityManager.START_DELIVERED_TO_TOP:
                     launched = true;
                     out.println(
                             "Warning: Activity not started, intent has "
                             + "been delivered to currently running "
                             + "top-most instance.");
                     break;
-                case IActivityManager.START_RETURN_INTENT_TO_CALLER:
+                case ActivityManager.START_RETURN_INTENT_TO_CALLER:
                     launched = true;
                     out.println(
                             "Warning: Activity not started because intent "
                             + "should be handled by the caller");
                     break;
-                case IActivityManager.START_TASK_TO_FRONT:
+                case ActivityManager.START_TASK_TO_FRONT:
                     launched = true;
                     out.println(
                             "Warning: Activity not started, its current "
                             + "task has been brought to the front");
                     break;
-                case IActivityManager.START_INTENT_NOT_RESOLVED:
+                case ActivityManager.START_INTENT_NOT_RESOLVED:
                     out.println(
                             "Error: Activity not started, unable to "
                             + "resolve " + intent.toString());
                     break;
-                case IActivityManager.START_CLASS_NOT_FOUND:
+                case ActivityManager.START_CLASS_NOT_FOUND:
                     out.println(NO_CLASS_ERROR_CODE);
                     out.println("Error: Activity class " +
                             intent.getComponent().toShortString()
                             + " does not exist.");
                     break;
-                case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
+                case ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
                     out.println(
                             "Error: Activity not started, you requested to "
                             + "both forward and receive its result");
                     break;
-                case IActivityManager.START_PERMISSION_DENIED:
+                case ActivityManager.START_PERMISSION_DENIED:
                     out.println(
                             "Error: Activity not started, you do not "
                             + "have permission to access it.");

@@ -1346,6 +1346,7 @@ public class Instrumentation {
      * @param intent The actual Intent to start.
      * @param requestCode Identifier for this request's result; less than zero 
      *                    if the caller is not expecting a result.
+     * @param options Addition options.
      * 
      * @return To force the return of a particular result, return an 
      *         ActivityResult object containing the desired data; otherwise
@@ -1361,7 +1362,7 @@ public class Instrumentation {
      */
     public ActivityResult execStartActivity(
             Context who, IBinder contextThread, IBinder token, Activity target,
-            Intent intent, int requestCode) {
+            Intent intent, int requestCode, Bundle options) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
             synchronized (mSync) {
@@ -1383,8 +1384,8 @@ public class Instrumentation {
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        null, 0, token, target != null ? target.mEmbeddedID : null,
-                        requestCode, false, false, false, null, null, false);
+                        token, target != null ? target.mEmbeddedID : null,
+                        requestCode, 0, null, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
         }
@@ -1400,7 +1401,7 @@ public class Instrumentation {
      * {@hide}
      */
     public void execStartActivities(Context who, IBinder contextThread,
-            IBinder token, Activity target, Intent[] intents) {
+            IBinder token, Activity target, Intent[] intents, Bundle options) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
             synchronized (mSync) {
@@ -1424,7 +1425,7 @@ public class Instrumentation {
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
-                .startActivities(whoThread, intents, resolvedTypes, token);
+                .startActivities(whoThread, intents, resolvedTypes, token, options);
             checkStartActivityResult(result, intents[0]);
         } catch (RemoteException e) {
         }
@@ -1459,7 +1460,7 @@ public class Instrumentation {
      */
     public ActivityResult execStartActivity(
         Context who, IBinder contextThread, IBinder token, Fragment target,
-        Intent intent, int requestCode) {
+        Intent intent, int requestCode, Bundle options) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
             synchronized (mSync) {
@@ -1481,9 +1482,8 @@ public class Instrumentation {
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        null, 0, token, target != null ? target.mWho : null,
-                        requestCode, false, false /* debug */, false /* openglTrace */,
-                        null, null, false);
+                        token, target != null ? target.mWho : null,
+                        requestCode, 0, null, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
         }
@@ -1502,13 +1502,13 @@ public class Instrumentation {
     }
 
     /*package*/ static void checkStartActivityResult(int res, Object intent) {
-        if (res >= IActivityManager.START_SUCCESS) {
+        if (res >= ActivityManager.START_SUCCESS) {
             return;
         }
         
         switch (res) {
-            case IActivityManager.START_INTENT_NOT_RESOLVED:
-            case IActivityManager.START_CLASS_NOT_FOUND:
+            case ActivityManager.START_INTENT_NOT_RESOLVED:
+            case ActivityManager.START_CLASS_NOT_FOUND:
                 if (intent instanceof Intent && ((Intent)intent).getComponent() != null)
                     throw new ActivityNotFoundException(
                             "Unable to find explicit activity class "
@@ -1516,13 +1516,13 @@ public class Instrumentation {
                             + "; have you declared this activity in your AndroidManifest.xml?");
                 throw new ActivityNotFoundException(
                         "No Activity found to handle " + intent);
-            case IActivityManager.START_PERMISSION_DENIED:
+            case ActivityManager.START_PERMISSION_DENIED:
                 throw new SecurityException("Not allowed to start activity "
                         + intent);
-            case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
+            case ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
                 throw new AndroidRuntimeException(
                         "FORWARD_RESULT_FLAG used while also requesting a result");
-            case IActivityManager.START_NOT_ACTIVITY:
+            case ActivityManager.START_NOT_ACTIVITY:
                 throw new IllegalArgumentException(
                         "PendingIntent is not an activity");
             default:

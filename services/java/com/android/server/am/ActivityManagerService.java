@@ -286,9 +286,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static class PendingActivityLaunch {
         ActivityRecord r;
         ActivityRecord sourceRecord;
-        Uri[] grantedUriPermissions;
-        int grantedMode;
-        boolean onlyIfNeeded;
+        int startFlags;
     }
     
     final ArrayList<PendingActivityLaunch> mPendingActivityLaunches
@@ -2095,8 +2093,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     aInfo.applicationInfo.uid);
             if (app == null || app.instrumentationClass == null) {
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mMainStack.startActivityLocked(null, intent, null, null, 0, aInfo,
-                        null, null, 0, 0, 0, false, false, null);
+                mMainStack.startActivityLocked(null, intent, null, aInfo,
+                        null, null, 0, 0, 0, 0, null, false, null);
             }
         }
 
@@ -2150,8 +2148,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
-                    mMainStack.startActivityLocked(null, intent, null, null, 0, ri.activityInfo,
-                            null, null, 0, 0, 0, false, false, null);
+                    mMainStack.startActivityLocked(null, intent, null, ri.activityInfo,
+                            null, null, 0, 0, 0, 0, null, false, null);
                 }
             }
         }
@@ -2257,18 +2255,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int i=0; i<N; i++) {
             PendingActivityLaunch pal = mPendingActivityLaunches.get(i);
             mMainStack.startActivityUncheckedLocked(pal.r, pal.sourceRecord,
-                    pal.grantedUriPermissions, pal.grantedMode, pal.onlyIfNeeded,
-                    doResume && i == (N-1));
+                    pal.startFlags, doResume && i == (N-1));
         }
         mPendingActivityLaunches.clear();
     }
 
     public final int startActivity(IApplicationThread caller,
-            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
-            int grantedMode, IBinder resultTo,
-            String resultWho, int requestCode, boolean onlyIfNeeded, boolean debug,
-            boolean openglTrace, String profileFile, ParcelFileDescriptor profileFd,
-            boolean autoStopProfiler) {
+            Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags,
+            String profileFile, ParcelFileDescriptor profileFd, Bundle options) {
         enforceNotIsolatedCaller("startActivity");
         int userId = 0;
         if (intent.getCategories() != null && intent.getCategories().contains(Intent.CATEGORY_HOME)) {
@@ -2285,43 +2280,38 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
-                grantedUriPermissions, grantedMode, resultTo, resultWho, requestCode, onlyIfNeeded,
-                debug, openglTrace, profileFile, profileFd, autoStopProfiler, null, null, userId);
+                resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
+                null, null, options, userId);
     }
 
     public final WaitResult startActivityAndWait(IApplicationThread caller,
-            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
-            int grantedMode, IBinder resultTo,
-            String resultWho, int requestCode, boolean onlyIfNeeded, boolean debug,
-            boolean openglTrace, String profileFile, ParcelFileDescriptor profileFd,
-            boolean autoStopProfiler) {
+            Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags, String profileFile,
+            ParcelFileDescriptor profileFd, Bundle options) {
         enforceNotIsolatedCaller("startActivityAndWait");
         WaitResult res = new WaitResult();
         int userId = Binder.getOrigCallingUser();
         mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
-                grantedUriPermissions, grantedMode, resultTo, resultWho,
-                requestCode, onlyIfNeeded, debug, openglTrace, profileFile, profileFd, autoStopProfiler,
-                res, null, userId);
+                resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
+                res, null, options, userId);
         return res;
     }
 
     public final int startActivityWithConfig(IApplicationThread caller,
-            Intent intent, String resolvedType, Uri[] grantedUriPermissions,
-            int grantedMode, IBinder resultTo,
-            String resultWho, int requestCode, boolean onlyIfNeeded,
-            boolean debug, Configuration config) {
+            Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags, Configuration config,
+            Bundle options) {
         enforceNotIsolatedCaller("startActivityWithConfig");
         int ret = mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
-                grantedUriPermissions, grantedMode, resultTo, resultWho,
-                requestCode, onlyIfNeeded,
-                debug, false, null, null, false, null, config, Binder.getOrigCallingUser());
+                resultTo, resultWho, requestCode, startFlags,
+                null, null, null, config, options, Binder.getOrigCallingUser());
         return ret;
     }
 
     public int startActivityIntentSender(IApplicationThread caller,
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
-            int flagsMask, int flagsValues) {
+            int flagsMask, int flagsValues, Bundle options) {
         enforceNotIsolatedCaller("startActivityIntentSender");
         // Refuse possible leaked file descriptors
         if (fillInIntent != null && fillInIntent.hasFileDescriptors()) {
@@ -2344,13 +2334,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mAppSwitchesAllowedTime = 0;
             }
         }
-        int ret = pir.sendInner(0, fillInIntent, resolvedType, null,
-                null, resultTo, resultWho, requestCode, flagsMask, flagsValues);
+        int ret = pir.sendInner(0, fillInIntent, resolvedType, null, null,
+                resultTo, resultWho, requestCode, flagsMask, flagsValues, options);
         return ret;
     }
     
     public boolean startNextMatchingActivity(IBinder callingActivity,
-            Intent intent) {
+            Intent intent, Bundle options) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -2430,13 +2420,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             // XXX we are not dealing with propagating grantedUriPermissions...
             // those are not yet exposed to user code, so there is no need.
             int res = mMainStack.startActivityLocked(r.app.thread, intent,
-                    r.resolvedType, null, 0, aInfo,
-                    resultTo != null ? resultTo.appToken : null, resultWho,
-                    requestCode, -1, r.launchedFromUid, false, false, null);
+                    r.resolvedType, aInfo, resultTo != null ? resultTo.appToken : null,
+                    resultWho, requestCode, -1, r.launchedFromUid, 0,
+                    options, false, null);
             Binder.restoreCallingIdentity(origId);
 
             r.finishing = wasFinishing;
-            if (res != START_SUCCESS) {
+            if (res != ActivityManager.START_SUCCESS) {
                 return false;
             }
             return true;
@@ -2445,7 +2435,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public final int startActivityInPackage(int uid,
             Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, boolean onlyIfNeeded) {
+            String resultWho, int requestCode, int startFlags, Bundle options) {
         
         // This is so super not safe, that only the system (or okay root)
         // can do it.
@@ -2457,21 +2447,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         int ret = mMainStack.startActivityMayWait(null, uid, intent, resolvedType,
-                null, 0, resultTo, resultWho, requestCode, onlyIfNeeded, false, false,
-                null, null, false, null, null, userId);
+                resultTo, resultWho, requestCode, startFlags,
+                null, null, null, null, options, userId);
         return ret;
     }
 
     public final int startActivities(IApplicationThread caller,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo) {
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle options) {
         enforceNotIsolatedCaller("startActivities");
         int ret = mMainStack.startActivities(caller, -1, intents, resolvedTypes, resultTo,
-                Binder.getOrigCallingUser());
+                options, Binder.getOrigCallingUser());
         return ret;
     }
 
     public final int startActivitiesInPackage(int uid,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo) {
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo,
+            Bundle options) {
 
         // This is so super not safe, that only the system (or okay root)
         // can do it.
@@ -2481,7 +2472,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "startActivityInPackage only available to the system");
         }
         int ret = mMainStack.startActivities(null, uid, intents, resolvedTypes, resultTo,
-                UserId.getUserId(uid));
+                options, UserId.getUserId(uid));
         return ret;
     }
 
@@ -4193,7 +4184,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (intent.hasFileDescriptors()) {
                         throw new IllegalArgumentException("File descriptors passed in Intent");
                     }
-                    if (type == INTENT_SENDER_BROADCAST &&
+                    if (type == ActivityManager.INTENT_SENDER_BROADCAST &&
                             (intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
                         throw new IllegalArgumentException(
                                 "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
@@ -4242,7 +4233,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (DEBUG_MU)
             Slog.v(TAG_MU, "getIntentSenderLocked(): uid=" + callingUid);
         ActivityRecord activity = null;
-        if (type == INTENT_SENDER_ACTIVITY_RESULT) {
+        if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
             activity = mMainStack.isInStackLocked(token);
             if (activity == null) {
                 return null;
@@ -4289,7 +4280,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         rec = new PendingIntentRecord(this, key, callingUid);
         mIntentSenderRecords.put(key, rec.ref);
-        if (type == INTENT_SENDER_ACTIVITY_RESULT) {
+        if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
             if (activity.pendingResults == null) {
                 activity.pendingResults
                         = new HashSet<WeakReference<PendingIntentRecord>>();
@@ -12454,7 +12445,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
-                return BROADCAST_SUCCESS;
+                return ActivityManager.BROADCAST_SUCCESS;
             }
         }
         
@@ -12472,7 +12463,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (requiredPermission != null) {
                 Slog.w(TAG, "Can't broadcast sticky intent " + intent
                         + " and enforce permission " + requiredPermission);
-                return BROADCAST_STICKY_CANT_HAVE_PERMISSION;
+                return ActivityManager.BROADCAST_STICKY_CANT_HAVE_PERMISSION;
             }
             if (intent.getComponent() != null) {
                 throw new SecurityException(
@@ -12646,7 +12637,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        return BROADCAST_SUCCESS;
+        return ActivityManager.BROADCAST_SUCCESS;
     }
 
     final Intent verifyBroadcastLocked(Intent intent) {

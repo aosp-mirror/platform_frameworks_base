@@ -3166,42 +3166,60 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Same as calling {@link #startActivityForResult(Intent, int, Bundle)}
+     * with no options.
+     *
+     * @param intent The intent to start.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     *
+     * @throws android.content.ActivityNotFoundException
+     *
+     * @see #startActivity 
+     */
+    public void startActivityForResult(Intent intent, int requestCode) {
+        startActivityForResult(intent, requestCode, null);
+    }
+
+    /**
      * Launch an activity for which you would like a result when it finished.
      * When this activity exits, your
      * onActivityResult() method will be called with the given requestCode. 
      * Using a negative requestCode is the same as calling 
      * {@link #startActivity} (the activity is not launched as a sub-activity).
-     * 
+     *
      * <p>Note that this method should only be used with Intent protocols
      * that are defined to return a result.  In other protocols (such as
      * {@link Intent#ACTION_MAIN} or {@link Intent#ACTION_VIEW}), you may
      * not get the result when you expect.  For example, if the activity you
      * are launching uses the singleTask launch mode, it will not run in your
      * task and thus you will immediately receive a cancel result.
-     * 
+     *
      * <p>As a special case, if you call startActivityForResult() with a requestCode 
      * >= 0 during the initial onCreate(Bundle savedInstanceState)/onResume() of your
      * activity, then your window will not be displayed until a result is 
      * returned back from the started activity.  This is to avoid visible 
      * flickering when redirecting to another activity. 
-     * 
+     *
      * <p>This method throws {@link android.content.ActivityNotFoundException}
      * if there was no Activity found to run the given Intent.
-     * 
+     *
      * @param intent The intent to start.
      * @param requestCode If >= 0, this code will be returned in
      *                    onActivityResult() when the activity exits.
-     * 
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
+     *
      * @throws android.content.ActivityNotFoundException
-     * 
+     *
      * @see #startActivity 
      */
-    public void startActivityForResult(Intent intent, int requestCode) {
+    public void startActivityForResult(Intent intent, int requestCode, Bundle options) {
         if (mParent == null) {
             Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
                     this, mMainThread.getApplicationThread(), mToken, this,
-                    intent, requestCode);
+                    intent, requestCode, options);
             if (ar != null) {
                 mMainThread.sendActivityResult(
                     mToken, mEmbeddedID, requestCode, ar.getResultCode(),
@@ -3218,8 +3236,36 @@ public class Activity extends ContextThemeWrapper
                 mStartedActivity = true;
             }
         } else {
-            mParent.startActivityFromChild(this, intent, requestCode);
+            if (options != null) {
+                mParent.startActivityFromChild(this, intent, requestCode, options);
+            } else {
+                // Note we want to go through this method for compatibility with
+                // existing applications that may have overridden it.
+                mParent.startActivityFromChild(this, intent, requestCode);
+            }
         }
+    }
+
+    /**
+     * Same as calling {@link #startIntentSenderForResult(IntentSender, int,
+     * Intent, int, int, int, Bundle)} with no options.
+     *
+     * @param intent The IntentSender to launch.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param fillInIntent If non-null, this will be provided as the
+     * intent parameter to {@link IntentSender#sendIntent}.
+     * @param flagsMask Intent flags in the original IntentSender that you
+     * would like to change.
+     * @param flagsValues Desired values for any bits set in
+     * <var>flagsMask</var>
+     * @param extraFlags Always set to 0.
+     */
+    public void startIntentSenderForResult(IntentSender intent, int requestCode,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException {
+        startIntentSenderForResult(intent, requestCode, fillInIntent, flagsMask,
+                flagsValues, extraFlags, null);
     }
 
     /**
@@ -3241,21 +3287,29 @@ public class Activity extends ContextThemeWrapper
      * @param flagsValues Desired values for any bits set in
      * <var>flagsMask</var>
      * @param extraFlags Always set to 0.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
      */
     public void startIntentSenderForResult(IntentSender intent, int requestCode,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
-            throws IntentSender.SendIntentException {
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
+            Bundle options) throws IntentSender.SendIntentException {
         if (mParent == null) {
             startIntentSenderForResultInner(intent, requestCode, fillInIntent,
-                    flagsMask, flagsValues, this);
+                    flagsMask, flagsValues, this, options);
+        } else if (options != null) {
+            mParent.startIntentSenderFromChild(this, intent, requestCode,
+                    fillInIntent, flagsMask, flagsValues, extraFlags, options);
         } else {
+            // Note we want to go through this call for compatibility with
+            // existing applications that may have overridden the method.
             mParent.startIntentSenderFromChild(this, intent, requestCode,
                     fillInIntent, flagsMask, flagsValues, extraFlags);
         }
     }
 
     private void startIntentSenderForResultInner(IntentSender intent, int requestCode,
-            Intent fillInIntent, int flagsMask, int flagsValues, Activity activity)
+            Intent fillInIntent, int flagsMask, int flagsValues, Activity activity,
+            Bundle options)
             throws IntentSender.SendIntentException {
         try {
             String resolvedType = null;
@@ -3266,8 +3320,8 @@ public class Activity extends ContextThemeWrapper
             int result = ActivityManagerNative.getDefault()
                 .startActivityIntentSender(mMainThread.getApplicationThread(), intent,
                         fillInIntent, resolvedType, mToken, activity.mEmbeddedID,
-                        requestCode, flagsMask, flagsValues);
-            if (result == IActivityManager.START_CANCELED) {
+                        requestCode, flagsMask, flagsValues, options);
+            if (result == ActivityManager.START_CANCELED) {
                 throw new IntentSender.SendIntentException();
             }
             Instrumentation.checkStartActivityResult(result, null);
@@ -3286,6 +3340,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Same as {@link #startActivity(Intent, Bundle)} with no options
+     * specified.
+     *
+     * @param intent The intent to start.
+     *
+     * @throws android.content.ActivityNotFoundException
+     *
+     * @see {@link #startActivity(Intent, Bundle)}
+     * @see #startActivityForResult
+     */
+    @Override
+    public void startActivity(Intent intent) {
+        startActivity(intent, null);
+    }
+
+    /**
      * Launch a new activity.  You will not receive any information about when
      * the activity exits.  This implementation overrides the base version,
      * providing information about
@@ -3298,14 +3368,39 @@ public class Activity extends ContextThemeWrapper
      * if there was no Activity found to run the given Intent.
      * 
      * @param intent The intent to start. 
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
      * 
      * @throws android.content.ActivityNotFoundException
-     * 
+     *
+     * @see {@link #startActivity(Intent)}
      * @see #startActivityForResult 
      */
     @Override
-    public void startActivity(Intent intent) {
-        startActivityForResult(intent, -1);
+    public void startActivity(Intent intent, Bundle options) {
+        if (options != null) {
+            startActivityForResult(intent, -1, options);
+        } else {
+            // Note we want to go through this call for compatibility with
+            // applications that may have overridden the method.
+            startActivityForResult(intent, -1);
+        }
+    }
+
+    /**
+     * Same as {@link #startActivities(Intent[], Bundle)} with no options
+     * specified.
+     *
+     * @param intents The intents to start.
+     *
+     * @throws android.content.ActivityNotFoundException
+     *
+     * @see {@link #startActivities(Intent[], Bundle)}
+     * @see #startActivityForResult
+     */
+    @Override
+    public void startActivities(Intent[] intents) {
+        startActivities(intents, null);
     }
 
     /**
@@ -3321,22 +3416,23 @@ public class Activity extends ContextThemeWrapper
      * if there was no Activity found to run the given Intent.
      *
      * @param intents The intents to start.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
      *
      * @throws android.content.ActivityNotFoundException
      *
+     * @see {@link #startActivities(Intent[])}
      * @see #startActivityForResult
      */
     @Override
-    public void startActivities(Intent[] intents) {
+    public void startActivities(Intent[] intents, Bundle options) {
         mInstrumentation.execStartActivities(this, mMainThread.getApplicationThread(),
-                mToken, this, intents);
+                mToken, this, intents, options);
     }
 
     /**
-     * Like {@link #startActivity(Intent)}, but taking a IntentSender
-     * to start; see
-     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
-     * for more information.
+     * Same as calling {@link #startIntentSender(IntentSender, Intent, int, int, int, Bundle)}
+     * with no options.
      * 
      * @param intent The IntentSender to launch.
      * @param fillInIntent If non-null, this will be provided as the
@@ -3350,8 +3446,58 @@ public class Activity extends ContextThemeWrapper
     public void startIntentSender(IntentSender intent,
             Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
             throws IntentSender.SendIntentException {
-        startIntentSenderForResult(intent, -1, fillInIntent, flagsMask,
-                flagsValues, extraFlags);
+        startIntentSender(intent, fillInIntent, flagsMask, flagsValues,
+                extraFlags, null);
+    }
+
+    /**
+     * Like {@link #startActivity(Intent, Bundle)}, but taking a IntentSender
+     * to start; see
+     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int, Bundle)}
+     * for more information.
+     *
+     * @param intent The IntentSender to launch.
+     * @param fillInIntent If non-null, this will be provided as the
+     * intent parameter to {@link IntentSender#sendIntent}.
+     * @param flagsMask Intent flags in the original IntentSender that you
+     * would like to change.
+     * @param flagsValues Desired values for any bits set in
+     * <var>flagsMask</var>
+     * @param extraFlags Always set to 0.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
+     */
+    public void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
+            Bundle options) throws IntentSender.SendIntentException {
+        if (options != null) {
+            startIntentSenderForResult(intent, -1, fillInIntent, flagsMask,
+                    flagsValues, extraFlags, options);
+        } else {
+            // Note we want to go through this call for compatibility with
+            // applications that may have overridden the method.
+            startIntentSenderForResult(intent, -1, fillInIntent, flagsMask,
+                    flagsValues, extraFlags);
+        }
+    }
+
+    /**
+     * Same as calling {@link #startActivityIfNeeded(Intent, int, Bundle)}
+     * with no options.
+     *
+     * @param intent The intent to start.
+     * @param requestCode If >= 0, this code will be returned in
+     *         onActivityResult() when the activity exits, as described in
+     *         {@link #startActivityForResult}.
+     *
+     * @return If a new activity was launched then true is returned; otherwise
+     *         false is returned and you must handle the Intent yourself.
+     *
+     * @see #startActivity
+     * @see #startActivityForResult
+     */
+    public boolean startActivityIfNeeded(Intent intent, int requestCode) {
+        return startActivityIfNeeded(intent, requestCode, null);
     }
 
     /**
@@ -3374,6 +3520,8 @@ public class Activity extends ContextThemeWrapper
      * @param requestCode If >= 0, this code will be returned in
      *         onActivityResult() when the activity exits, as described in
      *         {@link #startActivityForResult}.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
      * 
      * @return If a new activity was launched then true is returned; otherwise
      *         false is returned and you must handle the Intent yourself.
@@ -3381,17 +3529,17 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivity
      * @see #startActivityForResult
      */
-    public boolean startActivityIfNeeded(Intent intent, int requestCode) {
+    public boolean startActivityIfNeeded(Intent intent, int requestCode, Bundle options) {
         if (mParent == null) {
-            int result = IActivityManager.START_RETURN_INTENT_TO_CALLER;
+            int result = ActivityManager.START_RETURN_INTENT_TO_CALLER;
             try {
                 intent.setAllowFds(false);
                 result = ActivityManagerNative.getDefault()
                     .startActivity(mMainThread.getApplicationThread(),
                             intent, intent.resolveTypeIfNeeded(getContentResolver()),
-                            null, 0,
-                            mToken, mEmbeddedID, requestCode, true /* onlyIfNeeded */,
-                            false, false, null, null, false);
+                            mToken, mEmbeddedID, requestCode,
+                            ActivityManager.START_FLAG_ONLY_IF_NEEDED, null, null,
+                            options);
             } catch (RemoteException e) {
                 // Empty
             }
@@ -3408,11 +3556,29 @@ public class Activity extends ContextThemeWrapper
                 // activity is finished, no matter what happens to it.
                 mStartedActivity = true;
             }
-            return result != IActivityManager.START_RETURN_INTENT_TO_CALLER;
+            return result != ActivityManager.START_RETURN_INTENT_TO_CALLER;
         }
 
         throw new UnsupportedOperationException(
             "startActivityIfNeeded can only be called from a top-level activity");
+    }
+
+    /**
+     * Same as calling {@link #startNextMatchingActivity(Intent, Bundle)} with
+     * no options.
+     *
+     * @param intent The intent to dispatch to the next activity.  For
+     * correct behavior, this must be the same as the Intent that started
+     * your own activity; the only changes you can make are to the extras
+     * inside of it.
+     *
+     * @return Returns a boolean indicating whether there was another Activity
+     * to start: true if there was a next activity to start, false if there
+     * wasn't.  In general, if true is returned you will then want to call
+     * finish() on yourself.
+     */
+    public boolean startNextMatchingActivity(Intent intent) {
+        return startNextMatchingActivity(intent, null);
     }
 
     /**
@@ -3425,18 +3591,20 @@ public class Activity extends ContextThemeWrapper
      * correct behavior, this must be the same as the Intent that started
      * your own activity; the only changes you can make are to the extras
      * inside of it.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
      * 
      * @return Returns a boolean indicating whether there was another Activity
      * to start: true if there was a next activity to start, false if there
      * wasn't.  In general, if true is returned you will then want to call
      * finish() on yourself.
      */
-    public boolean startNextMatchingActivity(Intent intent) {
+    public boolean startNextMatchingActivity(Intent intent, Bundle options) {
         if (mParent == null) {
             try {
                 intent.setAllowFds(false);
                 return ActivityManagerNative.getDefault()
-                    .startNextMatchingActivity(mToken, intent);
+                    .startNextMatchingActivity(mToken, intent, options);
             } catch (RemoteException e) {
                 // Empty
             }
@@ -3446,7 +3614,25 @@ public class Activity extends ContextThemeWrapper
         throw new UnsupportedOperationException(
             "startNextMatchingActivity can only be called from a top-level activity");
     }
-    
+
+    /**
+     * Same as calling {@link #startActivityFromChild(Activity, Intent, int, Bundle)}
+     * with no options.
+     *
+     * @param child The activity making the call.
+     * @param intent The intent to start.
+     * @param requestCode Reply request code.  < 0 if reply is not requested.
+     *
+     * @throws android.content.ActivityNotFoundException
+     *
+     * @see #startActivity
+     * @see #startActivityForResult
+     */
+    public void startActivityFromChild(Activity child, Intent intent,
+            int requestCode) {
+        startActivityFromChild(child, intent, requestCode);
+    }
+
     /**
      * This is called when a child activity of this one calls its 
      * {@link #startActivity} or {@link #startActivityForResult} method.
@@ -3456,7 +3642,9 @@ public class Activity extends ContextThemeWrapper
      * 
      * @param child The activity making the call.
      * @param intent The intent to start.
-     * @param requestCode Reply request code.  < 0 if reply is not requested. 
+     * @param requestCode Reply request code.  < 0 if reply is not requested.
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
      * 
      * @throws android.content.ActivityNotFoundException
      * 
@@ -3464,16 +3652,34 @@ public class Activity extends ContextThemeWrapper
      * @see #startActivityForResult 
      */
     public void startActivityFromChild(Activity child, Intent intent, 
-            int requestCode) {
+            int requestCode, Bundle options) {
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, child,
-                intent, requestCode);
+                intent, requestCode, options);
         if (ar != null) {
             mMainThread.sendActivityResult(
                 mToken, child.mEmbeddedID, requestCode,
                 ar.getResultCode(), ar.getResultData());
         }
+    }
+
+    /**
+     * Same as calling {@link #startActivityFromFragment(Fragment, Intent, int, Bundle)}
+     * with no options.
+     *
+     * @param fragment The fragment making the call.
+     * @param intent The intent to start.
+     * @param requestCode Reply request code.  < 0 if reply is not requested.
+     *
+     * @throws android.content.ActivityNotFoundException
+     *
+     * @see Fragment#startActivity
+     * @see Fragment#startActivityForResult
+     */
+    public void startActivityFromFragment(Fragment fragment, Intent intent, 
+            int requestCode) {
+        startActivityFromFragment(fragment, intent, requestCode, null);
     }
 
     /**
@@ -3487,6 +3693,8 @@ public class Activity extends ContextThemeWrapper
      * @param fragment The fragment making the call.
      * @param intent The intent to start.
      * @param requestCode Reply request code.  < 0 if reply is not requested. 
+     * @param options Additional options for how the Activity should be started.
+     * May be null if there are no options.
      * 
      * @throws android.content.ActivityNotFoundException
      * 
@@ -3494,16 +3702,28 @@ public class Activity extends ContextThemeWrapper
      * @see Fragment#startActivityForResult 
      */
     public void startActivityFromFragment(Fragment fragment, Intent intent, 
-            int requestCode) {
+            int requestCode, Bundle options) {
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, fragment,
-                intent, requestCode);
+                intent, requestCode, options);
         if (ar != null) {
             mMainThread.sendActivityResult(
                 mToken, fragment.mWho, requestCode,
                 ar.getResultCode(), ar.getResultData());
         }
+    }
+
+    /**
+     * Same as calling {@link #startIntentSenderFromChild(Activity, IntentSender,
+     * int, Intent, int, int, int, Bundle)} with no options.
+     */
+    public void startIntentSenderFromChild(Activity child, IntentSender intent,
+            int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
+            int extraFlags)
+            throws IntentSender.SendIntentException {
+        startIntentSenderFromChild(child, intent, requestCode, fillInIntent,
+                flagsMask, flagsValues, extraFlags, null);
     }
 
     /**
@@ -3514,10 +3734,10 @@ public class Activity extends ContextThemeWrapper
      */
     public void startIntentSenderFromChild(Activity child, IntentSender intent,
             int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
-            int extraFlags)
+            int extraFlags, Bundle options)
             throws IntentSender.SendIntentException {
         startIntentSenderForResultInner(intent, requestCode, fillInIntent,
-                flagsMask, flagsValues, child);
+                flagsMask, flagsValues, child, options);
     }
 
     /**
@@ -3843,7 +4063,7 @@ public class Activity extends ContextThemeWrapper
             data.setAllowFds(false);
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
-                        IActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName,
+                        ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName,
                         mParent == null ? mToken : mParent.mToken,
                         mEmbeddedID, requestCode, new Intent[] { data }, null, flags);
             return target != null ? new PendingIntent(target) : null;

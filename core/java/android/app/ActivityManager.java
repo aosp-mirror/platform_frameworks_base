@@ -59,6 +59,154 @@ public class ActivityManager {
     private final Context mContext;
     private final Handler mHandler;
 
+    /**
+     * Result for IActivityManager.startActivity: an error where the
+     * start had to be canceled.
+     * @hide
+     */
+    public static final int START_CANCELED = -6;
+
+    /**
+     * Result for IActivityManager.startActivity: an error where the
+     * thing being started is not an activity.
+     * @hide
+     */
+    public static final int START_NOT_ACTIVITY = -5;
+
+    /**
+     * Result for IActivityManager.startActivity: an error where the
+     * caller does not have permission to start the activity.
+     * @hide
+     */
+    public static final int START_PERMISSION_DENIED = -4;
+
+    /**
+     * Result for IActivityManager.startActivity: an error where the
+     * caller has requested both to forward a result and to receive
+     * a result.
+     * @hide
+     */
+    public static final int START_FORWARD_AND_REQUEST_CONFLICT = -3;
+
+    /**
+     * Result for IActivityManager.startActivity: an error where the
+     * requested class is not found.
+     * @hide
+     */
+    public static final int START_CLASS_NOT_FOUND = -2;
+
+    /**
+     * Result for IActivityManager.startActivity: an error where the
+     * given Intent could not be resolved to an activity.
+     * @hide
+     */
+    public static final int START_INTENT_NOT_RESOLVED = -1;
+
+    /**
+     * Result for IActivityManaqer.startActivity: the activity was started
+     * successfully as normal.
+     * @hide
+     */
+    public static final int START_SUCCESS = 0;
+
+    /**
+     * Result for IActivityManaqer.startActivity: the caller asked that the Intent not
+     * be executed if it is the recipient, and that is indeed the case.
+     * @hide
+     */
+    public static final int START_RETURN_INTENT_TO_CALLER = 1;
+
+    /**
+     * Result for IActivityManaqer.startActivity: activity wasn't really started, but
+     * a task was simply brought to the foreground.
+     * @hide
+     */
+    public static final int START_TASK_TO_FRONT = 2;
+
+    /**
+     * Result for IActivityManaqer.startActivity: activity wasn't really started, but
+     * the given Intent was given to the existing top activity.
+     * @hide
+     */
+    public static final int START_DELIVERED_TO_TOP = 3;
+
+    /**
+     * Result for IActivityManaqer.startActivity: request was canceled because
+     * app switches are temporarily canceled to ensure the user's last request
+     * (such as pressing home) is performed.
+     * @hide
+     */
+    public static final int START_SWITCHES_CANCELED = 4;
+
+    /**
+     * Flag for IActivityManaqer.startActivity: do special start mode where
+     * a new activity is launched only if it is needed.
+     * @hide
+     */
+    public static final int START_FLAG_ONLY_IF_NEEDED = 1<<0;
+
+    /**
+     * Flag for IActivityManaqer.startActivity: launch the app for
+     * debugging.
+     * @hide
+     */
+    public static final int START_FLAG_DEBUG = 1<<1;
+
+    /**
+     * Flag for IActivityManaqer.startActivity: launch the app for
+     * OpenGL tracing.
+     * @hide
+     */
+    public static final int START_FLAG_OPENGL_TRACES = 1<<2;
+
+    /**
+     * Flag for IActivityManaqer.startActivity: if the app is being
+     * launched for profiling, automatically stop the profiler once done.
+     * @hide
+     */
+    public static final int START_FLAG_AUTO_STOP_PROFILER = 1<<3;
+
+    /**
+     * Result for IActivityManaqer.broadcastIntent: success!
+     * @hide
+     */
+    public static final int BROADCAST_SUCCESS = 0;
+
+    /**
+     * Result for IActivityManaqer.broadcastIntent: attempt to broadcast
+     * a sticky intent without appropriate permission.
+     * @hide
+     */
+    public static final int BROADCAST_STICKY_CANT_HAVE_PERMISSION = -1;
+
+    /**
+     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * for a sendBroadcast operation.
+     * @hide
+     */
+    public static final int INTENT_SENDER_BROADCAST = 1;
+
+    /**
+     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * for a startActivity operation.
+     * @hide
+     */
+    public static final int INTENT_SENDER_ACTIVITY = 2;
+
+    /**
+     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * for an activity result operation.
+     * @hide
+     */
+    public static final int INTENT_SENDER_ACTIVITY_RESULT = 3;
+
+    /**
+     * Type for IActivityManaqer.getIntentSender: this PendingIntent is
+     * for a startService operation.
+     * @hide
+     */
+    public static final int INTENT_SENDER_SERVICE = 4;
+
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
         mHandler = handler;

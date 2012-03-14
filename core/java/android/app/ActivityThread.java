@@ -1802,7 +1802,7 @@ public final class ActivityThread {
         if (aInfo == null) {
             // Throw an exception.
             Instrumentation.checkStartActivityResult(
-                    IActivityManager.START_CLASS_NOT_FOUND, intent);
+                    ActivityManager.START_CLASS_NOT_FOUND, intent);
         }
         return aInfo;
     }
