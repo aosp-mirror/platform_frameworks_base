@@ -133,4 +133,25 @@ public class BitwiseStreamsTest extends AndroidTestCase {
         long end = android.os.SystemClock.elapsedRealtime();
         Log.d(LOG_TAG, "repeated encode-decode took " + (end - start) + " ms");
     }
+
+    @SmallTest
+    public void testExpandArray() throws Exception {
+        Random random = new Random();
+        int iterations = 10000;
+        int[] sizeArr = new int[iterations];
+        int[] valueArr = new int[iterations];
+        BitwiseOutputStream outStream = new BitwiseOutputStream(8);
+        for (int i = 0; i < iterations; i++) {
+            int x = random.nextInt();
+            int size = (x & 0x07) + 1;
+            int value = x & (-1 >>> (32 - size));
+            sizeArr[i] = size;
+            valueArr[i] = value;
+            outStream.write(size, value);
+        }
+        BitwiseInputStream inStream = new BitwiseInputStream(outStream.toByteArray());
+        for (int i = 0; i < iterations; i++) {
+            assertEquals(valueArr[i], inStream.read(sizeArr[i]));
+        }
+    }
 }
