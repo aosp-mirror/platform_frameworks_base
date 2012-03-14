@@ -101,7 +101,8 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/search/index.html">
             <span class="en">Adding Search Functionality</span>
-          </a></div>
+          </a> <span class="new">new!</span>
+        </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/search/setup.html">
             <span class="en">Setting up the Search Interface</span>
