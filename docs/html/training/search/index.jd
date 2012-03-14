@@ -1,0 +1,53 @@
+page.title=Adding Search Functionality
+trainingnavtop=true
+startpage=true
+next.title=Setting Up the Search Interface
+next.link=setup.html
+
+@jd:body
+
+  <div id="tb-wrapper">
+    <div id="tb">
+      <h2>Dependencies and prerequisites</h2>
+
+      <ul>
+        <li>Android 3.0 or later (with some support for Android 2.1)</li>
+
+        <li>Experience building an Android <a href="{@docRoot}guide/topics/ui/index.html">User
+        Interface</a></li>
+      </ul>
+
+      <h2>You should also read</h2>
+
+      <ul>
+        <li><a href="{@docRoot}guide/topics/search/index.html">Search</a></li>
+
+        <li><a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable
+        Dictionary Sample App</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <p>Android's built-in search features offer apps an easy way to provide a
+  consistent search experience for all users. There are two ways to implement search in your app
+  depending on the version of Android that is running on the device. This class covers how to add
+  search with {@link android.widget.SearchView}, which was introduced in Android 3.0, while
+  maintaining backward compatibility with older versions of Android by using the default search
+  dialog provided by the system.</p>
+
+  <h2>Lessons</h2>
+
+  <dl>
+    <dt><b><a href="setup.html">Setting Up the Search Interface</a></b></dt>
+
+    <dd>Learn how to add a search interface to your app and how to configure an activity to handle
+    search queries.</dd>
+
+    <dt><b><a href="search.html">Storing and Searching for Data</a></b></dt>
+
+    <dd>Learn a simple way to store and search for data in a SQLite virtual database table.</dd>
+
+    <dt><b><a href="backward-compat.html">Remaining Backward Compatible</a></b></dt>
+
+    <dd>Learn how to keep search features backward compatible with older devices by using.</dd>
+  </dl>
