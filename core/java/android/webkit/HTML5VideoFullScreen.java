@@ -112,6 +112,18 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         }
     };
 
+    MediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
+        new MediaPlayer.OnVideoSizeChangedListener() {
+            @Override
+            public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                mVideoWidth = mp.getVideoWidth();
+                mVideoHeight = mp.getVideoHeight();
+                if (mVideoWidth != 0 && mVideoHeight != 0) {
+                    mVideoSurfaceView.getHolder().setFixedSize(mVideoWidth, mVideoHeight);
+                }
+            }
+    };
+
     private SurfaceView getSurfaceView() {
         return mVideoSurfaceView;
     }
@@ -150,6 +162,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         mc.setSystemUiVisibility(mLayout.getSystemUiVisibility());
         setMediaController(mc);
         mPlayer.setScreenOnWhilePlaying(true);
+        mPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
         prepareDataAndDisplayMode(mProxy);
     }
 
