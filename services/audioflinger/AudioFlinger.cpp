@@ -1188,6 +1188,10 @@ status_t AudioFlinger::ThreadBase::dumpBase(int fd, const Vector<String16>& args
         write(fd, buffer, strlen(buffer));
     }
 
+    snprintf(buffer, SIZE, "io handle: %d\n", mId);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "TID: %d\n", getTid());
+    result.append(buffer);
     snprintf(buffer, SIZE, "standby: %d\n", mStandby);
     result.append(buffer);
     snprintf(buffer, SIZE, "Sample rate: %d\n", mSampleRate);
