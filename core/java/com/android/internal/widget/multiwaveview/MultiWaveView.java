@@ -164,9 +164,10 @@ public class MultiWaveView extends View {
         mFeedbackCount = a.getInt(R.styleable.MultiWaveView_feedbackCount,
                 mFeedbackCount);
         mHandleDrawable = new TargetDrawable(res,
-                a.getDrawable(R.styleable.MultiWaveView_handleDrawable));
+                a.peekValue(R.styleable.MultiWaveView_handleDrawable).resourceId);
         mTapRadius = mHandleDrawable.getWidth()/2;
-        mOuterRing = new TargetDrawable(res, a.getDrawable(R.styleable.MultiWaveView_waveDrawable));
+        mOuterRing = new TargetDrawable(res,
+                a.peekValue(R.styleable.MultiWaveView_waveDrawable).resourceId);
 
         // Read chevron animation drawables
         final int chevrons[] = { R.styleable.MultiWaveView_leftChevronDrawable,
@@ -174,11 +175,12 @@ public class MultiWaveView extends View {
                 R.styleable.MultiWaveView_topChevronDrawable,
                 R.styleable.MultiWaveView_bottomChevronDrawable
         };
+
         for (int chevron : chevrons) {
-            Drawable chevronDrawable = a.getDrawable(chevron);
+            TypedValue typedValue = a.peekValue(chevron);
             for (int i = 0; i < mFeedbackCount; i++) {
                 mChevronDrawables.add(
-                    chevronDrawable != null ? new TargetDrawable(res, chevronDrawable) : null);
+                    typedValue != null ? new TargetDrawable(res, typedValue.resourceId) : null);
             }
         }
 
@@ -519,8 +521,8 @@ public class MultiWaveView extends View {
         int count = array.length();
         ArrayList<TargetDrawable> targetDrawables = new ArrayList<TargetDrawable>(count);
         for (int i = 0; i < count; i++) {
-            Drawable drawable = array.getDrawable(i);
-            targetDrawables.add(new TargetDrawable(res, drawable));
+            TypedValue value = array.peekValue(i);
+            targetDrawables.add(new TargetDrawable(res, value != null ? value.resourceId : 0));
         }
         array.recycle();
         mTargetResourceId = resourceId;
@@ -679,7 +681,7 @@ public class MultiWaveView extends View {
         if (DEBUG && mDragging) Log.v(TAG, "** Handle RELEASE");
         switchToState(STATE_FINISH, event.getX(), event.getY());
     }
-    
+
     private void handleCancel(MotionEvent event) {
         if (DEBUG && mDragging) Log.v(TAG, "** Handle CANCEL");
         mActiveTarget = -1; // Drop the active target if canceled.
@@ -723,7 +725,7 @@ public class MultiWaveView extends View {
                     float dx = limitX - target.getX();
                     float dy = limitY - target.getY();
                     float dist2 = dx*dx + dy*dy;
-                    if (target.isValid() && dist2 < hitRadius2 && dist2 < best) {
+                    if (target.isEnabled() && dist2 < hitRadius2 && dist2 < best) {
                         activeTarget = i;
                         best = dist2;
                     }
@@ -967,5 +969,35 @@ public class MultiWaveView extends View {
         }
         array.recycle();
         return targetContentDescriptions;
+    }
+
+    public int getResourceIdForTarget(int index) {
+        final TargetDrawable drawable = mTargetDrawables.get(index);
+        return drawable == null ? 0 : drawable.getResourceId();
+    }
+
+    public void setEnableTarget(int resourceId, boolean enabled) {
+        for (int i = 0; i < mTargetDrawables.size(); i++) {
+            final TargetDrawable target = mTargetDrawables.get(i);
+            if (target.getResourceId() == resourceId) {
+                target.setEnabled(enabled);
+                break; // should never be more than one match
+            }
+        }
+    }
+
+    /**
+     * Gets the position of a target in the array that matches the given resource.
+     * @param resourceId
+     * @return the index or -1 if not found
+     */
+    public int getTargetPosition(int resourceId) {
+        for (int i = 0; i < mTargetDrawables.size(); i++) {
+            final TargetDrawable target = mTargetDrawables.get(i);
+            if (target.getResourceId() == resourceId) {
+                return i; // should never be more than one match
+            }
+        }
+        return -1;
     }
 }

@@ -974,6 +974,9 @@
   <java-symbol type="drawable" name="unlock_halo" />
   <java-symbol type="drawable" name="unlock_ring" />
   <java-symbol type="drawable" name="unlock_wave" />
+  <java-symbol type="drawable" name="ic_lockscreen_camera" />
+  <java-symbol type="drawable" name="ic_lockscreen_silent" />
+  <java-symbol type="drawable" name="ic_lockscreen_unlock" />
 
   <java-symbol type="layout" name="action_bar_home" />
   <java-symbol type="layout" name="action_bar_title_item" />

@@ -22,6 +22,7 @@ import com.android.internal.telephony.IccCard.State;
 import com.android.internal.widget.DigitalClock;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.TransportControlView;
+import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.SimStateCallback;
 
 import java.util.ArrayList;
@@ -625,9 +626,9 @@ class KeyguardStatusViewManager implements OnClickListener {
         }
     }
 
-    private KeyguardUpdateMonitor.InfoCallback mInfoCallback
-            = new KeyguardUpdateMonitor.InfoCallback() {
+    private InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
 
+        @Override
         public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
                 int batteryLevel) {
             mShowingBatteryInfo = showBatteryInfo;
@@ -637,33 +638,24 @@ class KeyguardStatusViewManager implements OnClickListener {
             update(BATTERY_INFO, getAltTextMessage(tmpIcon));
         }
 
+        @Override
         public void onTimeChanged() {
             refreshDate();
         }
 
+        @Override
         public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
             mPlmn = plmn;
             mSpn = spn;
             updateCarrierStateWithSimStatus(mSimState);
         }
 
-        public void onRingerModeChanged(int state) {
-
-        }
-
+        @Override
         public void onPhoneStateChanged(int phoneState) {
             mPhoneState = phoneState;
             updateEmergencyCallButtonState(phoneState);
         }
 
-        /** {@inheritDoc} */
-        public void onClockVisibilityChanged() {
-            // ignored
-        }
-
-        public void onDeviceProvisioned() {
-            // ignored
-        }
     };
 
     private SimStateCallback mSimStateCallback = new SimStateCallback() {

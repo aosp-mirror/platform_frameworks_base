@@ -16,6 +16,7 @@
 
 package com.android.internal.policy.impl;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -103,6 +104,7 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_PHONE_STATE_CHANGED = 306;
     private static final int MSG_CLOCK_VISIBILITY_CHANGED = 307;
     private static final int MSG_DEVICE_PROVISIONED = 308;
+    protected static final int MSG_DPM_STATE_CHANGED = 309;
 
     /**
      * When we receive a
@@ -204,6 +206,9 @@ public class KeyguardUpdateMonitor {
                     case MSG_DEVICE_PROVISIONED:
                         handleDeviceProvisioned();
                         break;
+                    case MSG_DPM_STATE_CHANGED:
+                        handleDevicePolicyManagerStateChanged();
+                        break;
                 }
             }
         };
@@ -262,6 +267,7 @@ public class KeyguardUpdateMonitor {
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         context.registerReceiver(new BroadcastReceiver() {
 
             public void onReceive(Context context, Intent intent) {
@@ -293,9 +299,18 @@ public class KeyguardUpdateMonitor {
                 } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
                     String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
+                } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
+                        .equals(action)) {
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED));
                 }
             }
         }, filter);
+    }
+
+    protected void handleDevicePolicyManagerStateChanged() {
+        for (int i = 0; i < mInfoCallbacks.size(); i++) {
+            mInfoCallbacks.get(i).onDevicePolicyManagerStateChanged();
+        }
     }
 
     protected void handleDeviceProvisioned() {
@@ -521,6 +536,40 @@ public class KeyguardUpdateMonitor {
          * Called when the device becomes provisioned
          */
         void onDeviceProvisioned();
+
+        /**
+         * Called when the device policy changes.
+         * See {@link DevicePolicyManager#ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED}
+         */
+        void onDevicePolicyManagerStateChanged();
+    }
+
+    // Simple class that allows methods to easily be overwritten
+    public static class InfoCallbackImpl implements InfoCallback {
+        public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
+                int batteryLevel) {
+        }
+
+        public void onTimeChanged() {
+        }
+
+        public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
+        }
+
+        public void onRingerModeChanged(int state) {
+        }
+
+        public void onPhoneStateChanged(int phoneState) {
+        }
+
+        public void onClockVisibilityChanged() {
+        }
+
+        public void onDeviceProvisioned() {
+        }
+
+        public void onDevicePolicyManagerStateChanged() {
+        }
     }
 
     /**
@@ -652,5 +701,11 @@ public class KeyguardUpdateMonitor {
 
     public boolean getMaxFaceUnlockAttemptsReached() {
         return mFailedFaceUnlockAttempts >= FAILED_FACE_UNLOCK_ATTEMPTS_BEFORE_BACKUP;
+    }
+
+    public boolean isSimLocked() {
+        return mSimState == IccCard.State.PIN_REQUIRED
+            || mSimState == IccCard.State.PUK_REQUIRED
+            || mSimState == IccCard.State.PERM_DISABLED;
     }
 }

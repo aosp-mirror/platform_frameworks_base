@@ -40,6 +40,8 @@ public class TargetDrawable {
     private float mScaleY = 1.0f;
     private float mAlpha = 1.0f;
     private Drawable mDrawable;
+    private boolean mEnabled = true;
+    private int mResourceId;
 
     /* package */ static class DrawableWithAlpha extends Drawable {
         private float mAlpha = 1.0f;
@@ -72,10 +74,8 @@ public class TargetDrawable {
     }
 
     public TargetDrawable(Resources res, int resId) {
-        this(res, resId == 0 ? null : res.getDrawable(resId));
-    }
-
-    public TargetDrawable(Resources res, Drawable drawable) {
+        mResourceId = resId;
+        Drawable drawable = resId == 0 ? null : res.getDrawable(resId);
         // Mutate the drawable so we can animate shared drawable properties.
         mDrawable = drawable != null ? drawable.mutate() : null;
         resizeDrawables();
@@ -122,8 +122,8 @@ public class TargetDrawable {
      *
      * @return
      */
-    public boolean isValid() {
-        return mDrawable != null;
+    public boolean isEnabled() {
+        return mDrawable != null && mEnabled;
     }
 
     /**
@@ -205,7 +205,7 @@ public class TargetDrawable {
     }
 
     public void draw(Canvas canvas) {
-        if (mDrawable == null) {
+        if (mDrawable == null || !mEnabled) {
             return;
         }
         canvas.save(Canvas.MATRIX_SAVE_FLAG);
@@ -215,5 +215,13 @@ public class TargetDrawable {
         mDrawable.setAlpha((int) Math.round(mAlpha * 255f));
         mDrawable.draw(canvas);
         canvas.restore();
+    }
+
+    public void setEnabled(boolean enabled) {
+        mEnabled  = enabled;
+    }
+
+    public int getResourceId() {
+        return mResourceId;
     }
 }

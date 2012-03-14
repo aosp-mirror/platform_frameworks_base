@@ -18,6 +18,7 @@ package com.android.internal.policy.impl;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
+import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
 
@@ -90,7 +91,7 @@ import android.view.WindowManagerPolicy;
  * thread of the keyguard.
  */
 public class KeyguardViewMediator implements KeyguardViewCallback,
-        KeyguardUpdateMonitor.InfoCallback, KeyguardUpdateMonitor.SimStateCallback {
+        KeyguardUpdateMonitor.SimStateCallback {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private final static boolean DEBUG = false;
     private final static boolean DBG_WAKE = false;
@@ -265,6 +266,20 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private int mLockSoundStreamId;
     private int mMasterStreamMaxVolume;
 
+    InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
+
+        @Override
+        public void onClockVisibilityChanged() {
+            adjustStatusBarLocked();
+        }
+
+        @Override
+        public void onDeviceProvisioned() {
+            mContext.sendBroadcast(mUserPresentIntent);
+        }
+
+    };
+
     public KeyguardViewMediator(Context context, PhoneWindowManager callback,
             LocalPowerManager powerManager) {
         mContext = context;
@@ -293,7 +308,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         mUpdateMonitor = new KeyguardUpdateMonitor(context);
 
-        mUpdateMonitor.registerInfoCallback(this);
+        mUpdateMonitor.registerInfoCallback(mInfoCallback);
+
         mUpdateMonitor.registerSimStateCallback(this);
 
         mLockPatternUtils = new LockPatternUtils(mContext);
@@ -750,8 +766,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             case PUK_REQUIRED:
                 synchronized (this) {
                     if (!isShowing()) {
-                        if (DEBUG) Log.d(TAG, "INTENT_VALUE_ICC_LOCKED and keygaurd isn't showing, we need "
-                                + "to show the keyguard so the user can enter their sim pin");
+                        if (DEBUG) Log.d(TAG, "INTENT_VALUE_ICC_LOCKED and keygaurd isn't showing, "
+                                + "we need to show keyguard so user can enter their sim pin");
                         doKeyguardLocked();
                     } else {
                         resetStateLocked();
@@ -1306,38 +1322,4 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         }
     }
 
-    /** {@inheritDoc} */
-    public void onClockVisibilityChanged() {
-        adjustStatusBarLocked();
-    }
-
-    /** {@inheritDoc} */
-    public void onPhoneStateChanged(int phoneState) {
-        // ignored
-    }
-
-    /** {@inheritDoc} */
-    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
-        // ignored
-    }
-
-    /** {@inheritDoc} */
-    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-        // ignored
-    }
-
-    /** {@inheritDoc} */
-    public void onRingerModeChanged(int state) {
-        // ignored
-    }
-
-    /** {@inheritDoc} */
-    public void onTimeChanged() {
-        // ignored
-    }
-
-    /** {@inheritDoc} */
-    public void onDeviceProvisioned() {
-        mContext.sendBroadcast(mUserPresentIntent);
-    }
 }
