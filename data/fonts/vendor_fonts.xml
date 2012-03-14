@@ -25,6 +25,15 @@
     place in the overall fallback fonts. The order of this list determines which fallback font
     will be used to support any glyphs that are not handled by the default system fonts.
 
+    Han languages (Chinese, Japanese, and Korean) share a common range of unicode characters;
+    their ordering in the fallback or vendor files gives priority to the first in the list.
+    Locale-specific ordering can be configured by adding language and region codes to the end
+    of the filename (e.g. /system/etc/fallback_fonts-ja.xml). When no region code is used,
+    as with this example, all regions are matched. Use separate files for each supported locale.
+    The standard fallback file (fallback_fonts.xml) is used when a locale does not have its own
+    file. All fallback files must contain the same complete set of fonts; only their ordering
+    can differ.
+
     The sample configuration below is an example of how one might provide two families of fonts
     that get inserted at the first and second (0  and 1) position in the overall fallback fonts.
 
