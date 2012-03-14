@@ -10372,10 +10372,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             if (mHardwareLayer == null) {
                 mHardwareLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
                         width, height, isOpaque());
-                mLocalDirtyRect.setEmpty();
+                mLocalDirtyRect.set(0, 0, width, height);
             } else if (mHardwareLayer.getWidth() != width || mHardwareLayer.getHeight() != height) {
                 mHardwareLayer.resize(width, height);
-                mLocalDirtyRect.setEmpty();
+                mLocalDirtyRect.set(0, 0, width, height);
             }
 
             // The layer is not valid if the underlying GPU resources cannot be allocated
