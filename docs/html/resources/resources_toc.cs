@@ -97,6 +97,30 @@
           </li>
         </ul>
       </li>
+      
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/efficient-downloads/index.html">
+            <span class="en">Transferring Data Without Draining the Battery</span>
+          </a> <span class="new">new!</span></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/efficient-network-access.html">
+            <span class="en">Optimizing Downloads for Efficient Network Access</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/regular_updates.html">
+            <span class="en">Minimizing the Effect of Regular Updates</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/redundant_redundant.html">
+            <span class="en">Redundant Downloads are Redundant</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/efficient-downloads/connectivity_patterns.html">
+            <span class="en">Modifying Patterns Based on the Connectivity Type</span>
+          </a>
+          </li>
+        </ul>
+      </li>
 
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/search/index.html">
