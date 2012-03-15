@@ -21,6 +21,7 @@
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
+#include <cutils/sched_policy.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
 
@@ -48,6 +49,8 @@ using namespace android;
 Mutex gKeyCreateMutex;
 static pthread_key_t gBgKey = -1;
 #endif
+
+// For both of these, err should be in the errno range (positive), not a status_t (negative)
 
 static void signalExceptionForPriorityError(JNIEnv* env, int err)
 {
@@ -168,26 +171,35 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
     return -1;
 }
 
-void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
+void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint grp)
 {
-    int res = androidSetThreadSchedulingGroup(pid, grp);
+    ALOGV("%s tid=%d grp=%d", __func__, tid, grp);
+    SchedPolicy sp = (SchedPolicy) grp;
+    int res = set_sched_policy(tid, sp);
     if (res != NO_ERROR) {
-        signalExceptionForGroupError(env, res == BAD_VALUE ? EINVAL : errno);
-        return;
+        signalExceptionForGroupError(env, -res);
     }
 }
 
 void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
+    ALOGV("%s pid=%d grp=%d", __func__, pid, grp);
     DIR *d;
     FILE *fp;
     char proc_path[255];
     struct dirent *de;
 
-    if (grp > ANDROID_TGROUP_MAX || grp < 0) {
+    if ((grp == SP_FOREGROUND) || (grp > SP_MAX)) {
         signalExceptionForGroupError(env, EINVAL);
         return;
     }
+
+    bool isDefault = false;
+    if (grp < 0) {
+        grp = SP_FOREGROUND;
+        isDefault = true;
+    }
+    SchedPolicy sp = (SchedPolicy) grp;
 
 #if POLICY_DEBUG
     char cmdline[32];
@@ -203,7 +215,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         close(fd);
     }
 
-    if (grp == ANDROID_TGROUP_BG_NONINTERACT) {
+    if (sp == SP_BACKGROUND) {
         ALOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
     } else {
         ALOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
@@ -230,16 +242,18 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             continue;
         }
 
-        t_pri = getpriority(PRIO_PROCESS, t_pid);
+        if (isDefault) {
+            t_pri = getpriority(PRIO_PROCESS, t_pid);
 
-        if (grp == ANDROID_TGROUP_DEFAULT &&
-            t_pri >= ANDROID_PRIORITY_BACKGROUND) {
-            // This task wants to stay at background
-            continue;
+            if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
+                // This task wants to stay at background
+                continue;
+            }
         }
 
-        if (androidSetThreadSchedulingGroup(t_pid, grp) != NO_ERROR) {
-            signalExceptionForGroupError(env, errno);
+        int err = set_sched_policy(t_pid, sp);
+        if (err != NO_ERROR) {
+            signalExceptionForGroupError(env, -err);
             break;
         }
     }

@@ -266,25 +266,38 @@ public class Process {
      */
     public static final int SCHED_IDLE = 5;
 
-    /**
-     * Default thread group - gets a 'normal' share of the CPU
-     * @hide
-     */
-    public static final int THREAD_GROUP_DEFAULT = 0;
+    // Keep in sync with SP_* constants of enum type SchedPolicy
+    // declared in system/core/include/cutils/sched_policy.h,
+    // except THREAD_GROUP_DEFAULT does not correspond to any SP_* value.
 
     /**
-     * Background non-interactive thread group - All threads in
+     * Default thread group -
+     * has meaning with setProcessGroup() only, cannot be used with setThreadGroup().
+     * When used with setProcessGroup(), the group of each thread in the process
+     * is conditionally changed based on that thread's current priority, as follows:
+     * threads with priority numerically less than THREAD_PRIORITY_BACKGROUND
+     * are moved to foreground thread group.  All other threads are left unchanged.
+     * @hide
+     */
+    public static final int THREAD_GROUP_DEFAULT = -1;
+
+    /**
+     * Background thread group - All threads in
      * this group are scheduled with a reduced share of the CPU.
+     * Value is same as constant SP_BACKGROUND of enum SchedPolicy.
+     * FIXME rename to THREAD_GROUP_BACKGROUND.
      * @hide
      */
-    public static final int THREAD_GROUP_BG_NONINTERACTIVE = 1;
+    public static final int THREAD_GROUP_BG_NONINTERACTIVE = 0;
 
     /**
-     * Foreground 'boost' thread group - All threads in
-     * this group are scheduled with an increased share of the CPU
+     * Foreground thread group - All threads in
+     * this group are scheduled with a normal share of the CPU.
+     * Value is same as constant SP_FOREGROUND of enum SchedPolicy.
+     * Not used at this level.
      * @hide
      **/
-    public static final int THREAD_GROUP_FG_BOOST = 2;
+    private static final int THREAD_GROUP_FOREGROUND = 1;
 
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
@@ -672,28 +685,37 @@ public class Process {
     /**
      * Sets the scheduling group for a thread.
      * @hide
-     * @param tid The indentifier of the thread/process to change.
-     * @param group The target group for this thread/process.
+     * @param tid The identifier of the thread to change.
+     * @param group The target group for this thread from THREAD_GROUP_*.
      * 
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      * @throws SecurityException Throws SecurityException if your process does
      * not have permission to modify the given thread, or to use the given
      * priority.
+     * If the thread is a thread group leader, that is it's gettid() == getpid(),
+     * then the other threads in the same thread group are _not_ affected.
      */
     public static final native void setThreadGroup(int tid, int group)
             throws IllegalArgumentException, SecurityException;
+
     /**
      * Sets the scheduling group for a process and all child threads
      * @hide
-     * @param pid The indentifier of the process to change.
-     * @param group The target group for this process.
+     * @param pid The identifier of the process to change.
+     * @param group The target group for this process from THREAD_GROUP_*.
      * 
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      * @throws SecurityException Throws SecurityException if your process does
      * not have permission to modify the given thread, or to use the given
      * priority.
+     *
+     * group == THREAD_GROUP_DEFAULT means to move all non-background priority
+     * threads to the foreground scheduling group, but to leave background
+     * priority threads alone.  group == THREAD_GROUP_BG_NONINTERACTIVE moves all
+     * threads, regardless of priority, to the background scheduling group.
+     * group == THREAD_GROUP_FOREGROUND is not allowed.
      */
     public static final native void setProcessGroup(int pid, int group)
             throws IllegalArgumentException, SecurityException;
