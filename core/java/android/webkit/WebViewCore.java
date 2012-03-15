@@ -2779,6 +2779,18 @@ public final class WebViewCore {
     }
 
     // called by JNI
+    private void updateTextSizeAndScroll(int pointer, int width, int height,
+            int scrollX, int scrollY) {
+        if (mWebView != null) {
+            Rect rect = new Rect(-scrollX, -scrollY, width - scrollX,
+                    height - scrollY);
+            Message.obtain(mWebView.mPrivateHandler,
+                    WebViewClassic.EDIT_TEXT_SIZE_CHANGED, pointer, 0, rect)
+                    .sendToTarget();
+        }
+    }
+
+    // called by JNI
     private void clearTextEntry() {
         if (mWebView == null) return;
         Message.obtain(mWebView.mPrivateHandler,
