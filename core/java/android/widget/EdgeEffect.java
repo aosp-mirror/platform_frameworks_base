@@ -123,6 +123,11 @@ public class EdgeEffect {
     
     private final Rect mBounds = new Rect();
 
+    private final int mEdgeHeight;
+    private final int mGlowHeight;
+    private final int mGlowWidth;
+    private final int mMaxEffectHeight;
+
     /**
      * Construct a new EdgeEffect with a theme appropriate for the provided context.
      * @param context Context used to provide theming and resource information for the EdgeEffect
@@ -131,6 +136,14 @@ public class EdgeEffect {
         final Resources res = context.getResources();
         mEdge = res.getDrawable(R.drawable.overscroll_edge);
         mGlow = res.getDrawable(R.drawable.overscroll_glow);
+
+        mEdgeHeight = mEdge.getIntrinsicHeight();
+        mGlowHeight = mGlow.getIntrinsicHeight();
+        mGlowWidth = mGlow.getIntrinsicWidth();
+
+        mMaxEffectHeight = (int) (Math.min(
+                mGlowHeight * MAX_GLOW_HEIGHT * mGlowHeight / mGlowWidth * 0.6f,
+                mGlowHeight * MAX_GLOW_HEIGHT) + 0.5f);
 
         mMinWidth = (int) (res.getDisplayMetrics().density * MIN_WIDTH + 0.5f);
         mInterpolator = new DecelerateInterpolator();
@@ -149,7 +162,7 @@ public class EdgeEffect {
 
     /**
      * Set the position of this edge effect in pixels. This position is
-     * only used by {@link #getBounds()}.
+     * only used by {@link #getBounds(boolean)}.
      * 
      * @param x The position of the edge effect on the X axis
      * @param y The position of the edge effect on the Y axis
@@ -159,17 +172,6 @@ public class EdgeEffect {
         mY = y;
     }
 
-    boolean isIdle() {
-        return mState == STATE_IDLE;
-    }
-
-    /**
-     * Returns the height of the effect itself.
-     */
-    int getHeight() {
-        return Math.max(mGlow.getBounds().height(), mEdge.getBounds().height());
-    }
-    
     /**
      * Reports if this EdgeEffect's animation is finished. If this method returns false
      * after a call to {@link #draw(Canvas)} the host widget should schedule another
@@ -326,15 +328,11 @@ public class EdgeEffect {
     public boolean draw(Canvas canvas) {
         update();
 
-        final int edgeHeight = mEdge.getIntrinsicHeight();
-        final int glowHeight = mGlow.getIntrinsicHeight();
-        final int glowWidth = mGlow.getIntrinsicWidth();
-
         mGlow.setAlpha((int) (Math.max(0, Math.min(mGlowAlpha, 1)) * 255));
 
         int glowBottom = (int) Math.min(
-                glowHeight * mGlowScaleY * glowHeight/ glowWidth * 0.6f,
-                glowHeight * MAX_GLOW_HEIGHT);
+                mGlowHeight * mGlowScaleY * mGlowHeight / mGlowWidth * 0.6f,
+                mGlowHeight * MAX_GLOW_HEIGHT);
         if (mWidth < mMinWidth) {
             // Center the glow and clip it.
             int glowLeft = (mWidth - mMinWidth)/2;
@@ -348,7 +346,7 @@ public class EdgeEffect {
 
         mEdge.setAlpha((int) (Math.max(0, Math.min(mEdgeAlpha, 1)) * 255));
 
-        int edgeBottom = (int) (edgeHeight * mEdgeScaleY);
+        int edgeBottom = (int) (mEdgeHeight * mEdgeScaleY);
         if (mWidth < mMinWidth) {
             // Center the edge and clip it.
             int edgeLeft = (mWidth - mMinWidth)/2;
@@ -368,11 +366,13 @@ public class EdgeEffect {
 
     /**
      * Returns the bounds of the edge effect.
+     * 
+     * @hide
      */
-    public Rect getBounds() {
-        mBounds.set(mGlow.getBounds());
-        mBounds.union(mEdge.getBounds());
-        mBounds.offset(mX, mY);
+    public Rect getBounds(boolean reverse) {
+        mBounds.set(0, 0, mWidth, mMaxEffectHeight);
+        mBounds.offset(mX, mY - (reverse ? mMaxEffectHeight : 0));
+
         return mBounds;
     }
 
