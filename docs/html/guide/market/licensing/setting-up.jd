@@ -177,12 +177,6 @@ href="#acct-signin">Signing in to an authorized account</a>, below.</p></li>
 <strong>Google APIs Add-On, API 8 (release 2) or higher</strong> includes the necessary Google
 Play services.</p>
 
-
-<img src="{@docRoot}images/licensing_gapis_8.png" alt=""/>
-<p class="img-caption"><strong>Figure 2.</strong> Google APIs
-Add-On, API 8 (release 2) or higher lets you debug and test your licensing
-implementation in an emulator.</p>
-
 <p>To set up an emulator for adding licensing to an application, follow
 these steps: </p>
 
@@ -190,7 +184,7 @@ these steps: </p>
   <li>Launch the Android SDK Manager. </li>
   <li>In the <strong>Available Packages</strong> panel, select and download the
 SDK component "Google APIs (Google Inc.) - API Level 8" (or higher) from the SDK
-repository, as shown in figure 2.
+repository.
   <p>When the download is complete, use the Android SDK Manager to
 create a new AVD based on that component, described next.</p></li>
   <li>In the <strong>Virtual
@@ -256,11 +250,11 @@ classes to check and enforce licensing.</li>
 
 <p>To download the LVL component into your development environment, use the
 Android SDK Manager. Launch the Android SDK Manager and then
-select the "Google Market Licensing" component, as shown in figure 3.
+select the "Google Market Licensing" component, as shown in figure 2.
 Accept the terms and click <strong>Install Selected</strong> to begin the download. </p>
 
 <img src="{@docRoot}images/licensing_package.png" alt=""/>
-<p class="img-caption"><strong>Figure 3.</strong> The Licensing package contains the LVL and
+<p class="img-caption"><strong>Figure 2.</strong> The Licensing package contains the LVL and
 the LVL sample application.</p>
 
 <p>When the download is complete, the Android SDK Manager installs both
@@ -390,7 +384,7 @@ Managing Projects from Eclipse with ADT</a></p>.
 
 
 <img src="{@docRoot}images/licensing_add_library.png" alt=""/>
-<p class="img-caption"><strong>Figure 4.</strong> If you are
+<p class="img-caption"><strong>Figure 3.</strong> If you are
 working in Eclipse with ADT, you can add the LVL library project to your
 application from the application's project properties.</p>
 
@@ -494,7 +488,7 @@ Response Codes</a> in the <a
 href="{@docRoot}guide/market/licensing/licensing-reference.html">Licensing Reference</a>.</p>
 
 <img src="{@docRoot}images/licensing_test_response.png" alt=""/>
-<p class="img-caption"><strong>Figure 5.</strong> The Licensing
+<p class="img-caption"><strong>Figure 4.</strong> The Licensing
 panel of your account's Edit Profile page, showing the Test Accounts field and the
 Test Response menu.</p>
 
@@ -586,7 +580,7 @@ Differences in account types for testing licensing.</p>
 <h4 id="reg-test-acct">Registering test accounts on the publisher account</h4>
 
 <p>To get started, you need to register each test account in your publisher
-account. As shown in Figure 5, you
+account. As shown in Figure 4, you
 register test accounts in the Licensing panel of your publisher account's Edit
 Profile page. Simply enter the accounts as a comma-delimited list and click
 <strong>Save</strong> to save your profile changes.</p>
