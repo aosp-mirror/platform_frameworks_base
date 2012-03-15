@@ -99,6 +99,26 @@
       </li>
 
       <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/search/index.html">
+            <span class="en">Adding Search Functionality</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/search/setup.html">
+            <span class="en">Setting up the Search Interface</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/search/search.html">
+            <span class="en">Storing and Searching for Data</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/search/backward-compat.html">
+            <span class="en">Remaining Backward Compatible</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/id-auth/index.html">
             <span class="en">Remembering Users</span>
           </a></div>
