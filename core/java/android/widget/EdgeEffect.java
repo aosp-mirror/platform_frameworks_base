@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.graphics.Rect;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -45,6 +46,7 @@ import android.view.animation.Interpolator;
  * {@link #draw(Canvas)} method.</p>
  */
 public class EdgeEffect {
+    @SuppressWarnings("UnusedDeclaration")
     private static final String TAG = "EdgeEffect";
 
     // Time it will take the effect to fully recede in ms
@@ -57,10 +59,7 @@ public class EdgeEffect {
     private static final int PULL_DECAY_TIME = 1000;
 
     private static final float MAX_ALPHA = 1.f;
-    private static final float HELD_EDGE_ALPHA = 0.7f;
     private static final float HELD_EDGE_SCALE_Y = 0.5f;
-    private static final float HELD_GLOW_ALPHA = 0.5f;
-    private static final float HELD_GLOW_SCALE_Y = 0.5f;
 
     private static final float MAX_GLOW_HEIGHT = 4.f;
 
@@ -76,7 +75,9 @@ public class EdgeEffect {
     private final Drawable mGlow;
     private int mWidth;
     private int mHeight;
-    private final int MIN_WIDTH = 300;
+    private int mX;
+    private int mY;
+    private static final int MIN_WIDTH = 300;
     private final int mMinWidth;
 
     private float mEdgeAlpha;
@@ -119,6 +120,8 @@ public class EdgeEffect {
     private int mState = STATE_IDLE;
 
     private float mPullDistance;
+    
+    private final Rect mBounds = new Rect();
 
     /**
      * Construct a new EdgeEffect with a theme appropriate for the provided context.
@@ -144,6 +147,29 @@ public class EdgeEffect {
         mHeight = height;
     }
 
+    /**
+     * Set the position of this edge effect in pixels. This position is
+     * only used by {@link #getBounds()}.
+     * 
+     * @param x The position of the edge effect on the X axis
+     * @param y The position of the edge effect on the Y axis
+     */
+    void setPosition(int x, int y) {
+        mX = x;
+        mY = y;
+    }
+
+    boolean isIdle() {
+        return mState == STATE_IDLE;
+    }
+
+    /**
+     * Returns the height of the effect itself.
+     */
+    int getHeight() {
+        return Math.max(mGlow.getBounds().height(), mEdge.getBounds().height());
+    }
+    
     /**
      * Reports if this EdgeEffect's animation is finished. If this method returns false
      * after a call to {@link #draw(Canvas)} the host widget should schedule another
@@ -301,7 +327,6 @@ public class EdgeEffect {
         update();
 
         final int edgeHeight = mEdge.getIntrinsicHeight();
-        final int edgeWidth = mEdge.getIntrinsicWidth();
         final int glowHeight = mGlow.getIntrinsicHeight();
         final int glowWidth = mGlow.getIntrinsicWidth();
 
@@ -334,7 +359,21 @@ public class EdgeEffect {
         }
         mEdge.draw(canvas);
 
+        if (mState == STATE_RECEDE && glowBottom == 0 && edgeBottom == 0) {
+            mState = STATE_IDLE;
+        }
+
         return mState != STATE_IDLE;
+    }
+
+    /**
+     * Returns the bounds of the edge effect.
+     */
+    public Rect getBounds() {
+        mBounds.set(mGlow.getBounds());
+        mBounds.union(mEdge.getBounds());
+        mBounds.offset(mX, mY);
+        return mBounds;
     }
 
     private void update() {
