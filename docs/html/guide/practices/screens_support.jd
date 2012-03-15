@@ -1242,12 +1242,12 @@ have to buy various devices just to test your application's screen support.</p>
 <p>To set up an environment for testing your application's screen support, you should create a
 series of AVDs (Android Virtual Devices), using emulator skins and screen configurations that
 emulate the screen sizes and densities you want your application to support. To do so, you can use
-the Android SDK and AVD Manager to create the AVDs and launch them with a graphical interface.</p>
+the AVD Manager to create the AVDs and launch them with a graphical interface.</p>
 
-<p>To launch the Android SDK and AVD Manager, execute the {@code
+<p>To launch the Android SDK Manager, execute the {@code
 SDK Manager.exe} from your Android SDK directory (on Windows only) or execute {@code android} from
-the {@code &lt;sdk&gt;/tools/} directory (on all platforms). Figure 6 shows the Android SDK and
-AVD Manager with a selection of AVDs, for testing various screen configurations.</p>
+the {@code &lt;sdk&gt;/tools/} directory (on all platforms). Figure 6 shows the AVD
+Manager with a selection of AVDs, for testing various screen configurations.</p>
 
 <p>Table 3 shows the various emulator skins that are available in the Android SDK, which you can use
 to emulate some of the most common screen configurations.</p>
@@ -1340,7 +1340,7 @@ dashboard.</p>
 <div class="figure" style="width:204px">
   <img src="{@docRoot}images/screens_support/avd-start.png" alt="" />
   <p class="img-caption"><strong>Figure 7.</strong>
-  Size and density options you can set, when starting an AVD from the Android SDK and AVD
+  Size and density options you can set, when starting an AVD from the AVD
 Manager.</p>
 </div>
 
@@ -1349,12 +1349,12 @@ up to run at a physical size that closely matches an actual device. This makes
 it a lot easier to compare the results at various sizes and densities. To
 do so you need to know the approximate density, in dpi, of your computer
 monitor (for instance, a 30" Dell monitor has a density of about 96 dpi). When you launch an AVD
-from the Android SDK and AVD Manager, you can specify the screen size for the emulator and your
+from the AVD Manager, you can specify the screen size for the emulator and your
 monitor dpi in the Launch Options, as shown in figure 7.</p>
 
 <p>If you would like to test your application on a screen that uses a resolution
 or density not supported by the built-in skins, you can create an AVD that uses a custom resolution
-or density. When creating the AVD from the Android SDK and AVD Manager, specify the Resolution,
+or density. When creating the AVD from the AVD Manager, specify the Resolution,
 instead of selecting a Built-in Skin.</p>
 
 <p>If you are launching your AVD from the command line, you can specify the scale for

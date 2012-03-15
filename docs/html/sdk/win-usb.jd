@@ -12,7 +12,7 @@ page.title=Google USB Driver
   <ol>
     <li><a href="{@docRoot}sdk/oem-usb.html#InstallingDriver">Installing a USB Driver</a></li>
     <li><a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a></li>
-    <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></li>
+    <li><a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a></li>
   </ol>
 </div>
 </div>
@@ -51,7 +51,7 @@ for Windows. </p>
 <p>The sections below provide notes about successive revisions of the USB Driver
 for Windows, as denoted by revision number. To determine what revision of the
 USB Driver for Windows you are using, refer to the "Installed Packages" listing
-in the Android SDK and AVD Manager.</p>
+in the Android SDK Manager.</p>
 
 <script type="text/javascript">
 function toggleDiv(link) {
@@ -149,7 +149,7 @@ for the T-Mobile G1 and myTouch 3G (and similar devices).</p></dt>
 
 <div class="figure" style="width:536px;margin:0">
   <img src="{@docRoot}images/developing/sdk-usb-driver.png" alt="" />
-  <p class="img-caption"><strong>Figure 1.</strong> The SDK and AVD Manager
+  <p class="img-caption"><strong>Figure 1.</strong> The SDK Manager
     with the Google USB Driver selected.</p>
 </div>
 
@@ -158,10 +158,10 @@ component. You need the driver only if you are developing on Windows and
 want to connect an Android-powered device (ADP, Nexus One, or Nexus S) to your
 development environment over USB. </p>
 
-<p>To download the driver, use the Android SDK and AVD Manager tool that is
+<p>To download the driver, use the Android SDK Manager tool that is
 included with the <a href="{@docRoot}sdk/index.html">Android SDK</a>:</p>
 <ol>
-  <li>Launch the SDK and AVD Manager by double-clicking <code>SDK Manager.exe</code>,
+  <li>Launch the Android SDK Manager by double-clicking <code>SDK Manager.exe</code>,
   at the root of your SDK directory.</li>
   <li>Expand <em>Extras</em>.</li>
   <li>Check <strong>Google USB Driver package</strong> and click <strong>Install</strong>.</li>
