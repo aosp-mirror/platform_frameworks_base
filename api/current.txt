@@ -3694,6 +3694,7 @@ package android.app {
 
   public static class Notification.Builder {
     ctor public Notification.Builder(android.content.Context);
+    method public android.app.Notification.Builder addAction(int, java.lang.CharSequence, android.app.PendingIntent);
     method public android.app.Notification.Builder addKind(java.lang.String);
     method public android.app.Notification getNotification();
     method public android.app.Notification.Builder setAutoCancel(boolean);
