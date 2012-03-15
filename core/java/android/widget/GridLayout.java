@@ -29,8 +29,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-
 import com.android.internal.R;
+import android.widget.RemoteViews.RemoteView;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -146,6 +146,7 @@ import static java.lang.Math.min;
  * @attr ref android.R.styleable#GridLayout_rowOrderPreserved
  * @attr ref android.R.styleable#GridLayout_columnOrderPreserved
  */
+@RemoteView
 public class GridLayout extends ViewGroup {
 
     // Public constants
@@ -234,7 +235,6 @@ public class GridLayout extends ViewGroup {
 
     final Axis horizontalAxis = new Axis(true);
     final Axis verticalAxis = new Axis(false);
-    boolean layoutParamsValid = false;
     int orientation = DEFAULT_ORIENTATION;
     boolean useDefaultMargins = DEFAULT_USE_DEFAULT_MARGINS;
     int alignmentMode = DEFAULT_ALIGNMENT_MODE;
@@ -713,12 +713,10 @@ public class GridLayout extends ViewGroup {
 
             minor = minor + minorSpan;
         }
-        lastLayoutParamsHashCode = computeLayoutParamsHashCode();
-        invalidateStructure();
     }
 
     private void invalidateStructure() {
-        layoutParamsValid = false;
+        lastLayoutParamsHashCode = UNINITIALIZED_HASH;
         horizontalAxis.invalidateStructure();
         verticalAxis.invalidateStructure();
         // This can end up being done twice. Better twice than not at all.
@@ -742,10 +740,6 @@ public class GridLayout extends ViewGroup {
     }
 
     final LayoutParams getLayoutParams(View c) {
-        if (!layoutParamsValid) {
-            validateLayoutParams();
-            layoutParamsValid = true;
-        }
         return (LayoutParams) c.getLayoutParams();
     }
 
@@ -874,20 +868,22 @@ public class GridLayout extends ViewGroup {
         return result;
     }
 
-    private void checkForLayoutParamsModification() {
-        int layoutParamsHashCode = computeLayoutParamsHashCode();
-        if (lastLayoutParamsHashCode != UNINITIALIZED_HASH &&
-                lastLayoutParamsHashCode != layoutParamsHashCode) {
-            invalidateStructure();
+    private void consistencyCheck() {
+        if (lastLayoutParamsHashCode == UNINITIALIZED_HASH) {
+            validateLayoutParams();
+            lastLayoutParamsHashCode = computeLayoutParamsHashCode();
+        } else if (lastLayoutParamsHashCode != computeLayoutParamsHashCode()) {
             Log.w(TAG, "The fields of some layout parameters were modified in between layout " +
                     "operations. Check the javadoc for GridLayout.LayoutParams#rowSpec.");
+            invalidateStructure();
+            consistencyCheck();
         }
     }
 
     // Measurement
 
     private void measureChildWithMargins2(View child, int parentWidthSpec, int parentHeightSpec,
-                                          int childWidth, int childHeight) {
+            int childWidth, int childHeight) {
         int childWidthSpec = getChildMeasureSpec(parentWidthSpec,
                 mPaddingLeft + mPaddingRight + getTotalMargin(child, true), childWidth);
         int childHeightSpec = getChildMeasureSpec(parentHeightSpec,
@@ -923,7 +919,7 @@ public class GridLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
-        checkForLayoutParamsModification();
+        consistencyCheck();
 
         /** If we have been called by {@link View#measure(int, int)}, one of width or height
          *  is  likely to have changed. We must invalidate if so. */
@@ -993,7 +989,7 @@ public class GridLayout extends ViewGroup {
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        checkForLayoutParamsModification();
+        consistencyCheck();
 
         int targetWidth = right - left;
         int targetHeight = bottom - top;
@@ -1250,7 +1246,7 @@ public class GridLayout extends ViewGroup {
         }
 
         private void include(List<Arc> arcs, Interval key, MutableInt size,
-                             boolean ignoreIfAlreadyPresent) {
+                boolean ignoreIfAlreadyPresent) {
             /*
             Remove self referential links.
             These appear:
@@ -1429,8 +1425,8 @@ public class GridLayout extends ViewGroup {
                 int dst = arc.span.max;
                 int value = arc.value.value;
                 result.append((src < dst) ?
-                        var + dst + " - " + var + src + " > " + value :
-                        var + src + " - " + var + dst + " < " + -value);
+                        var + dst + "-" + var + src + ">=" + value :
+                        var + src + "-" + var + dst + "<=" + -value);
 
             }
             return result.toString();
