@@ -1386,4 +1386,18 @@ public class DatabaseUtils {
         System.arraycopy(newValues, 0, result, originalValues.length, newValues.length);
         return result;
     }
+
+    /**
+     * Returns column index of "_id" column, or -1 if not found.
+     * @hide
+     */
+    public static int findRowIdColumnIndex(String[] columnNames) {
+        int length = columnNames.length;
+        for (int i = 0; i < length; i++) {
+            if (columnNames[i].equals("_id")) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }

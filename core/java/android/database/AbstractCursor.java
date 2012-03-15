@@ -33,10 +33,39 @@ import java.util.Map;
 public abstract class AbstractCursor implements CrossProcessCursor {
     private static final String TAG = "Cursor";
 
-    DataSetObservable mDataSetObservable = new DataSetObservable();
-    ContentObservable mContentObservable = new ContentObservable();
+    /**
+     * @deprecated This is never updated by this class and should not be used
+     */
+    @Deprecated
+    protected HashMap<Long, Map<String, Object>> mUpdatedRows;
 
-    Bundle mExtras = Bundle.EMPTY;
+    protected int mPos;
+
+    /**
+     * This must be set to the index of the row ID column by any
+     * subclass that wishes to support updates.
+     */
+    protected int mRowIdColumnIndex;
+
+    /**
+     * If {@link #mRowIdColumnIndex} is not -1 this contains contains the value of
+     * the column at {@link #mRowIdColumnIndex} for the current row this cursor is
+     * pointing at.
+     */
+    protected Long mCurrentRowID;
+
+    protected boolean mClosed;
+    protected ContentResolver mContentResolver;
+    private Uri mNotifyUri;
+
+    private final Object mSelfObserverLock = new Object();
+    private ContentObserver mSelfObserver;
+    private boolean mSelfObserverRegistered;
+
+    private DataSetObservable mDataSetObservable = new DataSetObservable();
+    private ContentObservable mContentObservable = new ContentObservable();
+
+    private Bundle mExtras = Bundle.EMPTY;
 
     /* -------------------------------------------------------- */
     /* These need to be implemented by subclasses */
@@ -415,30 +444,4 @@ public abstract class AbstractCursor implements CrossProcessCursor {
             }
         }
     }
-
-    /**
-     * @deprecated This is never updated by this class and should not be used
-     */
-    @Deprecated
-    protected HashMap<Long, Map<String, Object>> mUpdatedRows;
-
-    /**
-     * This must be set to the index of the row ID column by any
-     * subclass that wishes to support updates.
-     */
-    protected int mRowIdColumnIndex;
-
-    protected int mPos;
-    /**
-     * If {@link #mRowIdColumnIndex} is not -1 this contains contains the value of
-     * the column at {@link #mRowIdColumnIndex} for the current row this cursor is
-     * pointing at.
-     */
-    protected Long mCurrentRowID;
-    protected ContentResolver mContentResolver;
-    protected boolean mClosed = false;
-    private Uri mNotifyUri;
-    private ContentObserver mSelfObserver;
-    final private Object mSelfObserverLock = new Object();
-    private boolean mSelfObserverRegistered;
 }

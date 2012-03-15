@@ -132,6 +132,25 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
         }
     }
 
+    public BulkCursorDescriptor getBulkCursorDescriptor() {
+        synchronized (mLock) {
+            throwIfCursorIsClosed();
+
+            BulkCursorDescriptor d = new BulkCursorDescriptor();
+            d.cursor = this;
+            d.columnNames = mCursor.getColumnNames();
+            d.wantsAllOnMoveCalls = mCursor.getWantsAllOnMoveCalls();
+            d.count = mCursor.getCount();
+            d.window = mCursor.getWindow();
+            if (d.window != null) {
+                // Acquire a reference to the window because its reference count will be
+                // decremented when it is returned as part of the binder call reply parcel.
+                d.window.acquireReference();
+            }
+            return d;
+        }
+    }
+
     @Override
     public CursorWindow getWindow(int position) {
         synchronized (mLock) {
@@ -157,10 +176,9 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
                 mCursor.fillWindow(position, window);
             }
 
-            // Acquire a reference before returning from this RPC.
-            // The Binder proxy will decrement the reference count again as part of writing
-            // the CursorWindow to the reply parcel as a return value.
             if (window != null) {
+                // Acquire a reference to the window because its reference count will be
+                // decremented when it is returned as part of the binder call reply parcel.
                 window.acquireReference();
             }
             return window;
@@ -173,24 +191,6 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
             throwIfCursorIsClosed();
 
             mCursor.onMove(mCursor.getPosition(), position);
-        }
-    }
-
-    @Override
-    public int count() {
-        synchronized (mLock) {
-            throwIfCursorIsClosed();
-
-            return mCursor.getCount();
-        }
-    }
-
-    @Override
-    public String[] getColumnNames() {
-        synchronized (mLock) {
-            throwIfCursorIsClosed();
-
-            return mCursor.getColumnNames();
         }
     }
 
@@ -234,15 +234,6 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
             unregisterObserverProxyLocked();
             createAndRegisterObserverProxyLocked(observer);
             return mCursor.getCount();
-        }
-    }
-
-    @Override
-    public boolean getWantsAllOnMoveCalls() {
-        synchronized (mLock) {
-            throwIfCursorIsClosed();
-
-            return mCursor.getWantsAllOnMoveCalls();
         }
     }
 

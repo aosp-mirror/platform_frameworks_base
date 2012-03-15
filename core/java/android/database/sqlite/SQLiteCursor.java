@@ -105,12 +105,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         mQuery = query;
 
         mColumns = query.getColumnNames();
-        for (int i = 0; i < mColumns.length; i++) {
-            // Make note of the row ID column index for quick access to it
-            if ("_id".equals(mColumns[i])) {
-                mRowIdColumnIndex = i;
-            }
-        }
+        mRowIdColumnIndex = DatabaseUtils.findRowIdColumnIndex(mColumns);
     }
 
     /**
