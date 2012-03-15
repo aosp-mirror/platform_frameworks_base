@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Umožňuje aplikácii čítať súkromné slová, názvy a frázy, ktoré mohol používateľ uložiť do slovníka používateľa."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"zapisovať do slovníka definovaného používateľom"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Umožňuje aplikácii zapisovať nové slová do používateľského slovníka."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"čítanie obsahu ukl. pries. USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"čítanie obsahu karty SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Umožňuje apl. čítať obsah USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Umožňuje aplikácii čítať obsah karty SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"upraviť/odstrániť obsah ukl. pr. USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"Zmeniť/odstrániť obsah karty SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Umožňuje aplikácii zápis do ukladacieho priestoru USB."</string>

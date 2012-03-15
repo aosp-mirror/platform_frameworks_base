@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"للسماح للتطبيق بقراءة أي كلمات وأسماء وعبارات خاصة ربما خزنها المستخدم في قاموس المستخدم."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"كتابة إلى القاموس المعرّف بواسطة المستخدم"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"للسماح للتطبيق بكتابة كلمات جديدة في قاموس المستخدم."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"قراءة محتويات وحدة تخزين USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"قراءة محتويات بطاقة SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"للسماح للتطبيق بقراءة محتويات وحدة تخزين USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"للسماح للتطبيق بقراءة محتويات بطاقة SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"تعديل/حذف محتويات وحدة تخزين USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"تعديل/حذف محتويات بطاقة SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"للسماح للتطبيق بالكتابة إلى وحدة تخزين USB."</string>

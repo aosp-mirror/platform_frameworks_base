@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Lehetővé teszi az alkalmazás számára, hogy olvassa a felhasználói szótárban tárolt saját szavakat, neveket és kifejezéseket."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"a felhasználó által definiált szótár írása"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Lehetővé teszi az alkalmazás számára, hogy új szavakat írjon a felhasználói szótárba."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"USB-tár tartalmának beolvasása"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"SD-kártya tartalmának beolvasása"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Beolvashat USB-tartalmakat."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Lehetővé teszi az alkalmazás számára SD-kártyák tartalmának beolvasását."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"USB-tár tartalmának módosítása és törlése"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"az SD-kártya tartalmának módosítása és törlése"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Az alkalmazás USB-tárra írhat."</string>

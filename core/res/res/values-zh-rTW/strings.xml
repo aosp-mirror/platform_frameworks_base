@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"允許應用程式讀取使用者儲存在使用者字典內的任何私人字詞、名稱和詞組。"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"寫入使用者定義的字典"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允許應用程式將新字詞寫入使用者的字典。"</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"讀取 USB 儲存裝置的內容"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"讀取 SD 卡的內容"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"允許應用程式讀取 USB 儲存裝置的內容。"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"允許應用程式讀取 SD 卡的內容。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"修改/刪除 USB 儲存裝置內容"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"修改/刪除 SD 卡的內容"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"允許應用程式寫入 USB 儲存裝置。"</string>
