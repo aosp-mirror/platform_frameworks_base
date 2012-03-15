@@ -123,7 +123,7 @@ page.title=Content Provider Basics
 
     <!-- Intro paragraphs -->
 <p>
-    A content provider manages access to a central repository of data. The provider and
+    A content provider manages access to a central repository of data. A provider
     is part of an Android application, which often provides its own UI for working with
     the data. However, content providers are primarily intended to be used by other
     applications, which access the provider using a provider client object. Together, providers
@@ -569,7 +569,7 @@ selectionArgs[0] = mUserInput;
 </pre>
 <p>
     A selection clause that uses <code>?</code> as a replaceable parameter and an array of
-    selection arguments array are preferred way to specify a selection, even the provider isn't
+    selection arguments array are preferred way to specify a selection, even if the provider isn't
     based on an SQL database.
 </p>
 <!-- Displaying the results -->
