@@ -1088,12 +1088,8 @@ android.content.res.AssetFileDescriptor}, such as some {@link android.media.Medi
     <dd>Most applications don't need to use this class. This class defines a {@link
 android.content.ContentProvider} that marshals the data from the ZIP files through a content
 provider {@link android.net.Uri} in order to provide file access for certain Android APIs that
-expect {@link android.net.Uri} access to media files.
-      <p>The sample application available in the
-Apk Expansion package demonstrates a scenario in which this class is useful
-to specify a video with {@link android.widget.VideoView#setVideoURI
-VideoView.setVideoURI()}. See the sample app's class {@code SampleZipfileProvider} for an
-example of how to extend this class to use in your application.</p></dd>
+expect {@link android.net.Uri} access to media files. For example, this is useful if you want to
+play a video with {@link android.widget.VideoView#setVideoURI VideoView.setVideoURI()}.</p></dd>
 </dl>
 
 <h4>Reading from a ZIP file</h4>
