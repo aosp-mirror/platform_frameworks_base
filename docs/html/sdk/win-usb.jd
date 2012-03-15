@@ -147,7 +147,7 @@ for the T-Mobile G1 and myTouch 3G (and similar devices).</p></dt>
 
 <h2 id="WinUsbDriver">Downloading the Google USB Driver</h2>
 
-<div class="figure" style="width:498px;margin:0">
+<div class="figure" style="width:536px;margin:0">
   <img src="{@docRoot}images/developing/sdk-usb-driver.png" alt="" />
   <p class="img-caption"><strong>Figure 1.</strong> The SDK and AVD Manager
     with the Google USB Driver selected.</p>
