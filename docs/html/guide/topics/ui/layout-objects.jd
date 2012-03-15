@@ -163,7 +163,7 @@ refer to the ID using the syntax of a relative resource
         <td>
         <pre>
 &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android"
                 android:layout_width=&quot;fill_parent&quot; 
                 android:layout_height=&quot;wrap_content&quot;
                 android:background=&quot;@drawable/blue&quot;
