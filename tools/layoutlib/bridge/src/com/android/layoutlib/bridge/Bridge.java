@@ -29,6 +29,7 @@ import com.android.ide.common.rendering.api.SessionParams;
 import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.layoutlib.bridge.impl.RenderDrawable;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
+import com.android.layoutlib.bridge.util.DynamicIdMap;
 import com.android.ninepatch.NinePatchChunk;
 import com.android.resources.ResourceType;
 import com.android.tools.layoutlib.create.MethodAdapter;
@@ -78,7 +79,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     private final static ReentrantLock sLock = new ReentrantLock();
 
     /**
-     * Maps from id to resource type/name. This is for android.R only.
+     * Maps from id to resource type/name. This is for com.android.internal.R
      */
     private final static Map<Integer, Pair<ResourceType, String>> sRMap =
         new HashMap<Integer, Pair<ResourceType, String>>();
@@ -89,10 +90,16 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     private final static Map<IntArray, String> sRArrayMap = new HashMap<IntArray, String>();
     /**
      * Reverse map compared to sRMap, resource type -> (resource name -> id).
-     * This is for android.R only.
+     * This is for com.android.internal.R.
      */
-    private final static Map<ResourceType, Map<String, Integer>> sRFullMap =
+    private final static Map<ResourceType, Map<String, Integer>> sRevRMap =
         new EnumMap<ResourceType, Map<String,Integer>>(ResourceType.class);
+
+    // framework resources are defined as 0x01XX#### where XX is the resource type (layout,
+    // drawable, etc...). Using FF as the type allows for 255 resource types before we get a
+    // collision which should be fine.
+    private final static int DYNAMIC_ID_SEED_START = 0x01ff0000;
+    private final static DynamicIdMap sDynamicIds = new DynamicIdMap(DYNAMIC_ID_SEED_START);
 
     private final static Map<Object, Map<String, SoftReference<Bitmap>>> sProjectBitmapCache =
         new HashMap<Object, Map<String, SoftReference<Bitmap>>>();
@@ -257,7 +264,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                 ResourceType resType = ResourceType.getEnum(resTypeName);
                 if (resType != null) {
                     Map<String, Integer> fullMap = new HashMap<String, Integer>();
-                    sRFullMap.put(resType, fullMap);
+                    sRevRMap.put(resType, fullMap);
 
                     for (Field f : inner.getDeclaredFields()) {
                         // only process static final fields. Since the final attribute may have
@@ -459,7 +466,14 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      *     does not match any resource.
      */
     public static Pair<ResourceType, String> resolveResourceId(int value) {
-        return sRMap.get(value);
+        Pair<ResourceType, String> pair = sRMap.get(value);
+        if (pair == null) {
+            pair = sDynamicIds.resolveId(value);
+            if (pair == null) {
+                System.out.println(String.format("Missing id: %1$08X (%1$d)", value));
+            }
+        }
+        return pair;
     }
 
     /**
@@ -478,12 +492,17 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * @return an {@link Integer} containing the resource id, or null if no resource were found.
      */
     public static Integer getResourceId(ResourceType type, String name) {
-        Map<String, Integer> map = sRFullMap.get(type);
+        Map<String, Integer> map = sRevRMap.get(type);
+        Integer value = null;
         if (map != null) {
-            return map.get(name);
+            value = map.get(name);
         }
 
-        return null;
+        if (value == null) {
+            value = sDynamicIds.getId(type, name);
+        }
+
+        return value;
     }
 
     /**
@@ -598,6 +617,4 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             sFramework9PatchCache.put(value, new SoftReference<NinePatchChunk>(ninePatch));
         }
     }
-
-
 }
