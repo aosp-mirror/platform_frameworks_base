@@ -175,7 +175,7 @@ status_t TimedTextDriver::addOutOfBandTextSource(
     }
 
     sp<TimedTextSource> source;
-    if (strcasecmp(mimeType, MEDIA_MIMETYPE_TEXT_SUBRIP)) {
+    if (strcasecmp(mimeType, MEDIA_MIMETYPE_TEXT_SUBRIP) == 0) {
         source = TimedTextSource::CreateTimedTextSource(
                 dataSource, TimedTextSource::OUT_OF_BAND_FILE_SRT);
     }
