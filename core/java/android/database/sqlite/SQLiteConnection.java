@@ -99,6 +99,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private final SQLiteDatabaseConfiguration mConfiguration;
     private final int mConnectionId;
     private final boolean mIsPrimaryConnection;
+    private final boolean mIsReadOnlyConnection;
     private final PreparedStatementCache mPreparedStatementCache;
     private PreparedStatement mPreparedStatementPool;
 
@@ -111,7 +112,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private boolean mOnlyAllowReadOnlyOperations;
 
     // The number of times attachCancellationSignal has been called.
-    // Because SQLite statement execution can be re-entrant, we keep track of how many
+    // Because SQLite statement execution can be reentrant, we keep track of how many
     // times we have attempted to attach a cancellation signal to the connection so that
     // we can ensure that we detach the signal at the right time.
     private int mCancellationSignalAttachCount;
@@ -121,7 +122,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private static native void nativeClose(int connectionPtr);
     private static native void nativeRegisterCustomFunction(int connectionPtr,
             SQLiteCustomFunction function);
-    private static native void nativeSetLocale(int connectionPtr, String locale);
+    private static native void nativeRegisterLocalizedCollators(int connectionPtr, String locale);
     private static native int nativePrepareStatement(int connectionPtr, String sql);
     private static native void nativeFinalizeStatement(int connectionPtr, int statementPtr);
     private static native int nativeGetParameterCount(int connectionPtr, int statementPtr);
@@ -163,6 +164,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         mConfiguration = new SQLiteDatabaseConfiguration(configuration);
         mConnectionId = connectionId;
         mIsPrimaryConnection = primaryConnection;
+        mIsReadOnlyConnection = (configuration.openFlags & SQLiteDatabase.OPEN_READONLY) != 0;
         mPreparedStatementCache = new PreparedStatementCache(
                 mConfiguration.maxSqlCacheSize);
         mCloseGuard.open("close");
@@ -237,45 +239,102 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private void setPageSize() {
-        if (!mConfiguration.isInMemoryDb()) {
-            execute("PRAGMA page_size=" + SQLiteGlobal.getDefaultPageSize(), null, null);
+        if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
+            final long newValue = SQLiteGlobal.getDefaultPageSize();
+            long value = executeForLong("PRAGMA page_size", null, null);
+            if (value != newValue) {
+                execute("PRAGMA page_size=" + newValue, null, null);
+            }
         }
     }
 
     private void setAutoCheckpointInterval() {
-        if (!mConfiguration.isInMemoryDb()) {
-            executeForLong("PRAGMA wal_autocheckpoint=" + SQLiteGlobal.getWALAutoCheckpoint(),
-                    null, null);
+        if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
+            final long newValue = SQLiteGlobal.getWALAutoCheckpoint();
+            long value = executeForLong("PRAGMA wal_autocheckpoint", null, null);
+            if (value != newValue) {
+                executeForLong("PRAGMA wal_autocheckpoint=" + newValue, null, null);
+            }
         }
     }
 
     private void setJournalSizeLimit() {
-        if (!mConfiguration.isInMemoryDb()) {
-            executeForLong("PRAGMA journal_size_limit=" + SQLiteGlobal.getJournalSizeLimit(),
-                    null, null);
+        if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
+            final long newValue = SQLiteGlobal.getJournalSizeLimit();
+            long value = executeForLong("PRAGMA journal_size_limit", null, null);
+            if (value != newValue) {
+                executeForLong("PRAGMA journal_size_limit=" + newValue, null, null);
+            }
         }
     }
 
     private void setSyncModeFromConfiguration() {
-        if (!mConfiguration.isInMemoryDb()) {
-            execute("PRAGMA synchronous=" + mConfiguration.syncMode, null, null);
+        if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
+            final String newValue = mConfiguration.syncMode;
+            String value = executeForString("PRAGMA synchronous", null, null);
+            if (!value.equalsIgnoreCase(newValue)) {
+                execute("PRAGMA synchronous=" + newValue, null, null);
+            }
         }
     }
 
     private void setJournalModeFromConfiguration() {
-        if (!mConfiguration.isInMemoryDb()) {
-            String result = executeForString("PRAGMA journal_mode=" + mConfiguration.journalMode,
-                    null, null);
-            if (!result.equalsIgnoreCase(mConfiguration.journalMode)) {
-                Log.e(TAG, "setting journal_mode to " + mConfiguration.journalMode
-                        + " failed for db: " + mConfiguration.label
-                        + " (on pragma set journal_mode, sqlite returned:" + result);
+        if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
+            final String newValue = mConfiguration.journalMode;
+            String value = executeForString("PRAGMA journal_mode", null, null);
+            if (!value.equalsIgnoreCase(newValue)) {
+                value = executeForString("PRAGMA journal_mode=" + newValue, null, null);
+                if (!value.equalsIgnoreCase(newValue)) {
+                    Log.e(TAG, "setting journal_mode to " + newValue
+                            + " failed for db: " + mConfiguration.label
+                            + " (on pragma set journal_mode, sqlite returned:" + value);
+                }
             }
         }
     }
 
     private void setLocaleFromConfiguration() {
-        nativeSetLocale(mConnectionPtr, mConfiguration.locale.toString());
+        if ((mConfiguration.openFlags & SQLiteDatabase.NO_LOCALIZED_COLLATORS) != 0) {
+            return;
+        }
+
+        // Register the localized collators.
+        final String newLocale = mConfiguration.locale.toString();
+        nativeRegisterLocalizedCollators(mConnectionPtr, newLocale);
+
+        // If the database is read-only, we cannot modify the android metadata table
+        // or existing indexes.
+        if (mIsReadOnlyConnection) {
+            return;
+        }
+
+        try {
+            // Ensure the android metadata table exists.
+            execute("CREATE TABLE IF NOT EXISTS android_metadata (locale TEXT)", null, null);
+
+            // Check whether the locale was actually changed.
+            final String oldLocale = executeForString("SELECT locale FROM android_metadata "
+                    + "UNION SELECT NULL ORDER BY locale DESC LIMIT 1", null, null);
+            if (oldLocale != null && oldLocale.equals(newLocale)) {
+                return;
+            }
+
+            // Go ahead and update the indexes using the new locale.
+            execute("BEGIN", null, null);
+            boolean success = false;
+            try {
+                execute("DELETE FROM android_metadata", null, null);
+                execute("INSERT INTO android_metadata (locale) VALUES(?)",
+                        new Object[] { newLocale }, null);
+                execute("REINDEX LOCALIZED", null, null);
+                success = true;
+            } finally {
+                execute(success ? "COMMIT" : "ROLLBACK", null, null);
+            }
+        } catch (RuntimeException ex) {
+            throw new SQLiteException("Failed to change locale for db '" + mConfiguration.label
+                    + "' to '" + newLocale + "'.", ex);
+        }
     }
 
     // Called by SQLiteConnectionPool only.

@@ -7226,6 +7226,7 @@ package android.database {
   public class SQLException extends java.lang.RuntimeException {
     ctor public SQLException();
     ctor public SQLException(java.lang.String);
+    ctor public SQLException(java.lang.String, java.lang.Throwable);
   }
 
   public class StaleDataException extends java.lang.RuntimeException {
@@ -7403,6 +7404,7 @@ package android.database.sqlite {
   public class SQLiteException extends android.database.SQLException {
     ctor public SQLiteException();
     ctor public SQLiteException(java.lang.String);
+    ctor public SQLiteException(java.lang.String, java.lang.Throwable);
   }
 
   public class SQLiteFullException extends android.database.sqlite.SQLiteException {
