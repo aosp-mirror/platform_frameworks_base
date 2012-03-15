@@ -41,7 +41,6 @@ class ScreenRotationAnimation {
     BlackFrame mBlackFrame;
     int mWidth, mHeight;
 
-    int mSnapshotRotation;
     int mSnapshotDeltaRotation;
     int mOriginalRotation;
     int mOriginalWidth, mOriginalHeight;
@@ -125,8 +124,7 @@ class ScreenRotationAnimation {
         if (mBlackFrame != null) {
             mBlackFrame.printTo(prefix + "  ", pw);
         }
-        pw.print(prefix); pw.print("mSnapshotRotation="); pw.print(mSnapshotRotation);
-                pw.print(" mSnapshotDeltaRotation="); pw.print(mSnapshotDeltaRotation);
+        pw.print(prefix); pw.print(" mSnapshotDeltaRotation="); pw.print(mSnapshotDeltaRotation);
                 pw.print(" mCurRotation="); pw.println(mCurRotation);
         pw.print(prefix); pw.print("mOriginalRotation="); pw.print(mOriginalRotation);
                 pw.print(" mOriginalWidth="); pw.print(mOriginalWidth);
@@ -173,7 +171,6 @@ class ScreenRotationAnimation {
         mContext = context;
 
         // Screenshot does NOT include rotation!
-        mSnapshotRotation = 0;
         if (originalRotation == Surface.ROTATION_90
                 || originalRotation == Surface.ROTATION_270) {
             mWidth = originalHeight;
@@ -197,7 +194,7 @@ class ScreenRotationAnimation {
             try {
                 mSurface = new Surface(session, 0, "FreezeSurface",
                         -1, mWidth, mHeight, PixelFormat.OPAQUE, Surface.FX_SURFACE_SCREENSHOT | Surface.HIDDEN);
-                if (mSurface == null || !mSurface.isValid()) {
+                if (!mSurface.isValid()) {
                     // Screenshot failed, punt.
                     mSurface = null;
                     return;
@@ -281,7 +278,7 @@ class ScreenRotationAnimation {
         // Compute the transformation matrix that must be applied
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
-        int delta = deltaRotation(rotation, mSnapshotRotation);
+        int delta = deltaRotation(rotation, Surface.ROTATION_0);
         createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
 
         if (DEBUG_STATE) Slog.v(TAG, "**** ROTATION: " + delta);
@@ -703,20 +700,18 @@ class ScreenRotationAnimation {
     }
 
     void updateSurfaces() {
-        if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
-            if (mSurface != null) {
+        if (mSurface != null) {
+            if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
                 if (DEBUG_STATE) Slog.v(TAG, "Exit animations done, hiding screenshot surface");
                 mSurface.hide();
             }
         }
 
-        if (!mMoreStartFrame && !mMoreFinishFrame && !mMoreRotateFrame) {
-            if (mBlackFrame != null) {
+        if (mBlackFrame != null) {
+            if (!mMoreStartFrame && !mMoreFinishFrame && !mMoreRotateFrame) {
                 if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, hiding black frame");
                 mBlackFrame.hide();
-            }
-        } else {
-            if (mBlackFrame != null) {
+            } else {
                 mBlackFrame.setMatrix(mFrameTransformation.getMatrix());
             }
         }
