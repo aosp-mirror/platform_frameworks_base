@@ -1171,7 +1171,7 @@ public class SyncStorageEngine extends Handler {
                 syncs = new ArrayList<SyncInfo>();
                 mCurrentSyncs.put(userId, syncs);
             }
-            return new ArrayList<SyncInfo>(syncs);
+            return syncs;
         }
     }
 
