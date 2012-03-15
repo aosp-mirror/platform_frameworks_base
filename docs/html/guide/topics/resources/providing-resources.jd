@@ -287,9 +287,8 @@ names.</p>
         from the SIM card in the device. For example, <code>mcc310</code> is U.S. on any carrier,
         <code>mcc310-mnc004</code> is U.S. on Verizon, and <code>mcc208-mnc00</code> is France on
         Orange.</p>
-        <p>If the device uses a radio connection (GSM phone), the MCC comes
-        from the SIM, and the MNC comes from the network to which the
-        device is connected.</p>
+        <p>If the device uses a radio connection (GSM phone), the MCC and MNC values come
+        from the SIM card.</p>
         <p>You can also use the MCC alone (for example, to include country-specific legal
 resources in your application). If you need to specify based on the language only, then use the
 <em>language and region</em> qualifier instead (discussed next). If you decide to use the MCC and

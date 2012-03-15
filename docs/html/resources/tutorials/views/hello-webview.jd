@@ -52,7 +52,7 @@ public void onCreate(Bundle savedInstanceState) {
   <li>While you're in the manifest, give some more space for web pages by removing the title
   bar, with the "NoTitleBar" theme:
 <pre>
-&lt;activity android:name=".HelloGoogleMaps" android:label="@string/app_name"
+&lt;activity android:name=".HelloWebView" android:label="@string/app_name"
      <strong>android:theme="@android:style/Theme.NoTitleBar"</strong>&gt;
 </pre>
   </li>

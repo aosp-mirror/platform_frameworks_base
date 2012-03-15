@@ -15,7 +15,7 @@ next.link=connectivity-monitoring.html
 
 <h2>This lesson teaches you to</h2>
 <ol>
-  <li><a href="#CurrentDockState">Request the Audio Focus</a></li>
+  <li><a href="#CurrentDockState">Determine the Current Docking State</a></li>
   <li><a href="#DockType">Determine the Current Dock Type</a></li>
   <li><a href="#MonitorDockState">Monitor for Changes in the Dock State or Type</a></li>
 </ol>

@@ -43,7 +43,7 @@ device's temperature sensor and humidity sensor to calculate and report the dewp
 application might use the geomagnetic field sensor and accelerometer to report a compass
 bearing.</p>
 
-<p>The Android platform supports four broad categories of sensors:</p>
+<p>The Android platform supports three broad categories of sensors:</p>
 
 <ul>
   <li>Motion sensors
