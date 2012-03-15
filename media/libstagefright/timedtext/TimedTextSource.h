@@ -25,6 +25,7 @@
 namespace android {
 
 class DataSource;
+class MetaData;
 class Parcel;
 
 class TimedTextSource : public RefBase {
@@ -48,6 +49,7 @@ class TimedTextSource : public RefBase {
   virtual status_t extractGlobalDescriptions(Parcel *parcel) {
       return INVALID_OPERATION;
   }
+  virtual sp<MetaData> getFormat();
 
  protected:
   virtual ~TimedTextSource() { }

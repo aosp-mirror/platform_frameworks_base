@@ -37,6 +37,7 @@ public:
             Parcel *parcel,
             const MediaSource::ReadOptions *options = NULL);
     virtual status_t extractGlobalDescriptions(Parcel *parcel);
+    virtual sp<MetaData> getFormat();
 
 protected:
     virtual ~TimedText3GPPSource();

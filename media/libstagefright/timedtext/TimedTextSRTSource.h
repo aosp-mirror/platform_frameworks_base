@@ -39,12 +39,14 @@ public:
             int64_t *timeUs,
             Parcel *parcel,
             const MediaSource::ReadOptions *options = NULL);
+    virtual sp<MetaData> getFormat();
 
 protected:
     virtual ~TimedTextSRTSource();
 
 private:
     sp<DataSource> mSource;
+    sp<MetaData> mMetaData;
 
     struct TextInfo {
         int64_t endTimeUs;

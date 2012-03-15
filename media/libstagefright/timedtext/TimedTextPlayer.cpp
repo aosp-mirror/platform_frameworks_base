@@ -56,10 +56,6 @@ void TimedTextPlayer::pause() {
     (new AMessage(kWhatPause, id()))->post();
 }
 
-void TimedTextPlayer::resume() {
-    start();
-}
-
 void TimedTextPlayer::seekToAsync(int64_t timeUs) {
     sp<AMessage> msg = new AMessage(kWhatSeek, id());
     msg->setInt64("seekTimeUs", timeUs);
@@ -104,9 +100,9 @@ void TimedTextPlayer::onMessageReceived(const sp<AMessage> &msg) {
             if (obj != NULL) {
                 sp<ParcelEvent> parcelEvent;
                 parcelEvent = static_cast<ParcelEvent*>(obj.get());
-                notifyListener(MEDIA_TIMED_TEXT, &(parcelEvent->parcel));
+                notifyListener(&(parcelEvent->parcel));
             } else {
-                notifyListener(MEDIA_TIMED_TEXT);
+                notifyListener();
             }
             doRead();
             break;
@@ -119,14 +115,18 @@ void TimedTextPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 mSource->stop();
             }
             mSource = static_cast<TimedTextSource*>(obj.get());
-            mSource->start();
-            Parcel parcel;
-            if (mSource->extractGlobalDescriptions(&parcel) == OK &&
-                parcel.dataSize() > 0) {
-                notifyListener(MEDIA_TIMED_TEXT, &parcel);
-            } else {
-                notifyListener(MEDIA_TIMED_TEXT);
+            status_t err = mSource->start();
+            if (err != OK) {
+                notifyError(err);
+                break;
             }
+            Parcel parcel;
+            err = mSource->extractGlobalDescriptions(&parcel);
+            if (err != OK) {
+                notifyError(err);
+                break;
+            }
+            notifyListener(&parcel);
             break;
         }
     }
@@ -141,8 +141,12 @@ void TimedTextPlayer::doSeekAndRead(int64_t seekTimeUs) {
 void TimedTextPlayer::doRead(MediaSource::ReadOptions* options) {
     int64_t timeUs = 0;
     sp<ParcelEvent> parcelEvent = new ParcelEvent();
-    mSource->read(&timeUs, &(parcelEvent->parcel), options);
-    postTextEvent(parcelEvent, timeUs);
+    status_t err = mSource->read(&timeUs, &(parcelEvent->parcel), options);
+    if (err != OK) {
+        notifyError(err);
+    } else {
+        postTextEvent(parcelEvent, timeUs);
+    }
 }
 
 void TimedTextPlayer::postTextEvent(const sp<ParcelEvent>& parcel, int64_t timeUs) {
@@ -151,7 +155,7 @@ void TimedTextPlayer::postTextEvent(const sp<ParcelEvent>& parcel, int64_t timeU
         int64_t positionUs, delayUs;
         int32_t positionMs = 0;
         listener->getCurrentPosition(&positionMs);
-        positionUs = positionMs * 1000;
+        positionUs = positionMs * 1000ll;
 
         if (timeUs <= positionUs + kAdjustmentProcessingTimeUs) {
             delayUs = 0;
@@ -167,13 +171,20 @@ void TimedTextPlayer::postTextEvent(const sp<ParcelEvent>& parcel, int64_t timeU
     }
 }
 
-void TimedTextPlayer::notifyListener(int msg, const Parcel *parcel) {
+void TimedTextPlayer::notifyError(int error) {
+    sp<MediaPlayerBase> listener = mListener.promote();
+    if (listener != NULL) {
+        listener->sendEvent(MEDIA_INFO, MEDIA_INFO_TIMED_TEXT_ERROR, error);
+    }
+}
+
+void TimedTextPlayer::notifyListener(const Parcel *parcel) {
     sp<MediaPlayerBase> listener = mListener.promote();
     if (listener != NULL) {
         if (parcel != NULL && (parcel->dataSize() > 0)) {
-            listener->sendEvent(msg, 0, 0, parcel);
+            listener->sendEvent(MEDIA_TIMED_TEXT, 0, 0, parcel);
         } else {  // send an empty timed text to clear the screen
-            listener->sendEvent(msg);
+            listener->sendEvent(MEDIA_TIMED_TEXT);
         }
     }
 }

@@ -59,4 +59,8 @@ sp<TimedTextSource> TimedTextSource::CreateTimedTextSource(
     return NULL;
 }
 
+sp<MetaData> TimedTextSource::getFormat() {
+    return NULL;
+}
+
 }  // namespace android

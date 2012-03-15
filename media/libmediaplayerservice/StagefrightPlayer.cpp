@@ -166,7 +166,8 @@ player_type StagefrightPlayer::playerType() {
 }
 
 status_t StagefrightPlayer::invoke(const Parcel &request, Parcel *reply) {
-    return INVALID_OPERATION;
+    ALOGV("invoke()");
+    return mPlayer->invoke(request, reply);
 }
 
 void StagefrightPlayer::setAudioSink(const sp<AudioSink> &audioSink) {

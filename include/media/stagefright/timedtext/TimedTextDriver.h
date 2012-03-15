@@ -37,26 +37,26 @@ public:
 
     ~TimedTextDriver();
 
-    // TODO: pause-resume pair seems equivalent to stop-start pair.
-    // Check if it is replaceable with stop-start.
     status_t start();
-    status_t stop();
     status_t pause();
-    status_t resume();
+    status_t selectTrack(int32_t index);
+    status_t unselectTrack(int32_t index);
 
     status_t seekToAsync(int64_t timeUs);
 
     status_t addInBandTextSource(const sp<MediaSource>& source);
-    status_t addOutOfBandTextSource(const Parcel &request);
+    status_t addOutOfBandTextSource(const char *uri, const char *mimeType);
+    // Caller owns the file desriptor and caller is responsible for closing it.
+    status_t addOutOfBandTextSource(
+            int fd, off64_t offset, size_t length, const char *mimeType);
 
-    status_t setTimedTextTrackIndex(int32_t index);
+    void getTrackInfo(Parcel *parcel);
 
 private:
     Mutex mLock;
 
     enum State {
         UNINITIALIZED,
-        STOPPED,
         PLAYING,
         PAUSED,
     };
@@ -67,11 +67,11 @@ private:
 
     // Variables to be guarded by mLock.
     State mState;
-    Vector<sp<TimedTextSource> > mTextInBandVector;
-    Vector<sp<TimedTextSource> > mTextOutOfBandVector;
+    int32_t mCurrentTrackIndex;
+    Vector<sp<TimedTextSource> > mTextSourceVector;
     // -- End of variables to be guarded by mLock
 
-    status_t setTimedTextTrackIndex_l(int32_t index);
+    status_t selectTrack_l(int32_t index);
 
     DISALLOW_EVIL_CONSTRUCTORS(TimedTextDriver);
 };
