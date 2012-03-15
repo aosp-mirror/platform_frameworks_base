@@ -11473,7 +11473,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     if (concatMatrix) {
                         // Undo the scroll translation, apply the transformation matrix,
                         // then redo the scroll translate to get the correct result.
-                        if (!hasDisplayList) {
+                        if (!useDisplayListProperties) {
                             canvas.translate(-transX, -transY);
                             canvas.concat(transformToApply.getMatrix());
                             canvas.translate(transX, transY);
