@@ -72,26 +72,6 @@ public abstract class BulkCursorNative extends Binder implements IBulkCursor
                     return true;
                 }
 
-                case COUNT_TRANSACTION: {
-                    data.enforceInterface(IBulkCursor.descriptor);
-                    int count = count();
-                    reply.writeNoException();
-                    reply.writeInt(count);
-                    return true;
-                }
-
-                case GET_COLUMN_NAMES_TRANSACTION: {
-                    data.enforceInterface(IBulkCursor.descriptor);
-                    String[] columnNames = getColumnNames();
-                    reply.writeNoException();
-                    reply.writeInt(columnNames.length);
-                    int length = columnNames.length;
-                    for (int i = 0; i < length; i++) {
-                        reply.writeString(columnNames[i]);
-                    }
-                    return true;
-                }
-
                 case DEACTIVATE_TRANSACTION: {
                     data.enforceInterface(IBulkCursor.descriptor);
                     deactivate();
@@ -122,14 +102,6 @@ public abstract class BulkCursorNative extends Binder implements IBulkCursor
                     int position = data.readInt();
                     onMove(position);
                     reply.writeNoException();
-                    return true;
-                }
-
-                case WANTS_ON_MOVE_TRANSACTION: {
-                    data.enforceInterface(IBulkCursor.descriptor);
-                    boolean result = getWantsAllOnMoveCalls();
-                    reply.writeNoException();
-                    reply.writeInt(result ? 1 : 0);
                     return true;
                 }
 
@@ -217,52 +189,6 @@ final class BulkCursorProxy implements IBulkCursor {
         }
     }
 
-    public int count() throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        try {
-            data.writeInterfaceToken(IBulkCursor.descriptor);
-
-            boolean result = mRemote.transact(COUNT_TRANSACTION, data, reply, 0);
-            DatabaseUtils.readExceptionFromParcel(reply);
-
-            int count;
-            if (result == false) {
-                count = -1;
-            } else {
-                count = reply.readInt();
-            }
-            return count;
-        } finally {
-            data.recycle();
-            reply.recycle();
-        }
-    }
-
-    public String[] getColumnNames() throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        try {
-            data.writeInterfaceToken(IBulkCursor.descriptor);
-
-            mRemote.transact(GET_COLUMN_NAMES_TRANSACTION, data, reply, 0);
-            DatabaseUtils.readExceptionFromParcel(reply);
-
-            String[] columnNames = null;
-            int numColumns = reply.readInt();
-            columnNames = new String[numColumns];
-            for (int i = 0; i < numColumns; i++) {
-                columnNames[i] = reply.readString();
-            }
-            return columnNames;
-        } finally {
-            data.recycle();
-            reply.recycle();
-        }
-    }
-
     public void deactivate() throws RemoteException
     {
         Parcel data = Parcel.obtain();
@@ -311,23 +237,6 @@ final class BulkCursorProxy implements IBulkCursor {
                 mExtras = reply.readBundle();
             }
             return count;
-        } finally {
-            data.recycle();
-            reply.recycle();
-        }
-    }
-
-    public boolean getWantsAllOnMoveCalls() throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        try {
-            data.writeInterfaceToken(IBulkCursor.descriptor);
-
-            mRemote.transact(WANTS_ON_MOVE_TRANSACTION, data, reply, 0);
-            DatabaseUtils.readExceptionFromParcel(reply);
-
-            int result = reply.readInt();
-            return result != 0;
         } finally {
             data.recycle();
             reply.recycle();

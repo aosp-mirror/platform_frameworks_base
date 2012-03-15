@@ -43,28 +43,11 @@ public interface IBulkCursor extends IInterface  {
      */
     public void onMove(int position) throws RemoteException;
 
-    /**
-     * Returns the number of rows in the cursor.
-     *
-     * @return the number of rows in the cursor.
-     */
-    public int count() throws RemoteException;
-
-    /**
-     * Returns a string array holding the names of all of the columns in the
-     * cursor in the order in which they were listed in the result.
-     *
-     * @return the names of the columns returned in this query.
-     */
-    public String[] getColumnNames() throws RemoteException;
-
     public void deactivate() throws RemoteException;
 
     public void close() throws RemoteException;
 
     public int requery(IContentObserver observer) throws RemoteException;
-
-    boolean getWantsAllOnMoveCalls() throws RemoteException;
 
     Bundle getExtras() throws RemoteException;
 
@@ -74,13 +57,10 @@ public interface IBulkCursor extends IInterface  {
     static final String descriptor = "android.content.IBulkCursor";
 
     static final int GET_CURSOR_WINDOW_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION;
-    static final int COUNT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 1;
-    static final int GET_COLUMN_NAMES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 2;
-    static final int DEACTIVATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 5;
-    static final int REQUERY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 6;
-    static final int ON_MOVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 7;
-    static final int WANTS_ON_MOVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 8;
-    static final int GET_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 9;
-    static final int RESPOND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 10;
-    static final int CLOSE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 11;
+    static final int DEACTIVATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 1;
+    static final int REQUERY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 2;
+    static final int ON_MOVE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 3;
+    static final int GET_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 4;
+    static final int RESPOND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 5;
+    static final int CLOSE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 6;
 }
