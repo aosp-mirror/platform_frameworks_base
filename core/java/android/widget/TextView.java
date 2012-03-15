@@ -139,6 +139,7 @@ import android.view.textservice.TextServicesManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.RemoteViews.RemoteView;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastMath;
 import com.android.internal.widget.EditableInputConnection;
 
@@ -1214,6 +1215,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (imm != null) imm.restartInput(this);
         }
 
+        // Will change text color
         if (mEditor != null) getEditor().invalidateTextDisplayList();
         prepareCursorControllers();
 
@@ -2328,7 +2330,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setHighlightColor(int color) {
         if (mHighlightColor != color) {
             mHighlightColor = color;
-            if (mEditor != null) getEditor().invalidateTextDisplayList();
             invalidate();
         }
     }
@@ -2349,6 +2350,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mShadowDx = dx;
         mShadowDy = dy;
 
+        // Will change text clip region
         if (mEditor != null) getEditor().invalidateTextDisplayList();
         invalidate();
     }
@@ -2841,6 +2843,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         if (inval) {
+            // Text needs to be redrawn with the new color
             if (mEditor != null) getEditor().invalidateTextDisplayList();
             invalidate();
         }
@@ -3332,7 +3335,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             invalidate();
         }
 
-        // Invalidate display list if hint will be used
+        // Invalidate display list if hint is currently used
         if (mEditor != null && mText.length() == 0 && mHint != null) {
             getEditor().invalidateTextDisplayList();
         }
@@ -8274,6 +8277,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (getEditor().mPositionListener != null) {
                 getEditor().mPositionListener.onScrollChanged();
             }
+            // Internal scroll affects the clip boundaries
             getEditor().invalidateTextDisplayList();
         }
     }
@@ -11299,7 +11303,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         InputContentType mInputContentType;
         InputMethodState mInputMethodState;
 
-        DisplayList mTextDisplayList;
+        DisplayList[] mTextDisplayLists;
 
         boolean mFrozenWithFocus;
         boolean mSelectionMoved;
@@ -11545,7 +11549,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         void sendOnTextChanged(int start, int after) {
             updateSpellCheckSpans(start, start + after, false);
-            invalidateTextDisplayList();
 
             // Hide the controllers as soon as text is modified (typing, procedural...)
             // We do not hide the span controllers, since they can be added when a new text is
@@ -11702,34 +11705,89 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             layout.drawBackground(canvas, highlight, mHighlightPaint, cursorOffsetVertical,
                     firstLine, lastLine);
 
-            if (mTextDisplayList == null || !mTextDisplayList.isValid()) {
-                boolean displayListCreated = false;
-                if (mTextDisplayList == null) {
-                    mTextDisplayList = getHardwareRenderer().createDisplayList("Text");
-                    displayListCreated = true;
+            if (mTextDisplayLists == null) {
+                mTextDisplayLists = new DisplayList[ArrayUtils.idealObjectArraySize(0)];
+            }
+            if (! (layout instanceof DynamicLayout)) {
+                Log.e(LOG_TAG, "Editable TextView is not using a DynamicLayout");
+                return;
+            }
+
+            DynamicLayout dynamicLayout = (DynamicLayout) layout;
+            int[] blockEnds = dynamicLayout.getBlockEnds();
+            int[] blockIndices = dynamicLayout.getBlockIndices();
+            final int numberOfBlocks = dynamicLayout.getNumberOfBlocks();
+
+            canvas.translate(mScrollX, mScrollY);
+            int endOfPreviousBlock = -1;
+            int searchStartIndex = 0;
+            for (int i = 0; i < numberOfBlocks; i++) {
+                int blockEnd = blockEnds[i];
+                int blockIndex = blockIndices[i];
+
+                final boolean blockIsInvalid = blockIndex == DynamicLayout.INVALID_BLOCK_INDEX;
+                if (blockIsInvalid) {
+                    blockIndex = getAvailableDisplayListIndex(blockIndices, numberOfBlocks,
+                            searchStartIndex);
+                    // Dynamic layout internal block indices structure is updated from Editor
+                    blockIndices[i] = blockIndex;
+                    searchStartIndex = blockIndex + 1;
                 }
 
-                final HardwareCanvas hardwareCanvas = mTextDisplayList.start();
-                try {
-                    hardwareCanvas.setViewport(width, height);
-                    // The dirty rect should always be null for a display list
-                    hardwareCanvas.onPreDraw(null);
-                    hardwareCanvas.translate(-mScrollX, -mScrollY);
-                    layout.drawText(hardwareCanvas, firstLine, lastLine);
-                    //layout.draw(hardwareCanvas, highlight, mHighlightPaint, cursorOffsetVertical);
-                    hardwareCanvas.translate(mScrollX, mScrollY);
-                } finally {
-                    hardwareCanvas.onPostDraw();
-                    mTextDisplayList.end();
-                    if (displayListCreated && USE_DISPLAY_LIST_PROPERTIES) {
-                        mTextDisplayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
+                DisplayList blockDisplayList = mTextDisplayLists[blockIndex];
+                if (blockDisplayList == null) {
+                    blockDisplayList = mTextDisplayLists[blockIndex] =
+                            getHardwareRenderer().createDisplayList("Text " + blockIndex);
+                } else {
+                    if (blockIsInvalid) blockDisplayList.invalidate();
+                }
+
+                if (!blockDisplayList.isValid()) {
+                    final HardwareCanvas hardwareCanvas = blockDisplayList.start();
+                    try {
+                        hardwareCanvas.setViewport(width, height);
+                        // The dirty rect should always be null for a display list
+                        hardwareCanvas.onPreDraw(null);
+                        hardwareCanvas.translate(-mScrollX, -mScrollY);
+                        layout.drawText(hardwareCanvas, endOfPreviousBlock + 1, blockEnd);
+                        hardwareCanvas.translate(mScrollX, mScrollY);
+                    } finally {
+                        hardwareCanvas.onPostDraw();
+                        blockDisplayList.end();
+                        if (USE_DISPLAY_LIST_PROPERTIES) {
+                            blockDisplayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
+                        }
                     }
                 }
+
+                ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, width, height, null,
+                        DisplayList.FLAG_CLIP_CHILDREN);
+                endOfPreviousBlock = blockEnd;
             }
-            canvas.translate(mScrollX, mScrollY);
-            ((HardwareCanvas) canvas).drawDisplayList(mTextDisplayList, width, height, null,
-                    DisplayList.FLAG_CLIP_CHILDREN);
             canvas.translate(-mScrollX, -mScrollY);
+        }
+
+        private int getAvailableDisplayListIndex(int[] blockIndices, int numberOfBlocks,
+                int searchStartIndex) {
+            int length = mTextDisplayLists.length;
+            for (int i = searchStartIndex; i < length; i++) {
+                boolean blockIndexFound = false;
+                for (int j = 0; j < numberOfBlocks; j++) {
+                    if (blockIndices[j] == i) {
+                        blockIndexFound = true;
+                        break;
+                    }
+                }
+                if (blockIndexFound) continue;
+                return i;
+            }
+
+            // No available index found, the pool has to grow
+            int newSize = ArrayUtils.idealIntArraySize(length + 1);
+            DisplayList[] displayLists = new DisplayList[newSize];
+            System.arraycopy(mTextDisplayLists, 0, displayLists, 0, length);
+            mTextDisplayLists = displayLists;
+            return length;
         }
 
         private void drawCursor(Canvas canvas, int cursorOffsetVertical) {
@@ -11742,7 +11800,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         private void invalidateTextDisplayList() {
-            if (mTextDisplayList != null) mTextDisplayList.invalidate();
+            if (mTextDisplayLists != null) {
+                for (int i = 0; i < mTextDisplayLists.length; i++) {
+                    if (mTextDisplayLists[i] != null) mTextDisplayLists[i].invalidate();
+                }
+            }
         }
 
         private void updateCursorsPositions() {
