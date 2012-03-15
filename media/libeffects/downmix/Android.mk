@@ -20,8 +20,8 @@ LOCAL_LDLIBS += -ldl
 endif
 
 LOCAL_C_INCLUDES := \
-	system/media/audio_effects/include \
-	system/media/audio_utils/include
+	$(call include-path-for, audio-effects) \
+	$(call include-path-for, audio-utils)
 
 LOCAL_PRELINK_MODULE := false
 

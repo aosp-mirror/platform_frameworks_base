@@ -17,7 +17,7 @@ LOCAL_MODULE:= libvisualizer
 
 LOCAL_C_INCLUDES := \
 	$(call include-path-for, graphics corecg) \
-	system/media/audio_effects/include
+	$(call include-path-for, audio-effects)
 
 
 include $(BUILD_SHARED_LIBRARY)

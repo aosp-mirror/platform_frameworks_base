@@ -15,6 +15,6 @@ LOCAL_MODULE:= libeffects
 LOCAL_SHARED_LIBRARIES += libdl
 
 LOCAL_C_INCLUDES := \
-    system/media/audio_effects/include
+    $(call include-path-for, audio-effects)
 
 include $(BUILD_SHARED_LIBRARY)

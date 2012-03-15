@@ -50,7 +50,7 @@ LOCAL_C_INCLUDES += \
 	frameworks/base/media/libstagefright/codecs/amrnb/enc/src \
 	frameworks/base/media/libstagefright/codecs/amrnb/dec/include \
 	frameworks/base/media/libstagefright/codecs/amrnb/dec/src \
-	system/media/audio_effects/include
+	$(call include-path-for, audio-effects)
 
 LOCAL_CFLAGS += -fvisibility=hidden
 
