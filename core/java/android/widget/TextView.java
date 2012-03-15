@@ -7490,7 +7490,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Returns true, only while processing a touch gesture, if the initial
      * touch down event caused focus to move to the text view and as a result
      * its selection changed.  Only valid while processing the touch gesture
-     * of interest.
+     * of interest, in an editable text view.
      */
     public boolean didTouchFocusSelect() {
         return mEditor != null && getEditor().mTouchFocusSelected;
