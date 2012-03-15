@@ -4318,7 +4318,6 @@ public class Activity extends ContextThemeWrapper
      * {@link #setImmersive}.
      *
      * @see android.content.pm.ActivityInfo#FLAG_IMMERSIVE
-     * @hide
      */
     public boolean isImmersive() {
         try {
@@ -4341,7 +4340,6 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #isImmersive
      * @see android.content.pm.ActivityInfo#FLAG_IMMERSIVE
-     * @hide
      */
     public void setImmersive(boolean i) {
         try {
