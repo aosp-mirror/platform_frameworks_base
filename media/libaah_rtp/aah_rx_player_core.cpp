@@ -164,7 +164,7 @@ bool AAH_RXPlayer::setupSocket() {
     if (res < 0) {
         uint32_t a = ntohl(bind_addr.sin_addr.s_addr);
         uint16_t p = ntohs(bind_addr.sin_port);
-        LOGE("Failed to bind socket (%d) to %d.%d.%d.%d:%hd. (errno %d)",
+        LOGE("Failed to bind socket (%d) to %d.%d.%d.%d:%hu. (errno %d)",
              sock_fd_,
              (a >> 24) & 0xFF,
              (a >> 16) & 0xFF,
@@ -194,7 +194,7 @@ bool AAH_RXPlayer::setupSocket() {
         LOGW("Failed to increase socket buffer size to %d.  (errno %d)",
              buf_size, errno);
     } else {
-        LOGI("RX socket buffer size is now %d bytes",  buf_size);
+        LOGD("RX socket buffer size is now %d bytes",  buf_size);
     }
 
     if (listen_addr_.sin_addr.s_addr) {

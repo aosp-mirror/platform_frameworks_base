@@ -73,6 +73,7 @@ class TRTPPacket : public RefBase {
     nsecs_t getExpireTime() const;
 
     virtual bool pack() = 0;
+    bool isPacked() const { return mIsPacked; }
 
     // mask for the number of bits in a TRTP epoch
     static const uint32_t kTRTPEpochMask = (1 << 22) - 1;

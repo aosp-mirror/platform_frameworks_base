@@ -67,6 +67,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
                                               endpoint);
 
     static const int64_t kAAHRetryKeepAroundTimeNs;
+    static const int32_t kInvokeGetCNCPort;
 
   protected:
     virtual ~AAH_TXPlayer();
@@ -113,7 +114,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     void postPumpAudioEvent_l(int64_t delayUs);
     void onBufferingUpdate();
     void onPumpAudio();
-    void queuePacket_l(const sp<TRTPPacket>& packet);
+    void sendPacket_l(const sp<TRTPPacket>& packet);
 
     Mutex mLock;
 
@@ -161,10 +162,6 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     bool             mPlayRateIsPaused;
     CCHelper         mCCHelper;
 
-    Mutex mEndpointLock;
-    AAH_TXGroup::Endpoint mEndpoint;
-    bool mEndpointValid;
-    bool mEndpointRegistered;
     uint16_t mProgramID;
     uint8_t mTRTPVolume;
 
