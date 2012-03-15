@@ -4011,10 +4011,13 @@ final class ActivityStack {
         return info;
     }
 
-    public ActivityRecord removeTaskActivitiesLocked(int taskId, int subTaskIndex) {
+    public ActivityRecord removeTaskActivitiesLocked(int taskId, int subTaskIndex,
+            boolean taskRequired) {
         TaskAccessInfo info = getTaskAccessInfoLocked(taskId, false);
         if (info.root == null) {
-            Slog.w(TAG, "removeTaskLocked: unknown taskId " + taskId);
+            if (taskRequired) {
+                Slog.w(TAG, "removeTaskLocked: unknown taskId " + taskId);
+            }
             return null;
         }
 
@@ -4025,7 +4028,9 @@ final class ActivityStack {
         }
 
         if (subTaskIndex >= info.subtasks.size()) {
-            Slog.w(TAG, "removeTaskLocked: unknown subTaskIndex " + subTaskIndex);
+            if (taskRequired) {
+                Slog.w(TAG, "removeTaskLocked: unknown subTaskIndex " + subTaskIndex);
+            }
             return null;
         }
 

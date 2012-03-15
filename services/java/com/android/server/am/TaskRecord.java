@@ -39,7 +39,7 @@ class TaskRecord extends ThumbnailHolder {
     boolean askedCompatMode;// Have asked the user about compat mode for this task.
 
     String stringName;      // caching of toString() result.
-    int userId; // user for which this task was created
+    int userId;             // user for which this task was created
     
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {
         taskId = _taskId;

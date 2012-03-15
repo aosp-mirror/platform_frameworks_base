@@ -157,7 +157,7 @@ class ContentProviderRecord extends ContentProviderHolder {
         sb.append("ContentProviderRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(' ');
-        sb.append(info.name);
+        sb.append(name.flattenToShortString());
         sb.append('}');
         return stringName = sb.toString();
     }
