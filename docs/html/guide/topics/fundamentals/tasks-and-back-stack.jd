@@ -154,7 +154,7 @@ See the following section about <a href="#ActivityState">Activity state</a>.</p>
 
 <p>Because the activities in the back stack are never rearranged, if your application allows
 users to start a particular activity from more than one activity, a new instance of
-that activity is created and popped onto the stack (rather than bringing any previous instance of
+that activity is created and pushed onto the stack (rather than bringing any previous instance of
 the activity to the top). As such, one activity in your application might be instantiated multiple
 times (even from different tasks), as shown in figure 3. As such, if the user navigates backward
 using the <em>Back</em> button, each instance of the activity is revealed in the order they were
@@ -291,7 +291,7 @@ B should associate with current task. If both activities define how Activity B
 should associate with a task, then Activity A's request (as defined in the intent) is honored
 over Activity B's request (as defined in its manifest).</p>
 
-<p class="note"><strong>Note:</strong> Some the launch modes available in the manifest
+<p class="note"><strong>Note:</strong> Some launch modes available for the manifest file
 are not available as flags for an intent and, likewise, some launch modes available as flags
 for an intent cannot be defined in the manifest.</p>
 

@@ -236,7 +236,7 @@ Table 1 explains the flags and arguments.
     You can generate an API reference for monkeyrunner by running:
 </p>
 <pre>
-monkeyrunner &lt;format&gt; help.py &lt;outfile&gt;
+monkeyrunner help.py &lt;format&gt; &lt;outfile&gt;
 </pre>
 <p>
 The arguments are:
