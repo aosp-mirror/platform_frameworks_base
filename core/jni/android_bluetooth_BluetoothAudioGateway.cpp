@@ -196,7 +196,7 @@ static int do_accept(JNIEnv* env, jobject object, int ag_fd,
 
     struct sockaddr_rc raddr;
     int alen = sizeof(raddr);
-    int nsk = accept(ag_fd, (struct sockaddr *) &raddr, &alen);
+    int nsk = TEMP_FAILURE_RETRY(accept(ag_fd, (struct sockaddr *) &raddr, &alen));
     if (nsk < 0) {
         ALOGE("Error on accept from socket fd %d: %s (%d).",
              ag_fd,
@@ -331,12 +331,12 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
         to.tv_sec = timeout_ms / 1000;
         to.tv_usec = 1000 * (timeout_ms % 1000);
     }
-    n = select(MAX(nat->hf_ag_rfcomm_sock,
-                       nat->hs_ag_rfcomm_sock) + 1,
+    n = TEMP_FAILURE_RETRY(select(
+                   MAX(nat->hf_ag_rfcomm_sock, nat->hs_ag_rfcomm_sock) + 1,
                    &rset,
                    NULL,
                    NULL,
-                   (timeout_ms < 0 ? NULL : &to));
+                   (timeout_ms < 0 ? NULL : &to)));
     if (timeout_ms > 0) {
         jint remaining = to.tv_sec*1000 + to.tv_usec/1000;
         ALOGI("Remaining time %ldms", (long)remaining);
@@ -391,7 +391,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
         ALOGE("Neither HF nor HS listening sockets are open!");
         return JNI_FALSE;
     }
-    n = poll(fds, cnt, timeout_ms);
+    n = TEMP_FAILURE_RETRY(poll(fds, cnt, timeout_ms));
     if (n <= 0) {
         if (n < 0)  {
             ALOGE("listening poll() on RFCOMM sockets: %s (%d)",
