@@ -183,16 +183,20 @@ public class ProviderMap {
                 r.dump(pw, "    ");
             } else {
                 pw.print("  * ");
-                pw.print(r.name.toShortString());
-                /*
-                if (r.app != null) {
-                    pw.println(":");
-                    pw.print("      ");
-                    pw.println(r.app);
-                } else {
-                    pw.println();
+                pw.println(r);
+                if (r.proc != null) {
+                    pw.print("    proc=");
+                    pw.println(r.proc);
                 }
-                */
+                if (r.launchingApp != null) {
+                    pw.print("    launchingApp=");
+                    pw.println(r.launchingApp);
+                }
+                if (r.clients.size() > 0 || r.externalProcessNoHandleCount > 0) {
+                    pw.print("    "); pw.print(r.clients.size());
+                            pw.print(" clients, "); pw.print(r.externalProcessNoHandleCount);
+                            pw.println(" external handles");
+                }
             }
         }
     }
@@ -217,7 +221,7 @@ public class ProviderMap {
                 pw.println(" ");
             pw.println("  Published content providers (by class):");
             dumpProvidersByClassLocked(pw, dumpAll, mGlobalByClass);
-            pw.println(" ");
+            pw.println("");
         }
 
         if (mProvidersByClassPerUser.size() > 1) {

@@ -5443,15 +5443,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "removeSubTask()");
             long ident = Binder.clearCallingIdentity();
             try {
-                return mMainStack.removeTaskActivitiesLocked(taskId, subTaskIndex) != null;
+                return mMainStack.removeTaskActivitiesLocked(taskId, subTaskIndex,
+                        true) != null;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
     }
 
-    private void cleanUpRemovedTaskLocked(ActivityRecord root, boolean killProcesses) {
-        TaskRecord tr = root.task;
+    private void cleanUpRemovedTaskLocked(TaskRecord tr, int flags) {
+        final boolean killProcesses = (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0;
         Intent baseIntent = new Intent(
                 tr.intent != null ? tr.intent : tr.affinityIntent);
         ComponentName component = baseIntent.getComponent();
@@ -5462,7 +5463,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Find any running services associated with this app.
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
-        for (ServiceRecord sr : mServiceMap.getAllServices(root.userId)) {
+        for (ServiceRecord sr : mServiceMap.getAllServices(tr.userId)) {
             if (sr.packageName.equals(component.getPackageName())) {
                 services.add(sr);
             }
@@ -5517,11 +5518,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "removeTask()");
             long ident = Binder.clearCallingIdentity();
             try {
-                ActivityRecord r = mMainStack.removeTaskActivitiesLocked(taskId, -1);
+                ActivityRecord r = mMainStack.removeTaskActivitiesLocked(taskId, -1,
+                        false);
                 if (r != null) {
                     mRecentTasks.remove(r.task);
-                    cleanUpRemovedTaskLocked(r,
-                            (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0);
+                    cleanUpRemovedTaskLocked(r.task, flags);
                     return true;
                 } else {
                     TaskRecord tr = null;
@@ -5539,6 +5540,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // Caller is just removing a recent task that is
                             // not actively running.  That is easy!
                             mRecentTasks.remove(i);
+                            cleanUpRemovedTaskLocked(tr, flags);
+                            return true;
                         } else {
                             Slog.w(TAG, "removeTask: task " + taskId
                                     + " does not have activities to remove, "
@@ -9360,7 +9363,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     boolean dumpProvidersLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
-        boolean needSep = false;
+        boolean needSep = true;
 
         ItemMatcher matcher = new ItemMatcher();
         matcher.build(args, opti);
