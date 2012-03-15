@@ -1008,7 +1008,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (!mService.mDisplayFrozen && mService.mPolicy.isScreenOnFully()) {
             // We will run animations as long as the display isn't frozen.
 
-            if (!mDrawPending && !mCommitDrawPending && mAnimation != null) {
+            if (isDrawnLw() && mAnimation != null) {
                 mHasTransformation = true;
                 mHasLocalTransformation = true;
                 if (!mLocalAnimating) {
@@ -1467,8 +1467,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     public boolean isDisplayedLw() {
         final AppWindowToken atoken = mAppToken;
-        return mSurface != null && mPolicyVisibility && !mDestroying
-            && !mDrawPending && !mCommitDrawPending
+        return isDrawnLw() && mPolicyVisibility
             && ((!mAttachedHidden &&
                     (atoken == null || !atoken.hiddenRequested))
                     || mAnimating);
@@ -1489,7 +1488,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * complete UI in to.
      */
     public boolean isDrawnLw() {
-        final AppWindowToken atoken = mAppToken;
         return mSurface != null && !mDestroying
             && !mDrawPending && !mCommitDrawPending;
     }
@@ -1501,9 +1499,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean isOpaqueDrawn() {
         return (mAttrs.format == PixelFormat.OPAQUE
                         || mAttrs.type == TYPE_WALLPAPER)
-                && mSurface != null && mAnimation == null
-                && (mAppToken == null || mAppToken.animation == null)
-                && !mDrawPending && !mCommitDrawPending;
+                && isDrawnLw() && mAnimation == null
+                && (mAppToken == null || mAppToken.animation == null);
     }
 
     /**
