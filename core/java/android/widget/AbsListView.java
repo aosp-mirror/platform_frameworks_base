@@ -2944,27 +2944,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             mDirection = 0; // Reset when entering overscroll.
                             mTouchMode = TOUCH_MODE_OVERSCROLL;
                             if (rawDeltaY > 0) {
-                                if (!mEdgeGlowTop.isIdle()) {
-                                    invalidate(mEdgeGlowTop.getBounds());
-                                } else {
-                                    invalidate();
-                                }
-
                                 mEdgeGlowTop.onPull((float) overscroll / getHeight());
                                 if (!mEdgeGlowBottom.isFinished()) {
                                     mEdgeGlowBottom.onRelease();
                                 }
+                                invalidate(mEdgeGlowTop.getBounds(false));
                             } else if (rawDeltaY < 0) {
-                                if (!mEdgeGlowBottom.isIdle()) {
-                                    invalidate(mEdgeGlowBottom.getBounds());
-                                } else {
-                                    invalidate();
-                                }
-
                                 mEdgeGlowBottom.onPull((float) overscroll / getHeight());
                                 if (!mEdgeGlowTop.isFinished()) {
                                     mEdgeGlowTop.onRelease();
                                 }
+                                invalidate(mEdgeGlowBottom.getBounds(true));
                             }
                         }
                     }
@@ -3002,13 +2992,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (!mEdgeGlowBottom.isFinished()) {
                                 mEdgeGlowBottom.onRelease();
                             }
-                            invalidate(mEdgeGlowTop.getBounds());
+                            invalidate(mEdgeGlowTop.getBounds(false));
                         } else if (rawDeltaY < 0) {
                             mEdgeGlowBottom.onPull((float) overScrollDistance / getHeight());
                             if (!mEdgeGlowTop.isFinished()) {
                                 mEdgeGlowTop.onRelease();
                             }
-                            invalidate(mEdgeGlowBottom.getBounds());
+                            invalidate(mEdgeGlowBottom.getBounds(true));
                         }
                     }
                 }
@@ -3485,7 +3475,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mEdgeGlowTop.setSize(width, getHeight());
                 if (mEdgeGlowTop.draw(canvas)) {
                     mEdgeGlowTop.setPosition(leftPadding, edgeY);
-                    invalidate(mEdgeGlowTop.getBounds());
+                    invalidate(mEdgeGlowTop.getBounds(false));
                 }
                 canvas.restoreToCount(restoreCount);
             }
@@ -3503,8 +3493,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
                     // Account for the rotation
-                    mEdgeGlowBottom.setPosition(edgeX + width, edgeY - mEdgeGlowBottom.getHeight());
-                    invalidate(mEdgeGlowBottom.getBounds());
+                    mEdgeGlowBottom.setPosition(edgeX + width, edgeY);
+                    invalidate(mEdgeGlowBottom.getBounds(true));
                 }
                 canvas.restoreToCount(restoreCount);
             }
