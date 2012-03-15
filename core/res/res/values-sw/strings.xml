@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Inaruhusu programu kusoma maneno, majina na vifungu vyovyote vya kibinafsi, ambavyo huenda mtumiaji amehifadhi katika kamusi ya mtumiaji."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"andika kwa kamusi iliyobainishwa na mtumiaji"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Inaruhusu programu kuandika maneno mapya katika kamusi ya mtumiaji."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"soma maudhui ya hifadhi ya USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"soma maudhui ya kadi ya SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Huruhusu programu kusoma maudhui ya hifadhi ya USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Huruhusu programu kusoma maudhui ya kadi ya SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"rekebisha/futa maudhui ya hifadhi ya USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"rekebisha/futa maudhui ya kadi ya SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Inaruhusu programu kuandikia hifadhi ya USB."</string>

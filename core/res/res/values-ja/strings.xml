@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"ユーザーが単語リストに個人情報として登録した可能性のある語句や名前を読み込むことをアプリに許可します。"</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"単語リストへの書き込み"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"単語リストに新しい語句を書き込むことをアプリに許可します。"</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"USBストレージの読み取り"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"SDカードのコンテンツの読み取り"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"USBストレージの読み取りをアプリに許可します。"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"SDカードのコンテンツの読み取りをアプリに許可します。"</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"USBストレージのコンテンツの変更/削除"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SDカードのコンテンツを修正/削除する"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USBストレージへの書き込みをアプリに許可します。"</string>

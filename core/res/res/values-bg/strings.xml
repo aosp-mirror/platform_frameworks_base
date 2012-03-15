@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Разрешава на приложението да чете частни думи, имена и фрази, които потребителят може да е съхранил в потребителския речник."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"запис в дефинирания от потребителя речник"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Разрешава на приложението да записва нови думи в потребителския речник."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"четене на съдържанието на USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"четене на съдържанието на SD картата"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Разрешава на прил. да чете съдърж. на USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Разрешава на приложението да чете съдържанието на SD картата."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"промяна/изтриване на съдържанието в USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"промяна/изтриване на съдържанието на SD картата"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Разрешава на приложението да записва в USB."</string>

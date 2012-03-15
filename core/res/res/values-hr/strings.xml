@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Aplikaciji omogućuje čitanje svih privatnih riječi, imena i izraza koje je korisnik pohranio u korisničkom rječniku."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"pisanje u korisnički definiran rječnik"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Aplikaciji omogućuje pisanje novih riječi u korisnički rječnik."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"čitanje sadržaja USB pohrane"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"čitanje sadržaja SD kartice"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Aplikaciji omog. čitanje sadržaja USB pohrane."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Aplikaciji omogućuje čitanje sadržaja SD kartice."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"izmjeni/briši sadržaje memorije USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"izmjena/brisanje sadržaja SD kartice"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Dopušta pisanje u USB pohranu."</string>

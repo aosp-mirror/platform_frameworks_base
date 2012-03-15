@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Permite aplicaţiei să citească cuvinte, nume şi expresii private stocate de utilizator în dicţionarul său."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"scriere în dicţionarul definit de utilizator"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite aplicaţiei să scrie cuvinte noi în dicţionarul utilizatorului."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"citeşte conţinutul stoc. USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"citeşte conţinutul cardului SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Permite aplic. citirea conţinutului stoc. USB."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Permite aplicaţiei să citească conţinutul cardului SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modificare/ştergere a conţinutului stocării USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modificare/ştergere conţinut card SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Permite scriere în stoc. USB."</string>

@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"앱이 사용자 사전에 보관되어 있는 비공개 단어, 이름 및 구문을 읽도록 허용합니다."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"사용자 정의 사전에 작성"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"앱이 사용자 사전에 새 단어를 입력할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"USB 저장소 콘텐츠 읽기"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"SD 카드 콘텐츠 읽기"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"앱 USB 콘텐츠 읽기 허용"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"앱이 SD 카드의 콘텐츠를 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"USB 저장소 콘텐츠 수정/삭제"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SD 카드 콘텐츠 수정/삭제"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"앱이 USB 저장소에 쓸 수 있도록 허용합니다."</string>

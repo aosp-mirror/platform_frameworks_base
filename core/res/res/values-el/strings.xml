@@ -511,14 +511,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Επιτρέπει στην εφαρμογή την ανάγνωση ιδιωτικών λέξεων, ονομάτων και φράσεων, τα οποία ο χρήστης ενδέχεται να έχει αποθηκεύσει στο λεξικό χρήστη."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"εγγραφή σε λεξικό καθορισμένο από τον χρήστη"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Επιτρέπει στην εφαρμογή την εγγραφή νέων λέξεων στο λεξικό χρήστη."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"ανάγν. περιεχ. αποθ. χώρ. USB"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"ανάγνωση περιεχομένου κάρτας SD"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Επιτρ. η ανάγν. περιεχ. απ. χώρου USB"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Επιτρέπει στην εφαρμογή την ανάγνωση περιεχομένου της κάρτας SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"τροπ./διαγρ. περ. απ. χώρ. USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"τροποποίηση/διαγραφή περιεχομένων κάρτας SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Επιτρέπει στην εφαρμογή την εγγραφή στον αποθηκευτικό χώρο USB."</string>
