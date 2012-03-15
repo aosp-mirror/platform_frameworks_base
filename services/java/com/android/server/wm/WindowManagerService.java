@@ -1581,8 +1581,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + w.isReadyForDisplay() + " drawpending=" + w.mDrawPending
                     + " commitdrawpending=" + w.mCommitDrawPending);
             if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isReadyForDisplay()
-                    && (mWallpaperTarget == w
-                            || (!w.mDrawPending && !w.mCommitDrawPending))) {
+                    && (mWallpaperTarget == w || w.isDrawnLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
                         "Found wallpaper activity: #" + i + "=" + w);
                 foundW = w;
@@ -2688,8 +2687,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.mEnterAnimationPending = true;
                 }
                 if (displayed) {
-                    if (win.mSurface != null && !win.mDrawPending
-                            && !win.mCommitDrawPending && !mDisplayFrozen
+                    if (win.isDrawnLw() && !mDisplayFrozen
                             && mDisplayEnabled && mPolicy.isScreenOnFully()) {
                         applyEnterAnimationLocked(win);
                     }
@@ -3983,8 +3981,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // If we are being set visible, and the starting window is
                 // not yet displayed, then make sure it doesn't get displayed.
                 WindowState swin = wtoken.startingWindow;
-                if (swin != null && (swin.mDrawPending
-                        || swin.mCommitDrawPending)) {
+                if (swin != null && !swin.isDrawnLw()) {
                     swin.mPolicyVisibility = false;
                     swin.mPolicyVisibilityAfterAnim = false;
                  }
@@ -7669,21 +7666,76 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (mScreenRotationAnimation != null) {
-            if (mScreenRotationAnimation.isAnimating() ||
-                    mScreenRotationAnimation.mFinishAnimReady) {
-                if (mScreenRotationAnimation.stepAnimationLocked(currentTime)) {
-                    mInnerFields.mUpdateRotation = false;
-                    mInnerFields.mAnimating = true;
-                } else {
-                    mInnerFields.mUpdateRotation = true;
-                    mScreenRotationAnimation.kill();
-                    mScreenRotationAnimation = null;
-                }
+        if (mScreenRotationAnimation != null &&
+                (mScreenRotationAnimation.isAnimating() ||
+                        mScreenRotationAnimation.mFinishAnimReady)) {
+            if (mScreenRotationAnimation.stepAnimationLocked(currentTime)) {
+                mInnerFields.mUpdateRotation = false;
+                mInnerFields.mAnimating = true;
+            } else {
+                mInnerFields.mUpdateRotation = true;
+                mScreenRotationAnimation.kill();
+                mScreenRotationAnimation = null;
             }
         }
     }
 
+    private void animateAndUpdateSurfaces(final long currentTime, final int dw, final int dh,
+                                          final int innerDw, final int innerDh, 
+                                          final boolean recoveringMemory) {
+        // Update animations of all applications, including those
+        // associated with exiting/removed apps
+        Surface.openTransaction();
+
+        try {
+            mPendingLayoutChanges = performAnimationsLocked(currentTime, dw, dh,
+                    innerDw, innerDh);
+            updateWindowsAppsAndRotationAnimationsLocked(currentTime, innerDw, innerDh);
+        
+            // THIRD LOOP: Update the surfaces of all windows.
+            
+            if (mScreenRotationAnimation != null) {
+                mScreenRotationAnimation.updateSurfaces();
+            }
+        
+            final int N = mWindows.size();
+            for (int i=N-1; i>=0; i--) {
+                WindowState w = mWindows.get(i);
+                prepareSurfaceLocked(w, recoveringMemory);
+            }
+        
+            if (mDimAnimator != null && mDimAnimator.mDimShown) {
+                mInnerFields.mAnimating |=
+                        mDimAnimator.updateSurface(mInnerFields.mDimming, currentTime,
+                            mDisplayFrozen || !mDisplayEnabled || !mPolicy.isScreenOnFully());
+            }
+        
+            if (!mInnerFields.mBlurring && mBlurShown) {
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR " + mBlurSurface
+                        + ": HIDE");
+                try {
+                    mBlurSurface.hide();
+                } catch (IllegalArgumentException e) {
+                    Slog.w(TAG, "Illegal argument exception hiding blur surface");
+                }
+                mBlurShown = false;
+            }
+        
+            if (mBlackFrame != null) {
+                if (mScreenRotationAnimation != null) {
+                    mBlackFrame.setMatrix(
+                            mScreenRotationAnimation.getEnterTransformation().getMatrix());
+                } else {
+                    mBlackFrame.clearMatrix();
+                }
+            }
+        } catch (RuntimeException e) {
+            Log.wtf(TAG, "Unhandled exception in Window Manager", e);
+        } finally {
+            Surface.closeTransaction();
+        }
+    }
+    
     /**
      * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
      *
@@ -8357,7 +8409,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mResizingWindows.add(w);
                 }
             } else if (w.mOrientationChanging) {
-                if (!w.mDrawPending && !w.mCommitDrawPending) {
+                if (w.isDrawnLw()) {
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation not waiting for draw in "
                             + w + ", surface " + w.mSurface);
@@ -8387,6 +8439,16 @@ public class WindowManagerService extends IWindowManager.Stub
         // difficult because we do need to resize surfaces in some
         // cases while they are hidden such as when first showing a
         // window.
+        
+        if (w.mSurface == null) {
+            if (w.mOrientationChanging) {
+                if (DEBUG_ORIENTATION) {
+                    Slog.v(TAG, "Orientation change skips hidden " + w);
+                }
+                w.mOrientationChanging = false;
+            }
+            return;
+        }
         
         boolean displayed = false;
 
@@ -8521,8 +8583,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (w.mLastHidden && !w.mDrawPending
-                    && !w.mCommitDrawPending
+            if (w.mLastHidden && w.isDrawnLw()
                     && !w.mReadyToShow) {
                 if (SHOW_TRANSACTIONS) logSurface(w,
                         "SHOW (performLayout)", null);
@@ -8544,7 +8605,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (displayed) {
             if (w.mOrientationChanging) {
-                if (w.mDrawPending || w.mCommitDrawPending) {
+                if (!w.isDrawnLw()) {
                     mInnerFields.mOrientationChangeComplete = false;
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation continue waiting for draw in " + w);
@@ -8832,48 +8893,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 
             } while (mPendingLayoutChanges != 0);
 
-            // Update animations of all applications, including those
-            // associated with exiting/removed apps
-
-            mPendingLayoutChanges = performAnimationsLocked(currentTime, dw, dh,
-                    innerDw, innerDh);
-            updateWindowsAppsAndRotationAnimationsLocked(currentTime, innerDw, innerDh);
-
-            // THIRD LOOP: Update the surfaces of all windows.
-
-            final boolean someoneLosingFocus = mLosingFocus.size() != 0;
+            final boolean someoneLosingFocus = !mLosingFocus.isEmpty();
 
             mInnerFields.mObscured = false;
             mInnerFields.mBlurring = false;
             mInnerFields.mDimming = false;
             mInnerFields.mSyswin = false;
-
-            if (mScreenRotationAnimation != null) {
-                mScreenRotationAnimation.updateSurfaces();
-            }
-
+            
             final int N = mWindows.size();
-
             for (i=N-1; i>=0; i--) {
                 WindowState w = mWindows.get(i);
+                //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
+                w.mContentChanged = false;
 
-                if (w.mSurface != null) {
-                    prepareSurfaceLocked(w, recoveringMemory);
-                } else if (w.mOrientationChanging) {
-                    if (DEBUG_ORIENTATION) {
-                        Slog.v(TAG, "Orientation change skips hidden " + w);
-                    }
-                    w.mOrientationChanging = false;
-                }
-
-                if (w.mContentChanged) {
-                    //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
-                    w.mContentChanged = false;
-                }
-
-                final boolean canBeSeen = w.isDisplayedLw();
-
-                if (someoneLosingFocus && w == mCurrentFocus && canBeSeen) {
+                if (someoneLosingFocus && w == mCurrentFocus && w.isDisplayedLw()) {
                     focusDisplayed = true;
                 }
 
@@ -8892,37 +8925,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateWallpaperVisibilityLocked();
                 }
             }
-
-            if (mDimAnimator != null && mDimAnimator.mDimShown) {
-                mInnerFields.mAnimating |=
-                        mDimAnimator.updateSurface(mInnerFields.mDimming, currentTime,
-                            mDisplayFrozen || !mDisplayEnabled || !mPolicy.isScreenOnFully());
-            }
-
-            if (!mInnerFields.mBlurring && mBlurShown) {
-                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR " + mBlurSurface
-                        + ": HIDE");
-                try {
-                    mBlurSurface.hide();
-                } catch (IllegalArgumentException e) {
-                    Slog.w(TAG, "Illegal argument exception hiding blur surface");
-                }
-                mBlurShown = false;
-            }
-
-            if (mBlackFrame != null) {
-                if (mScreenRotationAnimation != null) {
-                    mBlackFrame.setMatrix(
-                            mScreenRotationAnimation.getEnterTransformation().getMatrix());
-                } else {
-                    mBlackFrame.clearMatrix();
-                }
-            }
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
+        } finally {
+            Surface.closeTransaction();
         }
 
-        Surface.closeTransaction();
+        // Update animations of all applications, including those
+        // associated with exiting/removed apps
+        animateAndUpdateSurfaces(currentTime, dw, dh, innerDw, innerDh, recoveringMemory);
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
