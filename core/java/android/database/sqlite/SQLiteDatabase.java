@@ -1718,7 +1718,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     /**
      * Sets the locale for this database.  Does nothing if this database has
-     * the NO_LOCALIZED_COLLATORS flag set or was opened read only.
+     * the {@link #NO_LOCALIZED_COLLATORS} flag set or was opened read only.
      *
      * @param locale The new locale.
      *

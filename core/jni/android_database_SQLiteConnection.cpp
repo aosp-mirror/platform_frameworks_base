@@ -36,8 +36,8 @@
 
 #include "android_database_SQLiteCommon.h"
 
+// Set to 1 to use UTF16 storage for localized indexes.
 #define UTF16_STORAGE 0
-#define ANDROID_TABLE "android_metadata"
 
 namespace android {
 
@@ -245,139 +245,16 @@ static void nativeRegisterCustomFunction(JNIEnv* env, jclass clazz, jint connect
     }
 }
 
-// Set locale in the android_metadata table, install localized collators, and rebuild indexes
-static void nativeSetLocale(JNIEnv* env, jclass clazz, jint connectionPtr, jstring localeStr) {
+static void nativeRegisterLocalizedCollators(JNIEnv* env, jclass clazz, jint connectionPtr,
+        jstring localeStr) {
     SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
 
-    if (connection->openFlags & SQLiteConnection::NO_LOCALIZED_COLLATORS) {
-        // We should probably throw IllegalStateException but the contract for
-        // setLocale says that we just do nothing.  Oh well.
-        return;
-    }
+    const char* locale = env->GetStringUTFChars(localeStr, NULL);
+    int err = register_localized_collators(connection->db, locale, UTF16_STORAGE);
+    env->ReleaseStringUTFChars(localeStr, locale);
 
-    int err;
-    char const* locale = env->GetStringUTFChars(localeStr, NULL);
-    sqlite3_stmt* stmt = NULL;
-    char** meta = NULL;
-    int rowCount, colCount;
-    char* dbLocale = NULL;
-
-    // create the table, if necessary and possible
-    if (!(connection->openFlags & SQLiteConnection::OPEN_READONLY)) {
-        err = sqlite3_exec(connection->db,
-                "CREATE TABLE IF NOT EXISTS " ANDROID_TABLE " (locale TEXT)",
-                NULL, NULL, NULL);
-        if (err != SQLITE_OK) {
-            ALOGE("CREATE TABLE " ANDROID_TABLE " failed");
-            throw_sqlite3_exception(env, connection->db);
-            goto done;
-        }
-    }
-
-    // try to read from the table
-    err = sqlite3_get_table(connection->db,
-            "SELECT locale FROM " ANDROID_TABLE " LIMIT 1",
-            &meta, &rowCount, &colCount, NULL);
     if (err != SQLITE_OK) {
-        ALOGE("SELECT locale FROM " ANDROID_TABLE " failed");
         throw_sqlite3_exception(env, connection->db);
-        goto done;
-    }
-
-    dbLocale = (rowCount >= 1) ? meta[colCount] : NULL;
-
-    if (dbLocale != NULL && !strcmp(dbLocale, locale)) {
-        // database locale is the same as the desired locale; set up the collators and go
-        err = register_localized_collators(connection->db, locale, UTF16_STORAGE);
-        if (err != SQLITE_OK) {
-            throw_sqlite3_exception(env, connection->db);
-        }
-        goto done;   // no database changes needed
-    }
-
-    if (connection->openFlags & SQLiteConnection::OPEN_READONLY) {
-        // read-only database, so we're going to have to put up with whatever we got
-        // For registering new index. Not for modifing the read-only database.
-        err = register_localized_collators(connection->db, locale, UTF16_STORAGE);
-        if (err != SQLITE_OK) {
-            throw_sqlite3_exception(env, connection->db);
-        }
-        goto done;
-    }
-
-    // need to update android_metadata and indexes atomically, so use a transaction...
-    err = sqlite3_exec(connection->db, "BEGIN TRANSACTION", NULL, NULL, NULL);
-    if (err != SQLITE_OK) {
-        ALOGE("BEGIN TRANSACTION failed setting locale");
-        throw_sqlite3_exception(env, connection->db);
-        goto done;
-    }
-
-    err = register_localized_collators(connection->db, locale, UTF16_STORAGE);
-    if (err != SQLITE_OK) {
-        ALOGE("register_localized_collators() failed setting locale");
-        throw_sqlite3_exception(env, connection->db);
-        goto rollback;
-    }
-
-    err = sqlite3_exec(connection->db, "DELETE FROM " ANDROID_TABLE, NULL, NULL, NULL);
-    if (err != SQLITE_OK) {
-        ALOGE("DELETE failed setting locale");
-        throw_sqlite3_exception(env, connection->db);
-        goto rollback;
-    }
-
-    static const char *sql = "INSERT INTO " ANDROID_TABLE " (locale) VALUES(?);";
-    err = sqlite3_prepare_v2(connection->db, sql, -1, &stmt, NULL);
-    if (err != SQLITE_OK) {
-        ALOGE("sqlite3_prepare_v2(\"%s\") failed", sql);
-        throw_sqlite3_exception(env, connection->db);
-        goto rollback;
-    }
-
-    err = sqlite3_bind_text(stmt, 1, locale, -1, SQLITE_TRANSIENT);
-    if (err != SQLITE_OK) {
-        ALOGE("sqlite3_bind_text() failed setting locale");
-        throw_sqlite3_exception(env, connection->db);
-        goto rollback;
-    }
-
-    err = sqlite3_step(stmt);
-    if (err != SQLITE_OK && err != SQLITE_DONE) {
-        ALOGE("sqlite3_step(\"%s\") failed setting locale", sql);
-        throw_sqlite3_exception(env, connection->db);
-        goto rollback;
-    }
-
-    err = sqlite3_exec(connection->db, "REINDEX LOCALIZED", NULL, NULL, NULL);
-    if (err != SQLITE_OK) {
-        ALOGE("REINDEX LOCALIZED failed");
-        throw_sqlite3_exception(env, connection->db);
-        goto rollback;
-    }
-
-    // all done, yay!
-    err = sqlite3_exec(connection->db, "COMMIT TRANSACTION", NULL, NULL, NULL);
-    if (err != SQLITE_OK) {
-        ALOGE("COMMIT TRANSACTION failed setting locale");
-        throw_sqlite3_exception(env, connection->db);
-        goto done;
-    }
-
-rollback:
-    if (err != SQLITE_OK) {
-        sqlite3_exec(connection->db, "ROLLBACK TRANSACTION", NULL, NULL, NULL);
-    }
-
-done:
-    if (stmt) {
-        sqlite3_finalize(stmt);
-    }
-    if (meta) {
-        sqlite3_free_table(meta);
-    }
-    if (locale) {
-        env->ReleaseStringUTFChars(localeStr, locale);
     }
 }
 
@@ -898,8 +775,8 @@ static JNINativeMethod sMethods[] =
             (void*)nativeClose },
     { "nativeRegisterCustomFunction", "(ILandroid/database/sqlite/SQLiteCustomFunction;)V",
             (void*)nativeRegisterCustomFunction },
-    { "nativeSetLocale", "(ILjava/lang/String;)V",
-            (void*)nativeSetLocale },
+    { "nativeRegisterLocalizedCollators", "(ILjava/lang/String;)V",
+            (void*)nativeRegisterLocalizedCollators },
     { "nativePrepareStatement", "(ILjava/lang/String;)I",
             (void*)nativePrepareStatement },
     { "nativeFinalizeStatement", "(II)V",
