@@ -79,18 +79,15 @@ jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format) {
 }
 
 static bool optionsPurgeable(JNIEnv* env, jobject options) {
-    return options != NULL &&
-            env->GetBooleanField(options, gOptions_purgeableFieldID);
+    return options != NULL && env->GetBooleanField(options, gOptions_purgeableFieldID);
 }
 
 static bool optionsShareable(JNIEnv* env, jobject options) {
-    return options != NULL &&
-            env->GetBooleanField(options, gOptions_shareableFieldID);
+    return options != NULL && env->GetBooleanField(options, gOptions_shareableFieldID);
 }
 
 static bool optionsJustBounds(JNIEnv* env, jobject options) {
-    return options != NULL &&
-            env->GetBooleanField(options, gOptions_justBoundsFieldID);
+    return options != NULL && env->GetBooleanField(options, gOptions_justBoundsFieldID);
 }
 
 static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
@@ -119,8 +116,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     SkBitmap::Config prefConfig = SkBitmap::kARGB_8888_Config;
     bool doDither = true;
     bool isMutable = false;
-    bool isPurgeable = forcePurgeable ||
-                        (allowPurgeable && optionsPurgeable(env, options));
+    bool isPurgeable = forcePurgeable || (allowPurgeable && optionsPurgeable(env, options));
     bool preferQualityOverSpeed = false;
     jobject javaBitmap = NULL;
 
@@ -437,23 +433,6 @@ static jbyteArray nativeScaleNinePatch(JNIEnv* env, jobject, jbyteArray chunkObj
     return chunkObject;
 }
 
-static void nativeSetDefaultConfig(JNIEnv* env, jobject, int nativeConfig) {
-    SkBitmap::Config config = static_cast<SkBitmap::Config>(nativeConfig);
-
-    // these are the only default configs that make sense for codecs right now
-    static const SkBitmap::Config gValidDefConfig[] = {
-        SkBitmap::kRGB_565_Config,
-        SkBitmap::kARGB_8888_Config,
-    };
-
-    for (size_t i = 0; i < SK_ARRAY_COUNT(gValidDefConfig); i++) {
-        if (config == gValidDefConfig[i]) {
-            SkImageDecoder::SetDeviceConfig(config);
-            break;
-        }
-    }
-}
-
 static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
     jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
     return ::lseek64(descriptor, 0, SEEK_CUR) != -1 ? JNI_TRUE : JNI_FALSE;
@@ -486,8 +465,6 @@ static JNINativeMethod gMethods[] = {
         "([BFLandroid/graphics/Rect;)[B",
         (void*)nativeScaleNinePatch
     },
-
-    {   "nativeSetDefaultConfig", "(I)V", (void*)nativeSetDefaultConfig },
 
     {   "nativeIsSeekable",
         "(Ljava/io/FileDescriptor;)Z",

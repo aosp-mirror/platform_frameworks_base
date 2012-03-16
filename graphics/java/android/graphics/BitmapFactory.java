@@ -595,30 +595,6 @@ public class BitmapFactory {
         return decodeFileDescriptor(fd, null, null);
     }
 
-    /**
-     * Set the default config used for decoding bitmaps. This config is
-     * presented to the codec if the caller did not specify a preferred config
-     * in their call to decode...
-     *
-     * The default value is chosen by the system to best match the device's
-     * screen and memory constraints.
-     *
-     * @param config The preferred config for decoding bitmaps. If null, then
-     *               a suitable default is chosen by the system.
-     *
-     * @hide - only called by the browser at the moment, but should be stable
-     *   enough to expose if needed
-     */
-    public static void setDefaultConfig(Bitmap.Config config) {
-        if (config == null) {
-            // pick this for now, as historically it was our default.
-            // However, if we have a smarter algorithm, we can change this.
-            config = Bitmap.Config.RGB_565;
-        }
-        nativeSetDefaultConfig(config.nativeInt);
-    }
-
-    private static native void nativeSetDefaultConfig(int nativeConfig);
     private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,
             Rect padding, Options opts);
     private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,
