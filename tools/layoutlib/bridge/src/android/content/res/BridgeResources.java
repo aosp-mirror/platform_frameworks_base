@@ -120,10 +120,8 @@ public final class BridgeResources extends Resources {
         mProjectCallback = projectCallback;
     }
 
-    public BridgeTypedArray newTypeArray(int numEntries, boolean platformFile,
-            boolean platformStyleable, String styleableName) {
-        return new BridgeTypedArray(this, mContext, numEntries, platformFile,
-                platformStyleable, styleableName);
+    public BridgeTypedArray newTypeArray(int numEntries, boolean platformFile) {
+        return new BridgeTypedArray(this, mContext, numEntries, platformFile);
     }
 
     private Pair<String, ResourceValue> getResourceValue(int id, boolean[] platformResFlag_out) {
