@@ -4909,11 +4909,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     private void getSelectionHandles(int[] handles) {
         handles[0] = mSelectCursorBase.right;
-        handles[1] = mSelectCursorBase.bottom -
-                (mSelectCursorBase.height() / 4);
+        handles[1] = mSelectCursorBase.bottom;
         handles[2] = mSelectCursorExtent.left;
-        handles[3] = mSelectCursorExtent.bottom
-                - (mSelectCursorExtent.height() / 4);
+        handles[3] = mSelectCursorExtent.bottom;
         if (!nativeIsBaseFirst(mNativeClass)) {
             int swap = handles[0];
             handles[0] = handles[2];
