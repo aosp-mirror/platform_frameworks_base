@@ -611,7 +611,7 @@ public class DynamicLayout extends Layout
     private PackedIntVector mInts;
     private PackedObjectVector<Directions> mObjects;
 
-    /*
+    /**
      * Value used in mBlockIndices when a block has been created or recycled and indicating that its
      * display list needs to be re-created.
      * @hide
