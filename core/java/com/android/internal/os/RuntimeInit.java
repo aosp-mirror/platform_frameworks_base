@@ -52,6 +52,7 @@ public class RuntimeInit {
 
     private static final native void nativeZygoteInit();
     private static final native void nativeFinishInit();
+    private static final native void nativeSetExitWithoutCleanup(boolean exitWithoutCleanup);
 
     /**
      * Use this to log a message when a thread exits due to an uncaught
@@ -281,6 +282,13 @@ public class RuntimeInit {
 
     private static void applicationInit(int targetSdkVersion, String[] argv)
             throws ZygoteInit.MethodAndArgsCaller {
+        // If the application calls System.exit(), terminate the process
+        // immediately without running any shutdown hooks.  It is not possible to
+        // shutdown an Android application gracefully.  Among other things, the
+        // Android runtime shutdown hooks close the Binder driver, which can cause
+        // leftover running threads to crash before the process actually exits.
+        nativeSetExitWithoutCleanup(true);
+
         // We want to be fairly aggressive about heap utilization, to avoid
         // holding on to a lot of memory that isn't needed.
         VMRuntime.getRuntime().setTargetHeapUtilization(0.75f);

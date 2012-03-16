@@ -66,6 +66,12 @@ public:
 
     void start(const char *classname, const char* options);
 
+    void exit(int code);
+
+    void setExitWithoutCleanup(bool exitWithoutCleanup) {
+        mExitWithoutCleanup = exitWithoutCleanup;
+    }
+
     static AndroidRuntime* getRuntime();
 
     /**
@@ -86,14 +92,13 @@ public:
      * fork. Override it to initialize threads, etc. Upon return, the
      * correct static main will be invoked.
      */
-    virtual void onZygoteInit() {};
-
+    virtual void onZygoteInit() { }
 
     /**
-     * Called when the Java application exits.  The default
-     * implementation calls exit(code).
+     * Called when the Java application exits to perform additional cleanup actions
+     * before the process is terminated.
      */
-    virtual void onExit(int code);
+    virtual void onExit(int code) { }
 
     /** create a new thread that is visible from Java */
     static android_thread_id_t createJavaThread(const char* name, void (*start)(void *),
@@ -114,6 +119,7 @@ private:
     int startVm(JavaVM** pJavaVM, JNIEnv** pEnv);
 
     Vector<JavaVMOption> mOptions;
+    bool mExitWithoutCleanup;
 
     /* JNI JavaVM pointer */
     static JavaVM* mJavaVM;

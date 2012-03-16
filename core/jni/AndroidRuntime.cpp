@@ -199,6 +199,12 @@ static void com_android_internal_os_RuntimeInit_nativeZygoteInit(JNIEnv* env, jo
     gCurRuntime->onZygoteInit();
 }
 
+static void com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup(JNIEnv* env,
+        jobject clazz, jboolean exitWithoutCleanup)
+{
+    gCurRuntime->setExitWithoutCleanup(exitWithoutCleanup);
+}
+
 /*
  * JNI registration.
  */
@@ -207,6 +213,8 @@ static JNINativeMethod gMethods[] = {
         (void*) com_android_internal_os_RuntimeInit_nativeFinishInit },
     { "nativeZygoteInit", "()V",
         (void*) com_android_internal_os_RuntimeInit_nativeZygoteInit },
+    { "nativeSetExitWithoutCleanup", "(Z)V",
+        (void*) com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup },
 };
 
 int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
@@ -220,7 +228,8 @@ int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
 /*static*/ JavaVM* AndroidRuntime::mJavaVM = NULL;
 
 
-AndroidRuntime::AndroidRuntime()
+AndroidRuntime::AndroidRuntime() :
+        mExitWithoutCleanup(false)
 {
     SkGraphics::Init();
     // this sets our preference for 16bit images during decode
@@ -298,8 +307,7 @@ status_t AndroidRuntime::callMain(const char* className,
  */
 static void runtime_exit(int code)
 {
-    gCurRuntime->onExit(code);
-    exit(code);
+    gCurRuntime->exit(code);
 }
 
 /*
@@ -870,10 +878,16 @@ void AndroidRuntime::start(const char* className, const char* options)
         ALOGW("Warning: VM did not shut down cleanly\n");
 }
 
-void AndroidRuntime::onExit(int code)
+void AndroidRuntime::exit(int code)
 {
-    ALOGV("AndroidRuntime onExit calling exit(%d)", code);
-    exit(code);
+    if (mExitWithoutCleanup) {
+        ALOGI("VM exiting with result code %d, cleanup skipped.", code);
+        ::_exit(code);
+    } else {
+        ALOGI("VM exiting with result code %d.", code);
+        onExit(code);
+        ::exit(code);
+    }
 }
 
 void AndroidRuntime::onVmCreated(JNIEnv* env)
