@@ -42,7 +42,7 @@ public:
     virtual status_t        getCameraInfo(int cameraId,
                                           struct CameraInfo* cameraInfo) = 0;
     virtual sp<ICamera>     connect(const sp<ICameraClient>& cameraClient,
-                                    int cameraId) = 0;
+                                    int cameraId, bool force, bool keep) = 0;
 };
 
 // ----------------------------------------------------------------------------

@@ -236,6 +236,50 @@ public class Camera {
     /**
      * Creates a new Camera object to access a particular hardware camera.
      *
+     * <p>When <code>force</code> is set to false, this will throw an exception
+     * if the same camera is already opened by other clients. If true, the other
+     * client will be disconnected from the camera they opened. If the device
+     * can only support one camera running at a time, all camera-using clients
+     * will be disconnected from their cameras.
+     *
+     * <p>A camera being held by an application can be taken away by other
+     * applications at any time. Before the camera is taken, applications will
+     * get {@link #CAMERA_ERROR_RELEASED} and have some time to clean up. Apps
+     * receiving this callback must immediately stop video recording and then
+     * call {@link #release()} on their camera object. Otherwise, it will be
+     * released by the frameworks in a short time. After receiving
+     * CAMERA_ERROR_RELEASED, apps should not call any method except <code>
+     * release</code> and {@link #isReleased()}. After a camera is taken away,
+     * all methods will throw exceptions except <code>isReleased</code> and
+     * <code>release</code>. Apps can use <code>isReleased</code> to see if the
+     * camera has been taken away. If the camera is taken away, the apps can
+     * silently finish themselves or show a dialog.
+     *
+     * <p>Applications with android.permission.KEEP_CAMERA can request to keep
+     * the camera. That is, the camera will not be taken by other applications
+     * while it is opened. The permission can only be obtained by trusted
+     * platform applications, such as those implementing lock screen security
+     * features.
+     *
+     * @param cameraId the hardware camera to access, between 0 and
+     *     {@link #getNumberOfCameras()}-1.
+     * @param force true to take the ownership from the existing client if the
+     *     camera has been opened by other clients.
+     * @param keep true if the applications do not want other apps to take the
+     *     camera. Only the apps with android.permission.KEEP_CAMERA can keep
+     *     the camera.
+     * @return a new Camera object, connected, locked and ready for use.
+     * @hide
+     */
+    public static Camera open(int cameraId, boolean force, boolean keep) {
+        return new Camera(cameraId, force, keep);
+    }
+
+    /**
+     * Creates a new Camera object to access a particular hardware camera. If
+     * the same camera is opened by other applications, this will throw a
+     * RuntimeException.
+     *
      * <p>You must call {@link #release()} when you are done using the camera,
      * otherwise it will remain locked and be unavailable to other applications.
      *
@@ -255,13 +299,13 @@ public class Camera {
      * @param cameraId the hardware camera to access, between 0 and
      *     {@link #getNumberOfCameras()}-1.
      * @return a new Camera object, connected, locked and ready for use.
-     * @throws RuntimeException if connection to the camera service fails (for
-     *     example, if the camera is in use by another process or device policy
-     *     manager has disabled the camera).
+     * @throws RuntimeException if opening the camera fails (for example, if the
+     *     camera is in use by another process or device policy manager has
+     *     disabled the camera).
      * @see android.app.admin.DevicePolicyManager#getCameraDisabled(android.content.ComponentName)
      */
     public static Camera open(int cameraId) {
-        return new Camera(cameraId);
+        return new Camera(cameraId, false, false);
     }
 
     /**
@@ -276,13 +320,13 @@ public class Camera {
         for (int i = 0; i < numberOfCameras; i++) {
             getCameraInfo(i, cameraInfo);
             if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
-                return new Camera(i);
+                return new Camera(i, false, false);
             }
         }
         return null;
     }
 
-    Camera(int cameraId) {
+    Camera(int cameraId, boolean force, boolean keep) {
         mShutterCallback = null;
         mRawImageCallback = null;
         mJpegCallback = null;
@@ -299,7 +343,7 @@ public class Camera {
             mEventHandler = null;
         }
 
-        native_setup(new WeakReference<Camera>(this), cameraId);
+        native_setup(new WeakReference<Camera>(this), cameraId, force, keep);
     }
 
     /**
@@ -312,7 +356,8 @@ public class Camera {
         release();
     }
 
-    private native final void native_setup(Object camera_this, int cameraId);
+    private native final void native_setup(Object camera_this, int cameraId,
+            boolean force, boolean keep);
     private native final void native_release();
 
 
@@ -325,6 +370,18 @@ public class Camera {
         native_release();
         mFaceDetectionRunning = false;
     }
+
+    /**
+     * Whether the camera is released. When any camera method throws an
+     * exception, applications can use this to check whether the camera has been
+     * taken by other clients. If true, it means other clients have taken the
+     * camera. The applications can silently finish themselves or show a dialog.
+     *
+     * @return whether the camera is released.
+     * @see #open(int, boolean, boolean)
+     * @hide
+     */
+    public native final boolean isReleased();
 
     /**
      * Unlocks the camera to allow another process to access it.
@@ -1320,6 +1377,17 @@ public class Camera {
      * @see Camera.ErrorCallback
      */
     public static final int CAMERA_ERROR_UNKNOWN = 1;
+
+    /**
+     * Camera was released because another client has opened the camera. The
+     * application should call {@link #release()} after getting this. The apps
+     * should not call any method except <code>release</code> and {@link #isReleased()}
+     * after this.
+     *
+     * @see Camera.ErrorCallback
+     * @hide
+     */
+    public static final int CAMERA_ERROR_RELEASED = 2;
 
     /**
      * Media server died. In this case, the application must release the
