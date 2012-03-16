@@ -16,7 +16,7 @@
 
 package android.content.res;
 
-import com.android.ide.common.rendering.api.DeclareStyleableResourceValue;
+import com.android.ide.common.rendering.api.AttrResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
@@ -51,28 +51,33 @@ public final class BridgeTypedArray extends TypedArray {
     private final BridgeResources mBridgeResources;
     private final BridgeContext mContext;
     private final boolean mPlatformFile;
-    private final boolean mPlatformStyleable;
-    private final String mStyleableName;
 
     private ResourceValue[] mResourceData;
     private String[] mNames;
+    private boolean[] mIsFramework;
 
     public BridgeTypedArray(BridgeResources resources, BridgeContext context, int len,
-            boolean platformFile, boolean platformStyleable, String styleableName) {
+            boolean platformFile) {
         super(null, null, null, 0);
         mBridgeResources = resources;
         mContext = context;
         mPlatformFile = platformFile;
-        mPlatformStyleable = platformStyleable;
-        mStyleableName = styleableName;
         mResourceData = new ResourceValue[len];
         mNames = new String[len];
+        mIsFramework = new boolean[len];
     }
 
-    /** A bridge-specific method that sets a value in the type array */
-    public void bridgeSetValue(int index, String name, ResourceValue value) {
+    /**
+     * A bridge-specific method that sets a value in the type array
+     * @param index the index of the value in the TypedArray
+     * @param name the name of the attribute
+     * @param isFramework whether the attribute is in the android namespace.
+     * @param value the value of the attribute
+     */
+    public void bridgeSetValue(int index, String name, boolean isFramework, ResourceValue value) {
         mResourceData[index] = value;
         mNames[index] = name;
+        mIsFramework[index] = isFramework;
     }
 
     /**
@@ -213,8 +218,12 @@ public final class BridgeTypedArray extends TypedArray {
             return defValue;
         }
 
+        if (s == null) {
+            return defValue;
+        }
+
         try {
-            return (s == null) ? defValue : XmlUtils.convertValueToInt(s, defValue);
+            return XmlUtils.convertValueToInt(s, defValue);
         } catch (NumberFormatException e) {
             // pass
         }
@@ -223,15 +232,14 @@ public final class BridgeTypedArray extends TypedArray {
         // Check for possible constants and try to find them.
         // Get the map of attribute-constant -> IntegerValue
         Map<String, Integer> map = null;
-        if (mPlatformStyleable) {
+        if (mIsFramework[index]) {
             map = Bridge.getEnumValues(mNames[index]);
-        } else if (mStyleableName != null) {
+        } else {
             // get the styleable matching the resolved name
             RenderResources res = mContext.getRenderResources();
-            ResourceValue styleable = res.getProjectResource(ResourceType.DECLARE_STYLEABLE,
-                    mStyleableName);
-            if (styleable instanceof DeclareStyleableResourceValue) {
-                map = ((DeclareStyleableResourceValue) styleable).getAttributeValues(mNames[index]);
+            ResourceValue attr = res.getProjectResource(ResourceType.ATTR, mNames[index]);
+            if (attr instanceof AttrResourceValue) {
+                map = ((AttrResourceValue) attr).getAttributeValues();
             }
         }
 
