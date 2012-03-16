@@ -92,7 +92,7 @@ sp<VBRISeeker> VBRISeeker::CreateFromSource(
     }
 
     sp<VBRISeeker> seeker = new VBRISeeker;
-    seeker->mBasePos = post_id3_pos;
+    seeker->mBasePos = post_id3_pos + frameSize;
     seeker->mDurationUs = durationUs;
 
     off64_t offset = post_id3_pos;
