@@ -178,10 +178,10 @@ void Context::setupProgramStore() {
     mFragmentStore->setup(this, &mStateFragmentStore);
 }
 
-static bool getProp(const char *str) {
+static uint32_t getProp(const char *str) {
     char buf[PROPERTY_VALUE_MAX];
     property_get(str, buf, "0");
-    return 0 != strcmp(buf, "0");
+    return atoi(buf);
 }
 
 void Context::displayDebugStats() {
@@ -211,13 +211,14 @@ void * Context::threadProc(void *vrsc) {
     setpriority(PRIO_PROCESS, rsc->mNativeThreadId, ANDROID_PRIORITY_DISPLAY);
     rsc->mThreadPriority = ANDROID_PRIORITY_DISPLAY;
 #endif //ANDROID_RS_SERIALIZE
-    rsc->props.mLogTimes = getProp("debug.rs.profile");
-    rsc->props.mLogScripts = getProp("debug.rs.script");
-    rsc->props.mLogObjects = getProp("debug.rs.object");
-    rsc->props.mLogShaders = getProp("debug.rs.shader");
-    rsc->props.mLogShadersAttr = getProp("debug.rs.shader.attributes");
-    rsc->props.mLogShadersUniforms = getProp("debug.rs.shader.uniforms");
-    rsc->props.mLogVisual = getProp("debug.rs.visual");
+    rsc->props.mLogTimes = getProp("debug.rs.profile") != 0;
+    rsc->props.mLogScripts = getProp("debug.rs.script") != 0;
+    rsc->props.mLogObjects = getProp("debug.rs.object") != 0;
+    rsc->props.mLogShaders = getProp("debug.rs.shader") != 0;
+    rsc->props.mLogShadersAttr = getProp("debug.rs.shader.attributes") != 0;
+    rsc->props.mLogShadersUniforms = getProp("debug.rs.shader.uniforms") != 0;
+    rsc->props.mLogVisual = getProp("debug.rs.visual") != 0;
+    rsc->props.mDebugMaxThreads = getProp("debug.rs.max-threads");
 
     if (!rsdHalInit(rsc, 0, 0)) {
         rsc->setError(RS_ERROR_FATAL_DRIVER, "Failed initializing GL");
