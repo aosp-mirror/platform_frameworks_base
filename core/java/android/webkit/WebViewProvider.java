@@ -19,6 +19,7 @@ package android.webkit;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -333,6 +334,8 @@ public interface WebViewProvider {
         public boolean requestChildRectangleOnScreen(View child, Rect rect, boolean immediate);
 
         public void setBackgroundColor(int color);
+
+        public void setLayerType(int layerType, Paint paint);
     }
 
     interface ScrollDelegate {

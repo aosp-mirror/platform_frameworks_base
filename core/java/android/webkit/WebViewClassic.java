@@ -5561,6 +5561,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         addAccessibilityApisToJavaScript();
 
         mTouchEventQueue.reset();
+        updateHwAccelerated();
     }
 
     @Override
@@ -5580,6 +5581,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         removeAccessibilityApisFromJavaScript();
+        updateHwAccelerated();
     }
 
     @Override
@@ -9232,6 +9234,30 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         nativeDiscardAllTextures();
     }
 
+    @Override
+    public void setLayerType(int layerType, Paint paint) {
+        updateHwAccelerated();
+    }
+
+    private void updateHwAccelerated() {
+        if (mNativeClass == 0) {
+            return;
+        }
+        boolean hwAccelerated = false;
+        if (mWebView.isHardwareAccelerated()
+                && mWebView.getLayerType() != View.LAYER_TYPE_SOFTWARE) {
+            hwAccelerated = true;
+        }
+        int result = nativeSetHwAccelerated(mNativeClass, hwAccelerated);
+        if (mWebViewCore == null || mBlockWebkitViewMessages) {
+            return;
+        }
+        if (result == 1) {
+            // Sync layers
+            mWebViewCore.layersDraw();
+        }
+    }
+
     /**
      * Begin collecting per-tile profiling data
      *
@@ -9353,4 +9379,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static native boolean nativeIsBaseFirst(int instance);
     private static native void nativeMapLayerRect(int instance, int layerId,
             Rect rect);
+    // Returns 1 if a layer sync is needed, else 0
+    private static native int nativeSetHwAccelerated(int instance, boolean hwAccelerated);
 }

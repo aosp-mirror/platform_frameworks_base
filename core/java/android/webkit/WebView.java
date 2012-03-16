@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -1954,5 +1955,11 @@ public class WebView extends AbsoluteLayout
     @Override
     public void setBackgroundColor(int color) {
         mProvider.getViewDelegate().setBackgroundColor(color);
+    }
+
+    @Override
+    public void setLayerType(int layerType, Paint paint) {
+        super.setLayerType(layerType, paint);
+        mProvider.getViewDelegate().setLayerType(layerType, paint);
     }
 }
