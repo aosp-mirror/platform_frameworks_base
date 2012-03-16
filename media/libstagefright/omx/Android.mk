@@ -5,7 +5,6 @@ LOCAL_C_INCLUDES += $(JNI_H_INCLUDE)
 
 LOCAL_SRC_FILES:=                     \
         OMX.cpp                       \
-        OMXComponentBase.cpp          \
         OMXMaster.cpp                 \
         OMXNodeInstance.cpp           \
         SimpleSoftOMXComponent.cpp    \
