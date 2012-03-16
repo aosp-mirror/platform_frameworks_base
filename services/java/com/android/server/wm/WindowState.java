@@ -305,11 +305,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     int mAnimDw;
     int mAnimDh;
 
-    static final int ANIM_STATE_IDLE = 0;
-    static final int ANIM_STATE_RUNNING = 1;
-    static final int ANIM_STATE_STOPPING = 2;
-    int mAnimState = ANIM_STATE_IDLE;
-
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
            int viewVisibility) {
@@ -653,7 +648,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mLocalAnimating = false;
             mAnimation.cancel();
             mAnimation = null;
-            mAnimState = ANIM_STATE_IDLE;
         }
     }
 
@@ -665,7 +659,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mAnimation.cancel();
             mAnimation = null;
             destroySurfaceLocked();
-            mAnimState = ANIM_STATE_IDLE;
         }
         mExiting = false;
     }
@@ -971,7 +964,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mAppToken.firstWindowDrawn = true;
 
                 if (mAppToken.startingData != null) {
-                    if (WindowManagerService.DEBUG_STARTING_WINDOW || WindowManagerService.DEBUG_ANIM) Slog.v(WindowManagerService.TAG,
+                    if (WindowManagerService.DEBUG_STARTING_WINDOW ||
+                            WindowManagerService.DEBUG_ANIM) Slog.v(WindowManagerService.TAG,
                             "Finish starting " + mToken
                             + ": first real window is shown, no animation");
                     // If this initial window is animating, stop it -- we
@@ -983,7 +977,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                         mAnimation = null;
                         // Make sure we clean up the animation.
                         mAnimating = true;
-                        mAnimState = ANIM_STATE_IDLE;
                     }
                     mService.mFinishedStarting.add(mAppToken);
                     mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
@@ -995,7 +988,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     private boolean stepAnimation(long currentTime) {
-        if ((mAnimation == null) || !mLocalAnimating || (mAnimState != ANIM_STATE_RUNNING)) {
+        if ((mAnimation == null) || !mLocalAnimating) {
             return false;
         }
         mTransformation.clear();
@@ -1003,9 +996,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (WindowManagerService.DEBUG_ANIM) Slog.v(
             WindowManagerService.TAG, "Stepped animation in " + this +
             ": more=" + more + ", xform=" + mTransformation);
-        if (!more) {
-            mAnimState = ANIM_STATE_STOPPING;
-        }
         return more;
     }
 
@@ -1032,11 +1022,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     mAnimation.setStartTime(currentTime);
                     mLocalAnimating = true;
                     mAnimating = true;
-                    mAnimState = ANIM_STATE_RUNNING;
                 }
-                if ((mAnimation != null) && mLocalAnimating && 
-                        (mAnimState != ANIM_STATE_STOPPING)) {
-                    return stepAnimation(currentTime);
+                if ((mAnimation != null) && mLocalAnimating) {
+                    if (stepAnimation(currentTime)) {
+                        return true;
+                    }
                 }
                 if (WindowManagerService.DEBUG_ANIM) Slog.v(
                     WindowManagerService.TAG, "Finished animation in " + this +
@@ -1137,7 +1127,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mAppToken.updateReportedVisibilityLocked();
         }
 
-        mAnimState = ANIM_STATE_IDLE;
         return false;
     }
 

@@ -240,8 +240,10 @@ class AppWindowToken extends WindowToken {
                     animation.setStartTime(currentTime);
                     animating = true;
                 }
-                // we're done!
-                return stepAnimation(currentTime);
+                if (stepAnimation(currentTime)) {
+                    // we're done!
+                    return true;
+                }
             }
         } else if (animation != null) {
             // If the display is frozen, and there is a pending animation,
