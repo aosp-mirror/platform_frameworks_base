@@ -763,12 +763,9 @@ status_t AudioTrack::createTrack_l(
                 mNotificationFramesAct = frameCount/2;
             }
             if (frameCount < minFrameCount) {
-                if (enforceFrameCount) {
-                    LOGE("Invalid buffer size: minFrameCount %d, frameCount %d", minFrameCount, frameCount);
-                    return BAD_VALUE;
-                } else {
-                    frameCount = minFrameCount;
-                }
+                LOGW_IF(enforceFrameCount, "Minimum buffer size corrected from %d to %d",
+                         frameCount, minFrameCount);
+                frameCount = minFrameCount;
             }
         } else {
             // Ensure that buffer alignment matches channelcount
