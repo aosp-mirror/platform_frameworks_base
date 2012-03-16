@@ -7688,9 +7688,9 @@ public class WindowManagerService extends IWindowManager.Stub
         Surface.openTransaction();
 
         try {
+            updateWindowsAppsAndRotationAnimationsLocked(currentTime, innerDw, innerDh);
             mPendingLayoutChanges = performAnimationsLocked(currentTime, dw, dh,
                     innerDw, innerDh);
-            updateWindowsAppsAndRotationAnimationsLocked(currentTime, innerDw, innerDh);
         
             // THIRD LOOP: Update the surfaces of all windows.
             
