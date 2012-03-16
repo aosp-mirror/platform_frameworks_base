@@ -2280,16 +2280,8 @@ status_t AwesomePlayer::invoke(const Parcel &request, Parcel *reply) {
                 mTextDriver = new TimedTextDriver(mListener);
             }
             // String values written in Parcel are UTF-16 values.
-            String16 uri16 = request.readString16();
-            const char *uri = NULL;
-            if (uri16 != NULL) {
-                uri = String8(uri16).string();
-            }
-            String16 mimeType16 = request.readString16();
-            const char *mimeType = NULL;
-            if (mimeType16 != NULL) {
-                mimeType = String8(mimeType16).string();
-            }
+            String8 uri(request.readString16());
+            String8 mimeType(request.readString16());
             return mTextDriver->addOutOfBandTextSource(uri, mimeType);
         }
         case INVOKE_ID_ADD_EXTERNAL_SOURCE_FD:
@@ -2301,12 +2293,7 @@ status_t AwesomePlayer::invoke(const Parcel &request, Parcel *reply) {
             int fd         = request.readFileDescriptor();
             off64_t offset = request.readInt64();
             size_t length  = request.readInt64();
-            String16 mimeType16 = request.readString16();
-            const char *mimeType = NULL;
-            if (mimeType16 != NULL) {
-                mimeType = String8(mimeType16).string();
-            }
-
+            String8 mimeType(request.readString16());
             return mTextDriver->addOutOfBandTextSource(
                     fd, offset, length, mimeType);
         }
