@@ -986,17 +986,22 @@ public class ViewPropertyAnimator {
                 // Shouldn't happen, but just to play it safe
                 return;
             }
+            boolean useDisplayListProperties = View.USE_DISPLAY_LIST_PROPERTIES &&
+                    mView.mDisplayList != null;
+
             // alpha requires slightly different treatment than the other (transform) properties.
             // The logic in setAlpha() is not simply setting mAlpha, plus the invalidation
             // logic is dependent on how the view handles an internal call to onSetAlpha().
             // We track what kinds of properties are set, and how alpha is handled when it is
             // set, and perform the invalidation steps appropriately.
             boolean alphaHandled = false;
-            mView.invalidateParentCaches();
+            if (!useDisplayListProperties) {
+                mView.invalidateParentCaches();
+            }
             float fraction = animation.getAnimatedFraction();
             int propertyMask = propertyBundle.mPropertyMask;
             if ((propertyMask & TRANSFORM_MASK) != 0) {
-                mView.invalidate(false);
+                mView.invalidateViewProperty(false, false);
             }
             ArrayList<NameValuesHolder> valueList = propertyBundle.mNameValuesHolder;
             if (valueList != null) {
@@ -1013,11 +1018,17 @@ public class ViewPropertyAnimator {
             }
             if ((propertyMask & TRANSFORM_MASK) != 0) {
                 mView.mTransformationInfo.mMatrixDirty = true;
-                mView.mPrivateFlags |= View.DRAWN; // force another invalidation
+                if (!useDisplayListProperties) {
+                    mView.mPrivateFlags |= View.DRAWN; // force another invalidation
+                }
             }
             // invalidate(false) in all cases except if alphaHandled gets set to true
             // via the call to setAlphaNoInvalidation(), above
-            mView.invalidate(alphaHandled);
+            if (alphaHandled) {
+                mView.invalidate(true);
+            } else {
+                mView.invalidateViewProperty(false, false);
+            }
         }
     }
 }

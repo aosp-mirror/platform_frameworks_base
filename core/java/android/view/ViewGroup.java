@@ -3896,6 +3896,72 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Quick invalidation method called by View.invalidateViewProperty. This doesn't set the
+     * DRAWN flags and doesn't handle the Animation logic that the default invalidation methods
+     * do; all we want to do here is schedule a traversal with the appropriate dirty rect.
+     *
+     * @hide
+     */
+    public void invalidateChildFast(View child, final Rect dirty) {
+        ViewParent parent = this;
+
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            if (child.mLayerType != LAYER_TYPE_NONE) {
+                child.mLocalDirtyRect.union(dirty);
+            }
+
+            int left = child.mLeft;
+            int top = child.mTop;
+            if (!child.getMatrix().isIdentity()) {
+                child.transformRect(dirty);
+            }
+
+            do {
+                if (parent instanceof ViewGroup) {
+                    ViewGroup parentVG = (ViewGroup) parent;
+                    parent = parentVG.invalidateChildInParentFast(left, top, dirty);
+                    left = parentVG.mLeft;
+                    top = parentVG.mTop;
+                } else {
+                    // Reached the top; this calls into the usual invalidate method in
+                    // ViewRootImpl, which schedules a traversal
+                    final int[] location = attachInfo.mInvalidateChildLocation;
+                    location[0] = left;
+                    location[1] = top;
+                    parent = parent.invalidateChildInParent(location, dirty);
+                }
+            } while (parent != null);
+        }
+    }
+
+    /**
+     * Quick invalidation method that simply transforms the dirty rect into the parent's
+     * coordinate system, pruning the invalidation if the parent has already been invalidated.
+     */
+    private ViewParent invalidateChildInParentFast(int left, int top, final Rect dirty) {
+        if ((mPrivateFlags & DRAWN) == DRAWN ||
+                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
+            dirty.offset(left - mScrollX, top - mScrollY);
+
+            if ((mGroupFlags & FLAG_CLIP_CHILDREN) == 0 ||
+                    dirty.intersect(0, 0, mRight - mLeft, mBottom - mTop)) {
+
+                if (mLayerType != LAYER_TYPE_NONE) {
+                    mLocalDirtyRect.union(dirty);
+                }
+                if (!getMatrix().isIdentity()) {
+                    transformRect(dirty);
+                }
+
+                return mParent;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Offset a rectangle that is in a descendant's coordinate
      * space into our coordinate space.
      * @param descendant A descendant of this view
@@ -3986,6 +4052,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             v.mBottom += offset;
             if (USE_DISPLAY_LIST_PROPERTIES && v.mDisplayList != null) {
                 v.mDisplayList.offsetTopBottom(offset);
+                invalidateViewProperty(false, false);
             }
         }
     }
