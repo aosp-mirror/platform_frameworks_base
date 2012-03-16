@@ -1254,6 +1254,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int FOCUS_NODE_CHANGED                 = 147;
     static final int AUTOFILL_FORM                      = 148;
     static final int ANIMATE_TEXT_SCROLL                = 149;
+    static final int EDIT_TEXT_SIZE_CHANGED             = 150;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -8502,6 +8503,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
                 case ANIMATE_TEXT_SCROLL:
                     computeEditTextScroll();
+                    break;
+
+                case EDIT_TEXT_SIZE_CHANGED:
+                    if (msg.arg1 == mFieldPointer) {
+                        mEditTextContent.set((Rect)msg.obj);
+                    }
                     break;
 
                 default:
