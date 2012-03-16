@@ -31,6 +31,14 @@ import com.android.internal.util.Objects;
  * @hide
  */
 public class NetworkIdentity {
+    /**
+     * When enabled, combine all {@link #mSubType} together under
+     * {@link #SUBTYPE_COMBINED}.
+     */
+    public static final boolean COMBINE_SUBTYPE_ENABLED = true;
+
+    public static final int SUBTYPE_COMBINED = -1;
+
     final int mType;
     final int mSubType;
     final String mSubscriberId;
@@ -38,7 +46,7 @@ public class NetworkIdentity {
 
     public NetworkIdentity(int type, int subType, String subscriberId, boolean roaming) {
         this.mType = type;
-        this.mSubType = subType;
+        this.mSubType = COMBINE_SUBTYPE_ENABLED ? SUBTYPE_COMBINED : subType;
         this.mSubscriberId = subscriberId;
         this.mRoaming = roaming;
     }
@@ -52,9 +60,8 @@ public class NetworkIdentity {
     public boolean equals(Object obj) {
         if (obj instanceof NetworkIdentity) {
             final NetworkIdentity ident = (NetworkIdentity) obj;
-            return mType == ident.mType && mSubType == ident.mSubType
-                    && Objects.equal(mSubscriberId, ident.mSubscriberId)
-                    && mRoaming == ident.mRoaming;
+            return mType == ident.mType && mSubType == ident.mSubType && mRoaming == ident.mRoaming
+                    && Objects.equal(mSubscriberId, ident.mSubscriberId);
         }
         return false;
     }
@@ -63,7 +70,9 @@ public class NetworkIdentity {
     public String toString() {
         final String typeName = ConnectivityManager.getNetworkTypeName(mType);
         final String subTypeName;
-        if (ConnectivityManager.isNetworkTypeMobile(mType)) {
+        if (COMBINE_SUBTYPE_ENABLED) {
+            subTypeName = "COMBINED";
+        } else if (ConnectivityManager.isNetworkTypeMobile(mType)) {
             subTypeName = TelephonyManager.getNetworkTypeName(mSubType);
         } else {
             subTypeName = Integer.toString(mSubType);
@@ -130,5 +139,4 @@ public class NetworkIdentity {
         }
         return new NetworkIdentity(type, subType, subscriberId, roaming);
     }
-
 }

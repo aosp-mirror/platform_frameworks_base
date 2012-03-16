@@ -26,6 +26,7 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
+import static android.net.NetworkIdentity.COMBINE_SUBTYPE_ENABLED;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
@@ -304,7 +305,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // watch for networkType changes that aren't broadcast through
         // CONNECTIVITY_ACTION_IMMEDIATE above.
-        mTeleManager.listen(mPhoneListener, LISTEN_DATA_CONNECTION_STATE);
+        if (!COMBINE_SUBTYPE_ENABLED) {
+            mTeleManager.listen(mPhoneListener, LISTEN_DATA_CONNECTION_STATE);
+        }
 
         registerPollAlarmLocked();
         registerGlobalAlert();
@@ -325,7 +328,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContext.unregisterReceiver(mRemovedReceiver);
         mContext.unregisterReceiver(mShutdownReceiver);
 
-        mTeleManager.listen(mPhoneListener, LISTEN_NONE);
+        if (!COMBINE_SUBTYPE_ENABLED) {
+            mTeleManager.listen(mPhoneListener, LISTEN_NONE);
+        }
 
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();

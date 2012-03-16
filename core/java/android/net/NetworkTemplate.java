@@ -20,6 +20,7 @@ import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
+import static android.net.NetworkIdentity.COMBINE_SUBTYPE_ENABLED;
 import static android.net.NetworkIdentity.scrubSubscriberId;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_2_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
@@ -77,6 +78,7 @@ public class NetworkTemplate implements Parcelable {
      * uses statistics for requested IMSI.
      */
     public static NetworkTemplate buildTemplateMobile3gLower(String subscriberId) {
+        ensureSubtypeAvailable();
         return new NetworkTemplate(MATCH_MOBILE_3G_LOWER, subscriberId);
     }
 
@@ -86,6 +88,7 @@ public class NetworkTemplate implements Parcelable {
      * requested IMSI.
      */
     public static NetworkTemplate buildTemplateMobile4g(String subscriberId) {
+        ensureSubtypeAvailable();
         return new NetworkTemplate(MATCH_MOBILE_4G, subscriberId);
     }
 
@@ -199,6 +202,7 @@ public class NetworkTemplate implements Parcelable {
      * Check if mobile network classified 3G or lower with matching IMSI.
      */
     private boolean matchesMobile3gLower(NetworkIdentity ident) {
+        ensureSubtypeAvailable();
         if (ident.mType == TYPE_WIMAX) {
             return false;
         } else if (matchesMobile(ident)) {
@@ -216,6 +220,7 @@ public class NetworkTemplate implements Parcelable {
      * Check if mobile network classified 4G with matching IMSI.
      */
     private boolean matchesMobile4g(NetworkIdentity ident) {
+        ensureSubtypeAvailable();
         if (ident.mType == TYPE_WIMAX) {
             // TODO: consider matching against WiMAX subscriber identity
             return true;
@@ -265,6 +270,13 @@ public class NetworkTemplate implements Parcelable {
                 return "ETHERNET";
             default:
                 return "UNKNOWN";
+        }
+    }
+
+    private static void ensureSubtypeAvailable() {
+        if (COMBINE_SUBTYPE_ENABLED) {
+            throw new IllegalArgumentException(
+                    "Unable to enforce 3G_LOWER template on combined data.");
         }
     }
 
