@@ -1201,7 +1201,7 @@ public final class StrictMode {
             // throttled back to 60fps via SurfaceFlinger/View
             // invalidates, _not_ by posting frame updates every 16
             // milliseconds.
-            threadHandler.get().post(new Runnable() {
+            threadHandler.get().postAtFrontOfQueue(new Runnable() {
                     public void run() {
                         long loopFinishTime = SystemClock.uptimeMillis();
 
