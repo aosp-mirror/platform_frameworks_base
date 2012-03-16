@@ -140,7 +140,7 @@ OMX_ERRORTYPE SoftG711::internalSetParameter(
             OMX_AUDIO_PARAM_PCMMODETYPE *pcmParams =
                 (OMX_AUDIO_PARAM_PCMMODETYPE *)params;
 
-            if (pcmParams->nPortIndex != 0) {
+            if (pcmParams->nPortIndex != 0 && pcmParams->nPortIndex != 1) {
                 return OMX_ErrorUndefined;
             }
 
@@ -148,7 +148,9 @@ OMX_ERRORTYPE SoftG711::internalSetParameter(
                 return OMX_ErrorUndefined;
             }
 
-            mNumChannels = pcmParams->nChannels;
+            if(pcmParams->nPortIndex == 0) {
+                mNumChannels = pcmParams->nChannels;
+            }
 
             return OMX_ErrorNone;
         }
