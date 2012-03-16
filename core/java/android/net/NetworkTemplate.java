@@ -78,7 +78,6 @@ public class NetworkTemplate implements Parcelable {
      * uses statistics for requested IMSI.
      */
     public static NetworkTemplate buildTemplateMobile3gLower(String subscriberId) {
-        ensureSubtypeAvailable();
         return new NetworkTemplate(MATCH_MOBILE_3G_LOWER, subscriberId);
     }
 
@@ -88,7 +87,6 @@ public class NetworkTemplate implements Parcelable {
      * requested IMSI.
      */
     public static NetworkTemplate buildTemplateMobile4g(String subscriberId) {
-        ensureSubtypeAvailable();
         return new NetworkTemplate(MATCH_MOBILE_4G, subscriberId);
     }
 
