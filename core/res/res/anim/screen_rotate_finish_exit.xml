@@ -24,12 +24,14 @@
             android:pivotX="50%" android:pivotY="50%"
             android:interpolator="@interpolator/accelerate_decelerate"
             android:fillEnabled="true"
-            android:fillBefore="false" android:fillAfter="true"
+            android:fillBefore="true" android:fillAfter="true"
             android:duration="@android:integer/config_shortAnimTime"/>
     <scale android:fromXScale="100%" android:toXScale="100%p"
             android:fromYScale="100%" android:toYScale="100%p"
             android:pivotX="50%" android:pivotY="50%"
             android:interpolator="@interpolator/accelerate_decelerate"
+            android:fillEnabled="true"
+            android:fillBefore="true" android:fillAfter="true"
             android:duration="@android:integer/config_mediumAnimTime" />
     <alpha android:fromAlpha="1.0" android:toAlpha="0"
             android:interpolator="@interpolator/accelerate_decelerate"
