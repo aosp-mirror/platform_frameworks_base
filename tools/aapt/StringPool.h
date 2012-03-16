@@ -80,16 +80,10 @@ public:
     };
 
     /**
-     * If 'sorted' is true, then the final strings in the resource data
-     * structure will be generated in sorted order.  This allow for fast
-     * lookup with ResStringPool::indexOfString() (O(log n)), at the expense
-     * of support for styled string entries (which requires the same string
-     * be included multiple times in the pool).
-     *
      * If 'utf8' is true, strings will be encoded with UTF-8 instead of
      * left in Java's native UTF-16.
      */
-    explicit StringPool(bool sorted = false, bool utf8 = false);
+    explicit StringPool(bool utf8 = false);
 
     /**
      * Add a new string to the pool.  If mergeDuplicates is true, thenif
@@ -97,9 +91,7 @@ public:
      * otherwise, or if the value doesn't already exist, a new entry is
      * created.
      *
-     * Returns the index in the entry array of the new string entry.  Note that
-     * if this string pool is sorted, the returned index will not be valid
-     * when the pool is finally written.
+     * Returns the index in the entry array of the new string entry.
      */
     ssize_t add(const String16& value, bool mergeDuplicates = false,
             const String8* configTypeName = NULL, const ResTable_config* config = NULL);
@@ -107,24 +99,14 @@ public:
     ssize_t add(const String16& value, const Vector<entry_style_span>& spans,
             const String8* configTypeName = NULL, const ResTable_config* config = NULL);
 
-    ssize_t add(const String16& ident, const String16& value,
-                bool mergeDuplicates = false,
-                const String8* configTypeName = NULL, const ResTable_config* config = NULL);
-
     status_t addStyleSpan(size_t idx, const String16& name,
                           uint32_t start, uint32_t end);
     status_t addStyleSpans(size_t idx, const Vector<entry_style_span>& spans);
     status_t addStyleSpan(size_t idx, const entry_style_span& span);
 
-    size_t size() const;
-
-    const entry& entryAt(size_t idx) const;
-
-    size_t countIdentifiers() const;
-
     // Sort the contents of the string block by the configuration associated
     // with each item.  After doing this you can use mapOriginalPosToNewPos()
-    // to find out the new position given the position originall returned by
+    // to find out the new position given the position originally returned by
     // add().
     void sortByConfig();
 
@@ -159,7 +141,6 @@ public:
 private:
     static int config_sort(const size_t* lhs, const size_t* rhs, void* state);
 
-    const bool                              mSorted;
     const bool                              mUTF8;
 
     // The following data structures represent the actual structures
@@ -186,9 +167,6 @@ private:
     // Unique set of all the strings added to the pool, mapped to
     // the first index of mEntryArray where the value was added.
     DefaultKeyedVector<String16, ssize_t>   mValues;
-    // Unique set of all (optional) identifiers of strings in the
-    // pool, mapping to indices in mEntries.
-    DefaultKeyedVector<String16, ssize_t>   mIdents;
     // This array maps from the original position a string was placed at
     // in mEntryArray to its new position after being sorted with sortByConfig().
     Vector<size_t>                          mOriginalPosToNewPos;

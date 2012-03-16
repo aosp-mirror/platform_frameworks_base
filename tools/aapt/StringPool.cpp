@@ -98,39 +98,24 @@ int StringPool::entry::compare(const entry& o) const {
     return 0;
 }
 
-StringPool::StringPool(bool sorted, bool utf8)
-    : mSorted(sorted), mUTF8(utf8), mValues(-1), mIdents(-1)
+StringPool::StringPool(bool utf8) :
+        mUTF8(utf8), mValues(-1)
 {
-}
-
-ssize_t StringPool::add(const String16& value, bool mergeDuplicates,
-        const String8* configTypeName, const ResTable_config* config)
-{
-    return add(String16(), value, mergeDuplicates, configTypeName, config);
 }
 
 ssize_t StringPool::add(const String16& value, const Vector<entry_style_span>& spans,
         const String8* configTypeName, const ResTable_config* config)
 {
-    ssize_t res = add(String16(), value, false, configTypeName, config);
+    ssize_t res = add(value, false, configTypeName, config);
     if (res >= 0) {
         addStyleSpans(res, spans);
     }
     return res;
 }
 
-ssize_t StringPool::add(const String16& ident, const String16& value,
+ssize_t StringPool::add(const String16& value,
         bool mergeDuplicates, const String8* configTypeName, const ResTable_config* config)
 {
-    if (ident.size() > 0) {
-        ssize_t idx = mIdents.valueFor(ident);
-        if (idx >= 0) {
-            fprintf(stderr, "ERROR: Duplicate string identifier %s\n",
-                    String8(mEntries[idx].value).string());
-            return UNKNOWN_ERROR;
-        }
-    }
-
     ssize_t vidx = mValues.indexOfKey(value);
     ssize_t pos = vidx >= 0 ? mValues.valueAt(vidx) : -1;
     ssize_t eidx = pos >= 0 ? mEntryArray.itemAt(pos) : -1;
@@ -181,14 +166,8 @@ ssize_t StringPool::add(const String16& ident, const String16& value,
         if (first) {
             vidx = mValues.add(value, pos);
         }
-        if (!mSorted) {
-            entry& ent = mEntries.editItemAt(eidx);
-            ent.indices.add(pos);
-        }
-    }
-
-    if (ident.size() > 0) {
-        mIdents.add(ident, vidx);
+        entry& ent = mEntries.editItemAt(eidx);
+        ent.indices.add(pos);
     }
 
     NOISY(printf("Adding string %s to pool: pos=%d eidx=%d vidx=%d\n",
@@ -221,8 +200,6 @@ status_t StringPool::addStyleSpans(size_t idx, const Vector<entry_style_span>& s
 
 status_t StringPool::addStyleSpan(size_t idx, const entry_style_span& span)
 {
-    LOG_ALWAYS_FATAL_IF(mSorted, "Can't use styles with sorted string pools.");
-
     // Place blank entries in the span array up to this index.
     while (mEntryStyleArray.size() <= idx) {
         mEntryStyleArray.add();
@@ -232,25 +209,6 @@ status_t StringPool::addStyleSpan(size_t idx, const entry_style_span& span)
     style.spans.add(span);
     mEntries.editItemAt(mEntryArray[idx]).hasStyles = true;
     return NO_ERROR;
-}
-
-size_t StringPool::size() const
-{
-    return mSorted ? mValues.size() : mEntryArray.size();
-}
-
-const StringPool::entry& StringPool::entryAt(size_t idx) const
-{
-    if (!mSorted) {
-        return mEntries[mEntryArray[idx]];
-    } else {
-        return mEntries[mEntryArray[mValues.valueAt(idx)]];
-    }
-}
-
-size_t StringPool::countIdentifiers() const
-{
-    return mIdents.size();
 }
 
 int StringPool::config_sort(const size_t* lhs, const size_t* rhs, void* state)
@@ -263,8 +221,6 @@ int StringPool::config_sort(const size_t* lhs, const size_t* rhs, void* state)
 
 void StringPool::sortByConfig()
 {
-    LOG_ALWAYS_FATAL_IF(mSorted, "Can't sort string pool containing identifiers.");
-    LOG_ALWAYS_FATAL_IF(mIdents.size() > 0, "Can't sort string pool containing identifiers.");
     LOG_ALWAYS_FATAL_IF(mOriginalPosToNewPos.size() > 0, "Can't sort string pool after already sorted.");
 
     const size_t N = mEntryArray.size();
@@ -432,7 +388,7 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
         }
     }
 
-    const size_t ENTRIES = size();
+    const size_t ENTRIES = mEntryArray.size();
 
     // Now build the pool of unique strings.
 
@@ -566,9 +522,6 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
     header->header.size = htodl(pool->getSize());
     header->stringCount = htodl(ENTRIES);
     header->styleCount = htodl(STYLES);
-    if (mSorted) {
-        header->flags |= htodl(ResStringPool_header::SORTED_FLAG);
-    }
     if (mUTF8) {
         header->flags |= htodl(ResStringPool_header::UTF8_FLAG);
     }
@@ -578,33 +531,18 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
     // Write string index array.
 
     uint32_t* index = (uint32_t*)(header+1);
-    if (mSorted) {
-        for (i=0; i<ENTRIES; i++) {
-            entry& ent = const_cast<entry&>(entryAt(i));
-            ent.indices.clear();
-            ent.indices.add(i);
-            *index++ = htodl(ent.offset);
-        }
-    } else {
-        for (i=0; i<ENTRIES; i++) {
-            entry& ent = mEntries.editItemAt(mEntryArray[i]);
-            *index++ = htodl(ent.offset);
-            NOISY(printf("Writing entry #%d: \"%s\" ent=%d off=%d\n", i,
-                    String8(ent.value).string(),
-                    mEntryArray[i], ent.offset));
-        }
+    for (i=0; i<ENTRIES; i++) {
+        entry& ent = mEntries.editItemAt(mEntryArray[i]);
+        *index++ = htodl(ent.offset);
+        NOISY(printf("Writing entry #%d: \"%s\" ent=%d off=%d\n", i,
+                String8(ent.value).string(),
+                mEntryArray[i], ent.offset));
     }
 
     // Write style index array.
 
-    if (mSorted) {
-        for (i=0; i<STYLES; i++) {
-            LOG_ALWAYS_FATAL("Shouldn't be here!");
-        }
-    } else {
-        for (i=0; i<STYLES; i++) {
-            *index++ = htodl(mEntryStyleArray[i].offset);
-        }
+    for (i=0; i<STYLES; i++) {
+        *index++ = htodl(mEntryStyleArray[i].offset);
     }
 
     return NO_ERROR;
