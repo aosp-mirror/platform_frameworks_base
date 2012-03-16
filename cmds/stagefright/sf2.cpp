@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "sf2"
+#include <utils/Log.h>
+
 #include <binder/ProcessState.h>
 
 #include <media/stagefright/foundation/hexdump.h>
@@ -205,6 +209,12 @@ protected:
                     }
 
                     looper()->stop();
+                } else if (what == ACodec::kWhatError) {
+                    ALOGE("something went wrong, codec reported an error.");
+
+                    printf("E\n");
+
+                    (new AMessage(kWhatStop, id()))->post();
                 }
                 break;
             }
