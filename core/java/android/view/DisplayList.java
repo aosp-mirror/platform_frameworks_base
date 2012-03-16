@@ -28,13 +28,6 @@ import android.os.Handler;
  * @hide 
  */
 public abstract class DisplayList {
-    private final Runnable mInvalidate = new Runnable() {
-        @Override
-        public void run() {
-            invalidate();
-        }
-    };
-
     /**
      * Flag used when calling
      * {@link HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int)}.
@@ -64,13 +57,6 @@ public abstract class DisplayList {
      * causes calls to {@link #isValid()} to return <code>false</code>.
      */
     public abstract void invalidate();
-
-    /**
-     * Posts a call to {@link #invalidate()} in the specified handler.
-     */
-    final void postInvalidate(Handler handler) {
-        handler.post(mInvalidate);
-    }
 
     /**
      * Returns whether the display list is currently usable. If this returns false,

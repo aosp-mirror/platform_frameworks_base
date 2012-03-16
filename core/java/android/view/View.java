@@ -9974,12 +9974,16 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         destroyLayer();
 
-        if (mDisplayList != null) {
-            mDisplayList.postInvalidate(mAttachInfo.mHandler);
-        }
-
         if (mAttachInfo != null) {
+            if (mDisplayList != null) {
+                mAttachInfo.mViewRootImpl.invalidateDisplayList(mDisplayList);
+            }
             mAttachInfo.mViewRootImpl.cancelInvalidate(this);
+        } else {
+            if (mDisplayList != null) {
+                // Should never happen
+                mDisplayList.invalidate();
+            }
         }
 
         mCurrentAnimation = null;

@@ -117,6 +117,8 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_CONFIGURATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_FPS = false;
 
+    private static final boolean USE_RENDER_THREAD = false;
+    
     /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
@@ -300,6 +302,8 @@ public final class ViewRootImpl implements ViewParent,
     private long mFpsPrevTime = -1;
     private int mFpsNumFrames;
 
+    private final ArrayList<DisplayList> mDisplayLists = new ArrayList<DisplayList>(24);
+    
     /**
      * see {@link #playSoundEffect(int)}
      */
@@ -402,23 +406,27 @@ public final class ViewRootImpl implements ViewParent,
      *         false otherwise
      */
     private static boolean isRenderThreadRequested(Context context) {
-        synchronized (sRenderThreadQueryLock) {
-            if (!sRenderThreadQueried) {
-                final PackageManager packageManager = context.getPackageManager();
-                final String packageName = context.getApplicationInfo().packageName;
-                try {
-                    ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName,
-                            PackageManager.GET_META_DATA);
-                    if (applicationInfo.metaData != null) {
-                        sUseRenderThread = applicationInfo.metaData.getBoolean(
-                                "android.graphics.renderThread", false);
+        if (USE_RENDER_THREAD) {
+            synchronized (sRenderThreadQueryLock) {
+                if (!sRenderThreadQueried) {
+                    final PackageManager packageManager = context.getPackageManager();
+                    final String packageName = context.getApplicationInfo().packageName;
+                    try {
+                        ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName,
+                                PackageManager.GET_META_DATA);
+                        if (applicationInfo.metaData != null) {
+                            sUseRenderThread = applicationInfo.metaData.getBoolean(
+                                    "android.graphics.renderThread", false);
+                        }
+                    } catch (PackageManager.NameNotFoundException e) {
+                    } finally {
+                        sRenderThreadQueried = true;
                     }
-                } catch (PackageManager.NameNotFoundException e) {
-                } finally {
-                    sRenderThreadQueried = true;
                 }
+                return sUseRenderThread;
             }
-            return sUseRenderThread;
+        } else {
+            return false;
         }
     }
 
@@ -690,7 +698,7 @@ public final class ViewRootImpl implements ViewParent,
                     return;
                 }
 
-                boolean renderThread = isRenderThreadRequested(context);
+                final boolean renderThread = isRenderThreadRequested(context);
                 if (renderThread) {
                     Log.i(HardwareRenderer.LOG_TAG, "Render threat initiated");
                 }
@@ -2210,6 +2218,17 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    void invalidateDisplayLists() {
+        final ArrayList<DisplayList> displayLists = mDisplayLists;
+        final int count = displayLists.size();
+
+        for (int i = 0; i < count; i++) {
+            displayLists.get(i).invalidate();
+        }
+
+        displayLists.clear();
+    }
+
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
         final View.AttachInfo attachInfo = mAttachInfo;
         final Rect ci = attachInfo.mContentInsets;
@@ -2516,6 +2535,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT = 22;
     private final static int MSG_PROCESS_INPUT_EVENTS = 23;
     private final static int MSG_DISPATCH_SCREEN_STATE = 24;
+    private final static int MSG_INVALIDATE_DISPLAY_LIST = 25;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2567,6 +2587,10 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT";
                 case MSG_PROCESS_INPUT_EVENTS:
                     return "MSG_PROCESS_INPUT_EVENTS";
+                case MSG_DISPATCH_SCREEN_STATE:
+                    return "MSG_DISPATCH_SCREEN_STATE";
+                case MSG_INVALIDATE_DISPLAY_LIST:
+                    return "MSG_INVALIDATE_DISPLAY_LIST";
             }
             return super.getMessageName(message);
         }
@@ -2777,9 +2801,13 @@ public final class ViewRootImpl implements ViewParent,
                     handleScreenStateChange(msg.arg1 == 1);
                 }
             } break;
+            case MSG_INVALIDATE_DISPLAY_LIST: {
+                invalidateDisplayLists();
+            } break;
             }
         }
     }
+
     final ViewRootHandler mHandler = new ViewRootHandler();
 
     /**
@@ -4136,6 +4164,14 @@ public final class ViewRootImpl implements ViewParent,
         mInvalidateOnAnimationRunnable.addViewRect(info);
     }
 
+    public void invalidateDisplayList(DisplayList displayList) {
+        mDisplayLists.add(displayList);
+
+        mHandler.removeMessages(MSG_INVALIDATE_DISPLAY_LIST);
+        Message msg = mHandler.obtainMessage(MSG_INVALIDATE_DISPLAY_LIST);
+        mHandler.sendMessage(msg);
+    }
+    
     public void cancelInvalidate(View view) {
         mHandler.removeMessages(MSG_INVALIDATE, view);
         // fixme: might leak the AttachInfo.InvalidateInfo objects instead of returning
