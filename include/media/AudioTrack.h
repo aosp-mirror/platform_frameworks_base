@@ -130,8 +130,10 @@ public:
      * format:             Audio format (e.g AUDIO_FORMAT_PCM_16_BIT for signed
      *                     16 bits per sample).
      * channelMask:        Channel mask: see audio_channels_t.
-     * frameCount:         Total size of track PCM buffer in frames. This defines the
-     *                     latency of the track.
+     * frameCount:         Minimum size of track PCM buffer in frames. This defines the
+     *                     latency of the track. The actual size selected by the AudioTrack could be
+     *                     larger if the requested size is not compatible with current audio HAL
+     *                     latency.
      * flags:              Reserved for future use.
      * cbf:                Callback function. If not null, this function is called periodically
      *                     to request new PCM data.
