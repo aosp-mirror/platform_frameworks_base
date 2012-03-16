@@ -12,7 +12,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libbinder \
 	libandroid_runtime \
 	libnativehelper \
-	libmedia
+	libmedia \
+	libmedia_native
 
 LOCAL_MODULE:= libsoundpool
 

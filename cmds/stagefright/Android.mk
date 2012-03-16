@@ -7,7 +7,7 @@ LOCAL_SRC_FILES:=       \
 	SineSource.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libstagefright libmedia libutils libbinder libstagefright_foundation \
+	libstagefright libmedia libmedia_native libutils libbinder libstagefright_foundation \
         libskia libgui
 
 LOCAL_C_INCLUDES:= \
@@ -108,7 +108,7 @@ LOCAL_SRC_FILES:=         \
 
 LOCAL_SHARED_LIBRARIES := \
 	libstagefright liblog libutils libbinder libgui \
-        libstagefright_foundation libmedia
+        libstagefright_foundation libmedia libmedia_native
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
@@ -132,7 +132,7 @@ LOCAL_SRC_FILES:=         \
 
 LOCAL_SHARED_LIBRARIES := \
 	libstagefright liblog libutils libbinder libstagefright_foundation \
-        libmedia libgui libcutils libui
+        libmedia libmedia_native libgui libcutils libui
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
@@ -157,7 +157,7 @@ LOCAL_SRC_FILES:=               \
 
 LOCAL_SHARED_LIBRARIES := \
 	libstagefright liblog libutils libbinder libstagefright_foundation \
-        libmedia libgui libcutils libui
+        libmedia libmedia_native libgui libcutils libui
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
