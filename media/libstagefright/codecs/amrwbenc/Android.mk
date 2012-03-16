@@ -5,7 +5,6 @@ include frameworks/base/media/libstagefright/codecs/common/Config.mk
 
 
 LOCAL_SRC_FILES := \
-	AMRWBEncoder.cpp \
 	src/autocorr.c \
 	src/az_isp.c \
 	src/bits.c \
