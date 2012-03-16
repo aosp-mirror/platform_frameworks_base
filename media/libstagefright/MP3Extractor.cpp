@@ -317,6 +317,13 @@ MP3Extractor::MP3Extractor(
         mSeeker = VBRISeeker::CreateFromSource(mDataSource, post_id3_pos);
     }
 
+    if (mSeeker != NULL) {
+        // While it is safe to send the XING/VBRI frame to the decoder, this will
+        // result in an extra 1152 samples being output. The real first frame to
+        // decode is after the XING/VBRI frame, so skip there.
+        mFirstFramePos += frame_size;
+    }
+
     int64_t durationUs;
 
     if (mSeeker == NULL || !mSeeker->getDuration(&durationUs)) {
