@@ -1226,7 +1226,19 @@ public class WebView extends AbsoluteLayout
 
     }
 
-    /*
+    /**
+     * Register the interface to be used when a find-on-page result has become
+     * available. This will replace the current handler.
+     *
+     * @param listener An implementation of FindListener
+     * @hide
+     */
+    public void setFindListener(FindListener listener) {
+        checkThread();
+        mProvider.setFindListener(listener);
+    }
+
+    /**
      * Highlight and scroll to the next occurance of String in findAll.
      * Wraps the page infinitely, and scrolls.  Must be called after
      * calling findAll.
@@ -1238,8 +1250,9 @@ public class WebView extends AbsoluteLayout
         mProvider.findNext(forward);
     }
 
-    /*
+    /**
      * Find all instances of find on the page and highlight them.
+     *
      * @param find  String to find.
      * @return int  The number of occurances of the String "find"
      *              that were found.
@@ -1247,6 +1260,18 @@ public class WebView extends AbsoluteLayout
     public int findAll(String find) {
         checkThread();
         return mProvider.findAll(find);
+    }
+
+    /**
+     * Find all instances of find on the page and highlight them,
+     * asynchronously.
+     *
+     * @param find  String to find.
+     * @hide
+     */
+    public void findAllAsync(String find) {
+        checkThread();
+        mProvider.findAllAsync(find);
     }
 
     /**
