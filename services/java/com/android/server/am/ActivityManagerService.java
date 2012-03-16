@@ -105,6 +105,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.text.format.Time;
 import android.util.EventLog;
 import android.util.Pair;
 import android.util.Slog;
@@ -185,6 +186,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
     
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
+
+    static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
     // Maximum number of recent tasks that we can remember.
     static final int MAX_RECENT_TASKS = 20;
@@ -2925,6 +2928,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             return null;
         }
 
+        dumpStackTraces(tracesPath, firstPids, processStats, lastPids);
+        return tracesFile;
+    }
+
+    private static void dumpStackTraces(String tracesPath, ArrayList<Integer> firstPids,
+            ProcessStats processStats, SparseArray<Boolean> lastPids) {
         // Use a FileObserver to detect when traces finish writing.
         // The order of traces is considered important to maintain for legibility.
         FileObserver observer = new FileObserver(tracesPath, FileObserver.CLOSE_WRITE) {
@@ -2935,16 +2944,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             observer.startWatching();
 
             // First collect all of the stacks of the most important pids.
-            try {
-                int num = firstPids.size();
-                for (int i = 0; i < num; i++) {
-                    synchronized (observer) {
-                        Process.sendSignal(firstPids.get(i), Process.SIGNAL_QUIT);
-                        observer.wait(200);  // Wait for write-close, give up after 200msec
+            if (firstPids != null) {
+                try {
+                    int num = firstPids.size();
+                    for (int i = 0; i < num; i++) {
+                        synchronized (observer) {
+                            Process.sendSignal(firstPids.get(i), Process.SIGNAL_QUIT);
+                            observer.wait(200);  // Wait for write-close, give up after 200msec
+                        }
                     }
+                } catch (InterruptedException e) {
+                    Log.wtf(TAG, e);
                 }
-            } catch (InterruptedException e) {
-                Log.wtf(TAG, e);
             }
 
             // Next measure CPU usage.
@@ -2980,8 +2991,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            return tracesFile;
-
         } finally {
             observer.stopWatching();
         }
@@ -2999,6 +3008,78 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public void run() {
             appNotResponding(mApp, null, null, mAnnotation);
+        }
+    }
+
+    final void logAppTooSlow(ProcessRecord app, long startTime, String msg) {
+        if (IS_USER_BUILD) {
+            return;
+        }
+        String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
+        if (tracesPath == null || tracesPath.length() == 0) {
+            return;
+        }
+
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+        StrictMode.allowThreadDiskWrites();
+        try {
+            final File tracesFile = new File(tracesPath);
+            final File tracesDir = tracesFile.getParentFile();
+            final File tracesTmp = new File(tracesDir, "__tmp__");
+            try {
+                if (!tracesDir.exists()) tracesFile.mkdirs();
+                FileUtils.setPermissions(tracesDir.getPath(), 0775, -1, -1);  // drwxrwxr-x
+
+                if (tracesFile.exists()) {
+                    tracesTmp.delete();
+                    tracesFile.renameTo(tracesTmp);
+                }
+                StringBuilder sb = new StringBuilder();
+                Time tobj = new Time();
+                tobj.set(System.currentTimeMillis());
+                sb.append(tobj.format("%Y-%m-%d %H:%M:%S"));
+                sb.append(": ");
+                TimeUtils.formatDuration(SystemClock.uptimeMillis()-startTime, sb);
+                sb.append(" since ");
+                sb.append(msg);
+                FileOutputStream fos = new FileOutputStream(tracesFile);
+                fos.write(sb.toString().getBytes());
+                if (app == null) {
+                    fos.write("\n*** No application process!".getBytes());
+                }
+                fos.close();
+                FileUtils.setPermissions(tracesFile.getPath(), 0666, -1, -1); // -rw-rw-rw-
+            } catch (IOException e) {
+                Slog.w(TAG, "Unable to prepare slow app traces file: " + tracesPath, e);
+                return;
+            }
+
+            if (app != null) {
+                ArrayList<Integer> firstPids = new ArrayList<Integer>();
+                firstPids.add(app.pid);
+                dumpStackTraces(tracesPath, firstPids, null, null);
+            }
+
+            File lastTracesFile = null;
+            File curTracesFile = null;
+            for (int i=9; i>=0; i--) {
+                String name = String.format("slow%02d.txt", i);
+                curTracesFile = new File(tracesDir, name);
+                if (curTracesFile.exists()) {
+                    if (lastTracesFile != null) {
+                        curTracesFile.renameTo(lastTracesFile);
+                    } else {
+                        curTracesFile.delete();
+                    }
+                }
+                lastTracesFile = curTracesFile;
+            }
+            tracesFile.renameTo(curTracesFile);
+            if (tracesTmp.exists()) {
+                tracesTmp.renameTo(tracesFile);
+            }
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 
