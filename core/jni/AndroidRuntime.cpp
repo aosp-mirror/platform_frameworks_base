@@ -189,49 +189,24 @@ static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
 /*
  * Code written in the Java Programming Language calls here from main().
  */
-static void com_android_internal_os_RuntimeInit_finishInit(JNIEnv* env, jobject clazz)
+static void com_android_internal_os_RuntimeInit_nativeFinishInit(JNIEnv* env, jobject clazz)
 {
     gCurRuntime->onStarted();
 }
 
-static void com_android_internal_os_RuntimeInit_zygoteInit(JNIEnv* env, jobject clazz)
+static void com_android_internal_os_RuntimeInit_nativeZygoteInit(JNIEnv* env, jobject clazz)
 {
     gCurRuntime->onZygoteInit();
-}
-
-static jint com_android_internal_os_RuntimeInit_isComputerOn(JNIEnv* env, jobject clazz)
-{
-    return 1;
-}
-
-static void com_android_internal_os_RuntimeInit_turnComputerOn(JNIEnv* env, jobject clazz)
-{
-}
-
-static jint com_android_internal_os_RuntimeInit_getQwertyKeyboard(JNIEnv* env, jobject clazz)
-{
-    char* value = getenv("qwerty");
-    if (value != NULL && strcmp(value, "true") == 0) {
-        return 1;
-    }
-
-    return 0;
 }
 
 /*
  * JNI registration.
  */
 static JNINativeMethod gMethods[] = {
-    { "finishInit", "()V",
-        (void*) com_android_internal_os_RuntimeInit_finishInit },
-    { "zygoteInitNative", "()V",
-        (void*) com_android_internal_os_RuntimeInit_zygoteInit },
-    { "isComputerOn", "()I",
-        (void*) com_android_internal_os_RuntimeInit_isComputerOn },
-    { "turnComputerOn", "()V",
-        (void*) com_android_internal_os_RuntimeInit_turnComputerOn },
-    { "getQwertyKeyboard", "()I",
-        (void*) com_android_internal_os_RuntimeInit_getQwertyKeyboard },
+    { "nativeFinishInit", "()V",
+        (void*) com_android_internal_os_RuntimeInit_nativeFinishInit },
+    { "nativeZygoteInit", "()V",
+        (void*) com_android_internal_os_RuntimeInit_nativeZygoteInit },
 };
 
 int register_com_android_internal_os_RuntimeInit(JNIEnv* env)

@@ -50,6 +50,9 @@ public class RuntimeInit {
 
     private static volatile boolean mCrashing = false;
 
+    private static final native void nativeZygoteInit();
+    private static final native void nativeFinishInit();
+
     /**
      * Use this to log a message when a thread exits due to an uncaught
      * exception.  The framework catches these for the main threads, so
@@ -90,13 +93,6 @@ public class RuntimeInit {
 
         /* set default handler; this applies to all threads in the VM */
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtHandler());
-
-        int hasQwerty = getQwertyKeyboard();
-
-        if (DEBUG) Slog.d(TAG, ">>>>> qwerty keyboard = " + hasQwerty);
-        if (hasQwerty == 1) {
-            System.setProperty("qwerty", "1");
-        }
 
         /*
          * Install a TimezoneGetter subclass for ZoneInfo.db
@@ -235,16 +231,14 @@ public class RuntimeInit {
          * Now that we're running in interpreted code, call back into native code
          * to run the system.
          */
-        finishInit();
+        nativeFinishInit();
 
         if (DEBUG) Slog.d(TAG, "Leaving RuntimeInit!");
     }
 
-    public static final native void finishInit();
-
     /**
      * The main function called when started through the zygote process. This
-     * could be unified with main(), if the native code in finishInit()
+     * could be unified with main(), if the native code in nativeFinishInit()
      * were rationalized with Zygote startup.<p>
      *
      * Current recognized args:
@@ -262,7 +256,7 @@ public class RuntimeInit {
         redirectLogStreams();
 
         commonInit();
-        zygoteInitNative();
+        nativeZygoteInit();
 
         applicationInit(targetSdkVersion, argv);
     }
@@ -314,24 +308,6 @@ public class RuntimeInit {
         System.err.close();
         System.setErr(new AndroidPrintStream(Log.WARN, "System.err"));
     }
-
-    public static final native void zygoteInitNative();
-
-    /**
-     * Returns 1 if the computer is on. If the computer isn't on, the value returned by this method is undefined.
-     */
-    public static final native int isComputerOn();
-
-    /**
-     * Turns the computer on if the computer is off. If the computer is on, the behavior of this method is undefined.
-     */
-    public static final native void turnComputerOn();
-
-    /**
-     *
-     * @return 1 if the device has a qwerty keyboard
-     */
-    public static native int getQwertyKeyboard();
 
     /**
      * Report a serious error in the current process.  May or may not cause
