@@ -124,6 +124,24 @@ static void dumpstate() {
         dump_file("VM TRACES AT LAST ANR", anr_traces_path);
     }
 
+    /* slow traces for slow operations */
+    if (anr_traces_path[0] != 0) {
+        int tail = strlen(anr_traces_path)-1;
+        while (tail > 0 && anr_traces_path[tail] != '/') {
+            tail--;
+        }
+        int i = 0;
+        while (1) {
+            sprintf(anr_traces_path+tail+1, "slow%02d.txt", i);
+            if (stat(anr_traces_path, &st)) {
+                // No traces file at this index, done with the files.
+                break;
+            }
+            dump_file("VM TRACES WHEN SLOW", anr_traces_path);
+            i++;
+        }
+    }
+
     dump_file("NETWORK DEV INFO", "/proc/net/dev");
     dump_file("QTAGUID NETWORK INTERFACES INFO", "/proc/net/xt_qtaguid/iface_stat_all");
     dump_file("QTAGUID CTRL INFO", "/proc/net/xt_qtaguid/ctrl");

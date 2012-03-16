@@ -87,7 +87,10 @@ final class ActivityStack {
     // How long we wait until giving up on the last activity telling us it
     // is idle.
     static final int IDLE_TIMEOUT = 10*1000;
-    
+
+    // Ticks during which we check progress while waiting for an app to launch.
+    static final int LAUNCH_TICK = 500;
+
     // How long we wait until giving up on the last activity to pause.  This
     // is short because it directly impacts the responsiveness of starting the
     // next activity.
@@ -275,6 +278,7 @@ final class ActivityStack {
     static final int LAUNCH_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
     static final int RESUME_TOP_ACTIVITY_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
+    static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 7;
     
     final Handler mHandler = new Handler() {
         //public Handler() {
@@ -297,6 +301,13 @@ final class ActivityStack {
                     // We don't at this point know if the activity is fullscreen,
                     // so we need to be conservative and assume it isn't.
                     Slog.w(TAG, "Activity pause timeout for " + r);
+                    synchronized (mService) {
+                        if (r.app != null) {
+                            mService.logAppTooSlow(r.app, r.pauseTime,
+                                    "pausing " + r);
+                        }
+                    }
+
                     activityPaused(r != null ? r.appToken : null, true);
                 } break;
                 case IDLE_TIMEOUT_MSG: {
@@ -312,6 +323,15 @@ final class ActivityStack {
                     ActivityRecord r = (ActivityRecord)msg.obj;
                     Slog.w(TAG, "Activity idle timeout for " + r);
                     activityIdleInternal(r != null ? r.appToken : null, true, null);
+                } break;
+                case LAUNCH_TICK_MSG: {
+                    ActivityRecord r = (ActivityRecord)msg.obj;
+                    synchronized (mService) {
+                        if (r.continueLaunchTickingLocked()) {
+                            mService.logAppTooSlow(r.app, r.launchTickTime,
+                                    "launching " + r);
+                        }
+                    }
                 } break;
                 case DESTROY_TIMEOUT_MSG: {
                     ActivityRecord r = (ActivityRecord)msg.obj;
@@ -553,6 +573,9 @@ final class ActivityStack {
 
         r.startFreezingScreenLocked(app, 0);
         mService.mWindowManager.setAppVisibility(r.appToken, true);
+
+        // schedule launch ticks to collect information about slow apps.
+        r.startLaunchTickingLocked();
 
         // Have the window manager re-evaluate the orientation of
         // the screen based on the new activity order.  Note that
@@ -936,6 +959,7 @@ final class ActivityStack {
             // responsiveness seen by the user.
             Message msg = mHandler.obtainMessage(PAUSE_TIMEOUT_MSG);
             msg.obj = prev;
+            prev.pauseTime = SystemClock.uptimeMillis();
             mHandler.sendMessageDelayed(msg, PAUSE_TIMEOUT);
             if (DEBUG_PAUSE) Slog.v(TAG, "Waiting for pause to complete...");
         } else {
@@ -1479,6 +1503,9 @@ final class ActivityStack {
 
             // This activity is now becoming visible.
             mService.mWindowManager.setAppVisibility(next.appToken, true);
+
+            // schedule launch ticks to collect information about slow apps.
+            next.startLaunchTickingLocked();
 
             ActivityRecord lastResumedActivity = mResumedActivity;
             ActivityState lastState = next.state;
@@ -3257,6 +3284,7 @@ final class ActivityStack {
             ActivityRecord r = ActivityRecord.forToken(token);
             if (r != null) {
                 mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
+                r.finishLaunchTickingLocked();
             }
 
             // Get the activity record.
@@ -3627,6 +3655,7 @@ final class ActivityStack {
         mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
         mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
         mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
+        r.finishLaunchTickingLocked();
     }
 
     final void removeActivityFromHistoryLocked(ActivityRecord r) {
