@@ -746,6 +746,10 @@ status_t ACodec::setComponentRole(
             "audio_decoder.aac", "audio_encoder.aac" },
         { MEDIA_MIMETYPE_AUDIO_VORBIS,
             "audio_decoder.vorbis", "audio_encoder.vorbis" },
+        { MEDIA_MIMETYPE_AUDIO_G711_MLAW,
+            "audio_decoder.g711mlaw", "audio_encoder.g711mlaw" },
+        { MEDIA_MIMETYPE_AUDIO_G711_ALAW,
+            "audio_decoder.g711alaw", "audio_encoder.g711alaw" },
         { MEDIA_MIMETYPE_VIDEO_AVC,
             "video_decoder.avc", "video_encoder.avc" },
         { MEDIA_MIMETYPE_VIDEO_MPEG4,
@@ -853,10 +857,6 @@ status_t ACodec::configureCodec(
         } else {
             err = setupG711Codec(encoder, numChannels);
         }
-    }
-
-    if (err != OK) {
-        return err;
     }
 
     int32_t maxInputSize;
@@ -2770,6 +2770,9 @@ bool ACodec::LoadedState::onConfigureComponent(
     status_t err = mCodec->configureCodec(mime.c_str(), msg);
 
     if (err != OK) {
+        ALOGE("[%s] configureCodec returning error %d",
+              mCodec->mComponentName.c_str(), err);
+
         mCodec->signalError(OMX_ErrorUndefined, err);
         return false;
     }
