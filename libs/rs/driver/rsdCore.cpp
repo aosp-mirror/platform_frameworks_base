@@ -228,7 +228,12 @@ bool rsdHalInit(Context *rsc, uint32_t version_major, uint32_t version_minor) {
 
     int cpu = sysconf(_SC_NPROCESSORS_ONLN);
     ALOGV("%p Launching thread(s), CPUs %i", rsc, cpu);
-    if (cpu < 2) cpu = 0;
+    if(rsc->props.mDebugMaxThreads && (cpu > (int)rsc->props.mDebugMaxThreads)) {
+        cpu = rsc->props.mDebugMaxThreads;
+    }
+    if (cpu < 2) {
+        cpu = 0;
+    }
 
     dc->mWorkers.mCount = (uint32_t)cpu;
     dc->mWorkers.mThreadId = (pthread_t *) calloc(dc->mWorkers.mCount, sizeof(pthread_t));

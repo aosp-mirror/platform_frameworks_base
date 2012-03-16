@@ -184,6 +184,7 @@ public:
         bool mLogShadersAttr;
         bool mLogShadersUniforms;
         bool mLogVisual;
+        uint32_t mDebugMaxThreads;
     } props;
 
     mutable struct {
