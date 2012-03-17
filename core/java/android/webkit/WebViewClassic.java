@@ -6130,6 +6130,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     ted.mReprocess = mDeferTouchProcess;
                     ted.mNativeLayer = mCurrentScrollingLayerId;
                     ted.mNativeLayerRect.set(mScrollingLayerRect);
+                    ted.mMotionEvent = MotionEvent.obtain(ev);
                     ted.mSequence = mTouchEventQueue.nextTouchSequence();
                     mTouchEventQueue.preQueueTouchEventData(ted);
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
