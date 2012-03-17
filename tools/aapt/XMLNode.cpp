@@ -973,7 +973,7 @@ status_t XMLNode::assignResourceIds(const sp<AaptAssets>& assets,
 status_t XMLNode::flatten(const sp<AaptFile>& dest,
         bool stripComments, bool stripRawValues) const
 {
-    StringPool strings = StringPool(false, mUTF8);
+    StringPool strings(mUTF8);
     Vector<uint32_t> resids;
     
     // First collect just the strings for attribute names that have a
