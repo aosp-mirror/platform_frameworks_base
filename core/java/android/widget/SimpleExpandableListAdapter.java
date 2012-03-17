@@ -38,6 +38,8 @@ import java.util.Map;
  */
 public class SimpleExpandableListAdapter extends BaseExpandableListAdapter {
     private List<? extends Map<String, ?>> mGroupData;
+    // Keeps track of if a group is currently expanded or not
+    private boolean[] mIsGroupExpanded;
     private int mExpandedGroupLayout;
     private int mCollapsedGroupLayout;
     private String[] mGroupFrom;
@@ -196,6 +198,8 @@ public class SimpleExpandableListAdapter extends BaseExpandableListAdapter {
             int childLayout, int lastChildLayout, String[] childFrom,
             int[] childTo) {
         mGroupData = groupData;
+        // Initially all groups are not expanded
+        mIsGroupExpanded = new boolean[groupData.size()];
         mExpandedGroupLayout = expandedGroupLayout;
         mCollapsedGroupLayout = collapsedGroupLayout;
         mGroupFrom = groupFrom;
@@ -298,4 +302,52 @@ public class SimpleExpandableListAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     * @return 1 for the last child in a group, 0 for the other children.
+     */
+    @Override
+    public int getChildType(int groupPosition, int childPosition) {
+        final int childrenInGroup = getChildrenCount(groupPosition);
+        return childPosition == childrenInGroup - 1 ? 1 : 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return 2, one type for the last child in a group, one for the other children.
+     */
+    @Override
+    public int getChildTypeCount() {
+        return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return 1 for an expanded group view, 0 for a collapsed one.
+     */
+    @Override
+    public int getGroupType(int groupPosition) {
+        return mIsGroupExpanded[groupPosition] ? 1 : 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @return 2, one for a collapsed group view, one for an expanded one.
+     */
+    @Override
+    public int getGroupTypeCount() {
+        return 2;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onGroupCollapsed(int groupPosition) {
+        mIsGroupExpanded[groupPosition] = false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onGroupExpanded(int groupPosition) {
+        mIsGroupExpanded[groupPosition] = true;
+    }
 }
