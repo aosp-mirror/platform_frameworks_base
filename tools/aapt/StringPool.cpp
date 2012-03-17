@@ -213,11 +213,11 @@ status_t StringPool::addStyleSpan(size_t idx, const entry_style_span& span)
     return NO_ERROR;
 }
 
-int StringPool::config_sort(const size_t* lhs, const size_t* rhs, void* state)
+int StringPool::config_sort(void* state, const void* lhs, const void* rhs)
 {
     StringPool* pool = (StringPool*)state;
-    const entry& lhe = pool->mEntries[pool->mEntryArray[*lhs]];
-    const entry& rhe = pool->mEntries[pool->mEntryArray[*rhs]];
+    const entry& lhe = pool->mEntries[pool->mEntryArray[*static_cast<const size_t*>(lhs)]];
+    const entry& rhe = pool->mEntries[pool->mEntryArray[*static_cast<const size_t*>(rhs)]];
     return lhe.compare(rhe);
 }
 
@@ -232,13 +232,17 @@ void StringPool::sortByConfig()
     // At that point it maps from the new position in the array to the
     // original position the entry appeared.
     Vector<size_t> newPosToOriginalPos;
-    for (size_t i=0; i<mEntryArray.size(); i++) {
+    newPosToOriginalPos.setCapacity(N);
+    for (size_t i=0; i < N; i++) {
         newPosToOriginalPos.add(i);
     }
 
     // Sort the array.
     NOISY(printf("SORTING STRINGS BY CONFIGURATION...\n"));
-    newPosToOriginalPos.sort(config_sort, this);
+    // Vector::sort uses insertion sort, which is very slow for this data set.
+    // Use quicksort instead because we don't need a stable sort here.
+    qsort_r(newPosToOriginalPos.editArray(), N, sizeof(size_t), this, config_sort);
+    //newPosToOriginalPos.sort(config_sort, this);
     NOISY(printf("DONE SORTING STRINGS BY CONFIGURATION.\n"));
 
     // Create the reverse mapping from the original position in the array
