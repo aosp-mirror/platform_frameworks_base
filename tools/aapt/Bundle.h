@@ -83,7 +83,7 @@ public:
     bool getForce(void) const { return mForce; }
     void setForce(bool val) { mForce = val; }
     void setGrayscaleTolerance(int val) { mGrayscaleTolerance = val; }
-    int  getGrayscaleTolerance() { return mGrayscaleTolerance; }
+    int  getGrayscaleTolerance() const { return mGrayscaleTolerance; }
     bool getMakePackageDirs(void) const { return mMakePackageDirs; }
     void setMakePackageDirs(bool val) { mMakePackageDirs = val; }
     bool getUpdate(void) const { return mUpdate; }
@@ -166,14 +166,14 @@ public:
     void setExtraPackages(const char* val) { mExtraPackages = val; }
     const char* getMaxResVersion() const { return mMaxResVersion; }
     void setMaxResVersion(const char * val) { mMaxResVersion = val; }
-    bool getDebugMode() { return mDebugMode; }
+    bool getDebugMode() const { return mDebugMode; }
     void setDebugMode(bool val) { mDebugMode = val; }
-    bool getNonConstantId() { return mNonConstantId; }
+    bool getNonConstantId() const { return mNonConstantId; }
     void setNonConstantId(bool val) { mNonConstantId = val; }
     const char* getProduct() const { return mProduct; }
     void setProduct(const char * val) { mProduct = val; }
     void setUseCrunchCache(bool val) { mUseCrunchCache = val; }
-    bool getUseCrunchCache() { return mUseCrunchCache; }
+    bool getUseCrunchCache() const { return mUseCrunchCache; }
 
     /*
      * Set and get the file specification.
