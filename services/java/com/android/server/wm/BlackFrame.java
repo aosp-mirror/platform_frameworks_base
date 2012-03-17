@@ -157,6 +157,14 @@ public class BlackFrame {
         }
     }
 
+    public void setAlpha(float alpha) {
+        for (int i=0; i<mBlackSurfaces.length; i++) {
+            if (mBlackSurfaces[i] != null) {
+                mBlackSurfaces[i].surface.setAlpha(alpha);
+            }
+        }
+    }
+
     public void clearMatrix() {
         for (int i=0; i<mBlackSurfaces.length; i++) {
             if (mBlackSurfaces[i] != null) {

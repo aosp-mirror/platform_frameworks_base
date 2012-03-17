@@ -33,12 +33,15 @@ class ScreenRotationAnimation {
     static final String TAG = "ScreenRotationAnimation";
     static final boolean DEBUG_STATE = false;
     static final boolean DEBUG_TRANSFORMS = false;
+    static final boolean USE_CUSTOM_BLACK_FRAME = false;
 
     static final int FREEZE_LAYER = WindowManagerService.TYPE_LAYER_MULTIPLIER * 200;
 
     final Context mContext;
     Surface mSurface;
-    BlackFrame mBlackFrame;
+    BlackFrame mCustomBlackFrame;
+    BlackFrame mExitingBlackFrame;
+    BlackFrame mEnteringBlackFrame;
     int mWidth, mHeight;
 
     int mSnapshotDeltaRotation;
@@ -104,6 +107,7 @@ class ScreenRotationAnimation {
     final Matrix mFrameInitialMatrix = new Matrix();
     final Matrix mSnapshotInitialMatrix = new Matrix();
     final Matrix mSnapshotFinalMatrix = new Matrix();
+    final Matrix mExitFrameFinalMatrix = new Matrix();
     final Matrix mTmpMatrix = new Matrix();
     final float[] mTmpFloats = new float[9];
     private boolean mMoreRotateEnter;
@@ -120,9 +124,19 @@ class ScreenRotationAnimation {
         pw.print(prefix); pw.print("mSurface="); pw.print(mSurface);
                 pw.print(" mWidth="); pw.print(mWidth);
                 pw.print(" mHeight="); pw.println(mHeight);
-        pw.print(prefix); pw.print("mBlackFrame="); pw.println(mBlackFrame);
-        if (mBlackFrame != null) {
-            mBlackFrame.printTo(prefix + "  ", pw);
+        if (USE_CUSTOM_BLACK_FRAME) {
+            pw.print(prefix); pw.print("mCustomBlackFrame="); pw.println(mCustomBlackFrame);
+            if (mCustomBlackFrame != null) {
+                mCustomBlackFrame.printTo(prefix + "  ", pw);
+            }
+        }
+        pw.print(prefix); pw.print("mExitingBlackFrame="); pw.println(mExitingBlackFrame);
+        if (mExitingBlackFrame != null) {
+            mExitingBlackFrame.printTo(prefix + "  ", pw);
+        }
+        pw.print(prefix); pw.print("mEnteringBlackFrame="); pw.println(mEnteringBlackFrame);
+        if (mEnteringBlackFrame != null) {
+            mEnteringBlackFrame.printTo(prefix + "  ", pw);
         }
         pw.print(prefix); pw.print(" mSnapshotDeltaRotation="); pw.print(mSnapshotDeltaRotation);
                 pw.print(" mCurRotation="); pw.println(mCurRotation);
@@ -164,6 +178,9 @@ class ScreenRotationAnimation {
                 mSnapshotInitialMatrix.printShortString(pw);
                 pw.print(" mSnapshotFinalMatrix="); mSnapshotFinalMatrix.printShortString(pw);
                 pw.println();
+        pw.print(prefix); pw.print("mExitFrameFinalMatrix=");
+                mExitFrameFinalMatrix.printShortString(pw);
+                pw.println();
     }
 
     public ScreenRotationAnimation(Context context, SurfaceSession session,
@@ -199,7 +216,7 @@ class ScreenRotationAnimation {
                     mSurface = null;
                     return;
                 }
-                mSurface.setLayer(FREEZE_LAYER);
+                mSurface.setLayer(FREEZE_LAYER + 1);
                 mSurface.show();
             } catch (Surface.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate freeze surface", e);
@@ -320,14 +337,18 @@ class ScreenRotationAnimation {
                     com.android.internal.R.anim.screen_rotate_start_exit);
             mStartEnterAnimation = AnimationUtils.loadAnimation(mContext,
                     com.android.internal.R.anim.screen_rotate_start_enter);
-            mStartFrameAnimation = AnimationUtils.loadAnimation(mContext,
-                    com.android.internal.R.anim.screen_rotate_start_frame);
+            if (USE_CUSTOM_BLACK_FRAME) {
+                mStartFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                        com.android.internal.R.anim.screen_rotate_start_frame);
+            }
             mFinishExitAnimation = AnimationUtils.loadAnimation(mContext,
                     com.android.internal.R.anim.screen_rotate_finish_exit);
             mFinishEnterAnimation = AnimationUtils.loadAnimation(mContext,
                     com.android.internal.R.anim.screen_rotate_finish_enter);
-            mFinishFrameAnimation = AnimationUtils.loadAnimation(mContext,
-                    com.android.internal.R.anim.screen_rotate_finish_frame);
+            if (USE_CUSTOM_BLACK_FRAME) {
+                mFinishFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                        com.android.internal.R.anim.screen_rotate_finish_frame);
+            }
         }
 
         if (DEBUG_STATE) Slog.v(TAG, "Rotation delta: " + delta + " finalWidth="
@@ -340,16 +361,20 @@ class ScreenRotationAnimation {
                         com.android.internal.R.anim.screen_rotate_0_exit);
                 mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_0_enter);
-                mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_0_frame);
+                if (USE_CUSTOM_BLACK_FRAME) {
+                    mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_0_frame);
+                }
                 break;
             case Surface.ROTATION_90:
                 mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_plus_90_exit);
                 mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_plus_90_enter);
-                mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_plus_90_frame);
+                if (USE_CUSTOM_BLACK_FRAME) {
+                    mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_plus_90_frame);
+                }
                 break;
             case Surface.ROTATION_180:
                 mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
@@ -364,8 +389,10 @@ class ScreenRotationAnimation {
                         com.android.internal.R.anim.screen_rotate_minus_90_exit);
                 mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
                         com.android.internal.R.anim.screen_rotate_minus_90_enter);
-                mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.screen_rotate_minus_90_frame);
+                if (USE_CUSTOM_BLACK_FRAME) {
+                    mRotateFrameAnimation = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.screen_rotate_minus_90_frame);
+                }
                 break;
         }
 
@@ -385,18 +412,23 @@ class ScreenRotationAnimation {
                     halfWidth, halfHeight);
             mStartExitAnimation.initialize(halfWidth, halfHeight,
                     mOriginalWidth, mOriginalHeight);
-            mStartFrameAnimation.initialize(finalWidth, finalHeight,
-                    mOriginalWidth, mOriginalHeight);
             mFinishEnterAnimation.initialize(finalWidth, finalHeight,
                     halfWidth, halfHeight);
             mFinishExitAnimation.initialize(halfWidth, halfHeight,
                     mOriginalWidth, mOriginalHeight);
-            mFinishFrameAnimation.initialize(finalWidth, finalHeight,
-                    mOriginalWidth, mOriginalHeight);
+            if (USE_CUSTOM_BLACK_FRAME) {
+                mStartFrameAnimation.initialize(finalWidth, finalHeight,
+                        mOriginalWidth, mOriginalHeight);
+                mFinishFrameAnimation.initialize(finalWidth, finalHeight,
+                        mOriginalWidth, mOriginalHeight);
+            }
         }
         mRotateEnterAnimation.initialize(finalWidth, finalHeight, mOriginalWidth, mOriginalHeight);
         mRotateExitAnimation.initialize(finalWidth, finalHeight, mOriginalWidth, mOriginalHeight);
-        mRotateFrameAnimation.initialize(finalWidth, finalHeight, mOriginalWidth, mOriginalHeight);
+        if (USE_CUSTOM_BLACK_FRAME) {
+            mRotateFrameAnimation.initialize(finalWidth, finalHeight, mOriginalWidth,
+                    mOriginalHeight);
+        }
         mAnimRunning = false;
         mFinishAnimReady = false;
         mFinishAnimStartTime = -1;
@@ -406,23 +438,27 @@ class ScreenRotationAnimation {
             mStartExitAnimation.scaleCurrentDuration(animationScale);
             mStartEnterAnimation.restrictDuration(maxAnimationDuration);
             mStartEnterAnimation.scaleCurrentDuration(animationScale);
-            mStartFrameAnimation.restrictDuration(maxAnimationDuration);
-            mStartFrameAnimation.scaleCurrentDuration(animationScale);
             mFinishExitAnimation.restrictDuration(maxAnimationDuration);
             mFinishExitAnimation.scaleCurrentDuration(animationScale);
             mFinishEnterAnimation.restrictDuration(maxAnimationDuration);
             mFinishEnterAnimation.scaleCurrentDuration(animationScale);
-            mFinishFrameAnimation.restrictDuration(maxAnimationDuration);
-            mFinishFrameAnimation.scaleCurrentDuration(animationScale);
+            if (USE_CUSTOM_BLACK_FRAME) {
+                mStartFrameAnimation.restrictDuration(maxAnimationDuration);
+                mStartFrameAnimation.scaleCurrentDuration(animationScale);
+                mFinishFrameAnimation.restrictDuration(maxAnimationDuration);
+                mFinishFrameAnimation.scaleCurrentDuration(animationScale);
+            }
         }
         mRotateExitAnimation.restrictDuration(maxAnimationDuration);
         mRotateExitAnimation.scaleCurrentDuration(animationScale);
         mRotateEnterAnimation.restrictDuration(maxAnimationDuration);
         mRotateEnterAnimation.scaleCurrentDuration(animationScale);
-        mRotateFrameAnimation.restrictDuration(maxAnimationDuration);
-        mRotateFrameAnimation.scaleCurrentDuration(animationScale);
+        if (USE_CUSTOM_BLACK_FRAME) {
+            mRotateFrameAnimation.restrictDuration(maxAnimationDuration);
+            mRotateFrameAnimation.scaleCurrentDuration(animationScale);
+        }
 
-        if (mBlackFrame == null) {
+        if (USE_CUSTOM_BLACK_FRAME && mCustomBlackFrame == null) {
             if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
                     WindowManagerService.TAG,
                     ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
@@ -440,8 +476,59 @@ class ScreenRotationAnimation {
                 Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
                         mOriginalWidth*2, mOriginalHeight*2);
                 Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
-                mBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 1);
-                mBlackFrame.setMatrix(mFrameInitialMatrix);
+                mCustomBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 3);
+                mCustomBlackFrame.setMatrix(mFrameInitialMatrix);
+            } catch (Surface.OutOfResourcesException e) {
+                Slog.w(TAG, "Unable to allocate black surface", e);
+            } finally {
+                Surface.closeTransaction();
+                if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                        WindowManagerService.TAG,
+                        "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
+            }
+        }
+
+        if (mExitingBlackFrame == null) {
+            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                    WindowManagerService.TAG,
+                    ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
+            Surface.openTransaction();
+
+            // Compute the transformation matrix that must be applied
+            // the the black frame to make it stay in the initial position
+            // before the new screen rotation.  This is different than the
+            // snapshot transformation because the snapshot is always based
+            // of the native orientation of the screen, not the orientation
+            // we were last in.
+            createRotationMatrix(delta, mOriginalWidth, mOriginalHeight, mFrameInitialMatrix);
+
+            try {
+                Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
+                        mOriginalWidth*2, mOriginalHeight*2);
+                Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
+                mExitingBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER + 2);
+                mExitingBlackFrame.setMatrix(mFrameInitialMatrix);
+            } catch (Surface.OutOfResourcesException e) {
+                Slog.w(TAG, "Unable to allocate black surface", e);
+            } finally {
+                Surface.closeTransaction();
+                if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                        WindowManagerService.TAG,
+                        "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
+            }
+        }
+
+        if (false && mEnteringBlackFrame == null) {
+            if (WindowManagerService.SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
+                    WindowManagerService.TAG,
+                    ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
+            Surface.openTransaction();
+
+            try {
+                Rect outer = new Rect(-finalWidth*1, -finalHeight*1,
+                        finalWidth*2, finalHeight*2);
+                Rect inner = new Rect(0, 0, finalWidth, finalHeight);
+                mEnteringBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER);
             } catch (Surface.OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
             } finally {
@@ -486,9 +573,17 @@ class ScreenRotationAnimation {
             mSurface.destroy();
             mSurface = null;
         }
-        if (mBlackFrame != null) {
-            mBlackFrame.kill();
-            mBlackFrame = null;
+        if (mCustomBlackFrame != null) {
+            mCustomBlackFrame.kill();
+            mCustomBlackFrame = null;
+        }
+        if (mExitingBlackFrame != null) {
+            mExitingBlackFrame.kill();
+            mExitingBlackFrame = null;
+        }
+        if (mEnteringBlackFrame != null) {
+            mEnteringBlackFrame.kill();
+            mEnteringBlackFrame = null;
         }
         if (mStartExitAnimation != null) {
             mStartExitAnimation.cancel();
@@ -544,123 +639,120 @@ class ScreenRotationAnimation {
             mFinishAnimStartTime = now;
         }
 
-        // If the start animation is no longer running, we want to keep its
-        // transformation intact until the finish animation also completes.
-
         mMoreStartExit = false;
         if (mStartExitAnimation != null) {
-            mStartExitTransformation.clear();
             mMoreStartExit = mStartExitAnimation.getTransformation(now, mStartExitTransformation);
             if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped start exit: " + mStartExitTransformation);
-            if (!mMoreStartExit) {
-                if (DEBUG_STATE) Slog.v(TAG, "Start exit animation done!");
-                mStartExitAnimation.cancel();
-                mStartExitAnimation = null;
-            }
         }
 
         mMoreStartEnter = false;
         if (mStartEnterAnimation != null) {
-            mStartEnterTransformation.clear();
             mMoreStartEnter = mStartEnterAnimation.getTransformation(now, mStartEnterTransformation);
             if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped start enter: " + mStartEnterTransformation);
-            if (!mMoreStartEnter) {
-                if (DEBUG_STATE) Slog.v(TAG, "Start enter animation done!");
-                mStartEnterAnimation.cancel();
-                mStartEnterAnimation = null;
-            }
         }
 
         mMoreStartFrame = false;
         if (mStartFrameAnimation != null) {
-            mStartFrameTransformation.clear();
             mMoreStartFrame = mStartFrameAnimation.getTransformation(now, mStartFrameTransformation);
             if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped start frame: " + mStartFrameTransformation);
-            if (!mMoreStartFrame) {
-                if (DEBUG_STATE) Slog.v(TAG, "Start frame animation done!");
-                mStartFrameAnimation.cancel();
-                mStartFrameAnimation = null;
-            }
         }
 
         long finishNow = mFinishAnimReady ? (now - mFinishAnimStartTime) : 0;
         if (DEBUG_STATE) Slog.v(TAG, "Step: finishNow=" + finishNow);
 
-        mFinishExitTransformation.clear();
         mMoreFinishExit = false;
         if (mFinishExitAnimation != null) {
             mMoreFinishExit = mFinishExitAnimation.getTransformation(finishNow, mFinishExitTransformation);
             if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped finish exit: " + mFinishExitTransformation);
-            if (!mMoreStartExit && !mMoreFinishExit) {
-                if (DEBUG_STATE) Slog.v(TAG, "Finish exit animation done, clearing start/finish anims!");
-                mStartExitTransformation.clear();
-                mFinishExitAnimation.cancel();
-                mFinishExitAnimation = null;
-                mFinishExitTransformation.clear();
-            }
         }
 
-        mFinishEnterTransformation.clear();
         mMoreFinishEnter = false;
         if (mFinishEnterAnimation != null) {
             mMoreFinishEnter = mFinishEnterAnimation.getTransformation(finishNow, mFinishEnterTransformation);
             if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped finish enter: " + mFinishEnterTransformation);
-            if (!mMoreStartEnter && !mMoreFinishEnter) {
-                if (DEBUG_STATE) Slog.v(TAG, "Finish enter animation done, clearing start/finish anims!");
-                mStartEnterTransformation.clear();
-                mFinishEnterAnimation.cancel();
-                mFinishEnterAnimation = null;
-                mFinishEnterTransformation.clear();
-            }
         }
 
-        mFinishFrameTransformation.clear();
         mMoreFinishFrame = false;
         if (mFinishFrameAnimation != null) {
             mMoreFinishFrame = mFinishFrameAnimation.getTransformation(finishNow, mFinishFrameTransformation);
             if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped finish frame: " + mFinishFrameTransformation);
-            if (!mMoreStartFrame && !mMoreFinishFrame) {
-                if (DEBUG_STATE) Slog.v(TAG, "Finish frame animation done, clearing start/finish anims!");
-                mStartFrameTransformation.clear();
-                mFinishFrameAnimation.cancel();
-                mFinishFrameAnimation = null;
-                mFinishFrameTransformation.clear();
-            }
         }
 
-        mRotateExitTransformation.clear();
         mMoreRotateExit = false;
         if (mRotateExitAnimation != null) {
             mMoreRotateExit = mRotateExitAnimation.getTransformation(now, mRotateExitTransformation);
             if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate exit: " + mRotateExitTransformation);
-            if (!mMoreFinishExit && !mMoreRotateExit) {
-                if (DEBUG_STATE) Slog.v(TAG, "Rotate exit animation done!");
+        }
+
+        mMoreRotateEnter = false;
+        if (mRotateEnterAnimation != null) {
+            mMoreRotateEnter = mRotateEnterAnimation.getTransformation(now, mRotateEnterTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate enter: " + mRotateEnterTransformation);
+        }
+
+        mMoreRotateFrame = false;
+        if (mRotateFrameAnimation != null) {
+            mMoreRotateFrame = mRotateFrameAnimation.getTransformation(now, mRotateFrameTransformation);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate frame: " + mRotateFrameTransformation);
+        }
+
+        if (!mMoreStartExit && !mMoreRotateExit && !mMoreFinishExit) {
+            if (mStartExitAnimation != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Exit animations done, clearing start exit anim!");
+                mStartExitAnimation.cancel();
+                mStartExitAnimation = null;
+                mStartExitTransformation.clear();
+            }
+            if (mFinishExitAnimation != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Exit animations done, clearing finish exit anim!");
+                mFinishExitAnimation.cancel();
+                mFinishExitAnimation = null;
+                mFinishExitTransformation.clear();
+            }
+            if (mRotateExitAnimation != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Exit animations done, clearing rotate exit anim!");
                 mRotateExitAnimation.cancel();
                 mRotateExitAnimation = null;
                 mRotateExitTransformation.clear();
             }
         }
 
-        mRotateEnterTransformation.clear();
-        mMoreRotateEnter = false;
-        if (mRotateEnterAnimation != null) {
-            mMoreRotateEnter = mRotateEnterAnimation.getTransformation(now, mRotateEnterTransformation);
-            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate enter: " + mRotateEnterTransformation);
-            if (!mMoreFinishEnter && !mMoreRotateEnter) {
-                if (DEBUG_STATE) Slog.v(TAG, "Rotate enter animation done!");
+        if (!mMoreStartEnter && !mMoreRotateEnter && !mMoreFinishEnter) {
+            if (mStartEnterAnimation != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Enter animations done, clearing start enter anim!");
+                mStartEnterAnimation.cancel();
+                mStartEnterAnimation = null;
+                mStartEnterTransformation.clear();
+            }
+            if (mFinishEnterAnimation != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Enter animations done, clearing finish enter anim!");
+                mFinishEnterAnimation.cancel();
+                mFinishEnterAnimation = null;
+                mFinishEnterTransformation.clear();
+            }
+            if (mRotateEnterAnimation != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Enter animations done, clearing rotate enter anim!");
                 mRotateEnterAnimation.cancel();
                 mRotateEnterAnimation = null;
                 mRotateEnterTransformation.clear();
             }
         }
 
-        mRotateFrameTransformation.clear();
-        mMoreRotateFrame = false;
-        if (mRotateFrameAnimation != null) {
-            mMoreRotateFrame = mRotateFrameAnimation.getTransformation(now, mRotateFrameTransformation);
-            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Stepped rotate frame: " + mRotateFrameTransformation);
-            if (!mMoreFinishFrame && !mMoreRotateFrame) {
-                if (DEBUG_STATE) Slog.v(TAG, "Rotate frame animation done!");
+        if (USE_CUSTOM_BLACK_FRAME && !mMoreStartFrame && !mMoreRotateFrame && !mMoreFinishFrame) {
+            if (mStartFrameAnimation != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, clearing start frame anim!");
+                mStartFrameAnimation.cancel();
+                mStartFrameAnimation = null;
+                mStartFrameTransformation.clear();
+            }
+            if (mFinishFrameAnimation != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, clearing finish frame anim!");
+                mFinishFrameAnimation.cancel();
+                mFinishFrameAnimation = null;
+                mFinishFrameTransformation.clear();
+            }
+            if (mRotateFrameAnimation != null) {
+                if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, clearing rotate frame anim!");
                 mRotateFrameAnimation.cancel();
                 mRotateFrameAnimation = null;
                 mRotateFrameTransformation.clear();
@@ -675,17 +767,19 @@ class ScreenRotationAnimation {
         mEnterTransformation.compose(mStartEnterTransformation);
         mEnterTransformation.compose(mFinishEnterTransformation);
 
-        //mFrameTransformation.set(mRotateExitTransformation);
-        //mFrameTransformation.compose(mStartExitTransformation);
-        //mFrameTransformation.compose(mFinishExitTransformation);
-        mFrameTransformation.set(mRotateFrameTransformation);
-        mFrameTransformation.compose(mStartFrameTransformation);
-        mFrameTransformation.compose(mFinishFrameTransformation);
-        mFrameTransformation.getMatrix().preConcat(mFrameInitialMatrix);
-
         if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final exit: " + mExitTransformation);
         if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final enter: " + mEnterTransformation);
-        if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final frame: " + mFrameTransformation);
+
+        if (USE_CUSTOM_BLACK_FRAME) {
+            //mFrameTransformation.set(mRotateExitTransformation);
+            //mFrameTransformation.compose(mStartExitTransformation);
+            //mFrameTransformation.compose(mFinishExitTransformation);
+            mFrameTransformation.set(mRotateFrameTransformation);
+            mFrameTransformation.compose(mStartFrameTransformation);
+            mFrameTransformation.compose(mFinishFrameTransformation);
+            mFrameTransformation.getMatrix().preConcat(mFrameInitialMatrix);
+            if (DEBUG_TRANSFORMS) Slog.v(TAG, "Final frame: " + mFrameTransformation);
+        }
 
         final boolean more = mMoreStartEnter || mMoreStartExit || mMoreStartFrame
                 || mMoreFinishEnter || mMoreFinishExit || mMoreFinishFrame
@@ -707,12 +801,32 @@ class ScreenRotationAnimation {
             }
         }
 
-        if (mBlackFrame != null) {
+        if (mCustomBlackFrame != null) {
             if (!mMoreStartFrame && !mMoreFinishFrame && !mMoreRotateFrame) {
                 if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, hiding black frame");
-                mBlackFrame.hide();
+                mCustomBlackFrame.hide();
             } else {
-                mBlackFrame.setMatrix(mFrameTransformation.getMatrix());
+                mCustomBlackFrame.setMatrix(mFrameTransformation.getMatrix());
+            }
+        }
+
+        if (mExitingBlackFrame != null) {
+            if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
+                if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, hiding exiting frame");
+                mExitingBlackFrame.hide();
+            } else {
+                mExitFrameFinalMatrix.setConcat(mExitTransformation.getMatrix(), mFrameInitialMatrix);
+                mExitingBlackFrame.setMatrix(mExitFrameFinalMatrix);
+                mExitingBlackFrame.setAlpha(mExitTransformation.getAlpha());
+            }
+        }
+
+        if (mEnteringBlackFrame != null) {
+            if (!mMoreStartEnter && !mMoreFinishEnter && !mMoreRotateEnter) {
+                if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, hiding entering frame");
+                mEnteringBlackFrame.hide();
+            } else {
+                mEnteringBlackFrame.setMatrix(mEnterTransformation.getMatrix());
             }
         }
 
