@@ -408,6 +408,12 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
                 break;
             }
 
+            if (mAudioSink != NULL) {
+                mLatencyUs = (int64_t)mAudioSink->latency() * 1000;
+            } else {
+                mLatencyUs = (int64_t)mAudioTrack->latency() * 1000;
+            }
+
             CHECK(mInputBuffer->meta_data()->findInt64(
                         kKeyTime, &mPositionTimeMediaUs));
 
