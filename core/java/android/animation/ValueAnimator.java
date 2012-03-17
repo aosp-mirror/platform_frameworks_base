@@ -557,12 +557,22 @@ public class ValueAnimator extends Animator {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case ANIMATION_START:
-                    doAnimationStart();
+                    // If there are already active animations, or if another ANIMATION_START
+                    // message was processed during this frame, then the pending list may already
+                    // have been cleared. If that's the case, we've already processed the
+                    // active animations for this frame - don't do it again.
+                    if (mPendingAnimations.size() > 0) {
+                        doAnimationFrame();
+                    }
                     break;
             }
         }
 
-        private void doAnimationStart() {
+        private void doAnimationFrame() {
+            // currentTime holds the common time for all animations processed
+            // during this frame
+            long currentTime = AnimationUtils.currentAnimationTimeMillis();
+
             // mPendingAnimations holds any animations that have requested to be started
             // We're going to clear mPendingAnimations, but starting animation may
             // cause more to be added to the pending list (for example, if one animation
@@ -583,15 +593,7 @@ public class ValueAnimator extends Animator {
                     }
                 }
             }
-            doAnimationFrame();
-        }
-
-        private void doAnimationFrame() {
-            // currentTime holds the common time for all animations processed
-            // during this frame
-            long currentTime = AnimationUtils.currentAnimationTimeMillis();
-
-            // First, process animations currently sitting on the delayed queue, adding
+            // Next, process animations currently sitting on the delayed queue, adding
             // them to the active animations if they are ready
             int numDelayedAnims = mDelayedAnims.size();
             for (int i = 0; i < numDelayedAnims; ++i) {
