@@ -62,7 +62,7 @@ class TRTPPacket : public RefBase {
     int64_t getPTS() const;
 
     void setEpoch(uint32_t val);
-    void setProgramID(uint16_t val);
+    void setProgramID(uint8_t val);
     void setSubstreamID(uint16_t val);
     void setClockTransform(const LinearTransform& trans);
 
@@ -103,7 +103,7 @@ class TRTPPacket : public RefBase {
     bool mPTSValid;
     int64_t  mPTS;
     uint32_t mEpoch;
-    uint16_t mProgramID;
+    uint8_t mProgramID;
     uint16_t mSubstreamID;
     LinearTransform mClockTranform;
     bool mClockTranformValid;
@@ -177,14 +177,35 @@ class TRTPControlPacket : public TRTPPacket {
         kCommandNop   = 1,
         kCommandFlush = 2,
         kCommandEOS   = 3,
+        kCommandAPU   = 4,
     };
 
     void setCommandID(TRTPCommandID val);
 
     virtual bool pack();
 
-  private:
+  protected:
+    explicit TRTPControlPacket(TRTPCommandID commandID)
+        : TRTPPacket(kHeaderTypeControl)
+        , mCommandID(commandID) {}
+
     TRTPCommandID mCommandID;
+};
+
+class TRTPActiveProgramUpdatePacket : public TRTPControlPacket {
+  public:
+    TRTPActiveProgramUpdatePacket()
+        : TRTPControlPacket(kCommandAPU)
+        , mProgramIDCnt(0) {}
+
+    virtual bool pack();
+    bool pushProgramID(uint8_t id);
+
+  private:
+    static const uint8_t kMaxProgramIDs = 31;
+
+    uint8_t mProgramIDCnt;
+    uint8_t mProgramIDs[kMaxProgramIDs];
 };
 
 }  // namespace android

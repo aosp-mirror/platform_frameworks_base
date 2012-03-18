@@ -37,9 +37,10 @@ const uint32_t AAH_RXPlayer::kRetransNAKMagic =
     FOURCC('T','n','a','k');
 const uint32_t AAH_RXPlayer::kFastStartRequestMagic =
     FOURCC('T','f','s','t');
-const uint32_t AAH_RXPlayer::kGapRerequestTimeoutUSec = 75000;
-const uint32_t AAH_RXPlayer::kFastStartTimeoutUSec = 800000;
-const uint32_t AAH_RXPlayer::kRTPActivityTimeoutUSec = 10000000;
+const uint32_t AAH_RXPlayer::kGapRerequestTimeoutMsec = 75;
+const uint32_t AAH_RXPlayer::kFastStartTimeoutMsec = 800;
+const uint32_t AAH_RXPlayer::kRTPActivityTimeoutMsec = 10000;
+const uint32_t AAH_RXPlayer::kSSCleanoutTimeoutMsec = 1000;
 
 static inline int16_t fetchInt16(uint8_t* data) {
     return static_cast<int16_t>(U16_AT(data));
@@ -53,20 +54,10 @@ static inline int64_t fetchInt64(uint8_t* data) {
     return static_cast<int64_t>(U64_AT(data));
 }
 
-uint64_t AAH_RXPlayer::monotonicUSecNow() {
-    struct timespec now;
-    int res = clock_gettime(CLOCK_MONOTONIC, &now);
-    CHECK(res >= 0);
-
-    uint64_t ret = static_cast<uint64_t>(now.tv_sec) * 1000000;
-    ret += now.tv_nsec / 1000;
-
-    return ret;
-}
-
 status_t AAH_RXPlayer::startWorkThread() {
     status_t res;
     stopWorkThread();
+    ss_cleanout_timeout_.setTimeout(kSSCleanoutTimeoutMsec);
     res = thread_wrapper_->run("TRX_Player", PRIORITY_AUDIO);
 
     if (res != OK) {
@@ -125,7 +116,7 @@ void AAH_RXPlayer::resetPipeline() {
 
     substreams_.clear();
 
-    current_gap_status_ = kGS_NoGap;
+    setGapStatus(kGS_NoGap);
 }
 
 bool AAH_RXPlayer::setupSocket() {
@@ -231,24 +222,25 @@ bool AAH_RXPlayer::threadLoop() {
 
     while (!thread_wrapper_->exitPending()) {
         // Step 1: Wait until there is something to do.
-        int gap_timeout = computeNextGapRetransmitTimeout();
+        int gap_timeout = next_retrans_req_timeout_.msecTillTimeout();
         int ring_timeout = ring_buffer_.computeInactivityTimeout();
+        int ss_cleanout_timeout = ss_cleanout_timeout_.msecTillTimeout();
         int timeout = -1;
 
         if (!ring_timeout) {
             LOGW("RTP inactivity timeout reached, resetting pipeline.");
             resetPipeline();
-            timeout = gap_timeout;
-        } else {
-            if (gap_timeout < 0) {
-                timeout = ring_timeout;
-            } else if (ring_timeout < 0) {
-                timeout = gap_timeout;
-            } else {
-                timeout = (gap_timeout < ring_timeout) ? gap_timeout
-                                                       : ring_timeout;
-            }
+            continue;
         }
+
+        if (!ss_cleanout_timeout) {
+            cleanoutExpiredSubstreams();
+            continue;
+        }
+
+        timeout = minTimeout(gap_timeout, timeout);
+        timeout = minTimeout(ring_timeout, timeout);
+        timeout = minTimeout(ss_cleanout_timeout, timeout);
 
         if ((0 != timeout) && (!process_more_right_now)) {
             // Set up the events to wait on.  Start with the wakeup pipe.
@@ -564,7 +556,7 @@ void AAH_RXPlayer::processRingBuffer() {
                 }
             }
 
-            // Is this a command packet?  If so, its not necessarily associate
+            // Is this a command packet?  If so, its not necessarily associated
             // with one particular substream.  Just give it to the command
             // packet handler and then move on.
             if (4 == payload_type) {
@@ -620,7 +612,7 @@ void AAH_RXPlayer::processCommandPacket(PacketBuffer* pb) {
     }
 
     uint8_t trtp_version =  data[12];
-    uint8_t trtp_flags   =  data[13]       & 0xF;
+    uint8_t trtp_flags   =  data[13] & 0xF;
 
     if (1 != trtp_version) {
         LOGV("Dropping packet, bad trtp version %hhu", trtp_version);
@@ -643,32 +635,85 @@ void AAH_RXPlayer::processCommandPacket(PacketBuffer* pb) {
         return;
     }
 
+    bool do_cleanup_pass = false;
     uint16_t command_id = U16_AT(data + offset);
+    offset += 2;
 
     switch (command_id) {
         case TRTPControlPacket::kCommandNop:
+            // Note: NOPs are frequently used to carry timestamp transformation
+            // updates.  If there was a timestamp transform attached to this
+            // payload, it was already taken care of by processRX.
             break;
 
         case TRTPControlPacket::kCommandEOS:
+            // TODO need to differentiate between flush and EOS.  Substreams
+            // which have hit EOS need a chance to drain before being destroyed.
+
         case TRTPControlPacket::kCommandFlush: {
-            uint16_t program_id = (U32_AT(data + 8) >> 5) & 0x1F;
+            uint8_t program_id = (U32_AT(data + 8) >> 5) & 0x1F;
             LOGI("*** %s flushing program_id=%d",
                  __PRETTY_FUNCTION__, program_id);
 
-            Vector<uint32_t> substreams_to_remove;
+            // Flag any programs with the given program ID for cleanup.
             for (size_t i = 0; i < substreams_.size(); ++i) {
-                sp<Substream> iter = substreams_.valueAt(i);
-                if (iter->getProgramID() == program_id) {
-                    iter->shutdown();
-                    substreams_to_remove.add(iter->getSSRC());
+                const sp<Substream>& stream = substreams_.valueAt(i);
+                if (stream->getProgramID() == program_id) {
+                    stream->clearInactivityTimeout();
                 }
             }
 
-            for (size_t i = 0; i < substreams_to_remove.size(); ++i) {
-                substreams_.removeItem(substreams_to_remove[i]);
+            // Make sure we do our cleanup pass at the end of this.
+            do_cleanup_pass = true;
+        } break;
+
+        case TRTPControlPacket::kCommandAPU: {
+            // Active program update packet.  Go over all of our substreams and
+            // either reset the inactivity timer for the substreams listed in
+            // this update packet, or clear the inactivity timer for the
+            // substreams not listed in this update packet.  A cleared
+            // inactivity timer will flag a substream for deletion in the
+            // cleanup pass at the end of this function.
+
+            // The packet must contain at least the 1 byte numActivePrograms
+            // field.
+            if (amt < offset + 1) {
+                return;
             }
+            uint8_t numActivePrograms = data[offset++];
+
+            // If the payload is not long enough to contain the list it promises
+            // to have, just skip it.
+            if (amt < (offset + numActivePrograms)) {
+                return;
+            }
+
+            // Clear all inactivity timers.
+            for (size_t i = 0; i < substreams_.size(); ++i) {
+                const sp<Substream>& stream = substreams_.valueAt(i);
+                stream->clearInactivityTimeout();
+            }
+
+            // Now go over the list of active programs and reset the inactivity
+            // timers for those streams which are currently in the active
+            // program update packet.
+            for (uint8_t j = 0; j < numActivePrograms; ++j) {
+                uint8_t pid = (data[offset + j] & 0x1F);
+                for (size_t i = 0; i < substreams_.size(); ++i) {
+                    const sp<Substream>& stream = substreams_.valueAt(i);
+                    if (stream->getProgramID() == pid) {
+                        stream->resetInactivityTimeout();
+                    }
+                }
+            }
+
+            // Make sure we do our cleanup pass at the end of this.
+            do_cleanup_pass = true;
         } break;
     }
+
+    if (do_cleanup_pass)
+        cleanoutExpiredSubstreams();
 }
 
 bool AAH_RXPlayer::processGaps() {
@@ -705,18 +750,18 @@ bool AAH_RXPlayer::processGaps() {
         // this gap and move on.
         if (!send_retransmit_request &&
            (kGS_NoGap != current_gap_status_) &&
-           (0 == computeNextGapRetransmitTimeout())) {
-
+           (0 == next_retrans_req_timeout_.msecTillTimeout())) {
             // If out current gap is the fast-start gap, don't bother to skip it
             // because substreams look like the are about to underflow.
             if ((kGS_FastStartGap != gap_status) ||
                 (current_gap_.end_seq_ != gap.end_seq_)) {
+
                 for (size_t i = 0; i < substreams_.size(); ++i) {
                     if (substreams_.valueAt(i)->isAboutToUnderflow()) {
-                        LOGV("About to underflow, giving up on gap [%hu, %hu]",
+                        LOGI("About to underflow, giving up on gap [%hu, %hu]",
                                 gap.start_seq_, gap.end_seq_);
                         ring_buffer_.processNAK();
-                        current_gap_status_ = kGS_NoGap;
+                        setGapStatus(kGS_NoGap);
                         return true;
                     }
                 }
@@ -727,7 +772,7 @@ bool AAH_RXPlayer::processGaps() {
             send_retransmit_request = true;
         }
     } else {
-        current_gap_status_ = kGS_NoGap;
+        setGapStatus(kGS_NoGap);
     }
 
     if (send_retransmit_request) {
@@ -738,7 +783,7 @@ bool AAH_RXPlayer::processGaps() {
             (current_gap_.end_seq_ == gap.end_seq_)) {
             LOGV("Fast start is taking forever; giving up.");
             ring_buffer_.processNAK();
-            current_gap_status_ = kGS_NoGap;
+            setGapStatus(kGS_NoGap);
             return true;
         }
 
@@ -777,32 +822,53 @@ bool AAH_RXPlayer::processGaps() {
 
         // Update the current gap info.
         current_gap_ = gap;
-        current_gap_status_ = gap_status;
-        next_retrans_req_time_ = monotonicUSecNow() +
-                               ((kGS_FastStartGap == current_gap_status_)
-                                ? kFastStartTimeoutUSec
-                                : kGapRerequestTimeoutUSec);
+        setGapStatus(gap_status);
     }
 
     return false;
 }
 
-// Compute when its time to send the next gap retransmission in milliseconds.
-// Returns < 0 for an infinite timeout (no gap) and 0 if its time to retransmit
-// right now.
-int AAH_RXPlayer::computeNextGapRetransmitTimeout() {
-    if (kGS_NoGap == current_gap_status_) {
-        return -1;
+void AAH_RXPlayer::setGapStatus(GapStatus status) {
+    current_gap_status_ = status;
+
+    switch(current_gap_status_) {
+        case kGS_NormalGap:
+            next_retrans_req_timeout_.setTimeout(kGapRerequestTimeoutMsec);
+            break;
+
+        case kGS_FastStartGap:
+            next_retrans_req_timeout_.setTimeout(kFastStartTimeoutMsec);
+            break;
+
+        case kGS_NoGap:
+        default:
+            next_retrans_req_timeout_.setTimeout(-1);
+            break;
     }
+}
 
-    int64_t timeout_delta = next_retrans_req_time_ - monotonicUSecNow();
+void AAH_RXPlayer::cleanoutExpiredSubstreams() {
+    static const size_t kMaxPerPass = 32;
+    uint32_t to_remove[kMaxPerPass];
+    size_t cnt, i;
 
-    timeout_delta /= 1000;
-    if (timeout_delta <= 0) {
-        return 0;
-    }
+    do {
+        for (i = 0, cnt = 0;
+            (i < substreams_.size()) && (cnt < kMaxPerPass);
+            ++i) {
+            const sp<Substream>& stream = substreams_.valueAt(i);
+            if (stream->shouldExpire()) {
+                to_remove[cnt++] = stream->getSSRC();
+            }
+        }
 
-    return static_cast<uint32_t>(timeout_delta);
+        for (i = 0; i < cnt; ++i) {
+            LOGI("Purging substream with SSRC 0x%08x", to_remove[i]);
+            substreams_.removeItem(to_remove[i]);
+        }
+    } while (cnt >= kMaxPerPass);
+
+    ss_cleanout_timeout_.setTimeout(kSSCleanoutTimeoutMsec);
 }
 
 }  // namespace android

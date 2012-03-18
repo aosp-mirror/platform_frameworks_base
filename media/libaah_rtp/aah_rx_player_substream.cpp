@@ -33,8 +33,9 @@
 
 namespace android {
 
-int64_t AAH_RXPlayer::Substream::kAboutToUnderflowThreshold =
+const int64_t AAH_RXPlayer::Substream::kAboutToUnderflowThreshold =
     50ull * 1000;
+const int AAH_RXPlayer::Substream::kInactivityTimeoutMsec = 10000;
 
 AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
     ssrc_ = ssrc;
@@ -54,6 +55,7 @@ AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
     // cleanupBufferInProgress will reset most of the internal state variables.
     // Just need to make sure that buffer_in_progress_ is NULL before calling.
     cleanupBufferInProgress();
+    resetInactivityTimeout();
 }
 
 AAH_RXPlayer::Substream::~Substream() {
@@ -107,6 +109,8 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
     if (shouldAbort(__PRETTY_FUNCTION__)) {
         return;
     }
+
+    resetInactivityTimeout();
 
     // Do we have a buffer in progress already?  If so, abort the buffer.  In
     // theory, this should never happen.  If there were a discontinutity in the
@@ -361,6 +365,8 @@ void AAH_RXPlayer::Substream::processPayloadCont(uint8_t* buf,
     if (shouldAbort(__PRETTY_FUNCTION__)) {
         return;
     }
+
+    resetInactivityTimeout();
 
     if (NULL == buffer_in_progress_) {
         LOGV("TRTP Receiver skipping payload continuation; no buffer currently"

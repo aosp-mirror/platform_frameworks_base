@@ -31,6 +31,7 @@
 
 #include "aah_decoder_pump.h"
 #include "pipe_event.h"
+#include "utils.h"
 
 namespace android {
 
@@ -173,8 +174,7 @@ class AAH_RXPlayer : public MediaPlayerInterface {
         bool           waiting_for_fast_start_;
         bool           fetched_first_packet_;
 
-        uint64_t       rtp_activity_timeout_;
-        bool           rtp_activity_timeout_valid_;
+        Timeout        rtp_activity_timeout_;
 
         DISALLOW_EVIL_CONSTRUCTORS(RXRingBuffer);
     };
@@ -194,8 +194,25 @@ class AAH_RXPlayer : public MediaPlayerInterface {
 
         bool     isAboutToUnderflow();
         uint32_t getSSRC()      const { return ssrc_; }
-        uint16_t getProgramID() const { return (ssrc_ >> 5) & 0x1F; }
+        uint8_t  getProgramID() const { return (ssrc_ >> 5) & 0x1F; }
         status_t getStatus() const { return status_; }
+
+        void clearInactivityTimeout() {
+            inactivity_timeout_.setTimeout(-1);
+        }
+
+        void resetInactivityTimeout() {
+            inactivity_timeout_.setTimeout(kInactivityTimeoutMsec);
+        }
+
+        bool shouldExpire() {
+            // Substreams should always have a positive time until timeout.  A
+            // timeout value of 0 indicates that the timer has expired, while a
+            // negative timeout (normally meaning no timeout) is used by some of
+            // the core code to implement a mark and sweep pattern for cleaning
+            // out no longer relevant substreams.
+            return (inactivity_timeout_.msecTillTimeout() <= 0);
+        }
 
       protected:
         virtual ~Substream();
@@ -228,8 +245,10 @@ class AAH_RXPlayer : public MediaPlayerInterface {
         uint32_t            aux_data_expected_size_;
 
         sp<AAH_DecoderPump> decoder_;
+        Timeout             inactivity_timeout_;
 
-        static int64_t      kAboutToUnderflowThreshold;
+        static const int64_t    kAboutToUnderflowThreshold;
+        static const int        kInactivityTimeoutMsec;
 
         DISALLOW_EVIL_CONSTRUCTORS(Substream);
     };
@@ -247,7 +266,8 @@ class AAH_RXPlayer : public MediaPlayerInterface {
     void                processRingBuffer();
     void                processCommandPacket(PacketBuffer* pb);
     bool                processGaps();
-    int                 computeNextGapRetransmitTimeout();
+    void                setGapStatus(GapStatus status);
+    void                cleanoutExpiredSubstreams();
     void                fetchAudioFlinger();
 
     PipeEvent           wakeup_work_thread_evt_;
@@ -268,7 +288,9 @@ class AAH_RXPlayer : public MediaPlayerInterface {
 
     SeqNoGap            current_gap_;
     GapStatus           current_gap_status_;
-    uint64_t            next_retrans_req_time_;
+    Timeout             next_retrans_req_timeout_;
+
+    Timeout             ss_cleanout_timeout_;
 
     RXRingBuffer        ring_buffer_;
     SubstreamVec        substreams_;
@@ -282,14 +304,13 @@ class AAH_RXPlayer : public MediaPlayerInterface {
     static const uint32_t kRetransRequestMagic;
     static const uint32_t kFastStartRequestMagic;
     static const uint32_t kRetransNAKMagic;
-    static const uint32_t kGapRerequestTimeoutUSec;
-    static const uint32_t kFastStartTimeoutUSec;
-    static const uint32_t kRTPActivityTimeoutUSec;
+    static const uint32_t kGapRerequestTimeoutMsec;
+    static const uint32_t kFastStartTimeoutMsec;
+    static const uint32_t kRTPActivityTimeoutMsec;
+    static const uint32_t kSSCleanoutTimeoutMsec;
 
     static const uint32_t INVOKE_GET_MASTER_VOLUME = 3;
     static const uint32_t INVOKE_SET_MASTER_VOLUME = 4;
-
-    static uint64_t monotonicUSecNow();
 
     DISALLOW_EVIL_CONSTRUCTORS(AAH_RXPlayer);
 };

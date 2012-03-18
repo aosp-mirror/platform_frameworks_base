@@ -66,6 +66,9 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     virtual status_t    setRetransmitEndpoint(const struct sockaddr_in*
                                               endpoint);
 
+    void    setProgramID(uint8_t programID) { mProgramID = programID; }
+    uint8_t getProgramID() const            { return mProgramID; }
+
     static const int64_t kAAHRetryKeepAroundTimeNs;
     static const int32_t kInvokeGetCNCPort;
 
@@ -103,6 +106,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     status_t seekTo_l(int64_t timeUs);
     void updateClockTransform_l(bool pause);
     void sendEOS_l();
+    void sendTSUpdateNop_l();
     void cancelPlayerEvents(bool keepBufferingGoing = false);
     void reset_l();
     void notifyListener_l(int msg, int ext1 = 0, int ext2 = 0);
@@ -139,6 +143,8 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     bool mIsSeeking;
     int64_t mSeekTimeUs;
 
+    Timeout mPauseTSUpdateResendTimeout;
+
     sp<TimedEventQueue::Event> mPumpAudioEvent;
     bool mPumpAudioEventPending;
 
@@ -162,8 +168,10 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     bool             mPlayRateIsPaused;
     CCHelper         mCCHelper;
 
-    uint16_t mProgramID;
+    uint8_t mProgramID;
     uint8_t mTRTPVolume;
+
+    static const int kPauseTSUpdateResendTimeoutMsec;
 
     DISALLOW_EVIL_CONSTRUCTORS(AAH_TXPlayer);
 };

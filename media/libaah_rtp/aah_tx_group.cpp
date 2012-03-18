@@ -29,6 +29,7 @@
 
 #include "aah_tx_group.h"
 #include "aah_tx_player.h"
+#include "utils.h"
 
 //#define DROP_PACKET_TEST
 #ifdef DROP_PACKET_TEST
@@ -101,15 +102,17 @@ static ssize_t droptest_recvfrom(int sockfd, void *buf,
 namespace android {
 
 const int AAH_TXGroup::kRetryTrimIntervalMsec = 100;
-const int AAH_TXGroup::kHeartbeatIntervalMsec = 1000;
+const int AAH_TXGroup::kHeartbeatIntervalMsec = 500;
 const int AAH_TXGroup::kTXGroupLingerTimeMsec = 10000;
 const int AAH_TXGroup::kUnicastClientTimeoutMsec = 5000;
 
 const size_t AAH_TXGroup::kRetryBufferCapacity = 100;
-const size_t AAH_TXGroup::kMaxUnicastTargets = 16;
+const size_t AAH_TXGroup::kMaxAllowedUnicastTargets = 16;
 const size_t AAH_TXGroup::kInitialUnicastTargetCapacity = 4;
-const size_t AAH_TXGroup::kMaxAllowedTXGroups = 16;
+const size_t AAH_TXGroup::kMaxAllowedTXGroups = 8;
 const size_t AAH_TXGroup::kInitialActiveTXGroupsCapacity = 4;
+const size_t AAH_TXGroup::kMaxAllowedPlayerClients = 4;
+const size_t AAH_TXGroup::kInitialPlayerClientCapacity = 2;
 
 const uint32_t AAH_TXGroup::kCNC_RetryRequestID     = 'Treq';
 const uint32_t AAH_TXGroup::kCNC_FastStartRequestID = 'Tfst';
@@ -124,33 +127,24 @@ sp<AAH_TXGroup::CmdAndControlRXer>  AAH_TXGroup::mCmdAndControlRXer;
 uint32_t                            AAH_TXGroup::sNextEpoch;
 bool                                AAH_TXGroup::sNextEpochValid = false;
 
-static inline bool matchSockaddrs(const struct sockaddr_in* a,
-                                  const struct sockaddr_in* b) {
-    CHECK(NULL != a);
-    CHECK(NULL != b);
-    return ((a->sin_family      == b->sin_family)      &&
-            (a->sin_addr.s_addr == b->sin_addr.s_addr) &&
-            (a->sin_port        == b->sin_port));
-}
-
 AAH_TXGroup::AAH_TXGroup()
     : mRetryBuffer(kRetryBufferCapacity)
 {
     // Initialize members with no constructor to sensible defaults.
-    mClientRefCount = 0;
     mTRTPSeqNumber = 0;
     mNextProgramID = 1;
     mEpoch = getNextEpoch();
     mMulticastTargetValid = false;
     mSocket = -1;
     mCmdAndControlPort = 0;
-    mClientRefCount = 0;
 
     mUnicastTargets.setCapacity(kInitialUnicastTargetCapacity);
+    mActiveClients.setCapacity(kInitialPlayerClientCapacity);
+    mHeartbeatTimeout.setTimeout(kHeartbeatIntervalMsec);
 }
 
 AAH_TXGroup::~AAH_TXGroup() {
-    CHECK(0 == mClientRefCount);
+    CHECK(mActiveClients.size() == 0);
 
     if (mSocket >= 0) {
         ::close(mSocket);
@@ -237,7 +231,8 @@ bailout:
     return ret_val;
 }
 
-sp<AAH_TXGroup> AAH_TXGroup::getGroup(uint16_t port) {
+sp<AAH_TXGroup> AAH_TXGroup::getGroup(uint16_t port,
+                                      const sp<AAH_TXPlayer>& client) {
     sp<AAH_TXGroup> ret_val;
 
     // If port is non-zero, we are creating a new group.  Otherwise, we are
@@ -250,7 +245,13 @@ sp<AAH_TXGroup> AAH_TXGroup::getGroup(uint16_t port) {
         for (size_t i = 0; i < sActiveTXGroups.size(); ++i) {
             if (port == sActiveTXGroups[i]->getCmdAndControlPort()) {
                 ret_val = sActiveTXGroups[i];
-                ret_val->addClientReference();
+
+                if (!ret_val->registerClient(client)) {
+                    // No need to log an error, registerClient has already done
+                    // so for us.
+                    ret_val = NULL;
+                }
+
                 break;
             }
         }
@@ -312,6 +313,13 @@ sp<AAH_TXGroup> AAH_TXGroup::getGroup(uint16_t port) {
                 }
             }
 
+            // Register the client with the newly created group.
+            if (!ret_val->registerClient(client)) {
+                // No need to log an error, registerClient has already done so
+                // for us.
+                goto bailout;
+            }
+
             // Make sure we are at least at minimum capacity in the
             // ActiveTXGroups vector.
             if (sActiveTXGroups.capacity() < kInitialActiveTXGroupsCapacity) {
@@ -321,10 +329,9 @@ sp<AAH_TXGroup> AAH_TXGroup::getGroup(uint16_t port) {
             // Add ourselves to the list of active TXGroups.
             if (sActiveTXGroups.add(ret_val) < 0) {
                 LOGE("Failed to add new TX Group to Active Group list");
+                ret_val->unregisterClient(client);
                 goto bailout;
             }
-
-            ret_val->addClientReference();
 
             LOGI("Created TX Group with C&C Port %hu.  %d/%d groups now"
                  " active.", ret_val->getCmdAndControlPort(),
@@ -342,7 +349,8 @@ bailout:
     return sp<AAH_TXGroup>(NULL);
 }
 
-sp<AAH_TXGroup> AAH_TXGroup::getGroup(const struct sockaddr_in* target) {
+sp<AAH_TXGroup> AAH_TXGroup::getGroup(const struct sockaddr_in* target,
+                                      const sp<AAH_TXPlayer>& client) {
     // Hold the static lock while we search for a TX Group which has the
     // multicast target passed to us.
     Mutex::Autolock lock(sLock);
@@ -359,32 +367,71 @@ sp<AAH_TXGroup> AAH_TXGroup::getGroup(const struct sockaddr_in* target) {
         }
     }
 
-    if (ret_val != NULL)
-        ret_val->addClientReference();
+    if (ret_val != NULL) {
+        if (!ret_val->registerClient(client)) {
+            // No need to log an error, registerClient has already done so for
+            // us.
+            ret_val = NULL;
+        }
+    }
 
     return ret_val;
 }
 
-void AAH_TXGroup::dropClientReference() {
+void AAH_TXGroup::unregisterClient(const sp<AAH_TXPlayer>& client) {
     Mutex::Autolock lock(mLock);
-    CHECK(mClientRefCount > 0);
-    --mClientRefCount;
 
-    if (!mClientRefCount) {
+    LOGI("TXPlayer leaving TXGroup listening on C&C port %hu",
+         mCmdAndControlPort);
+
+    bool found_it = false;
+    for (size_t i = 0; i < mActiveClients.size(); ++i) {
+        if (mActiveClients[i].get() == client.get()) {
+            found_it = true;
+            mActiveClients.removeAt(i);
+            break;
+        }
+    }
+    CHECK(found_it);
+
+    if (!mActiveClients.size()) {
         mCleanupTimeout.setTimeout(kTXGroupLingerTimeMsec);
     }
 }
 
-void AAH_TXGroup::addClientReference() {
+bool AAH_TXGroup::registerClient(const sp<AAH_TXPlayer>& client) {
+    // ASSERT holding sLock
     Mutex::Autolock lock(mLock);
-    ++mClientRefCount;
+
+    CHECK(client != NULL);
+
+    // Check the client limit.
+    if (mActiveClients.size() >= kMaxAllowedPlayerClients) {
+        LOGE("Cannot register new client with C&C group listening on port %hu."
+             "  %d/%d clients are already active", mCmdAndControlPort,
+             mActiveClients.size(), kMaxAllowedPlayerClients);
+        return false;
+    }
+
+    // Try to add the client to the list.
+    if (mActiveClients.add(client) < 0) {
+        LOGE("Failed to register new client with C&C group listening on port"
+             " %hu.  %d/%d clients are currently active", mCmdAndControlPort,
+             mActiveClients.size(), kMaxAllowedPlayerClients);
+        return false;
+    }
+
+    // Assign our new client's program ID, cancel the cleanup timeout and get
+    // out.
+    client->setProgramID(getNewProgramID());
     mCleanupTimeout.setTimeout(-1);
+    return true;
 }
 
 bool AAH_TXGroup::shouldExpire() {
     Mutex::Autolock lock(mLock);
 
-    if (mClientRefCount) {
+    if (mActiveClients.size()) {
         return false;
     }
 
@@ -395,9 +442,12 @@ bool AAH_TXGroup::shouldExpire() {
     return true;
 }
 
-uint16_t AAH_TXGroup::getNewProgramID() {
-    int tmp = android_atomic_inc(&mNextProgramID);
-    return static_cast<uint16_t>(tmp & 0xFFFF);
+uint8_t AAH_TXGroup::getNewProgramID() {
+    uint8_t tmp;
+    do {
+        tmp = static_cast<uint8_t>(android_atomic_inc(&mNextProgramID) & 0x1F);
+    } while(!tmp);
+    return tmp;
 }
 
 status_t AAH_TXGroup::sendPacket(const sp<TRTPPacket>& packet) {
@@ -449,12 +499,9 @@ status_t AAH_TXGroup::sendPacket_l(const sp<TRTPPacket>& packet) {
             LOGI("TXGroup on port %hu removing client at %d.%d.%d.%d:%hu due to"
                  " timeout.  Now serving %d/%d unicast clients.",
                  mCmdAndControlPort, IP_PRINTF_HELPER(addr), port,
-                 mUnicastTargets.size(), kMaxUnicastTargets);
+                 mUnicastTargets.size(), kMaxAllowedUnicastTargets);
         }
     }
-
-    // reset our heartbeat timer.
-    mHeartbeatTimeout.setTimeout(kHeartbeatIntervalMsec);
 
     // Done; see comments sendToTarget discussing error handling behavior
     return OK;
@@ -562,19 +609,22 @@ void AAH_TXGroup::sendHeartbeatIfNeeded() {
     Mutex::Autolock lock(mLock);
 
     if (!mHeartbeatTimeout.msecTillTimeout()) {
-        sp<TRTPControlPacket> packet = new TRTPControlPacket();
+        sp<TRTPActiveProgramUpdatePacket> packet =
+            new TRTPActiveProgramUpdatePacket();
 
         if (packet != NULL) {
-            packet->setCommandID(TRTPControlPacket::kCommandNop);
+            for (size_t i = 0; i < mActiveClients.size(); ++i) {
+                packet->pushProgramID(mActiveClients[i]->getProgramID());
+            }
 
-            // Note: the act of calling sendPacket will reset our heartbeat
-            // timer.
             sendPacket_l(packet);
         } else {
             LOGE("Failed to allocate TRTP packet for heartbeat on TX Group with"
                  " C&C port %hu", mCmdAndControlPort);
-            mHeartbeatTimeout.setTimeout(kHeartbeatIntervalMsec);
         }
+
+        // reset our heartbeat timer.
+        mHeartbeatTimeout.setTimeout(kHeartbeatIntervalMsec);
     }
 }
 
@@ -828,7 +878,7 @@ void AAH_TXGroup::handleJoinGroup(const struct sockaddr_in* src_addr) {
     // Looks like we have a new client.  Check to see if we have room to add it
     // before proceeding.  If not, send a NAK back so it knows to signal an
     // error to its application level.
-    if (mUnicastTargets.size() >= kMaxUnicastTargets) {
+    if (mUnicastTargets.size() >= kMaxAllowedUnicastTargets) {
         uint32_t nak_payload = htonl(kCNC_NakJoinGroupID);
 
         if (sendto(mSocket, &nak_payload, sizeof(nak_payload),
@@ -865,7 +915,7 @@ void AAH_TXGroup::handleJoinGroup(const struct sockaddr_in* src_addr) {
     LOGI("TXGroup on port %hu added new client at %d.%d.%d.%d:%hu.  "
          "Now serving %d/%d unicast clients.",
          mCmdAndControlPort, IP_PRINTF_HELPER(addr), port,
-         mUnicastTargets.size(), kMaxUnicastTargets);
+         mUnicastTargets.size(), kMaxAllowedUnicastTargets);
 }
 
 void AAH_TXGroup::handleLeaveGroup(const struct sockaddr_in* src_addr) {
@@ -888,39 +938,11 @@ void AAH_TXGroup::handleLeaveGroup(const struct sockaddr_in* src_addr) {
             LOGI("TXGroup on port %hu removing client at %d.%d.%d.%d:%hu due to"
                  " leave request.  Now serving %d/%d unicast clients.",
                  mCmdAndControlPort, IP_PRINTF_HELPER(addr), port,
-                 mUnicastTargets.size(), kMaxUnicastTargets);
+                 mUnicastTargets.size(), kMaxAllowedUnicastTargets);
 
             return;
         }
     }
-}
-
-void AAH_TXGroup::Timeout::setTimeout(int msec) {
-    if (msec < 0) {
-        mSystemEndTime = 0;
-        return;
-    }
-
-    mSystemEndTime = systemTime() + (static_cast<nsecs_t>(msec) * 1000000);
-}
-
-int AAH_TXGroup::Timeout::msecTillTimeout(nsecs_t nowTime) {
-    if (!mSystemEndTime) {
-        return -1;
-    }
-
-    if (mSystemEndTime < nowTime) {
-        return 0;
-    }
-
-    nsecs_t delta = mSystemEndTime - nowTime;
-    delta += 999999;
-    delta /= 1000000;
-    if (delta > 0x7FFFFFFF) {
-        return 0x7FFFFFFF;
-    }
-
-    return static_cast<int>(delta);
 }
 
 AAH_TXGroup::CmdAndControlRXer::CmdAndControlRXer() {
@@ -1003,25 +1025,16 @@ bool AAH_TXGroup::CmdAndControlRXer::threadLoop() {
 
             // Check the heartbeat timeout for this group.
             tmp = txGroups[i]->mHeartbeatTimeout.msecTillTimeout(now);
-            if (static_cast<unsigned int>(tmp) <
-                static_cast<unsigned int>(nextTimeout)) {
-                nextTimeout = tmp;
-            }
+            nextTimeout = minTimeout(nextTimeout, tmp);
 
             // Check the cleanup timeout for this group.
             tmp = txGroups[i]->mCleanupTimeout.msecTillTimeout(now);
-            if (static_cast<unsigned int>(tmp) <
-                static_cast<unsigned int>(nextTimeout)) {
-                nextTimeout = tmp;
-            }
+            nextTimeout = minTimeout(nextTimeout, tmp);
         }
 
         // Take into account the common trim timeout.
         tmp = mTrimRetryTimeout.msecTillTimeout(now);
-        if (static_cast<unsigned int>(tmp) <
-            static_cast<unsigned int>(nextTimeout)) {
-            nextTimeout = tmp;
-        }
+        nextTimeout = minTimeout(nextTimeout, tmp);
     }
 
     // Step 3: OK - time to wait for there to be something to do.  Release our
