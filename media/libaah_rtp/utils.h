@@ -22,6 +22,9 @@
 #include <media/stagefright/foundation/ABase.h>
 #include <utils/Timers.h>
 
+#define IP_PRINTF_HELPER(a) ((a >> 24) & 0xFF), ((a >> 16) & 0xFF), \
+                            ((a >>  8) & 0xFF),  (a        & 0xFF)
+
 namespace android {
 
 // Definition of a helper class used to track things like when we need to
@@ -53,6 +56,14 @@ inline bool matchSockaddrs(const struct sockaddr_in* a,
     return ((a->sin_family      == b->sin_family)      &&
             (a->sin_addr.s_addr == b->sin_addr.s_addr) &&
             (a->sin_port        == b->sin_port));
+}
+
+inline bool isMulticastSockaddr(const struct sockaddr_in* sa) {
+    if (sa->sin_family != AF_INET)
+        return false;
+
+    uint32_t addr = ntohl(sa->sin_addr.s_addr);
+    return ((addr & 0xF0000000) == 0xE0000000);
 }
 
 // Return the minimum timeout between a and b where timeouts less than 0 are

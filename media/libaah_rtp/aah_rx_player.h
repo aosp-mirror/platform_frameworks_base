@@ -266,19 +266,23 @@ class AAH_RXPlayer : public MediaPlayerInterface {
     void                processRingBuffer();
     void                processCommandPacket(PacketBuffer* pb);
     bool                processGaps();
+    bool                processRetransmitNAK(const uint8_t* data, size_t amt);
     void                setGapStatus(GapStatus status);
     void                cleanoutExpiredSubstreams();
+    void                sendUnicastGroupJoin();
+    void                sendUnicastGroupLeave();
     void                fetchAudioFlinger();
 
     PipeEvent           wakeup_work_thread_evt_;
     sp<ThreadWrapper>   thread_wrapper_;
     Mutex               api_lock_;
     bool                is_playing_;
-    bool                data_source_set_;
 
-    struct sockaddr_in  listen_addr_;
-    int                 sock_fd_;
+    struct sockaddr_in  data_source_addr_;
+    bool                data_source_set_;
+    bool                multicast_mode_;
     bool                multicast_joined_;
+    int                 sock_fd_;
 
     struct sockaddr_in  transmitter_addr_;
     bool                transmitter_known_;
@@ -291,6 +295,7 @@ class AAH_RXPlayer : public MediaPlayerInterface {
     Timeout             next_retrans_req_timeout_;
 
     Timeout             ss_cleanout_timeout_;
+    Timeout             unicast_group_report_timeout_;
 
     RXRingBuffer        ring_buffer_;
     SubstreamVec        substreams_;
@@ -301,13 +306,13 @@ class AAH_RXPlayer : public MediaPlayerInterface {
     sp<IAudioFlinger>   audio_flinger_;
 
     static const uint32_t kRTPRingBufferSize;
-    static const uint32_t kRetransRequestMagic;
-    static const uint32_t kFastStartRequestMagic;
-    static const uint32_t kRetransNAKMagic;
+
     static const uint32_t kGapRerequestTimeoutMsec;
     static const uint32_t kFastStartTimeoutMsec;
     static const uint32_t kRTPActivityTimeoutMsec;
     static const uint32_t kSSCleanoutTimeoutMsec;
+    static const uint32_t kGrpMemberSlowReportIntervalMsec;
+    static const uint32_t kGrpMemberFastReportIntervalMsec;
 
     static const uint32_t INVOKE_GET_MASTER_VOLUME = 3;
     static const uint32_t INVOKE_SET_MASTER_VOLUME = 4;

@@ -114,13 +114,6 @@ const size_t AAH_TXGroup::kInitialActiveTXGroupsCapacity = 4;
 const size_t AAH_TXGroup::kMaxAllowedPlayerClients = 4;
 const size_t AAH_TXGroup::kInitialPlayerClientCapacity = 2;
 
-const uint32_t AAH_TXGroup::kCNC_RetryRequestID     = 'Treq';
-const uint32_t AAH_TXGroup::kCNC_FastStartRequestID = 'Tfst';
-const uint32_t AAH_TXGroup::kCNC_NakRetryRequestID  = 'Tnak';
-const uint32_t AAH_TXGroup::kCNC_JoinGroupID        = 'Tjgp';
-const uint32_t AAH_TXGroup::kCNC_LeaveGroupID       = 'Tlgp';
-const uint32_t AAH_TXGroup::kCNC_NakJoinGroupID     = 'Tngp';
-
 Mutex                               AAH_TXGroup::sLock;
 Vector < sp<AAH_TXGroup> >          AAH_TXGroup::sActiveTXGroups;
 sp<AAH_TXGroup::CmdAndControlRXer>  AAH_TXGroup::mCmdAndControlRXer;
@@ -687,12 +680,12 @@ void AAH_TXGroup::handleRequests() {
         uint32_t id = U32_AT(request);
         size_t minSize = 0;
         switch(id) {
-            case kCNC_RetryRequestID:
-            case kCNC_FastStartRequestID:
+            case TRTPPacket::kCNC_RetryRequestID:
+            case TRTPPacket::kCNC_FastStartRequestID:
                 minSize = sizeof(RetryPacket);
                 break;
-            case kCNC_JoinGroupID:
-            case kCNC_LeaveGroupID:
+            case TRTPPacket::kCNC_JoinGroupID:
+            case TRTPPacket::kCNC_LeaveGroupID:
                 minSize = sizeof(uint32_t);
                 break;
         }
@@ -705,19 +698,19 @@ void AAH_TXGroup::handleRequests() {
         }
 
         switch(id) {
-            case kCNC_RetryRequestID:
+            case TRTPPacket::kCNC_RetryRequestID:
                 handleRetryRequest(request, &srcAddr, false);
                 break;
 
-            case kCNC_FastStartRequestID:
+            case TRTPPacket::kCNC_FastStartRequestID:
                 handleRetryRequest(request, &srcAddr, true);
                 break;
 
-            case kCNC_JoinGroupID:
+            case TRTPPacket::kCNC_JoinGroupID:
                 handleJoinGroup(&srcAddr);
                 break;
 
-            case kCNC_LeaveGroupID:
+            case TRTPPacket::kCNC_LeaveGroupID:
                 handleLeaveGroup(&srcAddr);
                 break;
 
@@ -755,7 +748,7 @@ void AAH_TXGroup::handleRetryRequest(const uint8_t* req,
         // we have an empty retry buffer for this group, so NAK the entire
         // request
         RetryPacket nak = *req_overlay;
-        nak.id = htonl(kCNC_NakRetryRequestID);
+        nak.id = htonl(TRTPPacket::kCNC_NakRetryRequestID);
 
         if (sendto(mSocket, &nak, sizeof(nak), 0,
                    src, sizeof(*src_addr)) < 0) {
@@ -796,7 +789,7 @@ void AAH_TXGroup::handleRetryRequest(const uint8_t* req,
     if (startIndex == -1 && endIndex == -1) {
         // no part of the request range is found in the retry buffer
         RetryPacket nak = *req_overlay;
-        nak.id = htonl(kCNC_NakRetryRequestID);
+        nak.id = htonl(TRTPPacket::kCNC_NakRetryRequestID);
 
         if (sendto(mSocket, &nak, sizeof(nak), 0,
                    src, sizeof(*src_addr)) < 0) {
@@ -810,7 +803,7 @@ void AAH_TXGroup::handleRetryRequest(const uint8_t* req,
     if (startIndex == -1) {
         // NAK a subrange at the front of the request range
         RetryPacket nak = *req_overlay;
-        nak.id = htonl(kCNC_NakRetryRequestID);
+        nak.id = htonl(TRTPPacket::kCNC_NakRetryRequestID);
         nak.seqEnd = htons(retryFirstSeq - 1);
 
         if (sendto(mSocket, &nak, sizeof(nak), 0,
@@ -824,7 +817,7 @@ void AAH_TXGroup::handleRetryRequest(const uint8_t* req,
     } else if (endIndex == -1) {
         // NAK a subrange at the back of the request range
         RetryPacket nak = *req_overlay;
-        nak.id = htonl(kCNC_NakRetryRequestID);
+        nak.id = htonl(TRTPPacket::kCNC_NakRetryRequestID);
         nak.seqStart = htons(retryLastSeq + 1);
 
         if (sendto(mSocket, &nak, sizeof(nak), 0,
@@ -879,7 +872,7 @@ void AAH_TXGroup::handleJoinGroup(const struct sockaddr_in* src_addr) {
     // before proceeding.  If not, send a NAK back so it knows to signal an
     // error to its application level.
     if (mUnicastTargets.size() >= kMaxAllowedUnicastTargets) {
-        uint32_t nak_payload = htonl(kCNC_NakJoinGroupID);
+        uint32_t nak_payload = htonl(TRTPPacket::kCNC_NakJoinGroupID);
 
         if (sendto(mSocket, &nak_payload, sizeof(nak_payload),
                    0, src, sizeof(*src_addr)) < 0) {
@@ -898,7 +891,7 @@ void AAH_TXGroup::handleJoinGroup(const struct sockaddr_in* src_addr) {
     // application level.
     sp<UnicastTarget> ut = new UnicastTarget(*src_addr);
     if ((ut == NULL) || (mUnicastTargets.add(ut) < 0)) {
-        uint32_t nak_payload = htonl(kCNC_NakJoinGroupID);
+        uint32_t nak_payload = htonl(TRTPPacket::kCNC_NakJoinGroupID);
 
         if (sendto(mSocket, &nak_payload, sizeof(nak_payload),
                    0, src, sizeof(*src_addr)) < 0) {

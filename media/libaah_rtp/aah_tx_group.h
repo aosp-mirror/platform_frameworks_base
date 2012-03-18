@@ -28,9 +28,6 @@
 #include "aah_tx_packet.h"
 #include "utils.h"
 
-#define IP_PRINTF_HELPER(a) ((a >> 24) & 0xFF), ((a >> 16) & 0xFF), \
-                            ((a >>  8) & 0xFF),  (a        & 0xFF)
-
 namespace android {
 
 class AAH_TXPlayer;
@@ -317,13 +314,6 @@ class AAH_TXGroup : public virtual RefBase {
     static const size_t kInitialActiveTXGroupsCapacity;
     static const size_t kMaxAllowedPlayerClients;
     static const size_t kInitialPlayerClientCapacity;
-
-    static const uint32_t kCNC_RetryRequestID;
-    static const uint32_t kCNC_FastStartRequestID;
-    static const uint32_t kCNC_NakRetryRequestID;
-    static const uint32_t kCNC_JoinGroupID;
-    static const uint32_t kCNC_LeaveGroupID;
-    static const uint32_t kCNC_NakJoinGroupID;
 
     DISALLOW_EVIL_CONSTRUCTORS(AAH_TXGroup);
 };
