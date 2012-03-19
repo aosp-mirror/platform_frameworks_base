@@ -98,6 +98,12 @@ public class Process {
     public static final int SDCARD_RW_GID = 1015;
 
     /**
+     * Defines the UID/GID for the group that controls VPN services.
+     * @hide
+     */
+    public static final int VPN_UID = 1016;
+
+    /**
      * Defines the UID/GID for the NFC service process.
      * @hide
      */
