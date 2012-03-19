@@ -70,6 +70,8 @@ enum {
     kKeyThumbnailTime     = 'thbT',  // int64_t (usecs)
     kKeyTrackID           = 'trID',
     kKeyIsDRM             = 'idrm',  // int32_t (bool)
+    kKeyEncoderDelay      = 'encd',  // int32_t (frames)
+    kKeyEncoderPadding    = 'encp',  // int32_t (frames)
 
     kKeyAlbum             = 'albu',  // cstring
     kKeyArtist            = 'arti',  // cstring

@@ -463,40 +463,65 @@ static void convertISO8859ToString8(
     tmp = NULL;
 }
 
-void ID3::Iterator::getString(String8 *id) const {
+// the 2nd argument is used to get the data following the \0 in a comment field
+void ID3::Iterator::getString(String8 *id, String8 *comment) const {
+    getstring(id, false);
+    if (comment != NULL) {
+        getstring(comment, true);
+    }
+}
+
+// comment fields (COM/COMM) contain an initial short descriptor, followed by \0,
+// followed by more data. The data following the \0 can be retrieved by setting
+// "otherdata" to true.
+void ID3::Iterator::getstring(String8 *id, bool otherdata) const {
     id->setTo("");
 
-    if (mFrameData == NULL) {
+    const uint8_t *frameData = mFrameData;
+    if (frameData == NULL) {
         return;
     }
+
+    uint8_t encoding = *frameData;
 
     if (mParent.mVersion == ID3_V1 || mParent.mVersion == ID3_V1_1) {
         if (mOffset == 126 || mOffset == 127) {
             // Special treatment for the track number and genre.
             char tmp[16];
-            sprintf(tmp, "%d", (int)*mFrameData);
+            sprintf(tmp, "%d", (int)*frameData);
 
             id->setTo(tmp);
             return;
         }
 
-        convertISO8859ToString8(mFrameData, mFrameSize, id);
+        convertISO8859ToString8(frameData, mFrameSize, id);
         return;
     }
 
     size_t n = mFrameSize - getHeaderLength() - 1;
+    if (otherdata) {
+        // skip past the encoding, language, and the 0 separator
+        frameData += 4;
+        int32_t i = n - 4;
+        while(--i >= 0 && *++frameData != 0) ;
+        int skipped = (frameData - mFrameData);
+        if (skipped >= n) {
+            return;
+        }
+        n -= skipped;
+    }
 
-    if (*mFrameData == 0x00) {
+    if (encoding == 0x00) {
         // ISO 8859-1
-        convertISO8859ToString8(mFrameData + 1, n, id);
-    } else if (*mFrameData == 0x03) {
+        convertISO8859ToString8(frameData + 1, n, id);
+    } else if (encoding == 0x03) {
         // UTF-8
-        id->setTo((const char *)(mFrameData + 1), n);
-    } else if (*mFrameData == 0x02) {
+        id->setTo((const char *)(frameData + 1), n);
+    } else if (encoding == 0x02) {
         // UTF-16 BE, no byte order mark.
         // API wants number of characters, not number of bytes...
         int len = n / 2;
-        const char16_t *framedata = (const char16_t *) (mFrameData + 1);
+        const char16_t *framedata = (const char16_t *) (frameData + 1);
         char16_t *framedatacopy = NULL;
 #if BYTE_ORDER == LITTLE_ENDIAN
         framedatacopy = new char16_t[len];
@@ -513,7 +538,7 @@ void ID3::Iterator::getString(String8 *id) const {
         // UCS-2
         // API wants number of characters, not number of bytes...
         int len = n / 2;
-        const char16_t *framedata = (const char16_t *) (mFrameData + 1);
+        const char16_t *framedata = (const char16_t *) (frameData + 1);
         char16_t *framedatacopy = NULL;
         if (*framedata == 0xfffe) {
             // endianness marker doesn't match host endianness, convert

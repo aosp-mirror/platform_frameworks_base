@@ -31,10 +31,15 @@ struct XINGSeeker : public MP3Seeker {
     virtual bool getDuration(int64_t *durationUs);
     virtual bool getOffsetForTime(int64_t *timeUs, off64_t *pos);
 
+    virtual int32_t getEncoderDelay();
+    virtual int32_t getEncoderPadding();
+
 private:
     int64_t mFirstFramePos;
     int64_t mDurationUs;
     int32_t mSizeBytes;
+    int32_t mEncoderDelay;
+    int32_t mEncoderPadding;
 
     // TOC entries in XING header. Skip the first one since it's always 0.
     unsigned char mTOC[99];
