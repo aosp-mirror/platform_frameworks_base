@@ -335,18 +335,12 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"запис. контактні дані"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Дозволяє програмі змінювати контактні дані (адресу), збережені в планшетному ПК. Шкідливі програми можуть використовувати це для видалення чи зміни ваших контактних даних."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Дозволяє програмі змінювати контактні дані (адресу), збережені в телефоні. Шкідливі програми можуть використовувати це для видалення чи зміни ваших контактних даних."</string>
-    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
-    <skip />
-    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
-    <skip />
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"читати журнал викликів"</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Дозволяє програмі читати журнал викликів вашого планшетного ПК, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для надсилання ваших даних іншим людям."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Дозволяє програмі читати журнал викликів вашого телефону, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для надсилання ваших даних іншим людям."</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"записувати в журнал викликів"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Дозволяє програмі змінювати журнал викликів вашого планшетного ПК, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Дозволяє програмі змінювати журнал викликів вашого телефону, включно з даними про вхідні та вихідні дзвінки. Шкідливі програми можуть використовувати це для стирання або зміни вашого журналу викликів."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"читати дані вашого профілю"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Дозволяє програмі читати особисту інформацію профілю, збережену на вашому пристрої, як-от ваше ім’я та контактну інформацію. Це означає, що інші програми можуть ідентифікувати вашу особу та надсилати дані вашого профілю іншим."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"записувати в дані профілю"</string>

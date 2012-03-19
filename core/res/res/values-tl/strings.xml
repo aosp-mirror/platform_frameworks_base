@@ -335,18 +335,12 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"sumulat ng data ng pakikipag-ugnay"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Pinapayagan ang app na baguhin ang data ng contact (address) na nakaimbak sa iyong tablet. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong data ng contact."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Pinapayagan ang app na baguhin ang data ng contact (address) na nakaimbak sa iyong telepono. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong data ng contact."</string>
-    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
-    <skip />
-    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
-    <skip />
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"basahin ang log ng tawag"</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Binibigyang-daan ang app na basahin ang log ng tawag ng iyong tablet, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang ipadala ang iyong data sa ibang mga tao."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Binibigyang-daan ang app na basahin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang ipadala ang iyong data sa ibang mga tao."</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"isulat ang log ng tawag"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong tablet, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"basahin ang iyong data ng profile"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Pinapayagan ang app na basahin ang personal na impormasyon ng profile na nakaimbak sa iyong device, gaya ng iyong pangalan at impormasyon ng contact. Nangangahulugan ito na makikilala ka ng app at maipapadala nito ang impormasyon ng iyong profile sa iba."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"i-write sa iyong data ng profile"</string>

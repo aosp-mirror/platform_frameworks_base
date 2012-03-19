@@ -335,18 +335,12 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"contactgegevens schrijven"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Hiermee kan de app de op uw tablet opgeslagen contactgegevens (adresgegevens) wijzigen. Schadelijke apps kunnen hiermee uw contactgegevens verwijderen of wijzigen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Hiermee kan de app de op uw telefoon opgeslagen contactgegevens (adresgegevens) wijzigen. Schadelijke apps kunnen hiermee uw contactgegevens verwijderen of wijzigen."</string>
-    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
-    <skip />
-    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
-    <skip />
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"oproeplogboek lezen"</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Toestaan dat de app het oproeplogboek van uw tablet leest, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gegevens naar andere personen verzenden."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Toestaan dat de app het oproeplogboek van uw telefoon leest, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gegevens naar andere personen verzenden."</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"oproeplogboek schrijven"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app het oproeplogboek van uw tablet aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw oproeplogboek wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app het oproeplogboek van uw telefoon aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw oproeplogboek wissen of aanpassen."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"uw profielgegevens lezen"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Hiermee kan de app persoonlijke profielgegevens lezen die op uw apparaat zijn opgeslagen, zoals uw naam en contactgegevens. Dit betekent dat de app u kan identificeren en uw profielgegevens naar anderen kan verzenden."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"schrijven naar profielgegevens"</string>
@@ -511,14 +505,10 @@
     <string name="permdesc_readDictionary" msgid="8977815988329283705">"Hiermee kan de app privéwoorden, namen en woordcombinaties lezen die de gebruiker heeft opgeslagen in het gebruikerswoordenboek."</string>
     <string name="permlab_writeDictionary" msgid="2296383164914812772">"schrijven naar door gebruiker gedefinieerd woordenboek"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Hiermee kan de app nieuwe woorden schrijven naar het gebruikerswoordenboek."</string>
-    <!-- no translation found for permlab_sdcardRead (4086221374639183281) -->
-    <skip />
-    <!-- no translation found for permlab_sdcardRead (8537875151845139539) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (1055302898999352339) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardRead (7947792373570683542) -->
-    <skip />
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"inhoud van USB-opslag lezen"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"inhoud van SD-kaart lezen"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"App kan inhoud van USB lezen."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Hiermee kan de app de inhoud van de SD-kaart lezen."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"inhoud van USB-opslag aanpassen/verwijderen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"inhoud op de SD-kaart aanpassen/verwijderen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Hiermee kan de app schrijven naar de USB-opslag."</string>

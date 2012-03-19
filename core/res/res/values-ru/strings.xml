@@ -335,18 +335,12 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"перезаписывать данные контакта"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Приложение сможет изменять адреса, сохраненные на планшетном ПК. Вредоносные программы смогут таким образом удалять и изменять данные ваших контактов."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Приложение сможет изменять адреса, сохраненные на телефоне. Вредоносные программы смогут таким образом удалять и изменять данные ваших контактов."</string>
-    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
-    <skip />
-    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
-    <skip />
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"чтение журнала вызовов"</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Приложение получит доступ к списку вызовов планшетного ПК, включая данные о входящих и исходящих звонках. Вредоносные приложения могут использовать доступ для передачи ваших данных третьим лицам."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Приложение получит доступ к списку вызовов телефона, включая данные о входящих и исходящих звонках. Вредоносные приложения смогут воспользоваться этим, чтобы отправить ваши данные третьим лицам."</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"запись журнала вызовов"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Приложение сможет вносить изменения в список вызовов планшетного ПК и данные о входящих и исходящих звонках. Вредоносные приложения смогут воспользоваться этим для удаления или изменения информации о звонках."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Приложение сможет вносить изменения в список вызовов телефона и данные о входящих и исходящих звонках. Вредоносные приложения смогут воспользоваться этим для удаления или изменения информации о звонках."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"просматривать данные профиля"</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Приложение сможет считывать информацию личного профиля, сохраненную на устройстве, такую как ваше имя и контактные данные. Это означает, что приложение сможет получить ваши личные данные и отправить их другим пользователям."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"изменение данных профиля"</string>
