@@ -407,8 +407,8 @@
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Der Anwendung wird der Start der CDMA-Bereitstellung ermöglicht. Schädliche Anwendungen können die CDMA-Bereitstellung unnötigerweise starten."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"Benachrichtigungen für Standortaktualisierung steuern"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Ermöglicht die Aktivierung/Deaktivierung der Mobilfunkbenachrichtigungen über Standort-Updates. Nicht für normale Apps vorgesehen."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"Auf Check-In-Eigenschaften zugreifen"</string>
-    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Ermöglicht den Schreib-/Lesezugriff auf vom Check-In-Service hochgeladene Elemente. Nicht für normale Apps vorgesehen."</string>
+    <string name="permlab_checkinProperties" msgid="7855259461268734914">"Auf Check-in-Eigenschaften zugreifen"</string>
+    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Ermöglicht den Schreib-/Lesezugriff auf vom Check-in-Service hochgeladene Elemente. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"Widgets auswählen"</string>
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Ermöglicht der App, dem System zu melden, welche Widgets von welcher App verwendet werden können. Mit dieser Berechtigung können Apps anderen Apps Zugriff auf persönliche Daten gewähren. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"Telefonstatus ändern"</string>
