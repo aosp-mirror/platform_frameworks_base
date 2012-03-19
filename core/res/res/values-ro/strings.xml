@@ -335,18 +335,12 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"scriere date de contact"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Permite aplicaţiei să modifice datele de contact (adresele) stocate pe tabletă. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a şterge sau a modifica datele dvs. de contact."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Permite aplicaţiei să modifice datele de contact (adresele) stocate pe telefon. Aplicaţiile rău intenţionate pot să utilizeze această permisiune pentru a şterge sau pentru a modifica datele dvs. de contact."</string>
-    <!-- no translation found for permlab_readCallLog (3478133184624102739) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3995157599976515002) -->
-    <skip />
-    <!-- no translation found for permdesc_readCallLog (3452017559804750758) -->
-    <skip />
-    <!-- no translation found for permlab_writeCallLog (8552045664743499354) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (6661806062274119245) -->
-    <skip />
-    <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
-    <skip />
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"citeşte jurnalul de apeluri"</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Permite aplicaţiei să citească jurnalul de apeluri al tabletei dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a trimite datele dvs. altor persoane."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Permite aplicaţiei să citească jurnalul de apeluri al telefonului dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a trimite datele dvs. altor persoane."</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"scrie jurnalul de apeluri"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permite aplicaţiei să modifice jurnalul de apeluri al tabletei dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a şterge sau pentru a modifica jurnalul dvs. de apeluri."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite aplicaţiei să modifice jurnalul de apeluri al telefonului dvs., inclusiv datele despre apelurile primite sau efectuate. Aplicaţiile rău intenţionate pot utiliza această permisiune pentru a şterge sau pentru a modifica jurnalul dvs. de apeluri."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"citire date din profilul dvs."</string>
     <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"Permite aplicaţiei să citească informaţii de profil personal stocate pe dispozitiv, cum ar fi numele şi informaţiile de contact, ceea ce înseamnă că aplicaţia vă poate identifica şi poate trimite informaţiile dvs. de profil altor utilizatori."</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"scriere date în profilul dvs."</string>
