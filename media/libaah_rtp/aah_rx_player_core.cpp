@@ -682,6 +682,7 @@ void AAH_RXPlayer::processCommandPacket(PacketBuffer* pb) {
 
     bool do_cleanup_pass = false;
     uint16_t command_id = U16_AT(data + offset);
+    uint8_t  program_id = (U32_AT(data + 8) >> 5) & 0x1F;
     offset += 2;
 
     switch (command_id) {
@@ -692,13 +693,23 @@ void AAH_RXPlayer::processCommandPacket(PacketBuffer* pb) {
             break;
 
         case TRTPControlPacket::kCommandEOS:
-            // TODO need to differentiate between flush and EOS.  Substreams
-            // which have hit EOS need a chance to drain before being destroyed.
+            // Flag the substreams which are a member of this program as having
+            // hit EOS.  Once in the EOS state, it is not possible to get out.
+            // It is possible to pause and unpause, but the only way out would
+            // be to seek, or to stop completely.  Both of these operations
+            // would involve a flush, which would destroy and (possibly)
+            // recreate a new the substream, getting rid of the EOS flag in the
+            // process.
+            for (size_t i = 0; i < substreams_.size(); ++i) {
+                const sp<Substream>& stream = substreams_.valueAt(i);
+                if (stream->getProgramID() == program_id) {
+                    stream->signalEOS();
+                }
+            }
+            break;
 
         case TRTPControlPacket::kCommandFlush: {
-            uint8_t program_id = (U32_AT(data + 8) >> 5) & 0x1F;
-            LOGI("*** %s flushing program_id=%d",
-                 __PRETTY_FUNCTION__, program_id);
+            LOGI("Flushing program_id=%d", program_id);
 
             // Flag any programs with the given program ID for cleanup.
             for (size_t i = 0; i < substreams_.size(); ++i) {

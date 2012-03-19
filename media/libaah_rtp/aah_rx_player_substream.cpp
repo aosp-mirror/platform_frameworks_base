@@ -43,6 +43,7 @@ AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
     buffer_in_progress_ = NULL;
     status_ = OK;
     codec_mime_type_ = "";
+    eos_reached_ = false;
 
     decoder_ = new AAH_DecoderPump(omx);
     if (decoder_ == NULL) {
@@ -637,8 +638,27 @@ void AAH_RXPlayer::Substream::processTSTransform(const LinearTransform& trans) {
     }
 }
 
+void AAH_RXPlayer::Substream::signalEOS() {
+    if (!eos_reached_) {
+        LOGI("Substream with SSRC 0x%08x now at EOS", ssrc_);
+        eos_reached_ = true;
+    }
+
+    // TODO: Be sure to signal EOS to our decoder so that it can flush out any
+    // reordered samples.  Not supporting video right now, so its not super
+    // important.
+}
+
 bool AAH_RXPlayer::Substream::isAboutToUnderflow() {
+    // If we have no decoder, we cannot be about to underflow.
     if (decoder_ == NULL) {
+        return false;
+    }
+
+    // If we have hit EOS, we will not be receiveing any new samples, so the
+    // about-to-underflow hack/heuristic is no longer valid.  We should just
+    // return false to be safe.
+    if (eos_reached_) {
         return false;
     }
 

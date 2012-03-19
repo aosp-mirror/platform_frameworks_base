@@ -192,6 +192,7 @@ class AAH_RXPlayer : public MediaPlayerInterface {
         void processTSTransform(const LinearTransform& trans);
 
         bool     isAboutToUnderflow();
+        void     signalEOS();
         uint32_t getSSRC()      const { return ssrc_; }
         uint8_t  getProgramID() const { return (ssrc_ >> 5) & 0x1F; }
         status_t getStatus() const { return status_; }
@@ -217,34 +218,35 @@ class AAH_RXPlayer : public MediaPlayerInterface {
         virtual ~Substream();
 
       private:
-        void                cleanupDecoder();
-        bool                shouldAbort(const char* log_tag);
-        void                processCompletedBuffer();
-        bool                setupSubstreamMeta();
-        bool                setupMP3SubstreamMeta();
-        bool                setupAACSubstreamMeta();
-        bool                setupSubstreamType(uint8_t substream_type,
-                                               uint8_t codec_type);
+        void                    cleanupDecoder();
+        bool                    shouldAbort(const char* log_tag);
+        void                    processCompletedBuffer();
+        bool                    setupSubstreamMeta();
+        bool                    setupMP3SubstreamMeta();
+        bool                    setupAACSubstreamMeta();
+        bool                    setupSubstreamType(uint8_t substream_type,
+                                                   uint8_t codec_type);
 
-        uint32_t            ssrc_;
-        bool                waiting_for_rap_;
-        status_t            status_;
+        uint32_t                ssrc_;
+        bool                    waiting_for_rap_;
+        status_t                status_;
 
-        bool                substream_details_known_;
-        uint8_t             substream_type_;
-        uint8_t             codec_type_;
-        const char*         codec_mime_type_;
-        sp<MetaData>        substream_meta_;
+        bool                    substream_details_known_;
+        uint8_t                 substream_type_;
+        uint8_t                 codec_type_;
+        const char*             codec_mime_type_;
+        sp<MetaData>            substream_meta_;
 
-        MediaBuffer*        buffer_in_progress_;
-        uint32_t            expected_buffer_size_;
-        uint32_t            buffer_filled_;
+        MediaBuffer*            buffer_in_progress_;
+        uint32_t                expected_buffer_size_;
+        uint32_t                buffer_filled_;
 
-        Vector<uint8_t>     aux_data_in_progress_;
-        uint32_t            aux_data_expected_size_;
+        Vector<uint8_t>         aux_data_in_progress_;
+        uint32_t                aux_data_expected_size_;
 
-        sp<AAH_DecoderPump> decoder_;
-        Timeout             inactivity_timeout_;
+        sp<AAH_DecoderPump>     decoder_;
+        Timeout                 inactivity_timeout_;
+        bool                    eos_reached_;
 
         static const int64_t    kAboutToUnderflowThreshold;
         static const int        kInactivityTimeoutMsec;
