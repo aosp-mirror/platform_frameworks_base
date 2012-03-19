@@ -1817,7 +1817,16 @@ public class AccountManagerService
             // Migrate old file, if it exists, to the new location
             File oldFile = new File(systemDir, DATABASE_NAME);
             if (oldFile.exists()) {
-                oldFile.renameTo(databaseFile);
+                // Check for use directory; create if it doesn't exist, else renameTo will fail
+                File userDir = new File(systemDir, "users/" + userId);
+                if (!userDir.exists()) {
+                    if (!userDir.mkdirs()) {
+                        throw new IllegalStateException("User dir cannot be created: " + userDir);
+                    }
+                }
+                if (!oldFile.renameTo(databaseFile)) {
+                    throw new IllegalStateException("User dir cannot be migrated: " + databaseFile);
+                }
             }
         }
         return databaseFile.getPath();
