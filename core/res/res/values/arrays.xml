@@ -338,16 +338,6 @@
         <item>#ffffffff</item>
     </array>
 
-    <!-- Do not translate. -->
-    <integer-array name="maps_starting_lat_lng">
-        <item>36149777</item>
-        <item>-95993398</item>
-    </integer-array>
-    <!-- Do not translate. -->
-    <integer-array name="maps_starting_zoom">
-        <item>3</item>
-    </integer-array>
-
     <!-- Used in LocalePicker -->
     <string-array translatable="false" name="special_locale_codes">
         <item>zh_CN</item>
