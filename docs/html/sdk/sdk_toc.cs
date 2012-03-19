@@ -81,7 +81,8 @@ class="new">new!</span></li>
         <div><a href="<?cs var:toroot ?>sdk/android-4.0-highlights.html">
         <span class="en">Android 4.0.x Platform</span></a> <span class="new">new!</span></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>sdk/android-4.0.3.html">Android 4.0.3 Platform</a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>sdk/android-4.0.3.html">Android 4.0.3 Platform</a>
+            <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>sdk/android-4.0.html">Android 4.0 Platform</a> </li>
         </ul>
       </li>
@@ -152,10 +153,10 @@ class="new">new!</span></li>
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r16</a> <span
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r17</a> <span
 class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Support Package, r6</a>
+      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Support Package, r7</a>
       <span class="new">new!</span></li>
     </ul>
   </li>
@@ -171,7 +172,7 @@ class="new">new!</span></li>
       <span style="display:none" class="zh-TW"></span>
     </span>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 16.0.1
+      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 17.0.0
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>
