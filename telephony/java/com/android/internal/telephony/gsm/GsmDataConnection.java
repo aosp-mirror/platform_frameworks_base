@@ -91,8 +91,8 @@ public class GsmDataConnection extends DataConnection {
 
         int authType = mApn.authType;
         if (authType == -1) {
-            authType = (mApn.user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP :
-                RILConstants.SETUP_DATA_AUTH_NONE;
+            authType = TextUtils.isEmpty(mApn.user) ? RILConstants.SETUP_DATA_AUTH_NONE
+                    : RILConstants.SETUP_DATA_AUTH_PAP_CHAP;
         }
 
         String protocol;
