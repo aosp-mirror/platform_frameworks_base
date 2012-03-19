@@ -146,6 +146,12 @@ class HTML5VideoViewProxy extends Handler
                 // Save the inline video info and inherit it in the full screen
                 int savePosition = 0;
                 if (mHTML5VideoView != null) {
+                    // We don't allow enter full screen mode while the previous
+                    // full screen video hasn't finished yet.
+                    if (!mHTML5VideoView.fullScreenExited() && mHTML5VideoView.isFullScreenMode()) {
+                        Log.w(LOGTAG, "Try to reenter the full screen mode");
+                        return;
+                    }
                     // If we are playing the same video, then it is better to
                     // save the current position.
                     if (layerId == mHTML5VideoView.getVideoLayerId()) {
