@@ -71,14 +71,16 @@ String8 StringPool::entry::makeConfigsString() const {
 }
 
 int StringPool::entry::compare(const entry& o) const {
-    // Strings with styles go first, to reduce the size of the
-    // styles array.
+    // Strings with styles go first, to reduce the size of the styles array.
+    // We don't care about the relative order of these strings.
     if (hasStyles) {
         return o.hasStyles ? 0 : -1;
     }
     if (o.hasStyles) {
         return 1;
     }
+
+    // Sort unstyled strings by type, then by logical configuration.
     int comp = configTypeName.compare(o.configTypeName);
     if (comp != 0) {
         return comp;
