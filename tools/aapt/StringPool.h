@@ -139,7 +139,11 @@ public:
     const Vector<size_t>* offsetsForString(const String16& val) const;
 
 private:
+#ifdef __GLIBC__
+    static int config_sort(const void* lhs, const void* rhs, void* state);
+#else
     static int config_sort(void* state, const void* lhs, const void* rhs);
+#endif
 
     const bool                              mUTF8;
 
