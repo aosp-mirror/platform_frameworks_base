@@ -213,7 +213,11 @@ status_t StringPool::addStyleSpan(size_t idx, const entry_style_span& span)
     return NO_ERROR;
 }
 
+#ifdef __GLIBC__
+int StringPool::config_sort(const void* lhs, const void* rhs, void* state)
+#else
 int StringPool::config_sort(void* state, const void* lhs, const void* rhs)
+#endif
 {
     StringPool* pool = (StringPool*)state;
     const entry& lhe = pool->mEntries[pool->mEntryArray[*static_cast<const size_t*>(lhs)]];
@@ -241,7 +245,13 @@ void StringPool::sortByConfig()
     NOISY(printf("SORTING STRINGS BY CONFIGURATION...\n"));
     // Vector::sort uses insertion sort, which is very slow for this data set.
     // Use quicksort instead because we don't need a stable sort here.
+    // For more fun, GLibC took qsort_r from BSD but then decided to swap the
+    // order the last two parameters.
+#ifdef __GLIBC__
+    qsort_r(newPosToOriginalPos.editArray(), N, sizeof(size_t), config_sort, this);
+#else
     qsort_r(newPosToOriginalPos.editArray(), N, sizeof(size_t), this, config_sort);
+#endif
     //newPosToOriginalPos.sort(config_sort, this);
     NOISY(printf("DONE SORTING STRINGS BY CONFIGURATION.\n"));
 
