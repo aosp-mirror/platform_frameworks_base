@@ -14,6 +14,8 @@
 #include "FileFinder.h"
 #include "CacheUpdater.h"
 
+#include <utils/WorkQueue.h>
+
 #if HAVE_PRINTF_ZD
 #  define ZD "%zd"
 #  define ZD_TYPE ssize_t
@@ -23,6 +25,9 @@
 #endif
 
 #define NOISY(x) // x
+
+// Number of threads to use for preprocessing images.
+static const size_t MAX_THREADS = 4;
 
 // ==========================================================================
 // ==========================================================================
@@ -302,20 +307,51 @@ static status_t makeFileResources(Bundle* bundle, const sp<AaptAssets>& assets,
     return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
 }
 
-static status_t preProcessImages(Bundle* bundle, const sp<AaptAssets>& assets,
+class PreProcessImageWorkUnit : public WorkQueue::WorkUnit {
+public:
+    PreProcessImageWorkUnit(const Bundle* bundle, const sp<AaptAssets>& assets,
+            const sp<AaptFile>& file, volatile bool* hasErrors) :
+            mBundle(bundle), mAssets(assets), mFile(file), mHasErrors(hasErrors) {
+    }
+
+    virtual bool run() {
+        status_t status = preProcessImage(mBundle, mAssets, mFile, NULL);
+        if (status) {
+            *mHasErrors = true;
+        }
+        return true; // continue even if there are errors
+    }
+
+private:
+    const Bundle* mBundle;
+    sp<AaptAssets> mAssets;
+    sp<AaptFile> mFile;
+    volatile bool* mHasErrors;
+};
+
+static status_t preProcessImages(const Bundle* bundle, const sp<AaptAssets>& assets,
                           const sp<ResourceTypeSet>& set, const char* type)
 {
-    bool hasErrors = false;
+    volatile bool hasErrors = false;
     ssize_t res = NO_ERROR;
     if (bundle->getUseCrunchCache() == false) {
+        WorkQueue wq(MAX_THREADS, false);
         ResourceDirIterator it(set, String8(type));
-        Vector<sp<AaptFile> > newNameFiles;
-        Vector<String8> newNamePaths;
         while ((res=it.next()) == NO_ERROR) {
-            res = preProcessImage(bundle, assets, it.getFile(), NULL);
-            if (res < NO_ERROR) {
+            PreProcessImageWorkUnit* w = new PreProcessImageWorkUnit(
+                    bundle, assets, it.getFile(), &hasErrors);
+            status_t status = wq.schedule(w);
+            if (status) {
+                fprintf(stderr, "preProcessImages failed: schedule() returned %d\n", status);
                 hasErrors = true;
+                delete w;
+                break;
             }
+        }
+        status_t status = wq.finish();
+        if (status) {
+            fprintf(stderr, "preProcessImages failed: finish() returned %d\n", status);
+            hasErrors = true;
         }
     }
     return (hasErrors || (res < NO_ERROR)) ? UNKNOWN_ERROR : NO_ERROR;

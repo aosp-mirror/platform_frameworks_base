@@ -964,7 +964,7 @@ static void write_png(const char* imageName,
                  compression_type));
 }
 
-status_t preProcessImage(Bundle* bundle, const sp<AaptAssets>& assets,
+status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& assets,
                          const sp<AaptFile>& file, String8* outNewLeafName)
 {
     String8 ext(file->getPath().getPathExtension());
@@ -1084,7 +1084,7 @@ bail:
     return error;
 }
 
-status_t preProcessImageToCache(Bundle* bundle, String8 source, String8 dest)
+status_t preProcessImageToCache(const Bundle* bundle, const String8& source, const String8& dest)
 {
     png_structp read_ptr = NULL;
     png_infop read_info = NULL;
