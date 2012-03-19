@@ -30,7 +30,6 @@
 #include <utils/threads.h>
 
 #include "aah_decoder_pump.h"
-#include "pipe_event.h"
 #include "utils.h"
 
 namespace android {
@@ -273,7 +272,7 @@ class AAH_RXPlayer : public MediaPlayerInterface {
     void                sendUnicastGroupLeave();
     void                fetchAudioFlinger();
 
-    PipeEvent           wakeup_work_thread_evt_;
+    int                 wakeup_work_thread_evt_fd_;
     sp<ThreadWrapper>   thread_wrapper_;
     Mutex               api_lock_;
     bool                is_playing_;

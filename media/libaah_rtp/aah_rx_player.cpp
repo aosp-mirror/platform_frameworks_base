@@ -17,6 +17,8 @@
 #define LOG_TAG "LibAAH_RTP"
 //#define LOG_NDEBUG 0
 
+#include <sys/eventfd.h>
+
 #include <binder/IServiceManager.h>
 #include <media/MediaPlayerInterface.h>
 #include <utils/Log.h>
@@ -49,6 +51,7 @@ AAH_RXPlayer::AAH_RXPlayer()
 
     memset(&data_source_addr_, 0, sizeof(data_source_addr_));
     memset(&transmitter_addr_, 0, sizeof(transmitter_addr_));
+    wakeup_work_thread_evt_fd_ = eventfd(0, EFD_NONBLOCK);
 
     fetchAudioFlinger();
 }
@@ -57,6 +60,10 @@ AAH_RXPlayer::~AAH_RXPlayer() {
     reset_l();
     CHECK(substreams_.size() == 0);
     omx_.disconnect();
+
+    if (wakeup_work_thread_evt_fd_ >= 0) {
+        ::close(wakeup_work_thread_evt_fd_);
+    }
 }
 
 status_t AAH_RXPlayer::initCheck() {
@@ -67,6 +74,11 @@ status_t AAH_RXPlayer::initCheck() {
 
     if (!ring_buffer_.initCheck()) {
         LOGE("Failed to allocate reassembly ring buffer!");
+        return NO_MEMORY;
+    }
+
+    if (wakeup_work_thread_evt_fd_ < 0) {
+        LOGE("Failed to allocate wakeup eventfd");
         return NO_MEMORY;
     }
 

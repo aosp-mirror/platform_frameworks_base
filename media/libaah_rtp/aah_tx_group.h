@@ -127,15 +127,14 @@ class AAH_TXGroup : public virtual RefBase {
     class CmdAndControlRXer : public Thread {
       public:
         CmdAndControlRXer();
-        void wakeupThread();
         bool init();
+        void wakeupThread() { signalEventFD(mWakeupEventFD); }
 
       protected:
         virtual ~CmdAndControlRXer();
 
       private:
         virtual bool threadLoop();
-        void clearWakeupEvent();
 
         static const int kMaxReceiverPacketLen;
         static const uint32_t kRetryRequestID;
