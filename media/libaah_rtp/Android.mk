@@ -29,6 +29,7 @@ LOCAL_SHARED_LIBRARIES := \
     libcommon_time_client \
     libbinder \
     libmedia \
+    libmedia_native \
     libstagefright \
     libstagefright_foundation \
     libutils
@@ -37,4 +38,3 @@ LOCAL_LDLIBS := \
     -lpthread
 
 include $(BUILD_SHARED_LIBRARY)
-

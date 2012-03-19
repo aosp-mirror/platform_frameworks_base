@@ -23,6 +23,7 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	libvorbisidec         			\
 	libsonivox            			\
 	libmedia              			\
+	libmedia_native       			\
 	libcamera_client      			\
 	libandroid_runtime    			\
 	libstagefright        			\

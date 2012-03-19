@@ -37,6 +37,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
 	libmedia \
+	libmedia_native \
 	libstagefright_amrnb_common
 
 LOCAL_STATIC_LIBRARIES := libgsm libstagefright_amrnbdec libstagefright_amrnbenc

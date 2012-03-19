@@ -22,6 +22,7 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libbinder \
     libmedia \
+    libmedia_native \
     libskia \
     libui \
     libcutils \
