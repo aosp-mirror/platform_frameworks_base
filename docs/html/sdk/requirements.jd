@@ -24,7 +24,7 @@ Android applications using the Android SDK. </p>
 
 <h4 style="margin-top:.25em"><em>Eclipse IDE</em></h4>
     <ul>
-      <li>Eclipse 3.6 (Helios) or greater
+      <li>Eclipse 3.6.2 (Helios) or greater
 <p class="note"><strong>Note:</strong> Eclipse 3.5 (Galileo) is no longer
 supported with the latest version of ADT.</p></li>
       <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
@@ -41,8 +41,8 @@ packages: </p>
            <li>Eclipse IDE for Java EE Developers</li>
          </ul>
       </li>
-      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 5 or JDK
-6</a> (JRE alone is not sufficient)</li>
+      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
+        (JRE alone is not sufficient)</li>
       <li><a href="eclipse-adt.html">Android Development Tools plugin</a>
 (recommended)</li>
       <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
@@ -51,8 +51,8 @@ packages: </p>
 
 <h4><em>Other development environments or IDEs</em></h4>
     <ul>
-      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 5 or JDK
-6</a> (JRE alone is not sufficient)</li>
+      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
+        (JRE alone is not sufficient)</li>
       <li><a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later</li>
       <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
     </ul>

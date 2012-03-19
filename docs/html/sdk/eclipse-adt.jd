@@ -1,8 +1,8 @@
 page.title=ADT Plugin for Eclipse
-adt.zip.version=16.0.1
-adt.zip.download=ADT-16.0.1.zip
-adt.zip.bytes=7000078
-adt.zip.checksum=03a2a23650ddac128c8b9e8aaf0aa433
+adt.zip.version=17.0.0
+adt.zip.download=ADT-17.0.0.zip
+adt.zip.bytes=12836115
+adt.zip.checksum=ecb12c07e534997cd32c66d57f21b770
 
 @jd:body
 
@@ -108,10 +108,108 @@ padding: .25em 1em;
 }
 </style>
 
-
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+width="9px" />
+ADT 17.0.0</a> <em>(March 2012)</em>
+  <div class="toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required for ADT 17.0.0.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 17.0.0.</li>
+      <li>ADT 17.0.0 is designed for use with <a href="{@docRoot}sdk/tools-notes.html">SDK Tools
+      r17</a>. If you haven't already installed SDK Tools r17 into your SDK, use the Android SDK
+      Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General improvements:</dt>
+  <dd>
+    <ul>
+      <li>New build features
+        <ul>
+          <li>Added feature to automatically setup JAR dependencies. Any {@code .jar} files in the
+          {@code /libs} folder are added to the build configuration (similar to how the Ant build
+          system works). Also, {@code .jar} files needed by library projects are also automatically
+          added to projects that depend on those library projects.</li>
+          <li>Added a feature that allows you to run some code only in debug mode. Builds now
+generate a class called {@code BuildConfig} containing a {@code DEBUG} constant that is
+automatically set according to your build type. You can check the ({@code BuildConfig.DEBUG})
+constant in your code to run debug-only functions.</li>
+          <li>Added support for custom views with custom attributes in libraries. Layouts using
+custom attributes must use the namespace URI {@code http://schemas.android.com/apk/res-auto} instead
+of the URI that includes the app package name. This URI is replaced with the app specific one at
+build time.</li>
+        </ul>
+      </li>
+      <li>Improved Lint features. See the <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r17</a>
+release notes.</li>
+      <li>Improved the Lint user interface
+        <ul>
+          <li>Added <strong>Run Lint</strong> toolbar action with a dropdown menu for selecting
+specific (or all) projects, clearing results and other actions.</li>
+          <li>Updated the results window to be organized as a tree rather than a flat list. Each
+issue type has a single top level item, which makes it easier to quickly scan through the reported
+issues and narrow down to the issues you are most interested in.</li>
+          <li>Added many new toolbar actions to the results window, including expand/collapse,
+ignore in file, ignore in project, ignore everywhere, show options, and configure columns.</li>
+          <li>Added new column options for the <strong>Lint Warnings</strong> tab, such as
+category, priority, project, file and line. The column selection (as well as the column sizes) are
+persisted. You can also click on columns to sort by those values.</li>
+          <li>Added Enable All and Disable All buttons to the Lint Options dialog, and a search
+filter textbox to filter by issue id, summary and severity.</li>
+        </ul>
+      </li>
+      <li>Added Quick Outline for XML editors (Ctrl-O, Command-O). This feature shows the structure
+of the current file including icons and ids, lets you filter and quickly jump to specific ids.</li>
+      <li>Updated the resource chooser to shows the resolved value for resources. For example,
+when selecting {@code @string/hello} the chooser displays a resolved value such as "Hello World").
+The resource chooser also now allows you to edit the chosen value directly.</li>
+      <li>Updated Layout Editor so that it does not assign default ids to layouts, includes and
+merge tags. This behavior tended to pollute the namespace with a lot of unused resources since
+layouts are not usually manipulated via code, or referenced from XML. (The RelativeLayout editor
+automatically assigns ids to views without ids when pointing to them.)</li>
+      <li>Added ability to export screenshots from the Layout Editor</li>
+    </ul>
+  </dd>
+
+  <dt>Bug fixes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed problem using Layout Editor with {@link android.widget.SlidingDrawer} which could
+        not be dragged into the layout on some platforms.</li>
+      <li>Fixed preview rendering for {@link android.widget.SlidingDrawer} and 
+        {@link android.widget.TabHost}.
+        (<a href="http://code.google.com/p/android/issues/detail?id=23022">Issue 23022</a>).</li>
+      <li>Fixed issues that could prevent layout rendering due to unresolvable resources.
+        (<a href="http://code.google.com/p/android/issues/detail?id=21046">Issue 21046</a>,
+        <a href="http://code.google.com/p/android/issues/detail?id=21051">Issue 21051</a>)</li>
+      <li>Fixed a bug in resource chooser which made some types of framework resources impossible to
+select. (<a href="http://code.google.com/p/android/issues/detail?id=20589">Issue 20589</a>)</li>
+      <li>Fixed a bug in the formatter where a certain whitespace pattern could result in a
+        non-space character getting deleted.
+        (<a href="http://code.google.com/p/android/issues/detail?id=23940">Issue 23940</a>)</li>
+      <li>Fixed a locale bug affecting Turkish locales in particular.
+        (<a href="http://code.google.com/p/android/issues/detail?id=23747">Issue 23747</a>)</li>
+      <li>Fixed issue where dex complains about duplicate classes in cases where a Library
+        Project depends on the same jar files or Java-only projects.</li>
+      <li>Fixed issue where test projects had to independently reference the library projects used
+        by an app project. Now referencing only the app project is enough.</li>
+    </ul>
+  </dd>
+
+</dl>
+
+</div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
 width="9px" />
 ADT 16.0.1</a> <em>(December 2011)</em>
   <div class="toggleme">
@@ -182,11 +280,11 @@ ADT 15.0.1</a> <em>(November 2011)</em>
   <div class="toggleme">
 <dl>
   <dt>Dependencies:</dt>
-  
+
   <dd>ADT 15.0.1 is designed for use with <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r15</a>.
   If you haven't already installed SDK Tools r15 into your SDK, use the Android SDK Manager to
   do so.</dd>
-  
+
   <dt>Bug fixes:</dt>
   <dd>
     <ul>
