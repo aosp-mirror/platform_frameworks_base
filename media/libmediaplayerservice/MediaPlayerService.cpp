@@ -1514,7 +1514,7 @@ status_t MediaPlayerService::AudioOutput::open(
     frameCount = (sampleRate*afFrameCount*bufferCount)/afSampleRate;
 
     if (channelMask == CHANNEL_MASK_USE_CHANNEL_ORDER) {
-        channelMask = audio_channel_mask_from_count(channelCount);
+        channelMask = audio_channel_out_mask_from_count(channelCount);
         if (0 == channelMask) {
             ALOGE("open() error, can\'t derive mask for %d audio channels", channelCount);
             return NO_INIT;

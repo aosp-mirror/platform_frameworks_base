@@ -75,7 +75,7 @@ class AAH_DecoderPump : public MediaSource {
     void stopAndCleanupRenderer();
 
     sp<MetaData>        format_;
-    int32_t             format_channels_;
+    int32_t             format_channels_;   // channel count, not channel mask
     int32_t             format_sample_rate_;
 
     sp<MediaSource>     decoder_;

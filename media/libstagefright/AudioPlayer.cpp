@@ -144,7 +144,7 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
     } else {
         // playing to an AudioTrack, set up mask if necessary
         audio_channel_mask_t audioMask = channelMask == CHANNEL_MASK_USE_CHANNEL_ORDER ?
-                audio_channel_mask_from_count(numChannels) : channelMask;
+                audio_channel_out_mask_from_count(numChannels) : channelMask;
         if (0 == audioMask) {
             return BAD_VALUE;
         }

@@ -92,7 +92,7 @@ int JetPlayer::init()
     mAudioTrack->set(AUDIO_STREAM_MUSIC,  //TODO parametrize this
             pLibConfig->sampleRate,
             AUDIO_FORMAT_PCM_16_BIT,
-            (pLibConfig->numChannels == 2) ? AUDIO_CHANNEL_OUT_STEREO : AUDIO_CHANNEL_OUT_MONO,
+            audio_channel_out_mask_from_count(pLibConfig->numChannels),
             mTrackBufferSize,
             AUDIO_POLICY_OUTPUT_FLAG_NONE);
 

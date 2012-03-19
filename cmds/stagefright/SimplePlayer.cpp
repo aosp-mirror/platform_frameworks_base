@@ -583,8 +583,7 @@ status_t SimplePlayer::onOutputFormatChanged(
                 AUDIO_STREAM_MUSIC,
                 sampleRate,
                 AUDIO_FORMAT_PCM_16_BIT,
-                (channelCount == 1)
-                    ? AUDIO_CHANNEL_OUT_MONO : AUDIO_CHANNEL_OUT_STEREO,
+                audio_channel_out_mask_from_count(channelCount),
                 0);
 
         state->mNumFramesWritten = 0;

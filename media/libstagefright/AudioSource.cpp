@@ -47,22 +47,22 @@ static void AudioRecordCallbackFunction(int event, void *user, void *info) {
 }
 
 AudioSource::AudioSource(
-        audio_source_t inputSource, uint32_t sampleRate, uint32_t channels)
+        audio_source_t inputSource, uint32_t sampleRate, uint32_t channelCount)
     : mStarted(false),
       mSampleRate(sampleRate),
       mPrevSampleTimeUs(0),
       mNumFramesReceived(0),
       mNumClientOwnedBuffers(0) {
 
-    ALOGV("sampleRate: %d, channels: %d", sampleRate, channels);
-    CHECK(channels == 1 || channels == 2);
+    ALOGV("sampleRate: %d, channelCount: %d", sampleRate, channelCount);
+    CHECK(channelCount == 1 || channelCount == 2);
     AudioRecord::record_flags flags = (AudioRecord::record_flags)
                     (AudioRecord::RECORD_AGC_ENABLE |
                      AudioRecord::RECORD_NS_ENABLE  |
                      AudioRecord::RECORD_IIR_ENABLE);
     mRecord = new AudioRecord(
                 inputSource, sampleRate, AUDIO_FORMAT_PCM_16_BIT,
-                channels > 1? AUDIO_CHANNEL_IN_STEREO: AUDIO_CHANNEL_IN_MONO,
+                audio_channel_in_mask_from_count(channelCount),
                 4 * kMaxBufferSize / sizeof(int16_t), /* Enable ping-pong buffers */
                 flags,
                 AudioRecordCallbackFunction,
