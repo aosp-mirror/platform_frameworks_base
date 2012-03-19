@@ -1777,7 +1777,10 @@ public final class WebViewCore {
                         case SELECT_WORD_AT: {
                             int x = msg.arg1;
                             int y = msg.arg2;
-                            nativeSelectWordAt(mNativeClass, x, y);
+                            if (!nativeSelectWordAt(mNativeClass, x, y)) {
+                                mWebView.mPrivateHandler.obtainMessage(WebViewClassic.SHOW_CARET_HANDLE)
+                                    .sendToTarget();
+                            }
                             break;
                         }
                         case SELECT_ALL:
@@ -3106,7 +3109,7 @@ public final class WebViewCore {
     private native void nativeSelectText(int nativeClass,
             int startX, int startY, int endX, int endY);
     private native void nativeClearTextSelection(int nativeClass);
-    private native void nativeSelectWordAt(int nativeClass, int x, int y);
+    private native boolean nativeSelectWordAt(int nativeClass, int x, int y);
     private native void nativeSelectAll(int nativeClass);
 
     private static native void nativeCertTrustChanged();
