@@ -242,7 +242,7 @@ public class RecentTasksLoader {
                 // We load in two stages: first, we update progress with just the first screenful
                 // of items. Then, we update with the rest of the items
                 final int origPri = Process.getThreadPriority(Process.myTid());
-                Process.setThreadPriority(Process.THREAD_GROUP_BG_NONINTERACTIVE);
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 final PackageManager pm = mContext.getPackageManager();
                 final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -326,7 +326,7 @@ public class RecentTasksLoader {
             @Override
             protected Void doInBackground(Void... params) {
                 final int origPri = Process.getThreadPriority(Process.myTid());
-                Process.setThreadPriority(Process.THREAD_GROUP_BG_NONINTERACTIVE);
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
                 while (true) {
                     if (isCancelled()) {
