@@ -17613,6 +17613,7 @@ package android.provider {
     field public static final java.lang.String INPUT_METHOD_SELECTOR_VISIBILITY = "input_method_selector_visibility";
     field public static final java.lang.String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
     field public static final java.lang.String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
+    field public static final java.lang.String LOCK_BIOMETRIC_WEAK_FLAGS = "lock_biometric_weak_flags";
     field public static final java.lang.String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
     field public static final java.lang.String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED = "lock_pattern_tactile_feedback_enabled";
     field public static final java.lang.String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";

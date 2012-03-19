@@ -105,6 +105,12 @@ public class LockPatternUtils {
      */
     public static final int MIN_PATTERN_REGISTER_FAIL = MIN_LOCK_PATTERN_SIZE;
 
+    /**
+     * The bit in LOCK_BIOMETRIC_WEAK_FLAGS to be used to indicate whether liveliness should
+     * be used
+     */
+    public static final int FLAG_BIOMETRIC_WEAK_LIVELINESS = 0x1;
+
     private final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     private final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
     private final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
@@ -875,6 +881,28 @@ public class LockPatternUtils {
 
 
         return true;
+    }
+
+    /**
+     * Set whether biometric weak liveliness is enabled.
+     */
+    public void setBiometricWeakLivelinessEnabled(boolean enabled) {
+        long currentFlag = getLong(Settings.Secure.LOCK_BIOMETRIC_WEAK_FLAGS, 0L);
+        long newFlag;
+        if (enabled) {
+            newFlag = currentFlag | FLAG_BIOMETRIC_WEAK_LIVELINESS;
+        } else {
+            newFlag = currentFlag & ~FLAG_BIOMETRIC_WEAK_LIVELINESS;
+        }
+        setLong(Settings.Secure.LOCK_BIOMETRIC_WEAK_FLAGS, newFlag);
+    }
+
+    /**
+     * @return Whether the biometric weak liveliness is enabled.
+     */
+    public boolean isBiometricWeakLivelinessEnabled() {
+        long currentFlag = getLong(Settings.Secure.LOCK_BIOMETRIC_WEAK_FLAGS, 0L);
+        return ((currentFlag & FLAG_BIOMETRIC_WEAK_LIVELINESS) != 0);
     }
 
     /**
