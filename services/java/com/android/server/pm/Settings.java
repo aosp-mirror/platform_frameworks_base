@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageManager.ENFORCEMENT_DEFAULT;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
@@ -74,6 +75,9 @@ final class Settings {
 
     private static final boolean DEBUG_STOPPED = false;
 
+    private static final String TAG_READ_EXTERNAL_STORAGE = "read-external-storage";
+    private static final String ATTR_ENFORCEMENT = "enforcement";
+
     private final File mSettingsFilename;
     private final File mBackupSettingsFilename;
     private final File mPackageListFilename;
@@ -90,6 +94,8 @@ final class Settings {
     // used to grant newer permissions one time during a system upgrade.
     int mInternalSdkPlatform;
     int mExternalSdkPlatform;
+
+    int mReadExternalStorageEnforcement = ENFORCEMENT_DEFAULT;
 
     /** Device identity for the purpose of package verification. */
     private VerifierDeviceIdentity mVerifierDeviceIdentity;
@@ -864,11 +870,18 @@ final class Settings {
             serializer.attribute(null, "internal", Integer.toString(mInternalSdkPlatform));
             serializer.attribute(null, "external", Integer.toString(mExternalSdkPlatform));
             serializer.endTag(null, "last-platform-version");
-            
+
             if (mVerifierDeviceIdentity != null) {
                 serializer.startTag(null, "verifier");
                 serializer.attribute(null, "device", mVerifierDeviceIdentity.toString());
                 serializer.endTag(null, "verifier");
+            }
+
+            if (mReadExternalStorageEnforcement != ENFORCEMENT_DEFAULT) {
+                serializer.startTag(null, TAG_READ_EXTERNAL_STORAGE);
+                serializer.attribute(
+                        null, ATTR_ENFORCEMENT, Integer.toString(mReadExternalStorageEnforcement));
+                serializer.endTag(null, TAG_READ_EXTERNAL_STORAGE);
             }
 
             serializer.startTag(null, "permission-trees");
@@ -1290,6 +1303,12 @@ final class Settings {
                     } catch (IllegalArgumentException e) {
                         Slog.w(PackageManagerService.TAG, "Discard invalid verifier device id: "
                                 + e.getMessage());
+                    }
+                } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
+                    final String enforcement = parser.getAttributeValue(null, ATTR_ENFORCEMENT);
+                    try {
+                        mReadExternalStorageEnforcement = Integer.parseInt(enforcement);
+                    } catch (NumberFormatException e) {
                     }
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "

@@ -1090,6 +1090,11 @@ public abstract class PackageManager {
     public static final String EXTRA_VERIFICATION_INSTALL_FLAGS
             = "android.content.pm.extra.VERIFICATION_INSTALL_FLAGS";
 
+    /** {@hide} */
+    public static final int ENFORCEMENT_DEFAULT = 0;
+    /** {@hide} */
+    public static final int ENFORCEMENT_YES = 1;
+
     /**
      * Retrieve overall information about an application package that is
      * installed on the system.
