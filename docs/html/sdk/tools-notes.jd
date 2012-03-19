@@ -64,10 +64,111 @@ padding: .25em 1em;
 }
 </style>
 
-
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+    width="9px" />
+    SDK Tools, Revision 17</a> <em>(March 2012)</em>
+
+  <div class="toggleme">
+    <p class="caution"><strong>Important:</strong> To download the new Android
+    4.0 system components from the Android SDK Manager, you must first update the
+    SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
+    the Android 4.0 system components will not be available for download.</p>
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 9 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r17 is designed for
+        use with ADT 17.0.0 and later. If you haven't already, we highly recommend updating your
+        <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 17.0.0.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+    </ul>
+    </dd>
+    <dt>General notes:</dt>
+    <dd>
+      <ul>
+        <li>Emulator
+          <ul>
+            <li>Added support for hardware accelerated graphics rendering. This feature requires an
+API Level 15, Revision 3 or later system image.
+(<a href="{@docRoot}guide/developing/devices/emulator.html#accel-graphics">more info</a>)
+              <p class="note"><strong>Note:</strong> As of the SDK Tools Revision 17 release, the
+API Level 15, Revision 3 system image is not yet available.</p>
+            </li>
+            <li>Added support for running Android x86 system images in virtualization mode on
+Windows and Mac OS X.
+(<a href="{@docRoot}guide/developing/devices/emulator.html#accel-vm">more info</a>)</li>
+            <li>Added experimental support for multi-touch input by enabing the emulator to receive
+              touch input from a USB-tethered physical Android device.
+              (<a href="http://tools.android.com/tips/hardware-emulation">more info</a>)</li>
+          </ul>
+        </li>
+        <li>Added viewing of live detailed network usage of an app in DDMS. (<a
+    href="http://tools.android.com/recent/detailednetworkusageinddms">more info</a>)</li>
+        <li>ProGuard
+          <ul>
+            <li>Updated the bundled ProGuard tool to version 4.7. In addition to many new features,
+this update fixes the {@code Conversion to Dalvik format failed with error 1} error some users have
+experienced.</li>
+            <li>Updated the default {@code proguard.cfg} file with better default flags for
+              Android.</li>
+            <li>Split the ProGuard configuration file has been in half, with project specific flags
+kept in project and the generic Android flags distributed (and updated) with the tools
+themselves.</li>
+          </ul>
+        </li>
+        <li>Build
+          <ul>
+            <li>Added a feature that allows you to run some code only in debug mode. Builds now
+generate a class called {@code BuildConfig} containing a {@code DEBUG} constant that is
+automatically set according to your build type. You can check the ({@code BuildConfig.DEBUG})
+constant in your code to run debug-only functions.</li>
+            <li>Fixed issue when a project and its libraries include the same jar file in their libs
+              folder.</li>
+            <li>Added support for custom views with custom attributes in libraries. Layouts using
+custom attributes must use the namespace URI {@code http://schemas.android.com/apk/res-auto} instead
+of the URI that includes the app package name. This URI is replaced with the app specific one at
+build time.</li>
+          </ul>
+        </li>
+        <li>Lint
+          <ul>
+            <li>Updated Lint to check Android application code. Lint rules which previously
+performed pattern based searches in the application code (such as the unused resource check) have
+been rewritten to use the more accurate Java-style parse trees.</li>
+            <li>Added support for checking library projects. This change means that rules such as
+the unused resource check properly handle resources declared in a library project and referenced in
+a downstream project.</li>
+            <li>Added ability to suppress Lint warnings in Java code with the new
+{@code @SuppressLint} annotation, and in XML files with the new tools: namespace and
+ignore attribute. (<a
+    href="http://tools.android.com/recent/ignoringlintwarnings">more info</a>)</li>
+            <li>New Lint checks:
+              <ul>
+                <li>Added check for Android API calls that require a version of Android higher than
+                  the minimum supported version. You can use the new {@code @TargetApi} annotation
+                  to suppress warnings when the code is wrapped in a system version condition.
+                  (<a href="http://tools.android.com/recent/lintapicheck">more info</a>)</li>
+                <li>Added over 20 new Lint rules, including checks for
+                  <a href="http://tools.android.com/recent/lintperformancechecks">performance</a>,
+                  XML layouts, manifest and file handling.</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
     width="9px" />
     SDK Tools, Revision 16</a> <em>(December 2011)</em>
 
@@ -92,10 +193,10 @@ padding: .25em 1em;
 <dt>General notes:</dt>
 <dd>
   <ul>
-    <li>Added Lint tools to detect common errors in Android projects. 
+    <li>Added Lint tools to detect common errors in Android projects.
       (<a href="http://tools.android.com/recent/lint">more info</a>)</li>
     <li>Added sensor emulation support, which allows the emulator to read sensor data from a
-      physical Android device. 
+      physical Android device.
       (<a href="http://tools.android.com/recent/sensoremulation">more info</a>)</li>
     <li>Added support for using a webcam to emulate a camera on Mac OS X.</li>
   </ul>
