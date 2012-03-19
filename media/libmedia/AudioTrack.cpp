@@ -261,8 +261,7 @@ status_t AudioTrack::set(
                                   frameCount,
                                   flags,
                                   sharedBuffer,
-                                  output,
-                                  true);
+                                  output);
 
     if (status != NO_ERROR) {
         return status;
@@ -741,8 +740,7 @@ status_t AudioTrack::createTrack_l(
         int frameCount,
         audio_policy_output_flags_t flags,
         const sp<IMemory>& sharedBuffer,
-        audio_io_handle_t output,
-        bool enforceFrameCount)
+        audio_io_handle_t output)
 {
     status_t status;
     const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
@@ -789,7 +787,8 @@ status_t AudioTrack::createTrack_l(
                 mNotificationFramesAct = frameCount/2;
             }
             if (frameCount < minFrameCount) {
-                ALOGW_IF(enforceFrameCount, "Minimum buffer size corrected from %d to %d",
+                // not ALOGW because it happens all the time when playing key clicks over A2DP
+                ALOGV("Minimum buffer size corrected from %d to %d",
                          frameCount, minFrameCount);
                 frameCount = minFrameCount;
             }
@@ -1249,8 +1248,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
                                mFrameCount,
                                mFlags,
                                mSharedBuffer,
-                               getOutput_l(),
-                               false);
+                               getOutput_l());
 
         if (result == NO_ERROR) {
             uint32_t user = cblk->user;
