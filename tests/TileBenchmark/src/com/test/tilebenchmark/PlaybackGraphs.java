@@ -37,10 +37,10 @@ public class PlaybackGraphs {
     private static Paint whiteLabels;
 
     private static double viewportCoverage(TileData view, TileData tile) {
-        if (tile.left < view.right
-                && tile.right >= view.left
-                && tile.top < view.bottom
-                && tile.bottom >= view.top) {
+        if (tile.left < (view.right * view.scale)
+                && tile.right >= (view.left * view.scale)
+                && tile.top < (view.bottom * view.scale)
+                && tile.bottom >= (view.top * view.scale)) {
             return 1.0f;
         }
         return 0.0f;
@@ -215,7 +215,7 @@ public class PlaybackGraphs {
         int lastBar = 0;
         for (int frameIndex = 0; frameIndex < data.frames.length; frameIndex++) {
             TileData frame[] = data.frames[frameIndex];
-            int newBar = (frame[0].top + frame[0].bottom) / 2;
+            int newBar = (int)((frame[0].top + frame[0].bottom) * frame[0].scale / 2.0f);
 
             MetricGen s = Metrics[metricIndex];
             double absoluteValue = s.getValue(frame);
