@@ -29,8 +29,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -280,7 +280,9 @@ public class DatePicker extends FrameLayout {
         reorderSpinners();
 
         // set content descriptions
-        setContentDescriptions();
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            setContentDescriptions();
+        }
     }
 
     /**
@@ -715,27 +717,20 @@ public class DatePicker extends FrameLayout {
 
     private void setContentDescriptions() {
         // Day
-        trySetContentDescription(mDaySpinner, R.id.increment,
-                R.string.date_picker_increment_day_button);
-        trySetContentDescription(mDaySpinner, R.id.decrement,
-                R.string.date_picker_decrement_day_button);
+        String text = mContext.getString(R.string.date_picker_increment_day_button);
+        mDaySpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.date_picker_decrement_day_button);
+        mDaySpinner.findViewById(R.id.decrement).setContentDescription(text);
         // Month
-        trySetContentDescription(mMonthSpinner, R.id.increment,
-                R.string.date_picker_increment_month_button);
-        trySetContentDescription(mMonthSpinner, R.id.decrement,
-                R.string.date_picker_decrement_month_button);
+        text = mContext.getString(R.string.date_picker_increment_month_button);
+        mMonthSpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.date_picker_decrement_month_button);
+        mMonthSpinner.findViewById(R.id.decrement).setContentDescription(text);
         // Year
-        trySetContentDescription(mYearSpinner, R.id.increment,
-                R.string.date_picker_increment_year_button);
-        trySetContentDescription(mYearSpinner, R.id.decrement,
-                R.string.date_picker_decrement_year_button);
-    }
-
-    private void trySetContentDescription(View root, int viewId, int contDescResId) {
-        View target = root.findViewById(viewId);
-        if (target != null) {
-            target.setContentDescription(mContext.getString(contDescResId));
-        }
+        text = mContext.getString(R.string.date_picker_increment_year_button);
+        mYearSpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.date_picker_decrement_year_button);
+        mYearSpinner.findViewById(R.id.decrement).setContentDescription(text);
     }
 
     private void updateInputState() {
