@@ -1780,7 +1780,7 @@ public class AccountManagerService
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "performing bindService to " + authenticatorInfo.componentName);
             }
-            if (!mContext.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
+            if (!mContext.bindService(intent, this, Context.BIND_AUTO_CREATE, mAccounts.userId)) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "bindService to " + authenticatorInfo.componentName + " failed");
                 }
