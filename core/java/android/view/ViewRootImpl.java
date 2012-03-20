@@ -841,7 +841,9 @@ public final class ViewRootImpl implements ViewParent,
         localDirty.union(dirty.left, dirty.top, dirty.right, dirty.bottom);
         // Intersect with the bounds of the window to skip
         // updates that lie outside of the visible region
-        localDirty.intersect(0, 0, mWidth, mHeight);
+        final float appScale = mAttachInfo.mApplicationScale;
+        localDirty.intersect(0, 0,
+                (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
 
         if (!mWillDrawSoon) {
             scheduleTraversals();

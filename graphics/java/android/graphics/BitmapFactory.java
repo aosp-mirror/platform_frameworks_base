@@ -32,6 +32,8 @@ import java.io.InputStream;
  * and byte-arrays.
  */
 public class BitmapFactory {
+    private static final int DECODE_BUFFER_SIZE = 16 * 1024;
+
     public static class Options {
         /**
          * Create a default Options object, which if left unchanged will give
@@ -469,7 +471,7 @@ public class BitmapFactory {
         // we need mark/reset to work properly
 
         if (!is.markSupported()) {
-            is = new BufferedInputStream(is, 16 * 1024);
+            is = new BufferedInputStream(is, DECODE_BUFFER_SIZE);
         }
 
         // so we can call reset() if a given codec gives up after reading up to
@@ -477,11 +479,30 @@ public class BitmapFactory {
         // value should be.
         is.mark(1024);
 
-        Bitmap  bm;
+        Bitmap bm;
+        boolean finish = true;
 
         if (is instanceof AssetManager.AssetInputStream) {
-            bm = nativeDecodeAsset(((AssetManager.AssetInputStream) is).getAssetInt(),
-                    outPadding, opts);
+            final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+
+            if (opts == null || (opts.inScaled && opts.inBitmap == null)) {
+                float scale = 1.0f;
+                int targetDensity = 0;
+                if (opts != null) {
+                    final int density = opts.inDensity;
+                    targetDensity = opts.inTargetDensity;
+                    if (density != 0 && targetDensity != 0) {
+                        scale = targetDensity / (float) density;
+                    }
+                }
+
+                bm = nativeDecodeAsset(asset, outPadding, opts, true, scale);
+                if (bm != null && targetDensity != 0) bm.setDensity(targetDensity);
+
+                finish = false;
+            } else {
+                bm = nativeDecodeAsset(asset, outPadding, opts);
+            }
         } else {
             // pass some temp storage down to the native code. 1024 is made up,
             // but should be large enough to avoid too many small calls back
@@ -490,13 +511,32 @@ public class BitmapFactory {
             byte [] tempStorage = null;
             if (opts != null) tempStorage = opts.inTempStorage;
             if (tempStorage == null) tempStorage = new byte[16 * 1024];
-            bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
+
+            if (opts == null || (opts.inScaled && opts.inBitmap == null)) {
+                float scale = 1.0f;
+                int targetDensity = 0;
+                if (opts != null) {
+                    final int density = opts.inDensity;
+                    targetDensity = opts.inTargetDensity;
+                    if (density != 0 && targetDensity != 0) {
+                        scale = targetDensity / (float) density;
+                    }
+                }
+
+                bm = nativeDecodeStream(is, tempStorage, outPadding, opts, true, scale);
+                if (bm != null && targetDensity != 0) bm.setDensity(targetDensity);
+
+                finish = false;
+            } else {
+                bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
+            }
         }
+
         if (bm == null && opts != null && opts.inBitmap != null) {
             throw new IllegalArgumentException("Problem decoding into existing bitmap");
         }
 
-        return finishDecode(bm, outPadding, opts);
+        return finish ? finishDecode(bm, outPadding, opts) : bm;
     }
 
     private static Bitmap finishDecode(Bitmap bm, Rect outPadding, Options opts) {
@@ -524,12 +564,13 @@ public class BitmapFactory {
                 bm = Bitmap.createScaledBitmap(oldBitmap, (int) (bm.getWidth() * scale + 0.5f),
                         (int) (bm.getHeight() * scale + 0.5f), true);
                 if (bm != oldBitmap) oldBitmap.recycle();
+
+                if (isNinePatch) {
+                    np = nativeScaleNinePatch(np, scale, outPadding);
+                    bm.setNinePatchChunk(np);
+                }
             }
 
-            if (isNinePatch) {
-                if (scale != 1.0f) np = nativeScaleNinePatch(np, scale, outPadding);
-                bm.setNinePatchChunk(np);
-            }
             bm.setDensity(targetDensity);
         }
 
@@ -597,9 +638,13 @@ public class BitmapFactory {
 
     private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,
             Rect padding, Options opts);
+    private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,
+            Rect padding, Options opts, boolean applyScale, float scale);
     private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,
             Rect padding, Options opts);
     private static native Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts);
+    private static native Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts,
+            boolean applyScale, float scale);
     private static native Bitmap nativeDecodeByteArray(byte[] data, int offset,
             int length, Options opts);
     private static native byte[] nativeScaleNinePatch(byte[] chunk, float scale, Rect pad);
