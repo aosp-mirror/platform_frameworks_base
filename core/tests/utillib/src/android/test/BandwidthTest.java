@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import java.lang.annotation.RetentionPolicy;
  * annotation is present, the test method is profiled for bandwidth metrics and the results
  * written through instrumentation output. It can also be used on the class itself,
  * which is equivalent to tagging all test methods with this annotation.
- *
- * {@hide} Pending approval for public API.
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BandwidthTest {
