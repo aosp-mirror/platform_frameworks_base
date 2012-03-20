@@ -370,4 +370,7 @@ interface IPackageManager {
     boolean isFirstBoot();
 
     List<UserInfo> getUsers();
+
+    void setPermissionEnforcement(String permission, int enforcement);
+    int getPermissionEnforcement(String permission);
 }

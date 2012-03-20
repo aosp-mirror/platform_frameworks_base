@@ -20,6 +20,10 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageManager.ENFORCEMENT_DEFAULT;
+import static android.content.pm.PackageManager.ENFORCEMENT_YES;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.GRANT_REVOKE_PERMISSIONS;
 import static libcore.io.OsConstants.S_ISLNK;
 
 import com.android.internal.app.IMediaContainerService;
@@ -1872,6 +1876,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return PackageManager.PERMISSION_GRANTED;
                 }
             }
+            if (!isPermissionEnforcedLocked(permName)) {
+                return PackageManager.PERMISSION_GRANTED;
+            }
         }
         return PackageManager.PERMISSION_DENIED;
     }
@@ -1889,6 +1896,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (perms != null && perms.contains(permName)) {
                     return PackageManager.PERMISSION_GRANTED;
                 }
+            }
+            if (!isPermissionEnforcedLocked(permName)) {
+                return PackageManager.PERMISSION_GRANTED;
             }
         }
         return PackageManager.PERMISSION_DENIED;
@@ -8834,5 +8844,45 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public List<UserInfo> getUsers() {
         return mUserManager.getUsers();
+    }
+
+    @Override
+    public void setPermissionEnforcement(String permission, int enforcement) {
+        mContext.enforceCallingOrSelfPermission(GRANT_REVOKE_PERMISSIONS, null);
+        if (READ_EXTERNAL_STORAGE.equals(permission)) {
+            synchronized (mPackages) {
+                if (mSettings.mReadExternalStorageEnforcement != enforcement) {
+                    mSettings.mReadExternalStorageEnforcement = enforcement;
+                    mSettings.writeLPr();
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("No selective enforcement for " + permission);
+        }
+    }
+
+    @Override
+    public int getPermissionEnforcement(String permission) {
+        mContext.enforceCallingOrSelfPermission(GRANT_REVOKE_PERMISSIONS, null);
+        if (READ_EXTERNAL_STORAGE.equals(permission)) {
+            synchronized (mPackages) {
+                return mSettings.mReadExternalStorageEnforcement;
+            }
+        } else {
+            throw new IllegalArgumentException("No selective enforcement for " + permission);
+        }
+    }
+
+    private boolean isPermissionEnforcedLocked(String permission) {
+        if (READ_EXTERNAL_STORAGE.equals(permission)) {
+            switch (mSettings.mReadExternalStorageEnforcement) {
+                case ENFORCEMENT_DEFAULT:
+                    return false;
+                case ENFORCEMENT_YES:
+                    return true;
+            }
+        }
+
+        return true;
     }
 }
