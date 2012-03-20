@@ -348,6 +348,37 @@ MP3Extractor::MP3Extractor(
     }
 
     mInitCheck = OK;
+
+    // get iTunes-style gapless info if present
+    ID3 id3(mDataSource);
+    if (id3.isValid()) {
+        ID3::Iterator *com = new ID3::Iterator(id3, "COM");
+        if (com->done()) {
+            delete com;
+            com = new ID3::Iterator(id3, "COMM");
+        }
+        while(!com->done()) {
+            String8 commentdesc;
+            String8 commentvalue;
+            com->getString(&commentdesc, &commentvalue);
+            const char * desc = commentdesc.string();
+            const char * value = commentvalue.string();
+
+            // first 3 characters are the language, which we don't care about
+            if(strlen(desc) > 3 && strcmp(desc + 3, "iTunSMPB") == 0) {
+
+                int32_t delay, padding;
+                if (sscanf(value, " %*x %x %x %*x", &delay, &padding) == 2) {
+                    mMeta->setInt32(kKeyEncoderDelay, delay);
+                    mMeta->setInt32(kKeyEncoderPadding, padding);
+                }
+                break;
+            }
+            com->next();
+        }
+        delete com;
+        com = NULL;
+    }
 }
 
 size_t MP3Extractor::countTracks() {
@@ -554,33 +585,6 @@ sp<MetaData> MP3Extractor::getMetaData() {
     if (!id3.isValid()) {
         return meta;
     }
-
-    ID3::Iterator *com = new ID3::Iterator(id3, "COM");
-    if (com->done()) {
-        delete com;
-        com = new ID3::Iterator(id3, "COMM");
-    }
-    while(!com->done()) {
-        String8 commentdesc;
-        String8 commentvalue;
-        com->getString(&commentdesc, &commentvalue);
-        const char * desc = commentdesc.string();
-        const char * value = commentvalue.string();
-
-        // first 3 characters are the language, which we don't care about
-        if(strlen(desc) > 3 && strcmp(desc + 3, "iTunSMPB") == 0) {
-
-            int32_t delay, padding;
-            if (sscanf(value, " %*x %x %x %*x", &delay, &padding) == 2) {
-                mMeta->setInt32(kKeyEncoderDelay, delay);
-                mMeta->setInt32(kKeyEncoderPadding, padding);
-            }
-            break;
-        }
-        com->next();
-    }
-    delete com;
-    com = NULL;
 
     struct Map {
         int key;
