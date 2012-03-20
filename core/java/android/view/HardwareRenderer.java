@@ -704,7 +704,7 @@ public abstract class HardwareRenderer {
             return null;
         }
 
-        private void printConfig(EGLConfig config) {
+        private static void printConfig(EGLConfig config) {
             int[] value = new int[1];
 
             Log.d(LOG_TAG, "EGL configuration " + config + ":");
@@ -990,10 +990,11 @@ public abstract class HardwareRenderer {
                             }
 
                             if (invalidateNeeded) {
-                                if (mRedrawClip.isEmpty() || view.getParent() == null) {
-                                    view.invalidate();
+                                if (mRedrawClip.isEmpty()) {
+                                    attachInfo.mViewRootImpl.invalidate();
                                 } else {
-                                    view.getParent().invalidateChild(view, mRedrawClip);
+                                    attachInfo.mViewRootImpl.invalidateChildInParent(
+                                            null, mRedrawClip);
                                 }
                                 mRedrawClip.setEmpty();
                             }

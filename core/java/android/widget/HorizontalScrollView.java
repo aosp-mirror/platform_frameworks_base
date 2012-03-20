@@ -715,7 +715,10 @@ public class HorizontalScrollView extends FrameLayout {
         } else {
             super.scrollTo(scrollX, scrollY);
         }
-        awakenScrollBars();
+        
+        if (!awakenScrollBars()) {
+            invalidate();
+        }
     }
 
     @Override
@@ -1204,10 +1207,9 @@ public class HorizontalScrollView extends FrameLayout {
                 }
             }
 
-            awakenScrollBars();
-
-            // Keep on drawing until the animation has finished.
-            postInvalidate();
+            if (!awakenScrollBars()) {
+                invalidate();
+            }
         }
     }
 
@@ -1414,7 +1416,7 @@ public class HorizontalScrollView extends FrameLayout {
     /**
      * Return true if child is a descendant of parent, (or equal to the parent).
      */
-    private boolean isViewDescendantOf(View child, View parent) {
+    private static boolean isViewDescendantOf(View child, View parent) {
         if (child == parent) {
             return true;
         }
@@ -1524,7 +1526,7 @@ public class HorizontalScrollView extends FrameLayout {
         }
     }
 
-    private int clamp(int n, int my, int child) {
+    private static int clamp(int n, int my, int child) {
         if (my >= child || n < 0) {
             return 0;
         }
