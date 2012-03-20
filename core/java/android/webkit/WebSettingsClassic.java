@@ -1638,7 +1638,7 @@ public class WebSettingsClassic extends WebSettings {
      */
     public void setProperty(String key, String value) {
         if (mWebView.nativeSetProperty(key, value)) {
-            mWebView.contentInvalidateAll();
+            mWebView.invalidate();
         }
     }
 
