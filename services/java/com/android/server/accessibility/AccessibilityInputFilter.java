@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import com.android.server.accessibility.TouchExplorer.GestureListener;
 import com.android.server.input.InputFilter;
 
 import android.content.Context;
@@ -35,6 +36,8 @@ public class AccessibilityInputFilter extends InputFilter {
     private static final boolean DEBUG = false;
 
     private final Context mContext;
+
+    private final GestureListener mGestureListener;
 
     /**
      * This is an interface for explorers that take a {@link MotionEvent}
@@ -64,11 +67,13 @@ public class AccessibilityInputFilter extends InputFilter {
     }
 
     private TouchExplorer mTouchExplorer;
+
     private int mTouchscreenSourceDeviceId;
 
-    public AccessibilityInputFilter(Context context) {
+    public AccessibilityInputFilter(Context context, GestureListener gestureListener) {
         super(context.getMainLooper());
         mContext = context;
+        mGestureListener = gestureListener;
     }
 
     @Override
@@ -76,7 +81,7 @@ public class AccessibilityInputFilter extends InputFilter {
         if (DEBUG) {
             Slog.d(TAG, "Accessibility input filter installed.");
         }
-        mTouchExplorer = new TouchExplorer(this, mContext);
+        mTouchExplorer = new TouchExplorer(this, mContext, mGestureListener);
         super.onInstalled();
     }
 

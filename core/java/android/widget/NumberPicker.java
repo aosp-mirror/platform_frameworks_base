@@ -112,8 +112,7 @@ public class NumberPicker extends LinearLayout {
     private static final int SELECTOR_ADJUSTMENT_DURATION_MILLIS = 800;
 
     /**
-     * The duration of scrolling to the next/previous value while snapping to
-     * a given position.
+     * The duration of scrolling while snapping to a given position.
      */
     private static final int SNAP_SCROLL_DURATION = 300;
 
@@ -680,6 +679,11 @@ public class NumberPicker extends LinearLayout {
         mAdjustScroller = new Scroller(getContext(), new DecelerateInterpolator(2.5f));
 
         updateInputTextView();
+
+        // If not explicitly specified this view is important for accessibility.
+        if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
     }
 
     @Override

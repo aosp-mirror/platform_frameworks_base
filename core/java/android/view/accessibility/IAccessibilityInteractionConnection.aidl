@@ -28,18 +28,26 @@ import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 oneway interface IAccessibilityInteractionConnection {
 
     void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, int prefetchFlags,
-        int interrogatingPid, long interrogatingTid);
+        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
+        long interrogatingTid);
 
     void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int id, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback,
-        int interrogatingPid, long interrogatingTid);
+        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
+        long interrogatingTid);
 
     void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
+        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
+        long interrogatingTid);
+
+    void findFocus(long accessibilityNodeId, int interactionId, int focusType,
+        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
+        long interrogatingTid);
+
+    void focusSearch(long accessibilityNodeId, int interactionId, int direction,
+        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
         long interrogatingTid);
 
     void performAccessibilityAction(long accessibilityNodeId, int action, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
+        IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
         long interrogatingTid);
 }

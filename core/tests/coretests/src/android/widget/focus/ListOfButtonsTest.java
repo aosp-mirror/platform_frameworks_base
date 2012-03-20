@@ -19,7 +19,7 @@ package android.widget.focus;
 import android.widget.focus.ListOfButtons;
 import com.android.frameworks.coretests.R;
 
-import android.test.ActivityInstrumentationTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.ListAdapter;
 import android.widget.Button;
@@ -31,7 +31,7 @@ import android.view.View;
  * Tests that focus works as expected when navigating into and out of
  * a {@link ListView} that has buttons in it.
  */
-public class ListOfButtonsTest extends ActivityInstrumentationTestCase<ListOfButtons> {
+public class ListOfButtonsTest extends ActivityInstrumentationTestCase2<ListOfButtons> {
 
     private ListAdapter mListAdapter;
     private Button mButtonAtTop;
@@ -39,7 +39,7 @@ public class ListOfButtonsTest extends ActivityInstrumentationTestCase<ListOfBut
     private ListView mListView;
 
     public ListOfButtonsTest() {
-        super("com.android.frameworks.coretests", ListOfButtons.class);
+        super(ListOfButtons.class);
     }
 
     @Override
@@ -47,6 +47,7 @@ public class ListOfButtonsTest extends ActivityInstrumentationTestCase<ListOfBut
         super.setUp();
 
         ListOfButtons a = getActivity();
+        getInstrumentation().waitForIdleSync();
         mListAdapter = a.getListAdapter();
         mButtonAtTop = (Button) a.findViewById(R.id.button);
         mListView = a.getListView();

@@ -835,6 +835,10 @@
 
         <!-- Reference to the Pointer style -->
         <attr name="pointerStyle" format="reference" />
+
+        <!-- The drawable for accessibility focused views. -->
+        <attr name="accessibilityFocusedDrawable" format="reference" />
+
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -2123,6 +2127,20 @@
                 layoutDirection is LTR, and ALIGN_LEFT otherwise -->
             <enum name="viewEnd" value="6" />
         </attr>
+
+        <!-- Controls how this View is important for accessibility which is if it fires
+             accessibility events and if it is reported to accessibility services that
+             query the screen. Note: While not recommended, an accessibility service may
+             decide to ignore this attribute and operate on all views in the view tree. -->
+        <attr name="importantForAccessibility" format="integer">
+            <!-- The system determines whether the view is important for accessibility (recommended). -->
+            <enum name="auto" value="0" />
+            <!-- The view is important for accessibility. -->
+            <enum name="yes" value="1" />
+            <!-- The view is not important for accessibility. -->
+            <enum name="no" value="2" />
+        </attr>
+
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
@@ -2445,6 +2463,8 @@
         <attr name="accessibilityFlags">
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#DEFAULT} -->
             <flag name="flagDefault" value="0x00000001" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#INCLUDE_NOT_IMPORTANT_VIEWS} -->
+            <flag name="flagIncludeNotImportantViews" value="0x00000002" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->
@@ -4317,6 +4337,7 @@
          <li>"state_hovered"
          <li>"state_drag_can_accept"
          <li>"state_drag_hovered"
+         <li>"state_accessibility_focused"
          </ul>  -->
     <declare-styleable name="DrawableStates">
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
@@ -4377,6 +4398,9 @@
              indicating that a drag operation (for which the Drawable's view is a valid recipient)
              is currently positioned over the Drawable. -->
         <attr name="state_drag_hovered" format="boolean" />
+        <!-- State for {@link android.graphics.drawable.StateListDrawable StateListDrawable}
+             indicating that a View has accessibility focus. -->
+        <attr name="state_accessibility_focused" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewDrawableStates">
         <attr name="state_pressed" />

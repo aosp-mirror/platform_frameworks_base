@@ -19,7 +19,7 @@ package android.view.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
-import android.accessibilityservice.IEventListener;
+import android.accessibilityservice.IAccessibilityServiceClient;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -49,7 +49,8 @@ interface IAccessibilityManager {
 
     void removeAccessibilityInteractionConnection(IWindow windowToken);
 
-    void registerUiTestAutomationService(IEventListener listener, in AccessibilityServiceInfo info);
+    void registerUiTestAutomationService(IAccessibilityServiceClient client,
+        in AccessibilityServiceInfo info);
 
-    void unregisterUiTestAutomationService(IEventListener listener);
+    void unregisterUiTestAutomationService(IAccessibilityServiceClient client);
 }

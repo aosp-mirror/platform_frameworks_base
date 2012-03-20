@@ -18,6 +18,7 @@ package android.view.accessibility;
 
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.util.SparseLongArray;
 
 /**
  * Simple cache for AccessibilityNodeInfos. The cache is mapping an
@@ -54,20 +55,25 @@ public class AccessibilityNodeInfoCache {
      * @param event An event.
      */
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        final int eventType = event.getEventType();
-        switch (eventType) {
-            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-            case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
-            case AccessibilityEvent.TYPE_VIEW_SCROLLED:
-                clear();
-                break;
-            case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-            case AccessibilityEvent.TYPE_VIEW_SELECTED:
-            case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
-            case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED:
-                final long accessibilityNodeId = event.getSourceNodeId();
-                remove(accessibilityNodeId);
-                break;
+        if (ENABLED) {
+            final int eventType = event.getEventType();
+            switch (eventType) {
+                case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
+                    clear();
+                } break;
+                case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+                case AccessibilityEvent.TYPE_VIEW_SELECTED:
+                case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
+                case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
+                    final long accessibilityNodeId = event.getSourceNodeId();
+                    remove(accessibilityNodeId);
+                } break;
+                case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+                case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
+                    final long accessibilityNodeId = event.getSourceNodeId();
+                    clearSubTree(accessibilityNodeId);
+                } break;
+            }
         }
     }
 
@@ -165,6 +171,25 @@ public class AccessibilityNodeInfoCache {
                 }
                 mCacheImpl.clear();
             }
+        }
+    }
+
+    /**
+     * Clears a subtree rooted at the node with the given id.
+     *
+     * @param rootNodeId The root id.
+     */
+    private void clearSubTree(long rootNodeId) {
+        AccessibilityNodeInfo current = mCacheImpl.get(rootNodeId);
+        if (current == null) {
+            return;
+        }
+        mCacheImpl.remove(rootNodeId);
+        SparseLongArray childNodeIds = current.getChildNodeIds();
+        final int childCount = childNodeIds.size();
+        for (int i = 0; i < childCount; i++) {
+            final long childNodeId = childNodeIds.valueAt(i);
+            clearSubTree(childNodeId);
         }
     }
 }

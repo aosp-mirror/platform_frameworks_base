@@ -197,7 +197,7 @@ public class ViewConfiguration {
      * gesture and the touch up event of a subsequent tap for the latter tap to be
      * considered as a tap i.e. to perform a click.
      */
-    private static final int TOUCH_EXPLORATION_TAP_SLOP = 80;
+    private static final int TOUCH_EXPLORE_TAP_SLOP = 80;
 
     /**
      * Delay before dispatching a recurring accessibility event in milliseconds.
@@ -238,7 +238,7 @@ public class ViewConfiguration {
     private final int mDoubleTapTouchSlop;
     private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
-    private final int mScaledTouchExplorationTapSlop;
+    private final int mScaledTouchExploreTapSlop;
     private final int mWindowTouchSlop;
     private final int mMaximumDrawingCacheSize;
     private final int mOverscrollDistance;
@@ -265,7 +265,7 @@ public class ViewConfiguration {
         mDoubleTapTouchSlop = DOUBLE_TAP_TOUCH_SLOP;
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
-        mScaledTouchExplorationTapSlop = TOUCH_EXPLORATION_TAP_SLOP;
+        mScaledTouchExploreTapSlop = TOUCH_EXPLORE_TAP_SLOP;
         mWindowTouchSlop = WINDOW_TOUCH_SLOP;
         //noinspection deprecation
         mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
@@ -302,7 +302,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
         mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
         mDoubleTapSlop = (int) (sizeAndDensity * DOUBLE_TAP_SLOP + 0.5f);
-        mScaledTouchExplorationTapSlop = (int) (density * TOUCH_EXPLORATION_TAP_SLOP + 0.5f);
+        mScaledTouchExploreTapSlop = (int) (density * TOUCH_EXPLORE_TAP_SLOP + 0.5f);
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
 
         final Display display = WindowManagerImpl.getDefault().getDefaultDisplay();
@@ -559,8 +559,8 @@ public class ViewConfiguration {
      *
      * @hide
      */
-    public int getScaledTouchExplorationTapSlop() {
-        return mScaledTouchExplorationTapSlop;
+    public int getScaledTouchExploreTapSlop() {
+        return mScaledTouchExploreTapSlop;
     }
 
     /**

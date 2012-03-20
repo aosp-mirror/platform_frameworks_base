@@ -191,6 +191,10 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
             if (view == null) {
                 // Make a new one
                 view = mAdapter.getView(selectedPosition, null, this);
+
+                if (view.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+                    view.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+                }
             }
 
             if (view != null) {

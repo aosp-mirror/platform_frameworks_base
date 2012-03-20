@@ -24,13 +24,14 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-
 
 /**
  * An AdapterView is a view whose children are determined by an {@link Adapter}.
@@ -232,6 +233,11 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
 
     public AdapterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        // If not explicitly specified this view is important for accessibility.
+        if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
     }
 
     /**
@@ -643,6 +649,11 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     public void setEmptyView(View emptyView) {
         mEmptyView = emptyView;
 
+        // If not explicitly specified this view is important for accessibility.
+        if (emptyView.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            emptyView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
+
         final T adapter = getAdapter();
         final boolean empty = ((adapter == null) || adapter.isEmpty());
         updateEmptyStatus(empty);
@@ -846,12 +857,14 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
                 }
             } else {
                 fireOnSelected();
+                performAccessibilityActionsOnSelected();
             }
         }
     }
 
     void selectionChanged() {
-        if (mOnItemSelectedListener != null) {
+        if (mOnItemSelectedListener != null
+                || AccessibilityManager.getInstance(mContext).isEnabled()) {
             if (mInLayout || mBlockLayoutRequests) {
                 // If we are in a layout traversal, defer notification
                 // by posting. This ensures that the view tree is
@@ -863,26 +876,33 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
                 post(mSelectionNotifier);
             } else {
                 fireOnSelected();
+                performAccessibilityActionsOnSelected();
             }
-        }
-
-        // we fire selection events here not in View
-        if (mSelectedPosition != ListView.INVALID_POSITION && isShown() && !isInTouchMode()) {
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         }
     }
 
     private void fireOnSelected() {
-        if (mOnItemSelectedListener == null)
+        if (mOnItemSelectedListener == null) {
             return;
-
-        int selection = this.getSelectedItemPosition();
+        }
+        final int selection = getSelectedItemPosition();
         if (selection >= 0) {
             View v = getSelectedView();
             mOnItemSelectedListener.onItemSelected(this, v, selection,
                     getAdapter().getItemId(selection));
         } else {
             mOnItemSelectedListener.onNothingSelected(this);
+        }
+    }
+
+    private void performAccessibilityActionsOnSelected() {
+        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+            return;
+        }
+        final int position = getSelectedItemPosition();
+        if (position >= 0) {
+            // we fire selection events here not in View
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         }
     }
 
@@ -934,6 +954,24 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         event.setFromIndex(getFirstVisiblePosition());
         event.setToIndex(getLastVisiblePosition());
         event.setItemCount(getCount());
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean onRequestAccessibilityFocusFromHover(float x, float y) {
+        // We prefer to five focus to the child instead of this view.
+        // Usually the children are not actionable for accessibility,
+        // and they will not take accessibility focus, so we give it.
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (isTransformedTouchPointInView(x, y, child, null)) {
+                return child.requestAccessibilityFocus();
+            }
+        }
+        return super.onRequestAccessibilityFocusFromHover(x, y);
     }
 
     private boolean isScrollableForAccessibility() {
@@ -1012,6 +1050,9 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             mNeedSync = false;
             checkSelectionChanged();
         }
+
+        //TODO: Hmm, we do not know the old state so this is sub-optimal
+        notifyAccessibilityStateChanged();
     }
 
     void checkSelectionChanged() {

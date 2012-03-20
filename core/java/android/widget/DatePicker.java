@@ -279,8 +279,13 @@ public class DatePicker extends FrameLayout {
         // re-order the number spinners to match the current date format
         reorderSpinners();
 
-        // set content descriptions
+        // accessibility
         setContentDescriptions();
+
+        // If not explicitly specified this view is important for accessibility.
+        if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
     }
 
     /**

@@ -141,6 +141,18 @@ public class ViewDebug {
     public static final String DEBUG_LATENCY_TAG = "ViewLatency";
 
     /**
+     * Enables detailed logging of accessibility focus operations.
+     * @hide
+     */
+    public static final boolean DEBUG_ACCESSIBILITY_FOCUS = false;
+
+    /**
+     * Tag for logging of accessibility focus operations
+     * @hide
+     */
+    public static final String DEBUG_ACCESSIBILITY_FOCUS_TAG = "AccessibilityFocus";
+
+    /**
      * <p>Enables or disables views consistency check. Even when this property is enabled,
      * view consistency checks happen only if {@link false} is set
      * to true. The value of this property can be configured externally in one of the

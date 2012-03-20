@@ -37,6 +37,7 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -56,17 +57,11 @@ import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Pool;
-import android.util.Poolable;
-import android.util.PoolableManager;
-import android.util.Pools;
 import android.util.Slog;
-import android.util.SparseLongArray;
 import android.util.TypedValue;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -79,6 +74,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 
+import com.android.internal.R;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.IInputMethodCallback;
@@ -89,9 +85,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -181,6 +175,10 @@ public final class ViewRootImpl implements ViewParent,
     View mFocusedView;
     View mRealFocusedView;  // this is not set to null in touch mode
     View mOldFocusedView;
+
+    View mAccessibilityFocusedHost;
+    AccessibilityNodeInfo mAccessibilityFocusedVirtualView;
+
     int mViewVisibility;
     boolean mAppVisible = true;
     int mOrigWindowType = -1;
@@ -321,7 +319,7 @@ public final class ViewRootImpl implements ViewParent,
 
     SendWindowContentChangedAccessibilityEvent mSendWindowContentChangedAccessibilityEvent;
 
-    AccessibilityNodePrefetcher mAccessibilityNodePrefetcher;
+    HashSet<View> mTempHashSet;
 
     private final int mDensity;
 
@@ -629,6 +627,10 @@ public final class ViewRootImpl implements ViewParent,
 
                 if (mAccessibilityManager.isEnabled()) {
                     mAccessibilityInteractionConnectionManager.ensureConnection();
+                }
+
+                if (view.getImportantForAccessibility() == View.IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+                    view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                 }
             }
         }
@@ -1418,6 +1420,8 @@ public final class ViewRootImpl implements ViewParent,
 
                             mView.draw(layerCanvas);
 
+                            drawAccessibilityFocusedDrawableIfNeeded(layerCanvas);
+
                             mResizeBufferStartTime = SystemClock.uptimeMillis();
                             mResizeBufferDuration = mView.getResources().getInteger(
                                     com.android.internal.R.integer.config_mediumAnimTime);
@@ -1712,7 +1716,7 @@ public final class ViewRootImpl implements ViewParent,
             attachInfo.mTreeObserver.dispatchOnGlobalLayout();
 
             if (AccessibilityManager.getInstance(host.mContext).isEnabled()) {
-                postSendWindowContentChangedCallback();
+                postSendWindowContentChangedCallback(mView);
             }
         }
 
@@ -1880,6 +1884,7 @@ public final class ViewRootImpl implements ViewParent,
             mResizePaint.setAlpha(mResizeAlpha);
             canvas.drawHardwareLayer(mResizeBuffer, 0.0f, mHardwareYOffset, mResizePaint);
         }
+        drawAccessibilityFocusedDrawableIfNeeded(canvas);
     }
 
     /**
@@ -2234,6 +2239,8 @@ public final class ViewRootImpl implements ViewParent,
 
                 mView.draw(canvas);
 
+                drawAccessibilityFocusedDrawableIfNeeded(canvas);
+
                 if (ViewDebug.DEBUG_LATENCY) {
                     long now = System.nanoTime();
                     Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- draw() took "
@@ -2272,6 +2279,64 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         return true;
+    }
+
+    /**
+     * We want to draw a highlight around the current accessibility focused.
+     * Since adding a style for all possible view is not a viable option we
+     * have this specialized drawing method.
+     *
+     * Note: We are doing this here to be able to draw the highlight for
+     *       virtual views in addition to real ones.
+     *
+     * @param canvas The canvas on which to draw.
+     */
+    private void drawAccessibilityFocusedDrawableIfNeeded(Canvas canvas) {
+        if (!AccessibilityManager.getInstance(mView.mContext).isEnabled()) {
+            return;
+        }
+        if (mAccessibilityFocusedHost == null || mAccessibilityFocusedHost.mAttachInfo == null) {
+            return;
+        }
+        Drawable drawable = getAccessibilityFocusedDrawable();
+        if (drawable == null) {
+            return;
+        }
+        AccessibilityNodeProvider provider =
+            mAccessibilityFocusedHost.getAccessibilityNodeProvider();
+        Rect bounds = mView.mAttachInfo.mTmpInvalRect;
+        if (provider == null) {
+            mAccessibilityFocusedHost.getDrawingRect(bounds);
+            if (mView instanceof ViewGroup) {
+                ViewGroup viewGroup = (ViewGroup) mView;
+                viewGroup.offsetDescendantRectToMyCoords(mAccessibilityFocusedHost, bounds);
+            }
+        } else {
+            if (mAccessibilityFocusedVirtualView == null) {
+                mAccessibilityFocusedVirtualView = provider.findAccessibilitiyFocus(View.NO_ID);
+            }
+            mAccessibilityFocusedVirtualView.getBoundsInScreen(bounds);
+            bounds.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
+        }
+        drawable.setBounds(bounds);
+        drawable.draw(canvas);
+    }
+
+    private Drawable getAccessibilityFocusedDrawable() {
+        if (mAttachInfo != null) {
+            // Lazily load the accessibility focus drawable.
+            if (mAttachInfo.mAccessibilityFocusDrawable == null) {
+                TypedValue value = new TypedValue();
+                final boolean resolved = mView.mContext.getTheme().resolveAttribute(
+                        R.attr.accessibilityFocusedDrawable, value, true);
+                if (resolved) {
+                    mAttachInfo.mAccessibilityFocusDrawable =
+                        mView.mContext.getResources().getDrawable(value.resourceId);
+                }
+            }
+            return mAttachInfo.mAccessibilityFocusDrawable;
+        }
+        return null;
     }
 
     void invalidateDisplayLists() {
@@ -2407,6 +2472,14 @@ public final class ViewRootImpl implements ViewParent,
         return handled;
     }
 
+    void setAccessibilityFocusedHost(View host) {
+        if (mAccessibilityFocusedHost != null && mAccessibilityFocusedVirtualView == null) {
+            mAccessibilityFocusedHost.clearAccessibilityFocusNoCallbacks();
+        }
+        mAccessibilityFocusedHost = host;
+        mAccessibilityFocusedVirtualView = null;
+    }
+
     public void requestChildFocus(View child, View focused) {
         checkThread();
 
@@ -2437,9 +2510,13 @@ public final class ViewRootImpl implements ViewParent,
         mFocusedView = mRealFocusedView = null;
     }
 
+    @Override
+    public ViewParent getParentForAccessibility() {
+        return null;
+    }
+
     public void focusableViewAvailable(View v) {
         checkThread();
-
         if (mView != null) {
             if (!mView.hasFocus()) {
                 v.requestFocus();
@@ -2547,7 +2624,7 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Return true if child is an ancestor of parent, (or equal to the parent).
      */
-    private static boolean isViewDescendantOf(View child, View parent) {
+    static boolean isViewDescendantOf(View child, View parent) {
         if (child == parent) {
             return true;
         }
@@ -2585,13 +2662,9 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_DISPATCH_DRAG_LOCATION_EVENT = 16;
     private final static int MSG_DISPATCH_SYSTEM_UI_VISIBILITY = 17;
     private final static int MSG_UPDATE_CONFIGURATION = 18;
-    private final static int MSG_PERFORM_ACCESSIBILITY_ACTION = 19;
-    private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID = 20;
-    private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID = 21;
-    private final static int MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT = 22;
-    private final static int MSG_PROCESS_INPUT_EVENTS = 23;
-    private final static int MSG_DISPATCH_SCREEN_STATE = 24;
-    private final static int MSG_INVALIDATE_DISPLAY_LIST = 25;
+    private final static int MSG_PROCESS_INPUT_EVENTS = 19;
+    private final static int MSG_DISPATCH_SCREEN_STATE = 20;
+    private final static int MSG_INVALIDATE_DISPLAY_LIST = 21;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2633,14 +2706,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_DISPATCH_SYSTEM_UI_VISIBILITY";
                 case MSG_UPDATE_CONFIGURATION:
                     return "MSG_UPDATE_CONFIGURATION";
-                case MSG_PERFORM_ACCESSIBILITY_ACTION:
-                    return "MSG_PERFORM_ACCESSIBILITY_ACTION";
-                case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID:
-                    return "MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID";
-                case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID:
-                    return "MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID";
-                case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT:
-                    return "MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT";
                 case MSG_PROCESS_INPUT_EVENTS:
                     return "MSG_PROCESS_INPUT_EVENTS";
                 case MSG_DISPATCH_SCREEN_STATE:
@@ -2770,8 +2835,28 @@ public final class ViewRootImpl implements ViewParent,
                         mHasHadWindowFocus = true;
                     }
 
-                    if (hasWindowFocus && mView != null && mAccessibilityManager.isEnabled()) {
-                        mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+                    if (mView != null && mAccessibilityManager.isEnabled()) {
+                        if (hasWindowFocus) {
+                            mView.sendAccessibilityEvent(
+                                    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+                            // Give accessibility focus to the view that has input
+                            // focus if such, otherwise to the first one.
+                            if (mView instanceof ViewGroup) {
+                                ViewGroup viewGroup = (ViewGroup) mView;
+                                View focused = viewGroup.findFocus();
+                                if (focused != null) {
+                                    focused.requestAccessibilityFocus();
+                                }
+                            }
+                            // There is no accessibility focus, despite our effort
+                            // above, now just give it to the first view.
+                            if (mAccessibilityFocusedHost == null) {
+                                mView.requestAccessibilityFocus();
+                            }
+                        } else {
+                            // Clear accessibility focus when the window loses input focus.
+                            setAccessibilityFocusedHost(null);
+                        }
                     }
                 }
             } break;
@@ -2827,30 +2912,6 @@ public final class ViewRootImpl implements ViewParent,
                     config = mLastConfiguration;
                 }
                 updateConfiguration(config, false);
-            } break;
-            case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID: {
-                if (mView != null) {
-                    getAccessibilityInteractionController()
-                        .findAccessibilityNodeInfoByAccessibilityIdUiThread(msg);
-                }
-            } break;
-            case MSG_PERFORM_ACCESSIBILITY_ACTION: {
-                if (mView != null) {
-                    getAccessibilityInteractionController()
-                        .perfromAccessibilityActionUiThread(msg);
-                }
-            } break;
-            case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID: {
-                if (mView != null) {
-                    getAccessibilityInteractionController()
-                        .findAccessibilityNodeInfoByViewIdUiThread(msg);
-                }
-            } break;
-            case MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT: {
-                if (mView != null) {
-                    getAccessibilityInteractionController()
-                        .findAccessibilityNodeInfosByTextUiThread(msg);
-                }
             } break;
             case MSG_DISPATCH_SCREEN_STATE: {
                 if (mView != null) {
@@ -2917,27 +2978,24 @@ public final class ViewRootImpl implements ViewParent,
                 // set yet.
                 final View focused = mView.findFocus();
                 if (focused != null && !focused.isFocusableInTouchMode()) {
-
                     final ViewGroup ancestorToTakeFocus =
                             findAncestorToTakeFocusInTouchMode(focused);
                     if (ancestorToTakeFocus != null) {
                         // there is an ancestor that wants focus after its descendants that
                         // is focusable in touch mode.. give it focus
                         return ancestorToTakeFocus.requestFocus();
-                    } else {
-                        // nothing appropriate to have focus in touch mode, clear it out
-                        mView.unFocus();
-                        mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(focused, null);
-                        mFocusedView = null;
-                        mOldFocusedView = null;
-                        return true;
                     }
                 }
+                // nothing appropriate to have focus in touch mode, clear it out
+                mView.unFocus();
+                mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(focused, null);
+                mFocusedView = null;
+                mOldFocusedView = null;
+                return true;
             }
         }
         return false;
     }
-
 
     /**
      * Find an ancestor of focused that wants focus after its descendants and is
@@ -2964,25 +3022,45 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean leaveTouchMode() {
         if (mView != null) {
+            boolean inputFocusValid = false;
             if (mView.hasFocus()) {
                 // i learned the hard way to not trust mFocusedView :)
                 mFocusedView = mView.findFocus();
                 if (!(mFocusedView instanceof ViewGroup)) {
                     // some view has focus, let it keep it
-                    return false;
-                } else if (((ViewGroup)mFocusedView).getDescendantFocusability() !=
+                    inputFocusValid = true;
+                } else if (((ViewGroup) mFocusedView).getDescendantFocusability() !=
                         ViewGroup.FOCUS_AFTER_DESCENDANTS) {
                     // some view group has focus, and doesn't prefer its children
                     // over itself for focus, so let them keep it.
-                    return false;
+                    inputFocusValid = true;
                 }
             }
-
-            // find the best view to give focus to in this brave new non-touch-mode
-            // world
-            final View focused = focusSearch(null, View.FOCUS_DOWN);
-            if (focused != null) {
-                return focused.requestFocus(View.FOCUS_DOWN);
+            // In accessibility mode we always have a view that has the
+            // accessibility focus and input focus follows it, i.e. we
+            // try to give input focus to the accessibility focused view.
+            if (!AccessibilityManager.getInstance(mView.mContext).isEnabled()) {
+                // If the current input focus is not valid, find the best view to give
+                // focus to in this brave new non-touch-mode world.
+                if (!inputFocusValid) {
+                    final View focused = focusSearch(null, View.FOCUS_DOWN);
+                    if (focused != null) {
+                        return focused.requestFocus(View.FOCUS_DOWN);
+                    }
+                }
+            } else {
+                // If the current input focus is not valid clear it but do not
+                // give it to another view since the accessibility focus is
+                // leading now and the input one follows.
+                if (!inputFocusValid) {
+                    if (mFocusedView != null) {
+                        mView.unFocus();
+                        mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(mFocusedView, null);
+                        mFocusedView = null;
+                        mOldFocusedView = null;
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -3487,37 +3565,36 @@ public final class ViewRootImpl implements ViewParent,
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             int direction = 0;
             switch (event.getKeyCode()) {
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                if (event.hasNoModifiers()) {
-                    direction = View.FOCUS_LEFT;
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                if (event.hasNoModifiers()) {
-                    direction = View.FOCUS_RIGHT;
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_UP:
-                if (event.hasNoModifiers()) {
-                    direction = View.FOCUS_UP;
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                if (event.hasNoModifiers()) {
-                    direction = View.FOCUS_DOWN;
-                }
-                break;
-            case KeyEvent.KEYCODE_TAB:
-                if (event.hasNoModifiers()) {
-                    direction = View.FOCUS_FORWARD;
-                } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                    direction = View.FOCUS_BACKWARD;
-                }
-                break;
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_LEFT;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_RIGHT;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_DPAD_UP:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_UP;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_DPAD_DOWN:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_DOWN;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_TAB:
+                    if (event.hasNoModifiers()) {
+                        direction = View.FOCUS_FORWARD;
+                    } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
+                        direction = View.FOCUS_BACKWARD;
+                    }
+                    break;
             }
-
             if (direction != 0) {
-                View focused = mView != null ? mView.findFocus() : null;
+                View focused = mView.findFocus();
                 if (focused != null) {
                     View v = focused.focusSearch(direction);
                     if (v != null && v != focused) {
@@ -3532,8 +3609,8 @@ public final class ViewRootImpl implements ViewParent,
                                     v, mTempRect);
                         }
                         if (v.requestFocus(direction, mTempRect)) {
-                            playSoundEffect(
-                                    SoundEffectConstants.getContantForFocusDirection(direction));
+                            playSoundEffect(SoundEffectConstants
+                                    .getContantForFocusDirection(direction));
                             finishInputEvent(q, true);
                             return;
                         }
@@ -3683,20 +3760,9 @@ public final class ViewRootImpl implements ViewParent,
                     + " called when there is no mView");
         }
         if (mAccessibilityInteractionController == null) {
-            mAccessibilityInteractionController = new AccessibilityInteractionController();
+            mAccessibilityInteractionController = new AccessibilityInteractionController(this);
         }
         return mAccessibilityInteractionController;
-    }
-
-    public AccessibilityNodePrefetcher getAccessibilityNodePrefetcher() {
-        if (mView == null) {
-            throw new IllegalStateException("getAccessibilityNodePrefetcher"
-                    + " called when there is no mView");
-        }
-        if (mAccessibilityNodePrefetcher == null) {
-            mAccessibilityNodePrefetcher = new AccessibilityNodePrefetcher();
-        }
-        return mAccessibilityNodePrefetcher;
     }
 
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
@@ -4375,15 +4441,19 @@ public final class ViewRootImpl implements ViewParent,
      * This event is send at most once every
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}.
      */
-    private void postSendWindowContentChangedCallback() {
+    private void postSendWindowContentChangedCallback(View source) {
         if (mSendWindowContentChangedAccessibilityEvent == null) {
             mSendWindowContentChangedAccessibilityEvent =
                 new SendWindowContentChangedAccessibilityEvent();
         }
-        if (!mSendWindowContentChangedAccessibilityEvent.mIsPending) {
-            mSendWindowContentChangedAccessibilityEvent.mIsPending = true;
+        View oldSource = mSendWindowContentChangedAccessibilityEvent.mSource;
+        if (oldSource == null) {
+            mSendWindowContentChangedAccessibilityEvent.mSource = source;
             mHandler.postDelayed(mSendWindowContentChangedAccessibilityEvent,
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
+        } else {
+            View newSource = getCommonPredecessor(oldSource, source);
+            mSendWindowContentChangedAccessibilityEvent.mSource = newSource;
         }
     }
 
@@ -4417,6 +4487,46 @@ public final class ViewRootImpl implements ViewParent,
         }
         mAccessibilityManager.sendAccessibilityEvent(event);
         return true;
+    }
+
+    @Override
+    public void childAccessibilityStateChanged(View child) {
+        postSendWindowContentChangedCallback(child);
+    }
+
+    private View getCommonPredecessor(View first, View second) {
+        if (mAttachInfo != null) {
+            if (mTempHashSet == null) {
+                mTempHashSet = new HashSet<View>();
+            }
+            HashSet<View> seen = mTempHashSet;
+            seen.clear();
+            View firstCurrent = first;
+            while (firstCurrent != null) {
+                seen.add(firstCurrent);
+                ViewParent firstCurrentParent = firstCurrent.mParent;
+                if (firstCurrentParent instanceof View) {
+                    firstCurrent = (View) firstCurrentParent;
+                } else {
+                    firstCurrent = null;
+                }
+            }
+            View secondCurrent = second;
+            while (secondCurrent != null) {
+                if (seen.contains(secondCurrent)) {
+                    seen.clear();
+                    return secondCurrent;
+                }
+                ViewParent secondCurrentParent = secondCurrent.mParent;
+                if (secondCurrentParent instanceof View) {
+                    secondCurrent = (View) secondCurrentParent;
+                } else {
+                    secondCurrent = null;
+                }
+            }
+            seen.clear();
+        }
+        return null;
     }
 
     void checkThread() {
@@ -4953,6 +5063,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
             } else {
                 ensureNoConnection();
+                setAccessibilityFocusedHost(null);
             }
         }
 
@@ -4991,14 +5102,15 @@ public final class ViewRootImpl implements ViewParent,
             mViewRootImpl = new WeakReference<ViewRootImpl>(viewRootImpl);
         }
 
+        @Override
         public void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                int prefetchFlags, int interrogatingPid, long interrogatingTid) {
+                int flags, int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityNodeId,
-                        interactionId, callback, prefetchFlags, interrogatingPid, interrogatingTid);
+                        interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -5009,16 +5121,17 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void performAccessibilityAction(long accessibilityNodeId, int action,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                int interogatingPid, long interrogatingTid) {
+                int flags, int interogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .performAccessibilityActionClientThread(accessibilityNodeId, action,
-                            interactionId, callback, interogatingPid, interrogatingTid);
+                            interactionId, callback, flags, interogatingPid, interrogatingTid);
             } else {
-                // We cannot make the call and notify the caller so it does not
+                // We cannot make the call and notify the caller so it does not wait.
                 try {
                     callback.setPerformAccessibilityActionResult(false, interactionId);
                 } catch (RemoteException re) {
@@ -5027,16 +5140,17 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int viewId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                int interrogatingPid, long interrogatingTid) {
+                int flags, int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByViewIdClientThread(accessibilityNodeId, viewId,
-                            interactionId, callback, interrogatingPid, interrogatingTid);
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } else {
-                // We cannot make the call and notify the caller so it does not
+                // We cannot make the call and notify the caller so it does not wait.
                 try {
                     callback.setFindAccessibilityNodeInfoResult(null, interactionId);
                 } catch (RemoteException re) {
@@ -5045,16 +5159,17 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        @Override
         public void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                int interrogatingPid, long interrogatingTid) {
+                int flags, int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfosByTextClientThread(accessibilityNodeId, text,
-                            interactionId, callback, interrogatingPid, interrogatingTid);
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } else {
-                // We cannot make the call and notify the caller so it does not
+                // We cannot make the call and notify the caller so it does not wait.
                 try {
                     callback.setFindAccessibilityNodeInfosResult(null, interactionId);
                 } catch (RemoteException re) {
@@ -5062,610 +5177,54 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         }
-    }
 
-    /**
-     * Computes whether a view is visible on the screen.
-     *
-     * @param view The view to check.
-     * @return Whether the view is visible on the screen.
-     */
-    private boolean isDisplayedOnScreen(View view) {
-        // The first two checks are made also made by isShown() which
-        // however traverses the tree up to the parent to catch that.
-        // Therefore, we do some fail fast check to minimize the up
-        // tree traversal.
-        return (view.mAttachInfo != null
-                && view.mAttachInfo.mWindowVisibility == View.VISIBLE
-                && view.isShown()
-                && view.getGlobalVisibleRect(mTempRect));
-    }
-
-    /**
-     * Class for managing accessibility interactions initiated from the system
-     * and targeting the view hierarchy. A *ClientThread method is to be
-     * called from the interaction connection this ViewAncestor gives the
-     * system to talk to it and a corresponding *UiThread method that is executed
-     * on the UI thread.
-     */
-    final class AccessibilityInteractionController {
-        private static final int POOL_SIZE = 5;
-
-        private ArrayList<AccessibilityNodeInfo> mTempAccessibilityNodeInfoList =
-            new ArrayList<AccessibilityNodeInfo>();
-
-        // Reusable poolable arguments for interacting with the view hierarchy
-        // to fit more arguments than Message and to avoid sharing objects between
-        // two messages since several threads can send messages concurrently.
-        private final Pool<SomeArgs> mPool = Pools.synchronizedPool(Pools.finitePool(
-                new PoolableManager<SomeArgs>() {
-                    public SomeArgs newInstance() {
-                        return new SomeArgs();
-                    }
-
-                    public void onAcquired(SomeArgs info) {
-                        /* do nothing */
-                    }
-
-                    public void onReleased(SomeArgs info) {
-                        info.clear();
-                    }
-                }, POOL_SIZE)
-        );
-
-        public class SomeArgs implements Poolable<SomeArgs> {
-            private SomeArgs mNext;
-            private boolean mIsPooled;
-
-            public Object arg1;
-            public Object arg2;
-            public int argi1;
-            public int argi2;
-            public int argi3;
-
-            public SomeArgs getNextPoolable() {
-                return mNext;
-            }
-
-            public boolean isPooled() {
-                return mIsPooled;
-            }
-
-            public void setNextPoolable(SomeArgs args) {
-                mNext = args;
-            }
-
-            public void setPooled(boolean isPooled) {
-                mIsPooled = isPooled;
-            }
-
-            private void clear() {
-                arg1 = null;
-                arg2 = null;
-                argi1 = 0;
-                argi2 = 0;
-                argi3 = 0;
-            }
-        }
-
-        public void findAccessibilityNodeInfoByAccessibilityIdClientThread(
-                long accessibilityNodeId, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, int prefetchFlags,
+        @Override
+        public void findFocus(long accessibilityNodeId, int interactionId, int focusType,
+                IAccessibilityInteractionConnectionCallback callback,  int flags,
                 int interrogatingPid, long interrogatingTid) {
-            Message message = mHandler.obtainMessage();
-            message.what = MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID;
-            message.arg1 = prefetchFlags;
-            SomeArgs args = mPool.acquire();
-            args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
-            args.argi2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
-            args.argi3 = interactionId;
-            args.arg1 = callback;
-            message.obj = args;
-            // If the interrogation is performed by the same thread as the main UI
-            // thread in this process, set the message as a static reference so
-            // after this call completes the same thread but in the interrogating
-            // client can handle the message to generate the result.
-            if (interrogatingPid == Process.myPid()
-                    && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
-                AccessibilityInteractionClient.getInstanceForThread(
-                        interrogatingTid).setSameThreadMessage(message);
+            ViewRootImpl viewRootImpl = mViewRootImpl.get();
+            if (viewRootImpl != null && viewRootImpl.mView != null) {
+                viewRootImpl.getAccessibilityInteractionController()
+                    .findFocusClientThread(accessibilityNodeId, interactionId, focusType,
+                            callback, flags, interrogatingPid, interrogatingTid);
             } else {
-                mHandler.sendMessage(message);
-            }
-        }
-
-        public void findAccessibilityNodeInfoByAccessibilityIdUiThread(Message message) {
-            final int prefetchFlags = message.arg1;
-            SomeArgs args = (SomeArgs) message.obj;
-            final int accessibilityViewId = args.argi1;
-            final int virtualDescendantId = args.argi2;
-            final int interactionId = args.argi3;
-            final IAccessibilityInteractionConnectionCallback callback =
-                (IAccessibilityInteractionConnectionCallback) args.arg1;
-            mPool.release(args);
-            List<AccessibilityNodeInfo> infos = mTempAccessibilityNodeInfoList;
-            infos.clear();
-            try {
-                View target = null;
-                if (accessibilityViewId == AccessibilityNodeInfo.UNDEFINED) {
-                    target = ViewRootImpl.this.mView;
-                } else {
-                    target = findViewByAccessibilityId(accessibilityViewId);
-                }
-                if (target != null && isDisplayedOnScreen(target)) {
-                    getAccessibilityNodePrefetcher().prefetchAccessibilityNodeInfos(target,
-                            virtualDescendantId, prefetchFlags, infos);
-                }
-            } finally {
+                // We cannot make the call and notify the caller so it does not wait.
                 try {
-                    callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
-                    infos.clear();
+                    callback.setFindAccessibilityNodeInfoResult(null, interactionId);
                 } catch (RemoteException re) {
-                    /* ignore - the other side will time out */
+                    /* best effort - ignore */
                 }
             }
         }
 
-        public void findAccessibilityNodeInfoByViewIdClientThread(long accessibilityNodeId,
-                int viewId, int interactionId, IAccessibilityInteractionConnectionCallback callback,
+        @Override
+        public void focusSearch(long accessibilityNodeId, int interactionId, int direction,
+                IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid) {
-            Message message = mHandler.obtainMessage();
-            message.what = MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID;
-            message.arg1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
-            SomeArgs args = mPool.acquire();
-            args.argi1 = viewId;
-            args.argi2 = interactionId;
-            args.arg1 = callback;
-            message.obj = args;
-            // If the interrogation is performed by the same thread as the main UI
-            // thread in this process, set the message as a static reference so
-            // after this call completes the same thread but in the interrogating
-            // client can handle the message to generate the result.
-            if (interrogatingPid == Process.myPid()
-                    && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
-                AccessibilityInteractionClient.getInstanceForThread(
-                        interrogatingTid).setSameThreadMessage(message);
+            ViewRootImpl viewRootImpl = mViewRootImpl.get();
+            if (viewRootImpl != null && viewRootImpl.mView != null) {
+                viewRootImpl.getAccessibilityInteractionController()
+                    .focusSearchClientThread(accessibilityNodeId, interactionId, direction,
+                            callback, flags, interrogatingPid, interrogatingTid);
             } else {
-                mHandler.sendMessage(message);
-            }
-        }
-
-        public void findAccessibilityNodeInfoByViewIdUiThread(Message message) {
-            final int accessibilityViewId = message.arg1;
-            SomeArgs args = (SomeArgs) message.obj;
-            final int viewId = args.argi1;
-            final int interactionId = args.argi2;
-            final IAccessibilityInteractionConnectionCallback callback =
-                (IAccessibilityInteractionConnectionCallback) args.arg1;
-            mPool.release(args);
-            AccessibilityNodeInfo info = null;
-            try {
-                View root = null;
-                if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
-                    root = findViewByAccessibilityId(accessibilityViewId);
-                } else {
-                    root = ViewRootImpl.this.mView;
-                }
-                if (root != null) {
-                    View target = root.findViewById(viewId);
-                    if (target != null && isDisplayedOnScreen(target)) {
-                        info = target.createAccessibilityNodeInfo();
-                    }
-                }
-            } finally {
+                // We cannot make the call and notify the caller so it does not wait.
                 try {
-                    callback.setFindAccessibilityNodeInfoResult(info, interactionId);
+                    callback.setFindAccessibilityNodeInfoResult(null, interactionId);
                 } catch (RemoteException re) {
-                    /* ignore - the other side will time out */
+                    /* best effort - ignore */
                 }
             }
-        }
-
-        public void findAccessibilityNodeInfosByTextClientThread(long accessibilityNodeId,
-                String text, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
-                long interrogatingTid) {
-            Message message = mHandler.obtainMessage();
-            message.what = MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT;
-            SomeArgs args = mPool.acquire();
-            args.arg1 = text;
-            args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
-            args.argi2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
-            args.argi3 = interactionId;
-            args.arg2 = callback;
-            message.obj = args;
-            // If the interrogation is performed by the same thread as the main UI
-            // thread in this process, set the message as a static reference so
-            // after this call completes the same thread but in the interrogating
-            // client can handle the message to generate the result.
-            if (interrogatingPid == Process.myPid()
-                    && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
-                AccessibilityInteractionClient.getInstanceForThread(
-                        interrogatingTid).setSameThreadMessage(message);
-            } else {
-                mHandler.sendMessage(message);
-            }
-        }
-
-        public void findAccessibilityNodeInfosByTextUiThread(Message message) {
-            SomeArgs args = (SomeArgs) message.obj;
-            final String text = (String) args.arg1;
-            final int accessibilityViewId = args.argi1;
-            final int virtualDescendantId = args.argi2;
-            final int interactionId = args.argi3;
-            final IAccessibilityInteractionConnectionCallback callback =
-                (IAccessibilityInteractionConnectionCallback) args.arg2;
-            mPool.release(args);
-            List<AccessibilityNodeInfo> infos = null;
-            try {
-                View target;
-                if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
-                    target = findViewByAccessibilityId(accessibilityViewId);
-                } else {
-                    target = ViewRootImpl.this.mView;
-                }
-                if (target != null && isDisplayedOnScreen(target)) {
-                    AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
-                    if (provider != null) {
-                        infos = provider.findAccessibilityNodeInfosByText(text,
-                                virtualDescendantId);
-                    } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED) {
-                        ArrayList<View> foundViews = mAttachInfo.mFocusablesTempList;
-                        foundViews.clear();
-                        target.findViewsWithText(foundViews, text, View.FIND_VIEWS_WITH_TEXT
-                                | View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION
-                                | View.FIND_VIEWS_WITH_ACCESSIBILITY_NODE_PROVIDERS);
-                        if (!foundViews.isEmpty()) {
-                            infos = mTempAccessibilityNodeInfoList;
-                            infos.clear();
-                            final int viewCount = foundViews.size();
-                            for (int i = 0; i < viewCount; i++) {
-                                View foundView = foundViews.get(i);
-                                if (isDisplayedOnScreen(foundView)) {
-                                    provider = foundView.getAccessibilityNodeProvider();
-                                    if (provider != null) {
-                                        List<AccessibilityNodeInfo> infosFromProvider =
-                                            provider.findAccessibilityNodeInfosByText(text,
-                                                    virtualDescendantId);
-                                        if (infosFromProvider != null) {
-                                            infos.addAll(infosFromProvider);
-                                        }
-                                    } else  {
-                                        infos.add(foundView.createAccessibilityNodeInfo());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } finally {
-                try {
-                    callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
-                } catch (RemoteException re) {
-                    /* ignore - the other side will time out */
-                }
-            }
-        }
-
-        public void performAccessibilityActionClientThread(long accessibilityNodeId, int action,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                int interogatingPid, long interrogatingTid) {
-            Message message = mHandler.obtainMessage();
-            message.what = MSG_PERFORM_ACCESSIBILITY_ACTION;
-            message.arg1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
-            message.arg2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
-            SomeArgs args = mPool.acquire();
-            args.argi1 = action;
-            args.argi2 = interactionId;
-            args.arg1 = callback;
-            message.obj = args;
-            // If the interrogation is performed by the same thread as the main UI
-            // thread in this process, set the message as a static reference so
-            // after this call completes the same thread but in the interrogating
-            // client can handle the message to generate the result.
-            if (interogatingPid == Process.myPid()
-                    && interrogatingTid == Looper.getMainLooper().getThread().getId()) {
-                AccessibilityInteractionClient.getInstanceForThread(
-                        interrogatingTid).setSameThreadMessage(message);
-            } else {
-                mHandler.sendMessage(message);
-            }
-        }
-
-        public void perfromAccessibilityActionUiThread(Message message) {
-            final int accessibilityViewId = message.arg1;
-            final int virtualDescendantId = message.arg2;
-            SomeArgs args = (SomeArgs) message.obj;
-            final int action = args.argi1;
-            final int interactionId = args.argi2;
-            final IAccessibilityInteractionConnectionCallback callback =
-                (IAccessibilityInteractionConnectionCallback) args.arg1;
-            mPool.release(args);
-            boolean succeeded = false;
-            try {
-                View target = findViewByAccessibilityId(accessibilityViewId);
-                if (target != null && isDisplayedOnScreen(target)) {
-                    AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
-                    if (provider != null) {
-                        succeeded = provider.performAccessibilityAction(action,
-                                virtualDescendantId);
-                    } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED) {
-                        switch (action) {
-                            case AccessibilityNodeInfo.ACTION_FOCUS: {
-                                if (!target.hasFocus()) {
-                                    // Get out of touch mode since accessibility
-                                    // wants to move focus around.
-                                    ensureTouchMode(false);
-                                    succeeded = target.requestFocus();
-                                }
-                            } break;
-                            case AccessibilityNodeInfo.ACTION_CLEAR_FOCUS: {
-                                if (target.hasFocus()) {
-                                    target.clearFocus();
-                                    succeeded = !target.isFocused();
-                                }
-                            } break;
-                            case AccessibilityNodeInfo.ACTION_SELECT: {
-                                if (!target.isSelected()) {
-                                    target.setSelected(true);
-                                    succeeded = target.isSelected();
-                                }
-                            } break;
-                            case AccessibilityNodeInfo.ACTION_CLEAR_SELECTION: {
-                                if (target.isSelected()) {
-                                    target.setSelected(false);
-                                    succeeded = !target.isSelected();
-                                }
-                            } break;
-                        }
-                    }
-                }
-            } finally {
-                try {
-                    callback.setPerformAccessibilityActionResult(succeeded, interactionId);
-                } catch (RemoteException re) {
-                    /* ignore - the other side will time out */
-                }
-            }
-        }
-
-        private View findViewByAccessibilityId(int accessibilityId) {
-            View root = ViewRootImpl.this.mView;
-            if (root == null) {
-                return null;
-            }
-            View foundView = root.findViewByAccessibilityId(accessibilityId);
-            if (foundView != null && foundView.getVisibility() != View.VISIBLE) {
-                return null;
-            }
-            return foundView;
         }
     }
 
     private class SendWindowContentChangedAccessibilityEvent implements Runnable {
-        public volatile boolean mIsPending;
+        public View mSource;
 
         public void run() {
-            if (mView != null) {
-                mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-                mIsPending = false;
-            }
-        }
-    }
-
-    /**
-     * This class encapsulates a prefetching strategy for the accessibility APIs for
-     * querying window content. It is responsible to prefetch a batch of
-     * AccessibilityNodeInfos in addition to the one for a requested node.
-     */
-    class AccessibilityNodePrefetcher {
-
-        private static final int MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE = 50;
-
-        public void prefetchAccessibilityNodeInfos(View view, int virtualViewId, int prefetchFlags,
-                List<AccessibilityNodeInfo> outInfos) {
-            AccessibilityNodeProvider provider = view.getAccessibilityNodeProvider();
-            if (provider == null) {
-                AccessibilityNodeInfo root = view.createAccessibilityNodeInfo();
-                if (root != null) {
-                    outInfos.add(root);
-                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) != 0) {
-                        prefetchPredecessorsOfRealNode(view, outInfos);
-                    }
-                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS) != 0) {
-                        prefetchSiblingsOfRealNode(view, outInfos);
-                    }
-                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS) != 0) {
-                        prefetchDescendantsOfRealNode(view, outInfos);
-                    }
-                }
-            } else {
-                AccessibilityNodeInfo root = provider.createAccessibilityNodeInfo(virtualViewId);
-                if (root != null) {
-                    outInfos.add(root);
-                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) != 0) {
-                        prefetchPredecessorsOfVirtualNode(root, view, provider, outInfos);
-                    }
-                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS) != 0) {
-                        prefetchSiblingsOfVirtualNode(root, view, provider, outInfos);
-                    }
-                    if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS) != 0) {
-                        prefetchDescendantsOfVirtualNode(root, provider, outInfos);
-                    }
-                }
-            }
-        }
-
-        private void prefetchPredecessorsOfRealNode(View view,
-                List<AccessibilityNodeInfo> outInfos) {
-            ViewParent parent = view.getParent();
-            while (parent instanceof View
-                    && outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
-                View parentView = (View) parent;
-                final long parentNodeId = AccessibilityNodeInfo.makeNodeId(
-                        parentView.getAccessibilityViewId(), AccessibilityNodeInfo.UNDEFINED);
-                AccessibilityNodeInfo info = parentView.createAccessibilityNodeInfo();
-                if (info != null) {
-                    outInfos.add(info);
-                }
-                parent = parent.getParent();
-            }
-        }
-
-        private void prefetchSiblingsOfRealNode(View current,
-                List<AccessibilityNodeInfo> outInfos) {
-            ViewParent parent = current.getParent();
-            if (parent instanceof ViewGroup) {
-                ViewGroup parentGroup = (ViewGroup) parent;
-                final int childCount = parentGroup.getChildCount();
-                for (int i = 0; i < childCount; i++) {
-                    View child = parentGroup.getChildAt(i);
-                    if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE
-                            && child.getAccessibilityViewId() != current.getAccessibilityViewId()
-                            && isDisplayedOnScreen(child)) {
-                        final long childNodeId = AccessibilityNodeInfo.makeNodeId(
-                                child.getAccessibilityViewId(), AccessibilityNodeInfo.UNDEFINED);
-                        AccessibilityNodeInfo info = null;
-                        AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
-                        if (provider == null) {
-                            info = child.createAccessibilityNodeInfo();
-                        } else {
-                            info = provider.createAccessibilityNodeInfo(
-                                    AccessibilityNodeInfo.UNDEFINED);
-                        }
-                        if (info != null) {
-                            outInfos.add(info);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void prefetchDescendantsOfRealNode(View root,
-                List<AccessibilityNodeInfo> outInfos) {
-            if (root instanceof ViewGroup) {
-                ViewGroup rootGroup = (ViewGroup) root;
-                HashMap<View, AccessibilityNodeInfo> addedChildren =
-                    new HashMap<View, AccessibilityNodeInfo>();
-                final int childCount = rootGroup.getChildCount();
-                for (int i = 0; i < childCount; i++) {
-                    View child = rootGroup.getChildAt(i);
-                    if (isDisplayedOnScreen(child)
-                            && outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
-                        final long childNodeId = AccessibilityNodeInfo.makeNodeId(
-                                child.getAccessibilityViewId(), AccessibilityNodeInfo.UNDEFINED);
-                        AccessibilityNodeProvider provider = child.getAccessibilityNodeProvider();
-                        if (provider == null) {
-                            AccessibilityNodeInfo info = child.createAccessibilityNodeInfo();
-                            if (info != null) {
-                                outInfos.add(info);
-                                addedChildren.put(child, null);
-                            }
-                        } else {
-                            AccessibilityNodeInfo info = provider.createAccessibilityNodeInfo(
-                                   AccessibilityNodeInfo.UNDEFINED);
-                            if (info != null) {
-                                outInfos.add(info);
-                                addedChildren.put(child, info);
-                            }
-                        }
-                    }
-                }
-                if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
-                    for (Map.Entry<View, AccessibilityNodeInfo> entry : addedChildren.entrySet()) {
-                        View addedChild = entry.getKey();
-                        AccessibilityNodeInfo virtualRoot = entry.getValue();
-                        if (virtualRoot == null) {
-                            prefetchDescendantsOfRealNode(addedChild, outInfos);
-                        } else {
-                            AccessibilityNodeProvider provider =
-                                addedChild.getAccessibilityNodeProvider();
-                            prefetchDescendantsOfVirtualNode(virtualRoot, provider, outInfos);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void prefetchPredecessorsOfVirtualNode(AccessibilityNodeInfo root,
-                View providerHost, AccessibilityNodeProvider provider,
-                List<AccessibilityNodeInfo> outInfos) {
-            long parentNodeId = root.getParentNodeId();
-            int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(parentNodeId);
-            while (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED) {
-                final int virtualDescendantId =
-                    AccessibilityNodeInfo.getVirtualDescendantId(parentNodeId);
-                if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED
-                        || accessibilityViewId == providerHost.getAccessibilityViewId()) {
-                    AccessibilityNodeInfo parent = provider.createAccessibilityNodeInfo(
-                            virtualDescendantId);
-                    if (parent != null) {
-                        outInfos.add(parent);
-                    }
-                    parentNodeId = parent.getParentNodeId();
-                    accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
-                            parentNodeId);
-                } else {
-                    prefetchPredecessorsOfRealNode(providerHost, outInfos);
-                    return;
-                }
-            }
-        }
-
-        private void prefetchSiblingsOfVirtualNode(AccessibilityNodeInfo current, View providerHost,
-                AccessibilityNodeProvider provider, List<AccessibilityNodeInfo> outInfos) {
-            final long parentNodeId = current.getParentNodeId();
-            final int parentAccessibilityViewId =
-                AccessibilityNodeInfo.getAccessibilityViewId(parentNodeId);
-            final int parentVirtualDescendantId =
-                AccessibilityNodeInfo.getVirtualDescendantId(parentNodeId);
-            if (parentVirtualDescendantId != AccessibilityNodeInfo.UNDEFINED
-                    || parentAccessibilityViewId == providerHost.getAccessibilityViewId()) {
-                AccessibilityNodeInfo parent =
-                    provider.createAccessibilityNodeInfo(parentVirtualDescendantId);
-                if (parent != null) {
-                    SparseLongArray childNodeIds = parent.getChildNodeIds();
-                    final int childCount = childNodeIds.size();
-                    for (int i = 0; i < childCount; i++) {
-                        final long childNodeId = childNodeIds.get(i);
-                        if (childNodeId != current.getSourceNodeId()
-                                && outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
-                            final int childVirtualDescendantId =
-                                AccessibilityNodeInfo.getVirtualDescendantId(childNodeId);
-                            AccessibilityNodeInfo child = provider.createAccessibilityNodeInfo(
-                                    childVirtualDescendantId);
-                            if (child != null) {
-                                outInfos.add(child);
-                            }
-                        }
-                    }
-                }
-            } else {
-                prefetchSiblingsOfRealNode(providerHost, outInfos);
-            }
-        }
-
-        private void prefetchDescendantsOfVirtualNode(AccessibilityNodeInfo root,
-                AccessibilityNodeProvider provider, List<AccessibilityNodeInfo> outInfos) {
-            SparseLongArray childNodeIds = root.getChildNodeIds();
-            final int initialOutInfosSize = outInfos.size();
-            final int childCount = childNodeIds.size();
-            for (int i = 0; i < childCount; i++) {
-                if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
-                    final long childNodeId = childNodeIds.get(i);
-                    AccessibilityNodeInfo child = provider.createAccessibilityNodeInfo(
-                            AccessibilityNodeInfo.getVirtualDescendantId(childNodeId));
-                    if (child != null) {
-                        outInfos.add(child);
-                    }
-                }
-            }
-            if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
-                final int addedChildCount = outInfos.size() - initialOutInfosSize;
-                for (int i = 0; i < addedChildCount; i++) {
-                    AccessibilityNodeInfo child = outInfos.get(initialOutInfosSize + i);
-                    prefetchDescendantsOfVirtualNode(child, provider, outInfos);
-                }
+            if (mSource != null) {
+                mSource.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                mSource.resetAccessibilityStateChanged();
+                mSource = null;
             }
         }
     }

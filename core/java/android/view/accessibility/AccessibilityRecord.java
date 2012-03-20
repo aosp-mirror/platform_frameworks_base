@@ -62,6 +62,7 @@ public class AccessibilityRecord {
     private static final int PROPERTY_PASSWORD = 0x00000004;
     private static final int PROPERTY_FULL_SCREEN = 0x00000080;
     private static final int PROPERTY_SCROLLABLE = 0x00000100;
+    private static final int PROPERTY_IMPORTANT_FOR_ACCESSIBILITY = 0x00000200;
 
     private static final int GET_SOURCE_PREFETCH_FLAGS =
         AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS
@@ -77,7 +78,7 @@ public class AccessibilityRecord {
     private boolean mIsInPool;
 
     boolean mSealed;
-    int mBooleanProperties;
+    int mBooleanProperties = PROPERTY_IMPORTANT_FOR_ACCESSIBILITY;
     int mCurrentItemIndex = UNDEFINED;
     int mItemCount = UNDEFINED;
     int mFromIndex = UNDEFINED;
@@ -134,6 +135,8 @@ public class AccessibilityRecord {
      */
     public void setSource(View root, int virtualDescendantId) {
         enforceNotSealed();
+        final boolean important = (root != null) ? root.isImportantForAccessibility() : true;
+        setBooleanProperty(PROPERTY_IMPORTANT_FOR_ACCESSIBILITY, important);
         mSourceWindowId = (root != null) ? root.getAccessibilityWindowId() : UNDEFINED;
         final int rootViewId = (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         mSourceNodeId = AccessibilityNodeInfo.makeNodeId(rootViewId, virtualDescendantId);
@@ -271,6 +274,23 @@ public class AccessibilityRecord {
     public void setScrollable(boolean scrollable) {
         enforceNotSealed();
         setBooleanProperty(PROPERTY_SCROLLABLE, scrollable);
+    }
+
+    /**
+     * Gets if the source is important for accessibility.
+     *
+     * <strong>Note:</strong> Used only internally to determine whether
+     * to deliver the event to a given accessibility service since some
+     * services may want to regard all views for accessibility while others
+     * may want to regard only the important views for accessibility.
+     *
+     * @return True if the source is important for accessibility,
+     *        false otherwise.
+     *
+     * @hide
+     */
+    public boolean isImportantForAccessibility() {
+        return getBooleanProperty(PROPERTY_IMPORTANT_FOR_ACCESSIBILITY);
     }
 
     /**
@@ -755,7 +775,7 @@ public class AccessibilityRecord {
      */
     void clear() {
         mSealed = false;
-        mBooleanProperties = 0;
+        mBooleanProperties = PROPERTY_IMPORTANT_FOR_ACCESSIBILITY;
         mCurrentItemIndex = UNDEFINED;
         mItemCount = UNDEFINED;
         mFromIndex = UNDEFINED;

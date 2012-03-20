@@ -414,6 +414,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             // get the fresh child from the adapter
             final View updatedChild = mAdapter.getView(modulo(i, adapterCount), null, this);
 
+            if (updatedChild.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+                updatedChild.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            }
+
             if (mViewsMap.containsKey(index)) {
                 final FrameLayout fl = (FrameLayout) mViewsMap.get(index).view;
                 // add the new child to the frame, if it exists

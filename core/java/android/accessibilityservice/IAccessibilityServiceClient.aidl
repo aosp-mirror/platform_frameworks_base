@@ -20,15 +20,17 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
- * Top-level interface to accessibility service component (implemented in Service).
+ * Top-level interface to an accessibility service component.
  *
  * @hide
  */
- oneway interface IEventListener {
+ oneway interface IAccessibilityServiceClient {
 
     void setConnection(in IAccessibilityServiceConnection connection, int connectionId);
 
     void onAccessibilityEvent(in AccessibilityEvent event);
 
     void onInterrupt();
+
+    void onGesture(int gestureId);
 }

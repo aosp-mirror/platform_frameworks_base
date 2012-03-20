@@ -17,7 +17,7 @@
 package android.accessibilityservice;
 
 import android.accessibilityservice.AccessibilityService.Callbacks;
-import android.accessibilityservice.AccessibilityService.IEventListenerWrapper;
+import android.accessibilityservice.AccessibilityService.IAccessibilityServiceClientWrapper;
 import android.content.Context;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -66,7 +66,7 @@ public class UiTestAutomationBridge {
 
     private volatile int mConnectionId = AccessibilityInteractionClient.NO_ID;
 
-    private IEventListenerWrapper mListener;
+    private IAccessibilityServiceClientWrapper mListener;
 
     private AccessibilityEvent mLastEvent;
 
@@ -133,7 +133,7 @@ public class UiTestAutomationBridge {
         mHandlerThread.start();
         Looper looper = mHandlerThread.getLooper();
 
-        mListener = new IEventListenerWrapper(null, looper, new Callbacks() {
+        mListener = new IAccessibilityServiceClientWrapper(null, looper, new Callbacks() {
             @Override
             public void onServiceConnected() {
                 /* do nothing */
@@ -174,6 +174,11 @@ public class UiTestAutomationBridge {
                     mConnectionId = connectionId;
                     mLock.notifyAll();
                 }
+            }
+
+            @Override
+            public void onGesture(int gestureId) {
+                /* do nothing */
             }
         });
 
@@ -252,6 +257,7 @@ public class UiTestAutomationBridge {
     public AccessibilityEvent executeCommandAndWaitForAccessibilityEvent(Runnable command,
             Predicate<AccessibilityEvent> predicate, long timeoutMillis)
             throws TimeoutException, Exception {
+        // TODO: This is broken - remove from here when finalizing this as public APIs.
         synchronized (mLock) {
             // Prepare to wait for an event.
             mWaitingForEventDelivery = true;

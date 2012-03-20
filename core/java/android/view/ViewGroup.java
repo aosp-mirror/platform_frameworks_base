@@ -45,6 +45,7 @@ import com.android.internal.R;
 import com.android.internal.util.Predicate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 
 /**
@@ -611,13 +612,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
-        ViewParent parent = getParent();
+        ViewParent parent = mParent;
         if (parent == null) {
             return false;
         }
         final boolean propagate = onRequestSendAccessibilityEvent(child, event);
-        //noinspection SimplifiableIfStatement
         if (!propagate) {
             return false;
         }
@@ -1552,6 +1553,33 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mFirstHoverTarget != null;
     }
 
+    @Override
+    public void addChildrenForAccessibility(ArrayList<View> childrenForAccessibility) {
+        View[] children = mChildren;
+        final int childrenCount = mChildrenCount;
+        for (int i = 0; i < childrenCount; i++) {
+            View child = children[i];
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
+                    && (child.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+                if (child.includeForAccessibility()) {
+                    childrenForAccessibility.add(child);
+                } else {
+                    child.addChildrenForAccessibility(childrenForAccessibility);
+                }
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void childAccessibilityStateChanged(View child) {
+        if (mParent != null) {
+            mParent.childAccessibilityStateChanged(child);
+        }
+    }
+
     /**
      * Implement this method to intercept hover events before they are handled
      * by child views.
@@ -2294,33 +2322,43 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
-        boolean handled = super.dispatchPopulateAccessibilityEventInternal(event);
-        if (handled) {
-            return handled;
+        boolean handled = false;
+        if (includeForAccessibility()) {
+            handled = super.dispatchPopulateAccessibilityEventInternal(event);
+            if (handled) {
+                return handled;
+            }
         }
         // Let our children have a shot in populating the event.
-        for (int i = 0, count = getChildCount(); i < count; i++) {
-            View child = getChildAt(i);
+        ChildListForAccessibility children = ChildListForAccessibility.obtain(this, true);
+        final int childCount = children.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = children.getChildAt(i);
             if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
-                handled = getChildAt(i).dispatchPopulateAccessibilityEvent(event);
+                handled = child.dispatchPopulateAccessibilityEvent(event);
                 if (handled) {
+                    children.recycle();
                     return handled;
                 }
             }
         }
+        children.recycle();
         return false;
     }
 
     @Override
     void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ViewGroup.class.getName());
-        for (int i = 0, count = mChildrenCount; i < count; i++) {
-            View child = mChildren[i];
-            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
-                    && (child.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+        if (mAttachInfo != null) {
+            ArrayList<View> childrenForAccessibility = mAttachInfo.mTempArrayList;
+            childrenForAccessibility.clear();
+            addChildrenForAccessibility(childrenForAccessibility);
+            final int childrenForAccessibilityCount = childrenForAccessibility.size();
+            for (int i = 0; i < childrenForAccessibilityCount; i++) {
+                View child = childrenForAccessibility.get(i);
                 info.addChild(child);
             }
+            childrenForAccessibility.clear();
         }
     }
 
@@ -2328,6 +2366,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
         event.setClassName(ViewGroup.class.getName());
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void resetAccessibilityStateChanged() {
+        super.resetAccessibilityStateChanged();
+        View[] children = mChildren;
+        final int childCount = mChildrenCount;
+        for (int i = 0; i < childCount; i++) {
+            View child = children[i];
+            child.resetAccessibilityStateChanged();
+        }
     }
 
     /**
@@ -3399,6 +3451,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (clearChildFocus) {
             clearChildFocus(view);
             ensureInputFocusOnFirstFocusable();
+        }
+
+        if (view.isAccessibilityFocused()) {
+            view.clearAccessibilityFocus();
         }
     }
 
@@ -5620,6 +5676,220 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
                 child = null;
             }
+        }
+    }
+
+    /**
+     * Pooled class that orderes the children of a ViewGroup from start
+     * to end based on how they are laid out and the layout direction.
+     */
+    static class ChildListForAccessibility {
+
+        private static final int MAX_POOL_SIZE = 32;
+
+        private static final Object sPoolLock = new Object();
+
+        private static ChildListForAccessibility sPool;
+
+        private static int sPoolSize;
+
+        private boolean mIsPooled;
+
+        private ChildListForAccessibility mNext;
+
+        private final ArrayList<View> mChildren = new ArrayList<View>();
+
+        private final ArrayList<ViewLocationHolder> mHolders = new ArrayList<ViewLocationHolder>();
+
+        public static ChildListForAccessibility obtain(ViewGroup parent, boolean sort) {
+            ChildListForAccessibility list = null;
+            synchronized (sPoolLock) {
+                if (sPool != null) {
+                    list = sPool;
+                    sPool = list.mNext;
+                    list.mNext = null;
+                    list.mIsPooled = false;
+                    sPoolSize--;
+                } else {
+                    list = new ChildListForAccessibility();
+                }
+                list.init(parent, sort);
+                return list;
+            }
+        }
+
+        public void recycle() {
+            if (mIsPooled) {
+                throw new IllegalStateException("Instance already recycled.");
+            }
+            clear();
+            if (sPoolSize < MAX_POOL_SIZE) {
+                mNext = sPool;
+                mIsPooled = true;
+                sPool = this;
+                sPoolSize++;
+            }
+        }
+
+        public int getChildCount() {
+            return mChildren.size();
+        }
+
+        public View getChildAt(int index) {
+            return mChildren.get(index);
+        }
+
+        public int getChildIndex(View child) {
+            return mChildren.indexOf(child);
+        }
+
+        private void init(ViewGroup parent, boolean sort) {
+            ArrayList<View> children = mChildren;
+            final int childCount = parent.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View child = parent.getChildAt(i);
+                children.add(child);
+            }
+            if (sort) {
+                ArrayList<ViewLocationHolder> holders = mHolders;
+                for (int i = 0; i < childCount; i++) {
+                    View child = children.get(i);
+                    ViewLocationHolder holder = ViewLocationHolder.obtain(parent, child);
+                    holders.add(holder);
+                }
+                Collections.sort(holders);
+                for (int i = 0; i < childCount; i++) {
+                    ViewLocationHolder holder = holders.get(i);
+                    children.set(i, holder.mView);
+                    holder.recycle();
+                }
+                holders.clear();
+            }
+        }
+
+        private void clear() {
+            mChildren.clear();
+        }
+    }
+
+    /**
+     * Pooled class that holds a View and its location with respect to
+     * a specified root. This enables sorting of views based on their
+     * coordinates without recomputing the position relative to the root
+     * on every comparison.
+     */
+    static class ViewLocationHolder implements Comparable<ViewLocationHolder> {
+
+        private static final int MAX_POOL_SIZE = 32;
+
+        private static final Object sPoolLock = new Object();
+
+        private static ViewLocationHolder sPool;
+
+        private static int sPoolSize;
+
+        private boolean mIsPooled;
+
+        private ViewLocationHolder mNext;
+
+        private final Rect mLocation = new Rect();
+
+        public View mView;
+
+        private int mLayoutDirection;
+
+        public static ViewLocationHolder obtain(ViewGroup root, View view) {
+            ViewLocationHolder holder = null;
+            synchronized (sPoolLock) {
+                if (sPool != null) {
+                    holder = sPool;
+                    sPool = holder.mNext;
+                    holder.mNext = null;
+                    holder.mIsPooled = false;
+                    sPoolSize--;
+                } else {
+                    holder = new ViewLocationHolder();
+                }
+                holder.init(root, view);
+                return holder;
+            }
+        }
+
+        public void recycle() {
+            if (mIsPooled) {
+                throw new IllegalStateException("Instance already recycled.");
+            }
+            clear();
+            if (sPoolSize < MAX_POOL_SIZE) {
+                mNext = sPool;
+                mIsPooled = true;
+                sPool = this;
+                sPoolSize++;
+            }
+        }
+
+        @Override
+        public int compareTo(ViewLocationHolder another) {
+            // This instance is greater than an invalid argument.
+            if (another == null) {
+                return 1;
+            }
+            if (getClass() != another.getClass()) {
+                return 1;
+            }
+            // First is above second.
+            if (mLocation.bottom - another.mLocation.top <= 0) {
+                return -1;
+            }
+            // First is below second.
+            if (mLocation.top - another.mLocation.bottom >= 0) {
+                return 1;
+            }
+            // LTR
+            if (mLayoutDirection == LAYOUT_DIRECTION_LTR) {
+                final int leftDifference = mLocation.left - another.mLocation.left;
+                // First more to the left than second.
+                if (leftDifference != 0) {
+                    return leftDifference;
+                }
+            } else { // RTL
+                final int rightDifference = mLocation.right - another.mLocation.right;
+                // First more to the right than second.
+                if (rightDifference != 0) {
+                    return -rightDifference;
+                }
+            }
+            // Break tie by top.
+            final int topDiference = mLocation.top - another.mLocation.top;
+            if (topDiference != 0) {
+                return topDiference;
+            }
+            // Break tie by height.
+            final int heightDiference = mLocation.height() - another.mLocation.height();
+            if (heightDiference != 0) {
+                return -heightDiference;
+            }
+            // Break tie by width.
+            final int widthDiference = mLocation.width() - another.mLocation.width();
+            if (widthDiference != 0) {
+                return -widthDiference;
+            }
+            // Return nondeterministically one of them since we do
+            // not want to ignore any views.
+            return 1;
+        }
+
+        private void init(ViewGroup root, View view) {
+            Rect viewLocation = mLocation;
+            view.getDrawingRect(viewLocation);
+            root.offsetDescendantRectToMyCoords(view, viewLocation);
+            mView = view;
+            mLayoutDirection = root.getResolvedLayoutDirection();
+        }
+
+        private void clear() {
+            mView = null;
+            mLocation.set(0, 0, 0, 0);
         }
     }
 }

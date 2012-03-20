@@ -975,6 +975,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public static final int FOCUSABLES_TOUCH_MODE = 0x00000001;
 
     /**
+     * View flag indicating whether {@link #addFocusables(ArrayList, int, int)}
+     * should add only accessibility focusable Views.
+     *
+     * @hide
+     */
+    public static final int FOCUSABLES_ACCESSIBILITY = 0x00000002;
+
+    /**
      * Use with {@link #focusSearch(int)}. Move focus to the previous selectable
      * item.
      */
@@ -1005,6 +1013,54 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Use with {@link #focusSearch(int)}. Move focus down.
      */
     public static final int FOCUS_DOWN = 0x00000082;
+
+    // Accessibility focus directions.
+
+    /**
+     * The accessibility focus which is the current user position when
+     * interacting with the accessibility framework.
+     */
+    public static final int FOCUS_ACCESSIBILITY =  0x00001000;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus left.
+     */
+    public static final int ACCESSIBILITY_FOCUS_LEFT = FOCUS_LEFT | FOCUS_ACCESSIBILITY;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus up.
+     */
+    public static final int ACCESSIBILITY_FOCUS_UP = FOCUS_UP | FOCUS_ACCESSIBILITY;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus right.
+     */
+    public static final int ACCESSIBILITY_FOCUS_RIGHT = FOCUS_RIGHT | FOCUS_ACCESSIBILITY;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus down.
+     */
+    public static final int ACCESSIBILITY_FOCUS_DOWN = FOCUS_DOWN | FOCUS_ACCESSIBILITY;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus to the next view.
+     */
+    public static final int ACCESSIBILITY_FOCUS_FORWARD = FOCUS_FORWARD | FOCUS_ACCESSIBILITY;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus to the previous view.
+     */
+    public static final int ACCESSIBILITY_FOCUS_BACKWARD = FOCUS_BACKWARD | FOCUS_ACCESSIBILITY;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus in a view.
+     */
+    public static final int ACCESSIBILITY_FOCUS_IN = 0x00000004 | FOCUS_ACCESSIBILITY;
+
+    /**
+     * Use with {@link #focusSearch(int)}. Move acessibility focus out of a view.
+     */
+    public static final int ACCESSIBILITY_FOCUS_OUT = 0x00000008 | FOCUS_ACCESSIBILITY;
 
     /**
      * Bits of {@link #getMeasuredWidthAndState()} and
@@ -1330,7 +1386,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         R.attr.state_accelerated,       VIEW_STATE_ACCELERATED,
         R.attr.state_hovered,           VIEW_STATE_HOVERED,
         R.attr.state_drag_can_accept,   VIEW_STATE_DRAG_CAN_ACCEPT,
-        R.attr.state_drag_hovered,      VIEW_STATE_DRAG_HOVERED,
+        R.attr.state_drag_hovered,      VIEW_STATE_DRAG_HOVERED
     };
 
     static {
@@ -1452,7 +1508,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
             | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
             | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
-            | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED;
+            | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
+            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED;
 
     /**
      * Temporary Rect currently for use in setBackground().  This will probably
@@ -1784,7 +1841,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     private static final int LAYOUT_DIRECTION_DEFAULT = LAYOUT_DIRECTION_INHERIT;
 
-
     /**
      * Indicates that the view is tracking some sort of transient state
      * that the app should not need to be aware of, but that the framework
@@ -1992,6 +2048,50 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public static final int TEXT_ALIGNMENT_RESOLVED_DEFAULT =
             TEXT_ALIGNMENT_GRAVITY << TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT;
 
+    // Accessiblity constants for mPrivateFlags2
+
+    /**
+     * Shift for accessibility related bits in {@link #mPrivateFlags2}.
+     */
+    static final int IMPORTANT_FOR_ACCESSIBILITY_SHIFT = 20;
+
+    /**
+     * Automatically determine whether a view is important for accessibility.
+     */
+    public static final int IMPORTANT_FOR_ACCESSIBILITY_AUTO = 0x00000000;
+
+    /**
+     * The view is important for accessibility.
+     */
+    public static final int IMPORTANT_FOR_ACCESSIBILITY_YES = 0x00000001;
+
+    /**
+     * The view is not important for accessibility.
+     */
+    public static final int IMPORTANT_FOR_ACCESSIBILITY_NO = 0x00000002;
+
+    /**
+     * The default whether the view is important for accessiblity.
+     */
+    static final int IMPORTANT_FOR_ACCESSIBILITY_DEFAULT = IMPORTANT_FOR_ACCESSIBILITY_AUTO;
+
+    /**
+     * Mask for obtainig the bits which specify how to determine
+     * whether a view is important for accessibility.
+     */
+    static final int IMPORTANT_FOR_ACCESSIBILITY_MASK = (IMPORTANT_FOR_ACCESSIBILITY_AUTO
+        | IMPORTANT_FOR_ACCESSIBILITY_YES | IMPORTANT_FOR_ACCESSIBILITY_NO)
+        << IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
+
+    /**
+     * Flag indicating whether a view has accessibility focus.
+     */
+    static final int ACCESSIBILITY_FOCUSED = 0x00000040 << IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
+
+    /**
+     * Flag indicating whether a view state for accessibility has changed.
+     */
+    static final int ACCESSIBILITY_STATE_CHANGED = 0x00000080 << IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
 
     /* End of masks for mPrivateFlags2 */
 
@@ -2952,7 +3052,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         // Set layout and text direction defaults
         mPrivateFlags2 = (LAYOUT_DIRECTION_DEFAULT << LAYOUT_DIRECTION_MASK_SHIFT) |
                 (TEXT_DIRECTION_DEFAULT << TEXT_DIRECTION_MASK_SHIFT) |
-                (TEXT_ALIGNMENT_DEFAULT << TEXT_ALIGNMENT_MASK_SHIFT);
+                (TEXT_ALIGNMENT_DEFAULT << TEXT_ALIGNMENT_MASK_SHIFT) |
+                (IMPORTANT_FOR_ACCESSIBILITY_DEFAULT << IMPORTANT_FOR_ACCESSIBILITY_SHIFT);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = -1;
@@ -3340,6 +3441,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     final int textAlignment = a.getInt(attr, TEXT_ALIGNMENT_DEFAULT);
                     mPrivateFlags2 |= TEXT_ALIGNMENT_FLAGS[textAlignment];
                     break;
+                case R.styleable.View_importantForAccessibility:
+                    setImportantForAccessibility(a.getInt(attr,
+                            IMPORTANT_FOR_ACCESSIBILITY_DEFAULT));
             }
         }
 
@@ -3970,6 +4074,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             onFocusChanged(true, direction, previouslyFocusedRect);
             refreshDrawableState();
+
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                notifyAccessibilityStateChanged();
+            }
         }
     }
 
@@ -4050,16 +4158,21 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
 
             onFocusChanged(false, 0, null);
+
             refreshDrawableState();
 
             ensureInputFocusOnFirstFocusable();
+
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                notifyAccessibilityStateChanged();
+            }
         }
     }
 
     void ensureInputFocusOnFirstFocusable() {
         View root = getRootView();
         if (root != null) {
-            root.requestFocus(FOCUS_FORWARD);
+            root.requestFocus();
         }
     }
 
@@ -4077,6 +4190,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             onFocusChanged(false, 0, null);
             refreshDrawableState();
+
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                notifyAccessibilityStateChanged();
+            }
         }
     }
 
@@ -4127,7 +4244,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         if (gainFocus) {
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+                requestAccessibilityFocus();
+            }
         }
 
         InputMethodManager imm = InputMethodManager.peekInstance();
@@ -4237,7 +4357,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
         if (mAccessibilityDelegate != null) {
-           mAccessibilityDelegate.sendAccessibilityEventUnchecked(this, event);
+            mAccessibilityDelegate.sendAccessibilityEventUnchecked(this, event);
         } else {
             sendAccessibilityEventUncheckedInternal(event);
         }
@@ -4256,6 +4376,31 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         // Only a subset of accessibility events populates text content.
         if ((event.getEventType() & POPULATING_ACCESSIBILITY_EVENT_TYPES) != 0) {
             dispatchPopulateAccessibilityEvent(event);
+        }
+        // Intercept accessibility focus events fired by virtual nodes to keep
+        // track of accessibility focus position in such nodes.
+        final int eventType = event.getEventType();
+        switch (eventType) {
+            case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
+                final long virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
+                        event.getSourceNodeId());
+                if (virtualNodeId != AccessibilityNodeInfo.UNDEFINED) {
+                    ViewRootImpl viewRootImpl = getViewRootImpl();
+                    if (viewRootImpl != null) {
+                        viewRootImpl.setAccessibilityFocusedHost(this);
+                    }
+                }
+            } break;
+            case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
+                final long virtualNodeId = AccessibilityNodeInfo.getVirtualDescendantId(
+                        event.getSourceNodeId());
+                if (virtualNodeId != AccessibilityNodeInfo.UNDEFINED) {
+                    ViewRootImpl viewRootImpl = getViewRootImpl();
+                    if (viewRootImpl != null) {
+                        viewRootImpl.setAccessibilityFocusedHost(null);
+                    }
+                }
+            } break;
         }
         // In the beginning we called #isShown(), so we know that getParent() is not null.
         getParent().requestSendAccessibilityEvent(this, event);
@@ -4399,7 +4544,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         event.setContentDescription(mContentDescription);
 
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && mAttachInfo != null) {
-            ArrayList<View> focusablesTempList = mAttachInfo.mFocusablesTempList;
+            ArrayList<View> focusablesTempList = mAttachInfo.mTempArrayList;
             getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD,
                     FOCUSABLES_ALL);
             event.setItemCount(focusablesTempList.size());
@@ -4488,10 +4633,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         info.setBoundsInScreen(bounds);
 
         if ((mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
-            ViewParent parent = getParent();
+            ViewParent parent = getParentForAccessibility();
             if (parent instanceof View) {
-                View parentView = (View) parent;
-                info.setParent(parentView);
+                info.setParent((View) parent);
             }
         }
 
@@ -4503,6 +4647,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         info.setClickable(isClickable());
         info.setFocusable(isFocusable());
         info.setFocused(isFocused());
+        info.setAccessibilityFocused(isAccessibilityFocused());
         info.setSelected(isSelected());
         info.setLongClickable(isLongClickable());
 
@@ -4597,10 +4742,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * true for views that do not have textual representation (For example,
      * ImageButton).
      *
-     * @return The content descriptiopn.
+     * @return The content description.
      *
      * @attr ref android.R.styleable#View_contentDescription
      */
+    @ViewDebug.ExportedProperty(category = "accessibility")
     public CharSequence getContentDescription() {
         return mContentDescription;
     }
@@ -5650,8 +5796,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Adds any focusable views that are descendants of this view (possibly
      * including this view if it is focusable itself) to views. This method
      * adds all focusable views regardless if we are in touch mode or
-     * only views focusable in touch mode if we are in touch mode depending on
-     * the focusable mode paramater.
+     * only views focusable in touch mode if we are in touch mode or
+     * only views that can take accessibility focus if accessibility is enabeld
+     * depending on the focusable mode paramater.
      *
      * @param views Focusable views found so far or null if all we are interested is
      *        the number of focusables.
@@ -5660,19 +5807,32 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @see #FOCUSABLES_ALL
      * @see #FOCUSABLES_TOUCH_MODE
+     * @see #FOCUSABLES_ACCESSIBILITY
      */
     public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
-        if (!isFocusable()) {
+        if (views == null) {
             return;
         }
-
-        if ((focusableMode & FOCUSABLES_TOUCH_MODE) == FOCUSABLES_TOUCH_MODE &&
-                isInTouchMode() && !isFocusableInTouchMode()) {
-            return;
+        if ((focusableMode & FOCUSABLE_IN_TOUCH_MODE) == FOCUSABLE_IN_TOUCH_MODE) {
+            if (isFocusable() && (!isInTouchMode() || isFocusableInTouchMode())) {
+                views.add(this);
+                return;
+            }
         }
-
-        if (views != null) {
-            views.add(this);
+        if ((focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
+            if (AccessibilityManager.getInstance(mContext).isEnabled()
+                    && includeForAccessibility()) {
+                views.add(this);
+                return;
+            }
+        }
+        if ((focusableMode & FOCUSABLES_ALL) == FOCUSABLES_ALL) {
+            if (isFocusable()) {
+                views.add(this);
+                return;
+            }
+        } else {
+            throw new IllegalArgumentException("Unknow focusable mode: " + focusableMode);
         }
     }
 
@@ -5734,6 +5894,149 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Returns whether this View is accessibility focused.
+     *
+     * @return True if this View is accessibility focused.
+     */
+    boolean isAccessibilityFocused() {
+        return (mPrivateFlags2 & ACCESSIBILITY_FOCUSED) != 0;
+    }
+
+    /**
+     * Call this to try to give accessibility focus to this view.
+     *
+     * A view will not actually take focus if {@link AccessibilityManager#isEnabled()}
+     * returns false or the view is no visible or the view already has accessibility
+     * focus.
+     *
+     * See also {@link #focusSearch(int)}, which is what you call to say that you
+     * have focus, and you want your parent to look for the next one.
+     *
+     * @return Whether this view actually took accessibility focus.
+     *
+     * @hide
+     */
+    public boolean requestAccessibilityFocus() {
+        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+            return false;
+        }
+        if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
+            return false;
+        }
+        if ((mPrivateFlags2 & ACCESSIBILITY_FOCUSED) == 0) {
+            mPrivateFlags2 |= ACCESSIBILITY_FOCUSED;
+            ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl != null) {
+                viewRootImpl.setAccessibilityFocusedHost(this);
+            }
+            invalidate();
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
+            notifyAccessibilityStateChanged();
+            // Try to give input focus to this view - not a descendant.
+            requestFocusNoSearch(View.FOCUS_DOWN, null);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Call this to try to clear accessibility focus of this view.
+     *
+     * See also {@link #focusSearch(int)}, which is what you call to say that you
+     * have focus, and you want your parent to look for the next one.
+     *
+     * @hide
+     */
+    public void clearAccessibilityFocus() {
+        if ((mPrivateFlags2 & ACCESSIBILITY_FOCUSED) != 0) {
+            mPrivateFlags2 &= ~ACCESSIBILITY_FOCUSED;
+            ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl != null) {
+                viewRootImpl.setAccessibilityFocusedHost(null);
+            }
+            invalidate();
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+            notifyAccessibilityStateChanged();
+            // Try to move accessibility focus to the input focus.
+            View rootView = getRootView();
+            if (rootView != null) {
+                View inputFocus = rootView.findFocus();
+                if (inputFocus != null) {
+                    inputFocus.requestAccessibilityFocus();
+                }
+            }
+        }
+    }
+
+    /**
+     * Find the best view to take accessibility focus from a hover.
+     * This function finds the deepest actionable view and if that
+     * fails ask the parent to take accessibility focus from hover.
+     *
+     * @param x The X hovered location in this view coorditantes.
+     * @param y The Y hovered location in this view coorditantes.
+     * @return Whether the request was handled.
+     *
+     * @hide
+     */
+    public boolean requestAccessibilityFocusFromHover(float x, float y) {
+        if (onRequestAccessibilityFocusFromHover(x, y)) {
+            return true;
+        }
+        ViewParent parent = mParent;
+        if (parent instanceof View) {
+            View parentView = (View) parent;
+
+            float[] position = mAttachInfo.mTmpTransformLocation;
+            position[0] = x;
+            position[1] = y;
+
+            // Compensate for the transformation of the current matrix.
+            if (!hasIdentityMatrix()) {
+                getMatrix().mapPoints(position);
+            }
+
+            // Compensate for the parent scroll and the offset
+            // of this view stop from the parent top.
+            position[0] += mLeft - parentView.mScrollX;
+            position[1] += mTop - parentView.mScrollY;
+
+            return parentView.requestAccessibilityFocusFromHover(position[0], position[1]);
+        }
+        return false;
+    }
+
+    /**
+     * Requests to give this View focus from hover.
+     *
+     * @param x The X hovered location in this view coorditantes.
+     * @param y The Y hovered location in this view coorditantes.
+     * @return Whether the request was handled.
+     *
+     * @hide
+     */
+    public boolean onRequestAccessibilityFocusFromHover(float x, float y) {
+        if (includeForAccessibility()
+                && (isActionableForAccessibility() || hasListenersForAccessibility())) {
+            return requestAccessibilityFocus();
+        }
+        return false;
+    }
+
+    /**
+     * Clears accessibility focus without calling any callback methods
+     * normally invoked in {@link #clearAccessibilityFocus()}. This method
+     * is used for clearing accessibility focus when giving this focus to
+     * another view.
+     */
+    void clearAccessibilityFocusNoCallbacks() {
+        if ((mPrivateFlags2 & ACCESSIBILITY_FOCUSED) != 0) {
+            mPrivateFlags2 &= ~ACCESSIBILITY_FOCUSED;
+            invalidate();
+        }
+    }
+
+    /**
      * Call this to try to give focus to a specific view or to one of its
      * descendants.
      *
@@ -5752,7 +6055,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public final boolean requestFocus() {
         return requestFocus(View.FOCUS_DOWN);
     }
-
 
     /**
      * Call this to try to give focus to a specific view or to one of its
@@ -5805,6 +6107,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return Whether this view or one of its descendants actually took focus.
      */
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
+        return requestFocusNoSearch(direction, previouslyFocusedRect);
+    }
+
+    private boolean requestFocusNoSearch(int direction, Rect previouslyFocusedRect) {
         // need to be focusable
         if ((mViewFlags & FOCUSABLE_MASK) != FOCUSABLE ||
                 (mViewFlags & VISIBILITY_MASK) != VISIBLE) {
@@ -5859,6 +6165,248 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             } else {
                 ancestor = vgAncestor.getParent();
             }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the mode for determining whether this View is important for accessibility
+     * which is if it fires accessibility events and if it is reported to
+     * accessibility services that query the screen.
+     *
+     * @return The mode for determining whether a View is important for accessibility.
+     *
+     * @attr ref android.R.styleable#View_importantForAccessibility
+     *
+     * @see #IMPORTANT_FOR_ACCESSIBILITY_YES
+     * @see #IMPORTANT_FOR_ACCESSIBILITY_NO
+     * @see #IMPORTANT_FOR_ACCESSIBILITY_AUTO
+     */
+    @ViewDebug.ExportedProperty(category = "accessibility", mapping = {
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_AUTO,
+                    to = "IMPORTANT_FOR_ACCESSIBILITY_AUTO"),
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_YES,
+                    to = "IMPORTANT_FOR_ACCESSIBILITY_YES"),
+            @ViewDebug.IntToString(from = IMPORTANT_FOR_ACCESSIBILITY_NO,
+                    to = "IMPORTANT_FOR_ACCESSIBILITY_NO")
+        })
+    public int getImportantForAccessibility() {
+        return (mPrivateFlags2 & IMPORTANT_FOR_ACCESSIBILITY_MASK)
+                >> IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
+    }
+
+    /**
+     * Sets how to determine whether this view is important for accessibility
+     * which is if it fires accessibility events and if it is reported to
+     * accessibility services that query the screen.
+     *
+     * @param mode How to determine whether this view is important for accessibility.
+     *
+     * @attr ref android.R.styleable#View_importantForAccessibility
+     *
+     * @see #IMPORTANT_FOR_ACCESSIBILITY_YES
+     * @see #IMPORTANT_FOR_ACCESSIBILITY_NO
+     * @see #IMPORTANT_FOR_ACCESSIBILITY_AUTO
+     */
+    public void setImportantForAccessibility(int mode) {
+        if (mode != getImportantForAccessibility()) {
+            mPrivateFlags2 &= ~IMPORTANT_FOR_ACCESSIBILITY_MASK;
+            mPrivateFlags2 |= (mode << IMPORTANT_FOR_ACCESSIBILITY_SHIFT)
+                    & IMPORTANT_FOR_ACCESSIBILITY_MASK;
+            notifyAccessibilityStateChanged();
+        }
+    }
+
+    /**
+     * Gets whether this view should be exposed for accessibility.
+     *
+     * @return Whether the view is exposed for accessibility.
+     *
+     * @hide
+     */
+    public boolean isImportantForAccessibility() {
+        final int mode = (mPrivateFlags2 & IMPORTANT_FOR_ACCESSIBILITY_MASK)
+                >> IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
+        switch (mode) {
+            case IMPORTANT_FOR_ACCESSIBILITY_YES:
+                return true;
+            case IMPORTANT_FOR_ACCESSIBILITY_NO:
+                return false;
+            case IMPORTANT_FOR_ACCESSIBILITY_AUTO:
+                return isActionableForAccessibility() || hasListenersForAccessibility();
+            default:
+                throw new IllegalArgumentException("Unknow important for accessibility mode: "
+                        + mode);
+        }
+    }
+
+    /**
+     * Gets the parent for accessibility purposes. Note that the parent for
+     * accessibility is not necessary the immediate parent. It is the first
+     * predecessor that is important for accessibility.
+     *
+     * @return The parent for accessibility purposes.
+     */
+    public ViewParent getParentForAccessibility() {
+        if (mParent instanceof View) {
+            View parentView = (View) mParent;
+            if (parentView.includeForAccessibility()) {
+                return mParent;
+            } else {
+                return mParent.getParentForAccessibility();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Adds the children of a given View for accessibility. Since some Views are
+     * not important for accessibility the children for accessibility are not
+     * necessarily direct children of the riew, rather they are the first level of
+     * descendants important for accessibility.
+     *
+     * @param children The list of children for accessibility.
+     */
+    public void addChildrenForAccessibility(ArrayList<View> children) {
+        if (includeForAccessibility()) {
+            children.add(this);
+        }
+    }
+
+    /**
+     * Whether to regard this view for accessibility. A view is regarded for
+     * accessibility if it is important for accessibility or the querying
+     * accessibility service has explicitly requested that view not
+     * important for accessibility are regarded.
+     *
+     * @return Whether to regard the view for accessibility.
+     */
+    boolean includeForAccessibility() {
+        if (mAttachInfo != null) {
+            if (!mAttachInfo.mIncludeNotImportantViews) {
+                return isImportantForAccessibility();
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the View is considered actionable from
+     * accessibility perspective. Such view are important for
+     * accessiiblity.
+     *
+     * @return True if the view is actionable for accessibility.
+     */
+    private boolean isActionableForAccessibility() {
+        return (isClickable() || isLongClickable() || isFocusable());
+    }
+
+    /**
+     * Returns whether the View has registered callbacks wich makes it
+     * important for accessiiblity.
+     *
+     * @return True if the view is actionable for accessibility.
+     */
+    private boolean hasListenersForAccessibility() {
+        ListenerInfo info = getListenerInfo();
+        return mTouchDelegate != null || info.mOnKeyListener != null
+                || info.mOnTouchListener != null || info.mOnGenericMotionListener != null
+                || info.mOnHoverListener != null || info.mOnDragListener != null;
+    }
+
+    /**
+     * Notifies accessibility services that some view's important for
+     * accessibility state has changed. Note that such notifications
+     * are made at most once every
+     * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}
+     * to avoid unnecessary load to the system. Also once a view has
+     * made a notifucation this method is a NOP until the notification has
+     * been sent to clients.
+     *
+     * @hide
+     *
+     * TODO: Makse sure this method is called for any view state change
+     *       that is interesting for accessilility purposes.
+     */
+    public void notifyAccessibilityStateChanged() {
+        if ((mPrivateFlags2 & ACCESSIBILITY_STATE_CHANGED) == 0) {
+            mPrivateFlags2 |= ACCESSIBILITY_STATE_CHANGED;
+            if (mParent != null) {
+                mParent.childAccessibilityStateChanged(this);
+            }
+        }
+    }
+
+    /**
+     * Reset the state indicating the this view has requested clients
+     * interested in its accessiblity state to be notified.
+     *
+     * @hide
+     */
+    public void resetAccessibilityStateChanged() {
+        mPrivateFlags2 &= ~ACCESSIBILITY_STATE_CHANGED;
+    }
+
+    /**
+     * Performs the specified accessibility action on the view. For
+     * possible accessibility actions look at {@link AccessibilityNodeInfo}.
+     *
+     * @param action The action to perform.
+     * @return Whether the action was performed.
+     */
+    public boolean performAccessibilityAction(int action) {
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_CLICK: {
+                final long now = SystemClock.uptimeMillis();
+                // Send down.
+                MotionEvent event = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN,
+                        getWidth() / 2, getHeight() / 2, 0);
+                onTouchEvent(event);
+                // Send up.
+                event.setAction(MotionEvent.ACTION_UP);
+                onTouchEvent(event);
+                // Clean up.
+                event.recycle();
+            } break;
+            case AccessibilityNodeInfo.ACTION_FOCUS: {
+                if (!hasFocus()) {
+                    // Get out of touch mode since accessibility
+                    // wants to move focus around.
+                    getViewRootImpl().ensureTouchMode(false);
+                    return requestFocus();
+                }
+            } break;
+            case AccessibilityNodeInfo.ACTION_CLEAR_FOCUS: {
+                if (hasFocus()) {
+                    clearFocus();
+                    return !isFocused();
+                }
+            } break;
+            case AccessibilityNodeInfo.ACTION_SELECT: {
+                if (!isSelected()) {
+                    setSelected(true);
+                    return isSelected();
+                }
+            } break;
+            case AccessibilityNodeInfo.ACTION_CLEAR_SELECTION: {
+                if (isSelected()) {
+                    setSelected(false);
+                    return !isSelected();
+                }
+            } break;
+            case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
+                if (!isAccessibilityFocused()) {
+                    return requestAccessibilityFocus();
+                }
+            } break;
+            case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
+                if (isAccessibilityFocused()) {
+                    clearAccessibilityFocus();
+                    return true;
+                }
+            } break;
         }
         return false;
     }
@@ -6757,21 +7305,27 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         // The root view may receive hover (or touch) events that are outside the bounds of
         // the window.  This code ensures that we only send accessibility events for
         // hovers that are actually within the bounds of the root view.
-        final int action = event.getAction();
+        final int action = event.getActionMasked();
         if (!mSendingHoverAccessibilityEvents) {
             if ((action == MotionEvent.ACTION_HOVER_ENTER
                     || action == MotionEvent.ACTION_HOVER_MOVE)
                     && !hasHoveredChild()
                     && pointInView(event.getX(), event.getY())) {
-                mSendingHoverAccessibilityEvents = true;
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+                mSendingHoverAccessibilityEvents = true;
+                requestAccessibilityFocusFromHover((int) event.getX(), (int) event.getY());
             }
         } else {
             if (action == MotionEvent.ACTION_HOVER_EXIT
-                    || (action == MotionEvent.ACTION_HOVER_MOVE
+                    || (action == MotionEvent.ACTION_MOVE
                             && !pointInView(event.getX(), event.getY()))) {
                 mSendingHoverAccessibilityEvents = false;
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+                // If the window does not have input focus we take away accessibility
+                // focus as soon as the user stop hovering over the view.
+                if (!mAttachInfo.mHasWindowFocus) {
+                    getViewRootImpl().setAccessibilityFocusedHost(null);
+                }
             }
         }
 
@@ -6795,6 +7349,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             dispatchGenericMotionEventInternal(event);
             return true;
         }
+
         return false;
     }
 
@@ -6806,7 +7361,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     private boolean isHoverable() {
         final int viewFlags = mViewFlags;
-        //noinspection SimplifiableIfStatement
         if ((viewFlags & ENABLED_MASK) == DISABLED) {
             return false;
         }
@@ -7130,6 +7684,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                  */
                 if (mParent != null) mParent.focusableViewAvailable(this);
             }
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                notifyAccessibilityStateChanged();
+            }
         }
 
         if ((flags & VISIBILITY_MASK) == VISIBLE) {
@@ -7161,6 +7718,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             if (((mViewFlags & VISIBILITY_MASK) == GONE)) {
                 if (hasFocus()) clearFocus();
+                clearAccessibilityFocus();
                 destroyDrawingCache();
                 if (mParent instanceof View) {
                     // GONE views noop invalidation, so invalidate the parent
@@ -7185,9 +7743,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             mPrivateFlags |= DRAWN;
 
             if (((mViewFlags & VISIBILITY_MASK) == INVISIBLE) && hasFocus()) {
-                // root view becoming invisible shouldn't clear focus
+                // root view becoming invisible shouldn't clear focus and accessibility focus
                 if (getRootView() != this) {
                     clearFocus();
+                    clearAccessibilityFocus();
                 }
             }
             if (mAttachInfo != null) {
@@ -7240,6 +7799,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
                 mParent.recomputeViewAttributes(this);
             }
+        }
+
+        if (AccessibilityManager.getInstance(mContext).isEnabled()
+                && ((changed & FOCUSABLE) != 0 || (changed & CLICKABLE) != 0
+                        || (changed & LONG_CLICKABLE) != 0 || (changed & ENABLED) != 0)) {
+            notifyAccessibilityStateChanged();
         }
     }
 
@@ -7319,6 +7884,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param canvas the canvas on which to draw the view
      */
     protected void dispatchDraw(Canvas canvas) {
+
     }
 
     /**
@@ -10227,6 +10793,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         resolvePadding();
         resolveTextDirection();
         resolveTextAlignment();
+        clearAccessibilityFocus();
         if (isFocused()) {
             InputMethodManager imm = InputMethodManager.peekInstance();
             imm.focusIn(this);
@@ -10457,6 +11024,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         resetResolvedLayoutDirection();
         resetResolvedTextAlignment();
+        resetAccessibilityStateChanged();
+        clearAccessibilityFocus();
     }
 
     /**
@@ -13287,6 +13856,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             invalidate(true);
             refreshDrawableState();
             dispatchSetSelected(selected);
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                notifyAccessibilityStateChanged();
+            }
         }
     }
 
@@ -13456,7 +14028,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             position[1] += view.mTop;
 
             viewParent = view.mParent;
-        }
+         }
 
         if (viewParent instanceof ViewRootImpl) {
             // *cough*
@@ -16291,12 +16863,23 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         /**
          * Temporary list for use in collecting focusable descendents of a view.
          */
-        final ArrayList<View> mFocusablesTempList = new ArrayList<View>(24);
+        final ArrayList<View> mTempArrayList = new ArrayList<View>(24);
 
         /**
          * The id of the window for accessibility purposes.
          */
         int mAccessibilityWindowId = View.NO_ID;
+
+        /**
+         * Whether to ingore not exposed for accessibility Views when
+         * reporting the view tree to accessibility services.
+         */
+        boolean mIncludeNotImportantViews;
+
+        /**
+         * The drawable for highlighting accessibility focus.
+         */
+        Drawable mAccessibilityFocusDrawable;
 
         /**
          * Creates a new set of attachment information with the specified

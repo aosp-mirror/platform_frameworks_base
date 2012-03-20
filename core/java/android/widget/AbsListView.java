@@ -2062,6 +2062,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             child = mAdapter.getView(position, scrapView, this);
 
+            if (child.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+                child.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            }
+
             if (ViewDebug.TRACE_RECYCLER) {
                 ViewDebug.trace(child, ViewDebug.RecyclerTraceType.BIND_VIEW,
                         position, getChildCount());
@@ -2082,6 +2086,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         } else {
             child = mAdapter.getView(position, null, this);
+
+            if (child.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+                child.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            }
+
             if (mCacheColorHint != 0) {
                 child.setDrawingCacheBackgroundColor(mCacheColorHint);
             }

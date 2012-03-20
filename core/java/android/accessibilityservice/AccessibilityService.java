@@ -19,16 +19,21 @@ package android.accessibilityservice;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.LocaleUtil;
 import android.util.Log;
+import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.os.HandlerCaller;
+
+import java.util.Locale;
 
 /**
  * An accessibility service runs in the background and receives callbacks by the system
@@ -202,11 +207,64 @@ import com.android.internal.os.HandlerCaller;
  * @see android.view.accessibility.AccessibilityManager
  */
 public abstract class AccessibilityService extends Service {
+
+    /**
+     * The user has performed a swipe up gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_UP = 1;
+
+    /**
+     * The user has performed a swipe down gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_DOWN = 2;
+
+    /**
+     * The user has performed a swipe left gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_LEFT = 3;
+
+    /**
+     * The user has performed a swipe right gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_RIGHT = 4;
+
+    /**
+     * The user has performed a swipe left and right gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_LEFT_AND_RIGHT = 5;
+
+    /**
+     * The user has performed a swipe right and left gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_RIGHT_AND_LEFT = 6;
+
+    /**
+     * The user has performed a swipe up and down gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_UP_AND_DOWN = 7;
+
+    /**
+     * The user has performed a swipe down and up gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_DOWN_AND_UP = 8;
+
+    /**
+     * The user has performed a clockwise circle gesture on the touch screen.
+     */
+    public static final int GESTURE_CLOCKWISE_CIRCLE = 9;
+
+    /**
+     * The user has performed a counter clockwise circle gesture on the touch screen.
+     */
+    public static final int GESTURE_COUNTER_CLOCKWISE_CIRCLE = 10;
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
     public static final String SERVICE_INTERFACE =
         "android.accessibilityservice.AccessibilityService";
+
+    private static final int UNDEFINED = -1;
 
     /**
      * Name under which an AccessibilityService component publishes information
@@ -233,11 +291,14 @@ public abstract class AccessibilityService extends Service {
         public void onInterrupt();
         public void onServiceConnected();
         public void onSetConnectionId(int connectionId);
+        public void onGesture(int gestureId);
     }
 
     private int mConnectionId;
 
     private AccessibilityServiceInfo mInfo;
+
+    private int mLayoutDirection;
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -264,6 +325,106 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
+     * Called by the system when the user performs a specific gesture on the
+     * touch screen.
+     *
+     * @param gestureId The unique id of the performed gesture.
+     *
+     * @see #GESTURE_SWIPE_UP
+     * @see #GESTURE_SWIPE_DOWN
+     * @see #GESTURE_SWIPE_LEFT
+     * @see #GESTURE_SWIPE_RIGHT
+     * @see #GESTURE_SWIPE_UP_AND_DOWN
+     * @see #GESTURE_SWIPE_DOWN_AND_UP
+     * @see #GESTURE_SWIPE_LEFT_AND_RIGHT
+     * @see #GESTURE_SWIPE_RIGHT_AND_LEFT
+     * @see #GESTURE_CLOCKWISE_CIRCLE
+     * @see #GESTURE_COUNTER_CLOCKWISE_CIRCLE
+     */
+    protected void onGesture(int gestureId) {
+        // TODO: Describe the default gesture processing in the javaDoc once it is finalized.
+
+        // Cache the id to avoid locking
+        final int connectionId = mConnectionId;
+        if (connectionId == UNDEFINED) {
+            throw new IllegalStateException("AccessibilityService not connected."
+                    + " Did you receive a call of onServiceConnected()?");
+        }
+        AccessibilityNodeInfo root = AccessibilityInteractionClient.getInstance()
+                .findAccessibilityNodeInfoByAccessibilityId(connectionId,
+                        AccessibilityNodeInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
+                        AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
+        if (root == null) {
+            return;
+        }
+        AccessibilityNodeInfo current = root.findFocus(View.FOCUS_ACCESSIBILITY);
+        if (current == null) {
+            current = root;
+        }
+        AccessibilityNodeInfo next = null;
+        switch (gestureId) {
+            case GESTURE_SWIPE_UP: {
+                next = current.focusSearch(View.ACCESSIBILITY_FOCUS_OUT);
+            } break;
+            case GESTURE_SWIPE_DOWN: {
+                next = current.focusSearch(View.ACCESSIBILITY_FOCUS_IN);
+            } break;
+            case GESTURE_SWIPE_LEFT: {
+                if (mLayoutDirection == View.LAYOUT_DIRECTION_LTR) {
+                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_BACKWARD);
+                } else { // LAYOUT_DIRECTION_RTL
+                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_FORWARD);
+                }
+            } break;
+            case GESTURE_SWIPE_RIGHT: {
+                if (mLayoutDirection == View.LAYOUT_DIRECTION_LTR) {
+                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_FORWARD);
+                } else { // LAYOUT_DIRECTION_RTL
+                    next = current.focusSearch(View.ACCESSIBILITY_FOCUS_BACKWARD);
+                }
+            } break;
+            case GESTURE_SWIPE_UP_AND_DOWN: {
+                next = current.focusSearch(View.ACCESSIBILITY_FOCUS_UP);
+            } break;
+            case GESTURE_SWIPE_DOWN_AND_UP: {
+                next = current.focusSearch(View.ACCESSIBILITY_FOCUS_DOWN);
+            } break;
+            case GESTURE_SWIPE_LEFT_AND_RIGHT: {
+                next = current.focusSearch(View.ACCESSIBILITY_FOCUS_LEFT);
+            } break;
+            case GESTURE_SWIPE_RIGHT_AND_LEFT: {
+                next = current.focusSearch(View.ACCESSIBILITY_FOCUS_RIGHT);
+            } break;
+        }
+        if (next != null && !next.equals(current)) {
+            next.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+        }
+    }
+
+    /**
+     * Gets the an {@link AccessibilityServiceInfo} describing this
+     * {@link AccessibilityService}. This method is useful if one wants
+     * to change some of the dynamically configurable properties at
+     * runtime.
+     *
+     * @return The accessibility service info.
+     *
+     * @see AccessibilityNodeInfo
+     */
+    public final AccessibilityServiceInfo getServiceInfo() {
+        IAccessibilityServiceConnection connection =
+            AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (connection != null) {
+            try {
+                return connection.getServiceInfo();
+            } catch (RemoteException re) {
+                Log.w(LOG_TAG, "Error while getting AccessibilityServiceInfo", re);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Sets the {@link AccessibilityServiceInfo} that describes this service.
      * <p>
      * Note: You can call this method any time but the info will be picked up after
@@ -287,10 +448,24 @@ public abstract class AccessibilityService extends Service {
         if (mInfo != null && connection != null) {
             try {
                 connection.setServiceInfo(mInfo);
+                mInfo = null;
+                AccessibilityInteractionClient.getInstance().clearCache();
             } catch (RemoteException re) {
                 Log.w(LOG_TAG, "Error while setting AccessibilityServiceInfo", re);
             }
         }
+    }
+
+    @Override
+    public void onCreate() {
+        Locale locale = getResources().getConfiguration().locale;
+        mLayoutDirection = LocaleUtil.getLayoutDirectionFromLocale(locale);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+        mLayoutDirection = LocaleUtil.getLayoutDirectionFromLocale(configuration.locale);
     }
 
     /**
@@ -299,7 +474,7 @@ public abstract class AccessibilityService extends Service {
      */
     @Override
     public final IBinder onBind(Intent intent) {
-        return new IEventListenerWrapper(this, getMainLooper(), new Callbacks() {
+        return new IAccessibilityServiceClientWrapper(this, getMainLooper(), new Callbacks() {
             @Override
             public void onServiceConnected() {
                 AccessibilityService.this.onServiceConnected();
@@ -319,14 +494,19 @@ public abstract class AccessibilityService extends Service {
             public void onSetConnectionId( int connectionId) {
                 mConnectionId = connectionId;
             }
+
+            @Override
+            public void onGesture(int gestureId) {
+                AccessibilityService.this.onGesture(gestureId);
+            }
         });
     }
 
     /**
-     * Implements the internal {@link IEventListener} interface to convert
+     * Implements the internal {@link IAccessibilityServiceClient} interface to convert
      * incoming calls to it back to calls on an {@link AccessibilityService}.
      */
-    static class IEventListenerWrapper extends IEventListener.Stub
+    static class IAccessibilityServiceClientWrapper extends IAccessibilityServiceClient.Stub
             implements HandlerCaller.Callback {
 
         static final int NO_ID = -1;
@@ -334,12 +514,14 @@ public abstract class AccessibilityService extends Service {
         private static final int DO_SET_SET_CONNECTION = 10;
         private static final int DO_ON_INTERRUPT = 20;
         private static final int DO_ON_ACCESSIBILITY_EVENT = 30;
+        private static final int DO_ON_GESTURE = 40;
 
         private final HandlerCaller mCaller;
 
         private final Callbacks mCallback;
 
-        public IEventListenerWrapper(Context context, Looper looper, Callbacks callback) {
+        public IAccessibilityServiceClientWrapper(Context context, Looper looper,
+                Callbacks callback) {
             mCallback = callback;
             mCaller = new HandlerCaller(context, looper, this);
         }
@@ -357,6 +539,11 @@ public abstract class AccessibilityService extends Service {
 
         public void onAccessibilityEvent(AccessibilityEvent event) {
             Message message = mCaller.obtainMessageO(DO_ON_ACCESSIBILITY_EVENT, event);
+            mCaller.sendMessage(message);
+        }
+
+        public void onGesture(int gestureId) {
+            Message message = mCaller.obtainMessageI(DO_ON_GESTURE, gestureId);
             mCaller.sendMessage(message);
         }
 
@@ -386,6 +573,10 @@ public abstract class AccessibilityService extends Service {
                         AccessibilityInteractionClient.getInstance().removeConnection(connectionId);
                         mCallback.onSetConnectionId(AccessibilityInteractionClient.NO_ID);
                     }
+                    return;
+                case DO_ON_GESTURE :
+                    final int gestureId = message.arg1;
+                    mCallback.onGesture(gestureId);
                     return;
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);

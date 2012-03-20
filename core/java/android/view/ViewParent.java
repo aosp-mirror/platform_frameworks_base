@@ -277,4 +277,22 @@ public interface ViewParent {
      * View.fitSystemWindows(Rect)} be performed.
      */
     public void requestFitSystemWindows();
+
+    /**
+     * Gets the parent of a given View for accessibility. Since some Views are not
+     * exposed to the accessibility layer the parent for accessibility is not
+     * necessarily the direct parent of the View, rather it is a predecessor.
+     *
+     * @return The parent or <code>null</code> if no such is found.
+     */
+    public ViewParent getParentForAccessibility();
+
+    /**
+     * A child notifies its parent that its state for accessibility has changed.
+     * That is some of the child properties reported to accessibility services has
+     * changed, hence the interested services have to be notified for the new state.
+     *
+     * @hide
+     */
+    public void childAccessibilityStateChanged(View child);
 }

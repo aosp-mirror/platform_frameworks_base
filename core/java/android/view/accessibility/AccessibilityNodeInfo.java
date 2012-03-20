@@ -74,29 +74,57 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int FLAG_PREFETCH_SIBLINGS = 0x00000002;
 
     /** @hide */
-    public static final int FLAG_PREFETCH_DESCENDANTS = 0x00000003;
+    public static final int FLAG_PREFETCH_DESCENDANTS = 0x00000004;
+
+    /** @hide */
+    public static final int INCLUDE_NOT_IMPORTANT_VIEWS = 0x00000008;
 
     // Actions.
 
     /**
-     * Action that focuses the node.
+     * Action that gives input focus to the node.
      */
-    public static final int ACTION_FOCUS =  0x00000001;
+    public static final int ACTION_FOCUS = 0x00000001;
 
     /**
-     * Action that unfocuses the node.
+     * Action that clears input focus of the node.
      */
-    public static final int ACTION_CLEAR_FOCUS =  0x00000002;
+    public static final int ACTION_CLEAR_FOCUS = 0x00000002;
 
     /**
      * Action that selects the node.
      */
-    public static final int ACTION_SELECT =  0x00000004;
+    public static final int ACTION_SELECT = 0x00000004;
 
     /**
      * Action that unselects the node.
      */
-    public static final int ACTION_CLEAR_SELECTION =  0x00000008;
+    public static final int ACTION_CLEAR_SELECTION = 0x00000008;
+
+    /**
+     * Action that gives accessibility focus to the node.
+     */
+    public static final int ACTION_ACCESSIBILITY_FOCUS = 0x00000010;
+
+    /**
+     * Action that clears accessibility focus of the node.
+     */
+    public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 0x00000020;
+
+    /**
+     * Action that clicks on the node info./AccessibilityNodeInfoCache.java
+     */
+    public static final int ACTION_CLICK = 0x00000040;
+
+    /**
+     * The input focus.
+     */
+    public static final int FOCUS_INPUT = 1;
+
+    /**
+     * The accessibility focus.
+     */
+    public static final int FOCUS_ACCESSIBILITY = 2;
 
     // Boolean attributes.
 
@@ -119,6 +147,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     private static final int PROPERTY_PASSWORD = 0x00000100;
 
     private static final int PROPERTY_SCROLLABLE = 0x00000200;
+
+    private static final int PROPERTY_ACCESSIBILITY_FOCUSED = 0x00000400;
 
     /**
      * Bits that provide the id of a virtual descendant of a view.
@@ -247,6 +277,57 @@ public class AccessibilityNodeInfo implements Parcelable {
         final int rootAccessibilityViewId =
             (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         mSourceNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+    }
+    
+    /**
+     * Find the view that has the input focus. The search starts from
+     * the view represented by this node info.
+     *
+     * @param focus The focus to find. One of {@link #FOCUS_INPUT} or
+     *         {@link #FOCUS_ACCESSIBILITY}.
+     * @return The node info of the focused view or null.
+     *
+     * @see #FOCUS_INPUT
+     * @see #FOCUS_ACCESSIBILITY
+     */
+    public AccessibilityNodeInfo findFocus(int focus) {
+        enforceSealed();
+        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+            return null;
+        }
+        return AccessibilityInteractionClient.getInstance().findFocus(mConnectionId, mWindowId,
+                mSourceNodeId, focus);
+    }
+
+    /**
+     * Searches for the nearest view in the specified direction that can take
+     * the input focus.
+     *
+     * @param direction The direction. Can be one of:
+     *     {@link View#FOCUS_DOWN},
+     *     {@link View#FOCUS_UP},
+     *     {@link View#FOCUS_LEFT},
+     *     {@link View#FOCUS_RIGHT},
+     *     {@link View#FOCUS_FORWARD},
+     *     {@link View#FOCUS_BACKWARD},
+     *     {@link View#ACCESSIBILITY_FOCUS_IN},
+     *     {@link View#ACCESSIBILITY_FOCUS_OUT},
+     *     {@link View#ACCESSIBILITY_FOCUS_FORWARD},
+     *     {@link View#ACCESSIBILITY_FOCUS_BACKWARD},
+     *     {@link View#ACCESSIBILITY_FOCUS_UP},
+     *     {@link View#ACCESSIBILITY_FOCUS_RIGHT},
+     *     {@link View#ACCESSIBILITY_FOCUS_DOWN},
+     *     {@link View#ACCESSIBILITY_FOCUS_LEFT}.
+     *
+     * @return The node info for the view that can take accessibility focus.
+     */
+    public AccessibilityNodeInfo focusSearch(int direction) {
+        enforceSealed();
+        if (!canPerformRequestOverConnection(mSourceNodeId)) {
+            return null;
+        }
+        return AccessibilityInteractionClient.getInstance().focusSearch(mConnectionId, mWindowId,
+                mSourceNodeId, direction);
     }
 
     /**
@@ -639,6 +720,31 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setFocused(boolean focused) {
         setBooleanProperty(PROPERTY_FOCUSED, focused);
+    }
+
+    /**
+     * Gets whether this node is accessibility focused.
+     *
+     * @return True if the node is accessibility focused.
+     */
+    public boolean isAccessibilityFocused() {
+        return getBooleanProperty(PROPERTY_ACCESSIBILITY_FOCUSED);
+    }
+
+    /**
+     * Sets whether this node is accessibility focused.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param focused True if the node is accessibility focused.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setAccessibilityFocused(boolean focused) {
+        setBooleanProperty(PROPERTY_ACCESSIBILITY_FOCUSED, focused);
     }
 
     /**

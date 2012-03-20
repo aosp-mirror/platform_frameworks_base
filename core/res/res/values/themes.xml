@@ -366,6 +366,9 @@ please see themes_device_defaults.xml.
 
         <!-- Pointer style -->
         <item name="pointerStyle">@android:style/Pointer</item>
+
+        <!-- Accessibility focused drawable. -->
+        <item name="accessibilityFocusedDrawable">@android:drawable/view_accessibility_focused</item>
     </style>
 
     <!-- Variant of {@link #Theme} with no title bar -->

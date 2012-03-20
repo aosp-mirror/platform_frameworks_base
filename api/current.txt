@@ -534,6 +534,7 @@ package android {
     field public static final int imeSubtypeLocale = 16843500; // 0x10102ec
     field public static final int imeSubtypeMode = 16843501; // 0x10102ed
     field public static final int immersive = 16843456; // 0x10102c0
+    field public static final int importantForAccessibility = 16843699; // 0x10103b3
     field public static final int inAnimation = 16843127; // 0x1010177
     field public static final int includeFontPadding = 16843103; // 0x101015f
     field public static final int includeInGlobalSearch = 16843374; // 0x101026e
@@ -1993,11 +1994,23 @@ package android.accessibilityservice {
 
   public abstract class AccessibilityService extends android.app.Service {
     ctor public AccessibilityService();
+    method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method public abstract void onAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method protected void onGesture(int);
     method public abstract void onInterrupt();
     method protected void onServiceConnected();
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
+    field public static final int GESTURE_CLOCKWISE_CIRCLE = 9; // 0x9
+    field public static final int GESTURE_COUNTER_CLOCKWISE_CIRCLE = 10; // 0xa
+    field public static final int GESTURE_SWIPE_DOWN = 2; // 0x2
+    field public static final int GESTURE_SWIPE_DOWN_AND_UP = 8; // 0x8
+    field public static final int GESTURE_SWIPE_LEFT = 3; // 0x3
+    field public static final int GESTURE_SWIPE_LEFT_AND_RIGHT = 5; // 0x5
+    field public static final int GESTURE_SWIPE_RIGHT = 4; // 0x4
+    field public static final int GESTURE_SWIPE_RIGHT_AND_LEFT = 6; // 0x6
+    field public static final int GESTURE_SWIPE_UP = 1; // 0x1
+    field public static final int GESTURE_SWIPE_UP_AND_DOWN = 7; // 0x7
     field public static final java.lang.String SERVICE_INTERFACE = "android.accessibilityservice.AccessibilityService";
     field public static final java.lang.String SERVICE_META_DATA = "android.accessibilityservice";
   }
@@ -2022,6 +2035,7 @@ package android.accessibilityservice {
     field public static final int FEEDBACK_HAPTIC = 2; // 0x2
     field public static final int FEEDBACK_SPOKEN = 1; // 0x1
     field public static final int FEEDBACK_VISUAL = 8; // 0x8
+    field public static final int INCLUDE_NOT_IMPORTANT_VIEWS = 2; // 0x2
     field public int eventTypes;
     field public int feedbackType;
     field public int flags;
@@ -23327,6 +23341,7 @@ package android.view {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, android.util.AttributeSet);
     ctor public View(android.content.Context, android.util.AttributeSet, int);
+    method public void addChildrenForAccessibility(java.util.ArrayList<android.view.View>);
     method public void addFocusables(java.util.ArrayList<android.view.View>, int);
     method public void addFocusables(java.util.ArrayList<android.view.View>, int, int);
     method public void addOnAttachStateChangeListener(android.view.View.OnAttachStateChangeListener);
@@ -23429,6 +23444,7 @@ package android.view {
     method public int getHorizontalFadingEdgeLength();
     method protected int getHorizontalScrollbarHeight();
     method public int getId();
+    method public int getImportantForAccessibility();
     method public boolean getKeepScreenOn();
     method public android.view.KeyEvent.DispatcherState getKeyDispatcherState();
     method public int getLayerType();
@@ -23462,6 +23478,7 @@ package android.view {
     method public int getPaddingStart();
     method public int getPaddingTop();
     method public final android.view.ViewParent getParent();
+    method public android.view.ViewParent getParentForAccessibility();
     method public float getPivotX();
     method public float getPivotY();
     method public int getResolvedLayoutDirection();
@@ -23617,6 +23634,7 @@ package android.view {
     method public void onWindowSystemUiVisibilityChanged(int);
     method protected void onWindowVisibilityChanged(int);
     method protected boolean overScrollBy(int, int, int, int, int, int, int, int, boolean);
+    method public boolean performAccessibilityAction(int);
     method public boolean performClick();
     method public boolean performHapticFeedback(int);
     method public boolean performHapticFeedback(int, int);
@@ -23688,6 +23706,7 @@ package android.view {
     method public void setHorizontalScrollBarEnabled(boolean);
     method public void setHovered(boolean);
     method public void setId(int);
+    method public void setImportantForAccessibility(int);
     method public void setKeepScreenOn(boolean);
     method public void setLayerType(int, android.graphics.Paint);
     method public void setLayoutDirection(int);
@@ -23762,6 +23781,14 @@ package android.view {
     method protected boolean verifyDrawable(android.graphics.drawable.Drawable);
     method public boolean willNotCacheDrawing();
     method public boolean willNotDraw();
+    field public static final int ACCESSIBILITY_FOCUS_BACKWARD = 4097; // 0x1001
+    field public static final int ACCESSIBILITY_FOCUS_DOWN = 4226; // 0x1082
+    field public static final int ACCESSIBILITY_FOCUS_FORWARD = 4098; // 0x1002
+    field public static final int ACCESSIBILITY_FOCUS_IN = 4100; // 0x1004
+    field public static final int ACCESSIBILITY_FOCUS_LEFT = 4113; // 0x1011
+    field public static final int ACCESSIBILITY_FOCUS_OUT = 4104; // 0x1008
+    field public static final int ACCESSIBILITY_FOCUS_RIGHT = 4162; // 0x1042
+    field public static final int ACCESSIBILITY_FOCUS_UP = 4129; // 0x1021
     field public static final android.util.Property ALPHA;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
@@ -23783,6 +23810,7 @@ package android.view {
     field protected static final int[] FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     field protected static final int[] FOCUSED_STATE_SET;
     field protected static final int[] FOCUSED_WINDOW_FOCUSED_STATE_SET;
+    field public static final int FOCUS_ACCESSIBILITY = 4096; // 0x1000
     field public static final int FOCUS_BACKWARD = 1; // 0x1
     field public static final int FOCUS_DOWN = 130; // 0x82
     field public static final int FOCUS_FORWARD = 2; // 0x2
@@ -23791,6 +23819,9 @@ package android.view {
     field public static final int FOCUS_UP = 33; // 0x21
     field public static final int GONE = 8; // 0x8
     field public static final int HAPTIC_FEEDBACK_ENABLED = 268435456; // 0x10000000
+    field public static final int IMPORTANT_FOR_ACCESSIBILITY_AUTO = 0; // 0x0
+    field public static final int IMPORTANT_FOR_ACCESSIBILITY_NO = 2; // 0x2
+    field public static final int IMPORTANT_FOR_ACCESSIBILITY_YES = 1; // 0x1
     field public static final int INVISIBLE = 4; // 0x4
     field public static final int KEEP_SCREEN_ON = 67108864; // 0x4000000
     field public static final int LAYER_TYPE_HARDWARE = 2; // 0x2
@@ -24215,6 +24246,7 @@ package android.view {
     method public abstract void focusableViewAvailable(android.view.View);
     method public abstract boolean getChildVisibleRect(android.view.View, android.graphics.Rect, android.graphics.Point);
     method public abstract android.view.ViewParent getParent();
+    method public abstract android.view.ViewParent getParentForAccessibility();
     method public abstract void invalidateChild(android.view.View, android.graphics.Rect);
     method public abstract android.view.ViewParent invalidateChildInParent(int[], android.graphics.Rect);
     method public abstract boolean isLayoutRequested();
@@ -24616,6 +24648,8 @@ package android.view.accessibility {
     field public static final int TYPE_NOTIFICATION_STATE_CHANGED = 64; // 0x40
     field public static final int TYPE_TOUCH_EXPLORATION_GESTURE_END = 1024; // 0x400
     field public static final int TYPE_TOUCH_EXPLORATION_GESTURE_START = 512; // 0x200
+    field public static final int TYPE_VIEW_ACCESSIBILITY_FOCUSED = 32768; // 0x8000
+    field public static final int TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED = 65536; // 0x10000
     field public static final int TYPE_VIEW_CLICKED = 1; // 0x1
     field public static final int TYPE_VIEW_FOCUSED = 8; // 0x8
     field public static final int TYPE_VIEW_HOVER_ENTER = 128; // 0x80
@@ -24656,6 +24690,8 @@ package android.view.accessibility {
     method public void addChild(android.view.View, int);
     method public int describeContents();
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String);
+    method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
+    method public android.view.accessibility.AccessibilityNodeInfo focusSearch(int);
     method public int getActions();
     method public void getBoundsInParent(android.graphics.Rect);
     method public void getBoundsInScreen(android.graphics.Rect);
@@ -24667,6 +24703,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
     method public java.lang.CharSequence getText();
     method public int getWindowId();
+    method public boolean isAccessibilityFocused();
     method public boolean isCheckable();
     method public boolean isChecked();
     method public boolean isClickable();
@@ -24683,6 +24720,7 @@ package android.view.accessibility {
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.accessibility.AccessibilityNodeInfo);
     method public boolean performAction(int);
     method public void recycle();
+    method public void setAccessibilityFocused(boolean);
     method public void setBoundsInParent(android.graphics.Rect);
     method public void setBoundsInScreen(android.graphics.Rect);
     method public void setCheckable(boolean);
@@ -24704,16 +24742,23 @@ package android.view.accessibility {
     method public void setSource(android.view.View, int);
     method public void setText(java.lang.CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ACTION_ACCESSIBILITY_FOCUS = 16; // 0x10
+    field public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 32; // 0x20
     field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
     field public static final int ACTION_CLEAR_SELECTION = 8; // 0x8
+    field public static final int ACTION_CLICK = 64; // 0x40
     field public static final int ACTION_FOCUS = 1; // 0x1
     field public static final int ACTION_SELECT = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
+    field public static final int FOCUS_INPUT = 1; // 0x1
   }
 
   public abstract class AccessibilityNodeProvider {
     ctor public AccessibilityNodeProvider();
+    method public android.view.accessibility.AccessibilityNodeInfo accessibilityFocusSearch(int, int);
     method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo(int);
+    method public android.view.accessibility.AccessibilityNodeInfo findAccessibilitiyFocus(int);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String, int);
     method public boolean performAccessibilityAction(int, int);
   }

@@ -251,6 +251,11 @@ public class TimePicker extends FrameLayout {
 
         // set the content descriptions
         setContentDescriptions();
+
+        // If not explicitly specified this view is important for accessibility.
+        if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
     }
 
     @Override

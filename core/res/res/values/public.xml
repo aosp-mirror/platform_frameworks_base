@@ -226,6 +226,7 @@
   <java-symbol type="attr" name="windowFixedWidthMinor" />
   <java-symbol type="attr" name="windowFixedHeightMajor" />
   <java-symbol type="attr" name="windowFixedHeightMinor" />
+  <java-symbol type="attr" name="accessibilityFocusedDrawable"/>
 
   <java-symbol type="bool" name="action_bar_embed_tabs" />
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
@@ -1103,6 +1104,7 @@
   <java-symbol type="xml" name="time_zones_by_country" />
   <java-symbol type="xml" name="sms_short_codes" />
 
+  <java-symbol type="raw" name="accessibility_gestures" />
   <java-symbol type="raw" name="incognito_mode_start_page" />
   <java-symbol type="raw" name="loaderror" />
   <java-symbol type="raw" name="nodomain" />
@@ -3583,7 +3585,11 @@
   <public type="attr" name="layout_marginEnd"/>
   <public type="attr" name="kcm"/>
 
+
   <public type="attr" name="parentActivityName" />
 
   <public type="attr" name="supportsSentenceSpellCheck" />
+
+  <public type="attr" name="importantForAccessibility"/>
+
 </resources>

@@ -508,7 +508,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_VIEW_SELECTED = 0x00000004;
 
     /**
-     * Represents the event of focusing a {@link android.view.View}.
+     * Represents the event of setting input focus of a {@link android.view.View}.
      */
     public static final int TYPE_VIEW_FOCUSED = 0x00000008;
 
@@ -549,7 +549,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_TOUCH_EXPLORATION_GESTURE_END = 0x00000400;
 
     /**
-     * Represents the event of changing the content of a window.
+     * Represents the event of changing the content of a window and more
+     * specifically the sub-tree rooted at the event's source.
      */
     public static final int TYPE_WINDOW_CONTENT_CHANGED = 0x00000800;
 
@@ -567,6 +568,16 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Represents the event of an application making an announcement.
      */
     public static final int TYPE_ANNOUNCEMENT = 0x00004000;
+
+    /**
+     * Represents the event of gaining accessibility focus.
+     */
+    public static final int TYPE_VIEW_ACCESSIBILITY_FOCUSED = 0x00008000;
+
+    /**
+     * Represents the event of clearing accessibility focus.
+     */
+    public static final int TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED = 0x00010000;
 
     /**
      * Mask for {@link AccessibilityEvent} all types.
@@ -1018,6 +1029,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 return "TYPE_VIEW_SCROLLED";
             case TYPE_ANNOUNCEMENT:
                 return "TYPE_ANNOUNCEMENT";
+            case TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+                return "TYPE_VIEW_ACCESSIBILITY_FOCUSED";
+            case TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
+                return "TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED";
             default:
                 return null;
         }

@@ -16,11 +16,14 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
+import static android.accessibilityservice.AccessibilityServiceInfo.INCLUDE_NOT_IMPORTANT_VIEWS;
+
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
-import android.accessibilityservice.IEventListener;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -35,6 +38,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -55,8 +59,7 @@ import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.HandlerCaller.SomeArgs;
+import com.android.server.accessibility.TouchExplorer.GestureListener;
 import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -80,7 +83,7 @@ import java.util.Set;
  * @hide
  */
 public class AccessibilityManagerService extends IAccessibilityManager.Stub
-        implements HandlerCaller.Callback {
+        implements GestureListener {
 
     private static final boolean DEBUG = false;
 
@@ -93,11 +96,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
 
-    private static final int DO_SET_SERVICE_INFO = 10;
-
     private static int sNextWindowId;
-
-    final HandlerCaller mCaller;
 
     final Context mContext;
 
@@ -152,7 +151,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             int eventType = message.arg1;
 
             synchronized (mLock) {
-                notifyEventListenerLocked(service, eventType);
+                notifyAccessibilityEventLocked(service, eventType);
             }
         }
     };
@@ -165,7 +164,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public AccessibilityManagerService(Context context) {
         mContext = context;
         mPackageManager = mContext.getPackageManager();
-        mCaller = new HandlerCaller(context, this);
         mWindowManagerService = (WindowManagerService) ServiceManager.getService(
                 Context.WINDOW_SERVICE);
         mSecurityPolicy = new SecurityPolicy();
@@ -395,32 +393,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    public void executeMessage(Message message) {
-        switch (message.what) {
-            case DO_SET_SERVICE_INFO: {
-                SomeArgs arguments = ((SomeArgs) message.obj);
-
-                AccessibilityServiceInfo info = (AccessibilityServiceInfo) arguments.arg1;
-                Service service = (Service) arguments.arg2;
-
-                synchronized (mLock) {
-                    // If the XML manifest had data to configure the service its info
-                    // should be already set. In such a case update only the dynamically
-                    // configurable properties.
-                    AccessibilityServiceInfo oldInfo = service.mAccessibilityServiceInfo;
-                    if (oldInfo != null) {
-                        oldInfo.updateDynamicallyConfigurableProperties(info);
-                        service.setDynamicallyConfigurableProperties(oldInfo);
-                    } else {
-                        service.setDynamicallyConfigurableProperties(info);
-                    }
-                }
-            } return;
-            default:
-                Slog.w(LOG_TAG, "Unknown message type: " + message.what);
-        }
-    }
-
     public int addAccessibilityInteractionConnection(IWindow windowToken,
             IAccessibilityInteractionConnection connection) throws RemoteException {
         synchronized (mLock) {
@@ -455,7 +427,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    public void registerUiTestAutomationService(IEventListener listener,
+    public void registerUiTestAutomationService(IAccessibilityServiceClient serviceClient,
             AccessibilityServiceInfo accessibilityServiceInfo) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
                 FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE);
@@ -480,16 +452,43 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         // Hook the automation service up.
         mUiAutomationService = new Service(componentName, accessibilityServiceInfo, true);
-        mUiAutomationService.onServiceConnected(componentName, listener.asBinder());
+        mUiAutomationService.onServiceConnected(componentName, serviceClient.asBinder());
     }
 
-    public void unregisterUiTestAutomationService(IEventListener listener) {
+    public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
         synchronized (mLock) {
             // Automation service is not bound, so pretend it died to perform clean up.
-            if (mUiAutomationService != null) {
+            if (mUiAutomationService != null
+                    && mUiAutomationService.mServiceInterface == serviceClient) {
                 mUiAutomationService.binderDied();
             }
         }
+    }
+
+    @Override
+    public void onGesture(int gestureId) {
+        synchronized (mLock) {
+            final boolean dispatched = notifyGestureLocked(gestureId, false);
+            if (!dispatched) {
+                notifyGestureLocked(gestureId, true);
+            }
+        }
+    }
+
+    private boolean notifyGestureLocked(int gestureId, boolean isDefault) {
+        final int serviceCount = mServices.size();
+        for (int i = 0; i < serviceCount; i++) {
+            Service service = mServices.get(i);
+            if (service.mIsDefault == isDefault) {
+                try {
+                    service.mServiceInterface.onGesture(gestureId);
+                    return true;
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Error dispatching gesture.");
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -588,13 +587,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * Notifies a service for a scheduled event given the event type.
+     * Notifies an accessibility service client for a scheduled event given the event type.
      *
-     * @param service The service.
+     * @param service The service client.
      * @param eventType The type of the event to dispatch.
      */
-    private void notifyEventListenerLocked(Service service, int eventType) {
-        IEventListener listener = service.mServiceInterface;
+    private void notifyAccessibilityEventLocked(Service service, int eventType) {
+        IAccessibilityServiceClient listener = service.mServiceInterface;
 
         // If the service died/was disabled while the message for dispatching
         // the accessibility event was propagating the listener may be null.
@@ -696,6 +695,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             int handledFeedbackTypes) {
 
         if (!service.isConfigured()) {
+            return false;
+        }
+
+        if (!event.isImportantForAccessibility()
+                && !service.mIncludeNotImportantViews) {
             return false;
         }
 
@@ -864,7 +868,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (!mHasInputFilter) {
                 mHasInputFilter = true;
                 if (mInputFilter == null) {
-                    mInputFilter = new AccessibilityInputFilter(mContext);
+                    mInputFilter = new AccessibilityInputFilter(mContext, this);
                 }
                 mWindowManagerService.setInputFilter(mInputFilter);
             }
@@ -942,7 +946,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         IBinder mService;
 
-        IEventListener mServiceInterface;
+        IAccessibilityServiceClient mServiceInterface;
 
         int mEventTypes;
 
@@ -951,6 +955,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         Set<String> mPackageNames = new HashSet<String>();
 
         boolean mIsDefault;
+
+        boolean mIncludeNotImportantViews;
 
         long mNotificationTimeout;
 
@@ -983,6 +989,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0));
             } else {
                 mCanRetrieveScreenContent = true;
+                mIncludeNotImportantViews = true;
             }
             setDynamicallyConfigurableProperties(accessibilityServiceInfo);
         }
@@ -995,7 +1002,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mPackageNames.addAll(Arrays.asList(packageNames));
             }
             mNotificationTimeout = info.notificationTimeout;
-            mIsDefault = (info.flags & AccessibilityServiceInfo.DEFAULT) != 0;
+            mIsDefault = (info.flags & DEFAULT) != 0;
+
+            final int targetSdkVersion =
+                info.getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion;
+            // TODO: Uncomment this line and remove the line below when JellyBean
+            // SDK version is finalized.
+            // if (targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+            if (targetSdkVersion > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                mIncludeNotImportantViews =
+                    (info.flags & INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
+            }
 
             synchronized (mLock) {
                 tryAddServiceLocked(this);
@@ -1043,13 +1060,33 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return (mEventTypes != 0 && mFeedbackType != 0 && mService != null);
         }
 
-        public void setServiceInfo(AccessibilityServiceInfo info) {
-            mCaller.obtainMessageOO(DO_SET_SERVICE_INFO, info, this).sendToTarget();
+        @Override
+        public AccessibilityServiceInfo getServiceInfo() {
+            synchronized (mLock) {
+                return mAccessibilityServiceInfo;
+            }
         }
 
+        @Override
+        public void setServiceInfo(AccessibilityServiceInfo info) {
+            synchronized (mLock) {
+                // If the XML manifest had data to configure the service its info
+                // should be already set. In such a case update only the dynamically
+                // configurable properties.
+                AccessibilityServiceInfo oldInfo = mAccessibilityServiceInfo;
+                if (oldInfo != null) {
+                    oldInfo.updateDynamicallyConfigurableProperties(info);
+                    setDynamicallyConfigurableProperties(oldInfo);
+                } else {
+                    setDynamicallyConfigurableProperties(info);
+                }
+            }
+        }
+
+        @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = service;
-            mServiceInterface = IEventListener.Stub.asInterface(service);
+            mServiceInterface = IAccessibilityServiceClient.Stub.asInterface(service);
             try {
                 mServiceInterface.setConnection(this, mId);
                 synchronized (mLock) {
@@ -1060,6 +1097,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
+        @Override
         public float findAccessibilityNodeInfoByViewId(int accessibilityWindowId,
                 long accessibilityNodeId, int viewId, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
@@ -1078,11 +1116,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             }
+            final int flags = (mIncludeNotImportantViews) ?
+                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
                 connection.findAccessibilityNodeInfoByViewId(accessibilityNodeId, viewId,
-                        interactionId, callback, interrogatingPid, interrogatingTid);
+                        interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error findAccessibilityNodeInfoByViewId().");
@@ -1093,6 +1133,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return getCompatibilityScale(resolvedWindowId);
         }
 
+        @Override
         public float findAccessibilityNodeInfosByText(int accessibilityWindowId,
                 long accessibilityNodeId, String text, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
@@ -1112,11 +1153,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             }
+            final int flags = (mIncludeNotImportantViews) ?
+                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
                 connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text,
-                        interactionId, callback, interrogatingPid, interrogatingTid);
+                        interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfosByText()");
@@ -1127,10 +1170,47 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return getCompatibilityScale(resolvedWindowId);
         }
 
+        @Override
         public float findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
                 long accessibilityNodeId, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid,
-                int prefetchFlags)
+                IAccessibilityInteractionConnectionCallback callback, int flags,
+                long interrogatingTid) throws RemoteException {
+            final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
+            IAccessibilityInteractionConnection connection = null;
+            synchronized (mLock) {
+                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
+                final boolean permissionGranted =
+                    mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
+                if (!permissionGranted) {
+                    return 0;
+                } else {
+                    connection = getConnectionLocked(resolvedWindowId);
+                    if (connection == null) {
+                        return 0;
+                    }
+                }
+            }
+            final int allFlags = flags | ((mIncludeNotImportantViews) ?
+                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0);
+            final int interrogatingPid = Binder.getCallingPid();
+            final long identityToken = Binder.clearCallingIdentity();
+            try {
+                connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
+                        interactionId, callback, allFlags, interrogatingPid, interrogatingTid);
+            } catch (RemoteException re) {
+                if (DEBUG) {
+                    Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfoByAccessibilityId()");
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identityToken);
+            }
+            return getCompatibilityScale(resolvedWindowId);
+        }
+
+        @Override
+        public float findFocus(int accessibilityWindowId, long accessibilityNodeId,
+                int focusType, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
             final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
             IAccessibilityInteractionConnection connection = null;
@@ -1147,14 +1227,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             }
+            final int flags = (mIncludeNotImportantViews) ?
+                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
-                        interactionId, callback, prefetchFlags, interrogatingPid, interrogatingTid);
+                connection.findFocus(accessibilityNodeId, interactionId, focusType, callback,
+                        flags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfoByAccessibilityId()");
+                    Slog.e(LOG_TAG, "Error calling findAccessibilityFocus()");
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
@@ -1162,6 +1244,44 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return getCompatibilityScale(resolvedWindowId);
         }
 
+        @Override
+        public float focusSearch(int accessibilityWindowId, long accessibilityNodeId,
+                int direction, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
+                throws RemoteException {
+            final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
+            IAccessibilityInteractionConnection connection = null;
+            synchronized (mLock) {
+                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
+                final boolean permissionGranted =
+                    mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
+                if (!permissionGranted) {
+                    return 0;
+                } else {
+                    connection = getConnectionLocked(resolvedWindowId);
+                    if (connection == null) {
+                        return 0;
+                    }
+                }
+            }
+            final int flags = (mIncludeNotImportantViews) ?
+                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
+            final int interrogatingPid = Binder.getCallingPid();
+            final long identityToken = Binder.clearCallingIdentity();
+            try {
+                connection.focusSearch(accessibilityNodeId, interactionId, direction, callback,
+                        flags, interrogatingPid, interrogatingTid);
+            } catch (RemoteException re) {
+                if (DEBUG) {
+                    Slog.e(LOG_TAG, "Error calling accessibilityFocusSearch()");
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identityToken);
+            }
+            return getCompatibilityScale(resolvedWindowId);
+        }
+
+        @Override
         public boolean performAccessibilityAction(int accessibilityWindowId,
                 long accessibilityNodeId, int action, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid) {
@@ -1179,11 +1299,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             }
+            final int flags = (mIncludeNotImportantViews) ?
+                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
                 connection.performAccessibilityAction(accessibilityNodeId, action, interactionId,
-                        callback, interrogatingPid, interrogatingTid);
+                        callback, flags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
                     Slog.e(LOG_TAG, "Error calling performAccessibilityAction()");
@@ -1263,22 +1385,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     final class SecurityPolicy {
-        private static final int VALID_ACTIONS = AccessibilityNodeInfo.ACTION_FOCUS
-            | AccessibilityNodeInfo.ACTION_CLEAR_FOCUS | AccessibilityNodeInfo.ACTION_SELECT
-            | AccessibilityNodeInfo.ACTION_CLEAR_SELECTION;
+        private static final int VALID_ACTIONS =
+            AccessibilityNodeInfo.ACTION_CLICK
+            | AccessibilityNodeInfo.ACTION_FOCUS
+            | AccessibilityNodeInfo.ACTION_CLEAR_FOCUS
+            | AccessibilityNodeInfo.ACTION_SELECT
+            | AccessibilityNodeInfo.ACTION_CLEAR_SELECTION
+            | AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS
+            | AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
 
         private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
-            AccessibilityEvent.TYPE_VIEW_CLICKED | AccessibilityEvent.TYPE_VIEW_FOCUSED
-            | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
-            | AccessibilityEvent.TYPE_VIEW_LONG_CLICKED | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
-            | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_SELECTED
+            AccessibilityEvent.TYPE_VIEW_CLICKED
+            | AccessibilityEvent.TYPE_VIEW_FOCUSED
+            | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
+            | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
+            | AccessibilityEvent.TYPE_VIEW_LONG_CLICKED
+            | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
+            | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+            | AccessibilityEvent.TYPE_VIEW_SELECTED
             | AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
             | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
-            | AccessibilityEvent.TYPE_VIEW_SCROLLED;
+            | AccessibilityEvent.TYPE_VIEW_SCROLLED
+            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
+            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED;
 
         private static final int RETRIEVAL_ALLOWING_WINDOW_CHANGE_EVENT_TYPES =
-            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
-            | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT;
+            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+            | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
+            | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
+            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED;
 
         private int mRetrievalAlowingWindowId;
 
