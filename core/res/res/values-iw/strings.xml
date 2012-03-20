@@ -130,7 +130,7 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"שטח האחסון של הטבלט מלא. מחק קבצים כדי לפנות מקום."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"שטח האחסון של הטלפון מלא. מחק חלק מהקבצים כדי לפנות שטח."</string>
     <string name="me" msgid="6545696007631404292">"אני"</string>
-    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"אפשרויות טבלט"</string>
+    <string name="power_dialog" product="tablet" msgid="8545351420865202853">"אפשרויות טאבלט"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"אפשרויות טלפון"</string>
     <string name="silent_mode" msgid="7167703389802618663">"מצב שקט"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"הפעל חיבור אלחוטי"</string>
@@ -146,7 +146,7 @@
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"האם ברצונך לבצע כיבוי?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"נוצרו לאחרונה"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"אין יישומים אחרונים"</string>
-    <string name="global_actions" product="tablet" msgid="408477140088053665">"אפשרויות טבלט"</string>
+    <string name="global_actions" product="tablet" msgid="408477140088053665">"אפשרויות טאבלט"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"אפשרויות טלפון"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"נעילת מסך"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"כיבוי"</string>
@@ -376,7 +376,7 @@
     <string name="permdesc_recordAudio" msgid="2387462233976248635">"מאפשר ליישום לגשת לנתיב להקלטת אודיו."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"צלם תמונות וסרטונים"</string>
     <string name="permdesc_camera" msgid="1507407407002492176">"מאפשר ליישום לצלם תמונות וסרטוני וידאו עם המצלמה. הגדרה זו מאפשרת ליישום לאסוף תמונות שהמצלמה קולטת בכל עת."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"השבת טבלט לצמיתות"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"השבת טאבלט לצמיתות"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"השבת טלפון לצמיתות"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"מאפשר ליישום להשבית את הטבלט כולו לצמיתות. זו הרשאה מסוכנת מאוד."</string>
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"מאפשר ליישום להשבית את הטלפון כולו לצמיתות. זו הרשאה מסוכנת מאוד."</string>
@@ -412,7 +412,7 @@
     <string name="permdesc_callPhone" msgid="6396463004110544744">"מאפשר ליישום להתקשר למספרי טלפון ללא התערבותך. יישומים זדוניים עלולים לגרום לחיובי שיחות בלתי צפויים בחשבון הטלפון שלך. לתשומת לבך, הרשאה זו לא מאפשרת ליישום להתקשר למספרי חירום."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"התקשר ישירות לכל מספר טלפון"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"מאפשר ליישום להתקשר לכל מספר טלפון שהוא, כולל מספרי חירום, ללא התערבותך. יישומים זדוניים עלולים לבצע שיחות מיותרות ולא חוקיות לשירותי חירום."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"הפעל ישירות התקנת טבלט מסוג CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"הפעל ישירות התקנת טאבלט מסוג CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"הפעל ישירות הגדרה של טלפון CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"מאפשר ליישום להפעיל הקצאת CDMA. יישומים זדוניים עלולים להפעיל הקצאת CDMA ללא צורך."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"שלוט בהתראות על עדכון מיקום"</string>
@@ -429,7 +429,7 @@
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"מניעת מעבר הטלפון למצב שינה"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"מאפשר ליישום למנוע מהטבלט לעבור למצב שינה."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"מאפשר ליישום למנוע מהטלפון לעבור למצב שינה."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"הפעלה או כיבוי של טבלט"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"הפעלה או כיבוי של טאבלט"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"הפעל או כבה את הטלפון"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"מאפשר ליישום להפעיל או לכבות את הטבלט."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"מאפשר ליישום להפעיל או לכבות את הטלפון."</string>

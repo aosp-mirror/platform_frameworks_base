@@ -335,7 +335,7 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"skryf kontakdata"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="988969759110632978">"Laat die program toe om die kontakdata (adresse) wat op jou tablet gestoor is, te verander. Kwaadwillige programme kan dit dalk gebruik om jou kontakdata uit te vee of te verander."</string>
     <string name="permdesc_writeContacts" product="default" msgid="5075164818647934067">"Laat die program toe om die kontakdata (adresse) wat op jou foon gestoor is, te verander. Kwaadwillige programme kan dit dalk gebruik om jou kontakdata uit te vee of te verander."</string>
-    <string name="permlab_readCallLog" msgid="3478133184624102739">"Lees oproeprekord"</string>
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"lees oproeprekord"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"Laat die program toe om jou tablet se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te lees. Kwaadwillige programme kan dit gebruik om jou data na ander mense te stuur."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"Laat die program toe om jou foon se oproeprekord, insluitende data oor inkomende en uitgaande oproepe, te lees. Kwaadwillige programme kan dit gebruik om jou data na ander mense te stuur."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"skryf oproeprekord"</string>
