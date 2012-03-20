@@ -698,14 +698,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     private static final int[] VISIBILITY_FLAGS = {VISIBLE, INVISIBLE, GONE};
 
     /**
-     * This view is enabled. Intrepretation varies by subclass.
+     * This view is enabled. Interpretation varies by subclass.
      * Use with ENABLED_MASK when calling setFlags.
      * {@hide}
      */
     static final int ENABLED = 0x00000000;
 
     /**
-     * This view is disabled. Intrepretation varies by subclass.
+     * This view is disabled. Interpretation varies by subclass.
      * Use with ENABLED_MASK when calling setFlags.
      * {@hide}
      */
@@ -953,50 +953,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@hide}
      */
     static final int PARENT_SAVE_DISABLED_MASK = 0x20000000;
-
-    /**
-     * Horizontal direction of this view is from Left to Right.
-     * Use with {@link #setLayoutDirection}.
-     */
-    public static final int LAYOUT_DIRECTION_LTR = 0x00000000;
-
-    /**
-     * Horizontal direction of this view is from Right to Left.
-     * Use with {@link #setLayoutDirection}.
-     */
-    public static final int LAYOUT_DIRECTION_RTL = 0x40000000;
-
-    /**
-     * Horizontal direction of this view is inherited from its parent.
-     * Use with {@link #setLayoutDirection}.
-     */
-    public static final int LAYOUT_DIRECTION_INHERIT = 0x80000000;
-
-    /**
-     * Horizontal direction of this view is from deduced from the default language
-     * script for the locale. Use with {@link #setLayoutDirection}.
-     */
-    public static final int LAYOUT_DIRECTION_LOCALE = 0xC0000000;
-
-    /**
-     * Mask for use with setFlags indicating bits used for horizontalDirection.
-     * {@hide}
-     */
-    static final int LAYOUT_DIRECTION_MASK = 0xC0000000;
-
-    /*
-     * Array of horizontal direction flags for mapping attribute "horizontalDirection" to correct
-     * flag value.
-     * {@hide}
-     */
-    private static final int[] LAYOUT_DIRECTION_FLAGS = {LAYOUT_DIRECTION_LTR,
-        LAYOUT_DIRECTION_RTL, LAYOUT_DIRECTION_INHERIT, LAYOUT_DIRECTION_LOCALE};
-
-    /**
-     * Default horizontalDirection.
-     * {@hide}
-     */
-    private static final int LAYOUT_DIRECTION_DEFAULT = LAYOUT_DIRECTION_INHERIT;
 
     /**
      * View flag indicating whether {@link #addFocusables(ArrayList, int, int)}
@@ -1748,19 +1704,73 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     static final int DRAG_HOVERED                 = 0x00000002;
 
     /**
-     * Indicates whether the view layout direction has been resolved and drawn to the
-     * right-to-left direction.
-     *
-     * @hide
+     * Horizontal layout direction of this view is from Left to Right.
+     * Use with {@link #setLayoutDirection}.
      */
-    static final int LAYOUT_DIRECTION_RESOLVED_RTL = 0x00000004;
+    public static final int LAYOUT_DIRECTION_LTR = 0x00000001;
 
     /**
-     * Indicates whether the view layout direction has been resolved.
-     *
+     * Horizontal layout direction of this view is from Right to Left.
+     * Use with {@link #setLayoutDirection}.
+     */
+    public static final int LAYOUT_DIRECTION_RTL = 0x00000002;
+
+    /**
+     * Horizontal layout direction of this view is inherited from its parent.
+     * Use with {@link #setLayoutDirection}.
+     */
+    public static final int LAYOUT_DIRECTION_INHERIT = 0x00000004;
+
+    /**
+     * Horizontal layout direction of this view is from deduced from the default language
+     * script for the locale. Use with {@link #setLayoutDirection}.
+     */
+    public static final int LAYOUT_DIRECTION_LOCALE = 0x00000008;
+
+    /**
+     * Bit shift to get the horizontal layout direction. (bits after DRAG_HOVERED)
      * @hide
      */
-    static final int LAYOUT_DIRECTION_RESOLVED = 0x00000008;
+    static final int LAYOUT_DIRECTION_MASK_SHIFT = 2;
+
+    /**
+     * Mask for use with private flags indicating bits used for horizontal layout direction.
+     * @hide
+     */
+    static final int LAYOUT_DIRECTION_MASK = 0x0000000F << LAYOUT_DIRECTION_MASK_SHIFT;
+
+    /**
+     * Indicates whether the view horizontal layout direction has been resolved and drawn to the
+     * right-to-left direction.
+     * @hide
+     */
+    static final int LAYOUT_DIRECTION_RESOLVED_RTL = 0x00000010 << LAYOUT_DIRECTION_MASK_SHIFT;
+
+    /**
+     * Indicates whether the view horizontal layout direction has been resolved.
+     * @hide
+     */
+    static final int LAYOUT_DIRECTION_RESOLVED = 0x00000020 << LAYOUT_DIRECTION_MASK_SHIFT;
+
+    /**
+     * Mask for use with private flags indicating bits used for resolved horizontal layout direction.
+     * @hide
+     */
+    static final int LAYOUT_DIRECTION_RESOLVED_MASK = 0x00000030 << LAYOUT_DIRECTION_MASK_SHIFT;
+
+    /*
+     * Array of horizontal layout direction flags for mapping attribute "layoutDirection" to correct
+     * flag value.
+     * @hide
+     */
+    private static final int[] LAYOUT_DIRECTION_FLAGS = {LAYOUT_DIRECTION_LTR,
+            LAYOUT_DIRECTION_RTL, LAYOUT_DIRECTION_INHERIT, LAYOUT_DIRECTION_LOCALE};
+
+    /**
+     * Default horizontal layout direction.
+     * @hide
+     */
+    private static final int LAYOUT_DIRECTION_DEFAULT = LAYOUT_DIRECTION_INHERIT;
 
 
     /**
@@ -1770,7 +1780,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @hide
      */
-    static final int HAS_TRANSIENT_STATE = 0x00000010;
+    static final int HAS_TRANSIENT_STATE = 0x00000100;
 
 
     /* End of masks for mPrivateFlags2 */
@@ -2739,7 +2749,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public View(Context context) {
         mContext = context;
         mResources = context != null ? context.getResources() : null;
-        mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED | LAYOUT_DIRECTION_INHERIT;
+        mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
+        mPrivateFlags2 |= (LAYOUT_DIRECTION_DEFAULT << LAYOUT_DIRECTION_MASK_SHIFT);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = -1;
@@ -2949,17 +2960,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     }
                     break;
                 case com.android.internal.R.styleable.View_layoutDirection:
-                    // Clear any HORIZONTAL_DIRECTION flag already set
-                    viewFlagValues &= ~LAYOUT_DIRECTION_MASK;
-                    // Set the HORIZONTAL_DIRECTION flags depending on the value of the attribute
+                    // Clear any layout direction flags (included resolved bits) already set
+                    mPrivateFlags2 &= ~(LAYOUT_DIRECTION_MASK | LAYOUT_DIRECTION_RESOLVED_MASK);
+                    // Set the layout direction flags depending on the value of the attribute
                     final int layoutDirection = a.getInt(attr, -1);
-                    if (layoutDirection != -1) {
-                        viewFlagValues |= LAYOUT_DIRECTION_FLAGS[layoutDirection];
-                    } else {
-                        // Set to default (LAYOUT_DIRECTION_INHERIT)
-                        viewFlagValues |= LAYOUT_DIRECTION_DEFAULT;
-                    }
-                    viewFlagMasks |= LAYOUT_DIRECTION_MASK;
+                    final int value = (layoutDirection != -1) ?
+                            LAYOUT_DIRECTION_FLAGS[layoutDirection] : LAYOUT_DIRECTION_DEFAULT;
+                    mPrivateFlags2 |= (value << LAYOUT_DIRECTION_MASK_SHIFT);
                     break;
                 case com.android.internal.R.styleable.View_drawingCacheQuality:
                     final int cacheQuality = a.getInt(attr, 0);
@@ -4882,7 +4889,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LOCALE,  to = "LOCALE")
     })
     public int getLayoutDirection() {
-        return mViewFlags & LAYOUT_DIRECTION_MASK;
+        return (mPrivateFlags2 & LAYOUT_DIRECTION_MASK) >> LAYOUT_DIRECTION_MASK_SHIFT;
     }
 
     /**
@@ -4899,9 +4906,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     @RemotableViewMethod
     public void setLayoutDirection(int layoutDirection) {
         if (getLayoutDirection() != layoutDirection) {
+            // Reset the current layout direction
+            mPrivateFlags2 &= ~LAYOUT_DIRECTION_MASK;
+            // Reset the current resolved layout direction
             resetResolvedLayoutDirection();
-            // Setting the flag will also request a layout.
-            setFlags(layoutDirection, LAYOUT_DIRECTION_MASK);
+            // Set the new layout direction (filtered) and ask for a layout pass
+            mPrivateFlags2 |=
+                    ((layoutDirection << LAYOUT_DIRECTION_MASK_SHIFT) & LAYOUT_DIRECTION_MASK);
+            requestLayout();
         }
     }
 
@@ -4909,11 +4921,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Returns the resolved layout direction for this view.
      *
      * @return {@link #LAYOUT_DIRECTION_RTL} if the layout direction is RTL or returns
-     * {@link #LAYOUT_DIRECTION_LTR} id the layout direction is not RTL.
+     * {@link #LAYOUT_DIRECTION_LTR} if the layout direction is not RTL.
      */
     @ViewDebug.ExportedProperty(category = "layout", mapping = {
-        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR,     to = "RESOLVED_DIRECTION_LTR"),
-        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL,     to = "RESOLVED_DIRECTION_RTL")
+        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR, to = "RESOLVED_DIRECTION_LTR"),
+        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL, to = "RESOLVED_DIRECTION_RTL")
     })
     public int getResolvedLayoutDirection() {
         resolveLayoutDirectionIfNeeded();
@@ -4922,8 +4934,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * <p>Indicates whether or not this view's layout is right-to-left. This is resolved from
-     * layout attribute and/or the inherited value from the parent.</p>
+     * Indicates whether or not this view's layout is right-to-left. This is resolved from
+     * layout attribute and/or the inherited value from the parent
      *
      * @return true if the layout is right-to-left.
      */
@@ -6939,10 +6951,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
                 mParent.recomputeViewAttributes(this);
             }
-        }
-
-        if ((changed & LAYOUT_DIRECTION_MASK) != 0) {
-            requestLayout();
         }
     }
 
@@ -9834,7 +9842,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if ((mPrivateFlags2 & LAYOUT_DIRECTION_RESOLVED) == LAYOUT_DIRECTION_RESOLVED) return;
 
         // Clear any previous layout direction resolution
-        mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED_RTL;
+        mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED_MASK;
 
         // Set resolved depending on layout direction
         switch (getLayoutDirection()) {
@@ -9966,8 +9974,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * when reset is done.
      */
     public void resetResolvedLayoutDirection() {
-        // Reset the current View resolution
-        mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED;
+        // Reset the current resolved bits
+        mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED_MASK;
         onResolvedLayoutDirectionReset();
         // Reset also the text direction
         resetResolvedTextDirection();
