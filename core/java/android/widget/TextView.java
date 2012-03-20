@@ -11680,7 +11680,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 highlight = null;
             }
 
-            if (canHaveDisplayList() && canvas.isHardwareAccelerated()) {
+            if (false /* TEMP patch for bugs 6198276 & 6193544 */ && canHaveDisplayList() && canvas.isHardwareAccelerated()) {
                 drawHardwareAccelerated(canvas, layout, highlight, cursorOffsetVertical);
             } else {
                 layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
