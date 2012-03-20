@@ -8675,7 +8675,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     } else {
                         mDimAnimator.show(innerDw, innerDh);
                     }
-                    mDimAnimator.show(innerDw, innerDh);
                     mDimAnimator.updateParameters(mContext.getResources(),
                             w, currentTime);
                 }
