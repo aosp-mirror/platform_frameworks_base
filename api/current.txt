@@ -2744,6 +2744,7 @@ package android.app {
     method public static boolean isUserAMonkey();
     method public void killBackgroundProcesses(java.lang.String);
     method public void moveTaskToFront(int, int);
+    method public void moveTaskToFront(int, int, android.os.Bundle);
     method public deprecated void restartPackage(java.lang.String);
     field public static final int MOVE_TASK_NO_USER_ACTION = 2; // 0x2
     field public static final int MOVE_TASK_WITH_HOME = 1; // 0x1
@@ -2867,7 +2868,12 @@ package android.app {
   public class ActivityOptions {
     method public void join(android.app.ActivityOptions);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
+    method public static android.app.ActivityOptions makeThumbnailScaleUpAnimation(android.view.View, android.graphics.Bitmap, int, int, android.app.ActivityOptions.OnAnimationStartedListener);
     method public android.os.Bundle toBundle();
+  }
+
+  public static abstract interface ActivityOptions.OnAnimationStartedListener {
+    method public abstract void onAnimationStarted();
   }
 
   public class AlarmManager {

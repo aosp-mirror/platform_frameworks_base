@@ -89,6 +89,8 @@ interface IWindowManager
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
     int getPendingAppTransition();
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim);
+    void overridePendingAppTransitionThumb(in Bitmap srcThumb, int startX, int startY,
+            IRemoteCallback startedCallback);
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
             in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,

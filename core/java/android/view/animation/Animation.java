@@ -875,7 +875,7 @@ public abstract class Animation implements Cloneable {
      * otherwise.
      *
      * @param currentTime Where we are in the animation. This is wall clock time.
-     * @param outTransformation A tranformation object that is provided by the
+     * @param outTransformation A transformation object that is provided by the
      *        caller and will be filled in by the animation.
      * @param scale Scaling factor to apply to any inputs to the transform operation, such
      *        pivot points being rotated or scaled around.

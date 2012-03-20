@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -542,24 +541,38 @@ final class ActivityRecord {
 
     void updateOptionsLocked(Bundle options) {
         if (options != null) {
+            if (pendingOptions != null) {
+                pendingOptions.abort();
+            }
             pendingOptions = new ActivityOptions(options);
         }
     }
 
     void applyOptionsLocked() {
         if (pendingOptions != null) {
-            if (pendingOptions.isCustomAnimation()) {
-                service.mWindowManager.overridePendingAppTransition(
-                        pendingOptions.getPackageName(),
-                        pendingOptions.getCustomEnterResId(),
-                        pendingOptions.getCustomExitResId());
+            switch (pendingOptions.getAnimationType()) {
+                case ActivityOptions.ANIM_CUSTOM:
+                    service.mWindowManager.overridePendingAppTransition(
+                            pendingOptions.getPackageName(),
+                            pendingOptions.getCustomEnterResId(),
+                            pendingOptions.getCustomExitResId());
+                    break;
+                case ActivityOptions.ANIM_THUMBNAIL:
+                    service.mWindowManager.overridePendingAppTransitionThumb(
+                            pendingOptions.getThumbnail(),
+                            pendingOptions.getStartX(), pendingOptions.getStartY(),
+                            pendingOptions.getOnAnimationStartListener());
+                    break;
             }
             pendingOptions = null;
         }
     }
 
     void clearOptionsLocked() {
-        pendingOptions = null;
+        if (pendingOptions != null) {
+            pendingOptions.abort();
+            pendingOptions = null;
+        }
     }
 
     void removeUriPermissionsLocked() {
