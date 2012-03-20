@@ -106,7 +106,7 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
         mHeaderText.setSelected(true);
 
         mKeyguardStatusViewManager = new KeyguardStatusViewManager(this, updateMonitor,
-                lockpatternutils, callback, false);
+                lockpatternutils, callback, true);
 
         mPinText.setFocusableInTouchMode(true);
         mPinText.setOnFocusChangeListener(this);
