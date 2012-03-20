@@ -42,18 +42,20 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     public long lastWarningSnooze;
     public long lastLimitSnooze;
     public boolean metered;
+    public boolean inferred;
 
     private static final long DEFAULT_MTU = 1500;
 
+    @Deprecated
     public NetworkPolicy(NetworkTemplate template, int cycleDay, String cycleTimezone,
             long warningBytes, long limitBytes, boolean metered) {
         this(template, cycleDay, cycleTimezone, warningBytes, limitBytes, SNOOZE_NEVER,
-                SNOOZE_NEVER, metered);
+                SNOOZE_NEVER, metered, false);
     }
 
     public NetworkPolicy(NetworkTemplate template, int cycleDay, String cycleTimezone,
             long warningBytes, long limitBytes, long lastWarningSnooze, long lastLimitSnooze,
-            boolean metered) {
+            boolean metered, boolean inferred) {
         this.template = checkNotNull(template, "missing NetworkTemplate");
         this.cycleDay = cycleDay;
         this.cycleTimezone = checkNotNull(cycleTimezone, "missing cycleTimezone");
@@ -62,6 +64,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         this.lastWarningSnooze = lastWarningSnooze;
         this.lastLimitSnooze = lastLimitSnooze;
         this.metered = metered;
+        this.inferred = inferred;
     }
 
     public NetworkPolicy(Parcel in) {
@@ -73,6 +76,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         lastWarningSnooze = in.readLong();
         lastLimitSnooze = in.readLong();
         metered = in.readInt() != 0;
+        inferred = in.readInt() != 0;
     }
 
     @Override
@@ -85,6 +89,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         dest.writeLong(lastWarningSnooze);
         dest.writeLong(lastLimitSnooze);
         dest.writeInt(metered ? 1 : 0);
+        dest.writeInt(inferred ? 1 : 0);
     }
 
     @Override
@@ -134,7 +139,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     @Override
     public int hashCode() {
         return Objects.hashCode(template, cycleDay, cycleTimezone, warningBytes, limitBytes,
-                lastWarningSnooze, lastLimitSnooze, metered);
+                lastWarningSnooze, lastLimitSnooze, metered, inferred);
     }
 
     @Override
@@ -145,6 +150,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
                     && limitBytes == other.limitBytes
                     && lastWarningSnooze == other.lastWarningSnooze
                     && lastLimitSnooze == other.lastLimitSnooze && metered == other.metered
+                    && inferred == other.inferred
                     && Objects.equal(cycleTimezone, other.cycleTimezone)
                     && Objects.equal(template, other.template);
         }
@@ -156,7 +162,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         return "NetworkPolicy[" + template + "]: cycleDay=" + cycleDay + ", cycleTimezone="
                 + cycleTimezone + ", warningBytes=" + warningBytes + ", limitBytes=" + limitBytes
                 + ", lastWarningSnooze=" + lastWarningSnooze + ", lastLimitSnooze="
-                + lastLimitSnooze + ", metered=" + metered;
+                + lastLimitSnooze + ", metered=" + metered + ", inferred=" + inferred;
     }
 
     public static final Creator<NetworkPolicy> CREATOR = new Creator<NetworkPolicy>() {
