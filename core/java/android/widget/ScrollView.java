@@ -715,9 +715,7 @@ public class ScrollView extends FrameLayout {
             super.scrollTo(scrollX, scrollY);
         }
 
-        if (!awakenScrollBars()) {
-            invalidate();
-        }
+        awakenScrollBars();
     }
 
     @Override
