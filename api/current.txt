@@ -2864,6 +2864,12 @@ package android.app {
     field public android.content.ComponentName topActivity;
   }
 
+  public class ActivityOptions {
+    method public void join(android.app.ActivityOptions);
+    method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
+    method public android.os.Bundle toBundle();
+  }
+
   public class AlarmManager {
     method public void cancel(android.app.PendingIntent);
     method public void set(int, long, android.app.PendingIntent);
@@ -3728,7 +3734,9 @@ package android.app {
     method public void cancel();
     method public int describeContents();
     method public static android.app.PendingIntent getActivities(android.content.Context, int, android.content.Intent[], int);
+    method public static android.app.PendingIntent getActivities(android.content.Context, int, android.content.Intent[], int, android.os.Bundle);
     method public static android.app.PendingIntent getActivity(android.content.Context, int, android.content.Intent, int);
+    method public static android.app.PendingIntent getActivity(android.content.Context, int, android.content.Intent, int, android.os.Bundle);
     method public static android.app.PendingIntent getBroadcast(android.content.Context, int, android.content.Intent, int);
     method public android.content.IntentSender getIntentSender();
     method public static android.app.PendingIntent getService(android.content.Context, int, android.content.Intent, int);

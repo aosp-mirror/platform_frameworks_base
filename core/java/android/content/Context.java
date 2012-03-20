@@ -846,7 +846,9 @@ public abstract class Context {
      *
      * @param intent The description of the activity to start.
      * @param options Additional options for how the Activity should be started.
-     * May be null if there are no options.
+     * May be null if there are no options.  See {@link android.app.ActivityOptions}
+     * for how to build the Bundle supplied here; there are no supported definitions
+     * for building it manually.
      *
      * @throws ActivityNotFoundException
      *
@@ -884,7 +886,8 @@ public abstract class Context {
      *
      * @param intents An array of Intents to be started.
      * @param options Additional options for how the Activity should be started.
-     * May be null if there are no options.
+     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @throws ActivityNotFoundException
      *
@@ -930,7 +933,10 @@ public abstract class Context {
      * <var>flagsMask</var>
      * @param extraFlags Always set to 0.
      * @param options Additional options for how the Activity should be started.
-     * May be null if there are no options.
+     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * Context.startActivity(Intent, Bundle)} for more details.  If options
+     * have also been supplied by the IntentSender, options given here will
+     * override any that conflict with those given by the IntentSender.
      *
      * @see #startActivity(Intent, Bundle)
      * @see #startIntentSender(IntentSender, Intent, int, int, int)

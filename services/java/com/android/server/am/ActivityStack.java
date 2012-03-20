@@ -22,6 +22,7 @@ import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IThumbnailRetriever;
@@ -1456,6 +1457,7 @@ final class ActivityStack {
         // We are starting up the next activity, so tell the window manager
         // that the previous one will be hidden soon.  This way it can know
         // to ignore it when computing the desired screen orientation.
+        boolean noAnim = false;
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_TRANSITION) Slog.v(TAG,
@@ -1474,6 +1476,7 @@ final class ActivityStack {
                 if (DEBUG_TRANSITION) Slog.v(TAG,
                         "Prepare open transition: prev=" + prev);
                 if (mNoAnimActivities.contains(next)) {
+                    noAnim = true;
                     mService.mWindowManager.prepareAppTransition(
                             WindowManagerPolicy.TRANSIT_NONE, false);
                 } else {
@@ -1490,12 +1493,18 @@ final class ActivityStack {
             if (DEBUG_TRANSITION) Slog.v(TAG,
                     "Prepare open transition: no previous");
             if (mNoAnimActivities.contains(next)) {
+                noAnim = true;
                 mService.mWindowManager.prepareAppTransition(
                         WindowManagerPolicy.TRANSIT_NONE, false);
             } else {
                 mService.mWindowManager.prepareAppTransition(
                         WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN, false);
             }
+        }
+        if (!noAnim) {
+            next.applyOptionsLocked();
+        } else {
+            next.clearOptionsLocked();
         }
 
         if (next.app != null && next.app.thread != null) {
@@ -1655,7 +1664,7 @@ final class ActivityStack {
     }
 
     private final void startActivityLocked(ActivityRecord r, boolean newTask,
-            boolean doResume, boolean keepCurTransition) {
+            boolean doResume, boolean keepCurTransition, Bundle options) {
         final int NH = mHistory.size();
 
         int addPos = -1;
@@ -1748,6 +1757,7 @@ final class ActivityStack {
                         : WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN, keepCurTransition);
                 mNoAnimActivities.remove(r);
             }
+            r.updateOptionsLocked(options);
             mService.mWindowManager.addAppToken(
                     addPos, r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen);
             boolean doShow = true;
@@ -2457,7 +2467,7 @@ final class ActivityStack {
         }
         
         err = startActivityUncheckedLocked(r, sourceRecord,
-                startFlags, true);
+                startFlags, true, options);
         if (mDismissKeyguardOnNextActivity && mPausingActivity == null) {
             // Someone asked to have the keyguard dismissed on the next
             // activity start, but we are not actually doing an activity
@@ -2480,7 +2490,8 @@ final class ActivityStack {
     }
 
     final int startActivityUncheckedLocked(ActivityRecord r,
-            ActivityRecord sourceRecord, int startFlags, boolean doResume) {
+            ActivityRecord sourceRecord, int startFlags, boolean doResume,
+            Bundle options) {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
         final int userId = r.userId;
@@ -2591,6 +2602,7 @@ final class ActivityStack {
                             // We really do want to push this one into the
                             // user's face, right now.
                             moveHomeToFrontFromLaunchLocked(launchFlags);
+                            r.updateOptionsLocked(options);
                             moveTaskToFrontLocked(taskTop.task, r);
                         }
                     }
@@ -2794,6 +2806,7 @@ final class ActivityStack {
                 if (where >= 0) {
                     ActivityRecord top = moveActivityToFrontLocked(where);
                     logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
+                    top.updateOptionsLocked(options);
                     top.deliverNewIntentLocked(callingUid, r.intent);
                     if (doResume) {
                         resumeTopActivityLocked(null);
@@ -2829,7 +2842,7 @@ final class ActivityStack {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, r.task.taskId);
         }
         logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
-        startActivityLocked(r, newTask, doResume, keepCurTransition);
+        startActivityLocked(r, newTask, doResume, keepCurTransition, options);
         return ActivityManager.START_SUCCESS;
     }
 
@@ -2944,7 +2957,7 @@ final class ActivityStack {
                                 ActivityManager.INTENT_SENDER_ACTIVITY, "android",
                                 realCallingUid, null, null, 0, new Intent[] { intent },
                                 new String[] { resolvedType }, PendingIntent.FLAG_CANCEL_CURRENT
-                                | PendingIntent.FLAG_ONE_SHOT);
+                                | PendingIntent.FLAG_ONE_SHOT, null);
                         
                         Intent newIntent = new Intent();
                         if (requestCode >= 0) {
@@ -3095,9 +3108,15 @@ final class ActivityStack {
                                 "FLAG_CANT_SAVE_STATE not supported here");
                     }
 
+                    Bundle theseOptions;
+                    if (options != null && i == intents.length-1) {
+                        theseOptions = options;
+                    } else {
+                        theseOptions = null;
+                    }
                     int res = startActivityLocked(caller, intent, resolvedTypes[i],
                             aInfo, resultTo, null, -1, callingPid, callingUid,
-                            0, options, componentSpecified, outActivity);
+                            0, theseOptions, componentSpecified, outActivity);
                     if (res < 0) {
                         return res;
                     }

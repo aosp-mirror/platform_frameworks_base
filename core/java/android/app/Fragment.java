@@ -965,6 +965,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     /**
      * Call {@link Activity#startActivity(Intent)} on the fragment's
      * containing Activity.
+     *
+     * @param intent The intent to start.
      */
     public void startActivity(Intent intent) {
         startActivity(intent, null);
@@ -973,6 +975,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     /**
      * Call {@link Activity#startActivity(Intent, Bundle)} on the fragment's
      * containing Activity.
+     *
+     * @param intent The intent to start.
+     * @param options Additional options for how the Activity should be started.
+     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * Context.startActivity(Intent, Bundle)} for more details.
      */
     public void startActivity(Intent intent, Bundle options) {
         if (mActivity == null) {

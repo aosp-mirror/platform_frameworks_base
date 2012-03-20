@@ -835,9 +835,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
                 requestResolvedTypes = null;
             }
             int fl = data.readInt();
+            Bundle options = data.readInt() != 0
+                    ? Bundle.CREATOR.createFromParcel(data) : null;
             IIntentSender res = getIntentSender(type, packageName, token,
                     resultWho, requestCode, requestIntents,
-                    requestResolvedTypes, fl);
+                    requestResolvedTypes, fl, options);
             reply.writeNoException();
             reply.writeStrongBinder(res != null ? res.asBinder() : null);
             return true;
@@ -2607,8 +2609,8 @@ class ActivityManagerProxy implements IActivityManager
     }
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
-            int requestCode, Intent[] intents, String[] resolvedTypes, int flags)
-            throws RemoteException {
+            int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
+            Bundle options) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -2625,6 +2627,12 @@ class ActivityManagerProxy implements IActivityManager
             data.writeInt(0);
         }
         data.writeInt(flags);
+        if (options != null) {
+            data.writeInt(1);
+            options.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(GET_INTENT_SENDER_TRANSACTION, data, reply, 0);
         reply.readException();
         IIntentSender res = IIntentSender.Stub.asInterface(
