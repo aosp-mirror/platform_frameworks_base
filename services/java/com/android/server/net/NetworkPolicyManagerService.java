@@ -157,6 +157,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_ADDED_METERED = 4;
     private static final int VERSION_SPLIT_SNOOZE = 5;
     private static final int VERSION_ADDED_TIMEZONE = 6;
+    private static final int VERSION_ADDED_INFERRED = 7;
 
     // @VisibleForTesting
     public static final int TYPE_WARNING = 0x1;
@@ -179,6 +180,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_LAST_WARNING_SNOOZE = "lastWarningSnooze";
     private static final String ATTR_LAST_LIMIT_SNOOZE = "lastLimitSnooze";
     private static final String ATTR_METERED = "metered";
+    private static final String ATTR_INFERRED = "inferred";
     private static final String ATTR_UID = "uid";
     private static final String ATTR_POLICY = "policy";
 
@@ -932,7 +934,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
             mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay, cycleTimezone,
-                    warningBytes, LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER, true));
+                    warningBytes, LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER, true, true));
             writePolicyLocked();
         }
     }
@@ -1004,12 +1006,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         } else {
                             lastWarningSnooze = SNOOZE_NEVER;
                         }
+                        final boolean inferred;
+                        if (version >= VERSION_ADDED_INFERRED) {
+                            inferred = readBooleanAttribute(in, ATTR_INFERRED);
+                        } else {
+                            inferred = false;
+                        }
 
                         final NetworkTemplate template = new NetworkTemplate(
                                 networkTemplate, subscriberId);
                         mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay,
                                 cycleTimezone, warningBytes, limitBytes, lastWarningSnooze,
-                                lastLimitSnooze, metered));
+                                lastLimitSnooze, metered, inferred));
 
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
@@ -1064,7 +1072,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             out.startDocument(null, true);
 
             out.startTag(null, TAG_POLICY_LIST);
-            writeIntAttribute(out, ATTR_VERSION, VERSION_ADDED_TIMEZONE);
+            writeIntAttribute(out, ATTR_VERSION, VERSION_ADDED_INFERRED);
             writeBooleanAttribute(out, ATTR_RESTRICT_BACKGROUND, mRestrictBackground);
 
             // write all known network policies
@@ -1084,6 +1092,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 writeLongAttribute(out, ATTR_LAST_WARNING_SNOOZE, policy.lastWarningSnooze);
                 writeLongAttribute(out, ATTR_LAST_LIMIT_SNOOZE, policy.lastLimitSnooze);
                 writeBooleanAttribute(out, ATTR_METERED, policy.metered);
+                writeBooleanAttribute(out, ATTR_INFERRED, policy.inferred);
                 out.endTag(null, TAG_NETWORK_POLICY);
             }
 
