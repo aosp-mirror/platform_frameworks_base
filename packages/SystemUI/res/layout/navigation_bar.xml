@@ -144,11 +144,11 @@
                 />
         </LinearLayout>
 
-        <View android:id="@+id/deadzone"
+        <com.android.systemui.statusbar.policy.DeadZone
+            android:id="@+id/deadzone"
             android:layout_height="@dimen/navigation_bar_deadzone_size"
             android:layout_width="match_parent"
             android:layout_gravity="top"
-            android:clickable="true"
             />
     </FrameLayout>
 
@@ -272,11 +272,11 @@
                 />
         </LinearLayout>
 
-        <View android:id="@+id/deadzone"
+        <com.android.systemui.statusbar.policy.DeadZone
+            android:id="@+id/deadzone"
             android:layout_width="@dimen/navigation_bar_deadzone_size"
             android:layout_height="match_parent"
             android:layout_gravity="left"
-            android:clickable="true"
             />
     </FrameLayout>
 
