@@ -642,8 +642,7 @@ public class ScrollView extends FrameLayout {
                 break;
             case MotionEvent.ACTION_POINTER_DOWN: {
                 final int index = ev.getActionIndex();
-                final float y = ev.getY(index);
-                mLastMotionY = y;
+                mLastMotionY = ev.getY(index);
                 mActivePointerId = ev.getPointerId(index);
                 break;
             }
@@ -715,7 +714,10 @@ public class ScrollView extends FrameLayout {
         } else {
             super.scrollTo(scrollX, scrollY);
         }
-        awakenScrollBars();
+
+        if (!awakenScrollBars()) {
+            invalidate();
+        }
     }
 
     @Override
@@ -745,42 +747,6 @@ public class ScrollView extends FrameLayout {
                     child.getHeight() - (getHeight() - mPaddingBottom - mPaddingTop));
         }
         return scrollRange;
-    }
-
-    /**
-     * <p>
-     * Finds the next focusable component that fits in this View's bounds
-     * (excluding fading edges) pretending that this View's top is located at
-     * the parameter top.
-     * </p>
-     *
-     * @param topFocus           look for a candidate at the top of the bounds if topFocus is true,
-     *                           or at the bottom of the bounds if topFocus is false
-     * @param top                the top offset of the bounds in which a focusable must be
-     *                           found (the fading edge is assumed to start at this position)
-     * @param preferredFocusable the View that has highest priority and will be
-     *                           returned if it is within my bounds (null is valid)
-     * @return the next focusable component in the bounds or null if none can be found
-     */
-    private View findFocusableViewInMyBounds(final boolean topFocus,
-            final int top, View preferredFocusable) {
-        /*
-         * The fading edge's transparent side should be considered for focus
-         * since it's mostly visible, so we divide the actual fading edge length
-         * by 2.
-         */
-        final int fadingEdgeLength = getVerticalFadingEdgeLength() / 2;
-        final int topWithoutFadingEdge = top + fadingEdgeLength;
-        final int bottomWithoutFadingEdge = top + getHeight() - fadingEdgeLength;
-
-        if ((preferredFocusable != null)
-                && (preferredFocusable.getTop() < bottomWithoutFadingEdge)
-                && (preferredFocusable.getBottom() > topWithoutFadingEdge)) {
-            return preferredFocusable;
-        }
-
-        return findFocusableViewInBounds(topFocus, topWithoutFadingEdge,
-                bottomWithoutFadingEdge);
     }
 
     /**
@@ -1208,10 +1174,10 @@ public class ScrollView extends FrameLayout {
                 }
             }
 
-            awakenScrollBars();
-
-            // Keep on drawing until the animation has finished.
-            postInvalidate();
+            if (!awakenScrollBars()) {
+                // Keep on drawing until the animation has finished.
+                invalidate();
+            }
         } else {
             if (mFlingStrictSpan != null) {
                 mFlingStrictSpan.finish();
@@ -1438,7 +1404,7 @@ public class ScrollView extends FrameLayout {
     /**
      * Return true if child is a descendant of parent, (or equal to the parent).
      */
-    private boolean isViewDescendantOf(View child, View parent) {
+    private static boolean isViewDescendantOf(View child, View parent) {
         if (child == parent) {
             return true;
         }
@@ -1461,8 +1427,6 @@ public class ScrollView extends FrameLayout {
 
             mScroller.fling(mScrollX, mScrollY, 0, velocityY, 0, 0, 0,
                     Math.max(0, bottom - height), 0, height/2);
-
-            final boolean movingDown = velocityY > 0;
 
             if (mFlingStrictSpan == null) {
                 mFlingStrictSpan = StrictMode.enterCriticalSpan("ScrollView-fling");
@@ -1554,7 +1518,7 @@ public class ScrollView extends FrameLayout {
         }
     }
 
-    private int clamp(int n, int my, int child) {
+    private static int clamp(int n, int my, int child) {
         if (my >= child || n < 0) {
             /* my >= child is this case:
              *                    |--------------- me ---------------|
