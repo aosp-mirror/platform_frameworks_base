@@ -507,8 +507,8 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Tillader, at appen kan skrive nye ord i brugerordbogen."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"læse USB-lagerets indhold"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"læse indholdet af SD-kortet"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Tillader, at app\'en læser indhold på USB-lager."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Tillader, at app\'en læser indholdet af SD-kortet."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Tillader, at appen læser indhold på USB-lageret."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Tillader, at appen læser indholdet af SD-kortet."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"rette/slette i USB-lager"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"ret/slet indholdet på SD-kortet"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Lader appen skrive til USB."</string>

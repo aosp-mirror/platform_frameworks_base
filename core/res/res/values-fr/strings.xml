@@ -507,7 +507,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permet à l\'application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="4086221374639183281">"lire contenu de la mémoire USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="8537875151845139539">"lire le contenu de la carte SD"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Permet à l\'appli de lire contenu mémoire USB."</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="1055302898999352339">"Permet à l\'appli de lire contenu de mémoire USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="7947792373570683542">"Permet à l\'application de lire le contenu de la carte SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"Modifier/Supprimer contenu mémoire USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modifier/supprimer le contenu de la carte SD"</string>
