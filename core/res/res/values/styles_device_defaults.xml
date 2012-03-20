@@ -200,9 +200,6 @@ easier.
     <style name="Widget.DeviceDefault.CompoundButton.Switch" parent="Widget.Holo.CompoundButton.Switch">
 
     </style>
-    <style name="Widget.DeviceDefault.EditText.NumberPickerInputText" parent="Widget.Holo.EditText.NumberPickerInputText">
-
-    </style>
     <style name="Widget.DeviceDefault.ExpandableListView.White" parent="Widget.Holo.ExpandableListView.White">
 
     </style>
@@ -210,12 +207,6 @@ easier.
 
     </style>
     <style name="Widget.DeviceDefault.GestureOverlayView" parent="Widget.Holo.GestureOverlayView">
-
-    </style>
-    <style name="Widget.DeviceDefault.ImageButton.NumberPickerDownButton" parent="Widget.Holo.ImageButton.NumberPickerDownButton">
-
-    </style>
-    <style name="Widget.DeviceDefault.ImageButton.NumberPickerUpButton" parent="Widget.Holo.ImageButton.NumberPickerUpButton">
 
     </style>
     <style name="Widget.DeviceDefault.ImageWell" parent="Widget.Holo.ImageWell">
@@ -465,9 +456,6 @@ easier.
     <style name="Widget.DeviceDefault.Light.DatePicker" parent="Widget.Holo.Light.DatePicker">
 
     </style>
-    <style name="Widget.DeviceDefault.Light.EditText.NumberPickerInputText" parent="Widget.Holo.Light.EditText.NumberPickerInputText">
-
-    </style>
     <style name="Widget.DeviceDefault.Light.ExpandableListView.White" parent="Widget.Holo.Light.ExpandableListView.White">
 
     </style>
@@ -475,12 +463,6 @@ easier.
 
     </style>
     <style name="Widget.DeviceDefault.Light.GestureOverlayView" parent="Widget.Holo.Light.GestureOverlayView">
-
-    </style>
-    <style name="Widget.DeviceDefault.Light.ImageButton.NumberPickerDownButton" parent="Widget.Holo.Light.ImageButton.NumberPickerDownButton">
-
-    </style>
-    <style name="Widget.DeviceDefault.Light.ImageButton.NumberPickerUpButton" parent="Widget.Holo.Light.ImageButton.NumberPickerUpButton">
 
     </style>
     <style name="Widget.DeviceDefault.Light.ImageWell" parent="Widget.Holo.Light.ImageWell">
