@@ -169,7 +169,7 @@ public interface IActivityManager extends IInterface {
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes,
-            int flags) throws RemoteException;
+            int flags, Bundle options) throws RemoteException;
     public void cancelIntentSender(IIntentSender sender) throws RemoteException;
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, int userId) throws RemoteException;

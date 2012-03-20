@@ -20,6 +20,7 @@ import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -95,6 +96,7 @@ final class ActivityRecord {
     ArrayList results;      // pending ActivityResult objs we have received
     HashSet<WeakReference<PendingIntentRecord>> pendingResults; // all pending intents for this act
     ArrayList newIntents;   // any pending new intents for single-top mode
+    ActivityOptions pendingOptions; // most recently given options
     HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
     UriPermissionOwner uriPermissions; // current special URI access perms.
     ProcessRecord app;      // if non-null, hosting application
@@ -536,6 +538,28 @@ final class ActivityRecord {
         if (!sent) {
             addNewIntentLocked(new Intent(intent));
         }
+    }
+
+    void updateOptionsLocked(Bundle options) {
+        if (options != null) {
+            pendingOptions = new ActivityOptions(options);
+        }
+    }
+
+    void applyOptionsLocked() {
+        if (pendingOptions != null) {
+            if (pendingOptions.isCustomAnimation()) {
+                service.mWindowManager.overridePendingAppTransition(
+                        pendingOptions.getPackageName(),
+                        pendingOptions.getCustomEnterResId(),
+                        pendingOptions.getCustomExitResId());
+            }
+            pendingOptions = null;
+        }
+    }
+
+    void clearOptionsLocked() {
+        pendingOptions = null;
     }
 
     void removeUriPermissionsLocked() {

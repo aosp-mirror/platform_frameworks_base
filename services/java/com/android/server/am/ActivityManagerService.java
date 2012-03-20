@@ -2258,7 +2258,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int i=0; i<N; i++) {
             PendingActivityLaunch pal = mPendingActivityLaunches.get(i);
             mMainStack.startActivityUncheckedLocked(pal.r, pal.sourceRecord,
-                    pal.startFlags, doResume && i == (N-1));
+                    pal.startFlags, doResume && i == (N-1), null);
         }
         mPendingActivityLaunches.clear();
     }
@@ -4252,7 +4252,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
-            int requestCode, Intent[] intents, String[] resolvedTypes, int flags) {
+            int requestCode, Intent[] intents, String[] resolvedTypes,
+            int flags, Bundle options) {
         enforceNotIsolatedCaller("getIntentSender");
         // Refuse possible leaked file descriptors
         if (intents != null) {
@@ -4278,6 +4279,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                         "Intent array length does not match resolvedTypes length");
             }
         }
+        if (options != null) {
+            if (options.hasFileDescriptors()) {
+                throw new IllegalArgumentException("File descriptors passed in options");
+            }
+        }
         
         synchronized(this) {
             int callingUid = Binder.getCallingUid();
@@ -4300,7 +4306,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.i(TAG_MU, "Getting intent sender for origCallingUid="
                             + Binder.getOrigCallingUid());
                 return getIntentSenderLocked(type, packageName, Binder.getOrigCallingUid(),
-                        token, resultWho, requestCode, intents, resolvedTypes, flags);
+                        token, resultWho, requestCode, intents, resolvedTypes, flags, options);
                 
             } catch (RemoteException e) {
                 throw new SecurityException(e);
@@ -4310,7 +4316,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     IIntentSender getIntentSenderLocked(int type,
             String packageName, int callingUid, IBinder token, String resultWho,
-            int requestCode, Intent[] intents, String[] resolvedTypes, int flags) {
+            int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
+            Bundle options) {
         if (DEBUG_MU)
             Slog.v(TAG_MU, "getIntentSenderLocked(): uid=" + callingUid);
         ActivityRecord activity = null;
@@ -4332,7 +4339,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         PendingIntentRecord.Key key = new PendingIntentRecord.Key(
                 type, packageName, activity, resultWho,
-                requestCode, intents, resolvedTypes, flags);
+                requestCode, intents, resolvedTypes, flags, options);
         WeakReference<PendingIntentRecord> ref;
         ref = mIntentSenderRecords.get(key);
         PendingIntentRecord rec = ref != null ? ref.get() : null;

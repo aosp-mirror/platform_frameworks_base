@@ -49,6 +49,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
         final int requestCode;
         final Intent requestIntent;
         final String requestResolvedType;
+        final Bundle options;
         Intent[] allIntents;
         String[] allResolvedTypes;
         final int flags;
@@ -57,7 +58,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
         private static final int ODD_PRIME_NUMBER = 37;
         
         Key(int _t, String _p, ActivityRecord _a, String _w,
-                int _r, Intent[] _i, String[] _it, int _f) {
+                int _r, Intent[] _i, String[] _it, int _f, Bundle _o) {
             type = _t;
             packageName = _p;
             activity = _a;
@@ -68,6 +69,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
             allIntents = _i;
             allResolvedTypes = _it;
             flags = _f;
+            options = _o;
             
             int hash = 23;
             hash = (ODD_PRIME_NUMBER*hash) + _f;
@@ -215,6 +217,13 @@ class PendingIntentRecord extends IIntentSender.Stub {
                 boolean sendFinish = finishedReceiver != null;
                 switch (key.type) {
                     case ActivityManager.INTENT_SENDER_ACTIVITY:
+                        if (options == null) {
+                            options = key.options;
+                        } else if (key.options != null) {
+                            Bundle opts = new Bundle(key.options);
+                            opts.putAll(options);
+                            options = opts;
+                        }
                         try {
                             if (key.allIntents != null && key.allIntents.length > 1) {
                                 Intent[] allIntents = new Intent[key.allIntents.length];
