@@ -521,10 +521,10 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.NumberPicker">
+        <item name="android:internalLayout">@android:layout/number_picker</item>
         <item name="android:orientation">vertical</item>
         <item name="android:fadingEdge">vertical</item>
         <item name="android:fadingEdgeLength">50dip</item>
-        <item name="android:flingable">false</item>
     </style>
 
     <style name="Widget.TimePicker">
@@ -534,25 +534,6 @@ please see styles_device_defaults.xml.
     <style name="Widget.DatePicker">
         <item name="android:internalLayout">@android:layout/date_picker</item>
         <item name="android:calendarViewShown">false</item>
-    </style>
-
-    <style name="Widget.ImageButton.NumberPickerUpButton">
-        <item name="android:background">@android:drawable/numberpicker_up_btn</item>
-        <item name="android:paddingTop">22dip</item>
-        <item name="android:paddingBottom">22dip</item>
-    </style>
-
-    <style name="Widget.ImageButton.NumberPickerDownButton">
-        <item name="android:background">@android:drawable/numberpicker_down_btn</item>
-        <item name="android:paddingTop">22dip</item>
-        <item name="android:paddingBottom">22dip</item>
-    </style>
-
-    <style name="Widget.EditText.NumberPickerInputText">
-        <item name="android:textAppearance">@style/TextAppearance.Large.Inverse.NumberPickerInputText</item>
-        <item name="android:gravity">center</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:background">@drawable/numberpicker_input</item>
     </style>
 
     <style name="Widget.AutoCompleteTextView" parent="Widget.EditText">
@@ -1656,12 +1637,14 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.NumberPicker" parent="Widget.NumberPicker">
+        <item name="android:internalLayout">@android:layout/number_picker_with_selector_wheel</item>
         <item name="android:solidColor">@android:color/transparent</item>
-        <item name="android:flingable">true</item>
         <item name="android:selectionDivider">@android:drawable/numberpicker_selection_divider</item>
         <item name="android:selectionDividerHeight">2dip</item>
+        <item name="android:selectionDividersDistance">48dip</item>
         <item name="android:internalMinWidth">48dip</item>
         <item name="android:internalMaxHeight">200dip</item>
+        <item name="android:minFlingDistance">150dip</item>
     </style>
 
     <style name="Widget.Holo.TimePicker" parent="Widget.TimePicker">
@@ -1671,31 +1654,6 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.DatePicker" parent="Widget.DatePicker">
         <item name="android:internalLayout">@android:layout/date_picker_holo</item>
         <item name="android:calendarViewShown">true</item>
-    </style>
-
-    <style name="Widget.Holo.ImageButton.NumberPickerUpButton">
-        <item name="android:background">@null</item>
-        <item name="android:src">@android:drawable/numberpicker_up_btn_holo_dark</item>
-        <item name="android:paddingTop">16dip</item>
-        <item name="android:paddingBottom">22dip</item>
-    </style>
-
-    <style name="Widget.Holo.ImageButton.NumberPickerDownButton">
-        <item name="android:background">@null</item>
-        <item name="android:src">@android:drawable/numberpicker_down_btn_holo_dark</item>
-        <item name="android:paddingTop">22dip</item>
-        <item name="android:paddingBottom">16dip</item>
-    </style>
-
-    <style name="Widget.Holo.EditText.NumberPickerInputText">
-        <item name="android:paddingTop">13sp</item>
-        <item name="android:paddingBottom">13sp</item>
-        <item name="android:paddingLeft">2sp</item>
-        <item name="android:paddingRight">2sp</item>
-        <item name="android:gravity">center</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:background">@null</item>
     </style>
 
     <style name="Widget.Holo.ActivityChooserView" parent="Widget.ActivityChooserView">
@@ -2107,17 +2065,6 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Light.DatePicker" parent="Widget.Holo.DatePicker">
-    </style>
-
-    <style name="Widget.Holo.Light.ImageButton.NumberPickerUpButton" parent="Widget.Holo.ImageButton.NumberPickerUpButton">
-        <item name="android:src">@android:drawable/numberpicker_up_btn_holo_light</item>
-    </style>
-
-    <style name="Widget.Holo.Light.ImageButton.NumberPickerDownButton" parent="Widget.Holo.ImageButton.NumberPickerDownButton">
-        <item name="android:src">@android:drawable/numberpicker_down_btn_holo_light</item>
-    </style>
-
-    <style name="Widget.Holo.Light.EditText.NumberPickerInputText" parent="Widget.Holo.EditText.NumberPickerInputText">
     </style>
 
     <style name="Widget.Holo.Light.ActivityChooserView" parent="Widget.Holo.ActivityChooserView">
