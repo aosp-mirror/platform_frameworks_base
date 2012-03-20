@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "XINGSEEKER"
+#include <utils/Log.h>
+
 #include "include/XINGSeeker.h"
 #include "include/avc_utils.h"
 
@@ -24,7 +27,9 @@ namespace android {
 
 XINGSeeker::XINGSeeker()
     : mDurationUs(-1),
-      mSizeBytes(0) {
+      mSizeBytes(0),
+      mEncoderDelay(0),
+      mEncoderPadding(0) {
 }
 
 bool XINGSeeker::getDuration(int64_t *durationUs) {
@@ -76,8 +81,6 @@ sp<XINGSeeker> XINGSeeker::CreateFromSource(
 
     seeker->mFirstFramePos = first_frame_pos;
 
-    ALOGI("xingseeker first frame pos: %lld", first_frame_pos);
-
     seeker->mSizeBytes = 0;
     seeker->mTOCValid = false;
     seeker->mDurationUs = 0;
@@ -110,6 +113,8 @@ sp<XINGSeeker> XINGSeeker::CreateFromSource(
         if (num_channels != 1) offset += 17;
         else offset += 9;
     }
+
+    int xingbase = offset;
 
     if (source->readAt(offset, &buffer, 4) < 4) { // XING header ID
         return NULL;
@@ -161,9 +166,30 @@ sp<XINGSeeker> XINGSeeker::CreateFromSource(
         // do something with the quality indicator
         offset += 4;
     }
+
+    if (source->readAt(xingbase + 0xaf - 0x24, &buffer, 1) < 1) { // encoding flags
+        return false;
+    }
+
+    ALOGV("nogap preceding: %s, nogap continued in next: %s",
+              (buffer[0] & 0x80) ? "true" : "false",
+              (buffer[0] & 0x40) ? "true" : "false");
 #endif
 
+    if (source->readAt(xingbase + 0xb1 - 0x24, &buffer, 3) == 3) {
+        seeker->mEncoderDelay = (buffer[0] << 4) + (buffer[1] >> 4);
+        seeker->mEncoderPadding = ((buffer[1] & 0xf) << 8) + buffer[2];
+    }
+
     return seeker;
+}
+
+int32_t XINGSeeker::getEncoderDelay() {
+    return mEncoderDelay;
+}
+
+int32_t XINGSeeker::getEncoderPadding() {
+    return mEncoderPadding;
 }
 
 }  // namespace android
