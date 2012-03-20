@@ -23137,6 +23137,7 @@ package android.view {
     method public void buildLayer();
     method public boolean callOnClick();
     method public boolean canResolveLayoutDirection();
+    method public boolean canResolveTextDirection();
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
     method public void cancelLongPress();
@@ -23527,7 +23528,6 @@ package android.view {
     method public boolean willNotCacheDrawing();
     method public boolean willNotDraw();
     field public static final android.util.Property ALPHA;
-    field protected static int DEFAULT_TEXT_DIRECTION;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
     field public static final int DRAWING_CACHE_QUALITY_LOW = 524288; // 0x80000
@@ -23561,10 +23561,10 @@ package android.view {
     field public static final int LAYER_TYPE_HARDWARE = 2; // 0x2
     field public static final int LAYER_TYPE_NONE = 0; // 0x0
     field public static final int LAYER_TYPE_SOFTWARE = 1; // 0x1
-    field public static final int LAYOUT_DIRECTION_INHERIT = 4; // 0x4
-    field public static final int LAYOUT_DIRECTION_LOCALE = 8; // 0x8
-    field public static final int LAYOUT_DIRECTION_LTR = 1; // 0x1
-    field public static final int LAYOUT_DIRECTION_RTL = 2; // 0x2
+    field public static final int LAYOUT_DIRECTION_INHERIT = 2; // 0x2
+    field public static final int LAYOUT_DIRECTION_LOCALE = 3; // 0x3
+    field public static final int LAYOUT_DIRECTION_LTR = 0; // 0x0
+    field public static final int LAYOUT_DIRECTION_RTL = 1; // 0x1
     field public static final int MEASURED_HEIGHT_STATE_SHIFT = 16; // 0x10
     field public static final int MEASURED_SIZE_MASK = 16777215; // 0xffffff
     field public static final int MEASURED_STATE_MASK = -16777216; // 0xff000000
@@ -23611,6 +23611,7 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
     field public static final int TEXT_DIRECTION_ANY_RTL = 2; // 0x2
+    field protected static int TEXT_DIRECTION_DEFAULT;
     field public static final int TEXT_DIRECTION_FIRST_STRONG = 1; // 0x1
     field public static final int TEXT_DIRECTION_INHERIT = 0; // 0x0
     field public static final int TEXT_DIRECTION_LOCALE = 5; // 0x5
