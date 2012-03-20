@@ -640,6 +640,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mAnimation = anim;
         mAnimation.restrictDuration(WindowManagerService.MAX_ANIMATION_DURATION);
         mAnimation.scaleCurrentDuration(mService.mWindowAnimationScale);
+        // Start out animation gone if window is gone, or visible if window is visible.
+        mTransformation.clear();
+        mTransformation.setAlpha(mLastHidden ? 0 : 1);
+        mHasLocalTransformation = true;
     }
 
     public void clearAnimation() {
@@ -933,13 +937,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (!mService.showSurfaceRobustlyLocked(this)) {
                 return false;
             }
+            
+            mService.enableScreenIfNeededLocked();
+
+            mService.applyEnterAnimationLocked(this);
+
             mLastAlpha = -1;
             mHasDrawn = true;
             mLastHidden = false;
             mReadyToShow = false;
-            mService.enableScreenIfNeededLocked();
-
-            mService.applyEnterAnimationLocked(this);
 
             int i = mChildWindows.size();
             while (i > 0) {

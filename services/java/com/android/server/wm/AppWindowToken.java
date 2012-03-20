@@ -135,6 +135,10 @@ class AppWindowToken extends WindowToken {
             animLayerAdjustment = adj;
             updateLayers();
         }
+        // Start out animation gone if window is gone, or visible if window is visible.
+        transformation.clear();
+        transformation.setAlpha(reportedVisible ? 1 : 0);
+        hasTransformation = true;
     }
 
     public void setDummyAnimation() {
