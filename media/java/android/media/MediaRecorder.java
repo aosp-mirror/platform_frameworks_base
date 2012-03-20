@@ -124,9 +124,15 @@ public class MediaRecorder
     /**
      * Sets a Surface to show a preview of recorded media (video). Calls this
      * before prepare() to make sure that the desirable preview display is
-     * set.
+     * set. If {@link #setCamera(Camera)} is used and the surface has been
+     * already set to the camera, application do not need to call this. If
+     * this is called with non-null surface, the preview surface of the camera
+     * will be replaced by the new surface. If this method is called with null
+     * surface or not called at all, media recorder will not change the preview
+     * surface of the camera.
      *
      * @param sv the Surface to use for the preview
+     * @see android.hardware.Camera#setPreviewDisplay(android.view.SurfaceHolder)
      */
     public void setPreviewDisplay(Surface sv) {
         mSurface = sv;

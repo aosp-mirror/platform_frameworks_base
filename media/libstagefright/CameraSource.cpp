@@ -515,9 +515,13 @@ status_t CameraSource::initWithCameraAccess(
         return err;
     }
 
-    // This CHECK is good, since we just passed the lock/unlock
-    // check earlier by calling mCamera->setParameters().
-    CHECK_EQ((status_t)OK, mCamera->setPreviewDisplay(mSurface));
+    // Set the preview display. Skip this if mSurface is null because
+    // applications may already set a surface to the camera.
+    if (mSurface != NULL) {
+        // This CHECK is good, since we just passed the lock/unlock
+        // check earlier by calling mCamera->setParameters().
+        CHECK_EQ((status_t)OK, mCamera->setPreviewDisplay(mSurface));
+    }
 
     // By default, do not store metadata in video buffers
     mIsMetaDataStoredInVideoBuffers = false;
