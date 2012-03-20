@@ -179,10 +179,7 @@ easier.
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@android:style/Widget.DeviceDefault.PreferenceFrameLayout</item>
 
-        <!-- NumberPicker styles-->
-        <item name="numberPickerUpButtonStyle">@style/Widget.DeviceDefault.ImageButton.NumberPickerUpButton</item>
-        <item name="numberPickerDownButtonStyle">@style/Widget.DeviceDefault.ImageButton.NumberPickerDownButton</item>
-        <item name="numberPickerInputTextStyle">@style/Widget.DeviceDefault.EditText.NumberPickerInputText</item>
+        <!-- NumberPicker style-->
         <item name="numberPickerStyle">@style/Widget.DeviceDefault.NumberPicker</item>
 
         <!-- CalendarView style-->
@@ -329,10 +326,7 @@ easier.
 
         <item name="searchDialogTheme">@style/Theme.DeviceDefault.Light.SearchBar</item>
 
-        <!-- NumberPicker attributes and styles-->
-        <item name="numberPickerUpButtonStyle">@style/Widget.DeviceDefault.Light.ImageButton.NumberPickerUpButton</item>
-        <item name="numberPickerDownButtonStyle">@style/Widget.DeviceDefault.Light.ImageButton.NumberPickerDownButton</item>
-        <item name="numberPickerInputTextStyle">@style/Widget.DeviceDefault.Light.EditText.NumberPickerInputText</item>
+        <!-- NumberPicker style -->
         <item name="numberPickerStyle">@style/Widget.DeviceDefault.Light.NumberPicker</item>
 
         <!-- CalendarView style-->
