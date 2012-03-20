@@ -532,28 +532,21 @@ public class TimePicker extends FrameLayout {
 
     private void setContentDescriptions() {
         // Minute
-        trySetContentDescription(mMinuteSpinner, R.id.increment,
-                R.string.time_picker_increment_minute_button);
-        trySetContentDescription(mMinuteSpinner, R.id.decrement,
-                R.string.time_picker_decrement_minute_button);
+        String text = mContext.getString(R.string.time_picker_increment_minute_button);
+        mMinuteSpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.time_picker_decrement_minute_button);
+        mMinuteSpinner.findViewById(R.id.decrement).setContentDescription(text);
         // Hour
-        trySetContentDescription(mHourSpinner, R.id.increment,
-                R.string.time_picker_increment_hour_button);
-        trySetContentDescription(mHourSpinner, R.id.decrement,
-                R.string.time_picker_decrement_hour_button);
+        text = mContext.getString(R.string.time_picker_increment_hour_button);
+        mHourSpinner.findViewById(R.id.increment).setContentDescription(text);
+        text = mContext.getString(R.string.time_picker_decrement_hour_button);
+        mHourSpinner.findViewById(R.id.decrement).setContentDescription(text);
         // AM/PM
         if (mAmPmSpinner != null) {
-            trySetContentDescription(mAmPmSpinner, R.id.increment,
-                    R.string.time_picker_increment_set_pm_button);
-            trySetContentDescription(mAmPmSpinner, R.id.decrement,
-                    R.string.time_picker_decrement_set_am_button);
-        }
-    }
-
-    private void trySetContentDescription(View root, int viewId, int contDescResId) {
-        View target = root.findViewById(viewId);
-        if (target != null) {
-            target.setContentDescription(mContext.getString(contDescResId));
+            text = mContext.getString(R.string.time_picker_increment_set_pm_button);
+            mAmPmSpinner.findViewById(R.id.increment).setContentDescription(text);
+            text = mContext.getString(R.string.time_picker_decrement_set_am_button);
+            mAmPmSpinner.findViewById(R.id.decrement).setContentDescription(text);
         }
     }
 

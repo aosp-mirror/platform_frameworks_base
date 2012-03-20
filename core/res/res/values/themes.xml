@@ -345,7 +345,10 @@ please see themes_device_defaults.xml.
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@android:style/Widget.PreferenceFrameLayout</item>
 
-        <!-- NumberPicker style-->
+        <!-- NumberPicker styles-->
+        <item name="numberPickerUpButtonStyle">@style/Widget.ImageButton.NumberPickerUpButton</item>
+        <item name="numberPickerDownButtonStyle">@style/Widget.ImageButton.NumberPickerDownButton</item>
+        <item name="numberPickerInputTextStyle">@style/Widget.EditText.NumberPickerInputText</item>
         <item name="numberPickerStyle">@style/Widget.NumberPicker</item>
 
         <!-- CalendarView style-->
@@ -1138,7 +1141,10 @@ please see themes_device_defaults.xml.
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@android:style/Widget.Holo.PreferenceFrameLayout</item>
 
-        <!-- NumberPicker style-->
+        <!-- NumberPicker styles-->
+        <item name="numberPickerUpButtonStyle">@style/Widget.Holo.ImageButton.NumberPickerUpButton</item>
+        <item name="numberPickerDownButtonStyle">@style/Widget.Holo.ImageButton.NumberPickerDownButton</item>
+        <item name="numberPickerInputTextStyle">@style/Widget.Holo.EditText.NumberPickerInputText</item>
         <item name="numberPickerStyle">@style/Widget.Holo.NumberPicker</item>
 
         <!-- CalendarView style-->
@@ -1437,7 +1443,10 @@ please see themes_device_defaults.xml.
 
         <item name="searchDialogTheme">@style/Theme.Holo.Light.SearchBar</item>
 
-        <!-- NumberPicker style-->
+        <!-- NumberPicker attributes and styles-->
+        <item name="numberPickerUpButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerUpButton</item>
+        <item name="numberPickerDownButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerDownButton</item>
+        <item name="numberPickerInputTextStyle">@style/Widget.Holo.Light.EditText.NumberPickerInputText</item>
         <item name="numberPickerStyle">@style/Widget.Holo.Light.NumberPicker</item>
 
         <!-- CalendarView style-->
