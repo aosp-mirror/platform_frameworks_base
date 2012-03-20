@@ -217,9 +217,9 @@ public class AccountManagerService
         mAuthenticatorCache = authenticatorCache;
         mAuthenticatorCache.setListener(this, null /* Handler */);
 
-        UserAccounts accounts = initUser(0);
-
         sThis.set(this);
+
+        UserAccounts accounts = initUser(0);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
