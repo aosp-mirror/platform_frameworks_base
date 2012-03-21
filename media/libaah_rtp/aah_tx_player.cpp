@@ -52,6 +52,8 @@ static const int64_t kAAHBufferTimeUs = 1000000LL;
 const int64_t AAH_TXPlayer::kAAHRetryKeepAroundTimeNs =
     kAAHBufferTimeUs * 1100;
 
+const int32_t AAH_TXPlayer::kInvokeGetCNCPort = 0xB33977;
+
 sp<MediaPlayerBase> createAAH_TXPlayer() {
     sp<MediaPlayerBase> ret = new AAH_TXPlayer();
     return ret;
@@ -228,9 +230,8 @@ status_t AAH_TXPlayer::prepareAsync_l() {
         return UNKNOWN_ERROR;  // async prepare already pending
     }
 
-    mAAH_TXGroup = AAH_TXGroup::GetInstance();
     if (mAAH_TXGroup == NULL) {
-        return NO_MEMORY;
+        return NO_INIT;
     }
 
     if (!mQueueStarted) {
@@ -507,21 +508,12 @@ status_t AAH_TXPlayer::play_l() {
         return INVALID_OPERATION;
     }
 
-    {
-        Mutex::Autolock lock(mEndpointLock);
-        if (!mEndpointValid) {
-            return INVALID_OPERATION;
-        }
-        if (!mEndpointRegistered) {
-            mProgramID = mAAH_TXGroup->registerEndpoint(mEndpoint);
-            mEndpointRegistered = true;
-        }
+    if (mAAH_TXGroup == NULL) {
+        return INVALID_OPERATION;
     }
 
     mFlags |= PLAYING;
-
     updateClockTransform_l(false);
-
     postPumpAudioEvent_l(-1);
 
     return OK;
@@ -594,16 +586,28 @@ void AAH_TXPlayer::updateClockTransform_l(bool pause) {
     mCurrentClockTransform.a_to_b_denom = pause ? 0 : 1;
 
     // send a packet announcing the new transform
-    sp<TRTPControlPacket> packet = new TRTPControlPacket();
-    packet->setClockTransform(mCurrentClockTransform);
-    packet->setCommandID(TRTPControlPacket::kCommandNop);
-    queuePacket_l(packet);
+    if (mAAH_TXGroup != NULL) {
+        sp<TRTPControlPacket> packet = new TRTPControlPacket();
+        if (packet != NULL) {
+            packet->setClockTransform(mCurrentClockTransform);
+            packet->setCommandID(TRTPControlPacket::kCommandNop);
+            sendPacket_l(packet);
+        } else {
+            LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
+        }
+    }
 }
 
 void AAH_TXPlayer::sendEOS_l() {
-    sp<TRTPControlPacket> packet = new TRTPControlPacket();
-    packet->setCommandID(TRTPControlPacket::kCommandEOS);
-    queuePacket_l(packet);
+    if (mAAH_TXGroup != NULL) {
+        sp<TRTPControlPacket> packet = new TRTPControlPacket();
+        if (packet != NULL) {
+            packet->setCommandID(TRTPControlPacket::kCommandEOS);
+            sendPacket_l(packet);
+        } else {
+            LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
+        }
+    }
 }
 
 bool AAH_TXPlayer::isPlaying() {
@@ -628,9 +632,15 @@ status_t AAH_TXPlayer::seekTo_l(int64_t timeUs) {
     mLastQueuedMediaTimePTSValid = false;
 
     // send a flush command packet
-    sp<TRTPControlPacket> packet = new TRTPControlPacket();
-    packet->setCommandID(TRTPControlPacket::kCommandFlush);
-    queuePacket_l(packet);
+    if (mAAH_TXGroup != NULL) {
+        sp<TRTPControlPacket> packet = new TRTPControlPacket();
+        if (packet != NULL) {
+            packet->setCommandID(TRTPControlPacket::kCommandFlush);
+            sendPacket_l(packet);
+        } else {
+            LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
+        }
+    }
 
     return OK;
 }
@@ -750,19 +760,15 @@ void AAH_TXPlayer::reset_l() {
     mFileSource.clear();
 
     mBitrate = -1;
-
-    {
-        Mutex::Autolock lock(mEndpointLock);
-        if (mAAH_TXGroup != NULL && mEndpointRegistered) {
-            mAAH_TXGroup->unregisterEndpoint(mEndpoint);
-        }
-        mEndpointRegistered = false;
-        mEndpointValid = false;
-    }
-
     mProgramID = 0;
 
-    mAAH_TXGroup.clear();
+    if (mAAH_TXGroup != NULL) {
+        LOGI("TXPlayer leaving TXGroup listening on C&C port %hu",
+             mAAH_TXGroup->getCmdAndControlPort());
+        mAAH_TXGroup->dropClientReference();
+        mAAH_TXGroup = NULL;
+    }
+
     mLastQueuedMediaTimePTSValid = false;
     mCurrentClockTransformValid = false;
     mPlayRateIsPaused = false;
@@ -787,7 +793,31 @@ status_t AAH_TXPlayer::getParameter(int key, Parcel *reply) {
 }
 
 status_t AAH_TXPlayer::invoke(const Parcel& request, Parcel *reply) {
-    return INVALID_OPERATION;
+    Mutex::Autolock lock(mLock);
+    if (!reply) {
+        return BAD_VALUE;
+    }
+
+    int32_t methodID;
+    status_t err = request.readInt32(&methodID);
+    if (err != android::OK) {
+        return err;
+    }
+
+    switch (methodID) {
+        case kInvokeGetCNCPort: {
+            if (mAAH_TXGroup == NULL) {
+                return NO_INIT;
+            }
+
+            reply->writeInt32(mAAH_TXGroup->getCmdAndControlPort());
+
+            return OK;
+        };
+
+        default:
+            return INVALID_OPERATION;
+    }
 }
 
 status_t AAH_TXPlayer::getMetadata(const media::Metadata::Filter& ids,
@@ -826,17 +856,80 @@ status_t AAH_TXPlayer::setRetransmitEndpoint(
         const struct sockaddr_in* endpoint) {
     Mutex::Autolock lock(mLock);
 
-    if (NULL == endpoint)
+    if (NULL == endpoint) {
         return BAD_VALUE;
+    }
 
-    // Once the endpoint has been registered, it may not be changed.
-    if (mEndpointRegistered)
+    // Once the tx group has been selected, it may not be changed.
+    if (mAAH_TXGroup != NULL) {
         return INVALID_OPERATION;
+    }
 
-    mEndpoint.addr = endpoint->sin_addr.s_addr;
-    mEndpoint.port = endpoint->sin_port;
-    mEndpointValid = true;
+    if (endpoint->sin_family != AF_INET) {
+        LOGE("Bad address family (%d) in %s",
+             endpoint->sin_family, __PRETTY_FUNCTION__);
+        return BAD_VALUE;
+    }
 
+    uint32_t addr = ntohl(endpoint->sin_addr.s_addr);
+    uint16_t port = ntohs(endpoint->sin_port);
+    if ((addr & 0xF0000000) == 0xE0000000) {
+        // Starting in multicast mode?  We need to have a specified port to
+        // multicast to, so sanity check that first.  Then search for an
+        // existing multicast TX group with the same target endpoint.  If we
+        // don't find one, then try to make one.
+        if (!port) {
+            LOGE("No port specified for multicast target %d.%d.%d.%d",
+                 IP_PRINTF_HELPER(addr));
+            return BAD_VALUE;
+        }
+
+        mAAH_TXGroup = AAH_TXGroup::getGroup(endpoint);
+        if (mAAH_TXGroup == NULL) {
+            // No pre-existing group.  Make a new one.
+            mAAH_TXGroup = AAH_TXGroup::getGroup(static_cast<uint16_t>(0));
+
+            // Still no group?  Thats bad.  We probably have exceeded our limit
+            // on the number of simultaneous TX groups.
+            if (mAAH_TXGroup == NULL) {
+                // No need to log, AAH_TXGroup should have already done so for
+                // us.
+                return NO_MEMORY;
+            }
+
+            // Make sure to set up the group's multicast target.
+            mAAH_TXGroup->setMulticastTXTarget(endpoint);
+        }
+
+        LOGI("TXPlayer joined multicast group %d.%d.%d.%d:%hu listening on"
+             " C&C port %hu",
+             IP_PRINTF_HELPER(addr), port, mAAH_TXGroup->getCmdAndControlPort());
+    } else if (addr == INADDR_ANY) {
+        // Starting in unicast mode.  A port of 0 means we need to create a new
+        // group, a non-zero port means that we want to join an existing one.
+        mAAH_TXGroup = AAH_TXGroup::getGroup(port);
+
+        if (mAAH_TXGroup == NULL) {
+            if (port) {
+                LOGE("Failed to find retransmit group with C&C port = %hu",
+                      port);
+                return BAD_VALUE;
+            } else {
+                LOGE("Failed to create new retransmit group.");
+                return NO_MEMORY;
+            }
+        }
+
+        LOGI("TXPlayer joined unicast group listening on C&C port %hu",
+             mAAH_TXGroup->getCmdAndControlPort());
+    } else {
+        LOGE("Unicast address (%d.%d.%d.%d) passed to %s",
+             IP_PRINTF_HELPER(addr), __PRETTY_FUNCTION__);
+        return BAD_VALUE;
+    }
+
+    CHECK(mAAH_TXGroup != NULL);
+    mProgramID = mAAH_TXGroup->getNewProgramID();
     return OK;
 }
 
@@ -1103,28 +1196,35 @@ void AAH_TXPlayer::onPumpAudio() {
         LOGV("*** transmitting packet with pts=%lld", mediaTimeUs);
 
         sp<TRTPAudioPacket> packet = new TRTPAudioPacket();
-        packet->setPTS(mediaTimeUs);
-        packet->setSubstreamID(1);
+        if (packet != NULL) {
+            packet->setPTS(mediaTimeUs);
+            packet->setSubstreamID(1);
 
-        packet->setCodecType(mAudioCodec);
-        packet->setVolume(mTRTPVolume);
-        // TODO : introduce a throttle for this so we can control the
-        // frequency with which transforms get sent.
-        packet->setClockTransform(mCurrentClockTransform);
-        packet->setAccessUnitData(data, mediaBuffer->range_length());
+            packet->setCodecType(mAudioCodec);
+            packet->setVolume(mTRTPVolume);
+            // TODO : introduce a throttle for this so we can control the
+            // frequency with which transforms get sent.
+            packet->setClockTransform(mCurrentClockTransform);
+            packet->setAccessUnitData(data, mediaBuffer->range_length());
 
-        // TODO : while its pretty much universally true that audio ES payloads
-        // are all RAPs across all codecs, it might be a good idea to throttle
-        // the frequency with which we send codec out of band data to the RXers.
-        // If/when we do, we need to flag only those payloads which have
-        // required out of band data attached to them as RAPs.
-        packet->setRandomAccessPoint(true);
+            // TODO : while its pretty much universally true that audio ES
+            // payloads are all RAPs across all codecs, it might be a good idea
+            // to throttle the frequency with which we send codec out of band
+            // data to the RXers.  If/when we do, we need to flag only those
+            // payloads which have required out of band data attached to them as
+            // RAPs.
+            packet->setRandomAccessPoint(true);
 
-        if (mAudioCodecData && mAudioCodecDataSize) {
-            packet->setAuxData(mAudioCodecData, mAudioCodecDataSize);
+            if (mAudioCodecData && mAudioCodecDataSize) {
+                packet->setAuxData(mAudioCodecData, mAudioCodecDataSize);
+            }
+
+            CHECK(mAAH_TXGroup != NULL);
+            sendPacket_l(packet);
+        } else {
+            LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
         }
 
-        queuePacket_l(packet);
         mediaBuffer->release();
 
         mLastQueuedMediaTimePTSValid = true;
@@ -1147,31 +1247,11 @@ void AAH_TXPlayer::onPumpAudio() {
     }
 }
 
-void AAH_TXPlayer::queuePacket_l(const sp<TRTPPacket>& packet) {
-    if (mAAH_TXGroup == NULL) {
-        return;
-    }
-
-    sp<AMessage> message = new AMessage(AAH_TXGroup::kWhatSendPacket,
-                                        mAAH_TXGroup->handlerID());
-
-    {
-        Mutex::Autolock lock(mEndpointLock);
-        if (!mEndpointValid) {
-            return;
-        }
-
-        message->setInt32(AAH_TXGroup::kSendPacketIPAddr, mEndpoint.addr);
-        message->setInt32(AAH_TXGroup::kSendPacketPort, mEndpoint.port);
-    }
-
+void AAH_TXPlayer::sendPacket_l(const sp<TRTPPacket>& packet) {
+    CHECK(mAAH_TXGroup != NULL);
+    CHECK(packet != NULL);
     packet->setProgramID(mProgramID);
-    packet->setExpireTime(systemTime() + kAAHRetryKeepAroundTimeNs);
-    packet->pack();
-
-    message->setObject(AAH_TXGroup::kSendPacketTRTPPacket, packet);
-
-    message->post();
+    mAAH_TXGroup->sendPacket(packet);
 }
 
 }  // namespace android
