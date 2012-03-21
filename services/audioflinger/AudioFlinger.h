@@ -899,6 +899,7 @@ public:
     protected:
         SortedVector< wp<Track> >       mActiveTracks;
 
+        // Allocate a track name.  Returns name >= 0 if successful, -1 on failure.
         virtual int             getTrackName_l() = 0;
         virtual void            deleteTrackName_l(int name) = 0;
         virtual uint32_t        activeSleepTimeUs();
@@ -1559,9 +1560,10 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         uint32_t mNewLeftVolume;       // new volume on left channel
         uint32_t mNewRightVolume;      // new volume on right channel
         uint32_t mStrategy; // strategy for this effect chain
-        // mSuspendedEffects lists all effect currently suspended in the chain
-        // use effect type UUID timelow field as key. There is no real risk of identical
+        // mSuspendedEffects lists all effects currently suspended in the chain.
+        // Use effect type UUID timelow field as key. There is no real risk of identical
         // timeLow fields among effect type UUIDs.
+        // Updated by updateSuspendedSessions_l() only.
         KeyedVector< int, sp<SuspendedEffectDesc> > mSuspendedEffects;
     };
 

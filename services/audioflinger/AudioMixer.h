@@ -70,9 +70,14 @@ public:
 
 
     // For all APIs with "name": TRACK0 <= name < TRACK0 + MAX_NUM_TRACKS
+
+    // Allocate a track name.  Returns new track name if successful, -1 on failure.
     int         getTrackName();
+
+    // Free an allocated track by name
     void        deleteTrackName(int name);
 
+    // Enable or disable an allocated track by name
     void        enable(int name);
     void        disable(int name);
 

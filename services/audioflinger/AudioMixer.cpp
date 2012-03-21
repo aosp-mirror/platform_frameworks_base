@@ -57,6 +57,10 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
     mState.outputTemp   = NULL;
     mState.resampleTemp = NULL;
     // mState.reserved
+
+    // FIXME Most of the following initialization is probably redundant since
+    // tracks[i] should only be referenced if (mTrackNames & (1 << i)) != 0
+    // and mTrackNames is initially 0.  However, leave it here until that's verified.
     track_t* t = mState.tracks;
     for (unsigned i=0 ; i < MAX_NUM_TRACKS ; i++) {
         t->needs = 0;
