@@ -1168,7 +1168,6 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"הוסף חשבון"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"הגדל"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"הפחת"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> גע והחזק."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"הסט מעלה כדי להוסיף ומטה כדי להפחית."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"הוסף דקה"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"הפחת דקה"</string>

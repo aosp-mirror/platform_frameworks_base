@@ -338,7 +338,7 @@
     <string name="permlab_readCallLog" msgid="3478133184624102739">"خواندن گزارش تماس"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3995157599976515002">"به برنامه اجازه می‌دهد گزارشات تماس رایانه لوحی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را بخواند. برنامه‌های مخرب ممکن است از این ویژگی برای ارسال داده‌های شما به دیگران استفاده کنند."</string>
     <string name="permdesc_readCallLog" product="default" msgid="3452017559804750758">"به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را بخواند. برنامه‌های مخرب ممکن است از این ویژگی برای ارسال داده‌های شما به دیگران استفاده کنند."</string>
-    <string name="permlab_writeCallLog" msgid="8552045664743499354">"نوشتن در گزارش تماس"</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"نوشتن گزارش تماس"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"به برنامه اجازه می‌دهد گزارشات تماس رایانه لوحی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"خواندن داده‌های نمایه شما"</string>
@@ -1168,7 +1168,6 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"افزودن حساب"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"افزایش"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"کاهش"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> لمس کرده و نگه دارید."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"برای افزایش به بالا و برای کاهش به پایین بلغزانید."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">" افزایش دقیقه"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"کاهش دقیقه"</string>
