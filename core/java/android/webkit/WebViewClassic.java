@@ -43,6 +43,7 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Picture;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -56,9 +57,7 @@ import android.net.http.SslCertificate;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.os.StrictMode;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.security.KeyChain;
@@ -758,22 +757,21 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             this.setContentView(mContentView);
         }
 
-        public void show(Rect cursorRect, int windowLeft, int windowTop) {
+        public void show(Point cursorBottom, Point cursorTop,
+                int windowLeft, int windowTop) {
             measureContent();
 
             int width = mContentView.getMeasuredWidth();
             int height = mContentView.getMeasuredHeight();
-            int y = cursorRect.top - height;
+            int y = cursorTop.y - height;
+            int x = cursorTop.x - (width / 2);
             if (y < windowTop) {
                 // There's not enough room vertically, move it below the
                 // handle.
-                // The selection handle is vertically offset by 1/4 of the
-                // line height.
                 ensureSelectionHandles();
-                y = cursorRect.bottom - (cursorRect.height() / 4) +
-                        mSelectHandleCenter.getIntrinsicHeight();
+                y = cursorBottom.y + mSelectHandleCenter.getIntrinsicHeight();
+                x = cursorBottom.x - (width / 2);
             }
-            int x = cursorRect.centerX() - (width / 2);
             if (x < windowLeft) {
                 x = windowLeft;
             }
@@ -1151,12 +1149,18 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private Drawable mSelectHandleLeft;
     private Drawable mSelectHandleRight;
     private Drawable mSelectHandleCenter;
-    private Rect mSelectCursorBase = new Rect();
+    private Point mSelectHandleLeftOffset;
+    private Point mSelectHandleRightOffset;
+    private Point mSelectHandleCenterOffset;
+    private Point mSelectCursorBase = new Point();
     private int mSelectCursorBaseLayerId;
-    private Rect mSelectCursorExtent = new Rect();
+    private QuadF mSelectCursorBaseTextQuad = new QuadF();
+    private Point mSelectCursorExtent = new Point();
     private int mSelectCursorExtentLayerId;
-    private Rect mSelectDraggingCursor;
-    private Point mSelectDraggingOffset = new Point();
+    private QuadF mSelectCursorExtentTextQuad = new QuadF();
+    private Point mSelectDraggingCursor;
+    private Point mSelectDraggingOffset;
+    private QuadF mSelectDraggingTextQuad;
     private boolean mIsCaretSelection;
     static final int HANDLE_ID_START = 0;
     static final int HANDLE_ID_END = 1;
@@ -3894,9 +3898,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mSelectingText) {
             if (mSelectCursorBaseLayerId == mCurrentScrollingLayerId) {
                 mSelectCursorBase.offset(dx, dy);
+                mSelectCursorBaseTextQuad.offset(dx, dy);
             }
             if (mSelectCursorExtentLayerId == mCurrentScrollingLayerId) {
                 mSelectCursorExtent.offset(dx, dy);
+                mSelectCursorExtentTextQuad.offset(dx, dy);
             }
         }
         if (mAutoCompletePopup != null &&
@@ -4774,6 +4780,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     com.android.internal.R.drawable.text_select_handle_left);
             mSelectHandleRight = mContext.getResources().getDrawable(
                     com.android.internal.R.drawable.text_select_handle_right);
+            mSelectHandleCenterOffset = new Point(0,
+                    -mSelectHandleCenter.getIntrinsicHeight());
+            mSelectHandleLeftOffset = new Point(0,
+                    -mSelectHandleLeft.getIntrinsicHeight());
+            mSelectHandleRightOffset = new Point(
+                    -mSelectHandleLeft.getIntrinsicWidth() / 2,
+                    -mSelectHandleRight.getIntrinsicHeight());
         }
     }
 
@@ -4813,10 +4826,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * startX, startY, endX, endY
      */
     private void getSelectionHandles(int[] handles) {
-        handles[0] = mSelectCursorBase.left;
-        handles[1] = mSelectCursorBase.bottom;
-        handles[2] = mSelectCursorExtent.left;
-        handles[3] = mSelectCursorExtent.bottom;
+        handles[0] = mSelectCursorBase.x;
+        handles[1] = mSelectCursorBase.y;
+        handles[2] = mSelectCursorExtent.x;
+        handles[3] = mSelectCursorExtent.y;
         if (!nativeIsBaseFirst(mNativeClass)) {
             int swap = handles[0];
             handles[0] = handles[2];
@@ -5332,15 +5345,64 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         ClipboardManager cm = (ClipboardManager)(mContext
                 .getSystemService(Context.CLIPBOARD_SERVICE));
         if (cm.hasPrimaryClip()) {
-            Rect cursorRect = contentToViewRect(mSelectCursorBase);
+            Point cursorPoint = new Point(contentToViewX(mSelectCursorBase.x),
+                    contentToViewY(mSelectCursorBase.y));
+            Point cursorTop = calculateCaretTop();
+            cursorTop.set(contentToViewX(cursorTop.x),
+                    contentToViewY(cursorTop.y));
+
             int[] location = new int[2];
             mWebView.getLocationInWindow(location);
-            cursorRect.offset(location[0] - getScrollX(), location[1] - getScrollY());
+            int offsetX = location[0] - getScrollX();
+            int offsetY = location[1] - getScrollY();
+            cursorPoint.offset(offsetX, offsetY);
+            cursorTop.offset(offsetX, offsetY);
             if (mPasteWindow == null) {
                 mPasteWindow = new PastePopupWindow();
             }
-            mPasteWindow.show(cursorRect, location[0], location[1]);
+            mPasteWindow.show(cursorPoint, cursorTop, location[0], location[1]);
         }
+    }
+
+    /**
+     * Given segment AB, this finds the point C along AB that is closest to
+     * point and then returns it scale along AB. The scale factor is AC/AB.
+     *
+     * @param x The x coordinate of the point near segment AB that determines
+     * the scale factor.
+     * @param y The y coordinate of the point near segment AB that determines
+     * the scale factor.
+     * @param a The first point of the line segment.
+     * @param b The second point of the line segment.
+     * @return The scale factor AC/AB, where C is the point on AB closest to
+     *         point.
+     */
+    private static float scaleAlongSegment(int x, int y, PointF a, PointF b) {
+        // The bottom line of the text box is line AB
+        float abX = b.x - a.x;
+        float abY = b.y - a.y;
+        float ab2 = (abX * abX) + (abY * abY);
+
+        // The line from first point in text bounds to bottom is AP
+        float apX = x - a.x;
+        float apY = y - a.y;
+        float abDotAP = (apX * abX) + (apY * abY);
+        float scale = abDotAP / ab2;
+        return scale;
+    }
+
+    /**
+     * Assuming arbitrary shape of a quadralateral forming text bounds, this
+     * calculates the top of a caret.
+     */
+    private Point calculateCaretTop() {
+        float scale = scaleAlongSegment(mSelectCursorBase.x, mSelectCursorBase.y,
+                mSelectCursorBaseTextQuad.p4, mSelectCursorBaseTextQuad.p3);
+        int x = Math.round(scaleCoordinate(scale,
+                mSelectCursorBaseTextQuad.p1.x, mSelectCursorBaseTextQuad.p2.x));
+        int y = Math.round(scaleCoordinate(scale,
+                mSelectCursorBaseTextQuad.p1.y, mSelectCursorBaseTextQuad.p2.y));
+        return new Point(x, y);
     }
 
     private void hidePasteButton() {
@@ -5351,9 +5413,54 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private void syncSelectionCursors() {
         mSelectCursorBaseLayerId =
-                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_BASE, mSelectCursorBase);
+                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_BASE,
+                        mSelectCursorBase, mSelectCursorBaseTextQuad);
         mSelectCursorExtentLayerId =
-                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_EXTENT, mSelectCursorExtent);
+                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_EXTENT,
+                        mSelectCursorExtent, mSelectCursorExtentTextQuad);
+    }
+
+    private void adjustSelectionCursors() {
+        boolean wasDraggingStart = (mSelectDraggingCursor == mSelectCursorBase);
+        int oldX = mSelectDraggingCursor.x;
+        int oldY = mSelectDraggingCursor.y;
+        int oldStartX = mSelectCursorBase.x;
+        int oldStartY = mSelectCursorBase.y;
+        int oldEndX = mSelectCursorExtent.x;
+        int oldEndY = mSelectCursorExtent.y;
+
+        syncSelectionCursors();
+        boolean dragChanged = oldX != mSelectDraggingCursor.x ||
+                oldY != mSelectDraggingCursor.y;
+        if (dragChanged && !mIsCaretSelection) {
+            boolean draggingStart;
+            if (wasDraggingStart) {
+                float endStart = distanceSquared(oldEndX, oldEndY,
+                        mSelectCursorBase);
+                float endEnd = distanceSquared(oldEndX, oldEndY,
+                        mSelectCursorExtent);
+                draggingStart = endStart > endEnd;
+            } else {
+                float startStart = distanceSquared(oldStartX, oldStartY,
+                        mSelectCursorBase);
+                float startEnd = distanceSquared(oldStartX, oldStartY,
+                        mSelectCursorExtent);
+                draggingStart = startStart > startEnd;
+            }
+            mSelectDraggingCursor = (draggingStart
+                    ? mSelectCursorBase : mSelectCursorExtent);
+            mSelectDraggingTextQuad = (draggingStart
+                    ? mSelectCursorBaseTextQuad : mSelectCursorExtentTextQuad);
+            mSelectDraggingOffset = (draggingStart
+                    ? mSelectHandleLeftOffset : mSelectHandleRightOffset);
+        }
+        mSelectDraggingCursor.set(oldX, oldY);
+    }
+
+    private float distanceSquared(int x, int y, Point p) {
+        float dx = p.x - x;
+        float dy = p.y - y;
+        return (dx * dx) + (dy * dy);
     }
 
     private boolean setupWebkitSelect() {
@@ -5370,14 +5477,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private void updateWebkitSelection() {
         int[] handles = null;
         if (mIsCaretSelection) {
-            mSelectCursorExtent.set(mSelectCursorBase);
+            mSelectCursorExtent.set(mSelectCursorBase.x, mSelectCursorBase.y);
         }
         if (mSelectingText) {
             handles = new int[4];
-            handles[0] = mSelectCursorBase.centerX();
-            handles[1] = mSelectCursorBase.centerY();
-            handles[2] = mSelectCursorExtent.centerX();
-            handles[3] = mSelectCursorExtent.centerY();
+            handles[0] = mSelectCursorBase.x;
+            handles[1] = mSelectCursorBase.y;
+            handles[2] = mSelectCursorExtent.x;
+            handles[3] = mSelectCursorExtent.y;
         } else {
             nativeSetTextSelection(mNativeClass, 0);
         }
@@ -5968,12 +6075,15 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                     mSelectionStarted = false;
                     if (mSelectingText) {
+                        ensureSelectionHandles();
                         int shiftedY = y - getTitleHeight() + getScrollY();
                         int shiftedX = x + getScrollX();
                         if (mSelectHandleCenter != null && mSelectHandleCenter.getBounds()
                                 .contains(shiftedX, shiftedY)) {
                             mSelectionStarted = true;
                             mSelectDraggingCursor = mSelectCursorBase;
+                            mSelectDraggingOffset = mSelectHandleCenterOffset;
+                            mSelectDraggingTextQuad = mSelectCursorBaseTextQuad;
                             mPrivateHandler.removeMessages(CLEAR_CARET_HANDLE);
                             hidePasteButton();
                         } else if (mSelectHandleLeft != null
@@ -5981,18 +6091,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                                     .contains(shiftedX, shiftedY)) {
                                 mSelectionStarted = true;
                                 mSelectDraggingCursor = mSelectCursorBase;
+                                mSelectDraggingOffset = mSelectHandleLeftOffset;
+                                mSelectDraggingTextQuad = mSelectCursorBaseTextQuad;
                         } else if (mSelectHandleRight != null
                                 && mSelectHandleRight.getBounds()
                                 .contains(shiftedX, shiftedY)) {
                             mSelectionStarted = true;
                             mSelectDraggingCursor = mSelectCursorExtent;
+                            mSelectDraggingOffset = mSelectHandleRightOffset;
+                            mSelectDraggingTextQuad = mSelectCursorExtentTextQuad;
                         } else if (mIsCaretSelection) {
                             selectionDone();
-                        }
-                        if (mSelectDraggingCursor != null) {
-                            mSelectDraggingOffset.set(
-                                    mSelectDraggingCursor.left - contentX,
-                                    mSelectDraggingCursor.top - contentY);
                         }
                         if (DebugFlags.WEB_VIEW) {
                             Log.v(LOGTAG, "select=" + contentX + "," + contentY);
@@ -6073,9 +6182,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         parent.requestDisallowInterceptTouchEvent(true);
                     }
                     if (deltaX != 0 || deltaY != 0) {
-                        mSelectDraggingCursor.offsetTo(
-                                contentX + mSelectDraggingOffset.x,
-                                contentY + mSelectDraggingOffset.y);
+                        snapDraggingCursor(contentX, contentY);
                         updateWebkitSelection();
                         mLastTouchX = x;
                         mLastTouchY = y;
@@ -6682,6 +6789,30 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         removeTouchHighlight();
         mHeldMotionless = MOTIONLESS_TRUE;
         mTouchMode = TOUCH_DONE_MODE;
+    }
+
+    private void snapDraggingCursor(int x, int y) {
+        x += viewToContentDimension(mSelectDraggingOffset.x);
+        y += viewToContentDimension(mSelectDraggingOffset.y);
+        if (mSelectDraggingTextQuad.containsPoint(x, y)) {
+            float scale = scaleAlongSegment(x, y,
+                    mSelectDraggingTextQuad.p4, mSelectDraggingTextQuad.p3);
+            // clamp scale to ensure point is on the bottom segment
+            scale = Math.max(0.0f, scale);
+            scale = Math.min(scale, 1.0f);
+            float newX = scaleCoordinate(scale,
+                    mSelectDraggingTextQuad.p4.x, mSelectDraggingTextQuad.p3.x);
+            float newY = scaleCoordinate(scale,
+                    mSelectDraggingTextQuad.p4.y, mSelectDraggingTextQuad.p3.y);
+            mSelectDraggingCursor.set(Math.round(newX), Math.round(newY));
+        } else {
+            mSelectDraggingCursor.set(x, y);
+        }
+    }
+
+    private static float scaleCoordinate(float scale, float coord1, float coord2) {
+        float diff = coord2 - coord1;
+        return coord1 + (scale * diff);
     }
 
     @Override
@@ -8735,6 +8866,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     setupWebkitSelect();
                 } else if (!mSelectionStarted) {
                     syncSelectionCursors();
+                } else {
+                    adjustSelectionCursors();
                 }
                 if (mIsCaretSelection) {
                     resetCaretTimer();
@@ -9398,7 +9531,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static native void nativeSetPauseDrawing(int instance, boolean pause);
     private static native void nativeSetTextSelection(int instance, int selection);
     private static native int nativeGetHandleLayerId(int instance, int handle,
-            Rect cursorLocation);
+            Point cursorLocation, QuadF textQuad);
     private static native boolean nativeIsBaseFirst(int instance);
     private static native void nativeMapLayerRect(int instance, int layerId,
             Rect rect);
