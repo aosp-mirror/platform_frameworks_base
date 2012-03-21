@@ -1908,7 +1908,8 @@ public class GridView extends AbsListView {
     }
 
     /**
-     * Describes how the child views are horizontally aligned. Defaults to Gravity.LEFT
+     * Set the gravity for this grid. Gravity describes how the child views
+     * are horizontally aligned. Defaults to Gravity.LEFT
      *
      * @param gravity the gravity to apply to this grid's children
      *
@@ -1919,6 +1920,17 @@ public class GridView extends AbsListView {
             mGravity = gravity;
             requestLayoutIfNecessary();
         }
+    }
+
+    /**
+     * Describes how the child views are horizontally aligned. Defaults to Gravity.LEFT
+     *
+     * @return the gravity that will be applied to this grid's children
+     *
+     * @attr ref android.R.styleable#GridView_gravity
+     */
+    public int getGravity() {
+        return mGravity;
     }
 
     /**
@@ -1937,6 +1949,44 @@ public class GridView extends AbsListView {
         }
     }
 
+    /**
+     * Returns the amount of horizontal spacing currently used between each item in the grid.
+     *
+     * <p>This is only accurate for the current layout. If {@link #setHorizontalSpacing(int)}
+     * has been called but layout is not yet complete, this method may return a stale value.
+     * To get the horizontal spacing that was explicitly requested use
+     * {@link #getRequestedHorizontalSpacing()}.</p>
+     *
+     * @return Current horizontal spacing between each item in pixels
+     *
+     * @see #setHorizontalSpacing(int)
+     * @see #getRequestedHorizontalSpacing()
+     *
+     * @attr ref android.R.styleable#GridView_horizontalSpacing
+     */
+    public int getHorizontalSpacing() {
+        return mHorizontalSpacing;
+    }
+
+    /**
+     * Returns the requested amount of horizontal spacing between each item in the grid.
+     *
+     * <p>The value returned may have been supplied during inflation as part of a style,
+     * the default GridView style, or by a call to {@link #setHorizontalSpacing(int)}.
+     * If layout is not yet complete or if GridView calculated a different horizontal spacing
+     * from what was requested, this may return a different value from
+     * {@link #getHorizontalSpacing()}.</p>
+     *
+     * @return The currently requested horizontal spacing between items, in pixels
+     *
+     * @see #setHorizontalSpacing(int)
+     * @see #getHorizontalSpacing()
+     *
+     * @attr ref android.R.styleable#GridView_horizontalSpacing
+     */
+    public int getRequestedHorizontalSpacing() {
+        return mRequestedHorizontalSpacing;
+    }
 
     /**
      * Set the amount of vertical (y) spacing to place between each item
@@ -1945,6 +1995,8 @@ public class GridView extends AbsListView {
      * @param verticalSpacing The amount of vertical space between items,
      * in pixels.
      *
+     * @see #getVerticalSpacing()
+     *
      * @attr ref android.R.styleable#GridView_verticalSpacing
      */
     public void setVerticalSpacing(int verticalSpacing) {
@@ -1952,6 +2004,19 @@ public class GridView extends AbsListView {
             mVerticalSpacing = verticalSpacing;
             requestLayoutIfNecessary();
         }
+    }
+
+    /**
+     * Returns the amount of vertical spacing between each item in the grid.
+     *
+     * @return The vertical spacing between items in pixels
+     *
+     * @see #setVerticalSpacing(int)
+     *
+     * @attr ref android.R.styleable#GridView_verticalSpacing
+     */
+    public int getVerticalSpacing() {
+        return mVerticalSpacing;
     }
 
     /**
@@ -1985,6 +2050,39 @@ public class GridView extends AbsListView {
             mRequestedColumnWidth = columnWidth;
             requestLayoutIfNecessary();
         }
+    }
+
+    /**
+     * Return the width of a column in the grid.
+     *
+     * <p>This may not be valid yet if a layout is pending.</p>
+     *
+     * @return The column width in pixels
+     *
+     * @see #setColumnWidth(int)
+     * @see #getRequestedColumnWidth()
+     *
+     * @attr ref android.R.styleable#GridView_columnWidth
+     */
+    public int getColumnWidth() {
+        return mColumnWidth;
+    }
+
+    /**
+     * Return the requested width of a column in the grid.
+     *
+     * <p>This may not be the actual column width used. Use {@link #getColumnWidth()}
+     * to retrieve the current real width of a column.</p>
+     *
+     * @return The requested column width in pixels
+     *
+     * @see #setColumnWidth(int)
+     * @see #getColumnWidth()
+     *
+     * @attr ref android.R.styleable#GridView_columnWidth
+     */
+    public int getRequestedColumnWidth() {
+        return mRequestedColumnWidth;
     }
 
     /**

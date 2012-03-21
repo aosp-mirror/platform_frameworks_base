@@ -26621,8 +26621,14 @@ package android.widget {
     ctor public GridView(android.content.Context, android.util.AttributeSet);
     ctor public GridView(android.content.Context, android.util.AttributeSet, int);
     method public android.widget.ListAdapter getAdapter();
+    method public int getColumnWidth();
+    method public int getGravity();
+    method public int getHorizontalSpacing();
     method public int getNumColumns();
+    method public int getRequestedColumnWidth();
+    method public int getRequestedHorizontalSpacing();
     method public int getStretchMode();
+    method public int getVerticalSpacing();
     method public void setColumnWidth(int);
     method public void setGravity(int);
     method public void setHorizontalSpacing(int);
