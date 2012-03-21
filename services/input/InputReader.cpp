@@ -2874,7 +2874,7 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
             mOrientedRanges.distance.min =
                     mRawPointerAxes.distance.minValue * mDistanceScale;
             mOrientedRanges.distance.max =
-                    mRawPointerAxes.distance.minValue * mDistanceScale;
+                    mRawPointerAxes.distance.maxValue * mDistanceScale;
             mOrientedRanges.distance.flat = 0;
             mOrientedRanges.distance.fuzz =
                     mRawPointerAxes.distance.fuzz * mDistanceScale;
