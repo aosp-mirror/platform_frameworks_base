@@ -40,10 +40,6 @@ public final class SIMFileHandler extends IccFileHandler implements IccConstants
         super(card, aid, ci);
     }
 
-    public void dispose() {
-        super.dispose();
-    }
-
     protected void finalize() {
         Log.d(LOG_TAG, "SIMFileHandler finalized");
     }

@@ -15,6 +15,7 @@
  */
 package com.android.internal.telephony.cdma;
 
+import android.content.Context;
 import android.os.AsyncResult;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -22,6 +23,8 @@ import android.util.Log;
 import com.android.internal.telephony.AdnRecordLoader;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.IccCardApplication.AppType;
+import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.MccTable;
@@ -54,8 +57,8 @@ public final class CdmaLteUiccRecords extends SIMRecords {
 
     private final IsimUiccRecords mIsimUiccRecords = new IsimUiccRecords();
 
-    public CdmaLteUiccRecords(PhoneBase p) {
-        super(p);
+    public CdmaLteUiccRecords(IccCard card, Context c, CommandsInterface ci) {
+        super(card, c, ci);
     }
 
     // Refer to ETSI TS 102.221
@@ -146,7 +149,7 @@ public final class CdmaLteUiccRecords extends SIMRecords {
             }
             if (DBG) log("spn=" + spn);
             if (DBG) log("spnCondition=" + mCsimSpnDisplayCondition);
-            phone.setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, spn);
+            SystemProperties.set(PROPERTY_ICC_OPERATOR_ALPHA, spn);
         }
     }
 
@@ -262,55 +265,54 @@ public final class CdmaLteUiccRecords extends SIMRecords {
 
     @Override
     protected void fetchSimRecords() {
-        IccFileHandler iccFh = phone.getIccFileHandler();
         recordsRequested = true;
 
-        phone.mCM.getIMSI(obtainMessage(EVENT_GET_IMSI_DONE));
+        mCi.getIMSIForApp(mParentCard.getAid(), obtainMessage(EVENT_GET_IMSI_DONE));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_ICCID, obtainMessage(EVENT_GET_ICCID_DONE));
+        mFh.loadEFTransparent(EF_ICCID, obtainMessage(EVENT_GET_ICCID_DONE));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_AD, obtainMessage(EVENT_GET_AD_DONE));
+        mFh.loadEFTransparent(EF_AD, obtainMessage(EVENT_GET_AD_DONE));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_PL,
+        mFh.loadEFTransparent(EF_PL,
                 obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfPlLoaded()));
         recordsToLoad++;
 
-        new AdnRecordLoader(phone).loadFromEF(EF_MSISDN, EF_EXT1, 1,
+        new AdnRecordLoader(mFh).loadFromEF(EF_MSISDN, EF_EXT1, 1,
                 obtainMessage(EVENT_GET_MSISDN_DONE));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_SST, obtainMessage(EVENT_GET_SST_DONE));
+        mFh.loadEFTransparent(EF_SST, obtainMessage(EVENT_GET_SST_DONE));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_CSIM_LI,
+        mFh.loadEFTransparent(EF_CSIM_LI,
                 obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimLiLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_CSIM_SPN,
+        mFh.loadEFTransparent(EF_CSIM_SPN,
                 obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimSpnLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFLinearFixed(EF_CSIM_MDN, 1,
+        mFh.loadEFLinearFixed(EF_CSIM_MDN, 1,
                 obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimMdnLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_CSIM_IMSIM,
+        mFh.loadEFTransparent(EF_CSIM_IMSIM,
                 obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimImsimLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFLinearFixedAll(EF_CSIM_CDMAHOME,
+        mFh.loadEFLinearFixedAll(EF_CSIM_CDMAHOME,
                 obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimCdmaHomeLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_CSIM_EPRL,
+        mFh.loadEFTransparent(EF_CSIM_EPRL,
                 obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimEprlLoaded()));
         recordsToLoad++;
 
         // load ISIM records
-        recordsToLoad += mIsimUiccRecords.fetchIsimRecords(iccFh, this);
+        recordsToLoad += mIsimUiccRecords.fetchIsimRecords(mFh, this);
     }
 
     private int adjstMinDigits (int digits) {
@@ -354,7 +356,7 @@ public final class CdmaLteUiccRecords extends SIMRecords {
                                     Integer.parseInt(imsi.substring(0,3)));
             }
             log("Setting locale to " + prefLang + "_" + country);
-            phone.setSystemLocale(prefLang, country, false);
+            MccTable.setSystemLocale(mContext, prefLang, country);
         } else {
             log ("No suitable CSIM selected locale");
         }
@@ -362,7 +364,7 @@ public final class CdmaLteUiccRecords extends SIMRecords {
 
     private String findBestLanguage(byte[] languages) {
         String bestMatch = null;
-        String[] locales = phone.getContext().getAssets().getLocales();
+        String[] locales = mContext.getAssets().getLocales();
 
         if ((languages == null) || (locales == null)) return null;
 
@@ -436,23 +438,14 @@ public final class CdmaLteUiccRecords extends SIMRecords {
             return true;
         }
 
-        if (phone == null || phone.mIccCard == null) {
+        if (mParentCard == null) {
             return false;
         }
 
-        if (phone.mIccCard.isApplicationOnIcc(AppType.APPTYPE_CSIM) &&
+        if (mParentCard.isApplicationOnIcc(AppType.APPTYPE_CSIM) &&
             ((mMdn == null) || (mMin == null))) {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Dispatch 3GPP format message. For CDMA/LTE phones,
-     * send the message to the secondary 3GPP format SMS dispatcher.
-     */
-    @Override
-    protected int dispatchGsmMessage(SmsMessageBase message) {
-        return ((CDMALTEPhone) phone).m3gppSMS.dispatchMessage(message);
     }
 }

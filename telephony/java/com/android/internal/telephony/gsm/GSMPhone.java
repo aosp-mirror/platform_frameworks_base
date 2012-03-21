@@ -152,7 +152,7 @@ public class GSMPhone extends PhoneBase {
         mStkService = CatService.getInstance(mCM, mIccRecords, mContext, mIccFileHandler, mIccCard);
 
         mCM.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
-        mIccRecords.registerForRecordsLoaded(this, EVENT_SIM_RECORDS_LOADED, null);
+        registerForSimRecordEvents();
         mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mCM.registerForOn(this, EVENT_RADIO_ON, null);
         mCM.setOnUSSD(this, EVENT_USSD, null);
@@ -205,7 +205,7 @@ public class GSMPhone extends PhoneBase {
 
             //Unregister from all former registered events
             mCM.unregisterForAvailable(this); //EVENT_RADIO_AVAILABLE
-            mIccRecords.unregisterForRecordsLoaded(this); //EVENT_SIM_RECORDS_LOADED
+            unregisterForSimRecordEvents();
             mCM.unregisterForOffOrNotAvailable(this); //EVENT_RADIO_OFF_OR_NOT_AVAILABLE
             mCM.unregisterForOn(this); //EVENT_RADIO_ON
             mSST.unregisterForNetworkAttached(this); //EVENT_REGISTERED_TO_NETWORK
@@ -219,8 +219,6 @@ public class GSMPhone extends PhoneBase {
             mCT.dispose();
             mDataConnectionTracker.dispose();
             mSST.dispose();
-            mIccFileHandler.dispose(); // instance of SimFileHandler
-            mIccRecords.dispose();
             mSimPhoneBookIntManager.dispose();
             mSimSmsIntManager.dispose();
             mSubInfo.dispose();
@@ -1288,6 +1286,21 @@ public class GSMPhone extends PhoneBase {
                 }
                 break;
 
+            case EVENT_NEW_ICC_SMS:
+                ar = (AsyncResult)msg.obj;
+                mSMS.dispatchMessage((SmsMessage)ar.result);
+                break;
+
+            case EVENT_SET_NETWORK_AUTOMATIC:
+                ar = (AsyncResult)msg.obj;
+                setNetworkSelectionModeAutomatic((Message)ar.result);
+                break;
+
+            case EVENT_ICC_RECORD_EVENTS:
+                ar = (AsyncResult)msg.obj;
+                processIccRecordEvents((Integer)ar.result);
+                break;
+
             // handle the select network completion callbacks.
             case EVENT_SET_NETWORK_MANUAL_COMPLETE:
             case EVENT_SET_NETWORK_AUTOMATIC_COMPLETE:
@@ -1311,7 +1324,18 @@ public class GSMPhone extends PhoneBase {
         }
     }
 
-    /**
+    private void processIccRecordEvents(int eventCode) {
+        switch (eventCode) {
+            case SIMRecords.EVENT_CFI:
+                notifyCallForwardingIndicator();
+                break;
+            case SIMRecords.EVENT_MWI:
+                notifyMessageWaitingIndicator();
+                break;
+        }
+    }
+
+   /**
      * Sets the "current" field in the telephony provider according to the SIM's operator
      *
      * @return true for success; false otherwise.
@@ -1460,4 +1484,20 @@ public class GSMPhone extends PhoneBase {
     public boolean isCspPlmnEnabled() {
         return mIccRecords.isCspPlmnEnabled();
     }
+
+    private void registerForSimRecordEvents() {
+        mIccRecords.registerForNetworkSelectionModeAutomatic(
+                this, EVENT_SET_NETWORK_AUTOMATIC, null);
+        mIccRecords.registerForNewSms(this, EVENT_NEW_ICC_SMS, null);
+        mIccRecords.registerForRecordsEvents(this, EVENT_ICC_RECORD_EVENTS, null);
+        mIccRecords.registerForRecordsLoaded(this, EVENT_SIM_RECORDS_LOADED, null);
+    }
+
+    private void unregisterForSimRecordEvents() {
+        mIccRecords.unregisterForNetworkSelectionModeAutomatic(this);
+        mIccRecords.unregisterForNewSms(this);
+        mIccRecords.unregisterForRecordsEvents(this);
+        mIccRecords.unregisterForRecordsLoaded(this);
+    }
+
 }

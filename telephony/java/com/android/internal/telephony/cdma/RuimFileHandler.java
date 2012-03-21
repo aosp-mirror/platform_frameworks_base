@@ -45,9 +45,6 @@ public final class RuimFileHandler extends IccFileHandler {
         super(card, aid, ci);
     }
 
-    public void dispose() {
-    }
-
     protected void finalize() {
         Log.d(LOG_TAG, "RuimFileHandler finalized");
     }

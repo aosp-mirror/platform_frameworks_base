@@ -20,16 +20,17 @@ import java.util.ArrayList;
 
 import android.os.AsyncResult;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
 
 public class AdnRecordLoader extends Handler {
-    static String LOG_TAG;
+    final static String LOG_TAG = "RIL_AdnRecordLoader";
 
     //***** Instance Variables
 
-    PhoneBase phone;
+    private IccFileHandler mFh;
     int ef;
     int extensionEF;
     int pendingExtLoads;
@@ -56,13 +57,11 @@ public class AdnRecordLoader extends Handler {
 
     //***** Constructor
 
-    public AdnRecordLoader(PhoneBase phone) {
+    public AdnRecordLoader(IccFileHandler fh) {
         // The telephony unit-test cases may create AdnRecords
         // in secondary threads
-        super(phone.getHandler().getLooper());
-
-        this.phone = phone;
-        LOG_TAG = phone.getPhoneName();
+        super(Looper.getMainLooper());
+        mFh = fh;
     }
 
     /**
@@ -77,7 +76,7 @@ public class AdnRecordLoader extends Handler {
         this.recordNumber = recordNumber;
         this.userResponse = response;
 
-        phone.mIccFileHandler.loadEFLinearFixed(
+        mFh.loadEFLinearFixed(
                     ef, recordNumber,
                     obtainMessage(EVENT_ADN_LOAD_DONE));
 
@@ -95,7 +94,7 @@ public class AdnRecordLoader extends Handler {
         this.extensionEF = extensionEF;
         this.userResponse = response;
 
-        phone.mIccFileHandler.loadEFLinearFixedAll(
+        mFh.loadEFLinearFixedAll(
                     ef,
                     obtainMessage(EVENT_ADN_LOAD_ALL_DONE));
 
@@ -122,7 +121,7 @@ public class AdnRecordLoader extends Handler {
         this.userResponse = response;
         this.pin2 = pin2;
 
-        phone.mIccFileHandler.getEFLinearRecordSize( ef,
+        mFh.getEFLinearRecordSize( ef,
             obtainMessage(EVENT_EF_LINEAR_RECORD_SIZE_DONE, adn));
     }
 
@@ -163,7 +162,7 @@ public class AdnRecordLoader extends Handler {
                                 ar.exception);
                     }
 
-                    phone.mIccFileHandler.updateEFLinearFixed(ef, recordNumber,
+                    mFh.updateEFLinearFixed(ef, recordNumber,
                             data, pin2, obtainMessage(EVENT_UPDATE_RECORD_DONE));
 
                     pendingExtLoads = 1;
@@ -203,7 +202,7 @@ public class AdnRecordLoader extends Handler {
 
                         pendingExtLoads = 1;
 
-                        phone.mIccFileHandler.loadEFLinearFixed(
+                        mFh.loadEFLinearFixed(
                             extensionEF, adn.extRecord,
                             obtainMessage(EVENT_EXT_RECORD_LOAD_DONE, adn));
                     }
@@ -253,7 +252,7 @@ public class AdnRecordLoader extends Handler {
 
                             pendingExtLoads++;
 
-                            phone.mIccFileHandler.loadEFLinearFixed(
+                            mFh.loadEFLinearFixed(
                                 extensionEF, adn.extRecord,
                                 obtainMessage(EVENT_EXT_RECORD_LOAD_DONE, adn));
                         }

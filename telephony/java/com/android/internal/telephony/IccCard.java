@@ -185,13 +185,14 @@ public class IccCard {
                 mPhone.mCM, mHandler, EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
         if (phone.mCM.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE
                 && phone instanceof CDMALTEPhone) {
-            mIccRecords = new CdmaLteUiccRecords(phone);
             mIccFileHandler = new CdmaLteUiccFileHandler(this, "", mPhone.mCM);
+            mIccRecords = new CdmaLteUiccRecords(this, mPhone.mContext, mPhone.mCM);
         } else {
-            mIccRecords = is3gpp ? new SIMRecords(phone) : new RuimRecords(phone);
             // Correct aid will be set later (when GET_SIM_STATUS returns)
             mIccFileHandler = is3gpp ? new SIMFileHandler(this, "", mPhone.mCM) :
                                        new RuimFileHandler(this, "", mPhone.mCM);
+            mIccRecords = is3gpp ? new SIMRecords(this, mPhone.mContext, mPhone.mCM) :
+                                   new RuimRecords(this, mPhone.mContext, mPhone.mCM);
         }
         mPhone.mCM.registerForOffOrNotAvailable(mHandler, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mPhone.mCM.registerForOn(mHandler, EVENT_RADIO_ON, null);
