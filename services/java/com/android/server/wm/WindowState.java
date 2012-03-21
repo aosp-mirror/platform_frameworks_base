@@ -1011,7 +1011,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // Save the animation state as it was before this step so WindowManagerService can tell if
         // we just started or just stopped animating by comparing mWasAnimating with isAnimating().
         mWasAnimating = mAnimating;
-        if (!mService.mDisplayFrozen && mService.mPolicy.isScreenOnFully()) {
+        if (mService.okToDisplay()) {
             // We will run animations as long as the display isn't frozen.
 
             if (isDrawnLw() && mAnimation != null) {
@@ -1515,11 +1515,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * sense to call from performLayoutAndPlaceSurfacesLockedInner().)
      */
     boolean shouldAnimateMove() {
-        return mContentChanged && !mExiting && !mLastHidden && !mService.mDisplayFrozen
+        return mContentChanged && !mExiting && !mLastHidden && mService.okToDisplay()
                 && (mFrame.top != mLastFrame.top
                         || mFrame.left != mLastFrame.left)
-                && (mAttachedWindow == null || !mAttachedWindow.shouldAnimateMove())
-                && mService.mPolicy.isScreenOnFully();
+                && (mAttachedWindow == null || !mAttachedWindow.shouldAnimateMove());
     }
 
     boolean isFullscreen(int screenWidth, int screenHeight) {
@@ -1606,7 +1605,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (doAnimation) {
             if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "doAnimation: mPolicyVisibility="
                     + mPolicyVisibility + " mAnimation=" + mAnimation);
-            if (mService.mDisplayFrozen || !mService.mPolicy.isScreenOnFully()) {
+            if (!mService.okToDisplay()) {
                 doAnimation = false;
             } else if (mPolicyVisibility && mAnimation == null) {
                 // Check for the case where we are currently visible and
@@ -1632,7 +1631,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean hideLw(boolean doAnimation, boolean requestAnim) {
         if (doAnimation) {
-            if (mService.mDisplayFrozen || !mService.mPolicy.isScreenOnFully()) {
+            if (!mService.okToDisplay()) {
                 doAnimation = false;
             }
         }

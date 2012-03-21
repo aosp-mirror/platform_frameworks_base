@@ -32,12 +32,14 @@ public class BlackFrame {
     class BlackSurface {
         final int left;
         final int top;
+        final int layer;
         final Surface surface;
 
         BlackSurface(SurfaceSession session, int layer, int l, int t, int r, int b)
                 throws Surface.OutOfResourcesException {
             left = l;
             top = t;
+            this.layer = layer;
             int w = r-l;
             int h = b-t;
             surface = new Surface(session, 0, "BlackSurface",
@@ -45,8 +47,6 @@ public class BlackFrame {
             if (WindowManagerService.SHOW_TRANSACTIONS ||
                     WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
                             "  BLACK " + surface + ": CREATE layer=" + layer);
-            surface.setAlpha(1.0f);
-            surface.setLayer(layer);
         }
 
         void setMatrix(Matrix matrix) {
@@ -58,6 +58,8 @@ public class BlackFrame {
             surface.setMatrix(
                     mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                     mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
+            surface.setAlpha(1.0f);
+            surface.setLayer(layer);
             if (false) {
                 Slog.i(WindowManagerService.TAG, "Black Surface @ (" + left + "," + top + "): ("
                         + mTmpFloats[Matrix.MTRANS_X] + ","
