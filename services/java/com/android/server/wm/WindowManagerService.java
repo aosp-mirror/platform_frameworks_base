@@ -7947,7 +7947,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     // We can now show all of the drawn windows!
                     if (!mOpeningApps.contains(wtoken)) {
-                        wtoken.showAllWindowsLocked();
+                        mInnerFields.mAnimating |= wtoken.showAllWindowsLocked();
                     }
                 }
             }
@@ -8131,7 +8131,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         transit, false);
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToShow = false;
-                wtoken.showAllWindowsLocked();
+                mInnerFields.mAnimating |= wtoken.showAllWindowsLocked();
             }
             NN = mClosingApps.size();
             for (i=0; i<NN; i++) {
