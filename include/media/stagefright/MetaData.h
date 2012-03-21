@@ -24,6 +24,7 @@
 
 #include <utils/RefBase.h>
 #include <utils/KeyedVector.h>
+#include <utils/String8.h>
 
 namespace android {
 
@@ -180,6 +181,8 @@ public:
     bool findData(uint32_t key, uint32_t *type,
                   const void **data, size_t *size) const;
 
+    void dumpToLog() const;
+
 protected:
     virtual ~MetaData();
 
@@ -194,6 +197,7 @@ private:
         void clear();
         void setData(uint32_t type, const void *data, size_t size);
         void getData(uint32_t *type, const void **data, size_t *size) const;
+        String8 asString() const;
 
     private:
         uint32_t mType;
