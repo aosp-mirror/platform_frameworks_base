@@ -228,8 +228,8 @@ status_t AAH_TXPlayer::prepareAsync_l() {
         return UNKNOWN_ERROR;  // async prepare already pending
     }
 
-    mAAH_Sender = AAH_TXSender::GetInstance();
-    if (mAAH_Sender == NULL) {
+    mAAH_TXGroup = AAH_TXGroup::GetInstance();
+    if (mAAH_TXGroup == NULL) {
         return NO_MEMORY;
     }
 
@@ -513,7 +513,7 @@ status_t AAH_TXPlayer::play_l() {
             return INVALID_OPERATION;
         }
         if (!mEndpointRegistered) {
-            mProgramID = mAAH_Sender->registerEndpoint(mEndpoint);
+            mProgramID = mAAH_TXGroup->registerEndpoint(mEndpoint);
             mEndpointRegistered = true;
         }
     }
@@ -597,13 +597,13 @@ void AAH_TXPlayer::updateClockTransform_l(bool pause) {
     sp<TRTPControlPacket> packet = new TRTPControlPacket();
     packet->setClockTransform(mCurrentClockTransform);
     packet->setCommandID(TRTPControlPacket::kCommandNop);
-    queuePacketToSender_l(packet);
+    queuePacket_l(packet);
 }
 
 void AAH_TXPlayer::sendEOS_l() {
     sp<TRTPControlPacket> packet = new TRTPControlPacket();
     packet->setCommandID(TRTPControlPacket::kCommandEOS);
-    queuePacketToSender_l(packet);
+    queuePacket_l(packet);
 }
 
 bool AAH_TXPlayer::isPlaying() {
@@ -630,7 +630,7 @@ status_t AAH_TXPlayer::seekTo_l(int64_t timeUs) {
     // send a flush command packet
     sp<TRTPControlPacket> packet = new TRTPControlPacket();
     packet->setCommandID(TRTPControlPacket::kCommandFlush);
-    queuePacketToSender_l(packet);
+    queuePacket_l(packet);
 
     return OK;
 }
@@ -753,8 +753,8 @@ void AAH_TXPlayer::reset_l() {
 
     {
         Mutex::Autolock lock(mEndpointLock);
-        if (mAAH_Sender != NULL && mEndpointRegistered) {
-            mAAH_Sender->unregisterEndpoint(mEndpoint);
+        if (mAAH_TXGroup != NULL && mEndpointRegistered) {
+            mAAH_TXGroup->unregisterEndpoint(mEndpoint);
         }
         mEndpointRegistered = false;
         mEndpointValid = false;
@@ -762,7 +762,7 @@ void AAH_TXPlayer::reset_l() {
 
     mProgramID = 0;
 
-    mAAH_Sender.clear();
+    mAAH_TXGroup.clear();
     mLastQueuedMediaTimePTSValid = false;
     mCurrentClockTransformValid = false;
     mPlayRateIsPaused = false;
@@ -1124,7 +1124,7 @@ void AAH_TXPlayer::onPumpAudio() {
             packet->setAuxData(mAudioCodecData, mAudioCodecDataSize);
         }
 
-        queuePacketToSender_l(packet);
+        queuePacket_l(packet);
         mediaBuffer->release();
 
         mLastQueuedMediaTimePTSValid = true;
@@ -1147,13 +1147,13 @@ void AAH_TXPlayer::onPumpAudio() {
     }
 }
 
-void AAH_TXPlayer::queuePacketToSender_l(const sp<TRTPPacket>& packet) {
-    if (mAAH_Sender == NULL) {
+void AAH_TXPlayer::queuePacket_l(const sp<TRTPPacket>& packet) {
+    if (mAAH_TXGroup == NULL) {
         return;
     }
 
-    sp<AMessage> message = new AMessage(AAH_TXSender::kWhatSendPacket,
-                                        mAAH_Sender->handlerID());
+    sp<AMessage> message = new AMessage(AAH_TXGroup::kWhatSendPacket,
+                                        mAAH_TXGroup->handlerID());
 
     {
         Mutex::Autolock lock(mEndpointLock);
@@ -1161,15 +1161,15 @@ void AAH_TXPlayer::queuePacketToSender_l(const sp<TRTPPacket>& packet) {
             return;
         }
 
-        message->setInt32(AAH_TXSender::kSendPacketIPAddr, mEndpoint.addr);
-        message->setInt32(AAH_TXSender::kSendPacketPort, mEndpoint.port);
+        message->setInt32(AAH_TXGroup::kSendPacketIPAddr, mEndpoint.addr);
+        message->setInt32(AAH_TXGroup::kSendPacketPort, mEndpoint.port);
     }
 
     packet->setProgramID(mProgramID);
     packet->setExpireTime(systemTime() + kAAHRetryKeepAroundTimeNs);
     packet->pack();
 
-    message->setObject(AAH_TXSender::kSendPacketTRTPPacket, packet);
+    message->setObject(AAH_TXGroup::kSendPacketTRTPPacket, packet);
 
     message->post();
 }

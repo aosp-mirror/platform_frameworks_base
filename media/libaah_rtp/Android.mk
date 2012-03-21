@@ -16,7 +16,7 @@ LOCAL_SRC_FILES := \
     aah_rx_player_substream.cpp \
     aah_tx_packet.cpp \
     aah_tx_player.cpp \
-    aah_tx_sender.cpp \
+    aah_tx_group.cpp \
     pipe_event.cpp
 
 LOCAL_C_INCLUDES := \
