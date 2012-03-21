@@ -1779,7 +1779,7 @@ public final class WebViewCore {
                             int x = msg.arg1;
                             int y = msg.arg2;
                             if (!nativeSelectWordAt(mNativeClass, x, y)) {
-                                mWebView.mPrivateHandler.obtainMessage(WebViewClassic.SHOW_CARET_HANDLE)
+                                mWebViewClassic.mPrivateHandler.obtainMessage(WebViewClassic.SHOW_CARET_HANDLE)
                                     .sendToTarget();
                             }
                             break;
