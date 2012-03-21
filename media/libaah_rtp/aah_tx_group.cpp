@@ -955,20 +955,6 @@ bool AAH_TXGroup::CmdAndControlRXer::init() {
     return (mWakeupEventFD >= 0);
 }
 
-void AAH_TXGroup::CmdAndControlRXer::wakeupThread() {
-    if (mWakeupEventFD >= 0) {
-        uint64_t tmp = 1;
-        ::write(mWakeupEventFD, &tmp, sizeof(tmp));
-    }
-}
-
-void AAH_TXGroup::CmdAndControlRXer::clearWakeupEvent() {
-    if (mWakeupEventFD >= 0) {
-        uint64_t tmp;
-        ::read(mWakeupEventFD, &tmp, sizeof(tmp));
-    }
-}
-
 bool AAH_TXGroup::CmdAndControlRXer::threadLoop() {
     // Implementation for main command and control receiver thread.  Its primary
     // job is to service command and control requests from clients.  These
@@ -1053,8 +1039,9 @@ bool AAH_TXGroup::CmdAndControlRXer::threadLoop() {
     }
 
     // clear the wakeup event if needed.
-    if (pollFds[0].revents)
-        clearWakeupEvent();
+    if (pollFds[0].revents) {
+        clearEventFD(mWakeupEventFD);
+    }
 
     // Handle any pending C&C requests and heartbeat timeouts.  Also, trim the
     // retry buffers if its time to do so.

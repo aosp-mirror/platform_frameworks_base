@@ -66,7 +66,7 @@ status_t AAH_RXPlayer::startWorkThread() {
 
 void AAH_RXPlayer::stopWorkThread() {
     thread_wrapper_->requestExit();  // set the exit pending flag
-    wakeup_work_thread_evt_.setEvent();
+    signalEventFD(wakeup_work_thread_evt_fd_);
 
     status_t res;
     res = thread_wrapper_->requestExitAndWait(); // block until thread exit.
@@ -74,7 +74,7 @@ void AAH_RXPlayer::stopWorkThread() {
         LOGE("Failed to stop work thread (res = %d)", res);
     }
 
-    wakeup_work_thread_evt_.clearPendingEvents();
+    clearEventFD(wakeup_work_thread_evt_fd_);
 }
 
 void AAH_RXPlayer::cleanupSocket() {
@@ -292,7 +292,7 @@ bool AAH_RXPlayer::threadLoop() {
         if ((0 != timeout) && (!process_more_right_now)) {
             // Set up the events to wait on.  Start with the wakeup pipe.
             memset(&poll_fds, 0, sizeof(poll_fds));
-            poll_fds[0].fd     = wakeup_work_thread_evt_.getWakeupHandle();
+            poll_fds[0].fd     = wakeup_work_thread_evt_fd_;
             poll_fds[0].events = POLLIN;
 
             // Add the RX socket.
@@ -313,7 +313,7 @@ bool AAH_RXPlayer::threadLoop() {
             break;
         }
 
-        wakeup_work_thread_evt_.clearPendingEvents();
+        clearEventFD(wakeup_work_thread_evt_fd_);
         process_more_right_now = false;
 
         // Step 2: Do we have data waiting in the socket?  If so, drain the

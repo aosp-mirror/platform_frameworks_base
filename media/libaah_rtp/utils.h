@@ -17,6 +17,9 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
+#include <stdint.h>
+#include <unistd.h>
+
 #include <netinet/in.h>
 
 #include <media/stagefright/foundation/ABase.h>
@@ -78,6 +81,20 @@ inline int minTimeout(int a, int b) {
     }
 
     return ((a < b) ? a : b);
+}
+
+inline void signalEventFD(int fd) {
+    if (fd >= 0) {
+        uint64_t tmp = 1;
+        ::write(fd, &tmp, sizeof(tmp));
+    }
+}
+
+inline void clearEventFD(int fd) {
+    if (fd >= 0) {
+        uint64_t tmp;
+        ::read(fd, &tmp, sizeof(tmp));
+    }
 }
 
 }  // namespace android
