@@ -4924,7 +4924,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * startX, startY, endX, endY
      */
     private void getSelectionHandles(int[] handles) {
-        handles[0] = mSelectCursorBase.right;
+        handles[0] = mSelectCursorBase.left;
         handles[1] = mSelectCursorBase.bottom;
         handles[2] = mSelectCursorExtent.left;
         handles[3] = mSelectCursorExtent.bottom;
