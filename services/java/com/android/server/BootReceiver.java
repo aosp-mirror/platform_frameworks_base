@@ -20,13 +20,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Downloads;
 import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.RecoverySystem;
 import android.os.SystemProperties;
+import android.provider.Downloads;
 import android.util.Slog;
 
 import java.io.File;
@@ -78,9 +78,8 @@ public class BootReceiver extends BroadcastReceiver {
         }.start();
     }
 
-    private void removeOldUpdatePackages(Context ctx) {
-        Downloads.ByUri.removeAllDownloadsByPackage(
-            ctx, OLD_UPDATER_PACKAGE, OLD_UPDATER_CLASS);
+    private void removeOldUpdatePackages(Context context) {
+        Downloads.removeAllDownloadsByPackage(context, OLD_UPDATER_PACKAGE, OLD_UPDATER_CLASS);
     }
 
     private void logBootEvents(Context ctx) throws IOException {
