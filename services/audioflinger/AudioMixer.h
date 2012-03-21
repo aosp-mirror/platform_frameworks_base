@@ -31,7 +31,8 @@ namespace android {
 class AudioMixer
 {
 public:
-                            AudioMixer(size_t frameCount, uint32_t sampleRate);
+                            AudioMixer(size_t frameCount, uint32_t sampleRate,
+                                       uint32_t maxNumTracks = MAX_NUM_TRACKS);
 
     /*virtual*/             ~AudioMixer();  // non-virtual saves a v-table, restore if sub-classed
 
@@ -189,11 +190,17 @@ private:
         int32_t         *outputTemp;
         int32_t         *resampleTemp;
         int32_t         reserved[2];
+        // FIXME allocate dynamically to save some memory when maxNumTracks < MAX_NUM_TRACKS
         track_t         tracks[MAX_NUM_TRACKS]; __attribute__((aligned(32)));
     };
 
     // bitmask of allocated track names, where bit 0 corresponds to TRACK0 etc.
     uint32_t        mTrackNames;
+
+    // bitmask of configured track names; ~0 if maxNumTracks == MAX_NUM_TRACKS,
+    // but will have fewer bits set if maxNumTracks < MAX_NUM_TRACKS
+    const uint32_t  mConfiguredNames;
+
     const uint32_t  mSampleRate;
 
     state_t         mState __attribute__((aligned(32)));
