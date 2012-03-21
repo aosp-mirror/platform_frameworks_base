@@ -74,7 +74,7 @@ void TRTPPacket::setEpoch(uint32_t val) {
     }
 }
 
-void TRTPPacket::setProgramID(uint16_t val) {
+void TRTPPacket::setProgramID(uint8_t val) {
     CHECK(!mIsPacked);
     mProgramID = val;
 }
@@ -336,6 +336,46 @@ bool TRTPControlPacket::pack() {
 
     writeTRTPHeader(cur, true, packetLen);
     writeU16(cur, mCommandID);
+
+    mIsPacked = true;
+    return true;
+}
+
+bool TRTPActiveProgramUpdatePacket::pushProgramID(uint8_t id) {
+    if (mProgramIDCnt >= kMaxProgramIDs)
+        return false;
+
+    mProgramIDs[mProgramIDCnt++] = id;
+    return true;
+}
+
+bool TRTPActiveProgramUpdatePacket::pack() {
+    if (mIsPacked) {
+        return false;
+    }
+
+    // Active program update packets contain a 2-byte command ID, 1 byte of
+    // length, and length bytes of program IDs.
+    int packetLen = kRTPHeaderLen +
+                    TRTPHeaderLen() +
+                    mProgramIDCnt +
+                    3;
+
+    mPacket = new uint8_t[packetLen];
+    if (!mPacket) {
+        return false;
+    }
+
+    mPacketLen = packetLen;
+
+    uint8_t* cur = mPacket;
+
+    writeTRTPHeader(cur, true, packetLen);
+    writeU16(cur, mCommandID);
+    writeU8(cur,  mProgramIDCnt);
+    for (uint8_t i = 0; i < mProgramIDCnt; ++i) {
+        writeU8(cur,  mProgramIDs[i]);
+    }
 
     mIsPacked = true;
     return true;

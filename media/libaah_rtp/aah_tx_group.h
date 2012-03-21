@@ -26,11 +26,14 @@
 #include <utils/Vector.h>
 
 #include "aah_tx_packet.h"
+#include "utils.h"
 
 #define IP_PRINTF_HELPER(a) ((a >> 24) & 0xFF), ((a >> 16) & 0xFF), \
                             ((a >>  8) & 0xFF),  (a        & 0xFF)
 
 namespace android {
+
+class AAH_TXPlayer;
 
 template <typename T> class CircularBuffer {
   public:
@@ -69,35 +72,42 @@ class AAH_TXGroup : public virtual RefBase {
     // Obtain the instance of the TXGroup whose command and control socket is
     // currently listening on the specified port.  Alternatively, if port is 0,
     // create a new TXGroup with an ephemerally bound command and control port.
-    static sp<AAH_TXGroup> getGroup(uint16_t port);
+    static sp<AAH_TXGroup> getGroup(uint16_t port,
+                                    const sp<AAH_TXPlayer>& client);
 
     // Obtain the instance of the TXGroup whose multicast transmit target is
     // currently set to target, or NULL if no such group exists.  To create a
     // new transmit group with a new multicast target address, call getGroup(0)
     // followed by setMulticastTXTarget.
-    static sp<AAH_TXGroup> getGroup(const struct sockaddr_in* target);
+    static sp<AAH_TXGroup> getGroup(const struct sockaddr_in* target,
+                                    const sp<AAH_TXPlayer>& client);
 
-    // AAH_TXGroups successfully obtained using calls to getGroup will have a
-    // client reference placed on them on behalf of the caller.  When the caller
-    // is finished using the group, they must call dropClientReference to remove
-    // this reference.  Once call client references have been released from a TX
-    // Group, the group will linger in the system for a short period of time
-    // before finally expiring and being cleaned up by the command and control
-    // thread.
-    // 
+    // AAH_TXGroups successfully obtained using calls to getGroup will hold a
+    // reference back to the client passed to getGroup.  When the client is
+    // finished using the group, it must call unregisterClient to release this
+    // reference.
+    //
+    // While there exists active clients of transmit group, the TX group will
+    // periodically send heartbeat messages to receiver clients containing the
+    // program IDs of the currently active TX Player clients so that receivers
+    // have a chance to clean up orphaned programs in the case where all EOS
+    // messages got dropped on the way to the receiver.
+    //
+    // Once all clients references have been released from a TX Group, the group
+    // will linger in the system for a short period of time before finally
+    // expiring and being cleaned up by the command and control thread.
+    //
     // TODO : someday, expose the AAH_TXGroup as a top level object in the
     // android MediaAPIs so that applications may explicitly manage TX group
     // lifecycles instead of relying on this timeout/cleanup mechanism.
-    void dropClientReference();
+    void unregisterClient(const sp<AAH_TXPlayer>& client);
+
 
     // Fetch the UDP port on which this TXGroup is listening for command and
     // control messages.  No need to hold any locks for this, the port is
     // established as group is created and bound, and then never changed
     // afterwards.
     uint16_t getCmdAndControlPort() const { return mCmdAndControlPort; }
-
-    // Used by players to obtain a new program ID for this retransmission group.
-    uint16_t getNewProgramID();
 
     // Assign a TRTP sequence number to the supplied packet and send it to all
     // registered clients.  Then place the packet into the RetryBuffer to
@@ -114,30 +124,6 @@ class AAH_TXGroup : public virtual RefBase {
     ~AAH_TXGroup();
 
   private:
-    // Definition of a helper class used to track things like when we need to
-    // transmit a heartbeat, or when we will need to wake up and trim the retry
-    // buffers.
-    class Timeout {
-      public:
-        Timeout() : mSystemEndTime(0) { }
-
-        // Set a timeout which should occur msec milliseconds from now.
-        // Negative values will cancel any current timeout;
-        void setTimeout(int msec);
-
-        // Return the number of milliseconds until the timeout occurs, or -1 if
-        // no timeout is scheduled.
-        int msecTillTimeout(nsecs_t nowTime);
-        int msecTillTimeout() { return msecTillTimeout(systemTime()); }
-
-      private:
-        // The systemTime() at which the timeout will be complete, or 0 if no
-        // timeout is currently scheduled.
-        nsecs_t mSystemEndTime;
-
-        DISALLOW_EVIL_CONSTRUCTORS(Timeout);
-    };
-
     // Definition of the singleton command and control receiver who will handle
     // requests from RX clients.  Requests include things like unicast group
     // management as well as retransmission requests.
@@ -228,8 +214,11 @@ class AAH_TXGroup : public virtual RefBase {
                             const uint8_t* payload,
                             size_t length);
 
-    // Add a client ref to this TX Group and reset its cleanup timer.
-    void addClientReference();
+    // Register a player client to this TX Group and reset its cleanup timer.
+    bool registerClient(const sp<AAH_TXPlayer>& client);
+
+    // Obtain a new program ID for a newly registered client.
+    uint8_t getNewProgramID();
 
     // Test used by the C&C thread to see if its time to expire and cleanup a
     // client.
@@ -263,12 +252,12 @@ class AAH_TXGroup : public virtual RefBase {
 
     // Lock we use to serialize access to instance variables.
     Mutex mLock;
-    
+
     // The list of packets we hold for servicing retry requests.
     RetryBuffer mRetryBuffer;
 
-    // The number of TX Player clients currently using this TX group.
-    uint32_t mClientRefCount;
+    // The current set of active TX Player clients using this TX group.
+    Vector< sp<AAH_TXPlayer> > mActiveClients;
 
     // The sequence number to assign to the next transmitted TRTP packet.
     uint16_t mTRTPSeqNumber;
@@ -322,10 +311,12 @@ class AAH_TXGroup : public virtual RefBase {
     static const int kUnicastClientTimeoutMsec;
 
     static const size_t kRetryBufferCapacity;
-    static const size_t kMaxUnicastTargets;
+    static const size_t kMaxAllowedUnicastTargets;
     static const size_t kInitialUnicastTargetCapacity;
     static const size_t kMaxAllowedTXGroups;
     static const size_t kInitialActiveTXGroupsCapacity;
+    static const size_t kMaxAllowedPlayerClients;
+    static const size_t kInitialPlayerClientCapacity;
 
     static const uint32_t kCNC_RetryRequestID;
     static const uint32_t kCNC_FastStartRequestID;

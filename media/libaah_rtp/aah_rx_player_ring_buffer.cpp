@@ -53,7 +53,7 @@ void AAH_RXPlayer::RXRingBuffer::reset() {
     rd_seq_known_ = false;
     waiting_for_fast_start_ = true;
     fetched_first_packet_ = false;
-    rtp_activity_timeout_valid_ = false;
+    rtp_activity_timeout_.setTimeout(-1);
 }
 
 bool AAH_RXPlayer::RXRingBuffer::pushBuffer(PacketBuffer* buf,
@@ -62,8 +62,7 @@ bool AAH_RXPlayer::RXRingBuffer::pushBuffer(PacketBuffer* buf,
     CHECK(NULL != ring_);
     CHECK(NULL != buf);
 
-    rtp_activity_timeout_valid_ = true;
-    rtp_activity_timeout_ = monotonicUSecNow() + kRTPActivityTimeoutUSec;
+    rtp_activity_timeout_.setTimeout(kRTPActivityTimeoutMsec);
 
     // If the ring buffer is totally reset (we have never received a single
     // payload) then we don't know the rd sequence number and this should be
@@ -328,17 +327,7 @@ void AAH_RXPlayer::RXRingBuffer::processNAK(SeqNoGap* nak) {
 
 int AAH_RXPlayer::RXRingBuffer::computeInactivityTimeout() {
     AutoMutex lock(&lock_);
-
-    if (!rtp_activity_timeout_valid_) {
-        return -1;
-    }
-
-    uint64_t now = monotonicUSecNow();
-    if (rtp_activity_timeout_ <= now) {
-        return 0;
-    }
-
-    return (rtp_activity_timeout_ - now) / 1000;
+    return rtp_activity_timeout_.msecTillTimeout();
 }
 
 AAH_RXPlayer::PacketBuffer*

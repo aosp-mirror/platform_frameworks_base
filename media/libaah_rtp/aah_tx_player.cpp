@@ -34,6 +34,7 @@
 
 #include "aah_tx_packet.h"
 #include "aah_tx_player.h"
+#include "utils.h"
 
 namespace android {
 
@@ -52,6 +53,7 @@ static const int64_t kAAHBufferTimeUs = 1000000LL;
 const int64_t AAH_TXPlayer::kAAHRetryKeepAroundTimeNs =
     kAAHBufferTimeUs * 1100;
 
+const int AAH_TXPlayer::kPauseTSUpdateResendTimeoutMsec = 250;
 const int32_t AAH_TXPlayer::kInvokeGetCNCPort = 0xB33977;
 
 sp<MediaPlayerBase> createAAH_TXPlayer() {
@@ -521,6 +523,7 @@ status_t AAH_TXPlayer::play_l() {
 
 status_t AAH_TXPlayer::stop() {
     status_t ret = pause();
+    mPauseTSUpdateResendTimeout.setTimeout(-1);
     sendEOS_l();
     return ret;
 }
@@ -586,15 +589,14 @@ void AAH_TXPlayer::updateClockTransform_l(bool pause) {
     mCurrentClockTransform.a_to_b_denom = pause ? 0 : 1;
 
     // send a packet announcing the new transform
-    if (mAAH_TXGroup != NULL) {
-        sp<TRTPControlPacket> packet = new TRTPControlPacket();
-        if (packet != NULL) {
-            packet->setClockTransform(mCurrentClockTransform);
-            packet->setCommandID(TRTPControlPacket::kCommandNop);
-            sendPacket_l(packet);
-        } else {
-            LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
-        }
+    sendTSUpdateNop_l();
+
+    // if we are paused, schedule a periodic resend of the TS update, JiC the
+    // receiveing client misses it.
+    if (mPlayRateIsPaused) {
+        mPauseTSUpdateResendTimeout.setTimeout(kPauseTSUpdateResendTimeoutMsec);
+    } else {
+        mPauseTSUpdateResendTimeout.setTimeout(-1);
     }
 }
 
@@ -603,6 +605,19 @@ void AAH_TXPlayer::sendEOS_l() {
         sp<TRTPControlPacket> packet = new TRTPControlPacket();
         if (packet != NULL) {
             packet->setCommandID(TRTPControlPacket::kCommandEOS);
+            sendPacket_l(packet);
+        } else {
+            LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
+        }
+    }
+}
+
+void AAH_TXPlayer::sendTSUpdateNop_l() {
+    if ((mAAH_TXGroup != NULL) && mCurrentClockTransformValid) {
+        sp<TRTPControlPacket> packet = new TRTPControlPacket();
+        if (packet != NULL) {
+            packet->setClockTransform(mCurrentClockTransform);
+            packet->setCommandID(TRTPControlPacket::kCommandFlush);
             sendPacket_l(packet);
         } else {
             LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
@@ -754,20 +769,20 @@ void AAH_TXPlayer::reset_l() {
     mIsSeeking = false;
     mSeekTimeUs = 0;
 
+    mPauseTSUpdateResendTimeout.setTimeout(-1);
+
     mUri.setTo("");
     mUriHeaders.clear();
 
     mFileSource.clear();
 
     mBitrate = -1;
-    mProgramID = 0;
 
     if (mAAH_TXGroup != NULL) {
-        LOGI("TXPlayer leaving TXGroup listening on C&C port %hu",
-             mAAH_TXGroup->getCmdAndControlPort());
-        mAAH_TXGroup->dropClientReference();
+        mAAH_TXGroup->unregisterClient(sp<AAH_TXPlayer>(this));
         mAAH_TXGroup = NULL;
     }
+    mProgramID = 0;
 
     mLastQueuedMediaTimePTSValid = false;
     mCurrentClockTransformValid = false;
@@ -873,6 +888,7 @@ status_t AAH_TXPlayer::setRetransmitEndpoint(
 
     uint32_t addr = ntohl(endpoint->sin_addr.s_addr);
     uint16_t port = ntohs(endpoint->sin_port);
+    sp<AAH_TXPlayer> thiz(this);
     if ((addr & 0xF0000000) == 0xE0000000) {
         // Starting in multicast mode?  We need to have a specified port to
         // multicast to, so sanity check that first.  Then search for an
@@ -884,10 +900,11 @@ status_t AAH_TXPlayer::setRetransmitEndpoint(
             return BAD_VALUE;
         }
 
-        mAAH_TXGroup = AAH_TXGroup::getGroup(endpoint);
+        mAAH_TXGroup = AAH_TXGroup::getGroup(endpoint, thiz);
         if (mAAH_TXGroup == NULL) {
             // No pre-existing group.  Make a new one.
-            mAAH_TXGroup = AAH_TXGroup::getGroup(static_cast<uint16_t>(0));
+            mAAH_TXGroup = AAH_TXGroup::getGroup(static_cast<uint16_t>(0),
+                                                 thiz);
 
             // Still no group?  Thats bad.  We probably have exceeded our limit
             // on the number of simultaneous TX groups.
@@ -907,7 +924,7 @@ status_t AAH_TXPlayer::setRetransmitEndpoint(
     } else if (addr == INADDR_ANY) {
         // Starting in unicast mode.  A port of 0 means we need to create a new
         // group, a non-zero port means that we want to join an existing one.
-        mAAH_TXGroup = AAH_TXGroup::getGroup(port);
+        mAAH_TXGroup = AAH_TXGroup::getGroup(port, thiz);
 
         if (mAAH_TXGroup == NULL) {
             if (port) {
@@ -929,7 +946,7 @@ status_t AAH_TXPlayer::setRetransmitEndpoint(
     }
 
     CHECK(mAAH_TXGroup != NULL);
-    mProgramID = mAAH_TXGroup->getNewProgramID();
+    CHECK(mProgramID != 0);
     return OK;
 }
 
@@ -1111,6 +1128,8 @@ void AAH_TXPlayer::onPumpAudio() {
         // of good options here.  For now, signal an error up to the app level
         // and shut down the transmission pump.
         int64_t commonTimeNow;
+        int64_t mediaTimeNow;
+        bool mediaTimeNowValid = false;
         if (OK != mCCHelper.getCommonTime(&commonTimeNow)) {
             // Failed to get common time; either the service is down or common
             // time is not synced.  Raise an error and shutdown the player.
@@ -1121,18 +1140,32 @@ void AAH_TXPlayer::onPumpAudio() {
             break;
         }
 
-        if (mCurrentClockTransformValid && mLastQueuedMediaTimePTSValid) {
-            int64_t mediaTimeNow;
-            bool conversionResult = mCurrentClockTransform.doReverseTransform(
-                                        commonTimeNow,
-                                        &mediaTimeNow);
-            CHECK(conversionResult);
+        if (mCurrentClockTransformValid) {
+            mediaTimeNowValid = mCurrentClockTransform.doReverseTransform(
+                                    commonTimeNow,
+                                    &mediaTimeNow);
+            CHECK(mediaTimeNowValid);
+        }
 
-            if ((mediaTimeNow +
-                 kAAHBufferTimeUs -
-                 mLastQueuedMediaTimePTS) <= 0) {
-                break;
+        // Has our pause-timestamp-update timer fired?  If so, take appropriate
+        // action.
+        if (!mPauseTSUpdateResendTimeout.msecTillTimeout()) {
+            if (mPlayRateIsPaused) {
+                // Send the update and schedule the next update.
+                sendTSUpdateNop_l();
+                mPauseTSUpdateResendTimeout.setTimeout(
+                        kPauseTSUpdateResendTimeoutMsec);
+            } else {
+                // Not paused; cancel the timer so it does not bug us anymore.
+                mPauseTSUpdateResendTimeout.setTimeout(-1);
             }
+        }
+
+        // Stop if we have reached our buffer threshold.
+        if (mediaTimeNowValid &&
+            mLastQueuedMediaTimePTSValid &&
+           (mediaTimeNow + kAAHBufferTimeUs - mLastQueuedMediaTimePTS) <= 0) {
+            break;
         }
 
         MediaSource::ReadOptions options;

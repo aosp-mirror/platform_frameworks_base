@@ -17,7 +17,8 @@ LOCAL_SRC_FILES := \
     aah_tx_group.cpp \
     aah_tx_packet.cpp \
     aah_tx_player.cpp \
-    pipe_event.cpp
+    pipe_event.cpp \
+    utils.cpp
 
 LOCAL_C_INCLUDES := \
     frameworks/base/include \
