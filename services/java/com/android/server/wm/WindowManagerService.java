@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
@@ -173,7 +172,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean HIDE_STACK_CRAWLS = true;
 
     static final boolean PROFILE_ORIENTATION = false;
-    static final boolean BLUR = true;
     static final boolean localLOGV = DEBUG;
 
     /** How much to multiply the policy's type layer, to reserve room
@@ -194,11 +192,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * Dim surface layer is immediately below target window.
      */
     static final int LAYER_OFFSET_DIM = 1;
-
-    /**
-     * Blur surface layer is immediately below dim layer.
-     */
-    static final int LAYER_OFFSET_BLUR = 2;
 
     /**
      * Layer at which to put the rotation freeze snapshot.
@@ -416,8 +409,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     SurfaceSession mFxSession;
     private DimAnimator mDimAnimator = null;
-    Surface mBlurSurface;
-    boolean mBlurShown;
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
     ScreenRotationAnimation mScreenRotationAnimation;
@@ -597,7 +588,6 @@ public class WindowManagerService extends IWindowManager.Stub
         private int mAdjResult = 0;
         private Session mHoldScreen = null;
         private boolean mObscured = false;
-        private boolean mBlurring = false;
         private boolean mDimming = false;
         private boolean mSyswin = false;
         private float mScreenBrightness = -1;
@@ -735,6 +725,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mAllowBootMessages = allowBootMsgs;
         }
 
+        @Override
         public void run() {
             Looper.prepare();
             WindowManagerService s = new WindowManagerService(mContext, mPM,
@@ -774,6 +765,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mPM = pm;
         }
 
+        @Override
         public void run() {
             Looper.prepare();
             WindowManagerPolicyThread.set(this, Looper.myLooper());
@@ -2302,8 +2294,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // to hold off on removing the window until the animation is done.
         // If the display is frozen, just remove immediately, since the
         // animation wouldn't be seen.
-        if (win.mSurface != null && !mDisplayFrozen && mDisplayEnabled
-                && mPolicy.isScreenOnFully()) {
+        if (win.mSurface != null && okToDisplay()) {
             // If we are not currently running the exit animation, we
             // need to see about starting one.
             if (wasVisible=win.isWinVisibleLw()) {
@@ -2687,8 +2678,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.mEnterAnimationPending = true;
                 }
                 if (displayed) {
-                    if (win.isDrawnLw() && !mDisplayFrozen
-                            && mDisplayEnabled && mPolicy.isScreenOnFully()) {
+                    if (win.isDrawnLw() && okToDisplay()) {
                         applyEnterAnimationLocked(win);
                     }
                     if ((win.mAttrs.flags
@@ -3015,7 +3005,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
-        if (!mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOnFully()) {
+        if (okToDisplay()) {
             int anim = mPolicy.selectAnimationLw(win, transit);
             int attr = -1;
             Animation a = null;
@@ -3101,7 +3091,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
-        if (!mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOnFully()) {
+        if (okToDisplay()) {
             Animation a;
             if (mNextAppTransitionPackage != null) {
                 a = loadAnimation(mNextAppTransitionPackage, enter ?
@@ -3233,6 +3223,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 + " requires " + permission;
         Slog.w(TAG, msg);
         return false;
+    }
+    
+    boolean okToDisplay() {
+        return !mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOnFully();
     }
 
     AppWindowToken findAppWindowToken(IBinder token) {
@@ -3665,7 +3659,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                     TAG, "Prepare app transition: transit=" + transit
                     + " mNextAppTransition=" + mNextAppTransition);
-            if (!mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOnFully()) {
+            if (okToDisplay()) {
                 if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET
                         || mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
                     mNextAppTransition = transit;
@@ -3749,7 +3743,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // If the display is frozen, we won't do anything until the
             // actual window is displayed so there is no reason to put in
             // the starting window.
-            if (mDisplayFrozen || !mDisplayEnabled || !mPolicy.isScreenOnFully()) {
+            if (!okToDisplay()) {
                 return;
             }
 
@@ -4039,8 +4033,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
-            if (!mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOnFully()
-                    && mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            if (okToDisplay() && mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                 // Already in requested state, don't do anything more.
                 if (wtoken.hiddenRequested != visible) {
                     return;
@@ -4168,7 +4161,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            if (configChanges == 0 && !mDisplayFrozen && mPolicy.isScreenOnFully()) {
+            if (configChanges == 0 && okToDisplay()) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping set freeze of " + token);
                 return;
             }
@@ -5476,7 +5469,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        rebuildBlackFrame(inTransaction);
+        rebuildBlackFrame();
 
         for (int i=mWindows.size()-1; i>=0; i--) {
             WindowState w = mWindows.get(i);
@@ -7151,45 +7144,32 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void rebuildBlackFrame(boolean inTransaction) {
-        if (!inTransaction) {
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    ">>> OPEN TRANSACTION rebuildBlackFrame");
-            Surface.openTransaction();
+    private void rebuildBlackFrame() {
+        if (mBlackFrame != null) {
+            mBlackFrame.kill();
+            mBlackFrame = null;
         }
-        try {
-            if (mBlackFrame != null) {
-                mBlackFrame.kill();
-                mBlackFrame = null;
+        if (mBaseDisplayWidth < mInitialDisplayWidth
+                || mBaseDisplayHeight < mInitialDisplayHeight) {
+            int initW, initH, baseW, baseH;
+            final boolean rotated = (mRotation == Surface.ROTATION_90
+                    || mRotation == Surface.ROTATION_270);
+            if (rotated) {
+                initW = mInitialDisplayHeight;
+                initH = mInitialDisplayWidth;
+                baseW = mBaseDisplayHeight;
+                baseH = mBaseDisplayWidth;
+            } else {
+                initW = mInitialDisplayWidth;
+                initH = mInitialDisplayHeight;
+                baseW = mBaseDisplayWidth;
+                baseH = mBaseDisplayHeight;
             }
-            if (mBaseDisplayWidth < mInitialDisplayWidth
-                    || mBaseDisplayHeight < mInitialDisplayHeight) {
-                int initW, initH, baseW, baseH;
-                final boolean rotated = (mRotation == Surface.ROTATION_90
-                        || mRotation == Surface.ROTATION_270);
-                if (rotated) {
-                    initW = mInitialDisplayHeight;
-                    initH = mInitialDisplayWidth;
-                    baseW = mBaseDisplayHeight;
-                    baseH = mBaseDisplayWidth;
-                } else {
-                    initW = mInitialDisplayWidth;
-                    initH = mInitialDisplayHeight;
-                    baseW = mBaseDisplayWidth;
-                    baseH = mBaseDisplayHeight;
-                }
-                Rect outer = new Rect(0, 0, initW, initH);
-                Rect inner = new Rect(0, 0, baseW, baseH);
-                try {
-                    mBlackFrame = new BlackFrame(mFxSession, outer, inner, MASK_LAYER);
-                } catch (Surface.OutOfResourcesException e) {
-                }
-            }
-        } finally {
-            if (!inTransaction) {
-                Surface.closeTransaction();
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                        "<<< CLOSE TRANSACTION rebuildBlackFrame");
+            Rect outer = new Rect(0, 0, initW, initH);
+            Rect inner = new Rect(0, 0, baseW, baseH);
+            try {
+                mBlackFrame = new BlackFrame(mFxSession, outer, inner, MASK_LAYER);
+            } catch (Surface.OutOfResourcesException e) {
             }
         }
     }
@@ -7240,7 +7220,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
 
-        rebuildBlackFrame(false);
+        rebuildBlackFrame();
 
         performLayoutAndPlaceSurfacesLocked();
     }
@@ -7625,7 +7605,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // If the screen is currently frozen or off, then keep
         // it frozen/off until this window draws at its new
         // orientation.
-        if (mDisplayFrozen || !mPolicy.isScreenOnFully()) {
+        if (!okToDisplay()) {
             if (DEBUG_ORIENTATION) Slog.v(TAG,
                     "Changing surface while display frozen: " + w);
             w.mOrientationChanging = true;
@@ -7707,18 +7687,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDimAnimator != null && mDimAnimator.mDimShown) {
                 mInnerFields.mAnimating |=
                         mDimAnimator.updateSurface(mInnerFields.mDimming, currentTime,
-                            mDisplayFrozen || !mDisplayEnabled || !mPolicy.isScreenOnFully());
-            }
-        
-            if (!mInnerFields.mBlurring && mBlurShown) {
-                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR " + mBlurSurface
-                        + ": HIDE");
-                try {
-                    mBlurSurface.hide();
-                } catch (IllegalArgumentException e) {
-                    Slog.w(TAG, "Illegal argument exception hiding blur surface");
-                }
-                mBlurShown = false;
+                            !okToDisplay());
             }
         
             if (mBlackFrame != null) {
@@ -7747,6 +7716,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     private int updateWindowsAndWallpaperLocked(final long currentTime, final int dw, final int dh,
                                                 final int innerDw, final int innerDh) {
+        ++mTransactionSequence;
+
         int changes = 0;
         for (int i = mWindows.size() - 1; i >= 0; i--) {
             WindowState w = mWindows.get(i);
@@ -8301,9 +8272,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // target, then the black goes *below* the wallpaper so we
             // don't cause the wallpaper to suddenly disappear.
             WindowState target = mInnerFields.mWindowAnimationBackground;
-            if (mWallpaperTarget == mInnerFields.mWindowAnimationBackground
-                    || mLowerWallpaperTarget == mInnerFields.mWindowAnimationBackground
-                    || mUpperWallpaperTarget == mInnerFields.mWindowAnimationBackground) {
+            if (mWallpaperTarget == target
+                    || mLowerWallpaperTarget == target
+                    || mUpperWallpaperTarget == target) {
                 for (int i=0; i<mWindows.size(); i++) {
                     WindowState w = mWindows.get(i);
                     if (w.mIsWallpaper) {
@@ -8656,75 +8627,30 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean opaqueDrawn = canBeSeen && w.isOpaqueDrawn();
         if (opaqueDrawn && w.isFullscreen(innerDw, innerDh)) {
             // This window completely covers everything behind it,
-            // so we want to leave all of them as unblurred (for
+            // so we want to leave all of them as undimmed (for
             // performance reasons).
             mInnerFields.mObscured = true;
-        } else if (canBeSeen && (attrFlags & (FLAG_BLUR_BEHIND | FLAG_DIM_BEHIND)) != 0) {
-            if (localLOGV) Slog.v(TAG, "Win " + w
-                    + ": blurring=" + mInnerFields.mBlurring
-                    + " obscured=" + mInnerFields.mObscured);
-            if ((attrFlags&FLAG_DIM_BEHIND) != 0) {
-                if (!mInnerFields.mDimming) {
-                    //Slog.i(TAG, "DIM BEHIND: " + w);
-                    mInnerFields.mDimming = true;
-                    if (mDimAnimator == null) {
-                        mDimAnimator = new DimAnimator(mFxSession);
-                    }
-                    if (attrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
-                        mDimAnimator.show(mCurDisplayWidth, mCurDisplayHeight);
-                    } else {
-                        mDimAnimator.show(innerDw, innerDh);
-                    }
-                    mDimAnimator.updateParameters(mContext.getResources(),
-                            w, currentTime);
+        } else if (canBeSeen && (attrFlags & FLAG_DIM_BEHIND) != 0) {
+            if (localLOGV) Slog.v(TAG, "Win " + w + " obscured=" + mInnerFields.mObscured);
+            if (!mInnerFields.mDimming) {
+                //Slog.i(TAG, "DIM BEHIND: " + w);
+                mInnerFields.mDimming = true;
+                if (mDimAnimator == null) {
+                    mDimAnimator = new DimAnimator(mFxSession);
                 }
-            }
-            if ((attrFlags & FLAG_BLUR_BEHIND) != 0) {
-                if (!mInnerFields.mBlurring) {
-                    //Slog.i(TAG, "BLUR BEHIND: " + w);
-                    mInnerFields.mBlurring = true;
-                    if (mBlurSurface == null) {
-                        try {
-                            mBlurSurface = new Surface(mFxSession, 0,
-                                    "BlurSurface",
-                                    -1, 16, 16,
-                                    PixelFormat.OPAQUE,
-                                    Surface.FX_SURFACE_BLUR);
-                        } catch (Exception e) {
-                            Slog.e(TAG, "Exception creating Blur surface", e);
-                        }
-                        if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
-                                + mBlurSurface + ": CREATE");
-                    }
-                    final int dw = mCurDisplayWidth;
-                    final int dh = mCurDisplayHeight;
-                    if (mBlurSurface != null) {
-                        if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
-                                + mBlurSurface + ": pos=(0,0) (" +
-                                dw + "x" + dh + "), layer=" + (w.mAnimLayer-1));
-                        mBlurSurface.setPosition(0, 0);
-                        mBlurSurface.setSize(dw, dh);
-                        mBlurSurface.setLayer(w.mAnimLayer-LAYER_OFFSET_BLUR);
-                        if (!mBlurShown) {
-                            try {
-                                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
-                                        + mBlurSurface + ": SHOW");
-                                mBlurSurface.show();
-                            } catch (RuntimeException e) {
-                                Slog.w(TAG, "Failure showing blur surface", e);
-                            }
-                            mBlurShown = true;
-                        }
-                    }
+                if (attrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
+                    mDimAnimator.show(mCurDisplayWidth, mCurDisplayHeight);
+                } else {
+                    mDimAnimator.show(innerDw, innerDh);
                 }
+                mDimAnimator.updateParameters(mContext.getResources(),
+                        w, currentTime);
             }
         }
     }
 
     private final int performAnimationsLocked(long currentTime, int dw, int dh,
             int innerDw, int innerDh) {
-        ++mTransactionSequence;
-
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: seq="
                 + mTransactionSequence + " mAnimating="
                 + mInnerFields.mAnimating);
@@ -8895,7 +8821,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean someoneLosingFocus = !mLosingFocus.isEmpty();
 
             mInnerFields.mObscured = false;
-            mInnerFields.mBlurring = false;
             mInnerFields.mDimming = false;
             mInnerFields.mSyswin = false;
             
@@ -9986,8 +9911,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
-            pw.print("  mLayoutNeeded="); pw.print(mLayoutNeeded);
-                    pw.print(" mBlurShown="); pw.println(mBlurShown);
+            pw.print("  mLayoutNeeded="); pw.println(mLayoutNeeded);
             if (mDimAnimator != null) {
                 pw.println("  mDimAnimator:");
                 mDimAnimator.printTo("    ", pw);

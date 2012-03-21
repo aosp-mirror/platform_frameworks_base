@@ -222,7 +222,7 @@ class AppWindowToken extends WindowToken {
 
     // This must be called while inside a transaction.
     boolean stepAnimationLocked(long currentTime, int dw, int dh) {
-        if (!service.mDisplayFrozen && service.mPolicy.isScreenOnFully()) {
+        if (service.okToDisplay()) {
             // We will run animations as long as the display isn't frozen.
 
             if (animation == WindowManagerService.sDummyAnimation) {

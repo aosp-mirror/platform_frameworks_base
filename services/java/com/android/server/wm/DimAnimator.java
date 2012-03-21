@@ -130,33 +130,31 @@ class DimAnimator {
             }
         }
 
-        boolean animating = false;
-        if (mLastDimAnimTime != 0) {
+        boolean animating = mLastDimAnimTime != 0;
+        if (animating) {
             mDimCurrentAlpha += mDimDeltaPerMs
                     * (currentTime-mLastDimAnimTime);
-            boolean more = true;
             if (displayFrozen) {
                 // If the display is frozen, there is no reason to animate.
-                more = false;
+                animating = false;
             } else if (mDimDeltaPerMs > 0) {
                 if (mDimCurrentAlpha > mDimTargetAlpha) {
-                    more = false;
+                    animating = false;
                 }
             } else if (mDimDeltaPerMs < 0) {
                 if (mDimCurrentAlpha < mDimTargetAlpha) {
-                    more = false;
+                    animating = false;
                 }
             } else {
-                more = false;
+                animating = false;
             }
 
             // Do we need to continue animating?
-            if (more) {
+            if (animating) {
                 if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DIM "
                         + mDimSurface + ": alpha=" + mDimCurrentAlpha);
                 mLastDimAnimTime = currentTime;
                 mDimSurface.setAlpha(mDimCurrentAlpha);
-                animating = true;
             } else {
                 mDimCurrentAlpha = mDimTargetAlpha;
                 mLastDimAnimTime = 0;
