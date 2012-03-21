@@ -79,6 +79,13 @@ class TRTPPacket : public RefBase {
     static const uint32_t kTRTPEpochMask = (1 << 22) - 1;
     static const int kTRTPEpochShift = 10;
 
+    static const uint32_t kCNC_RetryRequestID     = 'Treq';
+    static const uint32_t kCNC_FastStartRequestID = 'Tfst';
+    static const uint32_t kCNC_NakRetryRequestID  = 'Tnak';
+    static const uint32_t kCNC_JoinGroupID        = 'Tjgp';
+    static const uint32_t kCNC_LeaveGroupID       = 'Tlgp';
+    static const uint32_t kCNC_NakJoinGroupID     = 'Tngp';
+
   protected:
     static const int kRTPHeaderLen = 12;
     virtual int TRTPHeaderLen() const;

@@ -889,7 +889,7 @@ status_t AAH_TXPlayer::setRetransmitEndpoint(
     uint32_t addr = ntohl(endpoint->sin_addr.s_addr);
     uint16_t port = ntohs(endpoint->sin_port);
     sp<AAH_TXPlayer> thiz(this);
-    if ((addr & 0xF0000000) == 0xE0000000) {
+    if (isMulticastSockaddr(endpoint)) {
         // Starting in multicast mode?  We need to have a specified port to
         // multicast to, so sanity check that first.  Then search for an
         // existing multicast TX group with the same target endpoint.  If we

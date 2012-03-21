@@ -28,19 +28,16 @@
 
 #include "aah_rx_player.h"
 #include "aah_tx_packet.h"
+#include "utils.h"
 
 namespace android {
 
-const uint32_t AAH_RXPlayer::kRetransRequestMagic =
-    FOURCC('T','r','e','q');
-const uint32_t AAH_RXPlayer::kRetransNAKMagic =
-    FOURCC('T','n','a','k');
-const uint32_t AAH_RXPlayer::kFastStartRequestMagic =
-    FOURCC('T','f','s','t');
 const uint32_t AAH_RXPlayer::kGapRerequestTimeoutMsec = 75;
 const uint32_t AAH_RXPlayer::kFastStartTimeoutMsec = 800;
 const uint32_t AAH_RXPlayer::kRTPActivityTimeoutMsec = 10000;
 const uint32_t AAH_RXPlayer::kSSCleanoutTimeoutMsec = 1000;
+const uint32_t AAH_RXPlayer::kGrpMemberSlowReportIntervalMsec = 900;
+const uint32_t AAH_RXPlayer::kGrpMemberFastReportIntervalMsec = 200;
 
 static inline int16_t fetchInt16(uint8_t* data) {
     return static_cast<int16_t>(U16_AT(data));
@@ -82,10 +79,23 @@ void AAH_RXPlayer::stopWorkThread() {
 
 void AAH_RXPlayer::cleanupSocket() {
     if (sock_fd_ >= 0) {
+        // If we are in unicast mode, send a pair of leave requests spaced by a
+        // short delay.  We send a pair to increase the probability that at
+        // least one gets through.  If both get dropped, the transmitter will
+        // figure it out eventually via the timeout, but we'd rather not rely on
+        // that if we can avoid it.
+        if (!multicast_mode_) {
+            sendUnicastGroupLeave();
+            usleep(20000);  // 20mSec
+            sendUnicastGroupLeave();
+        }
+
+        // If we had joined a multicast group, make sure we leave it properly
+        // before closing our socket.
         if (multicast_joined_) {
             int res;
             struct ip_mreq mreq;
-            mreq.imr_multiaddr = listen_addr_.sin_addr;
+            mreq.imr_multiaddr = data_source_addr_.sin_addr;
             mreq.imr_interface.s_addr = htonl(INADDR_ANY);
             res = setsockopt(sock_fd_,
                              IPPROTO_IP,
@@ -101,6 +111,7 @@ void AAH_RXPlayer::cleanupSocket() {
         sock_fd_ = -1;
     }
 
+    multicast_mode_ = false;
     resetPipeline();
 }
 
@@ -123,9 +134,26 @@ bool AAH_RXPlayer::setupSocket() {
     long flags;
     int  res, buf_size;
     socklen_t opt_size;
+    uint32_t addr = ntohl(data_source_addr_.sin_addr.s_addr);
+    uint16_t port = ntohs(data_source_addr_.sin_port);
 
     cleanupSocket();
     CHECK(sock_fd_ < 0);
+
+    // Make sure we have a valid data source before proceeding.
+    if (!data_source_set_) {
+        LOGE("setupSocket called with no data source set.");
+        goto bailout;
+    }
+
+    if ((addr == INADDR_ANY) || !port) {
+        LOGE("setupSocket called with invalid data source (%d.%d.%d.%d:%hu)",
+             IP_PRINTF_HELPER(addr), port);
+        goto bailout;
+    }
+
+    // Check to see if we are in multicast RX mode or not.
+    multicast_mode_ = isMulticastSockaddr(&data_source_addr_);
 
     // Make the socket
     sock_fd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -143,12 +171,14 @@ bool AAH_RXPlayer::setupSocket() {
         goto bailout;
     }
 
-    // Bind to our port
+    // Bind to our port.  If we are in multicast mode, we need to bind to the
+    // port on which the multicast traffic will be arriving.  If we are in
+    // unicast mode, then just bind to an ephemeral port.
     struct sockaddr_in bind_addr;
     memset(&bind_addr, 0, sizeof(bind_addr));
     bind_addr.sin_family = AF_INET;
     bind_addr.sin_addr.s_addr = INADDR_ANY;
-    bind_addr.sin_port = listen_addr_.sin_port;
+    bind_addr.sin_port = multicast_mode_ ? data_source_addr_.sin_port : 0;
     res = bind(sock_fd_,
                reinterpret_cast<const sockaddr*>(&bind_addr),
                sizeof(bind_addr));
@@ -156,17 +186,12 @@ bool AAH_RXPlayer::setupSocket() {
         uint32_t a = ntohl(bind_addr.sin_addr.s_addr);
         uint16_t p = ntohs(bind_addr.sin_port);
         LOGE("Failed to bind socket (%d) to %d.%d.%d.%d:%hu. (errno %d)",
-             sock_fd_,
-             (a >> 24) & 0xFF,
-             (a >> 16) & 0xFF,
-             (a >>  8) & 0xFF,
-             (a      ) & 0xFF,
-             p,
-             errno);
+             sock_fd_, IP_PRINTF_HELPER(a), p, errno);
 
         goto bailout;
     }
 
+    // Increase our socket buffer RX size
     buf_size = 1 << 16;   // 64k
     res = setsockopt(sock_fd_,
                      SOL_SOCKET, SO_RCVBUF,
@@ -188,10 +213,12 @@ bool AAH_RXPlayer::setupSocket() {
         LOGD("RX socket buffer size is now %d bytes",  buf_size);
     }
 
-    if (listen_addr_.sin_addr.s_addr) {
+    // If we are in multicast mode, join our socket to the multicast group on
+    // which we expect to receive traffic.
+    if (multicast_mode_) {
         // Join the multicast group and we should be good to go.
         struct ip_mreq mreq;
-        mreq.imr_multiaddr = listen_addr_.sin_addr;
+        mreq.imr_multiaddr = data_source_addr_.sin_addr;
         mreq.imr_interface.s_addr = htonl(INADDR_ANY);
         res = setsockopt(sock_fd_,
                          IPPROTO_IP,
@@ -201,6 +228,7 @@ bool AAH_RXPlayer::setupSocket() {
             LOGE("Failed to join multicast group. (errno %d)", errno);
             goto bailout;
         }
+
         multicast_joined_ = true;
     }
 
@@ -220,27 +248,46 @@ bool AAH_RXPlayer::threadLoop() {
         goto bailout;
     }
 
+    // If we are not in multicast mode, send our first group membership report
+    // right now.  Otherwise, make sure that the timeout has been canceled so we
+    // don't accidentally end up sending reports when we should not.
+    if (!multicast_mode_) {
+        sendUnicastGroupJoin();
+    } else {
+        unicast_group_report_timeout_.setTimeout(-1);
+    }
+
     while (!thread_wrapper_->exitPending()) {
         // Step 1: Wait until there is something to do.
-        int gap_timeout = next_retrans_req_timeout_.msecTillTimeout();
-        int ring_timeout = ring_buffer_.computeInactivityTimeout();
-        int ss_cleanout_timeout = ss_cleanout_timeout_.msecTillTimeout();
         int timeout = -1;
+        int tmp;
 
-        if (!ring_timeout) {
+        // Time to report unicast group membership?
+        if (!(tmp = unicast_group_report_timeout_.msecTillTimeout())) {
+            sendUnicastGroupJoin();
+            continue;
+        }
+        timeout = minTimeout(tmp, timeout);
+
+        // Ring buffer timed out?
+        if (!(tmp = ring_buffer_.computeInactivityTimeout())) {
             LOGW("RTP inactivity timeout reached, resetting pipeline.");
             resetPipeline();
             continue;
         }
+        timeout = minTimeout(tmp, timeout);
 
-        if (!ss_cleanout_timeout) {
+        // Time to check for expired substreams?
+        if (!(tmp = ss_cleanout_timeout_.msecTillTimeout())) {
             cleanoutExpiredSubstreams();
             continue;
         }
+        timeout = minTimeout(tmp, timeout);
 
-        timeout = minTimeout(gap_timeout, timeout);
-        timeout = minTimeout(ring_timeout, timeout);
-        timeout = minTimeout(ss_cleanout_timeout, timeout);
+        // Finally, take the next retransmit request timeout into account and
+        // proceed.
+        tmp = next_retrans_req_timeout_.msecTillTimeout();
+        timeout = minTimeout(tmp, timeout);
 
         if ((0 != timeout) && (!process_more_right_now)) {
             // Set up the events to wait on.  Start with the wakeup pipe.
@@ -252,7 +299,7 @@ bool AAH_RXPlayer::threadLoop() {
             poll_fds[1].fd     = sock_fd_;
             poll_fds[1].events = POLLIN;
 
-            // Wait for something interesing to happen.
+            // Wait for something interesting to happen.
             int poll_res = poll(poll_fds, NELEM(poll_fds), timeout);
             if (poll_res < 0) {
                 LOGE("Fatal error (%d,%d) while waiting on events",
@@ -325,12 +372,7 @@ bool AAH_RXPlayer::threadLoop() {
                         uint32_t a = ntohl(from.sin_addr.s_addr);
                         uint16_t p = ntohs(from.sin_port);
                         LOGV("Dropping packet from unknown transmitter"
-                             " %u.%u.%u.%u:%hu",
-                             ((a >> 24) & 0xFF),
-                             ((a >> 16) & 0xFF),
-                             ((a >>  8) & 0xFF),
-                             ( a        & 0xFF),
-                             p);
+                             " %d.%d.%d.%d:%hu", IP_PRINTK_HELPER(a), p);
 
                         drop_packet = true;
                     } else {
@@ -408,36 +450,39 @@ bool AAH_RXPlayer::processRX(PacketBuffer* pb) {
     uint32_t nak_magic;
     uint16_t seq_no;
     uint32_t epoch;
+    bool     ret_val = true;
 
-    // Every packet either starts with an RTP header which is at least 12 bytes
-    // long or is a retry NAK which is 14 bytes long.  If there are fewer than
-    // 12 bytes here, this cannot be a proper RTP packet.
-    if (amt < 12) {
-        LOGV("Dropping packet, too short to contain RTP header (%u bytes)",
+    // Every packet should be either a C&C NAK packet, or a TRTP packet.  The
+    // shortest possible packet is a group membership NAK, which is only 4 bytes
+    // long.  If our RXed packet is not at least 4 bytes long, then this is junk
+    // and should be tossed.
+    if (amt < 4) {
+        LOGV("Dropping packet, too short to contain any valid data (%u bytes)",
              static_cast<uint32_t>(amt));
         goto drop_packet;
     }
 
-    // Check to see if this is the special case of a NAK packet.
+    // Check to see if this is a special C&C NAK packet.
     nak_magic = ntohl(*(reinterpret_cast<uint32_t*>(data)));
-    if (nak_magic == kRetransNAKMagic) {
-        // Looks like a NAK packet; make sure its long enough.
 
-        if (amt < static_cast<ssize_t>(sizeof(RetransRequest))) {
-            LOGV("Dropping packet, too short to contain NAK payload (%u bytes)",
-                 static_cast<uint32_t>(amt));
+    switch (nak_magic) {
+        case TRTPPacket::kCNC_NakRetryRequestID:
+            ret_val = processRetransmitNAK(data, amt);
             goto drop_packet;
-        }
 
-        SeqNoGap gap;
-        RetransRequest* rtr = reinterpret_cast<RetransRequest*>(data);
-        gap.start_seq_ = ntohs(rtr->start_seq_);
-        gap.end_seq_   = ntohs(rtr->end_seq_);
+        case TRTPPacket::kCNC_NakJoinGroupID:
+            LOGI("Received group join NAK; signalling error and shutting down");
+            ret_val = false;
+            goto drop_packet;
+    }
 
-        LOGV("Process NAK for gap at [%hu, %hu]", gap.start_seq_, gap.end_seq_);
-        ring_buffer_.processNAK(&gap);
-
-        return true;
+    // Every non C&C packet starts with an RTP header which is at least 12 bytes
+    // If there are fewer than 12 bytes here, this cannot be a proper RTP
+    // packet.
+    if (amt < 12) {
+        LOGV("Dropping packet, too short to contain RTP header (%u bytes)",
+             static_cast<uint32_t>(amt));
+        goto drop_packet;
     }
 
     // According to the TRTP spec, version should be 2, padding should be 0,
@@ -476,7 +521,7 @@ bool AAH_RXPlayer::processRX(PacketBuffer* pb) {
 
 drop_packet:
     PacketBuffer::destroy(pb);
-    return true;
+    return ret_val;
 }
 
 void AAH_RXPlayer::processRingBuffer() {
@@ -790,23 +835,19 @@ bool AAH_RXPlayer::processGaps() {
         // Send the request.
         RetransRequest req;
         uint32_t magic  = (kGS_FastStartGap == gap_status)
-                        ? kFastStartRequestMagic
-                        : kRetransRequestMagic;
+                        ? TRTPPacket::kCNC_FastStartRequestID
+                        : TRTPPacket::kCNC_RetryRequestID;
         req.magic_      = htonl(magic);
-        req.mcast_ip_   = listen_addr_.sin_addr.s_addr;
-        req.mcast_port_ = listen_addr_.sin_port;
+        req.mcast_ip_   = data_source_addr_.sin_addr.s_addr;
+        req.mcast_port_ = data_source_addr_.sin_port;
         req.start_seq_  = htons(gap.start_seq_);
         req.end_seq_    = htons(gap.end_seq_);
 
         {
             uint32_t a = ntohl(transmitter_addr_.sin_addr.s_addr);
             uint16_t p = ntohs(transmitter_addr_.sin_port);
-            LOGV("Sending to transmitter %u.%u.%u.%u:%hu",
-                    ((a >> 24) & 0xFF),
-                    ((a >> 16) & 0xFF),
-                    ((a >>  8) & 0xFF),
-                    ( a        & 0xFF),
-                    p);
+            LOGV("Sending to transmitter %d.%d.%d.%d:%hu",
+                 IP_PRINTF_HELPER(a), p);
         }
 
         int res = sendto(sock_fd_, &req, sizeof(req), 0,
@@ -826,6 +867,24 @@ bool AAH_RXPlayer::processGaps() {
     }
 
     return false;
+}
+
+bool AAH_RXPlayer::processRetransmitNAK(const uint8_t* data, size_t amt) {
+    if (amt < static_cast<ssize_t>(sizeof(RetransRequest))) {
+        LOGV("Dropping packet, too short to contain NAK payload (%u bytes)",
+             static_cast<uint32_t>(amt));
+        return true;
+    }
+
+    SeqNoGap gap;
+    const RetransRequest* rtr = reinterpret_cast<const RetransRequest*>(data);
+    gap.start_seq_ = ntohs(rtr->start_seq_);
+    gap.end_seq_   = ntohs(rtr->end_seq_);
+
+    LOGI("Process NAK for gap at [%hu, %hu]", gap.start_seq_, gap.end_seq_);
+    ring_buffer_.processNAK(&gap);
+
+    return true;
 }
 
 void AAH_RXPlayer::setGapStatus(GapStatus status) {
@@ -869,6 +928,55 @@ void AAH_RXPlayer::cleanoutExpiredSubstreams() {
     } while (cnt >= kMaxPerPass);
 
     ss_cleanout_timeout_.setTimeout(kSSCleanoutTimeoutMsec);
+}
+
+void AAH_RXPlayer::sendUnicastGroupJoin() {
+    if (!multicast_mode_ && (sock_fd_ >= 0)) {
+        uint32_t tag = htonl(TRTPPacket::kCNC_JoinGroupID);
+        uint32_t a = ntohl(data_source_addr_.sin_addr.s_addr);
+        uint16_t p = ntohs(data_source_addr_.sin_port);
+
+        LOGV("Sending group join to transmitter %d.%d.%d.%d:%hu",
+             IP_PRINTF_HELPER(a), p);
+
+        int res = sendto(sock_fd_, &tag, sizeof(tag), 0,
+                         reinterpret_cast<struct sockaddr*>(&data_source_addr_),
+                         sizeof(data_source_addr_));
+        if (res < 0) {
+            LOGW("Error sending group join to transmitter %d.%d.%d.%d:%hu"
+                 " (errno %d)", IP_PRINTF_HELPER(a), p, errno);
+        }
+
+        // Reset the membership report timeout.  Use our fast timeout until we
+        // have heard back from our transmitter at least once.
+        unicast_group_report_timeout_.setTimeout(transmitter_known_
+                ?  kGrpMemberSlowReportIntervalMsec
+                :  kGrpMemberFastReportIntervalMsec);
+    } else {
+        LOGE("Attempted to send unicast group membership report while"
+             " multicast_mode = %s and sock_fd = %d",
+             multicast_mode_ ? "true" : "false", sock_fd_);
+        unicast_group_report_timeout_.setTimeout(-1);
+    }
+}
+
+void AAH_RXPlayer::sendUnicastGroupLeave() {
+    if (!multicast_mode_ && (sock_fd_ >= 0)) {
+        uint32_t tag = htonl(TRTPPacket::kCNC_LeaveGroupID);
+        uint32_t a = ntohl(data_source_addr_.sin_addr.s_addr);
+        uint16_t p = ntohs(data_source_addr_.sin_port);
+
+        LOGI("Sending group leave to transmitter %d.%d.%d.%d:%hu",
+             IP_PRINTF_HELPER(a), p);
+
+        int res = sendto(sock_fd_, &tag, sizeof(tag), 0,
+                         reinterpret_cast<struct sockaddr*>(&data_source_addr_),
+                         sizeof(data_source_addr_));
+        if (res < 0) {
+            LOGW("Error sending group leave to transmitter %d.%d.%d.%d:%hu"
+                 " (errno %d)", IP_PRINTF_HELPER(a), p, errno);
+        }
+    }
 }
 
 }  // namespace android

@@ -39,6 +39,7 @@ AAH_RXPlayer::AAH_RXPlayer()
 
     is_playing_          = false;
     multicast_joined_    = false;
+    multicast_mode_      = false;
     transmitter_known_   = false;
     current_epoch_known_ = false;
     data_source_set_     = false;
@@ -46,7 +47,7 @@ AAH_RXPlayer::AAH_RXPlayer()
 
     substreams_.setCapacity(4);
 
-    memset(&listen_addr_,      0, sizeof(listen_addr_));
+    memset(&data_source_addr_, 0, sizeof(data_source_addr_));
     memset(&transmitter_addr_, 0, sizeof(transmitter_addr_));
 
     fetchAudioFlinger();
@@ -112,10 +113,10 @@ status_t AAH_RXPlayer::setDataSource(
 
     a = (a << 24) | (b << 16) | (c <<  8) | d;
 
-    memset(&listen_addr_, 0, sizeof(listen_addr_));
-    listen_addr_.sin_family      = AF_INET;
-    listen_addr_.sin_port        = htons(port);
-    listen_addr_.sin_addr.s_addr = htonl(a);
+    memset(&data_source_addr_, 0, sizeof(data_source_addr_));
+    data_source_addr_.sin_family      = AF_INET;
+    data_source_addr_.sin_port        = htons(port);
+    data_source_addr_.sin_addr.s_addr = htonl(a);
     data_source_set_ = true;
 
     return OK;
@@ -202,9 +203,9 @@ void AAH_RXPlayer::reset_l() {
     CHECK(sock_fd_ < 0);
     CHECK(!multicast_joined_);
     is_playing_ = false;
-    data_source_set_ = false;
     transmitter_known_ = false;
-    memset(&listen_addr_, 0, sizeof(listen_addr_));
+    memset(&data_source_addr_, 0, sizeof(data_source_addr_));
+    data_source_set_ = false;
 }
 
 status_t AAH_RXPlayer::setLooping(int loop) {
