@@ -29,6 +29,33 @@ import java.util.BitSet;
  */
 public class WifiConfiguration implements Parcelable {
 
+    /**
+     * In old configurations, the "private_key" field was used. However, newer
+     * configurations use the key_id field with the engine_id set to "keystore".
+     * If this field is found in the configuration, the migration code is
+     * triggered.
+     * @hide
+     */
+    public static final String OLD_PRIVATE_KEY_NAME = "private_key";
+
+    /**
+     * String representing the keystore OpenSSL ENGINE's ID.
+     * @hide
+     */
+    public static final String KEYSTORE_ENGINE_ID = "keystore";
+
+    /**
+     * String representing the keystore URI used for wpa_supplicant.
+     * @hide
+     */
+    public static final String KEYSTORE_URI = "keystore://";
+
+    /**
+     * String to set the engine value to when it should be enabled.
+     * @hide
+     */
+    public static final String ENGINE_ENABLE = "1";
+
     /** {@hide} */
     public static final String ssidVarName = "ssid";
     /** {@hide} */
@@ -82,14 +109,18 @@ public class WifiConfiguration implements Parcelable {
     /** {@hide} */
     public EnterpriseField client_cert = new EnterpriseField("client_cert");
     /** {@hide} */
-    public EnterpriseField private_key = new EnterpriseField("private_key");
+    public EnterpriseField engine = new EnterpriseField("engine");
+    /** {@hide} */
+    public EnterpriseField engine_id = new EnterpriseField("engine_id");
+    /** {@hide} */
+    public EnterpriseField key_id = new EnterpriseField("key_id");
     /** {@hide} */
     public EnterpriseField ca_cert = new EnterpriseField("ca_cert");
 
     /** {@hide} */
     public EnterpriseField[] enterpriseFields = {
             eap, phase2, identity, anonymous_identity, password, client_cert,
-            private_key, ca_cert };
+            engine, engine_id, key_id, ca_cert };
 
     /**
      * Recognized key management schemes.
