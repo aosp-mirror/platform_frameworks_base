@@ -3481,23 +3481,27 @@ AudioFlinger::PlaybackThread::Track::Track(
             const sp<IMemory>& sharedBuffer,
             int sessionId)
     :   TrackBase(thread, client, sampleRate, format, channelMask, frameCount, sharedBuffer, sessionId),
-    mMute(false), mSharedBuffer(sharedBuffer), mName(-1), mMainBuffer(NULL), mAuxBuffer(NULL),
+    mMute(false),
+    // mFillingUpStatus ?
+    // mRetryCount initialized later when needed
+    mSharedBuffer(sharedBuffer),
+    mStreamType(streamType),
+    mName(-1),  // see note below
+    mMainBuffer(thread->mixBuffer()),
+    mAuxBuffer(NULL),
     mAuxEffectId(0), mHasVolumeController(false)
 {
     if (mCblk != NULL) {
-        if (thread != NULL) {
-            mName = thread->getTrackName_l();
-            mMainBuffer = thread->mixBuffer();
-        }
-        ALOGV("Track constructor name %d, calling pid %d", mName, IPCThreadState::self()->getCallingPid());
-        if (mName < 0) {
-            ALOGE("no more track names available");
-        }
-        mStreamType = streamType;
         // NOTE: audio_track_cblk_t::frameSize for 8 bit PCM data is based on a sample size of
         // 16 bit because data is converted to 16 bit before being stored in buffer by AudioTrack
         mCblk->frameSize = audio_is_linear_pcm(format) ? mChannelCount * sizeof(int16_t) : sizeof(uint8_t);
+        // to avoid leaking a track name, do not allocate one unless there is an mCblk
+        mName = thread->getTrackName_l();
+        if (mName < 0) {
+            ALOGE("no more track names available");
+        }
     }
+    ALOGV("Track constructor name %d, calling pid %d", mName, IPCThreadState::self()->getCallingPid());
 }
 
 AudioFlinger::PlaybackThread::Track::~Track()

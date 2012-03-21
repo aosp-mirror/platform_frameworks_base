@@ -681,9 +681,9 @@ private:
             enum {FS_FILLING, FS_FILLED, FS_ACTIVE};
             mutable uint8_t     mFillingUpStatus;
             int8_t              mRetryCount;
-            sp<IMemory>         mSharedBuffer;
+            const sp<IMemory>   mSharedBuffer;
             bool                mResetDone;
-            audio_stream_type_t mStreamType;
+            const audio_stream_type_t mStreamType;
             int                 mName;
             int16_t             *mMainBuffer;
             int32_t             *mAuxBuffer;
