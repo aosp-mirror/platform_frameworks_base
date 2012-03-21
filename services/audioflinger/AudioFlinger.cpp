@@ -3793,16 +3793,9 @@ AudioFlinger::PlaybackThread::TimedTrack::create(
     if (!client->reserveTimedTrack())
         return NULL;
 
-    sp<TimedTrack> track = new TimedTrack(
+    return new TimedTrack(
         thread, client, streamType, sampleRate, format, channelMask, frameCount,
         sharedBuffer, sessionId);
-
-    if (track == NULL) {
-        client->releaseTimedTrack();
-        return NULL;
-    }
-
-    return track;
 }
 
 AudioFlinger::PlaybackThread::TimedTrack::TimedTrack(
