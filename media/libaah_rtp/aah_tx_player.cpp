@@ -53,8 +53,10 @@ static const int64_t kAAHBufferTimeUs = 1000000LL;
 const int64_t AAH_TXPlayer::kAAHRetryKeepAroundTimeNs =
     kAAHBufferTimeUs * 1100;
 
+const int AAH_TXPlayer::kEOSResendTimeoutMsec = 100;
 const int AAH_TXPlayer::kPauseTSUpdateResendTimeoutMsec = 250;
 const int32_t AAH_TXPlayer::kInvokeGetCNCPort = 0xB33977;
+
 
 sp<MediaPlayerBase> createAAH_TXPlayer() {
     sp<MediaPlayerBase> ret = new AAH_TXPlayer();
@@ -523,8 +525,9 @@ status_t AAH_TXPlayer::play_l() {
 
 status_t AAH_TXPlayer::stop() {
     status_t ret = pause();
+    mEOSResendTimeout.setTimeout(-1);
     mPauseTSUpdateResendTimeout.setTimeout(-1);
-    sendEOS_l();
+    sendFlush_l();
     return ret;
 }
 
@@ -592,7 +595,9 @@ void AAH_TXPlayer::updateClockTransform_l(bool pause) {
     sendTSUpdateNop_l();
 
     // if we are paused, schedule a periodic resend of the TS update, JiC the
-    // receiveing client misses it.
+    // receiveing client misses it.  Don't bother setting the timer if we have
+    // hit EOS; the EOS message will carry the update for us and serve the same
+    // purpose as the pause updates.
     if (mPlayRateIsPaused) {
         mPauseTSUpdateResendTimeout.setTimeout(kPauseTSUpdateResendTimeoutMsec);
     } else {
@@ -604,7 +609,27 @@ void AAH_TXPlayer::sendEOS_l() {
     if (mAAH_TXGroup != NULL) {
         sp<TRTPControlPacket> packet = new TRTPControlPacket();
         if (packet != NULL) {
+            if (mCurrentClockTransformValid) {
+                packet->setClockTransform(mCurrentClockTransform);
+            }
             packet->setCommandID(TRTPControlPacket::kCommandEOS);
+            sendPacket_l(packet);
+        } else {
+            LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
+        }
+    }
+
+    // While we are waiting to reach the end of the actual presentation and have
+    // the app clean us up, periodically resend the EOS message, just it case it
+    // was dropped.
+    mEOSResendTimeout.setTimeout(kEOSResendTimeoutMsec);
+}
+
+void AAH_TXPlayer::sendFlush_l() {
+    if (mAAH_TXGroup != NULL) {
+        sp<TRTPControlPacket> packet = new TRTPControlPacket();
+        if (packet != NULL) {
+            packet->setCommandID(TRTPControlPacket::kCommandFlush);
             sendPacket_l(packet);
         } else {
             LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
@@ -641,21 +666,13 @@ status_t AAH_TXPlayer::seekTo(int msec) {
 
 status_t AAH_TXPlayer::seekTo_l(int64_t timeUs) {
     mIsSeeking = true;
+    mEOSResendTimeout.setTimeout(-1);
     mSeekTimeUs = timeUs;
 
     mCurrentClockTransformValid = false;
     mLastQueuedMediaTimePTSValid = false;
 
-    // send a flush command packet
-    if (mAAH_TXGroup != NULL) {
-        sp<TRTPControlPacket> packet = new TRTPControlPacket();
-        if (packet != NULL) {
-            packet->setCommandID(TRTPControlPacket::kCommandFlush);
-            sendPacket_l(packet);
-        } else {
-            LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
-        }
-    }
+    sendFlush_l();
 
     return OK;
 }
@@ -748,7 +765,7 @@ void AAH_TXPlayer::reset_l() {
 
     cancelPlayerEvents();
 
-    sendEOS_l();
+    sendFlush_l();
 
     mCachedSource.clear();
 
@@ -769,6 +786,7 @@ void AAH_TXPlayer::reset_l() {
     mIsSeeking = false;
     mSeekTimeUs = 0;
 
+    mEOSResendTimeout.setTimeout(-1);
     mPauseTSUpdateResendTimeout.setTimeout(-1);
 
     mUri.setTo("");
@@ -1161,6 +1179,39 @@ void AAH_TXPlayer::onPumpAudio() {
             }
         }
 
+        // If we have hit EOS, then we will have an EOS resend timeout set.
+        int msecTillEOSResend = mEOSResendTimeout.msecTillTimeout();
+        if (msecTillEOSResend >= 0) {
+            // Resend the EOS message if its time.
+            if (!msecTillEOSResend) {
+                sendEOS_l();
+            }
+
+            // Declare playback complete to the app level if we have passed the
+            // PTS of the last sample queued, then cancel the EOS resend timer.
+            if (mediaTimeNowValid &&
+                mLastQueuedMediaTimePTSValid &&
+              ((mLastQueuedMediaTimePTS - mediaTimeNow) <= 0)) {
+                LOGI("Sending playback complete");
+                pause_l(false);
+                notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
+                mEOSResendTimeout.setTimeout(-1);
+
+                // Return directly from here to avoid rescheduling ourselves.
+                return;
+            }
+
+            // Once we have hit EOS, we are done until we seek or are reset.
+            break;
+        }
+
+        // Stop if we have reached our buffer threshold.
+        if (mediaTimeNowValid &&
+            mLastQueuedMediaTimePTSValid &&
+           (mediaTimeNow + kAAHBufferTimeUs - mLastQueuedMediaTimePTS) <= 0) {
+            break;
+        }
+
         // Stop if we have reached our buffer threshold.
         if (mediaTimeNowValid &&
             mLastQueuedMediaTimePTSValid &&
@@ -1177,11 +1228,34 @@ void AAH_TXPlayer::onPumpAudio() {
         status_t err = mAudioSource->read(&mediaBuffer, &options);
         if (err != NO_ERROR) {
             if (err == ERROR_END_OF_STREAM) {
-                LOGI("*** %s reached end of stream", __PRETTY_FUNCTION__);
-                notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
-                notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
-                pause_l(false);
+                LOGI("Demux reached reached end of stream.");
+
+                // Send an EOS message to our receivers so that they know there
+                // is no more data coming and can behave appropriately.
                 sendEOS_l();
+
+                // One way or the other, we are "completely buffered" at this
+                // point since we have hit the end of stream.
+                notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
+
+                // Do not send the playback complete message yet.  Instead, wait
+                // until we pass the presentation time of the last sample we
+                // queued to report playback complete up to the higher levels of
+                // code.
+                //
+                // It would be very odd to not have a last PTS at this point in
+                // time, but if we don't (for whatever reason), just go ahead
+                // and send the playback complete right now so we don't end up
+                // stuck.
+                if (!mLastQueuedMediaTimePTSValid) {
+                    LOGW("Sending playback complete (no valid last PTS)");
+                    pause_l(false);
+                    notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
+                    mEOSResendTimeout.setTimeout(-1);
+                } else {
+                    // Break out of the loop to reschude ourselves.
+                    break;
+                }
             } else {
                 LOGE("*** %s read failed err=%d", __PRETTY_FUNCTION__, err);
             }

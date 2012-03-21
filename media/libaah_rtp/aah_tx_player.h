@@ -106,6 +106,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     status_t seekTo_l(int64_t timeUs);
     void updateClockTransform_l(bool pause);
     void sendEOS_l();
+    void sendFlush_l();
     void sendTSUpdateNop_l();
     void cancelPlayerEvents(bool keepBufferingGoing = false);
     void reset_l();
@@ -143,6 +144,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     bool mIsSeeking;
     int64_t mSeekTimeUs;
 
+    Timeout mEOSResendTimeout;
     Timeout mPauseTSUpdateResendTimeout;
 
     sp<TimedEventQueue::Event> mPumpAudioEvent;
@@ -171,6 +173,7 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     uint8_t mProgramID;
     uint8_t mTRTPVolume;
 
+    static const int kEOSResendTimeoutMsec;
     static const int kPauseTSUpdateResendTimeoutMsec;
 
     DISALLOW_EVIL_CONSTRUCTORS(AAH_TXPlayer);
