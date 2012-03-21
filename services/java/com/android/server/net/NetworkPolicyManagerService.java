@@ -524,6 +524,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             case MATCH_MOBILE_3G_LOWER:
             case MATCH_MOBILE_4G:
             case MATCH_MOBILE_ALL:
+                // mobile templates aren't relevant in airplane mode
+                if (isAirplaneModeOn(mContext)) {
+                    return false;
+                }
+
                 // mobile templates are relevant when subscriberid is active
                 return Objects.equal(getActiveSubscriberId(), template.getSubscriberId());
         }
@@ -1721,6 +1726,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // @VisibleForTesting
     public void addIdleHandler(IdleHandler handler) {
         mHandler.getLooper().getQueue().addIdleHandler(handler);
+    }
+
+    public static boolean isAirplaneModeOn(Context context) {
+        return Settings.System.getInt(
+                context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
     }
 
     private static void collectKeys(SparseIntArray source, SparseBooleanArray target) {
