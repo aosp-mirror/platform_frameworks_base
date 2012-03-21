@@ -20,6 +20,7 @@
 
 #include <media/stagefright/MediaExtractor.h>
 #include <utils/Vector.h>
+#include <utils/String8.h>
 
 namespace android {
 
@@ -64,6 +65,9 @@ private:
     sp<MetaData> mFileMetaData;
 
     Vector<uint32_t> mPath;
+    String8 mLastCommentMean;
+    String8 mLastCommentName;
+    String8 mLastCommentData;
 
     status_t readMetaData();
     status_t parseChunk(off64_t *offset, int depth);

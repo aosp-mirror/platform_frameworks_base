@@ -599,6 +599,7 @@ static void convertTimeToDate(int64_t time_1904, String8 *s) {
 }
 
 status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
+    ALOGV("entering parseChunk %lld/%d", *offset, depth);
     uint32_t hdr[2];
     if (mDataSource->readAt(*offset, hdr, 8) < 8) {
         return ERROR_IO;
@@ -625,6 +626,7 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
 
     char chunk[5];
     MakeFourCCString(chunk_type, chunk);
+    ALOGV("chunk: %s @ %lld", chunk, *offset);
 
 #if 0
     static const char kWhitespace[] = "                                        ";
@@ -1302,6 +1304,8 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             break;
         }
 
+        case FOURCC('m', 'e', 'a', 'n'):
+        case FOURCC('n', 'a', 'm', 'e'):
         case FOURCC('d', 'a', 't', 'a'):
         {
             if (mPath.size() == 6 && underMetaDataPath(mPath)) {
@@ -1437,6 +1441,15 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             break;
         }
 
+        case FOURCC('-', '-', '-', '-'):
+        {
+            mLastCommentMean.clear();
+            mLastCommentName.clear();
+            mLastCommentData.clear();
+            *offset += chunk_size;
+            break;
+        }
+
         default:
         {
             *offset += chunk_size;
@@ -1553,6 +1566,9 @@ status_t MPEG4Extractor::parseMetaData(off64_t offset, size_t size) {
     uint32_t flags = U32_AT(buffer);
 
     uint32_t metadataKey = 0;
+    char chunk[5];
+    MakeFourCCString(mPath[4], chunk);
+    ALOGV("meta: %s @ %lld", chunk, offset);
     switch (mPath[4]) {
         case FOURCC(0xa9, 'a', 'l', 'b'):
         {
@@ -1629,6 +1645,35 @@ status_t MPEG4Extractor::parseMetaData(off64_t offset, size_t size) {
                         (int)buffer[size - 3], (int)buffer[size - 1]);
 
                 mFileMetaData->setCString(kKeyDiscNumber, tmp);
+            }
+            break;
+        }
+        case FOURCC('-', '-', '-', '-'):
+        {
+            buffer[size] = '\0';
+            switch (mPath[5]) {
+                case FOURCC('m', 'e', 'a', 'n'):
+                    mLastCommentMean.setTo((const char *)buffer + 4);
+                    break;
+                case FOURCC('n', 'a', 'm', 'e'):
+                    mLastCommentName.setTo((const char *)buffer + 4);
+                    break;
+                case FOURCC('d', 'a', 't', 'a'):
+                    mLastCommentData.setTo((const char *)buffer + 8);
+                    break;
+            }
+            if (mLastCommentMean == "com.apple.iTunes"
+                    && mLastCommentName == "iTunSMPB"
+                    && mLastCommentData.length() != 0) {
+                int32_t delay, padding;
+                if (sscanf(mLastCommentData,
+                           " %*x %x %x %*x", &delay, &padding) == 2) {
+                    mLastTrack->meta->setInt32(kKeyEncoderDelay, delay);
+                    mLastTrack->meta->setInt32(kKeyEncoderPadding, padding);
+                }
+                mLastCommentMean.clear();
+                mLastCommentName.clear();
+                mLastCommentData.clear();
             }
             break;
         }
