@@ -40,6 +40,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.webkit.WebViewClassic.FocusNodeHref;
+import android.webkit.WebViewInputDispatcher.WebKitCallbacks;
 
 import junit.framework.Assert;
 
@@ -257,6 +258,10 @@ public final class WebViewCore {
      * is called only from BrowserFrame in the WebCore thread. */
     /* package */ synchronized BrowserFrame getBrowserFrame() {
         return mBrowserFrame;
+    }
+
+    public WebKitCallbacks getInputDispatcherCallbacks() {
+        return mEventHub;
     }
 
     //-------------------------------------------------------------------------
@@ -663,6 +668,7 @@ public final class WebViewCore {
             int x, int y);
     private native void nativeTouchUp(int nativeClass,
             int touchGeneration, int framePtr, int nodePtr, int x, int y);
+    private native boolean nativeMouseClick(int nativeClass);
 
     private native boolean nativeHandleTouchEvent(int nativeClass, int action,
             int[] idArray, int[] xArray, int[] yArray, int count,
@@ -1025,8 +1031,8 @@ public final class WebViewCore {
             "REQUEST_CURSOR_HREF", // = 137;
             "ADD_JS_INTERFACE", // = 138;
             "LOAD_DATA", // = 139;
-            "TOUCH_UP", // = 140;
-            "TOUCH_EVENT", // = 141;
+            "", // = 140;
+            "", // = 141;
             "SET_ACTIVE", // = 142;
             "ON_PAUSE",     // = 143
             "ON_RESUME",    // = 144
@@ -1051,7 +1057,7 @@ public final class WebViewCore {
     /**
      * @hide
      */
-    public class EventHub {
+    public class EventHub implements WebViewInputDispatcher.WebKitCallbacks {
         // Message Ids
         static final int REVEAL_SELECTION = 96;
         static final int SCROLL_TEXT_INPUT = 99;
@@ -1095,11 +1101,6 @@ public final class WebViewCore {
         static final int REQUEST_CURSOR_HREF = 137;
         static final int ADD_JS_INTERFACE = 138;
         static final int LOAD_DATA = 139;
-
-        // motion
-        static final int TOUCH_UP = 140;
-        // message used to pass UI touch events to WebCore
-        static final int TOUCH_EVENT = 141;
 
         // Used to tell the focus controller not to draw the blinking cursor,
         // based on whether the WebView has focus and whether the WebView's
@@ -1496,45 +1497,6 @@ public final class WebViewCore {
                             nativeCloseIdleConnections(mNativeClass);
                             break;
 
-                        case TOUCH_UP:
-                            TouchUpData touchUpData = (TouchUpData) msg.obj;
-                            if (touchUpData.mNativeLayer != 0) {
-                                nativeScrollLayer(mNativeClass,
-                                        touchUpData.mNativeLayer,
-                                        touchUpData.mNativeLayerRect);
-                            }
-                            nativeTouchUp(mNativeClass,
-                                    touchUpData.mMoveGeneration,
-                                    touchUpData.mFrame, touchUpData.mNode,
-                                    touchUpData.mX, touchUpData.mY);
-                            break;
-
-                        case TOUCH_EVENT: {
-                            TouchEventData ted = (TouchEventData) msg.obj;
-                            final int count = ted.mPoints.length;
-                            int[] xArray = new int[count];
-                            int[] yArray = new int[count];
-                            for (int c = 0; c < count; c++) {
-                                xArray[c] = ted.mPoints[c].x;
-                                yArray[c] = ted.mPoints[c].y;
-                            }
-                            if (ted.mNativeLayer != 0) {
-                                nativeScrollLayer(mNativeClass,
-                                        ted.mNativeLayer, ted.mNativeLayerRect);
-                            }
-                            ted.mNativeResult = nativeHandleTouchEvent(
-                                    mNativeClass, ted.mAction, ted.mIds, xArray,
-                                    yArray, count, ted.mActionIndex,
-                                    ted.mMetaState);
-                            Message.obtain(
-                                    mWebViewClassic.mPrivateHandler,
-                                    WebViewClassic.PREVENT_TOUCH_ID,
-                                    ted.mAction,
-                                    ted.mNativeResult ? 1 : 0,
-                                    ted).sendToTarget();
-                            break;
-                        }
-
                         case SET_ACTIVE:
                             nativeSetFocusControllerActive(mNativeClass, msg.arg1 == 1);
                             break;
@@ -1815,6 +1777,38 @@ public final class WebViewCore {
                     mHandler.sendMessage(mMessages.get(i));
                 }
                 mMessages = null;
+            }
+        }
+
+        @Override
+        public Looper getWebKitLooper() {
+            return mHandler.getLooper();
+        }
+
+        @Override
+        public boolean dispatchWebKitEvent(MotionEvent event, int eventType, int flags) {
+            switch (eventType) {
+                case WebViewInputDispatcher.EVENT_TYPE_CLICK:
+                    return nativeMouseClick(mNativeClass);
+
+                case WebViewInputDispatcher.EVENT_TYPE_TOUCH: {
+                    int count = event.getPointerCount();
+                    int[] idArray = new int[count];
+                    int[] xArray = new int[count];
+                    int[] yArray = new int[count];
+                    for (int i = 0; i < count; i++) {
+                        idArray[i] = event.getPointerId(i);
+                        xArray[i] = (int) event.getX(i);
+                        yArray[i] = (int) event.getY(i);
+                    }
+                    return nativeHandleTouchEvent(mNativeClass,
+                            event.getActionMasked(),
+                            idArray, xArray, yArray, count,
+                            event.getActionIndex(), event.getMetaState());
+                }
+
+                default:
+                    return false;
             }
         }
 
