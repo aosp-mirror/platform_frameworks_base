@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.app.DownloadManager;
+import android.content.Context;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;
 
@@ -741,5 +742,20 @@ public final class Downloads {
              */
             public static final String INSERT_KEY_PREFIX = "http_header_";
         }
+    }
+
+    /**
+     * Query where clause for general querying.
+     */
+    private static final String QUERY_WHERE_CLAUSE = Impl.COLUMN_NOTIFICATION_PACKAGE + "=? AND "
+            + Impl.COLUMN_NOTIFICATION_CLASS + "=?";
+
+    /**
+     * Delete all the downloads for a package/class pair.
+     */
+    public static final void removeAllDownloadsByPackage(
+            Context context, String notification_package, String notification_class) {
+        context.getContentResolver().delete(Impl.CONTENT_URI, QUERY_WHERE_CLAUSE,
+                new String[] { notification_package, notification_class });
     }
 }
