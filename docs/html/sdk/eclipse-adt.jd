@@ -135,7 +135,9 @@ ADT 17.0.0</a> <em>(March 2012)</em>
           <li>Added feature to automatically setup JAR dependencies. Any {@code .jar} files in the
           {@code /libs} folder are added to the build configuration (similar to how the Ant build
           system works). Also, {@code .jar} files needed by library projects are also automatically
-          added to projects that depend on those library projects.</li>
+          added to projects that depend on those library projects.
+          (<a href="http://tools.android.com/recent/dealingwithdependenciesinandroidprojects">more
+          info</a>)</li>
           <li>Added a feature that allows you to run some code only in debug mode. Builds now
 generate a class called {@code BuildConfig} containing a {@code DEBUG} constant that is
 automatically set according to your build type. You can check the ({@code BuildConfig.DEBUG})

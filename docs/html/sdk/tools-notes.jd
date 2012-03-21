@@ -128,7 +128,8 @@ generate a class called {@code BuildConfig} containing a {@code DEBUG} constant 
 automatically set according to your build type. You can check the ({@code BuildConfig.DEBUG})
 constant in your code to run debug-only functions.</li>
             <li>Fixed issue when a project and its libraries include the same jar file in their libs
-              folder.</li>
+              folder. (<a href="http://tools.android.com/recent/dealingwithdependenciesinandroidprojects">more
+              info</a>)</li>
             <li>Added support for custom views with custom attributes in libraries. Layouts using
 custom attributes must use the namespace URI {@code http://schemas.android.com/apk/res-auto} instead
 of the URI that includes the app package name. This URI is replaced with the app specific one at
