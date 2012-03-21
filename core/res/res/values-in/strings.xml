@@ -386,7 +386,7 @@
     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Mengizinkan aplikasi untuk merusak penyimpanan internal."</string>
     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"pasang / lepas penyimpanan internal"</string>
     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Mengizinkan aplikasi untuk memasang / melepas penyimpanan internal."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"ubah nama penyimpanan internal"</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"ganti nama penyimpanan internal"</string>
     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Mengizinkan aplikasi untuk mengubah penyimpanan internal."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"mengontrol penggetar"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Mengizinkan aplikasi mengontrol penggetar."</string>
