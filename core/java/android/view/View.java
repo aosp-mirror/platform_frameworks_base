@@ -11481,7 +11481,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 layerType != LAYER_TYPE_HARDWARE;
 
         int restoreTo = -1;
-        if (!useDisplayListProperties) {
+        if (!useDisplayListProperties || transformToApply != null) {
             restoreTo = canvas.save();
         }
         if (offsetForScroll) {
@@ -11515,11 +11515,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     if (concatMatrix) {
                         // Undo the scroll translation, apply the transformation matrix,
                         // then redo the scroll translate to get the correct result.
-                        if (!useDisplayListProperties) {
-                            canvas.translate(-transX, -transY);
-                            canvas.concat(transformToApply.getMatrix());
-                            canvas.translate(transX, transY);
-                        }
+                        canvas.translate(-transX, -transY);
+                        canvas.concat(transformToApply.getMatrix());
+                        canvas.translate(transX, transY);
                         parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
                     }
 
@@ -11548,12 +11546,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
                         if (layerType == LAYER_TYPE_NONE) {
-                            if (!useDisplayListProperties) {
-                                final int scrollX = hasDisplayList ? 0 : sx;
-                                final int scrollY = hasDisplayList ? 0 : sy;
-                                canvas.saveLayerAlpha(scrollX, scrollY, scrollX + mRight - mLeft,
-                                        scrollY + mBottom - mTop, multipliedAlpha, layerFlags);
-                            }
+                            final int scrollX = hasDisplayList ? 0 : sx;
+                            final int scrollY = hasDisplayList ? 0 : sy;
+                            canvas.saveLayerAlpha(scrollX, scrollY, scrollX + mRight - mLeft,
+                                    scrollY + mBottom - mTop, multipliedAlpha, layerFlags);
                         }
                     } else {
                         // Alpha is handled by the child directly, clobber the layer's alpha
