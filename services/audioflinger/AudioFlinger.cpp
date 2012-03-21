@@ -894,7 +894,8 @@ status_t AudioFlinger::setParameters(audio_io_handle_t ioHandle, const String8& 
             // indicate output device change to all input threads for pre processing
             AudioParameter param = AudioParameter(keyValuePairs);
             int value;
-            if (param.getInt(String8(AudioParameter::keyRouting), value) == NO_ERROR) {
+            if ((param.getInt(String8(AudioParameter::keyRouting), value) == NO_ERROR) &&
+                    (value != 0)) {
                 for (size_t i = 0; i < mRecordThreads.size(); i++) {
                     mRecordThreads.valueAt(i)->setParameters(keyValuePairs);
                 }
