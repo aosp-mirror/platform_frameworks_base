@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "MetaData"
+#include <utils/Log.h>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -280,6 +284,61 @@ void MetaData::typed_data::freeStorage() {
     }
 
     mSize = 0;
+}
+
+String8 MetaData::typed_data::asString() const {
+    String8 out;
+    const void *data = storage();
+    switch(mType) {
+        case TYPE_NONE:
+            out = String8::format("no type, size %d)", mSize);
+            break;
+        case TYPE_C_STRING:
+            out = String8::format("(char*) %s", (const char *)data);
+            break;
+        case TYPE_INT32:
+            out = String8::format("(int32_t) %d", *(int32_t *)data);
+            break;
+        case TYPE_INT64:
+            out = String8::format("(int64_t) %lld", *(int64_t *)data);
+            break;
+        case TYPE_FLOAT:
+            out = String8::format("(float) %f", *(float *)data);
+            break;
+        case TYPE_POINTER:
+            out = String8::format("(void*) %p", *(void **)data);
+            break;
+        case TYPE_RECT:
+        {
+            const Rect *r = (const Rect *)data;
+            out = String8::format("Rect(%d, %d, %d, %d)",
+                                  r->mLeft, r->mTop, r->mRight, r->mBottom);
+            break;
+        }
+
+        default:
+            out = String8::format("(unknown type %d, size %d)", mType, mSize);
+            break;
+    }
+    return out;
+}
+
+static void MakeFourCCString(uint32_t x, char *s) {
+    s[0] = x >> 24;
+    s[1] = (x >> 16) & 0xff;
+    s[2] = (x >> 8) & 0xff;
+    s[3] = x & 0xff;
+    s[4] = '\0';
+}
+
+void MetaData::dumpToLog() const {
+    for (int i = mItems.size(); --i >= 0;) {
+        int32_t key = mItems.keyAt(i);
+        char cc[5];
+        MakeFourCCString(key, cc);
+        const typed_data &item = mItems.valueAt(i);
+        ALOGI("%s: %s", cc, item.asString().string());
+    }
 }
 
 }  // namespace android
