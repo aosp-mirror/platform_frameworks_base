@@ -194,6 +194,7 @@ status_t AudioTrack::set(
     if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
         return NO_INIT;
     }
+
     uint32_t afLatency;
     if (AudioSystem::getOutputLatency(&afLatency, streamType) != NO_ERROR) {
         return NO_INIT;
@@ -203,9 +204,11 @@ status_t AudioTrack::set(
     if (streamType == AUDIO_STREAM_DEFAULT) {
         streamType = AUDIO_STREAM_MUSIC;
     }
+
     if (sampleRate == 0) {
         sampleRate = afSampleRate;
     }
+
     // these below should probably come from the audioFlinger too...
     if (format == AUDIO_FORMAT_DEFAULT) {
         format = AUDIO_FORMAT_PCM_16_BIT;

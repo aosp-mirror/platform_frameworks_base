@@ -132,7 +132,7 @@ void AudioMixer::deleteTrackName(int name)
         invalidateState(1<<name);
     }
     if (track.resampler != NULL) {
-        // delete  the resampler
+        // delete the resampler
         delete track.resampler;
         track.resampler = NULL;
         track.sampleRate = mSampleRate;

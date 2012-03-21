@@ -809,9 +809,9 @@ bool AudioGroup::DeviceThread::threadLoop()
     AudioTrack track;
     AudioRecord record;
     if (track.set(AUDIO_STREAM_VOICE_CALL, sampleRate, AUDIO_FORMAT_PCM_16_BIT,
-        AUDIO_CHANNEL_OUT_MONO, output) != NO_ERROR || record.set(
-        AUDIO_SOURCE_VOICE_COMMUNICATION, sampleRate, AUDIO_FORMAT_PCM_16_BIT,
-        AUDIO_CHANNEL_IN_MONO, input) != NO_ERROR) {
+                AUDIO_CHANNEL_OUT_MONO, output) != NO_ERROR ||
+            record.set(AUDIO_SOURCE_VOICE_COMMUNICATION, sampleRate, AUDIO_FORMAT_PCM_16_BIT,
+                AUDIO_CHANNEL_IN_MONO, input) != NO_ERROR) {
         ALOGE("cannot initialize audio device");
         return false;
     }
