@@ -31,10 +31,14 @@
 #include "rs_atomic.rsh"
 #include "rs_cl.rsh"
 #include "rs_debug.rsh"
+#include "rs_element.rsh"
 #include "rs_math.rsh"
+#include "rs_mesh.rsh"
 #include "rs_matrix.rsh"
 #include "rs_object.rsh"
+#include "rs_program.rsh"
 #include "rs_quaternion.rsh"
+#include "rs_sampler.rsh"
 #include "rs_time.rsh"
 
 
