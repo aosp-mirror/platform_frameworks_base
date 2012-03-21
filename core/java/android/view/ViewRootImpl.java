@@ -1919,7 +1919,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void performDraw() {
-        if (!mAttachInfo.mScreenOn) return;
+        if (!mAttachInfo.mScreenOn && !mReportNextDraw) {
+            return;
+        }
 
         final long drawStartTime;
         if (ViewDebug.DEBUG_LATENCY) {
