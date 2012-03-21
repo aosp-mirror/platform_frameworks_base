@@ -38,6 +38,7 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXCodec.h>
 #include <media/stagefright/Utils.h>
+#include <media/stagefright/SkipCutBuffer.h>
 #include <utils/Vector.h>
 
 #include <OMX_Audio.h>
@@ -1303,6 +1304,7 @@ OMXCodec::OMXCodec(
       mSeekMode(ReadOptions::SEEK_CLOSEST_SYNC),
       mTargetTimeUs(-1),
       mOutputPortSettingsChangedPending(false),
+      mSkipCutBuffer(NULL),
       mLeftOverBuffer(NULL),
       mPaused(false),
       mNativeWindow(
@@ -1413,6 +1415,9 @@ OMXCodec::~OMXCodec() {
 
     free(mMIME);
     mMIME = NULL;
+
+    delete mSkipCutBuffer;
+    mSkipCutBuffer = NULL;
 }
 
 status_t OMXCodec::init() {
@@ -1571,6 +1576,34 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
 
         CODEC_LOGV("allocated buffer %p on %s port", buffer,
              portIndex == kPortIndexInput ? "input" : "output");
+    }
+
+    if (portIndex == kPortIndexOutput) {
+
+        sp<MetaData> meta = mSource->getFormat();
+        int32_t delay = 0;
+        if (!meta->findInt32(kKeyEncoderDelay, &delay)) {
+            delay = 0;
+        }
+        int32_t padding = 0;
+        if (!meta->findInt32(kKeyEncoderPadding, &padding)) {
+            padding = 0;
+        }
+        int32_t numchannels = 0;
+        if (delay + padding) {
+            if (meta->findInt32(kKeyChannelCount, &numchannels)) {
+                size_t frameSize = numchannels * sizeof(int16_t);
+                if (mSkipCutBuffer) {
+                    size_t prevbuffersize = mSkipCutBuffer->size();
+                    if (prevbuffersize != 0) {
+                        ALOGW("Replacing SkipCutBuffer holding %d bytes", prevbuffersize);
+                    }
+                    delete mSkipCutBuffer;
+                }
+                mSkipCutBuffer = new SkipCutBuffer(delay * frameSize, padding * frameSize,
+                                                   def.nBufferSize);
+            }
+        }
     }
 
     // dumpPortStatus(portIndex);
@@ -2489,6 +2522,10 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
 
             CHECK_EQ(countBuffersWeOwn(mPortBuffers[portIndex]),
                      mPortBuffers[portIndex].size());
+
+            if (mSkipCutBuffer && mPortStatus[kPortIndexOutput] == ENABLED) {
+                mSkipCutBuffer->clear();
+            }
 
             if (mState == RECONFIGURING) {
                 CHECK_EQ(portIndex, (OMX_U32)kPortIndexOutput);
@@ -3800,6 +3837,9 @@ status_t OMXCodec::read(
     info->mStatus = OWNED_BY_CLIENT;
 
     info->mMediaBuffer->add_ref();
+    if (mSkipCutBuffer) {
+        mSkipCutBuffer->submit(info->mMediaBuffer);
+    }
     *buffer = info->mMediaBuffer;
 
     return OK;

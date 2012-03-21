@@ -30,6 +30,7 @@ struct MediaCodecList;
 class MemoryDealer;
 struct OMXCodecObserver;
 struct CodecProfileLevel;
+class SkipCutBuffer;
 
 struct OMXCodec : public MediaSource,
                   public MediaBufferObserver {
@@ -201,6 +202,7 @@ private:
     ReadOptions::SeekMode mSeekMode;
     int64_t mTargetTimeUs;
     bool mOutputPortSettingsChangedPending;
+    SkipCutBuffer *mSkipCutBuffer;
 
     MediaBuffer *mLeftOverBuffer;
 
@@ -377,6 +379,7 @@ status_t QueryCodecs(
         const sp<IOMX> &omx,
         const char *mimeType, bool queryDecoders,
         Vector<CodecCapabilities> *results);
+
 
 }  // namespace android
 

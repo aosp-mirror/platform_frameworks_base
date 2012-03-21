@@ -42,6 +42,7 @@ LOCAL_SRC_FILES:=                         \
         OggExtractor.cpp                  \
         SampleIterator.cpp                \
         SampleTable.cpp                   \
+        SkipCutBuffer.cpp                 \
         StagefrightMediaScanner.cpp       \
         StagefrightMetadataRetriever.cpp  \
         SurfaceMediaSource.cpp            \
