@@ -42,12 +42,15 @@ namespace android {
 
 // ----------------------------------------------------------------------------
 
-AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
-    :   mTrackNames(0), mSampleRate(sampleRate)
+AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate, uint32_t maxNumTracks)
+    :   mTrackNames(0), mConfiguredNames((1 << maxNumTracks) - 1), mSampleRate(sampleRate)
 {
     // AudioMixer is not yet capable of multi-channel beyond stereo
     COMPILE_TIME_ASSERT_FUNCTION_SCOPE(2 == MAX_NUM_CHANNELS);
     
+    ALOG_ASSERT(maxNumTracks <= MAX_NUM_TRACKS, "maxNumTracks %u > MAX_NUM_TRACKS %u",
+            maxNumTracks, MAX_NUM_TRACKS);
+
     LocalClock lc;
 
     mState.enabledTracks= 0;
@@ -103,7 +106,7 @@ AudioMixer::~AudioMixer()
 
 int AudioMixer::getTrackName()
 {
-    uint32_t names = ~mTrackNames;
+    uint32_t names = (~mTrackNames) & mConfiguredNames;
     if (names != 0) {
         int n = __builtin_ctz(names);
         ALOGV("add track (%d)", n);
