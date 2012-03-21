@@ -396,7 +396,7 @@
     <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Mengizinkan apl merusak penyimpanan internal."</string>
     <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"memasang/melepas penyimpanan internal"</string>
     <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Mengizinkan apl memasang/melepas penyimpanan internal."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"ubah nama penyimpanan internal"</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"ganti nama penyimpanan internal"</string>
     <string name="permdesc_asec_rename" msgid="1794757588472127675">"Mengizinkan apl mengganti nama penyimpanan internal."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"mengontrol penggetar"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Mengizinkan aplikasi untuk mengendalikan vibrator."</string>
@@ -1168,7 +1168,6 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Tambahkan akun"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Penambahan"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Pengurangan"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> sentuh dan tahan."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Geser ke atas untuk menambah dan ke bawah untuk mengurangi."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Menit penambahan"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Menit pengurangan"</string>
