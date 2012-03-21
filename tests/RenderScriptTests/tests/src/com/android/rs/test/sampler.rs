@@ -9,35 +9,35 @@ rs_sampler anisotropy;
 static bool test_sampler_getters() {
     bool failed = false;
 
-    _RS_ASSERT(rsgSamplerGetMagnification(minification) == RS_SAMPLER_NEAREST);
-    _RS_ASSERT(rsgSamplerGetMinification(minification) == RS_SAMPLER_LINEAR_MIP_LINEAR);
-    _RS_ASSERT(rsgSamplerGetWrapS(minification) == RS_SAMPLER_CLAMP);
-    _RS_ASSERT(rsgSamplerGetWrapT(minification) == RS_SAMPLER_CLAMP);
-    _RS_ASSERT(rsgSamplerGetAnisotropy(minification) == 1.0f);
+    _RS_ASSERT(rsSamplerGetMagnification(minification) == RS_SAMPLER_NEAREST);
+    _RS_ASSERT(rsSamplerGetMinification(minification) == RS_SAMPLER_LINEAR_MIP_LINEAR);
+    _RS_ASSERT(rsSamplerGetWrapS(minification) == RS_SAMPLER_CLAMP);
+    _RS_ASSERT(rsSamplerGetWrapT(minification) == RS_SAMPLER_CLAMP);
+    _RS_ASSERT(rsSamplerGetAnisotropy(minification) == 1.0f);
 
-    _RS_ASSERT(rsgSamplerGetMagnification(magnification) == RS_SAMPLER_LINEAR);
-    _RS_ASSERT(rsgSamplerGetMinification(magnification) == RS_SAMPLER_NEAREST);
-    _RS_ASSERT(rsgSamplerGetWrapS(magnification) == RS_SAMPLER_CLAMP);
-    _RS_ASSERT(rsgSamplerGetWrapT(magnification) == RS_SAMPLER_CLAMP);
-    _RS_ASSERT(rsgSamplerGetAnisotropy(magnification) == 1.0f);
+    _RS_ASSERT(rsSamplerGetMagnification(magnification) == RS_SAMPLER_LINEAR);
+    _RS_ASSERT(rsSamplerGetMinification(magnification) == RS_SAMPLER_NEAREST);
+    _RS_ASSERT(rsSamplerGetWrapS(magnification) == RS_SAMPLER_CLAMP);
+    _RS_ASSERT(rsSamplerGetWrapT(magnification) == RS_SAMPLER_CLAMP);
+    _RS_ASSERT(rsSamplerGetAnisotropy(magnification) == 1.0f);
 
-    _RS_ASSERT(rsgSamplerGetMagnification(wrapS) == RS_SAMPLER_NEAREST);
-    _RS_ASSERT(rsgSamplerGetMinification(wrapS) == RS_SAMPLER_NEAREST);
-    _RS_ASSERT(rsgSamplerGetWrapS(wrapS) == RS_SAMPLER_WRAP);
-    _RS_ASSERT(rsgSamplerGetWrapT(wrapS) == RS_SAMPLER_CLAMP);
-    _RS_ASSERT(rsgSamplerGetAnisotropy(wrapS) == 1.0f);
+    _RS_ASSERT(rsSamplerGetMagnification(wrapS) == RS_SAMPLER_NEAREST);
+    _RS_ASSERT(rsSamplerGetMinification(wrapS) == RS_SAMPLER_NEAREST);
+    _RS_ASSERT(rsSamplerGetWrapS(wrapS) == RS_SAMPLER_WRAP);
+    _RS_ASSERT(rsSamplerGetWrapT(wrapS) == RS_SAMPLER_CLAMP);
+    _RS_ASSERT(rsSamplerGetAnisotropy(wrapS) == 1.0f);
 
-    _RS_ASSERT(rsgSamplerGetMagnification(wrapT) == RS_SAMPLER_NEAREST);
-    _RS_ASSERT(rsgSamplerGetMinification(wrapT) == RS_SAMPLER_NEAREST);
-    _RS_ASSERT(rsgSamplerGetWrapS(wrapT) == RS_SAMPLER_CLAMP);
-    _RS_ASSERT(rsgSamplerGetWrapT(wrapT) == RS_SAMPLER_WRAP);
-    _RS_ASSERT(rsgSamplerGetAnisotropy(wrapT) == 1.0f);
+    _RS_ASSERT(rsSamplerGetMagnification(wrapT) == RS_SAMPLER_NEAREST);
+    _RS_ASSERT(rsSamplerGetMinification(wrapT) == RS_SAMPLER_NEAREST);
+    _RS_ASSERT(rsSamplerGetWrapS(wrapT) == RS_SAMPLER_CLAMP);
+    _RS_ASSERT(rsSamplerGetWrapT(wrapT) == RS_SAMPLER_WRAP);
+    _RS_ASSERT(rsSamplerGetAnisotropy(wrapT) == 1.0f);
 
-    _RS_ASSERT(rsgSamplerGetMagnification(anisotropy) == RS_SAMPLER_NEAREST);
-    _RS_ASSERT(rsgSamplerGetMinification(anisotropy) == RS_SAMPLER_NEAREST);
-    _RS_ASSERT(rsgSamplerGetWrapS(anisotropy) == RS_SAMPLER_CLAMP);
-    _RS_ASSERT(rsgSamplerGetWrapT(anisotropy) == RS_SAMPLER_CLAMP);
-    _RS_ASSERT(rsgSamplerGetAnisotropy(anisotropy) == 8.0f);
+    _RS_ASSERT(rsSamplerGetMagnification(anisotropy) == RS_SAMPLER_NEAREST);
+    _RS_ASSERT(rsSamplerGetMinification(anisotropy) == RS_SAMPLER_NEAREST);
+    _RS_ASSERT(rsSamplerGetWrapS(anisotropy) == RS_SAMPLER_CLAMP);
+    _RS_ASSERT(rsSamplerGetWrapT(anisotropy) == RS_SAMPLER_CLAMP);
+    _RS_ASSERT(rsSamplerGetAnisotropy(anisotropy) == 8.0f);
 
     if (failed) {
         rsDebug("test_sampler_getters FAILED", 0);

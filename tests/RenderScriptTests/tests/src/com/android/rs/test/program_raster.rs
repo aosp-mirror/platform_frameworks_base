@@ -7,11 +7,11 @@ rs_program_raster cullMode;
 static bool test_program_raster_getters() {
     bool failed = false;
 
-    _RS_ASSERT(rsgProgramRasterGetPointSpriteEnabled(pointSpriteEnabled) == true);
-    _RS_ASSERT(rsgProgramRasterGetCullMode(pointSpriteEnabled) == RS_CULL_BACK);
+    _RS_ASSERT(rsProgramRasterGetPointSpriteEnabled(pointSpriteEnabled) == true);
+    _RS_ASSERT(rsProgramRasterGetCullMode(pointSpriteEnabled) == RS_CULL_BACK);
 
-    _RS_ASSERT(rsgProgramRasterGetPointSpriteEnabled(cullMode) == false);
-    _RS_ASSERT(rsgProgramRasterGetCullMode(cullMode) == RS_CULL_FRONT);
+    _RS_ASSERT(rsProgramRasterGetPointSpriteEnabled(cullMode) == false);
+    _RS_ASSERT(rsProgramRasterGetCullMode(cullMode) == RS_CULL_FRONT);
 
     if (failed) {
         rsDebug("test_program_raster_getters FAILED", 0);
