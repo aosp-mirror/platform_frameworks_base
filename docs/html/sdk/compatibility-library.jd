@@ -46,11 +46,40 @@ by the directory name, such as {@code v4/} and {@code v13/}.</p>
 <p>The sections below provide notes about successive releases of
 the Support Package, as denoted by revision number.</p>
 
-
 <div class="toggle-content open">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" />
+    Support Package, revision 7 (March 2012)
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v4.app.ShareCompat}, which provides helper classes
+for sending and receiving content for social sharing applications, including new metadata for
+attributing shared data to the source app. This class also provides compatible integration with the
+new {@link android.widget.ShareActionProvider} in Android 4.0.</li>
+          <li>Added {@link android.support.v4.app.NavUtils} and {@link
+android.support.v4.app.TaskStackBuilder} to provide support for implementing the
+<a href="{@docRoot}design/index.html">Android Design</a> guidelines for navigation. These 
+additions include a way to implement the action bar's <em>Up</em> button across versions.
+For an example implementation of this pattern, see the AppNavigation sample in
+({@code <em>&lt;sdk&gt;</em>/samples/<em>&lt;platform&gt;</em>/AppNavigation}).</li>
+          <li>Added {@link android.support.v4.app.NotificationCompat.Builder} to provide a
+compatibility implementation of Android 3.0's {@link android.app.Notification.Builder} helper class
+for creating standardized system notifications.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" />
     Support Package, revision 6 (December 2011)
   </a></p>
 
