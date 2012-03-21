@@ -1255,6 +1255,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int AUTOFILL_FORM                      = 148;
     static final int ANIMATE_TEXT_SCROLL                = 149;
     static final int EDIT_TEXT_SIZE_CHANGED             = 150;
+    static final int SHOW_CARET_HANDLE                  = 151;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -5468,9 +5469,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private boolean setupWebkitSelect() {
         syncSelectionCursors();
-        if (mIsCaretSelection) {
-            showPasteWindow();
-        } else if (!startSelectActionMode()) {
+        if (!mIsCaretSelection && !startSelectActionMode()) {
             selectionDone();
             return false;
         }
@@ -5539,7 +5538,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             if (!mIsCaretSelection) {
                 updateWebkitSelection();
             }
-            mIsCaretSelection = false;
             invalidate(); // redraw without selection
             mAutoScrollX = 0;
             mAutoScrollY = 0;
@@ -6378,7 +6376,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             case MotionEvent.ACTION_UP: {
                 mGestureDetector.onTouchEvent(ev);
                 if (mTouchInEditText && mConfirmMove) {
+                    stopTouch();
                     break; // We've been scrolling the edit text.
+                }
+                if (!mConfirmMove && mIsEditingText && mSelectionStarted &&
+                        mIsCaretSelection) {
+                    showPasteWindow();
+                    stopTouch();
+                    break;
                 }
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent()) {
@@ -6765,7 +6770,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             syncSelectionCursors();
             if (mIsCaretSelection) {
                 resetCaretTimer();
-                showPasteWindow();
             }
             invalidate();
         }
@@ -8524,6 +8528,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                     break;
 
+                case SHOW_CARET_HANDLE:
+                    if (!mSelectingText && mIsEditingText && mIsCaretSelection) {
+                        setupWebkitSelect();
+                        resetCaretTimer();
+                        showPasteWindow();
+                    }
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
@@ -8823,13 +8835,20 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 (data.mStart != data.mEnd ||
                 (mFieldPointer == nodePointer && mFieldPointer != 0))) {
             mIsCaretSelection = (data.mStart == data.mEnd);
-            if (!mSelectingText) {
-                setupWebkitSelect();
-            } else if (!mSelectionStarted) {
-                syncSelectionCursors();
-            }
-            if (mIsCaretSelection) {
-                resetCaretTimer();
+            if (mIsCaretSelection &&
+                    (mInputConnection == null ||
+                    mInputConnection.getEditable().length() == 0)) {
+                // There's no text, don't show caret handle.
+                selectionDone();
+            } else {
+                if (!mSelectingText) {
+                    setupWebkitSelect();
+                } else if (!mSelectionStarted) {
+                    syncSelectionCursors();
+                }
+                if (mIsCaretSelection) {
+                    resetCaretTimer();
+                }
             }
         } else {
             selectionDone();
