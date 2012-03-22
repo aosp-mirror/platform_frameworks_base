@@ -33,14 +33,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -122,6 +125,11 @@ public class ResolverActivity extends AlertActivity implements
         }
 
         setupAlert();
+
+        ListView lv = mAlert.getListView();
+        if (lv != null) {
+            lv.setOnItemLongClickListener(new ItemLongClickListener());
+        }
     }
 
     @Override
@@ -488,6 +496,19 @@ public class ResolverActivity extends AlertActivity implements
         } else {
             mClearDefaultHint.setVisibility(View.GONE);
         }
+    }
+
+    class ItemLongClickListener implements AdapterView.OnItemLongClickListener {
+
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            ResolveInfo ri = mAdapter.resolveInfoForPosition(position);
+            Intent in = new Intent().setAction("android.settings.APPLICATION_DETAILS_SETTINGS")
+                    .setData(Uri.fromParts("package", ri.activityInfo.packageName, null));
+            startActivity(in);
+            return true;
+        }
+
     }
 }
 
