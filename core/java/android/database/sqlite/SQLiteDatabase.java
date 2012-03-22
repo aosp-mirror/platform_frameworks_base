@@ -834,8 +834,14 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
         synchronized (mLock) {
             throwIfNotOpenLocked();
+
             mConfigurationLocked.customFunctions.add(wrapper);
-            mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.customFunctions.remove(wrapper);
+                throw ex;
+            }
         }
     }
 
@@ -1733,8 +1739,15 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
         synchronized (mLock) {
             throwIfNotOpenLocked();
+
+            final Locale oldLocale = mConfigurationLocked.locale;
             mConfigurationLocked.locale = locale;
-            mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.locale = oldLocale;
+                throw ex;
+            }
         }
     }
 
@@ -1759,8 +1772,15 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
         synchronized (mLock) {
             throwIfNotOpenLocked();
+
+            final int oldMaxSqlCacheSize = mConfigurationLocked.maxSqlCacheSize;
             mConfigurationLocked.maxSqlCacheSize = cacheSize;
-            mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.maxSqlCacheSize = oldMaxSqlCacheSize;
+                throw ex;
+            }
         }
     }
 
@@ -1805,6 +1825,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * </p>
      *
      * @return true if write-ahead-logging is set. false otherwise
+     *
+     * @throw IllegalStateException if there are transactions in progress at the
+     * time this method is called.  WAL mode can only be changed when there are no
+     * transactions in progress.
      */
     public boolean enableWriteAheadLogging() {
         synchronized (mLock) {
@@ -1835,18 +1859,32 @@ public final class SQLiteDatabase extends SQLiteClosable {
                 return false;
             }
 
-            mIsWALEnabledLocked = true;
+            final int oldMaxConnectionPoolSize = mConfigurationLocked.maxConnectionPoolSize;
+            final String oldSyncMode = mConfigurationLocked.syncMode;
+            final String oldJournalMode = mConfigurationLocked.journalMode;
             mConfigurationLocked.maxConnectionPoolSize = SQLiteGlobal.getWALConnectionPoolSize();
             mConfigurationLocked.syncMode = SQLiteGlobal.getWALSyncMode();
             mConfigurationLocked.journalMode = "WAL";
-            mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.maxConnectionPoolSize = oldMaxConnectionPoolSize;
+                mConfigurationLocked.syncMode = oldSyncMode;
+                mConfigurationLocked.journalMode = oldJournalMode;
+                throw ex;
+            }
+
+            mIsWALEnabledLocked = true;
         }
         return true;
     }
 
     /**
      * This method disables the features enabled by {@link #enableWriteAheadLogging()}.
-     * @hide
+     *
+     * @throw IllegalStateException if there are transactions in progress at the
+     * time this method is called.  WAL mode can only be changed when there are no
+     * transactions in progress.
      */
     public void disableWriteAheadLogging() {
         synchronized (mLock) {
@@ -1856,11 +1894,22 @@ public final class SQLiteDatabase extends SQLiteClosable {
                 return;
             }
 
-            mIsWALEnabledLocked = false;
+            final int oldMaxConnectionPoolSize = mConfigurationLocked.maxConnectionPoolSize;
+            final String oldSyncMode = mConfigurationLocked.syncMode;
+            final String oldJournalMode = mConfigurationLocked.journalMode;
             mConfigurationLocked.maxConnectionPoolSize = 1;
             mConfigurationLocked.syncMode = SQLiteGlobal.getDefaultSyncMode();
             mConfigurationLocked.journalMode = SQLiteGlobal.getDefaultJournalMode();
-            mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.maxConnectionPoolSize = oldMaxConnectionPoolSize;
+                mConfigurationLocked.syncMode = oldSyncMode;
+                mConfigurationLocked.journalMode = oldJournalMode;
+                throw ex;
+            }
+
+            mIsWALEnabledLocked = false;
         }
     }
 
