@@ -211,8 +211,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 SQLiteDebug.DEBUG_SQL_STATEMENTS, SQLiteDebug.DEBUG_SQL_TIME);
 
         setPageSize();
-        setSyncModeFromConfiguration();
-        setJournalModeFromConfiguration();
+        setWalModeFromConfiguration();
         setJournalSizeLimit();
         setAutoCheckpointInterval();
         setLocaleFromConfiguration();
@@ -268,28 +267,69 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
-    private void setSyncModeFromConfiguration() {
+    private void setWalModeFromConfiguration() {
         if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
-            final String newValue = mConfiguration.syncMode;
-            String value = executeForString("PRAGMA synchronous", null, null);
-            if (!value.equalsIgnoreCase(newValue)) {
-                execute("PRAGMA synchronous=" + newValue, null, null);
+            if (mConfiguration.walEnabled) {
+                setJournalMode("WAL");
+                setSyncMode(SQLiteGlobal.getWALSyncMode());
+            } else {
+                setJournalMode(SQLiteGlobal.getDefaultJournalMode());
+                setSyncMode(SQLiteGlobal.getDefaultSyncMode());
             }
         }
     }
 
-    private void setJournalModeFromConfiguration() {
-        if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
-            final String newValue = mConfiguration.journalMode;
-            String value = executeForString("PRAGMA journal_mode", null, null);
-            if (!value.equalsIgnoreCase(newValue)) {
-                value = executeForString("PRAGMA journal_mode=" + newValue, null, null);
-                if (!value.equalsIgnoreCase(newValue)) {
-                    Log.e(TAG, "setting journal_mode to " + newValue
-                            + " failed for db: " + mConfiguration.label
-                            + " (on pragma set journal_mode, sqlite returned:" + value);
+    private void setSyncMode(String newValue) {
+        String value = executeForString("PRAGMA synchronous", null, null);
+        if (!canonicalizeSyncMode(value).equalsIgnoreCase(
+                canonicalizeSyncMode(newValue))) {
+            execute("PRAGMA synchronous=" + newValue, null, null);
+        }
+    }
+
+    private static String canonicalizeSyncMode(String value) {
+        if (value.equals("0")) {
+            return "OFF";
+        } else if (value.equals("1")) {
+            return "NORMAL";
+        } else if (value.equals("2")) {
+            return "FULL";
+        }
+        return value;
+    }
+
+    private void setJournalMode(String newValue) {
+        String value = executeForString("PRAGMA journal_mode", null, null);
+        if (!value.equalsIgnoreCase(newValue)) {
+            try {
+                String result = executeForString("PRAGMA journal_mode=" + newValue, null, null);
+                if (result.equalsIgnoreCase(newValue)) {
+                    return;
                 }
+                // PRAGMA journal_mode silently fails and returns the original journal
+                // mode in some cases if the journal mode could not be changed.
+            } catch (SQLiteDatabaseLockedException ex) {
+                // This error (SQLITE_BUSY) occurs if one connection has the database
+                // open in WAL mode and another tries to change it to non-WAL.
             }
+            // Because we always disable WAL mode when a database is first opened
+            // (even if we intend to re-enable it), we can encounter problems if
+            // there is another open connection to the database somewhere.
+            // This can happen for a variety of reasons such as an application opening
+            // the same database in multiple processes at the same time or if there is a
+            // crashing content provider service that the ActivityManager has
+            // removed from its registry but whose process hasn't quite died yet
+            // by the time it is restarted in a new process.
+            //
+            // If we don't change the journal mode, nothing really bad happens.
+            // In the worst case, an application that enables WAL might not actually
+            // get it, although it can still use connection pooling.
+            Log.w(TAG, "Could not change the database journal mode of '"
+                    + mConfiguration.label + "' from '" + value + "' to '" + newValue
+                    + "' because the database is locked.  This usually means that "
+                    + "there are other open connections to the database which prevents "
+                    + "the database from enabling or disabling write-ahead logging mode.  "
+                    + "Proceeding without changing the journal mode.");
         }
     }
 
@@ -349,10 +389,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
 
         // Remember what changed.
-        boolean syncModeChanged = !configuration.syncMode.equalsIgnoreCase(
-                mConfiguration.syncMode);
-        boolean journalModeChanged = !configuration.journalMode.equalsIgnoreCase(
-                mConfiguration.journalMode);
+        boolean walModeChanged = configuration.walEnabled != mConfiguration.walEnabled;
         boolean localeChanged = !configuration.locale.equals(mConfiguration.locale);
 
         // Update configuration parameters.
@@ -361,14 +398,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         // Update prepared statement cache size.
         mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
 
-        // Update sync mode.
-        if (syncModeChanged) {
-            setSyncModeFromConfiguration();
-        }
-
-        // Update journal mode.
-        if (journalModeChanged) {
-            setJournalModeFromConfiguration();
+        // Update WAL.
+        if (walModeChanged) {
+            setWalModeFromConfiguration();
         }
 
         // Update locale.
