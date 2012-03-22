@@ -1826,7 +1826,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *
      * @return true if write-ahead-logging is set. false otherwise
      *
-     * @throw IllegalStateException if there are transactions in progress at the
+     * @throws IllegalStateException if there are transactions in progress at the
      * time this method is called.  WAL mode can only be changed when there are no
      * transactions in progress.
      */
@@ -1882,7 +1882,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
     /**
      * This method disables the features enabled by {@link #enableWriteAheadLogging()}.
      *
-     * @throw IllegalStateException if there are transactions in progress at the
+     * @throws IllegalStateException if there are transactions in progress at the
      * time this method is called.  WAL mode can only be changed when there are no
      * transactions in progress.
      */
