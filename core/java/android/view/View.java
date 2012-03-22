@@ -1459,7 +1459,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * apps.
      * @hide
      */
-    public static final boolean USE_DISPLAY_LIST_PROPERTIES = true;
+    public static final boolean USE_DISPLAY_LIST_PROPERTIES = false;
 
     /**
      * Map used to store views' tags.
