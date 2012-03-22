@@ -219,7 +219,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     private Context mContext;
     private ServiceListener mServiceListener;
     private IBluetoothHeadset mService;
-    BluetoothAdapter mAdapter;
+    private BluetoothAdapter mAdapter;
 
     /**
      * Create a BluetoothHeadset proxy object.
