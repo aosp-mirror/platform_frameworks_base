@@ -22,7 +22,6 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
     libbinder \
-    libmedia \
     libmedia_native \
     libhardware \
     libhardware_legacy \
