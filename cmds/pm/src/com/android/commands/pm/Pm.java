@@ -146,18 +146,18 @@ public final class Pm {
             return;
         }
 
-        if ("create-profile".equals(op)) {
-            runCreateProfile();
+        if ("create-user".equals(op)) {
+            runCreateUser();
             return;
         }
 
-        if ("remove-profile".equals(op)) {
-            runRemoveProfile();
+        if ("remove-user".equals(op)) {
+            runRemoveUser();
             return;
         }
 
-        if ("list-profiles".equals(op)) {
-            runListProfiles();
+        if ("list-users".equals(op)) {
+            runListUsers();
             return;
         }
 
@@ -215,6 +215,8 @@ public final class Pm {
             runListLibraries();
         } else if ("instrumentation".equals(type)) {
             runListInstrumentation();
+        } else if ("users".equals(type)) {
+            runListUsers();
         } else {
             System.err.println("Error: unknown list type '" + type + "'");
             showUsage();
@@ -832,10 +834,10 @@ public final class Pm {
         }
     }
 
-    public void runCreateProfile() {
+    public void runCreateUser() {
         // Need to be run as root
         if (Process.myUid() != ROOT_UID) {
-            System.err.println("Error: create-profile must be run as root");
+            System.err.println("Error: create-user must be run as root");
             return;
         }
         String name;
@@ -848,7 +850,7 @@ public final class Pm {
         name = arg;
         try {
             if (mPm.createUser(name, 0) == null) {
-                System.err.println("Error: couldn't create profile.");
+                System.err.println("Error: couldn't create User.");
                 showUsage();
             }
         } catch (RemoteException e) {
@@ -858,10 +860,10 @@ public final class Pm {
 
     }
 
-    public void runRemoveProfile() {
+    public void runRemoveUser() {
         // Need to be run as root
         if (Process.myUid() != ROOT_UID) {
-            System.err.println("Error: remove-profile must be run as root");
+            System.err.println("Error: remove-user must be run as root");
             return;
         }
         int userId;
@@ -880,7 +882,7 @@ public final class Pm {
         }
         try {
             if (!mPm.removeUser(userId)) {
-                System.err.println("Error: couldn't remove profile.");
+                System.err.println("Error: couldn't remove user.");
                 showUsage();
             }
         } catch (RemoteException e) {
@@ -889,10 +891,10 @@ public final class Pm {
         }
     }
 
-    public void runListProfiles() {
+    public void runListUsers() {
         // Need to be run as root
         if (Process.myUid() != ROOT_UID) {
-            System.err.println("Error: list-profiles must be run as root");
+            System.err.println("Error: list-users must be run as root");
             return;
         }
         try {
@@ -1029,7 +1031,29 @@ public final class Pm {
         return "unknown";
     }
 
+    private boolean isNumber(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
     private void runSetEnabledSetting(int state) {
+        int userId = 0;
+        String option = nextOption();
+        if (option != null && option.equals("--user")) {
+            String optionData = nextOptionData();
+            if (optionData == null || !isNumber(optionData)) {
+                System.err.println("Error: no USER_ID specified");
+                showUsage();
+                return;
+            } else {
+                userId = Integer.parseInt(optionData);
+            }
+        }
+
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package or component specified");
@@ -1039,20 +1063,20 @@ public final class Pm {
         ComponentName cn = ComponentName.unflattenFromString(pkg);
         if (cn == null) {
             try {
-                mPm.setApplicationEnabledSetting(pkg, state, 0);
+                mPm.setApplicationEnabledSetting(pkg, state, 0, userId);
                 System.err.println("Package " + pkg + " new state: "
                         + enabledSettingToString(
-                                mPm.getApplicationEnabledSetting(pkg)));
+                        mPm.getApplicationEnabledSetting(pkg, userId)));
             } catch (RemoteException e) {
                 System.err.println(e.toString());
                 System.err.println(PM_NOT_RUNNING_ERR);
             }
         } else {
             try {
-                mPm.setComponentEnabledSetting(cn, state, 0);
+                mPm.setComponentEnabledSetting(cn, state, 0, userId);
                 System.err.println("Component " + cn.toShortString() + " new state: "
                         + enabledSettingToString(
-                                mPm.getComponentEnabledSetting(cn)));
+                        mPm.getComponentEnabledSetting(cn, userId)));
             } catch (RemoteException e) {
                 System.err.println(e.toString());
                 System.err.println(PM_NOT_RUNNING_ERR);
@@ -1096,7 +1120,7 @@ public final class Pm {
      */
     private void displayPackageFilePath(String pckg) {
         try {
-            PackageInfo info = mPm.getPackageInfo(pckg, 0);
+            PackageInfo info = mPm.getPackageInfo(pckg, 0, 0);
             if (info != null && info.applicationInfo != null) {
                 System.out.print("package:");
                 System.out.println(info.applicationInfo.sourceDir);
@@ -1112,7 +1136,7 @@ public final class Pm {
         if (res != null) return res;
 
         try {
-            ApplicationInfo ai = mPm.getApplicationInfo(pii.packageName, 0);
+            ApplicationInfo ai = mPm.getApplicationInfo(pii.packageName, 0, 0);
             AssetManager am = new AssetManager();
             am.addAssetPath(ai.publicSourceDir);
             res = new Resources(am, null, null);
@@ -1178,19 +1202,20 @@ public final class Pm {
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
         System.err.println("       pm list features");
         System.err.println("       pm list libraries");
+        System.err.println("       pm list users");
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
         System.err.println("       pm clear PACKAGE");
-        System.err.println("       pm enable PACKAGE_OR_COMPONENT");
-        System.err.println("       pm disable PACKAGE_OR_COMPONENT");
-        System.err.println("       pm disable-user PACKAGE_OR_COMPONENT");
+        System.err.println("       pm enable [--user USER_ID] PACKAGE_OR_COMPONENT");
+        System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");
+        System.err.println("       pm disable-user [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm grant PACKAGE PERMISSION");
         System.err.println("       pm revoke PACKAGE PERMISSION");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
-        System.err.println("       pm create-profile USER_NAME");
-        System.err.println("       pm remove-profile USER_ID");
+        System.err.println("       pm create-user USER_NAME");
+        System.err.println("       pm remove-user USER_ID");
         System.err.println("");
         System.err.println("pm list packages: prints all packages, optionally only");
         System.err.println("  those whose package name contains the text in FILTER.  Options:");

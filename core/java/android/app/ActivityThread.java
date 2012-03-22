@@ -1586,7 +1586,7 @@ public final class ActivityThread {
         ApplicationInfo ai = null;
         try {
             ai = getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_SHARED_LIBRARY_FILES);
+                    PackageManager.GET_SHARED_LIBRARY_FILES, UserId.myUserId());
         } catch (RemoteException e) {
             // Ignore
         }

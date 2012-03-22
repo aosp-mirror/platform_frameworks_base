@@ -105,4 +105,12 @@ public final class UserId {
     public static final int getAppId(int uid) {
         return uid % PER_USER_RANGE;
     }
+
+    /**
+     * Returns the user id of the current process
+     * @return user id of the current process
+     */
+    public static final int myUserId() {
+        return getUserId(Process.myUid());
+    }
 }

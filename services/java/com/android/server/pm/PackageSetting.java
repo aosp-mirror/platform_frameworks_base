@@ -24,7 +24,7 @@ import java.io.File;
  * Settings data for a particular package we know about.
  */
 final class PackageSetting extends PackageSettingBase {
-    int userId;
+    int uid;
     PackageParser.Package pkg;
     SharedUserSetting sharedUser;
 
@@ -41,7 +41,7 @@ final class PackageSetting extends PackageSettingBase {
     PackageSetting(PackageSetting orig) {
         super(orig);
 
-        userId = orig.userId;
+        uid = orig.uid;
         pkg = orig.pkg;
         sharedUser = orig.sharedUser;
     }
@@ -50,6 +50,6 @@ final class PackageSetting extends PackageSettingBase {
     public String toString() {
         return "PackageSetting{"
             + Integer.toHexString(System.identityHashCode(this))
-            + " " + name + "/" + userId + "}";
+            + " " + name + "/" + uid + "}";
     }
 }

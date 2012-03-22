@@ -21,7 +21,7 @@
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- see comment in values/config.xml -->
-    <integer name="config_longPressOnPowerBehavior">2</integer>
+    <integer name="config_longPressOnPowerBehavior">1</integer>
 
     <!-- Enable lockscreen rotation -->
     <bool name="config_enableLockScreenRotation">true</bool>

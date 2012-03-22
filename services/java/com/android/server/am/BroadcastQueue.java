@@ -732,7 +732,7 @@ public class BroadcastQueue {
             // Broadcast is being executed, its package can't be stopped.
             try {
                 AppGlobals.getPackageManager().setPackageStoppedState(
-                        r.curComponent.getPackageName(), false);
+                        r.curComponent.getPackageName(), false, UserId.getUserId(r.callingUid));
             } catch (RemoteException e) {
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Failed trying to unstop package "

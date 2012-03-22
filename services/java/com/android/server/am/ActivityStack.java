@@ -1445,9 +1445,8 @@ final class ActivityStack {
         // Launching this app's activity, make sure the app is no longer
         // considered stopped.
         try {
-            // TODO: Apply to the correct userId
             AppGlobals.getPackageManager().setPackageStoppedState(
-                    next.packageName, false);
+                    next.packageName, false, next.userId); /* TODO: Verify if correct userid */
         } catch (RemoteException e1) {
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
@@ -2847,7 +2846,7 @@ final class ActivityStack {
     }
 
     ActivityInfo resolveActivity(Intent intent, String resolvedType, int startFlags,
-             String profileFile, ParcelFileDescriptor profileFd) {
+            String profileFile, ParcelFileDescriptor profileFd, int userId) {
         // Collect information about the target of the Intent.
         ActivityInfo aInfo;
         try {
@@ -2855,7 +2854,7 @@ final class ActivityStack {
                 AppGlobals.getPackageManager().resolveIntent(
                         intent, resolvedType,
                         PackageManager.MATCH_DEFAULT_ONLY
-                        | ActivityManagerService.STOCK_PM_FLAGS);
+                                    | ActivityManagerService.STOCK_PM_FLAGS, userId);
             aInfo = rInfo != null ? rInfo.activityInfo : null;
         } catch (RemoteException e) {
             aInfo = null;
@@ -2909,7 +2908,7 @@ final class ActivityStack {
 
         // Collect information about the target of the Intent.
         ActivityInfo aInfo = resolveActivity(intent, resolvedType, startFlags,
-                profileFile, profileFd);
+                profileFile, profileFd, userId);
         aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
         synchronized (mService) {
@@ -2989,7 +2988,7 @@ final class ActivityStack {
                                 AppGlobals.getPackageManager().resolveIntent(
                                         intent, null,
                                         PackageManager.MATCH_DEFAULT_ONLY
-                                        | ActivityManagerService.STOCK_PM_FLAGS);
+                                        | ActivityManagerService.STOCK_PM_FLAGS, userId);
                             aInfo = rInfo != null ? rInfo.activityInfo : null;
                             aInfo = mService.getActivityInfoForUser(aInfo, userId);
                         } catch (RemoteException e) {
@@ -3098,7 +3097,7 @@ final class ActivityStack {
 
                     // Collect information about the target of the Intent.
                     ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i],
-                            0, null, null);
+                            0, null, null, userId);
                     // TODO: New, check if this is correct
                     aInfo = mService.getActivityInfoForUser(aInfo, userId);
 

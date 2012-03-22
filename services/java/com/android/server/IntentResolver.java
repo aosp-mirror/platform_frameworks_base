@@ -201,7 +201,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     }
 
     public List<R> queryIntentFromList(Intent intent, String resolvedType, 
-            boolean defaultOnly, ArrayList<ArrayList<F>> listCut) {
+            boolean defaultOnly, ArrayList<ArrayList<F>> listCut, int userId) {
         ArrayList<R> resultList = new ArrayList<R>();
 
         final boolean debug = localLOGV ||
@@ -212,13 +212,14 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         int N = listCut.size();
         for (int i = 0; i < N; ++i) {
             buildResolveList(intent, categories, debug, defaultOnly,
-                             resolvedType, scheme, listCut.get(i), resultList);
+                    resolvedType, scheme, listCut.get(i), resultList, userId);
         }
         sortResults(resultList);
         return resultList;
     }
 
-    public List<R> queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
+    public List<R> queryIntent(Intent intent, String resolvedType, boolean defaultOnly,
+            int userId) {
         String scheme = intent.getScheme();
 
         ArrayList<R> finalList = new ArrayList<R>();
@@ -290,19 +291,19 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         FastImmutableArraySet<String> categories = getFastIntentCategories(intent);
         if (firstTypeCut != null) {
             buildResolveList(intent, categories, debug, defaultOnly,
-                    resolvedType, scheme, firstTypeCut, finalList);
+                    resolvedType, scheme, firstTypeCut, finalList, userId);
         }
         if (secondTypeCut != null) {
             buildResolveList(intent, categories, debug, defaultOnly,
-                    resolvedType, scheme, secondTypeCut, finalList);
+                    resolvedType, scheme, secondTypeCut, finalList, userId);
         }
         if (thirdTypeCut != null) {
             buildResolveList(intent, categories, debug, defaultOnly,
-                    resolvedType, scheme, thirdTypeCut, finalList);
+                    resolvedType, scheme, thirdTypeCut, finalList, userId);
         }
         if (schemeCut != null) {
             buildResolveList(intent, categories, debug, defaultOnly,
-                    resolvedType, scheme, schemeCut, finalList);
+                    resolvedType, scheme, schemeCut, finalList, userId);
         }
         sortResults(finalList);
 
@@ -329,7 +330,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
      * "stopped," that is whether it should not be included in the result
      * if the intent requests to excluded stopped objects.
      */
-    protected boolean isFilterStopped(F filter) {
+    protected boolean isFilterStopped(F filter, int userId) {
         return false;
     }
 
@@ -341,7 +342,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     protected abstract String packageForFilter(F filter);
     
     @SuppressWarnings("unchecked")
-    protected R newResult(F filter, int match) {
+    protected R newResult(F filter, int match, int userId) {
         return (R)filter;
     }
 
@@ -504,7 +505,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
 
     private void buildResolveList(Intent intent, FastImmutableArraySet<String> categories,
             boolean debug, boolean defaultOnly,
-            String resolvedType, String scheme, List<F> src, List<R> dest) {
+            String resolvedType, String scheme, List<F> src, List<R> dest, int userId) {
         final String action = intent.getAction();
         final Uri data = intent.getData();
         final String packageName = intent.getPackage();
@@ -519,7 +520,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             int match;
             if (debug) Slog.v(TAG, "Matching against filter " + filter);
 
-            if (excludingStopped && isFilterStopped(filter)) {
+            if (excludingStopped && isFilterStopped(filter, userId)) {
                 if (debug) {
                     Slog.v(TAG, "  Filter's target is stopped; skipping");
                 }
@@ -547,7 +548,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
                 if (debug) Slog.v(TAG, "  Filter matched!  match=0x" +
                         Integer.toHexString(match));
                 if (!defaultOnly || filter.hasCategory(Intent.CATEGORY_DEFAULT)) {
-                    final R oneResult = newResult(filter, match);
+                    final R oneResult = newResult(filter, match, userId);
                     if (oneResult != null) {
                         dest.add(oneResult);
                     }

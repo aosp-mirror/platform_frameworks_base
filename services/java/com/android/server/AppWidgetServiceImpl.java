@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.AlarmManager;
+import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -27,6 +28,7 @@ import android.content.ServiceConnection;
 import android.content.Intent.FilterComparison;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -158,7 +160,7 @@ class AppWidgetServiceImpl {
 
     Context mContext;
     Locale mLocale;
-    PackageManager mPackageManager;
+    IPackageManager mPm;
     AlarmManager mAlarmManager;
     ArrayList<Provider> mInstalledProviders = new ArrayList<Provider>();
     int mNextAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID + 1;
@@ -174,7 +176,7 @@ class AppWidgetServiceImpl {
 
     AppWidgetServiceImpl(Context context, int userId) {
         mContext = context;
-        mPackageManager = context.getPackageManager();
+        mPm = AppGlobals.getPackageManager();
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mUserId = userId;
     }
@@ -1009,16 +1011,19 @@ class AppWidgetServiceImpl {
     }
 
     void loadAppWidgetList() {
-        PackageManager pm = mPackageManager;
-
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        List<ResolveInfo> broadcastReceivers = pm.queryBroadcastReceivers(intent,
-                PackageManager.GET_META_DATA);
+        try {
+            List<ResolveInfo> broadcastReceivers = mPm.queryIntentReceivers(intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    PackageManager.GET_META_DATA, mUserId);
 
-        final int N = broadcastReceivers == null ? 0 : broadcastReceivers.size();
-        for (int i = 0; i < N; i++) {
-            ResolveInfo ri = broadcastReceivers.get(i);
-            addProviderLocked(ri);
+            final int N = broadcastReceivers == null ? 0 : broadcastReceivers.size();
+            for (int i = 0; i < N; i++) {
+                ResolveInfo ri = broadcastReceivers.get(i);
+                addProviderLocked(ri);
+            }
+        } catch (RemoteException re) {
+            // Shouldn't happen, local call
         }
     }
 
@@ -1131,7 +1136,7 @@ class AppWidgetServiceImpl {
         ActivityInfo activityInfo = ri.activityInfo;
         XmlResourceParser parser = null;
         try {
-            parser = activityInfo.loadXmlMetaData(mPackageManager,
+            parser = activityInfo.loadXmlMetaData(mContext.getPackageManager(),
                     AppWidgetManager.META_DATA_APPWIDGET_PROVIDER);
             if (parser == null) {
                 Slog.w(TAG, "No " + AppWidgetManager.META_DATA_APPWIDGET_PROVIDER
@@ -1159,7 +1164,7 @@ class AppWidgetServiceImpl {
             info.provider = component;
             p.uid = activityInfo.applicationInfo.uid;
 
-            Resources res = mPackageManager
+            Resources res = mContext.getPackageManager()
                     .getResourcesForApplication(activityInfo.applicationInfo);
 
             TypedArray sa = res.obtainAttributes(attrs,
@@ -1188,7 +1193,7 @@ class AppWidgetServiceImpl {
             if (className != null) {
                 info.configure = new ComponentName(component.getPackageName(), className);
             }
-            info.label = activityInfo.loadLabel(mPackageManager).toString();
+            info.label = activityInfo.loadLabel(mContext.getPackageManager()).toString();
             info.icon = ri.getIconResource();
             info.previewImage = sa.getResourceId(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
@@ -1213,7 +1218,12 @@ class AppWidgetServiceImpl {
     }
 
     int getUidForPackage(String packageName) throws PackageManager.NameNotFoundException {
-        PackageInfo pkgInfo = mPackageManager.getPackageInfo(packageName, 0);
+        PackageInfo pkgInfo = null;
+        try {
+            pkgInfo = mPm.getPackageInfo(packageName, 0, mUserId);
+        } catch (RemoteException re) {
+            // Shouldn't happen, local call
+        }
         if (pkgInfo == null || pkgInfo.applicationInfo == null) {
             throw new PackageManager.NameNotFoundException();
         }
@@ -1493,9 +1503,15 @@ class AppWidgetServiceImpl {
     void addProvidersForPackageLocked(String pkgName) {
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         intent.setPackage(pkgName);
-        List<ResolveInfo> broadcastReceivers = mPackageManager.queryBroadcastReceivers(intent,
-                PackageManager.GET_META_DATA);
-
+        List<ResolveInfo> broadcastReceivers;
+        try {
+            broadcastReceivers = mPm.queryIntentReceivers(intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    PackageManager.GET_META_DATA, mUserId);
+        } catch (RemoteException re) {
+            // Shouldn't happen, local call
+            return;
+        }
         final int N = broadcastReceivers == null ? 0 : broadcastReceivers.size();
         for (int i = 0; i < N; i++) {
             ResolveInfo ri = broadcastReceivers.get(i);
@@ -1513,8 +1529,15 @@ class AppWidgetServiceImpl {
         HashSet<String> keep = new HashSet<String>();
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         intent.setPackage(pkgName);
-        List<ResolveInfo> broadcastReceivers = mPackageManager.queryBroadcastReceivers(intent,
-                PackageManager.GET_META_DATA);
+        List<ResolveInfo> broadcastReceivers;
+        try {
+            broadcastReceivers = mPm.queryIntentReceivers(intent,
+                intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                PackageManager.GET_META_DATA, mUserId);
+        } catch (RemoteException re) {
+            // Shouldn't happen, local call
+            return;
+        }
 
         // add the missing ones and collect which ones to keep
         int N = broadcastReceivers == null ? 0 : broadcastReceivers.size();

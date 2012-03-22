@@ -240,7 +240,13 @@ public class PackageParser {
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
             HashSet<String> grantedPermissions) {
 
-        final int userId = Binder.getOrigCallingUser();
+        return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
+                grantedPermissions, UserId.getCallingUserId());
+    }
+
+    static PackageInfo generatePackageInfo(PackageParser.Package p,
+            int gids[], int flags, long firstInstallTime, long lastUpdateTime,
+            HashSet<String> grantedPermissions, int userId) {
 
         PackageInfo pi = new PackageInfo();
         pi.packageName = p.packageName;
@@ -3350,7 +3356,7 @@ public class PackageParser {
     }
 
     public static ApplicationInfo generateApplicationInfo(Package p, int flags) {
-        return generateApplicationInfo(p, flags, UserId.getUserId(Binder.getCallingUid()));
+        return generateApplicationInfo(p, flags, UserId.getCallingUserId());
     }
 
     public static ApplicationInfo generateApplicationInfo(Package p, int flags, int userId) {
@@ -3366,6 +3372,13 @@ public class PackageParser {
             } else {
                 p.applicationInfo.flags &= ~ApplicationInfo.FLAG_STOPPED;
             }
+            if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                p.applicationInfo.enabled = true;
+            } else if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                    || p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
+                p.applicationInfo.enabled = false;
+            }
+            p.applicationInfo.enabledSetting = p.mSetEnabled;
             return p.applicationInfo;
         }
 

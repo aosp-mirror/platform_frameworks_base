@@ -62,6 +62,7 @@ public class Am {
     private boolean mStopOption = false;
 
     private int mRepeat = 0;
+    private int mUserId = 0;
 
     private String mProfileFile;
 
@@ -135,7 +136,7 @@ public class Am {
             runToUri(false);
         } else if (op.equals("to-intent-uri")) {
             runToUri(true);
-        } else if (op.equals("switch-profile")) {
+        } else if (op.equals("switch-user")) {
             runSwitchUser();
         } else {
             throw new IllegalArgumentException("Unknown command: " + op);
@@ -152,6 +153,7 @@ public class Am {
         mStopOption = false;
         mRepeat = 0;
         mProfileFile = null;
+        mUserId = 0;
         Uri data = null;
         String type = null;
 
@@ -308,6 +310,8 @@ public class Am {
                 mStopOption = true;
             } else if (opt.equals("--opengl-trace")) {
                 mStartFlags |= ActivityManager.START_FLAG_OPENGL_TRACES;
+            } else if (opt.equals("--user")) {
+                mUserId = Integer.parseInt(nextArgRequired());
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -407,7 +411,8 @@ public class Am {
                         System.err.println("Error: Package manager not running; aborting");
                         return;
                     }
-                    List<ResolveInfo> activities = pm.queryIntentActivities(intent, mimeType, 0);
+                    List<ResolveInfo> activities = pm.queryIntentActivities(intent, mimeType, 0,
+                            mUserId);
                     if (activities == null || activities.size() <= 0) {
                         System.err.println("Error: Intent does not match any activities: "
                                 + intent);
@@ -550,7 +555,7 @@ public class Am {
         IntentReceiver receiver = new IntentReceiver();
         System.out.println("Broadcasting: " + intent);
         mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, null, true, false,
-                Binder.getOrigCallingUser());
+                mUserId);
         receiver.waitForFinish();
     }
 
@@ -1294,6 +1299,7 @@ public class Am {
                 "       am display-size [reset|MxN]\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
+                "       am switch-user <USER_ID>\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
