@@ -642,7 +642,7 @@ void AAH_TXPlayer::sendTSUpdateNop_l() {
         sp<TRTPControlPacket> packet = new TRTPControlPacket();
         if (packet != NULL) {
             packet->setClockTransform(mCurrentClockTransform);
-            packet->setCommandID(TRTPControlPacket::kCommandFlush);
+            packet->setCommandID(TRTPControlPacket::kCommandNop);
             sendPacket_l(packet);
         } else {
             LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
