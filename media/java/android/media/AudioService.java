@@ -623,23 +623,32 @@ public class AudioService extends IAudioService.Stub {
         ensureValidDirection(direction);
         int volume = Math.round(AudioSystem.getMasterVolume() * MAX_MASTER_VOLUME);
         int delta = 0;
-        for (int i = 0; i < mMasterVolumeRamp.length; i += 2) {
-            int testVolume = mMasterVolumeRamp[i];
-            int testDelta =  mMasterVolumeRamp[i + 1];
-            if (direction == AudioManager.ADJUST_RAISE) {
-                if (volume >= testVolume) {
-                    delta = testDelta;
-                } else {
+
+        if (direction == AudioManager.ADJUST_RAISE) {
+            // This is the default value if we make it to the end
+            delta = mMasterVolumeRamp[1];
+            // If we're raising the volume move down the ramp array until we
+            // find the volume we're above and use that groups delta.
+            for (int i = mMasterVolumeRamp.length - 1; i > 1; i -= 2) {
+                if (volume >= mMasterVolumeRamp[i - 1]) {
+                    delta = mMasterVolumeRamp[i];
                     break;
                 }
-            } else if (direction == AudioManager.ADJUST_LOWER) {
-                if (volume - testDelta >= testVolume) {
-                    delta = -testDelta;
-                } else {
+            }
+        } else if (direction == AudioManager.ADJUST_LOWER){
+            int length = mMasterVolumeRamp.length;
+            // This is the default value if we make it to the end
+            delta = -mMasterVolumeRamp[length - 1];
+            // If we're lowering the volume move up the ramp array until we
+            // find the volume we're below and use the group below it's delta
+            for (int i = 2; i < length; i += 2) {
+                if (volume <= mMasterVolumeRamp[i]) {
+                    delta = -mMasterVolumeRamp[i - 1];
                     break;
                 }
             }
         }
+
 //        Log.d(TAG, "adjustMasterVolume volume: " + volume + " delta: " + delta + " direction: " + direction);
         setMasterVolume(volume + delta, flags);
     }
