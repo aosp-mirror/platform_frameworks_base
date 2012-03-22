@@ -403,6 +403,9 @@ public final class InputMethodManager {
                                 mIInputContext.finishComposingText();
                             } catch (RemoteException e) {
                             }
+                            // Check focus again in case that "onWindowFocus" is called before
+                            // handling this message.
+                            checkFocus(mHasBeenInactive);
                         }
                     }
                     return;
@@ -1173,13 +1176,17 @@ public final class InputMethodManager {
         }
     }
 
+    private void checkFocus(boolean forceNewFocus) {
+        if (checkFocusNoStartInput(forceNewFocus)) {
+            startInputInner(null, 0, 0, 0);
+        }
+    }
+
     /**
      * @hide
      */
     public void checkFocus() {
-        if (checkFocusNoStartInput(false)) {
-            startInputInner(null, 0, 0, 0);
-        }
+        checkFocus(false);
     }
 
     private boolean checkFocusNoStartInput(boolean forceNewFocus) {
