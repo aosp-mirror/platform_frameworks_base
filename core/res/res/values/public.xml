@@ -255,6 +255,7 @@
   <java-symbol type="integer" name="db_journal_size_limit" />
   <java-symbol type="integer" name="db_wal_autocheckpoint" />
   <java-symbol type="integer" name="max_action_buttons" />
+  <java-symbol type="integer" name="config_wifi_driver_stop_delay" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
