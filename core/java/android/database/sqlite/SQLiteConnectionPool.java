@@ -257,7 +257,34 @@ public final class SQLiteConnectionPool implements Closeable {
         synchronized (mLock) {
             throwIfClosedLocked();
 
+            boolean restrictToOneConnection = false;
+            if (mConfiguration.journalMode.equalsIgnoreCase("WAL")
+                    != configuration.journalMode.equalsIgnoreCase("WAL")) {
+                // WAL mode can only be changed if there are no acquired connections
+                // because we need to close all but the primary connection first.
+                if (!mAcquiredConnections.isEmpty()) {
+                    throw new IllegalStateException("Write Ahead Logging (WAL) mode cannot "
+                            + "be enabled or disabled while there are transactions in "
+                            + "progress.  Finish all transactions and release all active "
+                            + "database connections first.");
+                }
+
+                // Close all non-primary connections.  This should happen immediately
+                // because none of them are in use.
+                closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked();
+                assert mAvailableNonPrimaryConnections.isEmpty();
+
+                restrictToOneConnection = true;
+            }
+
             if (mConfiguration.openFlags != configuration.openFlags) {
+                // If we are changing open flags and WAL mode at the same time, then
+                // we have no choice but to close the primary connection beforehand
+                // because there can only be one connection open when we change WAL mode.
+                if (restrictToOneConnection) {
+                    closeAvailableConnectionsAndLogExceptionsLocked();
+                }
+
                 // Try to reopen the primary connection using the new open flags then
                 // close and discard all existing connections.
                 // This might throw if the database is corrupt or cannot be opened in
@@ -453,16 +480,21 @@ public final class SQLiteConnectionPool implements Closeable {
 
     // Can't throw.
     private void closeAvailableConnectionsAndLogExceptionsLocked() {
-        final int count = mAvailableNonPrimaryConnections.size();
-        for (int i = 0; i < count; i++) {
-            closeConnectionAndLogExceptionsLocked(mAvailableNonPrimaryConnections.get(i));
-        }
-        mAvailableNonPrimaryConnections.clear();
+        closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked();
 
         if (mAvailablePrimaryConnection != null) {
             closeConnectionAndLogExceptionsLocked(mAvailablePrimaryConnection);
             mAvailablePrimaryConnection = null;
         }
+    }
+
+    // Can't throw.
+    private void closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked() {
+        final int count = mAvailableNonPrimaryConnections.size();
+        for (int i = 0; i < count; i++) {
+            closeConnectionAndLogExceptionsLocked(mAvailableNonPrimaryConnections.get(i));
+        }
+        mAvailableNonPrimaryConnections.clear();
     }
 
     // Can't throw.

@@ -7312,6 +7312,7 @@ package android.database.sqlite {
     method public static android.database.sqlite.SQLiteDatabase create(android.database.sqlite.SQLiteDatabase.CursorFactory);
     method public int delete(java.lang.String, java.lang.String, java.lang.String[]);
     method public static boolean deleteDatabase(java.io.File);
+    method public void disableWriteAheadLogging();
     method public boolean enableWriteAheadLogging();
     method public void endTransaction();
     method public void execSQL(java.lang.String) throws android.database.SQLException;
