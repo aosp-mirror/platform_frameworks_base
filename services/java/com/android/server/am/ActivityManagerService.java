@@ -7394,6 +7394,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private boolean handleAppCrashLocked(ProcessRecord app) {
+        if (mHeadless) {
+            Log.e(TAG, "handleAppCrashLocked: " + app.processName);
+            return false;
+        }
         long now = SystemClock.uptimeMillis();
 
         Long crashTime;
