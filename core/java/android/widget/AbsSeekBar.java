@@ -133,6 +133,16 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     /**
+     * Return the drawable used to represent the scroll thumb - the component that
+     * the user can drag back and forth indicating the current value by its position.
+     *
+     * @return The current thumb drawable
+     */
+    public Drawable getThumb() {
+        return mThumb;
+    }
+
+    /**
      * @see #setThumbOffset(int)
      */
     public int getThumbOffset() {

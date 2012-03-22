@@ -25899,6 +25899,7 @@ package android.widget {
     ctor public AbsSeekBar(android.content.Context, android.util.AttributeSet);
     ctor public AbsSeekBar(android.content.Context, android.util.AttributeSet, int);
     method public int getKeyProgressIncrement();
+    method public android.graphics.drawable.Drawable getThumb();
     method public int getThumbOffset();
     method public void setKeyProgressIncrement(int);
     method public void setThumb(android.graphics.drawable.Drawable);
