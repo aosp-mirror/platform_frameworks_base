@@ -117,6 +117,19 @@ public class SyncQueue {
         return true;
     }
 
+    public void removeUser(int userId) {
+        ArrayList<SyncOperation> opsToRemove = new ArrayList<SyncOperation>();
+        for (SyncOperation op : mOperationsMap.values()) {
+            if (op.userId == userId) {
+                opsToRemove.add(op);
+            }
+        }
+
+        for (SyncOperation op : opsToRemove) {
+            remove(op);
+        }
+    }
+
     /**
      * Remove the specified operation if it is in the queue.
      * @param operation the operation to remove

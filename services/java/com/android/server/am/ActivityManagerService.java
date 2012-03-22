@@ -152,6 +152,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -3582,9 +3583,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (doit) {
                         procs.add(app);
                     }
-                } else if ((uid > 0 && uid != Process.SYSTEM_UID && app.info.uid == uid)
-                        || app.processName.equals(packageName)
-                        || app.processName.startsWith(procNamePrefix)) {
+                // If uid is specified and the uid and process name match
+                // Or, the uid is not specified and the process name matches
+                } else if (((uid > 0 && uid != Process.SYSTEM_UID && app.info.uid == uid)
+                            && (app.processName.equals(packageName)
+                                || app.processName.startsWith(procNamePrefix)))
+                           || (uid < 0
+                               && (app.processName.equals(packageName)
+                                       || app.processName.startsWith(procNamePrefix)))) {
                     if (app.setAdj >= minOomAdj) {
                         if (!doit) {
                             return true;
@@ -3635,7 +3641,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (i=0; i<mMainStack.mHistory.size(); i++) {
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
             final boolean samePackage = r.packageName.equals(name);
-            if ((samePackage || r.task == lastTask)
+            if (r.userId == userId
+                    && (samePackage || r.task == lastTask)
                     && (r.app == null || evenPersistent || !r.app.persistent)) {
                 if (!doit) {
                     if (r.finishing) {
@@ -3685,7 +3692,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         ArrayList<ContentProviderRecord> providers = new ArrayList<ContentProviderRecord>();
-        for (ContentProviderRecord provider : mProviderMap.getProvidersByClass(-1).values()) {
+        for (ContentProviderRecord provider : mProviderMap.getProvidersByClass(userId).values()) {
             if (provider.info.packageName.equals(name)
                     && (provider.proc == null || evenPersistent || !provider.proc.persistent)) {
                 if (!doit) {
@@ -4118,7 +4125,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }, pkgFilter);
-        
+
+        IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onUserRemoved(intent);
+            }
+        }, userFilter);
+
         synchronized (this) {
             // Ensure that any processes we had put on hold are now started
             // up.
@@ -12469,7 +12485,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (DEBUG_BROADCAST_LIGHT) Slog.v(
             TAG, (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
-            + " ordered=" + ordered);
+            + " ordered=" + ordered + " userid=" + userId);
         if ((resultTo != null) && !ordered) {
             Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
         }
@@ -14593,25 +14609,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private int mCurrentUserId;
     private SparseIntArray mLoggedInUsers = new SparseIntArray(5);
-    private ArrayList<UserListener> mUserListeners = new ArrayList<UserListener>(3);
-
-    public interface UserListener {
-        public void onUserChanged(int userId);
-
-        public void onUserAdded(int userId);
-
-        public void onUserRemoved(int userId);
-
-        public void onUserLoggedOut(int userId);
-    }
-
-    public void addUserListener(UserListener listener) {
-        synchronized (this) {
-            if (!mUserListeners.contains(listener)) {
-                mUserListeners.add(listener);
-            }
-        }
-    }
 
     public boolean switchUser(int userId) {
         final int callingUid = Binder.getCallingUid();
@@ -14621,8 +14618,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (mCurrentUserId == userId)
             return true;
-
-        ArrayList<UserListener> listeners;
 
         synchronized (this) {
             // Check if user is already logged in, otherwise check if user exists first before
@@ -14640,23 +14635,44 @@ public final class ActivityManagerService extends ActivityManagerNative
                 startHomeActivityLocked(userId);
             }
 
-            listeners = (ArrayList<UserListener>) mUserListeners.clone();
         }
-        // Inform the listeners
-        for (UserListener listener : listeners) {
-            listener.onUserChanged(userId);
-        }
+
+        // Inform of user switch
+        Intent addedIntent = new Intent(Intent.ACTION_USER_SWITCHED);
+        addedIntent.putExtra(Intent.EXTRA_USERID, userId);
+        mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
+
         return true;
+    }
+
+    private void onUserRemoved(Intent intent) {
+        int extraUserId = intent.getIntExtra(Intent.EXTRA_USERID, -1);
+        if (extraUserId < 1) return;
+
+        // Kill all the processes for the user
+        ArrayList<Pair<String, Integer>> pkgAndUids = new ArrayList<Pair<String,Integer>>();
+        synchronized (this) {
+            HashMap<String,SparseArray<ProcessRecord>> map = mProcessNames.getMap();
+            for (Entry<String, SparseArray<ProcessRecord>> uidMap : map.entrySet()) {
+                SparseArray<ProcessRecord> uids = uidMap.getValue();
+                for (int i = 0; i < uids.size(); i++) {
+                    if (UserId.getUserId(uids.keyAt(i)) == extraUserId) {
+                        pkgAndUids.add(new Pair<String,Integer>(uidMap.getKey(), uids.keyAt(i)));
+                    }
+                }
+            }
+
+            for (Pair<String,Integer> pkgAndUid : pkgAndUids) {
+                forceStopPackageLocked(pkgAndUid.first, pkgAndUid.second,
+                        false, false, true, true, extraUserId);
+            }
+        }
     }
 
     private boolean userExists(int userId) {
         try {
-            List<UserInfo> users = AppGlobals.getPackageManager().getUsers();
-            for (UserInfo user : users) {
-                if (user.id == userId) {
-                    return true;
-                }
-            }
+            UserInfo user = AppGlobals.getPackageManager().getUser(userId);
+            return user != null;
         } catch (RemoteException re) {
             // Won't happen, in same process
         }

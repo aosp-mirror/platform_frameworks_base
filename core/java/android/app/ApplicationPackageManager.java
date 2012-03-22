@@ -1215,6 +1215,18 @@ final class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     @Override
+    public UserInfo getUser(int userId) {
+        try {
+            return mPM.getUser(userId);
+        } catch (RemoteException re) {
+            return null;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public boolean removeUser(int id) {
         try {
             return mPM.removeUser(id);
@@ -1228,7 +1240,10 @@ final class ApplicationPackageManager extends PackageManager {
      */
     @Override
     public void updateUserName(int id, String name) {
-        // TODO:
+        try {
+            mPM.updateUserName(id, name);
+        } catch (RemoteException re) {
+        }
     }
 
     /**

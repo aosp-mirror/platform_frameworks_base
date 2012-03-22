@@ -45,6 +45,7 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.RemoteException;
 
 import java.util.List;
 
@@ -523,6 +524,14 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public List<UserInfo> getUsers() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public UserInfo getUser(int userId) {
         throw new UnsupportedOperationException();
     }
 

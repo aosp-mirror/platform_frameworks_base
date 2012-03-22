@@ -231,6 +231,14 @@ public class AccountManagerService
             }
         }, intentFilter);
 
+        IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onUserRemoved(intent);
+            }
+        }, userFilter);
     }
 
     private UserAccounts initUser(int userId) {
@@ -344,6 +352,28 @@ public class AccountManagerService
                 mUsers.append(userId, accounts);
             }
             return accounts;
+        }
+    }
+
+    private void onUserRemoved(Intent intent) {
+        int userId = intent.getIntExtra(Intent.EXTRA_USERID, -1);
+        if (userId < 1) return;
+
+        UserAccounts accounts;
+        synchronized (mUsers) {
+            accounts = mUsers.get(userId);
+            mUsers.remove(userId);
+        }
+        if (accounts == null) {
+            File dbFile = new File(getDatabaseName(userId));
+            dbFile.delete();
+            return;
+        }
+
+        synchronized (accounts.cacheLock) {
+            accounts.openHelper.close();
+            File dbFile = new File(getDatabaseName(userId));
+            dbFile.delete();
         }
     }
 

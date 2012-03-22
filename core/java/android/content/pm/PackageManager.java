@@ -2153,7 +2153,8 @@ public abstract class PackageManager {
         if ((flags & GET_SIGNATURES) != 0) {
             packageParser.collectCertificates(pkg, 0);
         }
-        return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null);
+        return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, false,
+                COMPONENT_ENABLED_STATE_DEFAULT);
     }
 
     /**
@@ -2637,10 +2638,17 @@ public abstract class PackageManager {
     public abstract void updateUserFlags(int id, int flags);
 
     /**
-     * Returns the device identity that verifiers can use to associate their
-     * scheme to a particular device. This should not be used by anything other
-     * than a package verifier.
-     *
+     * Returns the details for the user specified by userId.
+     * @param userId the user id of the user
+     * @return UserInfo for the specified user, or null if no such user exists.
+     * @hide
+     */
+    public abstract UserInfo getUser(int userId);
+
+    /**
+     * Returns the device identity that verifiers can use to associate their scheme to a particular
+     * device. This should not be used by anything other than a package verifier.
+     * 
      * @return identity that uniquely identifies current device
      * @hide
      */

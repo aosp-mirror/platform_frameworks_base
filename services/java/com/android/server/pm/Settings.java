@@ -275,7 +275,7 @@ final class Settings {
             p.pkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
         }
         PackageSetting ret = addPackageLPw(name, p.realName, p.codePath, p.resourcePath,
-                p.nativeLibraryPathString, p.uid, p.versionCode, p.pkgFlags);
+                p.nativeLibraryPathString, p.appId, p.versionCode, p.pkgFlags);
         mDisabledSysPackages.remove(name);
         return ret;
     }
@@ -284,7 +284,7 @@ final class Settings {
             String nativeLibraryPathString, int uid, int vc, int pkgFlags) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
-            if (p.uid == uid) {
+            if (p.appId == uid) {
                 return p;
             }
             PackageManagerService.reportSettingsProblem(Log.ERROR,
@@ -293,7 +293,7 @@ final class Settings {
         }
         p = new PackageSetting(name, realName, codePath, resourcePath, nativeLibraryPathString,
                 vc, pkgFlags);
-        p.uid = uid;
+        p.appId = uid;
         if (addUserIdLPw(uid, p, name)) {
             mPackages.put(name, p);
             return p;
@@ -407,7 +407,7 @@ final class Settings {
                 p.copyFrom(origPackage);
                 p.signatures = s;
                 p.sharedUser = origPackage.sharedUser;
-                p.uid = origPackage.uid;
+                p.appId = origPackage.appId;
                 p.origPackage = origPackage;
                 mRenamedPackages.put(name, origPackage.name);
                 name = origPackage.name;
@@ -435,7 +435,7 @@ final class Settings {
                     }
                 }
                 if (sharedUser != null) {
-                    p.uid = sharedUser.userId;
+                    p.appId = sharedUser.userId;
                 } else {
                     // Clone the setting here for disabled system packages
                     PackageSetting dis = mDisabledSysPackages.get(name);
@@ -447,7 +447,7 @@ final class Settings {
                         if (dis.signatures.mSignatures != null) {
                             p.signatures.mSignatures = dis.signatures.mSignatures.clone();
                         }
-                        p.uid = dis.uid;
+                        p.appId = dis.appId;
                         // Clone permissions
                         p.grantedPermissions = new HashSet<String>(dis.grantedPermissions);
                         // Clone component info
@@ -464,14 +464,14 @@ final class Settings {
                             }
                         }
                         // Add new setting to list of user ids
-                        addUserIdLPw(p.uid, p, name);
+                        addUserIdLPw(p.appId, p, name);
                     } else {
                         // Assign new user id
-                        p.uid = newUserIdLPw(p);
+                        p.appId = newUserIdLPw(p);
                     }
                 }
             }
-            if (p.uid < 0) {
+            if (p.appId < 0) {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Package " + name + " could not be assigned a valid uid");
                 return null;
@@ -539,9 +539,9 @@ final class Settings {
                         + p.sharedUser + " but is now " + sharedUser
                         + "; I am not changing its files so it will probably fail!");
                 p.sharedUser.packages.remove(p);
-            } else if (p.uid != sharedUser.userId) {
+            } else if (p.appId != sharedUser.userId) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
-                    "Package " + p.name + " was user id " + p.uid
+                    "Package " + p.name + " was user id " + p.appId
                     + " but is now user " + sharedUser
                     + " with id " + sharedUser.userId
                     + "; I am not changing its files so it will probably fail!");
@@ -549,7 +549,7 @@ final class Settings {
 
             sharedUser.packages.add(p);
             p.sharedUser = sharedUser;
-            p.uid = sharedUser.userId;
+            p.appId = sharedUser.userId;
         }
     }
 
@@ -614,8 +614,8 @@ final class Settings {
                     return p.sharedUser.userId;
                 }
             } else {
-                removeUserIdLPw(p.uid);
-                return p.uid;
+                removeUserIdLPw(p.appId);
+                return p.appId;
             }
         }
         return -1;
@@ -628,7 +628,7 @@ final class Settings {
                 p.sharedUser.packages.remove(p);
                 p.sharedUser.packages.add(newp);
             } else {
-                replaceUserIdLPw(p.uid, newp);
+                replaceUserIdLPw(p.appId, newp);
             }
         }
         mPackages.put(name, newp);
@@ -1317,9 +1317,9 @@ final class Settings {
             serializer.attribute(null, "nativeLibraryPath", pkg.nativeLibraryPathString);
         }
         if (pkg.sharedUser == null) {
-            serializer.attribute(null, "userId", Integer.toString(pkg.uid));
+            serializer.attribute(null, "userId", Integer.toString(pkg.appId));
         } else {
-            serializer.attribute(null, "sharedUserId", Integer.toString(pkg.uid));
+            serializer.attribute(null, "sharedUserId", Integer.toString(pkg.appId));
         }
         serializer.startTag(null, "perms");
         if (pkg.sharedUser == null) {
@@ -1364,9 +1364,9 @@ final class Settings {
         serializer.attribute(null, "ut", Long.toHexString(pkg.lastUpdateTime));
         serializer.attribute(null, "version", String.valueOf(pkg.versionCode));
         if (pkg.sharedUser == null) {
-            serializer.attribute(null, "userId", Integer.toString(pkg.uid));
+            serializer.attribute(null, "userId", Integer.toString(pkg.appId));
         } else {
-            serializer.attribute(null, "sharedUserId", Integer.toString(pkg.uid));
+            serializer.attribute(null, "sharedUserId", Integer.toString(pkg.appId));
         }
         if (pkg.uidError) {
             serializer.attribute(null, "uidError", "true");
@@ -1607,7 +1607,7 @@ final class Settings {
         final Iterator<PackageSetting> disabledIt = mDisabledSysPackages.values().iterator();
         while (disabledIt.hasNext()) {
             final PackageSetting disabledPs = disabledIt.next();
-            final Object id = getUserIdLPr(disabledPs.uid);
+            final Object id = getUserIdLPr(disabledPs.appId);
             if (id != null && id instanceof SharedUserSetting) {
                 disabledPs.sharedUser = (SharedUserSetting) id;
             }
@@ -1753,10 +1753,10 @@ final class Settings {
             }
         }
         String idStr = parser.getAttributeValue(null, "userId");
-        ps.uid = idStr != null ? Integer.parseInt(idStr) : 0;
-        if (ps.uid <= 0) {
+        ps.appId = idStr != null ? Integer.parseInt(idStr) : 0;
+        if (ps.appId <= 0) {
             String sharedIdStr = parser.getAttributeValue(null, "sharedUserId");
-            ps.uid = sharedIdStr != null ? Integer.parseInt(sharedIdStr) : 0;
+            ps.appId = sharedIdStr != null ? Integer.parseInt(sharedIdStr) : 0;
         }
         int outerDepth = parser.getDepth();
         int type;
@@ -2164,6 +2164,13 @@ final class Settings {
         }
     }
 
+    void removeUserLPr(int userId) {
+        File file = getUserPackagesStateFile(userId);
+        file.delete();
+        file = getUserPackagesStateBackupFile(userId);
+        file.delete();
+    }
+
     // Returns -1 if we could not find an available UserId to assign
     private int newUserIdLPw(Object obj) {
         // Let's be stupidly inefficient for now...
@@ -2265,11 +2272,11 @@ final class Settings {
         if (pkgSetting == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
-        if (!allowedByPermission && (appId != pkgSetting.uid)) {
+        if (!allowedByPermission && (appId != pkgSetting.appId)) {
             throw new SecurityException(
                     "Permission Denial: attempt to change stopped state from pid="
                     + Binder.getCallingPid()
-                    + ", uid=" + uid + ", package uid=" + pkgSetting.uid);
+                    + ", uid=" + uid + ", package uid=" + pkgSetting.appId);
         }
         if (DEBUG_STOPPED) {
             if (stopped) {
@@ -2285,7 +2292,7 @@ final class Settings {
                 if (pkgSetting.installerPackageName != null) {
                     PackageManagerService.sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH,
                             pkgSetting.name, null,
-                            pkgSetting.installerPackageName, null);
+                            pkgSetting.installerPackageName, null, userId);
                 }
                 pkgSetting.setNotLaunched(false, userId);
             }
@@ -2369,7 +2376,7 @@ final class Settings {
                 pw.println(ps.name);
             }
 
-            pw.print("    userId="); pw.print(ps.uid);
+            pw.print("    userId="); pw.print(ps.appId);
             pw.print(" gids="); pw.println(PackageManagerService.arrayToString(ps.gids));
             pw.print("    sharedUser="); pw.println(ps.sharedUser);
             pw.print("    pkg="); pw.println(ps.pkg);
@@ -2513,7 +2520,7 @@ final class Settings {
                     pw.println(ps.name);
                 }
                 pw.print("    userId=");
-                pw.println(ps.uid);
+                pw.println(ps.appId);
                 pw.print("    sharedUser=");
                 pw.println(ps.sharedUser);
                 pw.print("    codePath=");

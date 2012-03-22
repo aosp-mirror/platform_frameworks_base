@@ -23,6 +23,7 @@ import com.android.internal.R;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -31,14 +32,18 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,6 +81,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mDeviceProvisioned = false;
     private ToggleAction.State mAirplaneState = ToggleAction.State.Off;
     private boolean mIsWaitingForEcmExit = false;
+
+    private IWindowManager mIWindowManager;
 
     /**
      * @param context everything needs a context :(
@@ -119,7 +126,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * @return A new dialog.
      */
     private AlertDialog createDialog() {
-        mSilentModeAction = new SilentModeAction(mAudioManager, mHandler);
+        mSilentModeAction = new SilentModeAction(mContext, mAudioManager, mHandler);
 
         mAirplaneModeOn = new ToggleAction(
                 R.drawable.ic_lock_airplane_mode,
@@ -200,6 +207,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     public void onPress() {
                         try {
                             ActivityManagerNative.getDefault().switchUser(user.id);
+                            getWindowManager().lockNow();
                         } catch (RemoteException re) {
                             Log.e(TAG, "Couldn't switch user " + re);
                         }
@@ -540,10 +548,15 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         private final AudioManager mAudioManager;
         private final Handler mHandler;
+        private final boolean mHasVibrator;
+        private final Context mContext;
 
-        SilentModeAction(AudioManager audioManager, Handler handler) {
+        SilentModeAction(Context context, AudioManager audioManager, Handler handler) {
             mAudioManager = audioManager;
             mHandler = handler;
+            mContext = context;
+            Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+            mHasVibrator = vibrator != null && vibrator.hasVibrator();
         }
 
         private int ringerModeToIndex(int ringerMode) {
@@ -567,6 +580,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 // Set up click handler
                 itemView.setTag(i);
                 itemView.setOnClickListener(this);
+                if (itemView.getId() == R.id.option2 && !mHasVibrator) {
+                    itemView.setVisibility(View.GONE);
+                }
             }
             return v;
         }
@@ -666,5 +682,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra("state", on);
         mContext.sendBroadcast(intent);
+    }
+
+    private IWindowManager getWindowManager() {
+        if (mIWindowManager == null) {
+            IBinder b = ServiceManager.getService(Context.WINDOW_SERVICE);
+            mIWindowManager = IWindowManager.Stub.asInterface(b);
+        }
+        return mIWindowManager;
     }
 }

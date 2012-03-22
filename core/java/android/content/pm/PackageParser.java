@@ -230,6 +230,15 @@ public class PackageParser {
         return name.endsWith(".apk");
     }
 
+    public static PackageInfo generatePackageInfo(PackageParser.Package p,
+            int gids[], int flags, long firstInstallTime, long lastUpdateTime,
+            HashSet<String> grantedPermissions) {
+
+        return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
+                grantedPermissions, false, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                UserId.getCallingUserId());
+    }
+
     /**
      * Generate and return the {@link PackageInfo} for a parsed package.
      *
@@ -238,15 +247,15 @@ public class PackageParser {
      */
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
-            HashSet<String> grantedPermissions) {
+            HashSet<String> grantedPermissions, boolean stopped, int enabledState) {
 
         return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
-                grantedPermissions, UserId.getCallingUserId());
+                grantedPermissions, stopped, enabledState, UserId.getCallingUserId());
     }
 
-    static PackageInfo generatePackageInfo(PackageParser.Package p,
+    public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
-            HashSet<String> grantedPermissions, int userId) {
+            HashSet<String> grantedPermissions, boolean stopped, int enabledState, int userId) {
 
         PackageInfo pi = new PackageInfo();
         pi.packageName = p.packageName;
@@ -254,7 +263,7 @@ public class PackageParser {
         pi.versionName = p.mVersionName;
         pi.sharedUserId = p.mSharedUserId;
         pi.sharedUserLabel = p.mSharedUserLabel;
-        pi.applicationInfo = generateApplicationInfo(p, flags);
+        pi.applicationInfo = generateApplicationInfo(p, flags, stopped, enabledState, userId);
         pi.installLocation = p.installLocation;
         pi.firstInstallTime = firstInstallTime;
         pi.lastUpdateTime = lastUpdateTime;
@@ -290,7 +299,7 @@ public class PackageParser {
                     if (activity.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
                         pi.activities[j++] = generateActivityInfo(p.activities.get(i), flags,
-                                userId);
+                                stopped, enabledState, userId);
                     }
                 }
             }
@@ -311,7 +320,8 @@ public class PackageParser {
                     final Activity activity = p.receivers.get(i);
                     if (activity.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.receivers[j++] = generateActivityInfo(p.receivers.get(i), flags, userId);
+                        pi.receivers[j++] = generateActivityInfo(p.receivers.get(i), flags,
+                                stopped, enabledState, userId);
                     }
                 }
             }
@@ -332,7 +342,8 @@ public class PackageParser {
                     final Service service = p.services.get(i);
                     if (service.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.services[j++] = generateServiceInfo(p.services.get(i), flags, userId);
+                        pi.services[j++] = generateServiceInfo(p.services.get(i), flags, stopped,
+                                enabledState, userId);
                     }
                 }
             }
@@ -353,7 +364,8 @@ public class PackageParser {
                     final Provider provider = p.providers.get(i);
                     if (provider.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.providers[j++] = generateProviderInfo(p.providers.get(i), flags, userId);
+                        pi.providers[j++] = generateProviderInfo(p.providers.get(i), flags, stopped,
+                                enabledState, userId);
                     }
                 }
             }
@@ -3068,11 +3080,11 @@ public class PackageParser {
         // For use by package manager to keep track of where it has done dexopt.
         public boolean mDidDexOpt;
         
-        // User set enabled state.
-        public int mSetEnabled = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-
-        // Whether the package has been stopped.
-        public boolean mSetStopped = false;
+        // // User set enabled state.
+        // public int mSetEnabled = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+        //
+        // // Whether the package has been stopped.
+        // public boolean mSetStopped = false;
 
         // Additional data supplied by callers.
         public Object mExtras;
@@ -3337,9 +3349,9 @@ public class PackageParser {
         }
     }
 
-    private static boolean copyNeeded(int flags, Package p, Bundle metaData) {
-        if (p.mSetEnabled != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
-            boolean enabled = p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+    private static boolean copyNeeded(int flags, Package p, int enabledState, Bundle metaData) {
+        if (enabledState != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+            boolean enabled = enabledState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
             if (p.applicationInfo.enabled != enabled) {
                 return true;
             }
@@ -3355,30 +3367,32 @@ public class PackageParser {
         return false;
     }
 
-    public static ApplicationInfo generateApplicationInfo(Package p, int flags) {
-        return generateApplicationInfo(p, flags, UserId.getCallingUserId());
+    public static ApplicationInfo generateApplicationInfo(Package p, int flags, boolean stopped,
+            int enabledState) {
+        return generateApplicationInfo(p, flags, stopped, enabledState, UserId.getCallingUserId());
     }
 
-    public static ApplicationInfo generateApplicationInfo(Package p, int flags, int userId) {
+    public static ApplicationInfo generateApplicationInfo(Package p, int flags,
+            boolean stopped, int enabledState, int userId) {
         if (p == null) return null;
-        if (!copyNeeded(flags, p, null) && userId == 0) {
+        if (!copyNeeded(flags, p, enabledState, null) && userId == 0) {
             // CompatibilityMode is global state. It's safe to modify the instance
             // of the package.
             if (!sCompatibilityModeEnabled) {
                 p.applicationInfo.disableCompatibilityMode();
             }
-            if (p.mSetStopped) {
+            if (stopped) {
                 p.applicationInfo.flags |= ApplicationInfo.FLAG_STOPPED;
             } else {
                 p.applicationInfo.flags &= ~ApplicationInfo.FLAG_STOPPED;
             }
-            if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
                 p.applicationInfo.enabled = true;
-            } else if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                    || p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
+            } else if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                    || enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
                 p.applicationInfo.enabled = false;
             }
-            p.applicationInfo.enabledSetting = p.mSetEnabled;
+            p.applicationInfo.enabledSetting = enabledState;
             return p.applicationInfo;
         }
 
@@ -3397,18 +3411,18 @@ public class PackageParser {
         if (!sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
         }
-        if (p.mSetStopped) {
+        if (stopped) {
             p.applicationInfo.flags |= ApplicationInfo.FLAG_STOPPED;
         } else {
             p.applicationInfo.flags &= ~ApplicationInfo.FLAG_STOPPED;
         }
-        if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+        if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;
-        } else if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                || p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
+        } else if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                || enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
             ai.enabled = false;
         }
-        ai.enabledSetting = p.mSetEnabled;
+        ai.enabledSetting = enabledState;
         return ai;
     }
 
@@ -3455,15 +3469,16 @@ public class PackageParser {
         }
     }
 
-    public static final ActivityInfo generateActivityInfo(Activity a, int flags, int userId) {
+    public static final ActivityInfo generateActivityInfo(Activity a, int flags, boolean stopped,
+            int enabledState, int userId) {
         if (a == null) return null;
-        if (!copyNeeded(flags, a.owner, a.metaData) && userId == 0) {
+        if (!copyNeeded(flags, a.owner, enabledState, a.metaData) && userId == 0) {
             return a.info;
         }
         // Make shallow copies so we can store the metadata safely
         ActivityInfo ai = new ActivityInfo(a.info);
         ai.metaData = a.metaData;
-        ai.applicationInfo = generateApplicationInfo(a.owner, flags, userId);
+        ai.applicationInfo = generateApplicationInfo(a.owner, flags, stopped, enabledState, userId);
         return ai;
     }
 
@@ -3488,16 +3503,17 @@ public class PackageParser {
         }
     }
 
-    public static final ServiceInfo generateServiceInfo(Service s, int flags, int userId) {
+    public static final ServiceInfo generateServiceInfo(Service s, int flags, boolean stopped,
+            int enabledState, int userId) {
         if (s == null) return null;
-        if (!copyNeeded(flags, s.owner, s.metaData)
+        if (!copyNeeded(flags, s.owner, enabledState, s.metaData)
                 && userId == UserId.getUserId(s.info.applicationInfo.uid)) {
             return s.info;
         }
         // Make shallow copies so we can store the metadata safely
         ServiceInfo si = new ServiceInfo(s.info);
         si.metaData = s.metaData;
-        si.applicationInfo = generateApplicationInfo(s.owner, flags, userId);
+        si.applicationInfo = generateApplicationInfo(s.owner, flags, stopped, enabledState, userId);
         return si;
     }
 
@@ -3530,9 +3546,10 @@ public class PackageParser {
         }
     }
 
-    public static final ProviderInfo generateProviderInfo(Provider p, int flags, int userId) {
+    public static final ProviderInfo generateProviderInfo(Provider p, int flags, boolean stopped,
+            int enabledState, int userId) {
         if (p == null) return null;
-        if (!copyNeeded(flags, p.owner, p.metaData)
+        if (!copyNeeded(flags, p.owner, enabledState, p.metaData)
                 && ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) != 0
                         || p.info.uriPermissionPatterns == null)
                 && userId == 0) {
@@ -3544,7 +3561,7 @@ public class PackageParser {
         if ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) == 0) {
             pi.uriPermissionPatterns = null;
         }
-        pi.applicationInfo = generateApplicationInfo(p.owner, flags, userId);
+        pi.applicationInfo = generateApplicationInfo(p.owner, flags, stopped, enabledState, userId);
         return pi;
     }
 

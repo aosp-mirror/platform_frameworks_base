@@ -273,4 +273,13 @@ class PackageSettingBase extends GrantedPermissions {
             return COMPONENT_ENABLED_STATE_DEFAULT;
         }
     }
+
+    void removeUser(int userId) {
+        enabled.delete(userId);
+        stopped.delete(userId);
+        enabledComponents.delete(userId);
+        disabledComponents.delete(userId);
+        notLaunched.delete(userId);
+    }
+
 }

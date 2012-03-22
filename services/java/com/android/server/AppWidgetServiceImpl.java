@@ -1484,9 +1484,13 @@ class AppWidgetServiceImpl {
         }
     }
 
+    static File getSettingsFile(int userId) {
+        return new File("/data/system/users/" + userId + "/" + SETTINGS_FILENAME);
+    }
+
     AtomicFile savedStateFile() {
         File dir = new File("/data/system/users/" + mUserId);
-        File settingsFile = new File(dir, SETTINGS_FILENAME);
+        File settingsFile = getSettingsFile(mUserId);
         if (!dir.exists()) {
             dir.mkdirs();
             if (mUserId == 0) {
@@ -1498,6 +1502,16 @@ class AppWidgetServiceImpl {
             }
         }
         return new AtomicFile(settingsFile);
+    }
+
+    void onUserRemoved() {
+        // prune the ones we don't want to keep
+        int N = mInstalledProviders.size();
+        for (int i = N - 1; i >= 0; i--) {
+            Provider p = mInstalledProviders.get(i);
+            cancelBroadcasts(p);
+        }
+        getSettingsFile(mUserId).delete();
     }
 
     void addProvidersForPackageLocked(String pkgName) {
