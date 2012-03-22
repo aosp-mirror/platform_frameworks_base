@@ -104,6 +104,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UpdateLock;
 import android.provider.Settings;
 import android.text.format.Time;
 import android.util.EventLog;
@@ -172,6 +173,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_CONFIGURATION = localLOGV || false;
     static final boolean DEBUG_POWER = localLOGV || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
+    static final boolean DEBUG_IMMERSIVE = localLOGV || true;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
     
@@ -810,6 +812,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     final AtomicBoolean mProcessStatsMutexFree = new AtomicBoolean(true);
 
     long mLastWriteTime = 0;
+
+    /**
+     * Used to retain an update lock when the foreground activity is in
+     * immersive mode.
+     */
+    final UpdateLock mUpdateLock = new UpdateLock("immersive");
 
     /**
      * Set to true after the system has finished booting.
@@ -1709,6 +1717,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             mFocusedActivity = r;
             if (r != null) {
                 mWindowManager.setFocusedApp(r.appToken, true);
+            }
+            applyUpdateLockStateLocked(r);
+        }
+    }
+
+    final void applyUpdateLockStateLocked(ActivityRecord r) {
+        final boolean nextState = r != null && r.immersive;
+        if (mUpdateLock.isHeld() != nextState) {
+            if (DEBUG_IMMERSIVE) {
+                Slog.d(TAG, "Applying new update lock state '" + nextState + "' for " + r);
+            }
+            if (nextState) {
+                mUpdateLock.acquire();
+            } else {
+                mUpdateLock.release();
             }
         }
     }
@@ -6667,11 +6690,24 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void setImmersive(IBinder token, boolean immersive) {
         synchronized(this) {
-            ActivityRecord r = mMainStack.isInStackLocked(token);
+            final ActivityRecord r = mMainStack.isInStackLocked(token);
             if (r == null) {
                 throw new IllegalArgumentException();
             }
             r.immersive = immersive;
+
+            // update associated state if we're frontmost
+            if (r == mMainStack.topRunningActivityLocked(null)) {
+                long oldId = Binder.clearCallingIdentity();
+                try {
+                    if (DEBUG_IMMERSIVE) {
+                        Slog.d(TAG, "Frontmost changed immersion: "+ r);
+                    }
+                    applyUpdateLockStateLocked(r);
+                } finally {
+                    Binder.restoreCallingIdentity(oldId);
+                }
+            }
         }
     }
 

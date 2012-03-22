@@ -2557,6 +2557,7 @@ package android.app {
     method public boolean isChangingConfigurations();
     method public final boolean isChild();
     method public boolean isFinishing();
+    method public boolean isImmersive();
     method public boolean isTaskRoot();
     method public final deprecated android.database.Cursor managedQuery(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
     method public boolean moveTaskToBack(boolean);
@@ -2638,6 +2639,7 @@ package android.app {
     method public final void setFeatureDrawableResource(int, int);
     method public final void setFeatureDrawableUri(int, android.net.Uri);
     method public void setFinishOnTouchOutside(boolean);
+    method public void setImmersive(boolean);
     method public void setIntent(android.content.Intent);
     method public final void setProgress(int);
     method public final void setProgressBarIndeterminate(boolean);
@@ -5952,6 +5954,7 @@ package android.content.pm {
     field public static final int FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS = 256; // 0x100
     field public static final int FLAG_FINISH_ON_TASK_LAUNCH = 2; // 0x2
     field public static final int FLAG_HARDWARE_ACCELERATED = 512; // 0x200
+    field public static final int FLAG_IMMERSIVE = 1024; // 0x400
     field public static final int FLAG_MULTIPROCESS = 1; // 0x1
     field public static final int FLAG_NO_HISTORY = 128; // 0x80
     field public static final int FLAG_STATE_NOT_NEEDED = 16; // 0x10
