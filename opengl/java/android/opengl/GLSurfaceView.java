@@ -1145,11 +1145,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 switch(error) {
                 case EGL11.EGL_CONTEXT_LOST:
                     return false;
+                case EGL10.EGL_BAD_CURRENT_SURFACE:
+                    // The current surface is bad, probably because the window manager has closed
+                    // the associated window. Ignore this error, on the assumption that the
+                    // application will be closed soon.
+                    break;
                 case EGL10.EGL_BAD_NATIVE_WINDOW:
-                    // The native window is bad, probably because the
-                    // window manager has closed it. Ignore this error,
-                    // on the expectation that the application will be closed soon.
-                    Log.e("EglHelper", "eglSwapBuffers returned EGL_BAD_NATIVE_WINDOW. tid=" + Thread.currentThread().getId());
+                    // The native window is bad, probably because the window manager has closed it.
+                    // Ignore this error, on the assumption that the application will be closed
+                    // soon.
                     break;
                 default:
                     throwEglException("eglSwapBuffers", error);
