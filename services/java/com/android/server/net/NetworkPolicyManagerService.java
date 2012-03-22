@@ -41,7 +41,6 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.dumpPolicy;
 import static android.net.NetworkPolicyManager.dumpRules;
-import static android.net.NetworkPolicyManager.isUidValidForPolicy;
 import static android.net.NetworkTemplate.MATCH_ETHERNET;
 import static android.net.NetworkTemplate.MATCH_MOBILE_3G_LOWER;
 import static android.net.NetworkTemplate.MATCH_MOBILE_4G;
@@ -74,6 +73,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
@@ -96,6 +96,7 @@ import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserId;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
@@ -158,6 +159,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_SPLIT_SNOOZE = 5;
     private static final int VERSION_ADDED_TIMEZONE = 6;
     private static final int VERSION_ADDED_INFERRED = 7;
+    private static final int VERSION_SWITCH_APP_ID = 8;
 
     // @VisibleForTesting
     public static final int TYPE_WARNING = 0x1;
@@ -167,6 +169,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG_POLICY_LIST = "policy-list";
     private static final String TAG_NETWORK_POLICY = "network-policy";
     private static final String TAG_UID_POLICY = "uid-policy";
+    private static final String TAG_APP_POLICY = "app-policy";
 
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_RESTRICT_BACKGROUND = "restrictBackground";
@@ -182,6 +185,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_METERED = "metered";
     private static final String ATTR_INFERRED = "inferred";
     private static final String ATTR_UID = "uid";
+    private static final String ATTR_APP_ID = "appId";
     private static final String ATTR_POLICY = "policy";
 
     private static final String TAG_ALLOW_BACKGROUND = TAG + ":allowBackground";
@@ -223,8 +227,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Currently active network rules for ifaces. */
     private HashMap<NetworkPolicy, String[]> mNetworkRules = Maps.newHashMap();
 
-    /** Defined UID policies. */
-    private SparseIntArray mUidPolicy = new SparseIntArray();
+    /** Defined app policies. */
+    private SparseIntArray mAppPolicy = new SparseIntArray();
     /** Currently derived rules for each UID. */
     private SparseIntArray mUidRules = new SparseIntArray();
 
@@ -379,18 +383,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final String action = intent.getAction();
             final int uid = intent.getIntExtra(EXTRA_UID, 0);
+            final int appId = UserId.getAppId(uid);
             synchronized (mRulesLock) {
                 if (ACTION_PACKAGE_ADDED.equals(action)) {
+                    // NOTE: PACKAGE_ADDED is currently only sent once, and is
+                    // not broadcast when users are added.
+
                     // update rules for UID, since it might be subject to
                     // global background data policy.
                     if (LOGV) Slog.v(TAG, "ACTION_PACKAGE_ADDED for uid=" + uid);
-                    updateRulesForUidLocked(uid);
+                    updateRulesForAppLocked(appId);
 
                 } else if (ACTION_UID_REMOVED.equals(action)) {
+                    // NOTE: UID_REMOVED is currently only sent once, and is not
+                    // broadcast when users are removed.
+
                     // remove any policy and update rules to clean up.
                     if (LOGV) Slog.v(TAG, "ACTION_UID_REMOVED for uid=" + uid);
-                    mUidPolicy.delete(uid);
-                    updateRulesForUidLocked(uid);
+
+                    mAppPolicy.delete(appId);
+                    updateRulesForAppLocked(appId);
                     writePolicyLocked();
                 }
             }
@@ -949,7 +961,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // clear any existing policy and read from disk
         mNetworkPolicy.clear();
-        mUidPolicy.clear();
+        mAppPolicy.clear();
 
         FileInputStream fis = null;
         try {
@@ -1028,10 +1040,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final int uid = readIntAttribute(in, ATTR_UID);
                         final int policy = readIntAttribute(in, ATTR_POLICY);
 
-                        if (isUidValidForPolicy(mContext, uid)) {
-                            setUidPolicyUnchecked(uid, policy, false);
+                        final int appId = UserId.getAppId(uid);
+                        if (UserId.isApp(appId)) {
+                            setAppPolicyUnchecked(appId, policy, false);
                         } else {
                             Slog.w(TAG, "unable to apply policy to UID " + uid + "; ignoring");
+                        }
+                    } else if (TAG_APP_POLICY.equals(tag)) {
+                        final int appId = readIntAttribute(in, ATTR_APP_ID);
+                        final int policy = readIntAttribute(in, ATTR_POLICY);
+
+                        if (UserId.isApp(appId)) {
+                            setAppPolicyUnchecked(appId, policy, false);
+                        } else {
+                            Slog.w(TAG, "unable to apply policy to appId " + appId + "; ignoring");
                         }
                     }
                 }
@@ -1077,7 +1099,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             out.startDocument(null, true);
 
             out.startTag(null, TAG_POLICY_LIST);
-            writeIntAttribute(out, ATTR_VERSION, VERSION_ADDED_INFERRED);
+            writeIntAttribute(out, ATTR_VERSION, VERSION_SWITCH_APP_ID);
             writeBooleanAttribute(out, ATTR_RESTRICT_BACKGROUND, mRestrictBackground);
 
             // write all known network policies
@@ -1102,17 +1124,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             // write all known uid policies
-            for (int i = 0; i < mUidPolicy.size(); i++) {
-                final int uid = mUidPolicy.keyAt(i);
-                final int policy = mUidPolicy.valueAt(i);
+            for (int i = 0; i < mAppPolicy.size(); i++) {
+                final int appId = mAppPolicy.keyAt(i);
+                final int policy = mAppPolicy.valueAt(i);
 
                 // skip writing empty policies
                 if (policy == POLICY_NONE) continue;
 
-                out.startTag(null, TAG_UID_POLICY);
-                writeIntAttribute(out, ATTR_UID, uid);
+                out.startTag(null, TAG_APP_POLICY);
+                writeIntAttribute(out, ATTR_APP_ID, appId);
                 writeIntAttribute(out, ATTR_POLICY, policy);
-                out.endTag(null, TAG_UID_POLICY);
+                out.endTag(null, TAG_APP_POLICY);
             }
 
             out.endTag(null, TAG_POLICY_LIST);
@@ -1127,24 +1149,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public void setUidPolicy(int uid, int policy) {
+    public void setAppPolicy(int appId, int policy) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
-        if (!isUidValidForPolicy(mContext, uid)) {
-            throw new IllegalArgumentException("cannot apply policy to UID " + uid);
+        if (!UserId.isApp(appId)) {
+            throw new IllegalArgumentException("cannot apply policy to appId " + appId);
         }
 
-        setUidPolicyUnchecked(uid, policy, true);
+        setAppPolicyUnchecked(appId, policy, true);
     }
 
-    private void setUidPolicyUnchecked(int uid, int policy, boolean persist) {
+    private void setAppPolicyUnchecked(int appId, int policy, boolean persist) {
         final int oldPolicy;
         synchronized (mRulesLock) {
-            oldPolicy = getUidPolicy(uid);
-            mUidPolicy.put(uid, policy);
+            oldPolicy = getAppPolicy(appId);
+            mAppPolicy.put(appId, policy);
 
             // uid policy changed, recompute rules and persist policy.
-            updateRulesForUidLocked(uid);
+            updateRulesForAppLocked(appId);
             if (persist) {
                 writePolicyLocked();
             }
@@ -1152,11 +1174,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public int getUidPolicy(int uid) {
+    public int getAppPolicy(int appId) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
         synchronized (mRulesLock) {
-            return mUidPolicy.get(uid, POLICY_NONE);
+            return mAppPolicy.get(appId, POLICY_NONE);
         }
     }
 
@@ -1347,26 +1369,28 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("  "); fout.println(policy.toString());
             }
 
-            fout.println("Policy status for known UIDs:");
+            fout.println("Policy for apps:");
+            int size = mAppPolicy.size();
+            for (int i = 0; i < size; i++) {
+                final int appId = mAppPolicy.keyAt(i);
+                final int policy = mAppPolicy.valueAt(i);
+                fout.print("  appId=");
+                fout.print(appId);
+                fout.print(" policy=");
+                dumpPolicy(fout, policy);
+                fout.println();
+            }
 
             final SparseBooleanArray knownUids = new SparseBooleanArray();
-            collectKeys(mUidPolicy, knownUids);
             collectKeys(mUidForeground, knownUids);
             collectKeys(mUidRules, knownUids);
 
-            final int size = knownUids.size();
+            fout.println("Status for known UIDs:");
+            size = knownUids.size();
             for (int i = 0; i < size; i++) {
                 final int uid = knownUids.keyAt(i);
                 fout.print("  UID=");
                 fout.print(uid);
-
-                fout.print(" policy=");
-                final int policyIndex = mUidPolicy.indexOfKey(uid);
-                if (policyIndex < 0) {
-                    fout.print("UNKNOWN");
-                } else {
-                    dumpPolicy(fout, mUidPolicy.valueAt(policyIndex));
-                }
 
                 fout.print(" foreground=");
                 final int foregroundIndex = mUidPidForeground.indexOfKey(uid);
@@ -1457,7 +1481,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final PackageManager pm = mContext.getPackageManager();
         final List<ApplicationInfo> apps = pm.getInstalledApplications(0);
         for (ApplicationInfo app : apps) {
-            updateRulesForUidLocked(app.uid);
+            final int appId = UserId.getAppId(app.uid);
+            updateRulesForAppLocked(appId);
         }
 
         // and catch system UIDs
@@ -1476,13 +1501,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void updateRulesForAppLocked(int appId) {
+        for (UserInfo user : mContext.getPackageManager().getUsers()) {
+            final int uid = UserId.getUid(user.id, appId);
+            updateRulesForUidLocked(uid);
+        }
+    }
+
     private void updateRulesForUidLocked(int uid) {
-        final int uidPolicy = getUidPolicy(uid);
+        final int appId = UserId.getAppId(uid);
+        final int appPolicy = getAppPolicy(appId);
         final boolean uidForeground = isUidForeground(uid);
 
         // derive active rules based on policy and active state
         int uidRules = RULE_ALLOW_ALL;
-        if (!uidForeground && (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
+        if (!uidForeground && (appPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
             // uid in background, and policy says to block metered data
             uidRules = RULE_REJECT_METERED;
         }

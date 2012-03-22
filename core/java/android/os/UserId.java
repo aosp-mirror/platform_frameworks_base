@@ -61,6 +61,15 @@ public final class UserId {
         return uid >= Process.FIRST_ISOLATED_UID && uid <= Process.LAST_ISOLATED_UID;
     }
 
+    public static boolean isApp(int uid) {
+        if (uid > 0) {
+            uid = UserId.getAppId(uid);
+            return uid >= Process.FIRST_APPLICATION_UID && uid <= Process.LAST_APPLICATION_UID;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Returns the user id for a given uid.
      * @hide
