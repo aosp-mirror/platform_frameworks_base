@@ -30,8 +30,8 @@ import android.net.NetworkTemplate;
 interface INetworkPolicyManager {
 
     /** Control UID policies. */
-    void setUidPolicy(int uid, int policy);
-    int getUidPolicy(int uid);
+    void setAppPolicy(int appId, int policy);
+    int getAppPolicy(int appId);
 
     boolean isUidForeground(int uid);
 

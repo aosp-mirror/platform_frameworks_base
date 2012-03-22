@@ -88,21 +88,21 @@ public class NetworkPolicyManager {
     }
 
     /**
-     * Set policy flags for specific UID.
+     * Set policy flags for specific application.
      *
      * @param policy {@link #POLICY_NONE} or combination of flags like
      *            {@link #POLICY_REJECT_METERED_BACKGROUND}.
      */
-    public void setUidPolicy(int uid, int policy) {
+    public void setAppPolicy(int appId, int policy) {
         try {
-            mService.setUidPolicy(uid, policy);
+            mService.setAppPolicy(appId, policy);
         } catch (RemoteException e) {
         }
     }
 
-    public int getUidPolicy(int uid) {
+    public int getAppPolicy(int appId) {
         try {
-            return mService.getUidPolicy(uid);
+            return mService.getAppPolicy(appId);
         } catch (RemoteException e) {
             return POLICY_NONE;
         }
@@ -203,6 +203,7 @@ public class NetworkPolicyManager {
      * Check if given UID can have a {@link #setUidPolicy(int, int)} defined,
      * usually to protect critical system services.
      */
+    @Deprecated
     public static boolean isUidValidForPolicy(Context context, int uid) {
         // first, quick-reject non-applications
         if (uid < android.os.Process.FIRST_APPLICATION_UID
