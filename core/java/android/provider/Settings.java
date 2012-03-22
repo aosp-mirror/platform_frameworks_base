@@ -793,6 +793,7 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.HTTP_PROXY);
             MOVED_TO_SECURE.add(Secure.INSTALL_NON_MARKET_APPS);
             MOVED_TO_SECURE.add(Secure.LOCATION_PROVIDERS_ALLOWED);
+            MOVED_TO_SECURE.add(Secure.LOCK_BIOMETRIC_WEAK_FLAGS);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_ENABLED);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_VISIBLE);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
@@ -2655,6 +2656,13 @@ public final class Settings {
          * Comma-separated list of location providers that activities may access.
          */
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
+
+        /**
+         * A flag containing settings used for biometric weak
+         * @hide
+         */
+        public static final String LOCK_BIOMETRIC_WEAK_FLAGS =
+                "lock_biometric_weak_flags";
 
         /**
          * Whether autolock is enabled (0 = false, 1 = true)
