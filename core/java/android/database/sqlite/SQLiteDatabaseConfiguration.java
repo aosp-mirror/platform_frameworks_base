@@ -85,18 +85,11 @@ public final class SQLiteDatabaseConfiguration {
     public Locale locale;
 
     /**
-     * The database synchronization mode.
+     * True if WAL mode is enabled.
      *
-     * Default is {@link SQLiteGlobal#getDefaultSyncMode()}.
+     * Default is false.
      */
-    public String syncMode;
-
-    /**
-     * The database journal mode.
-     *
-     * Default is {@link SQLiteGlobal#getDefaultJournalMode()}.
-     */
-    public String journalMode;
+    public boolean walEnabled;
 
     /**
      * The custom functions to register.
@@ -124,8 +117,6 @@ public final class SQLiteDatabaseConfiguration {
         maxConnectionPoolSize = 1;
         maxSqlCacheSize = 25;
         locale = Locale.getDefault();
-        syncMode = SQLiteGlobal.getDefaultSyncMode();
-        journalMode = SQLiteGlobal.getDefaultJournalMode();
     }
 
     /**
@@ -162,8 +153,7 @@ public final class SQLiteDatabaseConfiguration {
         maxConnectionPoolSize = other.maxConnectionPoolSize;
         maxSqlCacheSize = other.maxSqlCacheSize;
         locale = other.locale;
-        syncMode = other.syncMode;
-        journalMode = other.journalMode;
+        walEnabled = other.walEnabled;
         customFunctions.clear();
         customFunctions.addAll(other.customFunctions);
     }

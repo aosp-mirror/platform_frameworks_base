@@ -258,8 +258,7 @@ public final class SQLiteConnectionPool implements Closeable {
             throwIfClosedLocked();
 
             boolean restrictToOneConnection = false;
-            if (mConfiguration.journalMode.equalsIgnoreCase("WAL")
-                    != configuration.journalMode.equalsIgnoreCase("WAL")) {
+            if (mConfiguration.walEnabled != configuration.walEnabled) {
                 // WAL mode can only be changed if there are no acquired connections
                 // because we need to close all but the primary connection first.
                 if (!mAcquiredConnections.isEmpty()) {

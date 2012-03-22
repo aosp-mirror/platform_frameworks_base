@@ -127,10 +127,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
     // INVARIANT: Guarded by mLock.
     private boolean mHasAttachedDbsLocked;
 
-    // True if the database is in WAL mode.
-    // INVARIANT: Guarded by mLock.
-    private boolean mIsWALEnabledLocked;
-
     /**
      * When a constraint violation occurs, an immediate ROLLBACK occurs,
      * thus ending the current transaction, and the command aborts with a
@@ -1834,7 +1830,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
         synchronized (mLock) {
             throwIfNotOpenLocked();
 
-            if (mIsWALEnabledLocked) {
+            if (mConfigurationLocked.walEnabled) {
                 return true;
             }
 
@@ -1860,21 +1856,15 @@ public final class SQLiteDatabase extends SQLiteClosable {
             }
 
             final int oldMaxConnectionPoolSize = mConfigurationLocked.maxConnectionPoolSize;
-            final String oldSyncMode = mConfigurationLocked.syncMode;
-            final String oldJournalMode = mConfigurationLocked.journalMode;
             mConfigurationLocked.maxConnectionPoolSize = SQLiteGlobal.getWALConnectionPoolSize();
-            mConfigurationLocked.syncMode = SQLiteGlobal.getWALSyncMode();
-            mConfigurationLocked.journalMode = "WAL";
+            mConfigurationLocked.walEnabled = true;
             try {
                 mConnectionPoolLocked.reconfigure(mConfigurationLocked);
             } catch (RuntimeException ex) {
                 mConfigurationLocked.maxConnectionPoolSize = oldMaxConnectionPoolSize;
-                mConfigurationLocked.syncMode = oldSyncMode;
-                mConfigurationLocked.journalMode = oldJournalMode;
+                mConfigurationLocked.walEnabled = false;
                 throw ex;
             }
-
-            mIsWALEnabledLocked = true;
         }
         return true;
     }
@@ -1890,26 +1880,20 @@ public final class SQLiteDatabase extends SQLiteClosable {
         synchronized (mLock) {
             throwIfNotOpenLocked();
 
-            if (!mIsWALEnabledLocked) {
+            if (!mConfigurationLocked.walEnabled) {
                 return;
             }
 
             final int oldMaxConnectionPoolSize = mConfigurationLocked.maxConnectionPoolSize;
-            final String oldSyncMode = mConfigurationLocked.syncMode;
-            final String oldJournalMode = mConfigurationLocked.journalMode;
             mConfigurationLocked.maxConnectionPoolSize = 1;
-            mConfigurationLocked.syncMode = SQLiteGlobal.getDefaultSyncMode();
-            mConfigurationLocked.journalMode = SQLiteGlobal.getDefaultJournalMode();
+            mConfigurationLocked.walEnabled = false;
             try {
                 mConnectionPoolLocked.reconfigure(mConfigurationLocked);
             } catch (RuntimeException ex) {
                 mConfigurationLocked.maxConnectionPoolSize = oldMaxConnectionPoolSize;
-                mConfigurationLocked.syncMode = oldSyncMode;
-                mConfigurationLocked.journalMode = oldJournalMode;
+                mConfigurationLocked.walEnabled = true;
                 throw ex;
             }
-
-            mIsWALEnabledLocked = false;
         }
     }
 
