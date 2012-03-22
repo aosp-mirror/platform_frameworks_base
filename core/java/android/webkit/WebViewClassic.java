@@ -9130,8 +9130,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         // after the page regains focus.
                         mListBoxMessage = Message.obtain(null,
                                 EventHub.SINGLE_LISTBOX_CHOICE, (int) id, 0);
-                        mListBoxDialog.dismiss();
-                        mListBoxDialog = null;
+                        if (mListBoxDialog != null) {
+                            mListBoxDialog.dismiss();
+                            mListBoxDialog = null;
+                        }
                     }
                 });
                 if (mSelection != -1) {
