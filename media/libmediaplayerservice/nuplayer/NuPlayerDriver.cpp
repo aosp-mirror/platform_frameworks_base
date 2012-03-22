@@ -76,7 +76,13 @@ status_t NuPlayerDriver::setDataSource(
 }
 
 status_t NuPlayerDriver::setDataSource(int fd, int64_t offset, int64_t length) {
-    return INVALID_OPERATION;
+    CHECK_EQ((int)mState, (int)UNINITIALIZED);
+
+    mPlayer->setDataSource(fd, offset, length);
+
+    mState = STOPPED;
+
+    return OK;
 }
 
 status_t NuPlayerDriver::setDataSource(const sp<IStreamSource> &source) {
@@ -97,13 +103,16 @@ status_t NuPlayerDriver::setVideoSurfaceTexture(
 }
 
 status_t NuPlayerDriver::prepare() {
+    sendEvent(MEDIA_SET_VIDEO_SIZE, 320, 240);
     return OK;
 }
 
 status_t NuPlayerDriver::prepareAsync() {
+    status_t err = prepare();
+
     notifyListener(MEDIA_PREPARED);
 
-    return OK;
+    return err;
 }
 
 status_t NuPlayerDriver::start() {
