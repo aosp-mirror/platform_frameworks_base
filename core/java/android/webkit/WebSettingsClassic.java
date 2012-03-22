@@ -121,9 +121,6 @@ public class WebSettingsClassic extends WebSettings {
     private boolean         mForceUserScalable = false;
 
     // AutoFill Profile data
-    /**
-     * @hide for now, pending API council approval.
-     */
     public static class AutoFillProfile {
         private int mUniqueId;
         private String mFullName;
@@ -644,7 +641,6 @@ public class WebSettingsClassic extends WebSettings {
     /**
      * Set the double-tap zoom of the page in percent. Default is 100.
      * @param doubleTapZoom A percent value for increasing or decreasing the double-tap zoom.
-     * @hide
      */
     public void setDoubleTapZoom(int doubleTapZoom) {
         if (mDoubleTapZoom != doubleTapZoom) {
@@ -656,7 +652,6 @@ public class WebSettingsClassic extends WebSettings {
     /**
      * Get the double-tap zoom of the page in percent.
      * @return A percent value describing the double-tap zoom.
-     * @hide
      */
     public int getDoubleTapZoom() {
         return mDoubleTapZoom;
@@ -1012,7 +1007,6 @@ public class WebSettingsClassic extends WebSettings {
     /**
      * Set the number of pages cached by the WebKit for the history navigation.
      * @param size A non-negative integer between 0 (no cache) and 20 (max).
-     * @hide
      */
     public synchronized void setPageCacheCapacity(int size) {
         if (size < 0) size = 0;
@@ -1108,7 +1102,6 @@ public class WebSettingsClassic extends WebSettings {
     /**
      * Tell the WebView to use Skia's hardware accelerated rendering path
      * @param flag True if the WebView should use Skia's hw-accel path
-     * @hide
      */
     public synchronized void setHardwareAccelSkiaEnabled(boolean flag) {
         if (mHardwareAccelSkia != flag) {
@@ -1119,7 +1112,6 @@ public class WebSettingsClassic extends WebSettings {
 
     /**
      * @return True if the WebView is using hardware accelerated skia
-     * @hide
      */
     public synchronized boolean getHardwareAccelSkiaEnabled() {
         return mHardwareAccelSkia;
@@ -1128,7 +1120,6 @@ public class WebSettingsClassic extends WebSettings {
     /**
      * Tell the WebView to show the visual indicator
      * @param flag True if the WebView should show the visual indicator
-     * @hide
      */
     public synchronized void setShowVisualIndicator(boolean flag) {
         if (mShowVisualIndicator != flag) {
@@ -1139,7 +1130,6 @@ public class WebSettingsClassic extends WebSettings {
 
     /**
      * @return True if the WebView is showing the visual indicator
-     * @hide
      */
     public synchronized boolean getShowVisualIndicator() {
         return mShowVisualIndicator;
@@ -1283,7 +1273,6 @@ public class WebSettingsClassic extends WebSettings {
      * @param flag True if the WebView should enable WebWorkers.
      * Note that this flag only affects V8. JSC does not have
      * an equivalent setting.
-     * @hide
      */
     public synchronized void setWorkersEnabled(boolean flag) {
         if (mWorkersEnabled != flag) {
@@ -1305,8 +1294,8 @@ public class WebSettingsClassic extends WebSettings {
 
     /**
      * Sets whether XSS Auditor is enabled.
+     * Only used by LayoutTestController.
      * @param flag Whether XSS Auditor should be enabled.
-     * @hide Only used by LayoutTestController.
      */
     public synchronized void setXSSAuditorEnabled(boolean flag) {
         if (mXSSAuditorEnabled != flag) {
@@ -1507,7 +1496,6 @@ public class WebSettingsClassic extends WebSettings {
      * of an HTML page to fit the screen. This conflicts with attempts by
      * the UI to zoom in and out of an image, so it is set false by default.
      * @param shrink Set true to let webkit shrink the standalone image to fit.
-     * {@hide}
      */
     public void setShrinksStandaloneImagesToFit(boolean shrink) {
         if (mShrinksStandaloneImagesToFit != shrink) {
@@ -1520,7 +1508,6 @@ public class WebSettingsClassic extends WebSettings {
      * Specify the maximum decoded image size. The default is
      * 2 megs for small memory devices and 8 megs for large memory devices.
      * @param size The maximum decoded size, or zero to set to the default.
-     * @hide
      */
     public void setMaximumDecodedImageSize(long size) {
         if (mMaximumDecodedImageSize != size) {
@@ -1562,7 +1549,6 @@ public class WebSettingsClassic extends WebSettings {
 
     /**
      * Returns whether the viewport metatag can disable zooming
-     * @hide
      */
     public boolean forceUserScalable() {
         return mForceUserScalable;
@@ -1571,7 +1557,6 @@ public class WebSettingsClassic extends WebSettings {
     /**
      * Sets whether viewport metatag can disable zooming.
      * @param flag Whether or not to forceably enable user scalable.
-     * @hide
      */
     public synchronized void setForceUserScalable(boolean flag) {
         mForceUserScalable = flag;
@@ -1584,9 +1569,6 @@ public class WebSettingsClassic extends WebSettings {
         }
     }
 
-    /**
-     * @hide
-     */
     public synchronized void setAutoFillEnabled(boolean enabled) {
         // AutoFill is always disabled in private browsing mode.
         boolean autoFillEnabled = enabled && !mPrivateBrowsingEnabled;
@@ -1596,16 +1578,10 @@ public class WebSettingsClassic extends WebSettings {
         }
     }
 
-    /**
-     * @hide
-     */
     public synchronized boolean getAutoFillEnabled() {
         return mAutoFillEnabled;
     }
 
-    /**
-     * @hide
-     */
     public synchronized void setAutoFillProfile(AutoFillProfile profile) {
         if (mAutoFillProfile != profile) {
             mAutoFillProfile = profile;
@@ -1613,9 +1589,6 @@ public class WebSettingsClassic extends WebSettings {
         }
     }
 
-    /**
-     * @hide
-     */
     public synchronized AutoFillProfile getAutoFillProfile() {
         return mAutoFillProfile;
     }
@@ -1633,18 +1606,12 @@ public class WebSettingsClassic extends WebSettings {
         }
     }
 
-    /**
-     * @hide
-     */
     public void setProperty(String key, String value) {
         if (mWebView.nativeSetProperty(key, value)) {
             mWebView.invalidate();
         }
     }
 
-    /**
-     * @hide
-     */
     public String getProperty(String key) {
         return mWebView.nativeGetProperty(key);
     }
