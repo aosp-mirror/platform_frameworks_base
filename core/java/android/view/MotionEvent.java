@@ -1654,14 +1654,22 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             }
         }
     }
-    
+
     /**
-     * Scales down the coordination of this event by the given scale.
+     * Applies a scale factor to all points within this event.
      *
+     * This method is used to adjust touch events to simulate different density
+     * displays for compatibility mode.  The values returned by {@link #getRawX()},
+     * {@link #getRawY()}, {@link #getXPrecision()} and {@link #getYPrecision()}
+     * are also affected by the scale factor.
+     *
+     * @param scale The scale factor to apply.
      * @hide
      */
     public final void scale(float scale) {
-        nativeScale(mNativePtr, scale);
+        if (scale != 1.0f) {
+            nativeScale(mNativePtr, scale);
+        }
     }
 
     /** {@inheritDoc} */
@@ -2631,7 +2639,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param deltaY Amount to add to the current Y coordinate of the event.
      */
     public final void offsetLocation(float deltaX, float deltaY) {
-        nativeOffsetLocation(mNativePtr, deltaX, deltaY);
+        if (deltaX != 0.0f || deltaY != 0.0f) {
+            nativeOffsetLocation(mNativePtr, deltaX, deltaY);
+        }
     }
 
     /**
@@ -2644,7 +2654,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public final void setLocation(float x, float y) {
         float oldX = getX();
         float oldY = getY();
-        nativeOffsetLocation(mNativePtr, x - oldX, y - oldY);
+        offsetLocation(x - oldX, y - oldY);
     }
     
     /**
