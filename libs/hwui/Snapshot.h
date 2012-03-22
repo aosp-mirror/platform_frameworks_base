@@ -208,6 +208,17 @@ public:
      */
     Region* region;
 
+    /**
+     * Current alpha value. This value is 1 by default, but may be set by a DisplayList which
+     * has translucent rendering in a non-overlapping View. This value will be used by
+     * the renderer to set the alpha in the current color being used for ensuing drawing
+     * operations. The value is inherited by child snapshots because the same value should
+     * be applied to descendents of the current DisplayList (for example, a TextView contains
+     * the base alpha value which should be applied to the child DisplayLists used for drawing
+     * the actual text).
+     */
+    float alpha;
+
 private:
     void ensureClipRegion();
     void copyClipRectFromRegion();

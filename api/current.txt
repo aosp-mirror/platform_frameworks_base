@@ -23371,6 +23371,7 @@ package android.view {
     method public boolean hasFocus();
     method public boolean hasFocusable();
     method public boolean hasOnClickListeners();
+    method public boolean hasOverlappingRendering();
     method public boolean hasTransientState();
     method public boolean hasWindowFocus();
     method public static android.view.View inflate(android.content.Context, int, android.view.ViewGroup);

@@ -134,7 +134,7 @@ public abstract class HardwareRenderer {
     /**
      * Number of frames to profile.
      */
-    private static final int PROFILE_MAX_FRAMES = 64;
+    private static final int PROFILE_MAX_FRAMES = 120;
 
     /**
      * Number of floats per profiled frame.
@@ -1045,10 +1045,6 @@ public abstract class HardwareRenderer {
                             if (ViewDebug.DEBUG_LATENCY) {
                                 Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- getDisplayList() took " +
                                         total + "ms");
-                            }
-                            if (View.USE_DISPLAY_LIST_PROPERTIES) {
-                                Log.d("DLProperties", "getDisplayList():\t" +
-                                        mProfileData[mProfileCurrentFrame]);
                             }
                         }
 

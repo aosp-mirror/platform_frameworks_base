@@ -2830,19 +2830,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     private boolean mSendingHoverAccessibilityEvents;
 
     /**
-     * Delegate for injecting accessiblity functionality.
-     */
-    AccessibilityDelegate mAccessibilityDelegate;
-
-    /**
-     * Consistency verifier for debugging purposes.
-     * @hide
-     */
-    protected final InputEventConsistencyVerifier mInputEventConsistencyVerifier =
-            InputEventConsistencyVerifier.isInstrumentationEnabled() ?
-                    new InputEventConsistencyVerifier(this, 0) : null;
-
-    /**
      * Simple constructor to use when creating a view from code.
      *
      * @param context The Context the view is running in, through which it can
@@ -2861,6 +2848,19 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mUserPaddingEnd = -1;
         mUserPaddingRelative = false;
     }
+
+    /**
+     * Delegate for injecting accessiblity functionality.
+     */
+    AccessibilityDelegate mAccessibilityDelegate;
+
+    /**
+     * Consistency verifier for debugging purposes.
+     * @hide
+     */
+    protected final InputEventConsistencyVerifier mInputEventConsistencyVerifier =
+            InputEventConsistencyVerifier.isInstrumentationEnabled() ?
+                    new InputEventConsistencyVerifier(this, 0) : null;
 
     /**
      * Constructor that is called when inflating a view from XML. This is called
@@ -7855,6 +7855,23 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Returns whether this View has content which overlaps. This function, intended to be
+     * overridden by specific View types, is an optimization when alpha is set on a view. If
+     * rendering overlaps in a view with alpha < 1, that view is drawn to an offscreen buffer
+     * and then composited it into place, which can be expensive. If the view has no overlapping
+     * rendering, the view can draw each primitive with the appropriate alpha value directly.
+     * An example of overlapping rendering is a TextView with a background image, such as a
+     * Button. An example of non-overlapping rendering is a TextView with no background, or
+     * an ImageView with only the foreground image. The default implementation returns true;
+     * subclasses should override if they have cases which can be optimized.
+     *
+     * @return true if the content in this view might overlap, false otherwise.
+     */
+    public boolean hasOverlappingRendering() {
+        return true;
+    }
+
+    /**
      * <p>Sets the opacity of the view. This is a value from 0 to 1, where 0 means the view is
      * completely transparent and 1 means the view is completely opaque.</p>
      *
@@ -11525,6 +11542,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     void setDisplayListProperties(DisplayList displayList) {
         if (USE_DISPLAY_LIST_PROPERTIES && displayList != null) {
             displayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
+            displayList.setHasOverlappingRendering(hasOverlappingRendering());
             if (mParent instanceof ViewGroup) {
                 displayList.setClipChildren(
                         (((ViewGroup)mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);

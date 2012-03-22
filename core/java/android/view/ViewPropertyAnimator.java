@@ -834,40 +834,49 @@ public class ViewPropertyAnimator {
      */
     private void setValue(int propertyConstant, float value) {
         final View.TransformationInfo info = mView.mTransformationInfo;
+        DisplayList displayList = View.USE_DISPLAY_LIST_PROPERTIES ? mView.mDisplayList : null;
         switch (propertyConstant) {
             case TRANSLATION_X:
                 info.mTranslationX = value;
+                if (displayList != null) displayList.setTranslationX(value);
                 break;
             case TRANSLATION_Y:
                 info.mTranslationY = value;
+                if (displayList != null) displayList.setTranslationY(value);
                 break;
             case ROTATION:
                 info.mRotation = value;
+                if (displayList != null) displayList.setRotation(value);
                 break;
             case ROTATION_X:
                 info.mRotationX = value;
+                if (displayList != null) displayList.setRotationX(value);
                 break;
             case ROTATION_Y:
                 info.mRotationY = value;
+                if (displayList != null) displayList.setRotationY(value);
                 break;
             case SCALE_X:
                 info.mScaleX = value;
+                if (displayList != null) displayList.setScaleX(value);
                 break;
             case SCALE_Y:
                 info.mScaleY = value;
+                if (displayList != null) displayList.setScaleY(value);
                 break;
             case X:
                 info.mTranslationX = value - mView.mLeft;
+                if (displayList != null) displayList.setTranslationX(value - mView.mLeft);
                 break;
             case Y:
                 info.mTranslationY = value - mView.mTop;
+                if (displayList != null) displayList.setTranslationY(value - mView.mTop);
                 break;
             case ALPHA:
                 info.mAlpha = value;
+                if (displayList != null) displayList.setAlpha(value);
                 break;
         }
-        // TODO: optimize to set only the properties that have changed
-        mView.setDisplayListProperties();
     }
 
     /**
