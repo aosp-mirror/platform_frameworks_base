@@ -56,7 +56,8 @@ class AppWindowToken extends WindowToken {
     // These are used for determining when all windows associated with
     // an activity have been drawn, so they can be made visible together
     // at the same time.
-    int lastTransactionSequence;
+    // initialize so that it doesn't match mTransactionSequence which is an int.
+    long lastTransactionSequence = Long.MIN_VALUE;
     int numInterestingWindows;
     int numDrawnWindows;
     boolean inPendingTransaction;
@@ -113,7 +114,6 @@ class AppWindowToken extends WindowToken {
         appWindowToken = this;
         appToken = _token;
         mInputApplicationHandle = new InputApplicationHandle(this);
-        lastTransactionSequence = service.mTransactionSequence-1;
     }
 
     public void setAnimation(Animation anim) {
