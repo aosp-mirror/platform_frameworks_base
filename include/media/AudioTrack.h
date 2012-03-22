@@ -476,8 +476,7 @@ protected:
                                  int frameCount,
                                  audio_policy_output_flags_t flags,
                                  const sp<IMemory>& sharedBuffer,
-                                 audio_io_handle_t output,
-                                 bool enforceFrameCount);
+                                 audio_io_handle_t output);
             void flush_l();
             status_t setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCount);
             audio_io_handle_t getOutput_l();
