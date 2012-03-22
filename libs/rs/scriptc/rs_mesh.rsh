@@ -54,7 +54,7 @@
  *         data
  */
 extern uint32_t __attribute__((overloadable))
-    rsMeshGetVertexAllocationCount(rs_mesh m);
+    rsgMeshGetVertexAllocationCount(rs_mesh m);
 
 /**
  * @param m mesh to get data from
@@ -63,7 +63,7 @@ extern uint32_t __attribute__((overloadable))
  *         containing index data
  */
 extern uint32_t __attribute__((overloadable))
-    rsMeshGetPrimitiveCount(rs_mesh m);
+    rsgMeshGetPrimitiveCount(rs_mesh m);
 
 /**
  * @param m mesh to get data from
@@ -71,7 +71,7 @@ extern uint32_t __attribute__((overloadable))
  * @return allocation containing vertex data
  */
 extern rs_allocation __attribute__((overloadable))
-    rsMeshGetVertexAllocation(rs_mesh m, uint32_t index);
+    rsgMeshGetVertexAllocation(rs_mesh m, uint32_t index);
 
 /**
  * @param m mesh to get data from
@@ -79,7 +79,7 @@ extern rs_allocation __attribute__((overloadable))
  * @return allocation containing index data
  */
 extern rs_allocation __attribute__((overloadable))
-    rsMeshGetIndexAllocation(rs_mesh m, uint32_t index);
+    rsgMeshGetIndexAllocation(rs_mesh m, uint32_t index);
 
 /**
  * @param m mesh to get data from
@@ -87,7 +87,7 @@ extern rs_allocation __attribute__((overloadable))
  * @return primitive describing how the mesh is rendered
  */
 extern rs_primitive __attribute__((overloadable))
-    rsMeshGetPrimitive(rs_mesh m, uint32_t index);
+    rsgMeshGetPrimitive(rs_mesh m, uint32_t index);
 
 #endif // __RS_MESH_RSH__
 

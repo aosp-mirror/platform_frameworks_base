@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,11 @@
 #include "rs_debug.rsh"
 #include "rs_element.rsh"
 #include "rs_math.rsh"
-#include "rs_mesh.rsh"
 #include "rs_matrix.rsh"
 #include "rs_object.rsh"
-#include "rs_program.rsh"
 #include "rs_quaternion.rsh"
 #include "rs_sampler.rsh"
 #include "rs_time.rsh"
-
-
 
 /**
  * Send a message back to the client.  Will not block and returns true
