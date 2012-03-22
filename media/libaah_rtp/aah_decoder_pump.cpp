@@ -308,14 +308,55 @@ void* AAH_DecoderPump::workThread() {
         decode_timer.stop();
 
         if (res == INFO_FORMAT_CHANGED) {
-            // Format has changed.  Destroy our current renderer so that a new
-            // one can be created during queueToRenderer with the proper format.
+            sp<MetaData> params = decoder_->getFormat();
+            bool formatActuallyChanged = false;
+
+            if (params != NULL) {
+                int32_t channels;
+                int32_t sample_rate;
+
+                if (params->findInt32(kKeySampleRate, &sample_rate)) {
+                    if (format_sample_rate_ != sample_rate) {
+                        LOGD("Format change: sample rate %d Hz -> %d Hz",
+                             format_sample_rate_, sample_rate);
+                        formatActuallyChanged = true;
+                        format_sample_rate_ = sample_rate;
+                    }
+                } else {
+                    LOGW("Decoder signalled a format change, but provided no"
+                         " sample rate.  Keeping current setting of %d Hz",
+                         format_sample_rate_);
+                }
+
+                if (params->findInt32(kKeyChannelCount, &channels)) {
+                    if (format_channels_ != channels) {
+                        LOGD("Format change: channels  %d -> %d",
+                             format_channels_, channels);
+                        formatActuallyChanged = true;
+                        format_channels_ = channels;
+                    }
+                } else {
+                    LOGW("Decoder signalled a format change, but provided no"
+                         " channel count.  Keeping current setting of %d"
+                         " channels", format_channels_);
+                }
+            } else {
+                LOGW("Decoder signalled a format change, but provided no format"
+                     " information.  Keeping current settings of %d Hz %d"
+                     " Channels", format_sample_rate_, format_channels_);
+            }
+
+            // If the format has actually changed, destroy our current renderer
+            // so that a new one can be created during queueToRenderer with the
+            // proper format.
             //
             // TODO : In order to transition seamlessly, we should change this
             // to put the old renderer in a queue to play out completely before
             // we destroy it.  We can still create a new renderer, the timed
             // nature of the renderer should ensure a seamless splice.
-            stopAndCleanupRenderer();
+            if (formatActuallyChanged)
+                stopAndCleanupRenderer();
+
             res = OK;
         }
 
