@@ -46,7 +46,8 @@ protected:
 private:
     enum {
         kNumBuffers = 4,
-        kOutputBufferSize = 4608 * 2
+        kOutputBufferSize = 4608 * 2,
+        kPVMP3DecoderDelay = 529 // frames
     };
 
     tPVMP3DecoderExternal *mConfig;
@@ -57,8 +58,7 @@ private:
     int32_t mNumChannels;
     int32_t mSamplingRate;
 
-    bool mConfigured;
-
+    bool mIsFirst;
     bool mSignalledError;
 
     enum {

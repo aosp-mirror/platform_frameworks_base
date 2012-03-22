@@ -115,6 +115,7 @@ void SoftMP3::initDecoder() {
     mDecoderBuf = malloc(memRequirements);
 
     pvmp3_InitDecoder(mConfig, mDecoderBuf);
+    mIsFirst = true;
 }
 
 OMX_ERRORTYPE SoftMP3::internalGetParameter(
@@ -190,7 +191,10 @@ void SoftMP3::onQueueFilled(OMX_U32 portIndex) {
             inInfo->mOwnedByUs = false;
             notifyEmptyBufferDone(inHeader);
 
-            outHeader->nFilledLen = 0;
+            // pad the end of the stream with 529 samples, since that many samples
+            // were trimmed off the beginning when decoding started
+            outHeader->nFilledLen = kPVMP3DecoderDelay * mNumChannels * sizeof(int16_t);
+            memset(outHeader->pBuffer, 0, outHeader->nFilledLen);
             outHeader->nFlags = OMX_BUFFERFLAG_EOS;
 
             outQueue.erase(outQueue.begin());
@@ -251,8 +255,17 @@ void SoftMP3::onQueueFilled(OMX_U32 portIndex) {
             return;
         }
 
-        outHeader->nOffset = 0;
-        outHeader->nFilledLen = mConfig->outputFrameSize * sizeof(int16_t);
+        if (mIsFirst) {
+            mIsFirst = false;
+            // The decoder delay is 529 samples, so trim that many samples off
+            // the start of the first output buffer. This essentially makes this
+            // decoder have zero delay, which the rest of the pipeline assumes.
+            outHeader->nOffset = kPVMP3DecoderDelay * mNumChannels * sizeof(int16_t);
+            outHeader->nFilledLen = mConfig->outputFrameSize * sizeof(int16_t) - outHeader->nOffset;
+        } else {
+            outHeader->nOffset = 0;
+            outHeader->nFilledLen = mConfig->outputFrameSize * sizeof(int16_t);
+        }
 
         outHeader->nTimeStamp =
             mAnchorTimeUs
@@ -288,6 +301,7 @@ void SoftMP3::onPortFlushCompleted(OMX_U32 portIndex) {
         // Make sure that the next buffer output does not still
         // depend on fragments from the last one decoded.
         pvmp3_InitDecoder(mConfig, mDecoderBuf);
+        mIsFirst = true;
     }
 }
 
