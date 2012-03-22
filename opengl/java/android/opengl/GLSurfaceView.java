@@ -1845,7 +1845,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         ! renderer.startsWith(kMSM7K_RENDERER_PREFIX);
                     notifyAll();
                 }
-                mLimitedGLESContexts = !mMultipleGLESContextsAllowed || renderer.startsWith(kADRENO);
+                mLimitedGLESContexts = !mMultipleGLESContextsAllowed;
                 if (LOG_SURFACE) {
                     Log.w(TAG, "checkGLDriver renderer = \"" + renderer + "\" multipleContextsAllowed = "
                         + mMultipleGLESContextsAllowed
@@ -1871,6 +1871,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             }
         }
 
+        /**
+         * This check was required for some pre-Android-3.0 hardware. Android 3.0 provides
+         * support for hardware-accelerated views, therefore multiple EGL contexts are
+         * supported on all Android 3.0+ EGL drivers.
+         */
         private boolean mGLESVersionCheckComplete;
         private int mGLESVersion;
         private boolean mGLESDriverCheckComplete;
@@ -1879,7 +1884,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         private static final int kGLES_20 = 0x20000;
         private static final String kMSM7K_RENDERER_PREFIX =
             "Q3Dimension MSM7500 ";
-        private static final String kADRENO = "Adreno";
         private GLThread mEglOwner;
     }
 
