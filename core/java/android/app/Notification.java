@@ -23,9 +23,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.IntProperty;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
@@ -184,6 +186,13 @@ public class Notification implements Parcelable
      * The view that will represent this notification in the expanded status bar.
      */
     public RemoteViews contentView;
+
+
+    /**
+     * The view that will represent this notification in the pop-up "intruder alert" dialog.
+     * @hide
+     */
+    public RemoteViews intruderView;
 
     /**
      * The bitmap that may escape the bounds of the panel and bar.
@@ -418,6 +427,64 @@ public class Notification implements Parcelable
     private Bundle extras;
 
     /**
+     * Structure to encapsulate an "action", including title and icon, that can be attached to a Notification.
+     * @hide
+     */
+    private static class Action implements Parcelable {
+        public int icon;
+        public CharSequence title;
+        public PendingIntent actionIntent;
+        @SuppressWarnings("unused")
+        public Action() { }
+        private Action(Parcel in) {
+            icon = in.readInt();
+            title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            if (in.readInt() == 1) {
+                actionIntent = PendingIntent.CREATOR.createFromParcel(in);
+            }
+        }
+        public Action(int icon_, CharSequence title_, PendingIntent intent_) {
+            this.icon = icon_;
+            this.title = title_;
+            this.actionIntent = intent_;
+        }
+        @Override
+        public Action clone() {
+            return new Action(
+                this.icon,
+                this.title.toString(),
+                this.actionIntent // safe to alias
+            );
+        }
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(icon);
+            TextUtils.writeToParcel(title, out, flags);
+            if (actionIntent != null) {
+                out.writeInt(1);
+                actionIntent.writeToParcel(out, flags);
+            } else {
+                out.writeInt(0);
+            }
+        }
+        public static final Parcelable.Creator<Action> CREATOR
+        = new Parcelable.Creator<Action>() {
+            public Action createFromParcel(Parcel in) {
+                return new Action(in);
+            }
+            public Action[] newArray(int size) {
+                return new Action[size];
+            }
+        };
+    }
+
+    private Action[] actions;
+
+    /**
      * Constructs a Notification object with default values.
      * You might want to consider using {@link Builder} instead.
      */
@@ -506,11 +573,16 @@ public class Notification implements Parcelable
         }
 
         priority = parcel.readInt();
-        
+
         kind = parcel.createStringArray(); // may set kind to null
 
         if (parcel.readInt() != 0) {
             extras = parcel.readBundle();
+        }
+
+        actions = parcel.createTypedArray(Action.CREATOR);
+        if (parcel.readInt() != 0) {
+            intruderView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
     }
 
@@ -569,6 +641,14 @@ public class Notification implements Parcelable
         if (this.extras != null) {
             that.extras = new Bundle(this.extras);
 
+        }
+
+        that.actions = new Action[this.actions.length];
+        for(int i=0; i<this.actions.length; i++) {
+            that.actions[i] = this.actions[i].clone();
+        }
+        if (this.intruderView != null) {
+            that.intruderView = this.intruderView.clone();
         }
 
         return that;
@@ -655,6 +735,15 @@ public class Notification implements Parcelable
         if (extras != null) {
             parcel.writeInt(1);
             extras.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
+
+        parcel.writeTypedArray(actions, 0);
+
+        if (intruderView != null) {
+            parcel.writeInt(1);
+            intruderView.writeToParcel(parcel, 0);
         } else {
             parcel.writeInt(0);
         }
@@ -769,7 +858,14 @@ public class Notification implements Parcelable
                 sb.append(this.kind[i]);
             }
         }
-        sb.append("])");
+        sb.append("]");
+        if (actions != null) {
+            sb.append(" ");
+            sb.append(actions.length);
+            sb.append(" action");
+            if (actions.length > 1) sb.append("s");
+        }
+        sb.append(")");
         return sb.toString();
     }
 
@@ -821,6 +917,7 @@ public class Notification implements Parcelable
         private ArrayList<String> mKindList = new ArrayList<String>(1);
         private Bundle mExtras;
         private int mPriority;
+        private ArrayList<Action> mActions = new ArrayList<Action>(3);
 
         /**
          * Constructs a new Builder with the defaults:
@@ -1203,6 +1300,19 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /**
+         * Add an action to this notification. Actions are typically displayed by
+         * the system as a button adjacent to the notification content.
+         *
+         * @param icon Resource ID of a drawable that represents the action.
+         * @param title Text describing the action.
+         * @param intent PendingIntent to be fired when the action is invoked.
+         */
+        public Builder addAction(int icon, CharSequence title, PendingIntent intent) {
+            mActions.add(new Action(icon, title, intent));
+            return this;
+        }
+
         private void setFlag(int mask, boolean value) {
             if (value) {
                 mFlags |= mask;
@@ -1284,6 +1394,44 @@ public class Notification implements Parcelable
             }
         }
 
+        private RemoteViews makeIntruderView() {
+            RemoteViews intruderView = new RemoteViews(mContext.getPackageName(),
+                    R.layout.notification_intruder_content);
+            if (mLargeIcon != null) {
+                intruderView.setImageViewBitmap(R.id.icon, mLargeIcon);
+                intruderView.setViewVisibility(R.id.icon, View.VISIBLE);
+            } else if (mSmallIcon != 0) {
+                intruderView.setImageViewResource(R.id.icon, mSmallIcon);
+                intruderView.setViewVisibility(R.id.icon, View.VISIBLE);
+            } else {
+                intruderView.setViewVisibility(R.id.icon, View.GONE);
+            }
+            if (mContentTitle != null) {
+                intruderView.setTextViewText(R.id.title, mContentTitle);
+            }
+            if (mContentText != null) {
+                intruderView.setTextViewText(R.id.text, mContentText);
+            }
+            if (mActions.size() > 0) {
+                intruderView.setViewVisibility(R.id.actions, View.VISIBLE);
+                int N = mActions.size();
+                if (N>3) N=3;
+                final int[] BUTTONS = { R.id.action0, R.id.action1, R.id.action2 };
+                for (int i=0; i<N; i++) {
+                    final Action action = mActions.get(i);
+                    final int buttonId = BUTTONS[i];
+
+                    intruderView.setViewVisibility(buttonId, View.VISIBLE);
+                    intruderView.setImageViewResource(buttonId, action.icon);
+                    intruderView.setContentDescription(buttonId, action.title);
+                    intruderView.setOnClickPendingIntent(buttonId, action.actionIntent);
+                }
+            } else {
+                intruderView.setViewVisibility(R.id.actions, View.GONE);
+            }
+            return intruderView;
+        }
+
         /**
          * Combine all of the options that have been set and return a new {@link Notification}
          * object.
@@ -1309,6 +1457,7 @@ public class Notification implements Parcelable
             n.ledOffMS = mLedOffMs;
             n.defaults = mDefaults;
             n.flags = mFlags;
+            n.intruderView = makeIntruderView();
             if (mLedOnMs != 0 && mLedOffMs != 0) {
                 n.flags |= FLAG_SHOW_LIGHTS;
             }
@@ -1323,6 +1472,10 @@ public class Notification implements Parcelable
             }
             n.priority = mPriority;
             n.extras = mExtras != null ? new Bundle(mExtras) : null;
+            if (mActions.size() > 0) {
+                n.actions = new Action[mActions.size()];
+                mActions.toArray(n.actions);
+            }
             return n;
         }
     }

@@ -194,6 +194,10 @@
   <java-symbol type="id" name="zoomIn" />
   <java-symbol type="id" name="zoomMagnify" />
   <java-symbol type="id" name="zoomOut" />
+  <java-symbol type="id" name="actions" />
+  <java-symbol type="id" name="action0" />
+  <java-symbol type="id" name="action1" />
+  <java-symbol type="id" name="action2" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -1062,6 +1066,7 @@
   <java-symbol type="layout" name="zoom_container" />
   <java-symbol type="layout" name="zoom_controls" />
   <java-symbol type="layout" name="zoom_magnify" />
+  <java-symbol type="layout" name="notification_intruder_content" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
