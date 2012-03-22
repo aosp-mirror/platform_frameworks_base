@@ -312,6 +312,24 @@ public class WebView extends AbsoluteLayout
     public static final String SCHEME_GEO = "geo:0,0?q=";
 
     /**
+     * Interface to listen for find results.
+     * @hide
+     */
+    public interface FindListener {
+        /**
+         * Notify the listener about progress made by a find operation.
+         *
+         * @param numberOfMatches How many matches have been found.
+         * @param activeMatchOrdinal The zero-based ordinal of the currently selected match.
+         * @param isDoneCounting Whether the find operation has actually completed. The listener
+         * may be notified multiple times while the operation is underway, and the numberOfMatches
+         * value should not be considered final unless isDoneCounting is true.
+         */
+        public void onFindResultReceived(int numberOfMatches, int activeMatchOrdinal,
+            boolean isDoneCounting);
+    }
+
+    /**
      * Interface to listen for new pictures as they change.
      * @deprecated This interface is now obsolete.
      */
@@ -1228,10 +1246,10 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Register the interface to be used when a find-on-page result has become
-     * available. This will replace the current handler.
+     * Register the listener to be notified as find-on-page operations progress.
+     * This will replace the current listener.
      *
-     * @param listener An implementation of FindListener
+     * @param listener An implementation of {@link WebView#FindListener}.
      * @hide
      */
     public void setFindListener(FindListener listener) {

@@ -1440,7 +1440,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private PictureListener mPictureListener;
 
     // Used to notify listeners about find-on-page results.
-    private FindListener mFindListener;
+    private WebView.FindListener mFindListener;
 
     /**
      * Refer to {@link WebView#requestFocusNodeHref(Message)} for more information
@@ -3620,12 +3620,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
-     * Register the interface to be used when a find-on-page result has become
-     * available. This will replace the current handler.
-     *
-     * @param listener An implementation of FindListener
+     * See {@link WebView#setFindListener(WebView.FindListener)}.
+     * @hide
      */
-     public void setFindListener(FindListener listener) {
+     public void setFindListener(WebView.FindListener listener) {
          mFindListener = listener;
      }
 
