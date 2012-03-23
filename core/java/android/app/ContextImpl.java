@@ -59,6 +59,8 @@ import android.net.NetworkPolicyManager;
 import android.net.ThrottleManager;
 import android.net.IThrottleManager;
 import android.net.Uri;
+import android.net.nsd.INsdManager;
+import android.net.nsd.NsdManager;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.IWifiP2pManager;
@@ -370,6 +372,14 @@ class ContextImpl extends Context {
                                         com.android.internal.R.style.Theme_Holo_Dialog,
                                         com.android.internal.R.style.Theme_DeviceDefault_Dialog)),
                         ctx.mMainThread.getHandler());
+                }});
+
+        registerService(NSD_SERVICE, new ServiceFetcher() {
+                @Override
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(NSD_SERVICE);
+                    INsdManager service = INsdManager.Stub.asInterface(b);
+                    return new NsdManager(service);
                 }});
 
         // Note: this was previously cached in a static variable, but
