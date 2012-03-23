@@ -541,8 +541,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiP2pManager.CONNECT:
                     if (DBG) logd(getName() + " sending connect");
                     mSavedPeerConfig = (WifiP2pConfig) message.obj;
-                    String updatedPeerDetails = mWifiNative.p2pPeer(mSavedPeerConfig.deviceAddress);
-                    mPeers.update(new WifiP2pDevice(updatedPeerDetails));
                     mPersistGroup = false;
                     int netId = configuredNetworkId(mSavedPeerConfig.deviceAddress);
                     if (netId >= 0) {
@@ -553,7 +551,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         mWifiNative.p2pStopFind();
                         //If peer is a GO, we do not need to send provisional discovery,
                         //the supplicant takes care of it.
-                        if (isGroupOwner(mSavedPeerConfig.deviceAddress)) {
+                        if (mWifiNative.isGroupOwner(mSavedPeerConfig.deviceAddress)) {
                             p2pConnectWithPinDisplay(mSavedPeerConfig, JOIN_GROUP);
                             transitionTo(mGroupNegotiationState);
                         } else {
@@ -683,7 +681,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             switch (message.what) {
                 case PEER_CONNECTION_USER_ACCEPT:
                     //TODO: handle persistence
-                    if (isGroupOwner(mSavedPeerConfig.deviceAddress)) {
+                    if (mWifiNative.isGroupOwner(mSavedPeerConfig.deviceAddress)) {
                         p2pConnectWithPinDisplay(mSavedPeerConfig, JOIN_GROUP);
                     } else {
                         p2pConnectWithPinDisplay(mSavedPeerConfig, FORM_GROUP);
@@ -842,7 +840,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     String deviceAddress = device.deviceAddress;
                     if (deviceAddress != null) {
                         mGroup.addClient(deviceAddress);
-                        mPeers.updateInterfaceAddress(device);
                         updateDeviceStatus(deviceAddress, WifiP2pDevice.CONNECTED);
                         if (DBG) logd(getName() + " ap sta connected");
                         sendP2pPeersChangedBroadcast();
@@ -851,10 +848,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
                     break;
                 case WifiMonitor.AP_STA_DISCONNECTED_EVENT:
-                    //TODO: the disconnection event is still inconsistent and reports
-                    //interface address. Fix this after wpa_supplicant is fixed.
-                    String interfaceAddress = (String) message.obj;
-                    deviceAddress = getDeviceAddress(interfaceAddress);
+                    device = (WifiP2pDevice) message.obj;
+                    deviceAddress = device.deviceAddress;
                     if (deviceAddress != null) {
                         updateDeviceStatus(deviceAddress, WifiP2pDevice.AVAILABLE);
                         if (mGroup.removeClient(deviceAddress)) {
@@ -872,7 +867,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         sendP2pPeersChangedBroadcast();
                         if (DBG) loge(getName() + " ap sta disconnected");
                     } else {
-                        loge("Disconnect on unknown interface address : " + interfaceAddress);
+                        loge("Disconnect on unknown device: " + device);
                     }
                     break;
                 case DhcpStateMachine.CMD_POST_DHCP_ACTION:
@@ -883,6 +878,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         setWifiP2pInfoOnGroupFormation(dhcpInfo.serverAddress);
                         sendP2pConnectionChangedBroadcast();
                     } else {
+                        loge("DHCP failed");
                         mWifiNative.p2pGroupRemove(mGroup.getInterface());
                     }
                     break;
@@ -916,6 +912,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
 
                     mGroup = null;
+                    mWifiNative.p2pFlush();
                     if (changed) sendP2pPeersChangedBroadcast();
                     transitionTo(mInactiveState);
                     break;
@@ -1183,15 +1180,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         }
     }
 
-    private boolean isGroupOwner(String deviceAddress) {
-        for (WifiP2pDevice d : mPeers.getDeviceList()) {
-            if (d.deviceAddress.equals(deviceAddress)) {
-                return d.isGroupOwner();
-            }
-        }
-        return false;
-    }
-
     //TODO: implement when wpa_supplicant is fixed
     private int configuredNetworkId(String deviceAddress) {
         return -1;
@@ -1217,15 +1205,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         }
         //Treat the address as name if there is no match
         return deviceAddress;
-    }
-
-    private String getDeviceAddress(String interfaceAddress) {
-        for (WifiP2pDevice d : mPeers.getDeviceList()) {
-            if (interfaceAddress.equals(d.interfaceAddress)) {
-                return d.deviceAddress;
-            }
-        }
-        return null;
     }
 
     private WifiP2pDevice getDeviceFromPeerList(String deviceAddress) {

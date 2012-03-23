@@ -577,26 +577,6 @@ public class WifiNative {
     }
 
 
-    public String p2pGetInterfaceAddress(String deviceAddress) {
-        if (TextUtils.isEmpty(deviceAddress)) return null;
-
-        //  "p2p_peer deviceAddress" returns a multi-line result containing
-        //      intended_addr=fa:7b:7a:42:82:13
-        String peerInfo = p2pPeer(deviceAddress);
-        if (TextUtils.isEmpty(peerInfo)) return null;
-        String[] tokens= peerInfo.split("\n");
-
-        for (String token : tokens) {
-            //TODO: update from interface_addr when wpa_supplicant implementation is fixed
-            if (token.startsWith("intended_addr=")) {
-                String[] nameValue = token.split("=");
-                if (nameValue.length != 2) break;
-                return nameValue[1];
-            }
-        }
-        return null;
-    }
-
     public String p2pGetDeviceAddress() {
         String status = status();
         if (status == null) return "";
@@ -610,6 +590,13 @@ public class WifiNative {
             }
         }
         return "";
+    }
+
+    public boolean isGroupOwner(String deviceAddress) {
+        /* BSS returns details only for a GO */
+        String bssInfo = doStringCommand("BSS p2p_dev_addr=" + deviceAddress);
+        if (TextUtils.isEmpty(bssInfo)) return false;
+        return true;
     }
 
     public String p2pPeer(String deviceAddress) {
