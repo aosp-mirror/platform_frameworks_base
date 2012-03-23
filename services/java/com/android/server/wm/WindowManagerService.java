@@ -408,14 +408,11 @@ public class WindowManagerService extends IWindowManager.Stub
     IInputMethodManager mInputMethodManager;
 
     SurfaceSession mFxSession;
-    private DimAnimator mDimAnimator = null;
+    DimAnimator mDimAnimator = null;
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
-    ScreenRotationAnimation mScreenRotationAnimation;
 
     BlackFrame mBlackFrame;
-
-    int mTransactionSequence = 0;
 
     final float[] mTmpFloats = new float[9];
 
@@ -575,26 +572,21 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Pulled out of performLayoutAndPlaceSurfacesLockedInner in order to refactor into multiple
      * methods. */
-    private class LayoutAndSurfaceFields {
-        private boolean mAnimating = false;
-        private boolean mWallpaperForceHidingChanged = false;
-        private boolean mTokenMayBeDrawn = false;
-        private boolean mWallpaperMayChange = false;
-        private boolean mForceHiding = false;
-        private WindowState mDetachedWallpaper = null;
-        private WindowState mWindowAnimationBackground = null;
-        private int mWindowAnimationBackgroundColor = 0;
-        private boolean mOrientationChangeComplete = true;
+    class LayoutAndSurfaceFields {
+        boolean mWallpaperForceHidingChanged = false;
+        boolean mWallpaperMayChange = false;
+        WindowState mDetachedWallpaper = null;
+        boolean mOrientationChangeComplete = true;
         private int mAdjResult = 0;
         private Session mHoldScreen = null;
         private boolean mObscured = false;
-        private boolean mDimming = false;
+        boolean mDimming = false;
         private boolean mSyswin = false;
         private float mScreenBrightness = -1;
         private float mButtonBrightness = -1;
         private boolean mUpdateRotation = false;
     }
-    private LayoutAndSurfaceFields mInnerFields = new LayoutAndSurfaceFields();
+    LayoutAndSurfaceFields mInnerFields = new LayoutAndSurfaceFields();
 
     private final class AnimationRunnable implements Runnable {
         @Override
@@ -607,6 +599,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     final AnimationRunnable mAnimationRunnable = new AnimationRunnable();
     boolean mAnimationScheduled;
+    
+    final WindowAnimator mAnimator;
 
     final class DragInputEventReceiver extends InputEventReceiver {
         public DragInputEventReceiver(InputChannel inputChannel, Looper looper) {
@@ -828,6 +822,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
         mInputManager = new InputManager(context, this);
+        mAnimator = new WindowAnimator(this, context, mPolicy);
 
         PolicyThread thr = new PolicyThread(mPolicy, this, context, pm);
         thr.start();
@@ -2209,7 +2204,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInTouchMode) {
                 res |= WindowManagerImpl.ADD_FLAG_IN_TOUCH_MODE;
             }
-            if (win == null || win.mAppToken == null || !win.mAppToken.clientHidden) {
+            if (win.mAppToken == null || !win.mAppToken.clientHidden) {
                 res |= WindowManagerImpl.ADD_FLAG_APP_VISIBLE;
             }
 
@@ -2276,7 +2271,7 @@ public class WindowManagerService extends IWindowManager.Stub
             + ", surface=" + win.mSurface);
 
         final long origId = Binder.clearCallingIdentity();
-        
+
         win.disposeInputChannel();
 
         if (DEBUG_APP_TRANSITIONS) Slog.v(
@@ -2297,7 +2292,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.mSurface != null && okToDisplay()) {
             // If we are not currently running the exit animation, we
             // need to see about starting one.
-            if (wasVisible=win.isWinVisibleLw()) {
+            wasVisible = win.isWinVisibleLw();
+            if (wasVisible) {
 
                 int transit = WindowManagerPolicy.TRANSIT_EXIT;
                 if (win.getAttrs().type == TYPE_APPLICATION_STARTING) {
@@ -5382,7 +5378,8 @@ public class WindowManagerService extends IWindowManager.Stub
             return false;
         }
 
-        if (mScreenRotationAnimation != null && mScreenRotationAnimation.isAnimating()) {
+        if (mAnimator.mScreenRotationAnimation != null &&
+                mAnimator.mScreenRotationAnimation.isAnimating()) {
             // Rotation updates cannot be performed while the previous rotation change
             // animation is still in progress.  Skip this update.  We will try updating
             // again after the animation is finished and the display is unfrozen.
@@ -5452,9 +5449,9 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             // NOTE: We disable the rotation in the emulator because
             //       it doesn't support hardware OpenGL emulation yet.
-            if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
-                    && mScreenRotationAnimation.hasScreenshot()) {
-                if (mScreenRotationAnimation.setRotation(rotation, mFxSession,
+            if (CUSTOM_SCREEN_ROTATION && mAnimator.mScreenRotationAnimation != null
+                    && mAnimator.mScreenRotationAnimation.hasScreenshot()) {
+                if (mAnimator.mScreenRotationAnimation.setRotation(rotation, mFxSession,
                         MAX_ANIMATION_DURATION, mTransitionAnimationScale,
                         mCurDisplayWidth, mCurDisplayHeight)) {
                     scheduleAnimationLocked();
@@ -6156,6 +6153,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mDisplaySizeLock) {
             mAppDisplayWidth = appWidth;
             mAppDisplayHeight = appHeight;
+            mAnimator.setDisplayDimensions(mCurDisplayWidth, mCurDisplayHeight,
+                    mAppDisplayWidth, mAppDisplayHeight);
         }
         if (false) {
             Slog.i(TAG, "Set app display size: " + mAppDisplayWidth
@@ -6542,6 +6541,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 mBaseDisplayWidth = mCurDisplayWidth = mAppDisplayWidth = mInitialDisplayWidth;
                 mBaseDisplayHeight = mCurDisplayHeight = mAppDisplayHeight = mInitialDisplayHeight;
+                mAnimator.setDisplayDimensions(mCurDisplayWidth, mCurDisplayHeight,
+                        mAppDisplayWidth, mAppDisplayHeight);
             }
             mInputManager.setDisplaySize(Display.DEFAULT_DISPLAY,
                     mDisplay.getRawWidth(), mDisplay.getRawHeight(),
@@ -7622,342 +7623,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
-     * Update animations of all applications, including those associated with exiting/removed apps.
-     *
-     * @param currentTime The time which animations use for calculating transitions.
-     * @param innerDw Width of app window.
-     * @param innerDh Height of app window.
-     */
-    private void updateWindowsAppsAndRotationAnimationsLocked(long currentTime,
-                                                          int innerDw, int innerDh) {
-        int i;
-        final int NAT = mAppTokens.size();
-        for (i=0; i<NAT; i++) {
-            final AppWindowToken appToken = mAppTokens.get(i);
-            if (appToken.stepAnimationLocked(currentTime, innerDw, innerDh)) {
-                mInnerFields.mAnimating = true;
-            }
-        }
-        final int NEAT = mExitingAppTokens.size();
-        for (i=0; i<NEAT; i++) {
-            final AppWindowToken appToken = mExitingAppTokens.get(i);
-            if (appToken.stepAnimationLocked(currentTime, innerDw, innerDh)) {
-                mInnerFields.mAnimating = true;
-            }
-        }
-
-        if (mScreenRotationAnimation != null &&
-                (mScreenRotationAnimation.isAnimating() ||
-                        mScreenRotationAnimation.mFinishAnimReady)) {
-            if (mScreenRotationAnimation.stepAnimationLocked(currentTime)) {
-                mInnerFields.mUpdateRotation = false;
-                mInnerFields.mAnimating = true;
-            } else {
-                mInnerFields.mUpdateRotation = true;
-                mScreenRotationAnimation.kill();
-                mScreenRotationAnimation = null;
-            }
-        }
-    }
-
-    private void animateAndUpdateSurfaces(final long currentTime, final int dw, final int dh,
-                                          final int innerDw, final int innerDh, 
-                                          final boolean recoveringMemory) {
-        // Update animations of all applications, including those
-        // associated with exiting/removed apps
-        Surface.openTransaction();
-
-        try {
-            updateWindowsAppsAndRotationAnimationsLocked(currentTime, innerDw, innerDh);
-            mPendingLayoutChanges = performAnimationsLocked(currentTime, dw, dh,
-                    innerDw, innerDh);
-        
-            // THIRD LOOP: Update the surfaces of all windows.
-            
-            if (mScreenRotationAnimation != null) {
-                mScreenRotationAnimation.updateSurfaces();
-            }
-        
-            final int N = mWindows.size();
-            for (int i=N-1; i>=0; i--) {
-                WindowState w = mWindows.get(i);
-                prepareSurfaceLocked(w, recoveringMemory);
-            }
-        
-            if (mDimAnimator != null && mDimAnimator.mDimShown) {
-                mInnerFields.mAnimating |=
-                        mDimAnimator.updateSurface(mInnerFields.mDimming, currentTime,
-                            !okToDisplay());
-            }
-        
-            if (mBlackFrame != null) {
-                if (mScreenRotationAnimation != null) {
-                    mBlackFrame.setMatrix(
-                            mScreenRotationAnimation.getEnterTransformation().getMatrix());
-                } else {
-                    mBlackFrame.clearMatrix();
-                }
-            }
-        } catch (RuntimeException e) {
-            Log.wtf(TAG, "Unhandled exception in Window Manager", e);
-        } finally {
-            Surface.closeTransaction();
-        }
-    }
-    
-    /**
-     * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
-     *
-     * @param currentTime The time which animations use for calculating transitions.
-     * @param dw Width of app window.
-     * @param dh Height of app window.
-     * @param innerDw Width of app window.
-     * @param innerDh Height of app window.
-     */
-    private int updateWindowsAndWallpaperLocked(final long currentTime, final int dw, final int dh,
-                                                final int innerDw, final int innerDh) {
-        ++mTransactionSequence;
-
-        int changes = 0;
-        for (int i = mWindows.size() - 1; i >= 0; i--) {
-            WindowState w = mWindows.get(i);
-
-            final WindowManager.LayoutParams attrs = w.mAttrs;
-
-            if (w.mSurface != null) {
-                // Take care of the window being ready to display.
-                if (w.commitFinishDrawingLocked(currentTime)) {
-                    if ((w.mAttrs.flags
-                            & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
-                        if (DEBUG_WALLPAPER) Slog.v(TAG,
-                                "First draw done in potential wallpaper target " + w);
-                        mInnerFields.mWallpaperMayChange = true;
-                        changes |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                    }
-                }
-
-                // If the window has moved due to its containing
-                // content frame changing, then we'd like to animate
-                // it.  The checks here are ordered by what is least
-                // likely to be true first.
-                if (w.shouldAnimateMove()) {
-                    // Frame has moved, containing content frame
-                    // has also moved, and we're not currently animating...
-                    // let's do something.
-                    Animation a = AnimationUtils.loadAnimation(mContext,
-                            com.android.internal.R.anim.window_move_from_decor);
-                    w.setAnimation(a);
-                    w.mAnimDw = w.mLastFrame.left - w.mFrame.left;
-                    w.mAnimDh = w.mLastFrame.top - w.mFrame.top;
-                } else {
-                    w.mAnimDw = innerDw;
-                    w.mAnimDh = innerDh;
-                }
-
-                final boolean wasAnimating = w.mWasAnimating;
-                final boolean nowAnimating = w.stepAnimationLocked(currentTime);
-
-                if (DEBUG_WALLPAPER) {
-                    Slog.v(TAG, w + ": wasAnimating=" + wasAnimating +
-                            ", nowAnimating=" + nowAnimating);
-                }
-
-                // If this window is animating, make a note that we have
-                // an animating window and take care of a request to run
-                // a detached wallpaper animation.
-                if (nowAnimating) {
-                    if (w.mAnimation != null) {
-                        if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0
-                                && w.mAnimation.getDetachWallpaper()) {
-                            mInnerFields.mDetachedWallpaper = w;
-                        }
-                        if (w.mAnimation.getBackgroundColor() != 0) {
-                            if (mInnerFields.mWindowAnimationBackground == null
-                                    || (w.mAnimLayer <
-                                            mInnerFields.mWindowAnimationBackground.mAnimLayer)) {
-                                mInnerFields.mWindowAnimationBackground = w;
-                                mInnerFields.mWindowAnimationBackgroundColor =
-                                        w.mAnimation.getBackgroundColor();
-                            }
-                        }
-                    }
-                    mInnerFields.mAnimating = true;
-                }
-
-                // If this window's app token is running a detached wallpaper
-                // animation, make a note so we can ensure the wallpaper is
-                // displayed behind it.
-                if (w.mAppToken != null && w.mAppToken.animation != null
-                        && w.mAppToken.animating) {
-                    if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0
-                            && w.mAppToken.animation.getDetachWallpaper()) {
-                        mInnerFields.mDetachedWallpaper = w;
-                    }
-                    if (w.mAppToken.animation.getBackgroundColor() != 0) {
-                        if (mInnerFields.mWindowAnimationBackground == null
-                                || (w.mAnimLayer <
-                                        mInnerFields.mWindowAnimationBackground.mAnimLayer)) {
-                            mInnerFields.mWindowAnimationBackground = w;
-                            mInnerFields.mWindowAnimationBackgroundColor =
-                                    w.mAppToken.animation.getBackgroundColor();
-                        }
-                    }
-                }
-
-                if (wasAnimating && !w.mAnimating && mWallpaperTarget == w) {
-                    mInnerFields.mWallpaperMayChange = true;
-                    changes |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                }
-
-                if (mPolicy.doesForceHide(w, attrs)) {
-                    if (!wasAnimating && nowAnimating) {
-                        if (DEBUG_VISIBILITY) Slog.v(TAG,
-                                "Animation started that could impact force hide: "
-                                + w);
-                        mInnerFields.mWallpaperForceHidingChanged = true;
-                        changes |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                        mFocusMayChange = true;
-                    } else if (w.isReadyForDisplay() && w.mAnimation == null) {
-                        mInnerFields.mForceHiding = true;
-                    }
-                } else if (mPolicy.canBeForceHidden(w, attrs)) {
-                    boolean changed;
-                    if (mInnerFields.mForceHiding) {
-                        changed = w.hideLw(false, false);
-                        if (DEBUG_VISIBILITY && changed) Slog.v(TAG,
-                                "Now policy hidden: " + w);
-                    } else {
-                        changed = w.showLw(false, false);
-                        if (DEBUG_VISIBILITY && changed) Slog.v(TAG,
-                                "Now policy shown: " + w);
-                        if (changed) {
-                            if (mInnerFields.mWallpaperForceHidingChanged
-                                    && w.isVisibleNow() /*w.isReadyForDisplay()*/) {
-                                // Assume we will need to animate.  If
-                                // we don't (because the wallpaper will
-                                // stay with the lock screen), then we will
-                                // clean up later.
-                                Animation a = mPolicy.createForceHideEnterAnimation();
-                                if (a != null) {
-                                    w.setAnimation(a);
-                                }
-                            }
-                            if (mCurrentFocus == null ||
-                                    mCurrentFocus.mLayer < w.mLayer) {
-                                // We are showing on to of the current
-                                // focus, so re-evaluate focus to make
-                                // sure it is correct.
-                                mFocusMayChange = true;
-                            }
-                        }
-                    }
-                    if (changed && (attrs.flags
-                            & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
-                        mInnerFields.mWallpaperMayChange = true;
-                        changes |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                    }
-                }
-            }
-
-            final AppWindowToken atoken = w.mAppToken;
-            if (atoken != null && (!atoken.allDrawn || atoken.freezingScreen)) {
-                if (atoken.lastTransactionSequence != mTransactionSequence) {
-                    atoken.lastTransactionSequence = mTransactionSequence;
-                    atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
-                    atoken.startingDisplayed = false;
-                }
-                if ((w.isOnScreen() || w.mAttrs.type
-                        == WindowManager.LayoutParams.TYPE_BASE_APPLICATION)
-                        && !w.mExiting && !w.mDestroying) {
-                    if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
-                        Slog.v(TAG, "Eval win " + w + ": isDrawn="
-                                + w.isDrawnLw()
-                                + ", isAnimating=" + w.isAnimating());
-                        if (!w.isDrawnLw()) {
-                            Slog.v(TAG, "Not displayed: s=" + w.mSurface
-                                    + " pv=" + w.mPolicyVisibility
-                                    + " dp=" + w.mDrawPending
-                                    + " cdp=" + w.mCommitDrawPending
-                                    + " ah=" + w.mAttachedHidden
-                                    + " th=" + atoken.hiddenRequested
-                                    + " a=" + w.mAnimating);
-                        }
-                    }
-                    if (w != atoken.startingWindow) {
-                        if (!atoken.freezingScreen || !w.mAppFreezing) {
-                            atoken.numInterestingWindows++;
-                            if (w.isDrawnLw()) {
-                                atoken.numDrawnWindows++;
-                                if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Slog.v(TAG,
-                                        "tokenMayBeDrawn: " + atoken
-                                        + " freezingScreen=" + atoken.freezingScreen
-                                        + " mAppFreezing=" + w.mAppFreezing);
-                                mInnerFields.mTokenMayBeDrawn = true;
-                            }
-                        }
-                    } else if (w.isDrawnLw()) {
-                        atoken.startingDisplayed = true;
-                    }
-                }
-            } else if (w.mReadyToShow) {
-                w.performShowLocked();
-                changes |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
-            }
-        } // end forall windows
-
-        return changes;
-    }
-
-    /**
-     * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
-     *
-     * @return bitmap indicating if another pass through layout must be made.
-     */
-    private int testTokenMayBeDrawnLocked() {
-        int changes = 0;
-        // See if any windows have been drawn, so they (and others
-        // associated with them) can now be shown.
-        final int NT = mAppTokens.size();
-        for (int i=0; i<NT; i++) {
-            AppWindowToken wtoken = mAppTokens.get(i);
-            if (wtoken.freezingScreen) {
-                int numInteresting = wtoken.numInterestingWindows;
-                if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
-                    if (DEBUG_VISIBILITY) Slog.v(TAG,
-                            "allDrawn: " + wtoken
-                            + " interesting=" + numInteresting
-                            + " drawn=" + wtoken.numDrawnWindows);
-                    wtoken.showAllWindowsLocked();
-                    unsetAppFreezingScreenLocked(wtoken, false, true);
-                    if (DEBUG_ORIENTATION) Slog.i(TAG,
-                            "Setting mOrientationChangeComplete=true because wtoken "
-                            + wtoken + " numInteresting=" + numInteresting
-                            + " numDrawn=" + wtoken.numDrawnWindows);
-                    mInnerFields.mOrientationChangeComplete = true;
-                }
-            } else if (!wtoken.allDrawn) {
-                int numInteresting = wtoken.numInterestingWindows;
-                if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
-                    if (DEBUG_VISIBILITY) Slog.v(TAG,
-                            "allDrawn: " + wtoken
-                            + " interesting=" + numInteresting
-                            + " drawn=" + wtoken.numDrawnWindows);
-                    wtoken.allDrawn = true;
-                    changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_ANIM;
-
-                    // We can now show all of the drawn windows!
-                    if (!mOpeningApps.contains(wtoken)) {
-                        mInnerFields.mAnimating |= wtoken.showAllWindowsLocked();
-                    }
-                }
-            }
-        }
-
-        return changes;
-    }
-
-    /**
-     * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
      *
      * @return bitmap indicating if another pass through layout must be made.
      */
@@ -8131,7 +7796,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         transit, false);
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToShow = false;
-                mInnerFields.mAnimating |= wtoken.showAllWindowsLocked();
+                mAnimator.mAnimating |= wtoken.showAllWindowsLocked();
             }
             NN = mClosingApps.size();
             for (i=0; i<NN; i++) {
@@ -8229,14 +7894,14 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mLowerWallpaperTarget == null) {
             // Whoops, we don't need a special wallpaper animation.
             // Clear them out.
-            mInnerFields.mForceHiding = false;
+            mAnimator.mForceHiding = false;
             for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState w = mWindows.get(i);
                 if (w.mSurface != null) {
                     final WindowManager.LayoutParams attrs = w.mAttrs;
                     if (mPolicy.doesForceHide(w, attrs) && w.isVisibleLw()) {
                         if (DEBUG_FOCUS) Slog.i(TAG, "win=" + w + " force hides other windows");
-                        mInnerFields.mForceHiding = true;
+                        mAnimator.mForceHiding = true;
                     } else if (mPolicy.canBeForceHidden(w, attrs)) {
                         if (!w.mAnimating) {
                             // We set the animation above so it
@@ -8267,11 +7932,11 @@ public class WindowManagerService extends IWindowManager.Stub
             mInnerFields.mWallpaperMayChange = true;
         }
 
-        if (mInnerFields.mWindowAnimationBackgroundColor != 0) {
+        if (mAnimator.mWindowAnimationBackgroundColor != 0) {
             // If the window that wants black is the current wallpaper
             // target, then the black goes *below* the wallpaper so we
             // don't cause the wallpaper to suddenly disappear.
-            WindowState target = mInnerFields.mWindowAnimationBackground;
+            WindowState target = mAnimator.mWindowAnimationBackground;
             if (mWallpaperTarget == target
                     || mLowerWallpaperTarget == target
                     || mUpperWallpaperTarget == target) {
@@ -8290,7 +7955,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int dh = mCurDisplayHeight;
             mWindowAnimationBackgroundSurface.show(dw, dh,
                     target.mAnimLayer - LAYER_OFFSET_DIM,
-                    mInnerFields.mWindowAnimationBackgroundColor);
+                    mAnimator.mWindowAnimationBackgroundColor);
         } else if (mWindowAnimationBackgroundSurface != null) {
             mWindowAnimationBackgroundSurface.hide();
         }
@@ -8393,206 +8058,6 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
      *
-     * @param w WindowState whos Surface is being prepared.
-     * @param recoveringMemory true if the caller will reclaim surface memory on error.
-     */
-    public void prepareSurfaceLocked(final WindowState w, final boolean recoveringMemory) {
-        // XXX NOTE: The logic here could be improved.  We have
-        // the decision about whether to resize a window separated
-        // from whether to hide the surface.  This can cause us to
-        // resize a surface even if we are going to hide it.  You
-        // can see this by (1) holding device in landscape mode on
-        // home screen; (2) tapping browser icon (device will rotate
-        // to landscape; (3) tap home.  The wallpaper will be resized
-        // in step 2 but then immediately hidden, causing us to
-        // have to resize and then redraw it again in step 3.  It
-        // would be nice to figure out how to avoid this, but it is
-        // difficult because we do need to resize surfaces in some
-        // cases while they are hidden such as when first showing a
-        // window.
-        
-        if (w.mSurface == null) {
-            if (w.mOrientationChanging) {
-                if (DEBUG_ORIENTATION) {
-                    Slog.v(TAG, "Orientation change skips hidden " + w);
-                }
-                w.mOrientationChanging = false;
-            }
-            return;
-        }
-        
-        boolean displayed = false;
-
-        w.computeShownFrameLocked();
-
-        int width, height;
-        if ((w.mAttrs.flags & w.mAttrs.FLAG_SCALED) != 0) {
-            // for a scaled surface, we just want to use
-            // the requested size.
-            width  = w.mRequestedWidth;
-            height = w.mRequestedHeight;
-        } else {
-            width = w.mCompatFrame.width();
-            height = w.mCompatFrame.height();
-        }
-
-        if (width < 1) {
-            width = 1;
-        }
-        if (height < 1) {
-            height = 1;
-        }
-        final boolean surfaceResized = w.mSurfaceW != width || w.mSurfaceH != height;
-        if (surfaceResized) {
-            w.mSurfaceW = width;
-            w.mSurfaceH = height;
-        }
-
-        if (w.mSurfaceX != w.mShownFrame.left
-                || w.mSurfaceY != w.mShownFrame.top) {
-            try {
-                if (SHOW_TRANSACTIONS) logSurface(w,
-                        "POS " + w.mShownFrame.left
-                        + ", " + w.mShownFrame.top, null);
-                w.mSurfaceX = w.mShownFrame.left;
-                w.mSurfaceY = w.mShownFrame.top;
-                w.mSurface.setPosition(w.mShownFrame.left, w.mShownFrame.top);
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Error positioning surface of " + w
-                        + " pos=(" + w.mShownFrame.left
-                        + "," + w.mShownFrame.top + ")", e);
-                if (!recoveringMemory) {
-                    reclaimSomeSurfaceMemoryLocked(w, "position", true);
-                }
-            }
-        }
-
-        if (surfaceResized) {
-            try {
-                if (SHOW_TRANSACTIONS) logSurface(w,
-                        "SIZE " + width + "x" + height, null);
-                w.mSurfaceResized = true;
-                w.mSurface.setSize(width, height);
-            } catch (RuntimeException e) {
-                // If something goes wrong with the surface (such
-                // as running out of memory), don't take down the
-                // entire system.
-                Slog.e(TAG, "Error resizing surface of " + w
-                        + " size=(" + width + "x" + height + ")", e);
-                if (!recoveringMemory) {
-                    reclaimSomeSurfaceMemoryLocked(w, "size", true);
-                }
-            }
-        }
-
-        updateResizingWindows(w);
-
-        if (w.mAttachedHidden || !w.isReadyForDisplay()) {
-            if (!w.mLastHidden) {
-                //dump();
-                w.mLastHidden = true;
-                if (SHOW_TRANSACTIONS) logSurface(w,
-                        "HIDE (performLayout)", null);
-                if (w.mSurface != null) {
-                    w.mSurfaceShown = false;
-                    try {
-                        w.mSurface.hide();
-                    } catch (RuntimeException e) {
-                        Slog.w(TAG, "Exception hiding surface in " + w);
-                    }
-                }
-            }
-            // If we are waiting for this window to handle an
-            // orientation change, well, it is hidden, so
-            // doesn't really matter.  Note that this does
-            // introduce a potential glitch if the window
-            // becomes unhidden before it has drawn for the
-            // new orientation.
-            if (w.mOrientationChanging) {
-                w.mOrientationChanging = false;
-                if (DEBUG_ORIENTATION) Slog.v(TAG,
-                        "Orientation change skips hidden " + w);
-            }
-        } else if (w.mLastLayer != w.mAnimLayer
-                || w.mLastAlpha != w.mShownAlpha
-                || w.mLastDsDx != w.mDsDx
-                || w.mLastDtDx != w.mDtDx
-                || w.mLastDsDy != w.mDsDy
-                || w.mLastDtDy != w.mDtDy
-                || w.mLastHScale != w.mHScale
-                || w.mLastVScale != w.mVScale
-                || w.mLastHidden) {
-            displayed = true;
-            w.mLastAlpha = w.mShownAlpha;
-            w.mLastLayer = w.mAnimLayer;
-            w.mLastDsDx = w.mDsDx;
-            w.mLastDtDx = w.mDtDx;
-            w.mLastDsDy = w.mDsDy;
-            w.mLastDtDy = w.mDtDy;
-            w.mLastHScale = w.mHScale;
-            w.mLastVScale = w.mVScale;
-            if (SHOW_TRANSACTIONS) logSurface(w,
-                    "alpha=" + w.mShownAlpha + " layer=" + w.mAnimLayer
-                    + " matrix=[" + (w.mDsDx*w.mHScale)
-                    + "," + (w.mDtDx*w.mVScale)
-                    + "][" + (w.mDsDy*w.mHScale)
-                    + "," + (w.mDtDy*w.mVScale) + "]", null);
-            if (w.mSurface != null) {
-                try {
-                    w.mSurfaceAlpha = w.mShownAlpha;
-                    w.mSurface.setAlpha(w.mShownAlpha);
-                    w.mSurfaceLayer = w.mAnimLayer;
-                    w.mSurface.setLayer(w.mAnimLayer);
-                    w.mSurface.setMatrix(
-                            w.mDsDx*w.mHScale, w.mDtDx*w.mVScale,
-                            w.mDsDy*w.mHScale, w.mDtDy*w.mVScale);
-                } catch (RuntimeException e) {
-                    Slog.w(TAG, "Error updating surface in " + w, e);
-                    if (!recoveringMemory) {
-                        reclaimSomeSurfaceMemoryLocked(w, "update", true);
-                    }
-                }
-            }
-
-            if (w.mLastHidden && w.isDrawnLw()
-                    && !w.mReadyToShow) {
-                if (SHOW_TRANSACTIONS) logSurface(w,
-                        "SHOW (performLayout)", null);
-                if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + w
-                        + " during relayout");
-                if (showSurfaceRobustlyLocked(w)) {
-                    w.mHasDrawn = true;
-                    w.mLastHidden = false;
-                } else {
-                    w.mOrientationChanging = false;
-                }
-            }
-            if (w.mSurface != null) {
-                w.mToken.hasVisible = true;
-            }
-        } else {
-            displayed = true;
-        }
-
-        if (displayed) {
-            if (w.mOrientationChanging) {
-                if (!w.isDrawnLw()) {
-                    mInnerFields.mOrientationChangeComplete = false;
-                    if (DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Orientation continue waiting for draw in " + w);
-                } else {
-                    w.mOrientationChanging = false;
-                    if (DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Orientation change complete in " + w);
-                }
-            }
-            w.mToken.hasVisible = true;
-        }
-    }
-
-    /**
-     * Extracted from {@link #performLayoutAndPlaceSurfacesLockedInner} to reduce size of method.
-     *
      * @param w WindowState this method is applied to.
      * @param currentTime The time which animations use for calculating transitions.
      * @param innerDw Width of app window.
@@ -8649,65 +8114,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private final int performAnimationsLocked(long currentTime, int dw, int dh,
-            int innerDw, int innerDh) {
-        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: seq="
-                + mTransactionSequence + " mAnimating="
-                + mInnerFields.mAnimating);
-
-        mInnerFields.mTokenMayBeDrawn = false;
-        mInnerFields.mWallpaperMayChange = false;
-        mInnerFields.mForceHiding = false;
-        mInnerFields.mDetachedWallpaper = null;
-        mInnerFields.mWindowAnimationBackground = null;
-        mInnerFields.mWindowAnimationBackgroundColor = 0;
-
-        int changes = updateWindowsAndWallpaperLocked(currentTime, dw, dh, innerDw, innerDh);
-
-        if (mInnerFields.mTokenMayBeDrawn) {
-            changes |= testTokenMayBeDrawnLocked();
-        }
-
-        // If we are ready to perform an app transition, check through
-        // all of the app tokens to be shown and see if they are ready
-        // to go.
-        if (mAppTransitionReady) {
-            changes |= handleAppTransitionReadyLocked();
-        }
-
-        mInnerFields.mAdjResult = 0;
-
-        if (!mInnerFields.mAnimating && mAppTransitionRunning) {
-            // We have finished the animation of an app transition.  To do
-            // this, we have delayed a lot of operations like showing and
-            // hiding apps, moving apps in Z-order, etc.  The app token list
-            // reflects the correct Z-order, but the window list may now
-            // be out of sync with it.  So here we will just rebuild the
-            // entire app window list.  Fun!
-            changes |= handleAnimatingStoppedAndTransitionLocked();
-        }
-
-        if (mInnerFields.mWallpaperForceHidingChanged && changes == 0 && !mAppTransitionReady) {
-            // At this point, there was a window with a wallpaper that
-            // was force hiding other windows behind it, but now it
-            // is going away.  This may be simple -- just animate
-            // away the wallpaper and its window -- or it may be
-            // hard -- the wallpaper now needs to be shown behind
-            // something that was hidden.
-            changes |= animateAwayWallpaperLocked();
-        }
-
-        changes |= testWallpaperAndBackgroundLocked();
-
-        if (mLayoutNeeded) {
-            changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
-        }
-
-        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: changes=0x"
-                + Integer.toHexString(changes));
-        return changes;
-    }
-
     // "Something has changed!  Let's make it correct now."
     private final void performLayoutAndPlaceSurfacesLockedInner(
             boolean recoveringMemory) {
@@ -8745,7 +8151,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mScreenBrightness = -1;
         mInnerFields.mButtonBrightness = -1;
         boolean focusDisplayed = false;
-        mInnerFields.mAnimating = false;
+        mAnimator.mAnimating = false;
         boolean createWatermark = false;
 
         if (mFxSession == null) {
@@ -8855,9 +8261,53 @@ public class WindowManagerService extends IWindowManager.Stub
             Surface.closeTransaction();
         }
 
+        // If we are ready to perform an app transition, check through
+        // all of the app tokens to be shown and see if they are ready
+        // to go.
+        if (mAppTransitionReady) {
+            mPendingLayoutChanges |= handleAppTransitionReadyLocked();
+        }
+
+        mInnerFields.mAdjResult = 0;
+
+        if (!mAnimator.mAnimating && mAppTransitionRunning) {
+            // We have finished the animation of an app transition.  To do
+            // this, we have delayed a lot of operations like showing and
+            // hiding apps, moving apps in Z-order, etc.  The app token list
+            // reflects the correct Z-order, but the window list may now
+            // be out of sync with it.  So here we will just rebuild the
+            // entire app window list.  Fun!
+            mPendingLayoutChanges |= handleAnimatingStoppedAndTransitionLocked();
+        }
+
+        if (mInnerFields.mWallpaperForceHidingChanged && mPendingLayoutChanges == 0 &&
+                !mAppTransitionReady) {
+            // At this point, there was a window with a wallpaper that
+            // was force hiding other windows behind it, but now it
+            // is going away.  This may be simple -- just animate
+            // away the wallpaper and its window -- or it may be
+            // hard -- the wallpaper now needs to be shown behind
+            // something that was hidden.
+            mPendingLayoutChanges |= animateAwayWallpaperLocked();
+        }
+
+        mPendingLayoutChanges |= testWallpaperAndBackgroundLocked();
+
+        if (mLayoutNeeded) {
+            mPendingLayoutChanges |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
+        }
+
+        final int N = mWindows.size();
+        for (i=N-1; i>=0; i--) {
+            WindowState w = mWindows.get(i);
+            // TODO(cmautner): Can this move up to the loop at the end of try/catch above?
+            updateResizingWindows(w);
+        }
+
         // Update animations of all applications, including those
         // associated with exiting/removed apps
-        animateAndUpdateSurfaces(currentTime, dw, dh, innerDw, innerDh, recoveringMemory);
+        mAnimator.animate();
+        mPendingLayoutChanges |= mAnimator.mPendingLayoutChanges;
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
@@ -8961,7 +8411,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean needRelayout = false;
 
-        if (!mInnerFields.mAnimating && mAppTransitionRunning) {
+        if (!mAnimator.mAnimating && mAppTransitionRunning) {
             // We have finished the animation of an app transition.  To do
             // this, we have delayed a lot of operations like showing and
             // hiding apps, moving apps in Z-order, etc.  The app token list
@@ -8991,7 +8441,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (needRelayout) {
             requestTraversalLocked();
-        } else if (mInnerFields.mAnimating) {
+        } else if (mAnimator.mAnimating) {
             scheduleAnimationLocked();
         }
 
@@ -9257,6 +8707,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 TAG, "Changing focus from " + mCurrentFocus + " to " + newFocus);
             final WindowState oldFocus = mCurrentFocus;
             mCurrentFocus = newFocus;
+            mAnimator.setCurrentFocus(mCurrentFocus);
             mLosingFocus.remove(newFocus);
             int focusChanged = mPolicy.focusChangedLw(oldFocus, newFocus);
 
@@ -9397,16 +8848,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (CUSTOM_SCREEN_ROTATION) {
-            if (mScreenRotationAnimation != null) {
-                mScreenRotationAnimation.kill();
-                mScreenRotationAnimation = null;
+            if (mAnimator.mScreenRotationAnimation != null) {
+                mAnimator.mScreenRotationAnimation.kill();
+                mAnimator.mScreenRotationAnimation = null;
             }
-            if (mScreenRotationAnimation == null) {
-                mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
+            if (mAnimator.mScreenRotationAnimation == null) {
+                mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
                         mFxSession, inTransaction, mCurDisplayWidth, mCurDisplayHeight,
                         mDisplay.getRotation());
             }
-            if (!mScreenRotationAnimation.hasScreenshot()) {
+            if (!mAnimator.mScreenRotationAnimation.hasScreenshot()) {
                 Surface.freezeDisplay(0);
             }
         } else {
@@ -9431,20 +8882,20 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean updateRotation = false;
         
-        if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
-                && mScreenRotationAnimation.hasScreenshot()) {
+        if (CUSTOM_SCREEN_ROTATION && mAnimator.mScreenRotationAnimation != null
+                && mAnimator.mScreenRotationAnimation.hasScreenshot()) {
             if (DEBUG_ORIENTATION) Slog.i(TAG, "**** Dismissing screen rotation animation");
-            if (mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
+            if (mAnimator.mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
                     mTransitionAnimationScale, mCurDisplayWidth, mCurDisplayHeight)) {
                 scheduleAnimationLocked();
             } else {
-                mScreenRotationAnimation = null;
+                mAnimator.mScreenRotationAnimation = null;
                 updateRotation = true;
             }
         } else {
-            if (mScreenRotationAnimation != null) {
-                mScreenRotationAnimation.kill();
-                mScreenRotationAnimation = null;
+            if (mAnimator.mScreenRotationAnimation != null) {
+                mAnimator.mScreenRotationAnimation.kill();
+                mAnimator.mScreenRotationAnimation = null;
             }
             updateRotation = true;
         }
@@ -9927,9 +9378,9 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mLastWindowForcedOrientation"); pw.print(mLastWindowForcedOrientation);
                     pw.print(" mForcedAppOrientation="); pw.println(mForcedAppOrientation);
             pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
-            if (mScreenRotationAnimation != null) {
+            if (mAnimator.mScreenRotationAnimation != null) {
                 pw.println("  mScreenRotationAnimation:");
-                mScreenRotationAnimation.printTo("    ", pw);
+                mAnimator.mScreenRotationAnimation.printTo("    ", pw);
             }
             pw.print("  mWindowAnimationScale="); pw.print(mWindowAnimationScale);
                     pw.print(" mTransitionWindowAnimationScale="); pw.print(mTransitionAnimationScale);

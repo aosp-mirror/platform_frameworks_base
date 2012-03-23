@@ -1227,8 +1227,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
         }
 
-        final boolean screenAnimation = mService.mScreenRotationAnimation != null
-                && mService.mScreenRotationAnimation.isAnimating();
+        final boolean screenAnimation = mService.mAnimator.mScreenRotationAnimation != null
+                && mService.mAnimator.mScreenRotationAnimation.isAnimating();
         if (selfTransformation || attachedTransformation != null
                 || appTransformation != null || screenAnimation) {
             // cache often used attributes locally
@@ -1268,7 +1268,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
             if (screenAnimation) {
                 tmpMatrix.postConcat(
-                        mService.mScreenRotationAnimation.getEnterTransformation().getMatrix());
+                        mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getMatrix());
             }
 
             // "convert" it into SurfaceFlinger's format
@@ -1311,7 +1311,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 }
                 if (screenAnimation) {
                     mShownAlpha *=
-                        mService.mScreenRotationAnimation.getEnterTransformation().getAlpha();
+                        mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getAlpha();
                 }
             } else {
                 //Slog.i(TAG, "Not applying alpha transform");
