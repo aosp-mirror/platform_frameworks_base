@@ -17,10 +17,8 @@
 package com.android.internal.policy.impl;
 
 import com.android.internal.R;
-import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallback;
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.InfoCallbackImpl;
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.SimStateCallback;
-import com.android.internal.policy.impl.LockScreen.MultiWaveViewMethods;
 import com.android.internal.telephony.IccCard.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.SlidingTab;
@@ -29,6 +27,7 @@ import com.android.internal.widget.multiwaveview.MultiWaveView;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +38,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.media.AudioManager;
 import android.os.RemoteException;
@@ -79,7 +79,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
     private KeyguardStatusViewManager mStatusViewManager;
     private UnlockWidgetCommonMethods mUnlockWidgetMethods;
     private View mUnlockWidget;
-    public boolean mCameraDisabled;
+    private boolean mCameraDisabled;
+    private boolean mSearchDisabled;
 
     InfoCallbackImpl mInfoCallback = new InfoCallbackImpl() {
 
@@ -94,14 +95,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
         @Override
         public void onDevicePolicyManagerStateChanged() {
-            updateCameraTarget();
+            updateTargets();
         }
 
     };
 
     SimStateCallback mSimStateCallback = new SimStateCallback() {
         public void onSimStateChanged(State simState) {
-            updateCameraTarget();
+            updateTargets();
         }
     };
 
@@ -243,11 +244,12 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
 
         MultiWaveViewMethods(MultiWaveView multiWaveView) {
             mMultiWaveView = multiWaveView;
+
+            // TODO: get search icon.  See Launcher.updateGlobalSearchIcon()
         }
 
-        public boolean isCameraTargetPresent() {
-            return mMultiWaveView
-                .getTargetPosition(com.android.internal.R.drawable.ic_lockscreen_camera) != -1;
+        public boolean isTargetPresent(int resId) {
+            return mMultiWaveView.getTargetPosition(resId) != -1;
         }
 
         public void updateResources() {
@@ -263,6 +265,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                 mMultiWaveView.setTargetResources(resId);
             }
             setEnabled(com.android.internal.R.drawable.ic_lockscreen_camera, !mCameraDisabled);
+            setEnabled(com.android.internal.R.drawable.ic_lockscreen_search, !mSearchDisabled);
         }
 
         public void onGrabbed(View v, int handle) {
@@ -276,8 +279,13 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         public void onTrigger(View v, int target) {
             final int resId = mMultiWaveView.getResourceIdForTarget(target);
             switch (resId) {
+                case com.android.internal.R.drawable.ic_lockscreen_search:
+                    launchActivity(new Intent(RecognizerIntent.ACTION_WEB_SEARCH));
+                    mCallback.pokeWakelock();
+                    break;
+
                 case com.android.internal.R.drawable.ic_lockscreen_camera:
-                    launchCamera();
+                    launchActivity(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA));
                     mCallback.pokeWakelock();
                     break;
 
@@ -292,8 +300,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             }
         }
 
-        private void launchCamera() {
-            Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
+        private void launchActivity(Intent intent) {
             intent.setFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -457,18 +464,29 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
     }
 
-    private void updateCameraTarget() {
+    private void updateTargets() {
         boolean disabledByAdmin = mLockPatternUtils.getDevicePolicyManager()
                 .getCameraDisabled(null);
         boolean disabledBySimState = mUpdateMonitor.isSimLocked();
-        boolean targetPresent = (mUnlockWidgetMethods instanceof MultiWaveViewMethods)
-                ? ((MultiWaveViewMethods) mUnlockWidgetMethods).isCameraTargetPresent() : false;
+        boolean cameraTargetPresent = (mUnlockWidgetMethods instanceof MultiWaveViewMethods)
+                ? ((MultiWaveViewMethods) mUnlockWidgetMethods)
+                        .isTargetPresent(com.android.internal.R.drawable.ic_lockscreen_camera)
+                        : false;
+        boolean searchTargetPresent = (mUnlockWidgetMethods instanceof MultiWaveViewMethods)
+                ? ((MultiWaveViewMethods) mUnlockWidgetMethods)
+                        .isTargetPresent(com.android.internal.R.drawable.ic_lockscreen_search)
+                        : false;
+
+        // TODO: test to see if search is available
+        boolean searchActionAvailable = true;
+
         if (disabledByAdmin) {
             Log.v(TAG, "Camera disabled by Device Policy");
         } else if (disabledBySimState) {
             Log.v(TAG, "Camera disabled by Sim State");
         }
-        mCameraDisabled = disabledByAdmin || disabledBySimState || !targetPresent;
+        mCameraDisabled = disabledByAdmin || disabledBySimState || !cameraTargetPresent;
+        mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent;
         mUnlockWidgetMethods.updateResources();
     }
 
