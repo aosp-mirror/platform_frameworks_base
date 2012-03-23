@@ -7364,6 +7364,7 @@ package android.database.sqlite {
     method public static int releaseMemory();
     method public long replace(java.lang.String, java.lang.String, android.content.ContentValues);
     method public long replaceOrThrow(java.lang.String, java.lang.String, android.content.ContentValues) throws android.database.SQLException;
+    method public void setForeignKeyConstraintsEnabled(boolean);
     method public void setLocale(java.util.Locale);
     method public deprecated void setLockingEnabled(boolean);
     method public void setMaxSqlCacheSize(int);
@@ -7443,6 +7444,7 @@ package android.database.sqlite {
     method public java.lang.String getDatabaseName();
     method public android.database.sqlite.SQLiteDatabase getReadableDatabase();
     method public android.database.sqlite.SQLiteDatabase getWritableDatabase();
+    method public void onConfigure(android.database.sqlite.SQLiteDatabase);
     method public abstract void onCreate(android.database.sqlite.SQLiteDatabase);
     method public void onDowngrade(android.database.sqlite.SQLiteDatabase, int, int);
     method public void onOpen(android.database.sqlite.SQLiteDatabase);

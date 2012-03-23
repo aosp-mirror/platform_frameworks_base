@@ -211,6 +211,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 SQLiteDebug.DEBUG_SQL_STATEMENTS, SQLiteDebug.DEBUG_SQL_TIME);
 
         setPageSize();
+        setForeignKeyModeFromConfiguration();
         setWalModeFromConfiguration();
         setJournalSizeLimit();
         setAutoCheckpointInterval();
@@ -263,6 +264,16 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             long value = executeForLong("PRAGMA journal_size_limit", null, null);
             if (value != newValue) {
                 executeForLong("PRAGMA journal_size_limit=" + newValue, null, null);
+            }
+        }
+    }
+
+    private void setForeignKeyModeFromConfiguration() {
+        if (!mIsReadOnlyConnection) {
+            final long newValue = mConfiguration.foreignKeyConstraintsEnabled ? 1 : 0;
+            long value = executeForLong("PRAGMA foreign_keys", null, null);
+            if (value != newValue) {
+                execute("PRAGMA foreign_keys=" + newValue, null, null);
             }
         }
     }
@@ -389,6 +400,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
 
         // Remember what changed.
+        boolean foreignKeyModeChanged = configuration.foreignKeyConstraintsEnabled
+                != mConfiguration.foreignKeyConstraintsEnabled;
         boolean walModeChanged = ((configuration.openFlags ^ mConfiguration.openFlags)
                 & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
         boolean localeChanged = !configuration.locale.equals(mConfiguration.locale);
@@ -398,6 +411,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
         // Update prepared statement cache size.
         mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
+
+        // Update foreign key mode.
+        if (foreignKeyModeChanged) {
+            setForeignKeyModeFromConfiguration();
+        }
 
         // Update WAL.
         if (walModeChanged) {
