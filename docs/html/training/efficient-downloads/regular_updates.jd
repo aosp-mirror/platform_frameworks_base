@@ -1,0 +1,102 @@
+page.title=Minimizing the Effect of Regular Updates
+parent.title=Transferring Data Without Draining the Battery
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Optimizing Downloads for Efficient Network Access
+previous.link=efficient-network-access.html
+next.title=Redundant Downloads are Redundant
+next.link=redundant_redundant.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#C2DM">Use Cloud to Device Messaging as an alternative to polling</a></li>
+  <li><a href="#OptimizedPolling">Optimize polling with inexact repeating alarms and exponential back-offs</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
+  <li><a href="http://code.google.com/android/c2dm/">Android Cloud to Device Messaging</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>The optimal frequency of regular updates will vary based on device state, network connectivity, user behavior, and explicit user preferences.</p>
+
+<p><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a> discusses how to build battery-efficient apps that modify their refresh frequency based on the state of the host device. That includes disabling background service updates when you lose connectivity and reducing the rate of updates when the battery level is low.</p>
+
+<p>This lesson will examine how your refresh frequency can be varied to best mitigate the effect of background updates on the underlying wireless radio state machine.</p>
+ 
+<h2 id="C2DM">Use Cloud to Device Messaging as an Alternative to Polling</h2> 
+ 
+<p>Every time your app polls your server to check if an update is required, you activate the wireless radio, drawing power unnecessarily, for up to 20 seconds on a typical 3G connection.</p>
+
+<p><a href="http://code.google.com/android/c2dm/">Android Cloud to Device Messaging (C2DM)</a> is a lightweight mechanism used to transmit data from a server to a particular app instance. Using C2DM, your server can notify your app running on a particular device that there is new data available for it.</p>
+
+<p>Compared to polling, where your app must regularly ping the server to query for new data, this event-driven model allows your app to create a new connection only when it knows there is data to download.</p>
+
+<p>The result is a reduction in unnecessary connections, and a reduced latency for updated data within your application.</p>
+
+<p>C2DM is implemented using a persistent TCP/IP connection. While it's possible to implement your own push service, it's best practice to use C2DM. This minimizes the number of persistent connections and allows the platform to optimize bandwidth and minimize the associated impact on battery life.</p>
+
+<h2 id="OptimizedPolling">Optimize Polling with Inexact Repeating Alarms and Exponential Backoffs</h2> 
+
+<p>Where polling is required, it's good practice to set the default data refresh frequency of your app as low as possible without detracting from the user experience.</p>
+
+<p>A simple approach is to offer preferences to allow users to explicitly set their required update rate, allowing them to define their own balance between data freshness and battery life.</p>
+
+<p>When scheduling updates, use inexact repeating alarms that allow the system to "phase shift" the exact moment each alarm triggers.</p>
+
+<pre>int alarmType = AlarmManager.ELAPSED_REALTIME;
+long interval = AlarmManager.INTERVAL_HOUR;
+long start = System.currentTimeMillis() + interval;
+
+alarmManager.setInexactRepeating(alarmType, start, interval, pi);</pre>
+
+<p>If several alarms are scheduled to trigger at similar times, this phase-shifting will cause them to be triggered simultaneously, allowing each update to piggyback on top of a single active radio state change.</p>
+
+<p>Wherever possible, set your alarm type to {@code ELAPSED_REALTIME} or {@code RTC} rather than to their {@code _WAKEUP} equivalents. This further reduces battery impact by waiting until the phone is no longer in standby mode before the alarm triggers.</p>
+
+<p>You can further reduce the impact of these scheduled alarms by opportunistically reducing their frequency based on how recently your app was used.</p>
+
+<p>One approach is to implement an exponential back-off pattern to reduce the frequency of your updates (and / or the degree of prefetching you perform) if the app hasn't been used since the previous update. It's often useful to assert a minimum update frequency and to reset the frequency whenever the app is used, for example:</p>
+
+<pre>SharedPreferences sp = 
+  context.getSharedPreferences(PREFS, Context.MODE_WORLD_READABLE);
+
+boolean appUsed = sp.getBoolean(PREFS_APPUSED, false);
+long updateInterval = sp.getLong(PREFS_INTERVAL, DEFAULT_REFRESH_INTERVAL);
+
+if (!appUsed)
+  if ((updateInterval *= 2) > MAX_REFRESH_INTERVAL)  
+    updateInterval = MAX_REFRESH_INTERVAL;
+
+Editor spEdit = sp.edit();
+spEdit.putBoolean(PREFS_APPUSED, false);
+spEdit.putLong(PREFS_INTERVAL, updateInterval);
+spEdit.apply();
+
+rescheduleUpdates(updateInterval);
+executeUpdateOrPrefetch();</pre>
+
+<p>You can use a similar exponential back-off pattern to reduce the effect of failed connections and download errors.</p>
+
+<p>The cost of initiating a network connection is the same whether you are able to contact your server and download data or not. For time-sensitive transfers where successful completion is important, an exponential back-off algorithm can be used to reduce the frequency of retries in order to minimize the associated battery impact, for example:</p>
+
+<pre>private void retryIn(long interval) {
+  boolean success = attemptTransfer();
+    
+  if (!success) {
+    retryIn(interval*2 < MAX_RETRY_INTERVAL ? 
+            interval*2 : MAX_RETRY_INTERVAL);      
+  }
+}</pre>
+
+<p>Alternatively, for transfers that are failure tolerant (such as regular updates), you can simply ignore failed connection and transfer attempts.</p>
