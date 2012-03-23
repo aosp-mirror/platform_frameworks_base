@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <new>
+#include <time.h>
 #include <audio_effects/effect_visualizer.h>
 
 
@@ -47,9 +48,9 @@ enum visualizer_state_e {
     VISUALIZER_STATE_ACTIVE,
 };
 
-// maximum number of reads from same buffer before resetting capture buffer. This means
+// maximum time since last capture buffer update before resetting capture buffer. This means
 // that the framework has stopped playing audio and we must start returning silence
-#define MAX_STALL_COUNT 10
+#define MAX_STALL_TIME_MS 1000
 
 struct VisualizerContext {
     const struct effect_interface_s *mItfe;
@@ -59,7 +60,7 @@ struct VisualizerContext {
     uint8_t mState;
     uint8_t mCurrentBuf;
     uint8_t mLastBuf;
-    uint8_t mStallCount;
+    struct timespec mBufferUpdateTime;
     uint8_t mCaptureBuf[2][VISUALIZER_CAPTURE_SIZE_MAX];
 };
 
@@ -72,7 +73,7 @@ void Visualizer_reset(VisualizerContext *pContext)
     pContext->mCaptureIdx = 0;
     pContext->mCurrentBuf = 0;
     pContext->mLastBuf = 1;
-    pContext->mStallCount = 0;
+    pContext->mBufferUpdateTime.tv_sec = 0;
     memset(pContext->mCaptureBuf[0], 0x80, VISUALIZER_CAPTURE_SIZE_MAX);
     memset(pContext->mCaptureBuf[1], 0x80, VISUALIZER_CAPTURE_SIZE_MAX);
 }
@@ -321,6 +322,11 @@ int Visualizer_process(
     if (pContext->mCaptureIdx == pContext->mCaptureSize) {
         pContext->mCurrentBuf ^= 1;
         pContext->mCaptureIdx = 0;
+
+        // update last buffer update time stamp
+        if (clock_gettime(CLOCK_MONOTONIC, &pContext->mBufferUpdateTime) < 0) {
+            pContext->mBufferUpdateTime.tv_sec = 0;
+        }
     }
 
     if (inBuffer->raw != outBuffer->raw) {
@@ -453,16 +459,25 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
                    pContext->mCaptureSize);
             // if audio framework has stopped playing audio although the effect is still
             // active we must clear the capture buffer to return silence
-            if (pContext->mLastBuf == pContext->mCurrentBuf) {
-                if (pContext->mStallCount < MAX_STALL_COUNT) {
-                    if (++pContext->mStallCount == MAX_STALL_COUNT) {
+            if ((pContext->mLastBuf == pContext->mCurrentBuf) &&
+                    (pContext->mBufferUpdateTime.tv_sec != 0)) {
+                struct timespec ts;
+                if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+                    time_t secs = ts.tv_sec - pContext->mBufferUpdateTime.tv_sec;
+                    long nsec = ts.tv_nsec - pContext->mBufferUpdateTime.tv_nsec;
+                    if (nsec < 0) {
+                        --secs;
+                        nsec += 1000000000;
+                    }
+                    uint32_t deltaMs = secs * 1000 + nsec / 1000000;
+                    if (deltaMs > MAX_STALL_TIME_MS) {
+                        ALOGV("capture going to idle");
+                        pContext->mBufferUpdateTime.tv_sec = 0;
                         memset(pContext->mCaptureBuf[pContext->mCurrentBuf ^ 1],
                                 0x80,
                                 pContext->mCaptureSize);
                     }
                 }
-            } else {
-                pContext->mStallCount = 0;
             }
             pContext->mLastBuf = pContext->mCurrentBuf;
         } else {
