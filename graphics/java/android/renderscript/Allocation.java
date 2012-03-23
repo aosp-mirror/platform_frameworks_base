@@ -188,6 +188,29 @@ public class Allocation extends BaseObj {
         return getID();
     }
 
+
+   /**
+     * Get the element of the type of the Allocation.
+     *
+     * @hide
+     * @return Element
+     *
+     */
+    public Element getElement() {
+        return mType.getElement();
+    }
+
+    /**
+     * Get the usage flags of the Allocation.
+     *
+     * @hide
+     * @return usage
+     *
+     */
+    public int getUsage() {
+        return mUsage;
+    }
+
     private void updateCacheInfo(Type t) {
         mCurrentDimX = t.getX();
         mCurrentDimY = t.getY();
@@ -294,10 +317,21 @@ public class Allocation extends BaseObj {
         }
     }
 
+    /**
+     * Get the type of the Allocation.
+     *
+     * @return Type
+     *
+     */
     public Type getType() {
         return mType;
     }
 
+    /**
+     * Propogate changes from one usage of the allocation to the
+     * remaining usages of the allocation.
+     *
+     */
     public void syncAll(int srcLocation) {
         switch (srcLocation) {
         case USAGE_SCRIPT:
@@ -343,6 +377,11 @@ public class Allocation extends BaseObj {
         mRS.nAllocationIoReceive(getID());
     }
 
+    /**
+     * Copy an array of RS objects to the allocation
+     *
+     * @param d Source array.
+     */
     public void copyFrom(BaseObj[] d) {
         mRS.validate();
         validateIsObject();
