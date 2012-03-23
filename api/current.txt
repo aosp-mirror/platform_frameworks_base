@@ -23460,6 +23460,7 @@ package android.view {
     method public boolean requestRectangleOnScreen(android.graphics.Rect, boolean);
     method public void resetResolvedLayoutDirection();
     method public void resetResolvedTextDirection();
+    method public void resolveLayoutDirection();
     method public void resolvePadding();
     method public static int resolveSize(int, int);
     method public static int resolveSizeAndState(int, int, int);

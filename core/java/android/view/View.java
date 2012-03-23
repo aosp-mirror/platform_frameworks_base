@@ -4955,7 +4955,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL, to = "RESOLVED_DIRECTION_RTL")
     })
     public int getResolvedLayoutDirection() {
-        resolveLayoutDirectionIfNeeded();
+        // The layout diretion will be resolved only if needed
+        if ((mPrivateFlags2 & LAYOUT_DIRECTION_RESOLVED) != LAYOUT_DIRECTION_RESOLVED) {
+            resolveLayoutDirection();
+        }
         return ((mPrivateFlags2 & LAYOUT_DIRECTION_RESOLVED_RTL) == LAYOUT_DIRECTION_RESOLVED_RTL) ?
                 LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR;
     }
@@ -9832,7 +9835,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         jumpDrawablesToCurrentState();
         // Order is important here: LayoutDirection MUST be resolved before Padding
         // and TextDirection
-        resolveLayoutDirectionIfNeeded();
+        resolveLayoutDirection();
         resolvePadding();
         resolveTextDirection();
         if (isFocused()) {
@@ -9863,31 +9866,24 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Resolve and cache the layout direction. LTR is set initially. This is implicitly supposing
      * that the parent directionality can and will be resolved before its children.
+     * Will call {@link View#onResolvedLayoutDirectionChanged} when resolution is done.
      */
-    private void resolveLayoutDirectionIfNeeded() {
-        // Do not resolve if it is not needed
-        if ((mPrivateFlags2 & LAYOUT_DIRECTION_RESOLVED) == LAYOUT_DIRECTION_RESOLVED) return;
-
+    public void resolveLayoutDirection() {
         // Clear any previous layout direction resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED_MASK;
 
         // Set resolved depending on layout direction
         switch (getLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
-                // We cannot do the resolution if there is no parent
-                if (mParent == null) return;
-
                 // If this is root view, no need to look at parent's layout dir.
-                if (mParent instanceof ViewGroup) {
+                if (canResolveLayoutDirection()) {
                     ViewGroup viewGroup = ((ViewGroup) mParent);
 
-                    // Check if the parent view group can resolve
-                    if (! viewGroup.canResolveLayoutDirection()) {
-                        return;
-                    }
                     if (viewGroup.getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                         mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
                     }
+                } else {
+                    // Nothing to do, LTR by default
                 }
                 break;
             case LAYOUT_DIRECTION_RTL:
@@ -9990,7 +9986,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public boolean canResolveLayoutDirection() {
         switch (getLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
-                return (mParent != null);
+                return (mParent != null) && (mParent instanceof ViewGroup);
             default:
                 return true;
         }
@@ -14572,7 +14568,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_LOCALE},
      */
     public int getResolvedTextDirection() {
-        // The text direction is not inherited so return it back
+        // The text direction will be resolved only if needed
         if ((mPrivateFlags2 & TEXT_DIRECTION_RESOLVED) != TEXT_DIRECTION_RESOLVED) {
             resolveTextDirection();
         }
