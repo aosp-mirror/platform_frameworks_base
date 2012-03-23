@@ -211,6 +211,17 @@ public class Allocation extends BaseObj {
         return mUsage;
     }
 
+    /**
+     * Get the size of the Allocation in bytes.
+     *
+     * @hide
+     * @return sizeInBytes
+     *
+     */
+    public int getSizeBytes() {
+        return mType.getCount() * mType.getElement().getSizeBytes();
+    }
+
     private void updateCacheInfo(Type t) {
         mCurrentDimX = t.getX();
         mCurrentDimY = t.getY();
@@ -328,7 +339,7 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * Propogate changes from one usage of the allocation to the
+     * Propagate changes from one usage of the allocation to the
      * remaining usages of the allocation.
      *
      */
@@ -378,7 +389,7 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * Copy an array of RS objects to the allocation
+     * Copy an array of RS objects to the allocation.
      *
      * @param d Source array.
      */
