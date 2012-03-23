@@ -277,6 +277,20 @@ public final class SQLiteConnectionPool implements Closeable {
                 assert mAvailableNonPrimaryConnections.isEmpty();
             }
 
+            boolean foreignKeyModeChanged = configuration.foreignKeyConstraintsEnabled
+                    != mConfiguration.foreignKeyConstraintsEnabled;
+            if (foreignKeyModeChanged) {
+                // Foreign key constraints can only be changed if there are no transactions
+                // in progress.  To make this clear, we throw an exception if there are
+                // any acquired connections.
+                if (!mAcquiredConnections.isEmpty()) {
+                    throw new IllegalStateException("Foreign Key Constraints cannot "
+                            + "be enabled or disabled while there are transactions in "
+                            + "progress.  Finish all transactions and release all active "
+                            + "database connections first.");
+                }
+            }
+
             if (mConfiguration.openFlags != configuration.openFlags) {
                 // If we are changing open flags and WAL mode at the same time, then
                 // we have no choice but to close the primary connection beforehand

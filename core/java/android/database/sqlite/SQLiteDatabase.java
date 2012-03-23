@@ -1793,6 +1793,53 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
+     * Sets whether foreign key constraints are enabled for the database.
+     * <p>
+     * By default, foreign key constraints are not enforced by the database.
+     * This method allows an application to enable foreign key constraints.
+     * It must be called each time the database is opened to ensure that foreign
+     * key constraints are enabled for the session.
+     * </p><p>
+     * A good time to call this method is right after calling {@link #openOrCreateDatabase}
+     * or in the {@link SQLiteOpenHelper#onConfigure} callback.
+     * </p><p>
+     * When foreign key constraints are disabled, the database does not check whether
+     * changes to the database will violate foreign key constraints.  Likewise, when
+     * foreign key constraints are disabled, the database will not execute cascade
+     * delete or update triggers.  As a result, it is possible for the database
+     * state to become inconsistent.  To perform a database integrity check,
+     * call {@link #isDatabaseIntegrityOk}.
+     * </p><p>
+     * This method must not be called while a transaction is in progress.
+     * </p><p>
+     * See also <a href="http://sqlite.org/foreignkeys.html">SQLite Foreign Key Constraints</a>
+     * for more details about foreign key constraint support.
+     * </p>
+     *
+     * @param enable True to enable foreign key constraints, false to disable them.
+     *
+     * @throws IllegalStateException if the are transactions is in progress
+     * when this method is called.
+     */
+    public void setForeignKeyConstraintsEnabled(boolean enable) {
+        synchronized (mLock) {
+            throwIfNotOpenLocked();
+
+            if (mConfigurationLocked.foreignKeyConstraintsEnabled == enable) {
+                return;
+            }
+
+            mConfigurationLocked.foreignKeyConstraintsEnabled = enable;
+            try {
+                mConnectionPoolLocked.reconfigure(mConfigurationLocked);
+            } catch (RuntimeException ex) {
+                mConfigurationLocked.foreignKeyConstraintsEnabled = !enable;
+                throw ex;
+            }
+        }
+    }
+
+    /**
      * This method enables parallel execution of queries from multiple threads on the
      * same database.  It does this by opening multiple connections to the database
      * and using a different database connection for each query.  The database

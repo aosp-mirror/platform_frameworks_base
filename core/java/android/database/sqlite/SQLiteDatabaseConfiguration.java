@@ -77,6 +77,13 @@ public final class SQLiteDatabaseConfiguration {
     public Locale locale;
 
     /**
+     * True if foreign key constraints are enabled.
+     *
+     * Default is false.
+     */
+    public boolean foreignKeyConstraintsEnabled;
+
+    /**
      * The custom functions to register.
      */
     public final ArrayList<SQLiteCustomFunction> customFunctions =
@@ -136,6 +143,7 @@ public final class SQLiteDatabaseConfiguration {
         openFlags = other.openFlags;
         maxSqlCacheSize = other.maxSqlCacheSize;
         locale = other.locale;
+        foreignKeyConstraintsEnabled = other.foreignKeyConstraintsEnabled;
         customFunctions.clear();
         customFunctions.addAll(other.customFunctions);
     }
