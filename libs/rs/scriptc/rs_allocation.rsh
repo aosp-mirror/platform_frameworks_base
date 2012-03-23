@@ -14,31 +14,6 @@
  * limitations under the License.
  */
 
-/*! \mainpage notitle
- *
- * Renderscript is a high-performance runtime that provides graphics rendering and
- * compute operations at the native level. Renderscript code is compiled on devices
- * at runtime to allow platform-independence as well.
- * This reference documentation describes the Renderscript runtime APIs, which you
- * can utilize to write Renderscript code in C99. The Renderscript header
- * files are automatically included for you, except for the rs_graphics.rsh header. If
- * you are doing graphics rendering, include the graphics header file like this:
- *
- * <code>#include "rs_graphics.rsh"</code>
- *
- * To use Renderscript, you need to utilize the Renderscript runtime APIs documented here
- * as well as the Android framework APIs for Renderscript.
- * For documentation on the Android framework APIs, see the <a target="_parent" href=
- * "http://developer.android.com/reference/android/renderscript/package-summary.html">
- * android.renderscript</a> package reference.
- * For more information on how to develop with Renderscript and how the runtime and
- * Android framework APIs interact, see the <a target="_parent" href=
- * "http://developer.android.com/guide/topics/renderscript/index.html">Renderscript
- * developer guide</a> and the <a target="_parent" href=
- * "http://developer.android.com/resources/samples/RenderScript/index.html">
- * Renderscript samples</a>.
- */
-
 /** @file rs_allocation.rsh
  *  \brief Allocation routines
  *
@@ -168,6 +143,8 @@ extern const void * __attribute__((overloadable))
 extern const void * __attribute__((overloadable))
     rsGetElementAt(rs_allocation, uint32_t x, uint32_t y, uint32_t z);
 
+#if (defined(RS_VERSION) && (RS_VERSION >= 16))
+
 /**
  * @param a allocation to get data from
  * @return element describing allocation layout
@@ -216,26 +193,7 @@ extern const float4 __attribute__((overloadable))
 extern const float4 __attribute__((overloadable))
     rsSample(rs_allocation a, rs_sampler s, float2 location, float lod);
 
-/**
- * Fetch allocation in a way described by the sampler
- * @param a 3D allocation to sample from
- * @param s sampler state
- * @param location to sample from
- */
-extern const float4 __attribute__((overloadable))
-    rsSample(rs_allocation a, rs_sampler s, float3 location);
-
-/**
- * Fetch allocation in a way described by the sampler
- * @param a 3D allocation to sample from
- * @param s sampler state
- * @param location to sample from
- * @param lod mip level to sample from, for fractional values
- *            mip levels will be interpolated if
- *            RS_SAMPLER_LINEAR_MIP_LINEAR is used
- */
-extern const float4 __attribute__((overloadable))
-    rsSample(rs_allocation a, rs_sampler s, float3 location, float lod);
+#endif // (defined(RS_VERSION) && (RS_VERSION >= 16))
 
 #endif
 

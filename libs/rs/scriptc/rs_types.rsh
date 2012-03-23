@@ -402,6 +402,8 @@ typedef enum {
 
 #endif //defined(RS_VERSION) && (RS_VERSION >= 14)
 
+#if (defined(RS_VERSION) && (RS_VERSION >= 16))
+
 /**
  * Describes the way mesh vertex data is interpreted when rendering
  *
@@ -552,4 +554,6 @@ typedef enum {
     RS_SAMPLER_INVALID              = 100,
 } rs_sampler_value;
 
-#endif
+#endif // (defined(RS_VERSION) && (RS_VERSION >= 16))
+
+#endif // __RS_TYPES_RSH__
