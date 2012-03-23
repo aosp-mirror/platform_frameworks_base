@@ -916,8 +916,8 @@
     <string name="no" msgid="5141531044935541497">"Zrušit"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Upozornění"</string>
     <string name="loading" msgid="7933681260296021180">"Načítání..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"ZAPNUTO"</string>
-    <string name="capital_off" msgid="6815870386972805832">"VYPNUTO"</string>
+    <string name="capital_on" msgid="1544682755514494298">"I"</string>
+    <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončit akci pomocí aplikace"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použít jako výchozí nastavení pro tuto činnost."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Výchozí nastavení vymažete v části Nastavení systému &gt; Aplikace &gt; Stažené."</string>
@@ -1168,6 +1168,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Přidat účet"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Zvýšení"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Snížení"</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> dotkněte se a podržte."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Chcete-li přičítat, přejeďte prstem nahoru, chcete-li odečítat, přejeďte prstem dolů."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Přičíst minutu"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Odečíst minutu"</string>

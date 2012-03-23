@@ -1168,6 +1168,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Дадаць уліковы запіс"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Інкрэмент"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Дэкрэмент"</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"Націсніце і ўтрымлівайце <xliff:g id="VALUE">%s</xliff:g>."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Перасуньце палец уверх, каб павялiчыць адрэзак, або ўніз, каб паменшыць."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"На хвiлiну больш"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"На хвiлiну менш"</string>
