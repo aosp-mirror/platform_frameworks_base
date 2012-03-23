@@ -5,7 +5,7 @@ copyndkheaders() {
     local CURR_PLATFORM=android-9
     local ALL_PLATFORMS="$CURR_PLATFORM android-8 android-5 android-4 android-3"
 
-    local SRC_HEADERS=$ANDROID_BUILD_TOP/frameworks/base/native/include/android
+    local SRC_HEADERS=$ANDROID_BUILD_TOP/frameworks/native/include/android
     local NDK_PLATFORMS=$ANDROID_BUILD_TOP/development/ndk/platforms
     local DST_HEADERS=$NDK_PLATFORMS/$CURR_PLATFORM
 
