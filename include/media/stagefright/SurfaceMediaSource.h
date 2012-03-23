@@ -111,7 +111,7 @@ public:
     // Make sure this is called when the mutex is locked
     virtual status_t onFrameReceivedLocked();
 
-    virtual status_t setScalingMode(int mode) { } // no op for encoding
+    virtual status_t setScalingMode(int mode) { return OK; } // no op for encoding
     virtual int query(int what, int* value);
 
     // Just confirming to the ISurfaceTexture interface as of now
