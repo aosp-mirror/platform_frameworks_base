@@ -55,7 +55,7 @@
  * @param ps
  */
 extern rs_depth_func __attribute__((overloadable))
-    rsProgramStoreGetDepthFunc(rs_program_store ps);
+    rsgProgramStoreGetDepthFunc(rs_program_store ps);
 
 /**
  * @hide
@@ -64,7 +64,7 @@ extern rs_depth_func __attribute__((overloadable))
  * @param ps
  */
 extern bool __attribute__((overloadable))
-    rsProgramStoreGetDepthMask(rs_program_store ps);
+    rsgProgramStoreGetDepthMask(rs_program_store ps);
 /**
  * @hide
  * Get program store red component color mask
@@ -72,7 +72,7 @@ extern bool __attribute__((overloadable))
  * @param ps
  */
 extern bool __attribute__((overloadable))
-    rsProgramStoreGetColorMaskR(rs_program_store ps);
+    rsgProgramStoreGetColorMaskR(rs_program_store ps);
 
 /**
  * @hide
@@ -81,7 +81,7 @@ extern bool __attribute__((overloadable))
  * @param ps
  */
 extern bool __attribute__((overloadable))
-    rsProgramStoreGetColorMaskG(rs_program_store ps);
+    rsgProgramStoreGetColorMaskG(rs_program_store ps);
 
 /**
  * @hide
@@ -90,7 +90,7 @@ extern bool __attribute__((overloadable))
  * @param ps
  */
 extern bool __attribute__((overloadable))
-    rsProgramStoreGetColorMaskB(rs_program_store ps);
+    rsgProgramStoreGetColorMaskB(rs_program_store ps);
 
 /**
  * @hide
@@ -99,7 +99,7 @@ extern bool __attribute__((overloadable))
  * @param ps
  */
 extern bool __attribute__((overloadable))
-    rsProgramStoreGetColorMaskA(rs_program_store ps);
+    rsgProgramStoreGetColorMaskA(rs_program_store ps);
 
 /**
  * @hide
@@ -108,7 +108,7 @@ extern bool __attribute__((overloadable))
  * @param ps
  */
 extern rs_blend_src_func __attribute__((overloadable))
-        rsProgramStoreGetBlendSrcFunc(rs_program_store ps);
+        rsgProgramStoreGetBlendSrcFunc(rs_program_store ps);
 
 /**
  * @hide
@@ -117,7 +117,7 @@ extern rs_blend_src_func __attribute__((overloadable))
  * @param ps
  */
 extern rs_blend_dst_func __attribute__((overloadable))
-    rsProgramStoreGetBlendDstFunc(rs_program_store ps);
+    rsgProgramStoreGetBlendDstFunc(rs_program_store ps);
 
 /**
  * @hide
@@ -126,7 +126,7 @@ extern rs_blend_dst_func __attribute__((overloadable))
  * @param ps
  */
 extern bool __attribute__((overloadable))
-    rsProgramStoreGetDitherEnabled(rs_program_store ps);
+    rsgProgramStoreGetDitherEnabled(rs_program_store ps);
 
 /**
  * @hide
@@ -135,7 +135,7 @@ extern bool __attribute__((overloadable))
  * @param pr
  */
 extern bool __attribute__((overloadable))
-    rsProgramRasterGetPointSpriteEnabled(rs_program_raster pr);
+    rsgProgramRasterGetPointSpriteEnabled(rs_program_raster pr);
 
 /**
  * @hide
@@ -144,7 +144,7 @@ extern bool __attribute__((overloadable))
  * @param pr
  */
 extern rs_cull_mode __attribute__((overloadable))
-    rsProgramRasterGetCullMode(rs_program_raster pr);
+    rsgProgramRasterGetCullMode(rs_program_raster pr);
 
 
 

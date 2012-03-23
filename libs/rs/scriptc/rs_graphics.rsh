@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@
  */
 #ifndef __RS_GRAPHICS_RSH__
 #define __RS_GRAPHICS_RSH__
+
+#include "rs_mesh.rsh"
+#include "rs_program.rsh"
 
 #if (defined(RS_VERSION) && (RS_VERSION >= 14))
 /**
