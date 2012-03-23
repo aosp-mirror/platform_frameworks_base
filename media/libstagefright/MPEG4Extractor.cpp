@@ -373,7 +373,8 @@ status_t MPEG4Extractor::readMetaData() {
 
     if (mInitCheck == OK) {
         if (mHasVideo) {
-            mFileMetaData->setCString(kKeyMIMEType, "video/mp4");
+            mFileMetaData->setCString(
+                    kKeyMIMEType, MEDIA_MIMETYPE_CONTAINER_MPEG4);
         } else {
             mFileMetaData->setCString(kKeyMIMEType, "audio/mp4");
         }
