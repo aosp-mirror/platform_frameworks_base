@@ -18,13 +18,11 @@ package android.net;
 
 import android.os.SystemProperties;
 import android.util.Log;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.cert.X509Certificate;
-
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -36,7 +34,6 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
 import org.apache.harmony.xnet.provider.jsse.OpenSSLContextImpl;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
@@ -89,6 +86,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory mSecureFactory = null;
     private TrustManager[] mTrustManagers = null;
     private KeyManager[] mKeyManagers = null;
+    private byte[] mNpnProtocols = null;
 
     private final int mHandshakeTimeoutMillis;
     private final SSLClientSessionCache mSessionCache;
@@ -251,6 +249,60 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     /**
+     * Sets the <a href="http://technotes.googlecode.com/git/nextprotoneg.html">Next
+     * Protocol Negotiation (NPN)</a> protocols that this peer is interested in.
+     *
+     * <p>For servers this is the sequence of protocols to advertise as
+     * supported, in order of preference. This list is sent unencrypted to
+     * all clients that support NPN.
+     *
+     * <p>For clients this is a list of supported protocols to match against the
+     * server's list. If there is no protocol supported by both client and
+     * server then the first protocol in the client's list will be selected.
+     * The order of the client's protocols is otherwise insignificant.
+     *
+     * @param npnProtocols a possibly-empty list of protocol byte arrays. All
+     *     arrays must be non-empty and of length less than 256.
+     */
+    public void setNpnProtocols(byte[][] npnProtocols) {
+        this.mNpnProtocols = toNpnProtocolsList(npnProtocols);
+    }
+
+    /**
+     * Returns an array containing the concatenation of length-prefixed byte
+     * strings.
+     */
+    static byte[] toNpnProtocolsList(byte[]... npnProtocols) {
+        int totalLength = 0;
+        for (byte[] s : npnProtocols) {
+            if (s.length == 0 || s.length > 255) {
+                throw new IllegalArgumentException("s.length == 0 || s.length > 255: " + s.length);
+            }
+            totalLength += 1 + s.length;
+        }
+        byte[] result = new byte[totalLength];
+        int pos = 0;
+        for (byte[] s : npnProtocols) {
+            result[pos++] = (byte) s.length;
+            for (byte b : s) {
+                result[pos++] = b;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the <a href="http://technotes.googlecode.com/git/nextprotoneg.html">Next
+     * Protocol Negotiation (NPN)</a> protocol selected by client and server, or
+     * null if no protocol was negotiated.
+     *
+     * @param socket a socket created by this factory.
+     */
+    public byte[] getNpnSelectedProtocol(Socket socket) {
+        return ((OpenSSLSocketImpl) socket).getNpnSelectedProtocol();
+    }
+
+    /**
      * Sets the {@link KeyManager}s to be used for connections made by this factory.
      */
     public void setKeyManagers(KeyManager[] keyManagers) {
@@ -271,6 +323,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     @Override
     public Socket createSocket(Socket k, String host, int port, boolean close) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(k, host, port, close);
+        s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         if (mSecure) {
             verifyHostname(s, host);
@@ -289,6 +342,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     @Override
     public Socket createSocket() throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket();
+        s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         return s;
     }
@@ -305,6 +359,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
             throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(
                 addr, port, localAddr, localPort);
+        s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         return s;
     }
@@ -319,6 +374,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     @Override
     public Socket createSocket(InetAddress addr, int port) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(addr, port);
+        s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         return s;
     }
@@ -334,6 +390,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
             throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(
                 host, port, localAddr, localPort);
+        s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         if (mSecure) {
             verifyHostname(s, host);
@@ -350,6 +407,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     @Override
     public Socket createSocket(String host, int port) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(host, port);
+        s.setNpnProtocols(mNpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         if (mSecure) {
             verifyHostname(s, host);

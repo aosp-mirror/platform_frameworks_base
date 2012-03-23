@@ -16,17 +16,16 @@
 
 package android.net;
 
-import android.net.SSLCertificateSocketFactory;
 import android.test.suitebuilder.annotation.Suppress;
-import junit.framework.TestCase;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Arrays;
+import junit.framework.TestCase;
 
-//This test relies on network resources.
-@Suppress
 public class SSLTest extends TestCase {
+    //This test relies on network resources.
+    @Suppress
     public void testCertificate() throws Exception {
         // test www.fortify.net/sslcheck.html
         Socket ssl = SSLCertificateSocketFactory.getDefault().createSocket("www.fortify.net",443);
@@ -48,5 +47,36 @@ public class SSLTest extends TestCase {
         int ret = in.read(b);
 
         // System.out.println(new String(b));
+    }
+
+    public void testStringsToNpnBytes() {
+        byte[] expected = {
+                6, 's', 'p', 'd', 'y', '/', '2',
+                8, 'h', 't', 't', 'p', '/', '1', '.', '1',
+        };
+        assertTrue(Arrays.equals(expected, SSLCertificateSocketFactory.toNpnProtocolsList(
+                new byte[] { 's', 'p', 'd', 'y', '/', '2' },
+                new byte[] { 'h', 't', 't', 'p', '/', '1', '.', '1' })));
+    }
+
+    public void testStringsToNpnBytesEmptyByteArray() {
+        try {
+            SSLCertificateSocketFactory.toNpnProtocolsList(new byte[0]);
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    public void testStringsToNpnBytesEmptyArray() {
+        byte[] expected = {};
+        assertTrue(Arrays.equals(expected, SSLCertificateSocketFactory.toNpnProtocolsList()));
+    }
+
+    public void testStringsToNpnBytesOversizedInput() {
+        try {
+            SSLCertificateSocketFactory.toNpnProtocolsList(new byte[256]);
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
     }
 }
