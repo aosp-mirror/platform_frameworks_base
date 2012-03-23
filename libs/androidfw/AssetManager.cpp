@@ -25,13 +25,13 @@
 #include <androidfw/AssetDir.h>
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
-#include <androidfw/ZipFileRO.h>
 #include <utils/Atomic.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
 #include <utils/String8.h>
 #include <utils/threads.h>
 #include <utils/Timers.h>
+#include <utils/ZipFileRO.h>
 
 #include <assert.h>
 #include <dirent.h>
