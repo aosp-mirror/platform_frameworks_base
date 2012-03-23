@@ -90,6 +90,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
 	core/java/android/bluetooth/IBluetoothHeadsetPhone.aidl \
+	core/java/android/bluetooth/IBluetoothHealth.aidl \
 	core/java/android/bluetooth/IBluetoothHealthCallback.aidl \
 	core/java/android/bluetooth/IBluetoothInputDevice.aidl \
 	core/java/android/bluetooth/IBluetoothPbap.aidl \

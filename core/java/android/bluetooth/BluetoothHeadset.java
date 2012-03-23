@@ -239,7 +239,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * results once close() has been called. Multiple invocations of close()
      * are ok.
      */
-    /*package*/ synchronized void close() {
+    /*package*/ void close() {
         if (DBG) log("close()");
         if (mConnection != null) {
             mContext.unbindService(mConnection);

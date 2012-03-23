@@ -18,9 +18,7 @@ package android.bluetooth;
 
 import android.bluetooth.IBluetoothCallback;
 import android.bluetooth.IBluetoothStateChangeCallback;
-import android.bluetooth.IBluetoothHealthCallback;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHealthAppConfiguration;
 import android.os.ParcelUuid;
 import android.os.ParcelFileDescriptor;
 
