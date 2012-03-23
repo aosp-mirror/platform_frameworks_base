@@ -144,7 +144,6 @@ public class WebViewDatabase {
                         null);
             }
         }
-        mDatabase.enableWriteAheadLogging();
 
         // mDatabase should not be null,
         // the only case is RequestAPI test has problem to create db
@@ -163,11 +162,6 @@ public class WebViewDatabase {
                 mDatabase.endTransaction();
             }
         }
-
-        // use per table Mutex lock, turn off database lock, this
-        // improves performance as database's ReentrantLock is
-        // expansive
-        mDatabase.setLockingEnabled(false);
     }
 
     private static void upgradeDatabase() {
