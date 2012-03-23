@@ -216,9 +216,10 @@ public interface IActivityManager extends IInterface {
     public void enterSafeMode() throws RemoteException;
     
     public void noteWakeupAlarm(IIntentSender sender) throws RemoteException;
-    
+
     public boolean killPids(int[] pids, String reason, boolean secure) throws RemoteException;
-    
+    public boolean killProcessesBelowForeground(String reason) throws RemoteException;
+
     // Special low-level communication with activity manager.
     public void startRunning(String pkg, String cls, String action,
             String data) throws RemoteException;
@@ -573,4 +574,5 @@ public interface IActivityManager extends IInterface {
     int GET_CONTENT_PROVIDER_EXTERNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+140;
     int REMOVE_CONTENT_PROVIDER_EXTERNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+141;
     int GET_MY_MEMORY_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+142;
+    int KILL_PROCESSES_BELOW_FOREGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+143;
 }

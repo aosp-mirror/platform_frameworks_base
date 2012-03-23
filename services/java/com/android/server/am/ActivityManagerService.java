@@ -6993,7 +6993,43 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         return killed;
     }
-    
+
+    @Override
+    public boolean killProcessesBelowForeground(String reason) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("killProcessesBelowForeground() only available to system");
+        }
+
+        return killProcessesBelowAdj(ProcessList.FOREGROUND_APP_ADJ, reason);
+    }
+
+    private boolean killProcessesBelowAdj(int belowAdj, String reason) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("killProcessesBelowAdj() only available to system");
+        }
+
+        boolean killed = false;
+        synchronized (mPidsSelfLocked) {
+            final int size = mPidsSelfLocked.size();
+            for (int i = 0; i < size; i++) {
+                final int pid = mPidsSelfLocked.keyAt(i);
+                final ProcessRecord proc = mPidsSelfLocked.valueAt(i);
+                if (proc == null) continue;
+
+                final int adj = proc.setAdj;
+                if (adj > belowAdj && !proc.killedBackground) {
+                    Slog.w(TAG, "Killing " + proc + " (adj " + adj + "): " + reason);
+                    EventLog.writeEvent(
+                            EventLogTags.AM_KILL, proc.pid, proc.processName, adj, reason);
+                    killed = true;
+                    proc.killedBackground = true;
+                    Process.killProcessQuiet(pid);
+                }
+            }
+        }
+        return killed;
+    }
+
     public final void startRunning(String pkg, String cls, String action,
             String data) {
         synchronized(this) {

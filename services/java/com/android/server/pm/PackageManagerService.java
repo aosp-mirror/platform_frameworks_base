@@ -1577,7 +1577,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p != null) {
                 final PackageSetting ps = (PackageSetting)p.mExtras;
                 final SharedUserSetting suid = ps.sharedUser;
-                return suid != null ? suid.gids : ps.gids;
+                int[] gids = suid != null ? suid.gids : ps.gids;
+
+                // include GIDs for any unenforced permissions
+                if (!isPermissionEnforcedLocked(READ_EXTERNAL_STORAGE)) {
+                    final BasePermission basePerm = mSettings.mPermissions.get(
+                            READ_EXTERNAL_STORAGE);
+                    gids = appendInts(gids, basePerm.gids);
+                }
+
+                return gids;
             }
         }
         // stupid thing to indicate an error.
@@ -8854,6 +8863,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (mSettings.mReadExternalStorageEnforcement != enforcement) {
                     mSettings.mReadExternalStorageEnforcement = enforcement;
                     mSettings.writeLPr();
+
+                    // kill any non-foreground processes so we restart them and
+                    // grant/revoke the GID.
+                    final IActivityManager am = ActivityManagerNative.getDefault();
+                    if (am != null) {
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            am.killProcessesBelowForeground("setPermissionEnforcement");
+                        } catch (RemoteException e) {
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
                 }
             }
         } else {
