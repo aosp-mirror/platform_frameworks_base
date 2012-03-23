@@ -269,7 +269,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
     private void setWalModeFromConfiguration() {
         if (!mConfiguration.isInMemoryDb() && !mIsReadOnlyConnection) {
-            if (mConfiguration.walEnabled) {
+            if ((mConfiguration.openFlags & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0) {
                 setJournalMode("WAL");
                 setSyncMode(SQLiteGlobal.getWALSyncMode());
             } else {
@@ -389,7 +389,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
 
         // Remember what changed.
-        boolean walModeChanged = configuration.walEnabled != mConfiguration.walEnabled;
+        boolean walModeChanged = ((configuration.openFlags ^ mConfiguration.openFlags)
+                & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
         boolean localeChanged = !configuration.locale.equals(mConfiguration.locale);
 
         // Update configuration parameters.

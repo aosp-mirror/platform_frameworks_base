@@ -62,14 +62,6 @@ public final class SQLiteDatabaseConfiguration {
     public int openFlags;
 
     /**
-     * The maximum number of connections to retain in the connection pool.
-     * Must be at least 1.
-     *
-     * Default is 1.
-     */
-    public int maxConnectionPoolSize;
-
-    /**
      * The maximum size of the prepared statement cache for each database connection.
      * Must be non-negative.
      *
@@ -83,13 +75,6 @@ public final class SQLiteDatabaseConfiguration {
      * Default is the value returned by {@link Locale#getDefault()}.
      */
     public Locale locale;
-
-    /**
-     * True if WAL mode is enabled.
-     *
-     * Default is false.
-     */
-    public boolean walEnabled;
 
     /**
      * The custom functions to register.
@@ -114,7 +99,6 @@ public final class SQLiteDatabaseConfiguration {
         this.openFlags = openFlags;
 
         // Set default values for optional parameters.
-        maxConnectionPoolSize = 1;
         maxSqlCacheSize = 25;
         locale = Locale.getDefault();
     }
@@ -150,10 +134,8 @@ public final class SQLiteDatabaseConfiguration {
         }
 
         openFlags = other.openFlags;
-        maxConnectionPoolSize = other.maxConnectionPoolSize;
         maxSqlCacheSize = other.maxSqlCacheSize;
         locale = other.locale;
-        walEnabled = other.walEnabled;
         customFunctions.clear();
         customFunctions.addAll(other.customFunctions);
     }

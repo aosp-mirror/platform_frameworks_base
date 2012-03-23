@@ -81,6 +81,7 @@ public final class SQLiteConnectionPool implements Closeable {
     private final Object mLock = new Object();
     private final AtomicBoolean mConnectionLeaked = new AtomicBoolean();
     private final SQLiteDatabaseConfiguration mConfiguration;
+    private int mMaxConnectionPoolSize;
     private boolean mIsOpen;
     private int mNextConnectionId;
 
@@ -146,6 +147,7 @@ public final class SQLiteConnectionPool implements Closeable {
 
     private SQLiteConnectionPool(SQLiteDatabaseConfiguration configuration) {
         mConfiguration = new SQLiteDatabaseConfiguration(configuration);
+        setMaxConnectionPoolSizeLocked();
     }
 
     @Override
@@ -257,8 +259,9 @@ public final class SQLiteConnectionPool implements Closeable {
         synchronized (mLock) {
             throwIfClosedLocked();
 
-            boolean restrictToOneConnection = false;
-            if (mConfiguration.walEnabled != configuration.walEnabled) {
+            boolean walModeChanged = ((configuration.openFlags ^ mConfiguration.openFlags)
+                    & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0;
+            if (walModeChanged) {
                 // WAL mode can only be changed if there are no acquired connections
                 // because we need to close all but the primary connection first.
                 if (!mAcquiredConnections.isEmpty()) {
@@ -272,15 +275,13 @@ public final class SQLiteConnectionPool implements Closeable {
                 // because none of them are in use.
                 closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked();
                 assert mAvailableNonPrimaryConnections.isEmpty();
-
-                restrictToOneConnection = true;
             }
 
             if (mConfiguration.openFlags != configuration.openFlags) {
                 // If we are changing open flags and WAL mode at the same time, then
                 // we have no choice but to close the primary connection beforehand
                 // because there can only be one connection open when we change WAL mode.
-                if (restrictToOneConnection) {
+                if (walModeChanged) {
                     closeAvailableConnectionsAndLogExceptionsLocked();
                 }
 
@@ -296,9 +297,11 @@ public final class SQLiteConnectionPool implements Closeable {
 
                 mAvailablePrimaryConnection = newPrimaryConnection;
                 mConfiguration.updateParametersFrom(configuration);
+                setMaxConnectionPoolSizeLocked();
             } else {
                 // Reconfigure the database connections in place.
                 mConfiguration.updateParametersFrom(configuration);
+                setMaxConnectionPoolSizeLocked();
 
                 closeExcessConnectionsAndLogExceptionsLocked();
                 reconfigureAllConnectionsLocked();
@@ -360,8 +363,7 @@ public final class SQLiteConnectionPool implements Closeable {
                     mAvailablePrimaryConnection = connection;
                 }
                 wakeConnectionWaitersLocked();
-            } else if (mAvailableNonPrimaryConnections.size() >=
-                    mConfiguration.maxConnectionPoolSize - 1) {
+            } else if (mAvailableNonPrimaryConnections.size() >= mMaxConnectionPoolSize - 1) {
                 closeConnectionAndLogExceptionsLocked(connection);
             } else {
                 if (recycleConnectionLocked(connection, status)) {
@@ -499,7 +501,7 @@ public final class SQLiteConnectionPool implements Closeable {
     // Can't throw.
     private void closeExcessConnectionsAndLogExceptionsLocked() {
         int availableCount = mAvailableNonPrimaryConnections.size();
-        while (availableCount-- > mConfiguration.maxConnectionPoolSize - 1) {
+        while (availableCount-- > mMaxConnectionPoolSize - 1) {
             SQLiteConnection connection =
                     mAvailableNonPrimaryConnections.remove(availableCount);
             closeConnectionAndLogExceptionsLocked(connection);
@@ -874,7 +876,7 @@ public final class SQLiteConnectionPool implements Closeable {
         if (mAvailablePrimaryConnection != null) {
             openConnections += 1;
         }
-        if (openConnections >= mConfiguration.maxConnectionPoolSize) {
+        if (openConnections >= mMaxConnectionPoolSize) {
             return null;
         }
         connection = openConnectionLocked(mConfiguration,
@@ -926,6 +928,18 @@ public final class SQLiteConnectionPool implements Closeable {
         return (connectionFlags & CONNECTION_FLAG_INTERACTIVE) != 0 ? 1 : 0;
     }
 
+    private void setMaxConnectionPoolSizeLocked() {
+        if ((mConfiguration.openFlags & SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING) != 0) {
+            mMaxConnectionPoolSize = SQLiteGlobal.getWALConnectionPoolSize();
+        } else {
+            // TODO: We don't actually need to restrict the connection pool size to 1
+            // for non-WAL databases.  There might be reasons to use connection pooling
+            // with other journal modes.  For now, enabling connection pooling and
+            // using WAL are the same thing in the API.
+            mMaxConnectionPoolSize = 1;
+        }
+    }
+
     private void throwIfClosedLocked() {
         if (!mIsOpen) {
             throw new IllegalStateException("Cannot perform this operation "
@@ -972,7 +986,7 @@ public final class SQLiteConnectionPool implements Closeable {
         synchronized (mLock) {
             printer.println("Connection pool for " + mConfiguration.path + ":");
             printer.println("  Open: " + mIsOpen);
-            printer.println("  Max connections: " + mConfiguration.maxConnectionPoolSize);
+            printer.println("  Max connections: " + mMaxConnectionPoolSize);
 
             printer.println("  Available primary connection:");
             if (mAvailablePrimaryConnection != null) {

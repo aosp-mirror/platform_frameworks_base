@@ -84,6 +84,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mContext = context;
+        setWriteAheadLoggingEnabled(true);
     }
 
     public static boolean isValidTable(String name) {

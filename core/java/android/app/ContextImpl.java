@@ -766,17 +766,18 @@ class ContextImpl extends Context {
 
     @Override
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory) {
-        File f = validateFilePath(name, true);
-        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(f, factory);
-        setFilePermissionsFromMode(f.getPath(), mode, 0);
-        return db;
+        return openOrCreateDatabase(name, mode, factory, null);
     }
 
     @Override
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory,
             DatabaseErrorHandler errorHandler) {
         File f = validateFilePath(name, true);
-        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(f.getPath(), factory, errorHandler);
+        int flags = SQLiteDatabase.CREATE_IF_NECESSARY;
+        if ((mode & MODE_ENABLE_WRITE_AHEAD_LOGGING) != 0) {
+            flags |= SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;
+        }
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(f.getPath(), factory, flags, errorHandler);
         setFilePermissionsFromMode(f.getPath(), mode, 0);
         return db;
     }

@@ -58,6 +58,7 @@ public abstract class SQLiteOpenHelper {
 
     private SQLiteDatabase mDatabase;
     private boolean mIsInitializing;
+    private boolean mEnableWriteAheadLogging;
     private final DatabaseErrorHandler mErrorHandler;
 
     /**
@@ -74,7 +75,7 @@ public abstract class SQLiteOpenHelper {
      *     newer, {@link #onDowngrade} will be used to downgrade the database
      */
     public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version) {
-        this(context, name, factory, version, new DefaultDatabaseErrorHandler());
+        this(context, name, factory, version, null);
     }
 
     /**
@@ -92,14 +93,11 @@ public abstract class SQLiteOpenHelper {
      *     {@link #onUpgrade} will be used to upgrade the database; if the database is
      *     newer, {@link #onDowngrade} will be used to downgrade the database
      * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
-     * corruption.
+     * corruption, or null to use the default error handler.
      */
     public SQLiteOpenHelper(Context context, String name, CursorFactory factory, int version,
             DatabaseErrorHandler errorHandler) {
         if (version < 1) throw new IllegalArgumentException("Version must be >= 1, was " + version);
-        if (errorHandler == null) {
-            throw new IllegalArgumentException("DatabaseErrorHandler param value can't be null.");
-        }
 
         mContext = context;
         mName = name;
@@ -114,6 +112,32 @@ public abstract class SQLiteOpenHelper {
      */
     public String getDatabaseName() {
         return mName;
+    }
+
+    /**
+     * Enables or disables the use of write-ahead logging for the database.
+     *
+     * Write-ahead logging cannot be used with read-only databases so the value of
+     * this flag is ignored if the database is opened read-only.
+     *
+     * @param enabled True if write-ahead logging should be enabled, false if it
+     * should be disabled.
+     *
+     * @see SQLiteDatabase#enableWriteAheadLogging()
+     */
+    public void setWriteAheadLoggingEnabled(boolean enabled) {
+        synchronized (this) {
+            if (mEnableWriteAheadLogging != enabled) {
+                if (mDatabase != null && mDatabase.isOpen() && !mDatabase.isReadOnly()) {
+                    if (enabled) {
+                        mDatabase.enableWriteAheadLogging();
+                    } else {
+                        mDatabase.disableWriteAheadLogging();
+                    }
+                }
+                mEnableWriteAheadLogging = enabled;
+            }
+        }
     }
 
     /**
@@ -197,7 +221,9 @@ public abstract class SQLiteOpenHelper {
                         db = SQLiteDatabase.openDatabase(path, mFactory,
                                 SQLiteDatabase.OPEN_READONLY, mErrorHandler);
                     } else {
-                        db = mContext.openOrCreateDatabase(mName, 0, mFactory, mErrorHandler);
+                        db = mContext.openOrCreateDatabase(mName, mEnableWriteAheadLogging ?
+                                Context.MODE_ENABLE_WRITE_AHEAD_LOGGING : 0,
+                                mFactory, mErrorHandler);
                     }
                 } catch (SQLiteException ex) {
                     if (writable) {

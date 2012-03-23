@@ -5204,6 +5204,7 @@ package android.content {
     field public static final java.lang.String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final java.lang.String LOCATION_SERVICE = "location";
     field public static final int MODE_APPEND = 32768; // 0x8000
+    field public static final int MODE_ENABLE_WRITE_AHEAD_LOGGING = 8; // 0x8
     field public static final int MODE_MULTI_PROCESS = 4; // 0x4
     field public static final int MODE_PRIVATE = 0; // 0x0
     field public static final int MODE_WORLD_READABLE = 1; // 0x1
@@ -7334,6 +7335,7 @@ package android.database.sqlite {
     method public deprecated boolean isDbLockedByOtherThreads();
     method public boolean isOpen();
     method public boolean isReadOnly();
+    method public boolean isWriteAheadLoggingEnabled();
     method public deprecated void markTableSyncable(java.lang.String, java.lang.String);
     method public deprecated void markTableSyncable(java.lang.String, java.lang.String, java.lang.String);
     method public boolean needUpgrade(int);
@@ -7375,6 +7377,7 @@ package android.database.sqlite {
     field public static final int CONFLICT_REPLACE = 5; // 0x5
     field public static final int CONFLICT_ROLLBACK = 1; // 0x1
     field public static final int CREATE_IF_NECESSARY = 268435456; // 0x10000000
+    field public static final int ENABLE_WRITE_AHEAD_LOGGING = 536870912; // 0x20000000
     field public static final int MAX_SQL_CACHE_SIZE = 100; // 0x64
     field public static final int NO_LOCALIZED_COLLATORS = 16; // 0x10
     field public static final int OPEN_READONLY = 1; // 0x1
@@ -7438,6 +7441,7 @@ package android.database.sqlite {
     method public void onDowngrade(android.database.sqlite.SQLiteDatabase, int, int);
     method public void onOpen(android.database.sqlite.SQLiteDatabase);
     method public abstract void onUpgrade(android.database.sqlite.SQLiteDatabase, int, int);
+    method public void setWriteAheadLoggingEnabled(boolean);
   }
 
   public class SQLiteOutOfMemoryException extends android.database.sqlite.SQLiteException {
