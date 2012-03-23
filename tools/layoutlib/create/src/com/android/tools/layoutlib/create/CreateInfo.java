@@ -114,6 +114,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.LayoutInflater#rInflate",
         "android.view.LayoutInflater#parseInclude",
         "android.view.View#isInEditMode",
+        "android.view.ViewRootImpl#isInTouchMode",
         "android.view.inputmethod.InputMethodManager#getInstance",
         "android.util.Log#println_native",
         "com.android.internal.util.XmlUtils#convertValueToInt",
