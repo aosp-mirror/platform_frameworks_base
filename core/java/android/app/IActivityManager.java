@@ -105,7 +105,7 @@ public interface IActivityManager extends IInterface {
     public List getServices(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState()
             throws RemoteException;
-    public void moveTaskToFront(int task, int flags) throws RemoteException;
+    public void moveTaskToFront(int task, int flags, Bundle options) throws RemoteException;
     public void moveTaskToBack(int task) throws RemoteException;
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;

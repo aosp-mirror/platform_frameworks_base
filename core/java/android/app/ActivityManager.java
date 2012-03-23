@@ -31,6 +31,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Parcel;
@@ -816,6 +817,19 @@ public class ActivityManager {
     public static final int MOVE_TASK_NO_USER_ACTION = 0x00000002;
 
     /**
+     * Equivalent to calling {@link #moveTaskToFront(int, int, Bundle)}
+     * with a null options argument.
+     *
+     * @param taskId The identifier of the task to be moved, as found in
+     * {@link RunningTaskInfo} or {@link RecentTaskInfo}.
+     * @param flags Additional operational flags, 0 or more of
+     * {@link #MOVE_TASK_WITH_HOME}.
+     */
+    public void moveTaskToFront(int taskId, int flags) {
+        moveTaskToFront(taskId, flags, null);
+    }
+
+    /**
      * Ask that the task associated with a given task ID be moved to the
      * front of the stack, so it is now visible to the user.  Requires that
      * the caller hold permission {@link android.Manifest.permission#REORDER_TASKS}
@@ -825,10 +839,13 @@ public class ActivityManager {
      * {@link RunningTaskInfo} or {@link RecentTaskInfo}.
      * @param flags Additional operational flags, 0 or more of
      * {@link #MOVE_TASK_WITH_HOME}.
+     * @param options Additional options for the operation, either null or
+     * as per {@link Context#startActivity(Intent, android.os.Bundle)
+     * Context.startActivity(Intent, Bundle)}.
      */
-    public void moveTaskToFront(int taskId, int flags) {
+    public void moveTaskToFront(int taskId, int flags, Bundle options) {
         try {
-            ActivityManagerNative.getDefault().moveTaskToFront(taskId, flags);
+            ActivityManagerNative.getDefault().moveTaskToFront(taskId, flags, options);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
         }

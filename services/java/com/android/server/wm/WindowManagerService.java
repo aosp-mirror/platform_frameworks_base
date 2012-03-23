@@ -117,8 +117,12 @@ import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy.FakeWindow;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.Transformation;
 
 import java.io.BufferedWriter;
@@ -192,6 +196,18 @@ public class WindowManagerService extends IWindowManager.Stub
      * Dim surface layer is immediately below target window.
      */
     static final int LAYER_OFFSET_DIM = 1;
+
+    /**
+     * Blur surface layer is immediately below dim layer.
+     */
+    static final int LAYER_OFFSET_BLUR = 2;
+
+    /**
+     * Animation thumbnail is as far as possible below the window above
+     * the thumbnail (or in other words as far as possible above the window
+     * below it).
+     */
+    static final int LAYER_OFFSET_THUMBNAIL = WINDOW_LAYER_MULTIPLIER-1;
 
     /**
      * Layer at which to put the rotation freeze snapshot.
@@ -479,8 +495,12 @@ public class WindowManagerService extends IWindowManager.Stub
     // made visible or hidden at the next transition.
     int mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
     String mNextAppTransitionPackage;
+    Bitmap mNextAppTransitionThumbnail;
+    IRemoteCallback mNextAppTransitionCallback;
     int mNextAppTransitionEnter;
     int mNextAppTransitionExit;
+    int mNextAppTransitionStartX;
+    int mNextAppTransitionStartY;
     boolean mAppTransitionReady = false;
     boolean mAppTransitionRunning = false;
     boolean mAppTransitionTimeout = false;
@@ -2441,6 +2461,15 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.i(TAG, str);
         }
     }
+
+    static void logSurface(Surface s, String title, String msg, RuntimeException where) {
+        String str = "  SURFACE " + s + ": " + msg + " / " + title;
+        if (where != null) {
+            Slog.i(TAG, str, where);
+        } else {
+            Slog.i(TAG, str);
+        }
+    }
     
     void setTransparentRegionWindow(Session session, IWindow client, Region region) {
         long origId = Binder.clearCallingIdentity();
@@ -3081,6 +3110,63 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
+    private Animation createThumbnailAnimationLocked(int transit,
+            boolean enter, boolean thumb) {
+        Animation a;
+        final float thumbWidth = mNextAppTransitionThumbnail.getWidth();
+        final float thumbHeight = mNextAppTransitionThumbnail.getHeight();
+        // Pick the desired duration.  If this is an inter-activity transition,
+        // it  is the standard duration for that.  Otherwise we use the longer
+        // task transition duration.
+        int duration;
+        switch (transit) {
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+                duration = mContext.getResources().getInteger(
+                        com.android.internal.R.integer.config_shortAnimTime);
+                break;
+            default:
+                duration = 500;
+                break;
+            
+        }
+        if (thumb) {
+            // Animation for zooming thumbnail from its initial size to
+            // filling the screen.
+            Animation scale = new ScaleAnimation(
+                    1, mAppDisplayWidth/thumbWidth,
+                    1, mAppDisplayHeight/thumbHeight,
+                    mNextAppTransitionStartX + thumbWidth/2,
+                    mNextAppTransitionStartY + thumbHeight/2);
+            AnimationSet set = new AnimationSet(true);
+            Animation alpha = new AlphaAnimation(1, 0);
+            scale.setDuration(duration);
+            set.addAnimation(scale);
+            alpha.setDuration(duration);
+            set.addAnimation(alpha);
+            a = set;
+        } else if (enter) {
+            // Entering app zooms out from the center of the thumbnail.
+            a = new ScaleAnimation(
+                    thumbWidth/mAppDisplayWidth, 1,
+                    thumbHeight/mAppDisplayHeight, 1,
+                    mNextAppTransitionStartX + thumbWidth/2,
+                    mNextAppTransitionStartY + thumbHeight/2);
+            a.setDuration(duration);
+        } else {
+            // Exiting app just holds in place.
+            a = new AlphaAnimation(1, 1);
+            a.setDuration(duration);
+        }
+        a.setFillAfter(true);
+        final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
+                com.android.internal.R.interpolator.decelerate_quint);
+        a.setInterpolator(interpolator);
+        a.initialize(mAppDisplayWidth, mAppDisplayHeight,
+                mAppDisplayWidth, mAppDisplayHeight);
+        return a;
+    }
+
     private boolean applyAnimationLocked(AppWindowToken wtoken,
             WindowManager.LayoutParams lp, int transit, boolean enter) {
         // Only apply an animation if the display isn't frozen.  If it is
@@ -3089,7 +3175,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // is running.
         if (okToDisplay()) {
             Animation a;
-            if (mNextAppTransitionPackage != null) {
+            boolean initialized = false;
+            if (mNextAppTransitionThumbnail != null) {
+                a = createThumbnailAnimationLocked(transit, enter, false);
+                initialized = true;
+            } else if (mNextAppTransitionPackage != null) {
                 a = loadAnimation(mNextAppTransitionPackage, enter ?
                         mNextAppTransitionEnter : mNextAppTransitionExit);
             } else {
@@ -3161,7 +3251,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     Slog.v(TAG, "Loaded animation " + a + " for " + wtoken, e);
                 }
-                wtoken.setAnimation(a);
+                wtoken.setAnimation(a, initialized);
             }
         } else {
             wtoken.clearAnimation();
@@ -3689,8 +3779,20 @@ public class WindowManagerService extends IWindowManager.Stub
             int enterAnim, int exitAnim) {
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             mNextAppTransitionPackage = packageName;
+            mNextAppTransitionThumbnail = null;
             mNextAppTransitionEnter = enterAnim;
             mNextAppTransitionExit = exitAnim;
+        }
+    }
+
+    public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
+            int startY, IRemoteCallback startedCallback) {
+        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            mNextAppTransitionPackage = null;
+            mNextAppTransitionThumbnail = srcThumb;
+            mNextAppTransitionStartX = startX;
+            mNextAppTransitionStartY = startY;
+            mNextAppTransitionCallback = startedCallback;
         }
     }
 
@@ -3836,6 +3938,19 @@ public class WindowManagerService extends IWindowManager.Stub
                         // messages.
                         mH.sendMessageAtFrontOfQueue(m);
                         return;
+                    }
+                    if (ttoken.thumbnail != null) {
+                        // The old token is animating with a thumbnail, transfer
+                        // that to the new token.
+                        if (wtoken.thumbnail != null) {
+                            wtoken.thumbnail.destroy();
+                        }
+                        wtoken.thumbnail = ttoken.thumbnail;
+                        wtoken.thumbnailX = ttoken.thumbnailX;
+                        wtoken.thumbnailY = ttoken.thumbnailY;
+                        wtoken.thumbnailLayer = ttoken.thumbnailLayer;
+                        wtoken.thumbnailAnimation = ttoken.thumbnailAnimation;
+                        ttoken.thumbnail = null;
                     }
                 }
             }
@@ -4232,6 +4347,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Make sure there is no animation running on this token,
                     // so any windows associated with it will be removed as
                     // soon as their animations are complete
+                    wtoken.clearAnimation();
                     wtoken.animation = null;
                     wtoken.animating = false;
                 }
@@ -7784,11 +7900,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 animLp = null;
             }
 
+            AppWindowToken topOpeningApp = null;
+            int topOpeningLayer = 0;
+
             NN = mOpeningApps.size();
             for (i=0; i<NN; i++) {
                 AppWindowToken wtoken = mOpeningApps.get(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "Now opening app" + wtoken);
+                wtoken.clearThumbnail();
                 wtoken.reportedVisible = false;
                 wtoken.inPendingTransaction = false;
                 wtoken.animation = null;
@@ -7797,12 +7917,26 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToShow = false;
                 mAnimator.mAnimating |= wtoken.showAllWindowsLocked();
+                if (animLp != null) {
+                    int layer = -1;
+                    for (int j=0; j<wtoken.windows.size(); j++) {
+                        WindowState win = wtoken.windows.get(j);
+                        if (win.mAnimLayer > layer) {
+                            layer = win.mAnimLayer;
+                        }
+                    }
+                    if (topOpeningApp == null || layer > topOpeningLayer) {
+                        topOpeningApp = wtoken;
+                        topOpeningLayer = layer;
+                    }
+                }
             }
             NN = mClosingApps.size();
             for (i=0; i<NN; i++) {
                 AppWindowToken wtoken = mClosingApps.get(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "Now closing app" + wtoken);
+                wtoken.clearThumbnail();
                 wtoken.inPendingTransaction = false;
                 wtoken.animation = null;
                 setTokenVisibilityLocked(wtoken, animLp, false,
@@ -7815,7 +7949,47 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.allDrawn = true;
             }
 
+            if (mNextAppTransitionThumbnail != null && topOpeningApp != null
+                    && topOpeningApp.animation != null) {
+                // This thumbnail animation is very special, we need to have
+                // an extra surface with the thumbnail included with the animation.
+                Rect dirty = new Rect(0, 0, mNextAppTransitionThumbnail.getWidth(),
+                        mNextAppTransitionThumbnail.getHeight());
+                try {
+                    Surface surface = new Surface(mFxSession, Process.myPid(),
+                            "thumbnail anim", 0, dirty.width(), dirty.height(),
+                            PixelFormat.TRANSLUCENT, Surface.HIDDEN);
+                    topOpeningApp.thumbnail = surface;
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  THUMBNAIL "
+                            + surface + ": CREATE");
+                    Surface drawSurface = new Surface();
+                    drawSurface.copyFrom(surface);
+                    Canvas c = drawSurface.lockCanvas(dirty);
+                    c.drawBitmap(mNextAppTransitionThumbnail, 0, 0, null);
+                    drawSurface.unlockCanvasAndPost(c);
+                    drawSurface.release();
+                    topOpeningApp.thumbnailLayer = topOpeningLayer;
+                    Animation anim = createThumbnailAnimationLocked(transit, true, true);
+                    topOpeningApp.thumbnailAnimation = anim;
+                    anim.restrictDuration(MAX_ANIMATION_DURATION);
+                    anim.scaleCurrentDuration(mTransitionAnimationScale);
+                    topOpeningApp.thumbnailX = mNextAppTransitionStartX;
+                    topOpeningApp.thumbnailY = mNextAppTransitionStartY;
+                } catch (Surface.OutOfResourcesException e) {
+                    Slog.e(TAG, "Can't allocate thumbnail surface w=" + dirty.width()
+                            + " h=" + dirty.height(), e);
+                    topOpeningApp.clearThumbnail();
+                }
+            }
+
             mNextAppTransitionPackage = null;
+            mNextAppTransitionThumbnail = null;
+            if (mNextAppTransitionCallback != null) {
+                try {
+                    mNextAppTransitionCallback.sendResult(null);
+                } catch (RemoteException e) {
+                }
+            }
 
             mOpeningApps.clear();
             mClosingApps.clear();
@@ -8400,6 +8574,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Make sure there is no animation running on this token,
                 // so any windows associated with it will be removed as
                 // soon as their animations are complete
+                token.clearAnimation();
                 token.animation = null;
                 token.animating = false;
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
@@ -8839,6 +9014,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
             mNextAppTransitionPackage = null;
+            mNextAppTransitionThumbnail = null;
             mAppTransitionReady = true;
         }
 
@@ -9398,6 +9574,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(Integer.toHexString(mNextAppTransitionEnter));
                     pw.print(" mNextAppTransitionExit=0x");
                     pw.print(Integer.toHexString(mNextAppTransitionExit));
+            }
+            if (mNextAppTransitionThumbnail != null) {
+                pw.print("  mNextAppTransitionThumbnail=");
+                    pw.print(mNextAppTransitionThumbnail);
+                    pw.print(" mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
+                    pw.print(" mNextAppTransitionStartY="); pw.println(mNextAppTransitionStartY);
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);

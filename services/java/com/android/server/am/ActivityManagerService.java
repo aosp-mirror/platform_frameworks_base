@@ -34,6 +34,7 @@ import dalvik.system.Zygote;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
@@ -2353,10 +2354,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             ActivityRecord r = mMainStack.isInStackLocked(callingActivity);
             if (r == null) {
+                ActivityOptions.abort(options);
                 return false;
             }
             if (r.app == null || r.app.thread == null) {
                 // The caller is not running...  d'oh!
+                ActivityOptions.abort(options);
                 return false;
             }
             intent = new Intent(intent);
@@ -2393,6 +2396,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             if (aInfo == null) {
                 // Nobody who is next!
+                ActivityOptions.abort(options);
                 return false;
             }
 
@@ -2422,8 +2426,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             final long origId = Binder.clearCallingIdentity();
-            // XXX we are not dealing with propagating grantedUriPermissions...
-            // those are not yet exposed to user code, so there is no need.
             int res = mMainStack.startActivityLocked(r.app.thread, intent,
                     r.resolvedType, aInfo, resultTo != null ? resultTo.appToken : null,
                     resultWho, requestCode, -1, r.launchedFromUid, 0,
@@ -3653,7 +3655,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 lastTask = r.task;
                 if (r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED,
-                        null, "force-stop")) {
+                        null, "force-stop", true)) {
                     i--;
                 }
             }
@@ -5686,13 +5688,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * TODO: Add mController hook
      */
-    public void moveTaskToFront(int task, int flags) {
+    public void moveTaskToFront(int task, int flags, Bundle options) {
         enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
                 "moveTaskToFront()");
 
         synchronized(this) {
             if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
                     Binder.getCallingUid(), "Task to front")) {
+                ActivityOptions.abort(options);
                 return;
             }
             final long origId = Binder.clearCallingIdentity();
@@ -5707,7 +5710,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // we'll just move the home task to the top first.
                         mMainStack.moveHomeToFrontLocked();
                     }
-                    mMainStack.moveTaskToFrontLocked(tr, null);
+                    mMainStack.moveTaskToFrontLocked(tr, null, options);
                     return;
                 }
                 for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
@@ -5721,13 +5724,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // we'll just move the home task to the top first.
                             mMainStack.moveHomeToFrontLocked();
                         }
-                        mMainStack.moveTaskToFrontLocked(hr.task, null);
+                        mMainStack.moveTaskToFrontLocked(hr.task, null, options);
                         return;
                     }
                 }
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
+            ActivityOptions.abort(options);
         }
     }
 

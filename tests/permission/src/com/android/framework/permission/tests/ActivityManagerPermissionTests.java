@@ -39,7 +39,7 @@ public class ActivityManagerPermissionTests extends TestCase {
     @SmallTest
 	public void testREORDER_TASKS() {
         try {
-            mAm.moveTaskToFront(0, 0);
+            mAm.moveTaskToFront(0, 0, null);
             fail("IActivityManager.moveTaskToFront did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {

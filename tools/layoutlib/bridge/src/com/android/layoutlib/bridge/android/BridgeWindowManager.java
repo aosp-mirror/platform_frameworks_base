@@ -340,6 +340,12 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
+    public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX, int startY,
+            IRemoteCallback startedCallback) throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void pauseKeyDispatching(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
 

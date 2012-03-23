@@ -510,7 +510,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             int task = data.readInt();
             int fl = data.readInt();
-            moveTaskToFront(task, fl);
+            Bundle options = data.readInt() != 0
+                    ? Bundle.CREATOR.createFromParcel(data) : null;
+            moveTaskToFront(task, fl, options);
             reply.writeNoException();
             return true;
         }
@@ -2134,13 +2136,19 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return list;
     }
-    public void moveTaskToFront(int task, int flags) throws RemoteException
+    public void moveTaskToFront(int task, int flags, Bundle options) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(task);
         data.writeInt(flags);
+        if (options != null) {
+            data.writeInt(1);
+            options.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(MOVE_TASK_TO_FRONT_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

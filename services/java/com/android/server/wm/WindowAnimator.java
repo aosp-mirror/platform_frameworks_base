@@ -273,6 +273,15 @@ public class WindowAnimator {
                 w.performShowLocked();
                 mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
             }
+            if (atoken != null && atoken.thumbnail != null) {
+                if (atoken.thumbnailTransactionSeq != mTransactionSequence) {
+                    atoken.thumbnailTransactionSeq = mTransactionSequence;
+                    atoken.thumbnailLayer = 0;
+                }
+                if (atoken.thumbnailLayer < w.mAnimLayer) {
+                    atoken.thumbnailLayer = w.mAnimLayer;
+                }
+            }
         } // end forall windows
     }
 

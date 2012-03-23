@@ -3639,7 +3639,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityFromChild(Activity child, Intent intent,
             int requestCode) {
-        startActivityFromChild(child, intent, requestCode);
+        startActivityFromChild(child, intent, requestCode, null);
     }
 
     /**

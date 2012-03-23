@@ -19,6 +19,7 @@ package com.android.systemui.recent;
 import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -656,22 +657,33 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public void handleOnClick(View view) {
-        TaskDescription ad = ((ViewHolder) view.getTag()).taskDescription;
+        ViewHolder holder = (ViewHolder)view.getTag();
+        TaskDescription ad = holder.taskDescription;
         final Context context = view.getContext();
         final ActivityManager am = (ActivityManager)
                 context.getSystemService(Context.ACTIVITY_SERVICE);
+        holder.thumbnailViewImage.setDrawingCacheEnabled(true);
+        Bitmap bm = holder.thumbnailViewImage.getDrawingCache();
+        ActivityOptions opts = ActivityOptions.makeThumbnailScaleUpAnimation(
+                holder.thumbnailViewImage, bm, 0, 0,
+                new ActivityOptions.OnAnimationStartedListener() {
+                    @Override public void onAnimationStarted() {
+                        hide(true);
+                    }
+                });
         if (ad.taskId >= 0) {
             // This is an active task; it should just go to the foreground.
-            am.moveTaskToFront(ad.taskId, ActivityManager.MOVE_TASK_WITH_HOME);
+            am.moveTaskToFront(ad.taskId, ActivityManager.MOVE_TASK_WITH_HOME,
+                    opts.toBundle());
         } else {
             Intent intent = ad.intent;
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
                     | Intent.FLAG_ACTIVITY_TASK_ON_HOME
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             if (DEBUG) Log.v(TAG, "Starting activity " + intent);
-            context.startActivity(intent);
+            context.startActivity(intent, opts.toBundle());
         }
-        hide(true);
+        holder.thumbnailViewImage.setDrawingCacheEnabled(false);
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

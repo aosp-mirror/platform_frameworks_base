@@ -21,10 +21,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import com.android.server.wm.WindowManagerService.H;
 
 import android.content.pm.ActivityInfo;
+import android.graphics.Matrix;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.IApplicationToken;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
@@ -90,6 +92,7 @@ class AppWindowToken extends WindowToken {
 
     boolean animating;
     Animation animation;
+    boolean animInitialized;
     boolean hasTransformation;
     final Transformation transformation = new Transformation();
 
@@ -105,6 +108,15 @@ class AppWindowToken extends WindowToken {
     boolean startingMoved;
     boolean firstWindowDrawn;
 
+    // Special surface for thumbnail animation.
+    Surface thumbnail;
+    int thumbnailTransactionSeq;
+    int thumbnailX;
+    int thumbnailY;
+    int thumbnailLayer;
+    Animation thumbnailAnimation;
+    final Transformation thumbnailTransformation = new Transformation();
+
     // Input application handle used by the input dispatcher.
     final InputApplicationHandle mInputApplicationHandle;
 
@@ -116,11 +128,12 @@ class AppWindowToken extends WindowToken {
         mInputApplicationHandle = new InputApplicationHandle(this);
     }
 
-    public void setAnimation(Animation anim) {
+    public void setAnimation(Animation anim, boolean initialized) {
         if (WindowManagerService.localLOGV) Slog.v(
             WindowManagerService.TAG, "Setting animation in " + this + ": " + anim);
         animation = anim;
         animating = false;
+        animInitialized = initialized;
         anim.restrictDuration(WindowManagerService.MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(service.mTransitionAnimationScale);
         int zorder = anim.getZAdjustment();
@@ -146,6 +159,7 @@ class AppWindowToken extends WindowToken {
             if (WindowManagerService.localLOGV) Slog.v(
                 WindowManagerService.TAG, "Setting dummy animation in " + this);
             animation = WindowManagerService.sDummyAnimation;
+            animInitialized = false;
         }
     }
 
@@ -153,15 +167,28 @@ class AppWindowToken extends WindowToken {
         if (animation != null) {
             animation = null;
             animating = true;
+            animInitialized = false;
+        }
+        clearThumbnail();
+    }
+
+    public void clearThumbnail() {
+        if (thumbnail != null) {
+            thumbnail.destroy();
+            thumbnail = null;
         }
     }
 
     void updateLayers() {
         final int N = allAppWindows.size();
         final int adj = animLayerAdjustment;
+        thumbnailLayer = -1;
         for (int i=0; i<N; i++) {
             WindowState w = allAppWindows.get(i);
             w.mAnimLayer = w.mLayer + adj;
+            if (w.mAnimLayer > thumbnailLayer) {
+                thumbnailLayer = w.mAnimLayer;
+            }
             if (WindowManagerService.DEBUG_LAYERS) Slog.v(WindowManagerService.TAG, "Updating layer " + w + ": "
                     + w.mAnimLayer);
             if (w == service.mInputMethodTarget && !service.mInputMethodTargetWaitingAnim) {
@@ -203,6 +230,38 @@ class AppWindowToken extends WindowToken {
         return isAnimating;
     }
 
+    private void stepThumbnailAnimation(long currentTime) {
+        thumbnailTransformation.clear();
+        thumbnailAnimation.getTransformation(currentTime, thumbnailTransformation);
+        thumbnailTransformation.getMatrix().preTranslate(thumbnailX, thumbnailY);
+        final boolean screenAnimation = service.mAnimator.mScreenRotationAnimation != null
+                && service.mAnimator.mScreenRotationAnimation.isAnimating();
+        if (screenAnimation) {
+            thumbnailTransformation.postCompose(
+                    service.mAnimator.mScreenRotationAnimation.getEnterTransformation());
+        }
+        // cache often used attributes locally
+        final float tmpFloats[] = service.mTmpFloats;
+        thumbnailTransformation.getMatrix().getValues(tmpFloats);
+        if (WindowManagerService.SHOW_TRANSACTIONS) service.logSurface(thumbnail,
+                "thumbnail", "POS " + tmpFloats[Matrix.MTRANS_X]
+                + ", " + tmpFloats[Matrix.MTRANS_Y], null);
+        thumbnail.setPosition(tmpFloats[Matrix.MTRANS_X], tmpFloats[Matrix.MTRANS_Y]);
+        if (WindowManagerService.SHOW_TRANSACTIONS) service.logSurface(thumbnail,
+                "thumbnail", "alpha=" + thumbnailTransformation.getAlpha()
+                + " layer=" + thumbnailLayer
+                + " matrix=[" + tmpFloats[Matrix.MSCALE_X]
+                + "," + tmpFloats[Matrix.MSKEW_Y]
+                + "][" + tmpFloats[Matrix.MSKEW_X]
+                + "," + tmpFloats[Matrix.MSCALE_Y] + "]", null);
+        thumbnail.setAlpha(thumbnailTransformation.getAlpha());
+        // The thumbnail is layered below the window immediately above this
+        // token's anim layer.
+        thumbnail.setLayer(thumbnailLayer + WindowManagerService.WINDOW_LAYER_MULTIPLIER
+                - WindowManagerService.LAYER_OFFSET_THUMBNAIL);
+        thumbnail.setMatrix(tmpFloats[Matrix.MSCALE_X], tmpFloats[Matrix.MSKEW_Y],
+                tmpFloats[Matrix.MSKEW_X], tmpFloats[Matrix.MSCALE_Y]);
+    }
 
     private boolean stepAnimation(long currentTime) {
         if (animation == null) {
@@ -215,6 +274,7 @@ class AppWindowToken extends WindowToken {
             ": more=" + more + ", xform=" + transformation);
         if (!more) {
             animation = null;
+            clearThumbnail();
             if (WindowManagerService.DEBUG_ANIM) Slog.v(
                 WindowManagerService.TAG, "Finished animation in " + this +
                 " @ " + currentTime);
@@ -243,12 +303,22 @@ class AppWindowToken extends WindowToken {
                         " @ " + currentTime + ": dw=" + dw + " dh=" + dh
                         + " scale=" + service.mTransitionAnimationScale
                         + " allDrawn=" + allDrawn + " animating=" + animating);
-                    animation.initialize(dw, dh, dw, dh);
+                    if (!animInitialized) {
+                        animation.initialize(dw, dh, dw, dh);
+                    }
                     animation.setStartTime(currentTime);
                     animating = true;
+                    if (thumbnail != null) {
+                        thumbnail.show();
+                        thumbnailAnimation.setStartTime(currentTime);
+                    }
                 }
                 if (stepAnimation(currentTime)) {
-                    // we're done!
+                    // animation isn't over, step any thumbnail and that's
+                    // it for now.
+                    if (thumbnail != null) {
+                        stepThumbnailAnimation(currentTime);
+                    }
                     return true;
                 }
             }
@@ -439,6 +509,15 @@ class AppWindowToken extends WindowToken {
                     pw.print(" startingView="); pw.print(startingView);
                     pw.print(" startingDisplayed="); pw.print(startingDisplayed);
                     pw.print(" startingMoved"); pw.println(startingMoved);
+        }
+        if (thumbnail != null) {
+            pw.print(prefix); pw.print("thumbnail="); pw.print(thumbnail);
+                    pw.print(" x="); pw.print(thumbnailX);
+                    pw.print(" y="); pw.print(thumbnailY);
+                    pw.print(" layer="); pw.println(thumbnailLayer);
+            pw.print(prefix); pw.print("thumbnailAnimation="); pw.println(thumbnailAnimation);
+            pw.print(prefix); pw.print("thumbnailTransformation=");
+                    pw.println(thumbnailTransformation.toShortString());
         }
     }
 

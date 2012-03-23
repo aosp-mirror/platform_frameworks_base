@@ -1695,6 +1695,7 @@ final class ActivityStack {
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
                         }
+                        ActivityOptions.abort(options);
                         return;
                     }
                     break;
@@ -1797,6 +1798,7 @@ final class ActivityStack {
             // because there is nothing for it to animate on top of.
             mService.mWindowManager.addAppToken(addPos, r.appToken, r.task.taskId,
                     r.info.screenOrientation, r.fullscreen);
+            ActivityOptions.abort(options);
         }
         if (VALIDATE_TOKENS) {
             validateAppTokensLocked();
@@ -2344,6 +2346,7 @@ final class ActivityStack {
             // Transfer the result target from the source activity to the new
             // one being started, including any failures.
             if (requestCode >= 0) {
+                ActivityOptions.abort(options);
                 return ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT;
             }
             resultRecord = sourceRecord.resultTo;
@@ -2375,6 +2378,7 @@ final class ActivityStack {
                     Activity.RESULT_CANCELED, null);
             }
             mDismissKeyguardOnNextActivity = false;
+            ActivityOptions.abort(options);
             return err;
         }
 
@@ -2425,6 +2429,7 @@ final class ActivityStack {
                     // We pretend to the caller that it was really started, but
                     // they will just get a cancel result.
                     mDismissKeyguardOnNextActivity = false;
+                    ActivityOptions.abort(options);
                     return ActivityManager.START_SUCCESS;
                 }
             }
@@ -2447,6 +2452,7 @@ final class ActivityStack {
                     pal.startFlags = startFlags;
                     mService.mPendingActivityLaunches.add(pal);
                     mDismissKeyguardOnNextActivity = false;
+                    ActivityOptions.abort(options);
                     return ActivityManager.START_SWITCHES_CANCELED;
                 }
             }
@@ -2601,8 +2607,7 @@ final class ActivityStack {
                             // We really do want to push this one into the
                             // user's face, right now.
                             moveHomeToFrontFromLaunchLocked(launchFlags);
-                            r.updateOptionsLocked(options);
-                            moveTaskToFrontLocked(taskTop.task, r);
+                            moveTaskToFrontLocked(taskTop.task, r, options);
                         }
                     }
                     // If the caller has requested that the target task be
@@ -2618,6 +2623,7 @@ final class ActivityStack {
                         if (doResume) {
                             resumeTopActivityLocked(null);
                         }
+                        ActivityOptions.abort(options);
                         return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                     }
                     if ((launchFlags &
@@ -2705,6 +2711,7 @@ final class ActivityStack {
                         if (doResume) {
                             resumeTopActivityLocked(null);
                         }
+                        ActivityOptions.abort(options);
                         return ActivityManager.START_TASK_TO_FRONT;
                     }
                 }
@@ -2734,6 +2741,7 @@ final class ActivityStack {
                             if (doResume) {
                                 resumeTopActivityLocked(null);
                             }
+                            ActivityOptions.abort(options);
                             if ((startFlags&ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
                                 // We don't need to start a new activity, and
                                 // the client said not to do anything if that
@@ -2753,6 +2761,7 @@ final class ActivityStack {
                         r.resultTo, r.resultWho, r.requestCode,
                     Activity.RESULT_CANCELED, null);
             }
+            ActivityOptions.abort(options);
             return ActivityManager.START_CLASS_NOT_FOUND;
         }
 
@@ -2794,6 +2803,7 @@ final class ActivityStack {
                     if (doResume) {
                         resumeTopActivityLocked(null);
                     }
+                    ActivityOptions.abort(options);
                     return ActivityManager.START_DELIVERED_TO_TOP;
                 }
             } else if (!addingToTask &&
@@ -2948,6 +2958,7 @@ final class ActivityStack {
                                 Slog.w(TAG, "Unable to find app for caller " + caller
                                       + " (pid=" + realCallingPid + ") when starting: "
                                       + intent.toString());
+                                ActivityOptions.abort(options);
                                 return ActivityManager.START_PERMISSION_DENIED;
                             }
                         }
@@ -3480,6 +3491,15 @@ final class ActivityStack {
      */
     final boolean finishActivityLocked(ActivityRecord r, int index,
             int resultCode, Intent resultData, String reason) {
+        return finishActivityLocked(r, index, resultCode, resultData, reason, false);
+    }
+
+    /**
+     * @return Returns true if this activity has been removed from the history
+     * list, or false if it is still in the list and will be removed later.
+     */
+    final boolean finishActivityLocked(ActivityRecord r, int index,
+            int resultCode, Intent resultData, String reason, boolean immediate) {
         if (r.finishing) {
             Slog.w(TAG, "Duplicate finish request for " + r);
             return false;
@@ -3521,7 +3541,10 @@ final class ActivityStack {
             mService.mCancelledThumbnails.add(r);
         }
 
-        if (mResumedActivity == r) {
+        if (immediate) {
+            return finishCurrentActivityLocked(r, index,
+                    FINISH_IMMEDIATELY) == null;
+        } else if (mResumedActivity == r) {
             boolean endTask = index <= 0
                     || (mHistory.get(index-1)).task != r.task;
             if (DEBUG_TRANSITION) Slog.v(TAG,
@@ -3887,12 +3910,12 @@ final class ActivityStack {
             }
         }
         if (homeTask != null) {
-            moveTaskToFrontLocked(homeTask, null);
+            moveTaskToFrontLocked(homeTask, null, null);
         }
     }
 
 
-    final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason) {
+    final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason, Bundle options) {
         if (DEBUG_SWITCH) Slog.v(TAG, "moveTaskToFront: " + tr);
 
         final int task = tr.taskId;
@@ -3900,6 +3923,7 @@ final class ActivityStack {
 
         if (top < 0 || (mHistory.get(top)).task.taskId == task) {
             // nothing to do!
+            ActivityOptions.abort(options);
             return;
         }
 
@@ -3941,7 +3965,16 @@ final class ActivityStack {
             if (r != null) {
                 mNoAnimActivities.add(r);
             }
+            ActivityOptions.abort(options);
         } else {
+            if (options != null) {
+                ActivityRecord r = topRunningActivityLocked(null);
+                if (r != null && r.state != ActivityState.RESUMED) {
+                    r.updateOptionsLocked(options);
+                } else {
+                    ActivityOptions.abort(options);
+                }
+            }
             mService.mWindowManager.prepareAppTransition(
                     WindowManagerPolicy.TRANSIT_TASK_TO_FRONT, false);
         }
