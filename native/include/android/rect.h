@@ -18,6 +18,8 @@
 #ifndef ANDROID_RECT_H
 #define ANDROID_RECT_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
