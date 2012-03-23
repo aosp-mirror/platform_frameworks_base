@@ -16,8 +16,6 @@
 
 package android.view;
 
-import android.os.Handler;
-
 /**
  * A display lists records a series of graphics related operation and can replay
  * them later. Display lists are usually built by recording operations on a
