@@ -1,0 +1,87 @@
+page.title=Redundant Downloads are Redundant
+parent.title=Transferring Data Without Draining the Battery
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Minimizing the Effect of Regular Updates
+previous.link=regular_updates.html
+next.title=Connectivity Based Download Patterns
+next.link=connectivity_patterns.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#LocalCache">Cache files locally</a></li>
+  <li><a href="#ResponseCache">Use the HttpURLConnection response cache</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>The most fundamental way to reduce your downloads is to download only what you need. In terms of data, that means implementing REST APIs that allow you to specify query criteria that limit the returned data by using parameters such as the time of your last update.</p>
+
+<p>Similarly, when downloading images, it's good practice to reduce the size of the images server-side, rather than downloading full-sized images that are reduced on the client.</p>
+ 
+<h2 id="LocalCache">Cache Files Locally</h2> 
+
+<p>Another important technique is to avoid downloading duplicate data. You can do this by aggressive caching. Always cache static resources, including on-demand downloads such as full size images, for as long as reasonably possible. On-demand resources should be stored separately to enable you to regularly flush your on-demand cache to manage its size.</p>
+
+<p>To ensure that your caching doesn't result in your app displaying stale data, be sure to extract the time at which the requested content was last updated, and when it expires, from within the HTTP response headers. This will allow you to determine when the associated content should be refreshed.</p>
+
+<pre>long currentTime = System.currentTimeMillis());
+
+HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+long expires = conn.getHeaderFieldDate("Expires", currentTime);
+long lastModified = conn.getHeaderFieldDate("Last-Modified", currentTime);
+
+setDataExpirationDate(expires);
+
+if (lastModified < lastUpdateTime) {
+  // Skip update
+} else {
+  // Parse update
+}</pre>
+
+<p>Using this approach, you can also effectively cache dynamic content while ensuring it doesn't result in your application displaying stale information.</p>
+
+<p>You can cache non-sensitive data can in the unmanaged external cache directory:</p>
+
+<pre>Context.getExternalCacheDir();</pre>
+
+<p>Alternatively, you can use the managed / secure application cache. Note that this internal cache may be flushed when the system is running low on available storage.</p>
+
+<pre>Context.getCache();</pre>
+
+<p>Files stored in either cache location will be erased when the application is uninstalled.</p>
+
+<h2 id="ResponseCache">Use the HttpURLConnection Response Cache</h2> 
+
+<p>Android 4.0 added a response cache to {@code HttpURLConnection}. You can enable HTTP response caching on supported devices using reflection as follows:</p>
+
+<pre>private void enableHttpResponseCache() {
+  try {
+    long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+    File httpCacheDir = new File(getCacheDir(), "http");
+    Class.forName("android.net.http.HttpResponseCache")
+         .getMethod("install", File.class, long.class)
+         .invoke(null, httpCacheDir, httpCacheSize);
+  } catch (Exception httpResponseCacheNotAvailable) {
+    Log.d(TAG, "HTTP response cache is unavailable.");
+  }
+}</pre>
+
+<p>This sample code will turn on the response cache on Android 4.0+ devices without affecting earlier releases.</p>
+
+<p>With the cache installed, fully cached HTTP requests can be served directly from local storage, eliminating the need to open a network connection. Conditionally cached responses can validate their freshness from the server, eliminating the bandwidth cost associated with the download.</p>
+
+<p>Uncached responses get stored in the response cache for for future requests.</p>
