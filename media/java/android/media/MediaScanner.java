@@ -1396,6 +1396,7 @@ public class MediaScanner
         }
 
         mMtpObjectHandle = objectHandle;
+        Cursor fileList = null;
         try {
             if (MediaFile.isPlayListFileType(fileType)) {
                 // build file cache so we can look up tracks in the playlist
@@ -1403,7 +1404,9 @@ public class MediaScanner
 
                 FileEntry entry = makeEntryFor(path);
                 if (entry != null) {
-                    processPlayList(entry);
+                    fileList = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
+                            null, null, null, null);
+                    processPlayList(entry, fileList);
                 }
             } else {
                 // MTP will create a file entry for us so we don't want to do it in prescan
@@ -1417,6 +1420,9 @@ public class MediaScanner
             Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
         } finally {
             mMtpObjectHandle = 0;
+            if (fileList != null) {
+                fileList.close();
+            }
         }
     }
 
@@ -1479,7 +1485,7 @@ public class MediaScanner
     }
 
     private boolean addPlayListEntry(String entry, String playListDirectory,
-            Uri uri, ContentValues values, int index) {
+            Uri uri, ContentValues values, int index, Cursor fileList) {
 
         // watch for trailing whitespace
         int entryLength = entry.length();
@@ -1506,19 +1512,20 @@ public class MediaScanner
         // number of rightmost file/directory names for bestMatch
         int bestMatchLength = 0;
 
-        Cursor c = null;
-        try {
-            c = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
-                    null, null, null, null);
-        } catch (RemoteException e1) {
-        }
-
-        if (c != null) {
-            while (c.moveToNext()) {
-                long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
-                String path = c.getString(FILES_PRESCAN_PATH_COLUMN_INDEX);
-                int format = c.getInt(FILES_PRESCAN_FORMAT_COLUMN_INDEX);
-                long lastModified = c.getLong(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
+        if (fileList != null) {
+            int count = fileList.getCount();
+            // Backing up a little in the cursor helps when the files in the
+            // playlist are not in the same order as they are in the database
+            // but are still close.
+            fileList.move(-1000);
+            while(--count >= 0) {
+                if (!fileList.moveToNext()) {
+                    fileList.moveToFirst();
+                }
+                long rowId = fileList.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
+                String path = fileList.getString(FILES_PRESCAN_PATH_COLUMN_INDEX);
+                int format = fileList.getInt(FILES_PRESCAN_FORMAT_COLUMN_INDEX);
+                long lastModified = fileList.getLong(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
 
                 if (path.equalsIgnoreCase(entry)) {
                     bestMatch = new FileEntry(rowId, path, lastModified, format);
@@ -1531,7 +1538,6 @@ public class MediaScanner
                     bestMatchLength = matchLength;
                 }
             }
-            c.close();
         }
 
         if (bestMatch == null) {
@@ -1541,7 +1547,7 @@ public class MediaScanner
         try {
             // check rowid is set. Rowid may be missing if it is inserted by bulkInsert().
             if (bestMatch.mRowId == 0) {
-                c = mMediaProvider.query(mAudioUri, ID_PROJECTION,
+                Cursor c = mMediaProvider.query(mAudioUri, ID_PROJECTION,
                         MediaStore.Files.FileColumns.DATA + "=?",
                         new String[] { bestMatch.mPath }, null, null);
                 if (c != null) {
@@ -1567,7 +1573,8 @@ public class MediaScanner
         return true;
     }
 
-    private void processM3uPlayList(String path, String playListDirectory, Uri uri, ContentValues values) {
+    private void processM3uPlayList(String path, String playListDirectory, Uri uri,
+            ContentValues values, Cursor fileList) {
         BufferedReader reader = null;
         try {
             File f = new File(path);
@@ -1580,7 +1587,7 @@ public class MediaScanner
                     // ignore comment lines, which begin with '#'
                     if (line.length() > 0 && line.charAt(0) != '#') {
                         values.clear();
-                        if (addPlayListEntry(line, playListDirectory, uri, values, index))
+                        if (addPlayListEntry(line, playListDirectory, uri, values, index, fileList))
                             index++;
                     }
                     line = reader.readLine();
@@ -1598,7 +1605,8 @@ public class MediaScanner
         }
     }
 
-    private void processPlsPlayList(String path, String playListDirectory, Uri uri, ContentValues values) {
+    private void processPlsPlayList(String path, String playListDirectory, Uri uri,
+            ContentValues values, Cursor fileList) {
         BufferedReader reader = null;
         try {
             File f = new File(path);
@@ -1613,7 +1621,8 @@ public class MediaScanner
                         int equals = line.indexOf('=');
                         if (equals > 0) {
                             values.clear();
-                            if (addPlayListEntry(line.substring(equals + 1), playListDirectory, uri, values, index))
+                            if (addPlayListEntry(line.substring(equals + 1), playListDirectory,
+                                    uri, values, index, fileList))
                                 index++;
                         }
                     }
@@ -1637,12 +1646,14 @@ public class MediaScanner
         final ContentHandler handler;
         String playListDirectory;
         Uri uri;
+        Cursor fileList;
         ContentValues values = new ContentValues();
         int index = 0;
 
-        public WplHandler(String playListDirectory, Uri uri) {
+        public WplHandler(String playListDirectory, Uri uri, Cursor fileList) {
             this.playListDirectory = playListDirectory;
             this.uri = uri;
+            this.fileList = fileList;
 
             RootElement root = new RootElement("smil");
             Element body = root.getChild("body");
@@ -1653,11 +1664,12 @@ public class MediaScanner
             this.handler = root.getContentHandler();
         }
 
+        @Override
         public void start(Attributes attributes) {
             String path = attributes.getValue("", "src");
             if (path != null) {
                 values.clear();
-                if (addPlayListEntry(path, playListDirectory, uri, values, index)) {
+                if (addPlayListEntry(path, playListDirectory, uri, values, index, fileList)) {
                     index++;
                 }
             }
@@ -1671,14 +1683,16 @@ public class MediaScanner
         }
     }
 
-    private void processWplPlayList(String path, String playListDirectory, Uri uri) {
+    private void processWplPlayList(String path, String playListDirectory, Uri uri,
+            Cursor fileList) {
         FileInputStream fis = null;
         try {
             File f = new File(path);
             if (f.exists()) {
                 fis = new FileInputStream(f);
 
-                Xml.parse(fis, Xml.findEncodingByName("UTF-8"), new WplHandler(playListDirectory, uri).getContentHandler());
+                Xml.parse(fis, Xml.findEncodingByName("UTF-8"),
+                        new WplHandler(playListDirectory, uri, fileList).getContentHandler());
             }
         } catch (SAXException e) {
             e.printStackTrace();
@@ -1694,7 +1708,7 @@ public class MediaScanner
         }
     }
 
-    private void processPlayList(FileEntry entry) throws RemoteException {
+    private void processPlayList(FileEntry entry, Cursor fileList) throws RemoteException {
         String path = entry.mPath;
         ContentValues values = new ContentValues();
         int lastSlash = path.lastIndexOf('/');
@@ -1736,21 +1750,31 @@ public class MediaScanner
         int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
 
         if (fileType == MediaFile.FILE_TYPE_M3U) {
-            processM3uPlayList(path, playListDirectory, membersUri, values);
+            processM3uPlayList(path, playListDirectory, membersUri, values, fileList);
         } else if (fileType == MediaFile.FILE_TYPE_PLS) {
-            processPlsPlayList(path, playListDirectory, membersUri, values);
+            processPlsPlayList(path, playListDirectory, membersUri, values, fileList);
         } else if (fileType == MediaFile.FILE_TYPE_WPL) {
-            processWplPlayList(path, playListDirectory, membersUri);
+            processWplPlayList(path, playListDirectory, membersUri, fileList);
         }
     }
 
     private void processPlayLists() throws RemoteException {
         Iterator<FileEntry> iterator = mPlayLists.iterator();
-        while (iterator.hasNext()) {
-            FileEntry entry = iterator.next();
-            // only process playlist files if they are new or have been modified since the last scan
-            if (entry.mLastModifiedChanged) {
-                processPlayList(entry);
+        Cursor fileList = null;
+        try {
+            fileList = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
+                    null, null, null, null);
+            while (iterator.hasNext()) {
+                FileEntry entry = iterator.next();
+                // only process playlist files if they are new or have been modified since the last scan
+                if (entry.mLastModifiedChanged) {
+                    processPlayList(entry, fileList);
+                }
+            }
+        } catch (RemoteException e1) {
+        } finally {
+            if (fileList != null) {
+                fileList.close();
             }
         }
     }
