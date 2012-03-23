@@ -615,10 +615,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         if (!mFirstScreenful && tasks.size() == 0) {
             return;
         }
-        mNumItemsWaitingForThumbnailsAndIcons =
-                mFirstScreenful ? tasks.size() : mRecentTaskDescriptions.size();
+        mNumItemsWaitingForThumbnailsAndIcons = mFirstScreenful 
+                ? tasks.size() : mRecentTaskDescriptions == null 
+                        ? 0 : mRecentTaskDescriptions.size();
         if (mRecentTaskDescriptions == null) {
-            mRecentTaskDescriptions = new ArrayList(tasks);
+            mRecentTaskDescriptions = new ArrayList<TaskDescription>(tasks);
         } else {
             mRecentTaskDescriptions.addAll(tasks);
         }

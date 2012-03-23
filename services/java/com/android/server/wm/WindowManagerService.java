@@ -588,6 +588,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     LayoutAndSurfaceFields mInnerFields = new LayoutAndSurfaceFields();
 
+    /** Only do a maximum of 6 repeated layouts. After that quit */
+    private int mLayoutRepeatCount;
+
     private final class AnimationRunnable implements Runnable {
         @Override
         public void run() {
@@ -1897,7 +1900,7 @@ public class WindowManagerService extends IWindowManager.Stub
             rawChanged = true;
         }
 
-        if (rawChanged && (wallpaperWin.getAttrs().privateFlags &
+        if (rawChanged && (wallpaperWin.mAttrs.privateFlags &
                     WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS) != 0) {
             try {
                 if (DEBUG_WALLPAPER) Slog.v(TAG, "Report new wp offset "
@@ -2296,7 +2299,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (wasVisible) {
 
                 int transit = WindowManagerPolicy.TRANSIT_EXIT;
-                if (win.getAttrs().type == TYPE_APPLICATION_STARTING) {
+                if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
                     transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
                 }
                 // Try starting an animation.
@@ -2761,7 +2764,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // Try starting an animation; if there isn't one, we
                         // can destroy the surface right away.
                         int transit = WindowManagerPolicy.TRANSIT_EXIT;
-                        if (win.getAttrs().type == TYPE_APPLICATION_STARTING) {
+                        if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
                             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
                         }
                         if (!win.mSurfacePendingDestroy && win.isWinVisibleLw() &&
@@ -7459,10 +7462,25 @@ public class WindowManagerService extends IWindowManager.Stub
 
             } else {
                 mInLayout = false;
-                if (mLayoutNeeded) {
-                    requestTraversalLocked();
-                }
             }
+
+            if (mLayoutNeeded) {
+                if (++mLayoutRepeatCount < 6) {
+                    requestTraversalLocked();
+                } else {
+                    Slog.e(TAG, "Performed 6 layouts in a row. Skipping");
+                    mLayoutRepeatCount = 0;
+                }
+            } else {
+                mLayoutRepeatCount = 0;
+            }
+            
+            if (mAnimator.mAnimating) {
+                // Do this even if requestTraversalLocked was called above so we get a frame drawn
+                // at the proper time as well as the one drawn early.
+                scheduleAnimationLocked();
+            }
+
             if (mWindowsChanged && !mWindowChangeListeners.isEmpty()) {
                 mH.removeMessages(H.REPORT_WINDOWS_CHANGE);
                 mH.sendMessage(mH.obtainMessage(H.REPORT_WINDOWS_CHANGE));
@@ -8192,6 +8210,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mLayoutNeeded = true;
                     }
                 }
+
                 if ((mPendingLayoutChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG) != 0) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
                     if (updateOrientationFromAppTokensLocked(true)) {
@@ -8199,6 +8218,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
                     }
                 }
+
                 if ((mPendingLayoutChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT) != 0) {
                     mLayoutNeeded = true;
                 }
@@ -8409,8 +8429,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        boolean needRelayout = false;
-
         if (!mAnimator.mAnimating && mAppTransitionRunning) {
             // We have finished the animation of an app transition.  To do
             // this, we have delayed a lot of operations like showing and
@@ -8419,7 +8437,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // be out of sync with it.  So here we will just rebuild the
             // entire app window list.  Fun!
             mAppTransitionRunning = false;
-            needRelayout = true;
+            mLayoutNeeded = true;
             rebuildAppWindowListLocked();
             assignLayersLocked();
             // Clear information about apps that were moving.
@@ -8430,19 +8448,10 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.sendEmptyMessage(H.REPORT_LOSING_FOCUS);
         }
         if (wallpaperDestroyed) {
-            needRelayout = adjustWallpaperWindowsLocked() != 0;
+            mLayoutNeeded |= adjustWallpaperWindowsLocked() != 0;
         }
-        if ((mPendingLayoutChanges & (
-                WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER |
-                ADJUST_WALLPAPER_LAYERS_CHANGED |
-                WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG |
-                WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT)) != 0) {
-            needRelayout = true;
-        }
-        if (needRelayout) {
-            requestTraversalLocked();
-        } else if (mAnimator.mAnimating) {
-            scheduleAnimationLocked();
+        if (mPendingLayoutChanges != 0) {
+            mLayoutNeeded = true;
         }
 
         // Finally update all input windows now that the window changes have stabilized.
@@ -8485,7 +8494,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (mInnerFields.mOrientationChangeComplete && !needRelayout &&
+        if (mInnerFields.mOrientationChangeComplete && !mLayoutNeeded &&
                 !mInnerFields.mUpdateRotation) {
             checkDrawnWindowsLocked();
         }

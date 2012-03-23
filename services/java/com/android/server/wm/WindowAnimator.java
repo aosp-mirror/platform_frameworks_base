@@ -23,7 +23,7 @@ import com.android.internal.policy.impl.PhoneWindowManager;
  * on behalf of WindowManagerService.
  */
 public class WindowAnimator {
-    private static final String TAG = "WindowAnimations";
+    private static final String TAG = "WindowAnimator";
 
     final WindowManagerService mService;
     final Context mContext;
@@ -67,8 +67,24 @@ public class WindowAnimator {
         final int NAT = mService.mAppTokens.size();
         for (i=0; i<NAT; i++) {
             final AppWindowToken appToken = mService.mAppTokens.get(i);
+            final boolean wasAnimating = appToken.animation != null;
             if (appToken.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
                 mAnimating = true;
+            } else if (wasAnimating) {
+                // stopped animating, do one more pass through the layout
+                mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+            }
+        }
+        
+        final int NEAT = mService.mExitingAppTokens.size();
+        for (i=0; i<NEAT; i++) {
+            final AppWindowToken appToken = mService.mExitingAppTokens.get(i);
+            final boolean wasAnimating = appToken.animation != null;
+            if (appToken.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
+                mAnimating = true;
+            } else if (wasAnimating) {
+                // stopped animating, do one more pass through the layout
+                mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
 
@@ -517,6 +533,7 @@ public class WindowAnimator {
     }
 
     void animate() {
+        mPendingLayoutChanges = 0;
         mCurrentTime = SystemClock.uptimeMillis();
 
         // Update animations of all applications, including those
