@@ -2557,6 +2557,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 finalizeBackup(out);
             } catch (RemoteException e) {
                 Slog.e(TAG, "App died during full backup");
+            } catch (Exception e) {
+                Slog.e(TAG, "Internal exception during full backup", e);
             } finally {
                 tearDown(pkg);
                 try {
