@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2007-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,9 +100,8 @@ enum RsAllocationUsageType {
     RS_ALLOCATION_USAGE_GRAPHICS_VERTEX = 0x0004,
     RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS = 0x0008,
     RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET = 0x0010,
-    RS_ALLOCATION_USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE = 0x0020,
-    RS_ALLOCATION_USAGE_IO_INPUT = 0x0040,
-    RS_ALLOCATION_USAGE_IO_OUTPUT = 0x0080,
+    RS_ALLOCATION_USAGE_IO_INPUT = 0x0020,
+    RS_ALLOCATION_USAGE_IO_OUTPUT = 0x0040,
 
     RS_ALLOCATION_USAGE_ALL = 0x00FF
 };

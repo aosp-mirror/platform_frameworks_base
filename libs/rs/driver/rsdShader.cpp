@@ -39,7 +39,10 @@ RsdShader::RsdShader(const Program *p, uint32_t type,
     initMemberVars();
     initAttribAndUniformArray();
     init(textureNames, textureNamesCount, textureNamesLength);
-    createTexturesString(textureNames, textureNamesCount, textureNamesLength);
+
+    for(size_t i=0; i < textureNamesCount; i++) {
+        mTextureNames.push(String8(textureNames[i], textureNamesLength[i]));
+    }
 }
 
 RsdShader::~RsdShader() {
@@ -138,37 +141,42 @@ void RsdShader::appendAttributes() {
     }
 }
 
-void RsdShader::createTexturesString(const char** textureNames, size_t textureNamesCount,
-                                     const size_t *textureNamesLength) {
-    mShaderTextures.setTo("");
+void RsdShader::appendTextures() {
+
+    // TODO: this does not yet handle cases where the texture changes between IO
+    // input and local
+    bool appendUsing = true;
     for (uint32_t ct = 0; ct < mRSProgram->mHal.state.texturesCount; ct ++) {
         if (mRSProgram->mHal.state.textureTargets[ct] == RS_TEXTURE_2D) {
             Allocation *a = mRSProgram->mHal.state.textures[ct];
             if (a && a->mHal.state.surfaceTextureID) {
-                mShaderTextures.append("uniform samplerExternalOES UNI_");
+                if(appendUsing) {
+                    mShader.append("#extension GL_OES_EGL_image_external : require\n");
+                    appendUsing = false;
+                }
+                mShader.append("uniform samplerExternalOES UNI_");
+                mTextureTargets[ct] = GL_TEXTURE_EXTERNAL_OES;
             } else {
-                mShaderTextures.append("uniform sampler2D UNI_");
+                mShader.append("uniform sampler2D UNI_");
+                mTextureTargets[ct] = GL_TEXTURE_2D;
             }
-            mTextureTargets[ct] = GL_TEXTURE_2D;
         } else {
-            mShaderTextures.append("uniform samplerCube UNI_");
+            mShader.append("uniform samplerCube UNI_");
             mTextureTargets[ct] = GL_TEXTURE_CUBE_MAP;
         }
 
-        mShaderTextures.append(textureNames[ct], textureNamesLength[ct]);
-        mShaderTextures.append(";\n");
+        mShader.append(mTextureNames[ct]);
+        mShader.append(";\n");
     }
 }
 
 bool RsdShader::createShader() {
-
     if (mType == GL_FRAGMENT_SHADER) {
         mShader.append("precision mediump float;\n");
     }
     appendUserConstants();
     appendAttributes();
-    mShader.append(mShaderTextures);
-
+    appendTextures();
     mShader.append(mUserShader);
 
     return true;
@@ -177,6 +185,10 @@ bool RsdShader::createShader() {
 bool RsdShader::loadShader(const Context *rsc) {
     mShaderID = glCreateShader(mType);
     rsAssert(mShaderID);
+
+    if(!mShader.length()) {
+        createShader();
+    }
 
     if (rsc->props.mLogShaders) {
         ALOGV("Loading shader type %x, ID %i", mType, mShaderID);
@@ -423,7 +435,9 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
         }
 
         DrvAllocation *drvTex = (DrvAllocation *)mRSProgram->mHal.state.textures[ct]->mHal.drv;
-        if (drvTex->glTarget != GL_TEXTURE_2D && drvTex->glTarget != GL_TEXTURE_CUBE_MAP) {
+        if (drvTex->glTarget != GL_TEXTURE_2D &&
+            drvTex->glTarget != GL_TEXTURE_CUBE_MAP &&
+            drvTex->glTarget != GL_TEXTURE_EXTERNAL_OES) {
             ALOGE("Attempting to bind unknown texture to shader id %u, texture unit %u",
                   (uint)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "Non-texture allocation bound to a shader");

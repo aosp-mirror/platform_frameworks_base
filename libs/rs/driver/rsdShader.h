@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,15 +81,12 @@ protected:
 
     void appendAttributes();
     void appendTextures();
-    void createTexturesString(const char** textureNames, size_t textureNamesCount,
-                              const size_t *textureNamesLength);
 
     void initAttribAndUniformArray();
 
     mutable bool mDirty;
     android::String8 mShader;
     android::String8 mUserShader;
-    android::String8 mShaderTextures;
     uint32_t mShaderID;
     uint32_t mType;
 
@@ -100,6 +97,8 @@ protected:
     android::String8 *mAttribNames;
     android::String8 *mUniformNames;
     uint32_t *mUniformArraySizes;
+
+    android::Vector<android::String8> mTextureNames;
 
     int32_t mTextureUniformIndexStart;
 

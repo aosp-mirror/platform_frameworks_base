@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ bool rsdProgramVertexInit(const Context *rsc, const ProgramVertex *pv,
                                    textureNames, textureNamesCount, textureNamesLength);
     pv->mHal.drv = drv;
 
-    return drv->createShader();
+    return true;
 }
 
 static void SyncProgramConstants(const Context *rsc, const Program *p) {
@@ -88,7 +88,7 @@ bool rsdProgramFragmentInit(const Context *rsc, const ProgramFragment *pf,
                                    textureNames, textureNamesCount, textureNamesLength);
     pf->mHal.drv = drv;
 
-    return drv->createShader();
+    return true;
 }
 
 void rsdProgramFragmentSetActive(const Context *rsc, const ProgramFragment *pf) {

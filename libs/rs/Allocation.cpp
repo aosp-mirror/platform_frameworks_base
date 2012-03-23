@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,17 +51,14 @@ Allocation::Allocation(void *id, RenderScript *rs, const Type *t, uint32_t usage
                    RS_ALLOCATION_USAGE_GRAPHICS_VERTEX |
                    RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS |
                    RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET |
-                   RS_ALLOCATION_USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE |
                    RS_ALLOCATION_USAGE_IO_INPUT |
                    RS_ALLOCATION_USAGE_IO_OUTPUT)) != 0) {
         ALOGE("Unknown usage specified.");
     }
 
-    if ((usage & (RS_ALLOCATION_USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE |
-                  RS_ALLOCATION_USAGE_IO_INPUT)) != 0) {
+    if ((usage & RS_ALLOCATION_USAGE_IO_INPUT) != 0) {
         mWriteAllowed = false;
-        if ((usage & ~(RS_ALLOCATION_USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE |
-                       RS_ALLOCATION_USAGE_IO_INPUT |
+        if ((usage & ~(RS_ALLOCATION_USAGE_IO_INPUT |
                        RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE |
                        RS_ALLOCATION_USAGE_SCRIPT)) != 0) {
             ALOGE("Invalid usage combination.");

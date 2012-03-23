@@ -477,6 +477,15 @@ nAllocationGetSurfaceTextureID(JNIEnv *_env, jobject _this, RsContext con, jint 
 }
 
 static void
+nAllocationGetSurfaceTextureID2(JNIEnv *_env, jobject _this, RsContext con, jint a, jobject jst)
+{
+    LOG_API("nAllocationGetSurfaceTextureID2, con(%p), a(%p)", con, (RsAllocation)a);
+    sp<SurfaceTexture> st = SurfaceTexture_getSurfaceTexture(_env, jst);
+
+    rsAllocationGetSurfaceTextureID2(con, (RsAllocation)a, st.get(), sizeof(SurfaceTexture *));
+}
+
+static void
 nAllocationSetSurfaceTexture(JNIEnv *_env, jobject _this, RsContext con,
                              RsAllocation alloc, jobject sur)
 {
@@ -1352,7 +1361,8 @@ static JNINativeMethod methods[] = {
 
 {"rsnAllocationSyncAll",             "(III)V",                                (void*)nAllocationSyncAll },
 {"rsnAllocationGetSurfaceTextureID", "(II)I",                                 (void*)nAllocationGetSurfaceTextureID },
-{"rsnAllocationSetSurfaceTexture",   "(IILandroid/graphics/SurfaceTexture;)V", (void*)nAllocationSetSurfaceTexture },
+{"rsnAllocationGetSurfaceTextureID2","(IILandroid/graphics/SurfaceTexture;)V",(void*)nAllocationGetSurfaceTextureID2 },
+{"rsnAllocationSetSurfaceTexture",   "(IILandroid/graphics/SurfaceTexture;)V",(void*)nAllocationSetSurfaceTexture },
 {"rsnAllocationIoSend",              "(II)V",                                 (void*)nAllocationIoSend },
 {"rsnAllocationIoReceive",           "(II)V",                                 (void*)nAllocationIoReceive },
 {"rsnAllocationData1D",              "(IIIII[II)V",                           (void*)nAllocationData1D_i },
