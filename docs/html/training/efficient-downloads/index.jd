@@ -1,0 +1,51 @@
+page.title=Transferring Data Without Draining the Battery
+
+trainingnavtop=true
+startpage=true
+next.title=Optimizing Downloads for Efficient Network Access
+next.link=efficient-network-access.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 2.0 (API Level 5) or higher</li>
+</ul>
+
+<!-- related docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>In this class you will learn to minimize the battery life impact of downloads and network connections, particularly in relation to the wireless radio.</P
+
+<p>This class demonstrates the best practices for scheduling and executing downloads using techniques such as caching, polling, and prefetching. You will learn how the power-use profile of the wireless radio can affect your choices on when, what, and how to transfer data in order to minimize impact on battery life.</p> 
+
+<h2>Lessons</h2> 
+ 
+<!-- Create a list of the lessons in this class along with a short description of each lesson.
+These should be short and to the point. It should be clear from reading the summary whether someone
+will want to jump to a lesson or not.--> 
+ 
+<dl> 
+  <dt><b><a href="efficient-network-access.html">Optimizing Downloads for Efficient Network Access</a></b></dt>
+    <dd>This lesson introduces the wireless radio state machine, explains how your app’s connectivity model interacts with it, and how you can minimize your data connection and use prefetching and bundling to minimize the battery drain associated with your data transfers.</dd>
+ 
+  <dt><b><a href="regular_updates.html">Minimizing the Effect of Regular Updates</a></b></dt>
+    <dd>This lesson will examine how your refresh frequency can be varied to best mitigate the effect of background updates on the underlying wireless radio state machine.</dd>
+
+  <dt><b><a href="redundant_redundant.html">Redundant Downloads are Redundant</a></b></dt>
+    <dd>The most fundamental way to reduce your downloads is to download only what you need. This lesson introduces some best practices to eliminate redundant downloads.</dd>
+
+  <dt><b><a href="connectivity_patterns.html">Modifying your Download Patterns Based on the Connectivity Type</a></b></dt>
+    <dd>When it comes to impact on battery life, not all connection types are created equal. Not only does the Wi-Fi radio use significantly less battery than its wireless radio counterparts, but the radios used in different wireless radio technologies have different battery implications.</dd>
+
+</dl> 
