@@ -727,6 +727,7 @@ package android {
     field public static final int panelColorForeground = 16842848; // 0x1010060
     field public static final int panelFullBackground = 16842847; // 0x101005f
     field public static final int panelTextAppearance = 16842850; // 0x1010062
+    field public static final int parentActivityName = 16843696; // 0x10103b0
     field public static final deprecated int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
     field public static final int pathPattern = 16842796; // 0x101002c
@@ -2578,6 +2579,7 @@ package android.app {
     method public java.lang.String getLocalClassName();
     method public android.view.MenuInflater getMenuInflater();
     method public final android.app.Activity getParent();
+    method public android.content.Intent getParentActivityIntent();
     method public android.content.SharedPreferences getPreferences(int);
     method public int getRequestedOrientation();
     method public int getTaskId();
@@ -2594,6 +2596,8 @@ package android.app {
     method public boolean isTaskRoot();
     method public final deprecated android.database.Cursor managedQuery(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
     method public boolean moveTaskToBack(boolean);
+    method public boolean navigateUpTo(android.content.Intent);
+    method public boolean navigateUpToFromChild(android.app.Activity, android.content.Intent);
     method public void onActionModeFinished(android.view.ActionMode);
     method public void onActionModeStarted(android.view.ActionMode);
     method protected void onActivityResult(int, int, android.content.Intent);
@@ -2610,6 +2614,7 @@ package android.app {
     method public java.lang.CharSequence onCreateDescription();
     method protected deprecated android.app.Dialog onCreateDialog(int);
     method protected deprecated android.app.Dialog onCreateDialog(int, android.os.Bundle);
+    method public void onCreateNavigateUpTaskStack(android.app.TaskStackBuilder);
     method public boolean onCreateOptionsMenu(android.view.Menu);
     method public boolean onCreatePanelMenu(int, android.view.Menu);
     method public android.view.View onCreatePanelView(int);
@@ -2627,6 +2632,8 @@ package android.app {
     method public void onLowMemory();
     method public boolean onMenuItemSelected(int, android.view.MenuItem);
     method public boolean onMenuOpened(int, android.view.Menu);
+    method public boolean onNavigateUp();
+    method public boolean onNavigateUpFromChild(android.app.Activity);
     method protected void onNewIntent(android.content.Intent);
     method public boolean onOptionsItemSelected(android.view.MenuItem);
     method public void onOptionsMenuClosed(android.view.Menu);
@@ -2636,6 +2643,7 @@ package android.app {
     method protected void onPostResume();
     method protected deprecated void onPrepareDialog(int, android.app.Dialog);
     method protected deprecated void onPrepareDialog(int, android.app.Dialog, android.os.Bundle);
+    method public void onPrepareNavigateUpTaskStack(android.app.TaskStackBuilder);
     method public boolean onPrepareOptionsMenu(android.view.Menu);
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method protected void onRestart();
@@ -2686,6 +2694,7 @@ package android.app {
     method public void setTitleColor(int);
     method public void setVisible(boolean);
     method public final void setVolumeControlStream(int);
+    method public boolean shouldUpRecreateTask(android.content.Intent);
     method public final deprecated void showDialog(int);
     method public final deprecated boolean showDialog(int, android.os.Bundle);
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback);
@@ -3930,6 +3939,18 @@ package android.app {
     method public android.widget.TabWidget getTabWidget();
     method public void setDefaultTab(java.lang.String);
     method public void setDefaultTab(int);
+  }
+
+  public class TaskStackBuilder implements java.lang.Iterable {
+    method public android.app.TaskStackBuilder addNextIntent(android.content.Intent);
+    method public android.app.TaskStackBuilder addParentStack(android.app.Activity);
+    method public android.app.TaskStackBuilder addParentStack(java.lang.Class<?>);
+    method public static android.app.TaskStackBuilder from(android.content.Context);
+    method public android.content.Intent getIntent(int);
+    method public int getIntentCount();
+    method public android.app.PendingIntent getPendingIntent(int, int);
+    method public java.util.Iterator<android.content.Intent> iterator();
+    method public void startActivities();
   }
 
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
@@ -6102,6 +6123,7 @@ package android.content.pm {
     field public int configChanges;
     field public int flags;
     field public int launchMode;
+    field public java.lang.String parentActivityName;
     field public java.lang.String permission;
     field public int screenOrientation;
     field public int softInputMode;

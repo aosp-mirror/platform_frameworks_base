@@ -29,6 +29,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -65,13 +67,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManagerImpl;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewManager;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 
@@ -704,6 +706,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ boolean mVisibleFromServer = false;
     /*package*/ boolean mVisibleFromClient = true;
     /*package*/ ActionBarImpl mActionBar = null;
+    private boolean mEnableDefaultActionBarUp;
 
     private CharSequence mTitle;
     private int mTitleColor = 0;
@@ -864,6 +867,13 @@ public class Activity extends ContextThemeWrapper
     protected void onCreate(Bundle savedInstanceState) {
         if (mLastNonConfigurationInstances != null) {
             mAllLoaderManagers = mLastNonConfigurationInstances.loaders;
+        }
+        if (mActivityInfo.parentActivityName != null) {
+            if (mActionBar == null) {
+                mEnableDefaultActionBarUp = true;
+            } else {
+                mActionBar.setDefaultDisplayHomeAsUpEnabled(true);
+            }
         }
         if (savedInstanceState != null) {
             Parcelable p = savedInstanceState.getParcelable(FRAGMENTS_TAG);
@@ -1829,6 +1839,7 @@ public class Activity extends ContextThemeWrapper
         }
         
         mActionBar = new ActionBarImpl(this);
+        mActionBar.setDefaultDisplayHomeAsUpEnabled(mEnableDefaultActionBarUp);
     }
     
     /**
@@ -2630,7 +2641,7 @@ public class Activity extends ContextThemeWrapper
      * facilities.
      * 
      * <p>Derived classes should call through to the base class for it to
-     * perform the default menu handling.
+     * perform the default menu handling.</p>
      * 
      * @param item The menu item that was selected.
      * 
@@ -2643,7 +2654,102 @@ public class Activity extends ContextThemeWrapper
         if (mParent != null) {
             return mParent.onOptionsItemSelected(item);
         }
+        if (item.getItemId() == android.R.id.home && mActionBar != null &&
+                (mActionBar.getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+            if (mParent == null) {
+                onNavigateUp();
+            } else {
+                mParent.onNavigateUpFromChild(this);
+            }
+            return true;
+        }
         return false;
+    }
+
+    /**
+     * This method is called whenever the user chooses to navigate Up within your application's
+     * activity hierarchy from the action bar.
+     *
+     * <p>If the attribute {@link android.R.attr#parentActivityName parentActivityName}
+     * was specified in the manifest for this activity or an activity-alias to it,
+     * default Up navigation will be handled automatically. If any activity
+     * along the parent chain requires extra Intent arguments, the Activity subclass
+     * should override the method {@link #onPrepareNavigateUpTaskStack(TaskStackBuilder)}
+     * to supply those arguments.</p>
+     *
+     * <p>See <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
+     * from the developer guide and <a href="{@docRoot}design/patterns/navigation.html">Navigation</a>
+     * from the design guide for more information about navigating within your app.</p>
+     *
+     * <p>See the {@link TaskStackBuilder} class and the Activity methods
+     * {@link #getParentActivityIntent()}, {@link #shouldUpRecreateTask(Intent)}, and
+     * {@link #navigateUpTo(Intent)} for help implementing custom Up navigation.
+     * The AppNavigation sample application in the Android SDK is also available for reference.</p>
+     *
+     * @return true if Up navigation completed successfully and this Activity was finished,
+     *         false otherwise.
+     */
+    public boolean onNavigateUp() {
+        // Automatically handle hierarchical Up navigation if the proper
+        // metadata is available.
+        Intent upIntent = getParentActivityIntent();
+        if (upIntent != null) {
+            if (shouldUpRecreateTask(upIntent)) {
+                TaskStackBuilder b = TaskStackBuilder.from(this);
+                onCreateNavigateUpTaskStack(b);
+                onPrepareNavigateUpTaskStack(b);
+                b.startActivities();
+                finish();
+            } else {
+                navigateUpTo(upIntent);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * This is called when a child activity of this one attempts to navigate up.
+     * The default implementation simply calls onNavigateUp() on this activity (the parent).
+     *
+     * @param child The activity making the call.
+     */
+    public boolean onNavigateUpFromChild(Activity child) {
+        return onNavigateUp();
+    }
+
+    /**
+     * Define the synthetic task stack that will be generated during Up navigation from
+     * a different task.
+     *
+     * <p>The default implementation of this method adds the parent chain of this activity
+     * as specified in the manifest to the supplied {@link TaskStackBuilder}. Applications
+     * may choose to override this method to construct the desired task stack in a different
+     * way.</p>
+     *
+     * <p>Applications that wish to supply extra Intent parameters to the parent stack defined
+     * by the manifest should override {@link #onPrepareNavigateUpTaskStack(TaskStackBuilder)}.</p>
+     *
+     * @param builder An empty TaskStackBuilder - the application should add intents representing
+     *                the desired task stack
+     */
+    public void onCreateNavigateUpTaskStack(TaskStackBuilder builder) {
+        builder.addParentStack(this);
+    }
+
+    /**
+     * Prepare the synthetic task stack that will be generated during Up navigation
+     * from a different task.
+     *
+     * <p>This method receives the {@link TaskStackBuilder} with the constructed series of
+     * Intents as generated by {@link #onCreateNavigateUpTaskStack(TaskStackBuilder)}.
+     * If any extra data should be added to these intents before launching the new task,
+     * the application should override this method and add that data here.</p>
+     *
+     * @param builder A TaskStackBuilder that has been populated with Intents by
+     *                onCreateNavigateUpTaskStack.
+     */
+    public void onPrepareNavigateUpTaskStack(TaskStackBuilder builder) {
     }
 
     /**
@@ -4656,6 +4762,114 @@ public class Activity extends ContextThemeWrapper
      * @param mode The action mode that just finished.
      */
     public void onActionModeFinished(ActionMode mode) {
+    }
+
+    /**
+     * Returns true if the app should recreate the task when navigating 'up' from this activity
+     * by using targetIntent.
+     *
+     * <p>If this method returns false the app can trivially call
+     * {@link #navigateUpTo(Intent)} using the same parameters to correctly perform
+     * up navigation. If this method returns false, the app should synthesize a new task stack
+     * by using {@link TaskStackBuilder} or another similar mechanism to perform up navigation.</p>
+     *
+     * @param targetIntent An intent representing the target destination for up navigation
+     * @return true if navigating up should recreate a new task stack, false if the same task
+     *         should be used for the destination
+     */
+    public boolean shouldUpRecreateTask(Intent targetIntent) {
+        try {
+            PackageManager pm = getPackageManager();
+            ComponentName cn = targetIntent.getComponent();
+            if (cn == null) {
+                cn = targetIntent.resolveActivity(pm);
+            }
+            ActivityInfo info = pm.getActivityInfo(cn, 0);
+            if (info.taskAffinity == null) {
+                return false;
+            }
+            return !ActivityManagerNative.getDefault()
+                    .targetTaskAffinityMatchesActivity(mToken, info.taskAffinity);
+        } catch (RemoteException e) {
+            return false;
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Navigate from this activity to the activity specified by upIntent, finishing this activity
+     * in the process. If the activity indicated by upIntent already exists in the task's history,
+     * this activity and all others before the indicated activity in the history stack will be
+     * finished. If the indicated activity does not appear in the history stack, this is equivalent
+     * to simply calling finish() on this activity.
+     *
+     * <p>This method should be used when performing up navigation from within the same task
+     * as the destination. If up navigation should cross tasks in some cases, see
+     * {@link #shouldUpRecreateTask(Intent)}.</p>
+     *
+     * @param upIntent An intent representing the target destination for up navigation
+     *
+     * @return true if up navigation successfully reached the activity indicated by upIntent and
+     *         upIntent was delivered to it. false if an instance of the indicated activity could
+     *         not be found and this activity was simply finished normally.
+     */
+    public boolean navigateUpTo(Intent upIntent) {
+        if (mParent == null) {
+            ComponentName destInfo = upIntent.getComponent();
+            if (destInfo == null) {
+                destInfo = upIntent.resolveActivity(getPackageManager());
+                if (destInfo == null) {
+                    return false;
+                }
+                upIntent = new Intent(upIntent);
+                upIntent.setComponent(destInfo);
+            }
+            int resultCode;
+            Intent resultData;
+            synchronized (this) {
+                resultCode = mResultCode;
+                resultData = mResultData;
+            }
+            if (resultData != null) {
+                resultData.setAllowFds(false);
+            }
+            try {
+                return ActivityManagerNative.getDefault().navigateUpTo(mToken, upIntent,
+                        resultCode, resultData);
+            } catch (RemoteException e) {
+                return false;
+            }
+        } else {
+            return mParent.navigateUpToFromChild(this, upIntent);
+        }
+    }
+
+    /**
+     * This is called when a child activity of this one calls its
+     * {@link #navigateUpTo} method.  The default implementation simply calls
+     * navigateUpTo(upIntent) on this activity (the parent).
+     *
+     * @param child The activity making the call.
+     * @param upIntent An intent representing the target destination for up navigation
+     *
+     * @return true if up navigation successfully reached the activity indicated by upIntent and
+     *         upIntent was delivered to it. false if an instance of the indicated activity could
+     *         not be found and this activity was simply finished normally.
+     */
+    public boolean navigateUpToFromChild(Activity child, Intent upIntent) {
+        return navigateUpTo(upIntent);
+    }
+
+    /**
+     * Obtain an {@link Intent} that will launch an explicit target activity specified by
+     * this activity's logical parent. The logical parent is named in the application's manifest
+     * by the {@link android.R.attr#parentActivityName parentActivityName} attribute.
+     *
+     * @return a new Intent targeting the defined parent of this activity
+     */
+    public Intent getParentActivityIntent() {
+        return new Intent().setClassName(this, mActivityInfo.parentActivityName);
     }
 
     // ------------------ Internal API ------------------

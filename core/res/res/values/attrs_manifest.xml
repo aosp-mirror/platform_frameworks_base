@@ -740,6 +740,9 @@
         <flag name="splitActionBarWhenNarrow" value="1" />
     </attr>
 
+    <!-- The name of the logical parent of the activity as it appears in the manifest. -->
+    <attr name="parentActivityName" format="string" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1348,6 +1351,7 @@
         <attr name="immersive" />
         <attr name="hardwareAccelerated" />
         <attr name="uiOptions" />
+        <attr name="parentActivityName" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new
@@ -1384,6 +1388,7 @@
              component specific values). -->
         <attr name="enabled" />
         <attr name="exported" />
+        <attr name="parentActivityName" />
     </declare-styleable>
     
     <!-- The <code>meta-data</code> tag is used to attach additional
