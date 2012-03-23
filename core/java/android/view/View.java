@@ -1707,25 +1707,25 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Horizontal layout direction of this view is from Left to Right.
      * Use with {@link #setLayoutDirection}.
      */
-    public static final int LAYOUT_DIRECTION_LTR = 0x00000001;
+    public static final int LAYOUT_DIRECTION_LTR = 0;
 
     /**
      * Horizontal layout direction of this view is from Right to Left.
      * Use with {@link #setLayoutDirection}.
      */
-    public static final int LAYOUT_DIRECTION_RTL = 0x00000002;
+    public static final int LAYOUT_DIRECTION_RTL = 1;
 
     /**
      * Horizontal layout direction of this view is inherited from its parent.
      * Use with {@link #setLayoutDirection}.
      */
-    public static final int LAYOUT_DIRECTION_INHERIT = 0x00000004;
+    public static final int LAYOUT_DIRECTION_INHERIT = 2;
 
     /**
      * Horizontal layout direction of this view is from deduced from the default language
      * script for the locale. Use with {@link #setLayoutDirection}.
      */
-    public static final int LAYOUT_DIRECTION_LOCALE = 0x00000008;
+    public static final int LAYOUT_DIRECTION_LOCALE = 3;
 
     /**
      * Bit shift to get the horizontal layout direction. (bits after DRAG_HOVERED)
@@ -1737,34 +1737,38 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Mask for use with private flags indicating bits used for horizontal layout direction.
      * @hide
      */
-    static final int LAYOUT_DIRECTION_MASK = 0x0000000F << LAYOUT_DIRECTION_MASK_SHIFT;
+    static final int LAYOUT_DIRECTION_MASK = 0x00000003 << LAYOUT_DIRECTION_MASK_SHIFT;
 
     /**
      * Indicates whether the view horizontal layout direction has been resolved and drawn to the
      * right-to-left direction.
      * @hide
      */
-    static final int LAYOUT_DIRECTION_RESOLVED_RTL = 0x00000010 << LAYOUT_DIRECTION_MASK_SHIFT;
+    static final int LAYOUT_DIRECTION_RESOLVED_RTL = 4 << LAYOUT_DIRECTION_MASK_SHIFT;
 
     /**
      * Indicates whether the view horizontal layout direction has been resolved.
      * @hide
      */
-    static final int LAYOUT_DIRECTION_RESOLVED = 0x00000020 << LAYOUT_DIRECTION_MASK_SHIFT;
+    static final int LAYOUT_DIRECTION_RESOLVED = 8 << LAYOUT_DIRECTION_MASK_SHIFT;
 
     /**
      * Mask for use with private flags indicating bits used for resolved horizontal layout direction.
      * @hide
      */
-    static final int LAYOUT_DIRECTION_RESOLVED_MASK = 0x00000030 << LAYOUT_DIRECTION_MASK_SHIFT;
+    static final int LAYOUT_DIRECTION_RESOLVED_MASK = 0x0000000C << LAYOUT_DIRECTION_MASK_SHIFT;
 
     /*
      * Array of horizontal layout direction flags for mapping attribute "layoutDirection" to correct
      * flag value.
      * @hide
      */
-    private static final int[] LAYOUT_DIRECTION_FLAGS = {LAYOUT_DIRECTION_LTR,
-            LAYOUT_DIRECTION_RTL, LAYOUT_DIRECTION_INHERIT, LAYOUT_DIRECTION_LOCALE};
+    private static final int[] LAYOUT_DIRECTION_FLAGS = {
+            LAYOUT_DIRECTION_LTR,
+            LAYOUT_DIRECTION_RTL,
+            LAYOUT_DIRECTION_INHERIT,
+            LAYOUT_DIRECTION_LOCALE
+    };
 
     /**
      * Default horizontal layout direction.
@@ -1781,6 +1785,97 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     static final int HAS_TRANSIENT_STATE = 0x00000100;
+
+
+    /**
+     * Text direction is inherited thru {@link ViewGroup}
+     */
+    public static final int TEXT_DIRECTION_INHERIT = 0;
+
+    /**
+     * Text direction is using "first strong algorithm". The first strong directional character
+     * determines the paragraph direction. If there is no strong directional character, the
+     * paragraph direction is the view's resolved layout direction.
+     */
+    public static final int TEXT_DIRECTION_FIRST_STRONG = 1;
+
+    /**
+     * Text direction is using "any-RTL" algorithm. The paragraph direction is RTL if it contains
+     * any strong RTL character, otherwise it is LTR if it contains any strong LTR characters.
+     * If there are neither, the paragraph direction is the view's resolved layout direction.
+     */
+    public static final int TEXT_DIRECTION_ANY_RTL = 2;
+
+    /**
+     * Text direction is forced to LTR.
+     */
+    public static final int TEXT_DIRECTION_LTR = 3;
+
+    /**
+     * Text direction is forced to RTL.
+     */
+    public static final int TEXT_DIRECTION_RTL = 4;
+
+    /**
+     * Text direction is coming from the system Locale.
+     */
+    public static final int TEXT_DIRECTION_LOCALE = 5;
+
+    /**
+     * Bit shift to get the horizontal layout direction. (bits after LAYOUT_DIRECTION_RESOLVED)
+     * @hide
+     */
+    static final int TEXT_DIRECTION_MASK_SHIFT = 6;
+
+    /**
+     * Default text direction is inherited
+     */
+    protected static int TEXT_DIRECTION_DEFAULT = TEXT_DIRECTION_INHERIT;
+
+    /**
+     * Mask for use with private flags indicating bits used for text direction.
+     * @hide
+     */
+    static final int TEXT_DIRECTION_MASK = 0x00000007 << TEXT_DIRECTION_MASK_SHIFT;
+
+    /**
+     * Array of text direction flags for mapping attribute "textDirection" to correct
+     * flag value.
+     * @hide
+     */
+    private static final int[] TEXT_DIRECTION_FLAGS = {
+            TEXT_DIRECTION_INHERIT << TEXT_DIRECTION_MASK_SHIFT,
+            TEXT_DIRECTION_FIRST_STRONG << TEXT_DIRECTION_MASK_SHIFT,
+            TEXT_DIRECTION_ANY_RTL << TEXT_DIRECTION_MASK_SHIFT,
+            TEXT_DIRECTION_LTR << TEXT_DIRECTION_MASK_SHIFT,
+            TEXT_DIRECTION_RTL << TEXT_DIRECTION_MASK_SHIFT,
+            TEXT_DIRECTION_LOCALE << TEXT_DIRECTION_MASK_SHIFT
+    };
+
+    /**
+     * Indicates whether the view text direction has been resolved.
+     * @hide
+     */
+    static final int TEXT_DIRECTION_RESOLVED = 0x00000008 << TEXT_DIRECTION_MASK_SHIFT;
+
+    /**
+     * Bit shift to get the horizontal layout direction. (bits after DRAG_HOVERED)
+     * @hide
+     */
+    static final int TEXT_DIRECTION_RESOLVED_MASK_SHIFT = 10;
+
+    /**
+     * Mask for use with private flags indicating bits used for resolved text direction.
+     * @hide
+     */
+    static final int TEXT_DIRECTION_RESOLVED_MASK = 0x00000007 << TEXT_DIRECTION_RESOLVED_MASK_SHIFT;
+
+    /**
+     * Indicates whether the view text direction has been resolved to the "first strong" heuristic.
+     * @hide
+     */
+    static final int TEXT_DIRECTION_RESOLVED_DEFAULT =
+            TEXT_DIRECTION_FIRST_STRONG << TEXT_DIRECTION_RESOLVED_MASK_SHIFT;
 
 
     /* End of masks for mPrivateFlags2 */
@@ -2657,82 +2752,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     AccessibilityDelegate mAccessibilityDelegate;
 
     /**
-     * Text direction is inherited thru {@link ViewGroup}
-     */
-    public static final int TEXT_DIRECTION_INHERIT = 0;
-
-    /**
-     * Text direction is using "first strong algorithm". The first strong directional character
-     * determines the paragraph direction. If there is no strong directional character, the
-     * paragraph direction is the view's resolved layout direction.
-     *
-     */
-    public static final int TEXT_DIRECTION_FIRST_STRONG = 1;
-
-    /**
-     * Text direction is using "any-RTL" algorithm. The paragraph direction is RTL if it contains
-     * any strong RTL character, otherwise it is LTR if it contains any strong LTR characters.
-     * If there are neither, the paragraph direction is the view's resolved layout direction.
-     *
-     */
-    public static final int TEXT_DIRECTION_ANY_RTL = 2;
-
-    /**
-     * Text direction is forced to LTR.
-     *
-     */
-    public static final int TEXT_DIRECTION_LTR = 3;
-
-    /**
-     * Text direction is forced to RTL.
-     *
-     */
-    public static final int TEXT_DIRECTION_RTL = 4;
-
-    /**
-     * Text direction is coming from the system Locale.
-     *
-     */
-    public static final int TEXT_DIRECTION_LOCALE = 5;
-
-    /**
-     * Default text direction is inherited
-     *
-     */
-    protected static int DEFAULT_TEXT_DIRECTION = TEXT_DIRECTION_INHERIT;
-
-    /**
-     * The text direction that has been defined by {@link #setTextDirection(int)}.
-     *
-     */
-    @ViewDebug.ExportedProperty(category = "text", mapping = {
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG, to = "FIRST_STRONG"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE")
-    })
-    private int mTextDirection = DEFAULT_TEXT_DIRECTION;
-
-    /**
-     * The resolved text direction.  This needs resolution if the value is
-     * TEXT_DIRECTION_INHERIT.  The resolution matches mTextDirection if it is
-     * not TEXT_DIRECTION_INHERIT, otherwise resolution proceeds up the parent
-     * chain of the view.
-     *
-     */
-    @ViewDebug.ExportedProperty(category = "text", mapping = {
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG, to = "FIRST_STRONG"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE")
-    })
-    private int mResolvedTextDirection = TEXT_DIRECTION_INHERIT;
-
-    /**
      * Consistency verifier for debugging purposes.
      * @hide
      */
@@ -2750,7 +2769,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mContext = context;
         mResources = context != null ? context.getResources() : null;
         mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
-        mPrivateFlags2 |= (LAYOUT_DIRECTION_DEFAULT << LAYOUT_DIRECTION_MASK_SHIFT);
+        // Set layout and text direction defaults
+        mPrivateFlags2 = (LAYOUT_DIRECTION_DEFAULT << LAYOUT_DIRECTION_MASK_SHIFT) |
+                (TEXT_DIRECTION_DEFAULT << TEXT_DIRECTION_MASK_SHIFT);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = -1;
@@ -3110,7 +3131,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     setLayerType(a.getInt(attr, LAYER_TYPE_NONE), null);
                     break;
                 case R.styleable.View_textDirection:
-                    mTextDirection = a.getInt(attr, DEFAULT_TEXT_DIRECTION);
+                    // Clear any text direction flag already set
+                    mPrivateFlags2 &= ~TEXT_DIRECTION_MASK;
+                    // Set the text direction flags depending on the value of the attribute
+                    final int textDirection = a.getInt(attr, -1);
+                    if (textDirection != -1) {
+                        mPrivateFlags2 |= TEXT_DIRECTION_FLAGS[textDirection];
+                    }
                     break;
             }
         }
@@ -14491,8 +14518,16 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE},
      */
+    @ViewDebug.ExportedProperty(category = "text", mapping = {
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG, to = "FIRST_STRONG"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE")
+    })
     public int getTextDirection() {
-        return mTextDirection;
+        return (mPrivateFlags2 & TEXT_DIRECTION_MASK) >> TEXT_DIRECTION_MASK_SHIFT;
     }
 
     /**
@@ -14508,9 +14543,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_LOCALE},
      */
     public void setTextDirection(int textDirection) {
-        if (textDirection != mTextDirection) {
-            mTextDirection = textDirection;
+        if (getTextDirection() != textDirection) {
+            // Reset the current text direction
+            mPrivateFlags2 &= ~TEXT_DIRECTION_MASK;
+            // Set the new text direction
+            mPrivateFlags2 |= ((textDirection << TEXT_DIRECTION_MASK_SHIFT) & TEXT_DIRECTION_MASK);
+            // Reset the current resolved text direction
             resetResolvedTextDirection();
+            // Ask for a layout pass
             requestLayout();
         }
     }
@@ -14518,7 +14558,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Return the resolved text direction.
      *
-     * @return the resolved text direction. Return one of:
+     * This needs resolution if the value is TEXT_DIRECTION_INHERIT. The resolution matches
+     * {@link #getTextDirection()}if it is not TEXT_DIRECTION_INHERIT, otherwise resolution proceeds
+     * up the parent chain of the view. if there is no parent, then it will return the default
+     * {@link #TEXT_DIRECTION_FIRST_STRONG}.
+     *
+     * @return the resolved text direction. Returns one of:
      *
      * {@link #TEXT_DIRECTION_FIRST_STRONG}
      * {@link #TEXT_DIRECTION_ANY_RTL},
@@ -14527,10 +14572,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_LOCALE},
      */
     public int getResolvedTextDirection() {
-        if (mResolvedTextDirection == TEXT_DIRECTION_INHERIT) {
+        // The text direction is not inherited so return it back
+        if ((mPrivateFlags2 & TEXT_DIRECTION_RESOLVED) != TEXT_DIRECTION_RESOLVED) {
             resolveTextDirection();
         }
-        return mResolvedTextDirection;
+        return (mPrivateFlags2 & TEXT_DIRECTION_RESOLVED_MASK) >> TEXT_DIRECTION_RESOLVED_MASK_SHIFT;
     }
 
     /**
@@ -14538,17 +14584,51 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * resolution is done.
      */
     public void resolveTextDirection() {
-        if (mResolvedTextDirection != TEXT_DIRECTION_INHERIT) {
-            // Resolution has already been done.
-            return;
+        // Reset any previous text direction resolution
+        mPrivateFlags2 &= ~(TEXT_DIRECTION_RESOLVED | TEXT_DIRECTION_RESOLVED_MASK);
+
+        // Set resolved text direction flag depending on text direction flag
+        final int textDirection = getTextDirection();
+        switch(textDirection) {
+            case TEXT_DIRECTION_INHERIT:
+                if (canResolveTextDirection()) {
+                    ViewGroup viewGroup = ((ViewGroup) mParent);
+
+                    // Set current resolved direction to the same value as the parent's one
+                    final int parentResolvedDirection = viewGroup.getResolvedTextDirection();
+                    switch (parentResolvedDirection) {
+                        case TEXT_DIRECTION_FIRST_STRONG:
+                        case TEXT_DIRECTION_ANY_RTL:
+                        case TEXT_DIRECTION_LTR:
+                        case TEXT_DIRECTION_RTL:
+                        case TEXT_DIRECTION_LOCALE:
+                            mPrivateFlags2 |=
+                                    (parentResolvedDirection << TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
+                            break;
+                        default:
+                            // Default resolved direction is "first strong" heuristic
+                            mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED_DEFAULT;
+                    }
+                } else {
+                    // We cannot do the resolution if there is no parent, so use the default one
+                    mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED_DEFAULT;
+                }
+                break;
+            case TEXT_DIRECTION_FIRST_STRONG:
+            case TEXT_DIRECTION_ANY_RTL:
+            case TEXT_DIRECTION_LTR:
+            case TEXT_DIRECTION_RTL:
+            case TEXT_DIRECTION_LOCALE:
+                // Resolved direction is the same as text direction
+                mPrivateFlags2 |= (textDirection << TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
+                break;
+            default:
+                // Default resolved direction is "first strong" heuristic
+                mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED_DEFAULT;
         }
-        if (mTextDirection != TEXT_DIRECTION_INHERIT) {
-            mResolvedTextDirection = mTextDirection;
-        } else if (mParent != null && mParent instanceof ViewGroup) {
-            mResolvedTextDirection = ((ViewGroup) mParent).getResolvedTextDirection();
-        } else {
-            mResolvedTextDirection = TEXT_DIRECTION_FIRST_STRONG;
-        }
+
+        // Set to resolved
+        mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED;
         onResolvedTextDirectionChanged();
     }
 
@@ -14562,12 +14642,26 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Check if text direction resolution can be done.
+     *
+     * @return true if text direction resolution can be done otherwise return false.
+     */
+    public boolean canResolveTextDirection() {
+        switch (getTextDirection()) {
+            case TEXT_DIRECTION_INHERIT:
+                return (mParent != null) && (mParent instanceof ViewGroup);
+            default:
+                return true;
+        }
+    }
+
+    /**
      * Reset resolved text direction. Text direction can be resolved with a call to
      * getResolvedTextDirection(). Will call {@link View#onResolvedTextDirectionReset} when
      * reset is done.
      */
     public void resetResolvedTextDirection() {
-        mResolvedTextDirection = TEXT_DIRECTION_INHERIT;
+        mPrivateFlags2 &= ~(TEXT_DIRECTION_RESOLVED | TEXT_DIRECTION_RESOLVED_MASK);
         onResolvedTextDirectionReset();
     }
 
