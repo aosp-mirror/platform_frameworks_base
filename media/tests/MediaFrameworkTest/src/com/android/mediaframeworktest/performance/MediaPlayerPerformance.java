@@ -101,6 +101,9 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
 
     protected void setUp() throws Exception {
         super.setUp();
+        //Insert a 2 second before launching the test activity. This is
+        //the workaround for the race condition of requesting the updated surface.
+        Thread.sleep(2000);
         getActivity();
         if (MediaFrameworkPerfTestRunner.mGetNativeHeapDump)
             MediaTestUtil.getNativeHeapDump(this.getName() + "_before");
