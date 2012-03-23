@@ -16,8 +16,8 @@
 
 package android.renderscript;
 
-import java.lang.reflect.Field;
 import java.io.File;
+import java.lang.reflect.Field;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -293,6 +293,11 @@ public class RenderScript {
     synchronized int nAllocationGetSurfaceTextureID(int alloc) {
         validate();
         return rsnAllocationGetSurfaceTextureID(mContext, alloc);
+    }
+    native void rsnAllocationGetSurfaceTextureID2(int con, int alloc, SurfaceTexture st);
+    synchronized void nAllocationGetSurfaceTextureID2(int alloc, SurfaceTexture st) {
+        validate();
+        rsnAllocationGetSurfaceTextureID2(mContext, alloc, st);
     }
     native void rsnAllocationSetSurfaceTexture(int con, int alloc, SurfaceTexture sur);
     synchronized void nAllocationSetSurfaceTexture(int alloc, SurfaceTexture sur) {

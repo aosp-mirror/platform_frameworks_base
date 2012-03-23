@@ -131,22 +131,13 @@ public class Allocation extends BaseObj {
     public static final int USAGE_GRAPHICS_RENDER_TARGET = 0x0010;
 
     /**
-     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE The allocation
-     * will be used as a SurfaceTexture graphics consumer. This
-     * usage may only be used with USAGE_GRAPHICS_TEXTURE.
-     *
-     * @hide
-     */
-    public static final int USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE = 0x0020;
-
-    /**
      * USAGE_IO_INPUT The allocation will be used as SurfaceTexture
      * consumer.  This usage will cause the allocation to be created
      * read only.
      *
      * @hide
      */
-    public static final int USAGE_IO_INPUT = 0x0040;
+    public static final int USAGE_IO_INPUT = 0x0020;
 
     /**
      * USAGE_IO_OUTPUT The allocation will be used as a
@@ -155,7 +146,7 @@ public class Allocation extends BaseObj {
      *
      * @hide
      */
-    public static final int USAGE_IO_OUTPUT = 0x0080;
+    public static final int USAGE_IO_OUTPUT = 0x0040;
 
     /**
      * Controls mipmap behavior when using the bitmap creation and
@@ -217,17 +208,15 @@ public class Allocation extends BaseObj {
                        USAGE_GRAPHICS_VERTEX |
                        USAGE_GRAPHICS_CONSTANTS |
                        USAGE_GRAPHICS_RENDER_TARGET |
-                       USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE |
                        USAGE_IO_INPUT |
                        USAGE_IO_OUTPUT)) != 0) {
             throw new RSIllegalArgumentException("Unknown usage specified.");
         }
 
-        if ((usage & (USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE | USAGE_IO_INPUT)) != 0) {
+        if ((usage & USAGE_IO_INPUT) != 0) {
             mWriteAllowed = false;
 
-            if ((usage & ~(USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE |
-                           USAGE_IO_INPUT |
+            if ((usage & ~(USAGE_IO_INPUT |
                            USAGE_GRAPHICS_TEXTURE |
                            USAGE_SCRIPT)) != 0) {
                 throw new RSIllegalArgumentException("Invalid usage combination.");
@@ -348,7 +337,7 @@ public class Allocation extends BaseObj {
     public void ioGetInput() {
         if ((mUsage & USAGE_IO_INPUT) == 0) {
             throw new RSIllegalArgumentException(
-                "Can only send buffer if IO_OUTPUT usage specified.");
+                "Can only receive if IO_INPUT usage specified.");
         }
         mRS.validate();
         mRS.nAllocationIoReceive(getID());
@@ -1134,13 +1123,15 @@ public class Allocation extends BaseObj {
      *
      */
     public SurfaceTexture getSurfaceTexture() {
-        if ((mUsage & USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE) == 0) {
+        if ((mUsage & USAGE_IO_INPUT) == 0) {
             throw new RSInvalidStateException("Allocation is not a surface texture.");
         }
 
         int id = mRS.nAllocationGetSurfaceTextureID(getID());
-        return new SurfaceTexture(id);
+        SurfaceTexture st = new SurfaceTexture(id);
+        mRS.nAllocationGetSurfaceTextureID2(getID(), st);
 
+        return st;
     }
 
     /**

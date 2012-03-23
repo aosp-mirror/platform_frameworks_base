@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,6 @@ bool RsdShaderCache::link(const Context *rsc) {
     if (!vtx->getShaderID() || !frag->getShaderID()) {
         return false;
     }
-    //ALOGV("rsdShaderCache lookup  vtx %i, frag %i", vtx->getShaderID(), frag->getShaderID());
     uint32_t entryCount = mEntries.size();
     for (uint32_t ct = 0; ct < entryCount; ct ++) {
         if ((mEntries[ct]->vtx == vtx->getShaderID()) &&
@@ -134,8 +133,6 @@ bool RsdShaderCache::link(const Context *rsc) {
         }
     }
 
-    //ALOGV("RsdShaderCache miss");
-    //ALOGE("e0 %x", glGetError());
     ProgramEntry *e = new ProgramEntry(vtx->getAttribCount(),
                                        vtx->getUniformCount(),
                                        frag->getUniformCount());

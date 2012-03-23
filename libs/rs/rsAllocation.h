@@ -23,6 +23,8 @@ struct ANativeWindow;
 
 // ---------------------------------------------------------------------------
 namespace android {
+class SurfaceTexture;
+
 namespace renderscript {
 
 class Program;
@@ -60,6 +62,7 @@ public:
             void * usrPtr;
             int32_t surfaceTextureID;
             ANativeWindow *wndSurface;
+            SurfaceTexture *surfaceTexture;
         };
         State state;
 
@@ -130,6 +133,7 @@ public:
     }
 
     int32_t getSurfaceTextureID(const Context *rsc);
+    void setSurfaceTexture(const Context *rsc, SurfaceTexture *st);
     void setSurface(const Context *rsc, RsNativeWindow sur);
     void ioSend(const Context *rsc);
     void ioReceive(const Context *rsc);

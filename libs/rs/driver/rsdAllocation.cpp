@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include "hardware/gralloc.h"
 #include "ui/Rect.h"
 #include "ui/GraphicBufferMapper.h"
+#include "gui/SurfaceTexture.h"
 
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
@@ -139,7 +140,7 @@ static void Upload2DTexture(const Context *rsc, const Allocation *alloc, bool is
 static void UploadToTexture(const Context *rsc, const Allocation *alloc) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
-    if (alloc->mHal.state.usageFlags & RS_ALLOCATION_USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE) {
+    if (alloc->mHal.state.usageFlags & RS_ALLOCATION_USAGE_IO_INPUT) {
         if (!drv->textureID) {
             RSD_CALL_GL(glGenTextures, 1, &drv->textureID);
         }
@@ -475,7 +476,8 @@ void rsdAllocationIoSend(const Context *rsc, Allocation *alloc) {
 }
 
 void rsdAllocationIoReceive(const Context *rsc, Allocation *alloc) {
-    ALOGE("not implemented");
+    DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
+    alloc->mHal.state.surfaceTexture->updateTexImage();
 }
 
 

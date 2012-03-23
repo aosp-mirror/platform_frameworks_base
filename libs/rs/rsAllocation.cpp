@@ -20,6 +20,7 @@
 #include "rs_hal.h"
 
 #include "system/window.h"
+#include "gui/SurfaceTexture.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -64,6 +65,7 @@ void Allocation::updateCache() {
 
 Allocation::~Allocation() {
     freeChildrenUnlocked();
+    setSurfaceTexture(mRSC, NULL);
     mRSC->mHal.funcs.allocation.destroy(mRSC, this);
 }
 
@@ -424,6 +426,18 @@ int32_t Allocation::getSurfaceTextureID(const Context *rsc) {
     return id;
 }
 
+void Allocation::setSurfaceTexture(const Context *rsc, SurfaceTexture *st) {
+    if(st != mHal.state.surfaceTexture) {
+        if(mHal.state.surfaceTexture != NULL) {
+            mHal.state.surfaceTexture->decStrong(NULL);
+        }
+        mHal.state.surfaceTexture = st;
+        if(mHal.state.surfaceTexture != NULL) {
+            mHal.state.surfaceTexture->incStrong(NULL);
+        }
+    }
+}
+
 void Allocation::setSurface(const Context *rsc, RsNativeWindow sur) {
     ANativeWindow *nw = (ANativeWindow *)sur;
     ANativeWindow *old = mHal.state.wndSurface;
@@ -694,6 +708,11 @@ void rsi_AllocationCopy2DRange(Context *rsc,
 int32_t rsi_AllocationGetSurfaceTextureID(Context *rsc, RsAllocation valloc) {
     Allocation *alloc = static_cast<Allocation *>(valloc);
     return alloc->getSurfaceTextureID(rsc);
+}
+
+void rsi_AllocationGetSurfaceTextureID2(Context *rsc, RsAllocation valloc, void *vst, size_t len) {
+    Allocation *alloc = static_cast<Allocation *>(valloc);
+    alloc->setSurfaceTexture(rsc, static_cast<SurfaceTexture *>(vst));
 }
 
 void rsi_AllocationSetSurface(Context *rsc, RsAllocation valloc, RsNativeWindow sur) {
