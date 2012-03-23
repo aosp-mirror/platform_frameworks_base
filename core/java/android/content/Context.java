@@ -99,6 +99,16 @@ public abstract class Context {
     public static final int MODE_MULTI_PROCESS = 0x0004;
 
     /**
+     * Database open flag: when set, the database is opened with write-ahead
+     * logging enabled by default.
+     *
+     * @see #openOrCreateDatabase(String, int, CursorFactory)
+     * @see #openOrCreateDatabase(String, int, CursorFactory, DatabaseErrorHandler)
+     * @see SQLiteDatabase#enableWriteAheadLogging
+     */
+    public static final int MODE_ENABLE_WRITE_AHEAD_LOGGING = 0x0008;
+
+    /**
      * Flag for {@link #bindService}: automatically create the service as long
      * as the binding exists.  Note that while this will create the service,
      * its {@link android.app.Service#onStartCommand}
@@ -691,6 +701,7 @@ public abstract class Context {
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
      *     default operation, {@link #MODE_WORLD_READABLE}
      *     and {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     *     Use {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead logging by default.
      * @param factory An optional factory class that is called to instantiate a
      *     cursor when query is called.
      *
@@ -700,6 +711,7 @@ public abstract class Context {
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE
+     * @see #MODE_ENABLE_WRITE_AHEAD_LOGGING
      * @see #deleteDatabase
      */
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
@@ -716,6 +728,7 @@ public abstract class Context {
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
      *     default operation, {@link #MODE_WORLD_READABLE}
      *     and {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     *     Use {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead logging by default.
      * @param factory An optional factory class that is called to instantiate a
      *     cursor when query is called.
      * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
@@ -726,6 +739,7 @@ public abstract class Context {
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE
+     * @see #MODE_ENABLE_WRITE_AHEAD_LOGGING
      * @see #deleteDatabase
      */
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
