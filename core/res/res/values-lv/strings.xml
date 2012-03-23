@@ -1168,6 +1168,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Pievienot kontu"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Palielināt"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Samazināt"</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g>: pieskarieties un turiet nospiestu."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Bīdiet uz augšu, lai palielinātu vērtību, un uz leju, lai to samazinātu."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Palielināt minūtes vērtību"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Samazināt minūtes vērtību"</string>

@@ -1168,6 +1168,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Afegeix un compte"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Incrementa"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Disminueix"</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"Mantén premut <xliff:g id="VALUE">%s</xliff:g>."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Fes lliscar el dit cap amunt per incrementar i cap avall per disminuir."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Incrementa els minuts"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Disminueix els minuts"</string>

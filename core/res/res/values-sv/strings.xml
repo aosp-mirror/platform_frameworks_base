@@ -743,8 +743,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Tips! Dubbelknacka om du vill zooma in eller ut."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofyll"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Ange Autofyll"</string>
-    <!-- no translation found for autofill_address_name_separator (6350145154779706772) -->
-    <skip />
+    <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
@@ -1169,6 +1168,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Lägg till konto"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Öka"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Minska"</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> tryck länge."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Skjut uppåt för att öka och nedåt för att minska."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Öka minuter"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Minska minuter"</string>
