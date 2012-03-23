@@ -371,10 +371,19 @@ status_t AAH_TXPlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
     return OK;
 }
 
-void AAH_TXPlayer::abortPrepare(status_t err) {
+void AAH_TXPlayer::releaseTXGroup_l() {
+    if (mAAH_TXGroup != NULL) {
+        mAAH_TXGroup->unregisterClient(sp<AAH_TXPlayer>(this));
+        mAAH_TXGroup = NULL;
+    }
+    mProgramID = 0;
+}
+
+void AAH_TXPlayer::abortPrepare_l(status_t err) {
     CHECK(err != OK);
 
     notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, err);
+    releaseTXGroup_l();
 
     mPrepareResult = err;
     mFlags &= ~(PREPARING|PREPARE_CANCELLED|PREPARING_CONNECTED);
@@ -386,7 +395,7 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
 
     if (mFlags & PREPARE_CANCELLED) {
         LOGI("prepare was cancelled before doing anything");
-        abortPrepare(UNKNOWN_ERROR);
+        abortPrepare_l(UNKNOWN_ERROR);
         return;
     }
 
@@ -394,7 +403,7 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
         status_t err = finishSetDataSource_l();
 
         if (err != OK) {
-            abortPrepare(err);
+            abortPrepare_l(err);
             return;
         }
     }
@@ -406,7 +415,7 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
     const char* mime_type = NULL;
     if (!mAudioFormat->findCString(kKeyMIMEType, &mime_type)) {
         LOGE("Failed to find audio substream MIME type during prepare.");
-        abortPrepare(BAD_VALUE);
+        abortPrepare_l(BAD_VALUE);
         return;
     }
 
@@ -424,19 +433,19 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
 
         if (!mAudioFormat->findInt32(kKeySampleRate, &sample_rate)) {
             LOGE("Failed to find sample rate for AAC substream.");
-            abortPrepare(BAD_VALUE);
+            abortPrepare_l(BAD_VALUE);
             return;
         }
 
         if (!mAudioFormat->findInt32(kKeyChannelCount, &channel_count)) {
             LOGE("Failed to find channel count for AAC substream.");
-            abortPrepare(BAD_VALUE);
+            abortPrepare_l(BAD_VALUE);
             return;
         }
 
         if (!mAudioFormat->findData(kKeyESDS, &type, &esds_data, &esds_len)) {
             LOGE("Failed to find codec init data for AAC substream.");
-            abortPrepare(BAD_VALUE);
+            abortPrepare_l(BAD_VALUE);
             return;
         }
 
@@ -449,7 +458,7 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
             LOGE("Failed to allocate %u bytes for AAC substream codec aux"
                  " data.", mAudioCodecDataSize);
             mAudioCodecDataSize = 0;
-            abortPrepare(BAD_VALUE);
+            abortPrepare_l(BAD_VALUE);
             return;
         }
 
@@ -466,14 +475,14 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
         memcpy(tmp + 8, esds_data, esds_len);
     } else {
         LOGE("Unsupported MIME type \"%s\" in audio substream", mime_type);
-        abortPrepare(BAD_VALUE);
+        abortPrepare_l(BAD_VALUE);
         return;
     }
 
     status_t err = mAudioSource->start();
     if (err != OK) {
         LOGI("failed to start audio source, err=%d", err);
-        abortPrepare(err);
+        abortPrepare_l(err);
         return;
     }
 
@@ -796,11 +805,7 @@ void AAH_TXPlayer::reset_l() {
 
     mBitrate = -1;
 
-    if (mAAH_TXGroup != NULL) {
-        mAAH_TXGroup->unregisterClient(sp<AAH_TXPlayer>(this));
-        mAAH_TXGroup = NULL;
-    }
-    mProgramID = 0;
+    releaseTXGroup_l();
 
     mLastQueuedMediaTimePTSValid = false;
     mCurrentClockTransformValid = false;
@@ -1155,6 +1160,7 @@ void AAH_TXPlayer::onPumpAudio() {
                  "  Shutting down.");
             notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, UNKNOWN_ERROR);
             mPumpAudioEventPending = false;
+            releaseTXGroup_l();
             break;
         }
 
@@ -1296,40 +1302,43 @@ void AAH_TXPlayer::onPumpAudio() {
                                  MEDIA_ERROR_UNKNOWN,
                                  UNKNOWN_ERROR);
                 mPumpAudioEventPending = false;
+                releaseTXGroup_l();
                 break;
             }
         }
 
         LOGV("*** transmitting packet with pts=%lld", mediaTimeUs);
 
-        sp<TRTPAudioPacket> packet = new TRTPAudioPacket();
-        if (packet != NULL) {
-            packet->setPTS(mediaTimeUs);
-            packet->setSubstreamID(1);
+        if (mAAH_TXGroup != NULL) {
+            sp<TRTPAudioPacket> packet = new TRTPAudioPacket();
+            if (packet != NULL) {
+                packet->setPTS(mediaTimeUs);
+                packet->setSubstreamID(1);
 
-            packet->setCodecType(mAudioCodec);
-            packet->setVolume(mTRTPVolume);
-            // TODO : introduce a throttle for this so we can control the
-            // frequency with which transforms get sent.
-            packet->setClockTransform(mCurrentClockTransform);
-            packet->setAccessUnitData(data, mediaBuffer->range_length());
+                packet->setCodecType(mAudioCodec);
+                packet->setVolume(mTRTPVolume);
+                // TODO : introduce a throttle for this so we can control the
+                // frequency with which transforms get sent.
+                packet->setClockTransform(mCurrentClockTransform);
+                packet->setAccessUnitData(data, mediaBuffer->range_length());
 
-            // TODO : while its pretty much universally true that audio ES
-            // payloads are all RAPs across all codecs, it might be a good idea
-            // to throttle the frequency with which we send codec out of band
-            // data to the RXers.  If/when we do, we need to flag only those
-            // payloads which have required out of band data attached to them as
-            // RAPs.
-            packet->setRandomAccessPoint(true);
+                // TODO : while its pretty much universally true that audio ES
+                // payloads are all RAPs across all codecs, it might be a good
+                // idea to throttle the frequency with which we send codec out
+                // of band data to the RXers.  If/when we do, we need to flag
+                // only those payloads which have required out of band data
+                // attached to them as RAPs.
+                packet->setRandomAccessPoint(true);
 
-            if (mAudioCodecData && mAudioCodecDataSize) {
-                packet->setAuxData(mAudioCodecData, mAudioCodecDataSize);
+                if (mAudioCodecData && mAudioCodecDataSize) {
+                    packet->setAuxData(mAudioCodecData, mAudioCodecDataSize);
+                }
+
+                sendPacket_l(packet);
+            } else {
+                LOGD("Failed to allocate TRTP packet at %s:%d",
+                        __FILE__, __LINE__);
             }
-
-            CHECK(mAAH_TXGroup != NULL);
-            sendPacket_l(packet);
-        } else {
-            LOGD("Failed to allocate TRTP packet at %s:%d", __FILE__, __LINE__);
         }
 
         mediaBuffer->release();

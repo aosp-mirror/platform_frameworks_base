@@ -100,7 +100,8 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     status_t prepareAsync_l();
     void onPrepareAsyncEvent();
     void finishAsyncPrepare_l();
-    void abortPrepare(status_t err);
+    void releaseTXGroup_l();
+    void abortPrepare_l(status_t err);
     status_t play_l();
     status_t pause_l(bool doClockUpdate = true);
     status_t seekTo_l(int64_t timeUs);
