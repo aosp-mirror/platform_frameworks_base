@@ -464,8 +464,8 @@ public abstract class HardwareRenderer {
         static final Object[] sEglLock = new Object[0];
         int mWidth = -1, mHeight = -1;
 
-        static final ThreadLocal<Gl20Renderer.Gl20RendererEglContext> sEglContextStorage
-                = new ThreadLocal<Gl20Renderer.Gl20RendererEglContext>();
+        static final ThreadLocal<ManagedEGLContext> sEglContextStorage
+                = new ThreadLocal<ManagedEGLContext>();
 
         EGLContext mEglContext;
         Thread mEglThread;
@@ -622,7 +622,7 @@ public abstract class HardwareRenderer {
             }
         }
 
-        abstract GLES20Canvas createCanvas();
+        abstract HardwareCanvas createCanvas();
 
         abstract int[] getConfig(boolean dirtyRegions);
 
@@ -662,15 +662,17 @@ public abstract class HardwareRenderer {
                 }
             }
 
-            Gl20Renderer.Gl20RendererEglContext managedContext = sEglContextStorage.get();
+            ManagedEGLContext managedContext = sEglContextStorage.get();
             mEglContext = managedContext != null ? managedContext.getContext() : null;
             mEglThread = Thread.currentThread();
 
             if (mEglContext == null) {
                 mEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
-                sEglContextStorage.set(new Gl20Renderer.Gl20RendererEglContext(mEglContext));
+                sEglContextStorage.set(createManagedContext(mEglContext));
             }
         }
+
+        abstract ManagedEGLContext createManagedContext(EGLContext eglContext);
 
         private EGLConfig chooseEglConfig() {
             EGLConfig[] configs = new EGLConfig[1];
@@ -1103,7 +1105,8 @@ public abstract class HardwareRenderer {
                 // Make sure we do this on the correct thread.
                 if (mHandler.getLooper() != Looper.myLooper()) {
                     mHandler.post(new Runnable() {
-                        @Override public void run() {
+                        @Override
+                        public void run() {
                             onTerminate(eglContext);
                         }
                     });
@@ -1142,8 +1145,13 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        GLES20Canvas createCanvas() {
+        HardwareCanvas createCanvas() {
             return mGlCanvas = new GLES20Canvas(mTranslucent);
+        }
+
+        @Override
+        ManagedEGLContext createManagedContext(EGLContext eglContext) {
+            return new Gl20Renderer.Gl20RendererEglContext(mEglContext);
         }
 
         @Override
@@ -1249,7 +1257,8 @@ public abstract class HardwareRenderer {
                 if (isEnabled() && checkCurrent() != SURFACE_STATE_ERROR) needsContext = false;
 
                 if (needsContext) {
-                    Gl20RendererEglContext managedContext = sEglContextStorage.get();
+                    Gl20RendererEglContext managedContext =
+                            (Gl20RendererEglContext) sEglContextStorage.get();
                     if (managedContext == null) return;
                     usePbufferSurface(managedContext.getContext());
                 }
@@ -1282,7 +1291,8 @@ public abstract class HardwareRenderer {
         static void trimMemory(int level) {
             if (sEgl == null || sEglConfig == null) return;
 
-            Gl20RendererEglContext managedContext = sEglContextStorage.get();
+            Gl20RendererEglContext managedContext =
+                    (Gl20RendererEglContext) sEglContextStorage.get();
             // We do not have OpenGL objects
             if (managedContext == null) {
                 return;
