@@ -26,8 +26,6 @@
 #include <OMX_Core.h>
 #include <OMX_Video.h>
 
-#include "jni.h"
-
 namespace android {
 
 class IMemory;
