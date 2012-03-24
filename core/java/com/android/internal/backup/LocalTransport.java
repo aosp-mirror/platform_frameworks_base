@@ -166,10 +166,13 @@ public class LocalTransport extends IBackupTransport.Stub {
         if (DEBUG) Log.v(TAG, "clearBackupData() pkg=" + packageInfo.packageName);
 
         File packageDir = new File(mDataDir, packageInfo.packageName);
-        for (File f : packageDir.listFiles()) {
-            f.delete();
+        final File[] fileset = packageDir.listFiles();
+        if (fileset != null) {
+            for (File f : fileset) {
+                f.delete();
+            }
+            packageDir.delete();
         }
-        packageDir.delete();
         return BackupConstants.TRANSPORT_OK;
     }
 
