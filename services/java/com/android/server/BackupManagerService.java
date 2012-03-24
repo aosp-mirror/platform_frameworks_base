@@ -4693,6 +4693,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 mTransport.clearBackupData(mPackage);
             } catch (RemoteException e) {
                 // can't happen; the transport is local
+            } catch (Exception e) {
+                Slog.e(TAG, "Transport threw attempting to clear data for " + mPackage);
             } finally {
                 try {
                     // TODO - need to handle failures
