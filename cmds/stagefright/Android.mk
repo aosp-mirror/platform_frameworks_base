@@ -4,18 +4,18 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=       \
 	stagefright.cpp \
+	jpeg.cpp	\
 	SineSource.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libstagefright libmedia libmedia_native libutils libbinder libstagefright_foundation \
-        libskia libgui
+        libjpeg libgui
 
 LOCAL_C_INCLUDES:= \
 	frameworks/base/media/libstagefright \
 	frameworks/base/media/libstagefright/include \
 	$(TOP)/frameworks/native/include/media/openmax \
-	external/skia/include/core \
-	external/skia/include/images \
+	external/jpeg \
 
 LOCAL_CFLAGS += -Wno-multichar
 
