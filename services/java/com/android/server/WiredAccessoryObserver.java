@@ -66,7 +66,7 @@ class WiredAccessoryObserver extends UEventObserver {
         public String getDevName() { return mDevName; }
 
         public String getDevPath() {
-            return String.format("DEVPATH=/devices/virtual/switch/%s", mDevName);
+            return String.format("/devices/virtual/switch/%s", mDevName);
         }
 
         public String getSwitchStatePath() {
@@ -158,7 +158,7 @@ class WiredAccessoryObserver extends UEventObserver {
         init();  // set initial status
         for (int i = 0; i < uEventInfo.size(); ++i) {
             UEventInfo uei = uEventInfo.get(i);
-            startObserving(uei.getDevPath());
+            startObserving("DEVPATH="+uei.getDevPath());
         }
       }
     }
@@ -168,29 +168,20 @@ class WiredAccessoryObserver extends UEventObserver {
         if (LOG) Slog.v(TAG, "Headset UEVENT: " + event.toString());
 
         try {
+            String devPath = event.get("DEVPATH");
             String name = event.get("SWITCH_NAME");
             int state = Integer.parseInt(event.get("SWITCH_STATE"));
-            updateState(name, state);
+            updateState(devPath, name, state);
         } catch (NumberFormatException e) {
             Slog.e(TAG, "Could not parse switch state from event " + event);
         }
     }
 
-    private synchronized final void updateState(String name, int state)
+    private synchronized final void updateState(String devPath, String name, int state)
     {
-        // FIXME:  When ueventd informs of a change in state for a switch, it does not have to be
-        // the case that the name reported by /sys/class/switch/<device>/name is the same as
-        // <device>.  For normal users of the linux switch class driver, it will be.  But it is
-        // technically possible to hook the print_name method in the class driver and return a
-        // different name each and every time the name sysfs entry is queried.
-        //
-        // Right now this is not the case for any of the switch implementations used here.  I'm not
-        // certain anyone would ever choose to implement such a dynamic name, or what it would mean
-        // for the implementation at this level, but if it ever happens, we will need to revisit
-        // this code.
         for (int i = 0; i < uEventInfo.size(); ++i) {
             UEventInfo uei = uEventInfo.get(i);
-            if (name.equals(uei.getDevName())) {
+            if (devPath.equals(uei.getDevPath())) {
                 update(name, uei.computeNewHeadsetState(mHeadsetState, state));
                 return;
             }
@@ -213,7 +204,7 @@ class WiredAccessoryObserver extends UEventObserver {
                 curState = Integer.valueOf((new String(buffer, 0, len)).trim());
 
                 if (curState > 0) {
-                    updateState(uei.getDevName(), curState);
+                    updateState(uei.getDevPath(), uei.getDevName(), curState);
                 }
 
             } catch (FileNotFoundException e) {
