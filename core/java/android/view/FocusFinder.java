@@ -79,23 +79,43 @@ public class FocusFinder {
             switch (direction) {
                 case View.FOCUS_RIGHT:
                 case View.FOCUS_DOWN:
+                    setFocusBottomRight(root);
+                    break;
                 case View.FOCUS_FORWARD:
-                    final int rootTop = root.getScrollY();
-                    final int rootLeft = root.getScrollX();
-                    mFocusedRect.set(rootLeft, rootTop, rootLeft, rootTop);
+                    if (focused != null && focused.isLayoutRtl()) {
+                        setFocusTopLeft(root);
+                    } else {
+                        setFocusBottomRight(root);
+                    }
                     break;
 
                 case View.FOCUS_LEFT:
                 case View.FOCUS_UP:
-                case View.FOCUS_BACKWARD:
-                    final int rootBottom = root.getScrollY() + root.getHeight();
-                    final int rootRight = root.getScrollX() + root.getWidth();
-                    mFocusedRect.set(rootRight, rootBottom,
-                            rootRight, rootBottom);
+                    setFocusTopLeft(root);
                     break;
+                case View.FOCUS_BACKWARD:
+                    if (focused != null && focused.isLayoutRtl()) {
+                        setFocusBottomRight(root);
+                    } else {
+                        setFocusTopLeft(root);
+                    break;
+                }
             }
         }
         return findNextFocus(root, focused, mFocusedRect, direction);
+    }
+
+    private void setFocusTopLeft(ViewGroup root) {
+        final int rootBottom = root.getScrollY() + root.getHeight();
+        final int rootRight = root.getScrollX() + root.getWidth();
+        mFocusedRect.set(rootRight, rootBottom,
+                rootRight, rootBottom);
+    }
+
+    private void setFocusBottomRight(ViewGroup root) {
+        final int rootTop = root.getScrollY();
+        final int rootLeft = root.getScrollX();
+        mFocusedRect.set(rootLeft, rootTop, rootLeft, rootTop);
     }
 
     /**
@@ -135,22 +155,10 @@ public class FocusFinder {
             final int count = focusables.size();
             switch (direction) {
                 case View.FOCUS_FORWARD:
-                    if (focused != null) {
-                        int position = focusables.lastIndexOf(focused);
-                        if (position >= 0 && position + 1 < count) {
-                            return focusables.get(position + 1);
-                        }
-                    }
-                    return focusables.get(0);
+                    return getForwardFocusable(focused, focusables, count);
 
                 case View.FOCUS_BACKWARD:
-                    if (focused != null) {
-                        int position = focusables.indexOf(focused);
-                        if (position > 0) {
-                            return focusables.get(position - 1);
-                        }
-                    }
-                    return focusables.get(count - 1);
+                    return getBackwardFocusable(focused, focusables, count);
             }
             return null;
         }
@@ -191,6 +199,38 @@ public class FocusFinder {
             }
         }
         return closest;
+    }
+
+    private View getForwardFocusable(View focused, ArrayList<View> focusables, int count) {
+        return (focused != null && focused.isLayoutRtl()) ?
+                getPreviousFocusable(focused, focusables, count) :
+                getNextFocusable(focused, focusables, count);
+    }
+
+    private View getNextFocusable(View focused, ArrayList<View> focusables, int count) {
+        if (focused != null) {
+            int position = focusables.lastIndexOf(focused);
+            if (position >= 0 && position + 1 < count) {
+                return focusables.get(position + 1);
+            }
+        }
+        return focusables.get(0);
+    }
+
+    private View getBackwardFocusable(View focused, ArrayList<View> focusables, int count) {
+        return (focused != null && focused.isLayoutRtl()) ?
+                getNextFocusable(focused, focusables, count) :
+                getPreviousFocusable(focused, focusables, count);
+    }
+
+    private View getPreviousFocusable(View focused, ArrayList<View> focusables, int count) {
+        if (focused != null) {
+            int position = focusables.indexOf(focused);
+            if (position > 0) {
+                return focusables.get(position - 1);
+            }
+        }
+        return focusables.get(count - 1);
     }
 
     /**
