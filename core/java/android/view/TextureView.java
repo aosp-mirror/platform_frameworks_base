@@ -299,7 +299,7 @@ public class TextureView extends View {
     }
 
     @Override
-    boolean destroyLayer() {
+    boolean destroyLayer(boolean valid) {
         return false;
     }
 

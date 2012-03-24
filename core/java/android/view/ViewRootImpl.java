@@ -1809,7 +1809,7 @@ public final class ViewRootImpl implements ViewParent,
      *
      * @return The measure spec to use to measure the root view.
      */
-    private int getRootMeasureSpec(int windowSize, int rootDimension) {
+    private static int getRootMeasureSpec(int windowSize, int rootDimension) {
         int measureSpec;
         switch (rootDimension) {
 
@@ -2432,11 +2432,11 @@ public final class ViewRootImpl implements ViewParent,
                 mAccessibilityInteractionConnectionManager);
         removeSendWindowContentChangedCallback();
 
+        destroyHardwareRenderer();
+
         mView = null;
         mAttachInfo.mRootView = null;
         mAttachInfo.mSurface = null;
-
-        destroyHardwareRenderer();
 
         mSurface.release();
 
@@ -2893,7 +2893,7 @@ public final class ViewRootImpl implements ViewParent,
      * @param focused The currently focused view.
      * @return An appropriate view, or null if no such view exists.
      */
-    private ViewGroup findAncestorToTakeFocusInTouchMode(View focused) {
+    private static ViewGroup findAncestorToTakeFocusInTouchMode(View focused) {
         ViewParent parent = focused.getParent();
         while (parent instanceof ViewGroup) {
             final ViewGroup vgParent = (ViewGroup) parent;
@@ -3763,7 +3763,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void getGfxInfo(View view, int[] info) {
+    private static void getGfxInfo(View view, int[] info) {
         DisplayList displayList = view.mDisplayList;
         info[0]++;
         if (displayList != null) {
@@ -3784,6 +3784,7 @@ public final class ViewRootImpl implements ViewParent,
         if (immediate) {
             doDie();
         } else {
+            destroyHardwareRenderer();
             mHandler.sendEmptyMessage(MSG_DIE);
         }
     }
@@ -3826,10 +3827,18 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void destroyHardwareRenderer() {
-        if (mAttachInfo.mHardwareRenderer != null) {
-            mAttachInfo.mHardwareRenderer.destroy(true);
-            mAttachInfo.mHardwareRenderer = null;
-            mAttachInfo.mHardwareAccelerated = false;
+        AttachInfo attachInfo = mAttachInfo;
+        HardwareRenderer hardwareRenderer = attachInfo.mHardwareRenderer;
+
+        if (hardwareRenderer != null) {
+            if (mView != null) {
+                hardwareRenderer.destroyHardwareResources(mView);
+            }
+            hardwareRenderer.destroy(true);
+            hardwareRenderer.setRequested(false);
+
+            attachInfo.mHardwareRenderer = null;
+            attachInfo.mHardwareAccelerated = false;
         }
     }
 

@@ -10018,7 +10018,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         destroyDrawingCache();
 
-        destroyLayer();
+        destroyLayer(false);
 
         if (mAttachInfo != null) {
             if (mDisplayList != null) {
@@ -10394,7 +10394,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         // Destroy any previous software drawing cache if needed
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
-                destroyLayer();
+                destroyLayer(false);
                 // fall through - non-accelerated views may use software layer mechanism instead
             case LAYER_TYPE_SOFTWARE:
                 destroyDrawingCache();
@@ -10532,11 +10532,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #setLayerType(int, android.graphics.Paint) 
      * @see #LAYER_TYPE_HARDWARE
      */
-    boolean destroyLayer() {
+    boolean destroyLayer(boolean valid) {
         if (mHardwareLayer != null) {
             AttachInfo info = mAttachInfo;
             if (info != null && info.mHardwareRenderer != null &&
-                    info.mHardwareRenderer.isEnabled() && info.mHardwareRenderer.validate()) {
+                    info.mHardwareRenderer.isEnabled() &&
+                    (valid || info.mHardwareRenderer.validate())) {
                 mHardwareLayer.destroy();
                 mHardwareLayer = null;
 
@@ -10560,7 +10561,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     protected void destroyHardwareResources() {
-        destroyLayer();
+        destroyLayer(true);
     }
 
     /**

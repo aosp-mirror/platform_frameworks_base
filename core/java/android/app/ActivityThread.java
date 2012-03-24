@@ -404,6 +404,7 @@ public final class ActivityThread {
                     try {
                         fd.close();
                     } catch (IOException e) {
+                        // Ignore
                     }
                 }
                 return;
@@ -412,6 +413,7 @@ public final class ActivityThread {
                 try {
                     profileFd.close();
                 } catch (IOException e) {
+                    // Ignore
                 }
             }
             profileFile = file;
@@ -843,14 +845,13 @@ public final class ActivityThread {
             FileOutputStream fout = new FileOutputStream(fd);
             PrintWriter pw = new PrintWriter(fout);
             try {
-                return dumpMemInfo(pw, checkin, all, args);
+                return dumpMemInfo(pw, checkin, all);
             } finally {
                 pw.flush();
             }
         }
 
-        private Debug.MemoryInfo dumpMemInfo(PrintWriter pw, boolean checkin, boolean all,
-                String[] args) {
+        private Debug.MemoryInfo dumpMemInfo(PrintWriter pw, boolean checkin, boolean all) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
             long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
@@ -1456,17 +1457,6 @@ public final class ActivityThread {
         //        + metrics.heightPixels + " den=" + metrics.density
         //        + " xdpi=" + metrics.xdpi + " ydpi=" + metrics.ydpi);
         return dm;
-    }
-
-    static Configuration applyConfigCompat(Configuration config, CompatibilityInfo compat) {
-        if (config == null) {
-            return null;
-        }
-        if (compat != null && !compat.supportsScreen()) {
-            config = new Configuration(config);
-            compat.applyToConfiguration(config);
-        }
-        return config;
     }
 
     private Configuration mMainThreadConfig = new Configuration();
@@ -2509,7 +2499,7 @@ public final class ActivityThread {
         return r;
     }
 
-    final void cleanUpPendingRemoveWindows(ActivityClientRecord r) {
+    static final void cleanUpPendingRemoveWindows(ActivityClientRecord r) {
         if (r.mPendingRemoveWindow != null) {
             r.mPendingRemoveWindowManager.removeViewImmediate(r.mPendingRemoveWindow);
             IBinder wtoken = r.mPendingRemoveWindow.getWindowToken();
@@ -3437,15 +3427,12 @@ public final class ActivityThread {
                 = new ArrayList<ComponentCallbacks2>();
 
         if (mActivities.size() > 0) {
-            Iterator<ActivityClientRecord> it = mActivities.values().iterator();
-            while (it.hasNext()) {
-                ActivityClientRecord ar = it.next();
+            for (ActivityClientRecord ar : mActivities.values()) {
                 Activity a = ar.activity;
                 if (a != null) {
                     Configuration thisConfig = applyConfigCompatMainThread(newConfig,
                             ar.packageInfo.mCompatibilityInfo.getIfNeeded());
-                    if (!ar.activity.mFinished && (allActivities ||
-                            (a != null && !ar.paused))) {
+                    if (!ar.activity.mFinished && (allActivities || !ar.paused)) {
                         // If the activity is currently resumed, its configuration
                         // needs to change right now.
                         callbacks.add(a);
@@ -3455,24 +3442,24 @@ public final class ActivityThread {
                         // the activity manager may, before then, decide the
                         // activity needs to be destroyed to handle its new
                         // configuration.
-                        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Setting activity "
-                                + ar.activityInfo.name + " newConfig=" + thisConfig);
+                        if (DEBUG_CONFIGURATION) {
+                            Slog.v(TAG, "Setting activity "
+                                    + ar.activityInfo.name + " newConfig=" + thisConfig);
+                        }
                         ar.newConfig = thisConfig;
                     }
                 }
             }
         }
         if (mServices.size() > 0) {
-            Iterator<Service> it = mServices.values().iterator();
-            while (it.hasNext()) {
-                callbacks.add(it.next());
+            for (Service service : mServices.values()) {
+                callbacks.add(service);
             }
         }
         synchronized (mProviderMap) {
             if (mLocalProviders.size() > 0) {
-                Iterator<ProviderClientRecord> it = mLocalProviders.values().iterator();
-                while (it.hasNext()) {
-                    callbacks.add(it.next().mLocalProvider);
+                for (ProviderClientRecord providerClientRecord : mLocalProviders.values()) {
+                    callbacks.add(providerClientRecord.mLocalProvider);
                 }
             }
         }
@@ -3484,8 +3471,7 @@ public final class ActivityThread {
         return callbacks;
     }
 
-    private final void performConfigurationChanged(
-            ComponentCallbacks2 cb, Configuration config) {
+    private static void performConfigurationChanged(ComponentCallbacks2 cb, Configuration config) {
         // Only for Activity objects, check that they actually call up to their
         // superclass implementation.  ComponentCallbacks2 is an interface, so
         // we check the runtime type and act accordingly.
@@ -3692,7 +3678,7 @@ public final class ActivityThread {
         }
     }
 
-    final void handleDumpHeap(boolean managed, DumpHeapData dhd) {
+    static final void handleDumpHeap(boolean managed, DumpHeapData dhd) {
         if (managed) {
             try {
                 Debug.dumpHprofData(dhd.path, dhd.fd.getFileDescriptor());
@@ -3769,7 +3755,7 @@ public final class ActivityThread {
         }
 
         final int N = callbacks.size();
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             callbacks.get(i).onTrimMemory(level);
         }
         WindowManagerImpl.getDefault().terminateEgl();
@@ -4057,9 +4043,7 @@ public final class ActivityThread {
         final ArrayList<IActivityManager.ContentProviderHolder> results =
             new ArrayList<IActivityManager.ContentProviderHolder>();
 
-        Iterator<ProviderInfo> i = providers.iterator();
-        while (i.hasNext()) {
-            ProviderInfo cpi = i.next();
+        for (ProviderInfo cpi : providers) {
             StringBuilder buf = new StringBuilder(128);
             buf.append("Pub ");
             buf.append(cpi.authority);
