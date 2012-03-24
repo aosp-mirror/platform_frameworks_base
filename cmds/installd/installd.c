@@ -332,10 +332,13 @@ int initialize_directories() {
         ret = 0;
         // Make the /data/user directory if necessary
         if (access(user_data_dir, R_OK) < 0) {
-            if (mkdir(user_data_dir, 0755) < 0) {
+            if (mkdir(user_data_dir, 0711) < 0) {
                 return -1;
             }
             if (chown(user_data_dir, AID_SYSTEM, AID_SYSTEM) < 0) {
+                return -1;
+            }
+            if (chmod(user_data_dir, 0711) < 0) {
                 return -1;
             }
         }
