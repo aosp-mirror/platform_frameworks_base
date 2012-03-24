@@ -10,7 +10,6 @@ LOCAL_SRC_FILES:=                 \
         MPEG2TSExtractor.cpp      \
 
 LOCAL_C_INCLUDES:= \
-	$(JNI_H_INCLUDE) \
 	$(TOP)/frameworks/base/media/libstagefright \
 	$(TOP)/frameworks/native/include/media/openmax
 

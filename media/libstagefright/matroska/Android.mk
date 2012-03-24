@@ -5,7 +5,6 @@ LOCAL_SRC_FILES:=                 \
         MatroskaExtractor.cpp
 
 LOCAL_C_INCLUDES:= \
-        $(JNI_H_INCLUDE) \
         $(TOP)/external/libvpx/mkvparser \
         $(TOP)/frameworks/native/include/media/openmax \
 

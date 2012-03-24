@@ -32,7 +32,6 @@ LOCAL_SHARED_LIBRARIES := \
     libjpeg
 
 LOCAL_C_INCLUDES := \
-    $(JNI_H_INCLUDE) \
     $(TOP)/external/jpeg \
     $(TOP)/external/skia/include/config \
     $(TOP)/external/skia/include/core \
