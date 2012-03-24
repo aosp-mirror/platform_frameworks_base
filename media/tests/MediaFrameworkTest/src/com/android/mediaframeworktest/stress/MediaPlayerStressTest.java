@@ -43,13 +43,18 @@ import android.test.InstrumentationTestCase;
 /**
  * Junit / Instrumentation test case for the media player
  */
-public class MediaPlayerStressTest extends InstrumentationTestCase {
+public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
     private String TAG = "MediaPlayerStressTest";
 
     public MediaPlayerStressTest() {
+        super("com.android.mediaframeworktest", MediaFrameworkTest.class);
     }
 
     protected void setUp() throws Exception {
+        //Insert a 2 second before launching the test activity. This is
+        //the workaround for the race condition of requesting the updated surface.
+        Thread.sleep(2000);
+        getActivity();
         super.setUp();
     }
 

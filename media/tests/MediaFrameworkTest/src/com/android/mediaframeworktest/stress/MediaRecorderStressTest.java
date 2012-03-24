@@ -88,7 +88,9 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
         if (! sem.tryAcquire(WAIT_TIMEOUT, TimeUnit.MILLISECONDS)) {
             fail("Failed to start the looper.");
         }
-
+        //Insert a 2 second before launching the test activity. This is
+        //the workaround for the race condition of requesting the updated surface.
+        Thread.sleep(2000);
         getActivity();
         super.setUp();
     }
