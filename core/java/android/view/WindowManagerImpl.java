@@ -354,7 +354,7 @@ public class WindowManagerImpl implements WindowManager {
     View removeViewLocked(int index) {
         ViewRootImpl root = mRoots[index];
         View view = root.getView();
-        
+
         // Don't really remove until we have matched all calls to add().
         root.mAddNesting--;
         if (root.mAddNesting > 0) {

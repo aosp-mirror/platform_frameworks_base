@@ -1121,6 +1121,7 @@ public abstract class HardwareRenderer {
                         GLES20Canvas.terminateCaches();
 
                         sEgl.eglDestroyContext(sEglDisplay, eglContext);
+                        sEglContextStorage.set(null);
                         sEglContextStorage.remove();
 
                         sEgl.eglDestroySurface(sEglDisplay, sPbuffer);
@@ -1134,7 +1135,6 @@ public abstract class HardwareRenderer {
                         sEglDisplay = null;
                         sEglConfig = null;
                         sPbuffer = null;
-                        sEglContextStorage.set(null);
                     }
                 }
             }
@@ -1238,7 +1238,7 @@ public abstract class HardwareRenderer {
         }
 
         private static void destroyHardwareLayer(View view) {
-            view.destroyLayer();
+            view.destroyLayer(true);
 
             if (view instanceof ViewGroup) {
                 ViewGroup group = (ViewGroup) view;
