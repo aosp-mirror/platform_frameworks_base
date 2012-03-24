@@ -1,8 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES += $(JNI_H_INCLUDE)
-
 LOCAL_SRC_FILES:=                     \
         OMX.cpp                       \
         OMXMaster.cpp                 \

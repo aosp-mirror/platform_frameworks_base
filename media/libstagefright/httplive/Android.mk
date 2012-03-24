@@ -8,7 +8,6 @@ LOCAL_SRC_FILES:=               \
         M3UParser.cpp           \
 
 LOCAL_C_INCLUDES:= \
-	$(JNI_H_INCLUDE) \
 	$(TOP)/frameworks/base/media/libstagefright \
 	$(TOP)/frameworks/native/include/media/openmax \
 	$(TOP)/external/openssl/include

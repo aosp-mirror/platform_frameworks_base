@@ -11,7 +11,6 @@ LOCAL_SRC_FILES:=                 \
 
 LOCAL_CFLAGS += -Wno-multichar
 LOCAL_C_INCLUDES:= \
-        $(JNI_H_INCLUDE) \
         $(TOP)/frameworks/base/include/media/stagefright/timedtext \
         $(TOP)/frameworks/base/media/libstagefright
 

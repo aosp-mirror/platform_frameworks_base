@@ -38,7 +38,6 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_rtsp                     \
 
 LOCAL_C_INCLUDES :=                                               \
-	$(JNI_H_INCLUDE)                                                \
 	$(call include-path-for, graphics corecg)                       \
 	$(TOP)/frameworks/base/media/libstagefright/include             \
 	$(TOP)/frameworks/base/media/libstagefright/rtsp                \

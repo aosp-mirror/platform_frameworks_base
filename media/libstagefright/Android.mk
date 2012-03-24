@@ -57,7 +57,6 @@ LOCAL_SRC_FILES:=                         \
         avc_utils.cpp                     \
 
 LOCAL_C_INCLUDES:= \
-	$(JNI_H_INCLUDE) \
         $(TOP)/frameworks/base/include/media/stagefright/timedtext \
         $(TOP)/frameworks/native/include/media/hardware \
         $(TOP)/frameworks/native/include/media/openmax \

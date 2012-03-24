@@ -8,7 +8,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libstagefright libbinder libmedia libutils libstagefright_foundation
 
 LOCAL_C_INCLUDES := \
-	$(JNI_H_INCLUDE) \
 	frameworks/base/media/libstagefright \
 	$(TOP)/frameworks/native/include/media/openmax
 
