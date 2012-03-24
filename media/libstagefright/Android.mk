@@ -68,7 +68,6 @@ LOCAL_C_INCLUDES:= \
 LOCAL_SHARED_LIBRARIES := \
         libbinder \
         libcamera_client \
-        libchromium_net \
         libcrypto \
         libcutils \
         libdl \
@@ -101,13 +100,17 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_httplive \
         libstagefright_id3 \
         libFLAC \
-        libstagefright_chromium_http \
+
+ifneq ($(TARGET_BUILD_PDK), true)
+LOCAL_STATIC_LIBRARIES += \
+	libstagefright_chromium_http
+LOCAL_SHARED_LIBRARIES += \
+        libchromium_net
+LOCAL_CPPFLAGS += -DCHROMIUM_AVAILABLE=1
+endif
 
 LOCAL_SHARED_LIBRARIES += libstlport
 include external/stlport/libstlport.mk
-
-# TODO: Chromium is always available, so this flag can be removed.
-LOCAL_CPPFLAGS += -DCHROMIUM_AVAILABLE=1
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_enc_common \

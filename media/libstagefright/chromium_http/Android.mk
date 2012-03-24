@@ -1,5 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 
+ifneq ($(TARGET_BUILD_PDK), true)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=       \
@@ -21,3 +22,4 @@ include external/stlport/libstlport.mk
 LOCAL_MODULE:= libstagefright_chromium_http
 
 include $(BUILD_STATIC_LIBRARY)
+endif
