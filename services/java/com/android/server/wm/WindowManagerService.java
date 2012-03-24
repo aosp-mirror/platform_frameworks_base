@@ -8749,7 +8749,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void scheduleAnimationLocked() {
         if (!mAnimationScheduled) {
-            mChoreographer.postAnimationCallback(mAnimationRunnable, null);
+            mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, mAnimationRunnable, null);
             mAnimationScheduled = true;
         }
     }

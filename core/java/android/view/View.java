@@ -8981,7 +8981,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public void postOnAnimation(Runnable action) {
         final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
-            attachInfo.mViewRootImpl.mChoreographer.postAnimationCallback(action, null);
+            attachInfo.mViewRootImpl.mChoreographer.postCallback(
+                    Choreographer.CALLBACK_ANIMATION, action, null);
         } else {
             // Assume that post will succeed later
             ViewRootImpl.getRunQueue().post(action);
@@ -9005,8 +9006,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public void postOnAnimationDelayed(Runnable action, long delayMillis) {
         final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
-            attachInfo.mViewRootImpl.mChoreographer.postAnimationCallbackDelayed(
-                    action, null, delayMillis);
+            attachInfo.mViewRootImpl.mChoreographer.postCallbackDelayed(
+                    Choreographer.CALLBACK_ANIMATION, action, null, delayMillis);
         } else {
             // Assume that post will succeed later
             ViewRootImpl.getRunQueue().postDelayed(action, delayMillis);
@@ -9031,7 +9032,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             final AttachInfo attachInfo = mAttachInfo;
             if (attachInfo != null) {
                 attachInfo.mHandler.removeCallbacks(action);
-                attachInfo.mViewRootImpl.mChoreographer.removeAnimationCallbacks(action, null);
+                attachInfo.mViewRootImpl.mChoreographer.removeCallbacks(
+                        Choreographer.CALLBACK_ANIMATION, action, null);
             } else {
                 // Assume that post will succeed later
                 ViewRootImpl.getRunQueue().removeCallbacks(action);
@@ -12226,8 +12228,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (verifyDrawable(who) && what != null) {
             final long delay = when - SystemClock.uptimeMillis();
             if (mAttachInfo != null) {
-                mAttachInfo.mViewRootImpl.mChoreographer.postAnimationCallbackDelayed(
-                        what, who, Choreographer.subtractFrameDelay(delay));
+                mAttachInfo.mViewRootImpl.mChoreographer.postCallbackDelayed(
+                        Choreographer.CALLBACK_ANIMATION, what, who,
+                        Choreographer.subtractFrameDelay(delay));
             } else {
                 ViewRootImpl.getRunQueue().postDelayed(what, delay);
             }
@@ -12243,7 +12246,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public void unscheduleDrawable(Drawable who, Runnable what) {
         if (verifyDrawable(who) && what != null) {
             if (mAttachInfo != null) {
-                mAttachInfo.mViewRootImpl.mChoreographer.removeAnimationCallbacks(what, who);
+                mAttachInfo.mViewRootImpl.mChoreographer.removeCallbacks(
+                        Choreographer.CALLBACK_ANIMATION, what, who);
             } else {
                 ViewRootImpl.getRunQueue().removeCallbacks(what);
             }
@@ -12261,7 +12265,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void unscheduleDrawable(Drawable who) {
         if (mAttachInfo != null && who != null) {
-            mAttachInfo.mViewRootImpl.mChoreographer.removeAnimationCallbacks(null, who);
+            mAttachInfo.mViewRootImpl.mChoreographer.removeCallbacks(
+                    Choreographer.CALLBACK_ANIMATION, null, who);
         }
     }
 
