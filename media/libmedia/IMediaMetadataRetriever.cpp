@@ -18,7 +18,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <binder/Parcel.h>
-#include <SkBitmap.h>
 #include <media/IMediaMetadataRetriever.h>
 #include <utils/String8.h>
 
