@@ -226,6 +226,13 @@ public final class Bundle implements Parcelable, Cloneable {
     }
 
     /**
+     * @hide
+     */
+    public boolean isParcelled() {
+        return mParcelledData != null;
+    }
+
+    /**
      * Returns the number of mappings contained in this Bundle.
      *
      * @return the number of mappings as an int.

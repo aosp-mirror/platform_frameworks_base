@@ -1381,6 +1381,7 @@ public class Instrumentation {
         }
         try {
             intent.setAllowFds(false);
+            intent.migrateExtraStreamToClipData();
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
@@ -1479,6 +1480,7 @@ public class Instrumentation {
         }
         try {
             intent.setAllowFds(false);
+            intent.migrateExtraStreamToClipData();
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),

@@ -6467,4 +6467,46 @@ public class Intent implements Parcelable, Cloneable {
         }
         return type;
     }
+
+    /**
+     * Migrate any {@link #EXTRA_STREAM} in {@link #ACTION_SEND} and
+     * {@link #ACTION_SEND_MULTIPLE} to {@link ClipData}.
+     *
+     * @hide
+     */
+    public void migrateExtraStreamToClipData() {
+        // Refuse to touch if extras already parcelled
+        if (mExtras != null && mExtras.isParcelled()) return;
+
+        // Bail when someone already gave us ClipData
+        if (getClipData() != null) return;
+
+        final String action = getAction();
+        if (ACTION_SEND.equals(action)) {
+            final Uri stream = getParcelableExtra(EXTRA_STREAM);
+            if (stream != null) {
+                final ClipData clipData = new ClipData(
+                        null, new String[] { getType() }, new ClipData.Item(stream));
+
+                setClipData(clipData);
+                addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
+        } else if (ACTION_SEND_MULTIPLE.equals(action)) {
+            final ArrayList<Uri> streams = getParcelableArrayListExtra(EXTRA_STREAM);
+            if (streams != null && streams.size() > 0) {
+                final Uri firstStream = streams.get(0);
+                final ClipData clipData = new ClipData(
+                        null, new String[] { getType() }, new ClipData.Item(firstStream));
+
+                final int size = streams.size();
+                for (int i = 1; i < size; i++) {
+                    clipData.addItem(new ClipData.Item(streams.get(i)));
+                }
+
+                setClipData(clipData);
+                addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+            }
+        }
+    }
 }
