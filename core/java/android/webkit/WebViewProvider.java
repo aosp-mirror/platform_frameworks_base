@@ -192,7 +192,7 @@ public interface WebViewProvider {
 
     public WebBackForwardList copyBackForwardList();
 
-    public void setFindListener(FindListener listener);
+    public void setFindListener(WebView.FindListener listener);
 
     public void findNext(boolean forward);
 
