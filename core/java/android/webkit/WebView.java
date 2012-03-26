@@ -313,7 +313,6 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Interface to listen for find results.
-     * @hide
      */
     public interface FindListener {
         /**
@@ -1249,8 +1248,7 @@ public class WebView extends AbsoluteLayout
      * Register the listener to be notified as find-on-page operations progress.
      * This will replace the current listener.
      *
-     * @param listener An implementation of {@link WebView#FindListener}.
-     * @hide
+     * @param listener An implementation of {@link FindListener}.
      */
     public void setFindListener(FindListener listener) {
         checkThread();
@@ -1258,11 +1256,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Highlight and scroll to the next occurance of String in findAll.
-     * Wraps the page infinitely, and scrolls.  Must be called after
-     * calling findAll.
+     * Highlight and scroll to the next match found by {@link #findAll} or
+     * {@link #findAllAsync}, wrapping around page boundaries as necessary.
+     * Notifies any registered {@link FindListener}. If neither
+     * {@link #findAll} nor {@link #findAllAsync(String)} has been called yet,
+     * or if {@link #clearMatches} has been called since the last find
+     * operation, this function does nothing.
      *
      * @param forward Direction to search.
+     * @see #setFindListener
      */
     public void findNext(boolean forward) {
         checkThread();
@@ -1271,10 +1273,13 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Find all instances of find on the page and highlight them.
+     * Notifies any registered {@link FindListener}.
      *
      * @param find  String to find.
      * @return int  The number of occurances of the String "find"
      *              that were found.
+     * @deprecated {@link #findAllAsync} is preferred.
+     * @see #setFindListener
      */
     public int findAll(String find) {
         checkThread();
@@ -1283,10 +1288,12 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Find all instances of find on the page and highlight them,
-     * asynchronously.
+     * asynchronously. Notifies any registered {@link FindListener}.
+     * Successive calls to this or {@link #findAll} will cancel any
+     * pending searches.
      *
      * @param find  String to find.
-     * @hide
+     * @see #setFindListener
      */
     public void findAllAsync(String find) {
         checkThread();
@@ -1333,8 +1340,9 @@ public class WebView extends AbsoluteLayout
         return getFactory().getStatics().findAddress(addr);
     }
 
-    /*
-     * Clear the highlighting surrounding text matches created by findAll.
+    /**
+     * Clear the highlighting surrounding text matches created by
+     * {@link #findAll} or {@link #findAllAsync}.
      */
     public void clearMatches() {
         checkThread();

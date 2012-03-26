@@ -148,8 +148,8 @@ class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mInput.showSoftInput(mEditText, 0);
     }
 
-    public void updateMatchCount(int matchIndex, int matchCount, boolean isNewFind) {
-        if (!isNewFind) {
+    public void updateMatchCount(int matchIndex, int matchCount, boolean isEmptyFind) {
+        if (!isEmptyFind) {
             mNumberOfMatches = matchCount;
             mActiveMatchIndex = matchIndex;
             updateMatchesString();

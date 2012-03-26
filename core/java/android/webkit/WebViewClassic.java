@@ -3635,7 +3635,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     public void findNext(boolean forward) {
         if (0 == mNativeClass) return; // client isn't initialized
-        mWebViewCore.sendMessage(EventHub.FIND_NEXT, forward ? 1 : 0);
+        if (mFindRequest != null) {
+            mWebViewCore.sendMessage(EventHub.FIND_NEXT, forward ? 1 : 0, mFindRequest);
+        }
     }
 
     /**
@@ -3652,28 +3654,26 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private int findAllBody(String find, boolean isAsync) {
         if (0 == mNativeClass) return 0; // client isn't initialized
-        mLastFind = find;
+        mFindRequest = null;
         if (find == null) return 0;
         mWebViewCore.removeMessages(EventHub.FIND_ALL);
-        WebViewCore.FindAllRequest request = new
-            WebViewCore.FindAllRequest(find);
+        mFindRequest = new WebViewCore.FindAllRequest(find);
         if (isAsync) {
-            mWebViewCore.sendMessage(EventHub.FIND_ALL, request);
+            mWebViewCore.sendMessage(EventHub.FIND_ALL, mFindRequest);
             return 0; // no need to wait for response
         }
-        synchronized(request) {
+        synchronized(mFindRequest) {
             try {
-                mWebViewCore.sendMessageAtFrontOfQueue(EventHub.FIND_ALL,
-                    request);
-                while (request.mMatchCount == -1) {
-                    request.wait();
+                mWebViewCore.sendMessageAtFrontOfQueue(EventHub.FIND_ALL, mFindRequest);
+                while (mFindRequest.mMatchCount == -1) {
+                    mFindRequest.wait();
                 }
             }
             catch (InterruptedException e) {
                 return 0;
             }
+            return mFindRequest.mMatchCount;
         }
-        return request.mMatchCount;
     }
 
     /**
@@ -3704,7 +3704,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             return true;
         }
         if (text == null) {
-            text = mLastFind;
+            text = mFindRequest == null ? null : mFindRequest.mSearchText;
         }
         if (text != null) {
             mFindCallback.setText(text);
@@ -3730,9 +3730,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // or not we draw the highlights for matches.
     private boolean mFindIsUp;
 
-    // Keep track of the last string sent, so we can search again when find is
-    // reopened.
-    private String mLastFind;
+    // Keep track of the last find request sent.
+    private WebViewCore.FindAllRequest mFindRequest = null;
 
     /**
      * Return the first substring consisting of the address of a physical
@@ -8548,13 +8547,27 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 }
 
                 case UPDATE_MATCH_COUNT: {
-                    boolean isNewFind = mLastFind == null || !mLastFind.equals(msg.obj);
-                    if (mFindCallback != null)
-                        mFindCallback.updateMatchCount(msg.arg1, msg.arg2, isNewFind);
-                    if (mFindListener != null)
-                        mFindListener.onFindResultReceived(msg.arg1, msg.arg2, true);
+                    WebViewCore.FindAllRequest request = (WebViewCore.FindAllRequest)msg.obj;
+                    if (request == null) {
+                        if (mFindCallback != null) {
+                            mFindCallback.updateMatchCount(0, 0, true);
+                        }
+                    } else if (request == mFindRequest) {
+                        int matchCount, matchIndex;
+                        synchronized (mFindRequest) {
+                            matchCount = request.mMatchCount;
+                            matchIndex = request.mMatchIndex;
+                        }
+                        if (mFindCallback != null) {
+                            mFindCallback.updateMatchCount(matchIndex, matchCount, false);
+                        }
+                        if (mFindListener != null) {
+                            mFindListener.onFindResultReceived(matchIndex, matchCount, true);
+                        }
+                    }
                     break;
                 }
+
                 case CLEAR_CARET_HANDLE:
                     selectionDone();
                     break;

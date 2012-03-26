@@ -25685,7 +25685,8 @@ package android.webkit {
     method public deprecated void emulateShiftHeld();
     method public static deprecated void enablePlatformNotifications();
     method public static java.lang.String findAddress(java.lang.String);
-    method public int findAll(java.lang.String);
+    method public deprecated int findAll(java.lang.String);
+    method public void findAllAsync(java.lang.String);
     method public void findNext(boolean);
     method public void flingScroll(int, int);
     method public void freeMemory();
@@ -25736,6 +25737,7 @@ package android.webkit {
     method public void saveWebArchive(java.lang.String, boolean, android.webkit.ValueCallback<java.lang.String>);
     method public void setCertificate(android.net.http.SslCertificate);
     method public void setDownloadListener(android.webkit.DownloadListener);
+    method public void setFindListener(android.webkit.WebView.FindListener);
     method public void setHorizontalScrollbarOverlay(boolean);
     method public void setHttpAuthUsernamePassword(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     method public void setInitialScale(int);
@@ -25752,6 +25754,10 @@ package android.webkit {
     field public static final java.lang.String SCHEME_GEO = "geo:0,0?q=";
     field public static final java.lang.String SCHEME_MAILTO = "mailto:";
     field public static final java.lang.String SCHEME_TEL = "tel:";
+  }
+
+  public static abstract interface WebView.FindListener {
+    method public abstract void onFindResultReceived(int, int, boolean);
   }
 
   public static class WebView.HitTestResult {

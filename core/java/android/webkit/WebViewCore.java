@@ -1052,9 +1052,11 @@ public final class WebViewCore {
         public FindAllRequest(String text) {
             mSearchText = text;
             mMatchCount = -1;
+            mMatchIndex = -1;
         }
-        public String mSearchText;
+        public final String mSearchText;
         public int mMatchCount;
+        public int mMatchIndex;
     }
 
     /**
@@ -1788,21 +1790,32 @@ public final class WebViewCore {
                             nativeSelectAll(mNativeClass);
                             break;
                         case FIND_ALL: {
-                            FindAllRequest request = (FindAllRequest) msg.obj;
-                            if (request == null) {
-                                nativeFindAll(mNativeClass, null);
-                            } else {
-                                request.mMatchCount = nativeFindAll(
-                                    mNativeClass, request.mSearchText);
-                                synchronized(request) {
+                            FindAllRequest request = (FindAllRequest)msg.obj;
+                            if (request != null) {
+                                int matchCount = nativeFindAll(mNativeClass, request.mSearchText);
+                                int matchIndex = nativeFindNext(mNativeClass, true);
+                                synchronized (request) {
+                                    request.mMatchCount = matchCount;
+                                    request.mMatchIndex = matchIndex;
                                     request.notify();
                                 }
+                            } else {
+                                nativeFindAll(mNativeClass, null);
                             }
+                            Message.obtain(mWebViewClassic.mPrivateHandler,
+                                    WebViewClassic.UPDATE_MATCH_COUNT, request).sendToTarget();
                             break;
                         }
-                        case FIND_NEXT:
-                            nativeFindNext(mNativeClass, msg.arg1 != 0);
+                        case FIND_NEXT: {
+                            FindAllRequest request = (FindAllRequest)msg.obj;
+                            int matchIndex = nativeFindNext(mNativeClass, msg.arg1 != 0);
+                            synchronized (request) {
+                                request.mMatchIndex = matchIndex;
+                            }
+                            Message.obtain(mWebViewClassic.mPrivateHandler,
+                                    WebViewClassic.UPDATE_MATCH_COUNT, request).sendToTarget();
                             break;
+                        }
                     }
                 }
             };
@@ -2836,17 +2849,6 @@ public final class WebViewCore {
                 .sendToTarget();
     }
 
-    // called by JNI
-    private void updateMatchCount(int matchIndex, int matchCount,
-        String findText) {
-        if (mWebViewClassic == null) {
-            return;
-        }
-        Message.obtain(mWebViewClassic.mPrivateHandler,
-                WebViewClassic.UPDATE_MATCH_COUNT, matchIndex, matchCount,
-                findText).sendToTarget();
-    }
-
     private native void nativeRevealSelection(int nativeClass);
     private native String nativeRequestLabel(int nativeClass, int framePtr,
             int nodePtr);
@@ -3097,7 +3099,7 @@ public final class WebViewCore {
     private native void nativeAutoFillForm(int nativeClass, int queryId);
     private native void nativeScrollLayer(int nativeClass, int layer, Rect rect);
     private native int nativeFindAll(int nativeClass, String text);
-    private native void nativeFindNext(int nativeClass, boolean forward);
+    private native int nativeFindNext(int nativeClass, boolean forward);
 
     /**
      * Deletes editable text between two points. Note that the selection may
