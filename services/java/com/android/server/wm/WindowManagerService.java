@@ -89,6 +89,7 @@ import android.os.TokenWatcher;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.FloatMath;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -5261,8 +5262,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             long ident = Binder.clearCallingIdentity();
 
-            dw = mAppDisplayWidth;
-            dh = mAppDisplayHeight;
+            dw = mCurDisplayWidth;
+            dh = mCurDisplayHeight;
 
             int aboveAppLayer = mPolicy.windowTypeToLayerLw(
                     WindowManager.LayoutParams.TYPE_APPLICATION) * TYPE_LAYER_MULTIPLIER
@@ -5382,7 +5383,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Bitmap bm = Bitmap.createBitmap(width, height, rawss.getConfig());
         Matrix matrix = new Matrix();
         ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
-        matrix.postTranslate(-(int)(frame.left*scale), -(int)(frame.top*scale));
+        matrix.postTranslate(-FloatMath.ceil(frame.left*scale), -FloatMath.ceil(frame.top*scale));
         Canvas canvas = new Canvas(bm);
         canvas.drawBitmap(rawss, matrix, null);
         canvas.setBitmap(null);
