@@ -25,7 +25,8 @@ Differences Report &raquo;</a> </li>
 
 <h2>See Also</h2>
 <ol>
-  <li><a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android 3.0</a></li>
+  <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets and
+Handsets</a></li>
 </ol>
 
 </div>
@@ -41,7 +42,7 @@ libraries.</p>
 
 <p>To get started developing or testing against Android {@sdkPlatformVersion}, use the Android SDK
 Manager to download the platform into your SDK. For more information, see <a
-href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>. If you are new to Android, <a
+href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>. If you are new to Android, <a
 href="{@docRoot}sdk/index.html">download the SDK Starter Package</a> first.</p>
 
 <p>For a high-level introduction to Android {@sdkPlatformVersion}, see the <a
@@ -52,8 +53,8 @@ Highlights</a>.</p>
 If you've already published an Android application, please test and optimize your application on
 Android 3.0 as soon as possible. You should do so to be sure your application provides the best
 experience possible on the latest Android-powered devices. For information about what you can do,
-read <a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android
-3.0</a>.</p>
+read <a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets and
+Handsets</a>.</p>
 
 
 <h2 id="relnotes">Revisions</h2>

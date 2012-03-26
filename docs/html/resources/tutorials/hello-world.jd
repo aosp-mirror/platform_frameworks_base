@@ -42,7 +42,7 @@ you need to do it now.</p>
 
 <ol>
 
-  <li>In the Android SDK and AVD Manager, choose <strong>Available
+  <li>In the Android SDK Manager, choose <strong>Available
 Packages</strong> in the left panel.</li>
 
 <li>In the right panel, expand the Android Repository list to display
@@ -72,7 +72,7 @@ device settings used by the emulator.</p>
 
 <p>To create an AVD:</p>
 <ol>
-  <li>In Eclipse, select <strong>Window &gt; Android SDK and AVD Manager</strong>.</li>
+  <li>In Eclipse, select <strong>Window &gt; AVD Manager</strong>.</li>
   <li>Select <strong>Virtual Devices</strong> in the left panel.</li>
 
   <li>Click <strong>New...</strong>.

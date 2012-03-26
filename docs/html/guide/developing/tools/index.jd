@@ -12,8 +12,8 @@ latest Android platform.</p>
 <h2 id="tools-sdk">SDK Tools</h2>
 <p>The SDK tools are installed with the SDK starter package and are periodically updated.
 The SDK tools are required if you are developing Android applications. The most important SDK tools
-include the Android SDK and AVD Manager (<code>android</code>), the emulator
-(<code>emulator</code>), and the Dalvik Debug Monitor Server
+include the Android SDK Manager (<code>android sdk</code>), the AVD Manager (<code>android
+avd</code>) the emulator (<code>emulator</code>), and the Dalvik Debug Monitor Server
 (<code>ddms</code>). A short summary of some frequently-used SDK tools is provided below.</p>
 
 <dl>
