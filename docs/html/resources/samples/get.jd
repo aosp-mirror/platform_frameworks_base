@@ -26,15 +26,15 @@ needed!</p>
 <p>The SDK sample code is available to you as a set of downloadable SDK
 components, each of which contains the samples for a specific Android platform
 version. Once you have installed the SDK, you can download one or more samples
-component(s) into your SDK environment using the Android SDK and AVD Manager
+component(s) into your SDK environment using the Android SDK Manager
 tool, which is pre-installed in the SDK. </p>
 
-<p>To download the samples, launch the Android SDK and AVD Manager tool and
+<p>To download the samples, launch the Android SDK Manager tool and
 select one of the samples components from the <strong>Available
 Packages</strong> panel, for example "Samples for SDK API 7". Select
 <strong>Install Selected</strong>, verify and accept the download, then select
 <strong>Install Accepted</strong> to download the component into your SDK. If
-you aren't familiar with the Android SDK and AVD Manager and how to launch or
+you aren't familiar with the Android SDK Manager and how to launch or
 use it, please read the <a href="{@docRoot}sdk/adding-components.html">Adding
 SDK Components</a> document. </p>
 
@@ -74,7 +74,7 @@ From there you can read a short summary of each sample application and what
 types of concepts, features, or APIs it includes. Then, use the links provided
 to move through the directories and files of each sample. The browseable source
 is generated from the same source code that is downloadable through the Android
-SDK and AVD Manager, as described above. </p>
+SDK Manager, as described above. </p>
 
 <p>The browseable samples files are available online, at the Android Developers
 site only and are not included in the downloadable offline documentation.

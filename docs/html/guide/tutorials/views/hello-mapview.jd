@@ -14,8 +14,8 @@ location:</p>
 href="http://code.google.com/android/add-ons/google-apis">http://code.google.com/android/add-ons/google-apis</a></p>
 
 <p>The Google APIs add-on requires Android 1.5 SDK or later release. After
-installing the add-on in your SDK, set your project properties to use the build
-target called "Google APIs Add-on". See the instructions for setting a build
+installing the add-on in your SDK, set your project properties to use a <strong>Google
+APIs</strong> build target. See the instructions for setting a build
 target in <a href="{@docRoot}guide/developing/eclipse-adt.html">Developing in
 Eclipse with ADT</a> or <a
 href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>,

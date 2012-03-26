@@ -55,7 +55,7 @@ class="new">new!</span></li>
   /if ?>
   <li>
     <span class="heading">
-      <span class="en">Downloadable SDK Components</span>
+      <span class="en">Downloadable SDK Packages</span>
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>
@@ -66,7 +66,7 @@ class="new">new!</span></li>
     </span>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/adding-components.html">
-      <span class="en">Adding SDK Components</span>
+      <span class="en">Adding SDK Packages</span>
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>

@@ -209,8 +209,8 @@ used.</dd>
       application uses code and resources from an example library project called TicTacToeLib.</p>
 
       <p>To download the sample applications and run them as projects in
-      your environment, use the <em>Android SDK and AVD Manager</em> to download the "Samples for
-      SDK API 8" (or later) component into your SDK.</p>
+      your environment, use the <em>Android SDK Manager</em> to download the "Samples for
+      SDK API 8" (or later) package into your SDK.</p>
 
       <p>For more information and to browse the code of the samples, see
       the <a href="{@docRoot}resources/samples/TicTacToeMain/index.html">TicTacToeMain
@@ -227,8 +227,8 @@ used.</dd>
     <p class="note"><strong>Note:</strong> You need SDK Tools r14 or newer to use the new library
     project feature that generates each library project into its own JAR file.
     You can download the tools and platforms using the
-    <em>Android SDK and AVD Manager</em>, as described in
-    <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
+    <em>Android SDK Manager</em>, as described in
+    <a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>.</p>
 
     <p>If you have source code and resources that are common to multiple Android projects, you
     can move them to a library project so that it is easier to maintain across applications and
