@@ -149,8 +149,8 @@ relies on these utility classes.</td>
 </table>
 
 <p>The in-app billing sample application is available as a downloadable component of the Android
-SDK. To download the sample application component, launch the Android SDK and AVD Manager and then
-select the "Google Market Billing package" component (see figure 1), and click <strong>Install
+SDK. To download the sample application component, launch the Android SDK Manager and then
+select the <strong>Google Market Billing package</strong> component (see figure 1), and click <strong>Install
 Selected</strong> to begin the download.</p>
 
 
@@ -160,7 +160,7 @@ Selected</strong> to begin the download.</p>
   the AIDL file.
 </p>
 
-<p>When the download is complete, the Android SDK and AVD Manager saves the component into the
+<p>When the download is complete, the Android SDK Manager saves the component into the
 following directory:</p>
 
 <p><code>&lt;sdk&gt;/extras/google/market_billing/</code></p>

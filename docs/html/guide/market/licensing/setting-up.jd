@@ -173,25 +173,25 @@ your application without having publish it. For more information see <a
 href="#acct-signin">Signing in to an authorized account</a>, below.</p></li>
 </ul>
 
-<p>Several versions of the add-on are available through the SDK Manager, but only
-<strong>Google APIs Add-On, API 8 (release 2) or higher</strong> includes the necessary Google
+<p>Several versions of the Google APIs add-on are available through the SDK Manager, but only
+the version for Android 2.2 and higher includes the necessary Google
 Play services.</p>
 
 <p>To set up an emulator for adding licensing to an application, follow
 these steps: </p>
 
 <ol>
-  <li>Launch the Android SDK Manager. </li>
-  <li>In the <strong>Available Packages</strong> panel, select and download the
-SDK component "Google APIs (Google Inc.) - API Level 8" (or higher) from the SDK
-repository.
-  <p>When the download is complete, use the Android SDK Manager to
-create a new AVD based on that component, described next.</p></li>
-  <li>In the <strong>Virtual
-Devices</strong> panel of the Android SDK Manager, click
+  <li>Launch the Android SDK Manager (available under the Eclipse <strong>Window</strong>
+menu or by executing {@code &lt;sdk>/tools/android sdk}).</li>
+  <li>Select and download <strong>Google APIs</strong> for the Android version you'd like to target
+(must be Android 2.2 or higher).</li>
+  <li>When the download is complete, open the AVD Manager (available under the Eclipse
+<strong>Window</strong>
+menu or by executing {@code &lt;sdk>/tools/android avd}).</li>
+  <li>Click
 <strong>New</strong> and set the configuration details for the new AVD. </li>
   <li>In the dialog that appears, assign a descriptive name to the AVD and then
-use the "Target" menu to choose the "Google APIs (Google Inc.) - API Level 8" as
+use the Target menu to choose the <strong>Google APIs</strong> as
 the system image to run on the new AVD. Set the other configuration details as
 needed and then click <strong>Create AVD</strong> to finish. The SDK tools
 create the new AVD configuration, which then appears in the list of available
@@ -238,8 +238,8 @@ greatly simplify the work that you need to do to add licensing to your
 application. In all cases, we recommend that you download the LVL and use it as
 the basis for the licensing implementation in your application.</p>
 
-<p>The LVL is available as a downloadable component of the Android SDK. The
-component includes: </p>
+<p>The LVL is available as a downloadable package of the Android SDK. The
+package includes: </p>
 
 <ul>
 <li>The LVL sources, stored inside an Android library project. </li>
@@ -248,9 +248,9 @@ project. The example illustrates how an application uses the library helper
 classes to check and enforce licensing.</li>
 </ul>
 
-<p>To download the LVL component into your development environment, use the
+<p>To download the LVL package into your development environment, use the
 Android SDK Manager. Launch the Android SDK Manager and then
-select the "Google Market Licensing" component, as shown in figure 2.
+select the <strong>Google Market Licensing</strong> package, as shown in figure 2.
 Accept the terms and click <strong>Install Selected</strong> to begin the download. </p>
 
 <img src="{@docRoot}images/licensing_package.png" alt=""/>
@@ -265,8 +265,8 @@ the LVL library project and the example application into these directories: </p>
 <code>&lt;<em>sdk</em>&gt;/extras/google/market_licensing/sample/</code>&nbsp;&nbsp;(the example
 application)</p>
 
-<p>If you aren't familiar with how to download components into your SDK, see the
-<a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>
+<p>If you aren't familiar with how to download packess into your SDK, see the
+<a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>
 document. </p>
 
 
@@ -676,7 +676,7 @@ credentials.  </p>
 
 <ol>
 <li>Open Settings &gt; Accounts &amp; sync</li>
-<li>Select <strong>Add Account</strong> and choose to add a "Google" account.
+<li>Select <strong>Add Account</strong> and choose to add a Google account.
 </li>
 <li>Select <strong>Next</strong> and then <strong>Sign in</strong>.</li>
 <li>Enter the username and password of either the publisher account or a test

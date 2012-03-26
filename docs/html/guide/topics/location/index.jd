@@ -98,7 +98,7 @@ Google APIs add-on, visit</p>
 href="http://code.google.com/android/add-ons/google-apis">http://code.google.com/android/add-ons/google-apis</a></p>
 
 <p>For your convenience, the Google APIs add-on is also available as a downloadable component from
-the Android SDK and AVD Manager (see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
+the Android SDK Manager (see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
 Components</a>).</p>
 
 <p class="note"><strong>Note:</strong> In order to display Google Maps data in a
