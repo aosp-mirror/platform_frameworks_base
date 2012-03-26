@@ -158,4 +158,8 @@ public abstract class BaseStatusBar extends SystemUI implements CommandQueue.Cal
         }
         return vetoButton;
     }
+    
+    public void dismissIntruder() {
+        // pass
+    }
 }

@@ -56,6 +56,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -77,6 +78,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 
 import com.android.systemui.R;
+import com.android.systemui.SwipeHelper;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.recent.TaskDescription;
@@ -86,6 +88,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.IntruderAlertView;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
@@ -102,7 +105,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
-    private static final boolean ENABLE_INTRUDERS = false;
+    private static final boolean ENABLE_INTRUDERS = true;
 
     static final int EXPANDED_LEAVE_ALONE = -10000;
     static final int EXPANDED_FULL_OPEN = -10001;
@@ -117,7 +120,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private static final int MSG_CLOSE_RECENTS_PANEL = 1021;
 
     // will likely move to a resource or other tunable param at some point
-    private static final int INTRUDER_ALERT_DECAY_MS = 10000;
+    private static final int INTRUDER_ALERT_DECAY_MS = 0; // disabled, was 10000;
 
     private static final boolean CLOSE_PANEL_WHEN_EMPTIED = true;
 
@@ -185,7 +188,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     DateView mDateView;
 
     // for immersive activities
-    private View mIntruderAlertView;
+    private IntruderAlertView mIntruderAlertView;
 
     // on-screen navigation buttons
     private NavigationBarView mNavigationBarView = null;
@@ -294,9 +297,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         mNotificationPanel = expanded.findViewById(R.id.notification_panel);
 
-        mIntruderAlertView = View.inflate(context, R.layout.intruder_alert, null);
+        mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
         mIntruderAlertView.setVisibility(View.GONE);
-        mIntruderAlertView.setClickable(true);
+        mIntruderAlertView.setBar(this);
 
         PhoneStatusBarView sb = (PhoneStatusBarView)View.inflate(context,
                 R.layout.status_bar, null);
@@ -455,6 +458,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             toggleRecentApps();
         }
     };
+    private StatusBarNotification mCurrentlyIntrudingNotification;
 
     private void prepareNavigationBarView() {
         mNavigationBarView.reorient();
@@ -510,7 +514,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL, // above the status bar!
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -519,7 +523,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
-        lp.y += height * 1.5; // FIXME
+        //lp.y += height * 1.5; // FIXME
         lp.setTitle("IntruderAlert");
         lp.packageName = mContext.getPackageName();
         lp.windowAnimations = R.style.Animation_StatusBar_IntruderAlert;
@@ -562,30 +566,39 @@ public class PhoneStatusBar extends BaseStatusBar {
         } catch (RemoteException ex) {
         }
         if (ENABLE_INTRUDERS && (
-                   (notification.score >= mIntruderInImmersiveMinScore)
-                || (!immersive && (notification.score > mIntruderMinScore)))) {
+                   // TODO(dsandler): Only if the screen is on
+                notification.notification.intruderView != null)) {
+//                   notification.notification.fullScreenIntent != null
+//                || (notification.score >= mIntruderInImmersiveMinScore)
+//                || (!immersive && (notification.score > mIntruderMinScore)))) {
             Slog.d(TAG, "Presenting high-priority notification");
             // special new transient ticker mode
             // 1. Populate mIntruderAlertView
+            
+            if (notification.notification.intruderView == null) {
+                Slog.e(TAG, notification.notification.toString() + " wanted to intrude but intruderView was null");
+                return;
+            }
 
-            ImageView alertIcon = (ImageView) mIntruderAlertView.findViewById(R.id.alertIcon);
-            TextView alertText = (TextView) mIntruderAlertView.findViewById(R.id.alertText);
-            alertIcon.setImageDrawable(StatusBarIconView.getIcon(
-                alertIcon.getContext(),
-                iconView.getStatusBarIcon()));
-            alertText.setText(notification.notification.tickerText);
+            // bind the click event to the content area
+            PendingIntent contentIntent = notification.notification.contentIntent;
+            final View.OnClickListener listener = (contentIntent != null)
+                    ? new NotificationClicker(contentIntent,
+                            notification.pkg, notification.tag, notification.id)
+                    : null;
 
-            View button = mIntruderAlertView.findViewById(R.id.intruder_alert_content);
-            button.setOnClickListener(
-                new NotificationClicker(notification.notification.contentIntent,
-                    notification.pkg, notification.tag, notification.id));
+            mIntruderAlertView.applyIntruderContent(notification.notification.intruderView, listener);
 
+            mCurrentlyIntrudingNotification = notification;
+            
             // 2. Animate mIntruderAlertView in
             mHandler.sendEmptyMessage(MSG_SHOW_INTRUDER);
 
             // 3. Set alarm to age the notification off (TODO)
             mHandler.removeMessages(MSG_HIDE_INTRUDER);
-            mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
+            if (INTRUDER_ALERT_DECAY_MS > 0) {
+                mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
+            }
         } else if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
             Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
@@ -596,8 +609,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         } else {
             // usual case: status bar visible & not immersive
 
-            // show the ticker
-            tick(notification);
+            // show the ticker if there isn't an intruder too
+            if (mCurrentlyIntrudingNotification == null) {
+                tick(notification);
+            }
         }
 
         // Recalculate the position of the sliding windows and the titles.
@@ -708,11 +723,22 @@ public class PhoneStatusBar extends BaseStatusBar {
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+
+        // See if we need to update the intruder.
+        if (oldNotification == mCurrentlyIntrudingNotification) {
+            if (DEBUG) Slog.d(TAG, "updating the current intruder:" + notification);
+            // XXX: this is a hack for Alarms. The real implementation will need to *update* 
+            // the intruder.
+            if (notification.notification.fullScreenIntent == null) { // TODO(dsandler): consistent logic with add()
+                if (DEBUG) Slog.d(TAG, "no longer intrudes!");
+                mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
+            }
+        }
     }
 
     public void removeNotification(IBinder key) {
-        if (SPEW) Slog.d(TAG, "removeNotification key=" + key);
         StatusBarNotification old = removeNotificationViews(key);
+        if (SPEW) Slog.d(TAG, "removeNotification key=" + key + " old=" + old);
 
         if (old != null) {
             // Cancel the ticker if it's still running
@@ -720,6 +746,10 @@ public class PhoneStatusBar extends BaseStatusBar {
 
             // Recalculate the position of the sliding windows and the titles.
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+            
+            if (old == mCurrentlyIntrudingNotification) {
+                mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
+            }
 
             if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0 && !mAnimating) {
                 animateCollapse();
@@ -1080,6 +1110,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     break;
                 case MSG_HIDE_INTRUDER:
                     setIntruderAlertVisibility(false);
+                    mCurrentlyIntrudingNotification = null;
                     break;
                 case MSG_OPEN_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening recents panel");
@@ -1576,6 +1607,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         public void onClick(View v) {
+            if (DEBUG) {
+                Slog.v(TAG, "NotificationClicker: intent=" + mIntent
+                        + " pkg=" + mPkg
+                        + " tag=" + mTag
+                        + " id=" + mId);
+            }
             try {
                 // The intent we are sending is for the application, which
                 // won't have permission to immediately start an activity after
@@ -2182,9 +2219,25 @@ public class PhoneStatusBar extends BaseStatusBar {
     };
 
     private void setIntruderAlertVisibility(boolean vis) {
+        if (DEBUG) {
+            Slog.v(TAG, (vis ? "showing" : "hiding") + " intruder alert window");
+        }
         mIntruderAlertView.setVisibility(vis ? View.VISIBLE : View.GONE);
     }
 
+    public void dismissIntruder() {
+        if (mCurrentlyIntrudingNotification == null) return;
+
+        try {
+            mBarService.onNotificationClear(
+                    mCurrentlyIntrudingNotification.pkg,
+                    mCurrentlyIntrudingNotification.tag, 
+                    mCurrentlyIntrudingNotification.id);
+        } catch (android.os.RemoteException ex) {
+            // oh well
+        }
+    }
+    
     /**
      * Reload some of our resources when the configuration changes.
      *
