@@ -106,7 +106,7 @@ DisplayList::~DisplayList() {
 void DisplayList::initProperties() {
     mLeft = 0;
     mTop = 0;
-    mTop = 0;
+    mRight = 0;
     mBottom = 0;
     mApplicationScale = -1;
     mClipChildren = true;
@@ -121,6 +121,7 @@ void DisplayList::initProperties() {
     mScaleY = 1;
     mPivotX = 0;
     mPivotY = 0;
+    mCameraDistance = 0;
     mMatrixDirty = false;
     mMatrixFlags = 0;
     mPrevWidth = -1;
@@ -686,7 +687,7 @@ void DisplayList::outputViewProperties(OpenGLRenderer& renderer, char* indent) {
                         mTransformMatrix->get(8));
             }
         }
-        if (mAlpha < 1) {
+        if (mAlpha < 1 && !mCaching) {
             // TODO: should be able to store the size of a DL at record time and not
             // have to pass it into this call. In fact, this information might be in the
             // location/size info that we store with the new native transform data.
@@ -765,34 +766,6 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t width, ui
     }
 }
 
-void DisplayList::transformRect(float left, float top, float right, float bottom, Rect& result) {
-    result.left = left + mLeft;
-    result.top = top + mTop;
-    result.right = right + mLeft;
-    result.bottom = bottom + mTop;
-    if (mMatrixFlags != 0) {
-        if (mMatrixFlags == TRANSLATION) {
-            result.left += mTranslationX;
-            result.top += mTranslationY;
-            result.right += mTranslationX;
-            result.bottom += mTranslationY;
-        } else {
-            updateMatrix();
-            SkRect r;
-            r.fLeft = result.left;
-            r.fTop = result.top;
-            r.fRight = result.right;
-            r.fBottom = result.bottom;
-            mTransformMatrix->mapRect(&r);
-            result.left = r.fLeft;
-            result.top = r.fTop;
-            result.right = r.fRight;
-            result.bottom = r.fBottom;
-        }
-    }
-}
-
-
 /**
  * Changes to replay(), specifically those involving opcode or parameter changes, should be mimicked
  * in the output() function, since that function processes the same list of opcodes for the
@@ -822,6 +795,12 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
         restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     }
     setViewProperties(renderer, width, height, level);
+    if (USE_DISPLAY_LIST_PROPERTIES && renderer.quickReject(0, 0, width, height)) {
+        DISPLAY_LIST_LOGD("%s%s %d", (char*) indent, "RestoreToCount", restoreTo);
+        renderer.restoreToCount(restoreTo);
+        renderer.endMark();
+        return false;
+    }
 
     DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
     int saveCount = renderer.getSaveCount() - 1;
@@ -974,6 +953,9 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
                 float x = getFloat();
                 float y = getFloat();
                 SkPaint* paint = getPaint(renderer);
+                if (mCaching && mMultipliedAlpha < 255) {
+                    paint->setAlpha(mMultipliedAlpha);
+                }
                 DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                         bitmap, x, y, paint);
                 renderer.drawBitmap(bitmap, x, y, paint);
@@ -1421,24 +1403,11 @@ status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
         uint32_t width, uint32_t height, Rect& dirty, int32_t flags, uint32_t level) {
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
-    float top = 0;
-    float left = 0;
-    float right = width;
-    float bottom = height;
-    if (USE_DISPLAY_LIST_PROPERTIES) {
-        Rect transformedRect;
-        displayList->transformRect(left, top, right, bottom, transformedRect);
-        left = transformedRect.left;
-        top = transformedRect.top;
-        right = transformedRect.right;
-        bottom = transformedRect.bottom;
-    }
-    const bool reject = quickReject(left, top, right, bottom);
-    uint32_t* location = addOp(DisplayList::DrawDisplayList, reject);
+
+    addOp(DisplayList::DrawDisplayList);
     addDisplayList(displayList);
     addSize(width, height);
     addInt(flags);
-    addSkip(location);
     return DrawGlInfo::kStatusDone;
 }
 

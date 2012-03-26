@@ -3906,9 +3906,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             do {
                 if (parent instanceof ViewGroup) {
                     ViewGroup parentVG = (ViewGroup) parent;
-                    parent = parentVG.invalidateChildInParentFast(left, top, dirty);
-                    left = parentVG.mLeft;
-                    top = parentVG.mTop;
+                    if (parentVG.mLayerType != LAYER_TYPE_NONE) {
+                        // Layered parents should be recreated, not just re-issued
+                        parentVG.invalidate();
+                        parent = null;
+                    } else {
+                        parent = parentVG.invalidateChildInParentFast(left, top, dirty);
+                        left = parentVG.mLeft;
+                        top = parentVG.mTop;
+                    }
                 } else {
                     // Reached the top; this calls into the usual invalidate method in
                     // ViewRootImpl, which schedules a traversal
@@ -4664,6 +4670,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void clearDisappearingChildren() {
         if (mDisappearingChildren != null) {
             mDisappearingChildren.clear();
+            invalidate();
         }
     }
 
@@ -4775,7 +4782,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         view.mParent = null;
                     }
                 }
-                mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
+                invalidate();
             }
         }
     }

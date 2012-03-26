@@ -1459,7 +1459,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * apps.
      * @hide
      */
-    public static final boolean USE_DISPLAY_LIST_PROPERTIES = false;
+    public static final boolean USE_DISPLAY_LIST_PROPERTIES = true;
 
     /**
      * Map used to store views' tags.
@@ -7401,7 +7401,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         invalidateViewProperty(false, false);
         if (USE_DISPLAY_LIST_PROPERTIES && mDisplayList != null) {
-            mDisplayList.setCameraDistance(distance);
+            mDisplayList.setCameraDistance(-Math.abs(distance) / dpi);
         }
     }
 
@@ -10747,16 +10747,25 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 int layerType = (
                         !(mParent instanceof ViewGroup) || ((ViewGroup)mParent).mDrawLayers) ?
                         getLayerType() : LAYER_TYPE_NONE;
-                if (!isLayer && layerType == LAYER_TYPE_HARDWARE && USE_DISPLAY_LIST_PROPERTIES) {
-                    final HardwareLayer layer = getHardwareLayer();
-                    if (layer != null && layer.isValid()) {
-                        canvas.drawHardwareLayer(layer, 0, 0, mLayerPaint);
+                if (!isLayer && layerType != LAYER_TYPE_NONE && USE_DISPLAY_LIST_PROPERTIES) {
+                    if (layerType == LAYER_TYPE_HARDWARE) {
+                        final HardwareLayer layer = getHardwareLayer();
+                        if (layer != null && layer.isValid()) {
+                            canvas.drawHardwareLayer(layer, 0, 0, mLayerPaint);
+                        } else {
+                            canvas.saveLayer(0, 0, mRight - mLeft, mBottom - mTop, mLayerPaint,
+                                    Canvas.HAS_ALPHA_LAYER_SAVE_FLAG |
+                                            Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+                        }
+                        caching = true;
                     } else {
-                        canvas.saveLayer(0, 0,
-                                mRight - mLeft, mBottom - mTop, mLayerPaint,
-                                Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+                        buildDrawingCache(true);
+                        Bitmap cache = getDrawingCache(true);
+                        if (cache != null) {
+                            canvas.drawBitmap(cache, 0, 0, mLayerPaint);
+                            caching = true;
+                        }
                     }
-                    caching = true;
                 } else {
 
                     computeScroll();
@@ -11395,7 +11404,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                         mTransformationInfo.mRotation, mTransformationInfo.mRotationX,
                         mTransformationInfo.mRotationY, mTransformationInfo.mScaleX,
                         mTransformationInfo.mScaleY);
-                displayList.setCameraDistance(getCameraDistance());
+                if (mTransformationInfo.mCamera == null) {
+                    mTransformationInfo.mCamera = new Camera();
+                    mTransformationInfo.matrix3D = new Matrix();
+                }
+                displayList.setCameraDistance(mTransformationInfo.mCamera.getLocationZ());
                 if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == PIVOT_EXPLICITLY_SET) {
                     displayList.setPivotX(getPivotX());
                     displayList.setPivotY(getPivotY());
@@ -11489,8 +11502,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             } else {
                 switch (layerType) {
                     case LAYER_TYPE_SOFTWARE:
-                        buildDrawingCache(true);
-                        cache = getDrawingCache(true);
+                        if (useDisplayListProperties) {
+                            hasDisplayList = canHaveDisplayList();
+                        } else {
+                            buildDrawingCache(true);
+                            cache = getDrawingCache(true);
+                        }
                         break;
                     case LAYER_TYPE_HARDWARE:
                         if (useDisplayListProperties) {

@@ -1323,19 +1323,8 @@ void OpenGLRenderer::finishDrawTexture() {
 
 status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
         Rect& dirty, int32_t flags, uint32_t level) {
-    float top = 0;
-    float left = 0;
-    float right = width;
-    float bottom = height;
-    if (USE_DISPLAY_LIST_PROPERTIES) {
-        Rect transformedRect;
-        displayList->transformRect(left, top, right, bottom, transformedRect);
-        left = transformedRect.left;
-        top = transformedRect.top;
-        right = transformedRect.right;
-        bottom = transformedRect.bottom;
-    }
-    if (quickReject(left, top, right, bottom)) {
+
+    if (!USE_DISPLAY_LIST_PROPERTIES && quickReject(0, 0, width, height)) {
         return false;
     }
 

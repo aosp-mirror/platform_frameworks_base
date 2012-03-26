@@ -11683,7 +11683,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 highlight = null;
             }
 
-            if (false /* TEMP patch for bugs 6198276 & 6193544 */ && canHaveDisplayList() && canvas.isHardwareAccelerated()) {
+            if (canHaveDisplayList() && canvas.isHardwareAccelerated()) {
                 drawHardwareAccelerated(canvas, layout, highlight, cursorOffsetVertical);
             } else {
                 layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
@@ -11758,7 +11758,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         hardwareCanvas.onPostDraw();
                         blockDisplayList.end();
                         if (USE_DISPLAY_LIST_PROPERTIES) {
-                            blockDisplayList.setLeftTopRightBottom(mLeft, mTop, mRight, mBottom);
+                            blockDisplayList.setLeftTopRightBottom(0, 0, width, height);
                         }
                     }
                 }
