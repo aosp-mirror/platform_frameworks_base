@@ -35,6 +35,30 @@ public abstract class DisplayList {
      */
     public static final int FLAG_CLIP_CHILDREN = 0x1;
 
+    // NOTE: The STATUS_* values *must* match the enum in DrawGlInfo.h
+
+    /**
+     * Indicates that the display list is done drawing.
+     * 
+     * @see HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int) 
+     */
+    public static final int STATUS_DONE = 0x0;
+
+    /**
+     * Indicates that the display list needs another drawing pass.
+     * 
+     * @see HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int)
+     */
+    public static final int STATUS_DRAW = 0x2;
+
+    /**
+     * Indicates that the display list needs to re-execute its GL functors.
+     * 
+     * @see HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int)
+     * @see HardwareCanvas#callDrawGLFunction(int) 
+     */
+    public static final int STATUS_INVOKE = 0x2;
+
     /**
      * Starts recording the display list. All operations performed on the
      * returned canvas are recorded and stored in this display list.

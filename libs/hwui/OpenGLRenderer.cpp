@@ -236,7 +236,7 @@ void OpenGLRenderer::resume() {
     glBlendEquation(GL_FUNC_ADD);
 }
 
-bool OpenGLRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
+status_t OpenGLRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     interrupt();
     if (mDirtyClip) {
         setScissorFromClip();
@@ -269,7 +269,7 @@ bool OpenGLRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     }
 
     resume();
-    return result != 0;
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1321,7 +1321,7 @@ void OpenGLRenderer::finishDrawTexture() {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
+status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
         Rect& dirty, int32_t flags, uint32_t level) {
     float top = 0;
     float left = 0;
@@ -1345,7 +1345,7 @@ bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, u
         return displayList->replay(*this, width, height, dirty, flags, level);
     }
 
-    return false;
+    return DrawGlInfo::kStatusDone;
 }
 
 void OpenGLRenderer::outputDisplayList(DisplayList* displayList, uint32_t level) {

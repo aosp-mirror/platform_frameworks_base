@@ -966,7 +966,6 @@ public abstract class HardwareRenderer {
                                 Log.d("DLProperties", "getDisplayList():\t" +
                                         mProfileData[mProfileCurrentFrame]);
                             }
-
                         }
 
                         if (displayList != null) {
@@ -975,7 +974,7 @@ public abstract class HardwareRenderer {
                                 drawDisplayListStartTime = System.nanoTime();
                             }
 
-                            boolean invalidateNeeded = canvas.drawDisplayList(displayList,
+                            int status = canvas.drawDisplayList(displayList,
                                     view.getWidth(), view.getHeight(), mRedrawClip,
                                     DisplayList.FLAG_CLIP_CHILDREN);
 
@@ -986,19 +985,18 @@ public abstract class HardwareRenderer {
 
                                 if (ViewDebug.DEBUG_LATENCY) {
                                     Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- drawDisplayList() took " +
-                                            total + "ms, invalidateNeeded=" +
-                                            invalidateNeeded + ".");
+                                            total + "ms, status=" + status);
                                 }
                             }
 
-                            if (invalidateNeeded) {
+                            if (status != DisplayList.STATUS_DONE) {
                                 if (mRedrawClip.isEmpty()) {
                                     attachInfo.mViewRootImpl.invalidate();
                                 } else {
                                     attachInfo.mViewRootImpl.invalidateChildInParent(
                                             null, mRedrawClip);
+                                    mRedrawClip.setEmpty();
                                 }
-                                mRedrawClip.setEmpty();
                             }
                         } else {
                             // Shouldn't reach here

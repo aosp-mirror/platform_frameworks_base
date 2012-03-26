@@ -18,6 +18,8 @@
 
 #include <SkCamera.h>
 
+#include <private/hwui/DrawGlInfo.h>
+
 #include "DisplayListLogBuffer.h"
 #include "DisplayListRenderer.h"
 #include "Caches.h"
@@ -796,9 +798,9 @@ void DisplayList::transformRect(float left, float top, float right, float bottom
  * in the output() function, since that function processes the same list of opcodes for the
  * purposes of logging display list info for a given view.
  */
-bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
+status_t DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
         uint32_t height, Rect& dirty, int32_t flags, uint32_t level) {
-    bool needsInvalidate = false;
+    status_t drawGlStatus = 0;
     TextContainer text;
     mReader.rewind();
 
@@ -843,7 +845,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
                 Functor *functor = (Functor *) getInt();
                 DISPLAY_LIST_LOGD("%s%s %p", (char*) indent, OP_NAMES[op], functor);
                 renderer.startMark("GL functor");
-                needsInvalidate |= renderer.callDrawGLFunction(functor, dirty);
+                drawGlStatus |= renderer.callDrawGLFunction(functor, dirty);
                 renderer.endMark();
             }
             break;
@@ -950,7 +952,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
                 int32_t flags = getInt();
                 DISPLAY_LIST_LOGD("%s%s %p, %dx%d, 0x%x %d", (char*) indent, OP_NAMES[op],
                         displayList, width, height, flags, level + 1);
-                needsInvalidate |= renderer.drawDisplayList(displayList, width,
+                drawGlStatus |= renderer.drawDisplayList(displayList, width,
                         height, dirty, flags, level + 1);
             }
             break;
@@ -1233,8 +1235,8 @@ bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
     renderer.endMark();
 
     DISPLAY_LIST_LOGD("%sDone (%p, %s), returning %d", (char*) indent + 2, this, mName.string(),
-            needsInvalidate);
-    return needsInvalidate;
+            drawGlStatus);
+    return drawGlStatus;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1321,11 +1323,11 @@ void DisplayListRenderer::interrupt() {
 void DisplayListRenderer::resume() {
 }
 
-bool DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
+status_t DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     // Ignore dirty during recording, it matters only when we replay
     addOp(DisplayList::DrawGLFunction);
     addInt((int) functor);
-    return false; // No invalidate needed at record-time
+    return DrawGlInfo::kStatusDone; // No invalidate needed at record-time
 }
 
 int DisplayListRenderer::save(int flags) {
@@ -1415,7 +1417,7 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
     return OpenGLRenderer::clipRect(left, top, right, bottom, op);
 }
 
-bool DisplayListRenderer::drawDisplayList(DisplayList* displayList,
+status_t DisplayListRenderer::drawDisplayList(DisplayList* displayList,
         uint32_t width, uint32_t height, Rect& dirty, int32_t flags, uint32_t level) {
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
@@ -1437,7 +1439,7 @@ bool DisplayListRenderer::drawDisplayList(DisplayList* displayList,
     addSize(width, height);
     addInt(flags);
     addSkip(location);
-    return false;
+    return DrawGlInfo::kStatusDone;
 }
 
 void DisplayListRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {

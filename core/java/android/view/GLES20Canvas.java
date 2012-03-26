@@ -296,11 +296,11 @@ class GLES20Canvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public boolean callDrawGLFunction(int drawGLFunction) {
+    public int callDrawGLFunction(int drawGLFunction) {
         return nCallDrawGLFunction(mRenderer, drawGLFunction);
     }
 
-    private static native boolean nCallDrawGLFunction(int renderer, int drawGLFunction);
+    private static native int nCallDrawGLFunction(int renderer, int drawGLFunction);
 
     ///////////////////////////////////////////////////////////////////////////
     // Memory
@@ -394,13 +394,13 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nSetDisplayListName(int displayList, String name);
 
     @Override
-    public boolean drawDisplayList(DisplayList displayList, int width, int height,
+    public int drawDisplayList(DisplayList displayList, int width, int height,
             Rect dirty, int flags) {
         return nDrawDisplayList(mRenderer, ((GLES20DisplayList) displayList).getNativeDisplayList(),
                 width, height, dirty, flags);
     }
 
-    private static native boolean nDrawDisplayList(int renderer, int displayList,
+    private static native int nDrawDisplayList(int renderer, int displayList,
             int width, int height, Rect dirty, int flags);
 
     @Override
