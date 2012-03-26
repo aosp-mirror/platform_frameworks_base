@@ -17,24 +17,17 @@
 package android.webkit;
 
 import android.content.Context;
-import android.net.http.AndroidHttpClient;
 import android.net.http.Headers;
-import android.os.FileUtils;
 import android.util.Log;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Map;
 
-
-import com.android.org.bouncycastle.crypto.Digest;
-import com.android.org.bouncycastle.crypto.digests.SHA1Digest;
 
 /**
  * Manages the HTTP cache used by an application's {@link WebView} instances.
