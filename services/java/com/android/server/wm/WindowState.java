@@ -45,7 +45,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
-import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
 import java.io.PrintWriter;
@@ -91,7 +90,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mLastHidden;        // was this window last hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
-    boolean mWasAnimating;      // Were we animating going into the most recent animation step?
 
     /**
      * The window size that was requested by the application.  These are in
@@ -110,9 +108,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mTurnOnScreen;
 
     int mLayoutSeq = -1;
-    
+
     Configuration mConfiguration = null;
-    
+
     /**
      * Actual frame shown on-screen (may be modified by animation).  These
      * are in the screen's coordinate space (WITH the compatibility scale
@@ -212,15 +210,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // an enter animation.
     boolean mEnterAnimationPending;
 
-    // Currently running animation.
-    boolean mAnimating;
-    boolean mLocalAnimating;
-    Animation mAnimation;
-    boolean mAnimationIsEntrance;
-    boolean mHasTransformation;
-    boolean mHasLocalTransformation;
-    final Transformation mTransformation = new Transformation();
-
     // If a window showing a wallpaper: the requested offset for the
     // wallpaper; if a wallpaper window: the currently applied offset.
     float mWallpaperX = -1;
@@ -305,6 +294,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     int mAnimDw;
     int mAnimDh;
 
+    final WindowStateAnimator mWinAnimator;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
            int viewVisibility) {
@@ -333,6 +324,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mBaseLayer = 0;
             mSubLayer = 0;
             mInputWindowHandle = null;
+            mWinAnimator = null;
             return;
         }
         mDeathRecipient = deathRecipient;
@@ -369,9 +361,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mIsFloatingLayer = mIsImWindow || mIsWallpaper;
         }
 
+        mWinAnimator = new WindowStateAnimator(service, this, mAttachedWindow);
+
         WindowState appWin = this;
         while (appWin.mAttachedWindow != null) {
-            appWin = mAttachedWindow;
+            appWin = appWin.mAttachedWindow;
         }
         WindowToken appToken = appWin.mToken;
         while (appToken.appWindowToken == null) {
@@ -405,6 +399,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mSession.windowAddedLocked();
     }
 
+    @Override
     public void computeFrameLw(Rect pf, Rect df, Rect cf, Rect vf) {
         mHaveFrame = true;
 
@@ -547,38 +542,47 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    @Override
     public Rect getFrameLw() {
         return mFrame;
     }
 
+    @Override
     public RectF getShownFrameLw() {
         return mShownFrame;
     }
 
+    @Override
     public Rect getDisplayFrameLw() {
         return mDisplayFrame;
     }
 
+    @Override
     public Rect getContentFrameLw() {
         return mContentFrame;
     }
 
+    @Override
     public Rect getVisibleFrameLw() {
         return mVisibleFrame;
     }
 
+    @Override
     public boolean getGivenInsetsPendingLw() {
         return mGivenInsetsPending;
     }
 
+    @Override
     public Rect getGivenContentInsetsLw() {
         return mGivenContentInsets;
     }
 
+    @Override
     public Rect getGivenVisibleInsetsLw() {
         return mGivenVisibleInsets;
     }
 
+    @Override
     public WindowManager.LayoutParams getAttrs() {
         return mAttrs;
     }
@@ -630,41 +634,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     public boolean hasAppShownWindows() {
         return mAppToken != null ? mAppToken.firstWindowDrawn : false;
-    }
-
-    public void setAnimation(Animation anim) {
-        if (WindowManagerService.localLOGV) Slog.v(
-            WindowManagerService.TAG, "Setting animation in " + this + ": " + anim);
-        mAnimating = false;
-        mLocalAnimating = false;
-        mAnimation = anim;
-        mAnimation.restrictDuration(WindowManagerService.MAX_ANIMATION_DURATION);
-        mAnimation.scaleCurrentDuration(mService.mWindowAnimationScale);
-        // Start out animation gone if window is gone, or visible if window is visible.
-        mTransformation.clear();
-        mTransformation.setAlpha(mLastHidden ? 0 : 1);
-        mHasLocalTransformation = true;
-    }
-
-    public void clearAnimation() {
-        if (mAnimation != null) {
-            mAnimating = true;
-            mLocalAnimating = false;
-            mAnimation.cancel();
-            mAnimation = null;
-        }
-    }
-
-    // TODO: Fix and call finishExit() instead of cancelExitAnimationForNextAnimationLocked()
-    // for avoiding the code duplication.
-    void cancelExitAnimationForNextAnimationLocked() {
-        if (!mExiting) return;
-        if (mAnimation != null) {
-            mAnimation.cancel();
-            mAnimation = null;
-            destroySurfaceLocked();
-        }
-        mExiting = false;
     }
 
     Surface createSurfaceLocked() {
@@ -931,7 +900,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     + (mAppToken != null ? mAppToken.hiddenRequested : false)
                     + " tok.hidden="
                     + (mAppToken != null ? mAppToken.hidden : false)
-                    + " animating=" + mAnimating
+                    + " animating=" + mWinAnimator.mAnimating
                     + " tok animating="
                     + (mAppToken != null ? mAppToken.animating : false));
             if (!mService.showSurfaceRobustlyLocked(this)) {
@@ -978,11 +947,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     // will do an animation to reveal it from behind the
                     // starting window, so there is no need for it to also
                     // be doing its own stuff.
-                    if (mAnimation != null) {
-                        mAnimation.cancel();
-                        mAnimation = null;
+                    if (mWinAnimator.mAnimation != null) {
+                        mWinAnimator.mAnimation.cancel();
+                        mWinAnimator.mAnimation = null;
                         // Make sure we clean up the animation.
-                        mAnimating = true;
+                        mWinAnimator.mAnimating = true;
                     }
                     mService.mFinishedStarting.add(mAppToken);
                     mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
@@ -993,192 +962,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
         return true;
-    }
-
-    private boolean stepAnimation(long currentTime) {
-        if ((mAnimation == null) || !mLocalAnimating) {
-            return false;
-        }
-        mTransformation.clear();
-        final boolean more = mAnimation.getTransformation(currentTime, mTransformation);
-        if (WindowManagerService.DEBUG_ANIM) Slog.v(
-            WindowManagerService.TAG, "Stepped animation in " + this +
-            ": more=" + more + ", xform=" + mTransformation);
-        return more;
-    }
-
-    // This must be called while inside a transaction.  Returns true if
-    // there is more animation to run.
-    boolean stepAnimationLocked(long currentTime) {
-        // Save the animation state as it was before this step so WindowManagerService can tell if
-        // we just started or just stopped animating by comparing mWasAnimating with isAnimating().
-        mWasAnimating = mAnimating;
-        if (mService.okToDisplay()) {
-            // We will run animations as long as the display isn't frozen.
-
-            if (isDrawnLw() && mAnimation != null) {
-                mHasTransformation = true;
-                mHasLocalTransformation = true;
-                if (!mLocalAnimating) {
-                    if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                        WindowManagerService.TAG, "Starting animation in " + this +
-                        " @ " + currentTime + ": ww=" + mFrame.width() +
-                        " wh=" + mFrame.height() +
-                        " dw=" + mAnimDw + " dh=" + mAnimDh +
-                        " scale=" + mService.mWindowAnimationScale);
-                    mAnimation.initialize(mFrame.width(), mFrame.height(), mAnimDw, mAnimDh);
-                    mAnimation.setStartTime(currentTime);
-                    mLocalAnimating = true;
-                    mAnimating = true;
-                }
-                if ((mAnimation != null) && mLocalAnimating) {
-                    if (stepAnimation(currentTime)) {
-                        return true;
-                    }
-                }
-                if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                    WindowManagerService.TAG, "Finished animation in " + this +
-                    " @ " + currentTime);
-                //WindowManagerService.this.dump();
-            }
-            mHasLocalTransformation = false;
-            if ((!mLocalAnimating || mAnimationIsEntrance) && mAppToken != null
-                    && mAppToken.animation != null) {
-                // When our app token is animating, we kind-of pretend like
-                // we are as well.  Note the mLocalAnimating mAnimationIsEntrance
-                // part of this check means that we will only do this if
-                // our window is not currently exiting, or it is not
-                // locally animating itself.  The idea being that one that
-                // is exiting and doing a local animation should be removed
-                // once that animation is done.
-                mAnimating = true;
-                mHasTransformation = true;
-                mTransformation.clear();
-                return false;
-            } else if (mHasTransformation) {
-                // Little trick to get through the path below to act like
-                // we have finished an animation.
-                mAnimating = true;
-            } else if (isAnimating()) {
-                mAnimating = true;
-            }
-        } else if (mAnimation != null) {
-            // If the display is frozen, and there is a pending animation,
-            // clear it and make sure we run the cleanup code.
-            mAnimating = true;
-            mLocalAnimating = true;
-            mAnimation.cancel();
-            mAnimation = null;
-        }
-
-        if (!mAnimating && !mLocalAnimating) {
-            return false;
-        }
-
-        if (WindowManagerService.DEBUG_ANIM) Slog.v(
-            WindowManagerService.TAG, "Animation done in " + this + ": exiting=" + mExiting
-            + ", reportedVisible="
-            + (mAppToken != null ? mAppToken.reportedVisible : false));
-
-        mAnimating = false;
-        mLocalAnimating = false;
-        if (mAnimation != null) {
-            mAnimation.cancel();
-            mAnimation = null;
-        }
-        if (mService.mWindowDetachedWallpaper == this) {
-            mService.mWindowDetachedWallpaper = null;
-        }
-        mAnimLayer = mLayer;
-        if (mIsImWindow) {
-            mAnimLayer += mService.mInputMethodAnimLayerAdjustment;
-        } else if (mIsWallpaper) {
-            mAnimLayer += mService.mWallpaperAnimLayerAdjustment;
-        }
-        if (WindowManagerService.DEBUG_LAYERS) Slog.v(WindowManagerService.TAG, "Stepping win " + this
-                + " anim layer: " + mAnimLayer);
-        mHasTransformation = false;
-        mHasLocalTransformation = false;
-        if (mPolicyVisibility != mPolicyVisibilityAfterAnim) {
-            if (DEBUG_VISIBILITY) {
-                Slog.v(WindowManagerService.TAG, "Policy visibility changing after anim in " + this + ": "
-                        + mPolicyVisibilityAfterAnim);
-            }
-            mPolicyVisibility = mPolicyVisibilityAfterAnim;
-            mService.mLayoutNeeded = true;
-            if (!mPolicyVisibility) {
-                if (mService.mCurrentFocus == this) {
-                    mService.mFocusMayChange = true;
-                }
-                // Window is no longer visible -- make sure if we were waiting
-                // for it to be displayed before enabling the display, that
-                // we allow the display to be enabled now.
-                mService.enableScreenIfNeededLocked();
-            }
-        }
-        mTransformation.clear();
-        if (mHasDrawn
-                && mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
-                && mAppToken != null
-                && mAppToken.firstWindowDrawn
-                && mAppToken.startingData != null) {
-            if (WindowManagerService.DEBUG_STARTING_WINDOW) Slog.v(WindowManagerService.TAG, "Finish starting "
-                    + mToken + ": first real window done animating");
-            mService.mFinishedStarting.add(mAppToken);
-            mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
-        }
-
-        finishExit();
-        mService.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
-        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats("WindowState");
-
-        if (mAppToken != null) {
-            mAppToken.updateReportedVisibilityLocked();
-        }
-
-        return false;
-    }
-
-    void finishExit() {
-        if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                WindowManagerService.TAG, "finishExit in " + this
-                + ": exiting=" + mExiting
-                + " remove=" + mRemoveOnExit
-                + " windowAnimating=" + isWindowAnimating());
-
-        final int N = mChildWindows.size();
-        for (int i=0; i<N; i++) {
-            mChildWindows.get(i).finishExit();
-        }
-
-        if (!mExiting) {
-            return;
-        }
-
-        if (isWindowAnimating()) {
-            return;
-        }
-
-        if (WindowManagerService.localLOGV) Slog.v(
-                WindowManagerService.TAG, "Exit animation finished in " + this
-                + ": remove=" + mRemoveOnExit);
-        if (mSurface != null) {
-            mService.mDestroySurface.add(this);
-            mDestroying = true;
-            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(this, "HIDE (finishExit)", null);
-            mSurfaceShown = false;
-            try {
-                mSurface.hide();
-            } catch (RuntimeException e) {
-                Slog.w(WindowManagerService.TAG, "Error hiding surface in " + this, e);
-            }
-            mLastHidden = true;
-        }
-        mExiting = false;
-        if (mRemoveOnExit) {
-            mService.mPendingRemove.add(this);
-            mRemoveOnExit = false;
-        }
     }
 
     boolean isIdentityMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
@@ -1199,10 +982,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void computeShownFrameLocked() {
-        final boolean selfTransformation = mHasLocalTransformation;
+        final boolean selfTransformation = mWinAnimator.mHasLocalTransformation;
         Transformation attachedTransformation =
-                (mAttachedWindow != null && mAttachedWindow.mHasLocalTransformation)
-                ? mAttachedWindow.mTransformation : null;
+                (mAttachedWindow != null && mAttachedWindow.mWinAnimator.mHasLocalTransformation)
+                ? mAttachedWindow.mWinAnimator.mTransformation : null;
         Transformation appTransformation =
                 (mAppToken != null && mAppToken.hasTransformation)
                 ? mAppToken.transformation : null;
@@ -1211,10 +994,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // are currently targeting.
         if (mAttrs.type == TYPE_WALLPAPER && mService.mLowerWallpaperTarget == null
                 && mService.mWallpaperTarget != null) {
-            if (mService.mWallpaperTarget.mHasLocalTransformation &&
-                    mService.mWallpaperTarget.mAnimation != null &&
-                    !mService.mWallpaperTarget.mAnimation.getDetachWallpaper()) {
-                attachedTransformation = mService.mWallpaperTarget.mTransformation;
+            if (mService.mWallpaperTarget.mWinAnimator.mHasLocalTransformation &&
+                    mService.mWallpaperTarget.mWinAnimator.mAnimation != null &&
+                    !mService.mWallpaperTarget.mWinAnimator.mAnimation.getDetachWallpaper()) {
+                attachedTransformation = mService.mWallpaperTarget.mWinAnimator.mTransformation;
                 if (WindowManagerService.DEBUG_WALLPAPER && attachedTransformation != null) {
                     Slog.v(WindowManagerService.TAG, "WP target attached xform: " + attachedTransformation);
                 }
@@ -1260,7 +1043,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
             tmpMatrix.postScale(mGlobalScale, mGlobalScale);
             if (selfTransformation) {
-                tmpMatrix.postConcat(mTransformation.getMatrix());
+                tmpMatrix.postConcat(mWinAnimator.mTransformation.getMatrix());
             }
             tmpMatrix.postTranslate(frame.left + mXOffset, frame.top + mYOffset);
             if (attachedTransformation != null) {
@@ -1304,7 +1087,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                             && x == frame.left && y == frame.top))) {
                 //Slog.i(TAG, "Applying alpha transform");
                 if (selfTransformation) {
-                    mShownAlpha *= mTransformation.getAlpha();
+                    mShownAlpha *= mWinAnimator.mTransformation.getAlpha();
                 }
                 if (attachedTransformation != null) {
                     mShownAlpha *= attachedTransformation.getAlpha();
@@ -1323,7 +1106,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (WindowManagerService.localLOGV) Slog.v(
                 WindowManagerService.TAG, "computeShownFrameLocked: Animating " + this +
                 ": " + mShownFrame +
-                ", alpha=" + mTransformation.getAlpha() + ", mShownAlpha=" + mShownAlpha);
+                ", alpha=" + mWinAnimator.mTransformation.getAlpha() + ", mShownAlpha=" + mShownAlpha);
             return;
         }
 
@@ -1374,7 +1157,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
                                 && !mRootToken.hidden)
-                        || mAnimation != null || animating);
+                        || mWinAnimator.mAnimation != null || animating);
     }
 
     /**
@@ -1431,10 +1214,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (atoken != null) {
             return mSurface != null && mPolicyVisibility && !mDestroying
                     && ((!mAttachedHidden && !atoken.hiddenRequested)
-                            || mAnimation != null || atoken.animation != null);
+                            || mWinAnimator.mAnimation != null || atoken.animation != null);
         } else {
             return mSurface != null && mPolicyVisibility && !mDestroying
-                    && (!mAttachedHidden || mAnimation != null);
+                    && (!mAttachedHidden || mWinAnimator.mAnimation != null);
         }
     }
 
@@ -1450,24 +1233,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mSurface != null && mPolicyVisibility && !mDestroying
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
                                 && !mRootToken.hidden)
-                        || mAnimation != null
+                        || mWinAnimator.mAnimation != null
                         || ((mAppToken != null) && (mAppToken.animation != null)));
-    }
-
-    /** Is the window or its container currently animating? */
-    boolean isAnimating() {
-        final WindowState attached = mAttachedWindow;
-        final AppWindowToken atoken = mAppToken;
-        return mAnimation != null
-                || (attached != null && attached.mAnimation != null)
-                || (atoken != null &&
-                        (atoken.animation != null
-                                || atoken.inPendingTransaction));
-    }
-
-    /** Is this window currently animating? */
-    boolean isWindowAnimating() {
-        return mAnimation != null;
     }
 
     /**
@@ -1479,7 +1246,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return isDrawnLw() && mPolicyVisibility
             && ((!mAttachedHidden &&
                     (atoken == null || !atoken.hiddenRequested))
-                    || mAnimating);
+                    || mWinAnimator.mAnimating);
     }
 
     public boolean isGoneForLayoutLw() {
@@ -1508,7 +1275,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean isOpaqueDrawn() {
         return (mAttrs.format == PixelFormat.OPAQUE
                         || mAttrs.type == TYPE_WALLPAPER)
-                && isDrawnLw() && mAnimation == null
+                && isDrawnLw() && mWinAnimator.mAnimation == null
                 && (mAppToken == null || mAppToken.animation == null);
     }
 
@@ -1607,10 +1374,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Policy visibility true: " + this);
         if (doAnimation) {
             if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "doAnimation: mPolicyVisibility="
-                    + mPolicyVisibility + " mAnimation=" + mAnimation);
+                    + mPolicyVisibility + " mAnimation=" + mWinAnimator.mAnimation);
             if (!mService.okToDisplay()) {
                 doAnimation = false;
-            } else if (mPolicyVisibility && mAnimation == null) {
+            } else if (mPolicyVisibility && mWinAnimator.mAnimation == null) {
                 // Check for the case where we are currently visible and
                 // not animating; we do not want to do animation at such a
                 // point to become visible when we already are.
@@ -1646,7 +1413,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         if (doAnimation) {
             mService.applyAnimationLocked(this, WindowManagerPolicy.TRANSIT_EXIT, false);
-            if (mAnimation == null) {
+            if (mWinAnimator.mAnimation == null) {
                 doAnimation = false;
             }
         }
@@ -1821,20 +1588,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" last="); mLastVisibleInsets.printShortString(pw);
                     pw.println();
         }
-        if (mAnimating || mLocalAnimating || mAnimationIsEntrance
-                || mAnimation != null) {
-            pw.print(prefix); pw.print("mAnimating="); pw.print(mAnimating);
-                    pw.print(" mLocalAnimating="); pw.print(mLocalAnimating);
-                    pw.print(" mAnimationIsEntrance="); pw.print(mAnimationIsEntrance);
-                    pw.print(" mAnimation="); pw.println(mAnimation);
-        }
-        if (mHasTransformation || mHasLocalTransformation) {
-            pw.print(prefix); pw.print("XForm: has=");
-                    pw.print(mHasTransformation);
-                    pw.print(" hasLocal="); pw.print(mHasLocalTransformation);
-                    pw.print(" "); mTransformation.printShortString(pw);
-                    pw.println();
-        }
+        mWinAnimator.dump(pw, prefix, dumpAll);
         if (mShownAlpha != 1 || mAlpha != 1 || mLastAlpha != 1) {
             pw.print(prefix); pw.print("mShownAlpha="); pw.print(mShownAlpha);
                     pw.print(" mAlpha="); pw.print(mAlpha);

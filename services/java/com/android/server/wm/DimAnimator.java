@@ -82,7 +82,7 @@ class DimAnimator {
 
     /**
      * Set's the dim surface's layer and update dim parameters that will be used in
-     * {@link updateSurface} after all windows are examined.
+     * {@link #updateSurface} after all windows are examined.
      */
     void updateParameters(Resources res, WindowState w, long currentTime) {
         mDimSurface.setLayer(w.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM);
@@ -94,15 +94,15 @@ class DimAnimator {
             // If the desired dim level has changed, then
             // start an animation to it.
             mLastDimAnimTime = currentTime;
-            long duration = (w.mAnimating && w.mAnimation != null)
-                    ? w.mAnimation.computeDurationHint()
+            long duration = (w.mWinAnimator.mAnimating && w.mWinAnimator.mAnimation != null)
+                    ? w.mWinAnimator.mAnimation.computeDurationHint()
                     : WindowManagerService.DEFAULT_DIM_DURATION;
             if (target > mDimTargetAlpha) {
                 TypedValue tv = new TypedValue();
                 res.getValue(com.android.internal.R.fraction.config_dimBehindFadeDuration,
                         tv, true);
                 if (tv.type == TypedValue.TYPE_FRACTION) {
-                    duration = (long)tv.getFraction((float)duration, (float)duration);
+                    duration = (long)tv.getFraction(duration, duration);
                 } else if (tv.type >= TypedValue.TYPE_FIRST_INT
                         && tv.type <= TypedValue.TYPE_LAST_INT) {
                     duration = tv.data;
