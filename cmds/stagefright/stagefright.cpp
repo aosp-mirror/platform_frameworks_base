@@ -24,6 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "jpeg.h"
 #include "SineSource.h"
 
 #include <binder/IServiceManager.h>
@@ -49,8 +50,6 @@
 #include <media/stagefright/MPEG4Writer.h>
 
 #include <private/media/VideoFrame.h>
-#include <SkBitmap.h>
-#include <SkImageEncoder.h>
 
 #include <fcntl.h>
 
@@ -787,16 +786,9 @@ int main(int argc, char **argv) {
 
                 VideoFrame *frame = (VideoFrame *)mem->pointer();
 
-                SkBitmap bitmap;
-                bitmap.setConfig(
-                        SkBitmap::kRGB_565_Config, frame->mWidth, frame->mHeight);
-
-                bitmap.setPixels((uint8_t *)frame + sizeof(VideoFrame));
-
-                CHECK(SkImageEncoder::EncodeFile(
-                            "/sdcard/out.jpg", bitmap,
-                            SkImageEncoder::kJPEG_Type,
-                            SkImageEncoder::kDefaultQuality));
+                CHECK_EQ(writeJpegFile("/sdcard/out.jpg",
+                            (uint8_t *)frame + sizeof(VideoFrame),
+                            frame->mWidth, frame->mHeight), 0);
             }
 
             {
