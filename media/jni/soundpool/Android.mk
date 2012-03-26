@@ -2,14 +2,14 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	android_media_SoundPool.cpp \
-	SoundPool.cpp \
-	SoundPoolThread.cpp
+	android_media_SoundPool.cpp
+
+LOCAL_C_INCLUDES := \
+    frameworks/base/media/libmedia
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
-	libbinder \
 	libandroid_runtime \
 	libnativehelper \
 	libmedia \

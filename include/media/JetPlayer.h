@@ -18,7 +18,6 @@
 #define JETPLAYER_H_
 
 #include <utils/threads.h>
-#include <nativehelper/jni.h>
 
 #include <libsonivox/jet.h>
 #include <libsonivox/eas_types.h>
@@ -40,7 +39,7 @@ public:
     static const int JET_NUMQUEUEDSEGMENT_UPDATE = 3;
     static const int JET_PAUSE_UPDATE            = 4;
 
-    JetPlayer(jobject javaJetPlayer,
+    JetPlayer(void *javaJetPlayer,
             int maxTracks = 32,
             int trackBufferSize = 1200);
     ~JetPlayer();
@@ -75,7 +74,7 @@ private:
 
     jetevent_callback   mEventCallback;
 
-    jobject             mJavaJetPlayerRef;
+    void*               mJavaJetPlayerRef;
     Mutex               mMutex; // mutex to sync the render and playback thread with the JET calls
     pid_t               mTid;
     Condition           mCondition;
