@@ -20,6 +20,7 @@
 
 #include <binder/Parcel.h>
 #include <binder/IMemory.h>
+#include <media/ICrypto.h>
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaRecorder.h>
 #include <media/IOMX.h>
@@ -36,6 +37,7 @@ enum {
     CREATE_MEDIA_RECORDER,
     CREATE_METADATA_RETRIEVER,
     GET_OMX,
+    MAKE_CRYPTO,
     ADD_BATTERY_DATA,
     PULL_BATTERY_DATA
 };
@@ -109,6 +111,13 @@ public:
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
         remote()->transact(GET_OMX, data, &reply);
         return interface_cast<IOMX>(reply.readStrongBinder());
+    }
+
+    virtual sp<ICrypto> makeCrypto() {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
+        remote()->transact(MAKE_CRYPTO, data, &reply);
+        return interface_cast<ICrypto>(reply.readStrongBinder());
     }
 
     virtual void addBatteryData(uint32_t params) {
@@ -189,6 +198,12 @@ status_t BnMediaPlayerService::onTransact(
             CHECK_INTERFACE(IMediaPlayerService, data, reply);
             sp<IOMX> omx = getOMX();
             reply->writeStrongBinder(omx->asBinder());
+            return NO_ERROR;
+        } break;
+        case MAKE_CRYPTO: {
+            CHECK_INTERFACE(IMediaPlayerService, data, reply);
+            sp<ICrypto> crypto = makeCrypto();
+            reply->writeStrongBinder(crypto->asBinder());
             return NO_ERROR;
         } break;
         case ADD_BATTERY_DATA: {

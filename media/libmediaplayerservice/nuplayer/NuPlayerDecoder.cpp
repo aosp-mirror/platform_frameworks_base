@@ -125,6 +125,11 @@ sp<AMessage> NuPlayer::Decoder::makeFormat(const sp<MetaData> &meta) {
 
         msg->setInt32("channel-count", numChannels);
         msg->setInt32("sample-rate", sampleRate);
+
+        int32_t isADTS;
+        if (meta->findInt32(kKeyIsADTS, &isADTS) && isADTS != 0) {
+            msg->setInt32("is-adts", true);
+        }
     }
 
     int32_t maxInputSize;

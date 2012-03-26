@@ -31,6 +31,11 @@ struct MediaExtractor;
 struct MediaSource;
 
 struct NuMediaExtractor : public RefBase {
+    enum SampleFlags {
+        SAMPLE_FLAG_SYNC        = 1,
+        SAMPLE_FLAG_ENCRYPTED   = 2,
+    };
+
     NuMediaExtractor();
 
     status_t setDataSource(const char *path);
@@ -46,6 +51,7 @@ struct NuMediaExtractor : public RefBase {
     status_t readSampleData(const sp<ABuffer> &buffer);
     status_t getSampleTrackIndex(size_t *trackIndex);
     status_t getSampleTime(int64_t *sampleTimeUs);
+    status_t getSampleFlags(uint32_t *sampleFlags);
 
 protected:
     virtual ~NuMediaExtractor();
@@ -61,7 +67,9 @@ private:
         status_t mFinalResult;
         MediaBuffer *mSample;
         int64_t mSampleTimeUs;
-        uint32_t mFlags;  // bitmask of "TrackFlags"
+        uint32_t mSampleFlags;
+
+        uint32_t mTrackFlags;  // bitmask of "TrackFlags"
     };
 
     sp<MediaExtractor> mImpl;

@@ -65,6 +65,13 @@ public class MediaExtractor
     // Returns the current sample's presentation time in microseconds.
     public native long getSampleTime();
 
+    // Keep these in sync with their equivalents in NuMediaExtractor.h
+    public static final int SAMPLE_FLAG_SYNC      = 1;
+    public static final int SAMPLE_FLAG_ENCRYPTED = 2;
+
+    // Returns the current sample's flags.
+    public native int getSampleFlags();
+
     private static native final void native_init();
     private native final void native_setup(String path);
     private native final void native_finalize();

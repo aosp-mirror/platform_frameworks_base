@@ -23,6 +23,7 @@
 #include "pvmp4audiodecoder_api.h"
 
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/foundation/hexdump.h>
 
 namespace android {
 
@@ -42,6 +43,7 @@ SoftAAC::SoftAAC(
         OMX_COMPONENTTYPE **component)
     : SimpleSoftOMXComponent(name, callbacks, appData, component),
       mConfig(new tPVMP4AudioDecoderExternal),
+      mIsADTS(false),
       mDecoderBuf(NULL),
       mInputBufferCount(0),
       mUpsamplingFactor(2),
@@ -140,7 +142,12 @@ OMX_ERRORTYPE SoftAAC::internalGetParameter(
             aacParams->nAACtools = 0;
             aacParams->nAACERtools = 0;
             aacParams->eAACProfile = OMX_AUDIO_AACObjectMain;
-            aacParams->eAACStreamFormat = OMX_AUDIO_AACStreamFormatMP4FF;
+
+            aacParams->eAACStreamFormat =
+                mIsADTS
+                    ? OMX_AUDIO_AACStreamFormatMP4ADTS
+                    : OMX_AUDIO_AACStreamFormatMP4FF;
+
             aacParams->eChannelMode = OMX_AUDIO_ChannelModeStereo;
 
             if (!isConfigured()) {
@@ -212,6 +219,15 @@ OMX_ERRORTYPE SoftAAC::internalSetParameter(
                 (const OMX_AUDIO_PARAM_AACPROFILETYPE *)params;
 
             if (aacParams->nPortIndex != 0) {
+                return OMX_ErrorUndefined;
+            }
+
+            if (aacParams->eAACStreamFormat == OMX_AUDIO_AACStreamFormatMP4FF) {
+                mIsADTS = false;
+            } else if (aacParams->eAACStreamFormat
+                        == OMX_AUDIO_AACStreamFormatMP4ADTS) {
+                mIsADTS = true;
+            } else {
                 return OMX_ErrorUndefined;
             }
 
@@ -299,8 +315,35 @@ void SoftAAC::onQueueFilled(OMX_U32 portIndex) {
             mNumSamplesOutput = 0;
         }
 
-        mConfig->pInputBuffer = inHeader->pBuffer + inHeader->nOffset;
-        mConfig->inputBufferCurrentLength = inHeader->nFilledLen;
+        if (mIsADTS) {
+            // skip 30 bits, aac_frame_length follows.
+            // ssssssss ssssiiip ppffffPc ccohCCll llllllll lll?????
+
+            const uint8_t *adtsHeader = inHeader->pBuffer + inHeader->nOffset;
+
+            CHECK_GE(inHeader->nFilledLen, 7);
+
+            bool protectionAbsent = (adtsHeader[1] & 1);
+
+            unsigned aac_frame_length =
+                ((adtsHeader[3] & 3) << 11)
+                | (adtsHeader[4] << 3)
+                | (adtsHeader[5] >> 5);
+
+            CHECK_GE(inHeader->nFilledLen, aac_frame_length);
+
+            size_t headerSize = (protectionAbsent ? 7 : 9);
+
+            mConfig->pInputBuffer = (UChar *)adtsHeader + headerSize;
+            mConfig->inputBufferCurrentLength = aac_frame_length - headerSize;
+
+            inHeader->nOffset += headerSize;
+            inHeader->nFilledLen -= headerSize;
+        } else {
+            mConfig->pInputBuffer = inHeader->pBuffer + inHeader->nOffset;
+            mConfig->inputBufferCurrentLength = inHeader->nFilledLen;
+        }
+
         mConfig->inputBufferMaxLength = 0;
         mConfig->inputBufferUsedLength = 0;
         mConfig->remainderBits = 0;

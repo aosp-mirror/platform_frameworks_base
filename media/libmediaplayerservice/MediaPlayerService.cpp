@@ -70,6 +70,8 @@
 
 #include <OMX.h>
 
+#include "Crypto.h"
+
 namespace android {
 sp<MediaPlayerBase> createAAH_TXPlayer();
 sp<MediaPlayerBase> createAAH_RXPlayer();
@@ -290,6 +292,16 @@ sp<IOMX> MediaPlayerService::getOMX() {
     }
 
     return mOMX;
+}
+
+sp<ICrypto> MediaPlayerService::makeCrypto() {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mCrypto == NULL) {
+        mCrypto = new Crypto;
+    }
+
+    return mCrypto;
 }
 
 status_t MediaPlayerService::AudioCache::dump(int fd, const Vector<String16>& args) const

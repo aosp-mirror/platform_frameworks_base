@@ -73,6 +73,7 @@ struct AString {
     int compare(const AString &other) const;
 
     bool startsWith(const char *prefix) const;
+    bool endsWith(const char *suffix) const;
 
     void tolower();
 

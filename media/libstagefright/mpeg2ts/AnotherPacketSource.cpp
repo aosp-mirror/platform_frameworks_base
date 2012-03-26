@@ -117,6 +117,12 @@ status_t AnotherPacketSource::read(
 
             mediaBuffer->meta_data()->setInt64(kKeyTime, timeUs);
 
+            int32_t scrambling;
+            if (buffer->meta()->findInt32("scrambling", &scrambling)
+                    && scrambling != 0) {
+                mediaBuffer->meta_data()->setInt32(kKeyScrambling, scrambling);
+            }
+
             *out = mediaBuffer;
             return OK;
         }

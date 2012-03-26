@@ -238,7 +238,11 @@ private:
     void setComponentRole();
 
     void setAMRFormat(bool isWAMR, int32_t bitRate);
-    status_t setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate);
+
+    status_t setAACFormat(
+            int32_t numChannels, int32_t sampleRate, int32_t bitRate,
+            bool isADTS);
+
     void setG711Format(int32_t numChannels);
 
     status_t setVideoPortFormatType(

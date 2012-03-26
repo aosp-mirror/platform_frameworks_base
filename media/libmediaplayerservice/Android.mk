@@ -7,6 +7,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=               \
+    Crypto.cpp                  \
     MediaRecorderClient.cpp     \
     MediaPlayerService.cpp      \
     MetadataRetrieverClient.cpp \
@@ -42,7 +43,7 @@ LOCAL_C_INCLUDES :=                                               \
 	$(TOP)/frameworks/base/media/libstagefright/include             \
 	$(TOP)/frameworks/base/media/libstagefright/rtsp                \
 	$(TOP)/frameworks/native/include/media/openmax                  \
-	$(TOP)/external/tremolo/Tremolo
+	$(TOP)/external/tremolo/Tremolo                                 \
 
 LOCAL_MODULE:= libmediaplayerservice
 

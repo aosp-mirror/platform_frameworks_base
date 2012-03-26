@@ -31,6 +31,7 @@
 
 namespace android {
 
+struct ICrypto;
 class IMediaRecorder;
 class IOMX;
 struct IStreamSource;
@@ -47,6 +48,7 @@ public:
     virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat) = 0;
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat) = 0;
     virtual sp<IOMX>            getOMX() = 0;
+    virtual sp<ICrypto>         makeCrypto() = 0;
 
     // codecs and audio devices usage tracking for the battery app
     enum BatteryDataBits {

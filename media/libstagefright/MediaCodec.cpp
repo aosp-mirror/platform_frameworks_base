@@ -22,10 +22,14 @@
 
 #include "include/SoftwareRenderer.h"
 
+#include <binder/IServiceManager.h>
 #include <gui/SurfaceTextureClient.h>
+#include <media/ICrypto.h>
+#include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/ACodec.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
@@ -528,6 +532,12 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                         info.mOwnedByClient = false;
                         CHECK(msg->findBuffer(name.c_str(), &info.mData));
 
+                        if (portIndex == kPortIndexInput
+                                && (mFlags & kFlagIsSecure)) {
+                            info.mEncryptedData =
+                                new ABuffer(info.mData->capacity());
+                        }
+
                         buffers->push_back(info);
                     }
 
@@ -740,6 +750,59 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
 
             if (flags & CONFIGURE_FLAG_ENCODE) {
                 format->setInt32("encoder", true);
+            }
+
+            if (flags & CONFIGURE_FLAG_SECURE) {
+                mFlags |= kFlagIsSecure;
+
+                sp<IServiceManager> sm = defaultServiceManager();
+
+                sp<IBinder> binder =
+                    sm->getService(String16("media.player"));
+
+                sp<IMediaPlayerService> service =
+                    interface_cast<IMediaPlayerService>(binder);
+
+                CHECK(service != NULL);
+
+                mCrypto = service->makeCrypto();
+
+                status_t err = mCrypto->initialize();
+
+                if (err == OK) {
+                    sp<ABuffer> emm;
+                    if (format->findBuffer("emm", &emm)) {
+                        err = mCrypto->setEntitlementKey(
+                                emm->data(), emm->size());
+                    }
+                }
+
+                if (err == OK) {
+                    sp<ABuffer> ecm;
+                    if (format->findBuffer("ecm", &ecm)) {
+                        CHECK_EQ(ecm->size(), 80u);
+
+                        // bytes 16..47 of the original ecm stream data.
+                        err = mCrypto->setEntitlementControlMessage(
+                                ecm->data() + 16, 32);
+                    }
+                }
+
+                if (err != OK) {
+                    ALOGE("failed to instantiate crypto service.");
+
+                    mCrypto.clear();
+
+                    setState(INITIALIZED);
+
+                    sp<AMessage> response = new AMessage;
+                    response->setInt32("err", UNKNOWN_ERROR);
+
+                    response->postReply(mReplyID);
+                    break;
+                }
+            } else {
+                mFlags &= ~kFlagIsSecure;
             }
 
             mCodec->initiateConfigureComponent(format);
@@ -983,7 +1046,10 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
             for (size_t i = 0; i < srcBuffers.size(); ++i) {
                 const BufferInfo &info = srcBuffers.itemAt(i);
 
-                dstBuffers->push_back(info.mData);
+                dstBuffers->push_back(
+                        (portIndex == kPortIndexInput
+                            && (mFlags & kFlagIsSecure))
+                                ? info.mEncryptedData : info.mData);
             }
 
             (new AMessage)->postReply(replyID);
@@ -1037,9 +1103,14 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
 }
 
 void MediaCodec::setState(State newState) {
-    if (newState == UNINITIALIZED) {
+    if (newState == INITIALIZED) {
         delete mSoftRenderer;
         mSoftRenderer = NULL;
+
+        if (mCrypto != NULL) {
+            mCrypto->terminate();
+            mCrypto.clear();
+        }
 
         mNativeWindow.clear();
 
@@ -1148,6 +1219,43 @@ status_t MediaCodec::onQueueInputBuffer(const sp<AMessage> &msg) {
 
     if (flags & BUFFER_FLAG_CODECCONFIG) {
         info->mData->meta()->setInt32("csd", true);
+    }
+
+    if (mFlags & kFlagIsSecure) {
+        uint8_t iv[16];
+        memset(iv, 0, sizeof(iv));
+
+        ssize_t outLength;
+
+        if (mFlags & kFlagIsSoftwareCodec) {
+            outLength = mCrypto->decryptAudio(
+                    (flags & BUFFER_FLAG_ENCRYPTED) ? iv : NULL,
+                    (flags & BUFFER_FLAG_ENCRYPTED) ? sizeof(iv) : 0,
+                        info->mEncryptedData->base() + offset,
+                        size,
+                        info->mData->base(),
+                        info->mData->capacity());
+        } else {
+            outLength = mCrypto->decryptVideo(
+                    (flags & BUFFER_FLAG_ENCRYPTED) ? iv : NULL,
+                    (flags & BUFFER_FLAG_ENCRYPTED) ? sizeof(iv) : 0,
+                        info->mEncryptedData->base() + offset,
+                        size,
+                        info->mData->base(),
+                        0  /* offset */);
+        }
+
+        if (outLength < 0) {
+            return outLength;
+        }
+
+        if ((size_t)outLength > info->mEncryptedData->capacity()) {
+            return -ERANGE;
+        }
+
+        info->mData->setRange(0, outLength);
+    } else if (flags & BUFFER_FLAG_ENCRYPTED) {
+        return -EINVAL;
     }
 
     reply->setBuffer("buffer", info->mData);

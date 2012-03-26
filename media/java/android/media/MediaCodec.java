@@ -48,6 +48,7 @@ public class MediaCodec
     public static int FLAG_SYNCFRAME   = 1;
     public static int FLAG_CODECCONFIG = 2;
     public static int FLAG_EOS         = 4;
+    public static int FLAG_ENCRYPTED   = 8;
 
     /** Instantiate a codec component by mime type. For decoder components
         this is the mime type of media that this decoder should be able to
@@ -82,6 +83,7 @@ public class MediaCodec
     public native final void release();
 
     public static int CONFIGURE_FLAG_ENCODE = 1;
+    public static int CONFIGURE_FLAG_SECURE = 2;
 
     /** Configures a component.
      *  @param format A map of string/value pairs describing the input format

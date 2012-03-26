@@ -287,6 +287,11 @@ private:
 
             msg->setInt32("channel-count", numChannels);
             msg->setInt32("sample-rate", sampleRate);
+
+            int32_t isADTS;
+            if (meta->findInt32(kKeyIsADTS, &isADTS) && isADTS != 0) {
+                msg->setInt32("is-adts", true);
+            }
         }
 
         uint32_t type;

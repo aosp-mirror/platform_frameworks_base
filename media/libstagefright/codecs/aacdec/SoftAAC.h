@@ -49,6 +49,7 @@ private:
     };
 
     tPVMP4AudioDecoderExternal *mConfig;
+    bool mIsADTS;
     void *mDecoderBuf;
 
     size_t mInputBufferCount;
