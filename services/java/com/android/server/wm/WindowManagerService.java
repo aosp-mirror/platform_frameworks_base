@@ -170,10 +170,12 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_SCREEN_ON = false;
     static final boolean DEBUG_SCREENSHOT = false;
     static final boolean DEBUG_BOOT = false;
+    static final boolean DEBUG_LAYOUT_REPEATS = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
     static final boolean HIDE_STACK_CRAWLS = true;
+    static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
     static final boolean PROFILE_ORIENTATION = false;
     static final boolean localLOGV = DEBUG;
@@ -3326,6 +3328,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return wtoken.appWindowToken;
     }
 
+    @Override
     public void addWindowToken(IBinder token, int type) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addWindowToken()")) {
@@ -8378,6 +8381,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
+                if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("On entry to LockedInner");
+
                 if ((mPendingLayoutChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
                     if ((adjustWallpaperWindowsLocked()&ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
                         assignLayersLocked();
@@ -8407,6 +8412,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // FIRST AND ONE HALF LOOP: Make WindowManagerPolicy think
                 // it is animating.
                 mPendingLayoutChanges = 0;
+                if (DEBUG_LAYOUT_REPEATS)  debugLayoutRepeats("loop number " + mLayoutRepeatCount);
                 mPolicy.beginAnimationLw(dw, dh);
                 for (i = mWindows.size() - 1; i >= 0; i--) {
                     WindowState w = mWindows.get(i);
@@ -8415,7 +8421,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 mPendingLayoutChanges |= mPolicy.finishAnimationLw();
-                
+                if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after finishAnimationLw");
             } while (mPendingLayoutChanges != 0);
 
             final boolean someoneLosingFocus = !mLosingFocus.isEmpty();
@@ -8460,6 +8466,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // to go.
         if (mAppTransitionReady) {
             mPendingLayoutChanges |= handleAppTransitionReadyLocked();
+            if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after handleAppTransitionReadyLocked");
         }
 
         mInnerFields.mAdjResult = 0;
@@ -8472,6 +8479,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // be out of sync with it.  So here we will just rebuild the
             // entire app window list.  Fun!
             mPendingLayoutChanges |= handleAnimatingStoppedAndTransitionLocked();
+            if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after handleAnimStopAndXitionLock");
         }
 
         if (mInnerFields.mWallpaperForceHidingChanged && mPendingLayoutChanges == 0 &&
@@ -8483,12 +8491,15 @@ public class WindowManagerService extends IWindowManager.Stub
             // hard -- the wallpaper now needs to be shown behind
             // something that was hidden.
             mPendingLayoutChanges |= animateAwayWallpaperLocked();
+            if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after animateAwayWallpaperLocked");
         }
 
         mPendingLayoutChanges |= testWallpaperAndBackgroundLocked();
+        if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after testWallpaperAndBackgroundLocked");
 
         if (mLayoutNeeded) {
             mPendingLayoutChanges |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
+            if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("mLayoutNeeded");
         }
 
         final int N = mWindows.size();
@@ -8502,6 +8513,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // associated with exiting/removed apps
         mAnimator.animate();
         mPendingLayoutChanges |= mAnimator.mPendingLayoutChanges;
+        if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after animate()");
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
@@ -9756,5 +9768,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public interface OnHardKeyboardStatusChangeListener {
         public void onHardKeyboardStatusChange(boolean available, boolean enabled);
+    }
+    
+    void debugLayoutRepeats(final String msg) {
+        if (mLayoutRepeatCount >= LAYOUT_REPEAT_THRESHOLD) {
+            Slog.v(TAG, "Layouts looping: " + msg);
+            Slog.v(TAG, "mPendingLayoutChanges = 0x" + Integer.toHexString(mPendingLayoutChanges));
+        }
     }
 }

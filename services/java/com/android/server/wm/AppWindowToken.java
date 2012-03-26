@@ -336,6 +336,10 @@ class AppWindowToken extends WindowToken {
         }
 
         service.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+            service.debugLayoutRepeats("AppWindowToken");
+        }
+
         clearAnimation();
         animating = false;
         if (animLayerAdjustment != 0) {
