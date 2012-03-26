@@ -1798,6 +1798,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableRight
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
+    @android.view.RemotableViewMethod
     public void setCompoundDrawablesWithIntrinsicBounds(int left, int top, int right, int bottom) {
         final Resources resources = getContext().getResources();
         setCompoundDrawablesWithIntrinsicBounds(left != 0 ? resources.getDrawable(left) : null,
@@ -1967,6 +1968,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
+    @android.view.RemotableViewMethod
     public void setCompoundDrawablesRelativeWithIntrinsicBounds(int start, int top, int end,
             int bottom) {
         resetResolvedDrawables();
@@ -2042,6 +2044,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_drawablePadding
      */
+    @android.view.RemotableViewMethod
     public void setCompoundDrawablePadding(int pad) {
         Drawables dr = mDrawables;
         if (pad == 0) {

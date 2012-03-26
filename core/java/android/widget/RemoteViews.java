@@ -965,6 +965,58 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Helper action to set compound drawables on a TextView. Supports relative
+     * (s/t/e/b) or cardinal (l/t/r/b) arrangement.
+     */
+    private class TextViewDrawableAction extends Action {
+        public TextViewDrawableAction(int viewId, boolean isRelative, int d1, int d2, int d3, int d4) {
+            this.viewId = viewId;
+            this.isRelative = isRelative;
+            this.d1 = d1;
+            this.d2 = d2;
+            this.d3 = d3;
+            this.d4 = d4;
+        }
+
+        public TextViewDrawableAction(Parcel parcel) {
+            viewId = parcel.readInt();
+            isRelative = (parcel.readInt() != 0);
+            d1 = parcel.readInt();
+            d2 = parcel.readInt();
+            d3 = parcel.readInt();
+            d4 = parcel.readInt();
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            dest.writeInt(isRelative ? 1 : 0);
+            dest.writeInt(d1);
+            dest.writeInt(d2);
+            dest.writeInt(d3);
+            dest.writeInt(d4);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent) {
+            final Context context = root.getContext();
+            final TextView target = (TextView) root.findViewById(viewId);
+            if (target == null) return;
+            if (isRelative) {
+                target.setCompoundDrawablesRelativeWithIntrinsicBounds(d1, d2, d3, d4);
+            } else {
+                target.setCompoundDrawablesWithIntrinsicBounds(d1, d2, d3, d4);
+            }
+        }
+
+        int viewId;
+        boolean isRelative = false;
+        int d1, d2, d3, d4;
+
+        public final static int TAG = 11;
+    }
+
+    /**
      * Simple class used to keep track of memory usage in a RemoteViews.
      *
      */
@@ -1042,6 +1094,9 @@ public class RemoteViews implements Parcelable, Filter {
                     break;
                 case SetRemoteViewsAdapterIntent.TAG:
                     mActions.add(new SetRemoteViewsAdapterIntent(parcel));
+                    break;
+                case TextViewDrawableAction.TAG:
+                    mActions.add(new TextViewDrawableAction(parcel));
                     break;
                 default:
                     throw new ActionException("Tag " + tag + " not found");
@@ -1194,6 +1249,35 @@ public class RemoteViews implements Parcelable, Filter {
         setCharSequence(viewId, "setText", text);
     }
     
+    /**
+     * Equivalent to calling 
+     * {@link TextView#setCompoundDrawablesWithIntrinsicBounds(int, int, int, int)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param left The id of a drawable to place to the left of the text, or 0
+     * @param top The id of a drawable to place above the text, or 0
+     * @param right The id of a drawable to place to the right of the text, or 0
+     * @param bottom The id of a drawable to place below the text, or 0 
+     */
+    public void setTextViewCompoundDrawables(int viewId, int left, int top, int right, int bottom) {
+        addAction(new TextViewDrawableAction(viewId, false, left, top, right, bottom));
+    }
+
+    /**
+     * Equivalent to calling {@link 
+     * TextView#setCompoundDrawablesRelativeWithIntrinsicBounds(int, int, int, int)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param start The id of a drawable to place before the text (relative to the 
+     * layout direction), or 0
+     * @param top The id of a drawable to place above the text, or 0
+     * @param end The id of a drawable to place after the text, or 0
+     * @param bottom The id of a drawable to place below the text, or 0 
+     */
+    public void setTextViewCompoundDrawablesRelative(int viewId, int start, int top, int end, int bottom) {
+        addAction(new TextViewDrawableAction(viewId, true, start, top, end, bottom));
+    }
+
     /**
      * Equivalent to calling ImageView.setImageResource
      * 
