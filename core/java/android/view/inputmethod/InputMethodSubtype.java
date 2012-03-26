@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Locale;
 
@@ -45,6 +46,9 @@ public final class InputMethodSubtype implements Parcelable {
     private static final String TAG = InputMethodSubtype.class.getSimpleName();
     private static final String EXTRA_VALUE_PAIR_SEPARATOR = ",";
     private static final String EXTRA_VALUE_KEY_VALUE_SEPARATOR = "=";
+    // TODO: remove this
+    private static final String EXTRA_KEY_UNTRANSLATABLE_STRING_IN_SUBTYPE_NAME =
+            "UntranslatableReplacementStringInSubtypeName";
 
     private final boolean mIsAuxiliary;
     private final boolean mOverridesImplicitlyEnabledSubtype;
@@ -215,7 +219,17 @@ public final class InputMethodSubtype implements Parcelable {
         final CharSequence subtypeName = context.getPackageManager().getText(
                 packageName, mSubtypeNameResId, appInfo);
         if (!TextUtils.isEmpty(subtypeName)) {
-            return String.format(subtypeName.toString(), localeStr);
+            final String replacementString =
+                    containsExtraValueKey(EXTRA_KEY_UNTRANSLATABLE_STRING_IN_SUBTYPE_NAME)
+                            ? getExtraValueOf(EXTRA_KEY_UNTRANSLATABLE_STRING_IN_SUBTYPE_NAME)
+                            : localeStr;
+            try {
+                return String.format(
+                        subtypeName.toString(), replacementString != null ? replacementString : "");
+            } catch (IllegalFormatException e) {
+                Slog.w(TAG, "Found illegal format in subtype name("+ subtypeName + "): " + e);
+                return "";
+            }
         } else {
             return localeStr;
         }
