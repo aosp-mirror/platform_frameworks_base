@@ -596,12 +596,12 @@
      This may result in unexpected charges. Malicious apps may cost you money by
      sending messages without your confirmation.</string>
 
-     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sendSmsNoConfirmation">send SMS messages with no confirmation</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_sendSmsNoConfirmation">Allows the app to send SMS
-      messages. This may result in unexpected charges. Malicious apps may cost
-      you money by sending messages without your confirmation.</string>
+     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permlab_sendRespondViaMessageRequest">send respond-via-message events</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_sendRespondViaMessageRequest">Allows the app to send
+      requests to other messaging apps to handle respond-via-message events for incoming
+      calls.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readSms">read your text messages (SMS or MMS)</string>
