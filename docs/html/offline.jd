@@ -40,7 +40,7 @@ tools</li>
 <p>Follow the guide to <a href="{@docRoot}sdk/installing.html">Installing the Android SDK</a>, which
 will help you setup your development environment.</p>
 
-<h3>If you've installed new SDK components using the SDK and AVD Manager</h3>
+<h3>If you've installed new SDK components using the Android SDK Manager</h3>
 
 <p>There's no additional setup.</p>
 

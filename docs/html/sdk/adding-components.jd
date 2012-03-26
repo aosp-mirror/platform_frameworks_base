@@ -1,4 +1,4 @@
-page.title=Adding SDK Components
+page.title=Adding SDK Packages
 @jd:body
 
 
@@ -6,74 +6,74 @@ page.title=Adding SDK Components
 <div id="qv">
 <h2>Quickview</h2>
 <ul>
-  <li>Use the Android SDK and AVD Manager to
+  <li>Use the Android SDK Manager to
    set up your SDK and keep it up-to-date.</li>
 </ul>
 
 <h2>In this document</h2>
 <ol>
-  <li><a href="#launching">Launching the Android SDK and AVD Manager</a>
-  <li><a href="#InstallingComponents">Installing SDK Components</a>
-  <li><a href="#UpdatingComponents">Updating SDK Components</a>
-  <li><a href="#dependencies">Component Dependencies</a></li>
+  <li><a href="#launching">Launching the Android SDK Manager</a>
+  <li><a href="#InstallingComponents">Installing SDK Packages</a>
+  <li><a href="#UpdatingComponents">Updating SDK Packages</a>
+  <li><a href="#dependencies">Package Dependencies</a></li>
   <li><a href="#AddingSites">Adding New Sites</a></li>
   <li><a href="#troubleshooting">Troubleshooting</a></li>
 </ol>
 </div>
 </div>
 
-<p>Adding and updating components in your Android SDK is fast and easy. To add or
-update the individual SDK components that you need, use the <em>Android SDK and AVD
+<p>Adding and updating packages in your Android SDK is fast and easy. To add or
+update the individual SDK packages that you need, use the <em>Android SDK
 Manager</em> (included in the SDK Tools).</p>
 
 <p>It only takes a couple of clicks to install individual versions of the
 Android platform, new development tools, new documentation, and SDK add-ons. The
-new SDK components are automatically installed into your existing SDK directory,
+new SDK packages are automatically installed into your existing SDK directory,
 so you don't need to update your development environment to specify a new SDK
 location.</p>
 
 <p>If you're setting up your Android SDK for the first time,
 see <a href="{@docRoot}sdk/installing.html#components">Installing the SDK</a> for information about
-what components to install.</p>
+what packages to install.</p>
 
 <p class="note"><strong>Note:</strong> If you develop in Eclipse, you might also need
 to update your ADT plugin when you update your development tools. See the revisions listed in the
 <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin for Eclipse</a> document.</p>
 
 <img src="{@docRoot}images/sdk_manager_packages.png" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> The Android SDK and AVD Manager's
-<strong>Available Packages</strong> panel, which shows the SDK components that are
+<p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager's
+<strong>Available Packages</strong> panel, which shows the SDK packages that are
 available for you to download into your environment. </p>
 </div>
 
-<h2 id="launching">Launching the Android SDK and AVD Manager</h2>
+<h2 id="launching">Launching the Android SDK Manager</h2>
 
-<p>The Android SDK and AVD Manager is the tool that you use to install and
-upgrade SDK components in your development environment. </p>
+<p>The Android SDK Manager is the tool that you use to install and
+upgrade SDK packages in your development environment. </p>
 
-<p>You can launch the Android SDK and AVD Manager in one of the following ways.</p>
+<p>You can launch the Android SDK Manager in one of the following ways.</p>
 
 <h4>Launching from Eclipse/ADT</h4>
 
 <p>If you are developing in Eclipse and have already installed the ADT Plugin,
-follow these steps to access the Android SDK and AVD Manager tool:</p>
+follow these steps to access the Android SDK Manager tool:</p>
 
 <ol>
 <li>Open Eclipse</li>
-<li>Select <strong>Window</strong> &gt; <strong>Android SDK and AVD
+<li>Select <strong>Window</strong> &gt; <strong>Android SDK
 Manager</strong>.</li>
 </ol>
 
 <h4>Launching from the SDK Manager script (Windows only)</h4>
 
-<p>For Windows only, the SDK includes a script that invokes the Android SDK and
-AVD Manager. To launch the tool using the script, double-click {@code SDK
+<p>For Windows only, the SDK includes a script that invokes the Android SDK Manager. To launch the
+tool using the script, double-click {@code SDK
 Manager.exe} at the root of the the SDK directory.</p>
 
 <h4>Launching from a command line</h4>
 
-<p>In all development environments, follow these steps to access the Android SDK
-and AVD Manager tool from the command line: </p>
+<p>In all development environments, follow these steps to access the Android SDK Manager tool from
+the command line: </p>
 
 <ol>
 <li>Navigate to the <code>&lt;<em>sdk</em>&gt;/tools/</code> directory.</li>
@@ -82,26 +82,26 @@ and AVD Manager tool from the command line: </p>
 </ol>
 
 
-<h2 id="InstallingComponents">Installing SDK Components</h2>
+<h2 id="InstallingComponents">Installing SDK Packages</h2>
 
-<p class="caution"><strong>Caution:</strong> Before you install SDK components,
+<p class="caution"><strong>Caution:</strong> Before you install SDK packages,
 we recommend that you disable any antivirus software that may be running on
 your computer. There are cases in which antivirus software on Windows is known to interfere with the
 installation process, so we suggest you disable your antivirus until installation is
 complete.</p>
 
-<p>Follow these steps to install new SDK components in your environment:</p>
+<p>Follow these steps to install new SDK packages in your environment:</p>
 
 <ol>
-  <li>Launch the Android SDK and AVD Manager as described in the section above.</li>
+  <li>Launch the Android SDK Manager as described in the section above.</li>
   <li>Select <strong>Available Packages</strong> in the left panel.
-  This will reveal all of the components that are currently available for download
+  This will reveal all of the packages that are currently available for download
   from the SDK repository.</li>
-  <li>Select the component(s) you'd like to install and click <strong>Install
+  <li>Select the package(s) you'd like to install and click <strong>Install
   Selected</strong>. (If you aren't sure which packages to select, read <a
-  href="installing.html#which">Recommended Components</a>.)</li>
-  <li>Verify and accept the components you want (ensure each one is selected with a green
-checkmark) and click <strong>Install</strong>. The components will now be installed into
+  href="installing.html#which">Recommended Packages</a>.)</li>
+  <li>Verify and accept the packages you want (ensure each one is selected with a green
+checkmark) and click <strong>Install</strong>. The packages will now be installed into
 your existing Android SDK directories.</li>
 </ol>
 
@@ -114,60 +114,60 @@ and new documentation is saved in the existing
 <code>&lt;sdk&gt;/docs/</code> directory (old docs are replaced).</p>
 
 
-<h2 id="UpdatingComponents">Updating SDK Components</h2>
+<h2 id="UpdatingComponents">Updating SDK Packages</h2>
 
-<p>From time to time, new revisions of existing SDK components are released and
+<p>From time to time, new revisions of existing SDK packages are released and
 made available to you through the SDK repository. In most cases, if you have those
-components installed in your environment, you will want
+packages installed in your environment, you will want
 to download the new revisions as soon as possible. </p>
 
 <p>You can learn about the release of new revisions in two ways: </p>
 
 <ul>
 <li>You can watch for updates listed in the "SDK" tab of the Android Developers
-site, in the "Downloadable SDK Components" section. </li>
+site, in the "Downloadable SDK Packages" section. </li>
 <li>You can watch for updates listed in the <strong>Available Packages</strong>
-panel of the Android SDK and AVD Manager. </li>
+panel of the Android SDK Manager. </li>
 </ul>
 
-<p>When you see that a new revision is available, you can use the Android SDK
-and AVD Manager to quickly download it to your environment. Follow the same
-procedure as given in <a href="#InstallingComponents">Installing SDK Components</a>, above. The new
-component is installed in place of the old, but without impacting your
+<p>When you see that a new revision is available, you can use the Android SDK Manager to quickly
+download it to your environment. Follow the same
+procedure as given in <a href="#InstallingComponents">Installing SDK Packages</a>, above. The new
+package is installed in place of the old, but without impacting your
 applications. </p>
 
 <p class="note"><strong>Tip:</strong>
-Use the "Display updates only" checkbox to show only the components
+Use the "Display updates only" checkbox to show only the packages
 you do not have.</p>
 
 
-<h2 id="dependencies">SDK Component Dependencies</h2>
+<h2 id="dependencies">SDK Package Dependencies</h2>
 
-<p>In some cases, an SDK component may require a specific minimum revision of
-another component or SDK tool. Where such dependencies exist, they are
-documented in the revision notes for each component, available from the links in
-the "Downloadable SDK Components" section at left.</p>
+<p>In some cases, an SDK package may require a specific minimum revision of
+another package or SDK tool. Where such dependencies exist, they are
+documented in the revision notes for each package, available from the links in
+the "Downloadable SDK packages" section at left.</p>
 
 <p>For example, there may be a dependency between the ADT Plugin for Eclipse and
-the SDK Tools component. When you install the SDK Tools
-component, you should also upgrade to the required version of ADT (if you
+the SDK Tools package. When you install the SDK Tools
+package, you should also upgrade to the required version of ADT (if you
 are developing in Eclipse). In this case,  the major version number for your ADT plugin should
 always match the revision number of your SDK Tools (for example, ADT 8.x requires SDK Tools r8).
 </p>
 
 <p>Also make sure that, each time you install a new version of the Android platform, you have
-the latest version of the SDK Platform-tools component. The SDK Platform-tools contain
+the latest version of the SDK Platform-tools package. The SDK Platform-tools contain
 tools that are backward compatible with all versions of the Android platform and are
 often updated to support new features in the latest version of the Android platform.</p>
 
 <p>The development tools will notify you with debug warnings if there is dependency that you need to
-address. The SDK and AVD Manager also enforces dependencies by requiring that you download any
-components that are needed by those you have selected.</p>
+address. The Android SDK Manager also enforces dependencies by requiring that you download any
+packages that are needed by those you have selected.</p>
 
 
 <h2 id="AddingSites">Adding New Sites</h2>
 
-<p>By default, <strong>Available Packages</strong> displays components available from the
+<p>By default, <strong>Available Packages</strong> displays packages available from the
 <em>Android Repository</em> and <em>Third party Add-ons</em>. You can add other sites that host
 their own Android SDK add-ons, then download the SDK add-ons
 from those sites.</p>
@@ -178,7 +178,7 @@ to develop using their libraries, you must install their Android SDK add-on, if 
 available under <em>Third party Add-ons</em>. </p>
 
 <p>If a carrier or device manufacturer has hosted an SDK add-on repository file
-on their web site, follow these steps to add their site to the SDK and AVD
+on their web site, follow these steps to add their site to the Android SDK
 Manager:</p>
 
 <ol>
@@ -186,7 +186,7 @@ Manager:</p>
   <li>Click <strong>Add Add-on Site</strong> and enter the URL of the
 {@code repository.xml} file. Click <strong>OK</strong>.</li>
 </ol>
-<p>Any SDK components available from the site will now be listed under a new item named
+<p>Any SDK packages available from the site will now be listed under a new item named
 <strong>User Add-ons</strong>.</p>
 
 
@@ -194,12 +194,12 @@ Manager:</p>
 
 <p><strong>Problems connecting to the SDK repository</strong></p>
 
-<p>If you are using the SDK and AVD Manager to download components and are encountering
+<p>If you are using the Android SDK Manager to download packages and are encountering
 connection problems, try connecting over http, rather than https. To switch the
-protocol used by the SDK and AVD Manager, follow these steps: </p>
+protocol used by the Android SDK Manager, follow these steps: </p>
 
 <ol>
-  <li>With the Android SDK and AVD Manager window open, select "Settings" in the
+  <li>With the Android SDK Manager window open, select "Settings" in the
   left pane. </li>
   <li>On the right, in the "Misc" section, check the checkbox labeled "Force
   https://... sources to be fetched using http://..." </li>
