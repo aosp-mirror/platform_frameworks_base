@@ -324,7 +324,7 @@ status_t ConvertKeyValueArraysToMessage(
                 env->DeleteLocalRef(byteArray); byteArray = NULL;
             }
 
-            msg->setObject(key.c_str(), buffer);
+            msg->setBuffer(key.c_str(), buffer);
         }
     }
 

@@ -27,18 +27,21 @@ namespace android {
 struct ABuffer;
 struct ACodec;
 struct AMessage;
+struct ICrypto;
 struct SoftwareRenderer;
 struct SurfaceTextureClient;
 
 struct MediaCodec : public AHandler {
     enum ConfigureFlags {
         CONFIGURE_FLAG_ENCODE   = 1,
+        CONFIGURE_FLAG_SECURE   = 2,
     };
 
     enum BufferFlags {
         BUFFER_FLAG_SYNCFRAME   = 1,
         BUFFER_FLAG_CODECCONFIG = 2,
         BUFFER_FLAG_EOS         = 4,
+        BUFFER_FLAG_ENCRYPTED   = 8,
     };
 
     static sp<MediaCodec> CreateByType(
@@ -137,11 +140,13 @@ private:
         kFlagStickyError                = 8,
         kFlagDequeueInputPending        = 16,
         kFlagDequeueOutputPending       = 32,
+        kFlagIsSecure                   = 64,
     };
 
     struct BufferInfo {
         void *mBufferID;
         sp<ABuffer> mData;
+        sp<ABuffer> mEncryptedData;
         sp<AMessage> mNotify;
         bool mOwnedByClient;
     };
@@ -164,6 +169,8 @@ private:
 
     int32_t mDequeueOutputTimeoutGeneration;
     uint32_t mDequeueOutputReplyID;
+
+    sp<ICrypto> mCrypto;
 
     MediaCodec(const sp<ALooper> &looper);
 

@@ -427,24 +427,34 @@ status_t ACodec::allocateBuffersOnPort(OMX_U32 portIndex) {
                 sp<IMemory> mem = mDealer[portIndex]->allocate(def.nBufferSize);
                 CHECK(mem.get() != NULL);
 
-                IOMX::buffer_id buffer;
+                BufferInfo info;
+                info.mStatus = BufferInfo::OWNED_BY_US;
 
                 uint32_t requiresAllocateBufferBit =
                     (portIndex == kPortIndexInput)
                         ? OMXCodec::kRequiresAllocateBufferOnInputPorts
                         : OMXCodec::kRequiresAllocateBufferOnOutputPorts;
 
-                if (mQuirks & requiresAllocateBufferBit) {
+                if (portIndex == kPortIndexInput && (mFlags & kFlagIsSecure)) {
+                    mem.clear();
+
+                    void *ptr;
+                    err = mOMX->allocateBuffer(
+                            mNode, portIndex, def.nBufferSize, &info.mBufferID,
+                            &ptr);
+
+                    info.mData = new ABuffer(ptr, def.nBufferSize);
+                } else if (mQuirks & requiresAllocateBufferBit) {
                     err = mOMX->allocateBufferWithBackup(
-                            mNode, portIndex, mem, &buffer);
+                            mNode, portIndex, mem, &info.mBufferID);
                 } else {
-                    err = mOMX->useBuffer(mNode, portIndex, mem, &buffer);
+                    err = mOMX->useBuffer(mNode, portIndex, mem, &info.mBufferID);
                 }
 
-                BufferInfo info;
-                info.mBufferID = buffer;
-                info.mStatus = BufferInfo::OWNED_BY_US;
-                info.mData = new ABuffer(mem->pointer(), def.nBufferSize);
+                if (mem != NULL) {
+                    info.mData = new ABuffer(mem->pointer(), def.nBufferSize);
+                }
+
                 mBuffers[portIndex].push(info);
             }
         }
@@ -840,7 +850,13 @@ status_t ACodec::configureCodec(
                 || !msg->findInt32("sample-rate", &sampleRate)) {
             err = INVALID_OPERATION;
         } else {
-            err = setupAACCodec(encoder, numChannels, sampleRate, bitRate);
+            int32_t isADTS;
+            if (!msg->findInt32("is-adts", &isADTS)) {
+                isADTS = 0;
+            }
+
+            err = setupAACCodec(
+                    encoder, numChannels, sampleRate, bitRate, isADTS != 0);
         }
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)) {
         err = setupAMRCodec(encoder, false /* isWAMR */, bitRate);
@@ -934,7 +950,11 @@ status_t ACodec::selectAudioPortFormat(
 
 status_t ACodec::setupAACCodec(
         bool encoder,
-        int32_t numChannels, int32_t sampleRate, int32_t bitRate) {
+        int32_t numChannels, int32_t sampleRate, int32_t bitRate, bool isADTS) {
+    if (encoder && isADTS) {
+        return -EINVAL;
+    }
+
     status_t err = setupRawAudioFormat(
             encoder ? kPortIndexInput : kPortIndexOutput,
             sampleRate,
@@ -1021,7 +1041,11 @@ status_t ACodec::setupAACCodec(
 
     profile.nChannels = numChannels;
     profile.nSampleRate = sampleRate;
-    profile.eAACStreamFormat = OMX_AUDIO_AACStreamFormatMP4ADTS;
+
+    profile.eAACStreamFormat =
+        isADTS
+            ? OMX_AUDIO_AACStreamFormatMP4ADTS
+            : OMX_AUDIO_AACStreamFormatMP4FF;
 
     return mOMX->setParameter(
             mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
@@ -2653,6 +2677,12 @@ bool ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
     observer->setNotificationMessage(notify);
 
     mCodec->mComponentName = componentName;
+    mCodec->mFlags = 0;
+
+    if (componentName.endsWith(".secure")) {
+        mCodec->mFlags |= kFlagIsSecure;
+    }
+
     mCodec->mQuirks = quirks;
     mCodec->mOMX = omx;
     mCodec->mNode = node;
@@ -2701,6 +2731,7 @@ void ACodec::LoadedState::onShutdown(bool keepComponentAllocated) {
         mCodec->mNode = NULL;
         mCodec->mOMX.clear();
         mCodec->mQuirks = 0;
+        mCodec->mFlags = 0;
         mCodec->mComponentName.clear();
 
         mCodec->changeState(mCodec->mUninitializedState);

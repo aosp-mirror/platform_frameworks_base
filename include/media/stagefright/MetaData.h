@@ -128,6 +128,12 @@ enum {
     kKeyTextFormatData    = 'text',  // raw data
 
     kKeyRequiresSecureBuffers = 'secu',  // bool (int32_t)
+
+    kKeyScrambling        = 'scrm',  // int32_t
+    kKeyEMM               = 'emm ',  // raw data
+    kKeyECM               = 'ecm ',  // raw data
+
+    kKeyIsADTS            = 'adts',  // bool (int32_t)
 };
 
 enum {

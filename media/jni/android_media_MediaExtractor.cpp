@@ -160,6 +160,10 @@ status_t JMediaExtractor::getSampleTime(int64_t *sampleTimeUs) {
     return mImpl->getSampleTime(sampleTimeUs);
 }
 
+status_t JMediaExtractor::getSampleFlags(uint32_t *sampleFlags) {
+    return mImpl->getSampleFlags(sampleFlags);
+}
+
 }  // namespace android
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -343,6 +347,28 @@ static jlong android_media_MediaExtractor_getSampleTime(
     return sampleTimeUs;
 }
 
+static jint android_media_MediaExtractor_getSampleFlags(
+        JNIEnv *env, jobject thiz) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return -1ll;
+    }
+
+    uint32_t sampleFlags;
+    status_t err = extractor->getSampleFlags(&sampleFlags);
+
+    if (err == ERROR_END_OF_STREAM) {
+        return -1ll;
+    } else if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return false;
+    }
+
+    return sampleFlags;
+}
+
 static void android_media_MediaExtractor_native_init(JNIEnv *env) {
     jclass clazz = env->FindClass("android/media/MediaExtractor");
     CHECK(clazz != NULL);
@@ -411,6 +437,9 @@ static JNINativeMethod gMethods[] = {
 
     { "getSampleTime", "()J",
         (void *)android_media_MediaExtractor_getSampleTime },
+
+    { "getSampleFlags", "()I",
+        (void *)android_media_MediaExtractor_getSampleFlags },
 
     { "native_init", "()V", (void *)android_media_MediaExtractor_native_init },
 

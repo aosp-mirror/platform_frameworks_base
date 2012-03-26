@@ -515,7 +515,12 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
 
-        status_t err = setAACFormat(numChannels, sampleRate, bitRate);
+        int32_t isADTS;
+        if (!meta->findInt32(kKeyIsADTS, &isADTS)) {
+            isADTS = false;
+        }
+
+        status_t err = setAACFormat(numChannels, sampleRate, bitRate, isADTS);
         if (err != OK) {
             CODEC_LOGE("setAACFormat() failed (err = %d)", err);
             return err;
@@ -3386,11 +3391,17 @@ void OMXCodec::setAMRFormat(bool isWAMR, int32_t bitRate) {
     }
 }
 
-status_t OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate) {
-    if (numChannels > 2)
+status_t OMXCodec::setAACFormat(
+        int32_t numChannels, int32_t sampleRate, int32_t bitRate, bool isADTS) {
+    if (numChannels > 2) {
         ALOGW("Number of channels: (%d) \n", numChannels);
+    }
 
     if (mIsEncoder) {
+        if (isADTS) {
+            return -EINVAL;
+        }
+
         //////////////// input port ////////////////////
         setRawAudioFormat(kPortIndexInput, sampleRate, numChannels);
 
@@ -3445,7 +3456,9 @@ status_t OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t
                 &profile, sizeof(profile));
 
         if (err != OK) {
-            CODEC_LOGE("setParameter('OMX_IndexParamAudioAac') failed (err = %d)", err);
+            CODEC_LOGE("setParameter('OMX_IndexParamAudioAac') failed "
+                       "(err = %d)",
+                       err);
             return err;
         }
     } else {
@@ -3459,13 +3472,19 @@ status_t OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t
 
         profile.nChannels = numChannels;
         profile.nSampleRate = sampleRate;
-        profile.eAACStreamFormat = OMX_AUDIO_AACStreamFormatMP4ADTS;
+
+        profile.eAACStreamFormat =
+            isADTS
+                ? OMX_AUDIO_AACStreamFormatMP4ADTS
+                : OMX_AUDIO_AACStreamFormatMP4FF;
 
         err = mOMX->setParameter(
                 mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
 
         if (err != OK) {
-            CODEC_LOGE("setParameter('OMX_IndexParamAudioAac') failed (err = %d)", err);
+            CODEC_LOGE("setParameter('OMX_IndexParamAudioAac') failed "
+                       "(err = %d)",
+                       err);
             return err;
         }
     }

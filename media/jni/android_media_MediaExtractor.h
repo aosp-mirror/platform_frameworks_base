@@ -43,6 +43,7 @@ struct JMediaExtractor : public RefBase {
     status_t readSampleData(jobject byteBuf, size_t offset, size_t *sampleSize);
     status_t getSampleTrackIndex(size_t *trackIndex);
     status_t getSampleTime(int64_t *sampleTimeUs);
+    status_t getSampleFlags(uint32_t *sampleFlags);
 
 protected:
     virtual ~JMediaExtractor();

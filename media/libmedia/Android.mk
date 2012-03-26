@@ -17,6 +17,7 @@ LOCAL_SRC_FILES:= \
     IAudioFlingerClient.cpp \
     IAudioTrack.cpp \
     IAudioRecord.cpp \
+    ICrypto.cpp \
     AudioRecord.cpp \
     AudioSystem.cpp \
     mediaplayer.cpp \

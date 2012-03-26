@@ -89,6 +89,10 @@ private:
         kPortIndexOutput = 1
     };
 
+    enum {
+        kFlagIsSecure   = 1,
+    };
+
     struct BufferInfo {
         enum Status {
             OWNED_BY_US,
@@ -118,6 +122,7 @@ private:
     sp<FlushingState> mFlushingState;
 
     AString mComponentName;
+    uint32_t mFlags;
     uint32_t mQuirks;
     sp<IOMX> mOMX;
     IOMX::node_id mNode;
@@ -176,7 +181,8 @@ private:
 
     status_t setupAACCodec(
             bool encoder,
-            int32_t numChannels, int32_t sampleRate, int32_t bitRate);
+            int32_t numChannels, int32_t sampleRate, int32_t bitRate,
+            bool isADTS);
 
     status_t selectAudioPortFormat(
             OMX_U32 portIndex, OMX_AUDIO_CODINGTYPE desiredFormat);

@@ -28,6 +28,7 @@
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaCodec.h>
+#include <media/stagefright/MediaCodecList.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/NuMediaExtractor.h>
 #include <gui/SurfaceComposerClient.h>
@@ -36,7 +37,9 @@ static void usage(const char *me) {
     fprintf(stderr, "usage: %s [-a] use audio\n"
                     "\t\t[-v] use video\n"
                     "\t\t[-p] playback\n"
-                    "\t\t[-S] allocate buffers from a surface\n", me);
+                    "\t\t[-S] allocate buffers from a surface\n"
+                    "\t\t[-D] decrypt input buffers\n",
+                    me);
 
     exit(1);
 }
@@ -63,7 +66,8 @@ static int decode(
         const char *path,
         bool useAudio,
         bool useVideo,
-        const android::sp<android::Surface> &surface) {
+        const android::sp<android::Surface> &surface,
+        bool decryptInputBuffers) {
     using namespace android;
 
     static int64_t kTimeout = 500ll;
@@ -109,13 +113,31 @@ static int decode(
         state->mNumBuffersDecoded = 0;
         state->mIsAudio = isAudio;
 
-        state->mCodec = MediaCodec::CreateByType(
-                looper, mime.c_str(), false /* encoder */);
+        if (decryptInputBuffers && !isAudio) {
+            static const MediaCodecList *list = MediaCodecList::getInstance();
+
+            ssize_t index =
+                list->findCodecByType(mime.c_str(), false /* encoder */);
+
+            CHECK_GE(index, 0);
+
+            const char *componentName = list->getCodecName(index);
+
+            AString fullName = componentName;
+            fullName.append(".secure");
+
+            state->mCodec = MediaCodec::CreateByComponentName(
+                    looper, fullName.c_str());
+        } else {
+            state->mCodec = MediaCodec::CreateByType(
+                    looper, mime.c_str(), false /* encoder */);
+        }
 
         CHECK(state->mCodec != NULL);
 
         err = state->mCodec->configure(
-                format, isVideo ? surface : NULL, 0 /* flags */);
+                format, isVideo ? surface : NULL,
+                decryptInputBuffers ? MediaCodec::CONFIGURE_FLAG_SECURE : 0);
 
         CHECK_EQ(err, (status_t)OK);
 
@@ -202,12 +224,24 @@ static int decode(
                     err = extractor->getSampleTime(&timeUs);
                     CHECK_EQ(err, (status_t)OK);
 
+                    uint32_t bufferFlags = 0;
+
+                    uint32_t sampleFlags;
+                    err = extractor->getSampleFlags(&sampleFlags);
+                    CHECK_EQ(err, (status_t)OK);
+
+                    if (sampleFlags & NuMediaExtractor::SAMPLE_FLAG_ENCRYPTED) {
+                        CHECK(decryptInputBuffers);
+
+                        bufferFlags |= MediaCodec::BUFFER_FLAG_ENCRYPTED;
+                    }
+
                     err = state->mCodec->queueInputBuffer(
                             index,
                             0 /* offset */,
                             buffer->size(),
                             timeUs,
-                            0 /* flags */);
+                            bufferFlags);
 
                     CHECK_EQ(err, (status_t)OK);
 
@@ -341,9 +375,10 @@ int main(int argc, char **argv) {
     bool useVideo = false;
     bool playback = false;
     bool useSurface = false;
+    bool decryptInputBuffers = false;
 
     int res;
-    while ((res = getopt(argc, argv, "havpS")) >= 0) {
+    while ((res = getopt(argc, argv, "havpSD")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -366,6 +401,12 @@ int main(int argc, char **argv) {
             case 'S':
             {
                 useSurface = true;
+                break;
+            }
+
+            case 'D':
+            {
+                decryptInputBuffers = true;
                 break;
             }
 
@@ -440,7 +481,8 @@ int main(int argc, char **argv) {
         player->stop();
         player->reset();
     } else {
-        decode(looper, argv[0], useAudio, useVideo, surface);
+        decode(looper, argv[0],
+               useAudio, useVideo, surface, decryptInputBuffers);
     }
 
     if (playback || (useSurface && useVideo)) {

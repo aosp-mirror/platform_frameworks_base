@@ -240,6 +240,7 @@ public:
     virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat);
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat);
     virtual sp<IOMX>            getOMX();
+    virtual sp<ICrypto>         makeCrypto();
 
     virtual status_t            dump(int fd, const Vector<String16>& args);
 
@@ -419,6 +420,7 @@ private:
                 SortedVector< wp<MediaRecorderClient> > mMediaRecorderClients;
                 int32_t                     mNextConnId;
                 sp<IOMX>                    mOMX;
+                sp<ICrypto>                 mCrypto;
 };
 
 // ----------------------------------------------------------------------------

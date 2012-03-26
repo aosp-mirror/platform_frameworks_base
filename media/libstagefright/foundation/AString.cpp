@@ -310,6 +310,16 @@ bool AString::startsWith(const char *prefix) const {
     return !strncmp(mData, prefix, strlen(prefix));
 }
 
+bool AString::endsWith(const char *suffix) const {
+    size_t suffixLen = strlen(suffix);
+
+    if (mSize < suffixLen) {
+        return false;
+    }
+
+    return !strcmp(mData + mSize - suffixLen, suffix);
+}
+
 AString StringPrintf(const char *format, ...) {
     va_list ap;
     va_start(ap, format);
