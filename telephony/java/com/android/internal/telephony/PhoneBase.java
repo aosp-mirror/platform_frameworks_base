@@ -43,6 +43,7 @@ import com.android.internal.telephony.test.SimulatedRadioControl;
 import com.android.internal.telephony.gsm.SIMRecords;
 
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -116,7 +117,6 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     /* Instance Variables */
     public CommandsInterface mCM;
-    protected IccFileHandler mIccFileHandler;
     boolean mDnsCheckDisabled;
     public DataConnectionTracker mDataConnectionTracker;
     boolean mDoesRilSendMultipleCallRing;
@@ -125,7 +125,7 @@ public abstract class PhoneBase extends Handler implements Phone {
     public boolean mIsTheCurrentActivePhone = true;
     boolean mIsVoiceCapable = true;
     public IccRecords mIccRecords;
-    public IccCard mIccCard;
+    protected AtomicReference<IccCard> mIccCard = new AtomicReference<IccCard>();
     public SmsStorageMonitor mSmsStorageMonitor;
     public SmsUsageMonitor mSmsUsageMonitor;
     public SMSDispatcher mSMS;
@@ -268,7 +268,7 @@ public abstract class PhoneBase extends Handler implements Phone {
         mSmsUsageMonitor = null;
         mSMS = null;
         mIccRecords = null;
-        mIccCard = null;
+        mIccCard.set(null);
         mDataConnectionTracker = null;
     }
 
@@ -630,7 +630,11 @@ public abstract class PhoneBase extends Handler implements Phone {
     /**
      * Retrieves the IccFileHandler of the Phone instance
      */
-    public abstract IccFileHandler getIccFileHandler();
+    public IccFileHandler getIccFileHandler(){
+        IccCard iccCard = mIccCard.get();
+        if (iccCard == null) return null;
+        return iccCard.getIccFileHandler();
+    }
 
     /*
      * Retrieves the Handler of the Phone instance
@@ -655,7 +659,7 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     @Override
     public IccCard getIccCard() {
-        return mIccCard;
+        return mIccCard.get();
     }
 
     @Override

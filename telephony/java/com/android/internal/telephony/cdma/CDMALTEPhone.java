@@ -85,9 +85,8 @@ public class CDMALTEPhone extends CDMAPhone {
 
     @Override
     protected void initSstIcc() {
-        mIccCard = UiccController.getInstance(this).getIccCard();
-        mIccRecords = mIccCard.getIccRecords();
-        mIccFileHandler = mIccCard.getIccFileHandler();
+        mIccCard.set(UiccController.getInstance(this).getIccCard());
+        mIccRecords = mIccCard.get().getIccRecords();
         // CdmaLteServiceStateTracker registers with IccCard to know
         // when the card is ready. So create mIccCard before the ServiceStateTracker
         mSST = new CdmaLteServiceStateTracker(this);

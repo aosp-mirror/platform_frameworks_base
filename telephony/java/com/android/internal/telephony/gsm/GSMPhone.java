@@ -136,12 +136,11 @@ public class GSMPhone extends PhoneBase {
         }
 
         mCM.setPhoneType(Phone.PHONE_TYPE_GSM);
-        mIccCard = UiccController.getInstance(this).getIccCard();
+        mIccCard.set(UiccController.getInstance(this).getIccCard());
+        mIccRecords = mIccCard.get().getIccRecords();
         mCT = new GsmCallTracker(this);
         mSST = new GsmServiceStateTracker (this);
         mSMS = new GsmSMSDispatcher(this, mSmsStorageMonitor, mSmsUsageMonitor);
-        mIccFileHandler = mIccCard.getIccFileHandler();
-        mIccRecords = mIccCard.getIccRecords();
         mDataConnectionTracker = new GsmDataConnectionTracker (this);
         if (!unitTestMode) {
             mSimPhoneBookIntManager = new SimPhoneBookInterfaceManager(this);
@@ -229,7 +228,6 @@ public class GSMPhone extends PhoneBase {
         mSimPhoneBookIntManager = null;
         mSimSmsIntManager = null;
         mSubInfo = null;
-        mIccFileHandler = null;
         mCT = null;
         mSST = null;
         super.removeReferences();
@@ -1437,13 +1435,6 @@ public class GSMPhone extends PhoneBase {
      */
     public IccPhoneBookInterfaceManager getIccPhoneBookInterfaceManager(){
         return mSimPhoneBookIntManager;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public IccFileHandler getIccFileHandler(){
-        return this.mIccFileHandler;
     }
 
     /**

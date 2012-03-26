@@ -149,9 +149,8 @@ public class CDMAPhone extends PhoneBase {
     }
 
     protected void initSstIcc() {
-        mIccCard = UiccController.getInstance(this).getIccCard();
-        mIccRecords = mIccCard.getIccRecords();
-        mIccFileHandler = mIccCard.getIccFileHandler();
+        mIccCard.set(UiccController.getInstance(this).getIccCard());
+        mIccRecords = mIccCard.get().getIccRecords();
         // CdmaServiceStateTracker registers with IccCard to know
         // when the Ruim card is ready. So create mIccCard before the ServiceStateTracker
         mSST = new CdmaServiceStateTracker(this);
@@ -251,7 +250,6 @@ public class CDMAPhone extends PhoneBase {
         mRuimPhoneBookInterfaceManager = null;
         mRuimSmsInterfaceManager = null;
         mSubInfo = null;
-        mIccFileHandler = null;
         mCT = null;
         mSST = null;
         mEriManager = null;
@@ -1124,13 +1122,6 @@ public class CDMAPhone extends PhoneBase {
      */
     public final void setSystemProperty(String property, String value) {
         super.setSystemProperty(property, value);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public IccFileHandler getIccFileHandler() {
-        return this.mIccFileHandler;
     }
 
     /**

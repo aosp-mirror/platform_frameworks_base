@@ -211,7 +211,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         cm.setOnNITZTime(this, EVENT_NITZ_TIME, null);
         cm.setOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, null);
         cm.setOnRestrictedStateChanged(this, EVENT_RESTRICTED_STATE_CHANGED, null);
-        phone.mIccCard.registerForReady(this, EVENT_SIM_READY, null);
+        phone.getIccCard().registerForReady(this, EVENT_SIM_READY, null);
 
         // system setting property AIRPLANE_MODE_ON is set in Settings.
         int airplaneMode = Settings.System.getInt(
@@ -244,7 +244,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         cm.unregisterForAvailable(this);
         cm.unregisterForRadioStateChanged(this);
         cm.unregisterForVoiceNetworkStateChanged(this);
-        phone.mIccCard.unregisterForReady(this);
+        phone.getIccCard().unregisterForReady(this);
         phone.mIccRecords.unregisterForRecordsLoaded(this);
         cm.unSetOnSignalStrengthUpdate(this);
         cm.unSetOnRestrictedStateChanged(this);
