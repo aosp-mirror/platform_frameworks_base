@@ -518,6 +518,8 @@ FontRenderer::~FontRenderer() {
     mCacheLines.clear();
 
     if (mInitialized) {
+        // Unbinding the buffer shouldn't be necessary but it crashes with some drivers
+        Caches::getInstance().unbindIndicesBuffer();
         glDeleteBuffers(1, &mIndexBufferID);
 
         delete[] mTextMeshPtr;
