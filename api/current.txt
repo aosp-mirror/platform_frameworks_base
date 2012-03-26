@@ -26054,6 +26054,7 @@ package android.widget {
   public class AdapterViewFlipper extends android.widget.AdapterViewAnimator {
     ctor public AdapterViewFlipper(android.content.Context);
     ctor public AdapterViewFlipper(android.content.Context, android.util.AttributeSet);
+    method public int getFlipInterval();
     method public boolean isAutoStart();
     method public boolean isFlipping();
     method public void setAutoStart(boolean);
@@ -26729,19 +26730,27 @@ package android.widget {
     ctor public ImageView(android.content.Context, android.util.AttributeSet);
     ctor public ImageView(android.content.Context, android.util.AttributeSet, int);
     method public final void clearColorFilter();
+    method public boolean getAdjustViewBounds();
     method public boolean getBaselineAlignBottom();
+    method public android.graphics.ColorFilter getColorFilter();
+    method public boolean getCropToPadding();
     method public android.graphics.drawable.Drawable getDrawable();
+    method public int getImageAlpha();
     method public android.graphics.Matrix getImageMatrix();
+    method public int getMaxHeight();
+    method public int getMaxWidth();
     method public android.widget.ImageView.ScaleType getScaleType();
     method public int[] onCreateDrawableState(int);
     method public void setAdjustViewBounds(boolean);
-    method public void setAlpha(int);
+    method public deprecated void setAlpha(int);
     method public void setBaseline(int);
     method public void setBaselineAlignBottom(boolean);
     method public final void setColorFilter(int, android.graphics.PorterDuff.Mode);
     method public final void setColorFilter(int);
     method public void setColorFilter(android.graphics.ColorFilter);
+    method public void setCropToPadding(boolean);
     method protected boolean setFrame(int, int, int, int);
+    method public void setImageAlpha(int);
     method public void setImageBitmap(android.graphics.Bitmap);
     method public void setImageDrawable(android.graphics.drawable.Drawable);
     method public void setImageLevel(int);

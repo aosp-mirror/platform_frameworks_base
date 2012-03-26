@@ -127,13 +127,29 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
     }
 
     /**
-     * How long to wait before flipping to the next view
+     * Returns the flip interval, in milliseconds.
      *
-     * @param milliseconds
-     *            time in milliseconds
+     * @return the flip interval in milliseconds
+     *
+     * @see #setFlipInterval(int)
+     *
+     * @attr ref android.R.styleable#AdapterViewFlipper_flipInterval
      */
-    public void setFlipInterval(int milliseconds) {
-        mFlipInterval = milliseconds;
+    public int getFlipInterval() {
+        return mFlipInterval;
+    }
+
+    /**
+     * How long to wait before flipping to the next view.
+     *
+     * @param flipInterval flip interval in milliseconds
+     *
+     * @see #getFlipInterval()
+     *
+     * @attr ref android.R.styleable#AdapterViewFlipper_flipInterval
+     */
+    public void setFlipInterval(int flipInterval) {
+        mFlipInterval = flipInterval;
     }
 
     /**

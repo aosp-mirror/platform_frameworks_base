@@ -190,6 +190,8 @@ public class RadioGroup extends LinearLayout {
      *
      * @see #check(int)
      * @see #clearCheck()
+     *
+     * @attr ref android.R.styleable#RadioGroup_checkedButton
      */
     public int getCheckedRadioButtonId() {
         return mCheckedId;
