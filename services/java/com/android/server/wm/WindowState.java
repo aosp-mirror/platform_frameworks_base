@@ -989,6 +989,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 }
                 mAppToken.updateReportedVisibilityLocked();
             }
+        } else {
+            return false;
         }
         return true;
     }
@@ -1128,6 +1130,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         finishExit();
         mService.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats("WindowState");
 
         if (mAppToken != null) {
             mAppToken.updateReportedVisibilityLocked();

@@ -67,24 +67,32 @@ public class WindowAnimator {
         final int NAT = mService.mAppTokens.size();
         for (i=0; i<NAT; i++) {
             final AppWindowToken appToken = mService.mAppTokens.get(i);
-            final boolean wasAnimating = appToken.animation != null;
+            final boolean wasAnimating = appToken.animation != null
+                    && appToken.animation != WindowManagerService.sDummyAnimation;
             if (appToken.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
                 mAnimating = true;
             } else if (wasAnimating) {
                 // stopped animating, do one more pass through the layout
                 mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                    mService.debugLayoutRepeats("appToken " + appToken + " done");
+                }
             }
         }
         
         final int NEAT = mService.mExitingAppTokens.size();
         for (i=0; i<NEAT; i++) {
             final AppWindowToken appToken = mService.mExitingAppTokens.get(i);
-            final boolean wasAnimating = appToken.animation != null;
+            final boolean wasAnimating = appToken.animation != null
+                    && appToken.animation != WindowManagerService.sDummyAnimation;
             if (appToken.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
                 mAnimating = true;
             } else if (wasAnimating) {
                 // stopped animating, do one more pass through the layout
                 mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                    mService.debugLayoutRepeats("exiting appToken " + appToken + " done");
+                }
             }
         }
 
@@ -119,6 +127,9 @@ public class WindowAnimator {
                                 "First draw done in potential wallpaper target " + w);
                         mService.mInnerFields.mWallpaperMayChange = true;
                         mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 1");
+                        }
                     }
                 }
 
@@ -192,6 +203,9 @@ public class WindowAnimator {
                 if (wasAnimating && !w.mAnimating && mService.mWallpaperTarget == w) {
                     mService.mInnerFields.mWallpaperMayChange = true;
                     mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                    if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                        mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 2");
+                    }
                 }
 
                 if (mPolicy.doesForceHide(w, attrs)) {
@@ -201,6 +215,9 @@ public class WindowAnimator {
                                 + w);
                         mService.mInnerFields.mWallpaperForceHidingChanged = true;
                         mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 3");
+                        }
                         mService.mFocusMayChange = true;
                     } else if (w.isReadyForDisplay() && w.mAnimation == null) {
                         mForceHiding = true;
@@ -239,6 +256,9 @@ public class WindowAnimator {
                             & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
                         mService.mInnerFields.mWallpaperMayChange = true;
                         mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 4");
+                        }
                     }
                 }
             }
@@ -286,8 +306,12 @@ public class WindowAnimator {
                     }
                 }
             } else if (w.mReadyToShow) {
-                w.performShowLocked();
-                mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+                if (w.performShowLocked()) {
+                    mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+                    if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                        mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 5");
+                    }
+                }
             }
             if (atoken != null && atoken.thumbnail != null) {
                 if (atoken.thumbnailTransactionSeq != mTransactionSequence) {
@@ -331,6 +355,9 @@ public class WindowAnimator {
                             + " drawn=" + wtoken.numDrawnWindows);
                     wtoken.allDrawn = true;
                     mPendingLayoutChanges |= PhoneWindowManager.FINISH_LAYOUT_REDO_ANIM;
+                    if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                        mService.debugLayoutRepeats("testTokenMayBeDrawnLocked");
+                    }
 
                     // We can now show all of the drawn windows!
                     if (!mService.mOpeningApps.contains(wtoken)) {
