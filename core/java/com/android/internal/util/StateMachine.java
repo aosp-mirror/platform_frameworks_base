@@ -44,10 +44,14 @@ import java.util.Vector;
  * <p>When a state machine is created <code>addState</code> is used to build the
  * hierarchy and <code>setInitialState</code> is used to identify which of these
  * is the initial state. After construction the programmer calls <code>start</code>
- * which initializes the state machine and calls <code>enter</code> for all of the initial
- * state's hierarchy, starting at its eldest parent. For example given the simple
- * state machine below after start is called mP1.enter will have been called and
- * then mS1.enter.</p>
+ * which initializes and starts the state machine. The first action the StateMachine
+ * is to the invoke <code>enter</code> for all of the initial state's hierarchy,
+ * starting at its eldest parent. The calls to enter will be done in the context
+ * of the StateMachines Handler not in the context of the call to start and they
+ * will be invoked before any messages are processed. For example, given the simple
+ * state machine below mP1.enter will be invoked and then mS1.enter. Finally,
+ * messages sent to the state machine will be processed by the current state,
+ * in our simple state machine below that would initially be mS1.processMessage.</p>
 <code>
         mP1
        /   \
@@ -621,8 +625,8 @@ public class StateMachine {
         /** The debug flag */
         private boolean mDbg = false;
 
-        /** The quit object */
-        private static final Object mQuitObj = new Object();
+        /** The SmHandler object, identifies that message is internal */
+        private static final Object mSmHandlerObj = new Object();
 
         /** The current message */
         private Message mMsg;
@@ -726,19 +730,18 @@ public class StateMachine {
             /** Save the current message */
             mMsg = msg;
 
-            /**
-             * Check that construction was completed
-             */
-            if (!mIsConstructionCompleted) {
-                Log.e(TAG, "The start method not called, ignore msg: " + msg);
-                return;
+            if (mIsConstructionCompleted) {
+                /** Normal path */
+                processMsg(msg);
+            } else if (!mIsConstructionCompleted &&
+                    (mMsg.what == SM_INIT_CMD) && (mMsg.obj == mSmHandlerObj)) {
+                /** Initial one time path. */
+                mIsConstructionCompleted = true;
+                invokeEnterMethods(0);
+            } else {
+                throw new RuntimeException("StateMachine.handleMessage: " +
+                            "The start method not called, received msg: " + msg);
             }
-
-            /**
-             * Process the message abiding by the hierarchical semantics
-             * and perform any requested transitions.
-             */
-            processMsg(msg);
             performTransitions();
 
             if (mDbg) Log.d(TAG, "handleMessage: X");
@@ -852,18 +855,8 @@ public class StateMachine {
             mTempStateStack = new StateInfo[maxDepth];
             setupInitialStateStack();
 
-            /**
-             * Construction is complete call all enter methods
-             * starting at the first entry.
-             */
-            mIsConstructionCompleted = true;
-            mMsg = obtainMessage(SM_INIT_CMD);
-            invokeEnterMethods(0);
-
-            /**
-             * Perform any transitions requested by the enter methods
-             */
-            performTransitions();
+            /** Sending SM_INIT_CMD message to invoke enter methods asynchronously */
+            sendMessageAtFrontOfQueue(obtainMessage(SM_INIT_CMD, mSmHandlerObj));
 
             if (mDbg) Log.d(TAG, "completeConstruction: X");
         }
@@ -1103,14 +1096,14 @@ public class StateMachine {
 
         /** @see StateMachine#setInitialState(State) */
         private final void setInitialState(State initialState) {
-            if (mDbg) Log.d(TAG, "setInitialState: initialState" + initialState.getName());
+            if (mDbg) Log.d(TAG, "setInitialState: initialState=" + initialState.getName());
             mInitialState = initialState;
         }
 
         /** @see StateMachine#transitionTo(IState) */
         private final void transitionTo(IState destState) {
             mDestState = (State) destState;
-            if (mDbg) Log.d(TAG, "StateMachine.transitionTo EX destState" + mDestState.getName());
+            if (mDbg) Log.d(TAG, "transitionTo: destState=" + mDestState.getName());
         }
 
         /** @see StateMachine#deferMessage(Message) */
@@ -1127,12 +1120,12 @@ public class StateMachine {
         /** @see StateMachine#deferMessage(Message) */
         private final void quit() {
             if (mDbg) Log.d(TAG, "quit:");
-            sendMessage(obtainMessage(SM_QUIT_CMD, mQuitObj));
+            sendMessage(obtainMessage(SM_QUIT_CMD, mSmHandlerObj));
         }
 
         /** @see StateMachine#isQuit(Message) */
         private final boolean isQuit(Message msg) {
-            return (msg.what == SM_QUIT_CMD) && (msg.obj == mQuitObj);
+            return (msg.what == SM_QUIT_CMD) && (msg.obj == mSmHandlerObj);
         }
 
         /** @see StateMachine#isDbg() */
