@@ -4933,9 +4933,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     @RemotableViewMethod
     public void setLayoutDirection(int layoutDirection) {
         if (getLayoutDirection() != layoutDirection) {
-            // Reset the current layout direction
+            // Reset the current layout direction and the resolved one
             mPrivateFlags2 &= ~LAYOUT_DIRECTION_MASK;
-            // Reset the current resolved layout direction
             resetResolvedLayoutDirection();
             // Set the new layout direction (filtered) and ask for a layout pass
             mPrivateFlags2 |=
@@ -14545,14 +14544,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void setTextDirection(int textDirection) {
         if (getTextDirection() != textDirection) {
-            // Reset the current text direction
+            // Reset the current text direction and the resolved one
             mPrivateFlags2 &= ~TEXT_DIRECTION_MASK;
+            resetResolvedTextDirection();
             // Set the new text direction
             mPrivateFlags2 |= ((textDirection << TEXT_DIRECTION_MASK_SHIFT) & TEXT_DIRECTION_MASK);
-            // Reset the current resolved text direction
-            resetResolvedTextDirection();
-            // Ask for a layout pass
             requestLayout();
+            invalidate(true);
         }
     }
 
