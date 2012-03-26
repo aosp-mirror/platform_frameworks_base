@@ -21,12 +21,16 @@
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>
+
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
-#include <cutils/properties.h>
+#include <gui/SurfaceTexture.h>
+
 #include <androidfw/ResourceTypes.h>
 
-#include <gui/SurfaceTexture.h>
+#include <private/hwui/DrawGlInfo.h>
+
+#include <cutils/properties.h>
 
 #include <SkBitmap.h>
 #include <SkCanvas.h>
@@ -196,7 +200,7 @@ static jint android_view_GLES20Canvas_getStencilSize(JNIEnv* env, jobject clazz)
 // Functor
 // ----------------------------------------------------------------------------
 
-static bool android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
+static jint android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, Functor *functor) {
     android::uirenderer::Rect dirty;
     return renderer->callDrawGLFunction(functor, dirty);
@@ -682,16 +686,16 @@ static void android_view_GLES20Canvas_destroyDisplayList(JNIEnv* env,
     DisplayList::destroyDisplayListDeferred(displayList);
 }
 
-static bool android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
+static jint android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
         jobject clazz, OpenGLRenderer* renderer, DisplayList* displayList,
         jint width, jint height, jobject dirty, jint flags) {
     android::uirenderer::Rect bounds;
-    bool redraw = renderer->drawDisplayList(displayList, width, height, bounds, flags);
-    if (redraw && dirty != NULL) {
+    status_t status = renderer->drawDisplayList(displayList, width, height, bounds, flags);
+    if (status != DrawGlInfo::kStatusDone && dirty != NULL) {
         env->CallVoidMethod(dirty, gRectClassInfo.set,
                 int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
     }
-    return redraw;
+    return status;
 }
 
 static void android_view_GLES20Canvas_outputDisplayList(JNIEnv* env,
@@ -865,7 +869,7 @@ static JNINativeMethod gMethods[] = {
 
     { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
 
-    { "nCallDrawGLFunction", "(II)Z",
+    { "nCallDrawGLFunction", "(II)I",
             (void*) android_view_GLES20Canvas_callDrawGLFunction },
 
     { "nSave",              "(II)I",           (void*) android_view_GLES20Canvas_save },
@@ -943,7 +947,7 @@ static JNINativeMethod gMethods[] = {
     { "nGetDisplayListSize",     "(I)I",       (void*) android_view_GLES20Canvas_getDisplayListSize },
     { "nSetDisplayListName",     "(ILjava/lang/String;)V",
                                                (void*) android_view_GLES20Canvas_setDisplayListName },
-    { "nDrawDisplayList",        "(IIIILandroid/graphics/Rect;I)Z",
+    { "nDrawDisplayList",        "(IIIILandroid/graphics/Rect;I)I",
                                                (void*) android_view_GLES20Canvas_drawDisplayList },
 
     { "nCreateDisplayListRenderer", "()I",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },

@@ -59,11 +59,11 @@ public abstract class HardwareCanvas extends Canvas {
      *        if this method returns true, can be null.
      * @param flags Optional flags about drawing, see {@link DisplayList} for
      *              the possible flags.
-     * 
-     * @return True if the content of the display list requires another
-     *         drawing pass (invalidate()), false otherwise
+     *
+     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
+     *         {@link DisplayList#STATUS_INVOKE}
      */
-    public abstract boolean drawDisplayList(DisplayList displayList, int width, int height,
+    public abstract int drawDisplayList(DisplayList displayList, int width, int height,
             Rect dirty, int flags);
 
     /**
@@ -90,10 +90,12 @@ public abstract class HardwareCanvas extends Canvas {
      * This function may return true if an invalidation is needed after the call.
      *
      * @param drawGLFunction A native function pointer
-     * @return true if an invalidate is needed after the call, false otherwise
+     *                       
+     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
+     *         {@link DisplayList#STATUS_INVOKE}
      */
-    public boolean callDrawGLFunction(int drawGLFunction) {
+    public int callDrawGLFunction(int drawGLFunction) {
         // Noop - this is done in the display list recorder subclass
-        return false;
+        return DisplayList.STATUS_DONE;
     }
 }

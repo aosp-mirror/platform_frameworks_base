@@ -42,6 +42,23 @@ struct DrawGlInfo {
     float dirtyTop;
     float dirtyRight;
     float dirtyBottom;
+
+    /**
+     * Values used by OpenGL functors to tell the framework
+     * what to do next.
+     */
+    enum Status {
+        // The functor is done
+        kStatusDone,
+        // The functor is requesting a redraw (the clip rect
+        // used by the redraw is specified by DrawGlInfo.)
+        // The rest of the UI might redraw too.
+        kStatusDraw,
+        // The functor needs to be invoked again but will
+        // not redraw. Only the functor is invoked again
+        // (unless another functor requests a redraw.)
+        kStatusInvoke
+    };
 }; // struct DrawGlInfo
 
 }; // namespace uirenderer

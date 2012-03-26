@@ -72,7 +72,7 @@ public:
     virtual void interrupt();
     virtual void resume();
 
-    virtual bool callDrawGLFunction(Functor *functor, Rect& dirty);
+    virtual status_t callDrawGLFunction(Functor *functor, Rect& dirty);
 
     ANDROID_API int getSaveCount() const;
     virtual int save(int flags);
@@ -97,7 +97,7 @@ public:
     ANDROID_API bool quickReject(float left, float top, float right, float bottom);
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    virtual bool drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
+    virtual status_t drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
             Rect& dirty, int32_t flags, uint32_t level = 0);
     virtual void outputDisplayList(DisplayList* displayList, uint32_t level = 0);
     virtual void drawLayer(Layer* layer, float x, float y, SkPaint* paint);

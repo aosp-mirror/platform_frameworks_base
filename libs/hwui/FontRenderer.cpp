@@ -779,7 +779,7 @@ void FontRenderer::checkInit() {
     // We store a string with letters in a rough frequency of occurrence
     mLatinPrecache = String16("eisarntolcdugpmhbyfvkwzxjq ");
     mLatinPrecache += String16("EISARNTOLCDUGPMHBYFVKWZXJQ");
-    mLatinPrecache += String16(",.?!()-+@;:`'");
+    mLatinPrecache += String16(",.?!()-+@;:'");
     mLatinPrecache += String16("0123456789");
 
     mInitialized = true;
