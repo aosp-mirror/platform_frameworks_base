@@ -145,6 +145,8 @@ public class RatingBar extends AbsSeekBar {
      * by the user).
      * 
      * @param isIndicator Whether it should be an indicator.
+     *
+     * @attr ref android.R.styleable#RatingBar_isIndicator
      */
     public void setIsIndicator(boolean isIndicator) {
         mIsUserSeekable = !isIndicator;
@@ -153,6 +155,8 @@ public class RatingBar extends AbsSeekBar {
     
     /**
      * @return Whether this rating bar is only an indicator.
+     *
+     * @attr ref android.R.styleable#RatingBar_isIndicator
      */
     public boolean isIndicator() {
         return !mIsUserSeekable;

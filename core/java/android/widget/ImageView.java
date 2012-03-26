@@ -223,11 +223,28 @@ public class ImageView extends View {
     }
 
     /**
+     * True when ImageView is adjusting its bounds
+     * to preserve the aspect ratio of its drawable
+     *
+     * @return whether to adjust the bounds of this view
+     * to presrve the original aspect ratio of the drawable
+     *
+     * @see #setAdjustViewBounds(boolean)
+     *
+     * @attr ref android.R.styleable#ImageView_adjustViewBounds
+     */
+    public boolean getAdjustViewBounds() {
+        return mAdjustViewBounds;
+    }
+
+    /**
      * Set this to true if you want the ImageView to adjust its bounds
      * to preserve the aspect ratio of its drawable.
      * @param adjustViewBounds Whether to adjust the bounds of this view
      * to presrve the original aspect ratio of the drawable
      * 
+     * @see #getAdjustViewBounds()
+     *
      * @attr ref android.R.styleable#ImageView_adjustViewBounds
      */
     @android.view.RemotableViewMethod
@@ -237,7 +254,20 @@ public class ImageView extends View {
             setScaleType(ScaleType.FIT_CENTER);
         }
     }
-    
+
+    /**
+     * The maximum width of this view.
+     *
+     * @return The maximum width of this view
+     *
+     * @see #setMaxWidth(int)
+     *
+     * @attr ref android.R.styleable#ImageView_maxWidth
+     */
+    public int getMaxWidth() {
+        return mMaxWidth;
+    }
+
     /**
      * An optional argument to supply a maximum width for this view. Only valid if
      * {@link #setAdjustViewBounds(boolean)} has been set to true. To set an image to be a maximum
@@ -253,14 +283,29 @@ public class ImageView extends View {
      * </p>
      * 
      * @param maxWidth maximum width for this view
-     * 
+     *
+     * @see #getMaxWidth()
+     *
      * @attr ref android.R.styleable#ImageView_maxWidth
      */
     @android.view.RemotableViewMethod
     public void setMaxWidth(int maxWidth) {
         mMaxWidth = maxWidth;
     }
-    
+
+    /**
+     * The maximum height of this view.
+     *
+     * @return The maximum height of this view
+     *
+     * @see #setMaxHeight(int)
+     *
+     * @attr ref android.R.styleable#ImageView_maxHeight
+     */
+    public int getMaxHeight() {
+        return mMaxHeight;
+    }
+
     /**
      * An optional argument to supply a maximum height for this view. Only valid if
      * {@link #setAdjustViewBounds(boolean)} has been set to true. To set an image to be a
@@ -276,7 +321,9 @@ public class ImageView extends View {
      * </p>
      * 
      * @param maxHeight maximum height for this view
-     * 
+     *
+     * @see #getMaxHeight()
+     *
      * @attr ref android.R.styleable#ImageView_maxHeight
      */
     @android.view.RemotableViewMethod
@@ -522,7 +569,37 @@ public class ImageView extends View {
             invalidate();
         }
     }
-    
+
+    /**
+     * Return whether this ImageView crops to padding.
+     *
+     * @return whether this ImageView crops to padding
+     *
+     * @see #setCropToPadding(boolean)
+     *
+     * @attr ref android.R.styleable#ImageView_cropToPadding
+     */
+    public boolean getCropToPadding() {
+        return mCropToPadding;
+    }
+
+    /**
+     * Sets whether this ImageView will crop to padding.
+     *
+     * @param cropToPadding whether this ImageView will crop to padding
+     *
+     * @see #getCropToPadding()
+     *
+     * @attr ref android.R.styleable#ImageView_cropToPadding
+     */
+    public void setCropToPadding(boolean cropToPadding) {
+        if (mCropToPadding != cropToPadding) {
+            mCropToPadding = cropToPadding;
+            requestLayout();
+            invalidate();
+        }
+    }
+
     private void resolveUri() {
         if (mDrawable != null) {
             return;
@@ -997,11 +1074,24 @@ public class ImageView extends View {
     public final void clearColorFilter() {
         setColorFilter(null);
     }
-    
+
+    /**
+     * Returns the active color filter for this ImageView.
+     *
+     * @return the active color filter for this ImageView
+     *
+     * @see #setColorFilter(android.graphics.ColorFilter)
+     */
+    public ColorFilter getColorFilter() {
+        return mColorFilter;
+    }
+
     /**
      * Apply an arbitrary colorfilter to the image.
      *
      * @param cf the colorfilter to apply (may be null)
+     *
+     * @see #getColorFilter()
      */
     public void setColorFilter(ColorFilter cf) {
         if (mColorFilter != cf) {
@@ -1012,6 +1102,37 @@ public class ImageView extends View {
         }
     }
 
+    /**
+     * Returns the alpha that will be applied to the drawable of this ImageView.
+     *
+     * @return the alpha that will be applied to the drawable of this ImageView
+     *
+     * @see #setImageAlpha(int)
+     */
+    public int getImageAlpha() {
+        return mAlpha;
+    }
+
+    /**
+     * Sets the alpha value that should be applied to the image.
+     *
+     * @param alpha the alpha value that should be applied to the image
+     *
+     * @see #getImageAlpha()
+     */
+    @RemotableViewMethod
+    public void setImageAlpha(int alpha) {
+        setAlpha(alpha);
+    }
+
+    /**
+     * Sets the alpha value that should be applied to the image.
+     *
+     * @param alpha the alpha value that should be applied to the image
+     *
+     * @deprecated use #setImageAlpha(int) instead
+     */
+    @Deprecated
     @RemotableViewMethod
     public void setAlpha(int alpha) {
         alpha &= 0xFF;          // keep it legal
