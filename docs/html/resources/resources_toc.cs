@@ -253,6 +253,26 @@
           </a>
           </li>
         </ul>
+       </li>
+       <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/tv/index.html">
+           <span class="en">Designing for TV<span class="new">&nbsp;new!</span></span>
+           </a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/tv/optimizing-layouts-tv.html">
+            <span class="en">Optimizing Layouts for TV</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/tv/optimizing-navigation-tv.html">
+            <span class="en">Optimizing Navigation for TV</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/tv/unsupported-features-tv.html">
+            <span class="en">Handling Features Not Supported on TV</span>
+          </a>
+          </li>
+        </ul>
       </li>
     </ul>
   </li>    
