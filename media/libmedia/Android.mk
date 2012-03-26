@@ -43,7 +43,9 @@ LOCAL_SRC_FILES:= \
     IEffectClient.cpp \
     AudioEffect.cpp \
     Visualizer.cpp \
-    MemoryLeakTrackUtil.cpp
+    MemoryLeakTrackUtil.cpp \
+    SoundPool.cpp \
+    SoundPoolThread.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc libexpat \

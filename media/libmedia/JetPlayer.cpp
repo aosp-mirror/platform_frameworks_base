@@ -30,7 +30,7 @@ static const int MIX_NUM_BUFFERS = 4;
 static const S_EAS_LIB_CONFIG* pLibConfig = NULL;
 
 //-------------------------------------------------------------------------------------------------
-JetPlayer::JetPlayer(jobject javaJetPlayer, int maxTracks, int trackBufferSize) :
+JetPlayer::JetPlayer(void *javaJetPlayer, int maxTracks, int trackBufferSize) :
         mEventCallback(NULL),
         mJavaJetPlayerRef(javaJetPlayer),
         mTid(-1),
