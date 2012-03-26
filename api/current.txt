@@ -23240,6 +23240,7 @@ package android.view {
     method public boolean dispatchUnhandledMove(android.view.View, int);
     method protected void dispatchVisibilityChanged(android.view.View, int);
     method public void dispatchWindowFocusChanged(boolean);
+    method public void dispatchWindowSystemUiVisiblityChanged(int);
     method public void dispatchWindowVisibilityChanged(int);
     method public void draw(android.graphics.Canvas);
     method protected void drawableStateChanged();
@@ -23353,6 +23354,7 @@ package android.view {
     method public int getVisibility();
     method public final int getWidth();
     method protected int getWindowAttachCount();
+    method public int getWindowSystemUiVisibility();
     method public android.os.IBinder getWindowToken();
     method public int getWindowVisibility();
     method public void getWindowVisibleDisplayFrame(android.graphics.Rect);
@@ -23456,6 +23458,7 @@ package android.view {
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method protected void onVisibilityChanged(android.view.View, int);
     method public void onWindowFocusChanged(boolean);
+    method public void onWindowSystemUiVisibilityChanged(int);
     method protected void onWindowVisibilityChanged(int);
     method protected boolean overScrollBy(int, int, int, int, int, int, int, int, boolean);
     method public boolean performClick();
@@ -23473,6 +23476,7 @@ package android.view {
     method public boolean removeCallbacks(java.lang.Runnable);
     method public void removeOnAttachStateChangeListener(android.view.View.OnAttachStateChangeListener);
     method public void removeOnLayoutChangeListener(android.view.View.OnLayoutChangeListener);
+    method public void requestFitSystemWindows();
     method public final boolean requestFocus();
     method public final boolean requestFocus(int);
     method public boolean requestFocus(int, android.graphics.Rect);
@@ -23671,9 +23675,14 @@ package android.view {
     field public static final int SOUND_EFFECTS_ENABLED = 134217728; // 0x8000000
     field public static final deprecated int STATUS_BAR_HIDDEN = 1; // 0x1
     field public static final deprecated int STATUS_BAR_VISIBLE = 0; // 0x0
+    field public static final int SYSTEM_UI_FLAG_FULLSCREEN = 4; // 0x4
     field public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 2; // 0x2
+    field public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 1024; // 0x400
+    field public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 512; // 0x200
+    field public static final int SYSTEM_UI_FLAG_LAYOUT_STABLE = 256; // 0x100
     field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
+    field public static final int SYSTEM_UI_LAYOUT_FLAGS = 1536; // 0x600
     field public static final int TEXT_DIRECTION_ANY_RTL = 2; // 0x2
     field protected static int TEXT_DIRECTION_DEFAULT;
     field public static final int TEXT_DIRECTION_FIRST_STRONG = 1; // 0x1
@@ -24037,6 +24046,7 @@ package android.view {
     method public abstract void requestChildFocus(android.view.View, android.view.View);
     method public abstract boolean requestChildRectangleOnScreen(android.view.View, android.graphics.Rect, boolean);
     method public abstract void requestDisallowInterceptTouchEvent(boolean);
+    method public abstract void requestFitSystemWindows();
     method public abstract void requestLayout();
     method public abstract boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public abstract void requestTransparentRegion(android.view.View);

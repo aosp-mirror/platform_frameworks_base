@@ -223,6 +223,7 @@ public final class ViewRootImpl implements ViewParent,
     long mLastTraversalFinishedTimeNanos;
     long mLastDrawFinishedTimeNanos;
     boolean mWillDrawSoon;
+    boolean mFitSystemWindowsRequested;
     boolean mLayoutRequested;
     boolean mFirst;
     boolean mReportNextDraw;
@@ -230,6 +231,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mNewSurfaceNeeded;
     boolean mHasHadWindowFocus;
     boolean mLastWasImTarget;
+    int mLastSystemUiVisibility;
 
     // Pool of queued input events.
     private static final int MAX_QUEUED_INPUT_EVENT_POOL_SIZE = 10;
@@ -262,6 +264,8 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mPendingContentInsets = new Rect();
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
+
+    final Rect mFitSystemWindowsInsets = new Rect();
 
     final Configuration mLastConfiguration = new Configuration();
     final Configuration mPendingConfiguration = new Configuration();
@@ -539,6 +543,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 try {
                     mOrigWindowType = mWindowAttributes.type;
+                    mAttachInfo.mRecomputeGlobalAttributes = true;
+                    collectViewAttributes();
                     res = sWindowSession.add(mWindow, mSeq, mWindowAttributes,
                             getHostVisibility(), mAttachInfo.mContentInsets,
                             mInputChannel);
@@ -786,6 +792,15 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * {@inheritDoc}
      */
+    public void requestFitSystemWindows() {
+        checkThread();
+        mFitSystemWindowsRequested = true;
+        scheduleTraversals();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void requestLayout() {
         checkThread();
         mLayoutRequested = true;
@@ -974,6 +989,100 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    private boolean collectViewAttributes() {
+        final View.AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo.mRecomputeGlobalAttributes) {
+            //Log.i(TAG, "Computing view hierarchy attributes!");
+            attachInfo.mRecomputeGlobalAttributes = false;
+            boolean oldScreenOn = attachInfo.mKeepScreenOn;
+            int oldVis = attachInfo.mSystemUiVisibility;
+            boolean oldHasSystemUiListeners = attachInfo.mHasSystemUiListeners;
+            attachInfo.mKeepScreenOn = false;
+            attachInfo.mSystemUiVisibility = 0;
+            attachInfo.mHasSystemUiListeners = false;
+            mView.dispatchCollectViewAttributes(attachInfo, 0);
+            if (attachInfo.mKeepScreenOn != oldScreenOn
+                    || attachInfo.mSystemUiVisibility != oldVis
+                    || attachInfo.mHasSystemUiListeners != oldHasSystemUiListeners) {
+                WindowManager.LayoutParams params = mWindowAttributes;
+                if (attachInfo.mKeepScreenOn) {
+                    params.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+                }
+                params.subtreeSystemUiVisibility = attachInfo.mSystemUiVisibility;
+                params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners;
+                mView.dispatchWindowSystemUiVisiblityChanged(attachInfo.mSystemUiVisibility);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean measureHierarchy(final View host, final WindowManager.LayoutParams lp,
+            final Resources res, final int desiredWindowWidth, final int desiredWindowHeight) {
+        int childWidthMeasureSpec;
+        int childHeightMeasureSpec;
+        boolean windowSizeMayChange = false;
+
+        if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(TAG,
+                "Measuring " + host + " in display " + desiredWindowWidth
+                + "x" + desiredWindowHeight + "...");
+
+        boolean goodMeasure = false;
+        if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT) {
+            // On large screens, we don't want to allow dialogs to just
+            // stretch to fill the entire width of the screen to display
+            // one line of text.  First try doing the layout at a smaller
+            // size to see if it will fit.
+            final DisplayMetrics packageMetrics = res.getDisplayMetrics();
+            res.getValue(com.android.internal.R.dimen.config_prefDialogWidth, mTmpValue, true);
+            int baseSize = 0;
+            if (mTmpValue.type == TypedValue.TYPE_DIMENSION) {
+                baseSize = (int)mTmpValue.getDimension(packageMetrics);
+            }
+            if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": baseSize=" + baseSize);
+            if (baseSize != 0 && desiredWindowWidth > baseSize) {
+                childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
+                childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
+                host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
+                        + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
+                if ((host.getMeasuredWidthAndState()&View.MEASURED_STATE_TOO_SMALL) == 0) {
+                    goodMeasure = true;
+                } else {
+                    // Didn't fit in that size... try expanding a bit.
+                    baseSize = (baseSize+desiredWindowWidth)/2;
+                    if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": next baseSize="
+                            + baseSize);
+                    childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
+                    host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                    if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
+                            + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
+                    if ((host.getMeasuredWidthAndState()&View.MEASURED_STATE_TOO_SMALL) == 0) {
+                        if (DEBUG_DIALOG) Log.v(TAG, "Good!");
+                        goodMeasure = true;
+                    }
+                }
+            }
+        }
+
+        if (!goodMeasure) {
+            childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
+            childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
+            host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+            if (mWidth != host.getMeasuredWidth() || mHeight != host.getMeasuredHeight()) {
+                windowSizeMayChange = true;
+            }
+        }
+
+        if (DBG) {
+            System.out.println("======================================");
+            System.out.println("performTraversals -- after measure");
+            host.debug();
+        }
+
+        return windowSizeMayChange;
+    }
+
     private void performTraversals() {
         // cache mView since it is used so much below...
         final View host = mView;
@@ -995,8 +1104,6 @@ public final class ViewRootImpl implements ViewParent,
 
         int desiredWindowWidth;
         int desiredWindowHeight;
-        int childWidthMeasureSpec;
-        int childHeightMeasureSpec;
 
         final View.AttachInfo attachInfo = mAttachInfo;
 
@@ -1057,14 +1164,13 @@ public final class ViewRootImpl implements ViewParent,
             attachInfo.mHasWindowFocus = false;
             attachInfo.mWindowVisibility = viewVisibility;
             attachInfo.mRecomputeGlobalAttributes = false;
-            attachInfo.mKeepScreenOn = false;
-            attachInfo.mSystemUiVisibility = 0;
             viewVisibilityChanged = false;
             mLastConfiguration.setTo(host.getResources().getConfiguration());
+            mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
             host.dispatchAttachedToWindow(attachInfo, 0);
+            mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
+            host.fitSystemWindows(mFitSystemWindowsInsets);
             //Log.i(TAG, "Screen on initialized: " + attachInfo.mKeepScreenOn);
-
-            host.fitSystemWindows(mAttachInfo.mContentInsets);
 
         } else {
             desiredWindowWidth = frame.width();
@@ -1093,7 +1199,8 @@ public final class ViewRootImpl implements ViewParent,
 
         boolean insetsChanged = false;
 
-        if (mLayoutRequested && !mStopped) {
+        boolean layoutRequested = mLayoutRequested && !mStopped;
+        if (layoutRequested) {
             // Execute enqueued actions on every layout in case a view that was detached
             // enqueued an action after being detached
             getRunQueue().executeActions(attachInfo.mHandler);
@@ -1134,79 +1241,12 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             // Ask host how big it wants to be
-            if (DEBUG_ORIENTATION || DEBUG_LAYOUT) Log.v(TAG,
-                    "Measuring " + host + " in display " + desiredWindowWidth
-                    + "x" + desiredWindowHeight + "...");
-
-            boolean goodMeasure = false;
-            if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT) {
-                // On large screens, we don't want to allow dialogs to just
-                // stretch to fill the entire width of the screen to display
-                // one line of text.  First try doing the layout at a smaller
-                // size to see if it will fit.
-                final DisplayMetrics packageMetrics = res.getDisplayMetrics();
-                res.getValue(com.android.internal.R.dimen.config_prefDialogWidth, mTmpValue, true);
-                int baseSize = 0;
-                if (mTmpValue.type == TypedValue.TYPE_DIMENSION) {
-                    baseSize = (int)mTmpValue.getDimension(packageMetrics);
-                }
-                if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": baseSize=" + baseSize);
-                if (baseSize != 0 && desiredWindowWidth > baseSize) {
-                    childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
-                    childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
-                    host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-                    if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
-                            + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
-                    if ((host.getMeasuredWidthAndState()&View.MEASURED_STATE_TOO_SMALL) == 0) {
-                        goodMeasure = true;
-                    } else {
-                        // Didn't fit in that size... try expanding a bit.
-                        baseSize = (baseSize+desiredWindowWidth)/2;
-                        if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": next baseSize="
-                                + baseSize);
-                        childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
-                        host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-                        if (DEBUG_DIALOG) Log.v(TAG, "Window " + mView + ": measured ("
-                                + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
-                        if ((host.getMeasuredWidthAndState()&View.MEASURED_STATE_TOO_SMALL) == 0) {
-                            if (DEBUG_DIALOG) Log.v(TAG, "Good!");
-                            goodMeasure = true;
-                        }
-                    }
-                }
-            }
-
-            if (!goodMeasure) {
-                childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
-                childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
-                host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-                if (mWidth != host.getMeasuredWidth() || mHeight != host.getMeasuredHeight()) {
-                    windowSizeMayChange = true;
-                }
-            }
-
-            if (DBG) {
-                System.out.println("======================================");
-                System.out.println("performTraversals -- after measure");
-                host.debug();
-            }
+            windowSizeMayChange |= measureHierarchy(host, lp, res,
+                    desiredWindowWidth, desiredWindowHeight);
         }
 
-        if (attachInfo.mRecomputeGlobalAttributes && host.mAttachInfo != null) {
-            //Log.i(TAG, "Computing view hierarchy attributes!");
-            attachInfo.mRecomputeGlobalAttributes = false;
-            boolean oldScreenOn = attachInfo.mKeepScreenOn;
-            int oldVis = attachInfo.mSystemUiVisibility;
-            boolean oldHasSystemUiListeners = attachInfo.mHasSystemUiListeners;
-            attachInfo.mKeepScreenOn = false;
-            attachInfo.mSystemUiVisibility = 0;
-            attachInfo.mHasSystemUiListeners = false;
-            host.dispatchCollectViewAttributes(0);
-            if (attachInfo.mKeepScreenOn != oldScreenOn
-                    || attachInfo.mSystemUiVisibility != oldVis
-                    || attachInfo.mHasSystemUiListeners != oldHasSystemUiListeners) {
-                params = lp;
-            }
+        if (collectViewAttributes()) {
+            params = lp;
         }
         if (attachInfo.mForceReportNewAttributes) {
             attachInfo.mForceReportNewAttributes = false;
@@ -1245,7 +1285,28 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        boolean windowShouldResize = mLayoutRequested && windowSizeMayChange
+        if (mFitSystemWindowsRequested) {
+            mFitSystemWindowsRequested = false;
+            mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
+            host.fitSystemWindows(mFitSystemWindowsInsets);
+            if (mLayoutRequested) {
+                // Short-circuit catching a new layout request here, so
+                // we don't need to go through two layout passes when things
+                // change due to fitting system windows, which can happen a lot.
+                windowSizeMayChange |= measureHierarchy(host, lp,
+                        mView.getContext().getResources(),
+                        desiredWindowWidth, desiredWindowHeight);
+            }
+        }
+
+        if (layoutRequested) {
+            // Clear this now, so that if anything requests a layout in the
+            // rest of this function we will catch it and re-run a full
+            // layout pass.
+            mLayoutRequested = false;
+        }
+
+        boolean windowShouldResize = layoutRequested && windowSizeMayChange
             && ((mWidth != host.getMeasuredWidth() || mHeight != host.getMeasuredHeight())
                 || (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT &&
                         frame.width() < desiredWindowWidth && frame.width() != mWidth)
@@ -1285,15 +1346,6 @@ public final class ViewRootImpl implements ViewParent,
             boolean hadSurface = mSurface.isValid();
 
             try {
-                int fl = 0;
-                if (params != null) {
-                    fl = params.flags;
-                    if (attachInfo.mKeepScreenOn) {
-                        params.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-                    }
-                    params.subtreeSystemUiVisibility = attachInfo.mSystemUiVisibility;
-                    params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners;
-                }
                 if (DEBUG_LAYOUT) {
                     Log.i(TAG, "host=w:" + host.getMeasuredWidth() + ", h:" +
                             host.getMeasuredHeight() + ", params=" + params);
@@ -1301,10 +1353,6 @@ public final class ViewRootImpl implements ViewParent,
 
                 final int surfaceGenerationId = mSurface.getGenerationId();
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
-
-                if (params != null) {
-                    params.flags = fl;
-                }
 
                 if (DEBUG_LAYOUT) Log.v(TAG, "relayout: frame=" + frame.toShortString()
                         + " content=" + mPendingContentInsets.toShortString()
@@ -1323,7 +1371,9 @@ public final class ViewRootImpl implements ViewParent,
                 visibleInsetsChanged = !mPendingVisibleInsets.equals(
                         mAttachInfo.mVisibleInsets);
                 if (contentInsetsChanged) {
-                    if (mWidth > 0 && mHeight > 0 &&
+                    if (mWidth > 0 && mHeight > 0 && lp != null &&
+                            ((lp.systemUiVisibility|lp.subtreeSystemUiVisibility)
+                                    & View.SYSTEM_UI_LAYOUT_FLAGS) == 0 &&
                             mSurface != null && mSurface.isValid() &&
                             !mAttachInfo.mTurnOffWindowResizeAnim &&
                             mAttachInfo.mHardwareRenderer != null &&
@@ -1390,9 +1440,15 @@ public final class ViewRootImpl implements ViewParent,
                         }
                     }
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
-                    host.fitSystemWindows(mAttachInfo.mContentInsets);
                     if (DEBUG_LAYOUT) Log.v(TAG, "Content insets changing to: "
                             + mAttachInfo.mContentInsets);
+                }
+                if (contentInsetsChanged || mLastSystemUiVisibility !=
+                        mAttachInfo.mSystemUiVisibility || mFitSystemWindowsRequested) {
+                    mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
+                    mFitSystemWindowsRequested = false;
+                    mFitSystemWindowsInsets.set(mAttachInfo.mContentInsets);
+                    host.fitSystemWindows(mFitSystemWindowsInsets);
                 }
                 if (visibleInsetsChanged) {
                     mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
@@ -1547,8 +1603,8 @@ public final class ViewRootImpl implements ViewParent,
                         (relayoutResult&WindowManagerImpl.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
                 if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
                         || mHeight != host.getMeasuredHeight() || contentInsetsChanged) {
-                    childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
-                    childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
+                    int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
+                    int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
     
                     if (DEBUG_LAYOUT) Log.v(TAG, "Ooops, something changed!  mWidth="
                             + mWidth + " measuredWidth=" + host.getMeasuredWidth()
@@ -1586,12 +1642,12 @@ public final class ViewRootImpl implements ViewParent,
                         host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
                     }
     
-                    mLayoutRequested = true;
+                    layoutRequested = true;
                 }
             }
         }
 
-        final boolean didLayout = mLayoutRequested && !mStopped;
+        final boolean didLayout = layoutRequested && !mStopped;
         boolean triggerGlobalLayoutListener = didLayout
                 || attachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {
@@ -3579,9 +3635,6 @@ public final class ViewRootImpl implements ViewParent,
         if (mView == null) return;
         if (args.localChanges != 0) {
             if (mAttachInfo != null) {
-                mAttachInfo.mSystemUiVisibility =
-                        (mAttachInfo.mSystemUiVisibility & ~args.localChanges) |
-                                (args.localValue & args.localChanges);
                 mAttachInfo.mRecomputeGlobalAttributes = true;
             }
             mView.updateLocalSystemUiVisibility(args.localValue, args.localChanges);

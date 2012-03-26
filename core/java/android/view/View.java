@@ -765,7 +765,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     static final int FILTER_TOUCHES_WHEN_OBSCURED = 0x00000400;
 
-    // note flag value 0x00000800 is now available for next flags...
+    /**
+     * Set for framework elements that use FITS_SYSTEM_WINDOWS, to indicate
+     * that they are optional and should be skipped if the window has
+     * requested system UI flags that ignore those insets for layout.
+     */
+    static final int OPTIONAL_FITS_SYSTEM_WINDOWS = 0x00000800;
 
     /**
      * <p>This view doesn't show fading edges.</p>
@@ -1909,28 +1914,31 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public static final int OVER_SCROLL_NEVER = 2;
 
     /**
-     * View has requested the system UI (status bar) to be visible (the default).
+     * Special constant for {@link #setSystemUiVisibility(int)}: View has
+     * requested the system UI (status bar) to be visible (the default).
      *
      * @see #setSystemUiVisibility(int)
      */
     public static final int SYSTEM_UI_FLAG_VISIBLE = 0;
 
     /**
-     * View has requested the system UI to enter an unobtrusive "low profile" mode.
+     * Flag for {@link #setSystemUiVisibility(int)}: View has requested the
+     * system UI to enter an unobtrusive "low profile" mode.
      *
-     * This is for use in games, book readers, video players, or any other "immersive" application
-     * where the usual system chrome is deemed too distracting. 
+     * <p>This is for use in games, book readers, video players, or any other
+     * "immersive" application where the usual system chrome is deemed too distracting. 
      *
-     * In low profile mode, the status bar and/or navigation icons may dim.
+     * <p>In low profile mode, the status bar and/or navigation icons may dim.
      *
      * @see #setSystemUiVisibility(int)
      */
     public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 0x00000001;
 
     /**
-     * View has requested that the system navigation be temporarily hidden.
+     * Flag for {@link #setSystemUiVisibility(int)}: View has requested that the
+     * system navigation be temporarily hidden.
      *
-     * This is an even less obtrusive state than that called for by
+     * <p>This is an even less obtrusive state than that called for by
      * {@link #SYSTEM_UI_FLAG_LOW_PROFILE}; on devices that draw essential navigation controls
      * (Home, Back, and the like) on screen, <code>SYSTEM_UI_FLAG_HIDE_NAVIGATION</code> will cause
      * those to disappear. This is useful (in conjunction with the
@@ -1938,12 +1946,90 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link android.view.WindowManager.LayoutParams#FLAG_LAYOUT_IN_SCREEN FLAG_LAYOUT_IN_SCREEN}
      * window flags) for displaying content using every last pixel on the display.
      *
-     * There is a limitation: because navigation controls are so important, the least user
-     * interaction will cause them to reappear immediately.
+     * <p>There is a limitation: because navigation controls are so important, the least user
+     * interaction will cause them to reappear immediately.  When this happens, both
+     * this flag and {@link #SYSTEM_UI_FLAG_FULLSCREEN} will be cleared automatically,
+     * so that both elements reappear at the same time.
      *
      * @see #setSystemUiVisibility(int)
      */
     public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 0x00000002;
+
+    /**
+     * Flag for {@link #setSystemUiVisibility(int)}: View has requested to go
+     * into the normal fullscreen mode so that its content can take over the screen
+     * while still allowing the user to interact with the application.
+     *
+     * <p>This has the same visual effect as
+     * {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN
+     * WindowManager.LayoutParams.FLAG_FULLSCREEN},
+     * meaning that non-critical screen decorations (such as the status bar) will be
+     * hidden while the user is in the View's window, focusing the experience on
+     * that content.  Unlike the window flag, if you are using ActionBar in
+     * overlay mode with {@link Window#FEATURE_ACTION_BAR_OVERLAY
+     * Window.FEATURE_ACTION_BAR_OVERLAY}, then enabling this flag will also
+     * hide the action bar.
+     *
+     * <p>This approach to going fullscreen is best used over the window flag when
+     * it is a transient state -- that is, the application does this at certain
+     * points in its user interaction where it wants to allow the user to focus
+     * on content, but not as a continuous state.  For situations where the application
+     * would like to simply stay full screen the entire time (such as a game that
+     * wants to take over the screen), the
+     * {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN window flag}
+     * is usually a better approach.  The state set here will be removed by the system
+     * in various situations (such as the user moving to another application) like
+     * the other system UI states.
+     *
+     * <p>When using this flag, the application should provide some easy facility
+     * for the user to go out of it.  A common example would be in an e-book
+     * reader, where tapping on the screen brings back whatever screen and UI
+     * decorations that had been hidden while the user was immersed in reading
+     * the book.
+     *
+     * @see #setSystemUiVisibility(int)
+     */
+    public static final int SYSTEM_UI_FLAG_FULLSCREEN = 0x00000004;
+
+    /**
+     * Flag for {@link #setSystemUiVisibility(int)}: When using other layout
+     * flags, we would like a stable view of the content insets given to
+     * {@link #fitSystemWindows(Rect)}.  This means that the insets seen there
+     * will always represent the worst case that the application can expect
+     * as a continue state.  In practice this means with any of system bar,
+     * nav bar, and status bar shown, but not the space that would be needed
+     * for an input method.
+     *
+     * <p>If you are using ActionBar in
+     * overlay mode with {@link Window#FEATURE_ACTION_BAR_OVERLAY
+     * Window.FEATURE_ACTION_BAR_OVERLAY}, this flag will also impact the
+     * insets it adds to those given to the application.
+     */
+    public static final int SYSTEM_UI_FLAG_LAYOUT_STABLE = 0x00000100;
+
+    /**
+     * Flag for {@link #setSystemUiVisibility(int)}: View would like its window
+     * to be layed out as if it has requested
+     * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, even if it currently hasn't.  This
+     * allows it to avoid artifacts when switching in and out of that mode, at
+     * the expense that some of its user interface may be covered by screen
+     * decorations when they are shown.  You can perform layout of your inner
+     * UI elements to account for the navagation system UI through the
+     * {@link #fitSystemWindows(Rect)} method.
+     */
+    public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 0x00000200;
+
+    /**
+     * Flag for {@link #setSystemUiVisibility(int)}: View would like its window
+     * to be layed out as if it has requested
+     * {@link #SYSTEM_UI_FLAG_FULLSCREEN}, even if it currently hasn't.  This
+     * allows it to avoid artifacts when switching in and out of that mode, at
+     * the expense that some of its user interface may be covered by screen
+     * decorations when they are shown.  You can perform layout of your inner
+     * UI elements to account for non-fullscreen system UI through the
+     * {@link #fitSystemWindows(Rect)} method.
+     */
+    public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;
 
     /**
      * @deprecated Use {@link #SYSTEM_UI_FLAG_LOW_PROFILE} instead.
@@ -2055,17 +2141,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * @hide
-     *
-     * NOTE: This flag may only be used in subtreeSystemUiVisibility, etc. etc.
-     *
-     * This hides HOME and RECENT and is provided for compatibility with interim implementations.
-     */
-    @Deprecated
-    public static final int STATUS_BAR_DISABLE_NAVIGATION = 
-            STATUS_BAR_DISABLE_HOME | STATUS_BAR_DISABLE_RECENT;
-
-    /**
-     * @hide
      */
     public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x0000FFFF;
 
@@ -2076,7 +2151,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @hide
      */
     public static final int SYSTEM_UI_CLEARABLE_FLAGS =
-            SYSTEM_UI_FLAG_LOW_PROFILE | SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+            SYSTEM_UI_FLAG_LOW_PROFILE | SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | SYSTEM_UI_FLAG_FULLSCREEN;
+
+    /**
+     * Flags that can impact the layout in relation to system UI.
+     */
+    public static final int SYSTEM_UI_LAYOUT_FLAGS =
+            SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
     /**
      * Find views that render the specified text.
@@ -4692,21 +4775,54 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Apply the insets for system windows to this view, if the FITS_SYSTEM_WINDOWS flag
-     * is set
+     * Called by the view hierarchy when the content insets for a window have
+     * changed, to allow it to adjust its content to fit within those windows.
+     * The content insets tell you the space that the status bar, input method,
+     * and other system windows infringe on the application's window.
      *
-     * @param insets Insets for system windows
+     * <p>You do not normally need to deal with this function, since the default
+     * window decoration given to applications takes care of applying it to the
+     * content of the window.  If you use {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}
+     * or {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION} this will not be the case,
+     * and your content can be placed under those system elements.  You can then
+     * use this method within your view hierarchy if you have parts of your UI
+     * which you would like to ensure are not being covered.
      *
-     * @return True if this view applied the insets, false otherwise
+     * <p>The default implementation of this method simply applies the content
+     * inset's to the view's padding.  This can be enabled through
+     * {@link #setFitsSystemWindows(boolean)}.  Alternatively, you can override
+     * the method and handle the insets however you would like.  Note that the
+     * insets provided by the framework are always relative to the far edges
+     * of the window, not accounting for the location of the called view within
+     * that window.  (In fact when this method is called you do not yet know
+     * where the layout will place the view, as it is done before layout happens.)
+     *
+     * <p>Note: unlike many View methods, there is no dispatch phase to this
+     * call.  If you are overriding it in a ViewGroup and want to allow the
+     * call to continue to your children, you must be sure to call the super
+     * implementation.
+     *
+     * @param insets Current content insets of the window.  Prior to
+     * {@link android.os.Build.VERSION_CODES#JELLY_BEAN} you must not modify
+     * the insets or else you and Android will be unhappy.
+     *
+     * @return Return true if this view applied the insets and it should not
+     * continue propagating further down the hierarchy, false otherwise.
      */
     protected boolean fitSystemWindows(Rect insets) {
         if ((mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS) {
-            mPaddingLeft = insets.left;
-            mPaddingTop = insets.top;
-            mPaddingRight = insets.right;
-            mPaddingBottom = insets.bottom;
-            requestLayout();
-            return true;
+            mUserPaddingStart = -1;
+            mUserPaddingEnd = -1;
+            mUserPaddingRelative = false;
+            if ((mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) == 0
+                    || mAttachInfo == null
+                    || (mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0) {
+                internalSetPadding(insets.left, insets.top, insets.right, insets.bottom);
+                return true;
+            } else {
+                internalSetPadding(0, 0, 0, 0);
+                return false;
+            }
         }
         return false;
     }
@@ -4739,6 +4855,23 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public boolean fitsSystemWindows() {
         return (mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS;
+    }
+
+    /**
+     * Ask that a new dispatch of {@link #fitSystemWindows(Rect)} be performed.
+     */
+    public void requestFitSystemWindows() {
+        if (mParent != null) {
+            mParent.requestFitSystemWindows();
+        }
+    }
+
+    /**
+     * For use by PhoneWindow to make its own system window fitting optional.
+     * @hide
+     */
+    public void makeOptionalFitsSystemWindows() {
+        setFlags(OPTIONAL_FITS_SYSTEM_WINDOWS, OPTIONAL_FITS_SYSTEM_WINDOWS);
     }
 
     /**
@@ -6118,19 +6251,19 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Private function to aggregate all per-view attributes in to the view
      * root.
      */
-    void dispatchCollectViewAttributes(int visibility) {
-        performCollectViewAttributes(visibility);
+    void dispatchCollectViewAttributes(AttachInfo attachInfo, int visibility) {
+        performCollectViewAttributes(attachInfo, visibility);
     }
 
-    void performCollectViewAttributes(int visibility) {
-        if ((visibility & VISIBILITY_MASK) == VISIBLE && mAttachInfo != null) {
+    void performCollectViewAttributes(AttachInfo attachInfo, int visibility) {
+        if ((visibility & VISIBILITY_MASK) == VISIBLE) {
             if ((mViewFlags & KEEP_SCREEN_ON) == KEEP_SCREEN_ON) {
-                mAttachInfo.mKeepScreenOn = true;
+                attachInfo.mKeepScreenOn = true;
             }
-            mAttachInfo.mSystemUiVisibility |= mSystemUiVisibility;
+            attachInfo.mSystemUiVisibility |= mSystemUiVisibility;
             ListenerInfo li = mListenerInfo;
             if (li != null && li.mOnSystemUiVisibilityChangeListener != null) {
-                mAttachInfo.mHasSystemUiListeners = true;
+                attachInfo.mHasSystemUiListeners = true;
             }
         }
     }
@@ -10126,7 +10259,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             mAttachInfo.mScrollContainers.add(this);
             mPrivateFlags |= SCROLL_CONTAINER_ADDED;
         }
-        performCollectViewAttributes(visibility);
+        performCollectViewAttributes(mAttachInfo, visibility);
         onAttachedToWindow();
 
         ListenerInfo li = mListenerInfo;
@@ -13979,6 +14112,35 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
+    }
+
+    /**
+     * Returns the current system UI visibility that is currently set for
+     * the entire window.  This is the combination of the
+     * {@link #setSystemUiVisibility(int)} values supplied by all of the
+     * views in the window.
+     */
+    public int getWindowSystemUiVisibility() {
+        return mAttachInfo != null ? mAttachInfo.mSystemUiVisibility : 0;
+    }
+
+    /**
+     * Override to find out when the window's requested system UI visibility
+     * has changed, that is the value returned by {@link #getWindowSystemUiVisibility()}.
+     * This is different from the callbacks recieved through
+     * {@link #setOnSystemUiVisibilityChangeListener(OnSystemUiVisibilityChangeListener)}
+     * in that this is only telling you about the local request of the window,
+     * not the actual values applied by the system.
+     */
+    public void onWindowSystemUiVisibilityChanged(int visible) {
+    }
+
+    /**
+     * Dispatch callbacks to {@link #onWindowSystemUiVisibilityChanged(int)} down
+     * the view hierarchy.
+     */
+    public void dispatchWindowSystemUiVisiblityChanged(int visible) {
+        onWindowSystemUiVisibilityChanged(visible);
     }
 
     /**

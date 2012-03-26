@@ -594,7 +594,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                         mBarContents.setVisibility(View.VISIBLE);
 
                         try {
-                            mBarService.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
+                            mBarService.setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
                         } catch (RemoteException ex) {
                             // system process dead
                         }
@@ -1165,14 +1165,20 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     @Override // CommandQueue
-    public void setSystemUiVisibility(int vis) {
-        if (vis != mSystemUiVisibility) {
-            mSystemUiVisibility = vis;
+    public void setSystemUiVisibility(int vis, int mask) {
+        final int oldVal = mSystemUiVisibility;
+        final int newVal = (oldVal&~mask) | (vis&mask);
+        final int diff = newVal ^ oldVal;
 
-            mHandler.removeMessages(MSG_HIDE_CHROME);
-            mHandler.removeMessages(MSG_SHOW_CHROME);
-            mHandler.sendEmptyMessage(0 == (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) 
-                    ? MSG_SHOW_CHROME : MSG_HIDE_CHROME);
+        if (diff != 0) {
+            mSystemUiVisibility = newVal;
+
+            if (0 != (diff & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
+                mHandler.removeMessages(MSG_HIDE_CHROME);
+                mHandler.removeMessages(MSG_SHOW_CHROME);
+                mHandler.sendEmptyMessage(0 == (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) 
+                        ? MSG_SHOW_CHROME : MSG_HIDE_CHROME);
+            }
 
             notifyUiVisibilityChanged();
         }
@@ -1187,9 +1193,9 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         Slog.v(TAG, "setLightsOn(" + on + ")");
         if (on) {
-            setSystemUiVisibility(mSystemUiVisibility & ~View.SYSTEM_UI_FLAG_LOW_PROFILE);
+            setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
         } else {
-            setSystemUiVisibility(mSystemUiVisibility | View.SYSTEM_UI_FLAG_LOW_PROFILE);
+            setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE, View.SYSTEM_UI_FLAG_LOW_PROFILE);
         }
     }
 

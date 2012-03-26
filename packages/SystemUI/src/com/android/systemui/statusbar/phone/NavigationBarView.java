@@ -139,7 +139,7 @@ public class NavigationBarView extends LinearLayout {
                 setLowProfile(false, false, false);
 
                 try {
-                    mBarService.setSystemUiVisibility(0);
+                    mBarService.setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
                 } catch (android.os.RemoteException ex) {
                 }
             }
