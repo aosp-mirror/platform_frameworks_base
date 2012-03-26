@@ -93,7 +93,7 @@ import com.android.systemui.statusbar.policy.NotificationRowLayout;
 public class PhoneStatusBar extends BaseStatusBar {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = false;
-    public static final boolean SPEW = true;
+    public static final boolean SPEW = DEBUG;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
 
     // additional instrumentation for testing purposes; intended to be left on during development
