@@ -803,16 +803,19 @@ status_t AudioTrack::createTrack_l(
         }
     }
 
+    IAudioFlinger::track_flags_t trackFlags = IAudioFlinger::TRACK_DEFAULT;
+    if (mIsTimed) {
+        trackFlags |= IAudioFlinger::TRACK_TIMED;
+    }
     sp<IAudioTrack> track = audioFlinger->createTrack(getpid(),
                                                       streamType,
                                                       sampleRate,
                                                       format,
                                                       channelMask,
                                                       frameCount,
-                                                      ((uint16_t)flags) << 16,
+                                                      trackFlags,
                                                       sharedBuffer,
                                                       output,
-                                                      mIsTimed,
                                                       &mSessionId,
                                                       &status);
 

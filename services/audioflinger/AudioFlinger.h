@@ -87,10 +87,9 @@ public:
                                 audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
-                                uint32_t flags,
+                                IAudioFlinger::track_flags_t flags,
                                 const sp<IMemory>& sharedBuffer,
                                 audio_io_handle_t output,
-                                bool isTimed,
                                 int *sessionId,
                                 status_t *status);
 
@@ -101,7 +100,7 @@ public:
                                 audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
-                                uint32_t flags,
+                                IAudioFlinger::track_flags_t flags,
                                 int *sessionId,
                                 status_t *status);
 

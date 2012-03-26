@@ -201,7 +201,7 @@ status_t AudioRecord::set(
 
     // create the IAudioRecord
     status = openRecord_l(sampleRate, format, channelMask,
-                        frameCount, flags, input);
+                        frameCount, input);
     if (status != NO_ERROR) {
         return status;
     }
@@ -458,7 +458,6 @@ status_t AudioRecord::openRecord_l(
         audio_format_t format,
         uint32_t channelMask,
         int frameCount,
-        uint32_t flags,
         audio_io_handle_t input)
 {
     status_t status;
@@ -471,7 +470,7 @@ status_t AudioRecord::openRecord_l(
                                                        sampleRate, format,
                                                        channelMask,
                                                        frameCount,
-                                                       ((uint16_t)flags) << 16,
+                                                       IAudioFlinger::TRACK_DEFAULT,
                                                        &mSessionId,
                                                        &status);
 
@@ -778,7 +777,7 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
         // following member variables: mAudioRecord, mCblkMemory and mCblk.
         // It will also delete the strong references on previous IAudioRecord and IMemory
         result = openRecord_l(cblk->sampleRate, mFormat, mChannelMask,
-                mFrameCount, mFlags, getInput_l());
+                mFrameCount, getInput_l());
         if (result == NO_ERROR) {
             result = mAudioRecord->start(0);    // callback thread hasn't changed
         }

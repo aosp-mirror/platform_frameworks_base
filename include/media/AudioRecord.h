@@ -354,7 +354,6 @@ private:
                                 audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
-                                uint32_t flags,
                                 audio_io_handle_t input);
             audio_io_handle_t getInput_l();
             status_t restoreRecord_l(audio_track_cblk_t*& cblk);
