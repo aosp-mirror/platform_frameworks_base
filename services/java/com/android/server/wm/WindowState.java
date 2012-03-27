@@ -26,6 +26,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import com.android.server.wm.WindowManagerService.H;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -45,6 +46,8 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
 import java.io.PrintWriter;
@@ -60,6 +63,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     static final boolean SHOW_SURFACE_ALLOC = WindowManagerService.SHOW_SURFACE_ALLOC;
 
     final WindowManagerService mService;
+    final WindowManagerPolicy mPolicy;
+    final Context mContext;
     final Session mSession;
     final IWindow mClient;
     WindowToken mToken;
@@ -279,7 +284,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     float mSurfaceX, mSurfaceY, mSurfaceW, mSurfaceH;
     int mSurfaceLayer;
     float mSurfaceAlpha;
-    
+
     // Input channel and input window handle used by the input dispatcher.
     final InputWindowHandle mInputWindowHandle;
     InputChannel mInputChannel;
@@ -305,6 +310,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mToken = token;
         mAttrs.copyFrom(a);
         mViewVisibility = viewVisibility;
+        mPolicy = mService.mPolicy;
+        mContext = mService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();
         mAlpha = a.alpha;
         mSeq = seq;
@@ -333,10 +340,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mAttrs.type <= LAST_SUB_WINDOW)) {
             // The multiplier here is to reserve space for multiple
             // windows in the same type layer.
-            mBaseLayer = mService.mPolicy.windowTypeToLayerLw(
+            mBaseLayer = mPolicy.windowTypeToLayerLw(
                     attachedWindow.mAttrs.type) * WindowManagerService.TYPE_LAYER_MULTIPLIER
                     + WindowManagerService.TYPE_LAYER_OFFSET;
-            mSubLayer = mService.mPolicy.subWindowTypeToLayerLw(a.type);
+            mSubLayer = mPolicy.subWindowTypeToLayerLw(a.type);
             mAttachedWindow = attachedWindow;
             if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(WindowManagerService.TAG, "Adding " + this + " to " + mAttachedWindow);
             mAttachedWindow.mChildWindows.add(this);
@@ -349,7 +356,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         } else {
             // The multiplier here is to reserve space for multiple
             // windows in the same type layer.
-            mBaseLayer = mService.mPolicy.windowTypeToLayerLw(a.type)
+            mBaseLayer = mPolicy.windowTypeToLayerLw(a.type)
                     * WindowManagerService.TYPE_LAYER_MULTIPLIER
                     + WindowManagerService.TYPE_LAYER_OFFSET;
             mSubLayer = 0;
@@ -909,7 +916,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             
             mService.enableScreenIfNeededLocked();
 
-            mService.applyEnterAnimationLocked(this);
+            applyEnterAnimationLocked();
 
             mLastAlpha = -1;
             mHasDrawn = true;
@@ -1291,6 +1298,89 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && (mAttachedWindow == null || !mAttachedWindow.shouldAnimateMove());
     }
 
+    void applyEnterAnimationLocked() {
+        final int transit;
+        if (mEnterAnimationPending) {
+            mEnterAnimationPending = false;
+            transit = WindowManagerPolicy.TRANSIT_ENTER;
+        } else {
+            transit = WindowManagerPolicy.TRANSIT_SHOW;
+        }
+
+        applyAnimationLocked(transit, true);
+    }
+
+    /**
+     * Choose the correct animation and set it to the passed WindowState.
+     * @param win The window to add the animation to.
+     * @param transit If WindowManagerPolicy.TRANSIT_PREVIEW_DONE and the app window has been drawn
+     *      then the animation will be app_starting_exit. Any other value loads the animation from
+     *      the switch statement below.
+     * @param isEntrance The animation type the last time this was called. Used to keep from
+     *      loading the same animation twice.
+     * @return true if an animation has been loaded.
+     */
+    boolean applyAnimationLocked(int transit, boolean isEntrance) {
+        if (mWinAnimator.mLocalAnimating &&
+                mWinAnimator.mAnimationIsEntrance == isEntrance) {
+            // If we are trying to apply an animation, but already running
+            // an animation of the same type, then just leave that one alone.
+            return true;
+        }
+
+        // Only apply an animation if the display isn't frozen.  If it is
+        // frozen, there is no reason to animate and it can cause strange
+        // artifacts when we unfreeze the display if some different animation
+        // is running.
+        if (mService.okToDisplay()) {
+            int anim = mPolicy.selectAnimationLw(this, transit);
+            int attr = -1;
+            Animation a = null;
+            if (anim != 0) {
+                a = AnimationUtils.loadAnimation(mContext, anim);
+            } else {
+                switch (transit) {
+                    case WindowManagerPolicy.TRANSIT_ENTER:
+                        attr = com.android.internal.R.styleable.WindowAnimation_windowEnterAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_EXIT:
+                        attr = com.android.internal.R.styleable.WindowAnimation_windowExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_SHOW:
+                        attr = com.android.internal.R.styleable.WindowAnimation_windowShowAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_HIDE:
+                        attr = com.android.internal.R.styleable.WindowAnimation_windowHideAnimation;
+                        break;
+                }
+                if (attr >= 0) {
+                    a = mService.loadAnimation(mAttrs, attr);
+                }
+            }
+            if (WindowManagerService.DEBUG_ANIM) Slog.v(WindowManagerService.TAG,
+                    "applyAnimation: win=" + this
+                    + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
+                    + " mAnimation=" + mWinAnimator.mAnimation
+                    + " isEntrance=" + isEntrance);
+            if (a != null) {
+                if (WindowManagerService.DEBUG_ANIM) {
+                    RuntimeException e = null;
+                    if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                        e = new RuntimeException();
+                        e.fillInStackTrace();
+                    }
+                    Slog.v(WindowManagerService.TAG, "Loaded animation " + a + " for " + this, e);
+                }
+                mWinAnimator.setAnimation(a);
+                mWinAnimator.mAnimationIsEntrance = isEntrance;
+            }
+        } else {
+            mWinAnimator.clearAnimation();
+        }
+
+        return mWinAnimator.mAnimation != null;
+    }
+
     boolean isFullscreen(int screenWidth, int screenHeight) {
         return mFrame.left <= 0 && mFrame.top <= 0 &&
                 mFrame.right >= screenWidth && mFrame.bottom >= screenHeight;
@@ -1387,7 +1477,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mPolicyVisibility = true;
         mPolicyVisibilityAfterAnim = true;
         if (doAnimation) {
-            mService.applyAnimationLocked(this, WindowManagerPolicy.TRANSIT_ENTER, true);
+            applyAnimationLocked(WindowManagerPolicy.TRANSIT_ENTER, true);
         }
         if (requestAnim) {
             mService.scheduleAnimationLocked();
@@ -1412,7 +1502,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
         if (doAnimation) {
-            mService.applyAnimationLocked(this, WindowManagerPolicy.TRANSIT_EXIT, false);
+            applyAnimationLocked(WindowManagerPolicy.TRANSIT_EXIT, false);
             if (mWinAnimator.mAnimation == null) {
                 doAnimation = false;
             }

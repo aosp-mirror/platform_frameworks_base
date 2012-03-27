@@ -21,6 +21,7 @@ class WindowStateAnimator {
     final WindowManagerService mService;
     final WindowState mWin;
     final WindowState mAttachedWindow;
+    final WindowAnimator mAnimator;
 
     // Currently running animation.
     boolean mAnimating;
@@ -37,6 +38,7 @@ class WindowStateAnimator {
         mService = service;
         mWin = win;
         mAttachedWindow = attachedWindow;
+        mAnimator = mService.mAnimator;
     }
 
     public void setAnimation(Animation anim) {
@@ -182,8 +184,8 @@ class WindowStateAnimator {
             mAnimation.cancel();
             mAnimation = null;
         }
-        if (mService.mWindowDetachedWallpaper == mWin) {
-            mService.mWindowDetachedWallpaper = null;
+        if (mAnimator.mWindowDetachedWallpaper == mWin) {
+            mAnimator.mWindowDetachedWallpaper = null;
         }
         mWin.mAnimLayer = mWin.mLayer;
         if (mWin.mIsImWindow) {
