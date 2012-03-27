@@ -6483,7 +6483,12 @@ public class Intent implements Parcelable, Cloneable {
 
         final String action = getAction();
         if (ACTION_SEND.equals(action)) {
-            final Uri stream = getParcelableExtra(EXTRA_STREAM);
+            final Uri stream;
+            try {
+                stream = getParcelableExtra(EXTRA_STREAM);
+            } catch (ClassCastException e) {
+                return;
+            }
             if (stream != null) {
                 final ClipData clipData = new ClipData(
                         null, new String[] { getType() }, new ClipData.Item(stream));
@@ -6493,7 +6498,12 @@ public class Intent implements Parcelable, Cloneable {
             }
 
         } else if (ACTION_SEND_MULTIPLE.equals(action)) {
-            final ArrayList<Uri> streams = getParcelableArrayListExtra(EXTRA_STREAM);
+            final ArrayList<Uri> streams;
+            try {
+                streams = getParcelableArrayListExtra(EXTRA_STREAM);
+            } catch (ClassCastException e) {
+                return;
+            }
             if (streams != null && streams.size() > 0) {
                 final Uri firstStream = streams.get(0);
                 final ClipData clipData = new ClipData(
