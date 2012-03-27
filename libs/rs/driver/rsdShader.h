@@ -44,9 +44,13 @@ public:
               const size_t *textureNamesLength);
     virtual ~RsdShader();
 
-    bool createShader();
+    uint32_t getStateBasedShaderID(const android::renderscript::Context *);
 
-    uint32_t getShaderID() const {return mShaderID;}
+    // Add ability to get all ID's to clean up the cached program objects
+    uint32_t getStateBasedIDCount() const { return mStateBasedShaders.size(); }
+    uint32_t getStateBasedID(uint32_t index) const {
+        return mStateBasedShaders.itemAt(index)->mShaderID;
+    }
 
     uint32_t getAttribCount() const {return mAttribCount;}
     uint32_t getUniformCount() const {return mUniformCount;}
@@ -63,6 +67,21 @@ public:
     void setup(const android::renderscript::Context *, RsdShaderCache *sc);
 
 protected:
+
+    class StateBasedKey {
+    public:
+        StateBasedKey(uint32_t texCount) : mShaderID(0) {
+            mTextureTargets = new uint32_t[texCount];
+        }
+        ~StateBasedKey() {
+            delete[] mTextureTargets;
+        }
+        uint32_t mShaderID;
+        uint32_t *mTextureTargets;
+    };
+
+    bool createShader();
+    StateBasedKey *getExistingState();
 
     const android::renderscript::Program *mRSProgram;
     bool mIsValid;
@@ -87,11 +106,10 @@ protected:
     mutable bool mDirty;
     android::String8 mShader;
     android::String8 mUserShader;
-    uint32_t mShaderID;
     uint32_t mType;
 
     uint32_t mTextureCount;
-    uint32_t *mTextureTargets;
+    StateBasedKey *mCurrentState;
     uint32_t mAttribCount;
     uint32_t mUniformCount;
     android::String8 *mAttribNames;
@@ -99,6 +117,8 @@ protected:
     uint32_t *mUniformArraySizes;
 
     android::Vector<android::String8> mTextureNames;
+
+    android::Vector<StateBasedKey*> mStateBasedShaders;
 
     int32_t mTextureUniformIndexStart;
 

@@ -108,21 +108,17 @@ bool RsdShaderCache::link(const Context *rsc) {
 
     RsdShader *vtx = mVertex;
     RsdShader *frag = mFragment;
-    if (!vtx->getShaderID()) {
-        vtx->loadShader(rsc);
-    }
-    if (!frag->getShaderID()) {
-        frag->loadShader(rsc);
-    }
+
+    uint32_t vID = vtx->getStateBasedShaderID(rsc);
+    uint32_t fID = frag->getStateBasedShaderID(rsc);
 
     // Don't try to cache if shaders failed to load
-    if (!vtx->getShaderID() || !frag->getShaderID()) {
+    if (!vID || !fID) {
         return false;
     }
     uint32_t entryCount = mEntries.size();
     for (uint32_t ct = 0; ct < entryCount; ct ++) {
-        if ((mEntries[ct]->vtx == vtx->getShaderID()) &&
-            (mEntries[ct]->frag == frag->getShaderID())) {
+        if ((mEntries[ct]->vtx == vID) && (mEntries[ct]->frag == fID)) {
 
             //ALOGV("SC using program %i", mEntries[ct]->program);
             glUseProgram(mEntries[ct]->program);
@@ -138,14 +134,14 @@ bool RsdShaderCache::link(const Context *rsc) {
                                        frag->getUniformCount());
     mEntries.push(e);
     mCurrent = e;
-    e->vtx = vtx->getShaderID();
-    e->frag = frag->getShaderID();
+    e->vtx = vID;
+    e->frag = fID;
     e->program = glCreateProgram();
     if (e->program) {
         GLuint pgm = e->program;
-        glAttachShader(pgm, vtx->getShaderID());
+        glAttachShader(pgm, vID);
         //ALOGE("e1 %x", glGetError());
-        glAttachShader(pgm, frag->getShaderID());
+        glAttachShader(pgm, fID);
 
         glBindAttribLocation(pgm, 0, "ATTRIB_position");
         glBindAttribLocation(pgm, 1, "ATTRIB_color");
@@ -241,30 +237,38 @@ int32_t RsdShaderCache::vtxAttribSlot(const String8 &attrName) const {
     return -1;
 }
 
-void RsdShaderCache::cleanupVertex(uint32_t id) {
+void RsdShaderCache::cleanupVertex(RsdShader *s) {
     int32_t numEntries = (int32_t)mEntries.size();
-    for (int32_t ct = 0; ct < numEntries; ct ++) {
-        if (mEntries[ct]->vtx == id) {
-            glDeleteProgram(mEntries[ct]->program);
+    uint32_t numShaderIDs = s->getStateBasedIDCount();
+    for (uint32_t sId = 0; sId < numShaderIDs; sId ++) {
+        uint32_t id = s->getStateBasedID(sId);
+        for (int32_t ct = 0; ct < numEntries; ct ++) {
+            if (mEntries[ct]->vtx == id) {
+                glDeleteProgram(mEntries[ct]->program);
 
-            delete mEntries[ct];
-            mEntries.removeAt(ct);
-            numEntries = (int32_t)mEntries.size();
-            ct --;
+                delete mEntries[ct];
+                mEntries.removeAt(ct);
+                numEntries = (int32_t)mEntries.size();
+                ct --;
+            }
         }
     }
 }
 
-void RsdShaderCache::cleanupFragment(uint32_t id) {
+void RsdShaderCache::cleanupFragment(RsdShader *s) {
     int32_t numEntries = (int32_t)mEntries.size();
-    for (int32_t ct = 0; ct < numEntries; ct ++) {
-        if (mEntries[ct]->frag == id) {
-            glDeleteProgram(mEntries[ct]->program);
+    uint32_t numShaderIDs = s->getStateBasedIDCount();
+    for (uint32_t sId = 0; sId < numShaderIDs; sId ++) {
+        uint32_t id = s->getStateBasedID(sId);
+        for (int32_t ct = 0; ct < numEntries; ct ++) {
+            if (mEntries[ct]->frag == id) {
+                glDeleteProgram(mEntries[ct]->program);
 
-            delete mEntries[ct];
-            mEntries.removeAt(ct);
-            numEntries = (int32_t)mEntries.size();
-            ct --;
+                delete mEntries[ct];
+                mEntries.removeAt(ct);
+                numEntries = (int32_t)mEntries.size();
+                ct --;
+            }
         }
     }
 }

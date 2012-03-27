@@ -46,28 +46,72 @@ RsdShader::RsdShader(const Program *p, uint32_t type,
 }
 
 RsdShader::~RsdShader() {
-    if (mShaderID) {
-        glDeleteShader(mShaderID);
+    for (uint32_t i = 0; i < mStateBasedShaders.size(); i ++) {
+        StateBasedKey *state = mStateBasedShaders.itemAt(i);
+        if (state->mShaderID) {
+            glDeleteShader(state->mShaderID);
+        }
+        delete state;
     }
 
     delete[] mAttribNames;
     delete[] mUniformNames;
     delete[] mUniformArraySizes;
-    delete[] mTextureTargets;
 }
 
 void RsdShader::initMemberVars() {
     mDirty = true;
-    mShaderID = 0;
     mAttribCount = 0;
     mUniformCount = 0;
 
     mAttribNames = NULL;
     mUniformNames = NULL;
     mUniformArraySizes = NULL;
-    mTextureTargets = NULL;
+    mCurrentState = NULL;
 
     mIsValid = false;
+}
+
+RsdShader::StateBasedKey *RsdShader::getExistingState() {
+    RsdShader::StateBasedKey *returnKey = NULL;
+
+    for (uint32_t i = 0; i < mStateBasedShaders.size(); i ++) {
+        returnKey = mStateBasedShaders.itemAt(i);
+
+        for (uint32_t ct = 0; ct < mRSProgram->mHal.state.texturesCount; ct ++) {
+            uint32_t texType = 0;
+            if (mRSProgram->mHal.state.textureTargets[ct] == RS_TEXTURE_2D) {
+                Allocation *a = mRSProgram->mHal.state.textures[ct];
+                if (a && a->mHal.state.surfaceTextureID) {
+                    texType = GL_TEXTURE_EXTERNAL_OES;
+                } else {
+                    texType = GL_TEXTURE_2D;
+                }
+            } else {
+                texType = GL_TEXTURE_CUBE_MAP;
+            }
+            if (texType != returnKey->mTextureTargets[ct]) {
+                returnKey = NULL;
+                break;
+            }
+        }
+    }
+    return returnKey;
+}
+
+uint32_t RsdShader::getStateBasedShaderID(const Context *rsc) {
+    StateBasedKey *state = getExistingState();
+    if (state != NULL) {
+        mCurrentState = state;
+        return mCurrentState->mShaderID;
+    }
+    // We have not created a shader for this particular state yet
+    state = new StateBasedKey(mTextureCount);
+    mCurrentState = state;
+    mStateBasedShaders.add(state);
+    createShader();
+    loadShader(rsc);
+    return mCurrentState->mShaderID;
 }
 
 void RsdShader::init(const char** textureNames, size_t textureNamesCount,
@@ -155,14 +199,14 @@ void RsdShader::appendTextures() {
                     appendUsing = false;
                 }
                 mShader.append("uniform samplerExternalOES UNI_");
-                mTextureTargets[ct] = GL_TEXTURE_EXTERNAL_OES;
+                mCurrentState->mTextureTargets[ct] = GL_TEXTURE_EXTERNAL_OES;
             } else {
                 mShader.append("uniform sampler2D UNI_");
-                mTextureTargets[ct] = GL_TEXTURE_2D;
+                mCurrentState->mTextureTargets[ct] = GL_TEXTURE_2D;
             }
         } else {
             mShader.append("uniform samplerCube UNI_");
-            mTextureTargets[ct] = GL_TEXTURE_CUBE_MAP;
+            mCurrentState->mTextureTargets[ct] = GL_TEXTURE_CUBE_MAP;
         }
 
         mShader.append(mTextureNames[ct]);
@@ -171,6 +215,7 @@ void RsdShader::appendTextures() {
 }
 
 bool RsdShader::createShader() {
+    mShader.clear();
     if (mType == GL_FRAGMENT_SHADER) {
         mShader.append("precision mediump float;\n");
     }
@@ -183,37 +228,37 @@ bool RsdShader::createShader() {
 }
 
 bool RsdShader::loadShader(const Context *rsc) {
-    mShaderID = glCreateShader(mType);
-    rsAssert(mShaderID);
+    mCurrentState->mShaderID = glCreateShader(mType);
+    rsAssert(mCurrentState->mShaderID);
 
     if(!mShader.length()) {
         createShader();
     }
 
     if (rsc->props.mLogShaders) {
-        ALOGV("Loading shader type %x, ID %i", mType, mShaderID);
+        ALOGV("Loading shader type %x, ID %i", mType, mCurrentState->mShaderID);
         ALOGV("%s", mShader.string());
     }
 
-    if (mShaderID) {
+    if (mCurrentState->mShaderID) {
         const char * ss = mShader.string();
-        RSD_CALL_GL(glShaderSource, mShaderID, 1, &ss, NULL);
-        RSD_CALL_GL(glCompileShader, mShaderID);
+        RSD_CALL_GL(glShaderSource, mCurrentState->mShaderID, 1, &ss, NULL);
+        RSD_CALL_GL(glCompileShader, mCurrentState->mShaderID);
 
         GLint compiled = 0;
-        RSD_CALL_GL(glGetShaderiv, mShaderID, GL_COMPILE_STATUS, &compiled);
+        RSD_CALL_GL(glGetShaderiv, mCurrentState->mShaderID, GL_COMPILE_STATUS, &compiled);
         if (!compiled) {
             GLint infoLen = 0;
-            RSD_CALL_GL(glGetShaderiv, mShaderID, GL_INFO_LOG_LENGTH, &infoLen);
+            RSD_CALL_GL(glGetShaderiv, mCurrentState->mShaderID, GL_INFO_LOG_LENGTH, &infoLen);
             if (infoLen) {
                 char* buf = (char*) malloc(infoLen);
                 if (buf) {
-                    RSD_CALL_GL(glGetShaderInfoLog, mShaderID, infoLen, NULL, buf);
+                    RSD_CALL_GL(glGetShaderInfoLog, mCurrentState->mShaderID, infoLen, NULL, buf);
                     rsc->setError(RS_ERROR_FATAL_PROGRAM_LINK, buf);
                     free(buf);
                 }
-                RSD_CALL_GL(glDeleteShader, mShaderID);
-                mShaderID = 0;
+                RSD_CALL_GL(glDeleteShader, mCurrentState->mShaderID);
+                mCurrentState->mShaderID = 0;
                 return false;
             }
         }
@@ -430,7 +475,7 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
 
         if (!mRSProgram->mHal.state.textures[ct]) {
             // if nothing is bound, reset to default GL texture
-            RSD_CALL_GL(glBindTexture, mTextureTargets[ct], 0);
+            RSD_CALL_GL(glBindTexture, mCurrentState->mTextureTargets[ct], 0);
             continue;
         }
 
@@ -537,9 +582,6 @@ void RsdShader::initAttribAndUniformArray() {
     }
 
     mTextureCount = mRSProgram->mHal.state.texturesCount;
-    if (mTextureCount) {
-        mTextureTargets = new uint32_t[mTextureCount];
-    }
 }
 
 void RsdShader::initAddUserElement(const Element *e, String8 *names, uint32_t *arrayLengths,

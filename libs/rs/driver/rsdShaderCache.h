@@ -49,8 +49,8 @@ public:
 
     bool setup(const android::renderscript::Context *rsc);
 
-    void cleanupVertex(uint32_t id);
-    void cleanupFragment(uint32_t id);
+    void cleanupVertex(RsdShader *s);
+    void cleanupFragment(RsdShader *s);
 
     void cleanupAll();
 
