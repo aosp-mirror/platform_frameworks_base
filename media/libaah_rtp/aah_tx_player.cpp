@@ -769,9 +769,6 @@ void AAH_TXPlayer::reset_l() {
 
     mCachedSource.clear();
 
-    if (mAudioSource != NULL) {
-        mAudioSource->stop();
-    }
     mAudioSource.clear();
     mAudioCodec = TRTPAudioPacket::kCodecInvalid;
     mAudioFormat = NULL;
