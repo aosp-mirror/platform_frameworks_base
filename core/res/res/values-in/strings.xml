@@ -108,7 +108,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Kode fitur selesai."</string>
     <string name="fcError" msgid="3327560126588500777">"Masalah sambungan atau kode fitur tidak valid."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="7956392511146698522">"Terjadi galat jaringan."</string>
+    <string name="httpError" msgid="7956392511146698522">"Terjadi kesalahan jaringan."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"Tidak dapat menemukan URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Skema autentikasi situs tidak didukung."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Tidak dapat mengautentikasi."</string>
@@ -123,7 +123,7 @@
     <string name="httpErrorFile" msgid="2170788515052558676">"Tidak dapat mengakses file."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Tidak dapat menemukan file yang diminta."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Terlalu banyak permintaan yang diproses. Coba lagi nanti."</string>
-    <string name="notification_title" msgid="8967710025036163822">"Galat saat masuk untuk <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="notification_title" msgid="8967710025036163822">"Kesalahan saat masuk untuk <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinkron"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinkron"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Terlalu banyak <xliff:g id="CONTENT_TYPE">%s</xliff:g> penghapusan."</string>
@@ -1061,7 +1061,7 @@
     <string name="candidates_style" msgid="4333913089637062257"><u>"calon"</u></string>
     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Menyiapkan penyimpanan USB"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Menyiapkan kartu SD"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Memeriksa galat."</string>
+    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Memeriksa kesalahan."</string>
     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Penyimpanan USB kosong"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Kartu SD kosong"</string>
     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"Penyimpanan USB kosong atau sistem berkasnya tidak didukung."</string>

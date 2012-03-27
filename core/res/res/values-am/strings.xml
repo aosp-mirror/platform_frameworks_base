@@ -342,9 +342,9 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የጡባዊተኮህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ስለ ገቢ እና ወጪ ጥሪዎችን ውሂብ ጨምሮ፣ የስልክህን ምዝግብ ማስታወሻ ለመቀየር ለመተግበሪያው ይፈቅዳል። ይሄንን ተንኮል አዘል መተግበሪያዎች የስልክህን ምዝግብ ማስታወሻ ለመሰረዝ ወይም ለመለወጥ ሊጠቀሙበት ይችላሉ።"</string>
     <string name="permlab_readProfile" msgid="6824681438529842282">"የመገለጫ ውሂብዎን ያንብቡ"</string>
-    <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"ልክ እንደ አንተ ስም እና የዕውቂያ መረጃ ፣ ባንተ መሳሪያ ወስጥ የተከማቹ የግል መገለጫ መረጃ ለማንበብ ለመተግበሪያው ይፈቅዳሉ፡፡ይሄም ማለት ሌሎች መተግበሪያዎች ሊለዩህ ይችላሉ እና ለሌሎች የመገለጫ መረጃህን ይልካሉ፡፡"</string>
+    <string name="permdesc_readProfile" product="default" msgid="94520753797630679">"ልክ እንደ አንተ ስም እና የዕውቂያ መረጃ ፣ በአንተ መሳሪያ ወስጥ የተከማቹ የግል መገለጫ መረጃ ለማንበብ ለመተግበሪያው ይፈቅዳሉ፡፡ይሄም ማለት ሌሎች መተግበሪያዎች ሊለዩህ ይችላሉ እና ለሌሎች የመገለጫ መረጃህን ይልካሉ፡፡"</string>
     <string name="permlab_writeProfile" msgid="4679878325177177400">"የአርስዎ መገለጫ ውሂብ ላይ ይፃፉ"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"ልክ እንደ አንተ ስም እና የዕውቂያ መረጃ ፣ ባንተ መሳሪያ ወስጥ የተከማቹ የግል መገለጫ መረጃ ለመለወጥ ወይም ለማከል ለመተግበሪያው ይፈቅዳሉ፡፡ይሄም ማለት ሌሎች መተግበሪያዎች ሊለዩህ ይችላሉ እና ለሌሎች የመገለጫ መረጃህን ይልካሉ፡፡"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="4637366723793045603">"ልክ እንደ አንተ ስም እና የዕውቂያ መረጃ ፣ በአንተ መሳሪያ ወስጥ የተከማቹ የግል መገለጫ መረጃ ለመለወጥ ወይም ለማከል ለመተግበሪያው ይፈቅዳሉ፡፡ይሄም ማለት ሌሎች መተግበሪያዎች ሊለዩህ ይችላሉ እና ለሌሎች የመገለጫ መረጃህን ይልካሉ፡፡"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"የአንተን ማህበራዊ የውይይት ክፍሎች አንብብ"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="3419050808547335320">" ከአንተ ጓደኞች ማህበራዊ ዝማኔዎችን እንዲደርስባቸው እና እንዲያመሳስል ለመተግበሪያውይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች ይህን መዳረሻ ባንተና በጓደኞችህ መካከል በማህበራዊ አውታረመረቦች ያሉ የግል ተግባቦቶችን ለመዳረስ ሊጠቀሙበት ይችላሉ፡፡"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ወደ የአንተ  ማህበራዊ የውይይት ክፍሎች ጻፍ"</string>
