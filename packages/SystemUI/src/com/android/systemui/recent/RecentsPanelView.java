@@ -456,6 +456,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
         mPreloadTasksRunnable = new Runnable() {
             public void run() {
+                // If we set our visibility to INVISIBLE here, we avoid an extra call to
+                // onLayout later when we become visible (because onLayout is always called
+                // when going from GONE)
                 if (!mShowing) {
                     setVisibility(INVISIBLE);
                     refreshRecentTasksList();
@@ -562,9 +565,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         if (!mShowing) {
             int action = ev.getAction() & MotionEvent.ACTION_MASK;
             if (action == MotionEvent.ACTION_DOWN) {
-                // If we set our visibility to INVISIBLE here, we avoid an extra call to
-                // onLayout later when we become visible (because onLayout is always called
-                // when going from GONE)
                 post(mPreloadTasksRunnable);
             } else if (action == MotionEvent.ACTION_CANCEL) {
                 setVisibility(GONE);
@@ -583,9 +583,15 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         return false;
     }
 
+    public void preloadRecentTasksList() {
+        if (!mShowing) {
+            mPreloadTasksRunnable.run();
+        }
+    }
+
     public void clearRecentTasksList() {
         // Clear memory used by screenshots
-        if (mRecentTaskDescriptions != null) {
+        if (!mShowing && mRecentTaskDescriptions != null) {
             mRecentTasksLoader.cancelLoadingThumbnailsAndIcons();
             mRecentTaskDescriptions.clear();
             mListAdapter.notifyDataSetInvalidated();

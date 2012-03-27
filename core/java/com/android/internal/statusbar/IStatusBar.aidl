@@ -35,5 +35,7 @@ oneway interface IStatusBar
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
     void setHardKeyboardStatus(boolean available, boolean enabled);
     void toggleRecentApps();
+    void preloadRecentApps();
+    void cancelPreloadRecentApps();
 }
 

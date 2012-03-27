@@ -30,24 +30,22 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Resources;
 import android.content.res.Configuration;
-import android.inputmethodservice.InputMethodService;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
+import android.inputmethodservice.InputMethodService;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Slog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowManager;
@@ -76,19 +74,16 @@ import java.util.ArrayList;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
-
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.recent.RecentTasksLoader;
-import com.android.systemui.recent.RecentsPanelView;
-import com.android.systemui.recent.TaskDescription;
-import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
-import com.android.systemui.statusbar.policy.DateView;
+import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.IntruderAlertView;
+import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
@@ -116,8 +111,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
     private static final int MSG_SHOW_INTRUDER = 1002;
     private static final int MSG_HIDE_INTRUDER = 1003;
-    private static final int MSG_OPEN_RECENTS_PANEL = 1020;
-    private static final int MSG_CLOSE_RECENTS_PANEL = 1021;
+    // 1020-1030 reserved for BaseStatusBar
 
     // will likely move to a resource or other tunable param at some point
     private static final int INTRUDER_ALERT_DECAY_MS = 0; // disabled, was 10000;
@@ -152,7 +146,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     PhoneStatusBarView mStatusBarView;
     int mPixelFormat;
-    H mHandler = new H();
     Object mQueueLock = new Object();
 
     // icons
@@ -201,10 +194,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     private Ticker mTicker;
     private View mTickerView;
     private boolean mTicking;
-
-    // Recent apps
-    private RecentsPanelView mRecentsPanel;
-    private RecentTasksLoader mRecentTasksLoader;
 
     // Tracking finger for opening/closing.
     int mEdgeBorder; // corresponds to R.dimen.status_bar_edge_ignore
@@ -382,6 +371,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         return sb;
     }
 
+    @Override
     protected WindowManager.LayoutParams getRecentsLayoutParams(LayoutParams layoutParams) {
         boolean opaque = false;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -406,42 +396,13 @@ public class PhoneStatusBar extends BaseStatusBar {
         return lp;
     }
 
+    @Override
     protected void updateRecentsPanel() {
-        // Recents Panel
-        boolean visible = false;
-        ArrayList<TaskDescription> recentTasksList = null;
-        boolean firstScreenful = false;
-        if (mRecentsPanel != null) {
-            visible = mRecentsPanel.isShowing();
-            WindowManagerImpl.getDefault().removeView(mRecentsPanel);
-            if (visible) {
-                recentTasksList = mRecentsPanel.getRecentTasksList();
-                firstScreenful = mRecentsPanel.getFirstScreenful();
-            }
-        }
-
-        // Provide RecentsPanelView with a temporary parent to allow layout params to work.
-        LinearLayout tmpRoot = new LinearLayout(mContext);
-        mRecentsPanel = (RecentsPanelView) LayoutInflater.from(mContext).inflate(
-                R.layout.status_bar_recent_panel, tmpRoot, false);
-        mRecentsPanel.setRecentTasksLoader(mRecentTasksLoader);
-        mRecentTasksLoader.setRecentsPanel(mRecentsPanel);
-        mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
-                mRecentsPanel));
-        mRecentsPanel.setVisibility(View.GONE);
-
+        super.updateRecentsPanel();
         // Make .03 alpha the minimum so you always see the item a bit-- slightly below
         // .03, the item disappears entirely (as if alpha = 0) and that discontinuity looks
         // a bit jarring
         mRecentsPanel.setMinSwipeAlpha(0.03f);
-        WindowManager.LayoutParams lp = getRecentsLayoutParams(mRecentsPanel.getLayoutParams());
-
-        WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
-        mRecentsPanel.setBar(this);
-        if (visible) {
-            mRecentsPanel.show(true, false, recentTasksList, firstScreenful);
-        }
-
     }
 
     protected int getStatusBarGravity() {
@@ -1087,11 +1048,17 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+    @Override
+    BaseStatusBar.H createHandler() {
+        return new PhoneStatusBar.H();
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
-    private class H extends Handler {
+    private class H extends BaseStatusBar.H {
         public void handleMessage(Message m) {
+            super.handleMessage(m);
             switch (m.what) {
                 case MSG_ANIMATE:
                     doAnimation();
@@ -1111,18 +1078,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 case MSG_HIDE_INTRUDER:
                     setIntruderAlertVisibility(false);
                     mCurrentlyIntrudingNotification = null;
-                    break;
-                case MSG_OPEN_RECENTS_PANEL:
-                    if (DEBUG) Slog.d(TAG, "opening recents panel");
-                    if (mRecentsPanel != null) {
-                        mRecentsPanel.show(true, true);
-                    }
-                    break;
-                case MSG_CLOSE_RECENTS_PANEL:
-                    if (DEBUG) Slog.d(TAG, "closing recents panel");
-                    if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
-                        mRecentsPanel.show(false, true);
-                    }
                     break;
             }
         }
@@ -2052,13 +2007,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    public void toggleRecentApps() {
-        int msg = (mRecentsPanel.getVisibility() == View.VISIBLE)
-                ? MSG_CLOSE_RECENTS_PANEL : MSG_OPEN_RECENTS_PANEL;
-        mHandler.removeMessages(msg);
-        mHandler.sendEmptyMessage(msg);
-    }
-
     /**
      * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
      * This was added last-minute and is inconsistent with the way the rest of the notifications
@@ -2346,27 +2294,5 @@ public class PhoneStatusBar extends BaseStatusBar {
             vibrate();
         }
     };
-
-    public class TouchOutsideListener implements View.OnTouchListener {
-        private int mMsg;
-        private RecentsPanelView mPanel;
-
-        public TouchOutsideListener(int msg, RecentsPanelView panel) {
-            mMsg = msg;
-            mPanel = panel;
-        }
-
-        public boolean onTouch(View v, MotionEvent ev) {
-            final int action = ev.getAction();
-            if (action == MotionEvent.ACTION_OUTSIDE
-                || (action == MotionEvent.ACTION_DOWN
-                    && !mPanel.isInContentArea((int)ev.getX(), (int)ev.getY()))) {
-                mHandler.removeMessages(mMsg);
-                mHandler.sendEmptyMessage(mMsg);
-                return true;
-            }
-            return false;
-        }
-    }
 }
 
