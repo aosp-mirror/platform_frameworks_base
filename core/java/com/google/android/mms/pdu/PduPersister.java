@@ -20,6 +20,8 @@ package com.google.android.mms.pdu;
 import com.google.android.mms.ContentType;
 import com.google.android.mms.InvalidHeaderValueException;
 import com.google.android.mms.MmsException;
+import com.google.android.mms.util.DownloadDrmHelper;
+import com.google.android.mms.util.DrmConvertSession;
 import com.google.android.mms.util.PduCache;
 import com.google.android.mms.util.PduCacheEntry;
 import com.google.android.mms.util.SqliteWrapper;
@@ -30,7 +32,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteException;
+import android.drm.DrmManagerClient;
 import android.net.Uri;
+import android.os.FileUtils;
+import android.provider.MediaStore;
 import android.provider.Telephony;
 import android.provider.Telephony.Mms;
 import android.provider.Telephony.MmsSms;
@@ -42,6 +48,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -271,10 +278,12 @@ public class PduPersister {
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
+    private final DrmManagerClient mDrmManagerClient;
 
     private PduPersister(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+        mDrmManagerClient = new DrmManagerClient(context);
      }
 
     /** Get(or create if not exist) an instance of PduPersister */
@@ -761,6 +770,9 @@ public class PduPersister {
             throws MmsException {
         OutputStream os = null;
         InputStream is = null;
+        DrmConvertSession drmConvertSession = null;
+        Uri dataUri = null;
+        String path = null;
 
         try {
             byte[] data = part.getData();
@@ -773,9 +785,38 @@ public class PduPersister {
                     throw new MmsException("unable to update " + uri.toString());
                 }
             } else {
+                boolean isDrm = DownloadDrmHelper.isDrmConvertNeeded(contentType);
+                if (isDrm) {
+                    if (uri != null) {
+                        try {
+                            path = convertUriToPath(mContext, uri);
+                            if (LOCAL_LOGV) {
+                                Log.v(TAG, "drm uri: " + uri + " path: " + path);
+                            }
+                            File f = new File(path);
+                            long len = f.length();
+                            if (LOCAL_LOGV) {
+                                Log.v(TAG, "drm path: " + path + " len: " + len);
+                            }
+                            if (len > 0) {
+                                // we're not going to re-persist and re-encrypt an already
+                                // converted drm file
+                                return;
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Can't get file info for: " + part.getDataUri(), e);
+                        }
+                    }
+                    // We haven't converted the file yet, start the conversion
+                    drmConvertSession = DrmConvertSession.open(mContext, contentType);
+                    if (drmConvertSession == null) {
+                        throw new MmsException("Mimetype " + contentType +
+                                " can not be converted.");
+                    }
+                }
                 os = mContentResolver.openOutputStream(uri);
                 if (data == null) {
-                    Uri dataUri = part.getDataUri();
+                    dataUri = part.getDataUri();
                     if ((dataUri == null) || (dataUri == uri)) {
                         Log.w(TAG, "Can't find data for this part.");
                         return;
@@ -788,13 +829,32 @@ public class PduPersister {
 
                     byte[] buffer = new byte[8192];
                     for (int len = 0; (len = is.read(buffer)) != -1; ) {
-                        os.write(buffer, 0, len);
+                        if (!isDrm) {
+                            os.write(buffer, 0, len);
+                        } else {
+                            byte[] convertedData = drmConvertSession.convert(buffer, len);
+                            if (convertedData != null) {
+                                os.write(convertedData, 0, convertedData.length);
+                            } else {
+                                throw new MmsException("Error converting drm data.");
+                            }
+                        }
                     }
                 } else {
                     if (LOCAL_LOGV) {
                         Log.v(TAG, "Saving data to: " + uri);
                     }
-                    os.write(data);
+                    if (!isDrm) {
+                        os.write(data);
+                    } else {
+                        dataUri = uri;
+                        byte[] convertedData = drmConvertSession.convert(data, data.length);
+                        if (convertedData != null) {
+                            os.write(convertedData, 0, convertedData.length);
+                        } else {
+                            throw new MmsException("Error converting drm data.");
+                        }
+                    }
                 }
             }
         } catch (FileNotFoundException e) {
@@ -818,7 +878,65 @@ public class PduPersister {
                     Log.e(TAG, "IOException while closing: " + is, e);
                 } // Ignore
             }
+            if (drmConvertSession != null) {
+                drmConvertSession.close(path);
+
+                // Reset the permissions on the encrypted part file so everyone has only read
+                // permission.
+                File f = new File(path);
+                ContentValues values = new ContentValues(0);
+                SqliteWrapper.update(mContext, mContentResolver,
+                                     Uri.parse("content://mms/resetFilePerm/" + f.getName()),
+                                     values, null, null);
+            }
         }
+    }
+
+    /**
+     * This method expects uri in the following format
+     *     content://media/<table_name>/<row_index> (or)
+     *     file://sdcard/test.mp4
+     *     http://test.com/test.mp4
+     *
+     * Here <table_name> shall be "video" or "audio" or "images"
+     * <row_index> the index of the content in given table
+     */
+    static public String convertUriToPath(Context context, Uri uri) {
+        String path = null;
+        if (null != uri) {
+            String scheme = uri.getScheme();
+            if (null == scheme || scheme.equals("") ||
+                    scheme.equals(ContentResolver.SCHEME_FILE)) {
+                path = uri.getPath();
+
+            } else if (scheme.equals("http")) {
+                path = uri.toString();
+
+            } else if (scheme.equals(ContentResolver.SCHEME_CONTENT)) {
+                String[] projection = new String[] {MediaStore.MediaColumns.DATA};
+                Cursor cursor = null;
+                try {
+                    cursor = context.getContentResolver().query(uri, projection, null,
+                            null, null);
+                    if (null == cursor || 0 == cursor.getCount() || !cursor.moveToFirst()) {
+                        throw new IllegalArgumentException("Given Uri could not be found" +
+                                " in media store");
+                    }
+                    int pathIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+                    path = cursor.getString(pathIndex);
+                } catch (SQLiteException e) {
+                    throw new IllegalArgumentException("Given Uri is not formatted in a way " +
+                            "so that it can be found in media store.");
+                } finally {
+                    if (null != cursor) {
+                        cursor.close();
+                    }
+                }
+            } else {
+                throw new IllegalArgumentException("Given Uri scheme is not supported");
+            }
+        }
+        return path;
     }
 
     private void updateAddress(
