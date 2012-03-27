@@ -54,7 +54,7 @@ public class FocusFinder {
     /**
      * Find the next view to take focus in root's descendants, starting from the view
      * that currently is focused.
-     * @param root Contains focused
+     * @param root Contains focused. Cannot be null.
      * @param focused Has focus now.
      * @param direction Direction to look.
      * @return The next focusable view, or null if none exists.
@@ -82,7 +82,7 @@ public class FocusFinder {
                     setFocusBottomRight(root);
                     break;
                 case View.FOCUS_FORWARD:
-                    if (focused != null && focused.isLayoutRtl()) {
+                    if (root.isLayoutRtl()) {
                         setFocusTopLeft(root);
                     } else {
                         setFocusBottomRight(root);
@@ -94,7 +94,7 @@ public class FocusFinder {
                     setFocusTopLeft(root);
                     break;
                 case View.FOCUS_BACKWARD:
-                    if (focused != null && focused.isLayoutRtl()) {
+                    if (root.isLayoutRtl()) {
                         setFocusBottomRight(root);
                     } else {
                         setFocusTopLeft(root);
@@ -121,7 +121,7 @@ public class FocusFinder {
     /**
      * Find the next view to take focus in root's descendants, searching from
      * a particular rectangle in root's coordinates.
-     * @param root Contains focusedRect.
+     * @param root Contains focusedRect. Cannot be null.
      * @param focusedRect The starting point of the search.
      * @param direction Direction to look.
      * @return The next focusable view, or null if none exists.
@@ -155,10 +155,10 @@ public class FocusFinder {
             final int count = focusables.size();
             switch (direction) {
                 case View.FOCUS_FORWARD:
-                    return getForwardFocusable(focused, focusables, count);
+                    return getForwardFocusable(root, focused, focusables, count);
 
                 case View.FOCUS_BACKWARD:
-                    return getBackwardFocusable(focused, focusables, count);
+                    return getBackwardFocusable(root, focused, focusables, count);
             }
             return null;
         }
@@ -201,13 +201,14 @@ public class FocusFinder {
         return closest;
     }
 
-    private View getForwardFocusable(View focused, ArrayList<View> focusables, int count) {
-        return (focused != null && focused.isLayoutRtl()) ?
+    private static View getForwardFocusable(ViewGroup root, View focused,
+                                            ArrayList<View> focusables, int count) {
+        return (root.isLayoutRtl()) ?
                 getPreviousFocusable(focused, focusables, count) :
                 getNextFocusable(focused, focusables, count);
     }
 
-    private View getNextFocusable(View focused, ArrayList<View> focusables, int count) {
+    private static View getNextFocusable(View focused, ArrayList<View> focusables, int count) {
         if (focused != null) {
             int position = focusables.lastIndexOf(focused);
             if (position >= 0 && position + 1 < count) {
@@ -217,13 +218,14 @@ public class FocusFinder {
         return focusables.get(0);
     }
 
-    private View getBackwardFocusable(View focused, ArrayList<View> focusables, int count) {
-        return (focused != null && focused.isLayoutRtl()) ?
+    private static View getBackwardFocusable(ViewGroup root, View focused,
+                                             ArrayList<View> focusables, int count) {
+        return (root.isLayoutRtl()) ?
                 getNextFocusable(focused, focusables, count) :
                 getPreviousFocusable(focused, focusables, count);
     }
 
-    private View getPreviousFocusable(View focused, ArrayList<View> focusables, int count) {
+    private static View getPreviousFocusable(View focused, ArrayList<View> focusables, int count) {
         if (focused != null) {
             int position = focusables.indexOf(focused);
             if (position > 0) {
@@ -353,7 +355,7 @@ public class FocusFinder {
 
 
     /**
-     * Do the "beams" w.r.t the given direcition's axis of rect1 and rect2 overlap?
+     * Do the "beams" w.r.t the given direction's axis of rect1 and rect2 overlap?
      * @param direction the direction (up, down, left, right)
      * @param rect1 The first rectangle
      * @param rect2 The second rectangle
@@ -441,7 +443,7 @@ public class FocusFinder {
 
     /**
      * Find the distance on the minor axis w.r.t the direction to the nearest
-     * edge of the destination rectange.
+     * edge of the destination rectangle.
      * @param direction the direction (up, down, left, right)
      * @param source The source rect.
      * @param dest The destination rect.
