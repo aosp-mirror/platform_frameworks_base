@@ -358,6 +358,7 @@ interface IPackageManager {
 
     UserInfo createUser(in String name, int flags);
     boolean removeUser(int userId);
+    void updateUserName(int userId, String name);
 
     void installPackageWithVerification(in Uri packageURI, in IPackageInstallObserver observer,
             int flags, in String installerPackageName, in Uri verificationURI,
@@ -370,6 +371,7 @@ interface IPackageManager {
     boolean isFirstBoot();
 
     List<UserInfo> getUsers();
+    UserInfo getUser(int userId);
 
     void setPermissionEnforcement(String permission, int enforcement);
     int getPermissionEnforcement(String permission);

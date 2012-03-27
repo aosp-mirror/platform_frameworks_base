@@ -54,7 +54,7 @@ public class UserManagerTest extends AndroidTestCase {
     public void testAddUser() throws Exception {
         final UserManager details = mUserManager;
 
-        UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST, null);
+        UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST);
         assertTrue(userInfo != null);
 
         List<UserInfo> list = details.getUsers();
@@ -73,8 +73,8 @@ public class UserManagerTest extends AndroidTestCase {
     public void testAdd2Users() throws Exception {
         final UserManager details = mUserManager;
 
-        UserInfo user1 = details.createUser("Guest 1", UserInfo.FLAG_GUEST, null);
-        UserInfo user2 = details.createUser("User 2", UserInfo.FLAG_ADMIN, null);
+        UserInfo user1 = details.createUser("Guest 1", UserInfo.FLAG_GUEST);
+        UserInfo user2 = details.createUser("User 2", UserInfo.FLAG_ADMIN);
 
         assertTrue(user1 != null);
         assertTrue(user2 != null);
@@ -87,7 +87,7 @@ public class UserManagerTest extends AndroidTestCase {
     public void testRemoveUser() throws Exception {
         final UserManager details = mUserManager;
 
-        UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST, null);
+        UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST);
 
         details.removeUser(userInfo.id);
 

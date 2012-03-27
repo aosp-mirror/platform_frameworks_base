@@ -170,6 +170,15 @@ class AppWidgetService extends IAppWidgetService.Stub
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mBroadcastReceiver, sdFilter);
+
+        IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onUserRemoved(intent.getIntExtra(Intent.EXTRA_USERID, -1));
+            }
+        }, userFilter);
     }
 
     @Override
@@ -192,19 +201,6 @@ class AppWidgetService extends IAppWidgetService.Stub
         getImplForUser().deleteAllHosts();
     }
 
-    void cancelBroadcasts(Provider p) {
-        if (p.broadcast != null) {
-            mAlarmManager.cancel(p.broadcast);
-            long token = Binder.clearCallingIdentity();
-            try {
-                p.broadcast.cancel();
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-            p.broadcast = null;
-        }
-    }
-
     @Override
     public void bindAppWidgetId(int appWidgetId, ComponentName provider) throws RemoteException {
         getImplForUser().bindAppWidgetId(appWidgetId, provider);
@@ -222,8 +218,15 @@ class AppWidgetService extends IAppWidgetService.Stub
         return getImplForUser().startListening(host, packageName, hostId, updatedViews);
     }
 
-    // TODO: Call this from PackageManagerService when a user is removed
-    public void removeUser(int userId) {
+    public void onUserRemoved(int userId) {
+        AppWidgetServiceImpl impl = mAppWidgetServices.get(userId);
+        if (userId < 1) return;
+
+        if (impl == null) {
+            AppWidgetServiceImpl.getSettingsFile(userId).delete();
+        } else {
+            impl.onUserRemoved();
+        }
     }
 
     private AppWidgetServiceImpl getImplForUser() {

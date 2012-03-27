@@ -326,6 +326,13 @@ public class SyncManager implements OnAccountsUpdateListener {
         }
     };
 
+    private BroadcastReceiver mUserIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onUserRemoved(intent);
+        }
+    };
+
     private static final String ACTION_SYNC_ALARM = "android.content.syncmanager.SYNC_ALARM";
     private final SyncHandler mSyncHandler;
 
@@ -419,6 +426,10 @@ public class SyncManager implements OnAccountsUpdateListener {
         intentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
         intentFilter.setPriority(100);
         context.registerReceiver(mShutdownIntentReceiver, intentFilter);
+
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(mUserIntentReceiver, intentFilter);
 
         if (!factoryTest) {
             mNotificationMgr = (NotificationManager)
@@ -902,6 +913,18 @@ public class SyncManager implements OnAccountsUpdateListener {
         } else {
             Log.d(TAG, "not retrying sync operation because the error is a hard error: "
                     + operation);
+        }
+    }
+
+    private void onUserRemoved(Intent intent) {
+        int userId = intent.getIntExtra(Intent.EXTRA_USERID, -1);
+        if (userId == -1) return;
+
+        // Clean up the storage engine database
+        mSyncStorageEngine.doDatabaseCleanup(new Account[0], userId);
+        onAccountsUpdated(null);
+        synchronized (mSyncQueue) {
+            mSyncQueue.removeUser(userId);
         }
     }
 

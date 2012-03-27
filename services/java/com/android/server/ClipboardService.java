@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserId;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -204,7 +205,7 @@ public class ClipboardService extends IClipboard.Stub {
         PackageInfo pi;
         try {
             pi = mPm.getPackageInfo(pkg, 0);
-            if (pi.applicationInfo.uid != uid) {
+            if (!UserId.isSameApp(pi.applicationInfo.uid, uid)) {
                 throw new SecurityException("Calling uid " + uid
                         + " does not own package " + pkg);
             }

@@ -25,9 +25,11 @@ import android.app.PendingIntent;
 import android.app.WallpaperInfo;
 import android.app.backup.BackupManager;
 import android.app.backup.WallpaperBackupHelper;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -36,6 +38,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -401,39 +404,46 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             wallpaper.wallpaperObserver.stopWatching();
         }
     }
-    
+
     public void systemReady() {
         if (DEBUG) Slog.v(TAG, "systemReady");
         WallpaperData wallpaper = mWallpaperMap.get(0);
         switchWallpaper(wallpaper);
         wallpaper.wallpaperObserver = new WallpaperObserver(wallpaper);
         wallpaper.wallpaperObserver.startWatching();
-        ActivityManagerService ams = (ActivityManagerService) ServiceManager
-                .getService(Context.ACTIVITY_SERVICE);
-        ams.addUserListener(new ActivityManagerService.UserListener() {
 
+        IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(new BroadcastReceiver() {
             @Override
-            public void onUserChanged(int userId) {
-                switchUser(userId);
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                    switchUser(intent.getIntExtra(Intent.EXTRA_USERID, 0));
+                } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                    removeUser(intent.getIntExtra(Intent.EXTRA_USERID, 0));
+                }
             }
-
-            @Override
-            public void onUserAdded(int userId) {
-            }
-
-            @Override
-            public void onUserRemoved(int userId) {
-            }
-
-            @Override
-            public void onUserLoggedOut(int userId) {
-            }
-
-        });
+        }, userFilter);
     }
 
     String getName() {
         return mWallpaperMap.get(0).name;
+    }
+
+    void removeUser(int userId) {
+        synchronized (mLock) {
+            WallpaperData wallpaper = mWallpaperMap.get(userId);
+            if (wallpaper != null) {
+                wallpaper.wallpaperObserver.stopWatching();
+                mWallpaperMap.remove(userId);
+            }
+            File wallpaperFile = new File(getWallpaperDir(userId), WALLPAPER);
+            wallpaperFile.delete();
+            File wallpaperInfoFile = new File(getWallpaperDir(userId), WALLPAPER_INFO);
+            wallpaperInfoFile.delete();
+        }
     }
 
     void switchUser(int userId) {
@@ -861,7 +871,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     private static JournaledFile makeJournaledFile(int userId) {
-        final String base = "/data/system/users/" + userId + "/" + WALLPAPER_INFO;
+        final String base = getWallpaperDir(userId) + "/" + WALLPAPER_INFO;
         return new JournaledFile(new File(base), new File(base + ".tmp"));
     }
 
