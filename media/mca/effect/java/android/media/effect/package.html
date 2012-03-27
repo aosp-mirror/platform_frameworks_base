@@ -1,0 +1,54 @@
+<HTML>
+<BODY>
+<p>Provides classes that allow you to apply a variety of visual effects to images and
+videos. For example, you can easily fix red-eye, convert an image to grayscale,
+adjust brightness, adjust saturation, rotate an image, apply a fisheye effect, and much more. The
+system performs all effects processing on the GPU to obtain maximum performance.</p>
+
+<p>For maximum performance, effects are applied directly to OpenGL textures, so your application
+must have a valid OpenGL context before it can use the effects APIs. The textures to which you apply
+effects may be from bitmaps, videos or even the camera. However, there are certain restrictions that
+textures must meet:</p>
+<ol>
+<li>They must be bound to a {@link android.opengl.GLES20#GL_TEXTURE_2D} texture image</li>
+<li>They must contain at least one mipmap level</li>
+</ol>
+
+<p>An {@link android.media.effect.Effect} object defines a single media effect that you can apply to
+an image frame. The basic workflow to create an {@link android.media.effect.Effect} is:</p>
+
+<ol>
+<li>Call {@link android.media.effect.EffectContext#createWithCurrentGlContext
+EffectContext.createWithCurrentGlContext()} from your OpenGL ES 2.0 context.</li>
+<li>Use the returned {@link android.media.effect.EffectContext} to call {@link
+android.media.effect.EffectContext#getFactory EffectContext.getFactory()}, which returns an instance
+of {@link android.media.effect.EffectFactory}.</li>
+<li>Call {@link android.media.effect.EffectFactory#createEffect createEffect()}, passing it an
+effect name from @link android.media.effect.EffectFactory}, such as {@link
+android.media.effect.EffectFactory#EFFECT_FISHEYE} or {@link
+android.media.effect.EffectFactory#EFFECT_VIGNETTE}.</li>
+</ol>
+
+<p>You can adjust an effect’s parameters by calling {@link android.media.effect.Effect#setParameter
+setParameter()} and passing a parameter name and parameter value. Each type of effect accepts
+different parameters, which are documented with the effect name. For example, {@link
+android.media.effect.EffectFactory#EFFECT_FISHEYE} has one parameter for the {@code scale} of the
+distortion.</p>
+
+<p>To apply an effect on a texture, call {@link android.media.effect.Effect#apply apply()} on the
+{@link
+android.media.effect.Effect} and pass in the input texture, its width and height, and the output
+texture. The input texture  must be bound to a {@link android.opengl.GLES20#GL_TEXTURE_2D} texture
+image (usually done by calling the {@link android.opengl.GLES20#glTexImage2D glTexImage2D()}
+function). You may provide multiple mipmap levels. If the output texture has not been bound to a
+texture image, it will be automatically bound by the effect as a {@link
+android.opengl.GLES20#GL_TEXTURE_2D} and with one mipmap level (0), which will have the same
+size as the input.</p> 
+
+<p class="note"><strong>Note:</strong> All effects listed in {@link
+android.media.effect.EffectFactory} are guaranteed to be supported. However, some additional effects
+available from external libraries are not supported by all devices, so you must first check if the
+desired effect from the external library is supported by calling {@link
+android.media.effect.EffectFactory#isEffectSupported isEffectSupported()}.</p>
+</BODY>
+</HTML>

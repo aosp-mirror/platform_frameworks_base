@@ -324,9 +324,6 @@ fwbase_dirs_to_document := \
 # include definition of libcore_to_document
 include $(LOCAL_PATH)/../../libcore/Docs.mk
 
-# include definition of libfilterfw_to_document
-include $(LOCAL_PATH)/../../system/media/mca/Docs.mk
-
 non_base_dirs := \
 	../../external/apache-http/src/org/apache/http
 
@@ -349,8 +346,7 @@ html_dirs := \
 # Common sources for doc check and api check
 common_src_files := \
 	$(call find-other-html-files, $(html_dirs)) \
-	$(addprefix ../../libcore/, $(call libcore_to_document, $(LOCAL_PATH)/../../libcore)) \
-	$(addprefix ../../system/media/mca/, $(call libfilterfw_to_document, $(LOCAL_PATH)/../../system/media/mca)) \
+	$(addprefix ../../libcore/, $(call libcore_to_document, $(LOCAL_PATH)/../../libcore))
 
 # These are relative to frameworks/base
 framework_docs_LOCAL_SRC_FILES := \
