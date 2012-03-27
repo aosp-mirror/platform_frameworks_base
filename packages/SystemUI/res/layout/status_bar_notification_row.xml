@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/notification_height"
     >
@@ -7,31 +7,17 @@
         android:id="@+id/veto"
         android:layout_width="48dp"
         android:layout_height="match_parent"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
+        android:gravity="right"
         android:layout_marginRight="-80dp"
         android:background="@null"
         android:paddingRight="8dp"
         android:paddingLeft="8dp"
         />
 
-    <ImageView
-        android:id="@+id/large_icon"
-        android:layout_width="@android:dimen/notification_large_icon_width"
-        android:layout_height="@android:dimen/notification_large_icon_height"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:scaleType="center"
-        android:clickable="true"
-        android:background="@*android:drawable/notify_panel_notification_icon_bg_tile"
-        />
-
     <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@id/large_icon"
-        android:layout_alignParentRight="true"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/notification_divider_height"
         android:focusable="true"
         android:clickable="true"
         android:background="@drawable/notification_row_bg"
@@ -40,8 +26,8 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_divider_height"
-        android:layout_alignParentBottom="true"
+        android:gravity="bottom"
         android:background="@drawable/status_bar_notification_row_background_color"
         />
 
-</RelativeLayout>
+</FrameLayout>

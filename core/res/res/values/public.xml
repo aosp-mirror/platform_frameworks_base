@@ -198,6 +198,8 @@
   <java-symbol type="id" name="action0" />
   <java-symbol type="id" name="action1" />
   <java-symbol type="id" name="action2" />
+  <java-symbol type="id" name="big_picture" />
+  <java-symbol type="id" name="big_text" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -1070,6 +1072,7 @@
   <java-symbol type="layout" name="zoom_controls" />
   <java-symbol type="layout" name="zoom_magnify" />
   <java-symbol type="layout" name="notification_intruder_content" />
+  <java-symbol type="layout" name="notification_template_big_picture" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
