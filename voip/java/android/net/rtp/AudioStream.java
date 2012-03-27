@@ -158,7 +158,7 @@ public class AudioStream extends RtpStream {
             if (type < 96 || type > 127) {
                 throw new IllegalArgumentException("Invalid type");
             }
-            if (type == mCodec.type) {
+            if (mCodec != null && type == mCodec.type) {
                 throw new IllegalArgumentException("The type is used by codec");
             }
         }
