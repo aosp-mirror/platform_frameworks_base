@@ -166,6 +166,7 @@ void OpenGLRenderer::prepare(bool opaque) {
 
 void OpenGLRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
     mCaches.clearGarbage();
+    mFunctors.clear();
 
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
@@ -236,7 +237,39 @@ void OpenGLRenderer::resume() {
     glBlendEquation(GL_FUNC_ADD);
 }
 
-status_t OpenGLRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
+status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
+    status_t result = DrawGlInfo::kStatusDone;
+
+    Vector<Functor*> functors(mFunctors);
+    mFunctors.clear();
+
+    DrawGlInfo info;
+    info.clipLeft = 0;
+    info.clipTop = 0;
+    info.clipRight = 0;
+    info.clipBottom = 0;
+    info.isLayer = false;
+    memset(info.transform, 0, sizeof(float) * 16);
+
+    size_t count = functors.size();
+    for (size_t i = 0; i < count; i++) {
+        Functor* f = functors.itemAt(i);
+        result |= (*f)(DrawGlInfo::kModeProcess, &info);
+
+        if (result != DrawGlInfo::kStatusDone) {
+            Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
+            dirty.unionWith(localDirty);
+
+            if (result == DrawGlInfo::kStatusInvoke) {
+                mFunctors.push(f);
+            }
+        }
+    }
+
+    return result;
+}
+
+status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     interrupt();
     if (mDirtyClip) {
         setScissorFromClip();
@@ -261,11 +294,15 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     info.isLayer = hasLayer();
     getSnapshot()->transform->copyTo(&info.transform[0]);
 
-    status_t result = (*functor)(0, &info);
+    status_t result = (*functor)(DrawGlInfo::kModeDraw, &info);
 
-    if (result != 0) {
+    if (result != DrawGlInfo::kStatusDone) {
         Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
         dirty.unionWith(localDirty);
+
+        if (result == DrawGlInfo::kStatusInvoke) {
+            mFunctors.push(functor);
+        }
     }
 
     resume();

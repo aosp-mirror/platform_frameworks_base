@@ -16,9 +16,6 @@
 
 package android.os;
 
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.TimeUtils;
 
 /**
@@ -368,13 +365,13 @@ public final class Message implements Parcelable {
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
      * with represent to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#acquireSyncBarrier()}.
+     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
      *
      * @return True if the message is asynchronous.
      *
      * @see #setAsynchronous(boolean)
-     * @see MessageQueue#acquireSyncBarrier()
-     * @see MessageQueue#releaseSyncBarrier()
+     * @see MessageQueue#enqueueSyncBarrier(long)
+     * @see MessageQueue#removeSyncBarrier(int)
      *
      * @hide
      */
@@ -387,13 +384,13 @@ public final class Message implements Parcelable {
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
      * with represent to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#acquireSyncBarrier()}.
+     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
      *
      * @param async True if the message is asynchronous.
      *
      * @see #isAsynchronous()
-     * @see MessageQueue#acquireSyncBarrier()
-     * @see MessageQueue#releaseSyncBarrier()
+     * @see MessageQueue#enqueueSyncBarrier(long)
+     * @see MessageQueue#removeSyncBarrier(int)
      *
      * @hide
      */
@@ -506,7 +503,7 @@ public final class Message implements Parcelable {
         Messenger.writeMessengerOrNullToParcel(replyTo, dest);
     }
 
-    private final void readFromParcel(Parcel source) {
+    private void readFromParcel(Parcel source) {
         what = source.readInt();
         arg1 = source.readInt();
         arg2 = source.readInt();

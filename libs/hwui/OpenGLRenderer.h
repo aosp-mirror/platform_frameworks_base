@@ -72,7 +72,8 @@ public:
     virtual void interrupt();
     virtual void resume();
 
-    virtual status_t callDrawGLFunction(Functor *functor, Rect& dirty);
+    ANDROID_API status_t invokeFunctors(Rect& dirty);
+    virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
     ANDROID_API int getSaveCount() const;
     virtual int save(int flags);
@@ -602,8 +603,10 @@ private:
     // Various caches
     Caches& mCaches;
 
-    // List of rectagnles to clear after saveLayer() is invoked
+    // List of rectangles to clear after saveLayer() is invoked
     Vector<Rect*> mLayers;
+    // List of functors to invoke after a frame is drawn
+    Vector<Functor*> mFunctors;
 
     // Indentity matrix
     const mat4 mIdentity;

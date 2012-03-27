@@ -98,4 +98,16 @@ public abstract class HardwareCanvas extends Canvas {
         // Noop - this is done in the display list recorder subclass
         return DisplayList.STATUS_DONE;
     }
+
+    /**
+     * Invoke all the functors who requested to be invoked during the previous frame.
+     * 
+     * @param dirty The region to redraw when the functors return {@link DisplayList#STATUS_DRAW}
+     *              
+     * @return One of {@link DisplayList#STATUS_DONE}, {@link DisplayList#STATUS_DRAW} or
+     *         {@link DisplayList#STATUS_INVOKE}
+     */
+    public int invokeFunctors(Rect dirty) {
+        return DisplayList.STATUS_DONE;
+    }
 }
