@@ -201,9 +201,9 @@ class BackupManagerService extends IBackupManager.Stub {
     BackupHandler mBackupHandler;
     PendingIntent mRunBackupIntent, mRunInitIntent;
     BroadcastReceiver mRunBackupReceiver, mRunInitReceiver;
-    // map UIDs to the set of backup client services within that UID's app set
-    final SparseArray<HashSet<ApplicationInfo>> mBackupParticipants
-        = new SparseArray<HashSet<ApplicationInfo>>();
+    // map UIDs to the set of participating packages under that UID
+    final SparseArray<HashSet<String>> mBackupParticipants
+            = new SparseArray<HashSet<String>>();
     // set of backup services that have pending changes
     class BackupRequest {
         public String packageName;
@@ -960,7 +960,6 @@ class BackupManagerService extends IBackupManager.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
         // Register for events related to sdcard installation.
@@ -1239,12 +1238,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // Enqueue a new backup of every participant
         synchronized (mBackupParticipants) {
-            int N = mBackupParticipants.size();
+            final int N = mBackupParticipants.size();
             for (int i=0; i<N; i++) {
-                int uid = mBackupParticipants.keyAt(i);
-                HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
-                for (ApplicationInfo app: participants) {
-                    dataChangedImpl(app.packageName);
+                HashSet<String> participants = mBackupParticipants.valueAt(i);
+                if (participants != null) {
+                    for (String packageName : participants) {
+                        dataChangedImpl(packageName);
+                    }
                 }
             }
         }
@@ -1302,8 +1302,7 @@ class BackupManagerService extends IBackupManager.Stub {
             Bundle extras = intent.getExtras();
             String pkgList[] = null;
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
-                    Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
-                    Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
+                    Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
                 Uri uri = intent.getData();
                 if (uri == null) {
                     return;
@@ -1312,14 +1311,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (pkgName != null) {
                     pkgList = new String[] { pkgName };
                 }
-                if (Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
-                    // use the existing "add with replacement" logic
-                    if (MORE_DEBUG) Slog.d(TAG, "PACKAGE_REPLACED, updating package " + pkgName);
-                    added = replacing = true;
-                } else {
-                    added = Intent.ACTION_PACKAGE_ADDED.equals(action);
-                    replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
-                }
+                added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
                 added = true;
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
@@ -1331,20 +1324,23 @@ class BackupManagerService extends IBackupManager.Stub {
             if (pkgList == null || pkgList.length == 0) {
                 return;
             }
+
+            final int uid = extras.getInt(Intent.EXTRA_UID);
             if (added) {
                 synchronized (mBackupParticipants) {
                     if (replacing) {
-                        updatePackageParticipantsLocked(pkgList);
-                    } else {
-                        addPackageParticipantsLocked(pkgList);
+                        // This is the package-replaced case; we just remove the entry
+                        // under the old uid and fall through to re-add.
+                        removePackageParticipantsLocked(pkgList, uid);
                     }
+                    addPackageParticipantsLocked(pkgList);
                 }
             } else {
                 if (replacing) {
                     // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
                 } else {
                     synchronized (mBackupParticipants) {
-                        removePackageParticipantsLocked(pkgList);
+                        removePackageParticipantsLocked(pkgList, uid);
                     }
                 }
             }
@@ -1391,12 +1387,12 @@ class BackupManagerService extends IBackupManager.Stub {
         for (PackageInfo pkg : targetPkgs) {
             if (packageName == null || pkg.packageName.equals(packageName)) {
                 int uid = pkg.applicationInfo.uid;
-                HashSet<ApplicationInfo> set = mBackupParticipants.get(uid);
+                HashSet<String> set = mBackupParticipants.get(uid);
                 if (set == null) {
-                    set = new HashSet<ApplicationInfo>();
+                    set = new HashSet<String>();
                     mBackupParticipants.put(uid, set);
                 }
-                set.add(pkg.applicationInfo);
+                set.add(pkg.packageName);
                 if (MORE_DEBUG) Slog.v(TAG, "Agent found; added");
 
                 // If we've never seen this app before, schedule a backup for it
@@ -1410,63 +1406,36 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Remove the given packages' entries from our known active set.
-    void removePackageParticipantsLocked(String[] packageNames) {
+    void removePackageParticipantsLocked(String[] packageNames, int oldUid) {
         if (packageNames == null) {
             Slog.w(TAG, "removePackageParticipants with null list");
             return;
         }
 
-        if (DEBUG) Slog.v(TAG, "removePackageParticipantsLocked: #" + packageNames.length);
-        List<PackageInfo> knownPackages = allAgentPackages();
+        if (DEBUG) Slog.v(TAG, "removePackageParticipantsLocked: uid=" + oldUid
+                + " #" + packageNames.length);
         for (String pkg : packageNames) {
-            removePackageParticipantsLockedInner(pkg, knownPackages);
+            // Known previous UID, so we know which package set to check
+            HashSet<String> set = mBackupParticipants.get(oldUid);
+            if (set != null && set.contains(pkg)) {
+                removePackageFromSetLocked(set, pkg);
+                if (set.isEmpty()) {
+                    if (MORE_DEBUG) Slog.v(TAG, "  last one of this uid; purging set");
+                    mBackupParticipants.remove(oldUid);
+                }
+            }
         }
     }
 
-    private void removePackageParticipantsLockedInner(String packageName,
-            List<PackageInfo> allPackages) {
-        if (MORE_DEBUG) {
-            Slog.v(TAG, "removePackageParticipantsLockedInner (" + packageName
-                    + ") removing from " + allPackages.size() + " entries");
-            for (PackageInfo p : allPackages) {
-                Slog.v(TAG, "    - " + p.packageName);
-            }
-        }
-        for (PackageInfo pkg : allPackages) {
-            if (packageName == null || pkg.packageName.equals(packageName)) {
-                /*
-                int uid = -1;
-                try {
-                    PackageInfo info = mPackageManager.getPackageInfo(packageName, 0);
-                    uid = info.applicationInfo.uid;
-                } catch (NameNotFoundException e) {
-                    // we don't know this package name, so just skip it for now
-                    continue;
-                }
-                */
-                final int uid = pkg.applicationInfo.uid;
-                if (MORE_DEBUG) Slog.i(TAG, "   found pkg " + packageName + " uid=" + uid);
-
-                HashSet<ApplicationInfo> set = mBackupParticipants.get(uid);
-                if (set != null) {
-                    // Find the existing entry with the same package name, and remove it.
-                    // We can't just remove(app) because the instances are different.
-                    for (ApplicationInfo entry: set) {
-                        if (MORE_DEBUG) Slog.i(TAG, "      checking against " + entry.packageName);
-                        if (entry.packageName.equals(pkg)) {
-                            if (MORE_DEBUG) Slog.v(TAG, "  removing participant " + pkg);
-                            set.remove(entry);
-                            removeEverBackedUp(pkg.packageName);
-                            break;
-                        }
-                    }
-                    if (set.size() == 0) {
-                        mBackupParticipants.delete(uid);
-                    }
-                } else {
-                    if (MORE_DEBUG) Slog.i(TAG, "   ... not found in uid mapping");
-                }
-            }
+    private void removePackageFromSetLocked(final HashSet<String> set,
+            final String packageName) {
+        if (set.contains(packageName)) {
+            // Found it.  Remove this one package from the bookkeeping, and
+            // if it's the last participating app under this uid we drop the
+            // (now-empty) set as well.
+            if (MORE_DEBUG) Slog.v(TAG, "  removing participant " + packageName);
+            removeEverBackedUp(packageName);
+            set.remove(packageName);
         }
     }
 
@@ -1495,24 +1464,6 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
         return packages;
-    }
-
-    // Reset the given package's known backup participants.  Unlike add/remove, the update
-    // action cannot be passed a null package name.
-    void updatePackageParticipantsLocked(String[] packageNames) {
-        if (packageNames == null) {
-            Slog.e(TAG, "updatePackageParticipants called with null package list");
-            return;
-        }
-        if (DEBUG) Slog.v(TAG, "updatePackageParticipantsLocked: #" + packageNames.length);
-
-        if (packageNames.length > 0) {
-            List<PackageInfo> allApps = allAgentPackages();
-            for (String packageName : packageNames) {
-                removePackageParticipantsLockedInner(packageName, allApps);
-                addPackageParticipantsLockedInner(packageName, allApps);
-            }
-        }
     }
 
     // Called from the backup task: record that the given app has been successfully
@@ -4772,11 +4723,11 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     private void dataChangedImpl(String packageName) {
-        HashSet<ApplicationInfo> targets = dataChangedTargets(packageName);
+        HashSet<String> targets = dataChangedTargets(packageName);
         dataChangedImpl(packageName, targets);
     }
 
-    private void dataChangedImpl(String packageName, HashSet<ApplicationInfo> targets) {
+    private void dataChangedImpl(String packageName, HashSet<String> targets) {
         // Record that we need a backup pass for the caller.  Since multiple callers
         // may share a uid, we need to note all candidates within that uid and schedule
         // a backup pass for each of them.
@@ -4790,27 +4741,23 @@ class BackupManagerService extends IBackupManager.Stub {
 
         synchronized (mQueueLock) {
             // Note that this client has made data changes that need to be backed up
-            for (ApplicationInfo app : targets) {
-                // validate the caller-supplied package name against the known set of
-                // packages associated with this uid
-                if (app.packageName.equals(packageName)) {
-                    // Add the caller to the set of pending backups.  If there is
-                    // one already there, then overwrite it, but no harm done.
-                    BackupRequest req = new BackupRequest(packageName);
-                    if (mPendingBackups.put(app.packageName, req) == null) {
-                        if (DEBUG) Slog.d(TAG, "Now staging backup of " + packageName);
+            if (targets.contains(packageName)) {
+                // Add the caller to the set of pending backups.  If there is
+                // one already there, then overwrite it, but no harm done.
+                BackupRequest req = new BackupRequest(packageName);
+                if (mPendingBackups.put(packageName, req) == null) {
+                    if (DEBUG) Slog.d(TAG, "Now staging backup of " + packageName);
 
-                        // Journal this request in case of crash.  The put()
-                        // operation returned null when this package was not already
-                        // in the set; we want to avoid touching the disk redundantly.
-                        writeToJournalLocked(packageName);
+                    // Journal this request in case of crash.  The put()
+                    // operation returned null when this package was not already
+                    // in the set; we want to avoid touching the disk redundantly.
+                    writeToJournalLocked(packageName);
 
-                        if (MORE_DEBUG) {
-                            int numKeys = mPendingBackups.size();
-                            Slog.d(TAG, "Now awaiting backup for " + numKeys + " participants:");
-                            for (BackupRequest b : mPendingBackups.values()) {
-                                Slog.d(TAG, "    + " + b);
-                            }
+                    if (MORE_DEBUG) {
+                        int numKeys = mPendingBackups.size();
+                        Slog.d(TAG, "Now awaiting backup for " + numKeys + " participants:");
+                        for (BackupRequest b : mPendingBackups.values()) {
+                            Slog.d(TAG, "    + " + b);
                         }
                     }
                 }
@@ -4819,7 +4766,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Note: packageName is currently unused, but may be in the future
-    private HashSet<ApplicationInfo> dataChangedTargets(String packageName) {
+    private HashSet<String> dataChangedTargets(String packageName) {
         // If the caller does not hold the BACKUP permission, it can only request a
         // backup of its own data.
         if ((mContext.checkPermission(android.Manifest.permission.BACKUP, Binder.getCallingPid(),
@@ -4831,11 +4778,11 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // a caller with full permission can ask to back up any participating app
         // !!! TODO: allow backup of ANY app?
-        HashSet<ApplicationInfo> targets = new HashSet<ApplicationInfo>();
+        HashSet<String> targets = new HashSet<String>();
         synchronized (mBackupParticipants) {
             int N = mBackupParticipants.size();
             for (int i = 0; i < N; i++) {
-                HashSet<ApplicationInfo> s = mBackupParticipants.valueAt(i);
+                HashSet<String> s = mBackupParticipants.valueAt(i);
                 if (s != null) {
                     targets.addAll(s);
                 }
@@ -4862,7 +4809,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // ----- IBackupManager binder interface -----
 
     public void dataChanged(final String packageName) {
-        final HashSet<ApplicationInfo> targets = dataChangedTargets(packageName);
+        final HashSet<String> targets = dataChangedTargets(packageName);
         if (targets == null) {
             Slog.w(TAG, "dataChanged but no participant pkg='" + packageName + "'"
                    + " uid=" + Binder.getCallingUid());
@@ -4889,7 +4836,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // If the caller does not hold the BACKUP permission, it can only request a
         // wipe of its own backed-up data.
-        HashSet<ApplicationInfo> apps;
+        HashSet<String> apps;
         if ((mContext.checkPermission(android.Manifest.permission.BACKUP, Binder.getCallingPid(),
                 Binder.getCallingUid())) == PackageManager.PERMISSION_DENIED) {
             apps = mBackupParticipants.get(Binder.getCallingUid());
@@ -4897,30 +4844,27 @@ class BackupManagerService extends IBackupManager.Stub {
             // a caller with full permission can ask to back up any participating app
             // !!! TODO: allow data-clear of ANY app?
             if (DEBUG) Slog.v(TAG, "Privileged caller, allowing clear of other apps");
-            apps = new HashSet<ApplicationInfo>();
+            apps = new HashSet<String>();
             int N = mBackupParticipants.size();
             for (int i = 0; i < N; i++) {
-                HashSet<ApplicationInfo> s = mBackupParticipants.valueAt(i);
+                HashSet<String> s = mBackupParticipants.valueAt(i);
                 if (s != null) {
                     apps.addAll(s);
                 }
             }
         }
 
-        // now find the given package in the set of candidate apps
-        for (ApplicationInfo app : apps) {
-            if (app.packageName.equals(packageName)) {
-                if (DEBUG) Slog.v(TAG, "Found the app - running clear process");
-                // found it; fire off the clear request
-                synchronized (mQueueLock) {
-                    long oldId = Binder.clearCallingIdentity();
-                    mWakelock.acquire();
-                    Message msg = mBackupHandler.obtainMessage(MSG_RUN_CLEAR,
-                            new ClearParams(getTransport(mCurrentTransport), info));
-                    mBackupHandler.sendMessage(msg);
-                    Binder.restoreCallingIdentity(oldId);
-                }
-                break;
+        // Is the given app an available participant?
+        if (apps.contains(packageName)) {
+            if (DEBUG) Slog.v(TAG, "Found the app - running clear process");
+            // found it; fire off the clear request
+            synchronized (mQueueLock) {
+                long oldId = Binder.clearCallingIdentity();
+                mWakelock.acquire();
+                Message msg = mBackupHandler.obtainMessage(MSG_RUN_CLEAR,
+                        new ClearParams(getTransport(mCurrentTransport), info));
+                mBackupHandler.sendMessage(msg);
+                Binder.restoreCallingIdentity(oldId);
             }
         }
     }
@@ -5838,9 +5782,9 @@ class BackupManagerService extends IBackupManager.Stub {
                 int uid = mBackupParticipants.keyAt(i);
                 pw.print("  uid: ");
                 pw.println(uid);
-                HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
-                for (ApplicationInfo app: participants) {
-                    pw.println("    " + app.packageName);
+                HashSet<String> participants = mBackupParticipants.valueAt(i);
+                for (String app: participants) {
+                    pw.println("    " + app);
                 }
             }
 
