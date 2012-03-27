@@ -43,6 +43,7 @@
 #include "rsdFrameBufferObj.h"
 
 #include <gui/SurfaceTextureClient.h>
+#include <gui/DummyConsumer.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -326,8 +327,11 @@ bool rsdGLInit(const Context *rsc) {
     }
     gGLContextCount++;
 
-    sp<SurfaceTexture> st(new SurfaceTexture(123));
-    sp<SurfaceTextureClient> stc(new SurfaceTextureClient(st));
+    // Create a BufferQueue with a fake consumer
+    sp<BufferQueue> bq = new BufferQueue();
+    sp<DummyConsumer> dummy = new DummyConsumer(bq);
+    sp<SurfaceTextureClient> stc(new SurfaceTextureClient(static_cast<sp<ISurfaceTexture> >(bq)));
+
     dc->gl.egl.surfaceDefault = eglCreateWindowSurface(dc->gl.egl.display, dc->gl.egl.config,
                                                        static_cast<ANativeWindow*>(stc.get()),
                                                        NULL);
