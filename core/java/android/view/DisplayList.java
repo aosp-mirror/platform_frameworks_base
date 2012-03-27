@@ -49,7 +49,7 @@ public abstract class DisplayList {
      * 
      * @see HardwareCanvas#drawDisplayList(DisplayList, int, int, android.graphics.Rect, int)
      */
-    public static final int STATUS_DRAW = 0x2;
+    public static final int STATUS_DRAW = 0x1;
 
     /**
      * Indicates that the display list needs to re-execute its GL functors.
