@@ -17,7 +17,6 @@
 package android.webkit;
 
 import android.text.TextUtils;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 import libcore.net.MimeUtils;
 

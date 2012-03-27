@@ -38,6 +38,7 @@ public final class URLUtil {
     static final String RESOURCE_BASE = "file:///android_res/";
     static final String FILE_BASE = "file://";
     static final String PROXY_BASE = "file:///cookieless_proxy/";
+    static final String CONTENT_BASE = "content:";
 
     /**
      * Cleans up (if possible) user-entered web addresses
@@ -253,7 +254,7 @@ public final class URLUtil {
      * @return True iff the url is a content: url.
      */
     public static boolean isContentUrl(String url) {
-        return (null != url) && url.startsWith("content:");
+        return (null != url) && url.startsWith(CONTENT_BASE);
     }
 
     /**

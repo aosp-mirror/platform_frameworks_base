@@ -100,7 +100,7 @@ class JniUtil {
         return sContext.getPackageName();
     }
 
-    private static final String ANDROID_CONTENT = "content:";
+    private static final String ANDROID_CONTENT = URLUtil.CONTENT_BASE;
 
     /**
      * Called by JNI. Calculates the size of an input stream by reading it.
