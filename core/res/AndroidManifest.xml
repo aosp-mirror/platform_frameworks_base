@@ -1035,15 +1035,6 @@
         android:label="@string/permlab_clearAppCache"
         android:description="@string/permdesc_clearAppCache" />
 
-    <!-- Allows an application to read the low-level system log files.
-         Log entries can contain the user's private information,
-         which is why this permission is 'dangerous'. -->
-    <permission android:name="android.permission.READ_LOGS"
-        android:permissionGroup="android.permission-group.PERSONAL_INFO"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_readLogs"
-        android:description="@string/permdesc_readLogs" />
-
     <!-- Allows an application to use any media decoder when decoding for playback
          @hide -->
     <permission android:name="android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK"
@@ -1078,6 +1069,15 @@
         android:protectionLevel="signature|system|development"
         android:label="@string/permlab_dump"
         android:description="@string/permdesc_dump" />
+
+    <!-- Allows an application to read the low-level system log files.
+         Log entries can contain the user's private information,
+         which is why this permission is not available to normal apps. -->
+    <permission android:name="android.permission.READ_LOGS"
+        android:permissionGroup="android.permission-group.DEVELOPMENT_TOOLS"
+        android:protectionLevel="signature|system|development"
+        android:label="@string/permlab_readLogs"
+        android:description="@string/permdesc_readLogs" />
 
     <!-- Configure an application for debugging. -->
     <permission android:name="android.permission.SET_DEBUG_APP"
