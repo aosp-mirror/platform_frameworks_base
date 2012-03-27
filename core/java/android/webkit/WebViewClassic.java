@@ -4717,10 +4717,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         queueFull = nativeSetBaseLayer(mNativeClass, layer, invalRegion,
                                        showVisualIndicator, isPictureAfterFirstLayout);
 
-        if (layer == 0 || isPictureAfterFirstLayout) {
-            mWebViewCore.resumeWebKitDraw();
-        } else if (queueFull) {
+        if (queueFull) {
             mWebViewCore.pauseWebKitDraw();
+        } else {
+            mWebViewCore.resumeWebKitDraw();
         }
 
         if (mHTML5VideoViewProxy != null) {
@@ -8615,9 +8615,19 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         void onPageSwapOccurred(boolean notifyAnimationStarted);
     }
 
+    long mLastSwapTime;
+    double mAverageSwapFps;
+
     /** Called by JNI when pages are swapped (only occurs with hardware
      * acceleration) */
     protected void pageSwapCallback(boolean notifyAnimationStarted) {
+        if (DebugFlags.MEASURE_PAGE_SWAP_FPS) {
+            long now = System.currentTimeMillis();
+            long diff = now - mLastSwapTime;
+            mAverageSwapFps = ((1000.0 / diff) + mAverageSwapFps) / 2;
+            Log.d(LOGTAG, "page swap fps: " + mAverageSwapFps);
+            mLastSwapTime = now;
+        }
         mWebViewCore.resumeWebKitDraw();
         if (notifyAnimationStarted) {
             mWebViewCore.sendMessage(EventHub.NOTIFY_ANIMATION_STARTED);

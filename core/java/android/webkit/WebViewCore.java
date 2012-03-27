@@ -2271,6 +2271,7 @@ public final class WebViewCore {
                 mFirstLayoutForNonStandardLoad = false;
             }
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
+            pauseWebKitDraw();
             Message.obtain(mWebViewClassic.mPrivateHandler,
                     WebViewClassic.NEW_PICTURE_MSG_ID, draw).sendToTarget();
         }
