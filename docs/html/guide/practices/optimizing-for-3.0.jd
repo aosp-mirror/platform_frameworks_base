@@ -108,7 +108,7 @@ SDK with the new platform:</p>
 SDK starter package now</a>.)</p>
 
 <ol>
-  <li><a href="{@docRoot}sdk/adding-components.html#launching">Launch the Android SDK and AVD
+  <li><a href="{@docRoot}sdk/adding-components.html#launching">Launch the Android SDK
 Manager</a> and install the following:
     <ul>
       <li>SDK Platform Android 3.0</li>
@@ -147,7 +147,7 @@ Android 3.0, the emulator is still best way to evaluate your application's appea
 functionality on Android 3.0.</p>
 
 <p class="note"><strong>Tip:</strong> To improve the startup time for the emulator, enable snapshots
-for the AVD when you create it with the SDK and AVD Manager (there's a checkbox in the AVD creator
+for the AVD when you create it with the AVD Manager (there's a checkbox in the AVD creator
 to <strong>Enable</strong> snapshots). Then, start the AVD from the AVD manager and check <b>Launch
 from snapshot</b> and <b>Save to snapshot</b>. This way, when you close the emulator, a snapshot of
 the AVD state is saved and used to quickly relaunch the AVD next time. However, when you choose to
@@ -281,7 +281,7 @@ to help you add features from Android 3.0 without requiring you to change your <
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
 or build target, we're providing a static library called the <a
 href="{@docRoot}sdk/compatibility-library.html">Compatibility Library</a>
-(downloadable from the AVD and SDK Manager).</p>
+(downloadable from the Android SDK Manager).</p>
 <p>This library includes APIs for <a
 href="{@docRoot}guide/topics/fundamentals/fragments.html">fragments</a>, <a
 href="{@docRoot}guide/topics/fundamentals/loaders.html">loaders</a>, and some updated classes. By
@@ -421,7 +421,7 @@ href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
 href="{@docRoot}sdk/android-3.0.html#api">Android 3.0 Platform</a> document also have accompanying
 samples that allow you to preview the effects and can help you understand how to use them. To get
 the samples, download them from the SDK repository <a href="{@docRoot}sdk/adding-components.html"
->using the Android SDK and AVD Manager</a>. After downloading the samples ("Samples for SDK API
+>using the Android SDK Manager</a>. After downloading the samples ("Samples for SDK API
 11"), you can find them in <code>&lt;sdk_root&gt;/samples/android-11/</code>. The following list
 provides links to the browsable source code for some of the samples:</p>
 
