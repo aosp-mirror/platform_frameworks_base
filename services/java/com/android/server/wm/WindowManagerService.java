@@ -1238,7 +1238,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (highestTarget != null) {
                     if (DEBUG_INPUT_METHOD) Slog.v(TAG, "mNextAppTransition="
                             + mNextAppTransition + " " + highestTarget
-                            + " animating=" + highestTarget.isAnimating()
+                            + " animating=" + highestTarget.mWinAnimator.isAnimating()
                             + " layer=" + highestTarget.mAnimLayer
                             + " new layer=" + w.mAnimLayer);
 
@@ -1248,7 +1248,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mInputMethodTargetWaitingAnim = true;
                         mInputMethodTarget = highestTarget;
                         return highestPos + 1;
-                    } else if (highestTarget.isAnimating() &&
+                    } else if (highestTarget.mWinAnimator.isAnimating() &&
                             highestTarget.mAnimLayer > w.mAnimLayer) {
                         // If the window we are currently targeting is involved
                         // with an animation, and it is on top of the next target
@@ -1601,7 +1601,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 foundI = i;
                 if (w == mWallpaperTarget && ((w.mAppToken != null
                         && w.mAppToken.animation != null)
-                        || w.mAnimation != null)) {
+                        || w.mWinAnimator.mAnimation != null)) {
                     // The current wallpaper target is animating, so we'll
                     // look behind it for another possible target and figure
                     // out what is going on below.
@@ -1658,9 +1658,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // Now what is happening...  if the current and new targets are
             // animating, then we are in our super special mode!
             if (foundW != null && oldW != null) {
-                boolean oldAnim = oldW.mAnimation != null
+                boolean oldAnim = oldW.mWinAnimator.mAnimation != null
                         || (oldW.mAppToken != null && oldW.mAppToken.animation != null);
-                boolean foundAnim = foundW.mAnimation != null
+                boolean foundAnim = foundW.mWinAnimator.mAnimation != null
                         || (foundW.mAppToken != null && foundW.mAppToken.animation != null);
                 if (DEBUG_WALLPAPER) {
                     Slog.v(TAG, "New animation: " + foundAnim
@@ -1712,10 +1712,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         } else if (mLowerWallpaperTarget != null) {
             // Is it time to stop animating?
-            boolean lowerAnimating = mLowerWallpaperTarget.mAnimation != null
+            boolean lowerAnimating = mLowerWallpaperTarget.mWinAnimator.mAnimation != null
                     || (mLowerWallpaperTarget.mAppToken != null
                             && mLowerWallpaperTarget.mAppToken.animation != null);
-            boolean upperAnimating = mUpperWallpaperTarget.mAnimation != null
+            boolean upperAnimating = mUpperWallpaperTarget.mWinAnimator.mAnimation != null
                     || (mUpperWallpaperTarget.mAppToken != null
                             && mUpperWallpaperTarget.mAppToken.animation != null);
             if (!lowerAnimating || !upperAnimating) {
@@ -2303,7 +2303,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_APP_TRANSITIONS) Slog.v(
                 TAG, "Remove " + win + ": mSurface=" + win.mSurface
                 + " mExiting=" + win.mExiting
-                + " isAnimating=" + win.isAnimating()
+                + " isAnimating=" + win.mWinAnimator.isAnimating()
                 + " app-animation="
                 + (win.mAppToken != null ? win.mAppToken.animation : null)
                 + " inPendingTransaction="
@@ -2330,7 +2330,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.mExiting = true;
                 }
             }
-            if (win.mExiting || win.isAnimating()) {
+            if (win.mExiting || win.mWinAnimator.isAnimating()) {
                 // The exit animation is running... wait for it!
                 //Slog.i(TAG, "*** Running exit animation...");
                 win.mExiting = true;
@@ -2699,7 +2699,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     (win.mAppToken == null || !win.mAppToken.clientHidden)) {
                 displayed = !win.isVisibleLw();
                 if (win.mExiting) {
-                    win.cancelExitAnimationForNextAnimationLocked();
+                    win.mWinAnimator.cancelExitAnimationForNextAnimationLocked();
                 }
                 if (win.mDestroying) {
                     win.mDestroying = false;
@@ -2803,7 +2803,7 @@ public class WindowManagerService extends IWindowManager.Stub
                               applyAnimationLocked(win, transit, false)) {
                             focusMayChange = true;
                             win.mExiting = true;
-                        } else if (win.isAnimating()) {
+                        } else if (win.mWinAnimator.isAnimating()) {
                             // Currently in a hide animation... turn this into
                             // an exit.
                             win.mExiting = true;
@@ -2812,7 +2812,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             // window, we need to change both of them inside
                             // of a transaction to avoid artifacts.
                             win.mExiting = true;
-                            win.mAnimating = true;
+                            win.mWinAnimator.mAnimating = true;
                         } else {
                             if (mInputMethodWindow == win) {
                                 mInputMethodWindow = null;
@@ -3026,7 +3026,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     boolean applyAnimationLocked(WindowState win,
             int transit, boolean isEntrance) {
-        if (win.mLocalAnimating && win.mAnimationIsEntrance == isEntrance) {
+        if (win.mWinAnimator.mLocalAnimating &&
+                win.mWinAnimator.mAnimationIsEntrance == isEntrance) {
             // If we are trying to apply an animation, but already running
             // an animation of the same type, then just leave that one alone.
             return true;
@@ -3063,7 +3064,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (DEBUG_ANIM) Slog.v(TAG, "applyAnimation: win=" + win
                     + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
-                    + " mAnimation=" + win.mAnimation
+                    + " mAnimation=" + win.mWinAnimator.mAnimation
                     + " isEntrance=" + isEntrance);
             if (a != null) {
                 if (DEBUG_ANIM) {
@@ -3074,14 +3075,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     Slog.v(TAG, "Loaded animation " + a + " for " + win, e);
                 }
-                win.setAnimation(a);
-                win.mAnimationIsEntrance = isEntrance;
+                win.mWinAnimator.setAnimation(a);
+                win.mWinAnimator.mAnimationIsEntrance = isEntrance;
             }
         } else {
-            win.clearAnimation();
+            win.mWinAnimator.clearAnimation();
         }
 
-        return win.mAnimation != null;
+        return win.mWinAnimator.mAnimation != null;
     }
 
     private Animation loadAnimation(WindowManager.LayoutParams lp, int animAttr) {
@@ -3370,7 +3371,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     for (int i=0; i<N; i++) {
                         WindowState win = wtoken.windows.get(i);
 
-                        if (win.isAnimating()) {
+                        if (win.mWinAnimator.isAnimating()) {
                             delayed = true;
                         }
 
@@ -4063,7 +4064,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
 
-                if (win.isAnimating()) {
+                if (win.mWinAnimator.isAnimating()) {
                     delayed = true;
                 }
 
@@ -8099,11 +8100,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_FOCUS) Slog.i(TAG, "win=" + w + " force hides other windows");
                         mAnimator.mForceHiding = true;
                     } else if (mPolicy.canBeForceHidden(w, attrs)) {
-                        if (!w.mAnimating) {
+                        if (!w.mWinAnimator.mAnimating) {
                             // We set the animation above so it
                             // is not yet running.
                             // TODO(cmautner): We lose the enter animation when this occurs.
-                            w.clearAnimation();
+                            w.mWinAnimator.clearAnimation();
                         }
                     }
                 }
@@ -9770,7 +9771,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public interface OnHardKeyboardStatusChangeListener {
         public void onHardKeyboardStatusChange(boolean available, boolean enabled);
     }
-    
+
     void debugLayoutRepeats(final String msg) {
         if (mLayoutRepeatCount >= LAYOUT_REPEAT_THRESHOLD) {
             Slog.v(TAG, "Layouts looping: " + msg);

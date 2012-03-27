@@ -51,7 +51,7 @@ class AppWindowToken extends WindowToken {
     int groupId = -1;
     boolean appFullscreen;
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-    
+
     // The input dispatching timeout for this application token in nanoseconds.
     long inputDispatchingTimeoutNanos;
 
@@ -225,7 +225,7 @@ class AppWindowToken extends WindowToken {
             if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG,
                     "performing show on: " + w);
             w.performShowLocked();
-            isAnimating |= w.isAnimating();
+            isAnimating |= w.mWinAnimator.isAnimating();
         }
         return isAnimating;
     }
@@ -243,11 +243,11 @@ class AppWindowToken extends WindowToken {
         // cache often used attributes locally
         final float tmpFloats[] = service.mTmpFloats;
         thumbnailTransformation.getMatrix().getValues(tmpFloats);
-        if (WindowManagerService.SHOW_TRANSACTIONS) service.logSurface(thumbnail,
+        if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
                 "thumbnail", "POS " + tmpFloats[Matrix.MTRANS_X]
                 + ", " + tmpFloats[Matrix.MTRANS_Y], null);
         thumbnail.setPosition(tmpFloats[Matrix.MTRANS_X], tmpFloats[Matrix.MTRANS_Y]);
-        if (WindowManagerService.SHOW_TRANSACTIONS) service.logSurface(thumbnail,
+        if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
                 "thumbnail", "alpha=" + thumbnailTransformation.getAlpha()
                 + " layer=" + thumbnailLayer
                 + " matrix=[" + tmpFloats[Matrix.MSCALE_X]
@@ -358,7 +358,7 @@ class AppWindowToken extends WindowToken {
 
         final int N = windows.size();
         for (int i=0; i<N; i++) {
-            windows.get(i).finishExit();
+            windows.get(i).mWinAnimator.finishExit();
         }
         updateReportedVisibilityLocked();
 
@@ -388,7 +388,7 @@ class AppWindowToken extends WindowToken {
             if (WindowManagerService.DEBUG_VISIBILITY) {
                 Slog.v(WindowManagerService.TAG, "Win " + win + ": isDrawn="
                         + win.isDrawnLw()
-                        + ", isAnimating=" + win.isAnimating());
+                        + ", isAnimating=" + win.mWinAnimator.isAnimating());
                 if (!win.isDrawnLw()) {
                     Slog.v(WindowManagerService.TAG, "Not displayed: s=" + win.mSurface
                             + " pv=" + win.mPolicyVisibility
@@ -398,17 +398,17 @@ class AppWindowToken extends WindowToken {
                             + " th="
                             + (win.mAppToken != null
                                     ? win.mAppToken.hiddenRequested : false)
-                            + " a=" + win.mAnimating);
+                            + " a=" + win.mWinAnimator.mAnimating);
                 }
             }
             numInteresting++;
             if (win.isDrawnLw()) {
                 numDrawn++;
-                if (!win.isAnimating()) {
+                if (!win.mWinAnimator.isAnimating()) {
                     numVisible++;
                 }
                 nowGone = false;
-            } else if (win.isAnimating()) {
+            } else if (win.mWinAnimator.isAnimating()) {
                 nowGone = false;
             }
         }
