@@ -8679,7 +8679,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
                     b.left+","+b.top+","+b.right+","+b.bottom+"}");
         }
-        invalidateContentRect(draw.mInvalRegion.getBounds());
+        Rect invalBounds = draw.mInvalRegion.getBounds();
+        if (!invalBounds.isEmpty()) {
+            invalidateContentRect(invalBounds);
+        } else {
+            mWebView.invalidate();
+        }
 
         if (mPictureListener != null) {
             mPictureListener.onNewPicture(getWebView(), capturePicture());
