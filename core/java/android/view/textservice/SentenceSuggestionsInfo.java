@@ -22,8 +22,13 @@ import android.os.Parcelable;
 import java.util.Arrays;
 
 /**
- * @hide
- * This class contains a metadata of sentence level suggestions from the text service
+ * This class contains a metadata of suggestions returned from a text service
+ * (e.g. {@link android.service.textservice.SpellCheckerService}).
+ * The text service uses this class to return the suggestions
+ * for a sentence. See {@link SuggestionsInfo} which is used for suggestions for a word.
+ * This class extends the functionality of {@link SuggestionsInfo} as far as this class enables
+ * you to put multiple {@link SuggestionsInfo}s on a sentence with the offsets and the lengths
+ * of all {@link SuggestionsInfo}s.
  */
 public final class SentenceSuggestionsInfo implements Parcelable {
 
@@ -82,14 +87,15 @@ public final class SentenceSuggestionsInfo implements Parcelable {
     }
 
     /**
-     * @hide
+     * @return the count of {@link SuggestionsInfo}s this instance holds.
      */
     public int getSuggestionsCount() {
         return mSuggestionsInfos.length;
     }
 
     /**
-     * @hide
+     * @param i the id of {@link SuggestionsInfo}s this instance holds.
+     * @return a {@link SuggestionsInfo} at the specified id
      */
     public SuggestionsInfo getSuggestionsInfoAt(int i) {
         if (i >= 0 && i < mSuggestionsInfos.length) {
@@ -99,7 +105,8 @@ public final class SentenceSuggestionsInfo implements Parcelable {
     }
 
     /**
-     * @hide
+     * @param i the id of {@link SuggestionsInfo}s this instance holds
+     * @return the offset of the specified {@link SuggestionsInfo}
      */
     public int getOffsetAt(int i) {
         if (i >= 0 && i < mOffsets.length) {
@@ -109,7 +116,8 @@ public final class SentenceSuggestionsInfo implements Parcelable {
     }
 
     /**
-     * @hide
+     * @param i the id of {@link SuggestionsInfo}s this instance holds
+     * @return the length of the specified {@link SuggestionsInfo}
      */
     public int getLengthAt(int i) {
         if (i >= 0 && i < mLengths.length) {

@@ -18916,6 +18916,7 @@ package android.service.textservice {
     method public void onCancel();
     method public void onClose();
     method public abstract void onCreate();
+    method public android.view.textservice.SentenceSuggestionsInfo[] onGetSentenceSuggestionsMultiple(android.view.textservice.TextInfo[], int);
     method public abstract android.view.textservice.SuggestionsInfo onGetSuggestions(android.view.textservice.TextInfo, int);
     method public android.view.textservice.SuggestionsInfo[] onGetSuggestionsMultiple(android.view.textservice.TextInfo[], int, boolean);
   }
@@ -25147,6 +25148,18 @@ package android.view.inputmethod {
 
 package android.view.textservice {
 
+  public final class SentenceSuggestionsInfo implements android.os.Parcelable {
+    ctor public SentenceSuggestionsInfo(android.view.textservice.SuggestionsInfo[], int[], int[]);
+    ctor public SentenceSuggestionsInfo(android.os.Parcel);
+    method public int describeContents();
+    method public int getLengthAt(int);
+    method public int getOffsetAt(int);
+    method public int getSuggestionsCount();
+    method public android.view.textservice.SuggestionsInfo getSuggestionsInfoAt(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public final class SpellCheckerInfo implements android.os.Parcelable {
     method public int describeContents();
     method public android.content.ComponentName getComponent();
@@ -25165,6 +25178,7 @@ package android.view.textservice {
   public class SpellCheckerSession {
     method public void cancel();
     method public void close();
+    method public void getSentenceSuggestions(android.view.textservice.TextInfo[], int);
     method public android.view.textservice.SpellCheckerInfo getSpellChecker();
     method public void getSuggestions(android.view.textservice.TextInfo, int);
     method public void getSuggestions(android.view.textservice.TextInfo[], int, boolean);

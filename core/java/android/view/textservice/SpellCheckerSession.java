@@ -178,17 +178,19 @@ public class SpellCheckerSession {
     }
 
     /**
-     * @hide
+     * Get suggestions from the specified sentences
+     * @param textInfos an array of text metadata for a spell checker
+     * @param suggestionsLimit the maximum number of suggestions that will be returned
      */
-    public void getSentenceSuggestions(TextInfo[] textInfo, int suggestionsLimit) {
+    public void getSentenceSuggestions(TextInfo[] textInfos, int suggestionsLimit) {
         mSpellCheckerSessionListenerImpl.getSentenceSuggestionsMultiple(
-                textInfo, suggestionsLimit);
+                textInfos, suggestionsLimit);
     }
 
     /**
      * Get candidate strings for a substring of the specified text.
      * @param textInfo text metadata for a spell checker
-     * @param suggestionsLimit the number of limit of suggestions returned
+     * @param suggestionsLimit the maximum number of suggestions that will be returned
      */
     public void getSuggestions(TextInfo textInfo, int suggestionsLimit) {
         getSuggestions(new TextInfo[] {textInfo}, suggestionsLimit, false);
@@ -197,7 +199,7 @@ public class SpellCheckerSession {
     /**
      * A batch process of getSuggestions
      * @param textInfos an array of text metadata for a spell checker
-     * @param suggestionsLimit the number of limit of suggestions returned
+     * @param suggestionsLimit the maximum number of suggestions that will be returned
      * @param sequentialWords true if textInfos can be treated as sequential words.
      */
     public void getSuggestions(
@@ -434,12 +436,19 @@ public class SpellCheckerSession {
      */
     public interface SpellCheckerSessionListener {
         /**
-         * Callback for "getSuggestions"
-         * @param results an array of results of getSuggestions
+         * Callback for {@link SpellCheckerSession#getSuggestions(TextInfo[], int, boolean)}
+         * @param results an array of {@link SuggestionsInfo}s.
+         * These results are suggestions for {@link TextInfo}s queried by
+         * {@link SpellCheckerSession#getSuggestions(TextInfo[], int, boolean)}.
          */
         public void onGetSuggestions(SuggestionsInfo[] results);
+        // TODO: Remove @hide as soon as the sample spell checker client gets fixed.
         /**
          * @hide
+         * Callback for {@link SpellCheckerSession#getSentenceSuggestions(TextInfo[], int)}
+         * @param results an array of {@link SentenceSuggestionsInfo}s.
+         * These results are suggestions for {@link TextInfo}s
+         * queried by {@link SpellCheckerSession#getSentenceSuggestions(TextInfo[], int)}.
          */
         public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results);
     }
