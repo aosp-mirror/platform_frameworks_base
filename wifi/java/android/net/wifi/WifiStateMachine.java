@@ -127,6 +127,9 @@ public class WifiStateMachine extends StateMachine {
     private static final int SCAN_RESULT_CACHE_SIZE = 80;
     private final LruCache<String, ScanResult> mScanResultCache;
 
+    /* Chipset supports background scan */
+    private final boolean mBackgroundScanSupported;
+
     private String mInterfaceName;
     /* Tethering interface could be seperate from wlan interface */
     private String mTetherInterfaceName;
@@ -142,8 +145,14 @@ public class WifiStateMachine extends StateMachine {
     private boolean mScanResultIsPending = false;
     /* Tracks if the current scan settings are active */
     private boolean mSetScanActive = false;
+    /* High perf mode is true if an app has held a high perf Wifi Lock */
+    private boolean mHighPerfMode = false;
 
     private boolean mBluetoothConnectionActive = false;
+
+    private BroadcastReceiver mScreenReceiver;
+    private IntentFilter mScreenFilter;
+    private PowerManager.WakeLock mSuspendWakeLock;
 
     /**
      * Interval in milliseconds between polling for RSSI
@@ -320,6 +329,10 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_START_PACKET_FILTERING           = BASE + 84;
     /* Clear packet filter */
     static final int CMD_STOP_PACKET_FILTERING            = BASE + 85;
+    /* Set suspend mode optimizations in the driver */
+    static final int CMD_SET_SUSPEND_OPTIMIZATIONS        = BASE + 86;
+    /* Clear suspend mode optimizations in the driver */
+    static final int CMD_CLEAR_SUSPEND_OPTIMIZATIONS      = BASE + 87;
 
     /* arg1 values to CMD_STOP_PACKET_FILTERING and CMD_START_PACKET_FILTERING */
     static final int MULTICAST_V6  = 1;
@@ -566,6 +579,9 @@ public class WifiStateMachine extends StateMachine {
         mDriverStopDelayMs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_wifi_driver_stop_delay);
 
+        mBackgroundScanSupported = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_wifi_background_scan_support);
+
         mContext.registerReceiver(
             new BroadcastReceiver() {
                 @Override
@@ -587,10 +603,40 @@ public class WifiStateMachine extends StateMachine {
                 },
                 new IntentFilter(ACTION_START_SCAN));
 
+        mScreenFilter = new IntentFilter();
+        mScreenFilter.addAction(Intent.ACTION_SCREEN_ON);
+        mScreenFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        mScreenReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+
+                if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                    enableRssiPolling(true);
+                    if (mBackgroundScanSupported) {
+                        enableBackgroundScanCommand(false);
+                    }
+                    enableAllNetworks();
+                    sendMessage(CMD_CLEAR_SUSPEND_OPTIMIZATIONS);
+                } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                    enableRssiPolling(false);
+                    if (mBackgroundScanSupported) {
+                        enableBackgroundScanCommand(true);
+                    }
+                    //Allow 2s for suspend optimizations to be set
+                    mSuspendWakeLock.acquire(2000);
+                    sendMessage(CMD_SET_SUSPEND_OPTIMIZATIONS);
+                }
+            }
+        };
+
         mScanResultCache = new LruCache<String, ScanResult>(SCAN_RESULT_CACHE_SIZE);
 
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        mSuspendWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WifiSuspend");
+        mSuspendWakeLock.setReferenceCounted(false);
 
         addState(mDefaultState);
             addState(mInitialState, mDefaultState);
@@ -1436,21 +1482,6 @@ public class WifiStateMachine extends StateMachine {
         }
     }
 
-    private void setHighPerfModeEnabledNative(boolean enable) {
-        if(!mWifiNative.setSuspendOptimizations(!enable)) {
-            loge("set suspend optimizations failed!");
-        }
-        if (enable) {
-            if (!mWifiNative.setPowerMode(POWER_MODE_ACTIVE)) {
-                loge("set power mode active failed!");
-            }
-        } else {
-            if (!mWifiNative.setPowerMode(POWER_MODE_AUTO)) {
-                loge("set power mode auto failed!");
-            }
-        }
-    }
-
     private void configureLinkProperties() {
         if (mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
             mLinkProperties = mWifiConfigStore.getLinkProperties(mLastNetworkId);
@@ -1781,6 +1812,9 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_ENABLE_BACKGROUND_SCAN:
                     mEnableBackgroundScan = (message.arg1 == 1);
                     break;
+                case CMD_SET_HIGH_PERF_MODE:
+                    mHighPerfMode = (message.arg1 == 1);
+                    break;
                     /* Discard */
                 case CMD_LOAD_DRIVER:
                 case CMD_UNLOAD_DRIVER:
@@ -1812,7 +1846,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_CLEAR_BLACKLIST:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_RSSI_POLL:
@@ -1826,6 +1859,10 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_RESPONSE_AP_CONFIG:
                 case WifiWatchdogStateMachine.POOR_LINK_DETECTED:
                 case WifiWatchdogStateMachine.GOOD_LINK_DETECTED:
+                case CMD_CLEAR_SUSPEND_OPTIMIZATIONS:
+                    break;
+                case CMD_SET_SUSPEND_OPTIMIZATIONS:
+                    mSuspendWakeLock.release();
                     break;
                 case WifiMonitor.DRIVER_HUNG_EVENT:
                     setWifiEnabled(false);
@@ -1969,7 +2006,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -2103,7 +2139,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -2206,7 +2241,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -2416,7 +2450,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -2459,7 +2492,6 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
                 case WifiMonitor.WPS_OVERLAP_EVENT:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -2526,6 +2558,8 @@ public class WifiStateMachine extends StateMachine {
             }
 
             if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_ENABLE_P2P);
+
+            mContext.registerReceiver(mScreenReceiver, mScreenFilter);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2547,9 +2581,6 @@ public class WifiStateMachine extends StateMachine {
                         mWifiNative.setScanMode(mSetScanActive);
                     }
                     mScanResultIsPending = true;
-                    break;
-                case CMD_SET_HIGH_PERF_MODE:
-                    setHighPerfModeEnabledNative(message.arg1 == 1);
                     break;
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
@@ -2631,6 +2662,22 @@ public class WifiStateMachine extends StateMachine {
                         loge("Illegal arugments to CMD_STOP_PACKET_FILTERING");
                     }
                     break;
+                case CMD_SET_SUSPEND_OPTIMIZATIONS:
+                    if (!mHighPerfMode) {
+                        mWifiNative.setSuspendOptimizations(true);
+                    }
+                    mSuspendWakeLock.release();
+                    break;
+                case CMD_CLEAR_SUSPEND_OPTIMIZATIONS:
+                    mWifiNative.setSuspendOptimizations(false);
+                    break;
+                case CMD_SET_HIGH_PERF_MODE:
+                    mHighPerfMode = (message.arg1 == 1);
+                    if (mHighPerfMode) {
+                        //Disable any suspend optimizations
+                        mWifiNative.setSuspendOptimizations(false);
+                    }
+                    break;
                 default:
                     return NOT_HANDLED;
             }
@@ -2647,6 +2694,7 @@ public class WifiStateMachine extends StateMachine {
             mScanResults = null;
 
             if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_DISABLE_P2P);
+            mContext.unregisterReceiver(mScreenReceiver);
         }
     }
 
@@ -2670,7 +2718,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_START_DRIVER:
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -3430,7 +3477,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -3543,7 +3589,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
@@ -3638,7 +3683,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
                 case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
