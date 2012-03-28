@@ -5251,7 +5251,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        createEditorIfNeeded("onCreateInputConnection");
         if (onCheckIsTextEditor() && isEnabled()) {
             if (getEditor().mInputMethodState == null) {
                 getEditor().mInputMethodState = new InputMethodState();
