@@ -591,6 +591,7 @@ public class UsbDeviceManager {
                     notification.defaults = 0; // please be quiet
                     notification.sound = null;
                     notification.vibrate = null;
+                    notification.priority = Notification.PRIORITY_MIN;
 
                     Intent intent = Intent.makeRestartActivityTask(
                             new ComponentName("com.android.settings",
@@ -624,6 +625,7 @@ public class UsbDeviceManager {
                     notification.defaults = 0; // please be quiet
                     notification.sound = null;
                     notification.vibrate = null;
+                    notification.priority = Notification.PRIORITY_MIN;
 
                     Intent intent = Intent.makeRestartActivityTask(
                             new ComponentName("com.android.settings",
