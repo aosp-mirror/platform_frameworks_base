@@ -119,6 +119,13 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/fonts/DroidSans*)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/content)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/src/android/content)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/*/src/renderscript)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/*/src/renderscript)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/*/src/RenderScript.stamp)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/*/src/RenderScript.stamp)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libRS_intermediates)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/STATIC_LIBRARIES/libRSDriver_intermediates)
+$(call add-clean-step, rm -rf $(OUT_DIR)/host/$(HOST_PREBUILT_TAG)/obj/STATIC_LIBRARIES/libRS_intermediates)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
