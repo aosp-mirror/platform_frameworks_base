@@ -149,7 +149,7 @@ public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
-    static final boolean DEBUG_ADD_REMOVE = false;
+    static final boolean DEBUG_ADD_REMOVE = true;
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_ANIM = false;
     static final boolean DEBUG_LAYOUT = false;
@@ -158,7 +158,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_INPUT = false;
     static final boolean DEBUG_INPUT_METHOD = false;
     static final boolean DEBUG_VISIBILITY = false;
-    static final boolean DEBUG_WINDOW_MOVEMENT = false;
+    static final boolean DEBUG_WINDOW_MOVEMENT = true;
     static final boolean DEBUG_TOKEN_MOVEMENT = false;
     static final boolean DEBUG_ORIENTATION = false;
     static final boolean DEBUG_APP_ORIENTATION = false;

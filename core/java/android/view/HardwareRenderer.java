@@ -259,7 +259,14 @@ public abstract class HardwareRenderer {
      * @param pw
      */
     abstract void dumpGfxInfo(PrintWriter pw);
-    
+
+    /**
+     * Outputs the total number of frames rendered (used for fps calculations)
+     *
+     * @return the number of frames rendered
+     */
+    abstract long getFrameCount();
+
     /**
      * Sets the directory to use as a persistent storage for hardware rendering
      * resources.
@@ -475,7 +482,7 @@ public abstract class HardwareRenderer {
         GL mGl;
         HardwareCanvas mCanvas;
 
-        int mFrameCount;
+        long mFrameCount;
         Paint mDebugPaint;
 
         static boolean sDirtyRegions;
@@ -550,6 +557,11 @@ public abstract class HardwareRenderer {
                             mProfileData[i + 2]);
                 }
             }
+        }
+
+        @Override
+        long getFrameCount() {
+            return mFrameCount;
         }
 
         /**
@@ -1006,13 +1018,13 @@ public abstract class HardwareRenderer {
                         callbacks.onHardwarePostDraw(canvas);
                         canvas.restoreToCount(saveCount);
                         view.mRecreateDisplayList = false;
-
+                        mFrameCount++;
                         if (mDebugDirtyRegions) {
                             if (mDebugPaint == null) {
                                 mDebugPaint = new Paint();
                                 mDebugPaint.setColor(0x7fff0000);
                             }
-                            if (dirty != null && (mFrameCount++ & 1) == 0) {
+                            if (dirty != null && (mFrameCount & 1) == 0) {
                                 canvas.drawRect(dirty, mDebugPaint);
                             }
                         }

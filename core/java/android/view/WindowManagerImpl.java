@@ -510,8 +510,13 @@ public class WindowManagerImpl implements WindowManager {
 
                         String name = root.getClass().getName() + '@' +
                                 Integer.toHexString(hashCode());                        
-                        pw.printf("  %s: %d views, %.2f kB (display lists)\n",
+                        pw.printf("  %s: %d views, %.2f kB (display lists)",
                                 name, info[0], info[1] / 1024.0f);
+                        HardwareRenderer renderer = root.getView().mAttachInfo.mHardwareRenderer;
+                        if (renderer != null) {
+                            pw.printf(", %d frames rendered", renderer.getFrameCount());
+                        }
+                        pw.printf("\n");
 
                         viewsCount += info[0];
                         displayListsSize += info[1];
