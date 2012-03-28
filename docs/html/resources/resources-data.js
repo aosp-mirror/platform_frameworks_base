@@ -548,6 +548,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new'],
+    path: 'samples/KeyChainDemo/index.html',
+    title: {
+      en: 'KeyChain Demo'
+    },
+    description: {
+      en: 'A demo application to demonstrate how to use KeyChain APIs.'
+    }
+  },
+  {
     tags: ['sample', 'gamedev', 'media'],
     path: 'samples/LunarLander/index.html',
     title: {
