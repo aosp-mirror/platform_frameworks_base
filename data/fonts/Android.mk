@@ -54,7 +54,7 @@ ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
 # On space-constrained devices, we include a subset of fonts:
 ifeq ($(SMALLER_FONT_FOOTPRINT),true)
 droidsans_fallback_src := DroidSansFallback.ttf
-extra_droidsans_fonts := DroidSans.ttf DroidSans-Bold.ttf
+extra_font_files := DroidSans.ttf DroidSans-Bold.ttf
 else
 include $(CLEAR_VARS)
 LOCAL_MODULE := DroidSansEthiopic-Regular.ttf
@@ -64,8 +64,29 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
 include $(BUILD_PREBUILT)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := MTLmr3m.ttf
+LOCAL_SRC_FILES := $(LOCAL_MODULE)
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := fallback_fonts-ja.xml
+LOCAL_SRC_FILES := $(LOCAL_MODULE)
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_PATH := $(TARGET_OUT_ETC)
+include $(BUILD_PREBUILT)
+
 droidsans_fallback_src := DroidSansFallbackFull.ttf
-extra_droidsans_fonts := DroidSans.ttf DroidSans-Bold.ttf DroidSansEthiopic-Regular.ttf
+extra_font_files := \
+	DroidSans.ttf \
+	DroidSans-Bold.ttf \
+	DroidSansEthiopic-Regular.ttf \
+	MTLmr3m.ttf \
+	fallback_fonts-ja.xml
 endif  # SMALLER_FONT_FOOTPRINT
 
 ################################
@@ -75,13 +96,13 @@ LOCAL_SRC_FILES := $(droidsans_fallback_src)
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
-LOCAL_REQUIRED_MODULES := $(extra_droidsans_fonts)
+LOCAL_REQUIRED_MODULES := $(extra_font_files)
 include $(BUILD_PREBUILT)
 
 font_symlink_src :=
 font_symlink :=
 droidsans_fallback_src :=
-extra_droidsans_fonts :=
+extra_font_files :=
 
 ################################
 # Build the rest font files as prebuilt.

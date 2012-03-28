@@ -85,12 +85,12 @@
     </family>
     <family>
         <fileset>
-            <file>DroidSansFallback.ttf</file>
+            <file>MTLmr3m.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file>MTLmr3m.ttf</file>
+            <file>DroidSansFallback.ttf</file>
         </fileset>
     </family>
 </familyset>
