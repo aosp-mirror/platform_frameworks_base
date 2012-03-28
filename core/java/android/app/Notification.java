@@ -918,6 +918,8 @@ public class Notification implements Parcelable
         private Bundle mExtras;
         private int mPriority;
         private ArrayList<Action> mActions = new ArrayList<Action>(3);
+        private boolean mCanHasIntruder;
+        private boolean mIntruderActionsShowText;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -1313,6 +1315,38 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /**
+         * Specify whether this notification should pop up as an
+         * "intruder alert" (a small window that shares the screen with the
+         * current activity). This sort of notification is (as the name implies)
+         * very intrusive, so use it sparingly for notifications that require
+         * the user's attention.
+         *
+         * Notes:
+         * <ul>
+         * <li>Intruder alerts only show when the screen is on.</li>
+         * <li>Intruder alerts take precedence over fullScreenIntents.</li>
+         * </ul>
+         *
+         * @param intrude Whether to pop up an intruder alert (default false).
+         */
+        public Builder setUsesIntruderAlert(boolean intrude) {
+            mCanHasIntruder = intrude;
+            return this;
+        }
+
+        /**
+         * Control text on intruder alert action buttons. By default, action
+         * buttons in intruders do not show textual labels.
+         * 
+         * @param showActionText Whether to show text labels beneath action
+         *            icons (default false).
+         */
+        public Builder setIntruderActionsShowText(boolean showActionText) {
+            mIntruderActionsShowText = showActionText;
+            return this;
+        }
+
         private void setFlag(int mask, boolean value) {
             if (value) {
                 mFlags |= mask;
@@ -1394,7 +1428,7 @@ public class Notification implements Parcelable
             }
         }
 
-        private RemoteViews makeIntruderView() {
+        private RemoteViews makeIntruderView(boolean showLabels) {
             RemoteViews intruderView = new RemoteViews(mContext.getPackageName(),
                     R.layout.notification_intruder_content);
             if (mLargeIcon != null) {
@@ -1422,7 +1456,8 @@ public class Notification implements Parcelable
                     final int buttonId = BUTTONS[i];
 
                     intruderView.setViewVisibility(buttonId, View.VISIBLE);
-                    intruderView.setImageViewResource(buttonId, action.icon);
+                    intruderView.setTextViewText(buttonId, showLabels ? action.title : null);
+                    intruderView.setTextViewCompoundDrawables(buttonId, 0, action.icon, 0, 0);
                     intruderView.setContentDescription(buttonId, action.title);
                     intruderView.setOnClickPendingIntent(buttonId, action.actionIntent);
                 }
@@ -1457,7 +1492,9 @@ public class Notification implements Parcelable
             n.ledOffMS = mLedOffMs;
             n.defaults = mDefaults;
             n.flags = mFlags;
-            n.intruderView = makeIntruderView();
+            if (mCanHasIntruder) {
+                n.intruderView = makeIntruderView(mIntruderActionsShowText);
+            }
             if (mLedOnMs != 0 && mLedOffMs != 0) {
                 n.flags |= FLAG_SHOW_LIGHTS;
             }

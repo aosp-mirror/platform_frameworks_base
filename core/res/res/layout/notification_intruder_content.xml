@@ -2,7 +2,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="#FF333333"
     android:padding="4dp"
     >
     <ImageView android:id="@+id/icon"
@@ -39,29 +38,35 @@
     <LinearLayout
         android:id="@+id/actions"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
         android:orientation="horizontal"
         android:visibility="gone"
         >
-        <ImageView
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
             android:id="@+id/action0"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:visibility="gone"
             />
-        <ImageView
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
             android:id="@+id/action1"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:visibility="gone"
             />
-        <ImageView
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
             android:id="@+id/action2"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:visibility="gone"
             />
