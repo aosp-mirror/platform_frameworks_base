@@ -101,9 +101,6 @@ public class WifiService extends IWifiManager.Stub {
     private boolean mEmergencyCallbackMode = false;
     private int mPluggedType;
 
-    /* Chipset supports background scan */
-    private final boolean mBackgroundScanSupported;
-
     private final LockList mLocks = new LockList();
     // some wifi lock statistics
     private int mFullHighPerfLocksAcquired;
@@ -435,9 +432,6 @@ public class WifiService extends IWifiManager.Stub {
                 Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, 900) * 1000l;
         mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver(new Handler());
         mNotificationEnabledSettingObserver.register();
-
-        mBackgroundScanSupported = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_wifi_background_scan_support);
     }
 
     /**
@@ -956,11 +950,6 @@ public class WifiService extends IWifiManager.Stub {
                 mAlarmManager.cancel(mIdleIntent);
                 mScreenOff = false;
                 evaluateTrafficStatsPolling();
-                mWifiStateMachine.enableRssiPolling(true);
-                if (mBackgroundScanSupported) {
-                    mWifiStateMachine.enableBackgroundScanCommand(false);
-                }
-                mWifiStateMachine.enableAllNetworks();
                 setDeviceIdleAndUpdateWifi(false);
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 if (DBG) {
@@ -968,10 +957,6 @@ public class WifiService extends IWifiManager.Stub {
                 }
                 mScreenOff = true;
                 evaluateTrafficStatsPolling();
-                mWifiStateMachine.enableRssiPolling(false);
-                if (mBackgroundScanSupported) {
-                    mWifiStateMachine.enableBackgroundScanCommand(true);
-                }
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
                  * AND the "stay on while plugged in" setting doesn't match the
