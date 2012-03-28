@@ -4,9 +4,6 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
 	android_media_SoundPool.cpp
 
-LOCAL_C_INCLUDES := \
-    frameworks/base/media/libmedia
-
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \

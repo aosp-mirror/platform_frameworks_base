@@ -23,7 +23,7 @@
 #include <nativehelper/jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <SoundPool.h>
+#include <media/SoundPool.h>
 
 using namespace android;
 
