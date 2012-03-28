@@ -18,10 +18,7 @@ package android.webkit;
 
 import android.content.Context;
 import android.util.Log;
-import android.webkit.CookieManager.Cookie;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * The CookieSyncManager is used to synchronize the browser cookie store
@@ -61,9 +58,6 @@ import java.util.Iterator;
 public final class CookieSyncManager extends WebSyncManager {
 
     private static CookieSyncManager sRef;
-
-    // time when last update happened
-    private long mLastUpdate;
 
     private CookieSyncManager(Context context) {
         super(context, "CookieSyncManager");
