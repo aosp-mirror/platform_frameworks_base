@@ -41,6 +41,7 @@
 
 #include <rs.h>
 #include <rsEnv.h>
+#include <gui/Surface.h>
 #include <gui/SurfaceTexture.h>
 #include <gui/SurfaceTextureClient.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
@@ -486,19 +487,17 @@ nAllocationGetSurfaceTextureID2(JNIEnv *_env, jobject _this, RsContext con, jint
 }
 
 static void
-nAllocationSetSurfaceTexture(JNIEnv *_env, jobject _this, RsContext con,
-                             RsAllocation alloc, jobject sur)
+nAllocationSetSurface(JNIEnv *_env, jobject _this, RsContext con, RsAllocation alloc, jobject sur)
 {
     LOG_API("nAllocationSetSurfaceTexture, con(%p), alloc(%p), surface(%p)",
             con, alloc, (Surface *)sur);
 
-    sp<ANativeWindow> window;
+    sp<Surface> s;
     if (sur != 0) {
-        sp<SurfaceTexture> st = SurfaceTexture_getSurfaceTexture(_env, sur);
-        window = new SurfaceTextureClient(st);
+        s = Surface_getSurface(_env, sur);
     }
 
-    rsAllocationSetSurface(con, alloc, window.get());
+    rsAllocationSetSurface(con, alloc, static_cast<ANativeWindow *>(s.get()));
 }
 
 static void
@@ -1362,7 +1361,7 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationSyncAll",             "(III)V",                                (void*)nAllocationSyncAll },
 {"rsnAllocationGetSurfaceTextureID", "(II)I",                                 (void*)nAllocationGetSurfaceTextureID },
 {"rsnAllocationGetSurfaceTextureID2","(IILandroid/graphics/SurfaceTexture;)V",(void*)nAllocationGetSurfaceTextureID2 },
-{"rsnAllocationSetSurfaceTexture",   "(IILandroid/graphics/SurfaceTexture;)V",(void*)nAllocationSetSurfaceTexture },
+{"rsnAllocationSetSurface",          "(IILandroid/view/Surface;)V",           (void*)nAllocationSetSurface },
 {"rsnAllocationIoSend",              "(II)V",                                 (void*)nAllocationIoSend },
 {"rsnAllocationIoReceive",           "(II)V",                                 (void*)nAllocationIoReceive },
 {"rsnAllocationData1D",              "(IIIII[II)V",                           (void*)nAllocationData1D_i },
