@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.Principal;
 import java.security.PrivateKey;
@@ -39,6 +40,8 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import libcore.util.Objects;
+
+import org.apache.harmony.xnet.provider.jsse.OpenSSLEngine;
 import org.apache.harmony.xnet.provider.jsse.TrustedCertificateStore;
 
 /**
@@ -301,13 +304,20 @@ public final class KeyChain {
         }
         KeyChainConnection keyChainConnection = bind(context);
         try {
-            IKeyChainService keyChainService = keyChainConnection.getService();
-            byte[] privateKeyBytes = keyChainService.getPrivateKey(alias);
-            return toPrivateKey(privateKeyBytes);
+            final IKeyChainService keyChainService = keyChainConnection.getService();
+            final String keyId = keyChainService.requestPrivateKey(alias);
+            if (keyId == null) {
+                throw new KeyChainException("keystore had a problem");
+            }
+
+            final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
+            return engine.getPrivateKeyById(keyId);
         } catch (RemoteException e) {
             throw new KeyChainException(e);
         } catch (RuntimeException e) {
             // only certain RuntimeExceptions can be propagated across the IKeyChainService call
+            throw new KeyChainException(e);
+        } catch (InvalidKeyException e) {
             throw new KeyChainException(e);
         } finally {
             keyChainConnection.close();
@@ -353,18 +363,6 @@ public final class KeyChain {
             throw new KeyChainException(e);
         } finally {
             keyChainConnection.close();
-        }
-    }
-
-    private static PrivateKey toPrivateKey(byte[] bytes) {
-        if (bytes == null) {
-            throw new IllegalArgumentException("bytes == null");
-        }
-        try {
-            KeyPair keyPair = (KeyPair) Credentials.convertFromPem(bytes).get(0);
-            return keyPair.getPrivate();
-        } catch (IOException e) {
-            throw new AssertionError(e);
         }
     }
 

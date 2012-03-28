@@ -23,7 +23,7 @@ package android.security;
  */
 interface IKeyChainService {
     // APIs used by KeyChain
-    byte[] getPrivateKey(String alias);
+    String requestPrivateKey(String alias);
     byte[] getCertificate(String alias);
 
     // APIs used by CertInstaller

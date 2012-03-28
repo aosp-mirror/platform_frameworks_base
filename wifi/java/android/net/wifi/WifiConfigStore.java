@@ -25,6 +25,7 @@ import android.net.NetworkUtils;
 import android.net.NetworkInfo.DetailedState;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
+import android.net.wifi.WifiConfiguration.EnterpriseField;
 import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.ProxySettings;
@@ -1140,7 +1141,7 @@ class WifiConfigStore {
                 String varName = field.varName();
                 String value = field.value();
                 if (value != null) {
-                    if (field != config.eap) {
+                    if (field != config.eap && field != config.engine) {
                         value = (value.length() == 0) ? "NULL" : convertToQuotedString(value);
                     }
                     if (!mWifiNative.setNetworkVariable(
@@ -1449,10 +1450,68 @@ class WifiConfigStore {
             value = mWifiNative.getNetworkVariable(netId,
                     field.varName());
             if (!TextUtils.isEmpty(value)) {
-                if (field != config.eap) value = removeDoubleQuotes(value);
+                if (field != config.eap && field != config.engine) {
+                    value = removeDoubleQuotes(value);
+                }
                 field.setValue(value);
             }
         }
+
+        migrateOldEapTlsIfNecessary(config, netId);
+    }
+
+    /**
+     * Migration code for old EAP-TLS configurations. This should only be used
+     * when restoring an old wpa_supplicant.conf or upgrading from a previous
+     * platform version.
+     *
+     * @param config the configuration to be migrated
+     * @param netId the wpa_supplicant's net ID
+     * @param value the old private_key value
+     */
+    private void migrateOldEapTlsIfNecessary(WifiConfiguration config, int netId) {
+        String value = mWifiNative.getNetworkVariable(netId,
+                WifiConfiguration.OLD_PRIVATE_KEY_NAME);
+        /*
+         * If the old configuration value is not present, then there is nothing
+         * to do.
+         */
+        if (TextUtils.isEmpty(value)) {
+            return;
+        } else {
+            // Also ignore it if it's empty quotes.
+            value = removeDoubleQuotes(value);
+            if (TextUtils.isEmpty(value)) {
+                return;
+            }
+        }
+
+        config.engine.setValue(WifiConfiguration.ENGINE_ENABLE);
+        config.engine_id.setValue(convertToQuotedString(WifiConfiguration.KEYSTORE_ENGINE_ID));
+
+        /*
+         * The old key started with the keystore:// URI prefix, but we don't
+         * need that anymore. Trim it off if it exists.
+         */
+        final String keyName;
+        if (value.startsWith(WifiConfiguration.KEYSTORE_URI)) {
+            keyName = new String(value.substring(WifiConfiguration.KEYSTORE_URI.length()));
+        } else {
+            keyName = value;
+        }
+        config.key_id.setValue(convertToQuotedString(keyName));
+
+        // Now tell the wpa_supplicant the new configuration values.
+        final EnterpriseField needsUpdate[] = { config.engine, config.engine_id, config.key_id };
+        for (EnterpriseField field : needsUpdate) {
+            mWifiNative.setNetworkVariable(netId, field.varName(), field.value());
+        }
+
+        // Remove old private_key string so we don't run this again.
+        mWifiNative.setNetworkVariable(netId, WifiConfiguration.OLD_PRIVATE_KEY_NAME,
+                convertToQuotedString(""));
+
+        saveConfig();
     }
 
     private String removeDoubleQuotes(String string) {

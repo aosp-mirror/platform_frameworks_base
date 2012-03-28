@@ -26,11 +26,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charsets;
 import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +73,36 @@ public class Credentials {
     // commonly used on Windows
     public static final String EXTENSION_CER = ".cer";
     public static final String EXTENSION_PFX = ".pfx";
+
+    /**
+     * Intent extra: name for the user's private key.
+     */
+    public static final String EXTRA_USER_PRIVATE_KEY_NAME = "user_private_key_name";
+
+    /**
+     * Intent extra: data for the user's private key in PEM-encoded PKCS#8.
+     */
+    public static final String EXTRA_USER_PRIVATE_KEY_DATA = "user_private_key_data";
+
+    /**
+     * Intent extra: name for the user's certificate.
+     */
+    public static final String EXTRA_USER_CERTIFICATE_NAME = "user_certificate_name";
+
+    /**
+     * Intent extra: data for the user's certificate in PEM-encoded X.509.
+     */
+    public static final String EXTRA_USER_CERTIFICATE_DATA = "user_certificate_data";
+
+    /**
+     * Intent extra: name for CA certificate chain
+     */
+    public static final String EXTRA_CA_CERTIFICATES_NAME = "ca_certificates_name";
+
+    /**
+     * Intent extra: data for CA certificate chain in PEM-encoded X.509.
+     */
+    public static final String EXTRA_CA_CERTIFICATES_DATA = "ca_certificates_data";
 
     /**
      * Convert objects to a PEM format, which is used for
