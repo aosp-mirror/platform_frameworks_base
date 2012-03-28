@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * A class representing a Wi-Fi P2p group
@@ -47,6 +49,15 @@ public class WifiP2pGroup implements Parcelable {
     private String mPassphrase;
 
     private String mInterface;
+
+    /** P2P group started string pattern */
+    private static final Pattern groupStartedPattern = Pattern.compile(
+        "ssid=\"(.+)\" " +
+        "freq=(\\d+) " +
+        "(?:psk=)?([0-9a-fA-F]{64})?" +
+        "(?:passphrase=)?(?:\"(.{8,63})\")? " +
+        "go_dev_addr=((?:[0-9a-f]{2}:){5}[0-9a-f]{2})"
+    );
 
     public WifiP2pGroup() {
     }
@@ -78,24 +89,18 @@ public class WifiP2pGroup implements Parcelable {
             mInterface = tokens[1];
             mIsGroupOwner = tokens[2].equals("GO");
 
-            for (String token : tokens) {
-                String[] nameValue = token.split("=");
-                if (nameValue.length != 2) continue;
-
-                if (nameValue[0].equals("ssid")) {
-                    mNetworkName = nameValue[1];
-                    continue;
-                }
-
-                if (nameValue[0].equals("passphrase")) {
-                    mPassphrase = nameValue[1];
-                    continue;
-                }
-
-                if (nameValue[0].equals("go_dev_addr")) {
-                    mOwner = new WifiP2pDevice(nameValue[1]);
-                }
+            Matcher match = groupStartedPattern.matcher(supplicantEvent);
+            if (!match.find()) {
+                return;
             }
+
+            mNetworkName = match.group(1);
+            //freq and psk are unused right now
+            //int freq = Integer.parseInt(match.group(2));
+            //String psk = match.group(3);
+            mPassphrase = match.group(4);
+            mOwner = new WifiP2pDevice(match.group(5));
+
         } else if (tokens[0].equals("P2P-INVITATION-RECEIVED")) {
             for (String token : tokens) {
                 String[] nameValue = token.split("=");

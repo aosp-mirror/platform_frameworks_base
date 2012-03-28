@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.util.Log;
 
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * A class representing a Wi-Fi p2p device
@@ -40,17 +41,6 @@ public class WifiP2pDevice implements Parcelable {
      * The device MAC address uniquely identifies a Wi-Fi p2p device
      */
     public String deviceAddress = "";
-
-    /**
-     * interfaceAddress
-     *
-     * This address is used during group owner negotiation as the Intended
-     * P2P Interface Address and the group interface will be created with
-     * address as the local address in case of successfully completed
-     * negotiation.
-     * @hide
-     */
-    public String interfaceAddress;
 
     /**
      * Primary device type identifies the type of device. For example, an application
@@ -117,6 +107,43 @@ public class WifiP2pDevice implements Parcelable {
     /** Device connection status */
     public int status = UNAVAILABLE;
 
+    /** Detailed device string pattern
+     * Example:
+     *  P2P-DEVICE-FOUND fa:7b:7a:42:02:13 p2p_dev_addr=fa:7b:7a:42:02:13
+     *  pri_dev_type=1-0050F204-1 name='p2p-TEST1' config_methods=0x188 dev_capab=0x27
+     *  group_capab=0x0
+     *
+     */
+    private static final Pattern detailedDevicePattern = Pattern.compile(
+        "((?:[0-9a-f]{2}:){5}[0-9a-f]{2}) " +
+        "(\\d+ )?" +
+        "p2p_dev_addr=((?:[0-9a-f]{2}:){5}[0-9a-f]{2}) " +
+        "pri_dev_type=(\\d+-[0-9a-fA-F]+-\\d+) " +
+        "name='(.*)' " +
+        "config_methods=(0x[0-9a-fA-F]+) " +
+        "dev_capab=(0x[0-9a-fA-F]+) " +
+        "group_capab=(0x[0-9a-fA-F]+)"
+    );
+
+    /** 2 token device address pattern
+     * Example:
+     *  P2P-DEVICE-LOST p2p_dev_addr=fa:7b:7a:42:02:13
+     *  AP-STA-DISCONNECTED 42:fc:89:a8:96:09
+     */
+    private static final Pattern twoTokenPattern = Pattern.compile(
+        "(p2p_dev_addr=)?((?:[0-9a-f]{2}:){5}[0-9a-f]{2})"
+    );
+
+    /** 3 token device address pattern
+     * Example:
+     *  AP-STA-CONNECTED 42:fc:89:a8:96:09 p2p_dev_addr=fa:7b:7a:42:02:13
+     *  AP-STA-DISCONNECTED 42:fc:89:a8:96:09 p2p_dev_addr=fa:7b:7a:42:02:13
+     */
+    private static final Pattern threeTokenPattern = Pattern.compile(
+        "(?:[0-9a-f]{2}:){5}[0-9a-f]{2} p2p_dev_addr=((?:[0-9a-f]{2}:){5}[0-9a-f]{2})"
+    );
+
+
     public WifiP2pDevice() {
     }
 
@@ -128,6 +155,10 @@ public class WifiP2pDevice implements Parcelable {
      *
      *  P2P-DEVICE-LOST p2p_dev_addr=fa:7b:7a:42:02:13
      *
+     *  AP-STA-CONNECTED 42:fc:89:a8:96:09 [p2p_dev_addr=02:90:4c:a0:92:54]
+     *
+     *  AP-STA-DISCONNECTED 42:fc:89:a8:96:09 [p2p_dev_addr=02:90:4c:a0:92:54]
+     *
      *  fa:7b:7a:42:02:13
      *
      *  Note: The events formats can be looked up in the wpa_supplicant code
@@ -135,56 +166,44 @@ public class WifiP2pDevice implements Parcelable {
      */
     public WifiP2pDevice(String string) throws IllegalArgumentException {
         String[] tokens = string.split("[ \n]");
+        Matcher match;
 
         if (tokens.length < 1) {
             throw new IllegalArgumentException("Malformed supplicant event");
         }
 
-        /* Just a device address */
-        if (tokens.length == 1) {
-            deviceAddress = string;
-            return;
-        }
-
-        for (String token : tokens) {
-            String[] nameValue = token.split("=");
-            if (nameValue.length != 2) {
-                //mac address without key is device address
-                if (token.matches("(([0-9a-f]{2}:){5}[0-9a-f]{2})")) {
-                    deviceAddress = token;
+        switch (tokens.length) {
+            case 1:
+                /* Just a device address */
+                deviceAddress = string;
+                return;
+            case 2:
+                match = twoTokenPattern.matcher(string);
+                if (!match.find()) {
+                    throw new IllegalArgumentException("Malformed supplicant event");
                 }
-                continue;
-            }
+                deviceAddress = match.group(2);
+                return;
+            case 3:
+                match = threeTokenPattern.matcher(string);
+                if (!match.find()) {
+                    throw new IllegalArgumentException("Malformed supplicant event");
+                }
+                deviceAddress = match.group(1);
+                return;
+            default:
+                match = detailedDevicePattern.matcher(string);
+                if (!match.find()) {
+                    throw new IllegalArgumentException("Malformed supplicant event");
+                }
 
-            if (nameValue[0].equals("p2p_dev_addr")) {
-                deviceAddress = nameValue[1];
-                continue;
-            }
-
-            if (nameValue[0].equals("pri_dev_type")) {
-                primaryDeviceType = nameValue[1];
-                continue;
-            }
-
-            if (nameValue[0].equals("name") || nameValue[0].equals("device_name")) {
-                deviceName = trimQuotes(nameValue[1]);
-                continue;
-            }
-
-            if (nameValue[0].equals("config_methods")) {
-                wpsConfigMethodsSupported = parseHex(nameValue[1]);
-                continue;
-            }
-
-            if (nameValue[0].equals("dev_capab")) {
-                deviceCapability = parseHex(nameValue[1]);
-                continue;
-            }
-
-            if (nameValue[0].equals("group_capab")) {
-                groupCapability = parseHex(nameValue[1]);
-                continue;
-            }
+                deviceAddress = match.group(3);
+                primaryDeviceType = match.group(4);
+                deviceName = match.group(5);
+                wpsConfigMethodsSupported = parseHex(match.group(6));
+                deviceCapability = parseHex(match.group(7));
+                groupCapability = parseHex(match.group(8));
+                break;
         }
 
         if (tokens[0].startsWith("P2P-DEVICE-FOUND")) {
@@ -233,7 +252,6 @@ public class WifiP2pDevice implements Parcelable {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("Device: ").append(deviceName);
         sbuf.append("\n deviceAddress: ").append(deviceAddress);
-        sbuf.append("\n interfaceAddress: ").append(interfaceAddress);
         sbuf.append("\n primary type: ").append(primaryDeviceType);
         sbuf.append("\n secondary type: ").append(secondaryDeviceType);
         sbuf.append("\n wps: ").append(wpsConfigMethodsSupported);
@@ -253,7 +271,6 @@ public class WifiP2pDevice implements Parcelable {
         if (source != null) {
             deviceName = source.deviceName;
             deviceAddress = source.deviceAddress;
-            interfaceAddress = source.interfaceAddress;
             primaryDeviceType = source.primaryDeviceType;
             secondaryDeviceType = source.secondaryDeviceType;
             wpsConfigMethodsSupported = source.wpsConfigMethodsSupported;
@@ -267,7 +284,6 @@ public class WifiP2pDevice implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(deviceName);
         dest.writeString(deviceAddress);
-        dest.writeString(interfaceAddress);
         dest.writeString(primaryDeviceType);
         dest.writeString(secondaryDeviceType);
         dest.writeInt(wpsConfigMethodsSupported);
@@ -283,7 +299,6 @@ public class WifiP2pDevice implements Parcelable {
                 WifiP2pDevice device = new WifiP2pDevice();
                 device.deviceName = in.readString();
                 device.deviceAddress = in.readString();
-                device.interfaceAddress = in.readString();
                 device.primaryDeviceType = in.readString();
                 device.secondaryDeviceType = in.readString();
                 device.wpsConfigMethodsSupported = in.readInt();
@@ -297,15 +312,6 @@ public class WifiP2pDevice implements Parcelable {
                 return new WifiP2pDevice[size];
             }
         };
-
-    private String trimQuotes(String str) {
-        str = str.trim();
-        if (str.startsWith("'") && str.endsWith("'")) {
-            if (str.length() <= 2) return "";
-            else return str.substring(1, str.length()-1);
-        }
-        return str;
-    }
 
     //supported formats: 0x1abc, 0X1abc, 1abc
     private int parseHex(String hexString) {
