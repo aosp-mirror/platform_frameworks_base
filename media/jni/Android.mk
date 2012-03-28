@@ -42,12 +42,12 @@ LOCAL_C_INCLUDES += \
     external/jhead \
     external/tremor/Tremor \
     frameworks/base/core/jni \
-    frameworks/base/media/libmedia \
-    frameworks/base/media/libstagefright \
-    frameworks/base/media/libstagefright/codecs/amrnb/enc/src \
-    frameworks/base/media/libstagefright/codecs/amrnb/common \
-    frameworks/base/media/libstagefright/codecs/amrnb/common/include \
-    frameworks/base/media/mtp \
+    frameworks/av/media/libmedia \
+    frameworks/av/media/libstagefright \
+    frameworks/av/media/libstagefright/codecs/amrnb/enc/src \
+    frameworks/av/media/libstagefright/codecs/amrnb/common \
+    frameworks/av/media/libstagefright/codecs/amrnb/common/include \
+    frameworks/av/media/mtp \
     frameworks/native/include/media/openmax \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE) \
