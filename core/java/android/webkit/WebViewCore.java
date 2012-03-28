@@ -1914,6 +1914,14 @@ public final class WebViewCore {
         mEventHub.sendMessage(msg);
     }
 
+    void sendMessages(ArrayList<Message> messages) {
+        synchronized (mEventHub) {
+            for (int i = 0; i < messages.size(); i++) {
+                mEventHub.sendMessage(messages.get(i));
+            }
+        }
+    }
+
     void sendMessage(int what) {
         mEventHub.sendMessage(Message.obtain(null, what));
     }

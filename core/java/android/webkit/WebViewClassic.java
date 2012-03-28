@@ -386,6 +386,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         private boolean mIsAutoFillable;
         private boolean mIsAutoCompleteEnabled;
         private String mName;
+        private int mBatchLevel;
 
         public WebViewInputConnection() {
             super(mWebView, true);
@@ -402,6 +403,24 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                             mIsAutoCompleteEnabled);
                 }
             }
+        }
+
+        @Override
+        public boolean beginBatchEdit() {
+            if (mBatchLevel == 0) {
+                beginTextBatch();
+            }
+            mBatchLevel++;
+            return false;
+        }
+
+        @Override
+        public boolean endBatchEdit() {
+            mBatchLevel--;
+            if (mBatchLevel == 0) {
+                commitTextBatch();
+            }
+            return false;
         }
 
         public boolean getIsAutoFillable() {
@@ -879,6 +898,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     Rect mEditTextContent = new Rect();
     int mEditTextLayerId;
     boolean mIsEditingText = false;
+    ArrayList<Message> mBatchedTextChanges = new ArrayList<Message>();
+    boolean mIsBatchingTextChanges = false;
 
     private static class OnTrimMemoryListener implements ComponentCallbacks2 {
         private static OnTrimMemoryListener sInstance = null;
@@ -5095,8 +5116,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         // send complex characters to webkit for use by JS and plugins
         if (keyCode == KeyEvent.KEYCODE_UNKNOWN && event.getCharacters() != null) {
             // pass the key to DOM
-            mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
-            mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+            sendBatchableInputMessage(EventHub.KEY_DOWN, 0, 0, event);
+            sendBatchableInputMessage(EventHub.KEY_UP, 0, 0, event);
             // return true as DOM handles the key
             return true;
         }
@@ -5162,7 +5183,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 // if an accessibility script is injected we delegate to it the key handling.
                 // this script is a screen reader which is a fully fledged solution for blind
                 // users to navigate in and interact with web pages.
-                mWebViewCore.sendMessage(EventHub.KEY_DOWN, event);
+                sendBatchableInputMessage(EventHub.KEY_DOWN, 0, 0, event);
                 return true;
             } else {
                 // Clean up if accessibility was disabled after loading the current URL.
@@ -5289,7 +5310,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 // if an accessibility script is injected we delegate to it the key handling.
                 // this script is a screen reader which is a fully fledged solution for blind
                 // users to navigate in and interact with web pages.
-                mWebViewCore.sendMessage(EventHub.KEY_UP, event);
+                sendBatchableInputMessage(EventHub.KEY_UP, 0, 0, event);
                 return true;
             } else {
                 // Clean up if accessibility was disabled after loading the current URL.
@@ -7543,7 +7564,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         arg.mNewEnd = newEnd;
         mTextGeneration++;
         arg.mTextGeneration = mTextGeneration;
-        mWebViewCore.sendMessage(EventHub.REPLACE_TEXT, oldStart, oldEnd, arg);
+        sendBatchableInputMessage(EventHub.REPLACE_TEXT, oldStart, oldEnd, arg);
     }
 
     /* package */ void passToJavaScript(String currentText, KeyEvent event) {
@@ -8512,7 +8533,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     break;
 
                 case KEY_PRESS:
-                    mWebViewCore.sendMessage(EventHub.KEY_PRESS, msg.arg1);
+                    sendBatchableInputMessage(EventHub.KEY_PRESS, msg.arg1, 0, null);
                     break;
 
                 case RELOCATE_AUTO_COMPLETE_POPUP:
@@ -8896,6 +8917,31 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 scrollY, (Float)scrollPercentX);
         mPrivateHandler.sendEmptyMessageDelayed(ANIMATE_TEXT_SCROLL,
                 TEXT_SCROLL_ANIMATION_DELAY_MS);
+    }
+
+    private void beginTextBatch() {
+        mIsBatchingTextChanges = true;
+    }
+
+    private void commitTextBatch() {
+        if (mWebViewCore != null) {
+            mWebViewCore.sendMessages(mBatchedTextChanges);
+        }
+        mBatchedTextChanges.clear();
+        mIsBatchingTextChanges = false;
+    }
+
+    private void sendBatchableInputMessage(int what, int arg1, int arg2,
+            Object obj) {
+        if (mWebViewCore == null) {
+            return;
+        }
+        Message message = Message.obtain(null, what, arg1, arg2, obj);
+        if (mIsBatchingTextChanges) {
+            mBatchedTextChanges.add(message);
+        } else {
+            mWebViewCore.sendMessage(message);
+        }
     }
 
     // Class used to use a dropdown for a <select> element
@@ -9296,7 +9342,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 mWebView.playSoundEffect(sound);
             }
         }
-        mWebViewCore.sendMessage(eventHubAction, direction, event);
+        sendBatchableInputMessage(eventHubAction, direction, 0, event);
     }
 
     /**
