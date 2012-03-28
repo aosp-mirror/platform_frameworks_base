@@ -105,6 +105,7 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_CLOCK_VISIBILITY_CHANGED = 307;
     private static final int MSG_DEVICE_PROVISIONED = 308;
     protected static final int MSG_DPM_STATE_CHANGED = 309;
+    protected static final int MSG_USER_CHANGED = 310;
 
     /**
      * When we receive a
@@ -209,6 +210,9 @@ public class KeyguardUpdateMonitor {
                     case MSG_DPM_STATE_CHANGED:
                         handleDevicePolicyManagerStateChanged();
                         break;
+                    case MSG_USER_CHANGED:
+                        handleUserChanged(msg.arg1);
+                        break;
                 }
             }
         };
@@ -268,6 +272,8 @@ public class KeyguardUpdateMonitor {
         filter.addAction(SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_USER_REMOVED);
         context.registerReceiver(new BroadcastReceiver() {
 
             public void onReceive(Context context, Intent intent) {
@@ -302,6 +308,9 @@ public class KeyguardUpdateMonitor {
                 } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
                         .equals(action)) {
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_DPM_STATE_CHANGED));
+                } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_CHANGED,
+                            intent.getIntExtra(Intent.EXTRA_USERID, 0), 0));
                 }
             }
         }, filter);
@@ -310,6 +319,12 @@ public class KeyguardUpdateMonitor {
     protected void handleDevicePolicyManagerStateChanged() {
         for (int i = 0; i < mInfoCallbacks.size(); i++) {
             mInfoCallbacks.get(i).onDevicePolicyManagerStateChanged();
+        }
+    }
+
+    protected void handleUserChanged(int userId) {
+        for (int i = 0; i < mInfoCallbacks.size(); i++) {
+            mInfoCallbacks.get(i).onUserChanged(userId);
         }
     }
 
@@ -542,6 +557,11 @@ public class KeyguardUpdateMonitor {
          * See {@link DevicePolicyManager#ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED}
          */
         void onDevicePolicyManagerStateChanged();
+
+        /**
+         * Called when the user changes.
+         */
+        void onUserChanged(int userId);
     }
 
     // Simple class that allows methods to easily be overwritten
@@ -569,6 +589,9 @@ public class KeyguardUpdateMonitor {
         }
 
         public void onDevicePolicyManagerStateChanged() {
+        }
+
+        public void onUserChanged(int userId) {
         }
     }
 

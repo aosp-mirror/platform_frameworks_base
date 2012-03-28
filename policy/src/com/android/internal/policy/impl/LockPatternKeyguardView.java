@@ -757,6 +757,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                 hideFaceLockArea();
             }
         }
+
+        @Override
+        public void onUserChanged(int userId) {
+            mLockPatternUtils.setCurrentUser(userId);
+            updateScreen(getInitialMode(), true);
+        }
     };
 
     @Override

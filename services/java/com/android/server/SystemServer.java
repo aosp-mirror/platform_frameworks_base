@@ -47,6 +47,7 @@ import android.view.WindowManager;
 import com.android.internal.app.ShutdownThread;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
+import com.android.internal.widget.LockSettingsService;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
@@ -266,6 +267,7 @@ class ServerThread extends Thread {
         LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
         TextServicesManagerService tsms = null;
+        LockSettingsService lockSettings = null;
 
         // Bring up services needed for UI.
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
@@ -307,6 +309,14 @@ class ServerThread extends Thread {
         }
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            try {
+                Slog.i(TAG,  "LockSettingsService");
+                lockSettings = new LockSettingsService(context);
+                ServiceManager.addService("lock_settings", lockSettings);
+            } catch (Throwable e) {
+                reportWtf("starting LockSettingsService service", e);
+            }
+
             try {
                 Slog.i(TAG, "Device Policy");
                 devicePolicy = new DevicePolicyManagerService(context);
@@ -660,6 +670,11 @@ class ServerThread extends Thread {
             pm.systemReady();
         } catch (Throwable e) {
             reportWtf("making Package Manager Service ready", e);
+        }
+        try {
+            lockSettings.systemReady();
+        } catch (Throwable e) {
+            reportWtf("making Lock Settings Service ready", e);
         }
 
         // These are needed to propagate to the runnable below.
