@@ -11708,66 +11708,67 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             layout.drawBackground(canvas, highlight, mHighlightPaint, cursorOffsetVertical,
                     firstLine, lastLine);
 
-            if (mTextDisplayLists == null) {
-                mTextDisplayLists = new DisplayList[ArrayUtils.idealObjectArraySize(0)];
-            }
-            if (! (layout instanceof DynamicLayout)) {
-                Log.e(LOG_TAG, "Editable TextView is not using a DynamicLayout");
-                return;
-            }
-
-            DynamicLayout dynamicLayout = (DynamicLayout) layout;
-            int[] blockEnds = dynamicLayout.getBlockEnds();
-            int[] blockIndices = dynamicLayout.getBlockIndices();
-            final int numberOfBlocks = dynamicLayout.getNumberOfBlocks();
-
-            canvas.translate(mScrollX, mScrollY);
-            int endOfPreviousBlock = -1;
-            int searchStartIndex = 0;
-            for (int i = 0; i < numberOfBlocks; i++) {
-                int blockEnd = blockEnds[i];
-                int blockIndex = blockIndices[i];
-
-                final boolean blockIsInvalid = blockIndex == DynamicLayout.INVALID_BLOCK_INDEX;
-                if (blockIsInvalid) {
-                    blockIndex = getAvailableDisplayListIndex(blockIndices, numberOfBlocks,
-                            searchStartIndex);
-                    // Dynamic layout internal block indices structure is updated from Editor
-                    blockIndices[i] = blockIndex;
-                    searchStartIndex = blockIndex + 1;
+            if (layout instanceof DynamicLayout) {
+                if (mTextDisplayLists == null) {
+                    mTextDisplayLists = new DisplayList[ArrayUtils.idealObjectArraySize(0)];
                 }
 
-                DisplayList blockDisplayList = mTextDisplayLists[blockIndex];
-                if (blockDisplayList == null) {
-                    blockDisplayList = mTextDisplayLists[blockIndex] =
-                            getHardwareRenderer().createDisplayList("Text " + blockIndex);
-                } else {
-                    if (blockIsInvalid) blockDisplayList.invalidate();
-                }
+                DynamicLayout dynamicLayout = (DynamicLayout) layout;
+                int[] blockEnds = dynamicLayout.getBlockEnds();
+                int[] blockIndices = dynamicLayout.getBlockIndices();
+                final int numberOfBlocks = dynamicLayout.getNumberOfBlocks();
 
-                if (!blockDisplayList.isValid()) {
-                    final HardwareCanvas hardwareCanvas = blockDisplayList.start();
-                    try {
-                        hardwareCanvas.setViewport(width, height);
-                        // The dirty rect should always be null for a display list
-                        hardwareCanvas.onPreDraw(null);
-                        hardwareCanvas.translate(-mScrollX, -mScrollY);
-                        layout.drawText(hardwareCanvas, endOfPreviousBlock + 1, blockEnd);
-                        hardwareCanvas.translate(mScrollX, mScrollY);
-                    } finally {
-                        hardwareCanvas.onPostDraw();
-                        blockDisplayList.end();
-                        if (USE_DISPLAY_LIST_PROPERTIES) {
-                            blockDisplayList.setLeftTopRightBottom(0, 0, width, height);
+                canvas.translate(mScrollX, mScrollY);
+                int endOfPreviousBlock = -1;
+                int searchStartIndex = 0;
+                for (int i = 0; i < numberOfBlocks; i++) {
+                    int blockEnd = blockEnds[i];
+                    int blockIndex = blockIndices[i];
+
+                    final boolean blockIsInvalid = blockIndex == DynamicLayout.INVALID_BLOCK_INDEX;
+                    if (blockIsInvalid) {
+                        blockIndex = getAvailableDisplayListIndex(blockIndices, numberOfBlocks,
+                                searchStartIndex);
+                        // Dynamic layout internal block indices structure is updated from Editor
+                        blockIndices[i] = blockIndex;
+                        searchStartIndex = blockIndex + 1;
+                    }
+
+                    DisplayList blockDisplayList = mTextDisplayLists[blockIndex];
+                    if (blockDisplayList == null) {
+                        blockDisplayList = mTextDisplayLists[blockIndex] =
+                                getHardwareRenderer().createDisplayList("Text " + blockIndex);
+                    } else {
+                        if (blockIsInvalid) blockDisplayList.invalidate();
+                    }
+
+                    if (!blockDisplayList.isValid()) {
+                        final HardwareCanvas hardwareCanvas = blockDisplayList.start();
+                        try {
+                            hardwareCanvas.setViewport(width, height);
+                            // The dirty rect should always be null for a display list
+                            hardwareCanvas.onPreDraw(null);
+                            hardwareCanvas.translate(-mScrollX, -mScrollY);
+                            layout.drawText(hardwareCanvas, endOfPreviousBlock + 1, blockEnd);
+                            hardwareCanvas.translate(mScrollX, mScrollY);
+                        } finally {
+                            hardwareCanvas.onPostDraw();
+                            blockDisplayList.end();
+                            if (USE_DISPLAY_LIST_PROPERTIES) {
+                                blockDisplayList.setLeftTopRightBottom(0, 0, width, height);
+                            }
                         }
                     }
-                }
 
-                ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, width, height, null,
-                        DisplayList.FLAG_CLIP_CHILDREN);
-                endOfPreviousBlock = blockEnd;
+                    ((HardwareCanvas) canvas).drawDisplayList(blockDisplayList, width, height, null,
+                            DisplayList.FLAG_CLIP_CHILDREN);
+                    endOfPreviousBlock = blockEnd;
+                }
+                canvas.translate(-mScrollX, -mScrollY);
+            } else {
+                // Fallback on the layout method (a BoringLayout is used when the text is empty)
+                layout.drawText(canvas, firstLine, lastLine);
             }
-            canvas.translate(-mScrollX, -mScrollY);
         }
 
         private int getAvailableDisplayListIndex(int[] blockIndices, int numberOfBlocks,
