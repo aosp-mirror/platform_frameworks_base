@@ -12732,12 +12732,16 @@ package android.net.wifi.p2p {
     method public void requestPeers(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.PeerListListener);
     field public static final int BUSY = 2; // 0x2
     field public static final int ERROR = 0; // 0x0
+    field public static final java.lang.String EXTRA_DISCOVERY_STATE = "discoveryState";
     field public static final java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
     field public static final java.lang.String EXTRA_WIFI_P2P_DEVICE = "wifiP2pDevice";
     field public static final java.lang.String EXTRA_WIFI_P2P_INFO = "wifiP2pInfo";
     field public static final java.lang.String EXTRA_WIFI_STATE = "wifi_p2p_state";
     field public static final int P2P_UNSUPPORTED = 1; // 0x1
     field public static final java.lang.String WIFI_P2P_CONNECTION_CHANGED_ACTION = "android.net.wifi.p2p.CONNECTION_STATE_CHANGE";
+    field public static final java.lang.String WIFI_P2P_DISCOVERY_CHANGED_ACTION = "android.net.wifi.p2p.DISCOVERY_STATE_CHANGE";
+    field public static final int WIFI_P2P_DISCOVERY_STARTED = 2; // 0x2
+    field public static final int WIFI_P2P_DISCOVERY_STOPPED = 1; // 0x1
     field public static final java.lang.String WIFI_P2P_PEERS_CHANGED_ACTION = "android.net.wifi.p2p.PEERS_CHANGED";
     field public static final java.lang.String WIFI_P2P_STATE_CHANGED_ACTION = "android.net.wifi.p2p.STATE_CHANGED";
     field public static final int WIFI_P2P_STATE_DISABLED = 1; // 0x1
