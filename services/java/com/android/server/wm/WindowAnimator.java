@@ -10,7 +10,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Surface;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
@@ -103,7 +102,7 @@ public class WindowAnimator {
             final int dw = mDw;
             final int dh = mDh;
             mWindowAnimationBackgroundSurface.show(dw, dh,
-                    target.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM,
+                    target.mWinAnimator.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM,
                     mWindowAnimationBackgroundColor);
         } else if (mWindowAnimationBackgroundSurface != null) {
             mWindowAnimationBackgroundSurface.hide();
@@ -164,10 +163,9 @@ public class WindowAnimator {
         for (int i = mService.mWindows.size() - 1; i >= 0; i--) {
             WindowState w = mService.mWindows.get(i);
             WindowStateAnimator winAnimator = w.mWinAnimator;
-
             final WindowManager.LayoutParams attrs = w.mAttrs;
 
-            if (w.mSurface != null) {
+            if (winAnimator.mSurface != null) {
                 final boolean wasAnimating = winAnimator.mWasAnimating;
                 final boolean nowAnimating = winAnimator.stepAnimationLocked(mCurrentTime);
 
@@ -181,13 +179,14 @@ public class WindowAnimator {
                 // a detached wallpaper animation.
                 if (nowAnimating) {
                     if (winAnimator.mAnimation != null) {
-                        if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0
+                        if ((attrs.flags&FLAG_SHOW_WALLPAPER) != 0
                                 && winAnimator.mAnimation.getDetachWallpaper()) {
-                            mService.mInnerFields.mDetachedWallpaper = w;
+                            mDetachedWallpaper = w;
                         }
                         if (winAnimator.mAnimation.getBackgroundColor() != 0) {
                             if (mWindowAnimationBackground == null
-                                    || (w.mAnimLayer < mWindowAnimationBackground.mAnimLayer)) {
+                                    || (winAnimator.mAnimLayer <
+                                            mWindowAnimationBackground.mWinAnimator.mAnimLayer)) {
                                 mWindowAnimationBackground = w;
                                 mWindowAnimationBackgroundColor =
                                         winAnimator.mAnimation.getBackgroundColor();
@@ -202,14 +201,14 @@ public class WindowAnimator {
                 // displayed behind it.
                 if (w.mAppToken != null && w.mAppToken.animation != null
                         && w.mAppToken.animating) {
-                    if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0
+                    if ((attrs.flags&FLAG_SHOW_WALLPAPER) != 0
                             && w.mAppToken.animation.getDetachWallpaper()) {
-                        mService.mInnerFields.mDetachedWallpaper = w;
+                        mDetachedWallpaper = w;
                     }
                     if (w.mAppToken.animation.getBackgroundColor() != 0) {
                         if (mWindowAnimationBackground == null
-                                || (w.mAnimLayer <
-                                        mWindowAnimationBackground.mAnimLayer)) {
+                                || (winAnimator.mAnimLayer <
+                                        mWindowAnimationBackground.mWinAnimator.mAnimLayer)) {
                             mWindowAnimationBackground = w;
                             mWindowAnimationBackgroundColor =
                                     w.mAppToken.animation.getBackgroundColor();
@@ -296,7 +295,7 @@ public class WindowAnimator {
                                 + w.isDrawnLw()
                                 + ", isAnimating=" + winAnimator.isAnimating());
                         if (!w.isDrawnLw()) {
-                            Slog.v(TAG, "Not displayed: s=" + w.mSurface
+                            Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurface
                                     + " pv=" + w.mPolicyVisibility
                                     + " dp=" + w.mDrawPending
                                     + " cdp=" + w.mCommitDrawPending
@@ -323,7 +322,7 @@ public class WindowAnimator {
                     }
                 }
             } else if (w.mReadyToShow) {
-                if (w.performShowLocked()) {
+                if (winAnimator.performShowLocked()) {
                     mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
                     if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
                         mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 5");
@@ -335,8 +334,8 @@ public class WindowAnimator {
                     atoken.thumbnailTransactionSeq = mTransactionSequence;
                     atoken.thumbnailLayer = 0;
                 }
-                if (atoken.thumbnailLayer < w.mAnimLayer) {
-                    atoken.thumbnailLayer = w.mAnimLayer;
+                if (atoken.thumbnailLayer < winAnimator.mAnimLayer) {
+                    atoken.thumbnailLayer = winAnimator.mAnimLayer;
                 }
             }
         } // end forall windows
@@ -386,14 +385,10 @@ public class WindowAnimator {
     }
 
     private void performAnimationsLocked() {
-        if (WindowManagerService.DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: seq="
-                + mTransactionSequence + " mAnimating="
-                + mAnimating);
-
         mTokenMayBeDrawn = false;
         mService.mInnerFields.mWallpaperMayChange = false;
         mForceHiding = false;
-        mService.mInnerFields.mDetachedWallpaper = null;
+        mDetachedWallpaper = null;
         mWindowAnimationBackground = null;
         mWindowAnimationBackgroundColor = 0;
 
@@ -402,188 +397,8 @@ public class WindowAnimator {
         if (mTokenMayBeDrawn) {
             testTokenMayBeDrawnLocked();
         }
-
-        if (WindowManagerService.DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: changes=0x"
-                + Integer.toHexString(mPendingLayoutChanges));
     }
 
-    public void prepareSurfaceLocked(final WindowState w, final boolean recoveringMemory) {
-        if (w.mSurface == null) {
-            if (w.mOrientationChanging) {
-                if (WindowManagerService.DEBUG_ORIENTATION) {
-                    Slog.v(TAG, "Orientation change skips hidden " + w);
-                }
-                w.mOrientationChanging = false;
-            }
-            return;
-        }
-
-        boolean displayed = false;
-
-        w.computeShownFrameLocked();
-
-        int width, height;
-        if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
-            // for a scaled surface, we just want to use
-            // the requested size.
-            width  = w.mRequestedWidth;
-            height = w.mRequestedHeight;
-        } else {
-            width = w.mCompatFrame.width();
-            height = w.mCompatFrame.height();
-        }
-
-        if (width < 1) {
-            width = 1;
-        }
-        if (height < 1) {
-            height = 1;
-        }
-        final boolean surfaceResized = w.mSurfaceW != width || w.mSurfaceH != height;
-        if (surfaceResized) {
-            w.mSurfaceW = width;
-            w.mSurfaceH = height;
-        }
-
-        if (w.mSurfaceX != w.mShownFrame.left
-                || w.mSurfaceY != w.mShownFrame.top) {
-            try {
-                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "POS " + w.mShownFrame.left
-                        + ", " + w.mShownFrame.top, null);
-                w.mSurfaceX = w.mShownFrame.left;
-                w.mSurfaceY = w.mShownFrame.top;
-                w.mSurface.setPosition(w.mShownFrame.left, w.mShownFrame.top);
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Error positioning surface of " + w
-                        + " pos=(" + w.mShownFrame.left
-                        + "," + w.mShownFrame.top + ")", e);
-                if (!recoveringMemory) {
-                    mService.reclaimSomeSurfaceMemoryLocked(w, "position", true);
-                }
-            }
-        }
-
-        if (surfaceResized) {
-            try {
-                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "SIZE " + width + "x" + height, null);
-                w.mSurfaceResized = true;
-                w.mSurface.setSize(width, height);
-            } catch (RuntimeException e) {
-                // If something goes wrong with the surface (such
-                // as running out of memory), don't take down the
-                // entire system.
-                Slog.e(TAG, "Error resizing surface of " + w
-                        + " size=(" + width + "x" + height + ")", e);
-                if (!recoveringMemory) {
-                    mService.reclaimSomeSurfaceMemoryLocked(w, "size", true);
-                }
-            }
-        }
-
-        if (w.mAttachedHidden || !w.isReadyForDisplay()) {
-            if (!w.mLastHidden) {
-                //dump();
-                w.mLastHidden = true;
-                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "HIDE (performLayout)", null);
-                if (w.mSurface != null) {
-                    w.mSurfaceShown = false;
-                    try {
-                        w.mSurface.hide();
-                    } catch (RuntimeException e) {
-                        Slog.w(TAG, "Exception hiding surface in " + w);
-                    }
-                }
-            }
-            // If we are waiting for this window to handle an
-            // orientation change, well, it is hidden, so
-            // doesn't really matter.  Note that this does
-            // introduce a potential glitch if the window
-            // becomes unhidden before it has drawn for the
-            // new orientation.
-            if (w.mOrientationChanging) {
-                w.mOrientationChanging = false;
-                if (WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
-                        "Orientation change skips hidden " + w);
-            }
-        } else if (w.mLastLayer != w.mAnimLayer
-                || w.mLastAlpha != w.mShownAlpha
-                || w.mLastDsDx != w.mDsDx
-                || w.mLastDtDx != w.mDtDx
-                || w.mLastDsDy != w.mDsDy
-                || w.mLastDtDy != w.mDtDy
-                || w.mLastHScale != w.mHScale
-                || w.mLastVScale != w.mVScale
-                || w.mLastHidden) {
-            displayed = true;
-            w.mLastAlpha = w.mShownAlpha;
-            w.mLastLayer = w.mAnimLayer;
-            w.mLastDsDx = w.mDsDx;
-            w.mLastDtDx = w.mDtDx;
-            w.mLastDsDy = w.mDsDy;
-            w.mLastDtDy = w.mDtDy;
-            w.mLastHScale = w.mHScale;
-            w.mLastVScale = w.mVScale;
-            if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                    "alpha=" + w.mShownAlpha + " layer=" + w.mAnimLayer
-                    + " matrix=[" + (w.mDsDx*w.mHScale)
-                    + "," + (w.mDtDx*w.mVScale)
-                    + "][" + (w.mDsDy*w.mHScale)
-                    + "," + (w.mDtDy*w.mVScale) + "]", null);
-            if (w.mSurface != null) {
-                try {
-                    w.mSurfaceAlpha = w.mShownAlpha;
-                    w.mSurface.setAlpha(w.mShownAlpha);
-                    w.mSurfaceLayer = w.mAnimLayer;
-                    w.mSurface.setLayer(w.mAnimLayer);
-                    w.mSurface.setMatrix(
-                            w.mDsDx*w.mHScale, w.mDtDx*w.mVScale,
-                            w.mDsDy*w.mHScale, w.mDtDy*w.mVScale);
-                } catch (RuntimeException e) {
-                    Slog.w(TAG, "Error updating surface in " + w, e);
-                    if (!recoveringMemory) {
-                        mService.reclaimSomeSurfaceMemoryLocked(w, "update", true);
-                    }
-                }
-            }
-
-            if (w.mLastHidden && w.isDrawnLw()
-                    && !w.mReadyToShow) {
-                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "SHOW (performLayout)", null);
-                if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + w
-                        + " during relayout");
-                if (mService.showSurfaceRobustlyLocked(w)) {
-                    w.mHasDrawn = true;
-                    w.mLastHidden = false;
-                } else {
-                    w.mOrientationChanging = false;
-                }
-            }
-            if (w.mSurface != null) {
-                w.mToken.hasVisible = true;
-            }
-        } else {
-            displayed = true;
-        }
-
-        if (displayed) {
-            if (w.mOrientationChanging) {
-                if (!w.isDrawnLw()) {
-                    mService.mInnerFields.mOrientationChangeComplete = false;
-                    if (WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Orientation continue waiting for draw in " + w);
-                } else {
-                    w.mOrientationChanging = false;
-                    if (WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Orientation change complete in " + w);
-                }
-            }
-            w.mToken.hasVisible = true;
-        }
-    }
 
     void animate() {
         mPendingLayoutChanges = 0;
@@ -608,7 +423,7 @@ public class WindowAnimator {
             final int N = mService.mWindows.size();
             for (int i=N-1; i>=0; i--) {
                 WindowState w = mService.mWindows.get(i);
-                prepareSurfaceLocked(w, true);
+                w.mWinAnimator.prepareSurfaceLocked(true);
             }
 
             if (mService.mDimAnimator != null && mService.mDimAnimator.mDimShown) {
@@ -629,7 +444,7 @@ public class WindowAnimator {
         } finally {
             Surface.closeTransaction();
         }
-        
+
         if (mWallpaperMayChange) {
             mService.notifyWallpaperMayChange();
         }

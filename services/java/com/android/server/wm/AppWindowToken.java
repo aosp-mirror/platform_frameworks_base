@@ -184,13 +184,14 @@ class AppWindowToken extends WindowToken {
         final int adj = animLayerAdjustment;
         thumbnailLayer = -1;
         for (int i=0; i<N; i++) {
-            WindowState w = allAppWindows.get(i);
-            w.mAnimLayer = w.mLayer + adj;
-            if (w.mAnimLayer > thumbnailLayer) {
-                thumbnailLayer = w.mAnimLayer;
+            final WindowState w = allAppWindows.get(i);
+            final WindowStateAnimator winAnimator = w.mWinAnimator;
+            winAnimator.mAnimLayer = w.mLayer + adj;
+            if (winAnimator.mAnimLayer > thumbnailLayer) {
+                thumbnailLayer = winAnimator.mAnimLayer;
             }
             if (WindowManagerService.DEBUG_LAYERS) Slog.v(WindowManagerService.TAG, "Updating layer " + w + ": "
-                    + w.mAnimLayer);
+                    + winAnimator.mAnimLayer);
             if (w == service.mInputMethodTarget && !service.mInputMethodTargetWaitingAnim) {
                 service.setInputMethodAnimLayerAdjustment(adj);
             }
@@ -221,11 +222,11 @@ class AppWindowToken extends WindowToken {
         boolean isAnimating = false;
         final int NW = allAppWindows.size();
         for (int i=0; i<NW; i++) {
-            WindowState w = allAppWindows.get(i);
+            WindowStateAnimator winAnimator = allAppWindows.get(i).mWinAnimator;
             if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG,
-                    "performing show on: " + w);
-            w.performShowLocked();
-            isAnimating |= w.mWinAnimator.isAnimating();
+                    "performing show on: " + winAnimator);
+            winAnimator.performShowLocked();
+            isAnimating |= winAnimator.isAnimating();
         }
         return isAnimating;
     }
@@ -390,7 +391,7 @@ class AppWindowToken extends WindowToken {
                         + win.isDrawnLw()
                         + ", isAnimating=" + win.mWinAnimator.isAnimating());
                 if (!win.isDrawnLw()) {
-                    Slog.v(WindowManagerService.TAG, "Not displayed: s=" + win.mSurface
+                    Slog.v(WindowManagerService.TAG, "Not displayed: s=" + win.mWinAnimator.mSurface
                             + " pv=" + win.mPolicyVisibility
                             + " dp=" + win.mDrawPending
                             + " cdp=" + win.mCommitDrawPending
