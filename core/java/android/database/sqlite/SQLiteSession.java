@@ -398,16 +398,16 @@ public final class SQLiteSession {
         throwIfNoTransaction();
         assert mConnection != null;
 
-        endTransactionUnchecked(cancellationSignal);
+        endTransactionUnchecked(cancellationSignal, false);
     }
 
-    private void endTransactionUnchecked(CancellationSignal cancellationSignal) {
+    private void endTransactionUnchecked(CancellationSignal cancellationSignal, boolean yielding) {
         if (cancellationSignal != null) {
             cancellationSignal.throwIfCanceled();
         }
 
         final Transaction top = mTransactionStack;
-        boolean successful = top.mMarkedSuccessful && !top.mChildFailed;
+        boolean successful = (top.mMarkedSuccessful || yielding) && !top.mChildFailed;
 
         RuntimeException listenerException = null;
         final SQLiteTransactionListener listener = top.mListener;
@@ -534,7 +534,7 @@ public final class SQLiteSession {
         final int transactionMode = mTransactionStack.mMode;
         final SQLiteTransactionListener listener = mTransactionStack.mListener;
         final int connectionFlags = mConnectionFlags;
-        endTransactionUnchecked(cancellationSignal); // might throw
+        endTransactionUnchecked(cancellationSignal, true); // might throw
 
         if (sleepAfterYieldDelayMillis > 0) {
             try {
