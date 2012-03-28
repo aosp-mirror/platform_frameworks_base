@@ -62,9 +62,9 @@ using namespace uirenderer;
  */
 #ifdef USE_OPENGL_RENDERER
 
-///////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
 // Defines
-///////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
 
 // Debug
 #define DEBUG_RENDERER 0
@@ -87,51 +87,8 @@ static struct {
 } gRectClassInfo;
 
 // ----------------------------------------------------------------------------
-// Misc
+// Caching
 // ----------------------------------------------------------------------------
-
-static jboolean android_view_GLES20Canvas_preserveBackBuffer(JNIEnv* env, jobject clazz) {
-    EGLDisplay display = eglGetCurrentDisplay();
-    EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);
-
-    eglGetError();
-    eglSurfaceAttrib(display, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
-
-    EGLint error = eglGetError();
-    if (error != EGL_SUCCESS) {
-        RENDERER_LOGD("Could not enable buffer preserved swap behavior (%x)", error);
-    }
-
-    return error == EGL_SUCCESS;
-}
-
-static jboolean android_view_GLES20Canvas_isBackBufferPreserved(JNIEnv* env, jobject clazz) {
-    EGLDisplay display = eglGetCurrentDisplay();
-    EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);
-    EGLint value;
-
-    eglGetError();
-    eglQuerySurface(display, surface, EGL_SWAP_BEHAVIOR, &value);
-
-    EGLint error = eglGetError();
-    if (error != EGL_SUCCESS) {
-        RENDERER_LOGD("Could not query buffer preserved swap behavior (%x)", error);
-    }
-
-    return error == EGL_SUCCESS && value == EGL_BUFFER_PRESERVED;
-}
-
-static void android_view_GLES20Canvas_disableVsync(JNIEnv* env, jobject clazz) {
-    EGLDisplay display = eglGetCurrentDisplay();
-
-    eglGetError();
-    eglSwapInterval(display, 0);
-
-    EGLint error = eglGetError();
-    if (error != EGL_SUCCESS) {
-        RENDERER_LOGD("Could not disable v-sync (%x)", error);
-    }
-}
 
 static void android_view_GLES20Canvas_flushCaches(JNIEnv* env, jobject clazz,
         Caches::FlushMode mode) {
@@ -853,9 +810,6 @@ static JNINativeMethod gMethods[] = {
     { "nIsAvailable",       "()Z",             (void*) android_view_GLES20Canvas_isAvailable },
 
 #ifdef USE_OPENGL_RENDERER
-    { "nIsBackBufferPreserved", "()Z",         (void*) android_view_GLES20Canvas_isBackBufferPreserved },
-    { "nPreserveBackBuffer",    "()Z",         (void*) android_view_GLES20Canvas_preserveBackBuffer },
-    { "nDisableVsync",          "()V",         (void*) android_view_GLES20Canvas_disableVsync },
     { "nFlushCaches",           "(I)V",        (void*) android_view_GLES20Canvas_flushCaches },
     { "nInitCaches",            "()V",         (void*) android_view_GLES20Canvas_initCaches },
     { "nTerminateCaches",       "()V",         (void*) android_view_GLES20Canvas_terminateCaches },
@@ -869,8 +823,7 @@ static JNINativeMethod gMethods[] = {
 
     { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
 
-    { "nCallDrawGLFunction", "(II)I",
-            (void*) android_view_GLES20Canvas_callDrawGLFunction },
+    { "nCallDrawGLFunction", "(II)I",          (void*) android_view_GLES20Canvas_callDrawGLFunction },
 
     { "nSave",              "(II)I",           (void*) android_view_GLES20Canvas_save },
     { "nRestore",           "(I)V",            (void*) android_view_GLES20Canvas_restore },
@@ -962,7 +915,7 @@ static JNINativeMethod gMethods[] = {
     { "nResizeLayer",            "(III[I)V" ,  (void*) android_view_GLES20Canvas_resizeLayer },
     { "nCreateTextureLayer",     "(Z[I)I",     (void*) android_view_GLES20Canvas_createTextureLayer },
     { "nUpdateTextureLayer",     "(IIIZLandroid/graphics/SurfaceTexture;)V",
-                                               (void*) android_view_GLES20Canvas_updateTextureLayer },
+            (void*) android_view_GLES20Canvas_updateTextureLayer },
     { "nUpdateRenderLayer",      "(IIIIIII)V", (void*) android_view_GLES20Canvas_updateRenderLayer },
     { "nDestroyLayer",           "(I)V",       (void*) android_view_GLES20Canvas_destroyLayer },
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },

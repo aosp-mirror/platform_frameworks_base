@@ -282,6 +282,43 @@ public abstract class HardwareRenderer {
     private static native void nBeginFrame();
 
     /**
+     * Preserves the back buffer of the current surface after a buffer swap.
+     * Calling this method sets the EGL_SWAP_BEHAVIOR attribute of the current
+     * surface to EGL_BUFFER_PRESERVED. Calling this method requires an EGL
+     * config that supports EGL_SWAP_BEHAVIOR_PRESERVED_BIT.
+     *
+     * @return True if the swap behavior was successfully changed,
+     *         false otherwise.
+     */
+    static boolean preserveBackBuffer() {
+        return nPreserveBackBuffer();
+    }
+
+    private static native boolean nPreserveBackBuffer();
+
+    /**
+     * Indicates whether the current surface preserves its back buffer
+     * after a buffer swap.
+     *
+     * @return True, if the surface's EGL_SWAP_BEHAVIOR is EGL_BUFFER_PRESERVED,
+     *         false otherwise
+     */
+    static boolean isBackBufferPreserved() {
+        return nIsBackBufferPreserved();
+    }
+
+    private static native boolean nIsBackBufferPreserved();
+
+    /**
+     * Disables v-sync. For performance testing only.
+     */
+    static void disableVsync() {
+        nDisableVsync();
+    }
+
+    private static native void nDisableVsync();
+
+    /**
      * Interface used to receive callbacks whenever a view is drawn by
      * a hardware renderer instance.
      */
@@ -777,7 +814,7 @@ public abstract class HardwareRenderer {
             // If mDirtyRegions is set, this means we have an EGL configuration
             // with EGL_SWAP_BEHAVIOR_PRESERVED_BIT set
             if (sDirtyRegions) {
-                if (!(mDirtyRegionsEnabled = GLES20Canvas.preserveBackBuffer())) {
+                if (!(mDirtyRegionsEnabled = preserveBackBuffer())) {
                     Log.w(LOG_TAG, "Backbuffer cannot be preserved");
                 }
             } else if (sDirtyRegionsRequested) {
@@ -787,7 +824,7 @@ public abstract class HardwareRenderer {
                 // want to set mDirtyRegions. We try to do this only if dirty
                 // regions were initially requested as part of the device
                 // configuration (see RENDER_DIRTY_REGIONS)
-                mDirtyRegionsEnabled = GLES20Canvas.isBackBufferPreserved();
+                mDirtyRegionsEnabled = isBackBufferPreserved();
             }
         }
 
@@ -926,7 +963,6 @@ public abstract class HardwareRenderer {
                     }
 
                     beginFrame();
-
                     onPreDraw(dirty);
 
                     HardwareCanvas canvas = mCanvas;
@@ -1203,7 +1239,7 @@ public abstract class HardwareRenderer {
         void setup(int width, int height) {
             super.setup(width, height);
             if (mVsyncDisabled) {
-                GLES20Canvas.disableVsync();
+                disableVsync();
             }
         }
 
@@ -1247,7 +1283,7 @@ public abstract class HardwareRenderer {
                 }
             }
         }
-        
+
         @Override
         void destroyHardwareResources(View view) {
             if (view != null) {
@@ -1265,7 +1301,7 @@ public abstract class HardwareRenderer {
                 GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
             }
         }
-        
+
         private static void destroyResources(View view) {
             view.destroyHardwareResources();
 

@@ -20,14 +20,95 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
-#include <EGL/egl_cache.h>
-
-EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
+#ifdef USE_OPENGL_RENDERER
+    #include <EGL/egl_cache.h>
+    EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
+#endif
 
 namespace android {
 
+/**
+ * Note: OpenGLRenderer JNI layer is generated and compiled only on supported
+ *       devices. This means all the logic must be compiled only when the
+ *       preprocessor variable USE_OPENGL_RENDERER is defined.
+ */
+#ifdef USE_OPENGL_RENDERER
+
 // ----------------------------------------------------------------------------
-// Misc
+// Defines
+// ----------------------------------------------------------------------------
+
+// Debug
+#define DEBUG_RENDERER 0
+
+// Debug
+#if DEBUG_RENDERER
+    #define RENDERER_LOGD(...) ALOGD(__VA_ARGS__)
+#else
+    #define RENDERER_LOGD(...)
+#endif
+
+// ----------------------------------------------------------------------------
+// Surface and display management
+// ----------------------------------------------------------------------------
+
+static jboolean android_view_HardwareRenderer_preserveBackBuffer(JNIEnv* env, jobject clazz) {
+    EGLDisplay display = eglGetCurrentDisplay();
+    EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);
+
+    eglGetError();
+    eglSurfaceAttrib(display, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
+
+    EGLint error = eglGetError();
+    if (error != EGL_SUCCESS) {
+        RENDERER_LOGD("Could not enable buffer preserved swap behavior (%x)", error);
+    }
+
+    return error == EGL_SUCCESS;
+}
+
+static jboolean android_view_HardwareRenderer_isBackBufferPreserved(JNIEnv* env, jobject clazz) {
+    EGLDisplay display = eglGetCurrentDisplay();
+    EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);
+    EGLint value;
+
+    eglGetError();
+    eglQuerySurface(display, surface, EGL_SWAP_BEHAVIOR, &value);
+
+    EGLint error = eglGetError();
+    if (error != EGL_SUCCESS) {
+        RENDERER_LOGD("Could not query buffer preserved swap behavior (%x)", error);
+    }
+
+    return error == EGL_SUCCESS && value == EGL_BUFFER_PRESERVED;
+}
+
+static void android_view_HardwareRenderer_disableVsync(JNIEnv* env, jobject clazz) {
+    EGLDisplay display = eglGetCurrentDisplay();
+
+    eglGetError();
+    eglSwapInterval(display, 0);
+
+    EGLint error = eglGetError();
+    if (error != EGL_SUCCESS) {
+        RENDERER_LOGD("Could not disable v-sync (%x)", error);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Tracing and debugging
+// ----------------------------------------------------------------------------
+
+static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz) {
+    EGLDisplay dpy = eglGetCurrentDisplay();
+    EGLSurface surf = eglGetCurrentSurface(EGL_DRAW);
+    eglBeginFrame(dpy, surf);
+}
+
+#endif // USE_OPENGL_RENDERER
+
+// ----------------------------------------------------------------------------
+// Shaders
 // ----------------------------------------------------------------------------
 
 static void android_view_HardwareRenderer_setupShadersDiskCache(JNIEnv* env, jobject clazz,
@@ -38,12 +119,6 @@ static void android_view_HardwareRenderer_setupShadersDiskCache(JNIEnv* env, job
     env->ReleaseStringUTFChars(diskCachePath, cacheArray);
 }
 
-static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz) {
-    EGLDisplay dpy = eglGetCurrentDisplay();
-    EGLSurface surf = eglGetCurrentSurface(EGL_DRAW);
-    eglBeginFrame(dpy, surf);
-}
-
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -51,10 +126,20 @@ static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz)
 const char* const kClassPathName = "android/view/HardwareRenderer";
 
 static JNINativeMethod gMethods[] = {
-    { "nSetupShadersDiskCache", "(Ljava/lang/String;)V",
-            (void*) android_view_HardwareRenderer_setupShadersDiskCache },
+#ifdef USE_OPENGL_RENDERER
+    { "nIsBackBufferPreserved", "()Z",
+            (void*) android_view_HardwareRenderer_isBackBufferPreserved },
+    { "nPreserveBackBuffer",    "()Z",
+            (void*) android_view_HardwareRenderer_preserveBackBuffer },
+    { "nDisableVsync",          "()V",
+            (void*) android_view_HardwareRenderer_disableVsync },
+
     { "nBeginFrame", "()V",
             (void*) android_view_HardwareRenderer_beginFrame },
+#endif
+
+    { "nSetupShadersDiskCache", "(Ljava/lang/String;)V",
+            (void*) android_view_HardwareRenderer_setupShadersDiskCache },
 };
 
 int register_android_view_HardwareRenderer(JNIEnv* env) {
