@@ -692,13 +692,10 @@ class BrowserFrame extends Handler {
      * @return An InputStream to the android resource
      */
     private InputStream inputStreamForAndroidResource(String url) {
-        // This list needs to be kept in sync with the list in
-        // external/webkit/WebKit/android/WebCoreSupport/WebUrlLoaderClient.cpp
-        final String ANDROID_ASSET = "file:///android_asset/";
-        final String ANDROID_RESOURCE = "file:///android_res/";
-        final String ANDROID_CONTENT = "content:";
+        final String ANDROID_ASSET = URLUtil.ASSET_BASE;
+        final String ANDROID_RESOURCE = URLUtil.RESOURCE_BASE;
+        final String ANDROID_CONTENT = URLUtil.CONTENT_BASE;
 
-        // file:///android_res
         if (url.startsWith(ANDROID_RESOURCE)) {
             url = url.replaceFirst(ANDROID_RESOURCE, "");
             if (url == null || url.length() == 0) {
@@ -736,8 +733,6 @@ class BrowserFrame extends Handler {
                 Log.e(LOGTAG, "Exception: " + url);
                 return null;
             }
-
-        // file:///android_asset
         } else if (url.startsWith(ANDROID_ASSET)) {
             url = url.replaceFirst(ANDROID_ASSET, "");
             try {
@@ -747,8 +742,6 @@ class BrowserFrame extends Handler {
             } catch (IOException e) {
                 return null;
             }
-
-        // content://
         } else if (mSettings.getAllowContentAccess() &&
                    url.startsWith(ANDROID_CONTENT)) {
             try {
