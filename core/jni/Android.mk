@@ -26,7 +26,6 @@ endif
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 LOCAL_SRC_FILES:= \
-	ActivityManager.cpp \
 	AndroidRuntime.cpp \
 	Time.cpp \
 	com_android_internal_content_NativeLibraryHelper.cpp \
