@@ -479,18 +479,18 @@ class CallbackProxy extends Handler {
                     String databaseIdentifier =
                             (String) map.get("databaseIdentifier");
                     String url = (String) map.get("url");
-                    long currentQuota =
-                            ((Long) map.get("currentQuota")).longValue();
-                    long totalUsedQuota =
-                            ((Long) map.get("totalUsedQuota")).longValue();
-                    long estimatedSize =
-                            ((Long) map.get("estimatedSize")).longValue();
+                    long quota =
+                            ((Long) map.get("quota")).longValue();
+                    long totalQuota =
+                            ((Long) map.get("totalQuota")).longValue();
+                    long estimatedDatabaseSize =
+                            ((Long) map.get("estimatedDatabaseSize")).longValue();
                     WebStorage.QuotaUpdater quotaUpdater =
                         (WebStorage.QuotaUpdater) map.get("quotaUpdater");
 
                     mWebChromeClient.onExceededDatabaseQuota(url,
-                            databaseIdentifier, currentQuota, estimatedSize,
-                            totalUsedQuota, quotaUpdater);
+                            databaseIdentifier, quota, estimatedDatabaseSize,
+                            totalQuota, quotaUpdater);
                 }
                 break;
 
@@ -498,15 +498,15 @@ class CallbackProxy extends Handler {
                 if (mWebChromeClient != null) {
                     HashMap<String, Object> map =
                             (HashMap<String, Object>) msg.obj;
-                    long spaceNeeded =
-                            ((Long) map.get("spaceNeeded")).longValue();
-                    long totalUsedQuota =
-                        ((Long) map.get("totalUsedQuota")).longValue();
+                    long requiredStorage =
+                            ((Long) map.get("requiredStorage")).longValue();
+                    long quota =
+                        ((Long) map.get("quota")).longValue();
                     WebStorage.QuotaUpdater quotaUpdater =
                         (WebStorage.QuotaUpdater) map.get("quotaUpdater");
 
-                    mWebChromeClient.onReachedMaxAppCacheSize(spaceNeeded,
-                            totalUsedQuota, quotaUpdater);
+                    mWebChromeClient.onReachedMaxAppCacheSize(requiredStorage,
+                            quota, quotaUpdater);
                 }
                 break;
 
@@ -1422,19 +1422,21 @@ class CallbackProxy extends Handler {
      * @param url The URL that caused the quota overflow.
      * @param databaseIdentifier The identifier of the database that the
      *     transaction that caused the overflow was running on.
-     * @param currentQuota The current quota the origin is allowed.
-     * @param estimatedSize The estimated size of the database.
-     * @param totalUsedQuota is the sum of all origins' quota.
+     * @param quota The current quota the origin is allowed.
+     * @param estimatedDatabaseSize The estimated size of the database.
+     * @param totalQuota is the sum of all origins' quota.
      * @param quotaUpdater An instance of a class encapsulating a callback
      *     to WebViewCore to run when the decision to allow or deny more
      *     quota has been made.
      */
     public void onExceededDatabaseQuota(
-            String url, String databaseIdentifier, long currentQuota,
-            long estimatedSize, long totalUsedQuota,
+            String url, String databaseIdentifier, long quota,
+            long estimatedDatabaseSize, long totalQuota,
             WebStorage.QuotaUpdater quotaUpdater) {
         if (mWebChromeClient == null) {
-            quotaUpdater.updateQuota(currentQuota);
+            // Native-side logic prevents the quota being updated to a smaller
+            // value.
+            quotaUpdater.updateQuota(quota);
             return;
         }
 
@@ -1442,9 +1444,9 @@ class CallbackProxy extends Handler {
         HashMap<String, Object> map = new HashMap();
         map.put("databaseIdentifier", databaseIdentifier);
         map.put("url", url);
-        map.put("currentQuota", currentQuota);
-        map.put("estimatedSize", estimatedSize);
-        map.put("totalUsedQuota", totalUsedQuota);
+        map.put("quota", quota);
+        map.put("estimatedDatabaseSize", estimatedDatabaseSize);
+        map.put("totalQuota", totalQuota);
         map.put("quotaUpdater", quotaUpdater);
         exceededQuota.obj = map;
         sendMessage(exceededQuota);
@@ -1453,24 +1455,26 @@ class CallbackProxy extends Handler {
     /**
      * Called by WebViewCore to inform the Java side that the appcache has
      * exceeded its max size.
-     * @param spaceNeeded is the amount of disk space that would be needed
-     * in order for the last appcache operation to succeed.
-     * @param totalUsedQuota is the sum of all origins' quota.
+     * @param requiredStorage is the amount of storage, in bytes, that would be
+     * needed in order for the last appcache operation to succeed.
+     * @param quota is the current quota (for all origins).
      * @param quotaUpdater An instance of a class encapsulating a callback
      * to WebViewCore to run when the decision to allow or deny a bigger
      * app cache size has been made.
      */
-    public void onReachedMaxAppCacheSize(long spaceNeeded,
-            long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
+    public void onReachedMaxAppCacheSize(long requiredStorage,
+            long quota, WebStorage.QuotaUpdater quotaUpdater) {
         if (mWebChromeClient == null) {
-            quotaUpdater.updateQuota(0);
+            // Native-side logic prevents the quota being updated to a smaller
+            // value.
+            quotaUpdater.updateQuota(quota);
             return;
         }
 
         Message msg = obtainMessage(REACHED_APPCACHE_MAXSIZE);
         HashMap<String, Object> map = new HashMap();
-        map.put("spaceNeeded", spaceNeeded);
-        map.put("totalUsedQuota", totalUsedQuota);
+        map.put("requiredStorage", requiredStorage);
+        map.put("quota", quota);
         map.put("quotaUpdater", quotaUpdater);
         msg.obj = map;
         sendMessage(msg);

@@ -428,38 +428,38 @@ public final class WebViewCore {
      * Notify the browser that the origin has exceeded it's database quota.
      * @param url The URL that caused the overflow.
      * @param databaseIdentifier The identifier of the database.
-     * @param currentQuota The current quota for the origin.
-     * @param estimatedSize The estimated size of the database.
+     * @param quota The current quota for the origin.
+     * @param estimatedDatabaseSize The estimated size of the database.
      */
     protected void exceededDatabaseQuota(String url,
                                          String databaseIdentifier,
-                                         long currentQuota,
-                                         long estimatedSize) {
+                                         long quota,
+                                         long estimatedDatabaseSize) {
         // Inform the callback proxy of the quota overflow. Send an object
         // that encapsulates a call to the nativeSetDatabaseQuota method to
         // awaken the sleeping webcore thread when a decision from the
         // client to allow or deny quota is available.
         mCallbackProxy.onExceededDatabaseQuota(url, databaseIdentifier,
-                currentQuota, estimatedSize, getUsedQuota(),
+                quota, estimatedDatabaseSize, getUsedQuota(),
                 new WebStorage.QuotaUpdater() {
                         @Override
-                        public void updateQuota(long quota) {
-                            nativeSetNewStorageLimit(mNativeClass, quota);
+                        public void updateQuota(long newQuota) {
+                            nativeSetNewStorageLimit(mNativeClass, newQuota);
                         }
                 });
     }
 
     /**
      * Notify the browser that the appcache has exceeded its max size.
-     * @param spaceNeeded is the amount of disk space that would be needed
-     * in order for the last appcache operation to succeed.
+     * @param requiredStorage is the amount of storage, in bytes, that would be
+     * needed in order for the last appcache operation to succeed.
      */
-    protected void reachedMaxAppCacheSize(long spaceNeeded) {
-        mCallbackProxy.onReachedMaxAppCacheSize(spaceNeeded, getUsedQuota(),
+    protected void reachedMaxAppCacheSize(long requiredStorage) {
+        mCallbackProxy.onReachedMaxAppCacheSize(requiredStorage, getUsedQuota(),
                 new WebStorage.QuotaUpdater() {
                     @Override
-                    public void updateQuota(long quota) {
-                        nativeSetNewStorageLimit(mNativeClass, quota);
+                    public void updateQuota(long newQuota) {
+                        nativeSetNewStorageLimit(mNativeClass, newQuota);
                     }
                 });
     }
