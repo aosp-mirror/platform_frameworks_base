@@ -341,6 +341,8 @@ TextLayoutShaper::TextLayoutShaper() : mShaperItemGlyphArraySize(0) {
     mHebrewBoldTypeface = NULL;
     mBengaliTypeface = NULL;
     mThaiTypeface = NULL;
+    mDevanagariTypeface = NULL;
+    mTamilTypeface = NULL;
 
     mFontRec.klass = &harfbuzzSkiaClass;
     mFontRec.userData = 0;
@@ -383,6 +385,8 @@ TextLayoutShaper::~TextLayoutShaper() {
     SkSafeUnref(mHebrewBoldTypeface);
     SkSafeUnref(mBengaliTypeface);
     SkSafeUnref(mThaiTypeface);
+    SkSafeUnref(mDevanagariTypeface);
+    SkSafeUnref(mTamilTypeface);
     deleteShaperItemGlyphArrays();
 }
 
