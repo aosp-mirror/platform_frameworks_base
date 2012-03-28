@@ -18,13 +18,10 @@ package android.webkit;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -43,9 +40,6 @@ public final class WebStorage {
     public interface QuotaUpdater {
         public void updateQuota(long newQuota);
     };
-
-    // Log tag
-    private static final String TAG = "webstorage";
 
     // Global instance of a WebStorage
     private static WebStorage sWebStorage;
