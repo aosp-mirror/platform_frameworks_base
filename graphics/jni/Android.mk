@@ -21,7 +21,7 @@ rs_generated_include_dir := $(call intermediates-dir-for,SHARED_LIBRARIES,libRS,
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
-	$(LOCAL_PATH)/../../libs/rs \
+	frameworks/rs \
 	$(rs_generated_include_dir) \
 	$(call include-path-for, corecg graphics)
 
