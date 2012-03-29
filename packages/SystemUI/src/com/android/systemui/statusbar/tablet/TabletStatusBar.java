@@ -936,10 +936,8 @@ public class TabletStatusBar extends BaseStatusBar implements
                 if (contentIntent != null) {
                     final View.OnClickListener listener = new NotificationClicker(contentIntent,
                             notification.pkg, notification.tag, notification.id);
-                    oldEntry.largeIcon.setOnClickListener(listener);
                     oldEntry.content.setOnClickListener(listener);
                 } else {
-                    oldEntry.largeIcon.setOnClickListener(null);
                     oldEntry.content.setOnClickListener(null);
                 }
                 // Update the icon.
@@ -950,13 +948,6 @@ public class TabletStatusBar extends BaseStatusBar implements
                 if (!oldEntry.icon.set(ic)) {
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
-                }
-                // Update the large icon
-                if (notification.notification.largeIcon != null) {
-                    oldEntry.largeIcon.setImageBitmap(notification.notification.largeIcon);
-                } else {
-                    oldEntry.largeIcon.getLayoutParams().width = 0;
-                    oldEntry.largeIcon.setVisibility(View.INVISIBLE);
                 }
 
                 if (NOTIFICATION_PEEK_ENABLED && key == mNotificationPeekKey) {
@@ -1860,16 +1851,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         vetoButton.setContentDescription(mContext.getString(
                 R.string.accessibility_remove_notification));
 
-        // the large icon
-        ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);
-        if (sbn.notification.largeIcon != null) {
-            largeIcon.setImageBitmap(sbn.notification.largeIcon);
-            largeIcon.setContentDescription(sbn.notification.tickerText);
-        } else {
-            largeIcon.getLayoutParams().width = 0;
-            largeIcon.setVisibility(View.INVISIBLE);
-        }
-        largeIcon.setContentDescription(sbn.notification.tickerText);
+        // NB: the large icon is now handled entirely by the template
 
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
@@ -1880,10 +1862,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         if (contentIntent != null) {
             final View.OnClickListener listener = new NotificationClicker(
                     contentIntent, sbn.pkg, sbn.tag, sbn.id);
-            largeIcon.setOnClickListener(listener);
             content.setOnClickListener(listener);
         } else {
-            largeIcon.setOnClickListener(null);
             content.setOnClickListener(null);
         }
 
@@ -1909,7 +1889,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         entry.row = row;
         entry.content = content;
         entry.expanded = expanded;
-        entry.largeIcon = largeIcon;
 
         return true;
     }
