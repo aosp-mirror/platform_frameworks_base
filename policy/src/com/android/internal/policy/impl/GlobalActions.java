@@ -200,10 +200,19 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         List<UserInfo> users = mContext.getPackageManager().getUsers();
         if (users.size() > 1) {
+            UserInfo currentUser;
+            try {
+                currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+            } catch (RemoteException re) {
+                currentUser = null;
+            }
             for (final UserInfo user : users) {
+                boolean isCurrentUser = currentUser == null
+                        ? user.id == 0 : (currentUser.id == user.id);
                 SinglePressAction switchToUser = new SinglePressAction(
                         com.android.internal.R.drawable.ic_menu_cc,
-                        user.name != null ? user.name : "Primary") {
+                        (user.name != null ? user.name : "Primary")
+                        + (isCurrentUser ? " \u2714" : "")) {
                     public void onPress() {
                         try {
                             ActivityManagerNative.getDefault().switchUser(user.id);

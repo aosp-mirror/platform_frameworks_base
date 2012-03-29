@@ -1795,12 +1795,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ProcessRecord getProcessRecordLocked(
             String processName, int uid) {
         if (uid == Process.SYSTEM_UID) {
-            // The system gets to run in any process.  If there are multiple
-            // processes with the same uid, just pick the first (this
-            // should never happen).
-            SparseArray<ProcessRecord> procs = mProcessNames.getMap().get(
-                    processName);
-            return procs != null ? procs.valueAt(0) : null;
+            SparseArray<ProcessRecord> procs = mProcessNames.getMap().get(processName);
+            if (procs == null) return null;
+            int N = procs.size();
+            for (int i = 0; i < N; i++) {
+                if (UserId.isSameUser(procs.keyAt(i), uid)) {
+                    return procs.valueAt(i);
+                }
+            }
+            return null;
         }
         // uid = applyUserId(uid);
         ProcessRecord proc = mProcessNames.get(processName, uid);
@@ -14643,6 +14646,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         mContext.sendBroadcast(addedIntent, android.Manifest.permission.MANAGE_ACCOUNTS);
 
         return true;
+    }
+
+    @Override
+    public UserInfo getCurrentUser() throws RemoteException {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != Process.myUid()) {
+            Slog.e(TAG, "Trying to get user from unauthorized app");
+            return null;
+        }
+        return AppGlobals.getPackageManager().getUser(mCurrentUserId);
     }
 
     private void onUserRemoved(Intent intent) {
