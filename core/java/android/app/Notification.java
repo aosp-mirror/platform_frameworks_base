@@ -187,12 +187,19 @@ public class Notification implements Parcelable
      */
     public RemoteViews contentView;
 
-
     /**
      * The view that will represent this notification in the pop-up "intruder alert" dialog.
      * @hide
      */
     public RemoteViews intruderView;
+
+    /**
+     * A larger version of {@link #contentView}, giving the Notification an
+     * opportunity to show more detail. The system UI may choose to show this
+     * instead of the normal content view at its discretion.
+     * @hide
+     */
+    public RemoteViews bigContentView;
 
     /**
      * The bitmap that may escape the bounds of the panel and bar.
@@ -584,6 +591,9 @@ public class Notification implements Parcelable
         if (parcel.readInt() != 0) {
             intruderView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
+        if (parcel.readInt() != 0) {
+            bigContentView = RemoteViews.CREATOR.createFromParcel(parcel);
+        }
     }
 
     @Override
@@ -649,6 +659,9 @@ public class Notification implements Parcelable
         }
         if (this.intruderView != null) {
             that.intruderView = this.intruderView.clone();
+        }
+        if (this.bigContentView != null) {
+            that.bigContentView = this.bigContentView.clone();
         }
 
         return that;
@@ -744,6 +757,13 @@ public class Notification implements Parcelable
         if (intruderView != null) {
             parcel.writeInt(1);
             intruderView.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
+
+        if (bigContentView != null) {
+            parcel.writeInt(1);
+            bigContentView.writeToParcel(parcel, 0);
         } else {
             parcel.writeInt(0);
         }
@@ -896,6 +916,7 @@ public class Notification implements Parcelable
         private CharSequence mContentTitle;
         private CharSequence mContentText;
         private CharSequence mContentInfo;
+        private CharSequence mSubText;
         private PendingIntent mContentIntent;
         private RemoteViews mContentView;
         private PendingIntent mDeleteIntent;
@@ -1013,6 +1034,15 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Set the third line of text in the platform notification template. 
+         * Don't use if you're also using {@link #setProgress(int, int, boolean)}; they occupy the same location in the standard template.
+         */
+        public Builder setSubText(CharSequence text) {
+            mSubText = text;
+            return this;
+        }
+
+        /**
          * Set the large number at the right-hand side of the notification.  This is
          * equivalent to setContentInfo, although it might show the number in a different
          * font size for readability.
@@ -1025,7 +1055,6 @@ public class Notification implements Parcelable
         /**
          * A small piece of additional information pertaining to this notification.
          *
-
          * The platform template will draw this on the last line of the notification, at the far
          * right (to the right of a smallIcon if it has been placed there).
          */
@@ -1037,7 +1066,6 @@ public class Notification implements Parcelable
         /**
          * Set the progress this notification represents.
          *
-
          * The platform template will represent this using a {@link ProgressBar}.
          */
         public Builder setProgress(int max, int progress, boolean indeterminate) {
@@ -1050,7 +1078,6 @@ public class Notification implements Parcelable
         /**
          * Supply a custom RemoteViews to use instead of the platform template.
          *
-
          * @see Notification#contentView
          */
         public Builder setContent(RemoteViews views) {
@@ -1061,17 +1088,12 @@ public class Notification implements Parcelable
         /**
          * Supply a {@link PendingIntent} to be sent when the notification is clicked.
          *
-
          * As of {@link android.os.Build.VERSION_CODES#HONEYCOMB}, if this field is unset and you
          * have specified a custom RemoteViews with {@link #setContent(RemoteViews)}, you can use
          * {@link RemoteViews#setOnClickPendingIntent RemoteViews.setOnClickPendingIntent(int,PendingIntent)}
-
          * to assign PendingIntents to individual views in that custom layout (i.e., to create
-
-         * clickable buttons inside the
-         * notification view).
+         * clickable buttons inside the notification view).
          *
-
          * @see Notification#contentIntent Notification.contentIntent
          */
         public Builder setContentIntent(PendingIntent intent) {
@@ -1082,7 +1104,6 @@ public class Notification implements Parcelable
         /**
          * Supply a {@link PendingIntent} to send when the notification is cleared explicitly by the user.
          *
-
          * @see Notification#deleteIntent
          */
         public Builder setDeleteIntent(PendingIntent intent) {
@@ -1115,7 +1136,6 @@ public class Notification implements Parcelable
          * Set the "ticker" text which is displayed in the status bar when the notification first
          * arrives.
          *
-
          * @see Notification#tickerText
          */
         public Builder setTicker(CharSequence tickerText) {
@@ -1355,20 +1375,28 @@ public class Notification implements Parcelable
             }
         }
 
-        private RemoteViews makeRemoteViews(int resId) {
+        private RemoteViews applyStandardTemplate(int resId) {
             RemoteViews contentView = new RemoteViews(mContext.getPackageName(), resId);
             boolean hasLine3 = false;
+            boolean hasLine2 = false;
+            int smallIconImageViewId = R.id.icon;
+            if (mLargeIcon != null) {
+                contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
+                smallIconImageViewId = R.id.right_icon;
+            }
             if (mSmallIcon != 0) {
-                contentView.setImageViewResource(R.id.icon, mSmallIcon);
-                contentView.setViewVisibility(R.id.icon, View.VISIBLE);
+                contentView.setImageViewResource(smallIconImageViewId, mSmallIcon);
+                contentView.setViewVisibility(smallIconImageViewId, View.VISIBLE);
             } else {
-                contentView.setViewVisibility(R.id.icon, View.GONE);
+                contentView.setViewVisibility(smallIconImageViewId, View.GONE);
             }
             if (mContentTitle != null) {
                 contentView.setTextViewText(R.id.title, mContentTitle);
             }
             if (mContentText != null) {
-                contentView.setTextViewText(R.id.text, mContentText);
+                contentView.setTextViewText(
+                        (mSubText != null) ? R.id.text2 : R.id.text, 
+                        mContentText);
                 hasLine3 = true;
             }
             if (mContentInfo != null) {
@@ -1390,12 +1418,19 @@ public class Notification implements Parcelable
             } else {
                 contentView.setViewVisibility(R.id.info, View.GONE);
             }
-            if (mProgressMax != 0 || mProgressIndeterminate) {
-                contentView.setProgressBar(
-                        R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
-                contentView.setViewVisibility(R.id.progress, View.VISIBLE);
+
+            if (mSubText != null) {
+                contentView.setTextViewText(R.id.text, mSubText);
+                contentView.setViewVisibility(R.id.text2, View.VISIBLE);
             } else {
-                contentView.setViewVisibility(R.id.progress, View.GONE);
+                contentView.setViewVisibility(R.id.text2, View.GONE);
+                if (mProgressMax != 0 || mProgressIndeterminate) {
+                    contentView.setProgressBar(
+                            R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
+                    contentView.setViewVisibility(R.id.progress, View.VISIBLE);
+                } else {
+                    contentView.setViewVisibility(R.id.progress, View.GONE);
+                }
             }
             if (mWhen != 0) {
                 contentView.setLong(R.id.time, "setTime", mWhen);
@@ -1408,9 +1443,7 @@ public class Notification implements Parcelable
             if (mContentView != null) {
                 return mContentView;
             } else {
-                    return makeRemoteViews(mLargeIcon == null
-                            ? R.layout.status_bar_latest_event_content
-                        : R.layout.status_bar_latest_event_content_large_icon);
+                return applyStandardTemplate(R.layout.status_bar_latest_event_content); // no more special large_icon flavor
             }
         }
 
@@ -1419,7 +1452,7 @@ public class Notification implements Parcelable
                 return mTickerView;
             } else {
                 if (mContentView == null) {
-                    return makeRemoteViews(mLargeIcon == null
+                    return applyStandardTemplate(mLargeIcon == null
                             ? R.layout.status_bar_latest_event_ticker
                             : R.layout.status_bar_latest_event_ticker_large_icon);
                 } else {
@@ -1514,6 +1547,102 @@ public class Notification implements Parcelable
                 mActions.toArray(n.actions);
             }
             return n;
+        }
+    }
+
+    /**
+     * @hide because this API is still very rough
+     * 
+     * This is a "rebuilder": It consumes a Builder object and modifies its output.
+     * 
+     * This represents the "big picture" style notification, with a large Bitmap atop the usual notification.
+     *
+     * Usage:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.BigPictureStyle(
+     *      new Notification.Builder()
+     *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
+     *         .setContentText(subject)
+     *         .setSmallIcon(R.drawable.new_mail)
+     *         .setLargeIcon(aBitmap))
+     *      .bigPicture(aBigBitmap)
+     *      .build();
+     * </pre>
+     */
+    public static class BigPictureStyle {
+        private Builder mBuilder;
+        private Bitmap mPicture;
+
+        public BigPictureStyle(Builder builder) {
+            mBuilder = builder;
+        }
+
+        public BigPictureStyle bigPicture(Bitmap b) {
+            mPicture = b;
+            return this;
+        }
+
+        private RemoteViews makeBigContentView() {
+            RemoteViews contentView = mBuilder.applyStandardTemplate(R.layout.notification_template_big_picture);
+
+            contentView.setImageViewBitmap(R.id.big_picture, mPicture);
+
+            return contentView;
+        }
+
+        public Notification build() {
+            Notification wip = mBuilder.getNotification();
+            wip.bigContentView = makeBigContentView();
+            return wip;
+        }
+    }
+
+    /**
+     * @hide because this API is still very rough
+     * 
+     * This is a "rebuilder": It consumes a Builder object and modifies its output.
+     * 
+     * This represents the "big text" style notification, with more area for the main content text to be read in its entirety.
+     *
+     * Usage:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.BigPictureStyle(
+     *      new Notification.Builder()
+     *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
+     *         .setContentText(subject)
+     *         .setSmallIcon(R.drawable.new_mail)
+     *         .setLargeIcon(aBitmap))
+     *      .bigText(aVeryLongString)
+     *      .build();
+     * </pre>
+     */
+    public static class BigTextStyle {
+        private Builder mBuilder;
+        private CharSequence mBigText;
+
+        public BigTextStyle(Builder builder) {
+            mBuilder = builder;
+        }
+
+        public BigTextStyle bigText(CharSequence cs) {
+            mBigText = cs;
+            return this;
+        }
+
+        private RemoteViews makeBigContentView() {
+            RemoteViews contentView = mBuilder.applyStandardTemplate(R.layout.status_bar_latest_event_content);
+
+            contentView.setTextViewText(R.id.big_text, mBigText);
+            contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
+            contentView.setTextViewText(R.id.text, ""); // XXX: what do do with this spot?
+
+            return contentView;
+        }
+
+        public Notification build() {
+            Notification wip = mBuilder.getNotification();
+            wip.bigContentView = makeBigContentView();
+            return wip;
         }
     }
 }

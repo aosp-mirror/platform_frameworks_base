@@ -6,6 +6,8 @@
     android:orientation="vertical"
     android:paddingLeft="12dp"
     android:paddingRight="12dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
     >
     <LinearLayout
         android:id="@+id/line1"
@@ -44,6 +46,13 @@
         android:ellipsize="marquee"
         android:visibility="gone"
         />
+    <TextView android:id="@+id/big_text"
+        android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="false"
+        android:visibility="gone"
+        />
     <LinearLayout
         android:id="@+id/line3"
         android:layout_width="match_parent"
@@ -70,7 +79,7 @@
             android:gravity="center"
             android:paddingLeft="8dp"
             />
-        <ImageView android:id="@+id/icon"
+        <ImageView android:id="@+id/right_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

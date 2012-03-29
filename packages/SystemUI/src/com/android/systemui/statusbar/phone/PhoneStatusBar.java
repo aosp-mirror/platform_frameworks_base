@@ -675,10 +675,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 if (contentIntent != null) {
                     final View.OnClickListener listener = new NotificationClicker(contentIntent,
                             notification.pkg, notification.tag, notification.id);
-                    oldEntry.largeIcon.setOnClickListener(listener);
                     oldEntry.content.setOnClickListener(listener);
                 } else {
-                    oldEntry.largeIcon.setOnClickListener(null);
                     oldEntry.content.setOnClickListener(null);
                 }
                 // Update the icon.
@@ -689,13 +687,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 if (!oldEntry.icon.set(ic)) {
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
-                }
-                // Update the large icon
-                if (notification.notification.largeIcon != null) {
-                    oldEntry.largeIcon.setImageBitmap(notification.notification.largeIcon);
-                } else {
-                    oldEntry.largeIcon.getLayoutParams().width = 0;
-                    oldEntry.largeIcon.setVisibility(View.INVISIBLE);
                 }
             }
             catch (RuntimeException e) {
@@ -878,7 +869,10 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
         StatusBarNotification sbn = entry.notification;
-        RemoteViews remoteViews = sbn.notification.contentView;
+        // XXX: temporary: while testing big notifications, auto-expand all of them
+        final boolean big = (sbn.notification.bigContentView != null);
+        RemoteViews remoteViews = big ? sbn.notification.bigContentView
+                                      : sbn.notification.contentView;
         if (remoteViews == null) {
             return false;
         }
@@ -887,20 +881,18 @@ public class PhoneStatusBar extends BaseStatusBar {
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
+        ViewGroup.LayoutParams lp = row.getLayoutParams();
+        if (big) {
+            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        } else {
+            lp.height = mContext.getResources().getDimensionPixelSize(R.dimen.notification_height);
+        }
+        row.setLayoutParams(lp);
         View vetoButton = updateNotificationVetoButton(row, sbn);
         vetoButton.setContentDescription(mContext.getString(
                 R.string.accessibility_remove_notification));
 
-        // the large icon
-        ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);
-        if (sbn.notification.largeIcon != null) {
-            largeIcon.setImageBitmap(sbn.notification.largeIcon);
-            largeIcon.setContentDescription(sbn.notification.tickerText);
-        } else {
-            largeIcon.getLayoutParams().width = 0;
-            largeIcon.setVisibility(View.INVISIBLE);
-        }
-        largeIcon.setContentDescription(sbn.notification.tickerText);
+        // NB: the large icon is now handled entirely by the template
 
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
@@ -911,10 +903,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (contentIntent != null) {
             final View.OnClickListener listener = new NotificationClicker(contentIntent,
                     sbn.pkg, sbn.tag, sbn.id);
-            largeIcon.setOnClickListener(listener);
             content.setOnClickListener(listener);
         } else {
-            largeIcon.setOnClickListener(null);
             content.setOnClickListener(null);
         }
 
@@ -940,7 +930,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         entry.row = row;
         entry.content = content;
         entry.expanded = expanded;
-        entry.largeIcon = largeIcon;
 
         return true;
     }

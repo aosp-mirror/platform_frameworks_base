@@ -3724,6 +3724,7 @@ package android.app {
     method public android.app.Notification.Builder setSmallIcon(int, int);
     method public android.app.Notification.Builder setSound(android.net.Uri);
     method public android.app.Notification.Builder setSound(android.net.Uri, int);
+    method public android.app.Notification.Builder setSubText(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence, android.widget.RemoteViews);
     method public android.app.Notification.Builder setUsesIntruderAlert(boolean);

@@ -1,0 +1,17 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/status_bar_latest_event_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <ImageView
+        android:id="@+id/big_picture"
+        android:layout_width="match_parent"
+        android:layout_height="192dp"
+        android:scaleType="centerCrop"
+        />
+    <include layout="@layout/status_bar_latest_event_content" 
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/notification_large_icon_height"
+        android:layout_marginTop="192dp"
+        />
+</FrameLayout>
