@@ -877,50 +877,6 @@ public final class ViewRootImpl implements ViewParent,
     public void bringChildToFront(View child) {
     }
 
-    public void scheduleTraversals() {
-        if (!mTraversalScheduled) {
-            mTraversalScheduled = true;
-            mTraversalBarrier = mHandler.getLooper().postSyncBarrier();
-            scheduleFrame();
-        }
-    }
-
-    public void unscheduleTraversals() {
-        if (mTraversalScheduled) {
-            mTraversalScheduled = false;
-            mHandler.getLooper().removeSyncBarrier(mTraversalBarrier);
-        }
-    }
-
-    void scheduleFrame() {
-        if (!mFrameScheduled) {
-            mFrameScheduled = true;
-            mChoreographer.postDrawCallback(mFrameRunnable, null);
-        }
-    }
-
-    void unscheduleFrame() {
-        unscheduleTraversals();
-
-        if (mFrameScheduled) {
-            mFrameScheduled = false;
-            mChoreographer.removeDrawCallbacks(mFrameRunnable, null);
-        }
-    }
-
-    void doFrame() {
-        if (mInputEventReceiver != null) {
-            mInputEventReceiver.consumeBatchedInputEvents();
-        }
-        doProcessInputEvents();
-
-        if (mTraversalScheduled) {
-            mTraversalScheduled = false;
-            mHandler.getLooper().removeSyncBarrier(mTraversalBarrier);
-            doTraversal();
-        }
-    }
-
     int getHostVisibility() {
         return mAppVisible ? mView.getVisibility() : View.GONE;
     }
@@ -954,41 +910,67 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void doTraversal() {
-        if (mProfile) {
-            Debug.startMethodTracing("ViewAncestor");
+    void scheduleTraversals() {
+        if (!mTraversalScheduled) {
+            mTraversalScheduled = true;
+            mTraversalBarrier = mHandler.getLooper().postSyncBarrier();
+            mChoreographer.postCallback(
+                    Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
         }
+    }
 
-        final long traversalStartTime;
-        if (ViewDebug.DEBUG_LATENCY) {
-            traversalStartTime = System.nanoTime();
-            if (mLastTraversalFinishedTimeNanos != 0) {
-                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals(); it has been "
-                        + ((traversalStartTime - mLastTraversalFinishedTimeNanos) * 0.000001f)
-                        + "ms since the last traversals finished.");
-            } else {
-                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals().");
+    void unscheduleTraversals() {
+        if (mTraversalScheduled) {
+            mTraversalScheduled = false;
+            mHandler.getLooper().removeSyncBarrier(mTraversalBarrier);
+            mChoreographer.removeCallbacks(
+                    Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
+        }
+    }
+
+    void doTraversal() {
+        if (mTraversalScheduled) {
+            mTraversalScheduled = false;
+            mHandler.getLooper().removeSyncBarrier(mTraversalBarrier);
+
+            doConsumeBatchedInput(false);
+            doProcessInputEvents();
+
+            if (mProfile) {
+                Debug.startMethodTracing("ViewAncestor");
             }
-        }
 
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "performTraversals");
-        try {
-            performTraversals();
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        }
+            final long traversalStartTime;
+            if (ViewDebug.DEBUG_LATENCY) {
+                traversalStartTime = System.nanoTime();
+                if (mLastTraversalFinishedTimeNanos != 0) {
+                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals(); it has been "
+                            + ((traversalStartTime - mLastTraversalFinishedTimeNanos) * 0.000001f)
+                            + "ms since the last traversals finished.");
+                } else {
+                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals().");
+                }
+            }
 
-        if (ViewDebug.DEBUG_LATENCY) {
-            long now = System.nanoTime();
-            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "performTraversals() took "
-                    + ((now - traversalStartTime) * 0.000001f)
-                    + "ms.");
-            mLastTraversalFinishedTimeNanos = now;
-        }
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "performTraversals");
+            try {
+                performTraversals();
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
 
-        if (mProfile) {
-            Debug.stopMethodTracing();
-            mProfile = false;
+            if (ViewDebug.DEBUG_LATENCY) {
+                long now = System.nanoTime();
+                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "performTraversals() took "
+                        + ((now - traversalStartTime) * 0.000001f)
+                        + "ms.");
+                mLastTraversalFinishedTimeNanos = now;
+            }
+
+            if (mProfile) {
+                Debug.stopMethodTracing();
+                mProfile = false;
+            }
         }
     }
 
@@ -1937,6 +1919,7 @@ public final class ViewRootImpl implements ViewParent,
 
         final boolean fullRedrawNeeded = mFullRedrawNeeded;
         mFullRedrawNeeded = false;
+        mChoreographer.notifyDrawOccurred();
 
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
         try {
@@ -2460,7 +2443,7 @@ public final class ViewRootImpl implements ViewParent,
             mInputChannel = null;
         }
 
-        unscheduleFrame();
+        unscheduleTraversals();
     }
 
     void updateConfiguration(Configuration config, boolean force) {
@@ -3846,6 +3829,7 @@ public final class ViewRootImpl implements ViewParent,
         Message msg = mHandler.obtainMessage(MSG_IME_FINISHED_EVENT);
         msg.arg1 = seq;
         msg.arg2 = handled ? 1 : 0;
+        msg.setAsynchronous(true);
         mHandler.sendMessage(msg);
     }
 
@@ -3971,11 +3955,13 @@ public final class ViewRootImpl implements ViewParent,
     private void scheduleProcessInputEvents() {
         if (!mProcessInputEventsScheduled) {
             mProcessInputEventsScheduled = true;
-            mHandler.sendEmptyMessage(MSG_PROCESS_INPUT_EVENTS);
+            Message msg = mHandler.obtainMessage(MSG_PROCESS_INPUT_EVENTS);
+            msg.setAsynchronous(true);
+            mHandler.sendMessage(msg);
         }
     }
 
-    private void doProcessInputEvents() {
+    void doProcessInputEvents() {
         while (mCurrentInputEvent == null && mFirstPendingInputEvent != null) {
             QueuedInputEvent q = mFirstPendingInputEvent;
             mFirstPendingInputEvent = q.mNext;
@@ -4047,15 +4033,42 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    final class FrameRunnable implements Runnable {
-        @Override
-        public void run() {
-            mFrameScheduled = false;
-            doFrame();
+    void scheduleConsumeBatchedInput() {
+        if (!mConsumeBatchedInputScheduled) {
+            mConsumeBatchedInputScheduled = true;
+            mChoreographer.postCallback(Choreographer.CALLBACK_INPUT,
+                    mConsumedBatchedInputRunnable, null);
         }
     }
-    final FrameRunnable mFrameRunnable = new FrameRunnable();
-    boolean mFrameScheduled;
+
+    void unscheduleConsumeBatchedInput() {
+        if (mConsumeBatchedInputScheduled) {
+            mConsumeBatchedInputScheduled = false;
+            mChoreographer.removeCallbacks(Choreographer.CALLBACK_INPUT,
+                    mConsumedBatchedInputRunnable, null);
+        }
+    }
+
+    void doConsumeBatchedInput(boolean callback) {
+        if (mConsumeBatchedInputScheduled) {
+            mConsumeBatchedInputScheduled = false;
+            if (!callback) {
+                mChoreographer.removeCallbacks(Choreographer.CALLBACK_INPUT,
+                        mConsumedBatchedInputRunnable, null);
+            }
+            if (mInputEventReceiver != null) {
+                mInputEventReceiver.consumeBatchedInputEvents();
+            }
+        }
+    }
+
+    final class TraversalRunnable implements Runnable {
+        @Override
+        public void run() {
+            doTraversal();
+        }
+    }
+    final TraversalRunnable mTraversalRunnable = new TraversalRunnable();
 
     final class WindowInputEventReceiver extends InputEventReceiver {
         public WindowInputEventReceiver(InputChannel inputChannel, Looper looper) {
@@ -4069,10 +4082,27 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void onBatchedInputEventPending() {
-            scheduleFrame();
+            scheduleConsumeBatchedInput();
+        }
+
+        @Override
+        public void dispose() {
+            unscheduleConsumeBatchedInput();
+            super.dispose();
         }
     }
     WindowInputEventReceiver mInputEventReceiver;
+
+    final class ConsumeBatchedInputRunnable implements Runnable {
+        @Override
+        public void run() {
+            doConsumeBatchedInput(true);
+            doProcessInputEvents();
+        }
+    }
+    final ConsumeBatchedInputRunnable mConsumedBatchedInputRunnable =
+            new ConsumeBatchedInputRunnable();
+    boolean mConsumeBatchedInputScheduled;
 
     final class InvalidateOnAnimationRunnable implements Runnable {
         private boolean mPosted;
@@ -4109,7 +4139,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 if (mPosted && mViews.isEmpty() && mViewRects.isEmpty()) {
-                    mChoreographer.removeAnimationCallbacks(this, null);
+                    mChoreographer.removeCallbacks(Choreographer.CALLBACK_ANIMATION, this, null);
                     mPosted = false;
                 }
             }
@@ -4150,7 +4180,7 @@ public final class ViewRootImpl implements ViewParent,
 
         private void postIfNeededLocked() {
             if (!mPosted) {
-                mChoreographer.postAnimationCallback(this, null);
+                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, this, null);
                 mPosted = true;
             }
         }
