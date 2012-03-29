@@ -933,11 +933,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     broadcastIntentLocked(null, null, intent,
                             null, null, 0, null, null, null,
                             false, false, MY_PID, Process.SYSTEM_UID);
-
-                    Dialog d = new AppNotRespondingDialog(ActivityManagerService.this,
-                            mContext, proc, (ActivityRecord)data.get("activity"));
-                    d.show();
-                    proc.anrDialog = d;
+                    if (mShowDialogs) {
+                        Dialog d = new AppNotRespondingDialog(ActivityManagerService.this,
+                                mContext, proc, (ActivityRecord) data.get("activity"));
+                        d.show();
+                        proc.anrDialog = d;
+                    } else {
+                        // Just kill the app if there is no dialog to be shown.
+                        killAppAtUsersRequest(proc, null);
+                    }
                 }
                 
                 ensureBootCompleted();
