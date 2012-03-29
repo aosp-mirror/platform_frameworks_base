@@ -378,12 +378,16 @@ public class DynamicLayout extends Layout
      * An index is associated to each block (which will be used by display lists),
      * this class simply invalidates the index of blocks overlapping a modification.
      *
+     * This method is package private and not private so that it can be tested.
+     *
      * @param startLine the first line of the range of modified lines
      * @param endLine the last line of the range, possibly equal to startLine, lower
      * than getLineCount()
      * @param newLineCount the number of lines that will replace the range, possibly 0
+     *
+     * @hide
      */
-    private void updateBlocks(int startLine, int endLine, int newLineCount) {
+    void updateBlocks(int startLine, int endLine, int newLineCount) {
         int firstBlock = -1;
         int lastBlock = -1;
         for (int i = 0; i < mNumberOfBlocks; i++) {
@@ -463,6 +467,18 @@ public class DynamicLayout extends Layout
             mBlockEnds[blockIndex] = lastBlockEndLine + deltaLines;
             mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
         }
+    }
+
+    /**
+     * This package private method is used for test purposes only
+     * @hide
+     */
+    void setBlocksDataForTest(int[] blockEnds, int[] blockIndices, int numberOfBlocks) {
+        mBlockEnds = new int[blockEnds.length];
+        mBlockIndices = new int[blockIndices.length];
+        System.arraycopy(blockEnds, 0, mBlockEnds, 0, blockEnds.length);
+        System.arraycopy(blockIndices, 0, mBlockIndices, 0, blockIndices.length);
+        mNumberOfBlocks = numberOfBlocks;
     }
 
     /**
