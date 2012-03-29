@@ -49,7 +49,6 @@ public:
 
     status_t initialize();
     status_t scheduleVsync();
-    static int handleReceiveCallback(int receiveFd, int events, void* data);
 
 protected:
     virtual ~NativeDisplayEventReceiver();
@@ -59,6 +58,9 @@ private:
     sp<Looper> mLooper;
     DisplayEventReceiver mReceiver;
     bool mWaitingForVsync;
+
+    static int handleReceiveCallback(int receiveFd, int events, void* data);
+    bool readLastVsyncMessage(nsecs_t* outTimestamp, uint32_t* outCount);
 };
 
 
@@ -100,16 +102,9 @@ status_t NativeDisplayEventReceiver::scheduleVsync() {
         ALOGV("receiver %p ~ Scheduling vsync.", this);
 
         // Drain all pending events.
-        DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
-        ssize_t n;
-        while ((n = mReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
-            ALOGV("receiver %p ~ Drained %d events.", this, int(n));
-        }
-
-        if (n < 0) {
-            ALOGW("Failed to drain events from display event receiver, status=%d", status_t(n));
-            return status_t(n);
-        }
+        nsecs_t vsyncTimestamp;
+        uint32_t vsyncCount;
+        readLastVsyncMessage(&vsyncTimestamp, &vsyncCount);
 
         status_t status = mReceiver.requestNextVsync();
         if (status) {
@@ -138,23 +133,9 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
     }
 
     // Drain all pending events, keep the last vsync.
-    nsecs_t vsyncTimestamp = -1;
-    uint32_t vsyncCount = 0;
-
-    DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
-    ssize_t n;
-    while ((n = r->mReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
-        ALOGV("receiver %p ~ Read %d events.", data, int(n));
-        while (n-- > 0) {
-            if (buf[n].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
-                vsyncTimestamp = buf[n].header.timestamp;
-                vsyncCount = buf[n].vsync.count;
-                break; // stop at last vsync in the buffer
-            }
-        }
-    }
-
-    if (vsyncTimestamp < 0) {
+    nsecs_t vsyncTimestamp;
+    uint32_t vsyncCount;
+    if (!r->readLastVsyncMessage(&vsyncTimestamp, &vsyncCount)) {
         ALOGV("receiver %p ~ Woke up but there was no vsync pulse!", data);
         return 1; // keep the callback, did not obtain a vsync pulse
     }
@@ -177,6 +158,26 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
     }
 
     return 1; // keep the callback
+}
+
+bool NativeDisplayEventReceiver::readLastVsyncMessage(
+        nsecs_t* outTimestamp, uint32_t* outCount) {
+    DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
+    ssize_t n;
+    while ((n = mReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
+        ALOGV("receiver %p ~ Read %d events.", this, int(n));
+        while (n-- > 0) {
+            if (buf[n].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
+                *outTimestamp = buf[n].header.timestamp;
+                *outCount = buf[n].vsync.count;
+                return true; // stop at last vsync in the buffer
+            }
+        }
+    }
+    if (n < 0) {
+        ALOGW("Failed to get events from display event receiver, status=%d", status_t(n));
+    }
+    return false;
 }
 
 
