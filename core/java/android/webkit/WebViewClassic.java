@@ -70,8 +70,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
-import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.HardwareCanvas;
@@ -820,51 +818,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
-    private class TextScrollListener extends SimpleOnGestureListener {
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2,
-                float velocityX, float velocityY) {
-            int maxScrollX = mEditTextContent.width() -
-                    mEditTextBounds.width();
-            int maxScrollY = mEditTextContent.height() -
-                    mEditTextBounds.height();
-
-            int contentVelocityX = viewToContentDimension((int)-velocityX);
-            int contentVelocityY = viewToContentDimension((int)-velocityY);
-            mEditTextScroller.fling(-mEditTextContent.left,
-                    -mEditTextContent.top,
-                    contentVelocityX, contentVelocityY,
-                    0, maxScrollX, 0, maxScrollY);
-            return true;
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2,
-                float distanceX, float distanceY) {
-            // Scrollable edit text. Scroll it.
-            int newScrollX = deltaToTextScroll(
-                    -mEditTextContent.left, mEditTextContent.width(),
-                    mEditTextBounds.width(),
-                    (int) distanceX);
-            int newScrollY = deltaToTextScroll(
-                    -mEditTextContent.top, mEditTextContent.height(),
-                    mEditTextBounds.height(),
-                    (int) distanceY);
-            scrollEditText(newScrollX, newScrollY);
-            return true;
-        }
-
-        private int deltaToTextScroll(int oldScroll, int contentSize,
-                int boundsSize, int delta) {
-            int newScroll = oldScroll +
-                    viewToContentDimension(delta);
-            int maxScroll = contentSize - boundsSize;
-            newScroll = Math.min(maxScroll, newScroll);
-            newScroll = Math.max(0, newScroll);
-            return newScroll;
-        }
-    }
-
     // The listener to capture global layout change event.
     private InnerGlobalLayoutListener mGlobalLayoutListener = null;
 
@@ -893,7 +846,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private int mFieldPointer;
     private PastePopupWindow mPasteWindow;
     private AutoCompletePopup mAutoCompletePopup;
-    private GestureDetector mGestureDetector;
     Rect mEditTextBounds = new Rect();
     Rect mEditTextContent = new Rect();
     int mEditTextLayerId;
@@ -1037,6 +989,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static final int TOUCH_DONE_MODE = 7;
     private static final int TOUCH_PINCH_DRAG = 8;
     private static final int TOUCH_DRAG_LAYER_MODE = 9;
+    private static final int TOUCH_DRAG_TEXT_MODE = 10;
 
     // Whether to forward the touch events to WebCore
     // Can only be set by WebKit via JNI.
@@ -1514,7 +1467,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         mAutoFillData = new WebViewCore.AutoFillData();
-        mGestureDetector = new GestureDetector(mContext, new TextScrollListener());
         mEditTextScroller = new Scroller(context);
     }
 
@@ -3404,6 +3356,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             boolean clampedY) {
         // Special-case layer scrolling so that we do not trigger normal scroll
         // updating.
+        if (mTouchMode == TOUCH_DRAG_TEXT_MODE) {
+            scrollEditText(scrollX, scrollY);
+            return;
+        }
         if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
             scrollLayerTo(scrollX, scrollY);
             return;
@@ -3876,6 +3832,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     rangeY = mScrollingLayerRect.bottom;
                     // No overscrolling for layers.
                     overflingDistance = 0;
+                } else if (mTouchMode == TOUCH_DRAG_TEXT_MODE) {
+                    oldX = getTextScrollX();
+                    oldY = getTextScrollY();
+                    rangeX = getMaxTextScrollX();
+                    rangeY = getMaxTextScrollY();
+                    overflingDistance = 0;
                 }
 
                 mWebViewPrivate.overScrollBy(x - oldX, y - oldY, oldX, oldY,
@@ -3886,12 +3848,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     mOverScrollGlow.absorbGlow(x, y, oldX, oldY, rangeX, rangeY);
                 }
             } else {
-                if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
-                    setScrollXRaw(x);
-                    setScrollYRaw(y);
-                } else {
+                if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
                     // Update the layer position instead of WebView.
                     scrollLayerTo(x, y);
+                } else if (mTouchMode == TOUCH_DRAG_TEXT_MODE) {
+                    scrollEditText(x, y);
+                } else {
+                    setScrollXRaw(x);
+                    setScrollYRaw(y);
                 }
                 abortAnimation();
                 nativeSetIsScrolling(false);
@@ -6177,7 +6141,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 startTouch(x, y, eventTime);
                 if (mIsEditingText) {
                     mTouchInEditText = mEditTextBounds.contains(contentX, contentY);
-                    mGestureDetector.onTouchEvent(ev);
                 }
                 break;
             }
@@ -6209,13 +6172,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         mLastTouchY = y;
                         invalidate();
                     }
-                    break;
-                } else if (mConfirmMove && mTouchInEditText) {
-                    ViewParent parent = mWebView.getParent();
-                    if (parent != null) {
-                        parent.requestDisallowInterceptTouchEvent(true);
-                    }
-                    mGestureDetector.onTouchEvent(ev);
                     break;
                 }
 
@@ -6264,7 +6220,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 }
 
                 if (mTouchMode != TOUCH_DRAG_MODE &&
-                        mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+                        mTouchMode != TOUCH_DRAG_LAYER_MODE &&
+                        mTouchMode != TOUCH_DRAG_TEXT_MODE) {
 
                     if (!mConfirmMove) {
                         break;
@@ -6347,9 +6304,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                             deltaX = 0;
                         }
                     }
-                    mLastTouchX = x;
-                    mLastTouchY = y;
-
                     if (deltaX * deltaX + deltaY * deltaY > mTouchSlopSquare) {
                         mHeldMotionless = MOTIONLESS_FALSE;
                         nativeSetIsScrolling(true);
@@ -6360,13 +6314,24 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
 
                     mLastTouchTime = eventTime;
+                    boolean allDrag = doDrag(deltaX, deltaY);
+                    if (allDrag) {
+                        mLastTouchX = x;
+                        mLastTouchY = y;
+                    } else {
+                        int contentDeltaX = (int)Math.floor(deltaX * mZoomManager.getInvScale());
+                        int roundedDeltaX = contentToViewDimension(contentDeltaX);
+                        int contentDeltaY = (int)Math.floor(deltaY * mZoomManager.getInvScale());
+                        int roundedDeltaY = contentToViewDimension(contentDeltaY);
+                        mLastTouchX -= roundedDeltaX;
+                        mLastTouchY -= roundedDeltaY;
+                    }
                 }
-
-                doDrag(deltaX, deltaY);
 
                 // Turn off scrollbars when dragging a layer.
                 if (keepScrollBarsVisible &&
-                        mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+                        mTouchMode != TOUCH_DRAG_LAYER_MODE &&
+                        mTouchMode != TOUCH_DRAG_TEXT_MODE) {
                     if (mHeldMotionless != MOTIONLESS_TRUE) {
                         mHeldMotionless = MOTIONLESS_TRUE;
                         invalidate();
@@ -6387,11 +6352,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                mGestureDetector.onTouchEvent(ev);
-                if (mTouchInEditText && mConfirmMove) {
-                    stopTouch();
-                    break; // We've been scrolling the edit text.
-                }
                 if (!mConfirmMove && mIsEditingText && mSelectionStarted &&
                         mIsCaretSelection) {
                     showPasteWindow();
@@ -6505,6 +6465,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         }
                     case TOUCH_DRAG_MODE:
                     case TOUCH_DRAG_LAYER_MODE:
+                    case TOUCH_DRAG_TEXT_MODE:
                         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
                         mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
                         // if the user waits a while w/o moving before the
@@ -6701,20 +6662,31 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
-    private void doDrag(int deltaX, int deltaY) {
+    private boolean doDrag(int deltaX, int deltaY) {
+        boolean allDrag = true;
         if ((deltaX | deltaY) != 0) {
             int oldX = getScrollX();
             int oldY = getScrollY();
             int rangeX = computeMaxScrollX();
             int rangeY = computeMaxScrollY();
-            // Check for the original scrolling layer in case we change
-            // directions.  mTouchMode might be TOUCH_DRAG_MODE if we have
-            // reached the edge of a layer but mScrollingLayer will be non-zero
-            // if we initiated the drag on a layer.
-            if (mCurrentScrollingLayerId != 0) {
-                final int contentX = viewToContentDimension(deltaX);
-                final int contentY = viewToContentDimension(deltaY);
+            final int contentX = (int)Math.floor(deltaX * mZoomManager.getInvScale());
+            final int contentY = (int)Math.floor(deltaY * mZoomManager.getInvScale());
 
+            // Assume page scrolling and change below if we're wrong
+            mTouchMode = TOUCH_DRAG_MODE;
+
+            // Check special scrolling before going to main page scrolling.
+            if (mIsEditingText && mTouchInEditText && canTextScroll(deltaX, deltaY)) {
+                // Edit text scrolling
+                oldX = getTextScrollX();
+                rangeX = getMaxTextScrollX();
+                deltaX = contentX;
+                oldY = getTextScrollY();
+                rangeY = getMaxTextScrollY();
+                deltaY = contentY;
+                mTouchMode = TOUCH_DRAG_TEXT_MODE;
+                allDrag = false;
+            } else if (mCurrentScrollingLayerId != 0) {
                 // Check the scrolling bounds to see if we will actually do any
                 // scrolling.  The rectangle is in document coordinates.
                 final int maxX = mScrollingLayerRect.right;
@@ -6734,12 +6706,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     oldY = mScrollingLayerRect.top;
                     rangeX = maxX;
                     rangeY = maxY;
-                } else {
-                    // Scroll the main page if we are not going to scroll the
-                    // layer.  This does not reset mScrollingLayer in case the
-                    // user changes directions and the layer can scroll the
-                    // other way.
-                    mTouchMode = TOUCH_DRAG_MODE;
+                    allDrag = false;
                 }
             }
 
@@ -6755,11 +6722,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
         }
         mZoomManager.keepZoomPickerVisible();
+        return allDrag;
     }
 
     private void stopTouch() {
         if (mScroller.isFinished() && !mSelectingText
-                && (mTouchMode == TOUCH_DRAG_MODE || mTouchMode == TOUCH_DRAG_LAYER_MODE)) {
+                && (mTouchMode == TOUCH_DRAG_MODE
+                || mTouchMode == TOUCH_DRAG_LAYER_MODE)) {
             WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
             nativeSetIsScrolling(false);
@@ -7153,6 +7122,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             maxY = mScrollingLayerRect.bottom;
             // No overscrolling for layers.
             overscrollDistance = overflingDistance = 0;
+        } else if (mTouchMode == TOUCH_DRAG_TEXT_MODE) {
+            scrollX = getTextScrollX();
+            scrollY = getTextScrollY();
+            maxX = getMaxTextScrollX();
+            maxY = getMaxTextScrollY();
+            // No overscrolling for edit text.
+            overscrollDistance = overflingDistance = 0;
         }
 
         if (mSnapScrollMode != SNAP_NONE) {
@@ -7232,7 +7208,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         final int time = mScroller.getDuration();
 
         // Suppress scrollbars for layer scrolling.
-        if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+        if (mTouchMode != TOUCH_DRAG_LAYER_MODE && mTouchMode != TOUCH_DRAG_TEXT_MODE) {
             mWebViewPrivate.awakenScrollBars(time);
         }
 
@@ -7588,6 +7564,36 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     public synchronized WebViewCore getWebViewCore() {
         return mWebViewCore;
+    }
+
+    private boolean canTextScroll(int directionX, int directionY) {
+        int scrollX = getTextScrollX();
+        int scrollY = getTextScrollY();
+        int maxScrollX = getMaxTextScrollX();
+        int maxScrollY = getMaxTextScrollY();
+        boolean canScrollX = (directionX > 0)
+                ? (scrollX < maxScrollX)
+                : (scrollX > 0);
+        boolean canScrollY = (directionY > 0)
+                ? (scrollY < maxScrollY)
+                : (scrollY > 0);
+        return canScrollX || canScrollY;
+    }
+
+    private int getTextScrollX() {
+        return -mEditTextContent.left;
+    }
+
+    private int getTextScrollY() {
+        return -mEditTextContent.top;
+    }
+
+    private int getMaxTextScrollX() {
+        return Math.max(0, mEditTextContent.width() - mEditTextBounds.width());
+    }
+
+    private int getMaxTextScrollY() {
+        return Math.max(0, mEditTextContent.height() - mEditTextBounds.height());
     }
 
     /**
@@ -8909,8 +8915,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     private void scrollEditText(int scrollX, int scrollY) {
         // Scrollable edit text. Scroll it.
-        float maxScrollX = (float)(mEditTextContent.width() -
-                mEditTextBounds.width());
+        float maxScrollX = getMaxTextScrollX();
         float scrollPercentX = ((float)scrollX)/maxScrollX;
         mEditTextContent.offsetTo(-scrollX, -scrollY);
         mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SCROLL_TEXT_INPUT, 0,
