@@ -13,9 +13,10 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import com.android.internal.policy.impl.PhoneWindowManager;
+
+import java.io.PrintWriter;
 
 /**
  * @author cmautner@google.com (Craig Mautner)
@@ -55,11 +56,58 @@ public class WindowAnimator {
     /** The one and only screen rotation if one is happening */
     ScreenRotationAnimation mScreenRotationAnimation = null;
 
+    // Window currently running an animation that has requested it be detached
+    // from the wallpaper.  This means we need to ensure the wallpaper is
+    // visible behind it in case it animates in a way that would allow it to be
+    // seen.
+    WindowState mWindowDetachedWallpaper = null;
+    WindowState mDetachedWallpaper = null;
+    boolean mWallpaperMayChange;
+    DimSurface mWindowAnimationBackgroundSurface = null;
+
     WindowAnimator(final WindowManagerService service, final Context context,
             final WindowManagerPolicy policy) {
         mService = service;
         mContext = context;
         mPolicy = policy;
+    }
+
+    private void testWallpaperAndBackgroundLocked() {
+        if (mWindowDetachedWallpaper != mDetachedWallpaper) {
+            if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
+                    "Detached wallpaper changed from " + mWindowDetachedWallpaper
+                    + " to " + mDetachedWallpaper);
+            mWindowDetachedWallpaper = mDetachedWallpaper;
+            mWallpaperMayChange = true;
+        }
+
+        if (mWindowAnimationBackgroundColor != 0) {
+            // If the window that wants black is the current wallpaper
+            // target, then the black goes *below* the wallpaper so we
+            // don't cause the wallpaper to suddenly disappear.
+            WindowState target = mWindowAnimationBackground;
+            if (mService.mWallpaperTarget == target
+                    || mService.mLowerWallpaperTarget == target
+                    || mService.mUpperWallpaperTarget == target) {
+                for (int i=0; i<mService.mWindows.size(); i++) {
+                    WindowState w = mService.mWindows.get(i);
+                    if (w.mIsWallpaper) {
+                        target = w;
+                        break;
+                    }
+                }
+            }
+            if (mWindowAnimationBackgroundSurface == null) {
+                mWindowAnimationBackgroundSurface = new DimSurface(mService.mFxSession);
+            }
+            final int dw = mDw;
+            final int dh = mDh;
+            mWindowAnimationBackgroundSurface.show(dw, dh,
+                    target.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM,
+                    mWindowAnimationBackgroundColor);
+        } else if (mWindowAnimationBackgroundSurface != null) {
+            mWindowAnimationBackgroundSurface.hide();
+        }
     }
 
     private void updateWindowsAppsAndRotationAnimationsLocked() {
@@ -120,38 +168,6 @@ public class WindowAnimator {
             final WindowManager.LayoutParams attrs = w.mAttrs;
 
             if (w.mSurface != null) {
-                // Take care of the window being ready to display.
-                if (w.commitFinishDrawingLocked(mCurrentTime)) {
-                    if ((w.mAttrs.flags
-                            & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
-                        if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
-                                "First draw done in potential wallpaper target " + w);
-                        mService.mInnerFields.mWallpaperMayChange = true;
-                        mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 1");
-                        }
-                    }
-                }
-
-                // If the window has moved due to its containing
-                // content frame changing, then we'd like to animate
-                // it.  The checks here are ordered by what is least
-                // likely to be true first.
-                if (w.shouldAnimateMove()) {
-                    // Frame has moved, containing content frame
-                    // has also moved, and we're not currently animating...
-                    // let's do something.
-                    Animation a = AnimationUtils.loadAnimation(mContext,
-                            com.android.internal.R.anim.window_move_from_decor);
-                    winAnimator.setAnimation(a);
-                    w.mAnimDw = w.mLastFrame.left - w.mFrame.left;
-                    w.mAnimDh = w.mLastFrame.top - w.mFrame.top;
-                } else {
-                    w.mAnimDw = mInnerDw;
-                    w.mAnimDh = mInnerDh;
-                }
-
                 final boolean wasAnimating = winAnimator.mWasAnimating;
                 final boolean nowAnimating = winAnimator.stepAnimationLocked(mCurrentTime);
 
@@ -202,7 +218,7 @@ public class WindowAnimator {
                 }
 
                 if (wasAnimating && !winAnimator.mAnimating && mService.mWallpaperTarget == w) {
-                    mService.mInnerFields.mWallpaperMayChange = true;
+                    mWallpaperMayChange = true;
                     mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                     if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
                         mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 2");
@@ -255,7 +271,7 @@ public class WindowAnimator {
                     }
                     if (changed && (attrs.flags
                             & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
-                        mService.mInnerFields.mWallpaperMayChange = true;
+                        mWallpaperMayChange = true;
                         mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
                             mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 4");
@@ -571,6 +587,7 @@ public class WindowAnimator {
 
     void animate() {
         mPendingLayoutChanges = 0;
+        mWallpaperMayChange = false;
         mCurrentTime = SystemClock.uptimeMillis();
 
         // Update animations of all applications, including those
@@ -578,6 +595,7 @@ public class WindowAnimator {
         Surface.openTransaction();
 
         try {
+            testWallpaperAndBackgroundLocked();
             updateWindowsAppsAndRotationAnimationsLocked();
             performAnimationsLocked();
 
@@ -611,6 +629,10 @@ public class WindowAnimator {
         } finally {
             Surface.closeTransaction();
         }
+        
+        if (mWallpaperMayChange) {
+            mService.notifyWallpaperMayChange();
+        }
     }
 
     WindowState mCurrentFocus;
@@ -626,4 +648,13 @@ public class WindowAnimator {
         mInnerDh = appHeight;
     }
 
+    public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        if (mWindowDetachedWallpaper != null) {
+            pw.print("  mWindowDetachedWallpaper="); pw.println(mWindowDetachedWallpaper);
+        }
+        if (mWindowAnimationBackgroundSurface != null) {
+            pw.println("  mWindowAnimationBackgroundSurface:");
+            mWindowAnimationBackgroundSurface.printTo("    ", pw);
+        }
+    }
 }
