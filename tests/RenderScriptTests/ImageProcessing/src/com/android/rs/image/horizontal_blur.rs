@@ -1,4 +1,5 @@
 #pragma version(1)
+#pragma rs_fp_relaxed
 
 #include "ip.rsh"
 
