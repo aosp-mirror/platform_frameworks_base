@@ -176,8 +176,11 @@ public final class Ndef extends BasicTagTechnology {
      * <p>If the NDEF Message is modified by an I/O operation then it
      * will not be updated here, this function only returns what was discovered
      * when the tag entered the field.
+     * <p>Note that this method may return null if the tag was in the
+     * INITIALIZED state as defined by NFC Forum, as in this state the
+     * tag is formatted to support NDEF but does not contain a message yet.
      * <p>Does not cause any RF activity and does not block.
-     * @return NDEF Message read from the tag at discovery time
+     * @return NDEF Message read from the tag at discovery time, can be null
      */
     public NdefMessage getCachedNdefMessage() {
         return mNdefMsg;
@@ -245,11 +248,15 @@ public final class Ndef extends BasicTagTechnology {
      *
      * <p>This always reads the current NDEF Message stored on the tag.
      *
+     * <p>Note that this method may return null if the tag was in the
+     * INITIALIZED state as defined by NFC Forum, as in that state the
+     * tag is formatted to support NDEF but does not contain a message yet.
+     *
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
-     * @return the NDEF Message, never null
+     * @return the NDEF Message, can be null
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
      * @throws FormatException if the NDEF Message on the tag is malformed
@@ -265,17 +272,8 @@ public final class Ndef extends BasicTagTechnology {
             int serviceHandle = mTag.getServiceHandle();
             if (tagService.isNdef(serviceHandle)) {
                 NdefMessage msg = tagService.ndefRead(serviceHandle);
-                if (msg == null) {
-                    int errorCode = tagService.getLastError(serviceHandle);
-                    switch (errorCode) {
-                        case ErrorCodes.ERROR_IO:
-                            throw new IOException();
-                        case ErrorCodes.ERROR_INVALID_PARAM:
-                            throw new FormatException();
-                        default:
-                            // Should not happen
-                            throw new IOException();
-                    }
+                if (msg == null && !tagService.isPresent(serviceHandle)) {
+                    throw new TagLostException();
                 }
                 return msg;
             } else {
