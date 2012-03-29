@@ -277,7 +277,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
      */
     public boolean showOverflowMenu() {
         if (mReserveOverflow && !isOverflowMenuShowing() && mMenu != null && mMenuView != null &&
-                mPostedOpenRunnable == null) {
+                mPostedOpenRunnable == null && !mMenu.getNonActionItems().isEmpty()) {
             OverflowPopup popup = new OverflowPopup(mContext, mMenu, mOverflowButton, true);
             mPostedOpenRunnable = new OpenOverflowRunnable(popup);
             // Post this for later; we might still need a layout for the anchor to be right.
