@@ -182,6 +182,41 @@ public class WifiP2pManager {
         "android.net.wifi.p2p.PEERS_CHANGED";
 
     /**
+     * Broadcast intent action indicating that peer discovery has either started or stopped.
+     * One extra {@link #EXTRA_DISCOVERY_STATE} indicates whether discovery has started
+     * or stopped.
+     *
+     * Note that discovery will be stopped during a connection setup. If the application tries
+     * to re-initiate discovery during this time, it can fail.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String WIFI_P2P_DISCOVERY_CHANGED_ACTION =
+        "android.net.wifi.p2p.DISCOVERY_STATE_CHANGE";
+
+    /**
+     * The lookup key for an int that indicates whether p2p discovery has started or stopped.
+     * Retrieve it with {@link android.content.Intent#getIntExtra(String,int)}.
+     *
+     * @see #WIFI_P2P_DISCOVERY_STARTED
+     * @see #WIFI_P2P_DISCOVERY_STOPPED
+     */
+    public static final String EXTRA_DISCOVERY_STATE = "discoveryState";
+
+    /**
+     * p2p discovery has stopped
+     *
+     * @see #WIFI_P2P_DISCOVERY_CHANGED_ACTION
+     */
+    public static final int WIFI_P2P_DISCOVERY_STOPPED = 1;
+
+    /**
+     * p2p discovery has started
+     *
+     * @see #WIFI_P2P_DISCOVERY_CHANGED_ACTION
+     */
+    public static final int WIFI_P2P_DISCOVERY_STARTED = 2;
+
+    /**
      * Broadcast intent action indicating that this device details have changed.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)

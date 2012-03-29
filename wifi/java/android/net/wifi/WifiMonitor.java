@@ -166,6 +166,9 @@ public class WifiMonitor {
     /* P2P-DEVICE-LOST p2p_dev_addr=42:fc:89:e1:e2:27 */
     private static final String P2P_DEVICE_LOST_STR = "P2P-DEVICE-LOST";
 
+    /* P2P-FIND-STOPPED */
+    private static final String P2P_FIND_STOPPED_STR = "P2P-FIND-STOPPED";
+
     /* P2P-GO-NEG-REQUEST 42:fc:89:a8:96:09 dev_passwd_id=4 */
     private static final String P2P_GO_NEG_REQUEST_STR = "P2P-GO-NEG-REQUEST";
 
@@ -264,6 +267,7 @@ public class WifiMonitor {
     public static final int P2P_PROV_DISC_PBC_RSP_EVENT          = BASE + 34;
     public static final int P2P_PROV_DISC_ENTER_PIN_EVENT        = BASE + 35;
     public static final int P2P_PROV_DISC_SHOW_PIN_EVENT         = BASE + 36;
+    public static final int P2P_FIND_STOPPED_EVENT               = BASE + 37;
 
     /* hostap events */
     public static final int AP_STA_DISCONNECTED_EVENT            = BASE + 41;
@@ -516,6 +520,8 @@ public class WifiMonitor {
                 mStateMachine.sendMessage(P2P_DEVICE_FOUND_EVENT, new WifiP2pDevice(dataString));
             } else if (dataString.startsWith(P2P_DEVICE_LOST_STR)) {
                 mStateMachine.sendMessage(P2P_DEVICE_LOST_EVENT, new WifiP2pDevice(dataString));
+            } else if (dataString.startsWith(P2P_FIND_STOPPED_STR)) {
+                mStateMachine.sendMessage(P2P_FIND_STOPPED_EVENT);
             } else if (dataString.startsWith(P2P_GO_NEG_REQUEST_STR)) {
                 mStateMachine.sendMessage(P2P_GO_NEGOTIATION_REQUEST_EVENT,
                         new WifiP2pConfig(dataString));

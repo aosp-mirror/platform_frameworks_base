@@ -140,6 +140,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
      * is invoked */
     private boolean mPersistGroup;
 
+    /* Track whether we are in p2p discovery. This is used to avoid sending duplicate
+     * broadcasts
+     */
+    private boolean mDiscoveryStarted;
+
     private NetworkInfo mNetworkInfo;
 
     /* Is chosen as a unique range to avoid conflict with
@@ -489,10 +494,14 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiP2pManager.DISCOVER_PEERS:
                     if (mWifiNative.p2pFind(DISCOVER_TIMEOUT_S)) {
                         replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_SUCCEEDED);
+                        sendP2pDiscoveryChangedBroadcast(true);
                     } else {
                         replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_FAILED,
                                 WifiP2pManager.ERROR);
                     }
+                    break;
+                case WifiMonitor.P2P_FIND_STOPPED_EVENT:
+                    sendP2pDiscoveryChangedBroadcast(false);
                     break;
                 case WifiP2pManager.STOP_DISCOVERY:
                     if (mWifiNative.p2pStopFind()) {
@@ -1027,6 +1036,20 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             intent.putExtra(WifiP2pManager.EXTRA_WIFI_STATE,
                     WifiP2pManager.WIFI_P2P_STATE_DISABLED);
         }
+        mContext.sendStickyBroadcast(intent);
+    }
+
+    private void sendP2pDiscoveryChangedBroadcast(boolean started) {
+        if (mDiscoveryStarted == started) return;
+        mDiscoveryStarted = started;
+
+        if (DBG) logd("discovery change broadcast " + started);
+
+        final Intent intent = new Intent(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(WifiP2pManager.EXTRA_DISCOVERY_STATE, started ?
+                WifiP2pManager.WIFI_P2P_DISCOVERY_STARTED :
+                WifiP2pManager.WIFI_P2P_DISCOVERY_STOPPED);
         mContext.sendStickyBroadcast(intent);
     }
 
