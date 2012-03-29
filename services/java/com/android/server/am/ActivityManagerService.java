@@ -1794,16 +1794,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final ProcessRecord getProcessRecordLocked(
             String processName, int uid) {
-        if (uid == Process.SYSTEM_UID) {
-            SparseArray<ProcessRecord> procs = mProcessNames.getMap().get(processName);
-            if (procs == null) return null;
-            int N = procs.size();
-            for (int i = 0; i < N; i++) {
-                if (UserId.isSameUser(procs.keyAt(i), uid)) {
-                    return procs.valueAt(i);
-                }
-            }
-            return null;
+        // Temporary hack to make Settings run per user
+        if (uid == Process.SYSTEM_UID && !processName.equals("com.android.settings")) {
+            // The system gets to run in any process.  If there are multiple
+            // processes with the same uid, just pick the first (this
+            // should never happen).
+            SparseArray<ProcessRecord> procs = mProcessNames.getMap().get(
+                    processName);
+            return procs != null ? procs.valueAt(0) : null;
         }
         // uid = applyUserId(uid);
         ProcessRecord proc = mProcessNames.get(processName, uid);
