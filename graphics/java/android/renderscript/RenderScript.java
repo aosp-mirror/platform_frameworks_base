@@ -299,10 +299,10 @@ public class RenderScript {
         validate();
         rsnAllocationGetSurfaceTextureID2(mContext, alloc, st);
     }
-    native void rsnAllocationSetSurfaceTexture(int con, int alloc, SurfaceTexture sur);
-    synchronized void nAllocationSetSurfaceTexture(int alloc, SurfaceTexture sur) {
+    native void rsnAllocationSetSurface(int con, int alloc, Surface sur);
+    synchronized void nAllocationSetSurface(int alloc, Surface sur) {
         validate();
-        rsnAllocationSetSurfaceTexture(mContext, alloc, sur);
+        rsnAllocationSetSurface(mContext, alloc, sur);
     }
     native void rsnAllocationIoSend(int con, int alloc);
     synchronized void nAllocationIoSend(int alloc) {

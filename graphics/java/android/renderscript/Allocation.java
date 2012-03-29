@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.view.Surface;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.util.TypedValue;
@@ -1185,17 +1186,38 @@ public class Allocation extends BaseObj {
     }
 
     /**
+     *
+     * @hide
+     *
+     */
+    public Surface getSurface() {
+        return new Surface(getSurfaceTexture());
+    }
+
+    /**
      * @hide
      */
-    public void setSurfaceTexture(SurfaceTexture sur) {
+    public void setSurface(Surface sur) {
+        mRS.validate();
         if ((mUsage & USAGE_IO_OUTPUT) == 0) {
             throw new RSInvalidStateException("Allocation is not USAGE_IO_OUTPUT.");
         }
 
-        mRS.validate();
-        mRS.nAllocationSetSurfaceTexture(getID(), sur);
+        mRS.nAllocationSetSurface(getID(), sur);
     }
 
+    /**
+     * @hide
+     */
+    public void setSurfaceTexture(SurfaceTexture st) {
+        mRS.validate();
+        if ((mUsage & USAGE_IO_OUTPUT) == 0) {
+            throw new RSInvalidStateException("Allocation is not USAGE_IO_OUTPUT.");
+        }
+
+        Surface s = new Surface(st);
+        mRS.nAllocationSetSurface(getID(), s);
+    }
 
     /**
      * Creates a non-mipmapped renderscript allocation to use as a
