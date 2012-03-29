@@ -1,0 +1,76 @@
+page.title=Modifying your Download Patterns Based on the Connectivity Type
+parent.title=Transferring Data Without Draining the Battery
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Redundant Downloads are Redundant
+previous.link=redundant_redundant.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#WiFi">Use Wi-Fi</a></li>
+  <li><a href="#Bandwidth">Use greater bandwidth to download more data less often</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>When it comes to impact on battery life, not all connection types are created equal. Not only does the Wi-Fi radio use significantly less battery than its wireless radio counterparts, but the radios used in different wireless radio technologies have different battery implications.</p>
+ 
+<h2 id="WiFi">Use Wi-Fi</h2>
+
+<p>In most cases a Wi-Fi radio will offer greater bandwidth at a significantly lower battery cost. As a result, you should endeavor to perform data transfers when connected over Wi-Fi whenever possible.</p>
+
+<p>You can use a broadcast receiver to listen for connectivity changes that indicate when a Wi-Fi connection has been established to execute significant downloads, preempt scheduled updates, and potentially even temporarily increase the frequency of regular updates as described in <a href="{@docRoot}training/monitoring-device-state/index.html">Optimizing Battery Life</a> lesson <a href="{@docRoot}training/monitoring-device-state/connectivity-monitoring.html">Determining and Monitoring the Connectivity Status</a>.</p>
+
+<h2 id="Bandwidth">Use Greater Bandwidth to Download More Data Less Often</h2>
+
+<p>When connected over a wireless radio, higher bandwidth generally comes at the price of higher battery cost. Meaning that LTE typically consumes more energy than 3G, which is in turn more expensive than 2G.</p>
+
+<p>This means that while the underlying radio state machine varies based on the radio technology, generally speaking the relative battery impact of the state change tail-time is greater for higher bandwidth radios.</p>
+
+<p>At the same time, the higher bandwidth means you can prefetch more aggressively, downloading more data over the same time. Perhaps less intuitively, because the tail-time battery cost is relatively higher, it's also more efficient to keep the radio active for longer periods during each transfer session to reduce the frequency of updates.</p>
+
+<p>For example, if an LTE radio is has double the bandwidth and double the energy cost of 3G, you should download 4 times as much data during each session&mdash;or potentially as much as 10mb. When downloading this much data, it's important to consider the effect of your prefetching on the available local storage and flush your prefetch cache regularly.</p>
+
+<p>You can use the connectivity manager to determine the active wireless radio, and modify your prefetching routines accordingly:</p>
+
+<pre>ConnectivityManager cm =
+ (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+TelephonyManager tm =
+  (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+  
+NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+ 
+int PrefetchCacheSize = DEFAULT_PREFETCH_CACHE;
+ 
+switch (activeNetwork.getType()) {
+  case (ConnectivityManager.TYPE_WIFI): 
+    PrefetchCacheSize = MAX_PREFETCH_CACHE; break;
+  case (ConnectivityManager.TYPE_MOBILE): {
+    switch (tm.getNetworkType()) {
+      case (TelephonyManager.NETWORK_TYPE_LTE | 
+            TelephonyManager.NETWORK_TYPE_HSPAP): 
+        PrefetchCacheSize *= 4;
+        break;
+      case (TelephonyManager.NETWORK_TYPE_EDGE | 
+            TelephonyManager.NETWORK_TYPE_GPRS): 
+        PrefetchCacheSize /= 2;
+        break;
+      default: break;
+    }
+    break;
+  }
+  default: break;
+}</pre>
