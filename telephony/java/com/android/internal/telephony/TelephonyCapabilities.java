@@ -157,4 +157,24 @@ public class TelephonyCapabilities {
         return ((phone.getPhoneType() == Phone.PHONE_TYPE_GSM)
                 || (phone.getPhoneType() == Phone.PHONE_TYPE_SIP));
     }
+
+    /**
+     * Return true if phones with the given phone type support ADN
+     * (Abbreviated Dialing Numbers).
+     *
+     * Currently this returns true when the phone type is GSM
+     * ({@link Phone#PHONE_TYPE_GSM}).
+     *
+     * This is using int for an argument for letting apps outside
+     * Phone process access to it, while other methods in this class is
+     * using Phone object.
+     *
+     * TODO: Theoretically phones other than GSM may have the ADN capability.
+     * Consider having better check here, or have better capability as part
+     * of public API, with which the argument should be replaced with
+     * something more appropriate.
+     */
+    public static boolean supportsAdn(int phoneType) {
+        return phoneType == Phone.PHONE_TYPE_GSM;
+    }
 }
