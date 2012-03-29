@@ -79,6 +79,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     private static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250};
 
     private static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_NOTIFICATION;
+    private static final boolean SCORE_ONGOING_HIGHER = false;
 
     final Context mContext;
     final IActivityManager mAm;
@@ -720,7 +721,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         // Migrate notification flags to scores
         if (0 != (notification.flags & Notification.FLAG_HIGH_PRIORITY)) {
             if (notification.priority < Notification.PRIORITY_MAX) notification.priority = Notification.PRIORITY_MAX;
-        } else if (0 != (notification.flags & Notification.FLAG_ONGOING_EVENT)) {
+        } else if (SCORE_ONGOING_HIGHER && 0 != (notification.flags & Notification.FLAG_ONGOING_EVENT)) {
             if (notification.priority < Notification.PRIORITY_HIGH) notification.priority = Notification.PRIORITY_HIGH;
         }
         
