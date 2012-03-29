@@ -45,9 +45,14 @@ static void android_view_GLES20DisplayList_setCaching(JNIEnv* env,
     displayList->setCaching(caching);
 }
 
-static void android_view_GLES20DisplayList_setApplicationScale(JNIEnv* env,
-        jobject clazz, DisplayList* displayList, float scale) {
-    displayList->setApplicationScale(scale);
+static void android_view_GLES20DisplayList_setStaticMatrix(JNIEnv* env,
+        jobject clazz, DisplayList* displayList, SkMatrix* matrix) {
+    displayList->setStaticMatrix(matrix);
+}
+
+static void android_view_GLES20DisplayList_setAnimationMatrix(JNIEnv* env,
+        jobject clazz, DisplayList* displayList, SkMatrix* matrix) {
+    displayList->setAnimationMatrix(matrix);
 }
 
 static void android_view_GLES20DisplayList_setClipChildren(JNIEnv* env,
@@ -175,33 +180,32 @@ const char* const kClassPathName = "android/view/GLES20DisplayList";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
-    { "nSetCaching",             "(IZ)V",       (void*) android_view_GLES20DisplayList_setCaching },
-    { "nSetApplicationScale",    "(IF)V",
-            (void*) android_view_GLES20DisplayList_setApplicationScale },
-    { "nSetClipChildren",        "(IZ)V",      (void*) android_view_GLES20DisplayList_setClipChildren },
-    { "nSetAlpha",               "(IF)V",      (void*) android_view_GLES20DisplayList_setAlpha },
-    { "nSetTranslationX",        "(IF)V",      (void*) android_view_GLES20DisplayList_setTranslationX },
-    { "nSetTranslationY",        "(IF)V",      (void*) android_view_GLES20DisplayList_setTranslationY },
-    { "nSetRotation",            "(IF)V",      (void*) android_view_GLES20DisplayList_setRotation },
-    { "nSetRotationX",           "(IF)V",      (void*) android_view_GLES20DisplayList_setRotationX },
-    { "nSetRotationY",           "(IF)V",      (void*) android_view_GLES20DisplayList_setRotationY },
-    { "nSetScaleX",              "(IF)V",      (void*) android_view_GLES20DisplayList_setScaleX },
-    { "nSetScaleY",              "(IF)V",      (void*) android_view_GLES20DisplayList_setScaleY },
-    { "nSetTransformationInfo",  "(IFFFFFFFF)V",
+    { "nSetCaching",           "(IZ)V",  (void*) android_view_GLES20DisplayList_setCaching },
+    { "nSetStaticMatrix",      "(II)V",  (void*) android_view_GLES20DisplayList_setStaticMatrix },
+    { "nSetAnimationMatrix",   "(II)V",  (void*) android_view_GLES20DisplayList_setAnimationMatrix },
+    { "nSetClipChildren",      "(IZ)V",  (void*) android_view_GLES20DisplayList_setClipChildren },
+    { "nSetAlpha",             "(IF)V",  (void*) android_view_GLES20DisplayList_setAlpha },
+    { "nSetTranslationX",      "(IF)V",  (void*) android_view_GLES20DisplayList_setTranslationX },
+    { "nSetTranslationY",      "(IF)V",  (void*) android_view_GLES20DisplayList_setTranslationY },
+    { "nSetRotation",          "(IF)V",  (void*) android_view_GLES20DisplayList_setRotation },
+    { "nSetRotationX",         "(IF)V",  (void*) android_view_GLES20DisplayList_setRotationX },
+    { "nSetRotationY",         "(IF)V",  (void*) android_view_GLES20DisplayList_setRotationY },
+    { "nSetScaleX",            "(IF)V",  (void*) android_view_GLES20DisplayList_setScaleX },
+    { "nSetScaleY",            "(IF)V",  (void*) android_view_GLES20DisplayList_setScaleY },
+    { "nSetTransformationInfo","(IFFFFFFFF)V",
             (void*) android_view_GLES20DisplayList_setTransformationInfo },
-    { "nSetPivotX",              "(IF)V",      (void*) android_view_GLES20DisplayList_setPivotX },
-    { "nSetPivotY",              "(IF)V",      (void*) android_view_GLES20DisplayList_setPivotY },
-    { "nSetCameraDistance",      "(IF)V",
-            (void*) android_view_GLES20DisplayList_setCameraDistance },
-    { "nSetLeft",                "(II)V",      (void*) android_view_GLES20DisplayList_setLeft },
-    { "nSetTop",                 "(II)V",      (void*) android_view_GLES20DisplayList_setTop },
-    { "nSetRight",               "(II)V",      (void*) android_view_GLES20DisplayList_setRight },
-    { "nSetBottom",              "(II)V",      (void*) android_view_GLES20DisplayList_setBottom },
-    { "nSetLeftTop",             "(III)V",     (void*) android_view_GLES20DisplayList_setLeftTop },
-    { "nSetLeftTopRightBottom",  "(IIIII)V",
+    { "nSetPivotX",            "(IF)V",  (void*) android_view_GLES20DisplayList_setPivotX },
+    { "nSetPivotY",            "(IF)V",  (void*) android_view_GLES20DisplayList_setPivotY },
+    { "nSetCameraDistance",    "(IF)V",  (void*) android_view_GLES20DisplayList_setCameraDistance },
+    { "nSetLeft",              "(II)V",  (void*) android_view_GLES20DisplayList_setLeft },
+    { "nSetTop",               "(II)V",  (void*) android_view_GLES20DisplayList_setTop },
+    { "nSetRight",             "(II)V",  (void*) android_view_GLES20DisplayList_setRight },
+    { "nSetBottom",            "(II)V",  (void*) android_view_GLES20DisplayList_setBottom },
+    { "nSetLeftTop",           "(III)V", (void*) android_view_GLES20DisplayList_setLeftTop },
+    { "nSetLeftTopRightBottom","(IIIII)V",
             (void*) android_view_GLES20DisplayList_setLeftTopRightBottom },
-    { "nOffsetLeftRight",        "(II)V",      (void*) android_view_GLES20DisplayList_offsetLeftRight },
-    { "nOffsetTopBottom",        "(II)V",      (void*) android_view_GLES20DisplayList_offsetTopBottom },
+    { "nOffsetLeftRight",      "(II)V",  (void*) android_view_GLES20DisplayList_offsetLeftRight },
+    { "nOffsetTopBottom",      "(II)V",  (void*) android_view_GLES20DisplayList_offsetTopBottom },
 
 #endif
 };

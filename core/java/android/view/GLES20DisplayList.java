@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 
 import java.util.ArrayList;
 
@@ -119,9 +120,18 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
-    public void setApplicationScale(float scale) {
+    public void setStaticMatrix(Matrix matrix) {
         try {
-            nSetApplicationScale(getNativeDisplayList(), scale);
+            nSetStaticMatrix(getNativeDisplayList(), matrix.native_instance);
+        } catch (IllegalStateException e) {
+            // invalid DisplayList okay: we'll set current values the next time we render to it
+        }
+    }
+
+    @Override
+    public void setAnimationMatrix(Matrix matrix) {
+        try {
+            nSetAnimationMatrix(getNativeDisplayList(), matrix.native_instance);
         } catch (IllegalStateException e) {
             // invalid DisplayList okay: we'll set current values the next time we render to it
         }
@@ -335,6 +345,8 @@ class GLES20DisplayList extends DisplayList {
     private static native void nSetTransformationInfo(int displayList, float alpha,
             float translationX, float translationY, float rotation, float rotationX,
             float rotationY, float scaleX, float scaleY);
+    private static native void nSetStaticMatrix(int displayList, int nativeMatrix);
+    private static native void nSetAnimationMatrix(int displayList, int animationMatrix);
 
 
     ///////////////////////////////////////////////////////////////////////////

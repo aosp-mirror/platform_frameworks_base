@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.graphics.Matrix;
+
 /**
  * A display lists records a series of graphics related operation and can replay
  * them later. Display lists are usually built by recording operations on a
@@ -117,12 +119,26 @@ public abstract class DisplayList {
     public abstract void setClipChildren(boolean clipChildren);
 
     /**
-     * Set the application scale on the DisplayList. This scale is incurred by applications that
-     * are auto-scaled for compatibility reasons. By default, the value is 1 (unscaled).
+     * Set the static matrix on the DisplayList. This matrix exists if a custom ViewGroup
+     * overrides
+     * {@link ViewGroup#getChildStaticTransformation(View, android.view.animation.Transformation)}
+     * and also has {@link ViewGroup#setStaticTransformationsEnabled(boolean)} set to true.
+     * This matrix will be concatenated with any other matrices in the DisplayList to position
+     * the view appropriately.
      *
-     * @param scale The scaling factor
+     * @param matrix The matrix
      */
-    public abstract void setApplicationScale(float scale);
+    public abstract void setStaticMatrix(Matrix matrix);
+
+    /**
+     * Set the Animation matrix on the DisplayList. This matrix exists if an Animation is
+     * currently playing on a View, and is set on the DisplayList during at draw() time. When
+     * the Animation finishes, the matrix should be cleared by sending <code>null</code>
+     * for the matrix parameter.
+     *
+     * @param matrix The matrix, null indicates that the matrix should be cleared.
+     */
+    public abstract void setAnimationMatrix(Matrix matrix);
 
     /**
      * Sets the alpha value for the DisplayList

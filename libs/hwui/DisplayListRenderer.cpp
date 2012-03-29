@@ -94,7 +94,8 @@ void DisplayList::outputLogBuffer(int fd) {
 }
 
 DisplayList::DisplayList(const DisplayListRenderer& recorder) :
-    mTransformMatrix(NULL), mTransformCamera(NULL), mTransformMatrix3D(NULL) {
+    mTransformMatrix(NULL), mTransformCamera(NULL), mTransformMatrix3D(NULL),
+    mStaticMatrix(NULL), mAnimationMatrix(NULL) {
 
     initFromDisplayListRenderer(recorder);
 }
@@ -108,7 +109,6 @@ void DisplayList::initProperties() {
     mTop = 0;
     mRight = 0;
     mBottom = 0;
-    mApplicationScale = -1;
     mClipChildren = true;
     mAlpha = 1;
     mMultipliedAlpha = 255;
@@ -143,18 +143,16 @@ void DisplayList::clearResources() {
     sk_free((void*) mReader.base());
 
     if (USE_DISPLAY_LIST_PROPERTIES) {
-        if (mTransformMatrix) {
-            delete mTransformMatrix;
-            mTransformMatrix = NULL;
-        }
-        if (mTransformCamera) {
-            delete mTransformCamera;
-            mTransformCamera = NULL;
-        }
-        if (mTransformMatrix3D) {
-            delete mTransformMatrix3D;
-            mTransformMatrix3D = NULL;
-        }
+        delete mTransformMatrix;
+        delete mTransformCamera;
+        delete mTransformMatrix3D;
+        delete mStaticMatrix;
+        delete mAnimationMatrix;
+        mTransformMatrix = NULL;
+        mTransformCamera = NULL;
+        mTransformMatrix3D = NULL;
+        mStaticMatrix = NULL;
+        mAnimationMatrix = NULL;
     }
 
     Caches& caches = Caches::getInstance();
@@ -667,12 +665,26 @@ void DisplayList::updateMatrix() {
 void DisplayList::outputViewProperties(OpenGLRenderer& renderer, char* indent) {
     if (USE_DISPLAY_LIST_PROPERTIES) {
         updateMatrix();
-        if (mApplicationScale >= 0) {
-            ALOGD("%s%s %.2f, %.2f", (char*) indent, "Scale",
-                    mApplicationScale, mApplicationScale);
-        }
         if (mLeft != 0 || mTop != 0) {
-            ALOGD("%s%s %d, %d", indent, "Translate", mLeft, mTop);
+            ALOGD("%s%s %d, %d", indent, "Translate (left, top)", mLeft, mTop);
+        }
+        if (mStaticMatrix) {
+            ALOGD("%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
+                    indent, "ConcatMatrix (static)", mStaticMatrix,
+                    mStaticMatrix->get(0), mStaticMatrix->get(1),
+                    mStaticMatrix->get(2), mStaticMatrix->get(3),
+                    mStaticMatrix->get(4), mStaticMatrix->get(5),
+                    mStaticMatrix->get(6), mStaticMatrix->get(7),
+                    mStaticMatrix->get(8));
+        }
+        if (mAnimationMatrix) {
+            ALOGD("%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
+                    indent, "ConcatMatrix (animation)", mAnimationMatrix,
+                    mAnimationMatrix->get(0), mAnimationMatrix->get(1),
+                    mAnimationMatrix->get(2), mAnimationMatrix->get(3),
+                    mAnimationMatrix->get(4), mAnimationMatrix->get(5),
+                    mAnimationMatrix->get(6), mAnimationMatrix->get(7),
+                    mAnimationMatrix->get(8));
         }
         if (mMatrixFlags != 0) {
             if (mMatrixFlags == TRANSLATION) {
@@ -719,13 +731,29 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t width, ui
 #endif
         updateMatrix();
         if (mLeft != 0 || mTop != 0) {
-            DISPLAY_LIST_LOGD("%s%s %d, %d", indent, "Translate", mLeft, mTop);
+            DISPLAY_LIST_LOGD("%s%s %d, %d", indent, "Translate (left, top)", mLeft, mTop);
             renderer.translate(mLeft, mTop);
         }
-        if (mApplicationScale >= 0) {
-            DISPLAY_LIST_LOGD("%s%s %.2f, %.2f", (char*) indent, "Scale",
-                    mApplicationScale, mApplicationScale);
-            renderer.scale(mApplicationScale, mApplicationScale);
+        if (mStaticMatrix) {
+            DISPLAY_LIST_LOGD(
+                    "%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
+                    indent, "ConcatMatrix (static)", mStaticMatrix,
+                    mStaticMatrix->get(0), mStaticMatrix->get(1),
+                    mStaticMatrix->get(2), mStaticMatrix->get(3),
+                    mStaticMatrix->get(4), mStaticMatrix->get(5),
+                    mStaticMatrix->get(6), mStaticMatrix->get(7),
+                    mStaticMatrix->get(8));
+            renderer.concatMatrix(mStaticMatrix);
+        } else if (mAnimationMatrix) {
+            DISPLAY_LIST_LOGD(
+                    "%s%s %p: [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f]",
+                    indent, "ConcatMatrix (animation)", mAnimationMatrix,
+                    mAnimationMatrix->get(0), mAnimationMatrix->get(1),
+                    mAnimationMatrix->get(2), mAnimationMatrix->get(3),
+                    mAnimationMatrix->get(4), mAnimationMatrix->get(5),
+                    mAnimationMatrix->get(6), mAnimationMatrix->get(7),
+                    mAnimationMatrix->get(8));
+            renderer.concatMatrix(mAnimationMatrix);
         }
         if (mMatrixFlags != 0) {
             if (mMatrixFlags == TRANSLATION) {

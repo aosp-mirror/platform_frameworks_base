@@ -156,12 +156,22 @@ public:
         }
     }
 
-    void setApplicationScale(float scale) {
-        mApplicationScale = scale;
-    }
-
     void setClipChildren(bool clipChildren) {
         mClipChildren = clipChildren;
+    }
+
+    void setStaticMatrix(SkMatrix* matrix) {
+        delete mStaticMatrix;
+        mStaticMatrix = new SkMatrix(*matrix);
+    }
+
+    void setAnimationMatrix(SkMatrix* matrix) {
+        delete mAnimationMatrix;
+        if (matrix) {
+            mAnimationMatrix = new SkMatrix(*matrix);
+        } else {
+            mAnimationMatrix = NULL;
+        }
     }
 
     void setAlpha(float alpha) {
@@ -483,7 +493,6 @@ private:
     String8 mName;
 
     // View properties
-    float mApplicationScale;
     bool mClipChildren;
     float mAlpha;
     int mMultipliedAlpha;
@@ -502,6 +511,8 @@ private:
     SkMatrix* mTransformMatrix;
     Sk3DView* mTransformCamera;
     SkMatrix* mTransformMatrix3D;
+    SkMatrix* mStaticMatrix;
+    SkMatrix* mAnimationMatrix;
     bool mCaching;
 };
 
