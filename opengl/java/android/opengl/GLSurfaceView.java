@@ -779,8 +779,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 if (LOG_THREADS) {
                     Log.i("DefaultContextFactory", "tid=" + Thread.currentThread().getId());
                 }
-                throw new RuntimeException("eglDestroyContext failed: "
-                        + EGLLogWrapper.getErrorString(egl.eglGetError()));
+                EglHelper.throwEglException("eglDestroyContex", egl.eglGetError());
             }
         }
     }
@@ -1094,7 +1093,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
              * the context is current and bound to a surface.
              */
             if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
-                throwEglException("eglMakeCurrent");
+                /*
+                 * Could not make the context current, probably because the underlying
+                 * SurfaceView surface has been destroyed.
+                 */
+                logEglErrorAsWarning("EGLHelper", "eglMakeCurrent", mEgl.eglGetError());
+                return false;
             }
 
             return true;
@@ -1134,7 +1138,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
          */
         public int swap() {
             if (! mEgl.eglSwapBuffers(mEglDisplay, mEglSurface)) {
-                return  mEgl.eglGetError();
+                return mEgl.eglGetError();
             }
             return EGL10.EGL_SUCCESS;
         }
@@ -1180,12 +1184,21 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             throwEglException(function, mEgl.eglGetError());
         }
 
-        private void throwEglException(String function, int error) {
-            String message = function + " failed: " + EGLLogWrapper.getErrorString(error);
+        public static void throwEglException(String function, int error) {
+            String message = formatEglError(function, error);
             if (LOG_THREADS) {
-                Log.e("EglHelper", "throwEglException tid=" + Thread.currentThread().getId() + " " + message);
+                Log.e("EglHelper", "throwEglException tid=" + Thread.currentThread().getId() + " "
+                        + message);
             }
             throw new RuntimeException(message);
+        }
+
+        public static void logEglErrorAsWarning(String tag, String function, int error) {
+            Log.w(tag, formatEglError(function, error));
+        }
+
+        public static String formatEglError(String function, int error) {
+            return function + " failed: " + EGLLogWrapper.getErrorString(error);
         }
 
         private WeakReference<GLSurfaceView> mGLSurfaceViewWeakRef;
@@ -1334,7 +1347,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                 }
                             }
 
-                            // Have we lost the surface view surface?
+                            // Have we lost the SurfaceView surface?
                             if ((! mHasSurface) && (! mWaitingForSurface)) {
                                 if (LOG_SURFACE) {
                                     Log.i("GLThread", "noticed surfaceView surface lost tid=" + getId());
@@ -1446,8 +1459,8 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             Log.w("GLThread", "egl createSurface");
                         }
                         if (!mEglHelper.createSurface()) {
-                            // Couldn't create a surface. Quit quietly.
-                            break;
+                            mSurfaceIsBad = true;
+                            continue;
                         }
                         createEglSurface = false;
                     }
@@ -1502,12 +1515,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             break;
                         default:
                             // Other errors typically mean that the current surface is bad,
-                            // probably because the surfaceview surface has been destroyed,
+                            // probably because the SurfaceView surface has been destroyed,
                             // but we haven't been notified yet.
                             // Log the error to help developers understand why rendering stopped.
-                            Log.w("GLThread", "eglSwapBuffers error: " + swapError +
-                                    ". Assume surfaceview surface is being destroyed. tid="
-                                    + getId());
+                            EglHelper.logEglErrorAsWarning("GLThread", "eglSwapBuffers", swapError);
                             mSurfaceIsBad = true;
                             break;
                     }
