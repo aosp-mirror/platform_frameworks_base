@@ -1130,36 +1130,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
         /**
          * Display the current render surface.
-         * @return false if the context has been lost.
+         * @return the EGL error code from eglSwapBuffers.
          */
-        public boolean swap() {
+        public int swap() {
             if (! mEgl.eglSwapBuffers(mEglDisplay, mEglSurface)) {
-
-                /*
-                 * Check for EGL_CONTEXT_LOST, which means the context
-                 * and all associated data were lost (For instance because
-                 * the device went to sleep). We need to sleep until we
-                 * get a new surface.
-                 */
-                int error = mEgl.eglGetError();
-                switch(error) {
-                case EGL11.EGL_CONTEXT_LOST:
-                    return false;
-                case EGL10.EGL_BAD_CURRENT_SURFACE:
-                    // The current surface is bad, probably because the window manager has closed
-                    // the associated window. Ignore this error, on the assumption that the
-                    // application will be closed soon.
-                    break;
-                case EGL10.EGL_BAD_NATIVE_WINDOW:
-                    // The native window is bad, probably because the window manager has closed it.
-                    // Ignore this error, on the assumption that the application will be closed
-                    // soon.
-                    break;
-                default:
-                    throwEglException("eglSwapBuffers", error);
-                }
+                return  mEgl.eglGetError();
             }
-            return true;
+            return EGL10.EGL_SUCCESS;
         }
 
         public void destroySurface() {
@@ -1366,6 +1343,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                     stopEglSurfaceLocked();
                                 }
                                 mWaitingForSurface = true;
+                                mSurfaceIsBad = false;
                                 sGLThreadManager.notifyAll();
                             }
 
@@ -1423,7 +1401,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                         h = mHeight;
                                         wantRenderNotification = true;
                                         if (LOG_SURFACE) {
-                                            Log.i("GLThread", "noticing that we want render notification tid=" + getId());
+                                            Log.i("GLThread",
+                                                    "noticing that we want render notification tid="
+                                                    + getId());
                                         }
 
                                         // Destroy and recreate the EGL surface.
@@ -1444,6 +1424,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                     + " mHaveEglSurface: " + mHaveEglSurface
                                     + " mPaused: " + mPaused
                                     + " mHasSurface: " + mHasSurface
+                                    + " mSurfaceIsBad: " + mSurfaceIsBad
                                     + " mWaitingForSurface: " + mWaitingForSurface
                                     + " mWidth: " + mWidth
                                     + " mHeight: " + mHeight
@@ -1509,11 +1490,26 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             view.mRenderer.onDrawFrame(gl);
                         }
                     }
-                    if (!mEglHelper.swap()) {
-                        if (LOG_SURFACE) {
-                            Log.i("GLThread", "egl context lost tid=" + getId());
-                        }
-                        lostEglContext = true;
+                    int swapError = mEglHelper.swap();
+                    switch (swapError) {
+                        case EGL10.EGL_SUCCESS:
+                            break;
+                        case EGL11.EGL_CONTEXT_LOST:
+                            if (LOG_SURFACE) {
+                                Log.i("GLThread", "egl context lost tid=" + getId());
+                            }
+                            lostEglContext = true;
+                            break;
+                        default:
+                            // Other errors typically mean that the current surface is bad,
+                            // probably because the surfaceview surface has been destroyed,
+                            // but we haven't been notified yet.
+                            // Log the error to help developers understand why rendering stopped.
+                            Log.w("GLThread", "eglSwapBuffers error: " + swapError +
+                                    ". Assume surfaceview surface is being destroyed. tid="
+                                    + getId());
+                            mSurfaceIsBad = true;
+                            break;
                     }
 
                     if (wantRenderNotification) {
@@ -1537,7 +1533,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         private boolean readyToDraw() {
-            return (!mPaused) && mHasSurface
+            return (!mPaused) && mHasSurface && (!mSurfaceIsBad)
                 && (mWidth > 0) && (mHeight > 0)
                 && (mRequestRender || (mRenderMode == RENDERMODE_CONTINUOUSLY));
         }
@@ -1707,6 +1703,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         private boolean mRequestPaused;
         private boolean mPaused;
         private boolean mHasSurface;
+        private boolean mSurfaceIsBad;
         private boolean mWaitingForSurface;
         private boolean mHaveEglContext;
         private boolean mHaveEglSurface;
