@@ -346,17 +346,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mAccelerometerDefault = DEFAULT_ACCELEROMETER_ROTATION;
     boolean mHasSoftInput = false;
     
-    int mPointerLocationMode = 0;
-    PointerLocationView mPointerLocationView = null;
-    InputChannel mPointerLocationInputChannel;
+    int mPointerLocationMode = 0; // guarded by mLock
 
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
 
-    final class PointerLocationInputEventReceiver extends InputEventReceiver {
-        public PointerLocationInputEventReceiver(InputChannel inputChannel, Looper looper) {
+    private static final class PointerLocationInputEventReceiver extends InputEventReceiver {
+        private final PointerLocationView mView;
+
+        public PointerLocationInputEventReceiver(InputChannel inputChannel, Looper looper,
+                PointerLocationView view) {
             super(inputChannel, looper);
+            mView = view;
         }
 
         @Override
@@ -366,19 +368,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (event instanceof MotionEvent
                         && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
                     final MotionEvent motionEvent = (MotionEvent)event;
-                    synchronized (mLock) {
-                        if (mPointerLocationView != null) {
-                            mPointerLocationView.addPointerEvent(motionEvent);
-                            handled = true;
-                        }
-                    }
+                    mView.addPointerEvent(motionEvent);
+                    handled = true;
                 }
             } finally {
                 finishInputEvent(event, handled);
             }
         }
     }
+
+    // Pointer location view state, only modified on the mHandler Looper.
     PointerLocationInputEventReceiver mPointerLocationInputEventReceiver;
+    PointerLocationView mPointerLocationView;
+    InputChannel mPointerLocationInputChannel;
 
     // The current size of the screen; really; (ir)regardless of whether the status
     // bar can be hidden or not
@@ -475,6 +477,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManager.WakeLock mBroadcastWakeLock;
 
     final KeyCharacterMap.FallbackAction mFallbackAction = new KeyCharacterMap.FallbackAction();
+
+    private static final int MSG_ENABLE_POINTER_LOCATION = 1;
+    private static final int MSG_DISABLE_POINTER_LOCATION = 2;
+
+    private class PolicyHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ENABLE_POINTER_LOCATION:
+                    enablePointerLocation();
+                    break;
+                case MSG_DISABLE_POINTER_LOCATION:
+                    disablePointerLocation();
+                    break;
+            }
+        }
+    }
 
     private UEventObserver mHDMIObserver = new UEventObserver() {
         @Override
@@ -808,7 +827,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // don't create KeyguardViewMediator if headless
             mKeyguardMediator = new KeyguardViewMediator(context, this, powerManager);
         }
-        mHandler = new Handler();
+        mHandler = new PolicyHandler();
         mOrientationListener = new MyOrientationListener(mContext);
         try {
             mOrientationListener.setCurrentRotation(windowManager.getRotation());
@@ -967,8 +986,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
         boolean updateRotation = false;
-        View addView = null;
-        View removeView = null;
         synchronized (mLock) {
             mEndcallBehavior = Settings.System.getInt(resolver,
                     Settings.System.END_BUTTON_BEHAVIOR,
@@ -1001,16 +1018,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         Settings.System.POINTER_LOCATION, 0);
                 if (mPointerLocationMode != pointerLocation) {
                     mPointerLocationMode = pointerLocation;
-                    if (pointerLocation != 0) {
-                        if (mPointerLocationView == null) {
-                            mPointerLocationView = new PointerLocationView(mContext);
-                            mPointerLocationView.setPrintCoords(false);
-                            addView = mPointerLocationView;
-                        }
-                    } else {
-                        removeView = mPointerLocationView;
-                        mPointerLocationView = null;
-                    }
+                    mHandler.sendEmptyMessage(pointerLocation != 0 ?
+                            MSG_ENABLE_POINTER_LOCATION : MSG_DISABLE_POINTER_LOCATION);
                 }
             }
             // use screen off timeout setting as the timeout for the lockscreen
@@ -1044,7 +1053,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (updateRotation) {
             updateRotation(true);
         }
-        if (addView != null) {
+    }
+
+    private void enablePointerLocation() {
+        if (mPointerLocationView == null) {
+            mPointerLocationView = new PointerLocationView(mContext);
+            mPointerLocationView.setPrintCoords(false);
+
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
@@ -1058,37 +1073,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManager wm = (WindowManager)
                     mContext.getSystemService(Context.WINDOW_SERVICE);
             lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
-            wm.addView(addView, lp);
-            
-            if (mPointerLocationInputChannel == null) {
-                try {
-                    mPointerLocationInputChannel =
-                            mWindowManager.monitorInput("PointerLocationView");
-                    mPointerLocationInputEventReceiver =
-                            new PointerLocationInputEventReceiver(
-                                    mPointerLocationInputChannel, mHandler.getLooper());
-                } catch (RemoteException ex) {
-                    Slog.e(TAG, "Could not set up input monitoring channel for PointerLocation.",
-                            ex);
-                }
+            wm.addView(mPointerLocationView, lp);
+
+            try {
+                mPointerLocationInputChannel =
+                        mWindowManager.monitorInput("PointerLocationView");
+                mPointerLocationInputEventReceiver =
+                        new PointerLocationInputEventReceiver(mPointerLocationInputChannel,
+                                Looper.myLooper(), mPointerLocationView);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Could not set up input monitoring channel for PointerLocation.",
+                        ex);
             }
-        }
-        if (removeView != null) {
-            if (mPointerLocationInputEventReceiver != null) {
-                mPointerLocationInputEventReceiver.dispose();
-                mPointerLocationInputEventReceiver = null;
-            }
-            if (mPointerLocationInputChannel != null) {
-                mPointerLocationInputChannel.dispose();
-                mPointerLocationInputChannel = null;
-            }
-            
-            WindowManager wm = (WindowManager)
-                    mContext.getSystemService(Context.WINDOW_SERVICE);
-            wm.removeView(removeView);
         }
     }
-    
+
+    private void disablePointerLocation() {
+        if (mPointerLocationInputEventReceiver != null) {
+            mPointerLocationInputEventReceiver.dispose();
+            mPointerLocationInputEventReceiver = null;
+        }
+
+        if (mPointerLocationInputChannel != null) {
+            mPointerLocationInputChannel.dispose();
+            mPointerLocationInputChannel = null;
+        }
+
+        if (mPointerLocationView != null) {
+            WindowManager wm = (WindowManager)
+                    mContext.getSystemService(Context.WINDOW_SERVICE);
+            wm.removeView(mPointerLocationView);
+            mPointerLocationView = null;
+        }
+    }
+
     private int readRotation(int resID) {
         try {
             int rotation = mContext.getResources().getInteger(resID);

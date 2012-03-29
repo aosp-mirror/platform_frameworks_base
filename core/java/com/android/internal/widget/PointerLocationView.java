@@ -188,178 +188,176 @@ public class PointerLocationView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        synchronized (mPointers) {
-            final int w = getWidth();
-            final int itemW = w/7;
-            final int base = -mTextMetrics.ascent+1;
-            final int bottom = mHeaderBottom;
-            
-            final int NP = mPointers.size();
-            
-            // Labels
-            if (mActivePointerId >= 0) {
-                final PointerState ps = mPointers.get(mActivePointerId);
-                
-                canvas.drawRect(0, 0, itemW-1, bottom,mTextBackgroundPaint);
-                canvas.drawText(mText.clear()
-                        .append("P: ").append(mCurNumPointers)
-                        .append(" / ").append(mMaxNumPointers)
-                        .toString(), 1, base, mTextPaint);
+        final int w = getWidth();
+        final int itemW = w/7;
+        final int base = -mTextMetrics.ascent+1;
+        final int bottom = mHeaderBottom;
 
-                final int N = ps.mTraceCount;
-                if ((mCurDown && ps.mCurDown) || N == 0) {
-                    canvas.drawRect(itemW, 0, (itemW * 2) - 1, bottom, mTextBackgroundPaint);
-                    canvas.drawText(mText.clear()
-                            .append("X: ").append(ps.mCoords.x, 1)
-                            .toString(), 1 + itemW, base, mTextPaint);
-                    canvas.drawRect(itemW * 2, 0, (itemW * 3) - 1, bottom, mTextBackgroundPaint);
-                    canvas.drawText(mText.clear()
-                            .append("Y: ").append(ps.mCoords.y, 1)
-                            .toString(), 1 + itemW * 2, base, mTextPaint);
-                } else {
-                    float dx = ps.mTraceX[N - 1] - ps.mTraceX[0];
-                    float dy = ps.mTraceY[N - 1] - ps.mTraceY[0];
-                    canvas.drawRect(itemW, 0, (itemW * 2) - 1, bottom,
-                            Math.abs(dx) < mVC.getScaledTouchSlop()
-                            ? mTextBackgroundPaint : mTextLevelPaint);
-                    canvas.drawText(mText.clear()
-                            .append("dX: ").append(dx, 1)
-                            .toString(), 1 + itemW, base, mTextPaint);
-                    canvas.drawRect(itemW * 2, 0, (itemW * 3) - 1, bottom,
-                            Math.abs(dy) < mVC.getScaledTouchSlop()
-                            ? mTextBackgroundPaint : mTextLevelPaint);
-                    canvas.drawText(mText.clear()
-                            .append("dY: ").append(dy, 1)
-                            .toString(), 1 + itemW * 2, base, mTextPaint);
-                }
-                
-                canvas.drawRect(itemW * 3, 0, (itemW * 4) - 1, bottom, mTextBackgroundPaint);
+        final int NP = mPointers.size();
+
+        // Labels
+        if (mActivePointerId >= 0) {
+            final PointerState ps = mPointers.get(mActivePointerId);
+            
+            canvas.drawRect(0, 0, itemW-1, bottom,mTextBackgroundPaint);
+            canvas.drawText(mText.clear()
+                    .append("P: ").append(mCurNumPointers)
+                    .append(" / ").append(mMaxNumPointers)
+                    .toString(), 1, base, mTextPaint);
+
+            final int N = ps.mTraceCount;
+            if ((mCurDown && ps.mCurDown) || N == 0) {
+                canvas.drawRect(itemW, 0, (itemW * 2) - 1, bottom, mTextBackgroundPaint);
                 canvas.drawText(mText.clear()
-                        .append("Xv: ").append(ps.mXVelocity, 3)
-                        .toString(), 1 + itemW * 3, base, mTextPaint);
-                
-                canvas.drawRect(itemW * 4, 0, (itemW * 5) - 1, bottom, mTextBackgroundPaint);
+                        .append("X: ").append(ps.mCoords.x, 1)
+                        .toString(), 1 + itemW, base, mTextPaint);
+                canvas.drawRect(itemW * 2, 0, (itemW * 3) - 1, bottom, mTextBackgroundPaint);
                 canvas.drawText(mText.clear()
-                        .append("Yv: ").append(ps.mYVelocity, 3)
-                        .toString(), 1 + itemW * 4, base, mTextPaint);
-                
-                canvas.drawRect(itemW * 5, 0, (itemW * 6) - 1, bottom, mTextBackgroundPaint);
-                canvas.drawRect(itemW * 5, 0, (itemW * 5) + (ps.mCoords.pressure * itemW) - 1,
-                        bottom, mTextLevelPaint);
+                        .append("Y: ").append(ps.mCoords.y, 1)
+                        .toString(), 1 + itemW * 2, base, mTextPaint);
+            } else {
+                float dx = ps.mTraceX[N - 1] - ps.mTraceX[0];
+                float dy = ps.mTraceY[N - 1] - ps.mTraceY[0];
+                canvas.drawRect(itemW, 0, (itemW * 2) - 1, bottom,
+                        Math.abs(dx) < mVC.getScaledTouchSlop()
+                        ? mTextBackgroundPaint : mTextLevelPaint);
                 canvas.drawText(mText.clear()
-                        .append("Prs: ").append(ps.mCoords.pressure, 2)
-                        .toString(), 1 + itemW * 5, base, mTextPaint);
-                
-                canvas.drawRect(itemW * 6, 0, w, bottom, mTextBackgroundPaint);
-                canvas.drawRect(itemW * 6, 0, (itemW * 6) + (ps.mCoords.size * itemW) - 1,
-                        bottom, mTextLevelPaint);
+                        .append("dX: ").append(dx, 1)
+                        .toString(), 1 + itemW, base, mTextPaint);
+                canvas.drawRect(itemW * 2, 0, (itemW * 3) - 1, bottom,
+                        Math.abs(dy) < mVC.getScaledTouchSlop()
+                        ? mTextBackgroundPaint : mTextLevelPaint);
                 canvas.drawText(mText.clear()
-                        .append("Size: ").append(ps.mCoords.size, 2)
-                        .toString(), 1 + itemW * 6, base, mTextPaint);
+                        .append("dY: ").append(dy, 1)
+                        .toString(), 1 + itemW * 2, base, mTextPaint);
             }
-            
-            // Pointer trace.
-            for (int p = 0; p < NP; p++) {
-                final PointerState ps = mPointers.get(p);
-                
-                // Draw path.
-                final int N = ps.mTraceCount;
-                float lastX = 0, lastY = 0;
-                boolean haveLast = false;
-                boolean drawn = false;
-                mPaint.setARGB(255, 128, 255, 255);
-                for (int i=0; i < N; i++) {
-                    float x = ps.mTraceX[i];
-                    float y = ps.mTraceY[i];
-                    if (Float.isNaN(x)) {
-                        haveLast = false;
-                        continue;
-                    }
-                    if (haveLast) {
-                        canvas.drawLine(lastX, lastY, x, y, mPathPaint);
-                        canvas.drawPoint(lastX, lastY, mPaint);
-                        drawn = true;
-                    }
-                    lastX = x;
-                    lastY = y;
-                    haveLast = true;
-                }
-                
-                if (drawn) {
-                    // Draw movement estimate curve.
-                    mPaint.setARGB(128, 128, 0, 128);
-                    float lx = ps.mEstimator.estimateX(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                    float ly = ps.mEstimator.estimateY(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                    for (int i = -ESTIMATE_PAST_POINTS + 1; i <= ESTIMATE_FUTURE_POINTS; i++) {
-                        float x = ps.mEstimator.estimateX(i * ESTIMATE_INTERVAL);
-                        float y = ps.mEstimator.estimateY(i * ESTIMATE_INTERVAL);
-                        canvas.drawLine(lx, ly, x, y, mPaint);
-                        lx = x;
-                        ly = y;
-                    }
 
-                    // Draw velocity vector.
-                    mPaint.setARGB(255, 255, 64, 128);
-                    float xVel = ps.mXVelocity * (1000 / 60);
-                    float yVel = ps.mYVelocity * (1000 / 60);
-                    canvas.drawLine(lastX, lastY, lastX + xVel, lastY + yVel, mPaint);
-                }
-                
-                if (mCurDown && ps.mCurDown) {
-                    // Draw crosshairs.
-                    canvas.drawLine(0, ps.mCoords.y, getWidth(), ps.mCoords.y, mTargetPaint);
-                    canvas.drawLine(ps.mCoords.x, 0, ps.mCoords.x, getHeight(), mTargetPaint);
-                    
-                    // Draw current point.
-                    int pressureLevel = (int)(ps.mCoords.pressure * 255);
-                    mPaint.setARGB(255, pressureLevel, 255, 255 - pressureLevel);
-                    canvas.drawPoint(ps.mCoords.x, ps.mCoords.y, mPaint);
-                    
-                    // Draw current touch ellipse.
-                    mPaint.setARGB(255, pressureLevel, 255 - pressureLevel, 128);
-                    drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.touchMajor,
-                            ps.mCoords.touchMinor, ps.mCoords.orientation, mPaint);
-                    
-                    // Draw current tool ellipse.
-                    mPaint.setARGB(255, pressureLevel, 128, 255 - pressureLevel);
-                    drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.toolMajor,
-                            ps.mCoords.toolMinor, ps.mCoords.orientation, mPaint);
+            canvas.drawRect(itemW * 3, 0, (itemW * 4) - 1, bottom, mTextBackgroundPaint);
+            canvas.drawText(mText.clear()
+                    .append("Xv: ").append(ps.mXVelocity, 3)
+                    .toString(), 1 + itemW * 3, base, mTextPaint);
 
-                    // Draw the orientation arrow.
-                    float arrowSize = ps.mCoords.toolMajor * 0.7f;
-                    if (arrowSize < 20) {
-                        arrowSize = 20;
-                    }
-                    mPaint.setARGB(255, pressureLevel, 255, 0);
-                    float orientationVectorX = (float) (Math.sin(ps.mCoords.orientation)
-                            * arrowSize);
-                    float orientationVectorY = (float) (-Math.cos(ps.mCoords.orientation)
-                            * arrowSize);
-                    if (ps.mToolType == MotionEvent.TOOL_TYPE_STYLUS
-                            || ps.mToolType == MotionEvent.TOOL_TYPE_ERASER) {
-                        // Show full circle orientation.
-                        canvas.drawLine(ps.mCoords.x, ps.mCoords.y,
-                                ps.mCoords.x + orientationVectorX,
-                                ps.mCoords.y + orientationVectorY,
-                                mPaint);
-                    } else {
-                        // Show half circle orientation.
-                        canvas.drawLine(
-                                ps.mCoords.x - orientationVectorX,
-                                ps.mCoords.y - orientationVectorY,
-                                ps.mCoords.x + orientationVectorX,
-                                ps.mCoords.y + orientationVectorY,
-                                mPaint);
-                    }
+            canvas.drawRect(itemW * 4, 0, (itemW * 5) - 1, bottom, mTextBackgroundPaint);
+            canvas.drawText(mText.clear()
+                    .append("Yv: ").append(ps.mYVelocity, 3)
+                    .toString(), 1 + itemW * 4, base, mTextPaint);
 
-                    // Draw the tilt point along the orientation arrow.
-                    float tiltScale = (float) Math.sin(
-                            ps.mCoords.getAxisValue(MotionEvent.AXIS_TILT));
-                    canvas.drawCircle(
-                            ps.mCoords.x + orientationVectorX * tiltScale,
-                            ps.mCoords.y + orientationVectorY * tiltScale,
-                            3.0f, mPaint);
+            canvas.drawRect(itemW * 5, 0, (itemW * 6) - 1, bottom, mTextBackgroundPaint);
+            canvas.drawRect(itemW * 5, 0, (itemW * 5) + (ps.mCoords.pressure * itemW) - 1,
+                    bottom, mTextLevelPaint);
+            canvas.drawText(mText.clear()
+                    .append("Prs: ").append(ps.mCoords.pressure, 2)
+                    .toString(), 1 + itemW * 5, base, mTextPaint);
+
+            canvas.drawRect(itemW * 6, 0, w, bottom, mTextBackgroundPaint);
+            canvas.drawRect(itemW * 6, 0, (itemW * 6) + (ps.mCoords.size * itemW) - 1,
+                    bottom, mTextLevelPaint);
+            canvas.drawText(mText.clear()
+                    .append("Size: ").append(ps.mCoords.size, 2)
+                    .toString(), 1 + itemW * 6, base, mTextPaint);
+        }
+
+        // Pointer trace.
+        for (int p = 0; p < NP; p++) {
+            final PointerState ps = mPointers.get(p);
+
+            // Draw path.
+            final int N = ps.mTraceCount;
+            float lastX = 0, lastY = 0;
+            boolean haveLast = false;
+            boolean drawn = false;
+            mPaint.setARGB(255, 128, 255, 255);
+            for (int i=0; i < N; i++) {
+                float x = ps.mTraceX[i];
+                float y = ps.mTraceY[i];
+                if (Float.isNaN(x)) {
+                    haveLast = false;
+                    continue;
                 }
+                if (haveLast) {
+                    canvas.drawLine(lastX, lastY, x, y, mPathPaint);
+                    canvas.drawPoint(lastX, lastY, mPaint);
+                    drawn = true;
+                }
+                lastX = x;
+                lastY = y;
+                haveLast = true;
+            }
+
+            if (drawn) {
+                // Draw movement estimate curve.
+                mPaint.setARGB(128, 128, 0, 128);
+                float lx = ps.mEstimator.estimateX(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
+                float ly = ps.mEstimator.estimateY(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
+                for (int i = -ESTIMATE_PAST_POINTS + 1; i <= ESTIMATE_FUTURE_POINTS; i++) {
+                    float x = ps.mEstimator.estimateX(i * ESTIMATE_INTERVAL);
+                    float y = ps.mEstimator.estimateY(i * ESTIMATE_INTERVAL);
+                    canvas.drawLine(lx, ly, x, y, mPaint);
+                    lx = x;
+                    ly = y;
+                }
+
+                // Draw velocity vector.
+                mPaint.setARGB(255, 255, 64, 128);
+                float xVel = ps.mXVelocity * (1000 / 60);
+                float yVel = ps.mYVelocity * (1000 / 60);
+                canvas.drawLine(lastX, lastY, lastX + xVel, lastY + yVel, mPaint);
+            }
+
+            if (mCurDown && ps.mCurDown) {
+                // Draw crosshairs.
+                canvas.drawLine(0, ps.mCoords.y, getWidth(), ps.mCoords.y, mTargetPaint);
+                canvas.drawLine(ps.mCoords.x, 0, ps.mCoords.x, getHeight(), mTargetPaint);
+
+                // Draw current point.
+                int pressureLevel = (int)(ps.mCoords.pressure * 255);
+                mPaint.setARGB(255, pressureLevel, 255, 255 - pressureLevel);
+                canvas.drawPoint(ps.mCoords.x, ps.mCoords.y, mPaint);
+
+                // Draw current touch ellipse.
+                mPaint.setARGB(255, pressureLevel, 255 - pressureLevel, 128);
+                drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.touchMajor,
+                        ps.mCoords.touchMinor, ps.mCoords.orientation, mPaint);
+
+                // Draw current tool ellipse.
+                mPaint.setARGB(255, pressureLevel, 128, 255 - pressureLevel);
+                drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.toolMajor,
+                        ps.mCoords.toolMinor, ps.mCoords.orientation, mPaint);
+
+                // Draw the orientation arrow.
+                float arrowSize = ps.mCoords.toolMajor * 0.7f;
+                if (arrowSize < 20) {
+                    arrowSize = 20;
+                }
+                mPaint.setARGB(255, pressureLevel, 255, 0);
+                float orientationVectorX = (float) (Math.sin(ps.mCoords.orientation)
+                        * arrowSize);
+                float orientationVectorY = (float) (-Math.cos(ps.mCoords.orientation)
+                        * arrowSize);
+                if (ps.mToolType == MotionEvent.TOOL_TYPE_STYLUS
+                        || ps.mToolType == MotionEvent.TOOL_TYPE_ERASER) {
+                    // Show full circle orientation.
+                    canvas.drawLine(ps.mCoords.x, ps.mCoords.y,
+                            ps.mCoords.x + orientationVectorX,
+                            ps.mCoords.y + orientationVectorY,
+                            mPaint);
+                } else {
+                    // Show half circle orientation.
+                    canvas.drawLine(
+                            ps.mCoords.x - orientationVectorX,
+                            ps.mCoords.y - orientationVectorY,
+                            ps.mCoords.x + orientationVectorX,
+                            ps.mCoords.y + orientationVectorY,
+                            mPaint);
+                }
+
+                // Draw the tilt point along the orientation arrow.
+                float tiltScale = (float) Math.sin(
+                        ps.mCoords.getAxisValue(MotionEvent.AXIS_TILT));
+                canvas.drawCircle(
+                        ps.mCoords.x + orientationVectorX * tiltScale,
+                        ps.mCoords.y + orientationVectorY * tiltScale,
+                        3.0f, mPaint);
             }
         }
     }
@@ -461,111 +459,109 @@ public class PointerLocationView extends View {
     }
 
     public void addPointerEvent(MotionEvent event) {
-        synchronized (mPointers) {
-            final int action = event.getAction();
-            int NP = mPointers.size();
+        final int action = event.getAction();
+        int NP = mPointers.size();
 
-            if (action == MotionEvent.ACTION_DOWN
-                    || (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_DOWN) {
-                final int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
-                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT; // will be 0 for down
-                if (action == MotionEvent.ACTION_DOWN) {
-                    for (int p=0; p<NP; p++) {
-                        final PointerState ps = mPointers.get(p);
-                        ps.clearTrace();
-                        ps.mCurDown = false;
-                    }
-                    mCurDown = true;
-                    mCurNumPointers = 0;
-                    mMaxNumPointers = 0;
-                    mVelocity.clear();
+        if (action == MotionEvent.ACTION_DOWN
+                || (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_DOWN) {
+            final int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                    >> MotionEvent.ACTION_POINTER_INDEX_SHIFT; // will be 0 for down
+            if (action == MotionEvent.ACTION_DOWN) {
+                for (int p=0; p<NP; p++) {
+                    final PointerState ps = mPointers.get(p);
+                    ps.clearTrace();
+                    ps.mCurDown = false;
                 }
-
-                mCurNumPointers += 1;
-                if (mMaxNumPointers < mCurNumPointers) {
-                    mMaxNumPointers = mCurNumPointers;
-                }
-
-                final int id = event.getPointerId(index);
-                while (NP <= id) {
-                    PointerState ps = new PointerState();
-                    mPointers.add(ps);
-                    NP++;
-                }
-                
-                if (mActivePointerId < 0 ||
-                        !mPointers.get(mActivePointerId).mCurDown) {
-                    mActivePointerId = id;
-                }
-                
-                final PointerState ps = mPointers.get(id);
-                ps.mCurDown = true;
+                mCurDown = true;
+                mCurNumPointers = 0;
+                mMaxNumPointers = 0;
+                mVelocity.clear();
             }
 
-            final int NI = event.getPointerCount();
-
-            mVelocity.addMovement(event);
-            mVelocity.computeCurrentVelocity(1);
-
-            final int N = event.getHistorySize();
-            for (int historyPos = 0; historyPos < N; historyPos++) {
-                for (int i = 0; i < NI; i++) {
-                    final int id = event.getPointerId(i);
-                    final PointerState ps = mCurDown ? mPointers.get(id) : null;
-                    final PointerCoords coords = ps != null ? ps.mCoords : mTempCoords;
-                    event.getHistoricalPointerCoords(i, historyPos, coords);
-                    if (mPrintCoords) {
-                        logCoords("Pointer", action, i, coords, id,
-                                event.getToolType(i), event.getButtonState());
-                    }
-                    if (ps != null) {
-                        ps.addTrace(coords.x, coords.y);
-                    }
-                }
+            mCurNumPointers += 1;
+            if (mMaxNumPointers < mCurNumPointers) {
+                mMaxNumPointers = mCurNumPointers;
             }
+
+            final int id = event.getPointerId(index);
+            while (NP <= id) {
+                PointerState ps = new PointerState();
+                mPointers.add(ps);
+                NP++;
+            }
+
+            if (mActivePointerId < 0 ||
+                    !mPointers.get(mActivePointerId).mCurDown) {
+                mActivePointerId = id;
+            }
+
+            final PointerState ps = mPointers.get(id);
+            ps.mCurDown = true;
+        }
+
+        final int NI = event.getPointerCount();
+
+        mVelocity.addMovement(event);
+        mVelocity.computeCurrentVelocity(1);
+
+        final int N = event.getHistorySize();
+        for (int historyPos = 0; historyPos < N; historyPos++) {
             for (int i = 0; i < NI; i++) {
                 final int id = event.getPointerId(i);
                 final PointerState ps = mCurDown ? mPointers.get(id) : null;
                 final PointerCoords coords = ps != null ? ps.mCoords : mTempCoords;
-                event.getPointerCoords(i, coords);
+                event.getHistoricalPointerCoords(i, historyPos, coords);
                 if (mPrintCoords) {
                     logCoords("Pointer", action, i, coords, id,
                             event.getToolType(i), event.getButtonState());
                 }
                 if (ps != null) {
                     ps.addTrace(coords.x, coords.y);
-                    ps.mXVelocity = mVelocity.getXVelocity(id);
-                    ps.mYVelocity = mVelocity.getYVelocity(id);
-                    mVelocity.getEstimator(id, -1, -1, ps.mEstimator);
-                    ps.mToolType = event.getToolType(i);
                 }
             }
+        }
+        for (int i = 0; i < NI; i++) {
+            final int id = event.getPointerId(i);
+            final PointerState ps = mCurDown ? mPointers.get(id) : null;
+            final PointerCoords coords = ps != null ? ps.mCoords : mTempCoords;
+            event.getPointerCoords(i, coords);
+            if (mPrintCoords) {
+                logCoords("Pointer", action, i, coords, id,
+                        event.getToolType(i), event.getButtonState());
+            }
+            if (ps != null) {
+                ps.addTrace(coords.x, coords.y);
+                ps.mXVelocity = mVelocity.getXVelocity(id);
+                ps.mYVelocity = mVelocity.getYVelocity(id);
+                mVelocity.getEstimator(id, -1, -1, ps.mEstimator);
+                ps.mToolType = event.getToolType(i);
+            }
+        }
+
+        if (action == MotionEvent.ACTION_UP
+                || action == MotionEvent.ACTION_CANCEL
+                || (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP) {
+            final int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                    >> MotionEvent.ACTION_POINTER_INDEX_SHIFT; // will be 0 for UP
+
+            final int id = event.getPointerId(index);
+            final PointerState ps = mPointers.get(id);
+            ps.mCurDown = false;
 
             if (action == MotionEvent.ACTION_UP
-                    || action == MotionEvent.ACTION_CANCEL
-                    || (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP) {
-                final int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
-                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT; // will be 0 for UP
-                
-                final int id = event.getPointerId(index);
-                final PointerState ps = mPointers.get(id);
-                ps.mCurDown = false;
-                
-                if (action == MotionEvent.ACTION_UP
-                        || action == MotionEvent.ACTION_CANCEL) {
-                    mCurDown = false;
-                    mCurNumPointers = 0;
-                } else {
-                    mCurNumPointers -= 1;
-                    if (mActivePointerId == id) {
-                        mActivePointerId = event.getPointerId(index == 0 ? 1 : 0);
-                    }
-                    ps.addTrace(Float.NaN, Float.NaN);
+                    || action == MotionEvent.ACTION_CANCEL) {
+                mCurDown = false;
+                mCurNumPointers = 0;
+            } else {
+                mCurNumPointers -= 1;
+                if (mActivePointerId == id) {
+                    mActivePointerId = event.getPointerId(index == 0 ? 1 : 0);
                 }
+                ps.addTrace(Float.NaN, Float.NaN);
             }
-
-            postInvalidate();
         }
+
+        invalidate();
     }
     
     @Override
