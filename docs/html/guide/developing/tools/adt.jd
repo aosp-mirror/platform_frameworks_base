@@ -102,9 +102,8 @@ Project site.</p>
     (<strong>Window &gt; Open Perspective &gt; Traceview</strong>). </li>
 
     <li><a href="{@docRoot}guide/developing/tools/android.html">android</a>: Provides access to
-    the Android SDK and AVD Manager. Other <code>android</code> features such as creating or
-    updating projects (application and library) are integrated throughout the Eclipse IDE
-    (<strong>Window &gt; Android SDK and AVD Manager</strong>). </li>
+    the Android SDK Manager and AVD Manager. Other <code>android</code> features such as creating or
+    updating projects (application and library) are integrated throughout the Eclipse IDE. </li>
 
     <li><a href="{@docRoot}guide/developing/debugging/debugging-ui.html#HierarchyViewer">Hierarchy
     Viewer</a>: Allows you to visualize your application's view hierarchy to find inefficiencies

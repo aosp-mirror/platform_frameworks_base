@@ -330,13 +330,13 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
 
 <h2 id="Downloading">Downloading the Support Package</h2>
 
-<p>The Support Package is provided as a downloadable package from the Android SDK and AVD
+<p>The Support Package is provided as a downloadable package from the Android SDK
 Manager. To install:</p>
 
 <ol>
-  <li>Launch the SDK and AVD Manager.
+  <li>Launch the Android SDK Manager.
     <p>From Eclipse, you can select <strong>Window</strong>
-&gt; <strong>Android SDK and AVD Manager</strong>. Or, launch {@code SDK Manager.exe} from
+&gt; <strong>Android SDK Manager</strong>. Or, launch {@code SDK Manager.exe} from
 the {@code &lt;sdk&gt;/} directory (on Windows only) or {@code android} from the {@code
 &lt;sdk&gt;/tools/} directory.</p></li>
   <li>Expand the Android Repository, check <strong>Android Support package</strong>

@@ -58,8 +58,9 @@ information about the application and user&mdash;your application and the Google
 together to assemble the information and the Google Play client passes it to the server. </p>
 
 <p>To help you add licensing to your application, the Android SDK provides a downloadable set of
-library sources that you can include in your application project: the "Google Market Licensing
-package." The License Verification Library (LVL) is a library you can add to your application that
+library sources that you can include in your application project: the Google Market
+Licensing package. The License Verification Library (LVL) is a library you can add to your
+application that
 handles all of the licensing-related communication with the Google Play licensing service. With
 the LVL added to your application, your application can determine its licensing status for the
 current user by simply calling a method and implementing a callback that receives the status
@@ -116,7 +117,7 @@ tampered with or that are spoofed.</p>
 
 <h2 id="LVL">Licensing Verification Library</h2>
 
-<p>The Android SDK provides a downloadable component called the "Google Market Licensing package,"
+<p>The Android SDK provides a downloadable package called the Google Market Licensing package,
 which includes the License Verification Library (LVL). The LVL greatly simplifies the process of
 adding licensing to your application and helps ensure a more secure, robust implementation for your
 application. The LVL provides internal classes that handle most of the standard operations of a
@@ -162,8 +163,8 @@ does not cache any response data and allows the application access <em>only</em>
 when the server returns a licensed response.</dd>
 </dl>
 
-<p>The LVL is available as a downloadable component of the Android SDK. The
-component includes both the LVL itself and an example application that shows how
+<p>The LVL is available as a downloadable package of the Android SDK. The
+package includes both the LVL itself and an example application that shows how
 the library should be integrated with your application and how your application
 should manage response data, UI interaction, and error conditions. </p>
 

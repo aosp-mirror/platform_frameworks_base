@@ -7,9 +7,9 @@ page.title=Managing Virtual Devices
 
   <p>The easiest way to create an AVD is to use the graphical <a href= 
   "{@docRoot}guide/developing/devices/managing-avds.html">AVD Manager</a>, which you launch
-  from Eclipse by clicking <strong>Window &gt; Android SDK and AVD Manager</strong>. You can also start
-  the AVD Manager from the command line by calling the <code>android</code> tool in the <strong>tools</strong>
-  directory of the Android SDK.</p>
+  from Eclipse by clicking <strong>Window &gt; AVD Manager</strong>. You can also start the AVD
+Manager from the command line by calling the <code>android</code> tool with the <code>avd</code>
+options, from the <strong>&lt;sdk>/tools/</strong> directory.</p>
 
   <p>You can also create AVDs on the command line by passing the <code>android</code> tool options.
   For more information on how to create AVDs in this manner, see <a href= 

@@ -36,7 +36,7 @@ that is designed to give you a powerful, integrated environment in which
 to build Android applications.</p>
 
 <p>ADT extends the capabilities of Eclipse to let you quickly set up new Android
-projects, create an application UI, add components based on the Android
+projects, create an application UI, add packages based on the Android
 Framework API, debug your applications using the Android SDK tools, and even
 export signed (or unsigned) {@code .apk} files in order to distribute your application.</p>
 
@@ -468,7 +468,7 @@ ADT 12.0.0</a> <em>(July 2011)</em>
 
 <dd>ADT 12.0.0 is designed for use with <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r12</a>. If you haven't
 already installed SDK Tools r12 into your SDK, use
-the Android SDK and AVD Manager to do so.</dd>
+the Android SDK Manager to do so.</dd>
 
 <dt>Visual Layout Editor:</dt>
 <dd>
@@ -520,7 +520,7 @@ ADT 11.0.0</a> <em>(June 2011)</em>
 <dt>Dependencies:</dt>
 
 <dd>ADT 11.0.0 is designed for use with SDK Tools r11. If you haven't
-already installed SDK Tools r11 into your SDK, use the Android SDK and AVD Manager to do
+already installed SDK Tools r11 into your SDK, use the Android SDK Manager to do
 so.</dd>
 
 <dt>Visual Refactoring:</dt>
@@ -656,7 +656,7 @@ ADT 10.0.1</a> <em>(March 2011)</em>
 <dt>Dependencies:</dt>
 
 <dd>ADT 10.0.1 is designed for use with SDK Tools r10. If you haven't
-already installed SDK Tools r10 into your SDK, use the Android SDK and AVD Manager to do
+already installed SDK Tools r10 into your SDK, use the Android SDK Manager to do
 so.</dd>
 
 <dt>General notes:</dt>
@@ -686,7 +686,7 @@ ADT 10.0.0</a> <em>(February 2011)</em>
 <dt>Dependencies:</dt>
 
 <dd>ADT 10.0.0 is designed for use with SDK Tools r10. If you haven't
-already installed SDK Tools r10 into your SDK, use the Android SDK and AVD Manager to do
+already installed SDK Tools r10 into your SDK, use the Android SDK Manager to do
 so.</dd>
 
 <dt>General notes:</dt>
@@ -736,7 +736,7 @@ ADT 9.0.0</a> <em>(January 2011)</em>
 <dt>Dependencies:</dt>
 
 <dd>ADT 9.0.0 is designed for use with SDK Tools r9. If you haven't
-already installed SDK Tools r9 into your SDK, use the Android SDK and AVD Manager to do
+already installed SDK Tools r9 into your SDK, use the Android SDK Manager to do
 so.</dd>
 
 <dt>General notes:</dt>
@@ -845,7 +845,7 @@ ADT 8.0.1</a> <em>(December 2010)</em>
 <dt>Dependencies:</dt>
 
 <p><p>ADT 8.0.1 is designed for use with SDK Tools r8. If you haven't
-already installed SDK Tools r8 into your SDK, use the Android SDK and AVD Manager to do
+already installed SDK Tools r8 into your SDK, use the Android SDK Manager to do
 so.</p></dd>
 
 <dt>General notes:</dt>
@@ -874,7 +874,7 @@ ADT 8.0.0</a> <em>(December 2010)</em>
 <dt>Dependencies:</dt>
 
 <p><p>ADT 8.0.0 is designed for use with SDK Tools r8. If you haven't
-already installed SDK Tools r8 into your SDK, use the Android SDK and AVD Manager to do
+already installed SDK Tools r8 into your SDK, use the Android SDK Manager to do
 so.</p></dd>
 
 <dt>General notes:</dt>
@@ -1020,8 +1020,8 @@ ADT 0.9.6</a> <em>(March 2010)</em>
 <dt>Dependencies:</dt>
 
 <dd><p>ADT 0.9.6 is designed for use with SDK Tools r5 and later. Before
-updating to ADT 0.9.6, we highly recommend that you use the Android SDK and
-AVD Manager to install SDK Tools r5 into your SDK.</p></dd>
+updating to ADT 0.9.6, we highly recommend that you use the Android SDK Manager to install SDK
+Tools r5 into your SDK.</p></dd>
 
 <dt>General Notes:</dt>
 <dd>
@@ -1038,8 +1038,8 @@ first time with the SDK Usage panel.</li>
 <dt>AVD/SDK Manager:</dt>
 <dd>
 <ul>
-<li>Adds support for platform samples components.</li>
-<li>Improves support for dependency between components.</li>
+<li>Adds support for platform samples packages.</li>
+<li>Improves support for dependency between packages.</li>
 <li>AVDs now sorted by API level.</li>
 <li>The AVD creation dialog now enforces a minimum SD card size of 9MB.</li>
 <li>Prevents deletion of running AVDs.</li>
@@ -1087,9 +1087,9 @@ ADT 0.9.5</a> <em>(December 2009)</em>
 <dt>Dependencies:</dt>
 
 <dd><p>ADT 0.9.5 requires features provided in SDK Tools r4 or higher. If you install
-ADT 0.9.5, which is highly recommended, you should use the Android SDK and AVD
+ADT 0.9.5, which is highly recommended, you should use the Android SDK
 Manager to download the latest SDK Tools into your SDK. For more information,
-see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
+see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>.</p>
 </dd>
 
 <dt>General notes:</dt>
@@ -1114,9 +1114,9 @@ ADT 0.9.4</a> <em>(October 2009)</em>
 <dt>Dependencies:</dt>
 
 <dd><p>ADT 0.9.4 requires features provided in SDK Tools r3 or higher. If you install
-ADT 0.9.4, which is highly recommended, you should use the Android SDK and AVD
+ADT 0.9.4, which is highly recommended, you should use the Android SDK
 Manager to download the latest SDK Tools into your SDK. For more information,
-see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
+see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Packages</a>.</p>
 </dd>
 
 <dt>Project Creation Wizard:</dt>
@@ -1318,9 +1318,9 @@ to follow these steps again instead of the default update instructions.</p>
 <h4>Other install errors</h4>
 
 <p>Note that there are features of ADT that require some optional
-Eclipse components (for example, WST). If you encounter an error when
-installing ADT, your Eclipse installion might not include these components.
-For information about how to quickly add the necessary components to your
+Eclipse packages (for example, WST). If you encounter an error when
+installing ADT, your Eclipse installion might not include these packages.
+For information about how to quickly add the necessary packages to your
 Eclipse installation, see the troubleshooting topic
 <a href="{@docRoot}resources/faq/troubleshooting.html#installeclipsecomponents">ADT
 Installation Error: "requires plug-in org.eclipse.wst.sse.ui"</a>.</p>
@@ -1345,9 +1345,9 @@ you should update to it as soon as convenient. </p>
 
 <p>In some cases, a new revision of ADT will have a dependency on a specific
 revision of the Android SDK Tools. If such dependencies exist, you will need to
-update the SDK Tools component of the SDK after installing the new revision of
-ADT. To update the SDK Tools component, use the Android SDK and AVD Manager, as
-described in <a href="adding-components.html">Adding SDK Components</a>.</p>
+update the SDK Tools package of the SDK after installing the new revision of
+ADT. To update the SDK Tools package, use the Android SDK Manager, as
+described in <a href="adding-components.html">Adding SDK Packages</a>.</p>
 
 <p>To learn about new features of each ADT revision and also any dependencies on
 the SDK Tools, see the listings in the <a href="#notes">Revisions</a>

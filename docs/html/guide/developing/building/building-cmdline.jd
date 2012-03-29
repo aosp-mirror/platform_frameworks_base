@@ -202,12 +202,12 @@ ant release
 
   <ol>
     <li>
-      <strong>Open the SDK and AVD Manager and launch a virtual device</strong>
+      <strong>Open the AVD Manager and launch a virtual device</strong>
 
-      <p>From your SDK's <code>platform-tools/</code> directory, execute the {@code android} tool with no
-      arguments:</p>
+      <p>From your SDK's <code>platform-tools/</code> directory, execute the {@code android} tool
+with the <code>avd</code> options:</p>
       <pre>
-android
+android avd
 </pre>
 
       <p>In the <em>Virtual Devices</em> view, select an AVD and click <strong>Start</strong>.</p>
@@ -237,7 +237,7 @@ adb -s emulator-5554 install <em>path/to/your/app</em>.apk
   </ol>
 
   <p>If you don't see your application on the emulator, try closing the emulator and launching the
-  virtual device again from the SDK and AVD Manager. Sometimes when you install an application for the
+  virtual device again from the AVD Manager. Sometimes when you install an application for the
   first time, it won't show up in the application launcher or be accessible by other applications.
   This is because the package manager usually examines manifests completely only on emulator
   startup.</p>
