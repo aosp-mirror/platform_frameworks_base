@@ -53,6 +53,20 @@ Android apps!</p>
                                               <p><a href="{@docRoot}sdk/index.html">Learn more &raquo;</a></p>
                                       </td>
                               </tr>
+                              
+                              
+                              <tr>
+                                      <td colspan="2"><div class="seperator">&nbsp;</div></td>
+                              </tr>
+                              <tr>
+                                      <td class="imageCell"><a href="{@docRoot}design/index.html"><img src="{@docRoot}assets/images/icon_design.png" style="padding:5px" /></a></td>
+                                      <td>
+                                              <h2 class="green">Design</h2>
+                                              <p>Learn about principles, building blocks, and patterns for creating world-class Android user interfaces.</p>
+                                              <p><a href="{@docRoot}design/index.html">Learn more &raquo;</a></p>
+                                      </td>
+                              </tr>
+                              
                               <tr>
                                       <td colspan="2"><div class="seperator">&nbsp;</div></td>
                               </tr>
@@ -64,17 +78,7 @@ Android apps!</p>
                                               <p><a href="http://play.google.com/apps/publish">Learn more &raquo;</a></p>
                                       </td>
                               </tr>
-                              <tr>
-                                      <td colspan="2"><div class="seperator">&nbsp;</div></td>
-                              </tr>
-                              <tr>
-                                      <td class="imageCell"><a href="http://source.android.com"><img src="{@docRoot}assets/images/icon_contribute.jpg" style="padding:0" /></a></td>
-                                      <td>
-                                              <h2 class="green">Contribute</h2>
-                                              <p>Android Open Source Project gives you access to the entire platform source.</p>
-                                              <p><a href="http://source.android.com">Learn more &raquo;</a></p>
-                                      </td>
-                              </tr>
+                              
                               <tr>
                                       <td colspan="2"><div class="seperator">&nbsp;</div></td>
                               </tr>
