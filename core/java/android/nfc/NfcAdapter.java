@@ -556,109 +556,230 @@ public final class NfcAdapter {
     }
 
     /**
-     * Set the {@link NdefMessage} to push over NFC during the specified activities.
+     * Set a static {@link NdefMessage} to send using Android Beam (TM).
      *
-     * <p>This method may be called at any time, but the NDEF message is
-     * only made available for NDEF push when one of the specified activities
-     * is in resumed (foreground) state.
+     * <p>This method may be called at any time before {@link Activity#onDestroy},
+     * but the NDEF message is only made available for NDEF push when the
+     * specified activity(s) are in resumed (foreground) state. The recommended
+     * approach is to call this method during your Activity's
+     * {@link Activity#onCreate} - see sample
+     * code below. This method does not immediately perform any I/O or blocking work,
+     * so is safe to call on your main thread.
      *
      * <p>Only one NDEF message can be pushed by the currently resumed activity.
      * If both {@link #setNdefPushMessage} and
-     * {@link #setNdefPushMessageCallback} are set then
+     * {@link #setNdefPushMessageCallback} are set, then
      * the callback will take priority.
      *
-     * <p>Pass a null NDEF message to disable foreground NDEF push in the
-     * specified activities.
+     * <p>If neither {@link #setNdefPushMessage} or
+     * {@link #setNdefPushMessageCallback} have been called for your activity, then
+     * the Android OS may choose to send a default NDEF message on your behalf,
+     * such as a URI for your application.
      *
-     * <p>At least one activity must be specified, and usually only one is necessary.
+     * <p>If {@link #setNdefPushMessage} is called with a null NDEF message,
+     * and/or {@link #setNdefPushMessageCallback} is called with a null callback,
+     * then NDEF push will be completely disabled for the specified activity(s).
+     * This also disables any default NDEF message the Android OS would have
+     * otherwise sent on your behalf.
+     *
+     * <p>The API allows for multiple activities to be specified at a time,
+     * but it is strongly recommended to just register one at a time,
+     * and to do so during the activity's {@link Activity#onCreate}. For example:
+     * <pre>
+     * protected void onCreate(Bundle savedInstanceState) {
+     *     super.onCreate(savedInstanceState);
+     *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+     *     if (nfcAdapter == null) return;  // NFC not available on this device
+     *     nfcAdapter.setNdefPushMessage(ndefMessage, this);
+     * }
+     * </pre>
+     * And that is it. Only one call per activity is necessary. The Android
+     * OS will automatically release its references to the NDEF message and the
+     * Activity object when it is destroyed if you follow this pattern.
+     *
+     * <p>If your Activity wants to dynamically generate an NDEF message,
+     * then set a callback using {@link #setNdefPushMessageCallback} instead
+     * of a static message.
+     *
+     * <p class="note">Do not pass in an Activity that has already been through
+     * {@link Activity#onDestroy}. This is guaranteed if you call this API
+     * during {@link Activity#onCreate}.
      *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param message NDEF message to push over NFC, or null to disable
-     * @param activity an activity in which NDEF push should be enabled to share the provided
-     *                 NDEF message
-     * @param activities optional additional activities that should also enable NDEF push with
-     *                   the provided NDEF message
+     * @param activity activity for which the NDEF message will be pushed
+     * @param activities optional additional activities, however we strongly recommend
+     *        to only register one at a time, and to do so in that activity's
+     *        {@link Activity#onCreate}
      */
     public void setNdefPushMessage(NdefMessage message, Activity activity,
             Activity ... activities) {
-        if (activity == null) {
-            throw new NullPointerException("activity cannot be null");
-        }
-        mNfcActivityManager.setNdefPushMessage(activity, message);
-        for (Activity a : activities) {
-            if (a == null) {
-                throw new NullPointerException("activities cannot contain null");
+        int targetSdkVersion = getSdkVersion();
+        try {
+            if (activity == null) {
+                throw new NullPointerException("activity cannot be null");
             }
-            mNfcActivityManager.setNdefPushMessage(a, message);
+            mNfcActivityManager.setNdefPushMessage(activity, message);
+            for (Activity a : activities) {
+                if (a == null) {
+                    throw new NullPointerException("activities cannot contain null");
+                }
+                mNfcActivityManager.setNdefPushMessage(a, message);
+            }
+        } catch (IllegalStateException e) {
+            if (targetSdkVersion < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                // Less strict on old applications - just log the error
+                Log.e(TAG, "Cannot call API with Activity that has already " +
+                        "been destroyed", e);
+            } else {
+                // Prevent new applications from making this mistake, re-throw
+                throw(e);
+            }
         }
     }
 
     /**
-     * Set the callback to create a {@link NdefMessage} to push over NFC.
+     * Set a callback that dynamically generates NDEF messages to send using Android Beam (TM).
      *
-     * <p>This method may be called at any time, but this callback is
-     * only made if one of the specified activities
-     * is in resumed (foreground) state.
+     * <p>This method may be called at any time before {@link Activity#onDestroy},
+     * but the NDEF message callback can only occur when the
+     * specified activity(s) are in resumed (foreground) state. The recommended
+     * approach is to call this method during your Activity's
+     * {@link Activity#onCreate} - see sample
+     * code below. This method does not immediately perform any I/O or blocking work,
+     * so is safe to call on your main thread.
      *
      * <p>Only one NDEF message can be pushed by the currently resumed activity.
      * If both {@link #setNdefPushMessage} and
-     * {@link #setNdefPushMessageCallback} are set then
+     * {@link #setNdefPushMessageCallback} are set, then
      * the callback will take priority.
      *
-     * <p>Pass a null callback to disable the callback in the
-     * specified activities.
+     * <p>If neither {@link #setNdefPushMessage} or
+     * {@link #setNdefPushMessageCallback} have been called for your activity, then
+     * the Android OS may choose to send a default NDEF message on your behalf,
+     * such as a URI for your application.
      *
-     * <p>At least one activity must be specified, and usually only one is necessary.
+     * <p>If {@link #setNdefPushMessage} is called with a null NDEF message,
+     * and/or {@link #setNdefPushMessageCallback} is called with a null callback,
+     * then NDEF push will be completely disabled for the specified activity(s).
+     * This also disables any default NDEF message the Android OS would have
+     * otherwise sent on your behalf.
+     *
+     * <p>The API allows for multiple activities to be specified at a time,
+     * but it is strongly recommended to just register one at a time,
+     * and to do so during the activity's {@link Activity#onCreate}. For example:
+     * <pre>
+     * protected void onCreate(Bundle savedInstanceState) {
+     *     super.onCreate(savedInstanceState);
+     *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+     *     if (nfcAdapter == null) return;  // NFC not available on this device
+     *     nfcAdapter.setNdefPushMessageCallback(callback, this);
+     * }
+     * </pre>
+     * And that is it. Only one call per activity is necessary. The Android
+     * OS will automatically release its references to the callback and the
+     * Activity object when it is destroyed if you follow this pattern.
+     *
+     * <p class="note">Do not pass in an Activity that has already been through
+     * {@link Activity#onDestroy}. This is guaranteed if you call this API
+     * during {@link Activity#onCreate}.
      *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param callback callback, or null to disable
-     * @param activity an activity in which NDEF push should be enabled to share an NDEF message
-     *                 that's retrieved from the provided callback
-     * @param activities optional additional activities that should also enable NDEF push using
-     *                   the provided callback
+     * @param activity activity for which the NDEF message will be pushed
+     * @param activities optional additional activities, however we strongly recommend
+     *        to only register one at a time, and to do so in that activity's
+     *        {@link Activity#onCreate}
      */
     public void setNdefPushMessageCallback(CreateNdefMessageCallback callback, Activity activity,
             Activity ... activities) {
-        if (activity == null) {
-            throw new NullPointerException("activity cannot be null");
-        }
-        mNfcActivityManager.setNdefPushMessageCallback(activity, callback);
-        for (Activity a : activities) {
-            if (a == null) {
-                throw new NullPointerException("activities cannot contain null");
+        int targetSdkVersion = getSdkVersion();
+        try {
+            if (activity == null) {
+                throw new NullPointerException("activity cannot be null");
             }
-            mNfcActivityManager.setNdefPushMessageCallback(a, callback);
+            mNfcActivityManager.setNdefPushMessageCallback(activity, callback);
+            for (Activity a : activities) {
+                if (a == null) {
+                    throw new NullPointerException("activities cannot contain null");
+                }
+                mNfcActivityManager.setNdefPushMessageCallback(a, callback);
+            }
+        } catch (IllegalStateException e) {
+            if (targetSdkVersion < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                // Less strict on old applications - just log the error
+                Log.e(TAG, "Cannot call API with Activity that has already " +
+                        "been destroyed", e);
+            } else {
+                // Prevent new applications from making this mistake, re-throw
+                throw(e);
+            }
         }
     }
 
     /**
-     * Set the callback on a successful NDEF push over NFC.
+     * Set a callback on successful Android Beam (TM).
      *
-     * <p>This method may be called at any time, but NDEF push and this callback
-     * can only occur when one of the specified activities is in resumed
-     * (foreground) state.
+     * <p>This method may be called at any time before {@link Activity#onDestroy},
+     * but the callback can only occur when the
+     * specified activity(s) are in resumed (foreground) state. The recommended
+     * approach is to call this method during your Activity's
+     * {@link Activity#onCreate} - see sample
+     * code below. This method does not immediately perform any I/O or blocking work,
+     * so is safe to call on your main thread.
      *
-     * <p>One or more activities must be specified.
+     * <p>The API allows for multiple activities to be specified at a time,
+     * but it is strongly recommended to just register one at a time,
+     * and to do so during the activity's {@link Activity#onCreate}. For example:
+     * <pre>
+     * protected void onCreate(Bundle savedInstanceState) {
+     *     super.onCreate(savedInstanceState);
+     *     NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+     *     if (nfcAdapter == null) return;  // NFC not available on this device
+     *     nfcAdapter.setOnNdefPushCompleteCallback(callback, this);
+     * }
+     * </pre>
+     * And that is it. Only one call per activity is necessary. The Android
+     * OS will automatically release its references to the callback and the
+     * Activity object when it is destroyed if you follow this pattern.
+     *
+     * <p class="note">Do not pass in an Activity that has already been through
+     * {@link Activity#onDestroy}. This is guaranteed if you call this API
+     * during {@link Activity#onCreate}.
      *
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param callback callback, or null to disable
-     * @param activity an activity to enable the callback (at least one is required)
-     * @param activities zero or more additional activities to enable to callback
+     * @param activity activity for which the NDEF message will be pushed
+     * @param activities optional additional activities, however we strongly recommend
+     *        to only register one at a time, and to do so in that activity's
+     *        {@link Activity#onCreate}
      */
     public void setOnNdefPushCompleteCallback(OnNdefPushCompleteCallback callback,
             Activity activity, Activity ... activities) {
-        if (activity == null) {
-            throw new NullPointerException("activity cannot be null");
-        }
-        mNfcActivityManager.setOnNdefPushCompleteCallback(activity, callback);
-        for (Activity a : activities) {
-            if (a == null) {
-                throw new NullPointerException("activities cannot contain null");
+        int targetSdkVersion = getSdkVersion();
+        try {
+            if (activity == null) {
+                throw new NullPointerException("activity cannot be null");
             }
-            mNfcActivityManager.setOnNdefPushCompleteCallback(a, callback);
+            mNfcActivityManager.setOnNdefPushCompleteCallback(activity, callback);
+            for (Activity a : activities) {
+                if (a == null) {
+                    throw new NullPointerException("activities cannot contain null");
+                }
+                mNfcActivityManager.setOnNdefPushCompleteCallback(a, callback);
+            }
+        } catch (IllegalStateException e) {
+            if (targetSdkVersion < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                // Less strict on old applications - just log the error
+                Log.e(TAG, "Cannot call API with Activity that has already " +
+                        "been destroyed", e);
+            } else {
+                // Prevent new applications from making this mistake, re-throw
+                throw(e);
+            }
         }
     }
 
@@ -930,6 +1051,14 @@ public final class NfcAdapter {
     void enforceResumed(Activity activity) {
         if (!activity.isResumed()) {
             throw new IllegalStateException("API cannot be called while activity is paused");
+        }
+    }
+
+    int getSdkVersion() {
+        if (mContext == null) {
+            return android.os.Build.VERSION_CODES.GINGERBREAD; // best guess
+        } else {
+            return mContext.getApplicationInfo().targetSdkVersion;
         }
     }
 }
