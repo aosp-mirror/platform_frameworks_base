@@ -263,6 +263,17 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['article', 'input', 'ui'],
+    path: 'articles/spell-checker-framework.html',
+    title: {
+      en: 'The Android Spell Checker Framework'
+    },
+    description: {
+      en: 'This article describes the Android spell checker framework and how to use to implement spell checking in applications.'
+    }
+  },
+  
+  {
     tags: ['article', 'ui'],
     path: 'articles/touch-mode.html',
     title: {
