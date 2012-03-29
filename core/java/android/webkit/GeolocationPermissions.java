@@ -18,13 +18,11 @@ package android.webkit;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
+
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-
 
 /**
  * This class is used to manage permissions for the WebView's Geolocation
@@ -47,7 +45,7 @@ import java.util.Vector;
  * Geolocation permissions at any time.
  */
 // This class is the Java counterpart of the WebKit C++ GeolocationPermissions
-// class. It simply marshalls calls from the UI thread to the WebKit thread.
+// class. It simply marshals calls from the UI thread to the WebKit thread.
 //
 // Within WebKit, Geolocation permissions may be applied either temporarily
 // (for the duration of the page) or permanently. This class deals only with
@@ -69,9 +67,6 @@ public final class GeolocationPermissions {
          */
         public void invoke(String origin, boolean allow, boolean retain);
     };
-
-    // Log tag
-    private static final String TAG = "geolocationPermissions";
 
     // Global instance
     private static GeolocationPermissions sInstance;
