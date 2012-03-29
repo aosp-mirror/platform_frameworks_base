@@ -850,6 +850,8 @@
   <java-symbol type="string" name="wifi_watchdog_network_disabled" />
   <java-symbol type="string" name="wifi_watchdog_network_disabled_detailed" />
   <java-symbol type="string" name="yesterday" />
+  <java-symbol type="string" name="imei" />
+  <java-symbol type="string" name="meid" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />

@@ -97,6 +97,12 @@
          the SIM card. -->
     <string name="needPuk">Your SIM card is PUK-locked. Type the PUK code to unlock it.</string>
     <string name="needPuk2">Type PUK2 to unblock SIM card.</string>
+    <!-- Title for the dialog used to display the user's IMEI number [CHAR LIMIT=10] -->
+    <string name="imei">IMEI</string>
+
+    <!-- Title for the dialog used to display the user's MEID number on CDMA network
+         [CHAR LIMIT=10] -->
+    <string name="meid">MEID</string>
 
     <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
     <string name="ClipMmi">Incoming Caller ID</string>
