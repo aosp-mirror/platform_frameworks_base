@@ -141,8 +141,12 @@ public abstract class SpellCheckerService extends Service {
         }
 
         /**
-         * The default implementation returns an array of SentenceSuggestionsInfo by simply calling
-         * onGetSuggestions().
+         * Get sentence suggestions for specified texts in an array of TextInfo.
+         * The default implementation returns an array of SentenceSuggestionsInfo by simply
+         * calling onGetSuggestions.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
          * When you override this method, make sure that suggestionsLimit is applied to suggestions
          * that share the same start position and length.
          * @param textInfos an array of the text metadata
