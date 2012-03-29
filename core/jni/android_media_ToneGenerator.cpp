@@ -65,6 +65,16 @@ static void android_media_ToneGenerator_stopTone(JNIEnv *env, jobject thiz) {
     lpToneGen->stopTone();
 }
 
+static jint android_media_ToneGenerator_getAudioSessionId(JNIEnv *env, jobject thiz) {
+    ToneGenerator *lpToneGen = (ToneGenerator *)env->GetIntField(thiz,
+            fields.context);
+    if (lpToneGen == NULL) {
+        jniThrowRuntimeException(env, "Method called after release()");
+        return 0;
+    }
+    return lpToneGen->getSessionId();
+}
+
 static void android_media_ToneGenerator_release(JNIEnv *env, jobject thiz) {
     ToneGenerator *lpToneGen = (ToneGenerator *)env->GetIntField(thiz,
             fields.context);
@@ -120,6 +130,7 @@ static void android_media_ToneGenerator_native_finalize(JNIEnv *env,
 static JNINativeMethod gMethods[] = {
     { "startTone", "(II)Z", (void *)android_media_ToneGenerator_startTone },
     { "stopTone", "()V", (void *)android_media_ToneGenerator_stopTone },
+    { "getAudioSessionId", "()I", (void *)android_media_ToneGenerator_getAudioSessionId},
     { "release", "()V", (void *)android_media_ToneGenerator_release },
     { "native_setup", "(II)V", (void *)android_media_ToneGenerator_native_setup },
     { "native_finalize", "()V", (void *)android_media_ToneGenerator_native_finalize }

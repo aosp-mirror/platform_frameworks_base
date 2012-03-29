@@ -519,13 +519,34 @@ public class AudioRecord
 
         // start recording
         synchronized(mRecordingStateLock) {
-            if (native_start() == SUCCESS) {
+            if (native_start(MediaSyncEvent.SYNC_EVENT_NONE, 0) == SUCCESS) {
                 mRecordingState = RECORDSTATE_RECORDING;
             }
         }
     }
 
+    /**
+     * Starts recording from the AudioRecord instance when the specified synchronization event
+     * occurs on the specified audio session.
+     * @throws IllegalStateException
+     * @param syncEvent event that triggers the capture.
+     * @see MediaSyncEvent
+     * @hide
+     */
+    public void startRecording(MediaSyncEvent syncEvent)
+    throws IllegalStateException {
+        if (mState != STATE_INITIALIZED) {
+            throw(new IllegalStateException("startRecording() called on an "
+                    +"uninitialized AudioRecord."));
+        }
 
+        // start recording
+        synchronized(mRecordingStateLock) {
+            if (native_start(syncEvent.getType(), syncEvent.getAudioSessionId()) == SUCCESS) {
+                mRecordingState = RECORDSTATE_RECORDING;
+            }
+        }
+    }
 
     /**
      * Stops recording.
@@ -787,7 +808,7 @@ public class AudioRecord
     
     private native final void native_release();
 
-    private native final int native_start();
+    private native final int native_start(int syncEvent, int sessionId);
 
     private native final void native_stop();
 
