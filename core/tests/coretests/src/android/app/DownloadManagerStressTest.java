@@ -46,7 +46,6 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
     public void setUp() throws Exception {
         super.setUp();
         setWiFiStateOn(true);
-        mServer.play();
         removeAllCurrentDownloads();
     }
 
@@ -85,7 +84,7 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
             request.setTitle(String.format("%s--%d", DEFAULT_FILENAME + i, i));
 
             // Prepare the mock server with a standard response
-            enqueueResponse(HTTP_OK, blobData);
+            enqueueResponse(buildResponse(HTTP_OK, blobData));
 
             long requestID = mDownloadManager.enqueue(request);
         }
@@ -127,7 +126,7 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
         try {
             long dlRequest = doStandardEnqueue(largeFile);
 
-             // wait for the download to complete
+            // wait for the download to complete
             waitForDownloadOrTimeout(dlRequest);
 
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);

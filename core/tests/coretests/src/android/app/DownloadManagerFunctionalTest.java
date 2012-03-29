@@ -16,8 +16,6 @@
 
 package android.app;
 
-import coretestutils.http.MockResponse;
-
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.database.Cursor;
@@ -25,6 +23,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.test.suitebuilder.annotation.LargeTest;
+
+import com.google.mockwebserver.MockResponse;
 
 import java.io.File;
 import java.util.Iterator;
@@ -47,7 +47,6 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     public void setUp() throws Exception {
         super.setUp();
         setWiFiStateOn(true);
-        mServer.play();
         removeAllCurrentDownloads();
     }
 
@@ -132,8 +131,6 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
             assertEquals(1, cursor.getCount());
             assertTrue(cursor.moveToFirst());
 
-            mServer.checkForExceptions();
-
             verifyFileSize(pfd, fileSize);
             verifyFileContents(pfd, fileData);
             int colIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME);
@@ -154,7 +151,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
         byte[] blobData = generateData(DEFAULT_FILE_SIZE, DataType.TEXT);
 
         // Prepare the mock server with a standard response
-        enqueueResponse(HTTP_OK, blobData);
+        enqueueResponse(buildResponse(HTTP_OK, blobData));
 
         try {
             Uri uri = getServerUri(DEFAULT_FILENAME);
@@ -193,7 +190,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
             byte[] blobData = generateData(DEFAULT_FILE_SIZE, DataType.TEXT);
 
             // Prepare the mock server with a standard response
-            enqueueResponse(HTTP_OK, blobData);
+            enqueueResponse(buildResponse(HTTP_OK, blobData));
 
             Uri uri = getServerUri(DEFAULT_FILENAME);
             Request request = new Request(uri);
@@ -224,7 +221,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
             byte[] blobData = generateData(DEFAULT_FILE_SIZE, DataType.TEXT);
 
             // Prepare the mock server with a standard response
-            enqueueResponse(HTTP_OK, blobData);
+            enqueueResponse(buildResponse(HTTP_OK, blobData));
 
             Uri uri = getServerUri(DEFAULT_FILENAME);
             Request request = new Request(uri);
@@ -251,7 +248,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     public void testGetDownloadIdOnNotification() throws Exception {
         byte[] blobData = generateData(3000, DataType.TEXT);  // file size = 3000 bytes
 
-        MockResponse response = enqueueResponse(HTTP_OK, blobData);
+        enqueueResponse(buildResponse(HTTP_OK, blobData));
         long dlRequest = doCommonStandardEnqueue();
         waitForDownloadOrTimeout(dlRequest);
 
@@ -271,8 +268,9 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
 
         // force 6 redirects
         for (int i = 0; i < 6; ++i) {
-            MockResponse response = enqueueResponse(HTTP_REDIRECT);
-            response.addHeader("Location", uri.toString());
+            final MockResponse resp = buildResponse(HTTP_REDIRECT);
+            resp.setHeader("Location", uri.toString());
+            enqueueResponse(resp);
         }
         doErrorTest(uri, DownloadManager.ERROR_TOO_MANY_REDIRECTS);
     }
@@ -283,7 +281,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     @LargeTest
     public void testErrorUnhandledHttpCode() throws Exception {
         Uri uri = getServerUri(DEFAULT_FILENAME);
-        MockResponse response = enqueueResponse(HTTP_PARTIAL_CONTENT);
+        enqueueResponse(buildResponse(HTTP_PARTIAL_CONTENT));
 
         doErrorTest(uri, DownloadManager.ERROR_UNHANDLED_HTTP_CODE);
     }
@@ -294,8 +292,9 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     @LargeTest
     public void testErrorHttpDataError_invalidRedirect() throws Exception {
         Uri uri = getServerUri(DEFAULT_FILENAME);
-        MockResponse response = enqueueResponse(HTTP_REDIRECT);
-        response.addHeader("Location", "://blah.blah.blah.com");
+        final MockResponse resp = buildResponse(HTTP_REDIRECT);
+        resp.setHeader("Location", "://blah.blah.blah.com");
+        enqueueResponse(resp);
 
         doErrorTest(uri, DownloadManager.ERROR_HTTP_DATA_ERROR);
     }
@@ -327,7 +326,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     public void testSetTitle() throws Exception {
         int fileSize = 1024;
         byte[] blobData = generateData(fileSize, DataType.BINARY);
-        MockResponse response = enqueueResponse(HTTP_OK, blobData);
+        enqueueResponse(buildResponse(HTTP_OK, blobData));
 
         // An arbitrary unicode string title
         final String title = "\u00a5123;\"\u0152\u017d \u054b \u0a07 \ucce0 \u6820\u03a8\u5c34" +
@@ -359,7 +358,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
         byte[] blobData = generateData(fileSize, DataType.TEXT);
 
         setWiFiStateOn(false);
-        enqueueResponse(HTTP_OK, blobData);
+        enqueueResponse(buildResponse(HTTP_OK, blobData));
 
         try {
             Uri uri = getServerUri(DEFAULT_FILENAME);
@@ -383,32 +382,16 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
     }
 
     /**
-     * Tests when the server drops the connection after all headers (but before any data send).
-     */
-    @LargeTest
-    public void testDropConnection_headers() throws Exception {
-        byte[] blobData = generateData(DEFAULT_FILE_SIZE, DataType.TEXT);
-
-        MockResponse response = enqueueResponse(HTTP_OK, blobData);
-        response.setCloseConnectionAfterHeader("content-length");
-        long dlRequest = doCommonStandardEnqueue();
-
-        // Download will never complete when header is dropped
-        boolean success = waitForDownloadOrTimeoutNoThrow(dlRequest, DEFAULT_WAIT_POLL_TIME,
-                DEFAULT_MAX_WAIT_TIME);
-
-        assertFalse(success);
-    }
-
-    /**
      * Tests that we get an error code when the server drops the connection during a download.
      */
     @LargeTest
     public void testServerDropConnection_body() throws Exception {
         byte[] blobData = generateData(25000, DataType.TEXT);  // file size = 25000 bytes
 
-        MockResponse response = enqueueResponse(HTTP_OK, blobData);
-        response.setCloseConnectionAfterXBytes(15382);
+        final MockResponse resp = buildResponse(HTTP_OK, blobData);
+        resp.setHeader("Content-Length", "50000");
+        enqueueResponse(resp);
+
         long dlRequest = doCommonStandardEnqueue();
         waitForDownloadOrTimeout(dlRequest);
 

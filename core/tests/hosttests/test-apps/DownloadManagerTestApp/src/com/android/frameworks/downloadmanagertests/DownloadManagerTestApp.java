@@ -16,16 +16,11 @@
 package com.android.frameworks.downloadmanagertests;
 
 import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
-import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.provider.Settings;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -33,12 +28,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.util.HashSet;
-
-import coretestutils.http.MockResponse;
-import coretestutils.http.MockWebServer;
-import coretestutils.http.RecordedRequest;
 
 /**
  * Class to test downloading files from a real (not mock) external server.
@@ -243,7 +233,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
 
         Uri remoteUri = getExternalFileUri(filename);
         Request request = new Request(remoteUri);
-        request.setMimeType(getMimeMapping(DownloadFileType.APK));
+        request.setMimeType("application/vnd.android.package-archive");
 
         dlRequest = mDownloadManager.enqueue(request);
 
