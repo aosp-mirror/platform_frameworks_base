@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.ProviderInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -318,10 +319,11 @@ public interface IActivityManager extends IInterface {
     public boolean getPackageAskScreenCompat(String packageName) throws RemoteException;
     public void setPackageAskScreenCompat(String packageName, boolean ask)
             throws RemoteException;
-    
+
     // Multi-user APIs
     public boolean switchUser(int userid) throws RemoteException;
-    
+    public UserInfo getCurrentUser() throws RemoteException;
+
     public boolean removeSubTask(int taskId, int subTaskIndex) throws RemoteException;
 
     public boolean removeTask(int taskId, int flags) throws RemoteException;
@@ -575,4 +577,5 @@ public interface IActivityManager extends IInterface {
     int REMOVE_CONTENT_PROVIDER_EXTERNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+141;
     int GET_MY_MEMORY_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+142;
     int KILL_PROCESSES_BELOW_FOREGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+143;
+    int GET_CURRENT_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+144;
 }

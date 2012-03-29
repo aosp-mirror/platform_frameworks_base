@@ -25,6 +25,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -1494,7 +1495,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(result ? 1 : 0);
             return true;
         }
-        
+
+        case GET_CURRENT_USER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            UserInfo userInfo = getCurrentUser();
+            reply.writeNoException();
+            userInfo.writeToParcel(reply, 0);
+            return true;
+        }
+
         case REMOVE_SUB_TASK_TRANSACTION:
         {
             data.enforceInterface(IActivityManager.descriptor);
@@ -3530,7 +3539,19 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return result;
     }
-    
+
+    public UserInfo getCurrentUser() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(SWITCH_USER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        UserInfo userInfo = UserInfo.CREATOR.createFromParcel(reply);
+        reply.recycle();
+        data.recycle();
+        return userInfo;
+    }
+
     public boolean removeSubTask(int taskId, int subTaskIndex) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
