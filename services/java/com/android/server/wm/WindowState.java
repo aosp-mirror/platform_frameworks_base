@@ -88,10 +88,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mPolicyVisibility = true;
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppFreezing;
-    Surface mSurface;
-    Surface mPendingDestroySurface;
-    boolean mReportDestroySurface;
-    boolean mSurfacePendingDestroy;
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mLastHidden;        // was this window last hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
@@ -106,8 +102,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     int mLastRequestedHeight;
 
     int mLayer;
-    int mAnimLayer;
-    int mLastLayer;
     boolean mHaveFrame;
     boolean mObscured;
     boolean mTurnOnScreen;
@@ -122,18 +116,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * applied).
      */
     final RectF mShownFrame = new RectF();
-
-    /**
-     * Set when we have changed the size of the surface, to know that
-     * we must tell them application to resize (and thus redraw itself).
-     */
-    boolean mSurfaceResized;
-
-    /**
-     * Set if the client has asked that the destroy of its surface be delayed
-     * until it explicitly says it is okay.
-     */
-    boolean mSurfaceDestroyDeferred;
 
     /**
      * Insets that determine the actually visible area.  These are in the application's
@@ -183,11 +165,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     int mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 
     // Current transformation being applied.
-    boolean mHaveMatrix;
     float mGlobalScale=1;
     float mInvGlobalScale=1;
-    float mDsDx=1, mDtDx=0, mDsDy=0, mDtDy=1;
-    float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
     float mHScale=1, mVScale=1;
     float mLastHScale=1, mLastVScale=1;
     final Matrix mTmpMatrix = new Matrix();
@@ -206,14 +185,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final Rect mVisibleFrame = new Rect();
 
     boolean mContentChanged;
-
-    float mShownAlpha = 1;
-    float mAlpha = 1;
-    float mLastAlpha = 1;
-
-    // Set to true if, when the window gets displayed, it should perform
-    // an enter animation.
-    boolean mEnterAnimationPending;
 
     // If a window showing a wallpaper: the requested offset for the
     // wallpaper; if a wallpaper window: the currently applied offset.
@@ -279,12 +250,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // rebuilding window list.
     boolean mRebuilding;
 
-    // For debugging, this is the last information given to the surface flinger.
-    boolean mSurfaceShown;
-    float mSurfaceX, mSurfaceY, mSurfaceW, mSurfaceH;
-    int mSurfaceLayer;
-    float mSurfaceAlpha;
-
     // Input channel and input window handle used by the input dispatcher.
     final InputWindowHandle mInputWindowHandle;
     InputChannel mInputChannel;
@@ -293,11 +258,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     String mStringNameCache;
     CharSequence mLastTitle;
     boolean mWasPaused;
-
-    // Used to save animation distances between the time they are calculated and when they are 
-    // used.
-    int mAnimDw;
-    int mAnimDh;
 
     final WindowStateAnimator mWinAnimator;
 
@@ -313,7 +273,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mPolicy = mService.mPolicy;
         mContext = mService.mContext;
         DeathRecipient deathRecipient = new DeathRecipient();
-        mAlpha = a.alpha;
         mSeq = seq;
         mEnforceSizeCompat = (mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
         if (WindowManagerService.localLOGV) Slog.v(
@@ -369,6 +328,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
 
         mWinAnimator = new WindowStateAnimator(service, this, mAttachedWindow);
+        mWinAnimator.mAlpha = a.alpha;
 
         WindowState appWin = this;
         while (appWin.mAttachedWindow != null) {
@@ -385,7 +345,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mRootToken = appToken;
         mAppToken = appToken.appWindowToken;
 
-        mSurface = null;
         mRequestedWidth = 0;
         mRequestedHeight = 0;
         mLastRequestedWidth = 0;
@@ -393,8 +352,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mXOffset = 0;
         mYOffset = 0;
         mLayer = 0;
-        mAnimLayer = 0;
-        mLastLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
                 mAppToken != null ? mAppToken.mInputApplicationHandle : null, this);
     }
@@ -643,225 +600,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null ? mAppToken.firstWindowDrawn : false;
     }
 
-    Surface createSurfaceLocked() {
-        if (mSurface == null) {
-            mReportDestroySurface = false;
-            mSurfacePendingDestroy = false;
-            if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(WindowManagerService.TAG,
-                    "createSurface " + this + ": DRAW NOW PENDING");
-            mDrawPending = true;
-            mCommitDrawPending = false;
-            mReadyToShow = false;
-            if (mAppToken != null) {
-                mAppToken.allDrawn = false;
-            }
-
-            mService.makeWindowFreezingScreenIfNeededLocked(this);
-
-            int flags = 0;
-
-            if ((mAttrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
-                flags |= Surface.SECURE;
-            }
-            if (DEBUG_VISIBILITY) Slog.v(
-                WindowManagerService.TAG, "Creating surface in session "
-                + mSession.mSurfaceSession + " window " + this
-                + " w=" + mCompatFrame.width()
-                + " h=" + mCompatFrame.height() + " format="
-                + mAttrs.format + " flags=" + flags);
-
-            int w = mCompatFrame.width();
-            int h = mCompatFrame.height();
-            if ((mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
-                // for a scaled surface, we always want the requested
-                // size.
-                w = mRequestedWidth;
-                h = mRequestedHeight;
-            }
-
-            // Something is wrong and SurfaceFlinger will not like this,
-            // try to revert to sane values
-            if (w <= 0) w = 1;
-            if (h <= 0) h = 1;
-
-            mSurfaceShown = false;
-            mSurfaceLayer = 0;
-            mSurfaceAlpha = 1;
-            mSurfaceX = 0;
-            mSurfaceY = 0;
-            mSurfaceW = w;
-            mSurfaceH = h;
-            try {
-                final boolean isHwAccelerated = (mAttrs.flags &
-                        WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
-                final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : mAttrs.format;
-                if (!PixelFormat.formatHasAlpha(mAttrs.format)) {
-                    flags |= Surface.OPAQUE;
-                }
-                mSurface = new Surface(
-                        mSession.mSurfaceSession, mSession.mPid,
-                        mAttrs.getTitle().toString(),
-                        0, w, h, format, flags);
-                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
-                        "  CREATE SURFACE "
-                        + mSurface + " IN SESSION "
-                        + mSession.mSurfaceSession
-                        + ": pid=" + mSession.mPid + " format="
-                        + mAttrs.format + " flags=0x"
-                        + Integer.toHexString(flags)
-                        + " / " + this);
-            } catch (Surface.OutOfResourcesException e) {
-                Slog.w(WindowManagerService.TAG, "OutOfResourcesException creating surface");
-                mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
-                return null;
-            } catch (Exception e) {
-                Slog.e(WindowManagerService.TAG, "Exception creating surface", e);
-                return null;
-            }
-
-            if (WindowManagerService.localLOGV) Slog.v(
-                WindowManagerService.TAG, "Got surface: " + mSurface
-                + ", set left=" + mFrame.left + " top=" + mFrame.top
-                + ", animLayer=" + mAnimLayer);
-            if (SHOW_LIGHT_TRANSACTIONS) {
-                Slog.i(WindowManagerService.TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
-                WindowManagerService.logSurface(this, "CREATE pos=(" + mFrame.left
-                        + "," + mFrame.top + ") (" +
-                        mCompatFrame.width() + "x" + mCompatFrame.height() + "), layer=" +
-                        mAnimLayer + " HIDE", null);
-            }
-            Surface.openTransaction();
-            try {
-                try {
-                    mSurfaceX = mFrame.left + mXOffset;
-                    mSurfaceY = mFrame.top + mYOffset;
-                    mSurface.setPosition(mSurfaceX, mSurfaceY);
-                    mSurfaceLayer = mAnimLayer;
-                    mSurface.setLayer(mAnimLayer);
-                    mSurfaceShown = false;
-                    mSurface.hide();
-                    if ((mAttrs.flags&WindowManager.LayoutParams.FLAG_DITHER) != 0) {
-                        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(this, "DITHER", null);
-                        mSurface.setFlags(Surface.SURFACE_DITHER,
-                                Surface.SURFACE_DITHER);
-                    }
-                } catch (RuntimeException e) {
-                    Slog.w(WindowManagerService.TAG, "Error creating surface in " + w, e);
-                    mService.reclaimSomeSurfaceMemoryLocked(this, "create-init", true);
-                }
-                mLastHidden = true;
-            } finally {
-                Surface.closeTransaction();
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
-                        "<<< CLOSE TRANSACTION createSurfaceLocked");
-            }
-            if (WindowManagerService.localLOGV) Slog.v(
-                    WindowManagerService.TAG, "Created surface " + this);
-        }
-        return mSurface;
-    }
-
-    void destroySurfaceLocked() {
-        if (mAppToken != null && this == mAppToken.startingWindow) {
-            mAppToken.startingDisplayed = false;
-        }
-
-        if (mSurface != null) {
-            mDrawPending = false;
-            mCommitDrawPending = false;
-            mReadyToShow = false;
-
-            int i = mChildWindows.size();
-            while (i > 0) {
-                i--;
-                WindowState c = mChildWindows.get(i);
-                c.mAttachedHidden = true;
-            }
-
-            if (mReportDestroySurface) {
-                mReportDestroySurface = false;
-                mSurfacePendingDestroy = true;
-                try {
-                    mClient.dispatchGetNewSurface();
-                    // We'll really destroy on the next time around.
-                    return;
-                } catch (RemoteException e) {
-                }
-            }
-
-            try {
-                if (DEBUG_VISIBILITY) {
-                    RuntimeException e = null;
-                    if (!WindowManagerService.HIDE_STACK_CRAWLS) {
-                        e = new RuntimeException();
-                        e.fillInStackTrace();
-                    }
-                    Slog.w(WindowManagerService.TAG, "Window " + this + " destroying surface "
-                            + mSurface + ", session " + mSession, e);
-                }
-                if (mSurfaceDestroyDeferred) {
-                    if (mSurface != null && mPendingDestroySurface != mSurface) {
-                        if (mPendingDestroySurface != null) {
-                            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                                RuntimeException e = null;
-                                if (!WindowManagerService.HIDE_STACK_CRAWLS) {
-                                    e = new RuntimeException();
-                                    e.fillInStackTrace();
-                                }
-                                WindowManagerService.logSurface(this, "DESTROY PENDING", e);
-                            }
-                            mPendingDestroySurface.destroy();
-                        }
-                        mPendingDestroySurface = mSurface;
-                    }
-                } else {
-                    if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                        RuntimeException e = null;
-                        if (!WindowManagerService.HIDE_STACK_CRAWLS) {
-                            e = new RuntimeException();
-                            e.fillInStackTrace();
-                        }
-                        WindowManagerService.logSurface(this, "DESTROY", e);
-                    }
-                    mSurface.destroy();
-                }
-            } catch (RuntimeException e) {
-                Slog.w(WindowManagerService.TAG, "Exception thrown when destroying Window " + this
-                    + " surface " + mSurface + " session " + mSession
-                    + ": " + e.toString());
-            }
-
-            mSurfaceShown = false;
-            mSurface = null;
-        }
-    }
-
-    void destroyDeferredSurfaceLocked() {
-        try {
-            if (mPendingDestroySurface != null) {
-                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                    RuntimeException e = null;
-                    if (!WindowManagerService.HIDE_STACK_CRAWLS) {
-                        e = new RuntimeException();
-                        e.fillInStackTrace();
-                    }
-                    mService.logSurface(this, "DESTROY PENDING", e);
-                }
-                mPendingDestroySurface.destroy();
-            }
-        } catch (RuntimeException e) {
-            Slog.w(WindowManagerService.TAG, "Exception thrown when destroying Window "
-                    + this + " surface " + mPendingDestroySurface
-                    + " session " + mSession + ": " + e.toString());
-        }
-        mSurfaceDestroyDeferred = false;
-        mPendingDestroySurface = null;
-    }
-
     boolean finishDrawingLocked() {
         if (mDrawPending) {
             if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) Slog.v(
-                WindowManagerService.TAG, "finishDrawingLocked: " + this + " in " + mSurface);
+                WindowManagerService.TAG, "finishDrawingLocked: " + this + " in "
+                        + mWinAnimator.mSurface);
             mCommitDrawPending = true;
             mDrawPending = false;
             return true;
@@ -880,93 +623,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final boolean starting = mAttrs.type == TYPE_APPLICATION_STARTING;
         final AppWindowToken atoken = mAppToken;
         if (atoken == null || atoken.allDrawn || starting) {
-            performShowLocked();
-        }
-        return true;
-    }
-
-    // This must be called while inside a transaction.
-    boolean performShowLocked() {
-        if (DEBUG_VISIBILITY) {
-            RuntimeException e = null;
-            if (!WindowManagerService.HIDE_STACK_CRAWLS) {
-                e = new RuntimeException();
-                e.fillInStackTrace();
-            }
-            Slog.v(WindowManagerService.TAG, "performShow on " + this
-                    + ": readyToShow=" + mReadyToShow + " readyForDisplay=" + isReadyForDisplay()
-                    + " starting=" + (mAttrs.type == TYPE_APPLICATION_STARTING), e);
-        }
-        if (mReadyToShow && isReadyForDisplay()) {
-            if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) WindowManagerService.logSurface(this,
-                    "SHOW (performShowLocked)", null);
-            if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Showing " + this
-                    + " during animation: policyVis=" + mPolicyVisibility
-                    + " attHidden=" + mAttachedHidden
-                    + " tok.hiddenRequested="
-                    + (mAppToken != null ? mAppToken.hiddenRequested : false)
-                    + " tok.hidden="
-                    + (mAppToken != null ? mAppToken.hidden : false)
-                    + " animating=" + mWinAnimator.mAnimating
-                    + " tok animating="
-                    + (mAppToken != null ? mAppToken.animating : false));
-            if (!mService.showSurfaceRobustlyLocked(this)) {
-                return false;
-            }
-            
-            mService.enableScreenIfNeededLocked();
-
-            applyEnterAnimationLocked();
-
-            mLastAlpha = -1;
-            mHasDrawn = true;
-            mLastHidden = false;
-            mReadyToShow = false;
-
-            int i = mChildWindows.size();
-            while (i > 0) {
-                i--;
-                WindowState c = mChildWindows.get(i);
-                if (c.mAttachedHidden) {
-                    c.mAttachedHidden = false;
-                    if (c.mSurface != null) {
-                        c.performShowLocked();
-                        // It hadn't been shown, which means layout not
-                        // performed on it, so now we want to make sure to
-                        // do a layout.  If called from within the transaction
-                        // loop, this will cause it to restart with a new
-                        // layout.
-                        mService.mLayoutNeeded = true;
-                    }
-                }
-            }
-
-            if (mAttrs.type != TYPE_APPLICATION_STARTING
-                    && mAppToken != null) {
-                mAppToken.firstWindowDrawn = true;
-
-                if (mAppToken.startingData != null) {
-                    if (WindowManagerService.DEBUG_STARTING_WINDOW ||
-                            WindowManagerService.DEBUG_ANIM) Slog.v(WindowManagerService.TAG,
-                            "Finish starting " + mToken
-                            + ": first real window is shown, no animation");
-                    // If this initial window is animating, stop it -- we
-                    // will do an animation to reveal it from behind the
-                    // starting window, so there is no need for it to also
-                    // be doing its own stuff.
-                    if (mWinAnimator.mAnimation != null) {
-                        mWinAnimator.mAnimation.cancel();
-                        mWinAnimator.mAnimation = null;
-                        // Make sure we clean up the animation.
-                        mWinAnimator.mAnimating = true;
-                    }
-                    mService.mFinishedStarting.add(mAppToken);
-                    mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
-                }
-                mAppToken.updateReportedVisibilityLocked();
-            }
-        } else {
-            return false;
+            mWinAnimator.performShowLocked();
         }
         return true;
     }
@@ -988,150 +645,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
-    void computeShownFrameLocked() {
-        final boolean selfTransformation = mWinAnimator.mHasLocalTransformation;
-        Transformation attachedTransformation =
-                (mAttachedWindow != null && mAttachedWindow.mWinAnimator.mHasLocalTransformation)
-                ? mAttachedWindow.mWinAnimator.mTransformation : null;
-        Transformation appTransformation =
-                (mAppToken != null && mAppToken.hasTransformation)
-                ? mAppToken.transformation : null;
-
-        // Wallpapers are animated based on the "real" window they
-        // are currently targeting.
-        if (mAttrs.type == TYPE_WALLPAPER && mService.mLowerWallpaperTarget == null
-                && mService.mWallpaperTarget != null) {
-            if (mService.mWallpaperTarget.mWinAnimator.mHasLocalTransformation &&
-                    mService.mWallpaperTarget.mWinAnimator.mAnimation != null &&
-                    !mService.mWallpaperTarget.mWinAnimator.mAnimation.getDetachWallpaper()) {
-                attachedTransformation = mService.mWallpaperTarget.mWinAnimator.mTransformation;
-                if (WindowManagerService.DEBUG_WALLPAPER && attachedTransformation != null) {
-                    Slog.v(WindowManagerService.TAG, "WP target attached xform: " + attachedTransformation);
-                }
-            }
-            if (mService.mWallpaperTarget.mAppToken != null &&
-                    mService.mWallpaperTarget.mAppToken.hasTransformation &&
-                    mService.mWallpaperTarget.mAppToken.animation != null &&
-                    !mService.mWallpaperTarget.mAppToken.animation.getDetachWallpaper()) {
-                appTransformation = mService.mWallpaperTarget.mAppToken.transformation;
-                if (WindowManagerService.DEBUG_WALLPAPER && appTransformation != null) {
-                    Slog.v(WindowManagerService.TAG, "WP target app xform: " + appTransformation);
-                }
-            }
-        }
-
-        final boolean screenAnimation = mService.mAnimator.mScreenRotationAnimation != null
-                && mService.mAnimator.mScreenRotationAnimation.isAnimating();
-        if (selfTransformation || attachedTransformation != null
-                || appTransformation != null || screenAnimation) {
-            // cache often used attributes locally
-            final Rect frame = mFrame;
-            final float tmpFloats[] = mService.mTmpFloats;
-            final Matrix tmpMatrix = mTmpMatrix;
-
-            // Compute the desired transformation.
-            if (screenAnimation) {
-                // If we are doing a screen animation, the global rotation
-                // applied to windows can result in windows that are carefully
-                // aligned with each other to slightly separate, allowing you
-                // to see what is behind them.  An unsightly mess.  This...
-                // thing...  magically makes it call good: scale each window
-                // slightly (two pixels larger in each dimension, from the
-                // window's center).
-                final float w = frame.width();
-                final float h = frame.height();
-                if (w>=1 && h>=1) {
-                    tmpMatrix.setScale(1 + 2/w, 1 + 2/h, w/2, h/2);
-                } else {
-                    tmpMatrix.reset();
-                }
-            } else {
-                tmpMatrix.reset();
-            }
-            tmpMatrix.postScale(mGlobalScale, mGlobalScale);
-            if (selfTransformation) {
-                tmpMatrix.postConcat(mWinAnimator.mTransformation.getMatrix());
-            }
-            tmpMatrix.postTranslate(frame.left + mXOffset, frame.top + mYOffset);
-            if (attachedTransformation != null) {
-                tmpMatrix.postConcat(attachedTransformation.getMatrix());
-            }
-            if (appTransformation != null) {
-                tmpMatrix.postConcat(appTransformation.getMatrix());
-            }
-            if (screenAnimation) {
-                tmpMatrix.postConcat(
-                        mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getMatrix());
-            }
-
-            // "convert" it into SurfaceFlinger's format
-            // (a 2x2 matrix + an offset)
-            // Here we must not transform the position of the surface
-            // since it is already included in the transformation.
-            //Slog.i(TAG, "Transform: " + matrix);
-
-            mHaveMatrix = true;
-            tmpMatrix.getValues(tmpFloats);
-            mDsDx = tmpFloats[Matrix.MSCALE_X];
-            mDtDx = tmpFloats[Matrix.MSKEW_Y];
-            mDsDy = tmpFloats[Matrix.MSKEW_X];
-            mDtDy = tmpFloats[Matrix.MSCALE_Y];
-            float x = tmpFloats[Matrix.MTRANS_X];
-            float y = tmpFloats[Matrix.MTRANS_Y];
-            int w = frame.width();
-            int h = frame.height();
-            mShownFrame.set(x, y, x+w, y+h);
-
-            // Now set the alpha...  but because our current hardware
-            // can't do alpha transformation on a non-opaque surface,
-            // turn it off if we are running an animation that is also
-            // transforming since it is more important to have that
-            // animation be smooth.
-            mShownAlpha = mAlpha;
-            if (!mService.mLimitedAlphaCompositing
-                    || (!PixelFormat.formatHasAlpha(mAttrs.format)
-                    || (isIdentityMatrix(mDsDx, mDtDx, mDsDy, mDtDy)
-                            && x == frame.left && y == frame.top))) {
-                //Slog.i(TAG, "Applying alpha transform");
-                if (selfTransformation) {
-                    mShownAlpha *= mWinAnimator.mTransformation.getAlpha();
-                }
-                if (attachedTransformation != null) {
-                    mShownAlpha *= attachedTransformation.getAlpha();
-                }
-                if (appTransformation != null) {
-                    mShownAlpha *= appTransformation.getAlpha();
-                }
-                if (screenAnimation) {
-                    mShownAlpha *=
-                        mService.mAnimator.mScreenRotationAnimation.getEnterTransformation().getAlpha();
-                }
-            } else {
-                //Slog.i(TAG, "Not applying alpha transform");
-            }
-
-            if (WindowManagerService.localLOGV) Slog.v(
-                WindowManagerService.TAG, "computeShownFrameLocked: Animating " + this +
-                ": " + mShownFrame +
-                ", alpha=" + mWinAnimator.mTransformation.getAlpha() + ", mShownAlpha=" + mShownAlpha);
-            return;
-        }
-
-        if (WindowManagerService.localLOGV) Slog.v(
-            WindowManagerService.TAG, "computeShownFrameLocked: " + this +
-            " not attached, mAlpha=" + mAlpha);
-        mShownFrame.set(mFrame);
-        if (mXOffset != 0 || mYOffset != 0) {
-            mShownFrame.offset(mXOffset, mYOffset);
-        }
-        mShownAlpha = mAlpha;
-        mHaveMatrix = false;
-        mDsDx = mGlobalScale;
-        mDtDx = 0;
-        mDsDy = 0;
-        mDtDy = mGlobalScale;
-    }
-
     /**
      * Is this window visible?  It is not visible if there is no
      * surface, or we are in the process of running an exit animation
@@ -1139,7 +652,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     public boolean isVisibleLw() {
         final AppWindowToken atoken = mAppToken;
-        return mSurface != null && mPolicyVisibility && !mAttachedHidden
+        return mWinAnimator.mSurface != null && mPolicyVisibility && !mAttachedHidden
                 && (atoken == null || !atoken.hiddenRequested)
                 && !mExiting && !mDestroying;
     }
@@ -1160,7 +673,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final AppWindowToken atoken = mAppToken;
         final boolean animating = atoken != null
                 ? (atoken.animation != null) : false;
-        return mSurface != null && !mDestroying && !mExiting
+        return mWinAnimator.mSurface != null && !mDestroying && !mExiting
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
                                 && !mRootToken.hidden)
@@ -1174,7 +687,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     public boolean isWinVisibleLw() {
         final AppWindowToken atoken = mAppToken;
-        return mSurface != null && mPolicyVisibility && !mAttachedHidden
+        return mWinAnimator.mSurface != null && mPolicyVisibility && !mAttachedHidden
                 && (atoken == null || !atoken.hiddenRequested || atoken.animating)
                 && !mExiting && !mDestroying;
     }
@@ -1184,7 +697,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * the associated app token, not the pending requested hidden state.
      */
     boolean isVisibleNow() {
-        return mSurface != null && mPolicyVisibility && !mAttachedHidden
+        return mWinAnimator.mSurface != null && mPolicyVisibility && !mAttachedHidden
                 && !mRootToken.hidden && !mExiting && !mDestroying;
     }
 
@@ -1204,7 +717,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean isVisibleOrAdding() {
         final AppWindowToken atoken = mAppToken;
-        return ((mSurface != null && !mReportDestroySurface)
+        return ((mWinAnimator.mSurface != null && !mWinAnimator.mReportDestroySurface)
                         || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
                 && mPolicyVisibility && !mAttachedHidden
                 && (atoken == null || !atoken.hiddenRequested)
@@ -1219,11 +732,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean isOnScreen() {
         final AppWindowToken atoken = mAppToken;
         if (atoken != null) {
-            return mSurface != null && mPolicyVisibility && !mDestroying
+            return mWinAnimator.mSurface != null && mPolicyVisibility && !mDestroying
                     && ((!mAttachedHidden && !atoken.hiddenRequested)
                             || mWinAnimator.mAnimation != null || atoken.animation != null);
         } else {
-            return mSurface != null && mPolicyVisibility && !mDestroying
+            return mWinAnimator.mSurface != null && mPolicyVisibility && !mDestroying
                     && (!mAttachedHidden || mWinAnimator.mAnimation != null);
         }
     }
@@ -1237,7 +750,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mService.mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             return false;
         }
-        return mSurface != null && mPolicyVisibility && !mDestroying
+        return mWinAnimator.mSurface != null && mPolicyVisibility && !mDestroying
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
                                 && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null
@@ -1271,7 +784,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * complete UI in to.
      */
     public boolean isDrawnLw() {
-        return mSurface != null && !mDestroying
+        return mWinAnimator.mSurface != null && !mDestroying
             && !mDrawPending && !mCommitDrawPending;
     }
 
@@ -1298,89 +811,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && (mAttachedWindow == null || !mAttachedWindow.shouldAnimateMove());
     }
 
-    void applyEnterAnimationLocked() {
-        final int transit;
-        if (mEnterAnimationPending) {
-            mEnterAnimationPending = false;
-            transit = WindowManagerPolicy.TRANSIT_ENTER;
-        } else {
-            transit = WindowManagerPolicy.TRANSIT_SHOW;
-        }
-
-        applyAnimationLocked(transit, true);
-    }
-
-    /**
-     * Choose the correct animation and set it to the passed WindowState.
-     * @param win The window to add the animation to.
-     * @param transit If WindowManagerPolicy.TRANSIT_PREVIEW_DONE and the app window has been drawn
-     *      then the animation will be app_starting_exit. Any other value loads the animation from
-     *      the switch statement below.
-     * @param isEntrance The animation type the last time this was called. Used to keep from
-     *      loading the same animation twice.
-     * @return true if an animation has been loaded.
-     */
-    boolean applyAnimationLocked(int transit, boolean isEntrance) {
-        if (mWinAnimator.mLocalAnimating &&
-                mWinAnimator.mAnimationIsEntrance == isEntrance) {
-            // If we are trying to apply an animation, but already running
-            // an animation of the same type, then just leave that one alone.
-            return true;
-        }
-
-        // Only apply an animation if the display isn't frozen.  If it is
-        // frozen, there is no reason to animate and it can cause strange
-        // artifacts when we unfreeze the display if some different animation
-        // is running.
-        if (mService.okToDisplay()) {
-            int anim = mPolicy.selectAnimationLw(this, transit);
-            int attr = -1;
-            Animation a = null;
-            if (anim != 0) {
-                a = AnimationUtils.loadAnimation(mContext, anim);
-            } else {
-                switch (transit) {
-                    case WindowManagerPolicy.TRANSIT_ENTER:
-                        attr = com.android.internal.R.styleable.WindowAnimation_windowEnterAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_EXIT:
-                        attr = com.android.internal.R.styleable.WindowAnimation_windowExitAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_SHOW:
-                        attr = com.android.internal.R.styleable.WindowAnimation_windowShowAnimation;
-                        break;
-                    case WindowManagerPolicy.TRANSIT_HIDE:
-                        attr = com.android.internal.R.styleable.WindowAnimation_windowHideAnimation;
-                        break;
-                }
-                if (attr >= 0) {
-                    a = mService.loadAnimation(mAttrs, attr);
-                }
-            }
-            if (WindowManagerService.DEBUG_ANIM) Slog.v(WindowManagerService.TAG,
-                    "applyAnimation: win=" + this
-                    + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
-                    + " mAnimation=" + mWinAnimator.mAnimation
-                    + " isEntrance=" + isEntrance);
-            if (a != null) {
-                if (WindowManagerService.DEBUG_ANIM) {
-                    RuntimeException e = null;
-                    if (!WindowManagerService.HIDE_STACK_CRAWLS) {
-                        e = new RuntimeException();
-                        e.fillInStackTrace();
-                    }
-                    Slog.v(WindowManagerService.TAG, "Loaded animation " + a + " for " + this, e);
-                }
-                mWinAnimator.setAnimation(a);
-                mWinAnimator.mAnimationIsEntrance = isEntrance;
-            }
-        } else {
-            mWinAnimator.clearAnimation();
-        }
-
-        return mWinAnimator.mAnimation != null;
-    }
-
     boolean isFullscreen(int screenWidth, int screenHeight) {
         return mFrame.left <= 0 && mFrame.top <= 0 &&
                 mFrame.right >= screenWidth && mFrame.bottom >= screenHeight;
@@ -1393,8 +823,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(WindowManagerService.TAG, "Removing " + this + " from " + mAttachedWindow);
             mAttachedWindow.mChildWindows.remove(this);
         }
-        destroyDeferredSurfaceLocked();
-        destroySurfaceLocked();
+        mWinAnimator.destroyDeferredSurfaceLocked();
+        mWinAnimator.destroySurfaceLocked();
         mSession.windowRemovedLocked();
         try {
             mClient.asBinder().unlinkToDeath(mDeathRecipient, 0);
@@ -1477,7 +907,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mPolicyVisibility = true;
         mPolicyVisibilityAfterAnim = true;
         if (doAnimation) {
-            applyAnimationLocked(WindowManagerPolicy.TRANSIT_ENTER, true);
+            mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_ENTER, true);
         }
         if (requestAnim) {
             mService.scheduleAnimationLocked();
@@ -1502,7 +932,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
         if (doAnimation) {
-            applyAnimationLocked(WindowManagerPolicy.TRANSIT_EXIT, false);
+            mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_EXIT, false);
             if (mWinAnimator.mAnimation == null) {
                 doAnimation = false;
             }
@@ -1582,24 +1012,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" mAnimLayer="); pw.print(mLayer); pw.print("+");
                     pw.print((mTargetAppToken != null ? mTargetAppToken.animLayerAdjustment
                           : (mAppToken != null ? mAppToken.animLayerAdjustment : 0)));
-                    pw.print("="); pw.print(mAnimLayer);
-                    pw.print(" mLastLayer="); pw.println(mLastLayer);
-        }
-        if (mSurface != null) {
-            if (dumpAll) {
-                pw.print(prefix); pw.print("mSurface="); pw.println(mSurface);
-            }
-            pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);
-                    pw.print(" layer="); pw.print(mSurfaceLayer);
-                    pw.print(" alpha="); pw.print(mSurfaceAlpha);
-                    pw.print(" rect=("); pw.print(mSurfaceX);
-                    pw.print(","); pw.print(mSurfaceY);
-                    pw.print(") "); pw.print(mSurfaceW);
-                    pw.print(" x "); pw.println(mSurfaceH);
-        }
-        if (mPendingDestroySurface != null) {
-            pw.print(prefix); pw.print("mPendingDestroySurface=");
-                    pw.println(mPendingDestroySurface);
+                    pw.print("="); pw.print(mWinAnimator.mAnimLayer);
+                    pw.print(" mLastLayer="); pw.println(mWinAnimator.mLastLayer);
         }
         if (dumpAll) {
             pw.print(prefix); pw.print("mToken="); pw.println(mToken);
@@ -1629,10 +1043,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (!mRelayoutCalled || mLayoutNeeded) {
             pw.print(prefix); pw.print("mRelayoutCalled="); pw.print(mRelayoutCalled);
                     pw.print(" mLayoutNeeded="); pw.println(mLayoutNeeded);
-        }
-        if (mSurfaceResized || mSurfaceDestroyDeferred) {
-            pw.print(prefix); pw.print("mSurfaceResized="); pw.print(mSurfaceResized);
-                    pw.print(" mSurfaceDestroyDeferred="); pw.println(mSurfaceDestroyDeferred);
         }
         if (mXOffset != 0 || mYOffset != 0) {
             pw.print(prefix); pw.print("Offsets x="); pw.print(mXOffset);
@@ -1679,18 +1089,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.println();
         }
         mWinAnimator.dump(pw, prefix, dumpAll);
-        if (mShownAlpha != 1 || mAlpha != 1 || mLastAlpha != 1) {
-            pw.print(prefix); pw.print("mShownAlpha="); pw.print(mShownAlpha);
-                    pw.print(" mAlpha="); pw.print(mAlpha);
-                    pw.print(" mLastAlpha="); pw.println(mLastAlpha);
-        }
-        if (mHaveMatrix || mGlobalScale != 1) {
-            pw.print(prefix); pw.print("mGlobalScale="); pw.print(mGlobalScale);
-                    pw.print(" mDsDx="); pw.print(mDsDx);
-                    pw.print(" mDtDx="); pw.print(mDtDx);
-                    pw.print(" mDsDy="); pw.print(mDsDy);
-                    pw.print(" mDtDy="); pw.println(mDtDy);
-        }
         if (dumpAll) {
             pw.print(prefix); pw.print("mDrawPending="); pw.print(mDrawPending);
                     pw.print(" mCommitDrawPending="); pw.print(mCommitDrawPending);

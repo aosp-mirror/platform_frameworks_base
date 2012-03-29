@@ -85,17 +85,18 @@ class DimAnimator {
      * {@link #updateSurface} after all windows are examined.
      */
     void updateParameters(Resources res, WindowState w, long currentTime) {
-        mDimSurface.setLayer(w.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM);
+        final WindowStateAnimator winAnimator = w.mWinAnimator;
+        mDimSurface.setLayer(winAnimator.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM);
 
         final float target = w.mExiting ? 0 : w.mAttrs.dimAmount;
-        if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DIM " + mDimSurface
-                + ": layer=" + (w.mAnimLayer-1) + " target=" + target);
+        if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DIM "
+                + mDimSurface + ": layer=" + (winAnimator.mAnimLayer-1) + " target=" + target);
         if (mDimTargetAlpha != target) {
             // If the desired dim level has changed, then
             // start an animation to it.
             mLastDimAnimTime = currentTime;
-            long duration = (w.mWinAnimator.mAnimating && w.mWinAnimator.mAnimation != null)
-                    ? w.mWinAnimator.mAnimation.computeDurationHint()
+            long duration = (winAnimator.mAnimating && winAnimator.mAnimation != null)
+                    ? winAnimator.mAnimation.computeDurationHint()
                     : WindowManagerService.DEFAULT_DIM_DURATION;
             if (target > mDimTargetAlpha) {
                 TypedValue tv = new TypedValue();
