@@ -256,6 +256,8 @@ public final class Ndef extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @return the NDEF Message, can be null
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
