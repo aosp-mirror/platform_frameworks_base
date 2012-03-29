@@ -1883,8 +1883,6 @@ public class MediaPlayer
               return;
 
             case MEDIA_ERROR:
-                // For PV specific error values (msg.arg2) look in
-                // opencore/pvmi/pvmf/include/pvmf_return_codes.h
                 Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
                 boolean error_was_handled = false;
                 if (mOnErrorListener != null) {
