@@ -47,7 +47,16 @@ parent.link=../browser.html?tag=article
   <dt><a href="{@docRoot}resources/articles/glsurfaceview.html">Introducing GLSurfaceView</a></dt>
   <dd>This article provides an overview of GLSurfaceView, a class that makes it easy to implement 2D or 3D OpenGL rendering inside of an Android application.</dd>
 </dl>
-
+<dl>
+    <dt>
+        <a href="{@docRoot}resources/articles/spell-checker-framework.jd">
+        Using the Spell Checker Framework</a>
+    </dt>
+    <dd>
+        This article describes how to use the Spell Checker Framework to check spelling in
+        various ways in your application.
+    </dd>
+</dl>
 <dl>
   <dt><a href="{@docRoot}resources/articles/layout-tricks-reuse.html">Layout Tricks: Creating Reusable UI Components</a></dt>
   <dd>Learn how to combine multiple standard UI widgets into a single high-level component, which can be reused throughout your application.</dd>
@@ -149,7 +158,7 @@ parent.link=../browser.html?tag=article
 </dl>
 
 <dl>
-  <dt><a href="{@docRoot}resources/articles/window-bg-speed.html">Window Backgrounds & UI Speed</a></dt>
+  <dt><a href="{@docRoot}resources/articles/window-bg-speed.html">Window Backgrounds &amp; UI Speed</a></dt>
   <dd>Some Android applications need to squeeze every bit of performance out of the UI toolkit and there are many ways to do so. In this article, you will discover how to speed up the drawing and the perceived startup time of your activities. Both of these techniques rely on a single feature, the window's background drawable.</dd>
 </dl>
 
