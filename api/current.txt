@@ -25470,10 +25470,12 @@ package android.webkit {
     method public void setMimeType(java.lang.String);
   }
 
-  public class WebSettings {
+  public abstract class WebSettings {
     method public boolean enableSmoothTransition();
     method public boolean getAllowContentAccess();
     method public boolean getAllowFileAccess();
+    method public abstract boolean getAllowFileAccessFromFileURLs();
+    method public abstract boolean getAllowUniversalAccessFromFileURLs();
     method public synchronized boolean getBlockNetworkImage();
     method public synchronized boolean getBlockNetworkLoads();
     method public boolean getBuiltInZoomControls();
@@ -25515,6 +25517,8 @@ package android.webkit {
     method public synchronized java.lang.String getUserAgentString();
     method public void setAllowContentAccess(boolean);
     method public void setAllowFileAccess(boolean);
+    method public abstract void setAllowFileAccessFromFileURLs(boolean);
+    method public abstract void setAllowUniversalAccessFromFileURLs(boolean);
     method public synchronized void setAppCacheEnabled(boolean);
     method public synchronized void setAppCacheMaxSize(long);
     method public synchronized void setAppCachePath(java.lang.String);
