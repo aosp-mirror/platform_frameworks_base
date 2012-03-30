@@ -393,8 +393,8 @@ class AppWindowToken extends WindowToken {
                 if (!win.isDrawnLw()) {
                     Slog.v(WindowManagerService.TAG, "Not displayed: s=" + win.mWinAnimator.mSurface
                             + " pv=" + win.mPolicyVisibility
-                            + " dp=" + win.mDrawPending
-                            + " cdp=" + win.mCommitDrawPending
+                            + " dp=" + win.mWinAnimator.mDrawPending
+                            + " cdp=" + win.mWinAnimator.mCommitDrawPending
                             + " ah=" + win.mAttachedHidden
                             + " th="
                             + (win.mAppToken != null
