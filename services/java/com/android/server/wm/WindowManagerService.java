@@ -600,7 +600,6 @@ public class WindowManagerService extends IWindowManager.Stub
         private boolean mSyswin = false;
         private float mScreenBrightness = -1;
         private float mButtonBrightness = -1;
-        private boolean mUpdateRotation = false;
     }
     LayoutAndSurfaceFields mInnerFields = new LayoutAndSurfaceFields();
 
@@ -8575,17 +8574,17 @@ public class WindowManagerService extends IWindowManager.Stub
             mTurnOnScreen = false;
         }
 
-        if (mInnerFields.mUpdateRotation) {
+        if (mAnimator.mUpdateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
             if (updateRotationUncheckedLocked(false)) {
                 mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
             } else {
-                mInnerFields.mUpdateRotation = false;
+                mAnimator.mUpdateRotation = false;
             }
         }
 
         if (mInnerFields.mOrientationChangeComplete && !mLayoutNeeded &&
-                !mInnerFields.mUpdateRotation) {
+                !mAnimator.mUpdateRotation) {
             checkDrawnWindowsLocked();
         }
 
@@ -8924,11 +8923,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 mAnimator.mScreenRotationAnimation.kill();
                 mAnimator.mScreenRotationAnimation = null;
             }
-            if (mAnimator.mScreenRotationAnimation == null) {
-                mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
-                        mFxSession, inTransaction, mCurDisplayWidth, mCurDisplayHeight,
-                        mDisplay.getRotation());
-            }
+
+            mAnimator.mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
+                    mFxSession, inTransaction, mCurDisplayWidth, mCurDisplayHeight,
+                    mDisplay.getRotation());
+
             if (!mAnimator.mScreenRotationAnimation.hasScreenshot()) {
                 Surface.freezeDisplay(0);
             }
@@ -8943,6 +8942,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (mWaitingForConfig || mAppsFreezingScreen > 0 || mWindowsFreezingScreen) {
+            if (DEBUG_ORIENTATION) Slog.d(TAG,
+                "stopFreezingDisplayLocked: Returning mWaitingForConfig=" + mWaitingForConfig
+                + ", mAppsFreezingScreen=" + mAppsFreezingScreen
+                + ", mWindowsFreezingScreen=" + mWindowsFreezingScreen);
             return;
         }
         
