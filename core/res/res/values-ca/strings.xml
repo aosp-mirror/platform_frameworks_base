@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Introdueix un PUK compost com a mínim de 8 nombres."</string>
     <string name="needPuk" msgid="919668385956251611">"La targeta SIM està bloquejada pel PUK. Escriviu el codi PUK per desbloquejar-la."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Escriviu el PUK2 per desbloquejar la targeta SIM."</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"Identificació de trucada entrant"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Identificació de trucada de sortida"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Desviació de trucades"</string>

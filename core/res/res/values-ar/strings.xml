@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"اكتب رمز PUK مكونًا من 8 أرقام أو أكثر."</string>
     <string name="needPuk" msgid="919668385956251611">"بطاقة SIM مؤمّنة بكود PUK. اكتب كود PUK لإلغاء تأمينها."</string>
     <string name="needPuk2" msgid="4526033371987193070">"اكتب PUK2 لإلغاء تأمين بطاقة SIM."</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"معرف المتصل الوارد"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"معرف المتصل الصادر"</string>
     <string name="CfMmi" msgid="5123218989141573515">"إعادة توجيه الاتصال"</string>

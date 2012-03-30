@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Type a PUK that is 8 numbers or longer."</string>
     <string name="needPuk" msgid="919668385956251611">"Your SIM card is PUK-locked. Type the PUK code to unlock it."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Type PUK2 to unblock SIM card."</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"Incoming Caller ID"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Outgoing Caller ID"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Call forwarding"</string>

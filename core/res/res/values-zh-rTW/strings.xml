@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"輸入 8 位數以上的 PUK。"</string>
     <string name="needPuk" msgid="919668385956251611">"SIM 卡的 PUK 已鎖定。請輸入 PUK 碼解除鎖定。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"請輸入 PUK2 以解鎖 SIM 卡。"</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"來電顯示"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"本機號碼"</string>
     <string name="CfMmi" msgid="5123218989141573515">"來電轉接"</string>

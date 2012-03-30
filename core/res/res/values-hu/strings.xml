@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"8 számjegyű vagy hosszabb PUK kódot írjon be."</string>
     <string name="needPuk" msgid="919668385956251611">"A SIM-kártya le van zárva a PUK-kóddal. A feloldáshoz adja meg a PUK-kódot."</string>
     <string name="needPuk2" msgid="4526033371987193070">"A SIM-kártya feloldásához adja meg a PUK2-kódot."</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"Beérkező hívóazonosító"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Kimenő hívóazonosító"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Hívásátirányítás"</string>

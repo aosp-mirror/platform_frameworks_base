@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Mag-type ng PUK na may 8 numbero o mas mahaba."</string>
     <string name="needPuk" msgid="919668385956251611">"Na-PUK-lock ang iyong SIM card. I-type ang PUK code upang i-unlock ito."</string>
     <string name="needPuk2" msgid="4526033371987193070">"I-type ang PUK2 upang i-unblock ang SIM card."</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"Papasok na Caller ID"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Papalabas na Caller ID"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Pagpapasa ng tawag"</string>
