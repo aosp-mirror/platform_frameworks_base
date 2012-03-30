@@ -4056,9 +4056,13 @@ public final class ViewRootImpl implements ViewParent,
                 mChoreographer.removeCallbacks(Choreographer.CALLBACK_INPUT,
                         mConsumedBatchedInputRunnable, null);
             }
-            if (mInputEventReceiver != null) {
-                mInputEventReceiver.consumeBatchedInputEvents();
-            }
+        }
+
+        // Always consume batched input events even if not scheduled, because there
+        // might be new input there waiting for us that we have no noticed yet because
+        // the Looper has not had a chance to run again.
+        if (mInputEventReceiver != null) {
+            mInputEventReceiver.consumeBatchedInputEvents();
         }
     }
 
