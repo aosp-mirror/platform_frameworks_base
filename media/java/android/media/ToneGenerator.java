@@ -875,6 +875,15 @@ public class ToneGenerator
 
     private native final void native_finalize();
 
+    /**
+    * Returns the audio session ID.
+    *
+    * @return the ID of the audio session this ToneGenerator belongs to or 0 if an error
+    * occured.
+    * @hide
+    */
+    public native final int getAudioSessionId();
+
     @Override
     protected void finalize() { native_finalize(); }
 

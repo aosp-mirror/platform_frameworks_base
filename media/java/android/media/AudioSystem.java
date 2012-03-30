@@ -311,6 +311,10 @@ public class AudioSystem
     public static final int FOR_DOCK = 3;
     private static final int NUM_FORCE_USE = 4;
 
+    // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
+    public static final int SYNC_EVENT_NONE = 0;
+    public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1;
+
     public static native int setDeviceConnectionState(int device, int state, String device_address);
     public static native int getDeviceConnectionState(int device, String device_address);
     public static native int setPhoneState(int state);
