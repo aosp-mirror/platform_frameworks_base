@@ -3877,7 +3877,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private void scrollLayerTo(int x, int y) {
         int dx = mScrollingLayerRect.left - x;
         int dy = mScrollingLayerRect.top - y;
-        if (dx == 0 && y == 0) {
+        if (dx == 0 && dy == 0) {
             return;
         }
         if (mSelectingText) {
