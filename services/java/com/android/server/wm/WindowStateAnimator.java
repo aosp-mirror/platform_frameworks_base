@@ -554,7 +554,7 @@ class WindowStateAnimator {
                 mPendingDestroySurface.destroy();
             }
         } catch (RuntimeException e) {
-            Slog.w(WindowManagerService.TAG, "Exception thrown when destroying Window "
+            Slog.w(TAG, "Exception thrown when destroying Window "
                     + this + " surface " + mPendingDestroySurface
                     + " session " + mSession + ": " + e.toString());
         }
@@ -705,6 +705,7 @@ class WindowStateAnimator {
         mDsDy = 0;
         mDtDy = mWin.mGlobalScale;
     }
+
     public void prepareSurfaceLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
         if (mSurface == null) {
@@ -892,7 +893,7 @@ class WindowStateAnimator {
                 e = new RuntimeException();
                 e.fillInStackTrace();
             }
-            Slog.v(WindowManagerService.TAG, "performShow on " + this
+            Slog.v(TAG, "performShow on " + this
                     + ": readyToShow=" + mWin.mReadyToShow + " readyForDisplay="
                     + mWin.isReadyForDisplay()
                     + " starting=" + (mWin.mAttrs.type == TYPE_APPLICATION_STARTING), e);
@@ -900,7 +901,7 @@ class WindowStateAnimator {
         if (mWin.mReadyToShow && mWin.isReadyForDisplay()) {
             if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION)
                 WindowManagerService.logSurface(mWin, "SHOW (performShowLocked)", null);
-            if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Showing " + this
+            if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
                     + " during animation: policyVis=" + mWin.mPolicyVisibility
                     + " attHidden=" + mWin.mAttachedHidden
                     + " tok.hiddenRequested="
@@ -947,7 +948,7 @@ class WindowStateAnimator {
 
                 if (mWin.mAppToken.startingData != null) {
                     if (WindowManagerService.DEBUG_STARTING_WINDOW ||
-                            WindowManagerService.DEBUG_ANIM) Slog.v(WindowManagerService.TAG,
+                            WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
                             "Finish starting " + mWin.mToken
                             + ": first real window is shown, no animation");
                     // If this initial window is animating, stop it -- we
@@ -1059,7 +1060,7 @@ class WindowStateAnimator {
                     a = mService.loadAnimation(mWin.mAttrs, attr);
                 }
             }
-            if (WindowManagerService.DEBUG_ANIM) Slog.v(WindowManagerService.TAG,
+            if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation: win=" + this
                     + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
                     + " mAnimation=" + mAnimation
@@ -1071,7 +1072,7 @@ class WindowStateAnimator {
                         e = new RuntimeException();
                         e.fillInStackTrace();
                     }
-                    Slog.v(WindowManagerService.TAG, "Loaded animation " + a + " for " + this, e);
+                    Slog.v(TAG, "Loaded animation " + a + " for " + this, e);
                 }
                 setAnimation(a);
                 mAnimationIsEntrance = isEntrance;

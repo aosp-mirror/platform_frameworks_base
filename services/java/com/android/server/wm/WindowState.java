@@ -24,8 +24,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-import com.android.server.wm.WindowManagerService.H;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
@@ -40,15 +38,10 @@ import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IWindow;
 import android.view.InputChannel;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
-import android.view.WindowManager.LayoutParams;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Transformation;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -57,6 +50,8 @@ import java.util.ArrayList;
  * A window in the window manager.
  */
 final class WindowState implements WindowManagerPolicy.WindowState {
+    static final String TAG = "WindowState";
+    
     static final boolean DEBUG_VISIBILITY = WindowManagerService.DEBUG_VISIBILITY;
     static final boolean SHOW_TRANSACTIONS = WindowManagerService.SHOW_TRANSACTIONS;
     static final boolean SHOW_LIGHT_TRANSACTIONS = WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
@@ -276,7 +271,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mSeq = seq;
         mEnforceSizeCompat = (mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
         if (WindowManagerService.localLOGV) Slog.v(
-            WindowManagerService.TAG, "Window " + this + " client=" + c.asBinder()
+            TAG, "Window " + this + " client=" + c.asBinder()
             + " token=" + token + " (" + mAttrs.token + ")");
         try {
             c.asBinder().linkToDeath(deathRecipient, 0);
@@ -304,7 +299,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     + WindowManagerService.TYPE_LAYER_OFFSET;
             mSubLayer = mPolicy.subWindowTypeToLayerLw(a.type);
             mAttachedWindow = attachedWindow;
-            if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(WindowManagerService.TAG, "Adding " + this + " to " + mAttachedWindow);
+            if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + mAttachedWindow);
             mAttachedWindow.mChildWindows.add(this);
             mLayoutAttached = mAttrs.type !=
                     WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -358,7 +353,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     void attach() {
         if (WindowManagerService.localLOGV) Slog.v(
-            WindowManagerService.TAG, "Attaching " + this + " token=" + mToken
+            TAG, "Attaching " + this + " token=" + mToken
             + ", list=" + mToken.windows);
         mSession.windowAddedLocked();
     }
@@ -496,7 +491,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (WindowManagerService.localLOGV) {
             //if ("com.google.android.youtube".equals(mAttrs.packageName)
             //        && mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
-                Slog.v(WindowManagerService.TAG, "Resolving (mRequestedWidth="
+                Slog.v(TAG, "Resolving (mRequestedWidth="
                         + mRequestedWidth + ", mRequestedheight="
                         + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
                         + "): frame=" + mFrame.toShortString()
@@ -600,10 +595,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null ? mAppToken.firstWindowDrawn : false;
     }
 
+    // TODO(cmautner): Move to WindowStateAnimator
     boolean finishDrawingLocked() {
         if (mDrawPending) {
             if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) Slog.v(
-                WindowManagerService.TAG, "finishDrawingLocked: " + this + " in "
+                TAG, "finishDrawingLocked: " + this + " in "
                         + mWinAnimator.mSurface);
             mCommitDrawPending = true;
             mDrawPending = false;
@@ -612,6 +608,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return false;
     }
 
+    // TODO(cmautner): Move to WindowStateAnimator
     // This must be called while inside a transaction.
     boolean commitFinishDrawingLocked(long currentTime) {
         //Slog.i(TAG, "commitFinishDrawingLocked: " + mSurface);
@@ -820,7 +817,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         disposeInputChannel();
         
         if (mAttachedWindow != null) {
-            if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(WindowManagerService.TAG, "Removing " + this + " from " + mAttachedWindow);
+            if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
             mAttachedWindow.mChildWindows.remove(this);
         }
         mWinAnimator.destroyDeferredSurfaceLocked();
@@ -859,7 +856,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             try {
                 synchronized(mService.mWindowMap) {
                     WindowState win = mService.windowForClientLocked(mSession, mClient, false);
-                    Slog.i(WindowManagerService.TAG, "WIN DEATH: " + win);
+                    Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
                         mService.removeWindowLocked(mSession, win);
                     }
@@ -891,9 +888,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // Already showing.
             return false;
         }
-        if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Policy visibility true: " + this);
+        if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility true: " + this);
         if (doAnimation) {
-            if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "doAnimation: mPolicyVisibility="
+            if (DEBUG_VISIBILITY) Slog.v(TAG, "doAnimation: mPolicyVisibility="
                     + mPolicyVisibility + " mAnimation=" + mWinAnimator.mAnimation);
             if (!mService.okToDisplay()) {
                 doAnimation = false;
@@ -940,7 +937,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (doAnimation) {
             mPolicyVisibilityAfterAnim = false;
         } else {
-            if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Policy visibility false: " + this);
+            if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility false: " + this);
             mPolicyVisibilityAfterAnim = false;
             mPolicyVisibility = false;
             // Window is no longer visible -- make sure if we were waiting
