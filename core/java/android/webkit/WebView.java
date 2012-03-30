@@ -1883,12 +1883,14 @@ public class WebView extends AbsoluteLayout
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(WebView.class.getName());
         mProvider.getViewDelegate().onInitializeAccessibilityNodeInfo(info);
     }
 
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
+        event.setClassName(WebView.class.getName());
         mProvider.getViewDelegate().onInitializeAccessibilityEvent(event);
     }
 
