@@ -1141,7 +1141,15 @@ class WifiConfigStore {
                 String varName = field.varName();
                 String value = field.value();
                 if (value != null) {
-                    if (field != config.eap && field != config.engine) {
+                    if (field == config.engine) {
+                        /*
+                         * If the field is declared as an integer, it must not
+                         * be null
+                         */
+                        if (value.length() == 0) {
+                            value = "0";
+                        }
+                    } else if (field != config.eap) {
                         value = (value.length() == 0) ? "NULL" : convertToQuotedString(value);
                     }
                     if (!mWifiNative.setNetworkVariable(
