@@ -934,6 +934,7 @@ package android {
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
     field public static final int supportsRtl = 16843688; // 0x10103a8
+    field public static final int supportsSentenceSpellCheck = 16843698; // 0x10103b2
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
@@ -25280,11 +25281,13 @@ package android.view.textservice {
     method public android.view.textservice.SpellCheckerInfo getSpellChecker();
     method public void getSuggestions(android.view.textservice.TextInfo, int);
     method public void getSuggestions(android.view.textservice.TextInfo[], int, boolean);
+    method public boolean isSentenceSpellCheckSupported();
     method public boolean isSessionDisconnected();
     field public static final java.lang.String SERVICE_META_DATA = "android.view.textservice.scs";
   }
 
   public static abstract interface SpellCheckerSession.SpellCheckerSessionListener {
+    method public abstract void onGetSentenceSuggestions(android.view.textservice.SentenceSuggestionsInfo[]);
     method public abstract void onGetSuggestions(android.view.textservice.SuggestionsInfo[]);
   }
 

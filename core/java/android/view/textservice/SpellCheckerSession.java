@@ -436,15 +436,15 @@ public class SpellCheckerSession {
      */
     public interface SpellCheckerSessionListener {
         /**
-         * Callback for {@link SpellCheckerSession#getSuggestions(TextInfo[], int, boolean)}
+         * Callback for {@link SpellCheckerSession#getSuggestions(TextInfo, int)}
+         * and {@link SpellCheckerSession#getSuggestions(TextInfo[], int, boolean)}
          * @param results an array of {@link SuggestionsInfo}s.
          * These results are suggestions for {@link TextInfo}s queried by
-         * {@link SpellCheckerSession#getSuggestions(TextInfo[], int, boolean)}.
+         * {@link SpellCheckerSession#getSuggestions(TextInfo, int)} or
+         * {@link SpellCheckerSession#getSuggestions(TextInfo[], int, boolean)}
          */
         public void onGetSuggestions(SuggestionsInfo[] results);
-        // TODO: Remove @hide as soon as the sample spell checker client gets fixed.
         /**
-         * @hide
          * Callback for {@link SpellCheckerSession#getSentenceSuggestions(TextInfo[], int)}
          * @param results an array of {@link SentenceSuggestionsInfo}s.
          * These results are suggestions for {@link TextInfo}s
@@ -494,7 +494,7 @@ public class SpellCheckerSession {
     }
 
     /**
-     * @hide
+     * @return true if the spell checker supports sentence level spell checking APIs
      */
     public boolean isSentenceSpellCheckSupported() {
         return mSubtype.containsExtraValueKey(SUPPORT_SENTENCE_SPELL_CHECK);

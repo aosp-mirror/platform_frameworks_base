@@ -2349,6 +2349,8 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity"/>
+        <!-- Set true when the spell checker supports sentence level spell checking. -->
+        <attr name="supportsSentenceSpellCheck" format="boolean" />
     </declare-styleable>
 
     <!-- This is the subtype of the spell checker. Subtype can describe locales (e.g. en_US, fr_FR...) -->
