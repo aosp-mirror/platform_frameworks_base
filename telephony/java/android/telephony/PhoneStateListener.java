@@ -22,6 +22,7 @@ import android.os.Message;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.CellLocation;
+import android.telephony.CellInfo;
 import android.util.Log;
 
 import com.android.internal.telephony.IPhoneStateListener;
@@ -156,6 +157,14 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_OTASP_CHANGED                            = 0x00000200;
 
+    /**
+     * Listen for changes to observed cell info.
+     *
+     * @see #onCellInfoChanged
+     * @hide pending API review
+     */
+    public static final int LISTEN_CELL_INFO = 0x00000400;
+
     public PhoneStateListener() {
     }
 
@@ -276,6 +285,20 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when a observed cell info gets changed.
+     *
+     * A notification should be sent when:
+     *     1. a cell is newly-observed.
+     *     2. a observed cell is not visible.
+     *     3. any of the cell info of a observed cell has changed.
+     *
+     * @hide pending API review
+     */
+    public void onCellInfoChanged(CellInfo cellInfo) {
+        // default implementation empty
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      */
@@ -323,6 +346,10 @@ public class PhoneStateListener {
         public void onOtaspChanged(int otaspMode) {
             Message.obtain(mHandler, LISTEN_OTASP_CHANGED, otaspMode, 0).sendToTarget();
         }
+
+        public void onCellInfoChanged(CellInfo cellInfo) {
+            Message.obtain(mHandler, LISTEN_CELL_INFO, 0, 0).sendToTarget();
+        }
     };
 
     Handler mHandler = new Handler() {
@@ -360,6 +387,8 @@ public class PhoneStateListener {
                 case LISTEN_OTASP_CHANGED:
                     PhoneStateListener.this.onOtaspChanged(msg.arg1);
                     break;
+                case LISTEN_CELL_INFO:
+                    PhoneStateListener.this.onCellInfoChanged((CellInfo)msg.obj);
             }
         }
     };

@@ -17,5 +17,4 @@
 
 package android.telephony;
 
-parcelable ServiceState;
-
+parcelable CellInfo;
