@@ -142,34 +142,34 @@ public class AudioGroup {
     private native void nativeSetMode(int mode);
 
     // Package-private method used by AudioStream.join().
-    synchronized void add(AudioStream stream, AudioCodec codec, int dtmfType) {
+    synchronized void add(AudioStream stream) {
         if (!mStreams.containsKey(stream)) {
             try {
-                int socket = stream.dup();
+                AudioCodec codec = stream.getCodec();
                 String codecSpec = String.format("%d %s %s", codec.type,
                         codec.rtpmap, codec.fmtp);
-                nativeAdd(stream.getMode(), socket,
+                int id = nativeAdd(stream.getMode(), stream.getSocket(),
                         stream.getRemoteAddress().getHostAddress(),
-                        stream.getRemotePort(), codecSpec, dtmfType);
-                mStreams.put(stream, socket);
+                        stream.getRemotePort(), codecSpec, stream.getDtmfType());
+                mStreams.put(stream, id);
             } catch (NullPointerException e) {
                 throw new IllegalStateException(e);
             }
         }
     }
 
-    private native void nativeAdd(int mode, int socket, String remoteAddress,
+    private native int nativeAdd(int mode, int socket, String remoteAddress,
             int remotePort, String codecSpec, int dtmfType);
 
     // Package-private method used by AudioStream.join().
     synchronized void remove(AudioStream stream) {
-        Integer socket = mStreams.remove(stream);
-        if (socket != null) {
-            nativeRemove(socket);
+        Integer id = mStreams.remove(stream);
+        if (id != null) {
+            nativeRemove(id);
         }
     }
 
-    private native void nativeRemove(int socket);
+    private native void nativeRemove(int id);
 
     /**
      * Sends a DTMF digit to every {@link AudioStream} in this group. Currently
@@ -192,15 +192,14 @@ public class AudioGroup {
      * Removes every {@link AudioStream} in this group.
      */
     public void clear() {
-        synchronized (this) {
-            mStreams.clear();
-            nativeRemove(-1);
+        for (AudioStream stream : getStreams()) {
+            stream.join(null);
         }
     }
 
     @Override
     protected void finalize() throws Throwable {
-        clear();
+        nativeRemove(0);
         super.finalize();
     }
 }
