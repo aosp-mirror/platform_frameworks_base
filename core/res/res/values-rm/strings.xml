@@ -57,6 +57,10 @@
     <skip />
     <string name="needPuk" msgid="919668385956251611">"Vossa carta SIM è bloccada cun in PUK. Endatai il PUK per debloccar ella."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Endatai il PUK2 per debloccar la carta SIM."</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"Numer dal telefonader (entrant)"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"ID dal telefonader per cloms sortints"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Renviament da clom"</string>

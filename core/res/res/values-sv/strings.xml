@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Ange en PUK-kod med minst 8 siffror."</string>
     <string name="needPuk" msgid="919668385956251611">"Ditt SIM-kort är PUK-låst. Ange PUK-koden om du vill låsa upp det."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Ange PUK2-koden för att häva spärren av SIM-kortet."</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"Nummerpresentatör för inkommande samtal"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Nummerpresentatör för utgående samtal"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Vidarebefordra samtal"</string>

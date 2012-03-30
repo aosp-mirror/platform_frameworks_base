@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"PUKは8桁以上で入力してください。"</string>
     <string name="needPuk" msgid="919668385956251611">"SIMカードはPUKでロックされています。ロックを解除するにはPUKコードを入力してください。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIMカードのロック解除のためPUK2を入力します。"</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"着信時の発信者番号"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"発信者番号"</string>
     <string name="CfMmi" msgid="5123218989141573515">"着信転送"</string>

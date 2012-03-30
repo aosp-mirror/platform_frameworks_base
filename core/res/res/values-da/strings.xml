@@ -50,6 +50,10 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Angiv en PUK-kode på 8 eller flere cifre."</string>
     <string name="needPuk" msgid="919668385956251611">"Dit SIM-kort er låst med PUK-koden. Indtast PUK-koden for at låse den op."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Indtast PUK2-koden for at låse op for SIM-kortet."</string>
+    <!-- no translation found for imei (2625429890869005782) -->
+    <skip />
+    <!-- no translation found for meid (4841221237681254195) -->
+    <skip />
     <string name="ClipMmi" msgid="6952821216480289285">"Indgående opkalds-id"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Udgående opkalds-id"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Viderestilling af opkald"</string>
