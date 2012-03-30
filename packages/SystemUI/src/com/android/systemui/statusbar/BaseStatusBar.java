@@ -249,7 +249,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     }
 
-    H createHandler() {
+    protected H createHandler() {
          return new H();
     }
 

@@ -696,7 +696,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     @Override
-    BaseStatusBar.H createHandler() {
+    protected BaseStatusBar.H createHandler() {
         return new TabletStatusBar.H();
     }
 

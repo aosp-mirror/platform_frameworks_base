@@ -1038,7 +1038,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override
-    BaseStatusBar.H createHandler() {
+    protected BaseStatusBar.H createHandler() {
         return new PhoneStatusBar.H();
     }
 
