@@ -75,7 +75,7 @@ import libcore.io.Libcore;
  * - the processDirectory() JNI method wraps the provided mediascanner client in a native
  *   'MyMediaScannerClient' class, then calls processDirectory() on the native MediaScanner
  *   object (which got created when the Java MediaScanner was created).
- * - native MediaScanner.processDirectory() (currently part of opencore) calls
+ * - native MediaScanner.processDirectory() calls
  *   doProcessDirectory(), which recurses over the folder, and calls
  *   native MyMediaScannerClient.scanFile() for every file whose extension matches.
  * - native MyMediaScannerClient.scanFile() calls back on Java MediaScannerClient.scanFile,
