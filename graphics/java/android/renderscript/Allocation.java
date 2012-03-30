@@ -365,7 +365,7 @@ public class Allocation extends BaseObj {
      * @hide
      *
      */
-    public void ioSendOutput() {
+    public void ioSend() {
         if ((mUsage & USAGE_IO_OUTPUT) == 0) {
             throw new RSIllegalArgumentException(
                 "Can only send buffer if IO_OUTPUT usage specified.");
@@ -375,12 +375,20 @@ public class Allocation extends BaseObj {
     }
 
     /**
+     * Delete once code is updated.
+     * @hide
+     */
+    public void ioSendOutput() {
+        ioSend();
+    }
+
+    /**
      * Receive the latest input into the Allocation.
      *
      * @hide
      *
      */
-    public void ioGetInput() {
+    public void ioReceive() {
         if ((mUsage & USAGE_IO_INPUT) == 0) {
             throw new RSIllegalArgumentException(
                 "Can only receive if IO_INPUT usage specified.");
