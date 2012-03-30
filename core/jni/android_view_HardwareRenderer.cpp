@@ -99,10 +99,26 @@ static void android_view_HardwareRenderer_disableVsync(JNIEnv* env, jobject claz
 // Tracing and debugging
 // ----------------------------------------------------------------------------
 
-static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz) {
-    EGLDisplay dpy = eglGetCurrentDisplay();
-    EGLSurface surf = eglGetCurrentSurface(EGL_DRAW);
-    eglBeginFrame(dpy, surf);
+static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz,
+        jintArray size) {
+
+    EGLDisplay display = eglGetCurrentDisplay();
+    EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);
+
+    if (size) {
+        EGLint value;
+        jint* storage = env->GetIntArrayElements(size, NULL);
+
+        eglQuerySurface(display, surface, EGL_WIDTH, &value);
+        storage[0] = value;
+
+        eglQuerySurface(display, surface, EGL_HEIGHT, &value);
+        storage[1] = value;
+
+        env->ReleaseIntArrayElements(size, storage, 0);
+    }
+
+    eglBeginFrame(display, surface);
 }
 
 #endif // USE_OPENGL_RENDERER
@@ -127,15 +143,11 @@ const char* const kClassPathName = "android/view/HardwareRenderer";
 
 static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
-    { "nIsBackBufferPreserved", "()Z",
-            (void*) android_view_HardwareRenderer_isBackBufferPreserved },
-    { "nPreserveBackBuffer",    "()Z",
-            (void*) android_view_HardwareRenderer_preserveBackBuffer },
-    { "nDisableVsync",          "()V",
-            (void*) android_view_HardwareRenderer_disableVsync },
+    { "nIsBackBufferPreserved", "()Z",   (void*) android_view_HardwareRenderer_isBackBufferPreserved },
+    { "nPreserveBackBuffer",    "()Z",   (void*) android_view_HardwareRenderer_preserveBackBuffer },
+    { "nDisableVsync",          "()V",   (void*) android_view_HardwareRenderer_disableVsync },
 
-    { "nBeginFrame", "()V",
-            (void*) android_view_HardwareRenderer_beginFrame },
+    { "nBeginFrame",            "([I)V", (void*) android_view_HardwareRenderer_beginFrame },
 #endif
 
     { "nSetupShadersDiskCache", "(Ljava/lang/String;)V",

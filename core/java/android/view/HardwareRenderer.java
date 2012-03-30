@@ -274,12 +274,13 @@ public abstract class HardwareRenderer {
 
     /**
      * Notifies EGL that the frame is about to be rendered.
+     * @param size
      */
-    private static void beginFrame() {
-        nBeginFrame();
+    private static void beginFrame(int[] size) {
+        nBeginFrame(size);
     }
 
-    private static native void nBeginFrame();
+    private static native void nBeginFrame(int[] size);
 
     /**
      * Preserves the back buffer of the current surface after a buffer swap.
@@ -541,6 +542,7 @@ public abstract class HardwareRenderer {
         private boolean mDestroyed;
 
         private final Rect mRedrawClip = new Rect();
+        private final int[] mSurfaceSize = new int[2];
 
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
@@ -957,16 +959,28 @@ public abstract class HardwareRenderer {
 
                 final int surfaceState = checkCurrent();
                 if (surfaceState != SURFACE_STATE_ERROR) {
+                    HardwareCanvas canvas = mCanvas;
+                    attachInfo.mHardwareCanvas = canvas;
+                    
                     // We had to change the current surface and/or context, redraw everything
                     if (surfaceState == SURFACE_STATE_UPDATED) {
                         dirty = null;
+                        beginFrame(null);
+                    } else {
+                        int[] size = mSurfaceSize;
+                        beginFrame(size);
+
+                        if (size[1] != mHeight || size[0] != mWidth) {
+                            mWidth = size[0];
+                            mHeight = size[1];
+
+                            canvas.setViewport(mWidth, mHeight);
+
+                            dirty = null;
+                        }
                     }
 
-                    beginFrame();
                     onPreDraw(dirty);
-
-                    HardwareCanvas canvas = mCanvas;
-                    attachInfo.mHardwareCanvas = canvas;
 
                     int saveCount = canvas.save();
                     callbacks.onHardwarePreDraw(canvas);
