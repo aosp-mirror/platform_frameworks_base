@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.IntProperty;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
@@ -808,7 +809,7 @@ public class Notification implements Parcelable
     public void setLatestEventInfo(Context context,
             CharSequence contentTitle, CharSequence contentText, PendingIntent contentIntent) {
         RemoteViews contentView = new RemoteViews(context.getPackageName(),
-                R.layout.status_bar_latest_event_content);
+                R.layout.notification_template_base);
         if (this.icon != 0) {
             contentView.setImageViewResource(R.id.icon, this.icon);
         }
@@ -1439,11 +1440,28 @@ public class Notification implements Parcelable
             return contentView;
         }
 
+        private RemoteViews applyStandardTemplateWithActions(int layoutId) {
+            RemoteViews big = applyStandardTemplate(layoutId);
+
+            int N = mActions.size();
+            if (N > 0) {
+                Log.d("Notification", "has actions: " + mContentText);
+                big.setViewVisibility(R.id.actions, View.VISIBLE);
+                if (N>3) N=3;
+                for (int i=0; i<N; i++) {
+                    final RemoteViews button = generateActionButton(mActions.get(i));
+                    Log.d("Notification", "adding action " + i + ": " + mActions.get(i).title);
+                    big.addView(R.id.actions, button);
+                }
+            }
+            return big;
+        }
+
         private RemoteViews makeContentView() {
             if (mContentView != null) {
                 return mContentView;
             } else {
-                return applyStandardTemplate(R.layout.status_bar_latest_event_content); // no more special large_icon flavor
+                return applyStandardTemplate(R.layout.notification_template_base); // no more special large_icon flavor
             }
         }
 
@@ -1459,6 +1477,12 @@ public class Notification implements Parcelable
                     return null;
                 }
             }
+        }
+
+        private RemoteViews makeBigContentView() {
+            if (mActions.size() == 0) return null;
+
+            return applyStandardTemplateWithActions(R.layout.notification_template_base);
         }
 
         private RemoteViews makeIntruderView(boolean showLabels) {
@@ -1500,6 +1524,15 @@ public class Notification implements Parcelable
             return intruderView;
         }
 
+        private RemoteViews generateActionButton(Action action) {
+            RemoteViews button = new RemoteViews(mContext.getPackageName(), R.layout.notification_action);
+            button.setTextViewCompoundDrawables(R.id.action0, action.icon, 0, 0, 0);
+            button.setTextViewText(R.id.action0, action.title);
+            button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
+            button.setContentDescription(R.id.action0, action.title);
+            return button;
+        }
+
         /**
          * Combine all of the options that have been set and return a new {@link Notification}
          * object.
@@ -1528,6 +1561,7 @@ public class Notification implements Parcelable
             if (mCanHasIntruder) {
                 n.intruderView = makeIntruderView(mIntruderActionsShowText);
             }
+            n.bigContentView = makeBigContentView();
             if (mLedOnMs != 0 && mLedOffMs != 0) {
                 n.flags |= FLAG_SHOW_LIGHTS;
             }
@@ -1583,7 +1617,7 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
-            RemoteViews contentView = mBuilder.applyStandardTemplate(R.layout.notification_template_big_picture);
+            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(R.layout.notification_template_big_picture);
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
 
@@ -1630,7 +1664,7 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
-            RemoteViews contentView = mBuilder.applyStandardTemplate(R.layout.status_bar_latest_event_content);
+            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(R.layout.notification_template_base);
 
             contentView.setTextViewText(R.id.big_text, mBigText);
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);

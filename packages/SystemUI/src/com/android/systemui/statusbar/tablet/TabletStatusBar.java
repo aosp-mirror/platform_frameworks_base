@@ -1880,24 +1880,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         return true;
     }
 
-    void applyLegacyRowBackground(StatusBarNotification sbn, View content) {
-        if (sbn.notification.contentView.getLayoutId() !=
-                com.android.internal.R.layout.status_bar_latest_event_content) {
-            int version = 0;
-            try {
-                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.pkg, 0);
-                version = info.targetSdkVersion;
-            } catch (NameNotFoundException ex) {
-                Slog.e(TAG, "Failed looking up ApplicationInfo for " + sbn.pkg, ex);
-            }
-            if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
-                content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
-            } else {
-                content.setBackgroundResource(R.drawable.notification_row_bg);
-            }
-        }
-    }
-
     public void clearAll() {
         try {
             mBarService.onClearAllNotifications();

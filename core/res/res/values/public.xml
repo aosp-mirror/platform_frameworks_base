@@ -1011,7 +1011,6 @@
   <java-symbol type="layout" name="select_dialog" />
   <java-symbol type="layout" name="simple_dropdown_hint" />
   <java-symbol type="layout" name="status_bar_latest_event_content" />
-  <java-symbol type="layout" name="status_bar_latest_event_content_large_icon" />
   <java-symbol type="layout" name="status_bar_latest_event_ticker" />
   <java-symbol type="layout" name="status_bar_latest_event_ticker_large_icon" />
   <java-symbol type="layout" name="text_edit_action_popup_text" />
@@ -1073,7 +1072,9 @@
   <java-symbol type="layout" name="zoom_container" />
   <java-symbol type="layout" name="zoom_controls" />
   <java-symbol type="layout" name="zoom_magnify" />
+  <java-symbol type="layout" name="notification_action" />
   <java-symbol type="layout" name="notification_intruder_content" />
+  <java-symbol type="layout" name="notification_template_base" />
   <java-symbol type="layout" name="notification_template_big_picture" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
