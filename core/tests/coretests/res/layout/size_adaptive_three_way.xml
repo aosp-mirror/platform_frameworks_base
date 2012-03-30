@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2012 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<com.android.internal.widget.SizeAdaptiveLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:internal="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/three_way_multi"
+    android:layout_width="match_parent"
+    android:layout_height="64dp" >
+
+    <include
+        android:id="@+id/one_u"
+        layout="@layout/size_adaptive_one_u"
+        android:layout_width="fill_parent"
+        android:layout_height="64dp"
+        internal:layout_minHeight="64dp"
+        internal:layout_maxHeight="64dp"
+        />
+
+    <include
+        android:id="@+id/two_u"
+        layout="@layout/size_adaptive_four_u"
+        android:layout_width="fill_parent"
+        android:layout_height="128dp"
+        internal:layout_minHeight="65dp"
+        internal:layout_maxHeight="128dp"/>
+
+    <include
+        android:id="@+id/four_u"
+        layout="@layout/size_adaptive_four_u"
+        android:layout_width="fill_parent"
+        android:layout_height="256dp"
+        internal:layout_minHeight="129dp"
+        internal:layout_maxHeight="unbounded"/>
+
+</com.android.internal.widget.SizeAdaptiveLayout>

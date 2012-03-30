@@ -5380,6 +5380,21 @@
     </declare-styleable>
 
     <!-- =============================== -->
+    <!-- SizeAdaptiveLayout class attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+    <declare-styleable name="SizeAdaptiveLayout_Layout">
+      <!-- The maximum valid height for this item. -->
+      <attr name="layout_maxHeight" format="dimension">
+        <!-- Indicates that the view may be resized arbitrarily large. -->
+        <enum name="unbounded" value="-1" />
+      </attr>
+      <!-- The minimum valid height for this item. -->
+      <attr name="layout_minHeight" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="SizeAdaptiveLayout" />
+
+    <!-- =============================== -->
     <!-- LockPatternView class attributes -->
     <!-- =============================== -->
     <eat-comment />
