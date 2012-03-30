@@ -338,7 +338,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                     en = tbend;
 
                 if (getSpanStart(spans[i]) < 0) {
-                    setSpan(false, spans[i],
+                    setSpan(true, spans[i],
                             st - tbstart + start,
                             en - tbstart + start,
                             sp.getSpanFlags(spans[i]));
@@ -579,8 +579,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 mSpanEnds[i] = end;
                 mSpanFlags[i] = flags;
 
-                if (send) 
-                    sendSpanChanged(what, ostart, oend, nstart, nend);
+                if (send) sendSpanChanged(what, ostart, oend, nstart, nend);
 
                 return;
             }
@@ -610,8 +609,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         mSpanFlags[mSpanCount] = flags;
         mSpanCount++;
 
-        if (send)
-            sendSpanAdded(what, nstart, nend);
+        if (send) sendSpanAdded(what, nstart, nend);
     }
 
     /**
