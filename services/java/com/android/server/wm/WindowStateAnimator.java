@@ -98,6 +98,15 @@ class WindowStateAnimator {
     // an enter animation.
     boolean mEnterAnimationPending;
 
+    // This is set after the Surface has been created but before the
+    // window has been drawn.  During this time the surface is hidden.
+    boolean mDrawPending;
+
+    // This is set after the window has finished drawing for the first
+    // time but before its surface is shown.  The surface will be
+    // displayed when the next layout is run.
+    boolean mCommitDrawPending;
+
     public WindowStateAnimator(final WindowManagerService service, final WindowState win,
                                final WindowState attachedWindow) {
         mService = service;
@@ -347,14 +356,41 @@ class WindowStateAnimator {
         }
     }
 
+    boolean finishDrawingLocked() {
+        if (mDrawPending) {
+            if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) Slog.v(
+                TAG, "finishDrawingLocked: " + this + " in " + mSurface);
+            mCommitDrawPending = true;
+            mDrawPending = false;
+            return true;
+        }
+        return false;
+    }
+
+    // This must be called while inside a transaction.
+    boolean commitFinishDrawingLocked(long currentTime) {
+        //Slog.i(TAG, "commitFinishDrawingLocked: " + mSurface);
+        if (!mCommitDrawPending) {
+            return false;
+        }
+        mCommitDrawPending = false;
+        mWin.mReadyToShow = true;
+        final boolean starting = mWin.mAttrs.type == TYPE_APPLICATION_STARTING;
+        final AppWindowToken atoken = mWin.mAppToken;
+        if (atoken == null || atoken.allDrawn || starting) {
+            performShowLocked();
+        }
+        return true;
+    }
+
     Surface createSurfaceLocked() {
         if (mSurface == null) {
             mReportDestroySurface = false;
             mSurfacePendingDestroy = false;
             if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(TAG,
                     "createSurface " + this + ": DRAW NOW PENDING");
-            mWin.mDrawPending = true;
-            mWin.mCommitDrawPending = false;
+            mDrawPending = true;
+            mCommitDrawPending = false;
             mWin.mReadyToShow = false;
             if (mWin.mAppToken != null) {
                 mWin.mAppToken.allDrawn = false;
@@ -471,8 +507,8 @@ class WindowStateAnimator {
         }
 
         if (mSurface != null) {
-            mWin.mDrawPending = false;
-            mWin.mCommitDrawPending = false;
+            mDrawPending = false;
+            mCommitDrawPending = false;
             mWin.mReadyToShow = false;
 
             int i = mWin.mChildWindows.size();

@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -206,15 +205,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // even if it is not currently visible for layout.  This is set
     // when in that case until the layout is done.
     boolean mLayoutNeeded;
-
-    // This is set after the Surface has been created but before the
-    // window has been drawn.  During this time the surface is hidden.
-    boolean mDrawPending;
-
-    // This is set after the window has finished drawing for the first
-    // time but before its surface is shown.  The surface will be
-    // displayed when the next layout is run.
-    boolean mCommitDrawPending;
 
     // This is set during the time after the window's drawing has been
     // committed, and before its surface is actually shown.  It is used
@@ -595,36 +585,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null ? mAppToken.firstWindowDrawn : false;
     }
 
-    // TODO(cmautner): Move to WindowStateAnimator
-    boolean finishDrawingLocked() {
-        if (mDrawPending) {
-            if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) Slog.v(
-                TAG, "finishDrawingLocked: " + this + " in "
-                        + mWinAnimator.mSurface);
-            mCommitDrawPending = true;
-            mDrawPending = false;
-            return true;
-        }
-        return false;
-    }
-
-    // TODO(cmautner): Move to WindowStateAnimator
-    // This must be called while inside a transaction.
-    boolean commitFinishDrawingLocked(long currentTime) {
-        //Slog.i(TAG, "commitFinishDrawingLocked: " + mSurface);
-        if (!mCommitDrawPending) {
-            return false;
-        }
-        mCommitDrawPending = false;
-        mReadyToShow = true;
-        final boolean starting = mAttrs.type == TYPE_APPLICATION_STARTING;
-        final AppWindowToken atoken = mAppToken;
-        if (atoken == null || atoken.allDrawn || starting) {
-            mWinAnimator.performShowLocked();
-        }
-        return true;
-    }
-
     boolean isIdentityMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
         if (dsdx < .99999f || dsdx > 1.00001f) return false;
         if (dtdy < .99999f || dtdy > 1.00001f) return false;
@@ -782,7 +742,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     public boolean isDrawnLw() {
         return mWinAnimator.mSurface != null && !mDestroying
-            && !mDrawPending && !mCommitDrawPending;
+            && !mWinAnimator.mDrawPending && !mWinAnimator.mCommitDrawPending;
     }
 
     /**
@@ -1087,8 +1047,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         mWinAnimator.dump(pw, prefix, dumpAll);
         if (dumpAll) {
-            pw.print(prefix); pw.print("mDrawPending="); pw.print(mDrawPending);
-                    pw.print(" mCommitDrawPending="); pw.print(mCommitDrawPending);
+            pw.print(prefix); pw.print("mDrawPending="); pw.print(mWinAnimator.mDrawPending);
+                    pw.print(" mCommitDrawPending="); pw.print(mWinAnimator.mCommitDrawPending);
                     pw.print(" mReadyToShow="); pw.print(mReadyToShow);
                     pw.print(" mHasDrawn="); pw.println(mHasDrawn);
         }

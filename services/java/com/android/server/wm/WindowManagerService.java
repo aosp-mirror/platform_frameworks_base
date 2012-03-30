@@ -589,7 +589,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Pulled out of performLayoutAndPlaceSurfacesLockedInner in order to refactor into multiple
      * methods. */
-    class LayoutAndSurfaceFields {
+    class LayoutFields {
+        static final int SET_UPDATE_ROTATION        = 1 << 0;
+        static final int SET_WALLPAPER_MAY_CHANGE   = 1 << 1;
+
         boolean mWallpaperForceHidingChanged = false;
         boolean mWallpaperMayChange = false;
         boolean mOrientationChangeComplete = true;
@@ -600,8 +603,9 @@ public class WindowManagerService extends IWindowManager.Stub
         private boolean mSyswin = false;
         private float mScreenBrightness = -1;
         private float mButtonBrightness = -1;
+        private boolean mUpdateRotation = false;
     }
-    LayoutAndSurfaceFields mInnerFields = new LayoutAndSurfaceFields();
+    LayoutFields mInnerFields = new LayoutFields();
 
     /** Only do a maximum of 6 repeated layouts. After that quit */
     private int mLayoutRepeatCount;
@@ -1547,6 +1551,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int ADJUST_WALLPAPER_VISIBILITY_CHANGED = 1<<2;
 
     int adjustWallpaperWindowsLocked() {
+        mInnerFields.mWallpaperMayChange = false;
         int changed = 0;
 
         final int dw = mAppDisplayWidth;
@@ -1584,8 +1589,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": readyfordisplay="
-                    + w.isReadyForDisplay() + " drawpending=" + w.mDrawPending
-                    + " commitdrawpending=" + w.mCommitDrawPending);
+                    + w.isReadyForDisplay() + " drawpending=" + w.mWinAnimator.mDrawPending
+                    + " commitdrawpending=" + w.mWinAnimator.mCommitDrawPending);
             if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isReadyForDisplay()
                     && (mWallpaperTarget == w || w.isDrawnLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
@@ -2944,7 +2949,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
             WindowState win = windowForClientLocked(session, client, false);
-            if (win != null && win.finishDrawingLocked()) {
+            if (win != null && win.mWinAnimator.finishDrawingLocked()) {
                 if ((win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
                     adjustWallpaperWindowsLocked();
                 }
@@ -6651,6 +6656,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int REPORT_HARD_KEYBOARD_STATUS_CHANGE = 22;
         public static final int BOOT_TIMEOUT = 23;
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
+        public static final int BULK_UPDATE_PARAMETERS = 25;
 
         private Session mLastReportedHold;
 
@@ -7060,6 +7066,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     } catch (RemoteException e) {
                     }
                     break;
+                }
+
+                case BULK_UPDATE_PARAMETERS: {
+                    synchronized (mWindowMap) {
+                        // TODO(cmautner): As the number of bits grows, use masks of bit groups to
+                        //  eliminate unnecessary tests.
+                        if ((msg.arg1 & LayoutFields.SET_UPDATE_ROTATION) != 0) {
+                            mInnerFields.mUpdateRotation = true;
+                        }
+                        if ((msg.arg1 & LayoutFields.SET_WALLPAPER_MAY_CHANGE) != 0) {
+                            mInnerFields.mWallpaperMayChange = true;
+                        }
+
+                        requestTraversalLocked();
+                    }
                 }
             }
         }
@@ -7995,7 +8016,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         mInnerFields.mAdjResult |= adjustWallpaperWindowsLocked();
-        mInnerFields.mWallpaperMayChange = false;
         mInnerFields.mWallpaperForceHidingChanged = false;
         if (DEBUG_WALLPAPER) Slog.v(TAG, "****** OLD: " + oldWallpaper
                 + " NEW: " + mWallpaperTarget
@@ -8026,6 +8046,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void updateResizingWindows(final WindowState w) {
+        final WindowStateAnimator winAnimator = w.mWinAnimator;
         if (!w.mAppFreezing && w.mLayoutSeq == mLayoutSeq) {
             w.mContentInsetsChanged |=
                 !w.mLastContentInsets.equals(w.mContentInsets);
@@ -8045,7 +8066,7 @@ public class WindowManagerService extends IWindowManager.Stub
             w.mLastFrame.set(w.mFrame);
             if (w.mContentInsetsChanged
                     || w.mVisibleInsetsChanged
-                    || w.mWinAnimator.mSurfaceResized
+                    || winAnimator.mSurfaceResized
                     || configChanged) {
                 if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
                     Slog.v(TAG, "Resize reasons: "
@@ -8067,8 +8088,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation start waiting for draw in "
                             + w + ", surface " + w.mWinAnimator.mSurface);
-                    w.mDrawPending = true;
-                    w.mCommitDrawPending = false;
+                    winAnimator.mDrawPending = true;
+                    winAnimator.mCommitDrawPending = false;
                     w.mReadyToShow = false;
                     if (w.mAppToken != null) {
                         w.mAppToken.allDrawn = false;
@@ -8377,7 +8398,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // Moved from updateWindowsAndWallpaperLocked().
             if (winAnimator.mSurface != null) {
                 // Take care of the window being ready to display.
-                if (w.commitFinishDrawingLocked(currentTime)) {
+                if (winAnimator.commitFinishDrawingLocked(currentTime)) {
                     if ((w.mAttrs.flags
                             & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
                         if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
@@ -8439,6 +8460,7 @@ public class WindowManagerService extends IWindowManager.Stub
             do {
                 i--;
                 WindowState win = mResizingWindows.get(i);
+                final WindowStateAnimator winAnimator = win.mWinAnimator; 
                 try {
                     if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
                             "Reporting new frame to " + win + ": " + win.mCompatFrame);
@@ -8450,20 +8472,20 @@ public class WindowManagerService extends IWindowManager.Stub
                     if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION)
                             && configChanged) {
                         Slog.i(TAG, "Sending new config to window " + win + ": "
-                                + win.mWinAnimator.mSurfaceW + "x" + win.mWinAnimator.mSurfaceH
+                                + winAnimator.mSurfaceW + "x" + winAnimator.mSurfaceH
                                 + " / " + mCurConfiguration + " / 0x"
                                 + Integer.toHexString(diff));
                     }
                     win.mConfiguration = mCurConfiguration;
-                    if (DEBUG_ORIENTATION && win.mDrawPending) Slog.i(
+                    if (DEBUG_ORIENTATION && winAnimator.mDrawPending) Slog.i(
                             TAG, "Resizing " + win + " WITH DRAW PENDING"); 
-                    win.mClient.resized((int)win.mWinAnimator.mSurfaceW,
-                            (int)win.mWinAnimator.mSurfaceH,
-                            win.mLastContentInsets, win.mLastVisibleInsets, win.mDrawPending,
-                            configChanged ? win.mConfiguration : null);
+                    win.mClient.resized((int)winAnimator.mSurfaceW,
+                            (int)winAnimator.mSurfaceH,
+                            win.mLastContentInsets, win.mLastVisibleInsets,
+                            winAnimator.mDrawPending, configChanged ? win.mConfiguration : null);
                     win.mContentInsetsChanged = false;
                     win.mVisibleInsetsChanged = false;
-                    win.mWinAnimator.mSurfaceResized = false;
+                    winAnimator.mSurfaceResized = false;
                 } catch (RemoteException e) {
                     win.mOrientationChanging = false;
                 }
@@ -8574,17 +8596,17 @@ public class WindowManagerService extends IWindowManager.Stub
             mTurnOnScreen = false;
         }
 
-        if (mAnimator.mUpdateRotation) {
+        if (mInnerFields.mUpdateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
             if (updateRotationUncheckedLocked(false)) {
                 mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
             } else {
-                mAnimator.mUpdateRotation = false;
+                mInnerFields.mUpdateRotation = false;
             }
         }
 
         if (mInnerFields.mOrientationChangeComplete && !mLayoutNeeded &&
-                !mAnimator.mUpdateRotation) {
+                !mInnerFields.mUpdateRotation) {
             checkDrawnWindowsLocked();
         }
 
@@ -9646,15 +9668,14 @@ public class WindowManagerService extends IWindowManager.Stub
         requestTraversalLocked();
     }
 
-    void notifyWallpaperMayChange() {
-        mInnerFields.mWallpaperMayChange = true;
-        requestTraversalLocked();
-    }
-
     void debugLayoutRepeats(final String msg) {
         if (mLayoutRepeatCount >= LAYOUT_REPEAT_THRESHOLD) {
             Slog.v(TAG, "Layouts looping: " + msg);
             Slog.v(TAG, "mPendingLayoutChanges = 0x" + Integer.toHexString(mPendingLayoutChanges));
         }
+    }
+
+    void bulkSetParameters(final int bulkUpdateParams) {
+        mH.sendMessage(mH.obtainMessage(H.BULK_UPDATE_PARAMETERS, bulkUpdateParams, 0));
     }
 }

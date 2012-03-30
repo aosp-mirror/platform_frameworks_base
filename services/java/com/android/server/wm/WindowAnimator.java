@@ -4,6 +4,9 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
+import static com.android.server.wm.WindowManagerService.LayoutFields.SET_UPDATE_ROTATION;
+import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_MAY_CHANGE;
+
 import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
@@ -30,7 +33,6 @@ public class WindowAnimator {
     final WindowManagerPolicy mPolicy;
 
     boolean mAnimating;
-    boolean mUpdateRotation;
     boolean mTokenMayBeDrawn;
     boolean mForceHiding;
     WindowState mWindowAnimationBackground;
@@ -61,8 +63,9 @@ public class WindowAnimator {
     // seen.
     WindowState mWindowDetachedWallpaper = null;
     WindowState mDetachedWallpaper = null;
-    boolean mWallpaperMayChange;
     DimSurface mWindowAnimationBackgroundSurface = null;
+
+    int mBulkUpdateParams = 0;
 
     WindowAnimator(final WindowManagerService service, final Context context,
             final WindowManagerPolicy policy) {
@@ -77,7 +80,7 @@ public class WindowAnimator {
                     "Detached wallpaper changed from " + mWindowDetachedWallpaper
                     + " to " + mDetachedWallpaper);
             mWindowDetachedWallpaper = mDetachedWallpaper;
-            mWallpaperMayChange = true;
+            mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
         }
 
         if (mWindowAnimationBackgroundColor != 0) {
@@ -147,10 +150,9 @@ public class WindowAnimator {
                 (mScreenRotationAnimation.isAnimating() ||
                         mScreenRotationAnimation.mFinishAnimReady)) {
             if (mScreenRotationAnimation.stepAnimationLocked(mCurrentTime)) {
-                mUpdateRotation = false;
                 mAnimating = true;
             } else {
-                mUpdateRotation = true;
+                mBulkUpdateParams |= SET_UPDATE_ROTATION;
                 mScreenRotationAnimation.kill();
                 mScreenRotationAnimation = null;
             }
@@ -217,7 +219,7 @@ public class WindowAnimator {
                 }
 
                 if (wasAnimating && !winAnimator.mAnimating && mService.mWallpaperTarget == w) {
-                    mWallpaperMayChange = true;
+                    mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
                     mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                     if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
                         mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 2");
@@ -270,7 +272,7 @@ public class WindowAnimator {
                     }
                     if (changed && (attrs.flags
                             & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
-                        mWallpaperMayChange = true;
+                        mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
                         mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
                             mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 4");
@@ -297,8 +299,8 @@ public class WindowAnimator {
                         if (!w.isDrawnLw()) {
                             Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurface
                                     + " pv=" + w.mPolicyVisibility
-                                    + " dp=" + w.mDrawPending
-                                    + " cdp=" + w.mCommitDrawPending
+                                    + " dp=" + winAnimator.mDrawPending
+                                    + " cdp=" + winAnimator.mCommitDrawPending
                                     + " ah=" + w.mAttachedHidden
                                     + " th=" + atoken.hiddenRequested
                                     + " a=" + winAnimator.mAnimating);
@@ -386,7 +388,6 @@ public class WindowAnimator {
 
     private void performAnimationsLocked() {
         mTokenMayBeDrawn = false;
-        mService.mInnerFields.mWallpaperMayChange = false;
         mForceHiding = false;
         mDetachedWallpaper = null;
         mWindowAnimationBackground = null;
@@ -399,11 +400,10 @@ public class WindowAnimator {
         }
     }
 
-
     void animate() {
         mPendingLayoutChanges = 0;
-        mWallpaperMayChange = false;
         mCurrentTime = SystemClock.uptimeMillis();
+        mBulkUpdateParams = 0;
 
         // Update animations of all applications, including those
         // associated with exiting/removed apps
@@ -445,8 +445,8 @@ public class WindowAnimator {
             Surface.closeTransaction();
         }
 
-        if (mWallpaperMayChange) {
-            mService.notifyWallpaperMayChange();
+        if (mBulkUpdateParams != 0) {
+            mService.bulkSetParameters(mBulkUpdateParams);
         }
     }
 
