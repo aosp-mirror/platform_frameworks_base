@@ -19,31 +19,53 @@ package com.android.systemui.statusbar;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindowManager;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
+import android.view.WindowManagerImpl;
+import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.SystemUI;
+import com.android.systemui.recent.RecentsPanelView;
+import com.android.systemui.recent.RecentTasksLoader;
+import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
 import com.android.systemui.R;
 
-public abstract class BaseStatusBar extends SystemUI implements CommandQueue.Callbacks {
+public abstract class BaseStatusBar extends SystemUI implements
+    CommandQueue.Callbacks, RecentsPanelView.OnRecentsPanelVisibilityChangedListener {
     static final String TAG = "StatusBar";
     private static final boolean DEBUG = false;
 
+    protected static final int MSG_OPEN_RECENTS_PANEL = 1020;
+    protected static final int MSG_CLOSE_RECENTS_PANEL = 1021;
+    protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
+    protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
+
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
+    protected H mHandler = createHandler();
+
+    // Recent apps
+    protected RecentsPanelView mRecentsPanel;
+    protected RecentTasksLoader mRecentTasksLoader;
 
     // UI-specific methods
     
@@ -161,5 +183,122 @@ public abstract class BaseStatusBar extends SystemUI implements CommandQueue.Cal
     
     public void dismissIntruder() {
         // pass
+    }
+
+    @Override
+    public void toggleRecentApps() {
+        int msg = (mRecentsPanel.getVisibility() == View.VISIBLE)
+            ? MSG_CLOSE_RECENTS_PANEL : MSG_OPEN_RECENTS_PANEL;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
+    public void preloadRecentApps() {
+        int msg = MSG_PRELOAD_RECENT_APPS;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
+    public void cancelPreloadRecentApps() {
+        int msg = MSG_CANCEL_PRELOAD_RECENT_APPS;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
+    public void onRecentsPanelVisibilityChanged(boolean visible) {
+    }
+
+    protected abstract WindowManager.LayoutParams getRecentsLayoutParams(
+            LayoutParams layoutParams);
+
+    protected void updateRecentsPanel() {
+        // Recents Panel
+        boolean visible = false;
+        ArrayList<TaskDescription> recentTasksList = null;
+        boolean firstScreenful = false;
+        if (mRecentsPanel != null) {
+            visible = mRecentsPanel.isShowing();
+            WindowManagerImpl.getDefault().removeView(mRecentsPanel);
+            if (visible) {
+                recentTasksList = mRecentsPanel.getRecentTasksList();
+                firstScreenful = mRecentsPanel.getFirstScreenful();
+            }
+        }
+
+        // Provide RecentsPanelView with a temporary parent to allow layout params to work.
+        LinearLayout tmpRoot = new LinearLayout(mContext);
+        mRecentsPanel = (RecentsPanelView) LayoutInflater.from(mContext).inflate(
+                 R.layout.status_bar_recent_panel, tmpRoot, false);
+        mRecentsPanel.setRecentTasksLoader(mRecentTasksLoader);
+        mRecentTasksLoader.setRecentsPanel(mRecentsPanel);
+        mRecentsPanel.setOnTouchListener(
+                 new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL, mRecentsPanel));
+        mRecentsPanel.setVisibility(View.GONE);
+
+
+        WindowManager.LayoutParams lp = getRecentsLayoutParams(mRecentsPanel.getLayoutParams());
+
+        WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
+        mRecentsPanel.setBar(this);
+        if (visible) {
+            mRecentsPanel.show(true, false, recentTasksList, firstScreenful);
+        }
+
+    }
+
+    H createHandler() {
+         return new H();
+    }
+
+    protected class H extends Handler {
+        public void handleMessage(Message m) {
+            switch (m.what) {
+             case MSG_OPEN_RECENTS_PANEL:
+                  if (DEBUG) Slog.d(TAG, "opening recents panel");
+                  if (mRecentsPanel != null) {
+                      mRecentsPanel.show(true, true);
+                  }
+                  break;
+             case MSG_CLOSE_RECENTS_PANEL:
+                  if (DEBUG) Slog.d(TAG, "closing recents panel");
+                  if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
+                      mRecentsPanel.show(false, true);
+                  }
+                  break;
+             case MSG_PRELOAD_RECENT_APPS:
+                  if (DEBUG) Slog.d(TAG, "preloading recents");
+                  mRecentsPanel.preloadRecentTasksList();
+                  break;
+             case MSG_CANCEL_PRELOAD_RECENT_APPS:
+                  if (DEBUG) Slog.d(TAG, "cancel preloading recents");
+                  mRecentsPanel.clearRecentTasksList();
+                  break;
+            }
+        }
+    }
+
+    public class TouchOutsideListener implements View.OnTouchListener {
+        private int mMsg;
+        private StatusBarPanel mPanel;
+
+        public TouchOutsideListener(int msg, StatusBarPanel panel) {
+            mMsg = msg;
+            mPanel = panel;
+        }
+
+        public boolean onTouch(View v, MotionEvent ev) {
+            final int action = ev.getAction();
+            if (action == MotionEvent.ACTION_OUTSIDE
+                || (action == MotionEvent.ACTION_DOWN
+                    && !mPanel.isInContentArea((int)ev.getX(), (int)ev.getY()))) {
+                mHandler.removeMessages(mMsg);
+                mHandler.sendEmptyMessage(mMsg);
+                return true;
+            }
+            return false;
+        }
     }
 }

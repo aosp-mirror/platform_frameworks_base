@@ -36,21 +36,19 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.inputmethodservice.InputMethodService;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.inputmethodservice.InputMethodService;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowManager;
@@ -62,8 +60,10 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
@@ -78,7 +78,6 @@ import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
-import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
@@ -100,8 +99,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     public static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
     public static final int MSG_OPEN_NOTIFICATION_PEEK = 1002;
     public static final int MSG_CLOSE_NOTIFICATION_PEEK = 1003;
-    public static final int MSG_OPEN_RECENTS_PANEL = 1020;
-    public static final int MSG_CLOSE_RECENTS_PANEL = 1021;
+    // 1020-1029 reserved for BaseStatusBar
     public static final int MSG_SHOW_CHROME = 1030;
     public static final int MSG_HIDE_CHROME = 1031;
     public static final int MSG_OPEN_INPUT_METHODS_PANEL = 1040;
@@ -126,8 +124,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     int mNavIconWidth = -1;
     int mMenuNavIconWidth = -1;
     private int mMaxNotificationIcons = 5;
-
-    H mHandler = new H();
 
     IWindowManager mWindowManager;
 
@@ -189,8 +185,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     // for disabling the status bar
     int mDisabled = 0;
 
-    private RecentsPanelView mRecentsPanel;
-    private RecentTasksLoader mRecentTasksLoader;
     private InputMethodsPanel mInputMethodsPanel;
     private CompatModePanel mCompatModePanel;
 
@@ -348,33 +342,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         // Recents Panel
         mRecentTasksLoader = new RecentTasksLoader(context);
-        mRecentsPanel = (RecentsPanelView) View.inflate(context,
-                R.layout.status_bar_recent_panel, null);
-        mRecentsPanel.setVisibility(View.GONE);
-        mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
-                mRecentsPanel));
-        mRecentsPanel.setOnVisibilityChangedListener(this);
-        mRecentsPanel.setRecentTasksLoader(mRecentTasksLoader);
-        mRecentTasksLoader.setRecentsPanel(mRecentsPanel);
-
-        lp = new WindowManager.LayoutParams(
-                (int) res.getDimension(R.dimen.status_bar_recents_width),
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-                PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
-        lp.setTitle("RecentsPanel");
-        lp.windowAnimations = R.style.Animation_RecentPanel;
-        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
-                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-
-        WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
-        mRecentsPanel.setBar(this);
-        mRecentsPanel.setStatusBarView(mStatusBarView);
+        updateRecentsPanel();
 
         // Input methods Panel
         mInputMethodsPanel = (InputMethodsPanel) View.inflate(context,
@@ -680,6 +648,31 @@ public class TabletStatusBar extends BaseStatusBar implements
         return sb;
     }
 
+    @Override
+    protected WindowManager.LayoutParams getRecentsLayoutParams(LayoutParams layoutParams) {
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                (int) mContext.getResources().getDimension(R.dimen.status_bar_recents_width),
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        lp.setTitle("RecentsPanel");
+        lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
+            | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+
+        return lp;
+    }
+
+    protected void updateRecentsPanel() {
+        super.updateRecentsPanel();
+        mRecentsPanel.setStatusBarView(mStatusBarView);
+    }
+
     public int getStatusBarHeight() {
         return mHeightReceiver.getHeight();
     }
@@ -702,8 +695,14 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
     }
 
-    private class H extends Handler {
+    @Override
+    BaseStatusBar.H createHandler() {
+        return new TabletStatusBar.H();
+    }
+
+    private class H extends BaseStatusBar.H {
         public void handleMessage(Message m) {
+            super.handleMessage(m);
             switch (m.what) {
                 case MSG_OPEN_NOTIFICATION_PEEK:
                     if (DEBUG) Slog.d(TAG, "opening notification peek window; arg=" + m.arg1);
@@ -796,18 +795,6 @@ public class TabletStatusBar extends BaseStatusBar implements
                     if (mNotificationPanel.isShowing()) {
                         mNotificationPanel.show(false, true);
                         mNotificationArea.setVisibility(View.VISIBLE);
-                    }
-                    break;
-                case MSG_OPEN_RECENTS_PANEL:
-                    if (DEBUG) Slog.d(TAG, "opening recents panel");
-                    if (mRecentsPanel != null) {
-                        mRecentsPanel.show(true, true);
-                    }
-                    break;
-                case MSG_CLOSE_RECENTS_PANEL:
-                    if (DEBUG) Slog.d(TAG, "closing recents panel");
-                    if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
-                        mRecentsPanel.show(false, true);
                     }
                     break;
                 case MSG_OPEN_INPUT_METHODS_PANEL:
@@ -1921,13 +1908,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         visibilityChanged(false);
     }
 
-    public void toggleRecentApps() {
-        int msg = (mRecentsPanel.getVisibility() == View.VISIBLE)
-                ? MSG_CLOSE_RECENTS_PANEL : MSG_OPEN_RECENTS_PANEL;
-        mHandler.removeMessages(msg);
-        mHandler.sendEmptyMessage(msg);
-    }
-
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -1952,28 +1932,6 @@ public class TabletStatusBar extends BaseStatusBar implements
             }
         }
     };
-
-    public class TouchOutsideListener implements View.OnTouchListener {
-        private int mMsg;
-        private StatusBarPanel mPanel;
-
-        public TouchOutsideListener(int msg, StatusBarPanel panel) {
-            mMsg = msg;
-            mPanel = panel;
-        }
-
-        public boolean onTouch(View v, MotionEvent ev) {
-            final int action = ev.getAction();
-            if (action == MotionEvent.ACTION_OUTSIDE
-                    || (action == MotionEvent.ACTION_DOWN
-                        && !mPanel.isInContentArea((int)ev.getX(), (int)ev.getY()))) {
-                mHandler.removeMessages(mMsg);
-                mHandler.sendEmptyMessage(mMsg);
-                return true;
-            }
-            return false;
-        }
-    }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mDisabled=0x");

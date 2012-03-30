@@ -430,6 +430,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHideLockScreen;
     boolean mDismissKeyguard;
     boolean mHomePressed;
+    boolean mHomeLongPressed;
     Intent mHomeIntent;
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
@@ -744,7 +745,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             // Eat the longpress so it won't dismiss the recent apps dialog when
             // the user lets go of the home key
-            mHomePressed = false;
+            mHomeLongPressed = true;
         }
 
         if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
@@ -1619,33 +1620,45 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // it handle it, because that gives us the correct 5 second
         // timeout.
         if (keyCode == KeyEvent.KEYCODE_HOME) {
+
             // If we have released the home key, and didn't do anything else
             // while it was pressed, then it is time to go home!
-            if (mHomePressed && !down) {
+            if (!down) {
+                final boolean homeWasLongPressed = mHomeLongPressed;
                 mHomePressed = false;
-                if (!canceled) {
-                    // If an incoming call is ringing, HOME is totally disabled.
-                    // (The user is already on the InCallScreen at this point,
-                    // and his ONLY options are to answer or reject the call.)
-                    boolean incomingRinging = false;
+                mHomeLongPressed = false;
+                if (!homeWasLongPressed) {
                     try {
-                        ITelephony telephonyService = getTelephonyService();
-                        if (telephonyService != null) {
-                            incomingRinging = telephonyService.isRinging();
-                        }
-                    } catch (RemoteException ex) {
-                        Log.w(TAG, "RemoteException from getPhoneInterface()", ex);
+                        mStatusBarService.cancelPreloadRecentApps();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "RemoteException when showing recent apps", e);
                     }
 
-                    if (incomingRinging) {
-                        Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
+                    mHomePressed = false;
+                    if (!canceled) {
+                        // If an incoming call is ringing, HOME is totally disabled.
+                        // (The user is already on the InCallScreen at this point,
+                        // and his ONLY options are to answer or reject the call.)
+                        boolean incomingRinging = false;
+                        try {
+                            ITelephony telephonyService = getTelephonyService();
+                            if (telephonyService != null) {
+                                incomingRinging = telephonyService.isRinging();
+                            }
+                        } catch (RemoteException ex) {
+                            Log.w(TAG, "RemoteException from getPhoneInterface()", ex);
+                        }
+
+                        if (incomingRinging) {
+                            Log.i(TAG, "Ignoring HOME; there's a ringing incoming call.");
+                        } else {
+                            launchHomeFromHotKey();
+                        }
                     } else {
-                        launchHomeFromHotKey();
+                        Log.i(TAG, "Ignoring HOME; event canceled.");
                     }
-                } else {
-                    Log.i(TAG, "Ignoring HOME; event canceled.");
+                    return -1;
                 }
-                return -1;
             }
 
             // If a system window has focus, then it doesn't make sense
@@ -1666,8 +1679,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
-
             if (down) {
+                if (!mHomePressed) {
+                    try {
+                        mStatusBarService.preloadRecentApps();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "RemoteException when preloading recent apps", e);
+                    }
+                }
                 if (repeatCount == 0) {
                     mHomePressed = true;
                 } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {

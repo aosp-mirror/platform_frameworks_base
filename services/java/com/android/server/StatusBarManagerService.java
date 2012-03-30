@@ -352,6 +352,24 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
+    public void preloadRecentApps() {
+        if (mBar != null) {
+            try {
+                mBar.preloadRecentApps();
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public void cancelPreloadRecentApps() {
+        if (mBar != null) {
+            try {
+                mBar.cancelPreloadRecentApps();
+            } catch (RemoteException ex) {}
+        }
+    }
+
     private void enforceStatusBar() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR,
                 "StatusBarManagerService");
