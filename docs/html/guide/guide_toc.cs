@@ -259,13 +259,13 @@
     <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
             <span class="en">Graphics</span>
-          </a> <span class="new-child">new!</span></div>
+          </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/2d-graphics.html">
               <span class="en">Canvas and Drawables</span></a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/hardware-accel.html">
               <span class="en">Hardware Acceleration</span></a>
-            <span class="new">new!</span></li>
+            </li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/opengl.html">
               <span class="en">OpenGL</span>
             </a></li>
@@ -287,7 +287,6 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/renderscript/index.html">
           <span class="en">Renderscript</span></a>
-          <span class="new">updated</span>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/renderscript/graphics.html">
@@ -318,7 +317,6 @@
                 </li>
             <li><a href="<?cs var:toroot ?>guide/topics/media/camera.html">
                   <span class="en">Camera</span></a>
-                  <span class="new">new!</span>
                 </li>
             <li><a href="<?cs var:toroot ?>guide/topics/media/audio-capture.html">
                   <span class="en">Audio Capture</span></a>
@@ -332,7 +330,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/sensors/index.html">
               <span class="en">Sensors</span>
-              </a> <span class="new">new!</span></div>
+              </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/sensors/sensors_overview.html">
               <span class="en">Sensors Overview</span>
@@ -373,7 +371,7 @@
           </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot?>guide/topics/nfc/index.html">
-          <span class="en">Near Field Communication</span></a> <span class="new">updated</span>
+          <span class="en">Near Field Communication</span></a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/nfc/nfc.html">NFC Basics</a></li>
@@ -381,7 +379,7 @@
         </ul>
       </li>
       <li><a href="<?cs var:toroot?>guide/topics/wireless/wifip2p.html">
-            <span class="en">Wi-Fi Direct</span></a> <span class="new">new!</span>
+            <span class="en">Wi-Fi Direct</span></a>
           </li>
       <li class="toggle-list">
           <div><a href="<?cs var:toroot?>guide/topics/usb/index.html">
@@ -788,7 +786,7 @@ applications</span>
       </li>
       <li><a href="<?cs var:toroot ?>guide/practices/tablets-and-handsets.html">
             <span class="en">Supporting Tablets and Handsets</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">
                <span class="en">UI Guidelines</span>
