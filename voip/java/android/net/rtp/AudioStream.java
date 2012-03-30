@@ -94,7 +94,7 @@ public class AudioStream extends RtpStream {
                 mGroup = null;
             }
             if (group != null) {
-                group.add(this, mCodec, mDtmfType);
+                group.add(this);
                 mGroup = group;
             }
         }

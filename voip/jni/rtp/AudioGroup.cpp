@@ -478,7 +478,7 @@ public:
     bool setMode(int mode);
     bool sendDtmf(int event);
     bool add(AudioStream *stream);
-    bool remove(int socket);
+    bool remove(AudioStream *stream);
     bool platformHasAec() { return mPlatformHasAec; }
 
 private:
@@ -691,20 +691,19 @@ bool AudioGroup::add(AudioStream *stream)
     return true;
 }
 
-bool AudioGroup::remove(int socket)
+bool AudioGroup::remove(AudioStream *stream)
 {
     mNetworkThread->requestExitAndWait();
 
-    for (AudioStream *stream = mChain; stream->mNext; stream = stream->mNext) {
-        AudioStream *target = stream->mNext;
-        if (target->mSocket == socket) {
-            if (epoll_ctl(mEventQueue, EPOLL_CTL_DEL, socket, NULL)) {
+    for (AudioStream *chain = mChain; chain->mNext; chain = chain->mNext) {
+        if (chain->mNext == stream) {
+            if (epoll_ctl(mEventQueue, EPOLL_CTL_DEL, stream->mSocket, NULL)) {
                 ALOGE("epoll_ctl: %s", strerror(errno));
                 return false;
             }
-            stream->mNext = target->mNext;
-            ALOGD("stream[%d] leaves group[%d]", socket, mDeviceSocket);
-            delete target;
+            chain->mNext = stream->mNext;
+            ALOGD("stream[%d] leaves group[%d]", stream->mSocket, mDeviceSocket);
+            delete stream;
             break;
         }
     }
@@ -931,7 +930,7 @@ exit:
 static jfieldID gNative;
 static jfieldID gMode;
 
-void add(JNIEnv *env, jobject thiz, jint mode,
+int add(JNIEnv *env, jobject thiz, jint mode,
     jint socket, jstring jRemoteAddress, jint remotePort,
     jstring jCodecSpec, jint dtmfType)
 {
@@ -943,16 +942,22 @@ void add(JNIEnv *env, jobject thiz, jint mode,
     sockaddr_storage remote;
     if (parse(env, jRemoteAddress, remotePort, &remote) < 0) {
         // Exception already thrown.
-        return;
+        return 0;
     }
     if (!jCodecSpec) {
         jniThrowNullPointerException(env, "codecSpec");
-        return;
+        return 0;
     }
     const char *codecSpec = env->GetStringUTFChars(jCodecSpec, NULL);
     if (!codecSpec) {
         // Exception already thrown.
-        return;
+        return 0;
+    }
+    socket = dup(socket);
+    if (socket == -1) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "cannot get stream socket");
+        return 0;
     }
 
     // Create audio codec.
@@ -1001,7 +1006,7 @@ void add(JNIEnv *env, jobject thiz, jint mode,
 
     // Succeed.
     env->SetIntField(thiz, gNative, (int)group);
-    return;
+    return (int)stream;
 
 error:
     delete group;
@@ -1009,13 +1014,14 @@ error:
     delete codec;
     close(socket);
     env->SetIntField(thiz, gNative, 0);
+    return 0;
 }
 
-void remove(JNIEnv *env, jobject thiz, jint socket)
+void remove(JNIEnv *env, jobject thiz, jint stream)
 {
     AudioGroup *group = (AudioGroup *)env->GetIntField(thiz, gNative);
     if (group) {
-        if (socket == -1 || !group->remove(socket)) {
+        if (!stream || !group->remove((AudioStream *)stream)) {
             delete group;
             env->SetIntField(thiz, gNative, 0);
         }
@@ -1039,7 +1045,7 @@ void sendDtmf(JNIEnv *env, jobject thiz, jint event)
 }
 
 JNINativeMethod gMethods[] = {
-    {"nativeAdd", "(IILjava/lang/String;ILjava/lang/String;I)V", (void *)add},
+    {"nativeAdd", "(IILjava/lang/String;ILjava/lang/String;I)I", (void *)add},
     {"nativeRemove", "(I)V", (void *)remove},
     {"nativeSetMode", "(I)V", (void *)setMode},
     {"nativeSendDtmf", "(I)V", (void *)sendDtmf},

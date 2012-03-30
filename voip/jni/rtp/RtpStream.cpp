@@ -33,11 +33,11 @@ extern int parse(JNIEnv *env, jstring jAddress, int port, sockaddr_storage *ss);
 
 namespace {
 
-jfieldID gNative;
+jfieldID gSocket;
 
 jint create(JNIEnv *env, jobject thiz, jstring jAddress)
 {
-    env->SetIntField(thiz, gNative, -1);
+    env->SetIntField(thiz, gSocket, -1);
 
     sockaddr_storage ss;
     if (parse(env, jAddress, 0, &ss) < 0) {
@@ -58,7 +58,7 @@ jint create(JNIEnv *env, jobject thiz, jstring jAddress)
         &((sockaddr_in *)&ss)->sin_port : &((sockaddr_in6 *)&ss)->sin6_port;
     uint16_t port = ntohs(*p);
     if ((port & 1) == 0) {
-        env->SetIntField(thiz, gNative, socket);
+        env->SetIntField(thiz, gSocket, socket);
         return port;
     }
     ::close(socket);
@@ -75,7 +75,7 @@ jint create(JNIEnv *env, jobject thiz, jstring jAddress)
             *p = htons(port);
 
             if (bind(socket, (sockaddr *)&ss, sizeof(ss)) == 0) {
-                env->SetIntField(thiz, gNative, socket);
+                env->SetIntField(thiz, gSocket, socket);
                 return port;
             }
         }
@@ -86,25 +86,15 @@ jint create(JNIEnv *env, jobject thiz, jstring jAddress)
     return -1;
 }
 
-jint dup(JNIEnv *env, jobject thiz)
-{
-    int socket = ::dup(env->GetIntField(thiz, gNative));
-    if (socket == -1) {
-        jniThrowException(env, "java/lang/IllegalStateException", strerror(errno));
-    }
-    return socket;
-}
-
 void close(JNIEnv *env, jobject thiz)
 {
-    int socket = env->GetIntField(thiz, gNative);
+    int socket = env->GetIntField(thiz, gSocket);
     ::close(socket);
-    env->SetIntField(thiz, gNative, -1);
+    env->SetIntField(thiz, gSocket, -1);
 }
 
 JNINativeMethod gMethods[] = {
     {"create", "(Ljava/lang/String;)I", (void *)create},
-    {"dup", "()I", (void *)dup},
     {"close", "()V", (void *)close},
 };
 
@@ -114,7 +104,7 @@ int registerRtpStream(JNIEnv *env)
 {
     jclass clazz;
     if ((clazz = env->FindClass("android/net/rtp/RtpStream")) == NULL ||
-        (gNative = env->GetFieldID(clazz, "mNative", "I")) == NULL ||
+        (gSocket = env->GetFieldID(clazz, "mSocket", "I")) == NULL ||
         env->RegisterNatives(clazz, gMethods, NELEM(gMethods)) < 0) {
         ALOGE("JNI registration failed");
         return -1;
