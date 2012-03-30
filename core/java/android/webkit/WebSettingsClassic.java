@@ -90,6 +90,7 @@ public class WebSettingsClassic extends WebSettings {
     private boolean         mWorkersEnabled = false;  // only affects V8.
     private boolean         mGeolocationEnabled = true;
     private boolean         mXSSAuditorEnabled = false;
+    private boolean         mLinkPrefetchEnabled = false;
     // HTML5 configuration parameters
     private long            mAppCacheMaxSize = Long.MAX_VALUE;
     private String          mAppCachePath = null;
@@ -1300,6 +1301,16 @@ public class WebSettingsClassic extends WebSettings {
     public synchronized void setXSSAuditorEnabled(boolean flag) {
         if (mXSSAuditorEnabled != flag) {
             mXSSAuditorEnabled = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * Enables/disables HTML5 link "prefetch" parameter.
+     */
+    public synchronized void setLinkPrefetchEnabled(boolean flag) {
+        if (mLinkPrefetchEnabled != flag) {
+            mLinkPrefetchEnabled = flag;
             postSync();
         }
     }
