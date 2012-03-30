@@ -1446,6 +1446,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // Used to notify listeners about find-on-page results.
     private WebView.FindListener mFindListener;
 
+    // Used to prevent resending save password message
+    private Message mResumeMsg;
+
     /**
      * Refer to {@link WebView#requestFocusNodeHref(Message)} for more information
      */
@@ -1895,11 +1898,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
             String password, final Message resumeMsg) {
-       boolean rVal = false;
-       if (resumeMsg == null) {
-           // null resumeMsg implies saving password silently
-           mDatabase.setUsernamePassword(schemePlusHost, username, password);
-       } else {
+        boolean rVal = false;
+        if (resumeMsg == null) {
+            // null resumeMsg implies saving password silently
+            mDatabase.setUsernamePassword(schemePlusHost, username, password);
+        } else {
+            if (mResumeMsg != null) {
+                Log.w(LOGTAG, "onSavePassword should not be called while dialog is up");
+                resumeMsg.sendToTarget();
+                return true;
+            }
+            mResumeMsg = resumeMsg;
             final Message remember = mPrivateHandler.obtainMessage(
                     REMEMBER_PASSWORD);
             remember.getData().putString("host", schemePlusHost);
@@ -1921,34 +1930,46 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            resumeMsg.sendToTarget();
+                            if (mResumeMsg != null) {
+                                resumeMsg.sendToTarget();
+                                mResumeMsg = null;
+                            }
                         }
                     })
                     .setNeutralButton(com.android.internal.R.string.save_password_remember,
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            remember.sendToTarget();
+                            if (mResumeMsg != null) {
+                                remember.sendToTarget();
+                                mResumeMsg = null;
+                            }
                         }
                     })
                     .setNegativeButton(com.android.internal.R.string.save_password_never,
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            neverRemember.sendToTarget();
+                            if (mResumeMsg != null) {
+                                neverRemember.sendToTarget();
+                                mResumeMsg = null;
+                            }
                         }
                     })
                     .setOnCancelListener(new OnCancelListener() {
                         @Override
                         public void onCancel(DialogInterface dialog) {
-                            resumeMsg.sendToTarget();
+                            if (mResumeMsg != null) {
+                                resumeMsg.sendToTarget();
+                                mResumeMsg = null;
+                            }
                         }
                     }).show();
             // Return true so that WebViewCore will pause while the dialog is
             // up.
             rVal = true;
         }
-       return rVal;
+        return rVal;
     }
 
     @Override
