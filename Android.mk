@@ -443,6 +443,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/HoneycombGallery "Honeycomb Gallery" \
 		-samplecode $(sample_dir)/JetBoy \
 		            resources/samples/JetBoy "JetBoy" \
+		-samplecode $(sample_dir)/KeyChainDemo \
+		            resources/samples/KeyChainDemo "KeyChain Demo" \
 		-samplecode $(sample_dir)/LunarLander \
 		            resources/samples/LunarLander "Lunar Lander" \
 		-samplecode $(sample_dir)/training/ads-and-ux \
