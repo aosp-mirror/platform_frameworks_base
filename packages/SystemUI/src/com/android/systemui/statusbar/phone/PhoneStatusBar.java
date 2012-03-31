@@ -1471,12 +1471,13 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override // CommandQueue
-    public void setSystemUiVisibility(int vis) {
-        final int old = mSystemUiVisibility;
-        final int diff = vis ^ old;
+    public void setSystemUiVisibility(int vis, int mask) {
+        final int oldVal = mSystemUiVisibility;
+        final int newVal = (oldVal&~mask) | (vis&mask);
+        final int diff = newVal ^ oldVal;
 
         if (diff != 0) {
-            mSystemUiVisibility = vis;
+            mSystemUiVisibility = newVal;
 
             if (0 != (diff & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
                 final boolean lightsOut = (0 != (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE));
@@ -1495,9 +1496,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void setLightsOn(boolean on) {
         Log.v(TAG, "setLightsOn(" + on + ")");
         if (on) {
-            setSystemUiVisibility(mSystemUiVisibility & ~View.SYSTEM_UI_FLAG_LOW_PROFILE);
+            setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
         } else {
-            setSystemUiVisibility(mSystemUiVisibility | View.SYSTEM_UI_FLAG_LOW_PROFILE);
+            setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE, View.SYSTEM_UI_FLAG_LOW_PROFILE);
         }
     }
 

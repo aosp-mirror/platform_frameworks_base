@@ -292,27 +292,27 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    public void setSystemUiVisibility(int vis) {
+    public void setSystemUiVisibility(int vis, int mask) {
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
         if (SPEW) Slog.d(TAG, "setSystemUiVisibility(0x" + Integer.toHexString(vis) + ")");
 
         synchronized (mLock) {
-            updateUiVisibilityLocked(vis);
+            updateUiVisibilityLocked(vis, mask);
             disableLocked(vis & StatusBarManager.DISABLE_MASK, mSysUiVisToken,
                     "WindowManager.LayoutParams");
         }
     }
 
-    private void updateUiVisibilityLocked(final int vis) {
+    private void updateUiVisibilityLocked(final int vis, final int mask) {
         if (mSystemUiVisibility != vis) {
             mSystemUiVisibility = vis;
             mHandler.post(new Runnable() {
                     public void run() {
                         if (mBar != null) {
                             try {
-                                mBar.setSystemUiVisibility(vis);
+                                mBar.setSystemUiVisibility(vis, mask);
                             } catch (RemoteException ex) {
                             }
                         }

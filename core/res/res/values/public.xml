@@ -34,6 +34,7 @@
   <java-symbol type="id" name="account_type" />
   <java-symbol type="id" name="action_bar" />
   <java-symbol type="id" name="action_bar_container" />
+  <java-symbol type="id" name="action_bar_overlay_layout" />
   <java-symbol type="id" name="action_bar_title" />
   <java-symbol type="id" name="action_bar_subtitle" />
   <java-symbol type="id" name="action_context_bar" />
@@ -183,6 +184,7 @@
   <java-symbol type="id" name="to_common" />
   <java-symbol type="id" name="to_org" />
   <java-symbol type="id" name="to_org_unit" />
+  <java-symbol type="id" name="top_action_bar" />
   <java-symbol type="id" name="topPanel" />
   <java-symbol type="id" name="up" />
   <java-symbol type="id" name="value" />

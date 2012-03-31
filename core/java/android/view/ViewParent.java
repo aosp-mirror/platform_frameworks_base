@@ -271,4 +271,10 @@ public interface ViewParent {
      * @hide
      */
     public void childHasTransientStateChanged(View child, boolean hasTransientState);
+
+    /**
+     * Ask that a new dispatch of {@link View#fitSystemWindows(Rect)
+     * View.fitSystemWindows(Rect)} be performed.
+     */
+    public void requestFitSystemWindows();
 }

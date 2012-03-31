@@ -89,7 +89,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void disable(int state);
         public void animateExpand();
         public void animateCollapse();
-        public void setSystemUiVisibility(int vis);
+        public void setSystemUiVisibility(int vis, int mask);
         public void topAppWindowChanged(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
         public void setHardKeyboardStatus(boolean available, boolean enabled);
@@ -165,10 +165,10 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setSystemUiVisibility(int vis) {
+    public void setSystemUiVisibility(int vis, int mask) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_SET_SYSTEMUI_VISIBILITY);
-            mHandler.obtainMessage(MSG_SET_SYSTEMUI_VISIBILITY, vis, 0, null).sendToTarget();
+            mHandler.obtainMessage(MSG_SET_SYSTEMUI_VISIBILITY, vis, mask, null).sendToTarget();
         }
     }
 
@@ -279,7 +279,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     }
                     break;
                 case MSG_SET_SYSTEMUI_VISIBILITY:
-                    mCallbacks.setSystemUiVisibility(msg.arg1);
+                    mCallbacks.setSystemUiVisibility(msg.arg1, msg.arg2);
                     break;
                 case MSG_TOP_APP_WINDOW_CHANGED:
                     mCallbacks.topAppWindowChanged(msg.arg1 != 0);

@@ -2648,7 +2648,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 flagChanges = win.mAttrs.flags ^= attrs.flags;
                 attrChanges = win.mAttrs.copyFrom(attrs);
-                if ((attrChanges&WindowManager.LayoutParams.LAYOUT_CHANGED) != 0) {
+                if ((attrChanges & (WindowManager.LayoutParams.LAYOUT_CHANGED
+                        | WindowManager.LayoutParams.SYSTEM_UI_VISIBILITY_CHANGED)) != 0) {
                     win.mLayoutNeeded = true;
                 }
             }

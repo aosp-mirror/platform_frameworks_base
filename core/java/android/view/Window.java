@@ -75,6 +75,16 @@ public abstract class Window {
      * over how the Action Bar is displayed, such as letting application content scroll beneath
      * an Action Bar with a transparent background or otherwise displaying a transparent/translucent
      * Action Bar over application content.
+     *
+     * <p>This mode is especially useful with {@link View#SYSTEM_UI_FLAG_FULLSCREEN
+     * View.SYSTEM_UI_FLAG_FULLSCREEN}, which allows you to seamlessly hide the
+     * action bar in conjunction with other screen decorations.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#JELLY_BEAN}, when an
+     * ActionBar is in this mode it will adjust the insets provided to
+     * {@link View#fitSystemWindows(android.graphics.Rect) View.fitSystemWindows(Rect)}
+     * to include the content covered by the action bar, so you can do layout within
+     * that space.
      */
     public static final int FEATURE_ACTION_BAR_OVERLAY = 9;
     /**

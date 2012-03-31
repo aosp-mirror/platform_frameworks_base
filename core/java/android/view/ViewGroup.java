@@ -918,7 +918,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
     }
-    
+
+    /**
+     * @hide
+     */
+    @Override
+    public void makeOptionalFitsSystemWindows() {
+        super.makeOptionalFitsSystemWindows();
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            children[i].makeOptionalFitsSystemWindows();
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -1017,13 +1030,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    void dispatchCollectViewAttributes(int visibility) {
-        visibility |= mViewFlags&VISIBILITY_MASK;
-        super.dispatchCollectViewAttributes(visibility);
-        final int count = mChildrenCount;
-        final View[] children = mChildren;
-        for (int i = 0; i < count; i++) {
-            children[i].dispatchCollectViewAttributes(visibility);
+    void dispatchCollectViewAttributes(AttachInfo attachInfo, int visibility) {
+        if ((visibility & VISIBILITY_MASK) == VISIBLE) {
+            super.dispatchCollectViewAttributes(attachInfo, visibility);
+            final int count = mChildrenCount;
+            final View[] children = mChildren;
+            for (int i = 0; i < count; i++) {
+                final View child = children[i];
+                child.dispatchCollectViewAttributes(attachInfo,
+                        visibility | (child.mViewFlags&VISIBILITY_MASK));
+            }
         }
     }
 
@@ -1236,6 +1252,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
         return canAccept;
+    }
+
+    @Override
+    public void dispatchWindowSystemUiVisiblityChanged(int visible) {
+        super.dispatchWindowSystemUiVisiblityChanged(visible);
+
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i=0; i <count; i++) {
+            final View child = children[i];
+            child.dispatchWindowSystemUiVisiblityChanged(visible);
+        }
     }
 
     @Override
@@ -2244,12 +2272,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         super.dispatchAttachedToWindow(info, visibility);
         mGroupFlags &= ~FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW;
 
-        visibility |= mViewFlags & VISIBILITY_MASK;
-
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
-            children[i].dispatchAttachedToWindow(info, visibility);
+            final View child = children[i];
+            child.dispatchAttachedToWindow(info,
+                    visibility | (child.mViewFlags&VISIBILITY_MASK));
         }
     }
 

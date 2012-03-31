@@ -19,14 +19,16 @@ This is an optimized layout for a screen with
 the Action Bar enabled overlaying application content.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.ActionBarOverlayLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/action_bar_overlay_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
     <FrameLayout android:id="@android:id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <LinearLayout android:layout_width="match_parent"
+    <LinearLayout android:id="@+id/top_action_bar"
+                  android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_gravity="top">
         <com.android.internal.widget.ActionBarContainer android:id="@+id/action_bar_container"
@@ -50,8 +52,7 @@ the Action Bar enabled overlaying application content.
         <ImageView android:src="?android:attr/windowContentOverlay"
                    android:scaleType="fitXY"
                    android:layout_width="match_parent"
-                   android:layout_height="wrap_content"
-                   android:layout_below="@id/action_bar_container" />
+                   android:layout_height="wrap_content" />
     </LinearLayout>
     <com.android.internal.widget.ActionBarContainer android:id="@+id/split_action_bar"
                   android:layout_width="match_parent"
@@ -60,4 +61,4 @@ the Action Bar enabled overlaying application content.
                   style="?android:attr/actionBarSplitStyle"
                   android:visibility="gone"
                   android:gravity="center"/>
-</FrameLayout>
+</com.android.internal.widget.ActionBarOverlayLayout>

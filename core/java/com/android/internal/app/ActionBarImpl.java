@@ -21,6 +21,7 @@ import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.SubMenuBuilder;
 import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
+import com.android.internal.widget.ActionBarOverlayLayout;
 import com.android.internal.widget.ActionBarView;
 import com.android.internal.widget.ScrollingTabContainerView;
 
@@ -47,6 +48,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.SpinnerAdapter;
@@ -69,7 +71,9 @@ public class ActionBarImpl extends ActionBar {
     private Activity mActivity;
     private Dialog mDialog;
 
+    private ActionBarOverlayLayout mOverlayLayout;
     private ActionBarContainer mContainerView;
+    private ViewGroup mTopVisibilityView;
     private ActionBarView mActionView;
     private ActionBarContextView mContextView;
     private ActionBarContainer mSplitView;
@@ -100,6 +104,8 @@ public class ActionBarImpl extends ActionBar {
     final Handler mHandler = new Handler();
     Runnable mTabSelector;
 
+    private int mCurWindowVisibility = View.VISIBLE;
+
     private Animator mCurrentShowAnim;
     private Animator mCurrentModeAnim;
     private boolean mShowHideAnimationEnabled;
@@ -110,12 +116,12 @@ public class ActionBarImpl extends ActionBar {
         public void onAnimationEnd(Animator animation) {
             if (mContentView != null) {
                 mContentView.setTranslationY(0);
-                mContainerView.setTranslationY(0);
+                mTopVisibilityView.setTranslationY(0);
             }
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
                 mSplitView.setVisibility(View.GONE);
             }
-            mContainerView.setVisibility(View.GONE);
+            mTopVisibilityView.setVisibility(View.GONE);
             mContainerView.setTransitioning(false);
             mCurrentShowAnim = null;
             completeDeferredDestroyActionMode();
@@ -126,7 +132,7 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public void onAnimationEnd(Animator animation) {
             mCurrentShowAnim = null;
-            mContainerView.requestLayout();
+            mTopVisibilityView.requestLayout();
         }
     };
 
@@ -147,11 +153,21 @@ public class ActionBarImpl extends ActionBar {
 
     private void init(View decor) {
         mContext = decor.getContext();
+        mOverlayLayout = (ActionBarOverlayLayout) decor.findViewById(
+                com.android.internal.R.id.action_bar_overlay_layout);
+        if (mOverlayLayout != null) {
+            mOverlayLayout.setActionBar(this);
+        }
         mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
         mContextView = (ActionBarContextView) decor.findViewById(
                 com.android.internal.R.id.action_context_bar);
         mContainerView = (ActionBarContainer) decor.findViewById(
                 com.android.internal.R.id.action_bar_container);
+        mTopVisibilityView = (ViewGroup)decor.findViewById(
+                com.android.internal.R.id.top_action_bar);
+        if (mTopVisibilityView == null) {
+            mTopVisibilityView = mContainerView;
+        }
         mSplitView = (ActionBarContainer) decor.findViewById(
                 com.android.internal.R.id.split_action_bar);
 
@@ -190,9 +206,20 @@ public class ActionBarImpl extends ActionBar {
         }
         final boolean isInTabMode = getNavigationMode() == NAVIGATION_MODE_TABS;
         if (mTabScrollView != null) {
-            mTabScrollView.setVisibility(isInTabMode ? View.VISIBLE : View.GONE);
+            if (isInTabMode) {
+                mTabScrollView.setVisibility(View.VISIBLE);
+                if (mOverlayLayout != null) {
+                    mOverlayLayout.requestFitSystemWindows();
+                }
+            } else {
+                mTabScrollView.setVisibility(View.GONE);
+            }
         }
         mActionView.setCollapsable(!mHasEmbeddedTabs && isInTabMode);
+    }
+
+    public boolean hasNonEmbeddedTabs() {
+        return !mHasEmbeddedTabs && getNavigationMode() == NAVIGATION_MODE_TABS;
     }
 
     private void ensureTabsExist() {
@@ -206,8 +233,14 @@ public class ActionBarImpl extends ActionBar {
             tabScroller.setVisibility(View.VISIBLE);
             mActionView.setEmbeddedTabView(tabScroller);
         } else {
-            tabScroller.setVisibility(getNavigationMode() == NAVIGATION_MODE_TABS ?
-                    View.VISIBLE : View.GONE);
+            if (getNavigationMode() == NAVIGATION_MODE_TABS) {
+                tabScroller.setVisibility(View.VISIBLE);
+                if (mOverlayLayout != null) {
+                    mOverlayLayout.requestFitSystemWindows();
+                }
+            } else {
+                tabScroller.setVisibility(View.GONE);
+            }
             mContainerView.setTabContainer(tabScroller);
         }
         mTabScrollView = tabScroller;
@@ -219,6 +252,10 @@ public class ActionBarImpl extends ActionBar {
             mDeferredDestroyActionMode = null;
             mDeferredModeDestroyCallback = null;
         }
+    }
+
+    public void setWindowVisibility(int visibility) {
+        mCurWindowVisibility = visibility;
     }
 
     /**
@@ -396,7 +433,12 @@ public class ActionBarImpl extends ActionBar {
             animateToMode(true);
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
                 // TODO animate this
-                mSplitView.setVisibility(View.VISIBLE);
+                if (mSplitView.getVisibility() != View.VISIBLE) {
+                    mSplitView.setVisibility(View.VISIBLE);
+                    if (mOverlayLayout != null) {
+                        mOverlayLayout.requestFitSystemWindows();
+                    }
+                }
             }
             mContextView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
             mActionMode = mode;
@@ -530,28 +572,29 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void show() {
-        show(true);
+        show(true, false);
     }
 
-    void show(boolean markHiddenBeforeMode) {
+    public void show(boolean markHiddenBeforeMode, boolean alwaysAnimate) {
         if (mCurrentShowAnim != null) {
             mCurrentShowAnim.end();
         }
-        if (mContainerView.getVisibility() == View.VISIBLE) {
+        if (mTopVisibilityView.getVisibility() == View.VISIBLE) {
             if (markHiddenBeforeMode) mWasHiddenBeforeMode = false;
             return;
         }
-        mContainerView.setVisibility(View.VISIBLE);
+        mTopVisibilityView.setVisibility(View.VISIBLE);
 
-        if (mShowHideAnimationEnabled) {
-            mContainerView.setAlpha(0);
+        if (mCurWindowVisibility == View.VISIBLE && (mShowHideAnimationEnabled
+                || alwaysAnimate)) {
+            mTopVisibilityView.setAlpha(0);
             AnimatorSet anim = new AnimatorSet();
-            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "alpha", 1));
+            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView, "alpha", 1));
             if (mContentView != null) {
                 b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
-                        -mContainerView.getHeight(), 0));
-                mContainerView.setTranslationY(-mContainerView.getHeight());
-                b.with(ObjectAnimator.ofFloat(mContainerView, "translationY", 0));
+                        -mTopVisibilityView.getHeight(), 0));
+                mTopVisibilityView.setTranslationY(-mTopVisibilityView.getHeight());
+                b.with(ObjectAnimator.ofFloat(mTopVisibilityView, "translationY", 0));
             }
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
                 mSplitView.setAlpha(0);
@@ -562,7 +605,7 @@ public class ActionBarImpl extends ActionBar {
             mCurrentShowAnim = anim;
             anim.start();
         } else {
-            mContainerView.setAlpha(1);
+            mTopVisibilityView.setAlpha(1);
             mContainerView.setTranslationY(0);
             mShowListener.onAnimationEnd(null);
         }
@@ -570,23 +613,28 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void hide() {
+        hide(false);
+    }
+
+    public void hide(boolean alwaysAnimate) {
         if (mCurrentShowAnim != null) {
             mCurrentShowAnim.end();
         }
-        if (mContainerView.getVisibility() == View.GONE) {
+        if (mTopVisibilityView.getVisibility() == View.GONE) {
             return;
         }
 
-        if (mShowHideAnimationEnabled) {
-            mContainerView.setAlpha(1);
+        if (mCurWindowVisibility == View.VISIBLE && (mShowHideAnimationEnabled
+                || alwaysAnimate)) {
+            mTopVisibilityView.setAlpha(1);
             mContainerView.setTransitioning(true);
             AnimatorSet anim = new AnimatorSet();
-            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "alpha", 0));
+            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView, "alpha", 0));
             if (mContentView != null) {
                 b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
-                        0, -mContainerView.getHeight()));
-                b.with(ObjectAnimator.ofFloat(mContainerView, "translationY",
-                        -mContainerView.getHeight()));
+                        0, -mTopVisibilityView.getHeight()));
+                b.with(ObjectAnimator.ofFloat(mTopVisibilityView, "translationY",
+                        -mTopVisibilityView.getHeight()));
             }
             if (mSplitView != null && mSplitView.getVisibility() == View.VISIBLE) {
                 mSplitView.setAlpha(1);
@@ -601,12 +649,12 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public boolean isShowing() {
-        return mContainerView.getVisibility() == View.VISIBLE;
+        return mTopVisibilityView.getVisibility() == View.VISIBLE;
     }
 
     void animateToMode(boolean toActionMode) {
         if (toActionMode) {
-            show(false);
+            show(false, false);
         }
         if (mCurrentModeAnim != null) {
             mCurrentModeAnim.end();
@@ -979,6 +1027,11 @@ public class ActionBarImpl extends ActionBar {
                 selectTab(null);
                 mTabScrollView.setVisibility(View.GONE);
                 break;
+        }
+        if (oldMode != mode && !mHasEmbeddedTabs) {
+            if (mOverlayLayout != null) {
+                mOverlayLayout.requestFitSystemWindows();
+            }
         }
         mActionView.setNavigationMode(mode);
         switch (mode) {
