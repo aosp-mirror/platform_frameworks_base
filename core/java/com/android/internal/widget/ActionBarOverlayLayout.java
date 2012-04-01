@@ -137,7 +137,9 @@ public class ActionBarOverlayLayout extends FrameLayout {
 
         // The top and bottom action bars are always within the content area.
         boolean changed = applyInsets(mActionBarTop, insets, true, true, false, true);
-        changed |= applyInsets(mActionBarBottom, insets, true, false, true, true);
+        if (mActionBarBottom != null) {
+            changed |= applyInsets(mActionBarBottom, insets, true, false, true, true);
+        }
 
         // If the window has not requested system UI layout flags, we need to
         // make sure its content is not being covered by system UI...  though it
