@@ -1204,7 +1204,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int SHOW_FULLSCREEN                    = 120;
     static final int HIDE_FULLSCREEN                    = 121;
     static final int REPLACE_BASE_CONTENT               = 123;
-    static final int FORM_DID_BLUR                      = 124;
     static final int UPDATE_MATCH_COUNT                 = 126;
     static final int CENTER_FIT_RECT                    = 127;
     static final int REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID = 128;
@@ -1274,7 +1273,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         "HIDE_FULLSCREEN", //                = 121;
         "DOM_FOCUS_CHANGED", //              = 122;
         "REPLACE_BASE_CONTENT", //           = 123;
-        "FORM_DID_BLUR", //                  = 124;
         "RETURN_LABEL", //                   = 125;
         "UPDATE_MATCH_COUNT", //             = 126;
         "CENTER_FIT_RECT", //                = 127;
@@ -8294,9 +8292,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 case UPDATE_TEXT_SELECTION_MSG_ID:
                     updateTextSelectionFromMessage(msg.arg1, msg.arg2,
                             (WebViewCore.TextSelectionData) msg.obj);
-                    break;
-                case FORM_DID_BLUR:
-                    // TODO: Figure out if this is needed for something (b/6111763)
                     break;
                 case TAKE_FOCUS:
                     int direction = msg.arg1;

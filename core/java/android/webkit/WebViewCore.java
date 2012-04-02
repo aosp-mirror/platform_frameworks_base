@@ -325,17 +325,6 @@ public final class WebViewCore {
     }
 
     /**
-     * Called by JNI.  Send a message to the UI thread to hide the soft keyboard
-     * if the node pointed to by nodePointer is still in focus.
-     * @param nodePointer The node which just blurred.
-     */
-    private void formDidBlur(int nodePointer) {
-        if (mWebViewClassic == null) return;
-        Message.obtain(mWebViewClassic.mPrivateHandler, WebViewClassic.FORM_DID_BLUR,
-                nodePointer, 0).sendToTarget();
-    }
-
-    /**
      * Called by JNI when the focus node changed.
      */
     private void focusNodeChanged(int nodePointer, WebKitHitTest hitTest) {
