@@ -64,7 +64,7 @@ static jboolean isLoggable(const char* tag, jint level) {
 
     char buf[PROPERTY_VALUE_MAX];
     if (property_get(key.string(), buf, "") <= 0) {
-        return false;
+        buf[0] = '\0';
     }
 
     int logLevel = toLevel(buf);
