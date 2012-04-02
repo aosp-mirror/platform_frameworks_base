@@ -261,6 +261,7 @@ public final class LoadedApk {
 
             if (mIncludeCode && !mPackageName.equals("android")) {
                 String zip = mAppDir;
+                String libraryPath = mLibDir;
 
                 /*
                  * The following is a bit of a hack to inject
@@ -273,15 +274,20 @@ public final class LoadedApk {
 
                 String instrumentationAppDir =
                         mActivityThread.mInstrumentationAppDir;
+                String instrumentationAppLibraryDir =
+                        mActivityThread.mInstrumentationAppLibraryDir;
                 String instrumentationAppPackage =
                         mActivityThread.mInstrumentationAppPackage;
                 String instrumentedAppDir =
                         mActivityThread.mInstrumentedAppDir;
+                String instrumentedAppLibraryDir =
+                        mActivityThread.mInstrumentedAppLibraryDir;
                 String[] instrumentationLibs = null;
 
                 if (mAppDir.equals(instrumentationAppDir)
                         || mAppDir.equals(instrumentedAppDir)) {
                     zip = instrumentationAppDir + ":" + instrumentedAppDir;
+                    libraryPath = instrumentationAppLibraryDir + ":" + instrumentedAppLibraryDir;
                     if (! instrumentedAppDir.equals(instrumentationAppDir)) {
                         instrumentationLibs =
                             getLibrariesFor(instrumentationAppPackage);
@@ -301,7 +307,7 @@ public final class LoadedApk {
                  */
 
                 if (ActivityThread.localLOGV)
-                    Slog.v(ActivityThread.TAG, "Class path: " + zip + ", JNI path: " + mLibDir);
+                    Slog.v(ActivityThread.TAG, "Class path: " + zip + ", JNI path: " + libraryPath);
 
                 // Temporarily disable logging of disk reads on the Looper thread
                 // as this is early and necessary.
@@ -309,7 +315,7 @@ public final class LoadedApk {
 
                 mClassLoader =
                     ApplicationLoaders.getDefault().getClassLoader(
-                        zip, mLibDir, mBaseClassLoader);
+                        zip, libraryPath, mBaseClassLoader);
                 initializeJavaContextClassLoader();
 
                 StrictMode.setThreadPolicy(oldPolicy);
@@ -440,6 +446,10 @@ public final class LoadedApk {
 
     public String getAppDir() {
         return mAppDir;
+    }
+
+    public String getLibDir() {
+        return mLibDir;
     }
 
     public String getResDir() {
