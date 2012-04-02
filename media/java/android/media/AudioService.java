@@ -812,8 +812,9 @@ public class AudioService extends IAudioService.Stub {
                 // Post a persist master volume msg
                 sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME, 0, SENDMSG_REPLACE,
                         Math.round(volume * (float)1000.0), 0, null, PERSIST_DELAY);
-                sendMasterVolumeUpdate(flags, oldVolume, newVolume);
             }
+            // Send the volume update regardless whether there was a change.
+            sendMasterVolumeUpdate(flags, oldVolume, newVolume);
         }
     }
 
