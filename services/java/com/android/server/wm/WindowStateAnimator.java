@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Surface;
@@ -357,7 +358,7 @@ class WindowStateAnimator {
 
     boolean finishDrawingLocked() {
         if (mDrawPending) {
-            if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) Slog.v(
+            if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION) Slog.v(
                 TAG, "finishDrawingLocked: " + this + " in " + mSurface);
             mCommitDrawPending = true;
             mDrawPending = false;
@@ -386,7 +387,7 @@ class WindowStateAnimator {
         if (mSurface == null) {
             mReportDestroySurface = false;
             mSurfacePendingDestroy = false;
-            if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(TAG,
+            if (DEBUG_ORIENTATION) Slog.i(TAG,
                     "createSurface " + this + ": DRAW NOW PENDING");
             mDrawPending = true;
             mCommitDrawPending = false;
@@ -923,6 +924,34 @@ class WindowStateAnimator {
         }
     }
 
+    void setTransparentRegionHint(final Region region) {
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+            ">>> OPEN TRANSACTION setTransparentRegion");
+        Surface.openTransaction();
+        try {
+            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
+                    "transparentRegionHint=" + region, null);
+            mSurface.setTransparentRegionHint(region);
+        } finally {
+            Surface.closeTransaction();
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                    "<<< CLOSE TRANSACTION setTransparentRegion");
+        }
+    }
+
+    void setWallpaperOffset(int left, int top) {
+        Surface.openTransaction();
+        try {
+            mSurfaceX = left;
+            mSurfaceY = top;
+            mSurface.setPosition(left, top);
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Error positioning surface of " + mWin
+                    + " pos=(" + left + "," + top + ")", e);
+        }
+        Surface.closeTransaction();
+    }
+
     // This must be called while inside a transaction.
     boolean performShowLocked() {
         if (DEBUG_VISIBILITY) {
@@ -1053,6 +1082,7 @@ class WindowStateAnimator {
         applyAnimationLocked(transit, true);
     }
 
+    // TODO(cmautner): Move back to WindowState?
     /**
      * Choose the correct animation and set it to the passed WindowState.
      * @param transit If WindowManagerPolicy.TRANSIT_PREVIEW_DONE and the app window has been drawn
