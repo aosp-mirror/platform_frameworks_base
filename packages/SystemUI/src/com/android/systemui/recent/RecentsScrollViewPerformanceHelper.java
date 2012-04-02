@@ -37,15 +37,11 @@ public class RecentsScrollViewPerformanceHelper {
     public static final boolean OPTIMIZE_SW_RENDERED_RECENTS = true;
     public static final boolean USE_DARK_FADE_IN_HW_ACCELERATED_MODE = true;
     private View mScrollView;
-    private LinearLayout mLinearLayout;
     private RecentsCallback mCallback;
 
-    private boolean mShowBackground = false;
     private int mFadingEdgeLength;
-    private Drawable.ConstantState mBackgroundDrawable;
     private Context mContext;
     private boolean mIsVertical;
-    private boolean mFirstTime = true;
     private boolean mSoftwareRendered = false;
     private boolean mAttachedToWindow = false;
 
