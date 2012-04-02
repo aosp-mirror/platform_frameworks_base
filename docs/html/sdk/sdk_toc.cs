@@ -40,8 +40,7 @@
   <li>
     <span class="heading">Android 3.0 Preview SDK</span>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/preview/start.html">Getting Started</a> <span
-class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/preview/start.html">Getting Started</a></li>
     </ul>
   </li><?cs
   /if ?>
@@ -79,10 +78,9 @@ class="new">new!</span></li>
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>sdk/android-4.0-highlights.html">
-        <span class="en">Android 4.0.x Platform</span></a> <span class="new">new!</span></div>
+        <span class="en">Android 4.0.x Platform</span></a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>sdk/android-4.0.3.html">Android 4.0.3 Platform</a>
-            <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>sdk/android-4.0.3.html">Android 4.0.3 Platform</a></li>
           <li><a href="<?cs var:toroot ?>sdk/android-4.0.html">Android 4.0 Platform</a> </li>
         </ul>
       </li>
@@ -153,11 +151,9 @@ class="new">new!</span></li>
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r17</a> <span
-class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r17</a></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Support Package, r7</a>
-      <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Support Package, r7</a></li>
     </ul>
   </li>
   <li>
@@ -179,8 +175,7 @@ class="new">new!</span></li>
       <span style="display:none" class="it"></span>
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
-      <span style="display:none" class="zh-TW"></span></a> <span
-class="new">new!</span>
+      <span style="display:none" class="zh-TW"></span></a>
       </li>
     </ul>
   </li>
@@ -197,7 +192,6 @@ class="new">new!</span>
     </span>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r7b</a>
-        <span class="new">new!</span>
         </li>
       <li><a href="<?cs var:toroot ?>sdk/ndk/overview.html">What is the NDK?</a></li>
     </ul>
