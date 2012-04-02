@@ -46,6 +46,8 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.telephony.RILConstants;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -1016,5 +1018,19 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected void loge(String s) {
         Log.e(LOG_TAG, "[CdmaDCT] " + s);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("CdmaDataConnectionTracker extends:");
+        super.dump(fd, pw, args);
+        pw.println(" mCdmaPhone=" + mCdmaPhone);
+        pw.println(" mCdmaSSM=" + mCdmaSSM);
+        pw.println(" mPendingDataConnection=" + mPendingDataConnection);
+        pw.println(" mPendingRestartRadio=" + mPendingRestartRadio);
+        pw.println(" mSupportedApnTypes=" + mSupportedApnTypes);
+        pw.println(" mDefaultApnTypes=" + mDefaultApnTypes);
+        pw.println(" mDunApnTypes=" + mDunApnTypes);
+        pw.println(" mDefaultApnId=" + mDefaultApnId);
     }
 }

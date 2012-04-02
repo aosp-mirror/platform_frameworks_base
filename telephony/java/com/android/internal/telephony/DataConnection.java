@@ -32,6 +32,8 @@ import android.os.Message;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1184,5 +1186,28 @@ public abstract class DataConnection extends StateMachine {
     public void tearDownAll(String reason, Message onCompletedMsg) {
         sendMessage(obtainMessage(EVENT_DISCONNECT_ALL,
                 new DisconnectParams(reason, onCompletedMsg)));
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("DataConnection name=" + getName() + ":");
+        pw.println(" mApnList=" + mApnList);
+        pw.println(" mDataConnectionTracker=" + mDataConnectionTracker);
+        pw.println(" mApn=" + mApn);
+        pw.println(" mTag=" + mTag);
+        pw.println(" phone=" + phone);
+        pw.println(" mRilVersion=" + mRilVersion);
+        pw.println(" cid=" + cid);
+        pw.println(" mLinkProperties=" + mLinkProperties);
+        pw.println(" mCapabilities=" + mCapabilities);
+        pw.println(" createTime=" + createTime);
+        pw.println(" lastFailTime=" + lastFailTime);
+        pw.println(" lastFailCause=" + lastFailCause);
+        pw.println(" mRetryOverride=" + mRetryOverride);
+        pw.println(" mRefCount=" + mRefCount);
+        pw.println(" userData=" + userData);
+        pw.println(" total messages=" + getProcessedMessagesCount());
+        for (int i=0; i < getProcessedMessagesSize(); i++) {
+            pw.printf("  msg[%d]=%s\n", i, getProcessedMessageInfo(i));
+        }
     }
 }

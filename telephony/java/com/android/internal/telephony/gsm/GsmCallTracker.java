@@ -43,6 +43,8 @@ import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.GsmCall;
 import com.android.internal.telephony.gsm.GsmConnection;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -921,5 +923,29 @@ public final class GsmCallTracker extends CallTracker {
 
     protected void log(String msg) {
         Log.d(LOG_TAG, "[GsmCallTracker] " + msg);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("GsmCallTracker extends:");
+        super.dump(fd, pw, args);
+        pw.println("connections: length=" + connections.length);
+        for(int i=0; i < connections.length; i++) {
+            pw.printf("  connections[%d]=%s\n", i, connections[i]);
+        }
+        pw.println(" voiceCallEndedRegistrants=" + voiceCallEndedRegistrants);
+        pw.println(" voiceCallStartedRegistrants=" + voiceCallStartedRegistrants);
+        pw.println(" droppedDuringPoll: size=" + droppedDuringPoll.size());
+        for(int i = 0; i < droppedDuringPoll.size(); i++) {
+            pw.printf( "  droppedDuringPoll[%d]=%s\n", i, droppedDuringPoll.get(i));
+        }
+        pw.println(" ringingCall=" + ringingCall);
+        pw.println(" foregroundCall=" + foregroundCall);
+        pw.println(" backgroundCall=" + backgroundCall);
+        pw.println(" pendingMO=" + pendingMO);
+        pw.println(" hangupPendingMO=" + hangupPendingMO);
+        pw.println(" phone=" + phone);
+        pw.println(" desiredMute=" + desiredMute);
+        pw.println(" state=" + state);
     }
 }

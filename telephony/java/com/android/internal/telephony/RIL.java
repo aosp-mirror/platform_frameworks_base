@@ -56,8 +56,10 @@ import com.android.internal.telephony.IccRefreshResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -3832,5 +3834,28 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     public void testingEmergencyCall() {
         if (RILJ_LOGD) riljLog("testingEmergencyCall");
         mTestingEmergencyCall.set(true);
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("RIL:");
+        pw.println(" mSocket=" + mSocket);
+        pw.println(" mSenderThread=" + mSenderThread);
+        pw.println(" mSender=" + mSender);
+        pw.println(" mReceiverThread=" + mReceiverThread);
+        pw.println(" mReceiver=" + mReceiver);
+        pw.println(" mWakeLock=" + mWakeLock);
+        pw.println(" mWakeLockTimeout=" + mWakeLockTimeout);
+        synchronized (mRequestsList) {
+          pw.println(" mRequestMessagesPending=" + mRequestMessagesPending);
+          pw.println(" mRequestMessagesWaiting=" + mRequestMessagesWaiting);
+            int count = mRequestsList.size();
+            pw.println(" mRequestList count=" + count);
+            for (int i = 0; i < count; i++) {
+                RILRequest rr = mRequestsList.get(i);
+                pw.println("  [" + rr.mSerial + "] " + requestToString(rr.mRequest));
+            }
+        }
+        pw.println(" mLastNITZTimeInfo=" + mLastNITZTimeInfo);
+        pw.println(" mTestingEmergencyCall=" + mTestingEmergencyCall.get());
     }
 }

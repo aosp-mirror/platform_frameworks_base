@@ -28,6 +28,9 @@ import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.RetryManager;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * {@hide}
  */
@@ -152,5 +155,12 @@ public class GsmDataConnection extends DataConnection {
         if (address == null) return false;
 
         return Patterns.IP_ADDRESS.matcher(address).matches();
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("GsmDataConnection extends:");
+        super.dump(fd, pw, args);
+        pw.println(" mProfileId=" + mProfileId);
     }
 }

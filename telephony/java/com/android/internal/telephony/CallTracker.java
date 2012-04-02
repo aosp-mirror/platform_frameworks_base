@@ -25,6 +25,9 @@ import android.util.Log;
 
 import com.android.internal.telephony.CommandException;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 
 /**
  * {@hide}
@@ -170,4 +173,10 @@ public abstract class CallTracker extends Handler {
 
     protected abstract void log(String msg);
 
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("CallTracker:");
+        pw.println(" pendingOperations=" + pendingOperations);
+        pw.println(" needsPoll=" + needsPoll);
+        pw.println(" lastRelevantPoll=" + lastRelevantPoll);
+    }
 }

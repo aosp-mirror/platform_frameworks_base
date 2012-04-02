@@ -59,6 +59,8 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.TimeUtils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1680,5 +1682,41 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
     private static void sloge(String s) {
         Log.e(LOG_TAG, "[GsmSST] " + s);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("GsmServiceStateTracker extends:");
+        super.dump(fd, pw, args);
+        pw.println(" phone=" + phone);
+        pw.println(" cellLoc=" + cellLoc);
+        pw.println(" newCellLoc=" + newCellLoc);
+        pw.println(" mPreferredNetworkType=" + mPreferredNetworkType);
+        pw.println(" gprsState=" + gprsState);
+        pw.println(" newGPRSState=" + newGPRSState);
+        pw.println(" mMaxDataCalls=" + mMaxDataCalls);
+        pw.println(" mNewMaxDataCalls=" + mNewMaxDataCalls);
+        pw.println(" mReasonDataDenied=" + mReasonDataDenied);
+        pw.println(" mNewReasonDataDenied=" + mNewReasonDataDenied);
+        pw.println(" mGsmRoaming=" + mGsmRoaming);
+        pw.println(" mDataRoaming=" + mDataRoaming);
+        pw.println(" mEmergencyOnly=" + mEmergencyOnly);
+        pw.println(" mNeedFixZone=" + mNeedFixZone);
+        pw.println(" mZoneOffset=" + mZoneOffset);
+        pw.println(" mZoneDst=" + mZoneDst);
+        pw.println(" mZoneTime=" + mZoneTime);
+        pw.println(" mGotCountryCode=" + mGotCountryCode);
+        pw.println(" mNitzUpdatedTime=" + mNitzUpdatedTime);
+        pw.println(" mSavedTimeZone=" + mSavedTimeZone);
+        pw.println(" mSavedTime=" + mSavedTime);
+        pw.println(" mSavedAtTime=" + mSavedAtTime);
+        pw.println(" mNeedToRegForSimLoaded=" + mNeedToRegForSimLoaded);
+        pw.println(" mStartedGprsRegCheck=" + mStartedGprsRegCheck);
+        pw.println(" mReportedGprsNoReg=" + mReportedGprsNoReg);
+        pw.println(" mNotification=" + mNotification);
+        pw.println(" mWakeLock=" + mWakeLock);
+        pw.println(" curSpn=" + curSpn);
+        pw.println(" curPlmn=" + curPlmn);
+        pw.println(" curSpnRule=" + curSpnRule);
     }
 }
