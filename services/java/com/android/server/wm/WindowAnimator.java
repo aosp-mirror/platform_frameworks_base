@@ -299,8 +299,7 @@ public class WindowAnimator {
                         if (!w.isDrawnLw()) {
                             Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurface
                                     + " pv=" + w.mPolicyVisibility
-                                    + " dp=" + winAnimator.mDrawPending
-                                    + " cdp=" + winAnimator.mCommitDrawPending
+                                    + " mDrawState=" + winAnimator.mDrawState
                                     + " ah=" + w.mAttachedHidden
                                     + " th=" + atoken.hiddenRequested
                                     + " a=" + winAnimator.mAnimating);
@@ -323,7 +322,7 @@ public class WindowAnimator {
                         atoken.startingDisplayed = true;
                     }
                 }
-            } else if (w.mReadyToShow) {
+            } else if (winAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW) {
                 if (winAnimator.performShowLocked()) {
                     mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
                     if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {

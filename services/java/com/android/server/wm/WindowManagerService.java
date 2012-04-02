@@ -1589,8 +1589,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": readyfordisplay="
-                    + w.isReadyForDisplay() + " drawpending=" + w.mWinAnimator.mDrawPending
-                    + " commitdrawpending=" + w.mWinAnimator.mCommitDrawPending);
+                    + w.isReadyForDisplay() + " mDrawState=" + w.mWinAnimator.mDrawState);
             if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isReadyForDisplay()
                     && (mWallpaperTarget == w || w.isDrawnLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
@@ -8111,9 +8110,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation start waiting for draw in "
                             + w + ", surface " + w.mWinAnimator.mSurface);
-                    winAnimator.mDrawPending = true;
-                    winAnimator.mCommitDrawPending = false;
-                    w.mReadyToShow = false;
+                    winAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
                     if (w.mAppToken != null) {
                         w.mAppToken.allDrawn = false;
                     }
@@ -8498,12 +8495,14 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + Integer.toHexString(diff));
                     }
                     win.mConfiguration = mCurConfiguration;
-                    if (DEBUG_ORIENTATION && winAnimator.mDrawPending) Slog.i(
+                    if (DEBUG_ORIENTATION &&
+                            winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                             TAG, "Resizing " + win + " WITH DRAW PENDING"); 
                     win.mClient.resized((int)winAnimator.mSurfaceW,
                             (int)winAnimator.mSurfaceH,
                             win.mLastContentInsets, win.mLastVisibleInsets,
-                            winAnimator.mDrawPending, configChanged ? win.mConfiguration : null);
+                            winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
+                            configChanged ? win.mConfiguration : null);
                     win.mContentInsetsChanged = false;
                     win.mVisibleInsetsChanged = false;
                     winAnimator.mSurfaceResized = false;

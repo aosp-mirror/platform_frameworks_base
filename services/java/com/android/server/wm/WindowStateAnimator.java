@@ -100,14 +100,24 @@ class WindowStateAnimator {
     // an enter animation.
     boolean mEnterAnimationPending;
 
-    // This is set after the Surface has been created but before the
-    // window has been drawn.  During this time the surface is hidden.
-    boolean mDrawPending;
+    /** This is set when there is no Surface */
+    static final int NO_SURFACE = 0;
+    /** This is set after the Surface has been created but before the window has been drawn. During
+     * this time the surface is hidden. */
+    static final int DRAW_PENDING = 1;
+    /** This is set after the window has finished drawing for the first time but before its surface
+     * is shown.  The surface will be displayed when the next layout is run. */
+    static final int COMMIT_DRAW_PENDING = 2;
+    /** This is set during the time after the window's drawing has been committed, and before its
+     * surface is actually shown.  It is used to delay showing the surface until all windows in a
+     * token are ready to be shown. */
+    static final int READY_TO_SHOW = 3;
+    /** Set when the window has been shown in the screen the first time. */
+    static final int HAS_DRAWN = 4;
+    int mDrawState;
 
-    // This is set after the window has finished drawing for the first
-    // time but before its surface is shown.  The surface will be
-    // displayed when the next layout is run.
-    boolean mCommitDrawPending;
+    /** Was this window last hidden? */
+    boolean mLastHidden;
 
     public WindowStateAnimator(final WindowManagerService service, final WindowState win,
                                final WindowState attachedWindow) {
@@ -130,7 +140,7 @@ class WindowStateAnimator {
         mAnimation.scaleCurrentDuration(mService.mWindowAnimationScale);
         // Start out animation gone if window is gone, or visible if window is visible.
         mTransformation.clear();
-        mTransformation.setAlpha(mWin.mLastHidden ? 0 : 1);
+        mTransformation.setAlpha(mLastHidden ? 0 : 1);
         mHasLocalTransformation = true;
     }
 
@@ -291,7 +301,7 @@ class WindowStateAnimator {
             }
         }
         mTransformation.clear();
-        if (mWin.mHasDrawn
+        if (mDrawState == HAS_DRAWN
                 && mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
                 && mWin.mAppToken != null
                 && mWin.mAppToken.firstWindowDrawn
@@ -347,7 +357,7 @@ class WindowStateAnimator {
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error hiding surface in " + this, e);
             }
-            mWin.mLastHidden = true;
+            mLastHidden = true;
         }
         mWin.mExiting = false;
         if (mWin.mRemoveOnExit) {
@@ -357,11 +367,10 @@ class WindowStateAnimator {
     }
 
     boolean finishDrawingLocked() {
-        if (mDrawPending) {
+        if (mDrawState == DRAW_PENDING) {
             if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION) Slog.v(
                 TAG, "finishDrawingLocked: " + this + " in " + mSurface);
-            mCommitDrawPending = true;
-            mDrawPending = false;
+            mDrawState = COMMIT_DRAW_PENDING;
             return true;
         }
         return false;
@@ -370,11 +379,10 @@ class WindowStateAnimator {
     // This must be called while inside a transaction.
     boolean commitFinishDrawingLocked(long currentTime) {
         //Slog.i(TAG, "commitFinishDrawingLocked: " + mSurface);
-        if (!mCommitDrawPending) {
+        if (mDrawState != COMMIT_DRAW_PENDING) {
             return false;
         }
-        mCommitDrawPending = false;
-        mWin.mReadyToShow = true;
+        mDrawState = READY_TO_SHOW;
         final boolean starting = mWin.mAttrs.type == TYPE_APPLICATION_STARTING;
         final AppWindowToken atoken = mWin.mAppToken;
         if (atoken == null || atoken.allDrawn || starting) {
@@ -389,9 +397,7 @@ class WindowStateAnimator {
             mSurfacePendingDestroy = false;
             if (DEBUG_ORIENTATION) Slog.i(TAG,
                     "createSurface " + this + ": DRAW NOW PENDING");
-            mDrawPending = true;
-            mCommitDrawPending = false;
-            mWin.mReadyToShow = false;
+            mDrawState = DRAW_PENDING;
             if (mWin.mAppToken != null) {
                 mWin.mAppToken.allDrawn = false;
             }
@@ -456,10 +462,12 @@ class WindowStateAnimator {
                 mWin.mHasSurface = false;
                 Slog.w(TAG, "OutOfResourcesException creating surface");
                 mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
+                mDrawState = NO_SURFACE;
                 return null;
             } catch (Exception e) {
                 mWin.mHasSurface = false;
                 Slog.e(TAG, "Exception creating surface", e);
+                mDrawState = NO_SURFACE;
                 return null;
             }
 
@@ -492,7 +500,7 @@ class WindowStateAnimator {
                     Slog.w(TAG, "Error creating surface in " + w, e);
                     mService.reclaimSomeSurfaceMemoryLocked(this, "create-init", true);
                 }
-                mWin.mLastHidden = true;
+                mLastHidden = true;
             } finally {
                 Surface.closeTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
@@ -509,10 +517,8 @@ class WindowStateAnimator {
             mWin.mAppToken.startingDisplayed = false;
         }
 
+        mDrawState = NO_SURFACE;
         if (mSurface != null) {
-            mDrawPending = false;
-            mCommitDrawPending = false;
-            mWin.mReadyToShow = false;
 
             int i = mWin.mChildWindows.size();
             while (i > 0) {
@@ -823,9 +829,9 @@ class WindowStateAnimator {
         }
 
         if (w.mAttachedHidden || !w.isReadyForDisplay()) {
-            if (!w.mLastHidden) {
+            if (!mLastHidden) {
                 //dump();
-                w.mLastHidden = true;
+                mLastHidden = true;
                 if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                         "HIDE (performLayout)", null);
                 if (mSurface != null) {
@@ -856,7 +862,7 @@ class WindowStateAnimator {
                 || mLastDtDy != mDtDy
                 || w.mLastHScale != w.mHScale
                 || w.mLastVScale != w.mVScale
-                || w.mLastHidden) {
+                || mLastHidden) {
             displayed = true;
             mLastAlpha = mShownAlpha;
             mLastLayer = mAnimLayer;
@@ -881,29 +887,27 @@ class WindowStateAnimator {
                     mSurface.setMatrix(
                         mDsDx*w.mHScale, mDtDx*w.mVScale,
                         mDsDy*w.mHScale, mDtDy*w.mVScale);
+
+                    if (mLastHidden && mDrawState == HAS_DRAWN) {
+                        if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+                                "SHOW (performLayout)", null);
+                        if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + w
+                                + " during relayout");
+                        if (showSurfaceRobustlyLocked()) {
+                            mLastHidden = false;
+                        } else {
+                            w.mOrientationChanging = false;
+                        }
+                    }
+                    if (mSurface != null) {
+                        w.mToken.hasVisible = true;
+                    }
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Error updating surface in " + w, e);
                     if (!recoveringMemory) {
                         mService.reclaimSomeSurfaceMemoryLocked(this, "update", true);
                     }
                 }
-            }
-
-            if (w.mLastHidden && w.isDrawnLw()
-                    && !w.mReadyToShow) {
-                if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "SHOW (performLayout)", null);
-                if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + w
-                        + " during relayout");
-                if (showSurfaceRobustlyLocked()) {
-                    w.mHasDrawn = true;
-                    w.mLastHidden = false;
-                } else {
-                    w.mOrientationChanging = false;
-                }
-            }
-            if (mSurface != null) {
-                w.mToken.hasVisible = true;
             }
         } else {
             displayed = true;
@@ -961,11 +965,11 @@ class WindowStateAnimator {
                 e.fillInStackTrace();
             }
             Slog.v(TAG, "performShow on " + this
-                    + ": readyToShow=" + mWin.mReadyToShow + " readyForDisplay="
+                    + ": mDrawState=" + mDrawState + " readyForDisplay="
                     + mWin.isReadyForDisplay()
                     + " starting=" + (mWin.mAttrs.type == TYPE_APPLICATION_STARTING), e);
         }
-        if (mWin.mReadyToShow && mWin.isReadyForDisplay()) {
+        if (mDrawState == READY_TO_SHOW && mWin.isReadyForDisplay()) {
             if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
                 WindowManagerService.logSurface(mWin, "SHOW (performShowLocked)", null);
             if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
@@ -987,9 +991,8 @@ class WindowStateAnimator {
             applyEnterAnimationLocked();
 
             mLastAlpha = -1;
-            mWin.mHasDrawn = true;
-            mWin.mLastHidden = false;
-            mWin.mReadyToShow = false;
+            mLastHidden = false;
+            mDrawState = HAS_DRAWN;
 
             int i = mWin.mChildWindows.size();
             while (i > 0) {
@@ -1170,6 +1173,8 @@ class WindowStateAnimator {
         if (mSurface != null) {
             if (dumpAll) {
                 pw.print(prefix); pw.print("mSurface="); pw.println(mSurface);
+                pw.print(prefix); pw.print("mDrawState="); pw.print(mDrawState);
+                pw.print(" mLastHidden="); pw.println(mLastHidden);
             }
             pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);
                     pw.print(" layer="); pw.print(mSurfaceLayer);
