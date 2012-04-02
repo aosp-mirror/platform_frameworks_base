@@ -2014,7 +2014,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mWebView instanceof TitleBarDelegate) {
             return ((TitleBarDelegate) mWebView).getTitleHeight();
         }
-        return mTitleBar != null ? mTitleBar.getHeight() : 0;
+        return 0;
     }
 
     /**
@@ -2943,50 +2943,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mInOverScrollMode) return y;
         return pinLoc(y, getViewHeightWithTitle(),
                       computeRealVerticalScrollRange() + getTitleHeight());
-    }
-
-    /**
-     * A title bar which is embedded in this WebView, and scrolls along with it
-     * vertically, but not horizontally.
-     */
-    private View mTitleBar;
-
-    /**
-     * the title bar rendering gravity
-     */
-    private int mTitleGravity;
-
-    /**
-     * Add or remove a title bar to be embedded into the WebView, and scroll
-     * along with it vertically, while remaining in view horizontally. Pass
-     * null to remove the title bar from the WebView, and return to drawing
-     * the WebView normally without translating to account for the title bar.
-     */
-    public void setEmbeddedTitleBar(View v) {
-        if (mWebView instanceof TitleBarDelegate) {
-            ((TitleBarDelegate) mWebView).onSetEmbeddedTitleBar(v);
-        }
-        if (mTitleBar == v) return;
-        if (mTitleBar != null) {
-            mWebView.removeView(mTitleBar);
-        }
-        if (null != v) {
-            mWebView.addView(v, new AbsoluteLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT, 0, 0));
-        }
-        mTitleBar = v;
-    }
-
-    /**
-     * Set where to render the embedded title bar
-     * NO_GRAVITY at the top of the page
-     * TOP        at the top of the screen
-     */
-    public void setTitleBarGravity(int gravity) {
-        mTitleGravity = gravity;
-        // force refresh
-        invalidate();
     }
 
     /**
@@ -4187,7 +4143,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         // animate the title bar off screen slowly enough that the user can see
         // it.
         if (cx == 0 && cy == 1 && getScrollX() == 0 && getScrollY() == 0
-                && mTitleBar != null) {
+                && getTitleHeight() > 0) {
             // FIXME: 100 should be defined somewhere as our max progress.
             if (getProgress() < 100) {
                 // Wait to scroll the title bar off screen until the page has
@@ -4404,24 +4360,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
     }
 
-    @Override
-    public boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (child == mTitleBar) {
-            // When drawing the title bar, move it horizontally to always show
-            // at the top of the WebView.
-            mTitleBar.offsetLeftAndRight(getScrollX() - mTitleBar.getLeft());
-            int newTop = 0;
-            if (mTitleGravity == Gravity.NO_GRAVITY) {
-                newTop = Math.min(0, getScrollY());
-            } else if (mTitleGravity == Gravity.TOP) {
-                newTop = getScrollY();
-            }
-            mTitleBar.setBottom(newTop + mTitleBar.getHeight());
-            mTitleBar.setTop(newTop);
-        }
-        return false;  // We never call invalidate(), so unconditionally returning false.
-    }
-
     private void drawContent(Canvas canvas) {
         if (mDrawHistory) {
             canvas.scale(mZoomManager.getScale(), mZoomManager.getScale());
@@ -4586,9 +4524,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 .getUseWebViewBackgroundForOverscrollBackground()) {
             drawOverScrollBackground(canvas);
         }
-        if (mTitleBar != null) {
-            canvas.translate(0, getTitleHeight());
-        }
+
+        canvas.translate(0, getTitleHeight());
         drawContent(canvas);
         canvas.restoreToCount(saveCount);
 

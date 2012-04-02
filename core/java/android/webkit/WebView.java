@@ -1913,13 +1913,6 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        // Not using short-circuit OR: provider does suppress base-class call.
-        return mProvider.getViewDelegate().drawChild(canvas, child, drawingTime) |
-                super.drawChild(canvas, child, drawingTime);
-    }
-
-    @Override
     protected void onDraw(Canvas canvas) {
         mProvider.getViewDelegate().onDraw(canvas);
     }

@@ -287,8 +287,6 @@ public interface WebViewProvider {
 
         public void onWindowVisibilityChanged(int visibility);
 
-        public boolean drawChild(Canvas canvas, View child, long drawingTime);
-
         public void onDraw(Canvas canvas);
 
         public void setLayoutParams(LayoutParams layoutParams);
