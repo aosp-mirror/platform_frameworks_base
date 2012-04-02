@@ -2819,7 +2819,7 @@ public final class WebViewCore {
         Message.obtain(mWebViewClassic.mPrivateHandler,
                 WebViewClassic.INIT_EDIT_FIELD, initData).sendToTarget();
         Message.obtain(mWebViewClassic.mPrivateHandler,
-                WebViewClassic.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID,
+                WebViewClassic.UPDATE_TEXT_SELECTION_MSG_ID,
                 initData.mFieldPointer, 0,
                 new TextSelectionData(start, end, selectionPtr))
                 .sendToTarget();

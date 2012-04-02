@@ -1206,7 +1206,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int REPLACE_BASE_CONTENT               = 123;
     static final int UPDATE_MATCH_COUNT                 = 126;
     static final int CENTER_FIT_RECT                    = 127;
-    static final int REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID = 128;
     static final int SET_SCROLLBAR_MODES                = 129;
     static final int SELECTION_STRING_CHANGED           = 130;
     static final int HIT_TEST_RESULT                    = 131;
@@ -8286,9 +8285,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         }
                     }
                     break;
-                case REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID:
-                    displaySoftKeyboard(true);
-                    // fall through to UPDATE_TEXT_SELECTION_MSG_ID
                 case UPDATE_TEXT_SELECTION_MSG_ID:
                     updateTextSelectionFromMessage(msg.arg1, msg.arg2,
                             (WebViewCore.TextSelectionData) msg.obj);
