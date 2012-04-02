@@ -519,98 +519,99 @@ public class PduPersister {
      * @throws MmsException Failed to load some fields of a PDU.
      */
     public GenericPdu load(Uri uri) throws MmsException {
-        PduCacheEntry cacheEntry;
-        synchronized(PDU_CACHE_INSTANCE) {
-            if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
-                if (LOCAL_LOGV) {
-                    Log.v(TAG, "load: " + uri + " blocked by isUpdating()");
-                }
-                try {
-                    PDU_CACHE_INSTANCE.wait();
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "load: ", e);
-                }
-                cacheEntry = PDU_CACHE_INSTANCE.get(uri);
-                if (cacheEntry != null) {
-                    return cacheEntry.getPdu();
-                }
-            }
-            // Tell the cache to indicate to other callers that this item
-            // is currently being updated.
-            PDU_CACHE_INSTANCE.setUpdating(uri, true);
-        }
-
-        Cursor c = SqliteWrapper.query(mContext, mContentResolver, uri,
-                                                PDU_PROJECTION, null, null, null);
-        PduHeaders headers = new PduHeaders();
-        Set<Entry<Integer, Integer>> set;
-        long msgId = ContentUris.parseId(uri);
-        int msgBox;
-        long threadId;
-
-        try {
-            if ((c == null) || (c.getCount() != 1) || !c.moveToFirst()) {
-                throw new MmsException("Bad uri: " + uri);
-            }
-
-            msgBox = c.getInt(PDU_COLUMN_MESSAGE_BOX);
-            threadId = c.getLong(PDU_COLUMN_THREAD_ID);
-
-            set = ENCODED_STRING_COLUMN_INDEX_MAP.entrySet();
-            for (Entry<Integer, Integer> e : set) {
-                setEncodedStringValueToHeaders(
-                        c, e.getValue(), headers, e.getKey());
-            }
-
-            set = TEXT_STRING_COLUMN_INDEX_MAP.entrySet();
-            for (Entry<Integer, Integer> e : set) {
-                setTextStringToHeaders(
-                        c, e.getValue(), headers, e.getKey());
-            }
-
-            set = OCTET_COLUMN_INDEX_MAP.entrySet();
-            for (Entry<Integer, Integer> e : set) {
-                setOctetToHeaders(
-                        c, e.getValue(), headers, e.getKey());
-            }
-
-            set = LONG_COLUMN_INDEX_MAP.entrySet();
-            for (Entry<Integer, Integer> e : set) {
-                setLongToHeaders(
-                        c, e.getValue(), headers, e.getKey());
-            }
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-
-        // Check whether 'msgId' has been assigned a valid value.
-        if (msgId == -1L) {
-            throw new MmsException("Error! ID of the message: -1.");
-        }
-
-        // Load address information of the MM.
-        loadAddress(msgId, headers);
-
-        int msgType = headers.getOctet(PduHeaders.MESSAGE_TYPE);
-        PduBody body = new PduBody();
-
-        // For PDU which type is M_retrieve.conf or Send.req, we should
-        // load multiparts and put them into the body of the PDU.
-        if ((msgType == PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF)
-                || (msgType == PduHeaders.MESSAGE_TYPE_SEND_REQ)) {
-            PduPart[] parts = loadParts(msgId);
-            if (parts != null) {
-                int partsNum = parts.length;
-                for (int i = 0; i < partsNum; i++) {
-                    body.addPart(parts[i]);
-                }
-            }
-        }
-
         GenericPdu pdu = null;
-        switch (msgType) {
+        PduCacheEntry cacheEntry = null;
+        int msgBox = 0;
+        long threadId = -1;
+        try {
+            synchronized(PDU_CACHE_INSTANCE) {
+                if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
+                    if (LOCAL_LOGV) {
+                        Log.v(TAG, "load: " + uri + " blocked by isUpdating()");
+                    }
+                    try {
+                        PDU_CACHE_INSTANCE.wait();
+                    } catch (InterruptedException e) {
+                        Log.e(TAG, "load: ", e);
+                    }
+                    cacheEntry = PDU_CACHE_INSTANCE.get(uri);
+                    if (cacheEntry != null) {
+                        return cacheEntry.getPdu();
+                    }
+                }
+                // Tell the cache to indicate to other callers that this item
+                // is currently being updated.
+                PDU_CACHE_INSTANCE.setUpdating(uri, true);
+            }
+
+            Cursor c = SqliteWrapper.query(mContext, mContentResolver, uri,
+                    PDU_PROJECTION, null, null, null);
+            PduHeaders headers = new PduHeaders();
+            Set<Entry<Integer, Integer>> set;
+            long msgId = ContentUris.parseId(uri);
+
+            try {
+                if ((c == null) || (c.getCount() != 1) || !c.moveToFirst()) {
+                    throw new MmsException("Bad uri: " + uri);
+                }
+
+                msgBox = c.getInt(PDU_COLUMN_MESSAGE_BOX);
+                threadId = c.getLong(PDU_COLUMN_THREAD_ID);
+
+                set = ENCODED_STRING_COLUMN_INDEX_MAP.entrySet();
+                for (Entry<Integer, Integer> e : set) {
+                    setEncodedStringValueToHeaders(
+                            c, e.getValue(), headers, e.getKey());
+                }
+
+                set = TEXT_STRING_COLUMN_INDEX_MAP.entrySet();
+                for (Entry<Integer, Integer> e : set) {
+                    setTextStringToHeaders(
+                            c, e.getValue(), headers, e.getKey());
+                }
+
+                set = OCTET_COLUMN_INDEX_MAP.entrySet();
+                for (Entry<Integer, Integer> e : set) {
+                    setOctetToHeaders(
+                            c, e.getValue(), headers, e.getKey());
+                }
+
+                set = LONG_COLUMN_INDEX_MAP.entrySet();
+                for (Entry<Integer, Integer> e : set) {
+                    setLongToHeaders(
+                            c, e.getValue(), headers, e.getKey());
+                }
+            } finally {
+                if (c != null) {
+                    c.close();
+                }
+            }
+
+            // Check whether 'msgId' has been assigned a valid value.
+            if (msgId == -1L) {
+                throw new MmsException("Error! ID of the message: -1.");
+            }
+
+            // Load address information of the MM.
+            loadAddress(msgId, headers);
+
+            int msgType = headers.getOctet(PduHeaders.MESSAGE_TYPE);
+            PduBody body = new PduBody();
+
+            // For PDU which type is M_retrieve.conf or Send.req, we should
+            // load multiparts and put them into the body of the PDU.
+            if ((msgType == PduHeaders.MESSAGE_TYPE_RETRIEVE_CONF)
+                    || (msgType == PduHeaders.MESSAGE_TYPE_SEND_REQ)) {
+                PduPart[] parts = loadParts(msgId);
+                if (parts != null) {
+                    int partsNum = parts.length;
+                    for (int i = 0; i < partsNum; i++) {
+                        body.addPart(parts[i]);
+                    }
+                }
+            }
+
+            switch (msgType) {
             case PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND:
                 pdu = new NotificationInd(headers);
                 break;
@@ -657,16 +658,20 @@ public class PduPersister {
             default:
                 throw new MmsException(
                         "Unrecognized PDU type: " + Integer.toHexString(msgType));
+            }
+        } finally {
+            synchronized(PDU_CACHE_INSTANCE) {
+                if (pdu != null) {
+                    assert(PDU_CACHE_INSTANCE.get(uri) == null);
+                    // Update the cache entry with the real info
+                    cacheEntry = new PduCacheEntry(pdu, msgBox, threadId);
+                    PDU_CACHE_INSTANCE.put(uri, cacheEntry);
+                }
+                PDU_CACHE_INSTANCE.setUpdating(uri, false);
+                PDU_CACHE_INSTANCE.notifyAll(); // tell anybody waiting on this entry to go ahead
+            }
         }
-
-        synchronized(PDU_CACHE_INSTANCE ) {
-            assert(PDU_CACHE_INSTANCE.get(uri) == null);
-            // Update the cache entry with the real info
-            cacheEntry = new PduCacheEntry(pdu, msgBox, threadId);
-            PDU_CACHE_INSTANCE.put(uri, cacheEntry);
-            PDU_CACHE_INSTANCE.notifyAll();     // tell anybody waiting on this entry to go ahead
-            return pdu;
-        }
+        return pdu;
     }
 
     private void persistAddress(
