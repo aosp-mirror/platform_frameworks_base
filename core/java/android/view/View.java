@@ -11529,12 +11529,34 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 displayList.setClipChildren(
                         (((ViewGroup)mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);
             }
-            if (mAttachInfo != null && mAttachInfo.mScalingRequired &&
-                    mAttachInfo.mApplicationScale != 1.0f) {
-                displayList.setApplicationScale(1f / mAttachInfo.mApplicationScale);
+            float alpha = 1;
+            if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
+                    ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
+                ViewGroup parentVG = (ViewGroup) mParent;
+                final boolean hasTransform =
+                        parentVG.getChildStaticTransformation(this, parentVG.mChildTransformation);
+                if (hasTransform) {
+                    Transformation transform = parentVG.mChildTransformation;
+                    final int transformType = parentVG.mChildTransformation.getTransformationType();
+                    if (transformType != Transformation.TYPE_IDENTITY) {
+                        if ((transformType & Transformation.TYPE_ALPHA) != 0) {
+                            alpha = transform.getAlpha();
+                        }
+                        if ((transformType & Transformation.TYPE_MATRIX) != 0) {
+                            displayList.setStaticMatrix(transform.getMatrix());
+                        }
+                    }
+                }
             }
             if (mTransformationInfo != null) {
-                displayList.setTransformationInfo(mTransformationInfo.mAlpha,
+                alpha *= mTransformationInfo.mAlpha;
+                if (alpha < 1) {
+                    final int multipliedAlpha = (int) (255 * alpha);
+                    if (onSetAlpha(multipliedAlpha)) {
+                        alpha = 1;
+                    }
+                }
+                displayList.setTransformationInfo(alpha,
                         mTransformationInfo.mTranslationX, mTransformationInfo.mTranslationY,
                         mTransformationInfo.mRotation, mTransformationInfo.mRotationX,
                         mTransformationInfo.mRotationY, mTransformationInfo.mScaleX,
@@ -11548,6 +11570,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     displayList.setPivotX(getPivotX());
                     displayList.setPivotY(getPivotY());
                 }
+            } else if (alpha < 1) {
+                displayList.setAlpha(alpha);
             }
         }
     }
@@ -11580,6 +11604,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if ((flags & ViewGroup.FLAG_CHILDREN_DRAWN_WITH_CACHE) != 0 ||
                 (flags & ViewGroup.FLAG_ALWAYS_DRAWN_WITH_CACHE) != 0) {
             caching = true;
+            // Auto-scaled apps are not hw-accelerated, no need to set scaling flag on DisplayList
             if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
         } else {
             caching = (layerType != LAYER_TYPE_NONE) || hardwareAccelerated;
@@ -11590,7 +11615,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             more = drawAnimation(parent, drawingTime, a, scalingRequired);
             concatMatrix = a.willChangeTransformationMatrix();
             transformToApply = parent.mChildTransformation;
-        } else if ((flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
+        } else if (!useDisplayListProperties &&
+                (flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
             final boolean hasTransform =
                     parent.getChildStaticTransformation(this, parent.mChildTransformation);
             if (hasTransform) {
@@ -11658,6 +11684,17 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
         }
         useDisplayListProperties &= hasDisplayList;
+        if (useDisplayListProperties) {
+            displayList = getDisplayList();
+            if (!displayList.isValid()) {
+                // Uncommon, but possible. If a view is removed from the hierarchy during the call
+                // to getDisplayList(), the display list will be marked invalid and we should not
+                // try to use it again.
+                displayList = null;
+                hasDisplayList = false;
+                useDisplayListProperties = false;
+            }
+        }
 
         final boolean hasNoCache = cache == null || hasDisplayList;
         final boolean offsetForScroll = cache == null && !hasDisplayList &&
@@ -11675,6 +11712,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
             if (scalingRequired) {
                 if (useDisplayListProperties) {
+                    // TODO: Might not need this if we put everything inside the DL
                     restoreTo = canvas.save();
                 }
                 // mAttachInfo cannot be null, otherwise scalingRequired == false
@@ -11684,7 +11722,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         float alpha = useDisplayListProperties ? 1 : getAlpha();
-        if (transformToApply != null || alpha < 1.0f || !hasIdentityMatrix()) {
+        if (transformToApply != null || alpha < 1 || !hasIdentityMatrix()) {
             if (transformToApply != null || !childHasIdentityMatrix) {
                 int transX = 0;
                 int transY = 0;
@@ -11696,16 +11734,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
                 if (transformToApply != null) {
                     if (concatMatrix) {
-                        // Undo the scroll translation, apply the transformation matrix,
-                        // then redo the scroll translate to get the correct result.
-                        canvas.translate(-transX, -transY);
-                        canvas.concat(transformToApply.getMatrix());
-                        canvas.translate(transX, transY);
+                        if (useDisplayListProperties) {
+                            displayList.setAnimationMatrix(transformToApply.getMatrix());
+                        } else {
+                            // Undo the scroll translation, apply the transformation matrix,
+                            // then redo the scroll translate to get the correct result.
+                            canvas.translate(-transX, -transY);
+                            canvas.concat(transformToApply.getMatrix());
+                            canvas.translate(transX, transY);
+                        }
                         parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
                     }
 
                     float transformAlpha = transformToApply.getAlpha();
-                    if (transformAlpha < 1.0f) {
+                    if (transformAlpha < 1) {
                         alpha *= transformToApply.getAlpha();
                         parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
                     }
@@ -11718,7 +11760,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 }
             }
 
-            if (alpha < 1.0f) {
+            if (alpha < 1) {
                 parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
                 if (hasNoCache) {
                     final int multipliedAlpha = (int) (255 * alpha);
@@ -11728,7 +11770,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                                 layerType != LAYER_TYPE_NONE) {
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
-                        if (layerType == LAYER_TYPE_NONE) {
+                        if (useDisplayListProperties) {
+                            displayList.setAlpha(alpha * getAlpha());
+                        } else  if (layerType == LAYER_TYPE_NONE) {
                             final int scrollX = hasDisplayList ? 0 : sx;
                             final int scrollY = hasDisplayList ? 0 : sy;
                             canvas.saveLayerAlpha(scrollX, scrollY, scrollX + mRight - mLeft,
@@ -11758,7 +11802,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
         }
 
-        if (hasDisplayList) {
+        if (!useDisplayListProperties && hasDisplayList) {
             displayList = getDisplayList();
             if (!displayList.isValid()) {
                 // Uncommon, but possible. If a view is removed from the hierarchy during the call
@@ -11815,7 +11859,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     cachePaint.setDither(false);
                     parent.mCachePaint = cachePaint;
                 }
-                if (alpha < 1.0f) {
+                if (alpha < 1) {
                     cachePaint.setAlpha((int) (alpha * 255));
                     parent.mGroupFlags |= ViewGroup.FLAG_ALPHA_LOWER_THAN_ONE;
                 } else if  ((flags & ViewGroup.FLAG_ALPHA_LOWER_THAN_ONE) != 0) {
