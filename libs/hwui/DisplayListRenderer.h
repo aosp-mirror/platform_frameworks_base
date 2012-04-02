@@ -51,7 +51,7 @@ namespace uirenderer {
 
 // Set to 1 to enable native processing of View properties. 0 by default. Eventually this
 // will go away and we will always use this approach for accelerated apps.
-#define USE_DISPLAY_LIST_PROPERTIES 0
+#define USE_DISPLAY_LIST_PROPERTIES 1
 
 #define TRANSLATION 0x0001
 #define ROTATION    0x0002
