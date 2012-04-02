@@ -14,20 +14,10 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/status_bar_latest_event_content"
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/action0"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
-    <ImageView
-        android:id="@+id/big_picture"
-        android:layout_width="match_parent"
-        android:layout_height="192dp"
-        android:scaleType="centerCrop"
-        />
-    <include layout="@layout/notification_template_base" 
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="192dp"
-        />
-</FrameLayout>
+    android:layout_height="wrap_content"
+    style="@android:style/Widget.Holo.Button.Small"
+    android:gravity="left"
+    />

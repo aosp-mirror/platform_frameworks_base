@@ -19,6 +19,9 @@ package com.android.systemui.statusbar;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -181,6 +184,25 @@ public abstract class BaseStatusBar extends SystemUI implements
         return vetoButton;
     }
     
+
+    protected void applyLegacyRowBackground(StatusBarNotification sbn, View content) {
+        if (sbn.notification.contentView.getLayoutId() !=
+                com.android.internal.R.layout.notification_template_base) {
+            int version = 0;
+            try {
+                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.pkg, 0);
+                version = info.targetSdkVersion;
+            } catch (NameNotFoundException ex) {
+                Slog.e(TAG, "Failed looking up ApplicationInfo for " + sbn.pkg, ex);
+            }
+            if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
+                content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
+            } else {
+                content.setBackgroundResource(R.drawable.notification_row_bg);
+            }
+        }
+    }
+
     public void dismissIntruder() {
         // pass
     }
