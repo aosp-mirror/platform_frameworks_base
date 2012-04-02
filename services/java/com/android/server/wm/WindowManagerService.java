@@ -1972,6 +1972,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // TODO(cmautner):  Move to WindowAnimator.
+    void setWallpaperOffset(final WindowStateAnimator winAnimator, final int left, final int top) {
+        mH.sendMessage(mH.obtainMessage(H.SET_WALLPAPER_OFFSET, left, top, winAnimator));
+    }
+
     void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
         final int dw = mAppDisplayWidth;
         final int dh = mAppDisplayHeight;
@@ -2010,10 +2015,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (SHOW_TRANSACTIONS) logSurface(wallpaper,
                                     "POS " + wallpaper.mShownFrame.left
                                     + ", " + wallpaper.mShownFrame.top, null);
-                            winAnimator.mSurfaceX = wallpaper.mShownFrame.left;
-                            winAnimator.mSurfaceY = wallpaper.mShownFrame.top;
-                            winAnimator.mSurface.setPosition(wallpaper.mShownFrame.left,
-                                    wallpaper.mShownFrame.top);
+                            setWallpaperOffset(winAnimator, (int) wallpaper.mShownFrame.left,
+                                (int) wallpaper.mShownFrame.top);
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Error positioning surface of " + wallpaper
                                     + " pos=(" + wallpaper.mShownFrame.left
@@ -2474,25 +2477,20 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.i(TAG, str);
         }
     }
-    
+
+    // TODO(cmautner): Move to WindowStateAnimator.
+    void setTransparentRegionHint(final WindowStateAnimator winAnimator, final Region region) {
+        mH.sendMessage(mH.obtainMessage(H.SET_TRANSPARENT_REGION,
+                new Pair<WindowStateAnimator, Region>(winAnimator, region)));
+    }
+
     void setTransparentRegionWindow(Session session, IWindow client, Region region) {
         long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
                 WindowState w = windowForClientLocked(session, client, false);
                 if ((w != null) && w.mHasSurface) {
-                    if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                            ">>> OPEN TRANSACTION setTransparentRegion");
-                    Surface.openTransaction();
-                    try {
-                        if (SHOW_TRANSACTIONS) logSurface(w,
-                                "transparentRegionHint=" + region, null);
-                        w.mWinAnimator.mSurface.setTransparentRegionHint(region);
-                    } finally {
-                        Surface.closeTransaction();
-                        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                                "<<< CLOSE TRANSACTION setTransparentRegion");
-                    }
+                    setTransparentRegionHint(w.mWinAnimator, region);
                 }
             }
         } finally {
@@ -2615,6 +2613,7 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
 
         synchronized(mWindowMap) {
+            // TODO(cmautner): synchronize on mAnimator or win.mWinAnimator.
             WindowState win = windowForClientLocked(session, client, false);
             if (win == null) {
                 return 0;
@@ -6656,6 +6655,10 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
         public static final int BULK_UPDATE_PARAMETERS = 25;
 
+        public static final int ANIMATOR_WHAT_OFFSET = 100000;
+        public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
+        public static final int SET_WALLPAPER_OFFSET = ANIMATOR_WHAT_OFFSET + 2;
+
         private Session mLastReportedHold;
 
         public H() {
@@ -7079,6 +7082,28 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         requestTraversalLocked();
                     }
+                    break;
+                }
+
+                // Animation messages. Move to Window{State}Animator
+                case SET_TRANSPARENT_REGION: {
+                    // TODO(cmautner): Remove sync.
+                    synchronized (mWindowMap) {
+                        Pair<WindowStateAnimator, Region> pair =
+                                (Pair<WindowStateAnimator, Region>) msg.obj;
+                        final WindowStateAnimator winAnimator = pair.first;
+                        winAnimator.setTransparentRegionHint(pair.second);
+                    }
+                    break;
+                }
+
+                case SET_WALLPAPER_OFFSET: {
+                    // TODO(cmautner): Remove sync.
+                    synchronized (mWindowMap) {
+                        final WindowStateAnimator winAnimator = (WindowStateAnimator) msg.obj;
+                        winAnimator.setWallpaperOffset(msg.arg1, msg.arg2);
+                    }
+                    break;
                 }
             }
         }
