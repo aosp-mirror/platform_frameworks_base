@@ -20,8 +20,9 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 
+#include <EGL/egl_cache.h>
+
 #ifdef USE_OPENGL_RENDERER
-    #include <EGL/egl_cache.h>
     EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
 #endif
 
