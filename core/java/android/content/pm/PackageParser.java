@@ -1761,6 +1761,12 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_LARGE_HEAP;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_supportsRtl,
+                false /* default is no RTL support*/)) {
+            ai.flags |= ApplicationInfo.FLAG_SUPPORTS_RTL;
+        }
+
         String str;
         str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestApplication_permission, 0);

@@ -843,6 +843,9 @@
              @hide -->
         <attr name="cantSaveState" format="boolean" />
         <attr name="uiOptions" />
+        <!-- Declare that your application will be able to deal with RTL (right to left) layouts.
+             If set to  false (default value), your application will not care about RTL layouts. -->
+        <attr name="supportsRtl" format="boolean" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be
