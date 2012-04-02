@@ -83,7 +83,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppFreezing;
     boolean mAttachedHidden;    // is our parent window hidden?
-    boolean mLastHidden;        // was this window last hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
 
     /**
@@ -205,15 +204,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // even if it is not currently visible for layout.  This is set
     // when in that case until the layout is done.
     boolean mLayoutNeeded;
-
-    // This is set during the time after the window's drawing has been
-    // committed, and before its surface is actually shown.  It is used
-    // to delay showing the surface until all windows in a token are ready
-    // to be shown.
-    boolean mReadyToShow;
-
-    // Set when the window has been shown in the screen the first time.
-    boolean mHasDrawn;
 
     // Currently running an exit animation?
     boolean mExiting;
@@ -744,7 +734,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     public boolean isDrawnLw() {
         return mHasSurface && !mDestroying &&
-            !mWinAnimator.mDrawPending && !mWinAnimator.mCommitDrawPending;
+                (mWinAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW
+                || mWinAnimator.mDrawState == WindowStateAnimator.HAS_DRAWN);
     }
 
     /**
@@ -764,7 +755,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * sense to call from performLayoutAndPlaceSurfacesLockedInner().)
      */
     boolean shouldAnimateMove() {
-        return mContentChanged && !mExiting && !mLastHidden && mService.okToDisplay()
+        return mContentChanged && !mExiting && !mWinAnimator.mLastHidden && mService.okToDisplay()
                 && (mFrame.top != mLastFrame.top
                         || mFrame.left != mLastFrame.left)
                 && (mAttachedWindow == null || !mAttachedWindow.shouldAnimateMove());
@@ -837,10 +828,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0);
     }
 
+    @Override
     public boolean hasDrawnLw() {
-        return mHasDrawn;
+        return mWinAnimator.mDrawState == WindowStateAnimator.HAS_DRAWN;
     }
 
+    @Override
     public boolean showLw(boolean doAnimation) {
         return showLw(doAnimation, true);
     }
@@ -985,7 +978,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
             pw.print(prefix); pw.print("mViewVisibility=0x");
             pw.print(Integer.toHexString(mViewVisibility));
-            pw.print(" mLastHidden="); pw.print(mLastHidden);
             pw.print(" mHaveFrame="); pw.print(mHaveFrame);
             pw.print(" mObscured="); pw.println(mObscured);
             pw.print(prefix); pw.print("mSeq="); pw.print(mSeq);
@@ -1048,12 +1040,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.println();
         }
         mWinAnimator.dump(pw, prefix, dumpAll);
-        if (dumpAll) {
-            pw.print(prefix); pw.print("mDrawPending="); pw.print(mWinAnimator.mDrawPending);
-                    pw.print(" mCommitDrawPending="); pw.print(mWinAnimator.mCommitDrawPending);
-                    pw.print(" mReadyToShow="); pw.print(mReadyToShow);
-                    pw.print(" mHasDrawn="); pw.println(mHasDrawn);
-        }
         if (mExiting || mRemoveOnExit || mDestroying || mRemoved) {
             pw.print(prefix); pw.print("mExiting="); pw.print(mExiting);
                     pw.print(" mRemoveOnExit="); pw.print(mRemoveOnExit);
