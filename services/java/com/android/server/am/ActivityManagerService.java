@@ -3587,11 +3587,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // If uid is specified and the uid and process name match
                 // Or, the uid is not specified and the process name matches
                 } else if (((uid > 0 && uid != Process.SYSTEM_UID && app.info.uid == uid)
-                            && (app.processName.equals(packageName)
-                                || app.processName.startsWith(procNamePrefix)))
-                           || (uid < 0
-                               && (app.processName.equals(packageName)
-                                       || app.processName.startsWith(procNamePrefix)))) {
+                            || ((app.processName.equals(packageName)
+                                 || app.processName.startsWith(procNamePrefix))
+                                && uid < 0))) {
                     if (app.setAdj >= minOomAdj) {
                         if (!doit) {
                             return true;
