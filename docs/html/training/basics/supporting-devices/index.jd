@@ -1,0 +1,49 @@
+page.title=Supporting Different Devices
+
+trainingnavtop=true
+startpage=true
+next.title=Supporting Multiple Languages
+next.link=languages.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 1.6 or higher</li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/resources/index.html">Application Resources</a></li>
+  <li><a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple Screens</a></li>
+</ul>
+
+
+</div>
+</div>
+
+<p>Android devices come in many shapes and sizes all around the world. With a wide range of device
+types, you have an opportunity to reach a huge audience with your app. In order to be as successful
+as possible on Android, your app needs to adapt to various device configurations. Some of the
+important variations that you should consider include different languages, screen sizes, and
+versions of the Android platform.</p>
+
+<p>This class teaches you how to use basic platform features that leverage alternative
+resources and other features so your app can provide an optimized user experience on a
+variety of Android-compatible devices, using a single application package (APK).</p>
+
+<h2>Lessons</h2>
+ 
+<dl>
+  <dt><b><a href="languages.html">Supporting Different Languages</a></b></dt>
+  <dd>Learn how to support multiple languages with alternative string resources.</dd>
+  <dt><b><a href="screens.html">Supporting Different Screens</a></b></dt>
+  <dd>Learn how to optimize the user experience for different screen sizes and densities.</dd>
+  <dt><b><a href="platforms.html">Supporting Different Platform Versions</a></b></dt>
+  <dd>Learn how to use APIs available in new versions of Android while continuing to support
+older versions of Android.</dd>
+</dl> 
+
