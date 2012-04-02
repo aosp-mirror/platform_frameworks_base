@@ -380,6 +380,7 @@ public class WifiP2pManager {
             mHandler = new P2pHandler(looper);
             mChannelListener = l;
         }
+        private final static int INVALID_LISTENER_KEY = 0;
         private ChannelListener mChannelListener;
         private HashMap<Integer, Object> mListenerMap = new HashMap<Integer, Object>();
         private Object mListenerMapLock = new Object();
@@ -450,16 +451,19 @@ public class WifiP2pManager {
         }
 
         int putListener(Object listener) {
-            if (listener == null) return 0;
+            if (listener == null) return INVALID_LISTENER_KEY;
             int key;
             synchronized (mListenerMapLock) {
-                key = mListenerKey++;
+                do {
+                    key = mListenerKey++;
+                } while (key == INVALID_LISTENER_KEY);
                 mListenerMap.put(key, listener);
             }
             return key;
         }
 
         Object getListener(int key) {
+            if (key == INVALID_LISTENER_KEY) return null;
             synchronized (mListenerMapLock) {
                 return mListenerMap.remove(key);
             }
