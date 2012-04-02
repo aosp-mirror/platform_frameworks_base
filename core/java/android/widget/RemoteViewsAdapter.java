@@ -477,8 +477,11 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         private static final String TAG = "FixedSizeRemoteViewsCache";
 
         // The meta data related to all the RemoteViews, ie. count, is stable, etc.
-        private RemoteViewsMetaData mMetaData;
-        private RemoteViewsMetaData mTemporaryMetaData;
+        // The meta data objects are made final so that they can be locked on independently
+        // of the FixedSizeRemoteViewsCache. If we ever lock on both meta data objects, it is in
+        // the order mTemporaryMetaData followed by mMetaData.
+        private final RemoteViewsMetaData mMetaData;
+        private final RemoteViewsMetaData mTemporaryMetaData;
 
         // The cache/mapping of position to RemoteViewsMetaData.  This set is guaranteed to be
         // greater than or equal to the set of RemoteViews.
@@ -939,6 +942,10 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * which  wouldn't otherwise be possible.
      */
     public void setVisibleRangeHint(int lowerBound, int upperBound) {
+        if (lowerBound < 0 || upperBound < 0) {
+            throw new RuntimeException("Attempted to set invalid range: lowerBound="+lowerBound +
+                    "," + "upperBound="+upperBound);
+        }
         mVisibleWindowLowerBound = lowerBound;
         mVisibleWindowUpperBound = upperBound;
     }
@@ -1072,12 +1079,20 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
         // Re-request the new metadata (only after the notification to the factory)
         updateTemporaryMetaData();
+        int newCount;
+        synchronized(mCache.getTemporaryMetaData()) {
+            newCount = mCache.getTemporaryMetaData().count;
+        }
 
         // Pre-load (our best guess of) the views which are currently visible in the AdapterView.
         // This mitigates flashing and flickering of loading views when a widget notifies that
         // its data has changed.
         for (int i = mVisibleWindowLowerBound; i <= mVisibleWindowUpperBound; i++) {
-            updateRemoteViews(i, false, false);
+            // Because temporary meta data is only ever modified from this thread (ie.
+            // mWorkerThread), it is safe to assume that count is a valid representation.
+            if (i < newCount) {
+                updateRemoteViews(i, false, false);
+            }
         }
 
         // Propagate the notification back to the base adapter
