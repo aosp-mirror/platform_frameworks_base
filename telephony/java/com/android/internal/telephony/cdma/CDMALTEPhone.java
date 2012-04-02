@@ -39,6 +39,9 @@ import com.android.internal.telephony.gsm.SmsMessage;
 import com.android.internal.telephony.ims.IsimRecords;
 import com.android.internal.telephony.uicc.UiccController;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 public class CDMALTEPhone extends CDMAPhone {
     static final String LOG_TAG = "CDMA";
 
@@ -258,5 +261,12 @@ public class CDMALTEPhone extends CDMAPhone {
     @Override
     protected void log(String s) {
             Log.d(LOG_TAG, "[CDMALTEPhone] " + s);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("CDMALTEPhone extends:");
+        super.dump(fd, pw, args);
+        pw.println(" m3gppSMS=" + m3gppSMS);
     }
 }

@@ -36,6 +36,9 @@ import android.util.EventLog;
 
 import com.android.internal.telephony.gsm.GsmDataConnectionTracker;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
     CDMALTEPhone mCdmaLtePhone;
 
@@ -518,5 +521,13 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
     @Override
     protected void loge(String s) {
         Log.e(LOG_TAG, "[CdmaLteSST] " + s);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("CdmaLteServiceStateTracker extends:");
+        super.dump(fd, pw, args);
+        pw.println(" mCdmaLtePhone=" + mCdmaLtePhone);
+        pw.println(" mLteSS=" + mLteSS);
     }
 }

@@ -65,6 +65,8 @@ import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.RetryManager;
 import com.android.internal.util.AsyncChannel;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -2561,5 +2563,17 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected void loge(String s) {
         Log.e(LOG_TAG, "[GsmDCT] " + s);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("GsmDataConnectionTracker extends:");
+        super.dump(fd, pw, args);
+        pw.println(" RADIO_TESTS=" + RADIO_TESTS);
+        pw.println(" mReregisterOnReconnectFailure=" + mReregisterOnReconnectFailure);
+        pw.println(" mResolver=" + mResolver);
+        pw.println(" canSetPreferApn=" + canSetPreferApn);
+        pw.println(" mApnObserver=" + mApnObserver);
+        pw.println(" getOverallState=" + getOverallState());
     }
 }

@@ -49,8 +49,12 @@ import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1192,5 +1196,81 @@ public abstract class DataConnectionTracker extends Handler {
         for (DataConnection dc : mDataConnections.values()) {
             dc.resetRetryCount();
         }
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("DataConnectionTracker:");
+        pw.println(" mInternalDataEnabled=" + mInternalDataEnabled);
+        pw.println(" mUserDataEnabled=" + mUserDataEnabled);
+        pw.println(" sPolicyDataEnabed=" + sPolicyDataEnabled);
+        pw.println(" dataEnabled:");
+        for(int i=0; i < dataEnabled.length; i++) {
+            pw.printf("  dataEnabled[%d]=%b\n", i, dataEnabled[i]);
+        }
+        pw.flush();
+        pw.println(" enabledCount=" + enabledCount);
+        pw.println(" mRequestedApnType=" + mRequestedApnType);
+        pw.println(" mPhone=" + mPhone.getPhoneName());
+        pw.println(" mActivity=" + mActivity);
+        pw.println(" mState=" + mState);
+        pw.println(" mTxPkts=" + mTxPkts);
+        pw.println(" mRxPkts=" + mRxPkts);
+        pw.println(" mNetStatPollPeriod=" + mNetStatPollPeriod);
+        pw.println(" mNetStatPollEnabled=" + mNetStatPollEnabled);
+        pw.println(" mDataStallTxRxSum=" + mDataStallTxRxSum);
+        pw.println(" mDataStallAlarmTag=" + mDataStallAlarmTag);
+        pw.println(" mSentSinceLastRecv=" + mSentSinceLastRecv);
+        pw.println(" mNoRecvPollCount=" + mNoRecvPollCount);
+        pw.println(" mIsWifiConnected=" + mIsWifiConnected);
+        pw.println(" mReconnectIntent=" + mReconnectIntent);
+        pw.println(" mCidActive=" + mCidActive);
+        pw.println(" mAutoAttachOnCreation=" + mAutoAttachOnCreation);
+        pw.println(" mIsScreenOn=" + mIsScreenOn);
+        pw.println(" mUniqueIdGenerator=" + mUniqueIdGenerator);
+        pw.flush();
+        pw.println(" ***************************************");
+        Set<Entry<Integer, DataConnection> > mDcSet = mDataConnections.entrySet();
+        pw.println(" mDataConnections: count=" + mDcSet.size());
+        for (Entry<Integer, DataConnection> entry : mDcSet) {
+            pw.printf(" *** mDataConnection[%d] \n", entry.getKey());
+            entry.getValue().dump(fd, pw, args);
+        }
+        pw.println(" ***************************************");
+        pw.flush();
+        Set<Entry<String, Integer>> mApnToDcIdSet = mApnToDataConnectionId.entrySet();
+        pw.println(" mApnToDataConnectonId size=" + mApnToDcIdSet.size());
+        for (Entry<String, Integer> entry : mApnToDcIdSet) {
+            pw.printf(" mApnToDataConnectonId[%s]=%d\n", entry.getKey(), entry.getValue());
+        }
+        pw.println(" ***************************************");
+        pw.flush();
+        if (mApnContexts != null) {
+            Set<Entry<String, ApnContext>> mApnContextsSet = mApnContexts.entrySet();
+            pw.println(" mApnContexts size=" + mApnContextsSet.size());
+            for (Entry<String, ApnContext> entry : mApnContextsSet) {
+                pw.printf(" *** mApnContexts[%s]:\n", entry.getKey());
+                entry.getValue().dump(fd, pw, args);
+            }
+            pw.println(" ***************************************");
+        } else {
+            pw.println(" mApnContexts=null");
+        }
+        pw.flush();
+        pw.println(" mActiveApn=" + mActiveApn);
+        if (mAllApns != null) {
+            pw.println(" mAllApns size=" + mAllApns.size());
+            for (int i=0; i < mAllApns.size(); i++) {
+                pw.printf(" mAllApns[%d]: %s\n", i, mAllApns.get(i));
+            }
+            pw.flush();
+        } else {
+            pw.println(" mAllApns=null");
+        }
+        pw.println(" mPreferredApn=" + mPreferredApn);
+        pw.println(" mIsPsRestricted=" + mIsPsRestricted);
+        pw.println(" mIsDisposed=" + mIsDisposed);
+        pw.println(" mIntentReceiver=" + mIntentReceiver);
+        pw.println(" mDataRoamingSettingObserver=" + mDataRoamingSettingObserver);
+        pw.flush();
     }
 }

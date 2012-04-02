@@ -24,6 +24,9 @@ import android.os.RegistrantList;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * {@hide}
  */
@@ -458,5 +461,20 @@ public abstract class ServiceStateTracker extends Handler {
     protected void cancelPollState() {
         // This will effectively cancel the rest of the poll requests.
         pollingContext = new int[1];
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("ServiceStateTracker:");
+        pw.println(" ss=" + ss);
+        pw.println(" newSS=" + newSS);
+        pw.println(" mSignalStrength=" + mSignalStrength);
+        pw.println(" mRestrictedState=" + mRestrictedState);
+        pw.println(" pollingContext=" + pollingContext);
+        pw.println(" mDesiredPowerState=" + mDesiredPowerState);
+        pw.println(" mRilRadioTechnology=" + mRilRadioTechnology);
+        pw.println(" mNewRilRadioTechnology=" + mNewRilRadioTechnology);
+        pw.println(" dontPollSignalStrength=" + dontPollSignalStrength);
+        pw.println(" mPendingRadioPowerOffAfterDataOff=" + mPendingRadioPowerOffAfterDataOff);
+        pw.println(" mPendingRadioPowerOffAfterDataOffTag=" + mPendingRadioPowerOffAfterDataOffTag);
     }
 }

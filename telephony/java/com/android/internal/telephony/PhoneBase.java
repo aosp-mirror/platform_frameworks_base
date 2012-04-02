@@ -42,6 +42,8 @@ import com.android.internal.telephony.ims.IsimRecords;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 import com.android.internal.telephony.gsm.SIMRecords;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -1143,5 +1145,44 @@ public abstract class PhoneBase extends Handler implements Phone {
     @Override
     public UsimServiceTable getUsimServiceTable() {
         return mIccRecords.getUsimServiceTable();
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("PhoneBase:");
+        pw.println(" mCM=" + mCM);
+        pw.println(" mDnsCheckDisabled=" + mDnsCheckDisabled);
+        pw.println(" mDataConnectionTracker=" + mDataConnectionTracker);
+        pw.println(" mDoesRilSendMultipleCallRing=" + mDoesRilSendMultipleCallRing);
+        pw.println(" mCallRingContinueToken=" + mCallRingContinueToken);
+        pw.println(" mCallRingDelay=" + mCallRingDelay);
+        pw.println(" mIsTheCurrentActivePhone=" + mIsTheCurrentActivePhone);
+        pw.println(" mIsVoiceCapable=" + mIsVoiceCapable);
+        pw.println(" mIccRecords=" + mIccRecords);
+        pw.println(" mIccCard=" + mIccCard.get());
+        pw.println(" mSmsStorageMonitor=" + mSmsStorageMonitor);
+        pw.println(" mSmsUsageMonitor=" + mSmsUsageMonitor);
+        pw.println(" mSMS=" + mSMS);
+        pw.flush();
+        pw.println(" mLooper=" + mLooper);
+        pw.println(" mContext=" + mContext);
+        pw.println(" mNotifier=" + mNotifier);
+        pw.println(" mSimulatedRadioControl=" + mSimulatedRadioControl);
+        pw.println(" mUnitTestMode=" + mUnitTestMode);
+        pw.println(" isDnsCheckDisabled()=" + isDnsCheckDisabled());
+        pw.println(" getUnitTestMode()=" + getUnitTestMode());
+        pw.println(" getState()=" + getState());
+        pw.println(" getIccSerialNumber()=" + getIccSerialNumber());
+        pw.println(" getIccRecordsLoaded()=" + getIccRecordsLoaded());
+        pw.println(" getMessageWaitingIndicator()=" + getMessageWaitingIndicator());
+        pw.println(" getCallForwardingIndicator()=" + getCallForwardingIndicator());
+        pw.println(" isInEmergencyCall()=" + isInEmergencyCall());
+        pw.flush();
+        pw.println(" isInEcm()=" + isInEcm());
+        pw.println(" getPhoneName()=" + getPhoneName());
+        pw.println(" getPhoneType()=" + getPhoneType());
+        pw.println(" getVoiceMessageCount()=" + getVoiceMessageCount());
+        pw.println(" getActiveApnTypes()=" + getActiveApnTypes());
+        pw.println(" isDataConnectivityPossible()=" + isDataConnectivityPossible());
+        pw.println(" needsOtaServiceProvisioning=" + needsOtaServiceProvisioning());
     }
 }

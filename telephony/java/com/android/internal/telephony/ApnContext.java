@@ -17,6 +17,9 @@
 package com.android.internal.telephony;
 
 import android.util.Log;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -206,5 +209,20 @@ public class ApnContext {
 
     protected void log(String s) {
         Log.d(LOG_TAG, "[ApnContext] " + s);
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("ApnContext:");
+        pw.println(" mApnType=" + mApnType);
+        pw.println(" mState=" + mState);
+        pw.println(" mWaitingApns=" + mWaitingApns);
+        pw.println(" mWaitingApnsPermanentFailureCountDown=" +
+                            mWaitingApnsPermanentFailureCountDown);
+        pw.println(" mApnSetting=" + mApnSetting);
+        pw.println(" mDataConnection=" + mDataConnection);
+        pw.println(" mDataConnectionAc=" + mDataConnectionAc);
+        pw.println(" mReason=" + mReason);
+        pw.println(" mDataEnabled=" + mDataEnabled);
+        pw.println(" mDependencyMet=" + mDependencyMet);
     }
 }

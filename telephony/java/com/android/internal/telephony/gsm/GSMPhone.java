@@ -74,7 +74,9 @@ import com.android.internal.telephony.uicc.UiccController;
 import com.android.internal.telephony.IccVmNotSupportedException;
 import com.android.internal.telephony.ServiceStateTracker;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -90,6 +92,7 @@ public class GSMPhone extends PhoneBase {
     // log.  (Use "adb logcat -b radio" to see them.)
     static final String LOG_TAG = "GSM";
     private static final boolean LOCAL_DEBUG = true;
+    private static final boolean VDBG = false; /* STOP SHIP if true */
 
     // Key used to read/write current ciphering state
     public static final String CIPHERING_KEY = "ciphering_key";
@@ -1487,4 +1490,18 @@ public class GSMPhone extends PhoneBase {
         mIccRecords.unregisterForRecordsLoaded(this);
     }
 
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("GSMPhone extends:");
+        super.dump(fd, pw, args);
+        pw.println(" mCT=" + mCT);
+        pw.println(" mSST=" + mSST);
+        pw.println(" mPendingMMIs=" + mPendingMMIs);
+        pw.println(" mSimPhoneBookIntManager=" + mSimPhoneBookIntManager);
+        pw.println(" mSimSmsIntManager=" + mSimSmsIntManager);
+        pw.println(" mSubInfo=" + mSubInfo);
+        if (VDBG) pw.println(" mImei=" + mImei);
+        if (VDBG) pw.println(" mImeiSv=" + mImeiSv);
+        pw.println(" mVmNumber=" + mVmNumber);
+    }
 }

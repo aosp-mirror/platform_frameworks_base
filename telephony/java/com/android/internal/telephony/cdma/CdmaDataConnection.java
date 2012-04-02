@@ -25,6 +25,9 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.RetryManager;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * {@hide}
  */
@@ -113,5 +116,11 @@ public class CdmaDataConnection extends DataConnection {
     @Override
     protected void log(String s) {
         Log.d(LOG_TAG, "[" + getName() + "] " + s);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("CdmaDataConnection extends:");
+        super.dump(fd, pw, args);
     }
 }

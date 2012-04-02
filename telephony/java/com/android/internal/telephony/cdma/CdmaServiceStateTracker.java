@@ -54,6 +54,8 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.TimeUtils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -1664,5 +1666,44 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     @Override
     protected void loge(String s) {
         Log.e(LOG_TAG, "[CdmaSST] " + s);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("CdmaServiceStateTracker extends:");
+        super.dump(fd, pw, args);
+        pw.println(" phone=" + phone);
+        pw.println(" cellLoc=" + cellLoc);
+        pw.println(" newCellLoc=" + newCellLoc);
+        pw.println(" mCurrentOtaspMode=" + mCurrentOtaspMode);
+        pw.println(" mCdmaRoaming=" + mCdmaRoaming);
+        pw.println(" mRoamingIndicator=" + mRoamingIndicator);
+        pw.println(" mIsInPrl=" + mIsInPrl);
+        pw.println(" mDefaultRoamingIndicator=" + mDefaultRoamingIndicator);
+        pw.println(" mDataConnectionState=" + mDataConnectionState);
+        pw.println(" mNewDataConnectionState=" + mNewDataConnectionState);
+        pw.println(" mRegistrationState=" + mRegistrationState);
+        pw.println(" mNeedFixZone=" + mNeedFixZone);
+        pw.println(" mZoneOffset=" + mZoneOffset);
+        pw.println(" mZoneDst=" + mZoneDst);
+        pw.println(" mZoneTime=" + mZoneTime);
+        pw.println(" mGotCountryCode=" + mGotCountryCode);
+        pw.println(" mSavedTimeZone=" + mSavedTimeZone);
+        pw.println(" mSavedTime=" + mSavedTime);
+        pw.println(" mSavedAtTime=" + mSavedAtTime);
+        pw.println(" mNeedToRegForRuimLoaded=" + mNeedToRegForRuimLoaded);
+        pw.println(" mWakeLock=" + mWakeLock);
+        pw.println(" mCurPlmn=" + mCurPlmn);
+        pw.println(" mMdn=" + mMdn);
+        pw.println(" mHomeSystemId=" + mHomeSystemId);
+        pw.println(" mHomeNetworkId=" + mHomeNetworkId);
+        pw.println(" mMin=" + mMin);
+        pw.println(" mPrlVersion=" + mPrlVersion);
+        pw.println(" mIsMinInfoReady=" + mIsMinInfoReady);
+        pw.println(" isEriTextLoaded=" + isEriTextLoaded);
+        pw.println(" isSubscriptionFromRuim=" + isSubscriptionFromRuim);
+        pw.println(" mCdmaSSM=" + mCdmaSSM);
+        pw.println(" mRegistrationDeniedReason=" + mRegistrationDeniedReason);
+        pw.println(" currentCarrier=" + currentCarrier);
     }
 }

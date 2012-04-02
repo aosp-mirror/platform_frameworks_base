@@ -66,6 +66,8 @@ import com.android.internal.telephony.UUSInfo;
 import com.android.internal.telephony.cat.CatService;
 import com.android.internal.telephony.uicc.UiccController;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -81,6 +83,7 @@ import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OP
 public class CDMAPhone extends PhoneBase {
     static final String LOG_TAG = "CDMA";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false; /* STOP SHIP if true */
 
     // Default Emergency Callback Mode exit timer
     private static final int DEFAULT_ECM_EXIT_TIMER_VALUE = 300000;
@@ -1470,5 +1473,33 @@ public class CDMAPhone extends PhoneBase {
     protected void log(String s) {
         if (DBG)
             Log.d(LOG_TAG, "[CDMAPhone] " + s);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("CDMAPhone extends:");
+        super.dump(fd, pw, args);
+        pw.println(" mVmNumber=" + mVmNumber);
+        pw.println(" mCT=" + mCT);
+        pw.println(" mSST=" + mSST);
+        pw.println(" mCdmaSSM=" + mCdmaSSM);
+        pw.println(" mPendingMmis=" + mPendingMmis);
+        pw.println(" mRuimPhoneBookInterfaceManager=" + mRuimPhoneBookInterfaceManager);
+        pw.println(" mRuimSmsInterfaceManager=" + mRuimSmsInterfaceManager);
+        pw.println(" mCdmaSubscriptionSource=" + mCdmaSubscriptionSource);
+        pw.println(" mSubInfo=" + mSubInfo);
+        pw.println(" mEriManager=" + mEriManager);
+        pw.println(" mWakeLock=" + mWakeLock);
+        pw.println(" mIsPhoneInEcmState=" + mIsPhoneInEcmState);
+        if (VDBG) pw.println(" mImei=" + mImei);
+        if (VDBG) pw.println(" mImeiSv=" + mImeiSv);
+        if (VDBG) pw.println(" mEsn=" + mEsn);
+        if (VDBG) pw.println(" mMeid=" + mMeid);
+        pw.println(" mCarrierOtaSpNumSchema=" + mCarrierOtaSpNumSchema);
+        pw.println(" getCdmaEriIconIndex()=" + getCdmaEriIconIndex());
+        pw.println(" getCdmaEriIconMode()=" + getCdmaEriIconMode());
+        pw.println(" getCdmaEriText()=" + getCdmaEriText());
+        pw.println(" isMinInfoReady()=" + isMinInfoReady());
+        pw.println(" isCspPlmnEnabled()=" + isCspPlmnEnabled());
     }
 }
