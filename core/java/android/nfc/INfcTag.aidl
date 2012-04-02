@@ -45,4 +45,5 @@ interface INfcTag
     void resetTimeouts();
     boolean canMakeReadOnly(int ndefType);
     int getMaxTransceiveLength(int technology);
+    boolean getExtendedLengthApdusSupported();
 }
