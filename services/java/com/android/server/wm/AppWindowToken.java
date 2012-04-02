@@ -376,7 +376,8 @@ class AppWindowToken extends WindowToken {
         int numDrawn = 0;
         boolean nowGone = true;
 
-        if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Update reported visibility: " + this);
+        if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG,
+                "Update reported visibility: " + this);
         final int N = allAppWindows.size();
         for (int i=0; i<N; i++) {
             WindowState win = allAppWindows.get(i);

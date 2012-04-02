@@ -35,6 +35,7 @@ class WindowStateAnimator {
     static final boolean SHOW_LIGHT_TRANSACTIONS = WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
     static final boolean SHOW_SURFACE_ALLOC = WindowManagerService.SHOW_SURFACE_ALLOC;
     static final boolean localLOGV = WindowManagerService.localLOGV;
+    static final boolean DEBUG_ORIENTATION = WindowManagerService.DEBUG_ORIENTATION;
 
     static final String TAG = "WindowStateAnimator";
 
@@ -158,13 +159,11 @@ class WindowStateAnimator {
     }
 
     void cancelExitAnimationForNextAnimationLocked() {
-        if (!mWin.mExiting) return;
         if (mAnimation != null) {
             mAnimation.cancel();
             mAnimation = null;
             destroySurfaceLocked();
         }
-        mWin.mExiting = false;
     }
 
     private boolean stepAnimation(long currentTime) {
@@ -443,6 +442,7 @@ class WindowStateAnimator {
                         mSession.mSurfaceSession, mSession.mPid,
                         attrs.getTitle().toString(),
                         0, w, h, format, flags);
+                mWin.mHasSurface = true;
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
                         "  CREATE SURFACE "
                         + mSurface + " IN SESSION "
@@ -452,10 +452,12 @@ class WindowStateAnimator {
                         + Integer.toHexString(flags)
                         + " / " + this);
             } catch (Surface.OutOfResourcesException e) {
+                mWin.mHasSurface = false;
                 Slog.w(TAG, "OutOfResourcesException creating surface");
                 mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
                 return null;
             } catch (Exception e) {
+                mWin.mHasSurface = false;
                 Slog.e(TAG, "Exception creating surface", e);
                 return null;
             }
@@ -573,6 +575,7 @@ class WindowStateAnimator {
 
             mSurfaceShown = false;
             mSurface = null;
+            mWin.mHasSurface =false;
         }
     }
 
@@ -746,7 +749,7 @@ class WindowStateAnimator {
         final WindowState w = mWin;
         if (mSurface == null) {
             if (w.mOrientationChanging) {
-                if (WindowManagerService.DEBUG_ORIENTATION) {
+                if (DEBUG_ORIENTATION) {
                     Slog.v(TAG, "Orientation change skips hidden " + w);
                 }
                 w.mOrientationChanging = false;
@@ -841,7 +844,7 @@ class WindowStateAnimator {
             // new orientation.
             if (w.mOrientationChanging) {
                 w.mOrientationChanging = false;
-                if (WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
+                if (DEBUG_ORIENTATION) Slog.v(TAG,
                         "Orientation change skips hidden " + w);
             }
         } else if (mLastLayer != mAnimLayer
@@ -909,12 +912,11 @@ class WindowStateAnimator {
             if (w.mOrientationChanging) {
                 if (!w.isDrawnLw()) {
                     mService.mInnerFields.mOrientationChangeComplete = false;
-                    if (WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
+                    if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation continue waiting for draw in " + w);
                 } else {
                     w.mOrientationChanging = false;
-                    if (WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Orientation change complete in " + w);
+                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Orientation change complete in " + w);
                 }
             }
             w.mToken.hasVisible = true;
@@ -935,7 +937,7 @@ class WindowStateAnimator {
                     + " starting=" + (mWin.mAttrs.type == TYPE_APPLICATION_STARTING), e);
         }
         if (mWin.mReadyToShow && mWin.isReadyForDisplay()) {
-            if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION)
+            if (SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
                 WindowManagerService.logSurface(mWin, "SHOW (performShowLocked)", null);
             if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
                     + " during animation: policyVis=" + mWin.mPolicyVisibility
@@ -1169,4 +1171,12 @@ class WindowStateAnimator {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer("WindowStateAnimator (");
+        sb.append(mWin.mLastTitle + "): ");
+        sb.append("mSurface " + mSurface);
+        sb.append(", mAnimation " + mAnimation);
+        return sb.toString();
+    }
 }

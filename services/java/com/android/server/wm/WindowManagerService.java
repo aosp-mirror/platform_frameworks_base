@@ -2314,7 +2314,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // to hold off on removing the window until the animation is done.
         // If the display is frozen, just remove immediately, since the
         // animation wouldn't be seen.
-        if (win.mWinAnimator.mSurface != null && okToDisplay()) {
+        if (win.mHasSurface && okToDisplay()) {
             // If we are not currently running the exit animation, we
             // need to see about starting one.
             wasVisible = win.isWinVisibleLw();
@@ -2458,8 +2458,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     static void logSurface(WindowState w, String msg, RuntimeException where) {
-        String str = "  SURFACE " + Integer.toHexString(w.hashCode())
-                + ": " + msg + " / " + w.mAttrs.getTitle();
+        String str = "  SURFACE " + msg + ": " + w;
         if (where != null) {
             Slog.i(TAG, str, where);
         } else {
@@ -2481,15 +2480,14 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized (mWindowMap) {
                 WindowState w = windowForClientLocked(session, client, false);
-                WindowStateAnimator winAnimator = w.mWinAnimator;
-                if ((w != null) && (winAnimator.mSurface != null)) {
+                if ((w != null) && w.mHasSurface) {
                     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                             ">>> OPEN TRANSACTION setTransparentRegion");
                     Surface.openTransaction();
                     try {
                         if (SHOW_TRANSACTIONS) logSurface(w,
                                 "transparentRegionHint=" + region, null);
-                        winAnimator.mSurface.setTransparentRegionHint(region);
+                        w.mWinAnimator.mSurface.setTransparentRegionHint(region);
                     } finally {
                         Surface.closeTransaction();
                         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
@@ -2618,10 +2616,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized(mWindowMap) {
             WindowState win = windowForClientLocked(session, client, false);
-            WindowStateAnimator winAnimator = win.mWinAnimator;
             if (win == null) {
                 return 0;
             }
+            WindowStateAnimator winAnimator = win.mWinAnimator;
             if (win.mRequestedWidth != requestedWidth
                     || win.mRequestedHeight != requestedHeight) {
                 win.mLayoutNeeded = true;
@@ -2702,6 +2700,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayed = !win.isVisibleLw();
                 if (win.mExiting) {
                     winAnimator.cancelExitAnimationForNextAnimationLocked();
+                    win.mExiting = false;
                 }
                 if (win.mDestroying) {
                     win.mDestroying = false;
@@ -2740,7 +2739,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     surfaceChanged = true;
                 }
                 try {
-                    if (winAnimator.mSurface == null) {
+                    if (!win.mHasSurface) {
                         surfaceChanged = true;
                     }
                     Surface surface = winAnimator.createSurfaceLocked();
@@ -3416,15 +3415,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int getOrientationFromAppTokensLocked() {
-        int pos = mAppTokens.size() - 1;
         int curGroup = 0;
         int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         boolean findingBehind = false;
         boolean haveGroup = false;
         boolean lastFullscreen = false;
-        while (pos >= 0) {
+        for (int pos = mAppTokens.size() - 1; pos >= 0; pos--) {
             AppWindowToken wtoken = mAppTokens.get(pos);
-            pos--;
 
             if (DEBUG_APP_ORIENTATION) Slog.v(TAG, "Checking app orientation: " + wtoken);
 
@@ -4138,7 +4135,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState w = wtoken.allAppWindows.get(i);
                 if (w.mAppFreezing) {
                     w.mAppFreezing = false;
-                    if (w.mWinAnimator.mSurface != null && !w.mOrientationChanging) {
+                    if (w.mHasSurface && !w.mOrientationChanging) {
                         if (DEBUG_ORIENTATION) Slog.v(TAG, "set mOrientationChanging of " + w);
                         w.mOrientationChanging = true;
                     }
@@ -4726,7 +4723,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState w = mWindows.get(i);
-                if (w.mWinAnimator.mSurface != null) {
+                if (w.mHasSurface) {
                     try {
                         w.mClient.closeSystemDialogs(reason);
                     } catch (RemoteException e) {
@@ -5198,7 +5195,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean including = false;
             for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState ws = mWindows.get(i);
-                if (ws.mWinAnimator.mSurface == null) {
+                if (!ws.mHasSurface) {
                     continue;
                 }
                 if (ws.mLayer >= aboveAppLayer) {
@@ -5512,7 +5509,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         for (int i=mWindows.size()-1; i>=0; i--) {
             WindowState w = mWindows.get(i);
-            if (w.mWinAnimator.mSurface != null) {
+            if (w.mHasSurface) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG, "Set mOrientationChanging of " + w);
                 w.mOrientationChanging = true;
             }
@@ -8027,7 +8024,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mAnimator.mForceHiding = false;
             for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState w = mWindows.get(i);
-                if (w.mWinAnimator.mSurface != null) {
+                if (w.mHasSurface) {
                     final WindowManager.LayoutParams attrs = w.mAttrs;
                     if (mPolicy.doesForceHide(w, attrs) && w.isVisibleLw()) {
                         if (DEBUG_FOCUS) Slog.i(TAG, "win=" + w + " force hides other windows");
@@ -8127,7 +8124,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final int attrFlags = attrs.flags;
         final boolean canBeSeen = w.isDisplayedLw();
 
-        if (w.mWinAnimator.mSurface != null) {
+        if (w.mHasSurface) {
             if ((attrFlags&FLAG_KEEP_SCREEN_ON) != 0) {
                 mInnerFields.mHoldScreen = w.mSession;
             }
@@ -8279,7 +8276,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mPolicy.beginAnimationLw(dw, dh);
                 for (i = mWindows.size() - 1; i >= 0; i--) {
                     WindowState w = mWindows.get(i);
-                    if (w.mWinAnimator.mSurface != null) {
+                    if (w.mHasSurface) {
                         mPolicy.animatingWindowLw(w, w.mAttrs);
                     }
                 }
@@ -8397,7 +8394,7 @@ public class WindowManagerService extends IWindowManager.Stub
             updateResizingWindows(w);
 
             // Moved from updateWindowsAndWallpaperLocked().
-            if (winAnimator.mSurface != null) {
+            if (w.mHasSurface) {
                 // Take care of the window being ready to display.
                 if (winAnimator.commitFinishDrawingLocked(currentTime)) {
                     if ((w.mAttrs.flags
@@ -8456,10 +8453,8 @@ public class WindowManagerService extends IWindowManager.Stub
             stopFreezingDisplayLocked();
         }
 
-        i = mResizingWindows.size();
-        if (i > 0) {
-            do {
-                i--;
+        if (!mResizingWindows.isEmpty()) {
+            for (i = mResizingWindows.size() - 1; i >= 0; i--) {
                 WindowState win = mResizingWindows.get(i);
                 final WindowStateAnimator winAnimator = win.mWinAnimator; 
                 try {
@@ -8490,7 +8485,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 } catch (RemoteException e) {
                     win.mOrientationChanging = false;
                 }
-            } while (i > 0);
+            }
             mResizingWindows.clear();
         }
 
@@ -8725,6 +8720,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         wsa.mSurface.destroy();
                         wsa.mSurfaceShown = false;
                         wsa.mSurface = null;
+                        ws.mHasSurface = false;
                         mForceRemoves.add(ws);
                         i--;
                         N--;
@@ -8737,6 +8733,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         wsa.mSurface.destroy();
                         wsa.mSurfaceShown = false;
                         wsa.mSurface = null;
+                        ws.mHasSurface = false;
                         leakedSurface = true;
                     }
                 }
@@ -8775,6 +8772,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     surface.destroy();
                     winAnimator.mSurfaceShown = false;
                     winAnimator.mSurface = null;
+                    winAnimator.mWin.mHasSurface = false;
                 }
 
                 try {

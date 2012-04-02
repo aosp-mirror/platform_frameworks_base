@@ -246,6 +246,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     final WindowStateAnimator mWinAnimator;
 
+    boolean mHasSurface = false;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int seq, WindowManager.LayoutParams a,
            int viewVisibility) {
@@ -609,7 +611,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     public boolean isVisibleLw() {
         final AppWindowToken atoken = mAppToken;
-        return mWinAnimator.mSurface != null && mPolicyVisibility && !mAttachedHidden
+        return mHasSurface && mPolicyVisibility && !mAttachedHidden
                 && (atoken == null || !atoken.hiddenRequested)
                 && !mExiting && !mDestroying;
     }
@@ -630,7 +632,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final AppWindowToken atoken = mAppToken;
         final boolean animating = atoken != null
                 ? (atoken.animation != null) : false;
-        return mWinAnimator.mSurface != null && !mDestroying && !mExiting
+        return mHasSurface && !mDestroying && !mExiting
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
                                 && !mRootToken.hidden)
@@ -644,7 +646,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     public boolean isWinVisibleLw() {
         final AppWindowToken atoken = mAppToken;
-        return mWinAnimator.mSurface != null && mPolicyVisibility && !mAttachedHidden
+        return mHasSurface && mPolicyVisibility && !mAttachedHidden
                 && (atoken == null || !atoken.hiddenRequested || atoken.animating)
                 && !mExiting && !mDestroying;
     }
@@ -654,7 +656,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * the associated app token, not the pending requested hidden state.
      */
     boolean isVisibleNow() {
-        return mWinAnimator.mSurface != null && mPolicyVisibility && !mAttachedHidden
+        return mHasSurface && mPolicyVisibility && !mAttachedHidden
                 && !mRootToken.hidden && !mExiting && !mDestroying;
     }
 
@@ -674,7 +676,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean isVisibleOrAdding() {
         final AppWindowToken atoken = mAppToken;
-        return ((mWinAnimator.mSurface != null && !mWinAnimator.mReportDestroySurface)
+        return ((mHasSurface && !mWinAnimator.mReportDestroySurface)
                         || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
                 && mPolicyVisibility && !mAttachedHidden
                 && (atoken == null || !atoken.hiddenRequested)
@@ -687,15 +689,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * being visible.
      */
     boolean isOnScreen() {
+        if (!mHasSurface || !mPolicyVisibility || mDestroying) {
+            return false;
+        }
         final AppWindowToken atoken = mAppToken;
         if (atoken != null) {
-            return mWinAnimator.mSurface != null && mPolicyVisibility && !mDestroying
-                    && ((!mAttachedHidden && !atoken.hiddenRequested)
+            return ((!mAttachedHidden && !atoken.hiddenRequested)
                             || mWinAnimator.mAnimation != null || atoken.animation != null);
-        } else {
-            return mWinAnimator.mSurface != null && mPolicyVisibility && !mDestroying
-                    && (!mAttachedHidden || mWinAnimator.mAnimation != null);
         }
+        return !mAttachedHidden || mWinAnimator.mAnimation != null;
     }
 
     /**
@@ -707,7 +709,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mService.mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             return false;
         }
-        return mWinAnimator.mSurface != null && mPolicyVisibility && !mDestroying
+        return mHasSurface && mPolicyVisibility && !mDestroying
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
                                 && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null
@@ -741,8 +743,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * complete UI in to.
      */
     public boolean isDrawnLw() {
-        return mWinAnimator.mSurface != null && !mDestroying
-            && !mWinAnimator.mDrawPending && !mWinAnimator.mCommitDrawPending;
+        return mHasSurface && !mDestroying &&
+            !mWinAnimator.mDrawPending && !mWinAnimator.mCommitDrawPending;
     }
 
     /**
@@ -1017,8 +1019,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
             pw.print(prefix); pw.print("mConfiguration="); pw.println(mConfiguration);
         }
-        pw.print(prefix); pw.print("mShownFrame=");
-                mShownFrame.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
+                pw.print(" mShownFrame="); mShownFrame.printShortString(pw); pw.println();
         if (dumpAll) {
             pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
                     pw.print(" last="); mLastFrame.printShortString(pw);
