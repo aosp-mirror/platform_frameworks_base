@@ -262,19 +262,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         return append(String.valueOf(text));
     }
 
-    private int change(int start, int end, CharSequence tb, int tbstart, int tbend) {
-        return change(true, start, end, tb, tbstart, tbend);
-    }
-
-    private int change(boolean notify, int start, int end,
-                       CharSequence tb, int tbstart, int tbend) {
+    private void change(int start, int end, CharSequence tb, int tbstart, int tbend) {
         checkRange("replace", start, end);
-        int ret = tbend - tbstart;
-        TextWatcher[] recipients = null;
-
-        if (notify) {
-            recipients = sendTextWillChange(start, end - start, tbend - tbstart);
-        }
 
         for (int i = mSpanCount - 1; i >= 0; i--) {
             if ((mSpanFlags[i] & SPAN_PARAGRAPH) == SPAN_PARAGRAPH) {
@@ -338,7 +327,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                     en = tbend;
 
                 if (getSpanStart(spans[i]) < 0) {
-                    setSpan(true, spans[i],
+                    setSpan(false, spans[i],
                             st - tbstart + start,
                             en - tbstart + start,
                             sp.getSpanFlags(spans[i]));
@@ -346,51 +335,37 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             }
         }
 
-        // no need for span fixup on pure insertion
-        if (tbend > tbstart && end - start == 0) {
-            if (notify) {
-                sendTextChange(recipients, start, end - start, tbend - tbstart);
-                sendTextHasChanged(recipients);
-            }
+        if (end > start) {
+            // no need for span fixup on pure insertion
+            boolean atEnd = (mGapStart + mGapLength == mText.length);
 
-            return ret;
-        }
+            for (int i = mSpanCount - 1; i >= 0; i--) {
+                if (mSpanStarts[i] >= start &&
+                        mSpanStarts[i] < mGapStart + mGapLength) {
+                    int flag = (mSpanFlags[i] & START_MASK) >> START_SHIFT;
 
-        boolean atend = (mGapStart + mGapLength == mText.length);
-
-        for (int i = mSpanCount - 1; i >= 0; i--) {
-            if (mSpanStarts[i] >= start &&
-                mSpanStarts[i] < mGapStart + mGapLength) {
-                int flag = (mSpanFlags[i] & START_MASK) >> START_SHIFT;
-
-                if (flag == POINT || (flag == PARAGRAPH && atend))
+                if (flag == POINT || (flag == PARAGRAPH && atEnd))
                     mSpanStarts[i] = mGapStart + mGapLength;
                 else
                     mSpanStarts[i] = start;
-            }
+                }
 
-            if (mSpanEnds[i] >= start &&
-                mSpanEnds[i] < mGapStart + mGapLength) {
-                int flag = (mSpanFlags[i] & END_MASK);
+                if (mSpanEnds[i] >= start &&
+                        mSpanEnds[i] < mGapStart + mGapLength) {
+                    int flag = (mSpanFlags[i] & END_MASK);
 
-                if (flag == POINT || (flag == PARAGRAPH && atend))
-                    mSpanEnds[i] = mGapStart + mGapLength;
-                else
-                    mSpanEnds[i] = start;
-            }
+                    if (flag == POINT || (flag == PARAGRAPH && atEnd))
+                        mSpanEnds[i] = mGapStart + mGapLength;
+                    else
+                        mSpanEnds[i] = start;
+                }
 
-            // remove 0-length SPAN_EXCLUSIVE_EXCLUSIVE
-            if (mSpanEnds[i] < mSpanStarts[i]) {
-                removeSpan(i);
+                // remove 0-length SPAN_EXCLUSIVE_EXCLUSIVE
+                if (mSpanEnds[i] < mSpanStarts[i]) {
+                    removeSpan(i);
+                }
             }
         }
-
-        if (notify) {
-            sendTextChange(recipients, start, end - start, tbend - tbstart);
-            sendTextHasChanged(recipients);
-        }
-
-        return ret;
     }
 
     private void removeSpan(int i) {
@@ -425,8 +400,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                         CharSequence tb, int tbstart, int tbend) {
         int filtercount = mFilters.length;
         for (int i = 0; i < filtercount; i++) {
-            CharSequence repl = mFilters[i].filter(tb, tbstart, tbend,
-                                                   this, start, end);
+            CharSequence repl = mFilters[i].filter(tb, tbstart, tbend, this, start, end);
 
             if (repl != null) {
                 tb = repl;
@@ -435,11 +409,17 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             }
         }
 
-        if (end == start && tbstart == tbend) {
+        final int origLen = end - start;
+        final int newLen = tbend - tbstart;
+
+        if (origLen == 0 && newLen == 0) {
             return this;
         }
 
-        if (end == start || tbstart == tbend) {
+        TextWatcher[] textWatchers = getSpans(start, start + origLen, TextWatcher.class);
+        sendBeforeTextChanged(textWatchers, start, origLen, newLen);
+
+        if (origLen == 0 || newLen == 0) {
             change(start, end, tb, tbstart, tbend);
         } else {
             int selstart = Selection.getSelectionStart(this);
@@ -450,11 +430,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
             checkRange("replace", start, end);
             moveGapTo(end);
-            TextWatcher[] recipients;
-
-            int origlen = end - start;
-
-            recipients = sendTextWillChange(start, origlen, tbend - tbstart);
 
             if (mGapLength < 2)
                 resizeFor(length() + 1);
@@ -475,9 +450,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 new Exception("mGapLength < 1").printStackTrace();
             }
 
-            int inserted = change(false, start + 1, start + 1, tb, tbstart, tbend);
-            change(false, start, start + 1, "", 0, 0);
-            change(false, start + inserted, start + inserted + origlen, "", 0, 0);
+            change(start + 1, start + 1, tb, tbstart, tbend);
+            change(start, start + 1, "", 0, 0);
+            change(start + newLen, start + newLen + origLen, "", 0, 0);
 
             /*
              * Special case to keep the cursor in the same position
@@ -490,7 +465,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             if (selstart > start && selstart < end) {
                 long off = selstart - start;
 
-                off = off * inserted / (end - start);
+                off = off * newLen / (end - start);
                 selstart = (int) off + start;
 
                 setSpan(false, Selection.SELECTION_START, selstart, selstart,
@@ -499,14 +474,15 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             if (selend > start && selend < end) {
                 long off = selend - start;
 
-                off = off * inserted / (end - start);
+                off = off * newLen / (end - start);
                 selend = (int) off + start;
 
                 setSpan(false, Selection.SELECTION_END, selend, selend, Spanned.SPAN_POINT_POINT);
             }
-            sendTextChange(recipients, start, origlen, inserted);
-            sendTextHasChanged(recipients);
         }
+
+        sendTextChanged(textWatchers, start, origLen, newLen);
+        sendAfterTextChanged(textWatchers);
 
         return this; 
     }
@@ -872,30 +848,27 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         return new String(buf);
     }
 
-    private TextWatcher[] sendTextWillChange(int start, int before, int after) {
-        TextWatcher[] recip = getSpans(start, start + before, TextWatcher.class);
-        int n = recip.length;
+    private void sendBeforeTextChanged(TextWatcher[] watchers, int start, int before, int after) {
+        int n = watchers.length;
 
         for (int i = 0; i < n; i++) {
-            recip[i].beforeTextChanged(this, start, before, after);
-        }
-
-        return recip;
-    }
-
-    private void sendTextChange(TextWatcher[] recip, int start, int before, int after) {
-        int n = recip.length;
-
-        for (int i = 0; i < n; i++) {
-            recip[i].onTextChanged(this, start, before, after);
+            watchers[i].beforeTextChanged(this, start, before, after);
         }
     }
 
-    private void sendTextHasChanged(TextWatcher[] recip) {
-        int n = recip.length;
+    private void sendTextChanged(TextWatcher[] watchers, int start, int before, int after) {
+        int n = watchers.length;
 
         for (int i = 0; i < n; i++) {
-            recip[i].afterTextChanged(this);
+            watchers[i].onTextChanged(this, start, before, after);
+        }
+    }
+
+    private void sendAfterTextChanged(TextWatcher[] watchers) {
+        int n = watchers.length;
+
+        for (int i = 0; i < n; i++) {
+            watchers[i].afterTextChanged(this);
         }
     }
 
@@ -1037,8 +1010,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
-    public void drawText(Canvas c, int start, int end,
-                         float x, float y, Paint p) {
+    public void drawText(Canvas c, int start, int end, float x, float y, Paint p) {
         checkRange("drawText", start, end);
 
         if (end <= mGapStart) {
@@ -1059,8 +1031,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
-    public void drawTextRun(Canvas c, int start, int end,
-            int contextStart, int contextEnd,
+    public void drawTextRun(Canvas c, int start, int end, int contextStart, int contextEnd,
             float x, float y, int flags, Paint p) {
         checkRange("drawTextRun", start, end);
 
@@ -1262,6 +1233,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     private int[] mSpanFlags;
     private int mSpanCount;
 
+    // TODO These value are tightly related to the public SPAN_MARK/POINT values in {@link Spanned}
     private static final int POINT = 2;
     private static final int PARAGRAPH = 3;
 
