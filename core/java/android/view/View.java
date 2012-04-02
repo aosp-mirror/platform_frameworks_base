@@ -13614,13 +13614,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mPrivateFlags |= FORCE_LAYOUT;
         mPrivateFlags |= INVALIDATED;
 
-        if (mParent != null) {
-            if (mLayoutParams != null) {
-                mLayoutParams.onResolveLayoutDirection(getResolvedLayoutDirection());
-            }
-            if (!mParent.isLayoutRequested()) {
-                mParent.requestLayout();
-            }
+        if (mLayoutParams != null) {
+            mLayoutParams.onResolveLayoutDirection(getResolvedLayoutDirection());
+        }
+
+        if (mParent != null && !mParent.isLayoutRequested()) {
+            mParent.requestLayout();
         }
     }
 
