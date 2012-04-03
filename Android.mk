@@ -437,6 +437,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/ContactManager "Contact Manager" \
 		-samplecode $(sample_dir)/CubeLiveWallpaper \
 		            resources/samples/CubeLiveWallpaper "Cube Live Wallpaper" \
+		-samplecode $(sample_dir)/HelloEffects \
+		            resources/samples/HelloEffects "HelloEffects" \
 		-samplecode $(sample_dir)/Home \
 		            resources/samples/Home "Home" \
 		-samplecode $(sample_dir)/HoneycombGallery \
