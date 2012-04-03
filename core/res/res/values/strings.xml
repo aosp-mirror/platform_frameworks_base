@@ -2810,6 +2810,8 @@
     <string name="date_picker_dialog_title">Set date</string>
     <!-- Name of the button in the date/time picker to accept the date/time change -->
     <string name="date_time_set">Set</string>
+    <!-- Name of the button in the date/time picker to accept the date/time change -->
+    <string name="date_time_done">Done</string>
 
     <!-- Security Permissions strings-->
     <!-- The default permission group for any permissions that have not explicitly set a group. -->

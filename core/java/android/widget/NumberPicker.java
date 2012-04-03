@@ -112,10 +112,10 @@ public class NumberPicker extends LinearLayout {
     private static final int SELECTOR_ADJUSTMENT_DURATION_MILLIS = 800;
 
     /**
-     * The duration of scrolling to the next/previous value while changing the
-     * current value by one, i.e. increment or decrement.
+     * The duration of scrolling to the next/previous value while snapping to
+     * a given position.
      */
-    private static final int CHANGE_CURRENT_BY_ONE_SCROLL_DURATION = 300;
+    private static final int SNAP_SCROLL_DURATION = 300;
 
     /**
      * The strength of fading in the top and bottom while drawing the selector.
@@ -140,7 +140,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * Coefficient for adjusting touch scroll distance.
      */
-    private static final float TOUCH_SCROLL_DECELERATION_COEFFICIENT = 2.5f;
+    private static final float TOUCH_SCROLL_DECELERATION_COEFFICIENT = 2.0f;
 
     /**
      * The resource id for the default layout.
@@ -152,7 +152,7 @@ public class NumberPicker extends LinearLayout {
      */
     private static final char[] DIGIT_CHARACTERS = new char[] {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
-     };
+    };
 
     /**
      * Constant for unspecified size.
@@ -838,7 +838,13 @@ public class NumberPicker extends LinearLayout {
                     if (absDeltaMoveY > mMinFlingDistance) {
                         fling(initialVelocity);
                     } else {
-                        changeValueByOne(deltaMove < 0);
+                        final int normalizedDeltaMove =
+                            (int) (absDeltaMoveY / TOUCH_SCROLL_DECELERATION_COEFFICIENT);
+                        if (normalizedDeltaMove < mSelectorElementHeight) {
+                            snapToNextValue(deltaMove < 0);
+                        } else {
+                            snapToClosestValue();
+                        }
                     }
                     onScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
                 } else {
@@ -1509,11 +1515,9 @@ public class NumberPicker extends LinearLayout {
             }
             mPreviousScrollerY = 0;
             if (increment) {
-                mFlingScroller.startScroll(0, 0, 0, -mSelectorElementHeight,
-                        CHANGE_CURRENT_BY_ONE_SCROLL_DURATION);
+                mFlingScroller.startScroll(0, 0, 0, -mSelectorElementHeight, SNAP_SCROLL_DURATION);
             } else {
-                mFlingScroller.startScroll(0, 0, 0, mSelectorElementHeight,
-                        CHANGE_CURRENT_BY_ONE_SCROLL_DURATION);
+                mFlingScroller.startScroll(0, 0, 0, mSelectorElementHeight, SNAP_SCROLL_DURATION);
             }
             invalidate();
         } else {
@@ -1900,6 +1904,42 @@ public class NumberPicker extends LinearLayout {
             return true;
         }
         return false;
+    }
+
+    private void snapToNextValue(boolean increment) {
+        int deltaY = mCurrentScrollOffset - mInitialScrollOffset;
+        int amountToScroll = 0;
+        if (deltaY != 0) {
+            mPreviousScrollerY = 0;
+            if (deltaY > 0) {
+                if (increment) {
+                    amountToScroll = - deltaY;
+                } else {
+                    amountToScroll = mSelectorElementHeight - deltaY;
+                }
+            } else {
+                if (increment) {
+                    amountToScroll = - mSelectorElementHeight - deltaY;
+                } else {
+                    amountToScroll = - deltaY;
+                }
+            }
+            mFlingScroller.startScroll(0, 0, 0, amountToScroll, SNAP_SCROLL_DURATION);
+            invalidate();
+        }
+    }
+
+    private void snapToClosestValue() {
+        // adjust to the closest value
+        int deltaY = mInitialScrollOffset - mCurrentScrollOffset;
+        if (deltaY != 0) {
+            mPreviousScrollerY = 0;
+            if (Math.abs(deltaY) > mSelectorElementHeight / 2) {
+                deltaY += (deltaY > 0) ? -mSelectorElementHeight : mSelectorElementHeight;
+            }
+            mFlingScroller.startScroll(0, 0, 0, deltaY, SNAP_SCROLL_DURATION);
+            invalidate();
+        }
     }
 
     /**

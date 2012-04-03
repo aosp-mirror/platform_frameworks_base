@@ -1643,7 +1643,7 @@ please see styles_device_defaults.xml.
         <item name="android:selectionDividerHeight">2dip</item>
         <item name="android:selectionDividersDistance">48dip</item>
         <item name="android:internalMinWidth">48dip</item>
-        <item name="android:internalMaxHeight">200dip</item>
+        <item name="android:internalMaxHeight">180dip</item>
         <item name="android:minFlingDistance">150dip</item>
     </style>
 
