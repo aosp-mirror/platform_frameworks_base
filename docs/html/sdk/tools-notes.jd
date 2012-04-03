@@ -68,6 +68,48 @@ padding: .25em 1em;
   <a href="#" onclick="return toggleDiv(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
     width="9px" />
+    SDK Tools, Revision 18</a> <em>(April 2012)</em>
+
+  <div class="toggleme">
+    <p class="caution"><strong>Important:</strong> To download the new Android
+    4.0 system components from the Android SDK Manager, you must first update the
+    SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
+    the Android 4.0 system components will not be available for download.</p>
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 9 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r18 is designed for
+        use with ADT 18.0.0 and later. If you haven't already, we highly recommend updating your
+        <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 18.0.0.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+    </ul>
+    </dd>
+    <dt>General notes:</dt>
+    <dd>
+      <ul>
+        <li>Updated the SdkController app to encapsulate both sensor and multitouch emulation
+          functionality.</li>
+      </ul>
+    </dd>
+    <dt>Bug fixes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed Ant issues where some jar libraries in the {@code libs/} folder are not picked up
+in some cases.</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+    width="9px" />
     SDK Tools, Revision 17</a> <em>(March 2012)</em>
 
   <div class="toggleme">
@@ -96,12 +138,13 @@ padding: .25em 1em;
             <li>Added support for hardware accelerated graphics rendering. This feature requires an
 API Level 15, Revision 3 or later system image.
 (<a href="{@docRoot}guide/developing/devices/emulator.html#accel-graphics">more info</a>)
-              <p class="note"><strong>Note:</strong> As of the SDK Tools Revision 17 release, the
-API Level 15, Revision 3 system image is not yet available.</p>
             </li>
             <li>Added support for running Android x86 system images in virtualization mode on
 Windows and Mac OS X.
-(<a href="{@docRoot}guide/developing/devices/emulator.html#accel-vm">more info</a>)</li>
+(<a href="{@docRoot}guide/developing/devices/emulator.html#accel-vm">more info</a>)
+              <p class="note"><strong>Note:</strong> Use the Android SDK Manager to download and
+install x86 system images. Android x86 system images are not available for all API levels.</p>
+            </li>
             <li>Added experimental support for multi-touch input by enabing the emulator to receive
               touch input from a USB-tethered physical Android device.
               (<a href="http://tools.android.com/tips/hardware-emulation">more info</a>)</li>
