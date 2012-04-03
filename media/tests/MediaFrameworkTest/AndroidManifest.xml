@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.mediaframeworktest">
-    
+
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -24,7 +24,7 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <application>    
+    <application>
         <uses-library android:name="android.test.runner" />
         <activity android:label="@string/app_name"
                 android:name="MediaFrameworkTest"
@@ -34,12 +34,18 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-    </application>   
+    </application>
+
+    <instrumentation android:name=".CameraStressTestRunner"
+        android:targetPackage="com.android.mediaframeworktest"
+        android:label="Camera stress tests InstrumentationRunner">
+    </instrumentation>
+
     <instrumentation android:name=".MediaFrameworkTestRunner"
          android:targetPackage="com.android.mediaframeworktest"
          android:label="MediaFramework tests InstrumentationRunner">
      </instrumentation>
-     
+
       <instrumentation android:name=".MediaFrameworkPerfTestRunner"
          android:targetPackage="com.android.mediaframeworktest"
          android:label="MediaFramework Performance tests InstrumentationRunner">
@@ -49,7 +55,7 @@
          android:targetPackage="com.android.mediaframeworktest"
          android:label="MediaFramework unit tests InstrumentationRunner">
      </instrumentation>
-     
+
      <instrumentation android:name=".MediaRecorderStressTestRunner"
          android:targetPackage="com.android.mediaframeworktest"
          android:label="MediaRecorder stress tests InstrumentationRunner">
