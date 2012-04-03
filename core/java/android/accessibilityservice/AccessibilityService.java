@@ -35,6 +35,14 @@ import com.android.internal.os.HandlerCaller;
  * etc. Such a service can optionally request the capability for querying the content
  * of the active window. Development of an accessibility service requires extending this
  * class and implementing its abstract methods.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating AccessibilityServices, read the
+ * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+ * developer guide.</p>
+ * </div>
+ *
  * <h3>Lifecycle</h3>
  * <p>
  * The lifecycle of an accessibility service is managed exclusively by the system and
