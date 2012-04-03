@@ -69,10 +69,14 @@ void LayerCache::setMaxSize(uint32_t maxSize) {
 
 void LayerCache::deleteLayer(Layer* layer) {
     if (layer) {
-        LAYER_LOGD("Destroying layer %dx%d", layer->getWidth(), layer->getHeight());
+        GLuint fbo = layer->getFbo();
+        LAYER_LOGD("Destroying layer %dx%d, fbo %d", layer->getWidth(), layer->getHeight(), fbo);
+
         mSize -= layer->getWidth() * layer->getHeight() * 4;
-        layer->deleteFbo();
+
+        if (fbo) Caches::getInstance().fboCache.put(fbo);
         layer->deleteTexture();
+
         delete layer;
     }
 }
@@ -173,6 +177,10 @@ bool LayerCache::put(Layer* layer) {
             LAYER_LOGD("  Deleting layer %.2fx%.2f", victim->layer.getWidth(),
                     victim->layer.getHeight());
         }
+
+        layer->deferredUpdateScheduled = false;
+        layer->renderer = NULL;
+        layer->displayList = NULL;
 
         LayerEntry entry(layer);
 

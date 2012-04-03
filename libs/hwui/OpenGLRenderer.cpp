@@ -678,6 +678,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 
         // Put the FBO name back in the cache, if it doesn't fit, it will be destroyed
         mCaches.fboCache.put(current->fbo);
+        layer->setFbo(0);
     }
 
     dirtyClip();
