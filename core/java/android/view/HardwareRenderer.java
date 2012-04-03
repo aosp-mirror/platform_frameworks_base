@@ -87,7 +87,7 @@ public abstract class HardwareRenderer {
     /**
      * System property used to enable or disable hardware rendering profiling.
      * The default value of this property is assumed to be false.
-     * 
+     *
      * When profiling is enabled, the adb shell dumpsys gfxinfo command will
      * output extra information about the time taken to execute by the last
      * frames.
@@ -97,6 +97,20 @@ public abstract class HardwareRenderer {
      * "false", to disable profiling
      */
     static final String PROFILE_PROPERTY = "hwui.profile";
+
+    /**
+     * System property used to specify the number of frames to be used
+     * when doing hardware rendering profiling.
+     * The default value of this property is #PROFILE_MAX_FRAMES.
+     *
+     * When profiling is enabled, the adb shell dumpsys gfxinfo command will
+     * output extra information about the time taken to execute by the last
+     * frames.
+     *
+     * Possible values:
+     * "60", to set the limit of frames to 60
+     */
+    static final String PROFILE_MAXFRAMES_PROPERTY = "hwui.profile.maxframes";
 
     /**
      * System property used to debug EGL configuration choice.
@@ -134,7 +148,7 @@ public abstract class HardwareRenderer {
     /**
      * Number of frames to profile.
      */
-    private static final int PROFILE_MAX_FRAMES = 120;
+    private static final int PROFILE_MAX_FRAMES = 64;
 
     /**
      * Number of floats per profiled frame.
@@ -579,7 +593,13 @@ public abstract class HardwareRenderer {
             }
 
             if (mProfileEnabled) {
-                mProfileData = new float[PROFILE_MAX_FRAMES * PROFILE_FRAME_DATA_COUNT];
+                property = SystemProperties.get(PROFILE_MAXFRAMES_PROPERTY,
+                        Integer.toString(PROFILE_MAX_FRAMES));
+                int maxProfileFrames = Integer.valueOf(property);
+                mProfileData = new float[maxProfileFrames * PROFILE_FRAME_DATA_COUNT];
+                for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
+                    mProfileData[i] = mProfileData[i + 1] = mProfileData[i + 2] = -1;
+                }
             } else {
                 mProfileData = null;
             }
@@ -596,9 +616,14 @@ public abstract class HardwareRenderer {
             if (mProfileEnabled) {
                 pw.printf("\n\tDraw\tProcess\tExecute\n");
                 for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
+                    if (mProfileData[i] < 0) {
+                        break;
+                    }
                     pw.printf("\t%3.2f\t%3.2f\t%3.2f\n", mProfileData[i], mProfileData[i + 1],
                             mProfileData[i + 2]);
+                    mProfileData[i] = mProfileData[i + 1] = mProfileData[i + 2] = -1;
                 }
+                mProfileCurrentFrame = mProfileData.length;
             }
         }
 
