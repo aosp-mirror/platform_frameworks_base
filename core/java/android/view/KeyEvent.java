@@ -591,8 +591,24 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Calculator special function key.
      * Used to launch a calculator application. */
     public static final int KEYCODE_CALCULATOR      = 210;
+    /** Key code constant: Japanese full-width / half-width key. */
+    public static final int KEYCODE_ZENKAKU_HANKAKU = 211;
+    /** Key code constant: Japanese alphanumeric key. */
+    public static final int KEYCODE_EISU            = 212;
+    /** Key code constant: Japanese non-conversion key. */
+    public static final int KEYCODE_MUHENKAN        = 213;
+    /** Key code constant: Japanese conversion key. */
+    public static final int KEYCODE_HENKAN          = 214;
+    /** Key code constant: Japanese katakana / hiragana key. */
+    public static final int KEYCODE_KATAKANA_HIRAGANA = 215;
+    /** Key code constant: Japanese Yen key. */
+    public static final int KEYCODE_YEN             = 216;
+    /** Key code constant: Japanese Ro key. */
+    public static final int KEYCODE_RO              = 217;
+    /** Key code constant: Japanese kana key. */
+    public static final int KEYCODE_KANA            = 218;
 
-    private static final int LAST_KEYCODE           = KEYCODE_CALCULATOR;
+    private static final int LAST_KEYCODE           = KEYCODE_KANA;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -825,6 +841,14 @@ public class KeyEvent extends InputEvent implements Parcelable {
         names.append(KEYCODE_CALENDAR, "KEYCODE_CALENDAR");
         names.append(KEYCODE_MUSIC, "KEYCODE_MUSIC");
         names.append(KEYCODE_CALCULATOR, "KEYCODE_CALCULATOR");
+        names.append(KEYCODE_ZENKAKU_HANKAKU, "KEYCODE_ZENKAKU_HANKAKU");
+        names.append(KEYCODE_EISU, "KEYCODE_EISU");
+        names.append(KEYCODE_MUHENKAN, "KEYCODE_MUHENKAN");
+        names.append(KEYCODE_HENKAN, "KEYCODE_HENKAN");
+        names.append(KEYCODE_KATAKANA_HIRAGANA, "KEYCODE_KATAKANA_HIRAGANA");
+        names.append(KEYCODE_YEN, "KEYCODE_YEN");
+        names.append(KEYCODE_RO, "KEYCODE_RO");
+        names.append(KEYCODE_KANA, "KEYCODE_KANA");
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.
