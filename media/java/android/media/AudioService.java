@@ -92,7 +92,7 @@ public class AudioService extends IAudioService.Stub {
     protected static final boolean DEBUG_RC = false;
 
     /** How long to delay before persisting a change in volume/ringer mode. */
-    private static final int PERSIST_DELAY = 3000;
+    private static final int PERSIST_DELAY = 500;
 
     private Context mContext;
     private ContentResolver mContentResolver;
