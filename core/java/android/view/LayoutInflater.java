@@ -583,7 +583,14 @@ public abstract class LayoutInflater {
 
             Object[] args = mConstructorArgs;
             args[1] = attrs;
-            return constructor.newInstance(args);
+
+            final View view = constructor.newInstance(args);
+            if (view instanceof ViewStub) {
+                // always use ourselves when inflating ViewStub later
+                final ViewStub viewStub = (ViewStub) view;
+                viewStub.setLayoutInflater(this);
+            }
+            return view;
 
         } catch (NoSuchMethodException e) {
             InflateException ie = new InflateException(attrs.getPositionDescription()

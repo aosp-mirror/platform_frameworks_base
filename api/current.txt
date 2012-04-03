@@ -24084,9 +24084,11 @@ package android.view {
     ctor public ViewStub(android.content.Context, android.util.AttributeSet);
     ctor public ViewStub(android.content.Context, android.util.AttributeSet, int);
     method public int getInflatedId();
+    method public android.view.LayoutInflater getLayoutInflater();
     method public int getLayoutResource();
     method public android.view.View inflate();
     method public void setInflatedId(int);
+    method public void setLayoutInflater(android.view.LayoutInflater);
     method public void setLayoutResource(int);
     method public void setOnInflateListener(android.view.ViewStub.OnInflateListener);
   }

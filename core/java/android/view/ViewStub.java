@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
 
@@ -66,12 +67,14 @@ import java.lang.ref.WeakReference;
  * @attr ref android.R.styleable#ViewStub_inflatedId
  * @attr ref android.R.styleable#ViewStub_layout
  */
+@RemoteView
 public final class ViewStub extends View {
     private int mLayoutResource = 0;
     private int mInflatedId;
 
     private WeakReference<View> mInflatedViewRef;
 
+    private LayoutInflater mInflater;
     private OnInflateListener mInflateListener;
 
     public ViewStub(Context context) {
@@ -140,6 +143,7 @@ public final class ViewStub extends View {
      * @see #getInflatedId()
      * @attr ref android.R.styleable#ViewStub_inflatedId
      */
+    @android.view.RemotableViewMethod
     public void setInflatedId(int inflatedId) {
         mInflatedId = inflatedId;
     }
@@ -172,8 +176,24 @@ public final class ViewStub extends View {
      * @see #inflate()
      * @attr ref android.R.styleable#ViewStub_layout
      */
+    @android.view.RemotableViewMethod
     public void setLayoutResource(int layoutResource) {
         mLayoutResource = layoutResource;
+    }
+
+    /**
+     * Set {@link LayoutInflater} to use in {@link #inflate()}, or {@code null}
+     * to use the default.
+     */
+    public void setLayoutInflater(LayoutInflater inflater) {
+        mInflater = inflater;
+    }
+
+    /**
+     * Get current {@link LayoutInflater} used in {@link #inflate()}.
+     */
+    public LayoutInflater getLayoutInflater() {
+        return mInflater;
     }
 
     @Override
@@ -199,6 +219,7 @@ public final class ViewStub extends View {
      * @see #inflate() 
      */
     @Override
+    @android.view.RemotableViewMethod
     public void setVisibility(int visibility) {
         if (mInflatedViewRef != null) {
             View view = mInflatedViewRef.get();
@@ -228,7 +249,12 @@ public final class ViewStub extends View {
         if (viewParent != null && viewParent instanceof ViewGroup) {
             if (mLayoutResource != 0) {
                 final ViewGroup parent = (ViewGroup) viewParent;
-                final LayoutInflater factory = LayoutInflater.from(mContext);
+                final LayoutInflater factory;
+                if (mInflater != null) {
+                    factory = mInflater;
+                } else {
+                    factory = LayoutInflater.from(mContext);
+                }
                 final View view = factory.inflate(mLayoutResource, parent,
                         false);
 
