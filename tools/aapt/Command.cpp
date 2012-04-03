@@ -345,6 +345,7 @@ enum {
     LABEL_ATTR = 0x01010001,
     ICON_ATTR = 0x01010002,
     NAME_ATTR = 0x01010003,
+    DEBUGGABLE_ATTR = 0x0101000f,
     VERSION_CODE_ATTR = 0x0101021b,
     VERSION_NAME_ATTR = 0x0101021c,
     SCREEN_ORIENTATION_ATTR = 0x0101001e,
@@ -823,6 +824,15 @@ int doDump(Bundle* bundle)
                         printf("icon='%s'\n", icon.string());
                         if (testOnly != 0) {
                             printf("testOnly='%d'\n", testOnly);
+                        }
+
+                        int32_t debuggable = getResolvedIntegerAttribute(&res, tree, DEBUGGABLE_ATTR, &error, 0);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:debuggable' attribute: %s\n", error.string());
+                            goto bail;
+                        }
+                        if (debuggable != 0) {
+                            printf("application-debuggable\n");
                         }
                     } else if (tag == "uses-sdk") {
                         int32_t code = getIntegerAttribute(tree, MIN_SDK_VERSION_ATTR, &error);
