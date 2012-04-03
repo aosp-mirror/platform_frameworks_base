@@ -2,21 +2,21 @@ page.title=Android SDK
 page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
 sdk.redirect=0
 
-sdk.win_installer=installer_r17-windows.exe
-sdk.win_installer_bytes=37410775
-sdk.win_installer_checksum=5afaf6511ebaa52bd6d1dba4afc61e41
+sdk.win_installer=installer_r18-windows.exe
+sdk.win_installer_bytes=37456234
+sdk.win_installer_checksum=48b1fe7b431afe6b9c8a992bf75dd898
 
-sdk.win_download=android-sdk_r17-windows.zip
-sdk.win_bytes=37417953
-sdk.win_checksum=3af1baeb39707e54df068e939aea5a79
+sdk.win_download=android-sdk_r18-windows.zip
+sdk.win_bytes=37448775
+sdk.win_checksum=bfbfdf8b2d0fdecc2a621544d706fa98
 
-sdk.mac_download=android-sdk_r17-macosx.zip
-sdk.mac_bytes=33867836
-sdk.mac_checksum=52639aae036b7c2e47cf291696b23236
+sdk.mac_download=android-sdk_r18-macosx.zip
+sdk.mac_bytes=33903758
+sdk.mac_checksum=8328e8a5531c9d6f6f1a0261cb97af36
 
-sdk.linux_download=android-sdk_r17-linux.tgz
-sdk.linux_bytes=29706368
-sdk.linux_checksum=14e99dfa8eb1a8fadd2f3557322245c4
+sdk.linux_download=android-sdk_r18-linux.tgz
+sdk.linux_bytes=29731463
+sdk.linux_checksum=6cd716d0e04624b865ffed3c25b3485c
 
 @jd:body
 
