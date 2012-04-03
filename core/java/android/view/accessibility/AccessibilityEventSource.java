@@ -18,6 +18,13 @@ package android.view.accessibility;
 
 /**
  * This interface is implemented by classes source of {@link AccessibilityEvent}s.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about making applications accessible, read the
+ * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+ * developer guide.</p>
+ * </div>
  */
 public interface AccessibilityEventSource {
 
