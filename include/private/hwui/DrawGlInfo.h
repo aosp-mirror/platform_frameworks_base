@@ -42,6 +42,34 @@ struct DrawGlInfo {
     float dirtyTop;
     float dirtyRight;
     float dirtyBottom;
+
+    /**
+     * Values used as the "what" parameter of the functor.
+     */
+    enum Mode {
+        // Indicates that the functor is called to perform a draw
+        kModeDraw,
+        // Indicates the the functor is called only to perform
+        // processing and that no draw should be attempted
+        kModeProcess
+    };
+
+    /**
+     * Values used by OpenGL functors to tell the framework
+     * what to do next.
+     */
+    enum Status {
+        // The functor is done
+        kStatusDone = 0x0,
+        // The functor is requesting a redraw (the clip rect
+        // used by the redraw is specified by DrawGlInfo.)
+        // The rest of the UI might redraw too.
+        kStatusDraw = 0x1,
+        // The functor needs to be invoked again but will
+        // not redraw. Only the functor is invoked again
+        // (unless another functor requests a redraw.)
+        kStatusInvoke = 0x2
+    };
 }; // struct DrawGlInfo
 
 }; // namespace uirenderer
