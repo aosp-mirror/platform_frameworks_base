@@ -137,15 +137,15 @@ public class Mesh extends BaseObj {
     @Override
     void updateFromNative() {
         super.updateFromNative();
-        int vtxCount = mRS.nMeshGetVertexBufferCount(getID());
-        int idxCount = mRS.nMeshGetIndexCount(getID());
+        int vtxCount = mRS.nMeshGetVertexBufferCount(getID(mRS));
+        int idxCount = mRS.nMeshGetIndexCount(getID(mRS));
 
         int[] vtxIDs = new int[vtxCount];
         int[] idxIDs = new int[idxCount];
         int[] primitives = new int[idxCount];
 
-        mRS.nMeshGetVertices(getID(), vtxIDs, vtxCount);
-        mRS.nMeshGetIndices(getID(), idxIDs, primitives, idxCount);
+        mRS.nMeshGetVertices(getID(mRS), vtxIDs, vtxCount);
+        mRS.nMeshGetIndices(getID(mRS), idxIDs, primitives, idxCount);
 
         mVertexBuffers = new Allocation[vtxCount];
         mIndexBuffers = new Allocation[idxCount];
@@ -343,7 +343,7 @@ public class Mesh extends BaseObj {
                     alloc = Allocation.createSized(mRS, entry.e, entry.size, mUsage);
                 }
                 vertexBuffers[ct] = alloc;
-                vtx[ct] = alloc.getID();
+                vtx[ct] = alloc.getID(mRS);
             }
 
             for(int ct = 0; ct < mIndexTypes.size(); ct ++) {
@@ -354,7 +354,7 @@ public class Mesh extends BaseObj {
                 } else if(entry.e != null) {
                     alloc = Allocation.createSized(mRS, entry.e, entry.size, mUsage);
                 }
-                int allocID = (alloc == null) ? 0 : alloc.getID();
+                int allocID = (alloc == null) ? 0 : alloc.getID(mRS);
                 indexBuffers[ct] = alloc;
                 primitives[ct] = entry.prim;
 
@@ -483,12 +483,12 @@ public class Mesh extends BaseObj {
             for(int ct = 0; ct < mVertexTypeCount; ct ++) {
                 Entry entry = mVertexTypes[ct];
                 vertexBuffers[ct] = entry.a;
-                vtx[ct] = entry.a.getID();
+                vtx[ct] = entry.a.getID(mRS);
             }
 
             for(int ct = 0; ct < mIndexTypes.size(); ct ++) {
                 Entry entry = (Entry)mIndexTypes.elementAt(ct);
-                int allocID = (entry.a == null) ? 0 : entry.a.getID();
+                int allocID = (entry.a == null) ? 0 : entry.a.getID(mRS);
                 indexBuffers[ct] = entry.a;
                 primitives[ct] = entry.prim;
 

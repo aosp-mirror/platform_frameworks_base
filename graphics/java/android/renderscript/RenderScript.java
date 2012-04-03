@@ -1000,7 +1000,7 @@ public class RenderScript {
 
     int safeID(BaseObj o) {
         if(o != null) {
-            return o.getID();
+            return o.getID(this);
         }
         return 0;
     }
