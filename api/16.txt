@@ -25204,7 +25204,6 @@ package android.webkit {
     method public java.lang.String getTitle();
     method public java.lang.String getUrl();
     method public deprecated int getVisibleTitleHeight();
-    method public deprecated android.view.View getZoomControls();
     method public void goBack();
     method public void goBackOrForward(int);
     method public void goForward();

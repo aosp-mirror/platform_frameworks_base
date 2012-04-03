@@ -1531,6 +1531,7 @@ public class WebView extends AbsoluteLayout
      *
      * @deprecated The built-in zoom mechanism is preferred, see
      *             {@link WebSettings#setBuiltInZoomControls(boolean)}.
+     * @hide since API version 16.
      */
     @Deprecated
     public View getZoomControls() {
