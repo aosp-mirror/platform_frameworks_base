@@ -1,0 +1,55 @@
+page.title=Accessibility
+parent.title=User Interface
+parent.link=../index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Topics</h2>
+  <ol>
+  <li><a href="{@docRoot}guide/topics/ui/accessibility/apps.html">Making Applications Accessible</a>
+    </li>
+  <li><a href="{@docRoot}guide/topics/ui/accessibility/services.html">Building Accessibility
+    Services</a></li>
+  </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.view.accessibility.AccessibilityEvent}</li>
+    <li>{@link android.accessibilityservice.AccessibilityService}</li>
+  </ol>
+  
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}training/accessibility/index.html">Implementing Accessibility</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>Many Android users have disabilities that require them to interact with their Android devices in
+different ways. These include users who have visual, physical or age-related disabilities that
+prevent them from fully seeing or using a touchscreen.</p>
+
+<p>Android provides accessibility features and services for helping these users navigate their
+devices more easily, including text-to-speech, haptic feedback, trackball and D-pad navigation that
+augment their experience. Android application developers can take advantage of these services to
+make their applications more accessible and also build their own accessibility services.</p>
+
+<p>The following topics show you how to use the Android framework to make applications more
+accessible.</p>
+
+<dl>
+  <dt><strong><a href="{@docRoot}guide/topics/ui/accessibility/apps.html">Making Applications
+Accessible</a></strong>
+  </dt>
+  <dd>Development practices and API features to ensure your application is accessible to users with
+disabilities.</dd>
+
+  <dt><strong><a href="{@docRoot}guide/topics/ui/accessibility/service.html">Building Accessibility
+Services</a></strong>
+  </dt>
+  <dd>How to use API features to build services that make other applications more accessible for
+users.</dd>
+</dl>
