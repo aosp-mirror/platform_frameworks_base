@@ -6132,7 +6132,7 @@ package android.content.pm {
     field public static final int FLAG_STOPPED = 2097152; // 0x200000
     field public static final int FLAG_SUPPORTS_LARGE_SCREENS = 2048; // 0x800
     field public static final int FLAG_SUPPORTS_NORMAL_SCREENS = 1024; // 0x400
-    field public static final int FLAG_SUPPORTS_RTL = 1073741824; // 0x40000000
+    field public static final int FLAG_SUPPORTS_RTL = 4194304; // 0x400000
     field public static final int FLAG_SUPPORTS_SCREEN_DENSITIES = 8192; // 0x2000
     field public static final int FLAG_SUPPORTS_SMALL_SCREENS = 512; // 0x200
     field public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 524288; // 0x80000
