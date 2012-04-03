@@ -23,7 +23,6 @@ package android.media;
  * only when the playback on a particular audio session is complete.
  * The audio session ID is retrieved from a player (e.g {@link MediaPlayer}, {@link AudioTrack} or
  * {@link ToneGenerator}) by use of the getAudioSessionId() method.
- * @hide
  */
 public class MediaSyncEvent {
 
@@ -49,7 +48,7 @@ public class MediaSyncEvent {
      * <p>The type specifies which kind of event is monitored.
      * For instance, event {@link #SYNC_EVENT_PRESENTATION_COMPLETE} corresponds to the audio being
      * presented to the user on a particular audio session.
-     * @param type the synchronization event type.
+     * @param eventType the synchronization event type.
      * @return the MediaSyncEvent created.
      * @throws java.lang.IllegalArgumentException
      */

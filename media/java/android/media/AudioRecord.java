@@ -530,7 +530,6 @@ public class AudioRecord
      * @throws IllegalStateException
      * @param syncEvent event that triggers the capture.
      * @see MediaSyncEvent
-     * @hide
      */
     public void startRecording(MediaSyncEvent syncEvent)
     throws IllegalStateException {

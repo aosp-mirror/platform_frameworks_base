@@ -880,7 +880,6 @@ public class ToneGenerator
     *
     * @return the ID of the audio session this ToneGenerator belongs to or 0 if an error
     * occured.
-    * @hide
     */
     public native final int getAudioSessionId();
 
