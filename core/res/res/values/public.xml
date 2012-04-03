@@ -421,6 +421,7 @@
   <java-symbol type="string" name="date_picker_increment_year_button" />
   <java-symbol type="string" name="date_time" />
   <java-symbol type="string" name="date_time_set" />
+  <java-symbol type="string" name="date_time_done" />
   <java-symbol type="string" name="day_of_week_long_friday" />
   <java-symbol type="string" name="day_of_week_long_monday" />
   <java-symbol type="string" name="day_of_week_long_saturday" />

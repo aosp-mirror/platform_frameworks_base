@@ -92,8 +92,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         mCallBack = callBack;
 
         Context themeContext = getContext();
-        setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_set), this);
-        setButton(BUTTON_NEGATIVE, themeContext.getText(R.string.cancel), (OnClickListener) null);
+        setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_done), this);
         setIcon(0);
         setTitle(R.string.date_picker_dialog_title);
 
@@ -106,11 +105,7 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
     }
 
     public void onClick(DialogInterface dialog, int which) {
-        if (mCallBack != null) {
-            mDatePicker.clearFocus();
-            mCallBack.onDateSet(mDatePicker, mDatePicker.getYear(),
-                    mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
-        }
+        tryNotifyDateSet();
     }
 
     public void onDateChanged(DatePicker view, int year,
@@ -136,6 +131,20 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
      */
     public void updateDate(int year, int monthOfYear, int dayOfMonth) {
         mDatePicker.updateDate(year, monthOfYear, dayOfMonth);
+    }
+
+    private void tryNotifyDateSet() {
+        if (mCallBack != null) {
+            mDatePicker.clearFocus();
+            mCallBack.onDateSet(mDatePicker, mDatePicker.getYear(),
+                    mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        tryNotifyDateSet();
+        super.onStop();
     }
 
     @Override
