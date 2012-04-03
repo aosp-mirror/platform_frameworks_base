@@ -15901,6 +15901,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * classes i.e. classes in package android.view, that would like their
      * applications to be backwards compatible.
      * </p>
+     * <div class="special reference">
+     * <h3>Developer Guides</h3>
+     * <p>For more information about making applications accessible, read the
+     * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+     * developer guide.</p>
+     * </div>
      * <p>
      * A scenario in which a developer would like to use an accessibility delegate
      * is overriding a method introduced in a later API version then the minimal API
