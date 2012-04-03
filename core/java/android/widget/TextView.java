@@ -4268,7 +4268,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected boolean onSetAlpha(int alpha) {
         // Alpha is supported if and only if the drawing can be done in one pass.
         // TODO text with spans with a background color currently do not respect this alpha.
-        if (getBackground() == null) {
+        if (!USE_DISPLAY_LIST_PROPERTIES &&
+                (getBackground() != null || mText instanceof Spannable || hasSelection())) {
             if (mCurrentAlpha != alpha) {
                 mCurrentAlpha = alpha;
                 final Drawables dr = mDrawables;
@@ -4290,6 +4291,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         mCurrentAlpha = 255;
         return false;
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        if (!USE_DISPLAY_LIST_PROPERTIES) {
+            return super.hasOverlappingRendering();
+        } else {
+            return (getBackground() != null || mText instanceof Spannable || hasSelection());
+        }
     }
 
     /**

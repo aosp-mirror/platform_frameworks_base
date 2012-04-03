@@ -149,6 +149,15 @@ public abstract class DisplayList {
     public abstract void setAlpha(float alpha);
 
     /**
+     * Sets whether the DisplayList renders content which overlaps. Non-overlapping rendering
+     * can use a fast path for alpha that avoids rendering to an offscreen buffer.
+     *
+     * @param hasOverlappingRendering
+     * @see android.view.View#hasOverlappingRendering()
+     */
+    public abstract void setHasOverlappingRendering(boolean hasOverlappingRendering);
+
+    /**
      * Sets the translationX value for the DisplayList
      *
      * @param translationX The translationX value of the DisplayList

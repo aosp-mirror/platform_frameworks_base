@@ -85,6 +85,10 @@ public:
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
             int alpha, int flags);
 
+    virtual void setAlpha(float alpha) {
+        mSnapshot->alpha = alpha;
+    }
+
     virtual void translate(float dx, float dy);
     virtual void rotate(float degrees);
     virtual void scale(float sx, float sy);

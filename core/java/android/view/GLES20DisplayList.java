@@ -147,6 +147,15 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
+    public void setHasOverlappingRendering(boolean hasOverlappingRendering) {
+        try {
+            nSetHasOverlappingRendering(getNativeDisplayList(), hasOverlappingRendering);
+        } catch (IllegalStateException e) {
+            // invalid DisplayList okay: we'll set current values the next time we render to it
+        }
+    }
+
+    @Override
     public void setTranslationX(float translationX) {
         try {
             nSetTranslationX(getNativeDisplayList(), translationX);
@@ -335,6 +344,8 @@ class GLES20DisplayList extends DisplayList {
     private static native void nSetClipChildren(int displayList, boolean clipChildren);
     private static native void nSetApplicationScale(int displayList, float scale);
     private static native void nSetAlpha(int displayList, float alpha);
+    private static native void nSetHasOverlappingRendering(int displayList,
+            boolean hasOverlappingRendering);
     private static native void nSetTranslationX(int displayList, float translationX);
     private static native void nSetTranslationY(int displayList, float translationY);
     private static native void nSetRotation(int displayList, float rotation);

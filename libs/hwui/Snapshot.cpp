@@ -26,7 +26,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Snapshot::Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0),
-        invisible(false), empty(false) {
+        invisible(false), empty(false), alpha(1.0f) {
 
     transform = &mTransformRoot;
     clipRect = &mClipRectRoot;
@@ -41,7 +41,7 @@ Snapshot::Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0),
 Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags):
         flags(0), previous(s), layer(NULL), fbo(s->fbo),
         invisible(s->invisible), empty(false),
-        viewport(s->viewport), height(s->height) {
+        viewport(s->viewport), height(s->height), alpha(s->alpha) {
 
     clipRegion = NULL;
 

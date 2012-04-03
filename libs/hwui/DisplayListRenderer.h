@@ -181,6 +181,10 @@ public:
         }
     }
 
+    void setHasOverlappingRendering(bool hasOverlappingRendering) {
+        mHasOverlappingRendering = hasOverlappingRendering;
+    }
+
     void setTranslationX(float translationX) {
         if (translationX != mTranslationX) {
             mTranslationX = translationX;
@@ -496,6 +500,7 @@ private:
     bool mClipChildren;
     float mAlpha;
     int mMultipliedAlpha;
+    bool mHasOverlappingRendering;
     float mTranslationX, mTranslationY;
     float mRotation, mRotationX, mRotationY;
     float mScaleX, mScaleY;

@@ -65,6 +65,11 @@ static void android_view_GLES20DisplayList_setAlpha(JNIEnv* env,
     displayList->setAlpha(alpha);
 }
 
+static void android_view_GLES20DisplayList_setHasOverlappingRendering(JNIEnv* env,
+        jobject clazz, DisplayList* displayList, bool hasOverlappingRendering) {
+    displayList->setHasOverlappingRendering(hasOverlappingRendering);
+}
+
 static void android_view_GLES20DisplayList_setTranslationX(JNIEnv* env,
         jobject clazz, DisplayList* displayList, float tx) {
     displayList->setTranslationX(tx);
@@ -185,6 +190,8 @@ static JNINativeMethod gMethods[] = {
     { "nSetAnimationMatrix",   "(II)V",  (void*) android_view_GLES20DisplayList_setAnimationMatrix },
     { "nSetClipChildren",      "(IZ)V",  (void*) android_view_GLES20DisplayList_setClipChildren },
     { "nSetAlpha",             "(IF)V",  (void*) android_view_GLES20DisplayList_setAlpha },
+    { "nSetHasOverlappingRendering", "(IZ)V",
+            (void*) android_view_GLES20DisplayList_setHasOverlappingRendering },
     { "nSetTranslationX",      "(IF)V",  (void*) android_view_GLES20DisplayList_setTranslationX },
     { "nSetTranslationY",      "(IF)V",  (void*) android_view_GLES20DisplayList_setTranslationY },
     { "nSetRotation",          "(IF)V",  (void*) android_view_GLES20DisplayList_setRotation },

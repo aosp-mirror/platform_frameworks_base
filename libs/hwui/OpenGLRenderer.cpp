@@ -1101,6 +1101,7 @@ void OpenGLRenderer::setupDrawColor(int color) {
 
 void OpenGLRenderer::setupDrawColor(int color, int alpha) {
     mColorA = alpha / 255.0f;
+    mColorA *= mSnapshot->alpha;
     // Second divide of a by 255 is an optimization, allowing us to simply multiply
     // the rgb values by a instead of also dividing by 255
     const float a = mColorA / 255.0f;
@@ -2800,6 +2801,7 @@ void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mod
         *mode = SkXfermode::kSrcOver_Mode;
         *alpha = 255;
     }
+    *alpha *= mSnapshot->alpha;
 }
 
 SkXfermode::Mode OpenGLRenderer::getXfermode(SkXfermode* mode) {

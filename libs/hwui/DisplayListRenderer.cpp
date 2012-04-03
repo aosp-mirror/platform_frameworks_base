@@ -112,6 +112,7 @@ void DisplayList::initProperties() {
     mClipChildren = true;
     mAlpha = 1;
     mMultipliedAlpha = 255;
+    mHasOverlappingRendering = true;
     mTranslationX = 0;
     mTranslationY = 0;
     mRotation = 0;
@@ -772,18 +773,23 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, uint32_t width, ui
             }
         }
         if (mAlpha < 1 && !mCaching) {
-            // TODO: should be able to store the size of a DL at record time and not
-            // have to pass it into this call. In fact, this information might be in the
-            // location/size info that we store with the new native transform data.
-            int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipChildren) {
-                flags |= SkCanvas::kClipToLayer_SaveFlag;
+            if (!mHasOverlappingRendering) {
+                DISPLAY_LIST_LOGD("%s%s %.2f", indent, "SetAlpha", mAlpha);
+                renderer.setAlpha(mAlpha);
+            } else {
+                // TODO: should be able to store the size of a DL at record time and not
+                // have to pass it into this call. In fact, this information might be in the
+                // location/size info that we store with the new native transform data.
+                int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
+                if (mClipChildren) {
+                    flags |= SkCanvas::kClipToLayer_SaveFlag;
+                }
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
+                        (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
+                        mMultipliedAlpha, flags);
+                renderer.saveLayerAlpha(0, 0, mRight - mLeft, mBottom - mTop,
+                        mMultipliedAlpha, flags);
             }
-            DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", indent, "SaveLayerAlpha",
-                    (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
-                    mMultipliedAlpha, flags);
-            renderer.saveLayerAlpha(0, 0, mRight - mLeft, mBottom - mTop,
-                    mMultipliedAlpha, flags);
         }
         if (mClipChildren) {
             DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f", indent, "ClipRect", 0.0f, 0.0f,
