@@ -31,14 +31,14 @@ import android.util.SparseArray;
 public class ViewConfiguration {
     /**
      * Expected bit depth of the display panel.
-     * 
+     *
      * @hide
      */
     public static final float PANEL_BIT_DEPTH = 24;
 
     /**
      * Minimum alpha required for a view to draw.
-     * 
+     *
      * @hide
      */
     public static final float ALPHA_THRESHOLD = 0.5f / PANEL_BIT_DEPTH;
@@ -72,8 +72,8 @@ public class ViewConfiguration {
      * Defines the duration in milliseconds of the pressed state in child
      * components.
      */
-    private static final int PRESSED_STATE_DURATION = 125;
-    
+    private static final int PRESSED_STATE_DURATION = 64;
+
     /**
      * Defines the default duration in milliseconds before a press turns into
      * a long press
@@ -91,18 +91,18 @@ public class ViewConfiguration {
      * lock screen, etc).
      */
     private static final int GLOBAL_ACTIONS_KEY_TIMEOUT = 500;
-    
+
     /**
-     * Defines the duration in milliseconds we will wait to see if a touch event 
+     * Defines the duration in milliseconds we will wait to see if a touch event
      * is a tap or a scroll. If the user does not move within this interval, it is
-     * considered to be a tap. 
+     * considered to be a tap.
      */
     private static final int TAP_TIMEOUT = 180;
-    
+
     /**
-     * Defines the duration in milliseconds we will wait to see if a touch event 
+     * Defines the duration in milliseconds we will wait to see if a touch event
      * is a jump tap. If the user does not complete the jump tap within this interval, it is
-     * considered to be a tap. 
+     * considered to be a tap.
      */
     private static final int JUMP_TAP_TIMEOUT = 500;
 
@@ -128,7 +128,7 @@ public class ViewConfiguration {
     private static final int HOVER_TAP_SLOP = 20;
 
     /**
-     * Defines the duration in milliseconds we want to display zoom controls in response 
+     * Defines the duration in milliseconds we want to display zoom controls in response
      * to a user panning within an application.
      */
     private static final int ZOOM_CONTROLS_TIMEOUT = 3000;
@@ -137,7 +137,7 @@ public class ViewConfiguration {
      * Inset in dips to look for touchable content when the user touches the edge of the screen
      */
     private static final int EDGE_SLOP = 12;
-    
+
     /**
      * Distance a touch can wander before we think the user is scrolling in dips.
      * Note that this value defined here is only used as a fallback by legacy/misbehaving
@@ -150,7 +150,7 @@ public class ViewConfiguration {
      * the characteristics of the touch panel and firmware.
      */
     private static final int TOUCH_SLOP = 8;
-    
+
     /**
      * Distance the first touch can wander before we stop considering this event a double tap
      * (in dips)
@@ -170,12 +170,12 @@ public class ViewConfiguration {
      * config_viewConfigurationTouchSlop * 2 when provided with a Context.
      */
     private static final int PAGING_TOUCH_SLOP = TOUCH_SLOP * 2;
-    
+
     /**
      * Distance in dips between the first touch and second touch to still be considered a double tap
      */
     private static final int DOUBLE_TAP_SLOP = 100;
-    
+
     /**
      * Distance in dips a touch needs to be outside of a window's bounds for it to
      * count as outside for purposes of dismissing the window.
@@ -186,7 +186,7 @@ public class ViewConfiguration {
      * Minimum velocity to initiate a fling, as measured in dips per second
      */
     private static final int MINIMUM_FLING_VELOCITY = 50;
-    
+
     /**
      * Maximum velocity to initiate a fling, as measured in dips per second
      */
@@ -281,7 +281,7 @@ public class ViewConfiguration {
      *
      * @param context The application context used to initialize this view configuration.
      *
-     * @see #get(android.content.Context) 
+     * @see #get(android.content.Context)
      * @see android.util.DisplayMetrics
      */
     private ViewConfiguration(Context context) {
@@ -383,7 +383,7 @@ public class ViewConfiguration {
     public static int getScrollDefaultDelay() {
         return SCROLL_BAR_DEFAULT_DELAY;
     }
-    
+
     /**
      * @return the length of the fading edges in dips
      *
@@ -435,7 +435,7 @@ public class ViewConfiguration {
     /**
      * @return the duration in milliseconds we will wait to see if a touch event
      * is a tap or a scroll. If the user does not move within this interval, it is
-     * considered to be a tap. 
+     * considered to be a tap.
      */
     public static int getTapTimeout() {
         return TAP_TIMEOUT;
@@ -444,12 +444,12 @@ public class ViewConfiguration {
     /**
      * @return the duration in milliseconds we will wait to see if a touch event
      * is a jump tap. If the user does not move within this interval, it is
-     * considered to be a tap. 
+     * considered to be a tap.
      */
     public static int getJumpTapTimeout() {
         return JUMP_TAP_TIMEOUT;
     }
-    
+
     /**
      * @return the duration in milliseconds between the first tap's up event and
      * the second tap's down event for an interaction to be considered a
@@ -514,7 +514,7 @@ public class ViewConfiguration {
     public int getScaledTouchSlop() {
         return mTouchSlop;
     }
-    
+
     /**
      * @return Distance in pixels the first touch can wander before we do not consider this a
      * potential double tap event
@@ -543,7 +543,7 @@ public class ViewConfiguration {
     public static int getDoubleTapSlop() {
         return DOUBLE_TAP_SLOP;
     }
-    
+
     /**
      * @return Distance in pixels between the first touch and second touch to still be
      *         considered a double tap
@@ -595,7 +595,7 @@ public class ViewConfiguration {
     public int getScaledWindowTouchSlop() {
         return mWindowTouchSlop;
     }
-    
+
     /**
      * @return Minimum velocity to initiate a fling, as measured in dips per second.
      *
@@ -629,7 +629,7 @@ public class ViewConfiguration {
     public int getScaledMaximumFlingVelocity() {
         return mMaximumFlingVelocity;
     }
-    
+
     /**
      * The maximum drawing cache size expressed in bytes.
      *
@@ -671,7 +671,7 @@ public class ViewConfiguration {
     /**
      * The amount of time that the zoom controls should be
      * displayed on the screen expressed in milliseconds.
-     * 
+     *
      * @return the time the zoom controls should be visible expressed
      * in milliseconds.
      */
@@ -692,7 +692,7 @@ public class ViewConfiguration {
 
     /**
      * The amount of friction applied to scrolls and flings.
-     * 
+     *
      * @return A scalar dimensionless value representing the coefficient of
      *         friction.
      */
