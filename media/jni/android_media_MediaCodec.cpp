@@ -29,6 +29,7 @@
 #include <gui/Surface.h>
 #include <gui/SurfaceTextureClient.h>
 
+#include <media/ICrypto.h>
 #include <media/stagefright/MediaCodec.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
@@ -102,7 +103,7 @@ status_t JMediaCodec::configure(
     if (surfaceTexture != NULL) {
         client = new SurfaceTextureClient(surfaceTexture);
     }
-    return mCodec->configure(format, client, flags);
+    return mCodec->configure(format, client, NULL /* crypto */, flags);
 }
 
 status_t JMediaCodec::start() {
@@ -387,7 +388,7 @@ static jint android_media_MediaCodec_dequeueOutputBuffer(
 
     if (codec == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return NULL;
+        return 0;
     }
 
     size_t index;
