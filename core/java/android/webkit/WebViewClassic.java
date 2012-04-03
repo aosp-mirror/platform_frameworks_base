@@ -461,6 +461,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             selectionStart = Math.min(selectionStart, editable.length());
             selectionEnd = Math.min(selectionEnd, editable.length());
             setSelection(selectionStart, selectionEnd);
+            finishComposingText();
         }
 
         public void replaceSelection(CharSequence text) {
