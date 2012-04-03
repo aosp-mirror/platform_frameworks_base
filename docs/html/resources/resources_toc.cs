@@ -100,8 +100,9 @@
       
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/efficient-downloads/index.html">
-            <span class="en">Transferring Data Without Draining the Battery</span>
-          </a> <span class="new">new!</span></div>
+            <span class="en">Transferring Data Without Draining the Battery<span
+class="new">&nbsp;new!</span></span>
+          </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/efficient-downloads/efficient-network-access.html">
             <span class="en">Optimizing Downloads for Efficient Network Access</span>
@@ -124,8 +125,8 @@
 
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/search/index.html">
-            <span class="en">Adding Search Functionality</span>
-          </a> <span class="new">new!</span>
+            <span class="en">Adding Search Functionality<span class="new">&nbsp;new!</span></span>
+          </a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/search/setup.html">
@@ -281,8 +282,8 @@
 
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/accessibility/index.html">
-            <span class="en">Implementing Accessibility</span>
-          </a> <span class="new">new!</span></div>
+            <span class="en">Implementing Accessibility<span class="new">&nbsp;new!</span></span>
+          </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/accessibility/accessible-app.html">
             <span class="en">Developing Accessible Applications</span>

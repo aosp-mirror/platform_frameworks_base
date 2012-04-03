@@ -90,21 +90,20 @@
           <ul>
             <li>
                 <a href="<?cs var:toroot ?>guide/topics/providers/content-provider-basics.html">
-                    <span class="en">Content Provider Basics</span>
+                    <span class="en">Content Provider Basics<span
+class="new">&nbsp;new!</span></span>
                 </a>
-                <span class="new">new!</span>
             </li>
             <li>
                 <a href="<?cs var:toroot ?>guide/topics/providers/content-provider-creating.html">
-                    <span class="en">Creating a Content Provider</span>
+                    <span class="en">Creating a Content Provider<span
+class="new">&nbsp;new!</span></span>
                 </a>
-                <span class="new">new!</span>
             </li>
             <li>
                 <a href="<?cs var:toroot ?>guide/topics/providers/calendar-provider.html">
-                    <span class="en">Calendar Provider</span>
+                    <span class="en">Calendar Provider<span class="new">&nbsp;new!</span></span>
                 </a>
-                <span class="new">new!</span>
             </li>
           </ul>
       </li>
@@ -130,8 +129,8 @@
                 <span class="en">Input Events</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/menus.html">
-               <span class="en">Menus</span>
-              </a> <span class="new">updated</span></li>
+               <span class="en">Menus<span class="new">&nbsp;new!</span></span>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/actionbar.html">
                <span class="en">Action Bar</span>
               </a></li>
@@ -162,8 +161,7 @@
               </a></li>
           <li class="toggle-list">
             <div><a href="<?cs var:toroot ?>guide/topics/ui/accessibility/index.html">
-                <span class="en">Accessibility</span>
-                <span class="new">new!</span>
+                <span class="en">Accessibility<span class="new">&nbsp;new!</span></span>
             </a></div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/topics/ui/accessibility/apps.html">
@@ -514,8 +512,7 @@
           <span class="en">Multiple APK Support</span></a>
       </li>
       <li><a href="<?cs var:toroot ?>guide/market/expansion-files.html">
-          <span class="en">APK Expansion Files</span></a>
-          <span class="new">new!</span>
+          <span class="en">APK Expansion Files<span class="new">&nbsp;new!</span></span></a>
       </li>
     </ul>
   </li>
