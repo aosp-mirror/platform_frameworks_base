@@ -1,0 +1,51 @@
+page.title=Making Your App Location Aware
+
+trainingnavtop=true
+startpage=true
+next.title=Using the Location Manager
+next.link=locationmanager.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+
+<ul>
+  <li>Android 1.0 or higher (2.3+ for the sample app)</li>
+</ul>
+
+<h2>You should also read</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/topics/location/index.html">Location and Maps</a></li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+<a href="http://developer.android.com/shareables/training/LocationAware.zip" class="button">Download
+  the sample app</a>
+<p class="filename">LocationAware.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>Users bring their mobile devices with them almost everywhere.  One of the unique features available to mobile applications is location awareness.  Knowing the location and using the information wisely can bring a more contextual experience to your users.</p>
+
+<p>This class teaches you how to incorporate location based services in your Android application.  You'll learn a number of methods to receive location updates and related best practices.</p>
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt><b><a href="locationmanager.html">Using the Location Manager</a></b></dt>
+    <dd>Learn how to set up your application before it can receive location updates in Android.</dd>
+
+  <dt><b><a href="currentlocation.html">Obtaining the Current Location</a></b></dt>
+    <dd>Learn how to work with underlying location technologies available on the platform to obtain current location.</dd>
+
+  <dt><b><a href="geocoding.html">Displaying a Location Address</a></b></dt>
+    <dd>Learn how to translate location coordinates into addresses that are readable to users.</dd>
+</dl>
