@@ -1,0 +1,290 @@
+page.title=Building Accessibility Services
+parent.title=Accessibility
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Topics</h2>
+  <ol>
+    <li><a href="#manifest">Manifest Declarations and Permissions</a>
+      <ol>
+        <li><a href="service-declaration">Accessibility service declaration</a></li>
+        <li><a href="#service-config">Accessibility service configuration</a></li>
+      </ol>
+    </li>
+    <li><a href="#methods">AccessibilityService Methods</a></li>
+    <li><a href="#event-details">Getting Event Details</a></li>
+    <li><a href="#examples">Example Code</a></li>
+  </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.accessibilityservice.AccessibilityService}</li>
+    <li>{@link android.accessibilityservice.AccessibilityServiceInfo}</li>
+    <li>{@link android.view.accessibility.AccessibilityEvent}</li>
+    <li>{@link android.view.accessibility.AccessibilityRecord}</li>
+    <li>{@link android.view.accessibility.AccessibilityNodeInfo}</li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}training/accessibility/index.html">Implementing Accessibility</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>An accessibility service is an application that provides user interface enhancements to
+assist users with disabilities, or who may temporarily be unable to fully interact with a device.
+For example, users who are driving, taking care of a young child or attending a very loud party
+might need additional or alternative interface feedback.</p>
+
+<p>Android provides standard accessibility services, including TalkBack, and developers can
+create and distribute their own services. This document explains the basics of building an
+accessibility service.</p>
+
+<p>The ability for you to build and deploy accessibility services was introduced with Android
+1.6 (API Level 4) and received significant improvements with Android 4.0 (API Level 14). The Android
+Support Library was also updated with the release of Android 4.0 to provide support for these
+enhanced accessibility features back to Android 1.6. Developers aiming for widely compatible
+accessibility services are encouraged to use the
+<a href="{@docRoot}sdk/compatibility-library.html">Support Library</a> and develop for the more
+advanced accessibility features introduced in Android 4.0.</p>
+
+
+<h2 id="manifest">Manifest Declarations and Permissions</h2>
+
+<p>Applications that provide accessibility services must include specific declarations in their
+ application manifests in order to be treated as an accessibility service by an Android system.
+ This section explains the required and optional settings for accessibility services.</p>
+
+
+<h3 id="service-declaration">Accessibility service declaration</h3>
+
+<p>In order to be treated as an accessibility service, your application must include the
+{@code service} element (rather than the {@code activity} element) within the {@code application}
+element in its manifest. In addition, within the {@code service} element, you must also include an
+accessibility service intent filter, as shown in the following sample:</p>
+
+<pre>
+&lt;application&gt;
+  &lt;service android:name=&quot;.MyAccessibilityService&quot;
+      android:label=&quot;@string/accessibility_service_label&quot;&gt;
+    &lt;intent-filter&gt;
+      &lt;action android:name=&quot;android.accessibilityservice.AccessibilityService&quot; /&gt;
+    &lt;/intent-filter&gt;
+  &lt;/service&gt;
+&lt;/application&gt;
+</pre>
+
+<p>These declarations are required for all accessibility services deployed on Android 1.6 (API Level
+ 4) or higher.</p>
+
+
+<h3 id="service-config">Accessibility service configuration</h3>
+
+<p>Accessibility services must also provide a configuration which specifies the types of
+accessibility events that the service handles and additional information about the service. The
+configuration of an accessibility service is contained in the {@link
+android.accessibilityservice.AccessibilityServiceInfo} class. Your service can build and set a
+configuration using an instance of this class and {@link
+android.accessibilityservice.AccessibilityService#setServiceInfo setServiceInfo()} at runtime.
+However, not all configuration options are available using this method.</p>
+
+<p>Beginning with Android 4.0, you can include a {@code &lt;meta-data&gt;} element in your manifest
+with a reference to a configuration file, which allows you to set the full range of options for
+your accessibility service, as shown in the following example:</p>
+
+<pre>
+&lt;service android:name=&quot;.MyAccessibilityService&quot;&gt;
+  ...
+  &lt;meta-data
+    android:name=&quot;android.accessibilityservice&quot;
+    android:resource=&quot;@xml/accessibility_service_config&quot; /&gt;
+&lt;/service&gt;
+</pre>
+
+<p>This meta-data element refers to an XML file that you create in your application’s resource
+directory ({@code &lt;project_dir&gt;/res/xml/accessibility_service_config.xml}). The following code
+shows example contents for the service configuration file:</p>
+
+<pre>
+&lt;accessibility-service xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:description=&quot;@string/accessibility_service_description&quot;
+    android:packageNames=&quot;com.example.android.apis&quot;
+    android:accessibilityEventTypes=&quot;typeAllMask&quot;
+    android:accessibilityFlags=&quot;flagDefault&quot;
+    android:accessibilityFeedbackType=&quot;feedbackSpoken&quot;
+    android:notificationTimeout=&quot;100&quot;
+    android:canRetrieveWindowContent=&quot;true&quot;
+    android:settingsActivity=&quot;com.example.android.accessibility.ServiceSettingsActivity&quot;
+/&gt;
+</pre>
+
+<p>One of the most important functions of the accessibility service configuration parameters is to
+allow you to specify what types of accessibility events your service can handle. Being able to
+specify this information enables accessibility services to cooperate with each other, and allows you
+as a developer the flexibility to handle only specific events types from specific applications. The
+event filtering can include the following criteria:</p>
+
+<ul>
+  <li><strong>Package Names</strong> - Specify the package names of applications whose accessibility
+events you want your service to handle. If this parameter is omitted, your accessibility service is
+considered available to service accessibility events for any application. This parameter can be set
+in the accessibility service configuration files with the {@code android:packageNames} attribute as
+a comma-separated list, or set using the {@link
+android.accessibilityservice.AccessibilityServiceInfo#packageNames
+AccessibilityServiceInfo.packageNames} member.</li>
+  <li><strong>Event Types</strong> - Specify the types of accessibility events you want your service
+to handle. This parameter can be set in the accessibility service configuration files with the
+{@code android:accessibilityEventTypes} attribute as a comma-separated list, or set using the
+{@link android.accessibilityservice.AccessibilityServiceInfo#eventTypes
+AccessibilityServiceInfo.eventTypes} member. </li>
+</ul>
+
+<p>For more information about the XML attributes which can be used in the accessibility service
+ configuration file, follow these links to the reference documentation:</p>
+
+<ul>
+  <li><a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_description">{@code android:description}</a></li>
+  <li><a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_packageNames">{@code android:packageNames}</a></li>
+  <li><a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_accessibilityEventTypes">{@code android:accessibilityEventTypes}</a></li>
+  <li><a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_accessibilityFlags">{@code android:accessibilityFlags}</a></li>
+  <li><a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_accessibilityFeedbackType">{@code android:accessibilityFeedbackType}</a></li>
+  <li><a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_notificationTimeout">{@code android:notificationTimeout}</a></li>
+  <li><a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_canRetrieveWindowContent">{@code android:canRetrieveWindowContent}</a></li>
+  <li><a href="{@docRoot}reference/android/R.styleable.html#AccessibilityService_settingsActivity">{@code android:settingsActivity}</a></li>
+</ul>
+
+<p>For more information about which configuration settings can be dynamically set at runtime, see
+the {@link android.accessibilityservice.AccessibilityServiceInfo} reference documentation.</p>
+
+
+<h2 id="methods">AccessibilityService Methods</h2>
+
+<p>An application that provides accessibility service must extend the {@link
+android.accessibilityservice.AccessibilityService} class and override the following methods from
+that class. These methods are presented in the order in which they are called by the Android system,
+from when the service is started
+({@link android.accessibilityservice.AccessibilityService#onServiceConnected onServiceConnected()}),
+while it is running ({@link android.accessibilityservice.AccessibilityService#onAccessibilityEvent
+onAccessibilityEvent()},
+{@link android.accessibilityservice.AccessibilityService#onInterrupt onInterrupt()}) to when it is
+shut down ({@link android.accessibilityservice.AccessibilityService#onUnbind onUnbind()}).</p>
+
+<ul>
+  <li>{@link android.accessibilityservice.AccessibilityService#onServiceConnected
+onServiceConnected()} - (optional) This system calls this method when it successfully connects to
+your accessibility service. Use this method to do any one-time setup steps for your service,
+including connecting to user feedback system services, such as the audio manager or device vibrator.
+If you want to set the configuration of your service at runtime or make one-time adjustments, this
+is a convenient location from which to call {@link
+android.accessibilityservice.AccessibilityService#setServiceInfo setServiceInfo()}.</li>
+
+  <li>{@link android.accessibilityservice.AccessibilityService#onAccessibilityEvent
+onAccessibilityEvent()} - (required) This method is called back by the system when it detects an
+{@link android.view.accessibility.AccessibilityEvent} that matches the event filtering parameters
+specified by your accessibility service. For example, when the user clicks a button or focuses on a
+user interface control in an application for which your accessibility service is providing feedback.
+When this happens, the system calls this method of your service with the associated {@link
+android.view.accessibility.AccessibilityEvent}, which you can then interpret and provide feedback to
+the user. This method may be called many times over the lifecycle of your service.</li>
+
+  <li>{@link android.accessibilityservice.AccessibilityService#onInterrupt onInterrupt()} -
+(required) This method is called when the system wants to interrupt the feedback your service is
+providing, usually in response to a user taking action, such as moving focus to a different user
+interface control than the one for which you are currently providing feedback. This method may be
+called many times over the lifecycle of your service.</li>
+
+  <li>{@link android.accessibilityservice.AccessibilityService#onUnbind onUnbind()} - (optional)
+This method is called when the system is about to shutdown the accessibility service. Use this
+method to do any one-time shutdown procedures, including de-allocating user feedback system
+services, such as the audio manager or device vibrator.</li>
+</ul>
+
+<p>These callback methods provide the basic structure for your accessibility service. It is up to
+you to decide on how to process data provided by the Android system in the form of {@link
+android.view.accessibility.AccessibilityEvent} objects and provide feedback to the user.</p>
+
+
+<h2 id="event-details">Getting Event Details</h2>
+
+<p>The Android system provides information to accessibility services about the user interface
+interaction through {@link android.view.accessibility.AccessibilityEvent} objects. Prior to Android
+4.0, the information available in an accessibility event, while providing a significant amount of
+detail about a user interface control selected by the user, typically provided limited contextual
+information. In many cases, this missing context information might be critical to understanding the
+meaning of the selected control.</p>
+
+<p>A typical example of an interface where context is of critical importance is a calendar or day
+planner. If a user selects a 4:00 PM time slot in a Monday to Friday day list and the accessibility
+service announces “4 PM”, but fails to indicate this is a Friday a Monday, the month or day, this is
+hardly ideal feedback for the user. In this case, the context of a user interface control is of
+critical importance to a user who wants to schedule a meeting.</p>
+
+<p>Android 4.0 significantly extends the amount of information that an accessibility service can
+obtain about an user interface interaction by composing accessibility events based on the view
+hierarchy. A view hierarchy is the set of user interface components that contain the component (its
+parents) and the user interface elements that may be contained by that component (its children). In
+this way, the Android system can provide much richer detail about accessibility events, allowing
+accessibility services to provide more useful feedback to users.</p>
+
+<p>An accessibility service gets information about an user interface event through an {@link
+android.view.accessibility.AccessibilityEvent} passed by the system to the service’s
+{@link android.accessibilityservice.AccessibilityService#onAccessibilityEvent
+onAccessibilityEvent()} callback method. This object provides details about the event, including the
+type of object being acted upon, its descriptive text and other details. Starting in Android 4.0
+(and supported in previous releases through the {@link
+android.support.v4.view.accessibility.AccessibilityEventCompat} object in the Support Library), you
+can obtain additional information about the event using these calls:</p>
+
+<ul>
+  <li>{@link android.view.accessibility.AccessibilityEvent#getRecordCount
+AccessibilityEvent.getRecordCount()} and {@link
+android.view.accessibility.AccessibilityEvent#getRecord getRecord(int)} - These methods allow you to
+retrieve the set of {@link android.view.accessibility.AccessibilityRecord} objects which contributed
+to the {@link android.view.accessibility.AccessibilityEvent} passed to you by the system, which can
+provide more context for your accessibility service.</li>
+
+  <li>{@link android.view.accessibility.AccessibilityEvent#getSource
+AccessibilityEvent.getSource()} - This method returns an {@link
+android.view.accessibility.AccessibilityNodeInfo} object. This object allows you to request the
+parents and children of the component that originated the accessibility event and investigate their
+contents and state in order to provide
+
+    <p class="caution"><strong>Important:</strong> The ability to investigate the full view
+hierarchy from an {@link android.view.accessibility.AccessibilityEvent} potentially exposes private
+user information to your accessibility service. For this reason, your service must request this
+level of access through the accessibility <a href="#service-config">service configuration XML</a>
+file, by including the {@code canRetrieveWindowContent} attribute and setting it to {@code true}. If
+you do not include this setting in your service configuration xml file, calls to {@link
+android.view.accessibility.AccessibilityEvent#getSource getSource()} fail.</p>
+  </li>
+</ul>
+
+
+<h2 id="examples">Example Code</h2>
+
+<p>The API Demo project contains two samples which can be used as a starting point for generating
+accessibility services
+({@code &lt;sdk&gt;/samples/&lt;platform&gt;/ApiDemos/src/com/example/android/apis/accessibility}):
+</p>
+
+<ul>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/accessibility/ClockBackService.html">ClockBackService</a>
+ - This service is based on the original implementation of {@link
+android.accessibilityservice.AccessibilityService} and can be used as a base for developing basic
+accessibility services that are compatible with Android 1.6 (API Level 4) and higher.</li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/accessibility/TaskBackService.html">TaskBackService</a>
+ - This service is based on the enhanced accessibility APIs introduced in Android 4.0 (API Level
+14). However, you can use the Android <a href="{@docRoot}sdk/compatibility-library.html">Support
+Libary</a> to substitute classes introduced in later API levels (e.g.,
+{@link android.view.accessibility.AccessibilityRecord},
+{@link android.view.accessibility.AccessibilityNodeInfo}
+) with equivalent support package classes (e.g.,
+{@link android.support.v4.view.accessibility.AccessibilityRecordCompat},
+{@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}
+) to make this example work with API versions back to Android 1.6 (API Level 4).</li>
+</ul>

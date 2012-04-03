@@ -41,6 +41,13 @@ import java.io.IOException;
  * {@link AccessibilityService} for {@link android.view.accessibility.AccessibilityEvent}s
  * according to the information encapsulated in this class.
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating AccessibilityServices, read the
+ * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+ * developer guide.</p>
+ * </div>
+ *
  * @see AccessibilityService
  * @see android.view.accessibility.AccessibilityEvent
  * @see android.view.accessibility.AccessibilityManager
