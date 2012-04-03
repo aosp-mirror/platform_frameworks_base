@@ -68,6 +68,28 @@ the Android 4.0.x system components will not be available for download.</p>
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
 class="toggle-content-img" alt="" />
+    Revision 3</a> <em>(March 2012)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+
+    <p>Maintenance update. The system version is 4.0.4.</p>
+    <p class="note"><strong>Note:</strong> This system image includes support for emulator
+hardware graphics acceleration when used with SDK Tools r17 or higher.
+(<a href="{@docRoot}guide/developing/devices/emulator.html#accel-graphics">more info</a>)</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r17 or higher is required.</dd>
+    </dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
     Revision 2</a> <em>(January 2012)</em>
   </a></p>
 
