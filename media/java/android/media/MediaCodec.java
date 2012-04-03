@@ -83,7 +83,6 @@ public class MediaCodec
     public native final void release();
 
     public static int CONFIGURE_FLAG_ENCODE = 1;
-    public static int CONFIGURE_FLAG_SECURE = 2;
 
     /** Configures a component.
      *  @param format A map of string/value pairs describing the input format
