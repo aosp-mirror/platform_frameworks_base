@@ -35,6 +35,7 @@
 
 #include <gui/ISensorServer.h>
 #include <gui/ISensorEventConnection.h>
+#include <gui/SensorEventQueue.h>
 
 #include <hardware/sensors.h>
 
@@ -587,19 +588,15 @@ status_t SensorService::SensorEventConnection::sendEvents(
         count = numEvents;
     }
 
-    if (count == 0)
-        return 0;
-
-    ssize_t size = mChannel->write(scratch, count*sizeof(sensors_event_t));
+    // NOTE: ASensorEvent and sensors_event_t are the same type
+    ssize_t size = SensorEventQueue::write(mChannel,
+            reinterpret_cast<ASensorEvent const*>(scratch), count);
     if (size == -EAGAIN) {
         // the destination doesn't accept events anymore, it's probably
         // full. For now, we just drop the events on the floor.
         //ALOGW("dropping %d events on the floor", count);
         return size;
     }
-
-    //ALOGE_IF(size<0, "dropping %d events on the floor (%s)",
-    //        count, strerror(-size));
 
     return size < 0 ? status_t(size) : status_t(NO_ERROR);
 }
