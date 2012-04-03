@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r7b-windows.zip
-ndk.win_bytes=80346206
-ndk.win_checksum=c42b0c9c14428397337421d5e4999380
+ndk.win_download=android-ndk-r7c-windows.zip
+ndk.win_bytes=80361003
+ndk.win_checksum=e86184cdc4bf71d32fa9185fad8544e2
 
-ndk.mac_download=android-ndk-r7b-darwin-x86.tar.bz2
-ndk.mac_bytes=73817184
-ndk.mac_checksum=6daa82ca6b73bc0614c9997430079c7a
+ndk.mac_download=android-ndk-r7c-darwin-x86.tar.bz2
+ndk.mac_bytes=73836512
+ndk.mac_checksum=025f57feb5f32ed993a5fa7f5996477d
 
-ndk.linux_download=android-ndk-r7b-linux-x86.tar.bz2
-ndk.linux_bytes=64349733
-ndk.linux_checksum=0eb8af18796cdaa082df8f7c54ad7f9a
+ndk.linux_download=android-ndk-r7c-linux-x86.tar.bz2
+ndk.linux_bytes=63432410
+ndk.linux_checksum=0bc21b78823dcf6f86b988203626b1fe
 
 page.title=Android NDK
 
@@ -62,6 +62,59 @@ padding: .25em 1em;
 <div class="toggleable open">
   <a href="#" onclick="return toggleDiv(this)"><img src=
   "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
+  Android NDK, Revision 7c</a> <em>(March 2012)</em>
+
+  <div class="toggleme">
+    <p>This release of the NDK includes an important fix for Tegra2-based devices, and a few
+additional fixes and improvements:</p>
+
+    <dl>
+      <dt>Important bug fixes:</dt>
+
+      <dd>
+        <ul>
+          <li>Fixed GNU STL armeabi-v7a binaries to not crash on non-NEON
+  devices. The files provided with NDK r7b were not configured properly,
+  resulting in crashes on Tegra2-based devices and others when trying to use
+  certain floating-point functions (e.g., {@code cosf}, {@code sinf}, {@code expf}).</li>
+        </ul>
+      </dd>
+
+      <dt>Important changes:</dt>
+
+      <dd>
+        <ul>
+          <li>Added support for custom output directories through the {@code NDK_OUT}
+  environment variable. When defined, this variable is used to store all
+  intermediate generated files, instead of {@code $PROJECT_PATH/obj}. The variable is
+  also recognized by {@code ndk-gdb}. </li>
+          <li>Added support for building modules with hundreds or even thousands of source
+  files by defining {@code LOCAL_SHORT_COMMANDS} to {@code true} in your {@code Android.mk}.
+            <p>This change forces the NDK build system to put most linker or archiver options
+  into list files, as a work-around for command-line length limitations.
+  See {@code docs/ANDROID-MK.html} for details.</p>
+          </li>
+        </ul>
+      </dd>
+
+      <dt>Other bug fixes:</dt>
+
+      <dd>
+        <ul>
+          <li>Fixed {@code android_getCpuCount()} implementation in the {@code cpufeatures}
+helper library. On certain devices, where cores are enabled dynamically by the system, the previous
+implementation would report the total number of <em>active</em> cores the first time the function
+was called, rather than the total number of <em>physically available</em> cores.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)"><img src=
+  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
   Android NDK, Revision 7b</a> <em>(February 2012)</em>
 
   <div class="toggleme">
