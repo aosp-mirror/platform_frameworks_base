@@ -26,7 +26,7 @@ public class Script extends BaseObj {
      * @param slot
      */
     protected void invoke(int slot) {
-        mRS.nScriptInvoke(getID(), slot);
+        mRS.nScriptInvoke(getID(mRS), slot);
     }
 
     /**
@@ -37,9 +37,9 @@ public class Script extends BaseObj {
      */
     protected void invoke(int slot, FieldPacker v) {
         if (v != null) {
-            mRS.nScriptInvokeV(getID(), slot, v.getData());
+            mRS.nScriptInvokeV(getID(mRS), slot, v.getData());
         } else {
-            mRS.nScriptInvoke(getID(), slot);
+            mRS.nScriptInvoke(getID(mRS), slot);
         }
     }
 
@@ -58,17 +58,17 @@ public class Script extends BaseObj {
         }
         int in_id = 0;
         if (ain != null) {
-            in_id = ain.getID();
+            in_id = ain.getID(mRS);
         }
         int out_id = 0;
         if (aout != null) {
-            out_id = aout.getID();
+            out_id = aout.getID(mRS);
         }
         byte[] params = null;
         if (v != null) {
             params = v.getData();
         }
-        mRS.nScriptForEach(getID(), slot, in_id, out_id, params);
+        mRS.nScriptForEach(getID(mRS), slot, in_id, out_id, params);
     }
 
 
@@ -86,9 +86,9 @@ public class Script extends BaseObj {
     public void bindAllocation(Allocation va, int slot) {
         mRS.validate();
         if (va != null) {
-            mRS.nScriptBindAllocation(getID(), va.getID(), slot);
+            mRS.nScriptBindAllocation(getID(mRS), va.getID(mRS), slot);
         } else {
-            mRS.nScriptBindAllocation(getID(), 0, slot);
+            mRS.nScriptBindAllocation(getID(mRS), 0, slot);
         }
     }
 
@@ -99,7 +99,7 @@ public class Script extends BaseObj {
      * @param v
      */
     public void setVar(int index, float v) {
-        mRS.nScriptSetVarF(getID(), index, v);
+        mRS.nScriptSetVarF(getID(mRS), index, v);
     }
 
     /**
@@ -109,7 +109,7 @@ public class Script extends BaseObj {
      * @param v
      */
     public void setVar(int index, double v) {
-        mRS.nScriptSetVarD(getID(), index, v);
+        mRS.nScriptSetVarD(getID(mRS), index, v);
     }
 
     /**
@@ -119,7 +119,7 @@ public class Script extends BaseObj {
      * @param v
      */
     public void setVar(int index, int v) {
-        mRS.nScriptSetVarI(getID(), index, v);
+        mRS.nScriptSetVarI(getID(mRS), index, v);
     }
 
     /**
@@ -129,7 +129,7 @@ public class Script extends BaseObj {
      * @param v
      */
     public void setVar(int index, long v) {
-        mRS.nScriptSetVarJ(getID(), index, v);
+        mRS.nScriptSetVarJ(getID(mRS), index, v);
     }
 
     /**
@@ -139,7 +139,7 @@ public class Script extends BaseObj {
      * @param v
      */
     public void setVar(int index, boolean v) {
-        mRS.nScriptSetVarI(getID(), index, v ? 1 : 0);
+        mRS.nScriptSetVarI(getID(mRS), index, v ? 1 : 0);
     }
 
     /**
@@ -149,7 +149,7 @@ public class Script extends BaseObj {
      * @param o
      */
     public void setVar(int index, BaseObj o) {
-        mRS.nScriptSetVarObj(getID(), index, (o == null) ? 0 : o.getID());
+        mRS.nScriptSetVarObj(getID(mRS), index, (o == null) ? 0 : o.getID(mRS));
     }
 
     /**
@@ -159,13 +159,13 @@ public class Script extends BaseObj {
      * @param v
      */
     public void setVar(int index, FieldPacker v) {
-        mRS.nScriptSetVarV(getID(), index, v.getData());
+        mRS.nScriptSetVarV(getID(mRS), index, v.getData());
     }
 
     public void setTimeZone(String timeZone) {
         mRS.validate();
         try {
-            mRS.nScriptSetTimeZone(getID(), timeZone.getBytes("UTF-8"));
+            mRS.nScriptSetTimeZone(getID(mRS), timeZone.getBytes("UTF-8"));
         } catch (java.io.UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

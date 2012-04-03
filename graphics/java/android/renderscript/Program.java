@@ -134,11 +134,11 @@ public class Program extends BaseObj {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
         if (a != null &&
-            a.getType().getID() != mConstants[slot].getID()) {
+            a.getType().getID(mRS) != mConstants[slot].getID(mRS)) {
             throw new IllegalArgumentException("Allocation type does not match slot type.");
         }
-        int id = a != null ? a.getID() : 0;
-        mRS.nProgramBindConstants(getID(), slot, id);
+        int id = a != null ? a.getID(mRS) : 0;
+        mRS.nProgramBindConstants(getID(mRS), slot, id);
     }
 
     /**
@@ -159,8 +159,8 @@ public class Program extends BaseObj {
             throw new IllegalArgumentException("Cannot bind cubemap to 2d texture slot");
         }
 
-        int id = va != null ? va.getID() : 0;
-        mRS.nProgramBindTexture(getID(), slot, id);
+        int id = va != null ? va.getID(mRS) : 0;
+        mRS.nProgramBindTexture(getID(mRS), slot, id);
     }
 
     /**
@@ -179,8 +179,8 @@ public class Program extends BaseObj {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
 
-        int id = vs != null ? vs.getID() : 0;
-        mRS.nProgramBindSampler(getID(), slot, id);
+        int id = vs != null ? vs.getID(mRS) : 0;
+        mRS.nProgramBindSampler(getID(mRS), slot, id);
     }
 
 

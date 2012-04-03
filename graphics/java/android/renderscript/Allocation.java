@@ -184,9 +184,9 @@ public class Allocation extends BaseObj {
 
     private int getIDSafe() {
         if (mAdaptedAllocation != null) {
-            return mAdaptedAllocation.getID();
+            return mAdaptedAllocation.getID(mRS);
         }
-        return getID();
+        return getID(mRS);
     }
 
 
@@ -321,7 +321,7 @@ public class Allocation extends BaseObj {
     @Override
     void updateFromNative() {
         super.updateFromNative();
-        int typeID = mRS.nAllocationGetType(getID());
+        int typeID = mRS.nAllocationGetType(getID(mRS));
         if(typeID != 0) {
             mType = new Type(typeID, mRS);
             mType.updateFromNative();
@@ -371,7 +371,7 @@ public class Allocation extends BaseObj {
                 "Can only send buffer if IO_OUTPUT usage specified.");
         }
         mRS.validate();
-        mRS.nAllocationIoSend(getID());
+        mRS.nAllocationIoSend(getID(mRS));
     }
 
     /**
@@ -394,7 +394,7 @@ public class Allocation extends BaseObj {
                 "Can only receive if IO_INPUT usage specified.");
         }
         mRS.validate();
-        mRS.nAllocationIoReceive(getID());
+        mRS.nAllocationIoReceive(getID(mRS));
     }
 
     /**
@@ -411,7 +411,7 @@ public class Allocation extends BaseObj {
         }
         int i[] = new int[d.length];
         for (int ct=0; ct < d.length; ct++) {
-            i[ct] = d[ct].getID();
+            i[ct] = d[ct].getID(mRS);
         }
         copy1DRangeFromUnchecked(0, mCurrentCount, i);
     }
@@ -571,7 +571,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validateBitmapSize(b);
         validateBitmapFormat(b);
-        mRS.nAllocationCopyFromBitmap(getID(), b);
+        mRS.nAllocationCopyFromBitmap(getID(mRS), b);
     }
 
     /**
@@ -652,7 +652,7 @@ public class Allocation extends BaseObj {
      * followup sync will be required.
      */
     public void generateMipmaps() {
-        mRS.nAllocationGenerateMipmaps(getID());
+        mRS.nAllocationGenerateMipmaps(getID(mRS));
     }
 
     /**
@@ -780,7 +780,7 @@ public class Allocation extends BaseObj {
     public void copy1DRangeFrom(int off, int count, Allocation data, int dataOff) {
         mRS.nAllocationData2D(getIDSafe(), off, 0,
                               mSelectedLOD, mSelectedFace.mID,
-                              count, 1, data.getID(), dataOff, 0,
+                              count, 1, data.getID(mRS), dataOff, 0,
                               data.mSelectedLOD, data.mSelectedFace.mID);
     }
 
@@ -857,7 +857,7 @@ public class Allocation extends BaseObj {
         validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getIDSafe(), xoff, yoff,
                               mSelectedLOD, mSelectedFace.mID,
-                              w, h, data.getID(), dataXoff, dataYoff,
+                              w, h, data.getID(mRS), dataXoff, dataYoff,
                               data.mSelectedLOD, data.mSelectedFace.mID);
     }
 
@@ -888,7 +888,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validateBitmapFormat(b);
         validateBitmapSize(b);
-        mRS.nAllocationCopyToBitmap(getID(), b);
+        mRS.nAllocationCopyToBitmap(getID(mRS), b);
     }
 
     /**
@@ -901,7 +901,7 @@ public class Allocation extends BaseObj {
     public void copyTo(byte[] d) {
         validateIsInt8();
         mRS.validate();
-        mRS.nAllocationRead(getID(), d);
+        mRS.nAllocationRead(getID(mRS), d);
     }
 
     /**
@@ -914,7 +914,7 @@ public class Allocation extends BaseObj {
     public void copyTo(short[] d) {
         validateIsInt16();
         mRS.validate();
-        mRS.nAllocationRead(getID(), d);
+        mRS.nAllocationRead(getID(mRS), d);
     }
 
     /**
@@ -927,7 +927,7 @@ public class Allocation extends BaseObj {
     public void copyTo(int[] d) {
         validateIsInt32();
         mRS.validate();
-        mRS.nAllocationRead(getID(), d);
+        mRS.nAllocationRead(getID(mRS), d);
     }
 
     /**
@@ -940,7 +940,7 @@ public class Allocation extends BaseObj {
     public void copyTo(float[] d) {
         validateIsFloat32();
         mRS.validate();
-        mRS.nAllocationRead(getID(), d);
+        mRS.nAllocationRead(getID(mRS), d);
     }
 
     /**
@@ -959,10 +959,10 @@ public class Allocation extends BaseObj {
         if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
             throw new RSInvalidStateException("Resize only support for 1D allocations at this time.");
         }
-        mRS.nAllocationResize1D(getID(), dimX);
+        mRS.nAllocationResize1D(getID(mRS), dimX);
         mRS.finish();  // Necessary because resize is fifoed and update is async.
 
-        int typeID = mRS.nAllocationGetType(getID());
+        int typeID = mRS.nAllocationGetType(getID(mRS));
         mType = new Type(typeID, mRS);
         mType.updateFromNative();
         updateCacheInfo(mType);
@@ -991,10 +991,10 @@ public class Allocation extends BaseObj {
             throw new RSInvalidStateException(
                 "Resize only support for 2D allocations at this time.");
         }
-        mRS.nAllocationResize2D(getID(), dimX, dimY);
+        mRS.nAllocationResize2D(getID(mRS), dimX, dimY);
         mRS.finish();  // Necessary because resize is fifoed and update is async.
 
-        int typeID = mRS.nAllocationGetType(getID());
+        int typeID = mRS.nAllocationGetType(getID(mRS));
         mType = new Type(typeID, mRS);
         mType.updateFromNative();
         updateCacheInfo(mType);
@@ -1019,10 +1019,10 @@ public class Allocation extends BaseObj {
      */
     static public Allocation createTyped(RenderScript rs, Type type, MipmapControl mips, int usage) {
         rs.validate();
-        if (type.getID() == 0) {
+        if (type.getID(rs) == 0) {
             throw new RSInvalidStateException("Bad Type");
         }
-        int id = rs.nAllocationCreateTyped(type.getID(), mips.mID, usage, 0);
+        int id = rs.nAllocationCreateTyped(type.getID(rs), mips.mID, usage, 0);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
@@ -1043,10 +1043,10 @@ public class Allocation extends BaseObj {
     static public Allocation createTyped(RenderScript rs, Type type, MipmapControl mips,
                                          int usage, int pointer) {
         rs.validate();
-        if (type.getID() == 0) {
+        if (type.getID(rs) == 0) {
             throw new RSInvalidStateException("Bad Type");
         }
-        int id = rs.nAllocationCreateTyped(type.getID(), mips.mID, usage, pointer);
+        int id = rs.nAllocationCreateTyped(type.getID(rs), mips.mID, usage, pointer);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
@@ -1101,7 +1101,7 @@ public class Allocation extends BaseObj {
         b.setX(count);
         Type t = b.create();
 
-        int id = rs.nAllocationCreateTyped(t.getID(), MipmapControl.MIPMAP_NONE.mID, usage, 0);
+        int id = rs.nAllocationCreateTyped(t.getID(rs), MipmapControl.MIPMAP_NONE.mID, usage, 0);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
@@ -1168,7 +1168,7 @@ public class Allocation extends BaseObj {
         rs.validate();
         Type t = typeFromBitmap(rs, b, mips);
 
-        int id = rs.nAllocationCreateFromBitmap(t.getID(), mips.mID, b, usage);
+        int id = rs.nAllocationCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
         if (id == 0) {
             throw new RSRuntimeException("Load failed.");
         }
@@ -1186,9 +1186,9 @@ public class Allocation extends BaseObj {
             throw new RSInvalidStateException("Allocation is not a surface texture.");
         }
 
-        int id = mRS.nAllocationGetSurfaceTextureID(getID());
+        int id = mRS.nAllocationGetSurfaceTextureID(getID(mRS));
         SurfaceTexture st = new SurfaceTexture(id);
-        mRS.nAllocationGetSurfaceTextureID2(getID(), st);
+        mRS.nAllocationGetSurfaceTextureID2(getID(mRS), st);
 
         return st;
     }
@@ -1211,7 +1211,7 @@ public class Allocation extends BaseObj {
             throw new RSInvalidStateException("Allocation is not USAGE_IO_OUTPUT.");
         }
 
-        mRS.nAllocationSetSurface(getID(), sur);
+        mRS.nAllocationSetSurface(getID(mRS), sur);
     }
 
     /**
@@ -1224,7 +1224,7 @@ public class Allocation extends BaseObj {
         }
 
         Surface s = new Surface(st);
-        mRS.nAllocationSetSurface(getID(), s);
+        mRS.nAllocationSetSurface(getID(mRS), s);
     }
 
     /**
@@ -1283,7 +1283,7 @@ public class Allocation extends BaseObj {
         tb.setMipmaps(mips == MipmapControl.MIPMAP_FULL);
         Type t = tb.create();
 
-        int id = rs.nAllocationCubeCreateFromBitmap(t.getID(), mips.mID, b, usage);
+        int id = rs.nAllocationCubeCreateFromBitmap(t.getID(rs), mips.mID, b, usage);
         if(id == 0) {
             throw new RSRuntimeException("Load failed for bitmap " + b + " element " + e);
         }

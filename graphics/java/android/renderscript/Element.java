@@ -778,7 +778,7 @@ public class Element extends BaseObj {
 
         // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
         int[] dataBuffer = new int[5];
-        mRS.nElementGetNativeData(getID(), dataBuffer);
+        mRS.nElementGetNativeData(getID(mRS), dataBuffer);
 
         mNormalized = dataBuffer[2] == 1 ? true : false;
         mVectorSize = dataBuffer[3];
@@ -803,7 +803,7 @@ public class Element extends BaseObj {
             mOffsetInBytes = new int[numSubElements];
 
             int[] subElementIds = new int[numSubElements];
-            mRS.nElementGetSubElements(getID(), subElementIds, mElementNames, mArraySizes);
+            mRS.nElementGetSubElements(getID(mRS), subElementIds, mElementNames, mArraySizes);
             for(int i = 0; i < numSubElements; i ++) {
                 mElements[i] = new Element(subElementIds[i], mRS);
                 mElements[i].updateFromNative();
@@ -1062,7 +1062,7 @@ public class Element extends BaseObj {
 
             int[] ids = new int[ein.length];
             for (int ct = 0; ct < ein.length; ct++ ) {
-                ids[ct] = ein[ct].getID();
+                ids[ct] = ein[ct].getID(mRS);
             }
             int id = mRS.nElementCreate2(ids, sin, asin);
             return new Element(id, mRS, ein, sin, asin);

@@ -67,7 +67,7 @@ public class Path extends BaseObj {
 
 
     public static Path createStaticPath(RenderScript rs, Primitive p, float quality, Allocation vtx) {
-        int id = rs.nPathCreate(p.mID, false, vtx.getID(), 0, quality);
+        int id = rs.nPathCreate(p.mID, false, vtx.getID(rs), 0, quality);
         Path newPath = new Path(id, rs, p, null, null, quality);
         return newPath;
     }

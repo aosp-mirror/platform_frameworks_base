@@ -121,15 +121,15 @@ public class ProgramVertex extends Program {
 
             for (int i=0; i < mInputCount; i++) {
                 tmp[idx++] = ProgramParam.INPUT.mID;
-                tmp[idx++] = mInputs[i].getID();
+                tmp[idx++] = mInputs[i].getID(mRS);
             }
             for (int i=0; i < mOutputCount; i++) {
                 tmp[idx++] = ProgramParam.OUTPUT.mID;
-                tmp[idx++] = mOutputs[i].getID();
+                tmp[idx++] = mOutputs[i].getID(mRS);
             }
             for (int i=0; i < mConstantCount; i++) {
                 tmp[idx++] = ProgramParam.CONSTANT.mID;
-                tmp[idx++] = mConstants[i].getID();
+                tmp[idx++] = mConstants[i].getID(mRS);
             }
             for (int i=0; i < mTextureCount; i++) {
                 tmp[idx++] = ProgramParam.TEXTURE_TYPE.mID;
