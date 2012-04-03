@@ -1,0 +1,52 @@
+page.title=Designing for TV
+
+trainingnavtop=true
+startpage=true
+next.title=Optimizing layouts for TV
+next.link=optimizing-layouts-tv.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 2.0 (API Level 5) or higher</li>
+</ul>
+
+</div>
+</div>
+<p> 
+  Smart TVs powered by Android bring your favorite Android apps to the best screen in your house. 
+  Thousands of apps in the Google Play Store are already optimized for TVs. This class shows how 
+  you can optimize your Android app for TVs, including how to build a layout that 
+  works great when the user is ten feet away and navigating with a remote control. 
+</p> 
+
+<h2>Lessons</h2> 
+ 
+<dl> 
+  <dt><b><a href="optimizing-layouts-tv.html">Optimizing Layouts for TV</a></b></dt>
+    <dd>Shows you how to optimize app layouts for TV screens, which have some unique characteristics such as:
+    <ul>
+      <li>permanent "landscape" mode</li>
+      <li>high-resolution displays</li>
+      <li>"10 foot UI" environment.</li>
+    </ul>
+    </dd>
+ 
+  <dt><b><a href="optimizing-navigation-tv.html">Optimizing Navigation for TV</a></b></dt>
+    <dd>Shows you how to design navigation for TVs, including: 
+    <ul>
+      <li>handling D-pad navigation</li>
+      <li>providing navigational feedback</li>
+      <li>providing easily-accessible controls on the screen.</li>
+    </ul>
+    </dd>
+
+  <dt><b><a href="unsupported-features-tv.html">Handling features not supported on TV</a></b></dt>
+    <dd>Lists the hardware features that are usually not available on TVs. This lesson also shows you how to 
+    provide alternatives for missing features or check for missing features and disable code at run time.</dd>
+</dl> 
