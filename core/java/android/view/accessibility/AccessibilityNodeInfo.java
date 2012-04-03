@@ -43,6 +43,12 @@ import java.util.List;
  * details about how to obtain a handle to window content as a tree of accessibility
  * node info as well as familiarizing with the security model.
  * </p>
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about making applications accessible, read the
+ * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+ * developer guide.</p>
+ * </div>
  *
  * @see android.accessibilityservice.AccessibilityService
  * @see AccessibilityEvent
