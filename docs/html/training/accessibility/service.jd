@@ -1,0 +1,286 @@
+
+page.title=Developing an Accessibility Service
+parent.title=Implementing Accessibility
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Developing Accessible Applications
+previous.link=accessible-app.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#create">Create Your Accessibility Service</a></li>
+  <li><a href="#configure">Configure Your Accessibility Service</a></li>
+  <li><a href="#events">Respond to AccessibilityEvents</a></li>
+  <li><a href="#query">Query the View Heirarchy for More Context</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/ui/accessibility/services.html">Building
+  Accessibility Services</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>Accessibility services are a feature of the Android framework designed to
+provide alternative navigation feedback to the user on behalf of applications
+installed on Android devices.  An accessibility service can communicate to the
+user on the application's behalf, such as converting text to speech, or haptic
+feedback when a user is hovering on an important area of the screen.  This
+lesson covers how to create an accessibility service, process information
+received from the application, and report that information back to the
+user.</p>
+
+
+<h2 id="create">Create Your Accessibility Service</h2>
+<p>An accessibility service can be bundled with a normal application, or created
+as a standalone Android project.  The steps to creating the service are the same
+in either situation.  Within your project, create a class that extends {@link
+android.accessibilityservice.AccessibilityService}.</p>
+
+<pre>
+package com.example.android.apis.accessibility;
+
+import android.accessibilityservice.AccessibilityService;
+
+public class MyAccessibilityService extends AccessibilityService {
+...
+    &#64;Override
+    public void onAccessibilityEvent(AccessibilityEvent event) {
+    }
+
+    &#64;Override
+    public void onInterrupt() {
+    }
+
+...
+}
+</pre>
+
+<p>Like any other service, you also declare it in the manifest file.
+Remember to specify that it handles the {@code android.accessibilityservice} intent,
+so that the service is called when applications fire an 
+{@link android.view.accessibility.AccessibilityEvent}.</p>
+
+<pre>
+&lt;application ...&gt;
+...
+&lt;service android:name=".MyAccessibilityService"&gt;
+     &lt;intent-filter&gt;
+         &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;
+     &lt;/intent-filter&gt;
+     . . .
+&lt;/service&gt;
+...
+&lt;/application&gt;
+</pre>
+
+<p>If you created a new project for this service, and don't plan on having an
+application, you can remove the starter Activity class (usually called MainActivity.java) from your source.  Remember to
+also remove the corresponding activity element from your manifest.</p>
+
+<h2 id="configure">Configure Your Accessibility Service</h2>
+<p>Setting the configuration variables for your accessibility service tells the
+system how and when you want it to run.  Which event types would you like to
+respond to?  Should the service be active for all applications, or only specific
+package names?  What different feedback types does it use?</p>
+
+<p>You have two options for how to set these variables.  The
+backwards-compatible option is to set them in code, using {@link
+android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}.
+To do that, override the {@link
+android.accessibilityservice.AccessibilityService#onServiceConnected()} method
+and configure your service in there.</p>
+
+<pre>
+&#64;Override
+public void onServiceConnected() {
+    // Set the type of events that this service wants to listen to.  Others
+    // won't be passed to this service.
+    info.eventTypes = AccessibilityEvent.TYPE_VIEW_CLICKED |
+            AccessibilityEvent.TYPE_VIEW_FOCUSED;
+
+    // If you only want this service to work with specific applications, set their
+    // package names here.  Otherwise, when the service is activated, it will listen
+    // to events from all applications.
+    info.packageNames = new String[]
+            {"com.example.android.myFirstApp", "com.example.android.mySecondApp"};
+
+    // Set the type of feedback your service will provide.
+    info.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
+
+    // Default services are invoked only if no package-specific ones are present
+    // for the type of AccessibilityEvent generated.  This service *is*
+    // application-specific, so the flag isn't necessary.  If this was a
+    // general-purpose service, it would be worth considering setting the
+    // DEFAULT flag.
+
+    // info.flags = AccessibilityServiceInfo.DEFAULT;
+
+    info.notificationTimeout = 100;
+
+    this.setServiceInfo(info);
+
+}
+</pre>
+
+<p>Starting with Android 4.0, there is a second option available: configure the
+service using an XML file.  Certain configuration options like
+{@link android.R.attr#canRetrieveWindowContent} are only available if you
+configure your service using XML.  The same configuration options above, defined
+using XML, would look like this:</p>
+
+<pre>
+&lt;accessibility-service
+     android:accessibilityEventTypes="typeViewClicked|typeViewFocused"
+     android:packageNames="com.example.android.myFirstApp, com.example.android.mySecondApp"
+     android:accessibilityFeedbackType="feedbackSpoken"
+     android:notificationTimeout="100"
+     android:settingsActivity="com.example.android.apis.accessibility.TestBackActivity"
+     android:canRetrieveWindowContent="true"
+/&gt;
+</pre>
+
+<p>If you go the XML route, be sure to reference it in your manifest, by adding
+a <a
+href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a> tag to
+your service declaration, pointing at the XML file.  If you stored your XML file
+in {@code res/xml/serviceconfig.xml}, the new tag would look like this:</p>
+
+<pre>
+&lt;service android:name=".MyAccessibilityService"&gt;
+     &lt;intent-filter&gt;
+         &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;
+     &lt;/intent-filter&gt;
+     &lt;meta-data android:name="android.accessibilityservice"
+     android:resource="@xml/serviceconfig" /&gt;
+&lt;/service&gt;
+</pre>
+
+<h2 id="events">Respond to AccessibilityEvents</h2>
+<p>Now that your service is set up to run and listen for events, write some code
+so it knows what to do when an {@link
+android.view.accessibility.AccessibilityEvent} actually arrives!  Start by
+overriding the {@link
+android.accessibilityservice.AccessibilityService#onAccessibilityEvent} method.
+In that method, use {@link
+android.view.accessibility.AccessibilityEvent#getEventType} to determine the
+type of event, and {@link
+android.view.accessibility.AccessibilityEvent#getContentDescription} to extract
+any label text associated with the fiew that fired the event.</pre>
+
+<pre>
+&#64;Override
+public void onAccessibilityEvent(AccessibilityEvent event) {
+    final int eventType = event.getEventType();
+    String eventText = null;
+    switch(eventType) {
+        case AccessibilityEvent.TYPE_VIEW_CLICKED:
+            eventText = "Focused: ";
+            break;
+        case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+            eventText = "Focused: ";
+            break;
+    }
+
+    eventText = eventText + event.getContentDescription();
+
+    // Do something nifty with this text, like speak the composed string
+    // back to the user.
+    speakToUser(eventText);
+    ...
+}
+</pre>
+
+<h2 id="query">Query the View Heirarchy for More Context</h2>
+<p>This step is optional, but highly useful.  One of the new features in Android
+4.0 (API Level 14) is the ability for an
+{@link android.accessibilityservice.AccessibilityService} to query the view
+hierarchy, collecting information about the the UI component that generated an event, and
+its parent and children.  In order to do this, make sure that you set the
+following line in your XML configuration:</p>
+<pre>
+android:canRetrieveWindowContent="true"
+</pre>
+<p>Once that's done, get an {@link
+android.view.accessibility.AccessibilityNodeInfo} object using {@link
+android.view.accessibility.AccessibilityEvent#getSource}.  This call only
+returns an object if the window where the event originated is still the active
+window.  If not, it will return null, so <em>behave accordingly</em>.  The
+following example is a snippet of code that, when it receives an event, does
+the following:
+<ol>
+  <li>Immediately grab the parent of the view where the event originated</li>
+  <li>In that view, look for a label and a check box as children views</li>
+  <li>If it finds them, create a string to report to the user, indicating
+  the label and whether it was checked or not.</li>
+  <li>If at any point a null value is returned while traversing the view
+  hierarchy, the method quietly gives up.</li>
+</ol>
+
+<pre>
+
+// Alternative onAccessibilityEvent, that uses AccessibilityNodeInfo
+
+&#64;Override
+public void onAccessibilityEvent(AccessibilityEvent event) {
+
+    AccessibilityNodeInfo source = event.getSource();
+    if (source == null) {
+        return;
+    }
+
+    // Grab the parent of the view that fired the event.
+    AccessibilityNodeInfo rowNode = getListItemNodeInfo(source);
+    if (rowNode == null) {
+        return;
+    }
+
+    // Using this parent, get references to both child nodes, the label and the checkbox.
+    AccessibilityNodeInfo labelNode = rowNode.getChild(0);
+    if (labelNode == null) {
+        rowNode.recycle();
+        return;
+    }
+
+    AccessibilityNodeInfo completeNode = rowNode.getChild(1);
+    if (completeNode == null) {
+        rowNode.recycle();
+        return;
+    }
+
+    // Determine what the task is and whether or not it's complete, based on
+    // the text inside the label, and the state of the check-box.
+    if (rowNode.getChildCount() &lt; 2 || !rowNode.getChild(1).isCheckable()) {
+        rowNode.recycle();
+        return;
+    }
+
+    CharSequence taskLabel = labelNode.getText();
+    final boolean isComplete = completeNode.isChecked();
+    String completeStr = null;
+
+    if (isComplete) {
+        completeStr = getString(R.string.checked);
+    } else {
+        completeStr = getString(R.string.not_checked);
+    }
+    String reportStr = taskLabel + completeStr;
+    speakToUser(reportStr);
+}
+
+</pre>
+
+<p>Now you have a complete, functioning accessibility service.  Try configuring
+how it interacts with the user, by adding Android's <a
+  href="http://developer.android.com/resources/articles/tts.html">text-to-speech
+  engine</a>, or using a {@link android.os.Vibrator} to provide haptic
+feedback!</p>
