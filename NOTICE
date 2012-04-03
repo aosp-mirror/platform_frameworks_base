@@ -56,6 +56,17 @@ the Apache2 License.
    =========================================================================
    ==  NOTICE file corresponding to the section 4 d of                    ==
    ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the mDnsResponder code.                           ==
+   =========================================================================
+
+mDnsResponder TXTRecord
+This file is Copyright 2004 Apple Computer, Inc.  but released under
+the Apache2 License.
+
+
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
    ==  in this case for the TagSoup code.                                 ==
    =========================================================================
 
