@@ -228,6 +228,7 @@ public class SIMRecords extends IccRecords {
 
         adnCache.reset();
 
+        log("SIMRecords: onRadioOffOrNotAvailable set 'gsm.sim.operator.numeric' to operator=null");
         SystemProperties.set(PROPERTY_ICC_OPERATOR_NUMERIC, null);
         SystemProperties.set(PROPERTY_ICC_OPERATOR_ALPHA, null);
         SystemProperties.set(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, null);
@@ -1254,12 +1255,12 @@ public class SIMRecords extends IccRecords {
     }
 
     protected void onAllRecordsLoaded() {
-        log("record load complete");
-
         String operator = getOperatorNumeric();
 
         // Some fields require more than one SIM record to set
 
+        log("SIMRecords: onAllRecordsLoaded set 'gsm.sim.operator.numeric' to operator='" +
+                operator + "'");
         SystemProperties.set(PROPERTY_ICC_OPERATOR_NUMERIC, operator);
 
         if (imsi != null) {

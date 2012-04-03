@@ -329,11 +329,11 @@ public final class RuimRecords extends IccRecords {
 
     @Override
     protected void onAllRecordsLoaded() {
-        log("RuimRecords: record load complete");
-
         // Further records that can be inserted are Operator/OEM dependent
 
         String operator = getRUIMOperatorNumeric();
+        log("RuimRecords: onAllRecordsLoaded set 'gsm.sim.operator.numeric' to operator='" +
+                operator + "'");
         SystemProperties.set(PROPERTY_ICC_OPERATOR_NUMERIC, operator);
 
         if (mImsi != null) {
