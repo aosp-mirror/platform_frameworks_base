@@ -19,7 +19,9 @@
     android:versionCode="1"
     android:versionName="1.0">
 
-    <application android:label="BiDiTests" android:hardwareAccelerated="true">
+    <application android:label="BiDiTests"
+                 android:hardwareAccelerated="true"
+                 android:supportsRtl="true" >
 
         <activity android:name=".BiDiTestActivity"
             android:windowSoftInputMode="stateAlwaysHidden">

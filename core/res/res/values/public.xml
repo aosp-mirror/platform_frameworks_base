@@ -3551,6 +3551,8 @@
      =============================================================== -->
   <public type="attr" name="isolatedProcess" id="0x010103a7" />
 
+  <public type="attr" name="supportsRtl" id="0x010103a8" />
+
   <public type="attr" name="textDirection"/>
 
   <public type="attr" name="layoutDirection" />

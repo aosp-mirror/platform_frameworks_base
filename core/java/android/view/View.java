@@ -9998,6 +9998,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Return true if the application tag in the AndroidManifest has set "supportRtl" to true
+     */
+    private boolean hasRtlSupport() {
+        return mContext.getApplicationInfo().hasRtlSupport();
+    }
+
+    /**
      * Resolve and cache the layout direction. LTR is set initially. This is implicitly supposing
      * that the parent directionality can and will be resolved before its children.
      * Will call {@link View#onResolvedLayoutDirectionChanged} when resolution is done.
@@ -10006,30 +10013,32 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         // Clear any previous layout direction resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED_MASK;
 
-        // Set resolved depending on layout direction
-        switch (getLayoutDirection()) {
-            case LAYOUT_DIRECTION_INHERIT:
-                // If this is root view, no need to look at parent's layout dir.
-                if (canResolveLayoutDirection()) {
-                    ViewGroup viewGroup = ((ViewGroup) mParent);
+        if (hasRtlSupport()) {
+            // Set resolved depending on layout direction
+            switch (getLayoutDirection()) {
+                case LAYOUT_DIRECTION_INHERIT:
+                    // If this is root view, no need to look at parent's layout dir.
+                    if (canResolveLayoutDirection()) {
+                        ViewGroup viewGroup = ((ViewGroup) mParent);
 
-                    if (viewGroup.getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                        if (viewGroup.getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                            mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
+                        }
+                    } else {
+                        // Nothing to do, LTR by default
+                    }
+                    break;
+                case LAYOUT_DIRECTION_RTL:
+                    mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
+                    break;
+                case LAYOUT_DIRECTION_LOCALE:
+                    if(isLayoutDirectionRtl(Locale.getDefault())) {
                         mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
                     }
-                } else {
+                    break;
+                default:
                     // Nothing to do, LTR by default
-                }
-                break;
-            case LAYOUT_DIRECTION_RTL:
-                mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
-                break;
-            case LAYOUT_DIRECTION_LOCALE:
-                if(isLayoutDirectionRtl(Locale.getDefault())) {
-                    mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
-                }
-                break;
-            default:
-                // Nothing to do, LTR by default
+            }
         }
 
         // Set to resolved
@@ -14809,44 +14818,49 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         // Reset any previous text direction resolution
         mPrivateFlags2 &= ~(TEXT_DIRECTION_RESOLVED | TEXT_DIRECTION_RESOLVED_MASK);
 
-        // Set resolved text direction flag depending on text direction flag
-        final int textDirection = getTextDirection();
-        switch(textDirection) {
-            case TEXT_DIRECTION_INHERIT:
-                if (canResolveTextDirection()) {
-                    ViewGroup viewGroup = ((ViewGroup) mParent);
+        if (hasRtlSupport()) {
+            // Set resolved text direction flag depending on text direction flag
+            final int textDirection = getTextDirection();
+            switch(textDirection) {
+                case TEXT_DIRECTION_INHERIT:
+                    if (canResolveTextDirection()) {
+                        ViewGroup viewGroup = ((ViewGroup) mParent);
 
-                    // Set current resolved direction to the same value as the parent's one
-                    final int parentResolvedDirection = viewGroup.getResolvedTextDirection();
-                    switch (parentResolvedDirection) {
-                        case TEXT_DIRECTION_FIRST_STRONG:
-                        case TEXT_DIRECTION_ANY_RTL:
-                        case TEXT_DIRECTION_LTR:
-                        case TEXT_DIRECTION_RTL:
-                        case TEXT_DIRECTION_LOCALE:
-                            mPrivateFlags2 |=
-                                    (parentResolvedDirection << TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
-                            break;
-                        default:
-                            // Default resolved direction is "first strong" heuristic
-                            mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED_DEFAULT;
+                        // Set current resolved direction to the same value as the parent's one
+                        final int parentResolvedDirection = viewGroup.getResolvedTextDirection();
+                        switch (parentResolvedDirection) {
+                            case TEXT_DIRECTION_FIRST_STRONG:
+                            case TEXT_DIRECTION_ANY_RTL:
+                            case TEXT_DIRECTION_LTR:
+                            case TEXT_DIRECTION_RTL:
+                            case TEXT_DIRECTION_LOCALE:
+                                mPrivateFlags2 |=
+                                        (parentResolvedDirection << TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
+                                break;
+                            default:
+                                // Default resolved direction is "first strong" heuristic
+                                mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED_DEFAULT;
+                        }
+                    } else {
+                        // We cannot do the resolution if there is no parent, so use the default one
+                        mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED_DEFAULT;
                     }
-                } else {
-                    // We cannot do the resolution if there is no parent, so use the default one
+                    break;
+                case TEXT_DIRECTION_FIRST_STRONG:
+                case TEXT_DIRECTION_ANY_RTL:
+                case TEXT_DIRECTION_LTR:
+                case TEXT_DIRECTION_RTL:
+                case TEXT_DIRECTION_LOCALE:
+                    // Resolved direction is the same as text direction
+                    mPrivateFlags2 |= (textDirection << TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
+                    break;
+                default:
+                    // Default resolved direction is "first strong" heuristic
                     mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED_DEFAULT;
-                }
-                break;
-            case TEXT_DIRECTION_FIRST_STRONG:
-            case TEXT_DIRECTION_ANY_RTL:
-            case TEXT_DIRECTION_LTR:
-            case TEXT_DIRECTION_RTL:
-            case TEXT_DIRECTION_LOCALE:
-                // Resolved direction is the same as text direction
-                mPrivateFlags2 |= (textDirection << TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
-                break;
-            default:
-                // Default resolved direction is "first strong" heuristic
-                mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED_DEFAULT;
+            }
+        } else {
+            // Default resolved direction is "first strong" heuristic
+            mPrivateFlags2 |= TEXT_DIRECTION_RESOLVED_DEFAULT;
         }
 
         // Set to resolved
