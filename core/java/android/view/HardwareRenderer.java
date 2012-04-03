@@ -502,7 +502,9 @@ public abstract class HardwareRenderer {
         static final int SURFACE_STATE_ERROR = 0;
         static final int SURFACE_STATE_SUCCESS = 1;
         static final int SURFACE_STATE_UPDATED = 2;
-        
+
+        static final int FUNCTOR_PROCESS_DELAY = 2;
+
         static EGL10 sEgl;
         static EGLDisplay sEglDisplay;
         static EGLConfig sEglConfig;
@@ -549,7 +551,9 @@ public abstract class HardwareRenderer {
         private boolean mDestroyed;
 
         private final Rect mRedrawClip = new Rect();
+
         private final int[] mSurfaceSize = new int[2];
+        private final FunctorsRunnable mFunctorsRunnable = new FunctorsRunnable();
 
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
@@ -957,6 +961,24 @@ public abstract class HardwareRenderer {
         void onPostDraw() {
         }
 
+        class FunctorsRunnable implements Runnable {
+            View.AttachInfo attachInfo;
+
+            @Override
+            public void run() {
+                final HardwareRenderer renderer = attachInfo.mHardwareRenderer;
+                if (renderer == null || !renderer.isEnabled() || renderer != GlRenderer.this) {
+                    return;
+                }
+
+                final int surfaceState = checkCurrent();
+                if (surfaceState != SURFACE_STATE_ERROR) {
+                    int status = mCanvas.invokeFunctors(mRedrawClip);
+                    handleFunctorStatus(attachInfo, status);
+                }
+            }
+        }
+
         @Override
         boolean draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
                 Rect dirty) {
@@ -1051,15 +1073,7 @@ public abstract class HardwareRenderer {
                                 }
                             }
 
-                            if (status != DisplayList.STATUS_DONE) {
-                                if (mRedrawClip.isEmpty()) {
-                                    attachInfo.mViewRootImpl.invalidate();
-                                } else {
-                                    attachInfo.mViewRootImpl.invalidateChildInParent(
-                                            null, mRedrawClip);
-                                    mRedrawClip.setEmpty();
-                                }
-                            }
+                            handleFunctorStatus(attachInfo, status);
                         } else {
                             // Shouldn't reach here
                             view.draw(canvas);
@@ -1109,6 +1123,26 @@ public abstract class HardwareRenderer {
             }
 
             return false;
+        }
+
+        private void handleFunctorStatus(View.AttachInfo attachInfo, int status) {
+            // If the draw flag is set, functors will be invoked while executing
+            // the tree of display lists
+            if ((status & DisplayList.STATUS_DRAW) != 0) {
+                if (mRedrawClip.isEmpty()) {
+                    attachInfo.mViewRootImpl.invalidate();
+                } else {
+                    attachInfo.mViewRootImpl.invalidateChildInParent(null, mRedrawClip);
+                    mRedrawClip.setEmpty();
+                }
+            }
+
+            if ((status & DisplayList.STATUS_INVOKE) != 0) {
+                attachInfo.mHandler.removeCallbacks(mFunctorsRunnable);
+                mFunctorsRunnable.attachInfo = attachInfo;
+                // delay the functor callback by a few ms so it isn't polled constantly
+                attachInfo.mHandler.postDelayed(mFunctorsRunnable, FUNCTOR_PROCESS_DELAY);
+            }
         }
 
         /**

@@ -163,6 +163,21 @@ static jint android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject cl
     return renderer->callDrawGLFunction(functor, dirty);
 }
 
+static jint android_view_GLES20Canvas_invokeFunctors(JNIEnv* env,
+        jobject clazz, OpenGLRenderer* renderer, jobject dirty) {
+    android::uirenderer::Rect bounds;
+    status_t status = renderer->invokeFunctors(bounds);
+    if (status != DrawGlInfo::kStatusDone && dirty != NULL) {
+        env->CallVoidMethod(dirty, gRectClassInfo.set,
+                int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
+    }
+    return status;
+}
+
+// ----------------------------------------------------------------------------
+// Misc
+// ----------------------------------------------------------------------------
+
 static jint android_view_GLES20Canvas_getMaxTextureWidth(JNIEnv* env, jobject clazz) {
     return Caches::getInstance().maxTextureSize;
 }
@@ -824,6 +839,8 @@ static JNINativeMethod gMethods[] = {
     { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
 
     { "nCallDrawGLFunction", "(II)I",          (void*) android_view_GLES20Canvas_callDrawGLFunction },
+    { "nInvokeFunctors",         "(ILandroid/graphics/Rect;)I",
+            (void*) android_view_GLES20Canvas_invokeFunctors },
 
     { "nSave",              "(II)I",           (void*) android_view_GLES20Canvas_save },
     { "nRestore",           "(I)V",            (void*) android_view_GLES20Canvas_restore },
@@ -899,9 +916,9 @@ static JNINativeMethod gMethods[] = {
     { "nDestroyDisplayList",     "(I)V",       (void*) android_view_GLES20Canvas_destroyDisplayList },
     { "nGetDisplayListSize",     "(I)I",       (void*) android_view_GLES20Canvas_getDisplayListSize },
     { "nSetDisplayListName",     "(ILjava/lang/String;)V",
-                                               (void*) android_view_GLES20Canvas_setDisplayListName },
+            (void*) android_view_GLES20Canvas_setDisplayListName },
     { "nDrawDisplayList",        "(IIIILandroid/graphics/Rect;I)I",
-                                               (void*) android_view_GLES20Canvas_drawDisplayList },
+            (void*) android_view_GLES20Canvas_drawDisplayList },
 
     { "nCreateDisplayListRenderer", "()I",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
     { "nResetDisplayListRenderer",  "(I)V",    (void*) android_view_GLES20Canvas_resetDisplayListRenderer },
