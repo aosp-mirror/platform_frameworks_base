@@ -309,6 +309,7 @@ void LayerRenderer::destroyLayer(Layer* layer) {
         if (fbo) {
             flushLayer(layer);
             Caches::getInstance().fboCache.put(fbo);
+            layer->setFbo(0);
         }
 
         if (!Caches::getInstance().layerCache.put(layer)) {
