@@ -23,7 +23,6 @@ import android.util.Log;
 import android.webkit.WebSettingsClassic;
 import android.webkit.WebView;
 import android.webkit.WebViewClassic;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -72,10 +71,7 @@ public class ProfiledWebView extends WebView implements WebViewClassic.PageSwapD
             mContext = c;
         }
 
-        /** Show a toast from the web page */
         public void animationComplete() {
-            Toast.makeText(mContext, "Animation complete!", Toast.LENGTH_SHORT).show();
-            //Log.d(LOGTAG, "anim complete");
             mAnimationTime = System.currentTimeMillis();
         }
     }
