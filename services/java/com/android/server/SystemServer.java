@@ -120,6 +120,7 @@ class ServerThread extends Thread {
         ConnectivityService connectivity = null;
         WifiP2pService wifiP2p = null;
         WifiService wifi = null;
+        NsdService serviceDiscovery= null;
         IPackageManager pm = null;
         Context context = null;
         WindowManagerService wm = null;
@@ -391,6 +392,15 @@ class ServerThread extends Thread {
                 wifiP2p.connectivityServiceReady();
             } catch (Throwable e) {
                 reportWtf("starting Connectivity Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "Network Service Discovery Service");
+                serviceDiscovery = NsdService.create(context);
+                ServiceManager.addService(
+                        Context.NSD_SERVICE, serviceDiscovery);
+            } catch (Throwable e) {
+                reportWtf("starting Service Discovery Service", e);
             }
 
             try {
