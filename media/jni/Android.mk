@@ -2,6 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
+    android_media_Crypto.cpp \
     android_media_MediaCodec.cpp \
     android_media_MediaCodecList.cpp \
     android_media_MediaExtractor.cpp \

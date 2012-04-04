@@ -20,6 +20,7 @@
 
 #include "android_media_MediaCodec.h"
 
+#include "android_media_Crypto.h"
 #include "android_media_Utils.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
@@ -98,12 +99,13 @@ JMediaCodec::~JMediaCodec() {
 status_t JMediaCodec::configure(
         const sp<AMessage> &format,
         const sp<ISurfaceTexture> &surfaceTexture,
+        const sp<ICrypto> &crypto,
         int flags) {
     sp<SurfaceTextureClient> client;
     if (surfaceTexture != NULL) {
         client = new SurfaceTextureClient(surfaceTexture);
     }
-    return mCodec->configure(format, client, NULL /* crypto */, flags);
+    return mCodec->configure(format, client, crypto, flags);
 }
 
 status_t JMediaCodec::start() {
@@ -256,6 +258,7 @@ static void android_media_MediaCodec_native_configure(
         jobject thiz,
         jobjectArray keys, jobjectArray values,
         jobject jsurface,
+        jobject jcrypto,
         jint flags) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
@@ -286,7 +289,12 @@ static void android_media_MediaCodec_native_configure(
         }
     }
 
-    err = codec->configure(format, surfaceTexture, flags);
+    sp<ICrypto> crypto;
+    if (jcrypto != NULL) {
+        crypto = JCrypto::GetCrypto(env, jcrypto);
+    }
+
+    err = codec->configure(format, surfaceTexture, crypto, flags);
 
     throwExceptionAsNecessary(env, err);
 }
@@ -513,7 +521,8 @@ static JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaCodec_release },
 
     { "native_configure",
-      "([Ljava/lang/String;[Ljava/lang/Object;Landroid/view/Surface;I)V",
+      "([Ljava/lang/String;[Ljava/lang/Object;Landroid/view/Surface;"
+      "Landroid/media/Crypto;I)V",
       (void *)android_media_MediaCodec_native_configure },
 
     { "start", "()V", (void *)android_media_MediaCodec_start },

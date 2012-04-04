@@ -879,6 +879,7 @@ static int register_android_media_MediaPlayer(JNIEnv *env)
                 "android/media/MediaPlayer", gMethods, NELEM(gMethods));
 }
 
+extern int register_android_media_Crypto(JNIEnv *env);
 extern int register_android_media_MediaCodec(JNIEnv *env);
 extern int register_android_media_MediaExtractor(JNIEnv *env);
 extern int register_android_media_MediaCodecList(JNIEnv *env);
@@ -964,6 +965,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     }
 
     if (register_android_media_MediaCodecList(env) < 0) {
+        ALOGE("ERROR: MediaCodec native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_Crypto(env) < 0) {
         ALOGE("ERROR: MediaCodec native registration failed");
         goto bail;
     }

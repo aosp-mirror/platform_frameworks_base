@@ -27,6 +27,7 @@ namespace android {
 
 struct ALooper;
 struct AMessage;
+struct ICrypto;
 struct ISurfaceTexture;
 struct MediaCodec;
 
@@ -40,6 +41,7 @@ struct JMediaCodec : public RefBase {
     status_t configure(
             const sp<AMessage> &format,
             const sp<ISurfaceTexture> &surfaceTexture,
+            const sp<ICrypto> &crypto,
             int flags);
 
     status_t start();
