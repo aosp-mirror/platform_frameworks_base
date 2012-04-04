@@ -17,6 +17,7 @@
 package android.nfc;
 
 import android.nfc.NdefMessage;
+import android.net.Uri;
 
 /**
  * @hide
@@ -24,5 +25,7 @@ import android.nfc.NdefMessage;
 interface INdefPushCallback
 {
     NdefMessage createMessage();
+    Uri getUri();
+    String getMimeType();
     void onNdefPushComplete();
 }
