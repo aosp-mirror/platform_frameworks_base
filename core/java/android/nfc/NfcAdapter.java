@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
@@ -553,6 +554,18 @@ public final class NfcAdapter {
             attemptDeadServiceRecovery(e);
             return false;
         }
+    }
+
+    //TODO: Consider a callback alternative
+    //TOOD: See if we get rid of mimeType
+    //TODO: make sure NFC service has permission for URI
+    //TODO: javadoc
+    /** @hide */
+    public void setBeamPushUri(String mimeType, Uri uri, Activity activity) {
+        if (activity == null) {
+            throw new NullPointerException("activity cannot be null");
+        }
+        mNfcActivityManager.setNdefPushContentUri(activity, mimeType, uri);
     }
 
     /**
