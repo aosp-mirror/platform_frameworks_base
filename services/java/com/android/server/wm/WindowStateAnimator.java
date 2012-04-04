@@ -5,6 +5,8 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import static com.android.server.wm.WindowManagerService.LayoutFields.CLEAR_ORIENTATION_CHANGE_COMPLETE;
+
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -313,8 +315,9 @@ class WindowStateAnimator {
         }
 
         finishExit();
-        mService.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
-        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats("WindowState");
+        mAnimator.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) mService.debugLayoutRepeats(
+                "WindowStateAnimator", mAnimator.mPendingLayoutChanges);
 
         if (mWin.mAppToken != null) {
             mWin.mAppToken.updateReportedVisibilityLocked();
@@ -916,7 +919,7 @@ class WindowStateAnimator {
         if (displayed) {
             if (w.mOrientationChanging) {
                 if (!w.isDrawnLw()) {
-                    mService.mInnerFields.mOrientationChangeComplete = false;
+                    mAnimator.mBulkUpdateParams |= CLEAR_ORIENTATION_CHANGE_COMPLETE;
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation continue waiting for draw in " + w);
                 } else {

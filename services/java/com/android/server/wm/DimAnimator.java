@@ -57,12 +57,17 @@ class DimAnimator {
     }
 
     /**
-     * Show the dim surface.
+     * Set's the dim surface's layer and update dim parameters that will be used in
+     * {@link #updateSurface} after all windows are examined.
      */
-    void show(int dw, int dh) {
+    void updateParameters(final Resources res, final Parameters params, final long currentTime) {
+        final int dw = params.mDimWidth;
+        final int dh = params.mDimHeight;
+        final WindowStateAnimator winAnimator = params.mDimWinAnimator;
+        final float target = params.mDimTarget;
         if (!mDimShown) {
-            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DIM " + mDimSurface + ": SHOW pos=(0,0) (" +
-                    dw + "x" + dh + ")");
+            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
+                "  DIM " + mDimSurface + ": SHOW pos=(0,0) (" + dw + "x" + dh + ")");
             mDimShown = true;
             try {
                 mLastDimWidth = dw;
@@ -78,17 +83,9 @@ class DimAnimator {
             mLastDimHeight = dh;
             mDimSurface.setSize(dw, dh);
         }
-    }
 
-    /**
-     * Set's the dim surface's layer and update dim parameters that will be used in
-     * {@link #updateSurface} after all windows are examined.
-     */
-    void updateParameters(Resources res, WindowState w, long currentTime) {
-        final WindowStateAnimator winAnimator = w.mWinAnimator;
         mDimSurface.setLayer(winAnimator.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM);
 
-        final float target = w.mExiting ? 0 : w.mAttrs.dimAmount;
         if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DIM "
                 + mDimSurface + ": layer=" + (winAnimator.mAnimLayer-1) + " target=" + target);
         if (mDimTargetAlpha != target) {
@@ -188,5 +185,19 @@ class DimAnimator {
         pw.print(" target="); pw.print(mDimTargetAlpha);
         pw.print(" delta="); pw.print(mDimDeltaPerMs);
         pw.print(" lastAnimTime="); pw.println(mLastDimAnimTime);
+    }
+
+    static class Parameters {
+        final WindowStateAnimator mDimWinAnimator;
+        final int mDimWidth;
+        final int mDimHeight;
+        final float mDimTarget;
+        Parameters(final WindowStateAnimator dimWinAnimator, final int dimWidth,
+                final int dimHeight, final float dimTarget) {
+            mDimWinAnimator = dimWinAnimator;
+            mDimWidth = dimWidth;
+            mDimHeight = dimHeight;
+            mDimTarget = dimTarget;
+        }
     }
 }

@@ -65,6 +65,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     WindowToken mRootToken;
     AppWindowToken mAppToken;
     AppWindowToken mTargetAppToken;
+
+    // mAttrs.flags is tested in animation without being locked. If the bits tested are ever
+    // modified they will need to be locked.
     final WindowManager.LayoutParams mAttrs = new WindowManager.LayoutParams();
     final DeathRecipient mDeathRecipient;
     final WindowState mAttachedWindow;
