@@ -26,17 +26,20 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +48,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
+import android.widget.PopupMenu;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -214,6 +218,39 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    private void startApplicationDetailsActivity(String packageName) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.fromParts("package", packageName, null));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mContext.startActivity(intent);
+    }
+
+    protected View.OnLongClickListener getNotificationLongClicker() { 
+        return new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                final String packageNameF = (String) v.getTag();
+                if (packageNameF == null) return false;
+                PopupMenu popup = new PopupMenu(mContext, v);
+                popup.getMenuInflater().inflate(R.menu.notification_popup_menu, popup.getMenu());
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (item.getItemId() == R.id.notification_inspect_item) {
+                            startApplicationDetailsActivity(packageNameF);
+                            animateCollapse();
+                        } else {
+                            return false;
+                        }
+                        return true;
+                    }
+                });
+                popup.show();
+
+                return true;
+            }
+        };
+    }
+
     public void dismissIntruder() {
         // pass
     }
@@ -354,6 +391,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
+
+        // for blaming (see SwipeHelper.setLongPressListener)
+        row.setTag(sbn.pkg);
 
         // XXX: temporary: while testing big notifications, auto-expand all of them
         ViewGroup.LayoutParams lp = row.getLayoutParams();

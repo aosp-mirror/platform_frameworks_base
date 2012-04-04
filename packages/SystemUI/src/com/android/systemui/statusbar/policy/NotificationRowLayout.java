@@ -104,6 +104,10 @@ public class NotificationRowLayout
         mExpandHelper = new ExpandHelper(mContext, this, minHeight, maxHeight);
     }
 
+    public void setLongPressListener(View.OnLongClickListener listener) {
+        mSwipeHelper.setLongPressListener(listener);
+    }
+
     public void setAnimateBounds(boolean anim) {
         mAnimateBounds = anim;
     }

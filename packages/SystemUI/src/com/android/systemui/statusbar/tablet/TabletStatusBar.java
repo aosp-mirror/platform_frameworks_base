@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CompatModeButton;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.Prefs;
 
 import java.io.FileDescriptor;
@@ -153,7 +154,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     int mNotificationPeekTapDuration;
     int mNotificationFlingVelocity;
 
-    ViewGroup mPile;
+    NotificationRowLayout mPile;
 
     BatteryController mBatteryController;
     BluetoothController mBluetoothController;
@@ -375,8 +376,9 @@ public class TabletStatusBar extends BaseStatusBar implements
         
         mRecentButton.setOnTouchListener(mRecentsPanel);
 
-        mPile = (ViewGroup)mNotificationPanel.findViewById(R.id.content);
+        mPile = (NotificationRowLayout)mNotificationPanel.findViewById(R.id.content);
         mPile.removeAllViews();
+        mPile.setLongPressListener(getNotificationLongClicker());
 
         ScrollView scroller = (ScrollView)mPile.getParent();
         scroller.setFillViewport(true);

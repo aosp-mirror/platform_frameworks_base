@@ -365,4 +365,8 @@
 
     <!-- Description of the desk dock action that invokes the Android Dreams screen saver feature -->
     <string name="dreams_dock_launcher">Activate screen saver</string>
+
+    <!-- Title shown in notification popup for inspecting the responsible
+         application -->
+    <string name="status_bar_notification_inspect_item_title">App info</string>
 </resources>
