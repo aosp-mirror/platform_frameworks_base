@@ -35,6 +35,7 @@ jfieldID gOptions_mimeFieldID;
 jfieldID gOptions_mCancelID;
 jfieldID gOptions_bitmapFieldID;
 jfieldID gBitmap_nativeBitmapFieldID;
+jfieldID gBitmap_layoutBoundsFieldID;
 
 #if 0
     #define TRACE_BITMAP(code)  code
@@ -276,7 +277,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     }
 
     jbyteArray ninePatchChunk = NULL;
-    if (peeker.fPatchIsValid) {
+    if (peeker.fPatch != NULL) {
         if (willScale) {
             scaleNinePatchChunk(peeker.fPatch, scale);
         }
@@ -296,6 +297,18 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         env->ReleasePrimitiveArrayCritical(ninePatchChunk, array, 0);
     }
 
+    jintArray layoutBounds = NULL;
+    if (peeker.fLayoutBounds != NULL) {
+        layoutBounds = env->NewIntArray(4);
+        if (layoutBounds == NULL) {
+            return nullObjectReturn("layoutBounds == null");
+        }
+
+        env->SetIntArrayRegion(layoutBounds, 0, 4, (jint*) peeker.fLayoutBounds);
+        if (javaBitmap != NULL) {
+            env->SetObjectField(javaBitmap, gBitmap_layoutBoundsFieldID, layoutBounds);
+        }
+    }
     // detach bitmap from its autodeleter, since we want to own it now
     adb.detach();
 
@@ -321,7 +334,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     }
 
     if (padding) {
-        if (peeker.fPatchIsValid) {
+        if (peeker.fPatch != NULL) {
             GraphicsJNI::set_jrect(env, padding,
                     peeker.fPatch->paddingLeft, peeker.fPatch->paddingTop,
                     peeker.fPatch->paddingRight, peeker.fPatch->paddingBottom);
@@ -350,7 +363,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     }
     // now create the java bitmap
     return GraphicsJNI::createBitmap(env, bitmap, javaAllocator.getStorageObj(),
-            isMutable, ninePatchChunk);
+            isMutable, ninePatchChunk, layoutBounds, -1);
 }
 
 static jobject nativeDecodeStreamScaled(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,
@@ -576,7 +589,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
     SkASSERT(bitmap_class);
     gBitmap_nativeBitmapFieldID = getFieldIDCheck(env, bitmap_class, "mNativeBitmap", "I");
-
+    gBitmap_layoutBoundsFieldID = getFieldIDCheck(env, bitmap_class, "mLayoutBounds", "[I");
     int ret = AndroidRuntime::registerNativeMethods(env,
                                     "android/graphics/BitmapFactory$Options",
                                     gOptionsMethods,

@@ -47,6 +47,7 @@ public class NinePatchDrawable extends Drawable {
     private NinePatchState mNinePatchState;
     private NinePatch mNinePatch;
     private Rect mPadding;
+    private Rect mLayoutBounds;
     private Paint mPaint;
     private boolean mMutated;
 
@@ -96,6 +97,13 @@ public class NinePatchDrawable extends Drawable {
     public NinePatchDrawable(Resources res, NinePatch patch) {
         this(new NinePatchState(patch, new Rect()), res);
         mNinePatchState.mTargetDensity = mTargetDensity;
+    }
+
+    /**
+     * @hide
+     */
+    void setLayoutBounds(Rect layoutBounds) {
+        mLayoutBounds = layoutBounds;
     }
 
     private void setNinePatchState(NinePatchState state, Resources res) {
@@ -258,7 +266,7 @@ public class NinePatchDrawable extends Drawable {
         }
         options.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
 
-        final Rect padding = new Rect();        
+        final Rect padding = new Rect();
         Bitmap bitmap = null;
 
         try {

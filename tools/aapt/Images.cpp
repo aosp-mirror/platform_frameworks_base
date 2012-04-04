@@ -57,6 +57,13 @@ struct image_info
     bool is9Patch;
     Res_png_9patch info9Patch;
 
+    // Layout padding, if relevant
+    bool haveLayoutBounds;
+    int32_t layoutBoundsLeft;
+    int32_t layoutBoundsTop;
+    int32_t layoutBoundsRight;
+    int32_t layoutBoundsBottom;
+
     png_uint_32 allocHeight;
     png_bytepp allocRows;
 };
@@ -129,33 +136,62 @@ static void read_png(const char* imageName,
        &interlace_type, &compression_type, NULL);
 }
 
-static bool is_tick(png_bytep p, bool transparent, const char** outError)
+#define COLOR_TRANSPARENT 0
+#define COLOR_WHITE 0xFFFFFFFF
+#define COLOR_TICK  0xFF000000
+#define COLOR_LAYOUT_BOUNDS_TICK 0xFF0000FF
+
+enum {
+    TICK_TYPE_NONE,
+    TICK_TYPE_TICK,
+    TICK_TYPE_LAYOUT_BOUNDS,
+    TICK_TYPE_BOTH
+};
+
+static int tick_type(png_bytep p, bool transparent, const char** outError)
 {
+    png_uint_32 color = p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24);
+
     if (transparent) {
         if (p[3] == 0) {
-            return false;
+            return TICK_TYPE_NONE;
         }
+        if (color == COLOR_LAYOUT_BOUNDS_TICK) {
+            return TICK_TYPE_LAYOUT_BOUNDS;
+        }
+        if (color == COLOR_TICK) {
+            return TICK_TYPE_TICK;
+        }
+
+        // Error cases
         if (p[3] != 0xff) {
             *outError = "Frame pixels must be either solid or transparent (not intermediate alphas)";
-            return false;
+            return TICK_TYPE_NONE;
         }
         if (p[0] != 0 || p[1] != 0 || p[2] != 0) {
-            *outError = "Ticks in transparent frame must be black";
+            *outError = "Ticks in transparent frame must be black or red";
         }
-        return true;
+        return TICK_TYPE_TICK;
     }
 
     if (p[3] != 0xFF) {
         *outError = "White frame must be a solid color (no alpha)";
     }
-    if (p[0] == 0xFF && p[1] == 0xFF && p[2] == 0xFF) {
-        return false;
+    if (color == COLOR_WHITE) {
+        return TICK_TYPE_NONE;
     }
+    if (color == COLOR_TICK) {
+        return TICK_TYPE_TICK;
+    }
+    if (color == COLOR_LAYOUT_BOUNDS_TICK) {
+        return TICK_TYPE_LAYOUT_BOUNDS;
+    }
+
     if (p[0] != 0 || p[1] != 0 || p[2] != 0) {
-        *outError = "Ticks in white frame must be black";
-        return false;
+        *outError = "Ticks in white frame must be black or red";
+        return TICK_TYPE_NONE;
     }
-    return true;
+    return TICK_TYPE_TICK;
 }
 
 enum {
@@ -175,7 +211,7 @@ static status_t get_horizontal_ticks(
     bool found = false;
 
     for (i=1; i<width-1; i++) {
-        if (is_tick(row+i*4, transparent, outError)) {
+        if (TICK_TYPE_TICK == tick_type(row+i*4, transparent, outError)) {
             if (state == TICK_START ||
                 (state == TICK_OUTSIDE_1 && multipleAllowed)) {
                 *outLeft = i-1;
@@ -224,7 +260,7 @@ static status_t get_vertical_ticks(
     bool found = false;
 
     for (i=1; i<height-1; i++) {
-        if (is_tick(rows[i]+offset, transparent, outError)) {
+        if (TICK_TYPE_TICK == tick_type(rows[i]+offset, transparent, outError)) {
             if (state == TICK_START ||
                 (state == TICK_OUTSIDE_1 && multipleAllowed)) {
                 *outTop = i-1;
@@ -261,6 +297,83 @@ static status_t get_vertical_ticks(
 
     return NO_ERROR;
 }
+
+static status_t get_horizontal_layout_bounds_ticks(
+        png_bytep row, int width, bool transparent, bool required,
+        int32_t* outLeft, int32_t* outRight, const char** outError)
+{
+    int i;
+    *outLeft = *outRight = 0;
+
+    // Look for left tick
+    if (TICK_TYPE_LAYOUT_BOUNDS == tick_type(row + 4, transparent, outError)) {
+        // Starting with a layout padding tick
+        i = 1;
+        while (i < width - 1) {
+            (*outLeft)++;
+            i++;
+            int tick = tick_type(row + i * 4, transparent, outError);
+            if (tick != TICK_TYPE_LAYOUT_BOUNDS) {
+                break;
+            }
+        }
+    }
+
+    // Look for right tick
+    if (TICK_TYPE_LAYOUT_BOUNDS == tick_type(row + (width - 2) * 4, transparent, outError)) {
+        // Ending with a layout padding tick
+        i = width - 2;
+        while (i > 1) {
+            (*outRight)++;
+            i--;
+            int tick = tick_type(row+i*4, transparent, outError);
+            if (tick != TICK_TYPE_LAYOUT_BOUNDS) {
+                break;
+            }
+        }
+    }
+
+    return NO_ERROR;
+}
+
+static status_t get_vertical_layout_bounds_ticks(
+        png_bytepp rows, int offset, int height, bool transparent, bool required,
+        int32_t* outTop, int32_t* outBottom, const char** outError)
+{
+    int i;
+    *outTop = *outBottom = 0;
+
+    // Look for top tick
+    if (TICK_TYPE_LAYOUT_BOUNDS == tick_type(rows[1] + offset, transparent, outError)) {
+        // Starting with a layout padding tick
+        i = 1;
+        while (i < height - 1) {
+            (*outTop)++;
+            i++;
+            int tick = tick_type(rows[i] + offset, transparent, outError);
+            if (tick != TICK_TYPE_LAYOUT_BOUNDS) {
+                break;
+            }
+        }
+    }
+
+    // Look for bottom tick
+    if (TICK_TYPE_LAYOUT_BOUNDS == tick_type(rows[height - 2] + offset, transparent, outError)) {
+        // Ending with a layout padding tick
+        i = height - 2;
+        while (i > 1) {
+            (*outBottom)++;
+            i--;
+            int tick = tick_type(rows[i] + offset, transparent, outError);
+            if (tick != TICK_TYPE_LAYOUT_BOUNDS) {
+                break;
+            }
+        }
+    }
+
+    return NO_ERROR;
+}
+
 
 static uint32_t get_color(
     png_bytepp rows, int left, int top, int right, int bottom)
@@ -353,6 +466,9 @@ static status_t do_9patch(const char* imageName, image_info* image)
     image->info9Patch.paddingLeft = image->info9Patch.paddingRight =
         image->info9Patch.paddingTop = image->info9Patch.paddingBottom = -1;
 
+    image->layoutBoundsLeft = image->layoutBoundsRight =
+        image->layoutBoundsTop = image->layoutBoundsBottom = 0;
+
     png_bytep p = image->rows[0];
     bool transparent = p[3] == 0;
     bool hasColor = false;
@@ -406,6 +522,25 @@ static status_t do_9patch(const char* imageName, image_info* image)
         errorPixel = image->info9Patch.paddingTop;
         errorEdge = "right";
         goto getout;
+    }
+
+    // Find left and right of layout padding...
+    get_horizontal_layout_bounds_ticks(image->rows[H-1], W, transparent, false,
+                                        &image->layoutBoundsLeft,
+                                        &image->layoutBoundsRight, &errorMsg);
+
+    get_vertical_layout_bounds_ticks(image->rows, (W-1)*4, H, transparent, false,
+                                        &image->layoutBoundsTop,
+                                        &image->layoutBoundsBottom, &errorMsg);
+
+    image->haveLayoutBounds = image->layoutBoundsLeft != 0
+                               || image->layoutBoundsRight != 0
+                               || image->layoutBoundsTop != 0
+                               || image->layoutBoundsBottom != 0;
+
+    if (image->haveLayoutBounds) {
+        NOISY(printf("layoutBounds=%d %d %d %d\n", image->layoutBoundsLeft, image->layoutBoundsTop,
+                image->layoutBoundsRight, image->layoutBoundsBottom));
     }
 
     // Copy patch data into image
@@ -845,8 +980,9 @@ static void write_png(const char* imageName,
     int bit_depth, interlace_type, compression_type;
     int i;
 
-    png_unknown_chunk unknowns[1];
+    png_unknown_chunk unknowns[2];
     unknowns[0].data = NULL;
+    unknowns[1].data = NULL;
 
     png_bytepp outRows = (png_bytepp) malloc((int) imageInfo.height * png_sizeof(png_bytep));
     if (outRows == (png_bytepp) 0) {
@@ -916,22 +1052,41 @@ static void write_png(const char* imageName,
     }
 
     if (imageInfo.is9Patch) {
+        int chunk_count = 1 + (imageInfo.haveLayoutBounds ? 1 : 0);
+        int p_index = imageInfo.haveLayoutBounds ? 1 : 0;
+        int b_index = 0;
+        png_byte *chunk_names = imageInfo.haveLayoutBounds
+                ? (png_byte*)"npLb\0npTc\0"
+                : (png_byte*)"npTc";
         NOISY(printf("Adding 9-patch info...\n"));
-        strcpy((char*)unknowns[0].name, "npTc");
-        unknowns[0].data = (png_byte*)imageInfo.info9Patch.serialize();
-        unknowns[0].size = imageInfo.info9Patch.serializedSize();
+        strcpy((char*)unknowns[p_index].name, "npTc");
+        unknowns[p_index].data = (png_byte*)imageInfo.info9Patch.serialize();
+        unknowns[p_index].size = imageInfo.info9Patch.serializedSize();
         // TODO: remove the check below when everything works
-        checkNinePatchSerialization(&imageInfo.info9Patch, unknowns[0].data);
+        checkNinePatchSerialization(&imageInfo.info9Patch, unknowns[p_index].data);
+
+        if (imageInfo.haveLayoutBounds) {
+            int chunk_size = sizeof(png_uint_32) * 4;
+            strcpy((char*)unknowns[b_index].name, "npLb");
+            unknowns[b_index].data = (png_byte*) calloc(chunk_size, 1);
+            memcpy(unknowns[b_index].data, &imageInfo.layoutBoundsLeft, chunk_size);
+            unknowns[b_index].size = chunk_size;
+        }
+
         png_set_keep_unknown_chunks(write_ptr, PNG_HANDLE_CHUNK_ALWAYS,
-                                    (png_byte*)"npTc", 1);
-        png_set_unknown_chunks(write_ptr, write_info, unknowns, 1);
+                                    chunk_names, chunk_count);
+        png_set_unknown_chunks(write_ptr, write_info, unknowns, chunk_count);
         // XXX I can't get this to work without forcibly changing
         // the location to what I want...  which apparently is supposed
         // to be a private API, but everything else I have tried results
         // in the location being set to what I -last- wrote so I never
         // get written. :p
         png_set_unknown_chunk_location(write_ptr, write_info, 0, PNG_HAVE_PLTE);
+        if (imageInfo.haveLayoutBounds) {
+            png_set_unknown_chunk_location(write_ptr, write_info, 1, PNG_HAVE_PLTE);
+        }
     }
+
 
     png_write_info(write_ptr, write_info);
 
@@ -954,6 +1109,7 @@ static void write_png(const char* imageName,
     }
     free(outRows);
     free(unknowns[0].data);
+    free(unknowns[1].data);
 
     png_get_IHDR(write_ptr, write_info, &width, &height,
        &bit_depth, &color_type, &interlace_type,
