@@ -73,4 +73,8 @@ interface IBluetooth
     boolean setPairingConfirmation(in BluetoothDevice device, boolean accept);
 
     void sendConnectionStateChange(in BluetoothDevice device, int profile, int state, int prevState);
+
+    // For Socket
+    ParcelFileDescriptor connectSocket(in BluetoothDevice device, int type, in ParcelUuid uuid, int port, int flag);
+    ParcelFileDescriptor createSocketChannel(int type, in String serviceName, in ParcelUuid uuid, int port, int flag);
 }

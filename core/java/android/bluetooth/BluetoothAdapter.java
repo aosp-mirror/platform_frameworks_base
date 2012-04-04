@@ -848,51 +848,6 @@ public final class BluetoothAdapter {
     }
 
     /**
-    /**
-     * Picks RFCOMM channels until none are left.
-     * Avoids reserved channels.
-     */
-    private static class RfcommChannelPicker {
-        private static final int[] RESERVED_RFCOMM_CHANNELS =  new int[] {
-            10,  // HFAG
-            11,  // HSAG
-            12,  // OPUSH
-            19,  // PBAP
-        };
-        private static LinkedList<Integer> sChannels;  // master list of non-reserved channels
-        private static Random sRandom;
-
-        private final LinkedList<Integer> mChannels;  // local list of channels left to try
-
-        private final UUID mUuid;
-
-        public RfcommChannelPicker(UUID uuid) {
-            synchronized (RfcommChannelPicker.class) {
-                if (sChannels == null) {
-                    // lazy initialization of non-reserved rfcomm channels
-                    sChannels = new LinkedList<Integer>();
-                    for (int i = 1; i <= BluetoothSocket.MAX_RFCOMM_CHANNEL; i++) {
-                        sChannels.addLast(new Integer(i));
-                    }
-                    for (int reserved : RESERVED_RFCOMM_CHANNELS) {
-                        sChannels.remove(new Integer(reserved));
-                    }
-                    sRandom = new Random();
-                }
-                mChannels = (LinkedList<Integer>)sChannels.clone();
-            }
-            mUuid = uuid;
-        }
-        /* Returns next random channel, or -1 if we're out */
-        public int nextChannel() {
-            if (mChannels.size() == 0) {
-                return -1;
-            }
-            return mChannels.remove(sRandom.nextInt(mChannels.size()));
-        }
-    }
-
-    /**
      * Create a listening, secure RFCOMM Bluetooth socket.
      * <p>A remote device connecting to this socket will be authenticated and
      * communication on this socket will be encrypted.
@@ -911,10 +866,10 @@ public final class BluetoothAdapter {
                 BluetoothSocket.TYPE_RFCOMM, true, true, channel);
         int errno = socket.mSocket.bindListen();
         if (errno != 0) {
-            try {
-                socket.close();
-            } catch (IOException e) {}
-            socket.mSocket.throwErrnoNative(errno);
+            //TODO(BT): Throw the same exception error code
+            // that the previous code was using.
+            //socket.mSocket.throwErrnoNative(errno);
+            throw new IOException("Error: " + errno);
         }
         return socket;
     }
@@ -1015,71 +970,22 @@ public final class BluetoothAdapter {
         return createNewRfcommSocketAndRecord(name, uuid, false, true);
     }
 
+
     private BluetoothServerSocket createNewRfcommSocketAndRecord(String name, UUID uuid,
             boolean auth, boolean encrypt) throws IOException {
-        RfcommChannelPicker picker = new RfcommChannelPicker(uuid);
         BluetoothServerSocket socket;
-        int channel;
-        int errno;
-        while (true) {
-            channel = picker.nextChannel();
-
-            if (channel == -1) {
-                throw new IOException("No available channels");
-            }
-
-            socket = new BluetoothServerSocket(
-                    BluetoothSocket.TYPE_RFCOMM, auth, encrypt, channel);
-            errno = socket.mSocket.bindListen();
-            if (errno == 0) {
-                if (DBG) Log.d(TAG, "listening on RFCOMM channel " + channel);
-                break;  // success
-            } else if (errno == BluetoothSocket.EADDRINUSE) {
-                if (DBG) Log.d(TAG, "RFCOMM channel " + channel + " in use");
-                try {
-                    socket.close();
-                } catch (IOException e) {}
-                continue;  // try another channel
-            } else {
-                try {
-                    socket.close();
-                } catch (IOException e) {}
-                socket.mSocket.throwErrnoNative(errno);  // Exception as a result of bindListen()
-            }
+        socket = new BluetoothServerSocket(BluetoothSocket.TYPE_RFCOMM, auth,
+                        encrypt, new ParcelUuid(uuid));
+        socket.setServiceName(name);
+        int errno = socket.mSocket.bindListen();
+        if (errno != 0) {
+            //TODO(BT): Throw the same exception error code
+            // that the previous code was using.
+            //socket.mSocket.throwErrnoNative(errno);
+            throw new IOException("Error: " + errno);
         }
-
-        int handle = -1;
-        //TODO(BT):
-        /*try {
-            handle = mService.addRfcommServiceRecord(name, new ParcelUuid(uuid), channel,
-                    new Binder());
-        } catch (RemoteException e) {Log.e(TAG, "", e);}*/
-        if (handle == -1) {
-            try {
-                socket.close();
-            } catch (IOException e) {}
-            throw new IOException("Not able to register SDP record for " + name);
-        }
-
-        if (mServiceRecordHandler == null) {
-            mServiceRecordHandler = new Handler(Looper.getMainLooper()) {
-                    public void handleMessage(Message msg) {
-                        /* handle socket closing */
-                        int handle = msg.what;
-                        // TODO(BT):
-                        /*                       
-                        try {
-                            if (DBG) Log.d(TAG, "Removing service record " +
-                                           Integer.toHexString(handle));                        
-                        } catch (RemoteException e) {Log.e(TAG, "", e);}
-                        */
-                    }
-                };
-        }
-        socket.setCloseHandler(mServiceRecordHandler, handle);
         return socket;
     }
-
 
     /**
      * Construct an unencrypted, unauthenticated, RFCOMM server socket.
@@ -1094,10 +1000,10 @@ public final class BluetoothAdapter {
                 BluetoothSocket.TYPE_RFCOMM, false, false, port);
         int errno = socket.mSocket.bindListen();
         if (errno != 0) {
-            try {
-                socket.close();
-            } catch (IOException e) {}
-            socket.mSocket.throwErrnoNative(errno);
+            //TODO(BT): Throw the same exception error code
+            // that the previous code was using.
+            //socket.mSocket.throwErrnoNative(errno);
+            throw new IOException("Error: " + errno);
         }
         return socket;
     }
@@ -1115,11 +1021,11 @@ public final class BluetoothAdapter {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_RFCOMM, false, true, port);
         int errno = socket.mSocket.bindListen();
-        if (errno != 0) {
-            try {
-                socket.close();
-            } catch (IOException e) {}
-            socket.mSocket.throwErrnoNative(errno);
+        if (errno < 0) {
+            //TODO(BT): Throw the same exception error code
+            // that the previous code was using.
+            //socket.mSocket.throwErrnoNative(errno);
+            throw new IOException("Error: " + errno);
         }
         return socket;
     }
@@ -1136,11 +1042,10 @@ public final class BluetoothAdapter {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_SCO, false, false, -1);
         int errno = socket.mSocket.bindListen();
-        if (errno != 0) {
-            try {
-                socket.close();
-            } catch (IOException e) {}
-            socket.mSocket.throwErrnoNative(errno);
+        if (errno < 0) {
+            //TODO(BT): Throw the same exception error code
+            // that the previous code was using.
+            //socket.mSocket.throwErrnoNative(errno);
         }
         return socket;
     }

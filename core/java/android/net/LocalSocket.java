@@ -42,6 +42,15 @@ public class LocalSocket {
         isBound = false;
         isConnected = false;
     }
+    /**
+     * Creates a AF_LOCAL/UNIX domain stream socket with FileDescriptor.
+     * @hide
+     */
+    public LocalSocket(FileDescriptor fd) throws IOException {
+        this(new LocalSocketImpl(fd));
+        isBound = true;
+        isConnected = true;
+    }
 
     /**
      * for use with AndroidServerSocket

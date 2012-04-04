@@ -1,32 +1,27 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (C) 2012 Google Inc.
  */
 
 package android.bluetooth;
 
-import android.bluetooth.IBluetoothCallback;
+import android.os.IBinder;
 import android.os.ParcelUuid;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.Closeable;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
+import java.util.List;
+import android.net.LocalSocket;
+import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
 /**
  * A connected or connecting Bluetooth socket.
  *
@@ -89,31 +84,41 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ static final int EBADFD = 77;
     /*package*/ static final int EADDRINUSE = 98;
 
+    /*package*/ static final int SEC_FLAG_ENCRYPT = 1;
+    /*package*/ static final int SEC_FLAG_AUTH = 1 << 1;
+
     private final int mType;  /* one of TYPE_RFCOMM etc */
-    private final BluetoothDevice mDevice;    /* remote device */
-    private final String mAddress;    /* remote address */
+    private BluetoothDevice mDevice;    /* remote device */
+    private String mAddress;    /* remote address */
     private final boolean mAuth;
     private final boolean mEncrypt;
     private final BluetoothInputStream mInputStream;
     private final BluetoothOutputStream mOutputStream;
-    private final SdpHelper mSdp;
-
+    private final ParcelUuid mUuid;
+    private ParcelFileDescriptor mPfd;
+    private LocalSocket mSocket;
+    private InputStream mSocketIS;
+    private OutputStream mSocketOS;
     private int mPort;  /* RFCOMM channel or L2CAP psm */
+    private int mFd;
+    private String mServiceName;
+    private static IBluetooth sBluetoothProxy;
+    private static int PROXY_CONNECTION_TIMEOUT = 5000;
+
+    private static int SOCK_SIGNAL_SIZE = 16;
 
     private enum SocketState {
         INIT,
         CONNECTED,
-        CLOSED
+        LISTENING,
+        CLOSED,
     }
 
     /** prevents all native calls after destroyNative() */
-    private SocketState mSocketState;
+    private volatile SocketState mSocketState;
 
     /** protects mSocketState */
-    private final ReentrantReadWriteLock mLock;
-
-    /** used by native code only */
-    private int mSocketData;
+    //private final ReentrantReadWriteLock mLock;
 
     /**
      * Construct a BluetoothSocket.
@@ -134,36 +139,63 @@ public final class BluetoothSocket implements Closeable {
                 throw new IOException("Invalid RFCOMM channel: " + port);
             }
         }
-        if (uuid == null) {
-            mPort = port;
-            mSdp = null;
-        } else {
-            mSdp = new SdpHelper(device, uuid);
-            mPort = -1;
-        }
+        mUuid = uuid;
         mType = type;
         mAuth = auth;
         mEncrypt = encrypt;
         mDevice = device;
+        mPort = port;
+        mFd = fd;
+
+        mSocketState = SocketState.INIT;
+
         if (device == null) {
-            mAddress = null;
+            // Server socket
+            mAddress = BluetoothAdapter.getDefaultAdapter().getAddress();
         } else {
+            // Remote socket
             mAddress = device.getAddress();
         }
-
-        //TODO(BT)
-        /*
-        if (fd == -1) {
-            initSocketNative();
-        } else {
-            initSocketFromFdNative(fd);
-        }*/
         mInputStream = new BluetoothInputStream(this);
         mOutputStream = new BluetoothOutputStream(this);
-        mSocketState = SocketState.INIT;
-        mLock = new ReentrantReadWriteLock();
-    }
 
+        if (sBluetoothProxy == null) {
+            synchronized (BluetoothSocket.class) {
+                if (sBluetoothProxy == null) {
+                    IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_SERVICE);
+                    if (b == null)
+                        throw new RuntimeException("Bluetooth service not available");
+                    sBluetoothProxy = IBluetooth.Stub.asInterface(b);
+                }
+            }
+        }
+    }
+    private BluetoothSocket(BluetoothSocket s) {
+        mUuid = s.mUuid;
+        mType = s.mType;
+        mAuth = s.mAuth;
+        mEncrypt = s.mEncrypt;
+        mPort = s.mPort;
+        mInputStream = new BluetoothInputStream(this);
+        mOutputStream = new BluetoothOutputStream(this);
+        mServiceName = s.mServiceName;
+    }
+    private BluetoothSocket acceptSocket(String RemoteAddr) throws IOException {
+        BluetoothSocket as = new BluetoothSocket(this);
+        as.mSocketState = SocketState.CONNECTED;
+        FileDescriptor[] fds = mSocket.getAncillaryFileDescriptors();
+        Log.d(TAG, "socket fd passed by stack  fds: " + fds);
+        if(fds == null || fds.length != 1) {
+            Log.e(TAG, "socket fd passed from stack failed, fds: " + fds);
+            throw new IOException("bt socket acept failed");
+        }
+        as.mSocket = new LocalSocket(fds[0]);
+        as.mSocketIS = as.mSocket.getInputStream();
+        as.mSocketOS = as.mSocket.getOutputStream();
+        as.mAddress = RemoteAddr;
+        as.mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(RemoteAddr);
+        return as;
+    }
     /**
      * Construct a BluetoothSocket from address. Used by native code.
      * @param type    type of socket
@@ -189,71 +221,13 @@ public final class BluetoothSocket implements Closeable {
             super.finalize();
         }
     }
-
-    /**
-     * Attempt to connect to a remote device.
-     * <p>This method will block until a connection is made or the connection
-     * fails. If this method returns without an exception then this socket
-     * is now connected.
-     * <p>Creating new connections to
-     * remote Bluetooth devices should not be attempted while device discovery
-     * is in progress. Device discovery is a heavyweight procedure on the
-     * Bluetooth adapter and will significantly slow a device connection.
-     * Use {@link BluetoothAdapter#cancelDiscovery()} to cancel an ongoing
-     * discovery. Discovery is not managed by the Activity,
-     * but is run as a system service, so an application should always call
-     * {@link BluetoothAdapter#cancelDiscovery()} even if it
-     * did not directly request a discovery, just to be sure.
-     * <p>{@link #close} can be used to abort this call from another thread.
-     * @throws IOException on error, for example connection failure
-     */
-    public void connect() throws IOException {
-        mLock.readLock().lock();
-        try {
-            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
-
-            if (mSdp != null) {
-                mPort = mSdp.doSdp();  // blocks
-            }
-
-            connectNative();  // blocks
-            mSocketState = SocketState.CONNECTED;
-        } finally {
-            mLock.readLock().unlock();
-        }
-    }
-
-    /**
-     * Immediately close this socket, and release all associated resources.
-     * <p>Causes blocked calls on this socket in other threads to immediately
-     * throw an IOException.
-     */
-    public void close() throws IOException {
-        // abort blocking operations on the socket
-        //TODO(BT)
-        /*
-        mLock.readLock().lock();
-        try {
-            if (mSocketState == SocketState.CLOSED) return;
-            if (mSdp != null) {
-                mSdp.cancel();
-            }
-            abortNative();
-        } finally {
-            mLock.readLock().unlock();
-        }
-
-        // all native calls are guaranteed to immediately return after
-        // abortNative(), so this lock should immediately acquire
-        mLock.writeLock().lock();
-        try {
-            if (mSocketState != SocketState.CLOSED) {
-                mSocketState = SocketState.CLOSED;
-                destroyNative();
-            }
-        } finally {
-            mLock.writeLock().unlock();
-        }*/
+    private int getSecurityFlags() {
+        int flags = 0;
+        if(mAuth)
+            flags |= SEC_FLAG_AUTH;
+        if(mEncrypt)
+            flags |= SEC_FLAG_ENCRYPT;
+        return flags;
     }
 
     /**
@@ -293,7 +267,63 @@ public final class BluetoothSocket implements Closeable {
      *         false if not connected
      */
     public boolean isConnected() {
-        return (mSocketState == SocketState.CONNECTED);
+        return mSocketState == SocketState.CONNECTED;
+    }
+
+    /*package*/ void setServiceName(String name) {
+        mServiceName = name;
+    }
+
+    /**
+     * Attempt to connect to a remote device.
+     * <p>This method will block until a connection is made or the connection
+     * fails. If this method returns without an exception then this socket
+     * is now connected.
+     * <p>Creating new connections to
+     * remote Bluetooth devices should not be attempted while device discovery
+     * is in progress. Device discovery is a heavyweight procedure on the
+     * Bluetooth adapter and will significantly slow a device connection.
+     * Use {@link BluetoothAdapter#cancelDiscovery()} to cancel an ongoing
+     * discovery. Discovery is not managed by the Activity,
+     * but is run as a system service, so an application should always call
+     * {@link BluetoothAdapter#cancelDiscovery()} even if it
+     * did not directly request a discovery, just to be sure.
+     * <p>{@link #close} can be used to abort this call from another thread.
+     * @throws IOException on error, for example connection failure
+     */
+    public void connect() throws IOException {
+        if (mDevice == null) throw new IOException("Connect is called on null device");
+
+        try {
+            // TODO(BT) derive flag from auth and encrypt
+            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
+
+            mPfd = sBluetoothProxy.connectSocket(mDevice, mType,
+                    mUuid, mPort, getSecurityFlags());
+            synchronized(this)
+            {
+                Log.d(TAG, "connect(), SocketState: " + mSocketState + ", mPfd: " + mPfd);
+                if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
+                if (mPfd == null) throw new IOException("bt socket connect failed");
+                FileDescriptor fd = mPfd.getFileDescriptor();
+                mSocket = new LocalSocket(fd);
+                mSocketIS = mSocket.getInputStream();
+                mSocketOS = mSocket.getOutputStream();
+            }
+            int channel = readInt(mSocketIS);
+            if (channel <= 0)
+                throw new IOException("bt socket connect failed");
+            mPort = channel;
+            waitSocketSignal(mSocketIS);
+            synchronized(this)
+            {
+                if (mSocketState == SocketState.CLOSED)
+                    throw new IOException("bt socket closed");
+                mSocketState = SocketState.CONNECTED;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, Log.getStackTraceString(new Throwable()));
+        }
     }
 
     /**
@@ -301,134 +331,165 @@ public final class BluetoothSocket implements Closeable {
      * so that BluetoothAdapter can check the error code for EADDRINUSE
      */
     /*package*/ int bindListen() {
-        return -1;
-        //TODO(BT)
-        /*
-        mLock.readLock().lock();
+        int ret;
+        if (mSocketState == SocketState.CLOSED) return EBADFD;
         try {
-            if (mSocketState == SocketState.CLOSED) return EBADFD;
-            return bindListenNative();
-        } finally {
-            mLock.readLock().unlock();
-        }*/
+            mPfd = sBluetoothProxy.createSocketChannel(mType, mServiceName,
+                    mUuid, mPort, getSecurityFlags());
+        } catch (RemoteException e) {
+            Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            // TODO(BT) right error code?
+            return -1;
+        }
+
+        // read out port number
+        try {
+            synchronized(this) {
+                Log.d(TAG, "bindListen(), SocketState: " + mSocketState + ", mPfd: " + mPfd);
+                if(mSocketState != SocketState.INIT) return EBADFD;
+                if(mPfd == null) return -1;
+                FileDescriptor fd = mPfd.getFileDescriptor();
+                Log.d(TAG, "bindListen(), new LocalSocket ");
+                mSocket = new LocalSocket(fd);
+                Log.d(TAG, "bindListen(), new LocalSocket.getInputStream() ");
+                mSocketIS = mSocket.getInputStream();
+                mSocketOS = mSocket.getOutputStream();
+            }
+            Log.d(TAG, "bindListen(), readInt mSocketIS: " + mSocketIS);
+            int channel = readInt(mSocketIS);
+            synchronized(this) {
+                if(mSocketState == SocketState.INIT)
+                    mSocketState = SocketState.LISTENING;
+            }
+            Log.d(TAG, "channel: " + channel);
+            if (mPort == -1) {
+                mPort = channel;
+            } // else ASSERT(mPort == channel)
+            ret = 0;
+        } catch (IOException e) {
+            Log.e(TAG, "bindListen, fail to get port number, exception: " + e);
+            return -1;
+        }
+        return ret;
     }
 
     /*package*/ BluetoothSocket accept(int timeout) throws IOException {
-        mLock.readLock().lock();
-        try {
-            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
-
-            BluetoothSocket acceptedSocket = acceptNative(timeout);
-            mSocketState = SocketState.CONNECTED;
-            return acceptedSocket;
-        } finally {
-            mLock.readLock().unlock();
+        BluetoothSocket acceptedSocket;
+        if (mSocketState != SocketState.LISTENING) throw new IOException("bt socket is not in listen state");
+        // TODO(BT) wait on an incoming connection
+        String RemoteAddr = waitSocketSignal(mSocketIS);
+        synchronized(this)
+        {
+            if (mSocketState != SocketState.LISTENING)
+                throw new IOException("bt socket is not in listen state");
+            acceptedSocket = acceptSocket(RemoteAddr);
+            //quick drop the reference of the file handle
         }
+        // TODO(BT) rfcomm socket only supports one connection, return this?
+        // return this;
+        return acceptedSocket;
     }
 
     /*package*/ int available() throws IOException {
-        mLock.readLock().lock();
-        try {
-            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
-            return availableNative();
-        } finally {
-            mLock.readLock().unlock();
-        }
+        Log.d(TAG, "available: " + mSocketIS);
+        return mSocketIS.available();
     }
 
     /*package*/ int read(byte[] b, int offset, int length) throws IOException {
-        mLock.readLock().lock();
-        try {
-            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
-            return readNative(b, offset, length);
-        } finally {
-            mLock.readLock().unlock();
-        }
+
+            Log.d(TAG, "read in:  " + mSocketIS + " len: " + length);
+            int ret = mSocketIS.read(b, offset, length);
+            if(ret < 0)
+                throw new IOException("bt socket closed, read return: " + ret);
+            Log.d(TAG, "read out:  " + mSocketIS + " ret: " + ret);
+            return ret;
     }
 
     /*package*/ int write(byte[] b, int offset, int length) throws IOException {
-        mLock.readLock().lock();
-        try {
-            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
-            return writeNative(b, offset, length);
-        } finally {
-            mLock.readLock().unlock();
-        }
+
+            Log.d(TAG, "write: " + mSocketOS + " length: " + length);
+            mSocketOS.write(b, offset, length);
+            // There is no good way to confirm since the entire process is asynchronous anyway
+            Log.d(TAG, "write out: " + mSocketOS + " length: " + length);
+            return length;
     }
 
-    private native void initSocketNative() throws IOException;
-    private native void initSocketFromFdNative(int fd) throws IOException;
-    private native void connectNative() throws IOException;
-    private native int bindListenNative();
-    private native BluetoothSocket acceptNative(int timeout) throws IOException;
-    private native int availableNative() throws IOException;
-    private native int readNative(byte[] b, int offset, int length) throws IOException;
-    private native int writeNative(byte[] b, int offset, int length) throws IOException;
-    private native void abortNative() throws IOException;
-    private native void destroyNative() throws IOException;
-    /**
-     * Throws an IOException for given posix errno. Done natively so we can
-     * use strerr to convert to string error.
-     */
-    /*package*/ native void throwErrnoNative(int errno) throws IOException;
-
-    /**
-     * Helper to perform blocking SDP lookup.
-     */
-    private static class SdpHelper extends IBluetoothCallback.Stub {
-        private final IBluetooth service;
-        private final ParcelUuid uuid;
-        private final BluetoothDevice device;
-        private int channel;
-        private boolean canceled;
-        public SdpHelper(BluetoothDevice device, ParcelUuid uuid) {
-            service = BluetoothDevice.getService();
-            this.device = device;
-            this.uuid = uuid;
-            canceled = false;
+    @Override
+    public void close() throws IOException {
+        Log.d(TAG, "close() in, this: " + this + ", channel: " + mPort + ", state: " + mSocketState);
+        if(mSocketState == SocketState.CLOSED)
+            return;
+        else
+        {
+            synchronized(this)
+            {
+                 if(mSocketState == SocketState.CLOSED)
+                    return;
+                 mSocketState = SocketState.CLOSED;
+                 Log.d(TAG, "close() this: " + this + ", channel: " + mPort + ", mSocketIS: " + mSocketIS +
+                        ", mSocketOS: " + mSocketOS + "mSocket: " + mSocket);
+                 if(mSocket != null) {
+                    Log.d(TAG, "Closing mSocket: " + mSocket);
+                    mSocket.shutdownInput();
+                    mSocket.shutdownOutput();
+                    mSocket.close();
+                    mSocket = null;
+                }
+                if(mPfd != null)
+                    mPfd.detachFd();
+           }
         }
-        /**
-         * Returns the RFCOMM channel for the UUID, or throws IOException
-         * on failure.
-         */
-        public synchronized int doSdp() throws IOException {
-            if (canceled) throw new IOException("Service discovery canceled");
-            channel = -1;
+        // TODO(BT) unbind proxy,
+    }
 
-            boolean inProgress = false;
-            //TODO(BT)
-            /*
-            try {
-                inProgress = service.fetchRemoteUuids(device.getAddress(), uuid, this);
-            } catch (RemoteException e) {Log.e(TAG, "", e);}*/
+    /*package */ void removeChannel() {
+    }
 
-            if (!inProgress) throw new IOException("Unable to start Service Discovery");
-
-            try {
-                /* 12 second timeout as a precaution - onRfcommChannelFound
-                 * should always occur before the timeout */
-                wait(12000);   // block
-
-            } catch (InterruptedException e) {}
-
-            if (canceled) throw new IOException("Service discovery canceled");
-            if (channel < 1) throw new IOException("Service discovery failed");
-
-            return channel;
+    /*package */ int getPort() {
+        return mPort;
+    }
+    private String convertAddr(final byte[] addr)  {
+        return String.format("%02X:%02X:%02X:%02X:%02X:%02X",
+                addr[0] , addr[1], addr[2], addr[3] , addr[4], addr[5]);
+    }
+    private String waitSocketSignal(InputStream is) throws IOException {
+        byte [] sig = new byte[SOCK_SIGNAL_SIZE];
+        int ret = readAll(is, sig);
+        Log.d(TAG, "waitSocketSignal read 16 bytes signal ret: " + ret);
+        ByteBuffer bb = ByteBuffer.wrap(sig);
+        bb.order(ByteOrder.nativeOrder());
+        int size = bb.getShort();
+        byte [] addr = new byte[6];
+        bb.get(addr);
+        int channel = bb.getInt();
+        int status = bb.getInt();
+        String RemoteAddr = convertAddr(addr);
+        Log.d(TAG, "waitSocketSignal: sig size: " + size + ", remote addr: "
+                + RemoteAddr + ", channel: " + channel + ", status: " + status);
+        if(status != 0)
+            throw new IOException("Connection failure, status: " + status);
+        return RemoteAddr;
+    }
+    private int readAll(InputStream is, byte[] b) throws IOException {
+        int left = b.length;
+        while(left > 0) {
+            int ret = is.read(b, b.length - left, left);
+            if(ret < 0)
+                 throw new IOException("read failed, socket might closed, read ret: " + ret);
+            left -= ret;
+            if(left != 0)
+                Log.w(TAG, "readAll() looping, read partial size: " + (b.length - left) +
+                            ", expect size: " + b.length);
         }
-        /** Object cannot be re-used after calling cancel() */
-        public synchronized void cancel() {
-            if (!canceled) {
-                canceled = true;
-                channel = -1;
-                notifyAll();  // unblock
-            }
-        }
-        public synchronized void onRfcommChannelFound(int channel) {
-            if (!canceled) {
-                this.channel = channel;
-                notifyAll();  // unblock
-            }
-        }
+        return b.length;
+    }
+
+    private int readInt(InputStream is) throws IOException {
+        byte[] ibytes = new byte[4];
+        int ret = readAll(is, ibytes);
+        Log.d(TAG, "inputStream.read ret: " + ret);
+        ByteBuffer bb = ByteBuffer.wrap(ibytes);
+        bb.order(ByteOrder.nativeOrder());
+        return bb.getInt();
     }
 }

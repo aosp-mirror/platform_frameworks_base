@@ -17,6 +17,8 @@
 package android.bluetooth;
 
 import android.os.Handler;
+import android.os.Message;
+import android.os.ParcelUuid;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -86,6 +88,22 @@ public final class BluetoothServerSocket implements Closeable {
     }
 
     /**
+     * Construct a socket for incoming connections.
+     * @param type    type of socket
+     * @param auth    require the remote device to be authenticated
+     * @param encrypt require the connection to be encrypted
+     * @param uuid    uuid
+     * @throws IOException On error, for example Bluetooth not available, or
+     *                     insufficient privileges
+     */
+    /*package*/ BluetoothServerSocket(int type, boolean auth, boolean encrypt, ParcelUuid uuid)
+            throws IOException {
+        mSocket = new BluetoothSocket(type, -1, auth, encrypt, null, -1, uuid);
+        mChannel = mSocket.getPort();
+    }
+
+
+    /**
      * Block until a connection is established.
      * <p>Returns a connected {@link BluetoothSocket} on successful connection.
      * <p>Once this call returns, it can be called again to accept subsequent
@@ -133,7 +151,9 @@ public final class BluetoothServerSocket implements Closeable {
         mHandler = handler;
         mMessage = message;
     }
-
+    /*package*/ void setServiceName(String ServiceName) {
+        mSocket.setServiceName(ServiceName);
+    }
     /**
      * Returns the channel on which this socket is bound.
      * @hide
