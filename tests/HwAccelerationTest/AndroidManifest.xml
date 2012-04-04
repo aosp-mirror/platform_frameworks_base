@@ -42,6 +42,15 @@
         </activity>
 
         <activity
+                android:name="DatePickerActivity"
+                android:label="_DatePicker">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="ClipRegionActivity"
                 android:label="_ClipRegion">
             <intent-filter>
