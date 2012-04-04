@@ -831,7 +831,7 @@ public class AudioService extends IAudioService.Stub {
         if (state != AudioSystem.getMasterMute()) {
             AudioSystem.setMasterMute(state);
             // Post a persist master volume msg
-            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, 0, SENDMSG_REPLACE, state ? 1
+            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, SENDMSG_REPLACE, state ? 1
                     : 0, 0, null, PERSIST_DELAY);
             sendMasterMuteUpdate(state, AudioManager.FLAG_SHOW_UI);
         }
