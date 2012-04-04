@@ -624,7 +624,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         final AppWindowToken atoken = mAppToken;
         final boolean animating = atoken != null
-                ? (atoken.animation != null) : false;
+                ? (atoken.mAppAnimator.animation != null) : false;
         return mHasSurface && !mDestroying && !mExiting
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
@@ -640,7 +640,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public boolean isWinVisibleLw() {
         final AppWindowToken atoken = mAppToken;
         return mHasSurface && mPolicyVisibility && !mAttachedHidden
-                && (atoken == null || !atoken.hiddenRequested || atoken.animating)
+                && (atoken == null || !atoken.hiddenRequested || atoken.mAppAnimator.animating)
                 && !mExiting && !mDestroying;
     }
 
@@ -688,7 +688,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final AppWindowToken atoken = mAppToken;
         if (atoken != null) {
             return ((!mAttachedHidden && !atoken.hiddenRequested)
-                            || mWinAnimator.mAnimation != null || atoken.animation != null);
+                            || mWinAnimator.mAnimation != null || atoken.mAppAnimator.animation != null);
         }
         return !mAttachedHidden || mWinAnimator.mAnimation != null;
     }
@@ -706,7 +706,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
                                 && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null
-                        || ((mAppToken != null) && (mAppToken.animation != null)));
+                        || ((mAppToken != null) && (mAppToken.mAppAnimator.animation != null)));
     }
 
     /**
@@ -749,7 +749,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return (mAttrs.format == PixelFormat.OPAQUE
                         || mAttrs.type == TYPE_WALLPAPER)
                 && isDrawnLw() && mWinAnimator.mAnimation == null
-                && (mAppToken == null || mAppToken.animation == null);
+                && (mAppToken == null || mAppToken.mAppAnimator.animation == null);
     }
 
     /**
@@ -965,8 +965,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
                     pw.print(" mSubLayer="); pw.print(mSubLayer);
                     pw.print(" mAnimLayer="); pw.print(mLayer); pw.print("+");
-                    pw.print((mTargetAppToken != null ? mTargetAppToken.animLayerAdjustment
-                          : (mAppToken != null ? mAppToken.animLayerAdjustment : 0)));
+                    pw.print((mTargetAppToken != null ?
+                            mTargetAppToken.mAppAnimator.animLayerAdjustment
+                          : (mAppToken != null ? mAppToken.mAppAnimator.animLayerAdjustment : 0)));
                     pw.print("="); pw.print(mWinAnimator.mAnimLayer);
                     pw.print(" mLastLayer="); pw.println(mWinAnimator.mLastLayer);
         }

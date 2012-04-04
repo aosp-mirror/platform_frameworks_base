@@ -24,7 +24,6 @@ import com.android.internal.policy.impl.PhoneWindowManager;
 import java.io.PrintWriter;
 
 /**
- * @author cmautner@google.com (Craig Mautner)
  * Singleton class that carries out the animations and Surface operations in a separate task
  * on behalf of WindowManagerService.
  */
@@ -123,16 +122,16 @@ public class WindowAnimator {
         int i;
         final int NAT = mService.mAppTokens.size();
         for (i=0; i<NAT; i++) {
-            final AppWindowToken appToken = mService.mAppTokens.get(i);
-            final boolean wasAnimating = appToken.animation != null
-                    && appToken.animation != WindowManagerService.sDummyAnimation;
-            if (appToken.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
+            final AppWindowAnimator appAnimator = mService.mAppTokens.get(i).mAppAnimator;
+            final boolean wasAnimating = appAnimator.animation != null
+                    && appAnimator.animation != WindowManagerService.sDummyAnimation;
+            if (appAnimator.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
                 mAnimating = true;
             } else if (wasAnimating) {
                 // stopped animating, do one more pass through the layout
                 mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                    mService.debugLayoutRepeats("appToken " + appToken + " done",
+                    mService.debugLayoutRepeats("appToken " + appAnimator.mAppToken + " done",
                         mPendingLayoutChanges);
                 }
             }
@@ -140,17 +139,17 @@ public class WindowAnimator {
 
         final int NEAT = mService.mExitingAppTokens.size();
         for (i=0; i<NEAT; i++) {
-            final AppWindowToken appToken = mService.mExitingAppTokens.get(i);
-            final boolean wasAnimating = appToken.animation != null
-                    && appToken.animation != WindowManagerService.sDummyAnimation;
-            if (appToken.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
+            final AppWindowAnimator appAnimator = mService.mAppTokens.get(i).mAppAnimator;
+            final boolean wasAnimating = appAnimator.animation != null
+                    && appAnimator.animation != WindowManagerService.sDummyAnimation;
+            if (appAnimator.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
                 mAnimating = true;
             } else if (wasAnimating) {
                 // stopped animating, do one more pass through the layout
                 mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                    mService.debugLayoutRepeats("exiting appToken " + appToken + " done",
-                        mPendingLayoutChanges);
+                    mService.debugLayoutRepeats("exiting appToken " + appAnimator.mAppToken 
+                        + " done", mPendingLayoutChanges);
                 }
             }
         }
@@ -210,13 +209,15 @@ public class WindowAnimator {
                 // If this window's app token is running a detached wallpaper
                 // animation, make a note so we can ensure the wallpaper is
                 // displayed behind it.
-                if (w.mAppToken != null && w.mAppToken.animation != null
-                        && w.mAppToken.animating) {
+                final AppWindowAnimator appAnimator =
+                        w.mAppToken == null ? null : w.mAppToken.mAppAnimator;
+                if (appAnimator != null && appAnimator.animation != null
+                        && appAnimator.animating) {
                     if ((attrs.flags&FLAG_SHOW_WALLPAPER) != 0
-                            && w.mAppToken.animation.getDetachWallpaper()) {
+                            && appAnimator.animation.getDetachWallpaper()) {
                         mDetachedWallpaper = w;
                     }
-                    final int backgroundColor = w.mAppToken.animation.getBackgroundColor();
+                    final int backgroundColor = appAnimator.animation.getBackgroundColor();
                     if (backgroundColor != 0) {
                         if (mWindowAnimationBackground == null
                                 || (winAnimator.mAnimLayer <
@@ -294,7 +295,7 @@ public class WindowAnimator {
             }
 
             final AppWindowToken atoken = w.mAppToken;
-            if (atoken != null && (!atoken.allDrawn || atoken.freezingScreen)) {
+            if (atoken != null && (!atoken.allDrawn || atoken.mAppAnimator.freezingScreen)) {
                 if (atoken.lastTransactionSequence != mTransactionSequence) {
                     atoken.lastTransactionSequence = mTransactionSequence;
                     atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
@@ -318,14 +319,14 @@ public class WindowAnimator {
                         }
                     }
                     if (w != atoken.startingWindow) {
-                        if (!atoken.freezingScreen || !w.mAppFreezing) {
+                        if (!atoken.mAppAnimator.freezingScreen || !w.mAppFreezing) {
                             atoken.numInterestingWindows++;
                             if (w.isDrawnLw()) {
                                 atoken.numDrawnWindows++;
                                 if (WindowManagerService.DEBUG_VISIBILITY ||
                                         WindowManagerService.DEBUG_ORIENTATION) Slog.v(TAG,
                                         "tokenMayBeDrawn: " + atoken
-                                        + " freezingScreen=" + atoken.freezingScreen
+                                        + " freezingScreen=" + atoken.mAppAnimator.freezingScreen
                                         + " mAppFreezing=" + w.mAppFreezing);
                                 mTokenMayBeDrawn = true;
                             }
@@ -343,13 +344,15 @@ public class WindowAnimator {
                     }
                 }
             }
-            if (atoken != null && atoken.thumbnail != null) {
-                if (atoken.thumbnailTransactionSeq != mTransactionSequence) {
-                    atoken.thumbnailTransactionSeq = mTransactionSequence;
-                    atoken.thumbnailLayer = 0;
+            final AppWindowAnimator appAnimator =
+                    atoken == null ? null : atoken.mAppAnimator;
+            if (appAnimator != null && appAnimator.thumbnail != null) {
+                if (appAnimator.thumbnailTransactionSeq != mTransactionSequence) {
+                    appAnimator.thumbnailTransactionSeq = mTransactionSequence;
+                    appAnimator.thumbnailLayer = 0;
                 }
-                if (atoken.thumbnailLayer < winAnimator.mAnimLayer) {
-                    atoken.thumbnailLayer = winAnimator.mAnimLayer;
+                if (appAnimator.thumbnailLayer < winAnimator.mAnimLayer) {
+                    appAnimator.thumbnailLayer = winAnimator.mAnimLayer;
                 }
             }
         } // end forall windows
@@ -361,7 +364,7 @@ public class WindowAnimator {
         final int NT = mService.mAppTokens.size();
         for (int i=0; i<NT; i++) {
             AppWindowToken wtoken = mService.mAppTokens.get(i);
-            if (wtoken.freezingScreen) {
+            if (wtoken.mAppAnimator.freezingScreen) {
                 int numInteresting = wtoken.numInterestingWindows;
                 if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,

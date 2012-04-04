@@ -162,7 +162,7 @@ class WindowStateAnimator {
         return mAnimation != null
                 || (attached != null && attached.mWinAnimator.mAnimation != null)
                 || (atoken != null &&
-                        (atoken.animation != null
+                        (atoken.mAppAnimator.animation != null
                                 || atoken.inPendingTransaction));
     }
 
@@ -228,7 +228,7 @@ class WindowStateAnimator {
             }
             mHasLocalTransformation = false;
             if ((!mLocalAnimating || mAnimationIsEntrance) && mWin.mAppToken != null
-                    && mWin.mAppToken.animation != null) {
+                    && mWin.mAppToken.mAppAnimator.animation != null) {
                 // When our app token is animating, we kind-of pretend like
                 // we are as well.  Note the mLocalAnimating mAnimationIsEntrance
                 // part of this check means that we will only do this if
@@ -616,9 +616,10 @@ class WindowStateAnimator {
         Transformation attachedTransformation =
                 (mAttachedWindow != null && mAttachedWindow.mWinAnimator.mHasLocalTransformation)
                 ? mAttachedWindow.mWinAnimator.mTransformation : null;
-        Transformation appTransformation =
-                (mWin.mAppToken != null && mWin.mAppToken.hasTransformation)
-                ? mWin.mAppToken.transformation : null;
+        final AppWindowAnimator appAnimator =
+                mWin.mAppToken == null ? null : mWin.mAppToken.mAppAnimator;
+        Transformation appTransformation = (appAnimator != null && appAnimator.hasTransformation)
+                ? appAnimator.transformation : null;
 
         // Wallpapers are animated based on the "real" window they
         // are currently targeting.
@@ -632,11 +633,13 @@ class WindowStateAnimator {
                     Slog.v(TAG, "WP target attached xform: " + attachedTransformation);
                 }
             }
-            if (mService.mWallpaperTarget.mAppToken != null &&
-                    mService.mWallpaperTarget.mAppToken.hasTransformation &&
-                    mService.mWallpaperTarget.mAppToken.animation != null &&
-                    !mService.mWallpaperTarget.mAppToken.animation.getDetachWallpaper()) {
-                appTransformation = mService.mWallpaperTarget.mAppToken.transformation;
+            final AppWindowAnimator wpAppAnimator = mService.mWallpaperTarget.mAppToken == null
+                    ? null : mService.mWallpaperTarget.mAppToken.mAppAnimator;
+            if (wpAppAnimator != null &&
+                    wpAppAnimator.hasTransformation &&
+                    wpAppAnimator.animation != null &&
+                    !wpAppAnimator.animation.getDetachWallpaper()) {
+                appTransformation = wpAppAnimator.transformation;
                 if (WindowManagerService.DEBUG_WALLPAPER && appTransformation != null) {
                     Slog.v(TAG, "WP target app xform: " + appTransformation);
                 }
@@ -984,7 +987,7 @@ class WindowStateAnimator {
                     + (mWin.mAppToken != null ? mWin.mAppToken.hidden : false)
                     + " animating=" + mAnimating
                     + " tok animating="
-                    + (mWin.mAppToken != null ? mWin.mAppToken.animating : false));
+                    + (mWin.mAppToken != null ? mWin.mAppToken.mAppAnimator.animating : false));
             if (!showSurfaceRobustlyLocked()) {
                 return false;
             }
