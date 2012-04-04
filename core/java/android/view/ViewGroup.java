@@ -3375,7 +3375,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         boolean clearChildFocus = false;
         if (view == mFocused) {
-            view.clearFocusForRemoval();
+            view.unFocus();
             clearChildFocus = true;
         }
 
@@ -3398,6 +3398,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (clearChildFocus) {
             clearChildFocus(view);
+            ensureInputFocusOnFirstFocusable();
         }
     }
 
@@ -3450,7 +3451,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
 
             if (view == focused) {
-                view.clearFocusForRemoval();
+                view.unFocus();
                 clearChildFocus = view;
             }
 
@@ -3474,6 +3475,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (clearChildFocus != null) {
             clearChildFocus(clearChildFocus);
+            ensureInputFocusOnFirstFocusable();
         }
     }
 
@@ -3519,7 +3521,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
 
             if (view == focused) {
-                view.clearFocusForRemoval();
+                view.unFocus();
                 clearChildFocus = view;
             }
 
@@ -3542,6 +3544,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (clearChildFocus != null) {
             clearChildFocus(clearChildFocus);
+            ensureInputFocusOnFirstFocusable();
         }
     }
 
