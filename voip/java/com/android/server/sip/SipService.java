@@ -453,9 +453,8 @@ public final class SipService extends ISipService.Stub {
         public SipSessionGroupExt(SipProfile localProfile,
                 PendingIntent incomingCallPendingIntent,
                 ISipSessionListener listener) throws SipException {
-            String password = localProfile.getPassword();
-            SipProfile p = duplicate(localProfile);
-            mSipGroup = createSipSessionGroup(mLocalIp, p, password);
+            mSipGroup = new SipSessionGroup(duplicate(localProfile),
+                    localProfile.getPassword(), mTimer, mMyWakeLock);
             mIncomingCallPendingIntent = incomingCallPendingIntent;
             mAutoRegistration.setListener(listener);
         }
@@ -476,27 +475,6 @@ public final class SipService extends ISipService.Stub {
         // of timeout values
         void setWakeupTimer(SipWakeupTimer timer) {
             mSipGroup.setWakeupTimer(timer);
-        }
-
-        // network connectivity is tricky because network can be disconnected
-        // at any instant so need to deal with exceptions carefully even when
-        // you think you are connected
-        private SipSessionGroup createSipSessionGroup(String localIp,
-                SipProfile localProfile, String password) throws SipException {
-            try {
-                return new SipSessionGroup(localIp, localProfile, password,
-                        mTimer, mMyWakeLock);
-            } catch (IOException e) {
-                // network disconnected
-                Log.w(TAG, "createSipSessionGroup(): network disconnected?");
-                if (localIp != null) {
-                    return createSipSessionGroup(null, localProfile, password);
-                } else {
-                    // recursive
-                    Log.wtf(TAG, "impossible! recursive!");
-                    throw new RuntimeException("createSipSessionGroup");
-                }
-            }
         }
 
         private SipProfile duplicate(SipProfile p) {
@@ -530,7 +508,7 @@ public final class SipService extends ISipService.Stub {
                 throws SipException {
             mSipGroup.onConnectivityChanged();
             if (connected) {
-                resetGroup(mLocalIp);
+                mSipGroup.reset();
                 if (mOpenedToReceiveCalls) openToReceiveCalls();
             } else {
                 // close mSipGroup but remember mOpenedToReceiveCalls
@@ -538,22 +516,6 @@ public final class SipService extends ISipService.Stub {
                         + getUri() + ": " + mIncomingCallPendingIntent);
                 mSipGroup.close();
                 mAutoRegistration.stop();
-            }
-        }
-
-        private void resetGroup(String localIp) throws SipException {
-            try {
-                mSipGroup.reset(localIp);
-            } catch (IOException e) {
-                // network disconnected
-                Log.w(TAG, "resetGroup(): network disconnected?");
-                if (localIp != null) {
-                    resetGroup(null); // reset w/o local IP
-                } else {
-                    // recursive
-                    Log.wtf(TAG, "impossible!");
-                    throw new RuntimeException("resetGroup");
-                }
             }
         }
 
