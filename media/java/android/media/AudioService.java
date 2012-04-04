@@ -127,6 +127,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 12;
     private static final int MSG_RCDISPLAY_CLEAR = 13;
     private static final int MSG_RCDISPLAY_UPDATE = 14;
+    private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 15;
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
     // Timeout for connection to bluetooth headset service
@@ -485,6 +486,10 @@ public class AudioService extends IAudioService.Stub {
                 System.MUTE_STREAMS_AFFECTED,
                 ((1 << AudioSystem.STREAM_MUSIC)|(1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_SYSTEM)));
 
+        boolean masterMute = System.getInt(cr, System.VOLUME_MASTER_MUTE, 0) == 1;
+        AudioSystem.setMasterMute(masterMute);
+        broadcastMasterMuteStatus(masterMute);
+
         // Each stream will read its own persisted settings
 
         // Broadcast the sticky intent
@@ -707,9 +712,14 @@ public class AudioService extends IAudioService.Stub {
     // UI update and Broadcast Intent
     private void sendMasterMuteUpdate(boolean muted, int flags) {
         mVolumePanel.postMasterMuteChanged(flags);
+        broadcastMasterMuteStatus(muted);
+    }
 
+    private void broadcastMasterMuteStatus(boolean muted) {
         Intent intent = new Intent(AudioManager.MASTER_MUTE_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_MUTED, muted);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
         long origCallerIdentityToken = Binder.clearCallingIdentity();
         mContext.sendStickyBroadcast(intent);
         Binder.restoreCallingIdentity(origCallerIdentityToken);
@@ -772,6 +782,9 @@ public class AudioService extends IAudioService.Stub {
     public void setMasterMute(boolean state, IBinder cb) {
         if (state != AudioSystem.getMasterMute()) {
             AudioSystem.setMasterMute(state);
+            // Post a persist master volume msg
+            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, 0, SENDMSG_REPLACE, state ? 1
+                    : 0, 0, null, PERSIST_DELAY);
             sendMasterMuteUpdate(state, AudioManager.FLAG_SHOW_UI);
         }
     }
@@ -2366,6 +2379,11 @@ public class AudioService extends IAudioService.Stub {
                             (float)msg.arg1 / (float)1000.0);
                     break;
 
+                case MSG_PERSIST_MASTER_VOLUME_MUTE:
+                    Settings.System.putInt(mContentResolver, Settings.System.VOLUME_MASTER_MUTE,
+                            msg.arg1);
+                    break;
+
                 case MSG_PERSIST_RINGER_MODE:
                     persistRingerMode();
                     break;
@@ -2851,11 +2869,6 @@ public class AudioService extends IAudioService.Stub {
                 if (adapter != null) {
                     adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
                                             BluetoothProfile.A2DP);
-                }
-
-                if (mUseMasterVolume) {
-                    // Send sticky broadcast for initial master mute state
-                    sendMasterMuteUpdate(false, 0);
                 }
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
