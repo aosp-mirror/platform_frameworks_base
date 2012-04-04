@@ -609,6 +609,10 @@ public class MediaScanner
                 mCompilation = parseSubstring(value, 0, 0);
             } else if (name.equalsIgnoreCase("isdrm")) {
                 mIsDrm = (parseSubstring(value, 0, 0) == 1);
+            } else if (name.equalsIgnoreCase("width")) {
+                mWidth = parseSubstring(value, 0, 0);
+            } else if (name.equalsIgnoreCase("height")) {
+                mHeight = parseSubstring(value, 0, 0);
             } else {
                 //Log.v(TAG, "unknown tag: " + name + " (" + mProcessGenres + ")");
             }
@@ -734,9 +738,11 @@ public class MediaScanner
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
             map.put(MediaStore.MediaColumns.IS_DRM, mIsDrm);
 
+            String resolution = null;
             if (mWidth > 0 && mHeight > 0) {
                 map.put(MediaStore.MediaColumns.WIDTH, mWidth);
                 map.put(MediaStore.MediaColumns.HEIGHT, mHeight);
+                resolution = mWidth + "x" + mHeight;
             }
 
             if (!mNoMedia) {
@@ -746,7 +752,9 @@ public class MediaScanner
                     map.put(Video.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0
                             ? mAlbum : MediaStore.UNKNOWN_STRING));
                     map.put(Video.Media.DURATION, mDuration);
-                    // FIXME - add RESOLUTION
+                    if (resolution != null) {
+                        map.put(Video.Media.RESOLUTION, resolution);
+                    }
                 } else if (MediaFile.isImageFileType(mFileType)) {
                     // FIXME - add DESCRIPTION
                 } else if (MediaFile.isAudioFileType(mFileType)) {
