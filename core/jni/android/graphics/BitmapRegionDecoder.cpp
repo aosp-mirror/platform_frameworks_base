@@ -244,7 +244,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
 
     JavaPixelAllocator* allocator = (JavaPixelAllocator*) decoder->getAllocator();
     jbyteArray buff = allocator->getStorageObjAndReset();
-    return GraphicsJNI::createBitmap(env, bitmap, buff, false, NULL, -1);
+    return GraphicsJNI::createBitmap(env, bitmap, buff, false, NULL, NULL, -1);
 }
 
 static int nativeGetHeight(JNIEnv* env, jobject, SkBitmapRegionDecoder *brd) {

@@ -345,14 +345,14 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
-                                  bool isMutable, jbyteArray ninepatch, int density)
+                                  bool isMutable, jbyteArray ninepatch, jintArray layoutbounds,
+                                  int density)
 {
     SkASSERT(bitmap);
     SkASSERT(bitmap->pixelRef());
-
     jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
             static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)),
-            buffer, isMutable, ninepatch, density);
+            buffer, isMutable, ninepatch, layoutbounds, density);
     hasException(env); // For the side effect of logging.
     return obj;
 }
@@ -360,7 +360,7 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buff
 jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
                             jbyteArray ninepatch, int density)
 {
-    return createBitmap(env, bitmap, NULL, isMutable, ninepatch, density);
+    return createBitmap(env, bitmap, NULL, isMutable, ninepatch, NULL, density);
 }
 
 
@@ -587,7 +587,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
     gBitmap_nativeInstanceID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "I");
     gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>",
-                                            "(I[BZ[BI)V");
+                                            "(I[BZ[B[II)V");
     gBitmapRegionDecoder_class = make_globalref(env, "android/graphics/BitmapRegionDecoder");
     gBitmapRegionDecoder_constructorMethodID = env->GetMethodID(gBitmapRegionDecoder_class, "<init>", "(I)V");
 

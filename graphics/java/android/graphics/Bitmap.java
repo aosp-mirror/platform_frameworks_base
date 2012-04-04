@@ -16,9 +16,12 @@
 
 package android.graphics;
 
+import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
+import android.util.Log;
+
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -57,6 +60,7 @@ public final class Bitmap implements Parcelable {
 
     private final boolean mIsMutable;
     private byte[] mNinePatchChunk;   // may be null
+    private int[] mLayoutBounds;   // may be null
     private int mWidth = -1;
     private int mHeight = -1;
     private boolean mRecycled;
@@ -95,6 +99,19 @@ public final class Bitmap implements Parcelable {
     */
     /*package*/ Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
             int density) {
+        this(nativeBitmap, buffer, isMutable, ninePatchChunk, null, density);
+    }
+
+    /**
+     * @noinspection UnusedDeclaration
+     */
+    /*  Private constructor that must received an already allocated native
+        bitmap int (pointer).
+
+        This can be called from JNI code.
+    */
+    /*package*/ Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
+            int[] layoutBounds, int density) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
         }
@@ -106,6 +123,7 @@ public final class Bitmap implements Parcelable {
 
         mIsMutable = isMutable;
         mNinePatchChunk = ninePatchChunk;
+        mLayoutBounds = layoutBounds;
         if (density >= 0) {
             mDensity = density;
         }
@@ -161,6 +179,16 @@ public final class Bitmap implements Parcelable {
      */
     public void setNinePatchChunk(byte[] chunk) {
         mNinePatchChunk = chunk;
+    }
+
+    /**
+     * Sets the layout bounds as an array of left, top, right, bottom integers
+     * @param padding the array containing the padding values
+     *
+     * @hide
+     */
+    public void setLayoutBounds(int[] bounds) {
+        mLayoutBounds = bounds;
     }
 
     /**
@@ -687,6 +715,14 @@ public final class Bitmap implements Parcelable {
      */
     public byte[] getNinePatchChunk() {
         return mNinePatchChunk;
+    }
+
+    /**
+     * @hide
+     * @return the layout padding [left, right, top, bottom]
+     */
+    public int[] getLayoutBounds() {
+        return mLayoutBounds;
     }
 
     /**

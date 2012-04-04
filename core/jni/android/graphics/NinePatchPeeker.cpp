@@ -31,14 +31,11 @@ bool NinePatchPeeker::peek(const char tag[], const void* data, size_t length) {
         // this relies on deserialization being done in place
         Res_png_9patch::deserialize(patchNew);
         patchNew->fileToDevice();
-        if (fPatchIsValid) {
-            free(fPatch);
-        }
+        free(fPatch);
         fPatch = patchNew;
         //printf("9patch: (%d,%d)-(%d,%d)\n",
         //       fPatch.sizeLeft, fPatch.sizeTop,
         //       fPatch.sizeRight, fPatch.sizeBottom);
-        fPatchIsValid = true;
 
         // now update our host to force index or 32bit config
         // 'cause we don't want 565 predithered, since as a 9patch, we know
@@ -52,8 +49,9 @@ bool NinePatchPeeker::peek(const char tag[], const void* data, size_t length) {
             SkBitmap::kARGB_8888_Config,
         };
         fHost->setPrefConfigTable(gNo565Pref);
-    } else {
-        fPatch = NULL;
+    } else if (strcmp("npLb", tag) == 0 && length == sizeof(int) * 4) {
+        fLayoutBounds = new int[4];
+        memcpy(fLayoutBounds, data, sizeof(int) * 4);
     }
     return true;    // keep on decoding
 }

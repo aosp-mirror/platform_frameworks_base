@@ -424,6 +424,7 @@ public class BitmapFactory {
             throw new ArrayIndexOutOfBoundsException();
         }
         Bitmap bm = nativeDecodeByteArray(data, offset, length, opts);
+
         if (bm == null && opts != null && opts.inBitmap != null) {
             throw new IllegalArgumentException("Problem decoding into existing bitmap");
         }
@@ -554,7 +555,6 @@ public class BitmapFactory {
         if (targetDensity == 0 || density == targetDensity || density == opts.inScreenDensity) {
             return bm;
         }
-        
         byte[] np = bm.getNinePatchChunk();
         final boolean isNinePatch = np != null && NinePatch.isNinePatchChunk(np);
         if (opts.inScaled || isNinePatch) {

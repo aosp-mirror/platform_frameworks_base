@@ -773,7 +773,13 @@ public abstract class Drawable {
                 np = null;
                 pad = null;
             }
-            return drawableFromBitmap(res, bm, np, pad, srcName);
+            int[] layoutBounds = bm.getLayoutBounds();
+            Rect layoutBoundsRect = null;
+            if (layoutBounds != null) {
+                layoutBoundsRect = new Rect(layoutBounds[0], layoutBounds[1],
+                                             layoutBounds[2], layoutBounds[3]);
+            }
+            return drawableFromBitmap(res, bm, np, pad, layoutBoundsRect, srcName);
         }
         return null;
     }
@@ -875,7 +881,7 @@ public abstract class Drawable {
 
         Bitmap bm = BitmapFactory.decodeFile(pathName);
         if (bm != null) {
-            return drawableFromBitmap(null, bm, null, null, pathName);
+            return drawableFromBitmap(null, bm, null, null, null, pathName);
         }
 
         return null;
@@ -956,10 +962,12 @@ public abstract class Drawable {
     }
 
     private static Drawable drawableFromBitmap(Resources res, Bitmap bm, byte[] np,
-            Rect pad, String srcName) {
+            Rect pad, Rect layoutBounds, String srcName) {
 
         if (np != null) {
-            return new NinePatchDrawable(res, bm, np, pad, srcName);
+            NinePatchDrawable npd = new NinePatchDrawable(res, bm, np, pad, srcName);
+            npd.setLayoutBounds(layoutBounds);
+            return npd;
         }
 
         return new BitmapDrawable(res, bm);
