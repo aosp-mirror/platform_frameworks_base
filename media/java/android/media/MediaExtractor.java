@@ -23,8 +23,7 @@ import java.util.Map;
  * MediaExtractor
  * @hide
 */
-public class MediaExtractor
-{
+final public class MediaExtractor {
     public MediaExtractor(String path) {
         native_setup(path);
     }

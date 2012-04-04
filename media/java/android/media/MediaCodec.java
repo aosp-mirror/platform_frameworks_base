@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.media.Crypto;
 import android.view.Surface;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -25,8 +26,7 @@ import java.util.Map;
  * encoder/decoder components.
  * @hide
 */
-public class MediaCodec
-{
+final public class MediaCodec {
     /** Per buffer metadata includes an offset and size specifying
         the range of valid data in the associated codec buffer.
     */
@@ -113,11 +113,14 @@ public class MediaCodec
      *
      *  @param surface Specify a surface on which to render the output of this
      *                 decoder.
+     *  @param crypto  Specify a crypto object to facilitate secure decryption
+     *                 of the media data.
      *  @param flags   Specify {@link #CONFIGURE_FLAG_ENCODE} to configure the
      *                 component as an encoder.
     */
     public void configure(
-            Map<String, Object> format, Surface surface, int flags) {
+            Map<String, Object> format,
+            Surface surface, Crypto crypto, int flags) {
         String[] keys = null;
         Object[] values = null;
 
@@ -133,11 +136,12 @@ public class MediaCodec
             }
         }
 
-        native_configure(keys, values, surface, flags);
+        native_configure(keys, values, surface, crypto, flags);
     }
 
     private native final void native_configure(
-            String[] keys, Object[] values, Surface surface, int flags);
+            String[] keys, Object[] values,
+            Surface surface, Crypto crypto, int flags);
 
     /** After successfully configuring the component, call start. On return
      *  you can query the component for its input/output buffers.
