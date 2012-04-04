@@ -670,7 +670,8 @@ public final class BluetoothAdapter {
     /** @hide */
     public boolean setScanMode(int mode) {
         if (getState() != STATE_ON) return false;
-        return setScanMode(mode, 120);
+        /* getDiscoverableTimeout() to use the latest from NV than use 0 */
+        return setScanMode(mode, getDiscoverableTimeout());
     }
 
     /** @hide */
