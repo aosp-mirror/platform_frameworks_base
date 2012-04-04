@@ -35,6 +35,7 @@
       <li><a href="<?cs var:toroot ?>design/patterns/swipe-views.html">Swipe Views</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/selection.html">Selection</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/notifications.html">Notifications</a></li>
+      <li><a href="<?cs var:toroot ?>design/patterns/settings.html">Settings</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/compatibility.html">Compatibility</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/pure-android.html">Pure Android</a></li>
     </ul>

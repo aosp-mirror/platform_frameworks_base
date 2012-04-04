@@ -7,7 +7,7 @@ page.title=Application Structure
   single screen</li>
 <li>Apps such as Phone whose main purpose is to switch between different activities without deeper
   navigation</li>
-<li>Apps such as Gmail or Google Play that combine a broad set of data views with deep navigation</li>
+<li>Apps such as Gmail or the Play Store that combine a broad set of data views with deep navigation</li>
 </ul>
 <p>Your app's structure depends largely on the content and tasks you want to surface for your users.</p>
 <h2 id="general-structure">General Structure</h2>
@@ -60,7 +60,7 @@ layouts that are visually engaging and appropriate for the data type and screen 
 
     <img src="{@docRoot}design/media/app_structure_market.png">
     <div class="figure-caption">
-      The Google Play app's start screen primarily allows navigation into the stores for Apps, Music, Books,
+      The Play Store app's start screen primarily allows navigation into the stores for Apps, Music, Books,
       Movies and Games. It is also enriched with tailored recommendations and promotions that
       surface content of interest to the user. Search is readily available from the action bar.
     </div>
@@ -145,8 +145,8 @@ minimize navigational effort. Rule of thumb: no more than 5&ndash;7 tabs.</p>
 
     <img src="{@docRoot}design/media/app_structure_scrolltabs.png">
     <div class="figure-caption">
-      Google Play uses tabs to simultaneously show category choice and content. To navigate between
-      categories, users can swipe left/right on the content.
+      The Play Store app uses tabs to simultaneously show category choice and content. To navigate
+      between categories, users can swipe left/right on the content.
     </div>
 
   </div>
