@@ -828,6 +828,13 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
     // the screen all-the-time. Good for profiling our drawing code
     static private final boolean AUTO_REDRAW_HACK = false;
+
+    // The rate at which edit text is scrolled in content pixels per millisecond
+    static private final float TEXT_SCROLL_RATE = 0.01f;
+
+    // The presumed scroll rate for the first scroll of edit text
+    static private final long TEXT_SCROLL_FIRST_SCROLL_MS = 16;
+
     // true means redraw the screen all-the-time. Only with AUTO_REDRAW_HACK
     private boolean mAutoRedraw;
 
@@ -853,6 +860,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     boolean mIsEditingText = false;
     ArrayList<Message> mBatchedTextChanges = new ArrayList<Message>();
     boolean mIsBatchingTextChanges = false;
+    private long mLastEditScroll = 0;
 
     private static class OnTrimMemoryListener implements ComponentCallbacks2 {
         private static OnTrimMemoryListener sInstance = null;
@@ -1037,9 +1045,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // pages with the space bar, in pixels.
     private static final int PAGE_SCROLL_OVERLAP = 24;
 
-    // Time between successive calls to text scroll fling animation
-    private static final int TEXT_SCROLL_ANIMATION_DELAY_MS = 16;
-
     /**
      * These prevent calling requestLayout if either dimension is fixed. This
      * depends on the layout parameters and the measure specs.
@@ -1207,7 +1212,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int RELOCATE_AUTO_COMPLETE_POPUP       = 146;
     static final int FOCUS_NODE_CHANGED                 = 147;
     static final int AUTOFILL_FORM                      = 148;
-    static final int ANIMATE_TEXT_SCROLL                = 149;
+    static final int SCROLL_EDIT_TEXT                   = 149;
     static final int EDIT_TEXT_SIZE_CHANGED             = 150;
     static final int SHOW_CARET_HANDLE                  = 151;
     static final int UPDATE_CONTENT_BOUNDS              = 152;
@@ -6091,6 +6096,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                                 mSelectDraggingTextQuad.containsPoint(handleX, handleY);
                         boolean inEditBounds = mEditTextContentBounds
                                 .contains(handleX, handleY);
+                        if (mIsEditingText && !inEditBounds) {
+                            beginScrollEdit();
+                        } else {
+                            endScrollEdit();
+                        }
                         if (inCursorText || (mIsEditingText && !inEditBounds)) {
                             snapDraggingCursor();
                         }
@@ -6240,6 +6250,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 break;
             }
             case MotionEvent.ACTION_UP: {
+                endScrollEdit();
                 if (!mConfirmMove && mIsEditingText && mSelectionStarted &&
                         mIsCaretSelection) {
                     showPasteWindow();
@@ -6331,6 +6342,86 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 }
                 cancelTouch();
                 break;
+            }
+        }
+    }
+
+    /**
+     * Returns the text scroll speed in content pixels per millisecond based on
+     * the touch location.
+     * @param coordinate The x or y touch coordinate in content space
+     * @param min The minimum coordinate (x or y) of the edit content bounds
+     * @param max The maximum coordinate (x or y) of the edit content bounds
+     */
+    private static float getTextScrollSpeed(int coordinate, int min, int max) {
+        if (coordinate < min) {
+            return (coordinate - min) * TEXT_SCROLL_RATE;
+        } else if (coordinate >= max) {
+            return (coordinate - max + 1) * TEXT_SCROLL_RATE;
+        } else {
+            return 0.0f;
+        }
+    }
+
+    private void beginScrollEdit() {
+        if (mLastEditScroll == 0) {
+            mLastEditScroll = SystemClock.uptimeMillis() -
+                    TEXT_SCROLL_FIRST_SCROLL_MS;
+            scrollEditWithCursor();
+        }
+    }
+
+    private void endScrollEdit() {
+        mLastEditScroll = 0;
+    }
+
+    private static int getTextScrollDelta(float speed, long deltaT) {
+        float distance = speed * deltaT;
+        int intDistance = (int)Math.floor(distance);
+        float probability = distance - intDistance;
+        if (Math.random() < probability) {
+            intDistance++;
+        }
+        return intDistance;
+    }
+    /**
+     * Scrolls edit text a distance based on the last touch point,
+     * the last scroll time, and the edit text content bounds.
+     */
+    private void scrollEditWithCursor() {
+        if (mLastEditScroll != 0) {
+            int x = viewToContentX(mLastTouchX + getScrollX() + mSelectDraggingOffset.x);
+            float scrollSpeedX = getTextScrollSpeed(x, mEditTextContentBounds.left,
+                    mEditTextContentBounds.right);
+            int y = viewToContentY(mLastTouchY + getScrollY() + mSelectDraggingOffset.y);
+            float scrollSpeedY = getTextScrollSpeed(y, mEditTextContentBounds.top,
+                    mEditTextContentBounds.bottom);
+            if (scrollSpeedX == 0.0f && scrollSpeedY == 0.0f) {
+                endScrollEdit();
+            } else {
+                long currentTime = SystemClock.uptimeMillis();
+                long timeSinceLastUpdate = currentTime - mLastEditScroll;
+                int deltaX = getTextScrollDelta(scrollSpeedX, timeSinceLastUpdate);
+                int deltaY = getTextScrollDelta(scrollSpeedY, timeSinceLastUpdate);
+                mLastEditScroll = currentTime;
+                if (deltaX == 0 && deltaY == 0) {
+                    // By probability no text scroll this time. Try again later.
+                    mPrivateHandler.sendEmptyMessageDelayed(SCROLL_EDIT_TEXT,
+                            TEXT_SCROLL_FIRST_SCROLL_MS);
+                } else {
+                    int scrollX = getTextScrollX() + deltaX;
+                    scrollX = Math.min(getMaxTextScrollX(), scrollX);
+                    scrollX = Math.max(0, scrollX);
+                    int scrollY = getTextScrollY() + deltaY;
+                    scrollY = Math.min(getMaxTextScrollY(), scrollY);
+                    scrollY = Math.max(0, scrollY);
+                    scrollEditText(scrollX, scrollY);
+                    int cursorX = mSelectDraggingCursor.x;
+                    int cursorY = mSelectDraggingCursor.y;
+                    mSelectDraggingCursor.set(x - deltaX, y - deltaY);
+                    updateWebkitSelection();
+                    mSelectDraggingCursor.set(cursorX, cursorY);
+                }
             }
         }
     }
@@ -7673,10 +7764,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                             msg.arg1, /* unused */0);
                     break;
 
-                case ANIMATE_TEXT_SCROLL:
-                    computeEditTextScroll();
-                    break;
-
                 case EDIT_TEXT_SIZE_CHANGED:
                     if (msg.arg1 == mFieldPointer) {
                         mEditTextContent.set((Rect)msg.obj);
@@ -7693,6 +7780,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
                 case UPDATE_CONTENT_BOUNDS:
                     mEditTextContentBounds.set((Rect) msg.obj);
+                    break;
+
+                case SCROLL_EDIT_TEXT:
+                    scrollEditWithCursor();
                     break;
 
                 default:
@@ -8005,6 +8096,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (isPictureAfterFirstLayout) {
             mViewManager.postReadyToDrawAll();
         }
+        scrollEditWithCursor();
     }
 
     /**
@@ -8047,13 +8139,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         invalidate();
     }
 
-    private void computeEditTextScroll() {
-        if (mEditTextScroller.computeScrollOffset()) {
-            scrollEditText(mEditTextScroller.getCurrX(),
-                    mEditTextScroller.getCurrY());
-        }
-    }
-
     private void scrollEditText(int scrollX, int scrollY) {
         // Scrollable edit text. Scroll it.
         float maxScrollX = getMaxTextScrollX();
@@ -8061,8 +8146,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mEditTextContent.offsetTo(-scrollX, -scrollY);
         mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SCROLL_TEXT_INPUT, 0,
                 scrollY, (Float)scrollPercentX);
-        mPrivateHandler.sendEmptyMessageDelayed(ANIMATE_TEXT_SCROLL,
-                TEXT_SCROLL_ANIMATION_DELAY_MS);
     }
 
     private void beginTextBatch() {
