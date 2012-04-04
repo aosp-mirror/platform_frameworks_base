@@ -624,6 +624,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @attr ref android.R.styleable#View_scrollbarAlwaysDrawVerticalTrack
  * @attr ref android.R.styleable#View_soundEffectsEnabled
  * @attr ref android.R.styleable#View_tag
+ * @attr ref android.R.styleable#View_textAlignment
  * @attr ref android.R.styleable#View_transformPivotX
  * @attr ref android.R.styleable#View_transformPivotY
  * @attr ref android.R.styleable#View_translationX
@@ -1827,15 +1828,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public static final int TEXT_DIRECTION_LOCALE = 5;
 
     /**
+     * Default text direction is inherited
+     */
+    protected static int TEXT_DIRECTION_DEFAULT = TEXT_DIRECTION_INHERIT;
+
+    /**
      * Bit shift to get the horizontal layout direction. (bits after LAYOUT_DIRECTION_RESOLVED)
      * @hide
      */
     static final int TEXT_DIRECTION_MASK_SHIFT = 6;
-
-    /**
-     * Default text direction is inherited
-     */
-    protected static int TEXT_DIRECTION_DEFAULT = TEXT_DIRECTION_INHERIT;
 
     /**
      * Mask for use with private flags indicating bits used for text direction.
@@ -1881,6 +1882,113 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     static final int TEXT_DIRECTION_RESOLVED_DEFAULT =
             TEXT_DIRECTION_FIRST_STRONG << TEXT_DIRECTION_RESOLVED_MASK_SHIFT;
+
+    /*
+     * Default text alignment. The text alignment of this View is inherited from its parent.
+     * Use with {@link #setTextAlignment(int)}
+     */
+    public static final int TEXT_ALIGNMENT_INHERIT = 0;
+
+    /**
+     * Default for the root view. The gravity determines the text alignment, ALIGN_NORMAL,
+     * ALIGN_CENTER, or ALIGN_OPPOSITE, which are relative to each paragraph’s text direction.
+     *
+     * Use with {@link #setTextAlignment(int)}
+     */
+    public static final int TEXT_ALIGNMENT_GRAVITY = 1;
+
+    /**
+     * Align to the start of the paragraph, e.g. ALIGN_NORMAL.
+     *
+     * Use with {@link #setTextAlignment(int)}
+     */
+    public static final int TEXT_ALIGNMENT_TEXT_START = 2;
+
+    /**
+     * Align to the end of the paragraph, e.g. ALIGN_OPPOSITE.
+     *
+     * Use with {@link #setTextAlignment(int)}
+     */
+    public static final int TEXT_ALIGNMENT_TEXT_END = 3;
+
+    /**
+     * Center the paragraph, e.g. ALIGN_CENTER.
+     *
+     * Use with {@link #setTextAlignment(int)}
+     */
+    public static final int TEXT_ALIGNMENT_CENTER = 4;
+
+    /**
+     * Align to the start of the view, which is ALIGN_LEFT if the view’s resolved
+     * layoutDirection is LTR, and ALIGN_RIGHT otherwise.
+     *
+     * Use with {@link #setTextAlignment(int)}
+     */
+    public static final int TEXT_ALIGNMENT_VIEW_START = 5;
+
+    /**
+     * Align to the end of the view, which is ALIGN_RIGHT if the view’s resolved
+     * layoutDirection is LTR, and ALIGN_LEFT otherwise.
+     *
+     * Use with {@link #setTextAlignment(int)}
+     */
+    public static final int TEXT_ALIGNMENT_VIEW_END = 6;
+
+    /**
+     * Default text alignment is inherited
+     */
+    protected static int TEXT_ALIGNMENT_DEFAULT = TEXT_ALIGNMENT_GRAVITY;
+
+    /**
+      * Bit shift to get the horizontal layout direction. (bits after DRAG_HOVERED)
+      * @hide
+      */
+    static final int TEXT_ALIGNMENT_MASK_SHIFT = 13;
+
+    /**
+      * Mask for use with private flags indicating bits used for text alignment.
+      * @hide
+      */
+    static final int TEXT_ALIGNMENT_MASK = 0x00000007 << TEXT_ALIGNMENT_MASK_SHIFT;
+
+    /**
+     * Array of text direction flags for mapping attribute "textAlignment" to correct
+     * flag value.
+     * @hide
+     */
+    private static final int[] TEXT_ALIGNMENT_FLAGS = {
+            TEXT_ALIGNMENT_INHERIT << TEXT_ALIGNMENT_MASK_SHIFT,
+            TEXT_ALIGNMENT_GRAVITY << TEXT_ALIGNMENT_MASK_SHIFT,
+            TEXT_ALIGNMENT_TEXT_START << TEXT_ALIGNMENT_MASK_SHIFT,
+            TEXT_ALIGNMENT_TEXT_END << TEXT_ALIGNMENT_MASK_SHIFT,
+            TEXT_ALIGNMENT_CENTER << TEXT_ALIGNMENT_MASK_SHIFT,
+            TEXT_ALIGNMENT_VIEW_START << TEXT_ALIGNMENT_MASK_SHIFT,
+            TEXT_ALIGNMENT_VIEW_END << TEXT_ALIGNMENT_MASK_SHIFT
+    };
+
+    /**
+     * Indicates whether the view text alignment has been resolved.
+     * @hide
+     */
+    static final int TEXT_ALIGNMENT_RESOLVED = 0x00000008 << TEXT_ALIGNMENT_MASK_SHIFT;
+
+    /**
+     * Bit shift to get the resolved text alignment.
+     * @hide
+     */
+    static final int TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT = 17;
+
+    /**
+     * Mask for use with private flags indicating bits used for text alignment.
+     * @hide
+     */
+    static final int TEXT_ALIGNMENT_RESOLVED_MASK = 0x00000007 << TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT;
+
+    /**
+     * Indicates whether if the view text alignment has been resolved to gravity
+     */
+    public static final int TEXT_ALIGNMENT_RESOLVED_DEFAULT =
+            TEXT_ALIGNMENT_GRAVITY << TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT;
 
 
     /* End of masks for mPrivateFlags2 */
@@ -2841,7 +2949,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
         // Set layout and text direction defaults
         mPrivateFlags2 = (LAYOUT_DIRECTION_DEFAULT << LAYOUT_DIRECTION_MASK_SHIFT) |
-                (TEXT_DIRECTION_DEFAULT << TEXT_DIRECTION_MASK_SHIFT);
+                (TEXT_DIRECTION_DEFAULT << TEXT_DIRECTION_MASK_SHIFT) |
+                (TEXT_ALIGNMENT_DEFAULT << TEXT_ALIGNMENT_MASK_SHIFT);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = -1;
@@ -3221,6 +3330,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                     if (textDirection != -1) {
                         mPrivateFlags2 |= TEXT_DIRECTION_FLAGS[textDirection];
                     }
+                    break;
+                case R.styleable.View_textAlignment:
+                    // Clear any text alignment flag already set
+                    mPrivateFlags2 &= ~TEXT_ALIGNMENT_MASK;
+                    // Set the text alignment flag depending on the value of the attribute
+                    final int textAlignment = a.getInt(attr, TEXT_ALIGNMENT_DEFAULT);
+                    mPrivateFlags2 |= TEXT_ALIGNMENT_FLAGS[textAlignment];
                     break;
             }
         }
@@ -9989,6 +10105,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         resolveLayoutDirection();
         resolvePadding();
         resolveTextDirection();
+        resolveTextAlignment();
         if (isFocused()) {
             InputMethodManager imm = InputMethodManager.peekInstance();
             imm.focusIn(this);
@@ -10218,6 +10335,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         mCurrentAnimation = null;
 
         resetResolvedLayoutDirection();
+        resetResolvedTextAlignment();
     }
 
     /**
@@ -14766,7 +14884,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_ANY_RTL},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
-     * {@link #TEXT_DIRECTION_LOCALE},
+     * {@link #TEXT_DIRECTION_LOCALE}
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
             @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
@@ -14790,7 +14908,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_ANY_RTL},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
-     * {@link #TEXT_DIRECTION_LOCALE},
+     * {@link #TEXT_DIRECTION_LOCALE}
      */
     public void setTextDirection(int textDirection) {
         if (getTextDirection() != textDirection) {
@@ -14799,6 +14917,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             resetResolvedTextDirection();
             // Set the new text direction
             mPrivateFlags2 |= ((textDirection << TEXT_DIRECTION_MASK_SHIFT) & TEXT_DIRECTION_MASK);
+            // Refresh
             requestLayout();
             invalidate(true);
         }
@@ -14818,7 +14937,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_ANY_RTL},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
-     * {@link #TEXT_DIRECTION_LOCALE},
+     * {@link #TEXT_DIRECTION_LOCALE}
      */
     public int getResolvedTextDirection() {
         // The text direction will be resolved only if needed
@@ -14925,6 +15044,199 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * implementation does nothing.
      */
     public void onResolvedTextDirectionReset() {
+    }
+
+    /**
+     * Return the value specifying the text alignment or policy that was set with
+     * {@link #setTextAlignment(int)}.
+     *
+     * @return the defined text alignment. It can be one of:
+     *
+     * {@link #TEXT_ALIGNMENT_INHERIT},
+     * {@link #TEXT_ALIGNMENT_GRAVITY},
+     * {@link #TEXT_ALIGNMENT_CENTER},
+     * {@link #TEXT_ALIGNMENT_TEXT_START},
+     * {@link #TEXT_ALIGNMENT_TEXT_END},
+     * {@link #TEXT_ALIGNMENT_VIEW_START},
+     * {@link #TEXT_ALIGNMENT_VIEW_END}
+     */
+    @ViewDebug.ExportedProperty(category = "text", mapping = {
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_INHERIT, to = "INHERIT"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_GRAVITY, to = "GRAVITY"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_TEXT_START, to = "TEXT_START"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_TEXT_END, to = "TEXT_END"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_CENTER, to = "CENTER"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_START, to = "VIEW_START"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_END, to = "VIEW_END")
+    })
+    public int getTextAlignment() {
+        return (mPrivateFlags2 & TEXT_ALIGNMENT_MASK) >> TEXT_ALIGNMENT_MASK_SHIFT;
+    }
+
+    /**
+     * Set the text alignment.
+     *
+     * @param textAlignment The text alignment to set. Should be one of
+     *
+     * {@link #TEXT_ALIGNMENT_INHERIT},
+     * {@link #TEXT_ALIGNMENT_GRAVITY},
+     * {@link #TEXT_ALIGNMENT_CENTER},
+     * {@link #TEXT_ALIGNMENT_TEXT_START},
+     * {@link #TEXT_ALIGNMENT_TEXT_END},
+     * {@link #TEXT_ALIGNMENT_VIEW_START},
+     * {@link #TEXT_ALIGNMENT_VIEW_END}
+     *
+     * @attr ref android.R.styleable#View_textAlignment
+     */
+    public void setTextAlignment(int textAlignment) {
+        if (textAlignment != getTextAlignment()) {
+            // Reset the current and resolved text alignment
+            mPrivateFlags2 &= ~TEXT_ALIGNMENT_MASK;
+            resetResolvedTextAlignment();
+            // Set the new text alignment
+            mPrivateFlags2 |= ((textAlignment << TEXT_ALIGNMENT_MASK_SHIFT) & TEXT_ALIGNMENT_MASK);
+            // Refresh
+            requestLayout();
+            invalidate(true);
+        }
+    }
+
+    /**
+     * Return the resolved text alignment.
+     *
+     * The resolved text alignment. This needs resolution if the value is
+     * TEXT_ALIGNMENT_INHERIT. The resolution matches {@link #setTextAlignment(int)}  if it is
+     * not TEXT_ALIGNMENT_INHERIT, otherwise resolution proceeds up the parent chain of the view.
+     *
+     * @return the resolved text alignment. Returns one of:
+     *
+     * {@link #TEXT_ALIGNMENT_GRAVITY},
+     * {@link #TEXT_ALIGNMENT_CENTER},
+     * {@link #TEXT_ALIGNMENT_TEXT_START},
+     * {@link #TEXT_ALIGNMENT_TEXT_END},
+     * {@link #TEXT_ALIGNMENT_VIEW_START},
+     * {@link #TEXT_ALIGNMENT_VIEW_END}
+     */
+    @ViewDebug.ExportedProperty(category = "text", mapping = {
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_INHERIT, to = "INHERIT"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_GRAVITY, to = "GRAVITY"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_TEXT_START, to = "TEXT_START"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_TEXT_END, to = "TEXT_END"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_CENTER, to = "CENTER"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_START, to = "VIEW_START"),
+            @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_END, to = "VIEW_END")
+    })
+    public int getResolvedTextAlignment() {
+        // If text alignment is not resolved, then resolve it
+        if ((mPrivateFlags2 & TEXT_ALIGNMENT_RESOLVED) != TEXT_ALIGNMENT_RESOLVED) {
+            resolveTextAlignment();
+        }
+        return (mPrivateFlags2 & TEXT_ALIGNMENT_RESOLVED_MASK) >> TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT;
+    }
+
+    /**
+     * Resolve the text alignment. Will call {@link View#onResolvedTextAlignmentChanged} when
+     * resolution is done.
+     */
+    public void resolveTextAlignment() {
+        // Reset any previous text alignment resolution
+        mPrivateFlags2 &= ~(TEXT_ALIGNMENT_RESOLVED | TEXT_ALIGNMENT_RESOLVED_MASK);
+
+        if (hasRtlSupport()) {
+            // Set resolved text alignment flag depending on text alignment flag
+            final int textAlignment = getTextAlignment();
+            switch (textAlignment) {
+                case TEXT_ALIGNMENT_INHERIT:
+                    // Check if we can resolve the text alignment
+                    if (canResolveLayoutDirection() && mParent instanceof View) {
+                        View view = (View) mParent;
+
+                        final int parentResolvedTextAlignment = view.getResolvedTextAlignment();
+                        switch (parentResolvedTextAlignment) {
+                            case TEXT_ALIGNMENT_GRAVITY:
+                            case TEXT_ALIGNMENT_TEXT_START:
+                            case TEXT_ALIGNMENT_TEXT_END:
+                            case TEXT_ALIGNMENT_CENTER:
+                            case TEXT_ALIGNMENT_VIEW_START:
+                            case TEXT_ALIGNMENT_VIEW_END:
+                                // Resolved text alignment is the same as the parent resolved
+                                // text alignment
+                                mPrivateFlags2 |=
+                                        (parentResolvedTextAlignment << TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT);
+                                break;
+                            default:
+                                // Use default resolved text alignment
+                                mPrivateFlags2 |= TEXT_ALIGNMENT_RESOLVED_DEFAULT;
+                        }
+                    }
+                    else {
+                        // We cannot do the resolution if there is no parent so use the default
+                        mPrivateFlags2 |= TEXT_ALIGNMENT_RESOLVED_DEFAULT;
+                    }
+                    break;
+                case TEXT_ALIGNMENT_GRAVITY:
+                case TEXT_ALIGNMENT_TEXT_START:
+                case TEXT_ALIGNMENT_TEXT_END:
+                case TEXT_ALIGNMENT_CENTER:
+                case TEXT_ALIGNMENT_VIEW_START:
+                case TEXT_ALIGNMENT_VIEW_END:
+                    // Resolved text alignment is the same as text alignment
+                    mPrivateFlags2 |= (textAlignment << TEXT_ALIGNMENT_RESOLVED_MASK_SHIFT);
+                    break;
+                default:
+                    // Use default resolved text alignment
+                    mPrivateFlags2 |= TEXT_ALIGNMENT_RESOLVED_DEFAULT;
+            }
+        } else {
+            // Use default resolved text alignment
+            mPrivateFlags2 |= TEXT_ALIGNMENT_RESOLVED_DEFAULT;
+        }
+
+        // Set the resolved
+        mPrivateFlags2 |= TEXT_ALIGNMENT_RESOLVED;
+        onResolvedTextAlignmentChanged();
+    }
+
+    /**
+     * Check if text alignment resolution can be done.
+     *
+     * @return true if text alignment resolution can be done otherwise return false.
+     */
+    public boolean canResolveTextAlignment() {
+        switch (getTextAlignment()) {
+            case TEXT_DIRECTION_INHERIT:
+                return (mParent != null);
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Called when text alignment has been resolved. Subclasses that care about text alignment
+     * resolution should override this method.
+     *
+     * The default implementation does nothing.
+     */
+    public void onResolvedTextAlignmentChanged() {
+    }
+
+    /**
+     * Reset resolved text alignment. Text alignment can be resolved with a call to
+     * getResolvedTextAlignment(). Will call {@link View#onResolvedTextAlignmentReset} when
+     * reset is done.
+     */
+    public void resetResolvedTextAlignment() {
+        // Reset any previous text alignment resolution
+        mPrivateFlags2 &= ~(TEXT_ALIGNMENT_RESOLVED | TEXT_ALIGNMENT_RESOLVED_MASK);
+        onResolvedTextAlignmentReset();
+    }
+
+    /**
+     * Called when text alignment is reset. Subclasses that care about text alignment reset should
+     * override this method and do a reset of the text alignment of their children. The default
+     * implementation does nothing.
+     */
+    public void onResolvedTextAlignmentReset() {
     }
 
     //

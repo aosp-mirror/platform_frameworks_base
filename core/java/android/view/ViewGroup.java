@@ -5056,6 +5056,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    @Override
+    public void onResolvedTextAlignmentReset() {
+        // Take care of resetting the children resolution too
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.getTextAlignment() == TEXT_ALIGNMENT_INHERIT) {
+                child.resetResolvedTextAlignment();
+            }
+        }
+    }
+
     /**
      * Return true if the pressed state should be delayed for children or descendants of this
      * ViewGroup. Generally, this should be done for containers that can scroll, such as a List.

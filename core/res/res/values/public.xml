@@ -3554,6 +3554,7 @@
   <public type="attr" name="supportsRtl" id="0x010103a8" />
 
   <public type="attr" name="textDirection"/>
+  <public type="attr" name="textAlignment"/>
 
   <public type="attr" name="layoutDirection" />
 
