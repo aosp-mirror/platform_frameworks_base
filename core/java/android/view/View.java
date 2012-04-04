@@ -71,6 +71,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ScrollBarDrawable;
 
 import static android.os.Build.VERSION_CODES.*;
+import static java.lang.Math.max;
 
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
@@ -126,7 +127,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * example, all views will let you set a listener to be notified when the view
  * gains or loses focus. You can register such a listener using
  * {@link #setOnFocusChangeListener(android.view.View.OnFocusChangeListener)}.
- * Other view subclasses offer more specialized listeners. For example, a Button 
+ * Other view subclasses offer more specialized listeners. For example, a Button
  * exposes a listener to notify clients when the button is clicked.</li>
  * <li><strong>Set visibility:</strong> You can hide or show views using
  * {@link #setVisibility(int)}.</li>
@@ -579,6 +580,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @attr ref android.R.styleable#View_duplicateParentState
  * @attr ref android.R.styleable#View_id
  * @attr ref android.R.styleable#View_requiresFadingEdge
+ * @attr ref android.R.styleable#View_fadeScrollbars
  * @attr ref android.R.styleable#View_fadingEdgeLength
  * @attr ref android.R.styleable#View_filterTouchesWhenObscured
  * @attr ref android.R.styleable#View_fitsSystemWindows
@@ -1926,7 +1928,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * system UI to enter an unobtrusive "low profile" mode.
      *
      * <p>This is for use in games, book readers, video players, or any other
-     * "immersive" application where the usual system chrome is deemed too distracting. 
+     * "immersive" application where the usual system chrome is deemed too distracting.
      *
      * <p>In low profile mode, the status bar and/or navigation icons may dim.
      *
@@ -1942,7 +1944,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #SYSTEM_UI_FLAG_LOW_PROFILE}; on devices that draw essential navigation controls
      * (Home, Back, and the like) on screen, <code>SYSTEM_UI_FLAG_HIDE_NAVIGATION</code> will cause
      * those to disappear. This is useful (in conjunction with the
-     * {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN FLAG_FULLSCREEN} and 
+     * {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN FLAG_FULLSCREEN} and
      * {@link android.view.WindowManager.LayoutParams#FLAG_LAYOUT_IN_SCREEN FLAG_LAYOUT_IN_SCREEN}
      * window flags) for displaying content using every last pixel on the display.
      *
@@ -2339,7 +2341,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          */
         private int mPrevWidth = -1;
         private int mPrevHeight = -1;
-        
+
         /**
          * The degrees rotation around the vertical axis through the pivot point.
          */
@@ -2546,7 +2548,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     int mOldHeightMeasureSpec = Integer.MIN_VALUE;
 
-    private Drawable mBGDrawable;
+    private Drawable mBackground;
 
     private int mBackgroundResource;
     private boolean mBackgroundSizeChanged;
@@ -2620,7 +2622,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Set to true when drawing cache is enabled and cannot be created.
-     * 
+     *
      * @hide
      */
     public boolean mCachingFailed;
@@ -3230,7 +3232,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         setOverScrollMode(overScrollMode);
 
         if (background != null) {
-            setBackgroundDrawable(background);
+            setBackground(background);
         }
 
         // Cache user padding as we cannot fully resolve padding here (we dont have yet the resolved
@@ -3492,6 +3494,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (mScrollCache == null) {
             mScrollCache = new ScrollabilityCache(ViewConfiguration.get(mContext), this);
         }
+    }
+
+    private ScrollabilityCache getScrollCache() {
+        initScrollCache();
+        return mScrollCache;
     }
 
     /**
@@ -4562,11 +4569,26 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * Indicates whether this view is one of the set of scrollable containers in
+     * its window.
+     *
+     * @return whether this view is one of the set of scrollable containers in
+     * its window
+     *
+     * @attr ref android.R.styleable#View_isScrollContainer
+     */
+    public boolean isScrollContainer() {
+        return (mPrivateFlags & SCROLL_CONTAINER_ADDED) != 0;
+    }
+
+    /**
      * Change whether this view is one of the set of scrollable containers in
      * its window.  This will be used to determine whether the window can
      * resize or must pan when a soft input area is open -- scrollable
      * containers allow the window to use resize mode since the container
      * will appropriately shrink.
+     *
+     * @attr ref android.R.styleable#View_isScrollContainer
      */
     public void setScrollContainer(boolean isScrollContainer) {
         if (isScrollContainer) {
@@ -4898,7 +4920,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     @RemotableViewMethod
     public void setVisibility(int visibility) {
         setFlags(visibility, VISIBILITY_MASK);
-        if (mBGDrawable != null) mBGDrawable.setVisible(visibility == VISIBLE, false);
+        if (mBackground != null) mBackground.setVisible(visibility == VISIBLE, false);
     }
 
     /**
@@ -5279,7 +5301,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #setPressed(boolean)} is explicitly called, only clickable views can enter
      * the pressed state.
      *
-     * @see #setPressed(boolean) 
+     * @see #setPressed(boolean)
      * @see #isClickable()
      * @see #setClickable(boolean)
      *
@@ -5965,7 +5987,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Dispatch a hover event.
      * <p>
-     * Do not call this method directly. 
+     * Do not call this method directly.
      * Call {@link #dispatchGenericMotionEvent(MotionEvent)} instead.
      * </p>
      *
@@ -6152,7 +6174,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param visibility The new visibility of the window.
      *
-     * @see #onWindowVisibilityChanged(int) 
+     * @see #onWindowVisibilityChanged(int)
      */
     public void dispatchWindowVisibilityChanged(int visibility) {
         onWindowVisibilityChanged(visibility);
@@ -6228,7 +6250,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param newConfig The new resource configuration.
      *
-     * @see #onConfigurationChanged(android.content.res.Configuration) 
+     * @see #onConfigurationChanged(android.content.res.Configuration)
      */
     public void dispatchConfigurationChanged(Configuration newConfig) {
         onConfigurationChanged(newConfig);
@@ -7096,7 +7118,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         if ((changed & DRAW_MASK) != 0) {
             if ((mViewFlags & WILL_NOT_DRAW) != 0) {
-                if (mBGDrawable != null) {
+                if (mBackground != null) {
                     mPrivateFlags &= ~SKIP_DRAW;
                     mPrivateFlags |= ONLY_DRAWS_BACKGROUND;
                 } else {
@@ -7484,39 +7506,39 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * views are drawn) from the camera to this view. The camera's distance
      * affects 3D transformations, for instance rotations around the X and Y
      * axis. If the rotationX or rotationY properties are changed and this view is
-     * large (more than half the size of the screen), it is recommended to always 
+     * large (more than half the size of the screen), it is recommended to always
      * use a camera distance that's greater than the height (X axis rotation) or
      * the width (Y axis rotation) of this view.</p>
-     * 
+     *
      * <p>The distance of the camera from the view plane can have an affect on the
      * perspective distortion of the view when it is rotated around the x or y axis.
      * For example, a large distance will result in a large viewing angle, and there
      * will not be much perspective distortion of the view as it rotates. A short
-     * distance may cause much more perspective distortion upon rotation, and can 
+     * distance may cause much more perspective distortion upon rotation, and can
      * also result in some drawing artifacts if the rotated view ends up partially
      * behind the camera (which is why the recommendation is to use a distance at
      * least as far as the size of the view, if the view is to be rotated.)</p>
-     * 
+     *
      * <p>The distance is expressed in "depth pixels." The default distance depends
      * on the screen density. For instance, on a medium density display, the
      * default distance is 1280. On a high density display, the default distance
      * is 1920.</p>
-     * 
+     *
      * <p>If you want to specify a distance that leads to visually consistent
      * results across various densities, use the following formula:</p>
      * <pre>
      * float scale = context.getResources().getDisplayMetrics().density;
      * view.setCameraDistance(distance * scale);
      * </pre>
-     * 
+     *
      * <p>The density scale factor of a high density display is 1.5,
      * and 1920 = 1280 * 1.5.</p>
-     * 
+     *
      * @param distance The distance in "depth pixels", if negative the opposite
      *        value is used
-     * 
-     * @see #setRotationX(float) 
-     * @see #setRotationY(float) 
+     *
+     * @see #setRotationX(float)
+     * @see #setRotationY(float)
      */
     public void setCameraDistance(float distance) {
         invalidateViewProperty(true, false);
@@ -7541,10 +7563,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * The degrees that the view is rotated around the pivot point.
      *
-     * @see #setRotation(float) 
+     * @see #setRotation(float)
      * @see #getPivotX()
      * @see #getPivotY()
-     * 
+     *
      * @return The degrees of rotation.
      */
     @ViewDebug.ExportedProperty(category = "drawing")
@@ -7557,12 +7579,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * result in clockwise rotation.
      *
      * @param rotation The degrees of rotation.
-     * 
-     * @see #getRotation() 
+     *
+     * @see #getRotation()
      * @see #getPivotX()
      * @see #getPivotY()
-     * @see #setRotationX(float) 
-     * @see #setRotationY(float) 
+     * @see #setRotationX(float)
+     * @see #setRotationY(float)
      *
      * @attr ref android.R.styleable#View_rotation
      */
@@ -7586,8 +7608,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @see #getPivotX()
      * @see #getPivotY()
-     * @see #setRotationY(float) 
-     * 
+     * @see #setRotationY(float)
+     *
      * @return The degrees of Y rotation.
      */
     @ViewDebug.ExportedProperty(category = "drawing")
@@ -7599,18 +7621,18 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Sets the degrees that the view is rotated around the vertical axis through the pivot point.
      * Increasing values result in counter-clockwise rotation from the viewpoint of looking
      * down the y axis.
-     * 
+     *
      * When rotating large views, it is recommended to adjust the camera distance
      * accordingly. Refer to {@link #setCameraDistance(float)} for more information.
      *
      * @param rotationY The degrees of Y rotation.
-     * 
-     * @see #getRotationY() 
+     *
+     * @see #getRotationY()
      * @see #getPivotX()
      * @see #getPivotY()
      * @see #setRotation(float)
-     * @see #setRotationX(float) 
-     * @see #setCameraDistance(float) 
+     * @see #setRotationX(float)
+     * @see #setCameraDistance(float)
      *
      * @attr ref android.R.styleable#View_rotationY
      */
@@ -7633,8 +7655,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @see #getPivotX()
      * @see #getPivotY()
-     * @see #setRotationX(float) 
-     * 
+     * @see #setRotationX(float)
+     *
      * @return The degrees of X rotation.
      */
     @ViewDebug.ExportedProperty(category = "drawing")
@@ -7646,18 +7668,18 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Sets the degrees that the view is rotated around the horizontal axis through the pivot point.
      * Increasing values result in clockwise rotation from the viewpoint of looking down the
      * x axis.
-     * 
+     *
      * When rotating large views, it is recommended to adjust the camera distance
      * accordingly. Refer to {@link #setCameraDistance(float)} for more information.
      *
      * @param rotationX The degrees of X rotation.
-     * 
-     * @see #getRotationX() 
+     *
+     * @see #getRotationX()
      * @see #getPivotX()
      * @see #getPivotY()
      * @see #setRotation(float)
-     * @see #setRotationY(float) 
-     * @see #setCameraDistance(float) 
+     * @see #setRotationY(float)
+     * @see #setCameraDistance(float)
      *
      * @attr ref android.R.styleable#View_rotationX
      */
@@ -7762,6 +7784,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #getScaleY()
      * @see #getPivotY()
      * @return The x location of the pivot point.
+     *
+     * @attr ref android.R.styleable#View_transformPivotX
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getPivotX() {
@@ -7807,6 +7831,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #getScaleY()
      * @see #getPivotY()
      * @return The y location of the pivot point.
+     *
+     * @attr ref android.R.styleable#View_transformPivotY
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public float getPivotY() {
@@ -9022,7 +9048,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         //   - Background is opaque
         //   - Doesn't have scrollbars or scrollbars are inside overlay
 
-        if (mBGDrawable != null && mBGDrawable.getOpacity() == PixelFormat.OPAQUE) {
+        if (mBackground != null && mBackground.getOpacity() == PixelFormat.OPAQUE) {
             mPrivateFlags |= OPAQUE_BACKGROUND;
         } else {
             mPrivateFlags &= ~OPAQUE_BACKGROUND;
@@ -9070,7 +9096,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * <p>Causes the Runnable to be added to the message queue.
      * The runnable will be run on the user interface thread.</p>
-     * 
+     *
      * <p>This method can be invoked from outside of the UI thread
      * only when this View is attached to a window.</p>
      *
@@ -9094,7 +9120,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * <p>Causes the Runnable to be added to the message queue, to be run
      * after the specified amount of time elapses.
      * The runnable will be run on the user interface thread.</p>
-     * 
+     *
      * <p>This method can be invoked from outside of the UI thread
      * only when this View is attached to a window.</p>
      *
@@ -9168,7 +9194,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * <p>Removes the specified Runnable from the message queue.</p>
-     * 
+     *
      * <p>This method can be invoked from outside of the UI thread
      * only when this View is attached to a window.</p>
      *
@@ -9200,7 +9226,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * <p>This method can be invoked from outside of the UI thread
      * only when this View is attached to a window.</p>
-     * 
+     *
      * @see #invalidate()
      */
     public void postInvalidate() {
@@ -9210,7 +9236,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * <p>Cause an invalidate of the specified area to happen on a subsequent cycle
      * through the event loop. Use this to invalidate the View from a non-UI thread.</p>
-     * 
+     *
      * <p>This method can be invoked from outside of the UI thread
      * only when this View is attached to a window.</p>
      *
@@ -9229,7 +9255,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * <p>Cause an invalidate to happen on a subsequent cycle through the event
      * loop. Waits for the specified amount of time.</p>
-     * 
+     *
      * <p>This method can be invoked from outside of the UI thread
      * only when this View is attached to a window.</p>
      *
@@ -9248,7 +9274,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * <p>Cause an invalidate of the specified area to happen on a subsequent cycle
      * through the event loop. Waits for the specified amount of time.</p>
-     * 
+     *
      * <p>This method can be invoked from outside of the UI thread
      * only when this View is attached to a window.</p>
      *
@@ -9358,6 +9384,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         otherwise
      *
      * @see #setHorizontalFadingEdgeEnabled(boolean)
+     *
      * @attr ref android.R.styleable#View_requiresFadingEdge
      */
     public boolean isHorizontalFadingEdgeEnabled() {
@@ -9373,6 +9400,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *                                    horizontally
      *
      * @see #isHorizontalFadingEdgeEnabled()
+     *
      * @attr ref android.R.styleable#View_requiresFadingEdge
      */
     public void setHorizontalFadingEdgeEnabled(boolean horizontalFadingEdgeEnabled) {
@@ -9393,6 +9421,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         otherwise
      *
      * @see #setVerticalFadingEdgeEnabled(boolean)
+     *
      * @attr ref android.R.styleable#View_requiresFadingEdge
      */
     public boolean isVerticalFadingEdgeEnabled() {
@@ -9408,6 +9437,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *                                  vertically
      *
      * @see #isVerticalFadingEdgeEnabled()
+     *
      * @attr ref android.R.styleable#View_requiresFadingEdge
      */
     public void setVerticalFadingEdgeEnabled(boolean verticalFadingEdgeEnabled) {
@@ -9550,6 +9580,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param fadeScrollbars wheter to enable fading
      *
+     * @attr ref android.R.styleable#View_fadeScrollbars
      */
     public void setScrollbarFadingEnabled(boolean fadeScrollbars) {
         initScrollCache();
@@ -9567,9 +9598,83 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Returns true if scrollbars will fade when this view is not scrolling
      *
      * @return true if scrollbar fading is enabled
+     *
+     * @attr ref android.R.styleable#View_fadeScrollbars
      */
     public boolean isScrollbarFadingEnabled() {
         return mScrollCache != null && mScrollCache.fadeScrollBars;
+    }
+
+    /**
+     *
+     * Returns the delay before scrollbars fade.
+     *
+     * @return the delay before scrollbars fade
+     *
+     * @attr ref android.R.styleable#View_scrollbarDefaultDelayBeforeFade
+     */
+    public int getScrollBarDefaultDelayBeforeFade() {
+        return mScrollCache == null ? ViewConfiguration.getScrollDefaultDelay() :
+                mScrollCache.scrollBarDefaultDelayBeforeFade;
+    }
+
+    /**
+     * Define the delay before scrollbars fade.
+     *
+     * @param scrollBarDefaultDelayBeforeFade - the delay before scrollbars fade
+     *
+     * @attr ref android.R.styleable#View_scrollbarDefaultDelayBeforeFade
+     */
+    public void setScrollBarDefaultDelayBeforeFade(int scrollBarDefaultDelayBeforeFade) {
+        getScrollCache().scrollBarDefaultDelayBeforeFade = scrollBarDefaultDelayBeforeFade;
+    }
+
+    /**
+     *
+     * Returns the scrollbar fade duration.
+     *
+     * @return the scrollbar fade duration
+     *
+     * @attr ref android.R.styleable#View_scrollbarFadeDuration
+     */
+    public int getScrollBarFadeDuration() {
+        return mScrollCache == null ? ViewConfiguration.getScrollBarFadeDuration() :
+                mScrollCache.scrollBarFadeDuration;
+    }
+
+    /**
+     * Define the scrollbar fade duration.
+     *
+     * @param scrollBarFadeDuration - the scrollbar fade duration
+     *
+     * @attr ref android.R.styleable#View_scrollbarFadeDuration
+     */
+    public void setScrollBarFadeDuration(int scrollBarFadeDuration) {
+        getScrollCache().scrollBarFadeDuration = scrollBarFadeDuration;
+    }
+
+    /**
+     *
+     * Returns the scrollbar size.
+     *
+     * @return the scrollbar size
+     *
+     * @attr ref android.R.styleable#View_scrollbarSize
+     */
+    public int getScrollBarSize() {
+        return mScrollCache == null ? ViewConfiguration.getScrollBarSize() :
+                mScrollCache.scrollBarSize;
+    }
+
+    /**
+     * Define the scrollbar size.
+     *
+     * @param scrollBarSize - the scrollbar size
+     *
+     * @attr ref android.R.styleable#View_scrollbarSize
+     */
+    public void setScrollBarSize(int scrollBarSize) {
+        getScrollCache().scrollBarSize = scrollBarSize;
     }
 
     /**
@@ -9588,6 +9693,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #SCROLLBARS_INSIDE_INSET
      * @see #SCROLLBARS_OUTSIDE_OVERLAY
      * @see #SCROLLBARS_OUTSIDE_INSET
+     *
+     * @attr ref android.R.styleable#View_scrollbarStyle
      */
     public void setScrollBarStyle(int style) {
         if (style != (mViewFlags & SCROLLBARS_STYLE_MASK)) {
@@ -9604,6 +9711,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #SCROLLBARS_INSIDE_INSET
      * @see #SCROLLBARS_OUTSIDE_OVERLAY
      * @see #SCROLLBARS_OUTSIDE_INSET
+     *
+     * @attr ref android.R.styleable#View_scrollbarStyle
      */
     @ViewDebug.ExportedProperty(mapping = {
             @ViewDebug.IntToString(from = SCROLLBARS_INSIDE_OVERLAY, to = "INSIDE_OVERLAY"),
@@ -10348,9 +10457,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param container The SparseArray in which to save the view's state.
      *
-     * @see #restoreHierarchyState(android.util.SparseArray) 
-     * @see #dispatchSaveInstanceState(android.util.SparseArray) 
-     * @see #onSaveInstanceState() 
+     * @see #restoreHierarchyState(android.util.SparseArray)
+     * @see #dispatchSaveInstanceState(android.util.SparseArray)
+     * @see #onSaveInstanceState()
      */
     public void saveHierarchyState(SparseArray<Parcelable> container) {
         dispatchSaveInstanceState(container);
@@ -10363,9 +10472,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param container The SparseArray in which to save the view's state.
      *
-     * @see #dispatchRestoreInstanceState(android.util.SparseArray) 
-     * @see #saveHierarchyState(android.util.SparseArray) 
-     * @see #onSaveInstanceState() 
+     * @see #dispatchRestoreInstanceState(android.util.SparseArray)
+     * @see #saveHierarchyState(android.util.SparseArray)
+     * @see #onSaveInstanceState()
      */
     protected void dispatchSaveInstanceState(SparseArray<Parcelable> container) {
         if (mID != NO_ID && (mViewFlags & SAVE_DISABLED_MASK) == 0) {
@@ -10399,9 +10508,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return Returns a Parcelable object containing the view's current dynamic
      *         state, or null if there is nothing interesting to save. The
      *         default implementation returns null.
-     * @see #onRestoreInstanceState(android.os.Parcelable) 
-     * @see #saveHierarchyState(android.util.SparseArray) 
-     * @see #dispatchSaveInstanceState(android.util.SparseArray) 
+     * @see #onRestoreInstanceState(android.os.Parcelable)
+     * @see #saveHierarchyState(android.util.SparseArray)
+     * @see #dispatchSaveInstanceState(android.util.SparseArray)
      * @see #setSaveEnabled(boolean)
      */
     protected Parcelable onSaveInstanceState() {
@@ -10414,9 +10523,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param container The SparseArray which holds previously frozen states.
      *
-     * @see #saveHierarchyState(android.util.SparseArray) 
-     * @see #dispatchRestoreInstanceState(android.util.SparseArray) 
-     * @see #onRestoreInstanceState(android.os.Parcelable) 
+     * @see #saveHierarchyState(android.util.SparseArray)
+     * @see #dispatchRestoreInstanceState(android.util.SparseArray)
+     * @see #onRestoreInstanceState(android.os.Parcelable)
      */
     public void restoreHierarchyState(SparseArray<Parcelable> container) {
         dispatchRestoreInstanceState(container);
@@ -10430,9 +10539,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param container The SparseArray which holds previously saved state.
      *
-     * @see #dispatchSaveInstanceState(android.util.SparseArray) 
-     * @see #restoreHierarchyState(android.util.SparseArray) 
-     * @see #onRestoreInstanceState(android.os.Parcelable) 
+     * @see #dispatchSaveInstanceState(android.util.SparseArray)
+     * @see #restoreHierarchyState(android.util.SparseArray)
+     * @see #onRestoreInstanceState(android.os.Parcelable)
      */
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
         if (mID != NO_ID) {
@@ -10458,9 +10567,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param state The frozen state that had previously been returned by
      *        {@link #onSaveInstanceState}.
      *
-     * @see #onSaveInstanceState() 
-     * @see #restoreHierarchyState(android.util.SparseArray) 
-     * @see #dispatchRestoreInstanceState(android.util.SparseArray) 
+     * @see #onSaveInstanceState()
+     * @see #restoreHierarchyState(android.util.SparseArray)
+     * @see #dispatchRestoreInstanceState(android.util.SparseArray)
      */
     protected void onRestoreInstanceState(Parcelable state) {
         mPrivateFlags |= SAVE_STATE_CALLED;
@@ -10614,7 +10723,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         {@link #LAYER_TYPE_HARDWARE}
      *
      * @see #setLayerType(int, android.graphics.Paint)
-     * @see #buildLayer() 
+     * @see #buildLayer()
      * @see #LAYER_TYPE_NONE
      * @see #LAYER_TYPE_SOFTWARE
      * @see #LAYER_TYPE_HARDWARE
@@ -10627,14 +10736,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Forces this view's layer to be created and this view to be rendered
      * into its layer. If this view's layer type is set to {@link #LAYER_TYPE_NONE},
      * invoking this method will have no effect.
-     * 
+     *
      * This method can for instance be used to render a view into its layer before
      * starting an animation. If this view is complex, rendering into the layer
      * before starting the animation will avoid skipping frames.
-     * 
+     *
      * @throws IllegalStateException If this view is not attached to a window
-     * 
-     * @see #setLayerType(int, android.graphics.Paint) 
+     *
+     * @see #setLayerType(int, android.graphics.Paint)
      */
     public void buildLayer() {
         if (mLayerType == LAYER_TYPE_NONE) return;
@@ -10656,7 +10765,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 break;
         }
     }
-    
+
     // Make sure the HardwareRenderer.validate() was invoked before calling this method
     void flushLayer() {
         if (mLayerType == LAYER_TYPE_HARDWARE && mHardwareLayer != null) {
@@ -10675,7 +10784,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 !mAttachInfo.mHardwareRenderer.isEnabled()) {
             return null;
         }
-        
+
         if (!mAttachInfo.mHardwareRenderer.validate()) return null;
 
         final int width = mRight - mLeft;
@@ -10709,10 +10818,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Destroys this View's hardware layer if possible.
-     * 
+     *
      * @return True if the layer was destroyed, false otherwise.
-     * 
-     * @see #setLayerType(int, android.graphics.Paint) 
+     *
+     * @see #setLayerType(int, android.graphics.Paint)
      * @see #LAYER_TYPE_HARDWARE
      */
     boolean destroyLayer(boolean valid) {
@@ -10736,11 +10845,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Destroys all hardware rendering resources. This method is invoked
      * when the system needs to reclaim resources. Upon execution of this
      * method, you should free any OpenGL resources created by the view.
-     * 
+     *
      * Note: you <strong>must</strong> call
      * <code>super.destroyHardwareResources()</code> when overriding
      * this method.
-     * 
+     *
      * @hide
      */
     protected void destroyHardwareResources() {
@@ -11451,17 +11560,17 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (offsetRequired) top += getTopPaddingOffset();
         return top;
     }
-    
+
     /**
      * @hide
      * @param offsetRequired
      */
     protected int getFadeHeight(boolean offsetRequired) {
         int padding = mPaddingTop;
-        if (offsetRequired) padding += getTopPaddingOffset();        
+        if (offsetRequired) padding += getTopPaddingOffset();
         return mBottom - mTop - mPaddingBottom - padding;
     }
-    
+
     /**
      * <p>Indicates whether this view is attached to a hardware accelerated
      * window or not.</p>
@@ -11962,7 +12071,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         int saveCount;
 
         if (!dirtyOpaque) {
-            final Drawable background = mBGDrawable;
+            final Drawable background = mBackground;
             if (background != null) {
                 final int scrollX = mScrollX;
                 final int scrollY = mScrollY;
@@ -12036,7 +12145,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         final ScrollabilityCache scrollabilityCache = mScrollCache;
-        final float fadeHeight = scrollabilityCache.fadingEdgeLength;        
+        final float fadeHeight = scrollabilityCache.fadingEdgeLength;
         int length = (int) fadeHeight;
 
         // clip the fade length if top and bottom fades overlap
@@ -12143,8 +12252,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * optimize the drawing of the fading edges. If you do return a non-zero color, the alpha
      * should be set to 0xFF.
      *
-     * @see #setVerticalFadingEdgeEnabled(boolean) 
-     * @see #setHorizontalFadingEdgeEnabled(boolean) 
+     * @see #setVerticalFadingEdgeEnabled(boolean)
+     * @see #setHorizontalFadingEdgeEnabled(boolean)
      *
      * @return The known solid color background for this view, or 0 if the color may vary
      */
@@ -12493,7 +12602,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     * @param who the Drawable to query
     */
     public int getResolvedLayoutDirection(Drawable who) {
-        return (who == mBGDrawable) ? getResolvedLayoutDirection() : LAYOUT_DIRECTION_DEFAULT;
+        return (who == mBackground) ? getResolvedLayoutDirection() : LAYOUT_DIRECTION_DEFAULT;
     }
 
     /**
@@ -12512,11 +12621,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return boolean If true than the Drawable is being displayed in the
      *         view; else false and it is not allowed to animate.
      *
-     * @see #unscheduleDrawable(android.graphics.drawable.Drawable) 
-     * @see #drawableStateChanged() 
+     * @see #unscheduleDrawable(android.graphics.drawable.Drawable)
+     * @see #drawableStateChanged()
      */
     protected boolean verifyDrawable(Drawable who) {
-        return who == mBGDrawable;
+        return who == mBackground;
     }
 
     /**
@@ -12526,10 +12635,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * <p>Be sure to call through to the superclass when overriding this
      * function.
      *
-     * @see Drawable#setState(int[]) 
+     * @see Drawable#setState(int[])
      */
     protected void drawableStateChanged() {
-        Drawable d = mBGDrawable;
+        Drawable d = mBackground;
         if (d != null && d.isStateful()) {
             d.setState(getDrawableState());
         }
@@ -12559,9 +12668,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @return The current drawable state
      *
-     * @see Drawable#setState(int[]) 
-     * @see #drawableStateChanged() 
-     * @see #onCreateDrawableState(int) 
+     * @see Drawable#setState(int[])
+     * @see #drawableStateChanged()
+     * @see #onCreateDrawableState(int)
      */
     public final int[] getDrawableState() {
         if ((mDrawableState != null) && ((mPrivateFlags & DRAWABLE_STATE_DIRTY) == 0)) {
@@ -12586,7 +12695,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return Returns an array holding the current {@link Drawable} state of
      * the view.
      *
-     * @see #mergeDrawableStates(int[], int[]) 
+     * @see #mergeDrawableStates(int[], int[])
      */
     protected int[] onCreateDrawableState(int extraSpace) {
         if ((mViewFlags & DUPLICATE_PARENT_STATE) == DUPLICATE_PARENT_STATE &&
@@ -12662,7 +12771,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return As a convenience, the <var>baseState</var> array you originally
      * passed into the function is returned.
      *
-     * @see #onCreateDrawableState(int) 
+     * @see #onCreateDrawableState(int)
      */
     protected static int[] mergeDrawableStates(int[] baseState, int[] additionalState) {
         final int N = baseState.length;
@@ -12679,8 +12788,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * on all Drawable objects associated with this view.
      */
     public void jumpDrawablesToCurrentState() {
-        if (mBGDrawable != null) {
-            mBGDrawable.jumpToCurrentState();
+        if (mBackground != null) {
+            mBackground.jumpToCurrentState();
         }
     }
 
@@ -12690,10 +12799,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     @RemotableViewMethod
     public void setBackgroundColor(int color) {
-        if (mBGDrawable instanceof ColorDrawable) {
-            ((ColorDrawable) mBGDrawable).setColor(color);
+        if (mBackground instanceof ColorDrawable) {
+            ((ColorDrawable) mBackground).setColor(color);
         } else {
-            setBackgroundDrawable(new ColorDrawable(color));
+            setBackground(new ColorDrawable(color));
         }
     }
 
@@ -12701,6 +12810,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * Set the background to a given resource. The resource should refer to
      * a Drawable object or 0 to remove the background.
      * @param resid The identifier of the resource.
+     *
      * @attr ref android.R.styleable#View_background
      */
     @RemotableViewMethod
@@ -12713,7 +12823,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (resid != 0) {
             d = mResources.getDrawable(resid);
         }
-        setBackgroundDrawable(d);
+        setBackground(d);
 
         mBackgroundResource = resid;
     }
@@ -12725,11 +12835,19 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * touched. If setting the padding is desired, please use
      * {@link #setPadding(int, int, int, int)}.
      *
-     * @param d The Drawable to use as the background, or null to remove the
+     * @param background The Drawable to use as the background, or null to remove the
      *        background
      */
-    public void setBackgroundDrawable(Drawable d) {
-        if (d == mBGDrawable) {
+    public void setBackground(Drawable background) {
+        setBackgroundDrawable(background);
+    }
+
+    /**
+     * @deprecated use {@link #setBackground(Drawable)} instead
+     */
+    @Deprecated
+    public void setBackgroundDrawable(Drawable background) {
+        if (background == mBackground) {
             return;
         }
 
@@ -12741,19 +12859,19 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
          * Regardless of whether we're setting a new background or not, we want
          * to clear the previous drawable.
          */
-        if (mBGDrawable != null) {
-            mBGDrawable.setCallback(null);
-            unscheduleDrawable(mBGDrawable);
+        if (mBackground != null) {
+            mBackground.setCallback(null);
+            unscheduleDrawable(mBackground);
         }
 
-        if (d != null) {
+        if (background != null) {
             Rect padding = sThreadLocal.get();
             if (padding == null) {
                 padding = new Rect();
                 sThreadLocal.set(padding);
             }
-            if (d.getPadding(padding)) {
-                switch (d.getResolvedLayoutDirectionSelf()) {
+            if (background.getPadding(padding)) {
+                switch (background.getResolvedLayoutDirectionSelf()) {
                     case LAYOUT_DIRECTION_RTL:
                         setPadding(padding.right, padding.top, padding.left, padding.bottom);
                         break;
@@ -12765,17 +12883,17 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             // Compare the minimum sizes of the old Drawable and the new.  If there isn't an old or
             // if it has a different minimum size, we should layout again
-            if (mBGDrawable == null || mBGDrawable.getMinimumHeight() != d.getMinimumHeight() ||
-                    mBGDrawable.getMinimumWidth() != d.getMinimumWidth()) {
+            if (mBackground == null || mBackground.getMinimumHeight() != background.getMinimumHeight() ||
+                    mBackground.getMinimumWidth() != background.getMinimumWidth()) {
                 requestLayout = true;
             }
 
-            d.setCallback(this);
-            if (d.isStateful()) {
-                d.setState(getDrawableState());
+            background.setCallback(this);
+            if (background.isStateful()) {
+                background.setState(getDrawableState());
             }
-            d.setVisible(getVisibility() == VISIBLE, false);
-            mBGDrawable = d;
+            background.setVisible(getVisibility() == VISIBLE, false);
+            mBackground = background;
 
             if ((mPrivateFlags & SKIP_DRAW) != 0) {
                 mPrivateFlags &= ~SKIP_DRAW;
@@ -12784,7 +12902,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             }
         } else {
             /* Remove the background */
-            mBGDrawable = null;
+            mBackground = null;
 
             if ((mPrivateFlags & ONLY_DRAWS_BACKGROUND) != 0) {
                 /*
@@ -12820,10 +12938,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Gets the background drawable
+     *
      * @return The drawable used as the background for this view, if any.
+     *
+     * @see #setBackground(Drawable)
+     *
+     * @attr ref android.R.styleable#View_background
      */
     public Drawable getBackground() {
-        return mBGDrawable;
+        return mBackground;
     }
 
     /**
@@ -13364,8 +13487,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * number.
      *
      * @see #NO_ID
-     * @see #getId() 
-     * @see #findViewById(int) 
+     * @see #getId()
+     * @see #findViewById(int)
      *
      * @param id a number used to identify the view
      *
@@ -13404,8 +13527,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return a positive integer used to identify the view or {@link #NO_ID}
      *         if the view has no ID
      *
-     * @see #setId(int) 
-     * @see #findViewById(int) 
+     * @see #setId(int)
+     * @see #findViewById(int)
      * @attr ref android.R.styleable#View_id
      */
     @ViewDebug.CapturedViewProperty
@@ -13917,16 +14040,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The suggested minimum height of the view.
      */
     protected int getSuggestedMinimumHeight() {
-        int suggestedMinHeight = mMinHeight;
+        return (mBackground == null) ? mMinHeight : max(mMinHeight, mBackground.getMinimumHeight());
 
-        if (mBGDrawable != null) {
-            final int bgMinHeight = mBGDrawable.getMinimumHeight();
-            if (suggestedMinHeight < bgMinHeight) {
-                suggestedMinHeight = bgMinHeight;
-            }
-        }
-
-        return suggestedMinHeight;
     }
 
     /**
@@ -13941,16 +14056,20 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The suggested minimum width of the view.
      */
     protected int getSuggestedMinimumWidth() {
-        int suggestedMinWidth = mMinWidth;
+        return (mBackground == null) ? mMinWidth : max(mMinWidth, mBackground.getMinimumWidth());
+    }
 
-        if (mBGDrawable != null) {
-            final int bgMinWidth = mBGDrawable.getMinimumWidth();
-            if (suggestedMinWidth < bgMinWidth) {
-                suggestedMinWidth = bgMinWidth;
-            }
-        }
-
-        return suggestedMinWidth;
+    /**
+     * Returns the minimum height of the view.
+     *
+     * @return the minimum height the view will try to be.
+     *
+     * @see #setMinimumHeight(int)
+     *
+     * @attr ref android.R.styleable#View_minHeight
+     */
+    public int getMinimumHeight() {
+        return mMinHeight;
     }
 
     /**
@@ -13959,9 +14078,27 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * constrains it with less available height).
      *
      * @param minHeight The minimum height the view will try to be.
+     *
+     * @see #getMinimumHeight()
+     *
+     * @attr ref android.R.styleable#View_minHeight
      */
     public void setMinimumHeight(int minHeight) {
         mMinHeight = minHeight;
+        requestLayout();
+    }
+
+    /**
+     * Returns the minimum width of the view.
+     *
+     * @return the minimum width the view will try to be.
+     *
+     * @see #setMinimumWidth(int)
+     *
+     * @attr ref android.R.styleable#View_minWidth
+     */
+    public int getMinimumWidth() {
+        return mMinWidth;
     }
 
     /**
@@ -13970,9 +14107,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * constrains it with less available width).
      *
      * @param minWidth The minimum width the view will try to be.
+     *
+     * @see #getMinimumWidth()
+     *
+     * @attr ref android.R.styleable#View_minWidth
      */
     public void setMinimumWidth(int minWidth) {
         mMinWidth = minWidth;
+        requestLayout();
+
     }
 
     /**
@@ -14091,11 +14234,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 getLocationInWindow(location);
                 region.op(location[0], location[1], location[0] + mRight - mLeft,
                         location[1] + mBottom - mTop, Region.Op.DIFFERENCE);
-            } else if ((pflags & ONLY_DRAWS_BACKGROUND) != 0 && mBGDrawable != null) {
+            } else if ((pflags & ONLY_DRAWS_BACKGROUND) != 0 && mBackground != null) {
                 // The ONLY_DRAWS_BACKGROUND flag IS set and the background drawable
                 // exists, so we remove the background drawable's non-transparent
                 // parts from this transparent region.
-                applyDrawableToTransparentRegion(mBGDrawable, region);
+                applyDrawableToTransparentRegion(mBackground, region);
             }
         }
         return true;
@@ -15419,7 +15562,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * visibility.  This reports <strong>global</strong> changes to the system UI
      * state, not just what the application is requesting.
      *
-     * @see View#setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener) 
+     * @see View#setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener)
      */
     public interface OnSystemUiVisibilityChangeListener {
         /**
