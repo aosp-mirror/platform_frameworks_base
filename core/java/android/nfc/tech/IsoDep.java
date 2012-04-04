@@ -179,4 +179,27 @@ public final class IsoDep extends BasicTagTechnology {
     public int getMaxTransceiveLength() {
         return getMaxTransceiveLengthInternal();
     }
+
+    /**
+     * <p>Standard APDUs have a 1-byte length field, allowing a maximum of
+     * 255 payload bytes, which results in a maximum APDU length of 261 bytes.
+     *
+     * <p>Extended length APDUs have a 3-byte length field, allowing 65535
+     * payload bytes.
+     *
+     * <p>Some NFC adapters, like the one used in the Nexus S and the Galaxy Nexus
+     * do not support extended length APDUs. They are expected to be well-supported
+     * in the future though. Use this method to check for extended length APDU
+     * support.
+     *
+     * @return whether the NFC adapter on this device supports extended length APDUs.
+     */
+    public boolean isExtendedLengthApduSupported() {
+        try {
+            return mTag.getTagService().getExtendedLengthApdusSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+            return false;
+        }
+    }
 }

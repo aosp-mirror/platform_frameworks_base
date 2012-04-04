@@ -12899,6 +12899,7 @@ package android.nfc.tech {
     method public byte[] getHistoricalBytes();
     method public int getMaxTransceiveLength();
     method public int getTimeout();
+    method public boolean isExtendedLengthApduSupported();
     method public void setTimeout(int);
     method public byte[] transceive(byte[]) throws java.io.IOException;
   }
