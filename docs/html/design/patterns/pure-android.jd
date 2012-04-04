@@ -48,7 +48,8 @@ conventions of a different platform.</p>
 document or deleting.</p>
 <p>As you are migrating your app to Android, please swap out platform-specific icons with their Android
 counterparts.</p>
-<p>You can find a wide variety of icons for use in your app in the Android SDK.</p>
+<p>You can find a wide variety of icons for use in your app on the
+<a href="{@docRoot}design/downloads/index.html">Downloads</a> page.</p>
 
   </div>
   <div class="layout-content-col span-8">
@@ -85,6 +86,33 @@ platform and to avoid confusion between actions and view switching on Android.</
 
   </div>
 </div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Don't hardcode links to other apps</h4>
+<p>In some cases you might want your app to take advantage of another app's feature set. For
+example, you may want to share the content that your app created via a social network or messaging
+app, or view the content of a weblink in a browser. Don't use hard-coded, explicit links to
+particular apps to achieve this. Instead, use Android's intent API to launch an activity chooser
+which lists all applications that are set up to handle the particular request. This lets the user
+complete the task with their preferred app. For sharing in particular, consider using the <em>Share
+Action Provider</em> in your action bar to provide faster access to the user's most recently used
+sharing target.</p>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="{@docRoot}design/media/migrating_intents.png">
+    <div class="figure-caption">
+      Link to other apps with the activity chooser or use the <em>Share Action Provider</em> in the
+      action bar.
+    </div>
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-5">

@@ -42,9 +42,9 @@ available space.</p>
       <li class="value-1"><h4>Activity bar (shown with the Holo Dark theme)</h4>
         <p>
 
-An indeterminate activity bar is used at the start of an application download because Google Play hasn't
-been able to contact the server yet, and it's not possible to determine how long it will take for
-the download to begin.
+An indeterminate activity bar is used at the start of an application download because the Play Store
+app hasn't been able to contact the server yet, and it's not possible to determine how long it will
+take for the download to begin.
 
         </p>
       </li>
