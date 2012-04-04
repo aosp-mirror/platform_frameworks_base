@@ -1290,18 +1290,18 @@ void OpenGLRenderer::setupDrawVertices(GLvoid* vertices) {
  * are set up for each individual segment.
  */
 void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* widthCoords,
-        GLvoid* lengthCoords, float boundaryWidthProportion) {
+        GLvoid* lengthCoords, float boundaryWidthProportion, int& widthSlot, int& lengthSlot) {
     bool force = mCaches.unbindMeshBuffer();
     mCaches.bindPositionVertexPointer(force, mCaches.currentProgram->position,
             vertices, gAAVertexStride);
     mCaches.resetTexCoordsVertexPointer();
     mCaches.unbindIndicesBuffer();
 
-    int widthSlot = mCaches.currentProgram->getAttrib("vtxWidth");
+    widthSlot = mCaches.currentProgram->getAttrib("vtxWidth");
     glEnableVertexAttribArray(widthSlot);
     glVertexAttribPointer(widthSlot, 1, GL_FLOAT, GL_FALSE, gAAVertexStride, widthCoords);
 
-    int lengthSlot = mCaches.currentProgram->getAttrib("vtxLength");
+    lengthSlot = mCaches.currentProgram->getAttrib("vtxLength");
     glEnableVertexAttribArray(lengthSlot);
     glVertexAttribPointer(lengthSlot, 1, GL_FLOAT, GL_FALSE, gAAVertexStride, lengthCoords);
 
@@ -1310,7 +1310,12 @@ void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* widthCoords,
 
     // Setting the inverse value saves computations per-fragment in the shader
     int inverseBoundaryWidthSlot = mCaches.currentProgram->getUniform("inverseBoundaryWidth");
-    glUniform1f(inverseBoundaryWidthSlot, (1 / boundaryWidthProportion));
+    glUniform1f(inverseBoundaryWidthSlot, 1.0f / boundaryWidthProportion);
+}
+
+void OpenGLRenderer::finishDrawAALine(const int widthSlot, const int lengthSlot) {
+    glDisableVertexAttribArray(widthSlot);
+    glDisableVertexAttribArray(lengthSlot);
 }
 
 void OpenGLRenderer::finishDrawTexture() {
@@ -1682,13 +1687,18 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
     float width = right - left;
     float height = bottom - top;
 
+    int widthSlot;
+    int lengthSlot;
+
     float boundaryWidthProportion = (width != 0) ? (2 * boundarySizeX) / width : 0;
     float boundaryHeightProportion = (height != 0) ? (2 * boundarySizeY) / height : 0;
-    setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords, boundaryWidthProportion);
+    setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords,
+            boundaryWidthProportion, widthSlot, lengthSlot);
+
     int boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
     int inverseBoundaryLengthSlot = mCaches.currentProgram->getUniform("inverseBoundaryLength");
     glUniform1f(boundaryLengthSlot, boundaryHeightProportion);
-    glUniform1f(inverseBoundaryLengthSlot, (1 / boundaryHeightProportion));
+    glUniform1f(inverseBoundaryLengthSlot, (1.0f / boundaryHeightProportion));
 
     if (!quickReject(left, top, right, bottom)) {
         AAVertex::set(aaVertices++, left, bottom, 1, 1);
@@ -1698,6 +1708,8 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
         dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
+
+    finishDrawAALine(widthSlot, lengthSlot);
 }
 
 /**
@@ -1728,11 +1740,14 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     // A stroke width of 0 has a special meaning in Skia:
     // it draws a line 1 px wide regardless of current transform
     bool isHairLine = paint->getStrokeWidth() == 0.0f;
+
     float inverseScaleX = 1.0f;
     float inverseScaleY = 1.0f;
     bool scaled = false;
+
     int alpha;
     SkXfermode::Mode mode;
+
     int generatedVerticesCount = 0;
     int verticesCount = count;
     if (count > 4) {
@@ -1752,10 +1767,13 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             float m10 = mat->data[Matrix4::kSkewX];
             float m11 = mat->data[Matrix4::kScaleX];
             float m12 = mat->data[6];
+
             float scaleX = sqrtf(m00 * m00 + m01 * m01);
             float scaleY = sqrtf(m10 * m10 + m11 * m11);
+
             inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
             inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
+
             if (inverseScaleX != 1.0f || inverseScaleY != 1.0f) {
                 scaled = true;
             }
@@ -1785,10 +1803,16 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
         // Expand boundary to enable AA calculations on the quad border
         halfStrokeWidth += .5f;
     }
+
+    int widthSlot;
+    int lengthSlot;
+
     Vertex lines[verticesCount];
     Vertex* vertices = &lines[0];
+
     AAVertex wLines[verticesCount];
     AAVertex* aaVertices = &wLines[0];
+
     if (CC_UNLIKELY(!isAA)) {
         setupDrawVertices(vertices);
     } else {
@@ -1800,7 +1824,8 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
         // We will need to calculate the actual width proportion on each segment for
         // scaled non-hairlines, since the boundary proportion may differ per-axis when scaled.
         float boundaryWidthProportion = 1 / (2 * halfStrokeWidth);
-        setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords, boundaryWidthProportion);
+        setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords,
+                boundaryWidthProportion, widthSlot, lengthSlot);
     }
 
     AAVertex* prevAAVertex = NULL;
@@ -1810,10 +1835,12 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     int inverseBoundaryLengthSlot = -1;
     int boundaryWidthSlot = -1;
     int inverseBoundaryWidthSlot = -1;
+
     for (int i = 0; i < count; i += 4) {
         // a = start point, b = end point
         vec2 a(points[i], points[i + 1]);
         vec2 b(points[i + 2], points[i + 3]);
+
         float length = 0;
         float boundaryLengthProportion = 0;
         float boundaryWidthProportion = 0;
@@ -1830,6 +1857,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                 }
                 n *= wideningFactor;
             }
+
             if (scaled) {
                 n.x *= inverseScaleX;
                 n.y *= inverseScaleY;
@@ -1840,11 +1868,13 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             extendedN /= 2;
             extendedN.x *= inverseScaleX;
             extendedN.y *= inverseScaleY;
+
             float extendedNLength = extendedN.length();
             // We need to set this value on the shader prior to drawing
             boundaryWidthProportion = extendedNLength / (halfStrokeWidth + extendedNLength);
             n += extendedN;
         }
+
         float x = n.x;
         n.x = -n.y;
         n.y = x;
@@ -1854,6 +1884,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             vec2 abVector = (b - a);
             length = abVector.length();
             abVector.normalize();
+
             if (scaled) {
                 abVector.x *= inverseScaleX;
                 abVector.y *= inverseScaleY;
@@ -1862,6 +1893,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             } else {
                 boundaryLengthProportion = .5 / (length + 1);
             }
+
             abVector /= 2;
             a -= abVector;
             b += abVector;
@@ -1890,10 +1922,12 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                     Vertex::set(vertices++, p1.x, p1.y);
                     generatedVerticesCount += 2;
                 }
+
                 Vertex::set(vertices++, p1.x, p1.y);
                 Vertex::set(vertices++, p2.x, p2.y);
                 Vertex::set(vertices++, p4.x, p4.y);
                 Vertex::set(vertices++, p3.x, p3.y);
+
                 prevVertex = vertices - 1;
                 generatedVerticesCount += 4;
             } else {
@@ -1906,14 +1940,17 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                         inverseBoundaryWidthSlot =
                                 mCaches.currentProgram->getUniform("inverseBoundaryWidth");
                     }
+
                     glUniform1f(boundaryWidthSlot, boundaryWidthProportion);
                     glUniform1f(inverseBoundaryWidthSlot, (1 / boundaryWidthProportion));
                 }
+
                 if (boundaryLengthSlot < 0) {
                     boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
                     inverseBoundaryLengthSlot =
                             mCaches.currentProgram->getUniform("inverseBoundaryLength");
                 }
+
                 glUniform1f(boundaryLengthSlot, boundaryLengthProportion);
                 glUniform1f(inverseBoundaryLengthSlot, (1 / boundaryLengthProportion));
 
@@ -1927,20 +1964,28 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                     AAVertex::set(aaVertices++, p4.x, p4.y, 1, 1);
                     generatedVerticesCount += 2;
                 }
+
                 AAVertex::set(aaVertices++, p4.x, p4.y, 1, 1);
                 AAVertex::set(aaVertices++, p1.x, p1.y, 1, 0);
                 AAVertex::set(aaVertices++, p3.x, p3.y, 0, 1);
                 AAVertex::set(aaVertices++, p2.x, p2.y, 0, 0);
+
                 prevAAVertex = aaVertices - 1;
                 generatedVerticesCount += 4;
             }
+
             dirtyLayer(a.x == b.x ? left - 1 : left, a.y == b.y ? top - 1 : top,
                     a.x == b.x ? right: right, a.y == b.y ? bottom: bottom,
                     *mSnapshot->transform);
         }
     }
+
     if (generatedVerticesCount > 0) {
        glDrawArrays(GL_TRIANGLE_STRIP, 0, generatedVerticesCount);
+    }
+
+    if (isAA) {
+        finishDrawAALine(widthSlot, lengthSlot);
     }
 }
 
@@ -1987,10 +2032,12 @@ void OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
     for (int i = 0; i < count; i += 2) {
         TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
         generatedVerticesCount++;
+
         float left = points[i] - halfWidth;
         float right = points[i] + halfWidth;
         float top = points[i + 1] - halfWidth;
         float bottom = points [i + 1] + halfWidth;
+
         dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
     }
 

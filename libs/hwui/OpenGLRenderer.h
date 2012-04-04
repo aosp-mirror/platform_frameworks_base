@@ -548,7 +548,8 @@ private:
     void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords);
     void setupDrawVertices(GLvoid* vertices);
     void setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, GLvoid* lengthCoords,
-            float strokeWidth);
+            float strokeWidth, int& widthSlot, int& lengthSlot);
+    void finishDrawAALine(const int widthSlot, const int lengthSlot);
     void finishDrawTexture();
     void accountForClear(SkXfermode::Mode mode);
 
