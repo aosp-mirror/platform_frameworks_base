@@ -1,58 +1,6 @@
 page.title=Writing Style
 @jd:body
 
-<style>
-
-/* UI tables */
-
-.ui_table {
-  width: 100%;
-  background: #282828;
-  color: #fff;
-  border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
-  border-collapse: separate;
-}
-
-.ui_table th,
-.ui_table td {
-  padding: 5px 10px;
-}
-
-.ui_table thead th {
-  font-weight: 600;
-}
-
-.ui_table tfoot td {
-  border-top: 1px solid #494949;
-  border-right: 1px solid #494949;
-  text-align: center;
-}
-
-.ui_table tfoot td:last-child {
-  border-right: 0;
-}
-
-.list_item_margins {
-  margin-left: 30px !important;
-}
-
-.example_label {
-  margin-bottom: 10px;
-  padding-left: 20px;
-  background: transparent none no-repeat scroll 0px 3px;
-}
-
-.example_label.bad {
-  background-image: url({@docRoot}assets/design/ico_wrong.png);
-}
-
-.example_label.good {
-  background-image: url({@docRoot}assets/design/ico_good.png);
-}
-
-</style>
-
 <p>When choosing words for your app:</p>
 <ol>
 <li>
@@ -90,20 +38,20 @@ page.title=Writing Style
 <ol><li class="value-1"><strong>Keep it brief.</strong> From the setup wizard:</ol>
 
 <div class="layout-content-row">
-  <div class="layout-content-col span-6 list_item_margins">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
 
-    <div class="example_label bad">Too formal</div>
+    <div class="do-dont-label bad">Too formal</div>
 
-    <table class="ui_table good"><tbody><tr><td>
+    <table class="ui-table good"><tbody><tr><td>
     Consult the documentation that came with your phone for further instructions.
     </td></tr></tbody></table>
 
   </div>
   <div class="layout-content-col span-6">
 
-    <div class="example_label good">Better</div>
+    <div class="do-dont-label good">Better</div>
 
-    <table class="ui_table good"><tbody><tr><td>
+    <table class="ui-table good"><tbody><tr><td>
     Read the instructions that came with your phone.
     </td></tr></tbody></table>
 
@@ -115,11 +63,11 @@ page.title=Writing Style
 <ol><li class="value-2"><strong>Keep it simple.</strong> From the Location settings screen:</ol>
 
 <div class="layout-content-row">
-  <div class="layout-content-col span-6 list_item_margins">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
 
-    <div class="example_label bad">Confusing</div>
+    <div class="do-dont-label bad">Confusing</div>
 
-    <table class="ui_table bad">
+    <table class="ui-table bad">
     <thead>
       <tr>
         <th>
@@ -139,9 +87,9 @@ page.title=Writing Style
   </div>
   <div class="layout-content-col span-6">
 
-    <div class="example_label good">Better</div>
+    <div class="do-dont-label good">Better</div>
 
-    <table class="ui_table good">
+    <table class="ui-table good">
     <thead>
       <tr>
         <th>
@@ -167,12 +115,12 @@ page.title=Writing Style
 crashes:</ol>
 
 <div class="layout-content-row">
-  <div class="layout-content-col span-6 list_item_margins">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
 
-    <div class="example_label bad">Confusing and annoying&mdash;"Sorry" just rubs salt in the
+    <div class="do-dont-label bad">Confusing and annoying&mdash;"Sorry" just rubs salt in the
     wound.</div>
 
-    <table class="ui_table bad">
+    <table class="ui-table bad">
     <thead>
       <tr>
         <th colspan="3">
@@ -200,9 +148,9 @@ crashes:</ol>
   </div>
   <div class="layout-content-col span-6">
 
-    <div class="example_label good">Shorter, more direct, no faux-apologetic title:<br><br></div>
+    <div class="do-dont-label good">Shorter, more direct, no faux-apologetic title:<br><br></div>
 
-    <table class="ui_table good">
+    <table class="ui-table good">
     <thead>
       <tr>
         <th colspan="3">
@@ -234,20 +182,20 @@ crashes:</ol>
 <ol><li class="value-4"><strong>Put the most important thing first.</strong></ol>
 
 <div class="layout-content-row">
-  <div class="layout-content-col span-6 list_item_margins">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
 
-    <div class="example_label bad">Top news last</div>
+    <div class="do-dont-label bad">Top news last</div>
 
-    <table class="ui_table bad"><tbody><tr><td>
+    <table class="ui-table bad"><tbody><tr><td>
     77 other people +1'd this, including Larry Page.
     </td></tr></tbody></table>
 
   </div>
   <div class="layout-content-col span-6">
 
-    <div class="example_label good">Top news first</div>
+    <div class="do-dont-label good">Top news first</div>
 
-    <table class="ui_table good"><tbody><tr><td>
+    <table class="ui-table good"><tbody><tr><td>
     Larry Page and 77 others +1'd this.
     </td></tr></tbody></table>
 
@@ -255,20 +203,20 @@ crashes:</ol>
 </div>
 
 <div class="layout-content-row">
-  <div class="layout-content-col span-6 list_item_margins">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
 
-    <div class="example_label bad">Task last</div>
+    <div class="do-dont-label bad">Task last</div>
 
-    <table class="ui_table bad"><tbody><tr><td>
+    <table class="ui-table bad"><tbody><tr><td>
     Touch Next to complete setup using a Wi-Fi connection.
     </td></tr></tbody></table>
 
   </div>
   <div class="layout-content-col span-6">
 
-    <div class="example_label good">Task first</div>
+    <div class="do-dont-label good">Task first</div>
 
-    <table class="ui_table good"><tbody><tr><td>
+    <table class="ui-table good"><tbody><tr><td>
     To finish setup using Wi-Fi, touch Next.
     </td></tr></tbody></table>
 
@@ -280,11 +228,11 @@ crashes:</ol>
 <ol><li class="value-5"><strong>Describe only what's necessary, and no more.</strong></ol>
 
 <div class="layout-content-row">
-  <div class="layout-content-col span-6 list_item_margins">
+  <div class="layout-content-col span-6 layout-with-list-item-margins">
 
-    <div class="example_label bad">From a Setup Wizard screen</div>
+    <div class="do-dont-label bad">From a Setup Wizard screen</div>
 
-    <table class="ui_table bad">
+    <table class="ui-table bad">
     <thead>
       <tr>
         <th>
@@ -306,9 +254,9 @@ crashes:</ol>
   </div>
   <div class="layout-content-col span-6">
 
-    <div class="example_label good">From a Setup Wizard screen</div>
+    <div class="do-dont-label good">From a Setup Wizard screen</div>
 
-    <table class="ui_table good">
+    <table class="ui-table good">
     <thead>
       <tr>
         <th>
