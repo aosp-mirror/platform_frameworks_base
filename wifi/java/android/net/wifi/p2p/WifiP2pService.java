@@ -42,6 +42,9 @@ import android.net.wifi.WifiMonitor;
 import android.net.wifi.WifiNative;
 import android.net.wifi.WifiStateMachine;
 import android.net.wifi.WpsInfo;
+import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
+import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
+import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -55,6 +58,7 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,7 +75,10 @@ import com.android.internal.util.StateMachine;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * WifiP2pService inclues a state machine to perform Wi-Fi p2p operations. Applications
@@ -146,6 +153,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private boolean mDiscoveryStarted;
 
     private NetworkInfo mNetworkInfo;
+
+    /* The transaction Id of service discovery request */
+    private byte mServiceTransactionId = 0;
+
+    /* Service discovery request ID of wpa_supplicant.
+     * null means it's not set yet. */
+    private String mServiceDiscReqId;
+
+    /* clients(application) information list. */
+    private HashMap<Messenger, ClientInfo> mClientInfoList = new HashMap<Messenger, ClientInfo>();
 
     /* Is chosen as a unique range to avoid conflict with
        the range defined in Tethering.java */
@@ -310,6 +327,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     replyToMessage(message, WifiP2pManager.STOP_DISCOVERY_FAILED,
                             WifiP2pManager.BUSY);
                     break;
+                case WifiP2pManager.DISCOVER_SERVICES:
+                    replyToMessage(message, WifiP2pManager.DISCOVER_SERVICES_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
                 case WifiP2pManager.CONNECT:
                     replyToMessage(message, WifiP2pManager.CONNECT_FAILED,
                             WifiP2pManager.BUSY);
@@ -324,6 +345,32 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiP2pManager.REMOVE_GROUP:
                     replyToMessage(message, WifiP2pManager.REMOVE_GROUP_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
+                case WifiP2pManager.ADD_LOCAL_SERVICE:
+                    replyToMessage(message, WifiP2pManager.ADD_LOCAL_SERVICE_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
+                case WifiP2pManager.REMOVE_LOCAL_SERVICE:
+                    replyToMessage(message, WifiP2pManager.REMOVE_LOCAL_SERVICE_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
+                case WifiP2pManager.CLEAR_LOCAL_SERVICES:
+                    replyToMessage(message, WifiP2pManager.CLEAR_LOCAL_SERVICES_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
+                case WifiP2pManager.ADD_SERVICE_REQUEST:
+                    replyToMessage(message, WifiP2pManager.ADD_SERVICE_REQUEST_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
+                case WifiP2pManager.REMOVE_SERVICE_REQUEST:
+                    replyToMessage(message,
+                            WifiP2pManager.REMOVE_SERVICE_REQUEST_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
+                case WifiP2pManager.CLEAR_SERVICE_REQUESTS:
+                    replyToMessage(message,
+                            WifiP2pManager.CLEAR_SERVICE_REQUESTS_FAILED,
                             WifiP2pManager.BUSY);
                     break;
                 case WifiP2pManager.REQUEST_PEERS:
@@ -367,6 +414,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     replyToMessage(message, WifiP2pManager.STOP_DISCOVERY_FAILED,
                             WifiP2pManager.P2P_UNSUPPORTED);
                     break;
+                case WifiP2pManager.DISCOVER_SERVICES:
+                    replyToMessage(message, WifiP2pManager.DISCOVER_SERVICES_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
                 case WifiP2pManager.CONNECT:
                     replyToMessage(message, WifiP2pManager.CONNECT_FAILED,
                             WifiP2pManager.P2P_UNSUPPORTED);
@@ -381,6 +432,32 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiP2pManager.REMOVE_GROUP:
                     replyToMessage(message, WifiP2pManager.REMOVE_GROUP_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+                case WifiP2pManager.ADD_LOCAL_SERVICE:
+                    replyToMessage(message, WifiP2pManager.ADD_LOCAL_SERVICE_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+                case WifiP2pManager.REMOVE_LOCAL_SERVICE:
+                    replyToMessage(message, WifiP2pManager.REMOVE_LOCAL_SERVICE_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+                case WifiP2pManager.CLEAR_LOCAL_SERVICES:
+                    replyToMessage(message, WifiP2pManager.CLEAR_LOCAL_SERVICES_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+                case WifiP2pManager.ADD_SERVICE_REQUEST:
+                    replyToMessage(message, WifiP2pManager.ADD_SERVICE_REQUEST_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+                case WifiP2pManager.REMOVE_SERVICE_REQUEST:
+                    replyToMessage(message,
+                            WifiP2pManager.REMOVE_SERVICE_REQUEST_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+                case WifiP2pManager.CLEAR_SERVICE_REQUESTS:
+                    replyToMessage(message,
+                            WifiP2pManager.CLEAR_SERVICE_REQUESTS_FAILED,
                             WifiP2pManager.P2P_UNSUPPORTED);
                     break;
                default:
@@ -492,6 +569,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     transitionTo(mP2pDisablingState);
                     break;
                 case WifiP2pManager.DISCOVER_PEERS:
+                    // do not send service discovery request while normal find operation.
+                    clearSupplicantServiceRequest();
                     if (mWifiNative.p2pFind(DISCOVER_TIMEOUT_S)) {
                         replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_SUCCEEDED);
                         sendP2pDiscoveryChangedBroadcast(true);
@@ -511,6 +590,20 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                                 WifiP2pManager.ERROR);
                     }
                     break;
+                case WifiP2pManager.DISCOVER_SERVICES:
+                    if (DBG) logd(getName() + " discover services");
+                    if (!updateSupplicantServiceRequest()) {
+                        replyToMessage(message, WifiP2pManager.DISCOVER_SERVICES_FAILED,
+                                WifiP2pManager.NO_SERVICE_REQUESTS);
+                        break;
+                    }
+                    if (mWifiNative.p2pFind(DISCOVER_TIMEOUT_S)) {
+                        replyToMessage(message, WifiP2pManager.DISCOVER_SERVICES_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.DISCOVER_SERVICES_FAILED,
+                                WifiP2pManager.ERROR);
+                    }
+                    break;
                 case WifiMonitor.P2P_DEVICE_FOUND_EVENT:
                     WifiP2pDevice device = (WifiP2pDevice) message.obj;
                     if (mThisDevice.deviceAddress.equals(device.deviceAddress)) break;
@@ -521,7 +614,55 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     device = (WifiP2pDevice) message.obj;
                     if (mPeers.remove(device)) sendP2pPeersChangedBroadcast();
                     break;
-               default:
+               case WifiP2pManager.ADD_LOCAL_SERVICE:
+                    if (DBG) logd(getName() + " add service");
+                    WifiP2pServiceInfo servInfo = (WifiP2pServiceInfo)message.obj;
+                    if (addLocalService(message.replyTo, servInfo)) {
+                        replyToMessage(message, WifiP2pManager.ADD_LOCAL_SERVICE_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.ADD_LOCAL_SERVICE_FAILED);
+                    }
+                    break;
+                case WifiP2pManager.REMOVE_LOCAL_SERVICE:
+                    if (DBG) logd(getName() + " remove service");
+                    servInfo = (WifiP2pServiceInfo)message.obj;
+                    removeLocalService(message.replyTo, servInfo);
+                    replyToMessage(message, WifiP2pManager.REMOVE_LOCAL_SERVICE_SUCCEEDED);
+                    break;
+                case WifiP2pManager.CLEAR_LOCAL_SERVICES:
+                    if (DBG) logd(getName() + " clear service");
+                    clearLocalServices(message.replyTo);
+                    break;
+                case WifiP2pManager.ADD_SERVICE_REQUEST:
+                    if (DBG) logd(getName() + " add service request");
+                    if (!addServiceRequest(message.replyTo, (WifiP2pServiceRequest)message.obj)) {
+                        replyToMessage(message, WifiP2pManager.ADD_SERVICE_REQUEST_FAILED);
+                        break;
+                    }
+                    replyToMessage(message, WifiP2pManager.ADD_SERVICE_REQUEST_SUCCEEDED);
+                    break;
+                case WifiP2pManager.REMOVE_SERVICE_REQUEST:
+                    if (DBG) logd(getName() + " remove service request");
+                    removeServiceRequest(message.replyTo, (WifiP2pServiceRequest)message.obj);
+                    replyToMessage(message, WifiP2pManager.REMOVE_SERVICE_REQUEST_SUCCEEDED);
+                    break;
+                case WifiP2pManager.CLEAR_SERVICE_REQUESTS:
+                    if (DBG) logd(getName() + " clear service request");
+                    clearServiceRequests(message.replyTo);
+                    replyToMessage(message, WifiP2pManager.CLEAR_SERVICE_REQUESTS_SUCCEEDED);
+                    break;
+               case WifiMonitor.P2P_SERV_DISC_RESP_EVENT:
+                    if (DBG) logd(getName() + " receive service response");
+                    List<WifiP2pServiceResponse> sdRespList =
+                        (List<WifiP2pServiceResponse>) message.obj;
+                    for (WifiP2pServiceResponse resp : sdRespList) {
+                        WifiP2pDevice dev =
+                            mPeers.get(resp.getSrcDevice().deviceAddress);
+                        resp.setSrcDevice(dev);
+                        sendServiceResponse(resp);
+                    }
+                    break;
+                default:
                     return NOT_HANDLED;
             }
             return HANDLED;
@@ -1262,6 +1403,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mThisDevice.deviceAddress = mWifiNative.p2pGetDeviceAddress();
         updateThisDevice(WifiP2pDevice.AVAILABLE);
         if (DBG) Slog.d(TAG, "DeviceAddress: " + mThisDevice.deviceAddress);
+
+        mClientInfoList.clear();
+        mWifiNative.p2pFlush();
+        mWifiNative.p2pServiceFlush();
+        mServiceTransactionId = 0;
+        mServiceDiscReqId = null;
     }
 
     private void updateThisDevice(int status) {
@@ -1310,5 +1457,262 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         Slog.e(TAG, s);
     }
 
+    /**
+     * Update service discovery request to wpa_supplicant.
+     */
+    private boolean updateSupplicantServiceRequest() {
+        clearSupplicantServiceRequest();
+
+        StringBuffer sb = new StringBuffer();
+        for (ClientInfo c: mClientInfoList.values()) {
+            int key;
+            WifiP2pServiceRequest req;
+            for (int i=0; i < c.mReqList.size(); i++) {
+                key = c.mReqList.keyAt(i);
+                req = c.mReqList.get(key);
+                if (req != null) {
+                    sb.append(req.getSupplicantQuery());
+                }
+            }
+        }
+
+        if (sb.length() == 0) {
+            return false;
+        }
+
+        mServiceDiscReqId = mWifiNative.p2pServDiscReq("00:00:00:00:00:00", sb.toString());
+        if (mServiceDiscReqId == null) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Clear service discovery request in wpa_supplicant
+     */
+    private void clearSupplicantServiceRequest() {
+        if (mServiceDiscReqId == null) return;
+
+        mWifiNative.p2pServDiscCancelReq(mServiceDiscReqId);
+        mServiceDiscReqId = null;
+    }
+
+    /* TODO: We could track individual service adds seperately and avoid
+     * having to do update all service requests on every new request
+     */
+    private boolean addServiceRequest(Messenger m, WifiP2pServiceRequest req) {
+        clearClientDeadChannels();
+        ClientInfo clientInfo = getClientInfo(m, true);
+        if (clientInfo == null) {
+            return false;
+        }
+
+        req.setTransactionId(++mServiceTransactionId);
+        clientInfo.mReqList.put(mServiceTransactionId, req);
+
+        if (mServiceDiscReqId == null) {
+            return true;
+        }
+
+        return updateSupplicantServiceRequest();
+    }
+
+    private void removeServiceRequest(Messenger m, WifiP2pServiceRequest req) {
+
+        ClientInfo clientInfo = getClientInfo(m, false);
+        if (clientInfo == null) {
+            return;
+        }
+
+        clientInfo.mReqList.remove(req.getTransactionId());
+
+        if (clientInfo.mReqList.size() == 0 && clientInfo.mServList.size() == 0) {
+            if (DBG) logd("remove client information from framework");
+            mClientInfoList.remove(clientInfo.mMessenger);
+        }
+
+        if (mServiceDiscReqId == null) {
+            return;
+        }
+
+        updateSupplicantServiceRequest();
+    }
+
+    private void clearServiceRequests(Messenger m) {
+
+        ClientInfo clientInfo = getClientInfo(m, false);
+        if (clientInfo == null) {
+            return;
+        }
+
+        if (clientInfo.mReqList.size() == 0) {
+            return;
+        }
+
+        clientInfo.mReqList.clear();
+
+        if (clientInfo.mServList.size() == 0) {
+            if (DBG) logd("remove channel information from framework");
+            mClientInfoList.remove(clientInfo.mMessenger);
+        }
+
+        if (mServiceDiscReqId == null) {
+            return;
+        }
+
+        updateSupplicantServiceRequest();
+    }
+
+    private boolean addLocalService(Messenger m, WifiP2pServiceInfo servInfo) {
+        clearClientDeadChannels();
+        ClientInfo clientInfo = getClientInfo(m, true);
+        if (clientInfo == null) {
+            return false;
+        }
+
+        if (!clientInfo.mServList.add(servInfo)) {
+            return false;
+        }
+
+        if (!mWifiNative.p2pServiceAdd(servInfo)) {
+            clientInfo.mServList.remove(servInfo);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void removeLocalService(Messenger m, WifiP2pServiceInfo servInfo) {
+        ClientInfo clientInfo = getClientInfo(m, false);
+        if (clientInfo == null) {
+            return;
+        }
+
+        mWifiNative.p2pServiceDel(servInfo);
+
+        clientInfo.mServList.remove(servInfo);
+        if (clientInfo.mReqList.size() == 0 && clientInfo.mServList.size() == 0) {
+            if (DBG) logd("remove client information from framework");
+            mClientInfoList.remove(clientInfo.mMessenger);
+        }
+    }
+
+    private void clearLocalServices(Messenger m) {
+        ClientInfo clientInfo = getClientInfo(m, false);
+        if (clientInfo == null) {
+            return;
+        }
+
+        for (WifiP2pServiceInfo servInfo: clientInfo.mServList) {
+            mWifiNative.p2pServiceDel(servInfo);
+        }
+
+        clientInfo.mServList.clear();
+        if (clientInfo.mReqList.size() == 0) {
+            if (DBG) logd("remove client information from framework");
+            mClientInfoList.remove(clientInfo.mMessenger);
+        }
+    }
+
+    private void clearClientInfo(Messenger m) {
+        clearLocalServices(m);
+        clearServiceRequests(m);
+    }
+
+    /**
+     * Send the service response to the WifiP2pManager.Channel.
+     *
+     * @param resp
+     */
+    private void sendServiceResponse(WifiP2pServiceResponse resp) {
+        for (ClientInfo c : mClientInfoList.values()) {
+            WifiP2pServiceRequest req = c.mReqList.get(resp.getTransactionId());
+            if (req != null) {
+                Message msg = Message.obtain();
+                msg.what = WifiP2pManager.RESPONSE_SERVICE;
+                msg.arg1 = 0;
+                msg.arg2 = 0;
+                msg.obj = resp;
+                try {
+                    c.mMessenger.send(msg);
+                } catch (RemoteException e) {
+                    if (DBG) logd("detect dead channel");
+                    clearClientInfo(c.mMessenger);
+                }
+            }
+        }
+    }
+
+    /**
+     * We dont get notifications of clients that have gone away.
+     * We detect this actively when services are added and throw
+     * them away.
+     *
+     * TODO: This can be done better with full async channels.
+     */
+    private void clearClientDeadChannels() {
+        for (ClientInfo c : mClientInfoList.values()) {
+            Message msg = Message.obtain();
+            msg.what = WifiP2pManager.PING;
+            msg.arg1 = 0;
+            msg.arg2 = 0;
+            msg.obj = null;
+            try {
+                c.mMessenger.send(msg);
+            } catch (RemoteException e) {
+                if (DBG) logd("detect dead channel");
+                clearClientInfo(c.mMessenger);
+            }
+        }
+    }
+
+    /**
+     * Return the specified ClientInfo.
+     * @param m Messenger
+     * @param createIfNotExist if true and the specified channel info does not exist,
+     * create new client info.
+     * @return the specified ClientInfo.
+     */
+    private ClientInfo getClientInfo(Messenger m, boolean createIfNotExist) {
+        ClientInfo clientInfo = mClientInfoList.get(m);
+
+        if (clientInfo == null && createIfNotExist) {
+            if (DBG) logd("add a new client");
+            clientInfo = new ClientInfo(m);
+            mClientInfoList.put(m, clientInfo);
+        }
+
+        return clientInfo;
+    }
+
+    }
+
+    /**
+     * Information about a particular client and we track the service discovery requests
+     * and the local services registered by the client.
+     */
+    private class ClientInfo {
+
+        /*
+         * A reference to WifiP2pManager.Channel handler.
+         * The response of this request is notified to WifiP2pManager.Channel handler
+         */
+        private Messenger mMessenger;
+
+        /*
+         * A service discovery request list.
+         */
+        private SparseArray<WifiP2pServiceRequest> mReqList;
+
+        /*
+         * A local service information list.
+         */
+        private List<WifiP2pServiceInfo> mServList;
+
+        private ClientInfo(Messenger m) {
+            mMessenger = m;
+            mReqList = new SparseArray();
+            mServList = new ArrayList<WifiP2pServiceInfo>();
+        }
     }
 }
