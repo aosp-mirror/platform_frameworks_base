@@ -1265,7 +1265,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 AppWindowToken token = curTarget.mAppToken;
                 WindowState highestTarget = null;
                 int highestPos = 0;
-                if (token.animating || token.animation != null) {
+                if (token.mAppAnimator.animating || token.mAppAnimator.animation != null) {
                     int pos = localmWindows.indexOf(curTarget);
                     while (pos >= 0) {
                         WindowState win = localmWindows.get(pos);
@@ -1325,7 +1325,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInputMethodTarget = w;
                 mInputMethodTargetWaitingAnim = false;
                 if (w.mAppToken != null) {
-                    setInputMethodAnimLayerAdjustment(w.mAppToken.animLayerAdjustment);
+                    setInputMethodAnimLayerAdjustment(w.mAppToken.mAppAnimator.animLayerAdjustment);
                 } else {
                     setInputMethodAnimLayerAdjustment(0);
                 }
@@ -1588,12 +1588,12 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + ", obscured="
                 + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
                 + " anim=" + ((wallpaperTarget != null && wallpaperTarget.mAppToken != null)
-                        ? wallpaperTarget.mAppToken.animation : null)
+                        ? wallpaperTarget.mAppToken.mAppAnimator.animation : null)
                 + " upper=" + mUpperWallpaperTarget
                 + " lower=" + mLowerWallpaperTarget);
         return (wallpaperTarget != null
                         && (!wallpaperTarget.mObscured || (wallpaperTarget.mAppToken != null
-                                && wallpaperTarget.mAppToken.animation != null)))
+                                && wallpaperTarget.mAppToken.mAppAnimator.animation != null)))
                 || mUpperWallpaperTarget != null
                 || mLowerWallpaperTarget != null;
     }
@@ -1633,7 +1633,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (w != mAnimator.mWindowDetachedWallpaper && w.mAppToken != null) {
                 // If this window's app token is hidden and not animating,
                 // it is of no interest to us.
-                if (w.mAppToken.hidden && w.mAppToken.animation == null) {
+                if (w.mAppToken.hidden && w.mAppToken.mAppAnimator.animation == null) {
                     if (DEBUG_WALLPAPER) Slog.v(TAG,
                             "Skipping not hidden or animating token: " + w);
                     continue;
@@ -1648,7 +1648,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 foundW = w;
                 foundI = i;
                 if (w == mWallpaperTarget && ((w.mAppToken != null
-                        && w.mAppToken.animation != null)
+                        && w.mAppToken.mAppAnimator.animation != null)
                         || w.mWinAnimator.mAnimation != null)) {
                     // The current wallpaper target is animating, so we'll
                     // look behind it for another possible target and figure
@@ -1707,9 +1707,11 @@ public class WindowManagerService extends IWindowManager.Stub
             // animating, then we are in our super special mode!
             if (foundW != null && oldW != null) {
                 boolean oldAnim = oldW.mWinAnimator.mAnimation != null
-                        || (oldW.mAppToken != null && oldW.mAppToken.animation != null);
+                        || (oldW.mAppToken != null
+                            && oldW.mAppToken.mAppAnimator.animation != null);
                 boolean foundAnim = foundW.mWinAnimator.mAnimation != null
-                        || (foundW.mAppToken != null && foundW.mAppToken.animation != null);
+                        || (foundW.mAppToken != null &&
+                            foundW.mAppToken.mAppAnimator.animation != null);
                 if (DEBUG_WALLPAPER) {
                     Slog.v(TAG, "New animation: " + foundAnim
                             + " old animation: " + oldAnim);
@@ -1762,10 +1764,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // Is it time to stop animating?
             boolean lowerAnimating = mLowerWallpaperTarget.mWinAnimator.mAnimation != null
                     || (mLowerWallpaperTarget.mAppToken != null
-                            && mLowerWallpaperTarget.mAppToken.animation != null);
+                            && mLowerWallpaperTarget.mAppToken.mAppAnimator.animation != null);
             boolean upperAnimating = mUpperWallpaperTarget.mWinAnimator.mAnimation != null
                     || (mUpperWallpaperTarget.mAppToken != null
-                            && mUpperWallpaperTarget.mAppToken.animation != null);
+                            && mUpperWallpaperTarget.mAppToken.mAppAnimator.animation != null);
             if (!lowerAnimating || !upperAnimating) {
                 if (DEBUG_WALLPAPER) {
                     Slog.v(TAG, "No longer animating wallpaper targets!");
@@ -1787,7 +1789,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // between two wallpaper targets.
             mWallpaperAnimLayerAdjustment =
                     (mLowerWallpaperTarget == null && foundW.mAppToken != null)
-                    ? foundW.mAppToken.animLayerAdjustment : 0;
+                    ? foundW.mAppToken.mAppAnimator.animLayerAdjustment : 0;
 
             final int maxLayer = mPolicy.getMaxWallpaperLayer()
                     * TYPE_LAYER_MULTIPLIER
@@ -2358,7 +2360,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 + " mExiting=" + win.mExiting
                 + " isAnimating=" + win.mWinAnimator.isAnimating()
                 + " app-animation="
-                + (win.mAppToken != null ? win.mAppToken.animation : null)
+                + (win.mAppToken != null ? win.mAppToken.mAppAnimator.animation : null)
                 + " inPendingTransaction="
                 + (win.mAppToken != null ? win.mAppToken.inPendingTransaction : false)
                 + " mDisplayFrozen=" + mDisplayFrozen);
@@ -3226,13 +3228,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     Slog.v(TAG, "Loaded animation " + a + " for " + wtoken, e);
                 }
-                wtoken.setAnimation(a, initialized);
+                wtoken.mAppAnimator.setAnimation(a, initialized);
             }
         } else {
-            wtoken.clearAnimation();
+            wtoken.mAppAnimator.clearAnimation();
         }
 
-        return wtoken.animation != null;
+        return wtoken.mAppAnimator.animation != null;
     }
 
     // -------------------------------------------------------------
@@ -3880,14 +3882,16 @@ public class WindowManagerService extends IWindowManager.Stub
                             wtoken.clientHidden = ttoken.clientHidden;
                             wtoken.sendAppVisibilityToClients();
                         }
-                        if (ttoken.animation != null) {
-                            wtoken.animation = ttoken.animation;
-                            wtoken.animating = ttoken.animating;
-                            wtoken.animLayerAdjustment = ttoken.animLayerAdjustment;
-                            ttoken.animation = null;
-                            ttoken.animLayerAdjustment = 0;
-                            wtoken.updateLayers();
-                            ttoken.updateLayers();
+                        final AppWindowAnimator tAppAnimator = ttoken.mAppAnimator;
+                        final AppWindowAnimator wAppAnimator = wtoken.mAppAnimator;
+                        if (tAppAnimator.animation != null) {
+                            wAppAnimator.animation = tAppAnimator.animation;
+                            wAppAnimator.animating = tAppAnimator.animating;
+                            wAppAnimator.animLayerAdjustment = tAppAnimator.animLayerAdjustment;
+                            tAppAnimator.animation = null;
+                            tAppAnimator.animLayerAdjustment = 0;
+                            wAppAnimator.updateLayers();
+                            tAppAnimator.updateLayers();
                         }
 
                         updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
@@ -3912,18 +3916,20 @@ public class WindowManagerService extends IWindowManager.Stub
                         mH.sendMessageAtFrontOfQueue(m);
                         return;
                     }
-                    if (ttoken.thumbnail != null) {
+                    final AppWindowAnimator tAppAnimator = ttoken.mAppAnimator;
+                    final AppWindowAnimator wAppAnimator = wtoken.mAppAnimator;
+                    if (tAppAnimator.thumbnail != null) {
                         // The old token is animating with a thumbnail, transfer
                         // that to the new token.
-                        if (wtoken.thumbnail != null) {
-                            wtoken.thumbnail.destroy();
+                        if (wAppAnimator.thumbnail != null) {
+                            wAppAnimator.thumbnail.destroy();
                         }
-                        wtoken.thumbnail = ttoken.thumbnail;
-                        wtoken.thumbnailX = ttoken.thumbnailX;
-                        wtoken.thumbnailY = ttoken.thumbnailY;
-                        wtoken.thumbnailLayer = ttoken.thumbnailLayer;
-                        wtoken.thumbnailAnimation = ttoken.thumbnailAnimation;
-                        ttoken.thumbnail = null;
+                        wAppAnimator.thumbnail = tAppAnimator.thumbnail;
+                        wAppAnimator.thumbnailX = tAppAnimator.thumbnailX;
+                        wAppAnimator.thumbnailY = tAppAnimator.thumbnailY;
+                        wAppAnimator.thumbnailLayer = tAppAnimator.thumbnailLayer;
+                        wAppAnimator.thumbnailAnimation = tAppAnimator.thumbnailAnimation;
+                        tAppAnimator.thumbnail = null;
                     }
                 }
             }
@@ -4013,12 +4019,12 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean runningAppAnimation = false;
 
             if (transit != WindowManagerPolicy.TRANSIT_UNSET) {
-                if (wtoken.animation == sDummyAnimation) {
-                    wtoken.animation = null;
+                if (wtoken.mAppAnimator.animation == sDummyAnimation) {
+                    wtoken.mAppAnimator.animation = null;
                 }
                 applyAnimationLocked(wtoken, lp, transit, visible);
                 changed = true;
-                if (wtoken.animation != null) {
+                if (wtoken.mAppAnimator.animation != null) {
                     delayed = runningAppAnimation = true;
                 }
             }
@@ -4081,7 +4087,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (wtoken.animation != null) {
+        if (wtoken.mAppAnimator.animation != null) {
             delayed = true;
         }
 
@@ -4126,7 +4132,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (DEBUG_APP_TRANSITIONS) Slog.v(
                         TAG, "Setting dummy animation on: " + wtoken);
-                wtoken.setDummyAnimation();
+                wtoken.mAppAnimator.setDummyAnimation();
                 mOpeningApps.remove(wtoken);
                 mClosingApps.remove(wtoken);
                 wtoken.waitingToShow = wtoken.waitingToHide = false;
@@ -4176,7 +4182,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void unsetAppFreezingScreenLocked(AppWindowToken wtoken,
             boolean unfreezeSurfaceNow, boolean force) {
-        if (wtoken.freezingScreen) {
+        if (wtoken.mAppAnimator.freezingScreen) {
             if (DEBUG_ORIENTATION) Slog.v(TAG, "Clear freezing of " + wtoken
                     + " force=" + force);
             final int N = wtoken.allAppWindows.size();
@@ -4194,7 +4200,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (force || unfrozeWindows) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG, "No longer freezing: " + wtoken);
-                wtoken.freezingScreen = false;
+                wtoken.mAppAnimator.freezingScreen = false;
                 mAppsFreezingScreen--;
             }
             if (unfreezeSurfaceNow) {
@@ -4217,11 +4223,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             Slog.i(TAG, "Set freezing of " + wtoken.appToken
                     + ": hidden=" + wtoken.hidden + " freezing="
-                    + wtoken.freezingScreen, e);
+                    + wtoken.mAppAnimator.freezingScreen, e);
         }
         if (!wtoken.hiddenRequested) {
-            if (!wtoken.freezingScreen) {
-                wtoken.freezingScreen = true;
+            if (!wtoken.mAppAnimator.freezingScreen) {
+                wtoken.mAppAnimator.freezingScreen = true;
                 mAppsFreezingScreen++;
                 if (mAppsFreezingScreen == 1) {
                     startFreezingDisplayLocked(false);
@@ -4274,7 +4280,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             final long origId = Binder.clearCallingIdentity();
             if (DEBUG_ORIENTATION) Slog.v(TAG, "Clear freezing of " + token
-                    + ": hidden=" + wtoken.hidden + " freezing=" + wtoken.freezingScreen);
+                    + ": hidden=" + wtoken.hidden + " freezing=" + wtoken.mAppAnimator.freezingScreen);
             unsetAppFreezingScreenLocked(wtoken, true, force);
             Binder.restoreCallingIdentity(origId);
         }
@@ -4309,8 +4315,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (DEBUG_APP_TRANSITIONS) Slog.v(
                         TAG, "Removing app " + wtoken + " delayed=" + delayed
-                        + " animation=" + wtoken.animation
-                        + " animating=" + wtoken.animating);
+                        + " animation=" + wtoken.mAppAnimator.animation
+                        + " animating=" + wtoken.mAppAnimator.animating);
                 if (delayed) {
                     // set the token aside because it has an active animation to be finished
                     if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
@@ -4320,9 +4326,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Make sure there is no animation running on this token,
                     // so any windows associated with it will be removed as
                     // soon as their animations are complete
-                    wtoken.clearAnimation();
-                    wtoken.animation = null;
-                    wtoken.animating = false;
+                    wtoken.mAppAnimator.clearAnimation();
+                    wtoken.mAppAnimator.animating = false;
                 }
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                         "removeAppToken: " + wtoken);
@@ -7039,7 +7044,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             while (i > 0) {
                                 i--;
                                 AppWindowToken tok = mAppTokens.get(i);
-                                if (tok.freezingScreen) {
+                                if (tok.mAppAnimator.freezingScreen) {
                                     Slog.w(TAG, "Force clearing freeze: " + tok);
                                     unsetAppFreezingScreenLocked(tok, true, true);
                                 }
@@ -7525,9 +7530,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 w.mLayer = curLayer;
             }
             if (w.mTargetAppToken != null) {
-                w.mWinAnimator.mAnimLayer = w.mLayer + w.mTargetAppToken.animLayerAdjustment;
+                w.mWinAnimator.mAnimLayer =
+                        w.mLayer + w.mTargetAppToken.mAppAnimator.animLayerAdjustment;
             } else if (w.mAppToken != null) {
-                w.mWinAnimator.mAnimLayer = w.mLayer + w.mAppToken.animLayerAdjustment;
+                w.mWinAnimator.mAnimLayer =
+                        w.mLayer + w.mAppToken.mAppAnimator.animLayerAdjustment;
             } else {
                 w.mWinAnimator.mAnimLayer = w.mLayer;
             }
@@ -7961,10 +7968,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 AppWindowToken wtoken = mOpeningApps.get(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "Now opening app" + wtoken);
-                wtoken.clearThumbnail();
+                wtoken.mAppAnimator.clearThumbnail();
                 wtoken.reportedVisible = false;
                 wtoken.inPendingTransaction = false;
-                wtoken.animation = null;
+                wtoken.mAppAnimator.animation = null;
                 setTokenVisibilityLocked(wtoken, animLp, true,
                         transit, false);
                 wtoken.updateReportedVisibilityLocked();
@@ -7989,9 +7996,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 AppWindowToken wtoken = mClosingApps.get(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "Now closing app" + wtoken);
-                wtoken.clearThumbnail();
+                wtoken.mAppAnimator.clearThumbnail();
                 wtoken.inPendingTransaction = false;
-                wtoken.animation = null;
+                wtoken.mAppAnimator.animation = null;
                 setTokenVisibilityLocked(wtoken, animLp, false,
                         transit, false);
                 wtoken.updateReportedVisibilityLocked();
@@ -8003,7 +8010,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (mNextAppTransitionThumbnail != null && topOpeningApp != null
-                    && topOpeningApp.animation != null) {
+                    && topOpeningApp.mAppAnimator.animation != null) {
                 // This thumbnail animation is very special, we need to have
                 // an extra surface with the thumbnail included with the animation.
                 Rect dirty = new Rect(0, 0, mNextAppTransitionThumbnail.getWidth(),
@@ -8012,7 +8019,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Surface surface = new Surface(mFxSession, Process.myPid(),
                             "thumbnail anim", 0, dirty.width(), dirty.height(),
                             PixelFormat.TRANSLUCENT, Surface.HIDDEN);
-                    topOpeningApp.thumbnail = surface;
+                    topOpeningApp.mAppAnimator.thumbnail = surface;
                     if (SHOW_TRANSACTIONS) Slog.i(TAG, "  THUMBNAIL "
                             + surface + ": CREATE");
                     Surface drawSurface = new Surface();
@@ -8021,17 +8028,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     c.drawBitmap(mNextAppTransitionThumbnail, 0, 0, null);
                     drawSurface.unlockCanvasAndPost(c);
                     drawSurface.release();
-                    topOpeningApp.thumbnailLayer = topOpeningLayer;
+                    topOpeningApp.mAppAnimator.thumbnailLayer = topOpeningLayer;
                     Animation anim = createThumbnailAnimationLocked(transit, true, true);
-                    topOpeningApp.thumbnailAnimation = anim;
+                    topOpeningApp.mAppAnimator.thumbnailAnimation = anim;
                     anim.restrictDuration(MAX_ANIMATION_DURATION);
                     anim.scaleCurrentDuration(mTransitionAnimationScale);
-                    topOpeningApp.thumbnailX = mNextAppTransitionStartX;
-                    topOpeningApp.thumbnailY = mNextAppTransitionStartY;
+                    topOpeningApp.mAppAnimator.thumbnailX = mNextAppTransitionStartX;
+                    topOpeningApp.mAppAnimator.thumbnailY = mNextAppTransitionStartY;
                 } catch (Surface.OutOfResourcesException e) {
                     Slog.e(TAG, "Can't allocate thumbnail surface w=" + dirty.width()
                             + " h=" + dirty.height(), e);
-                    topOpeningApp.clearThumbnail();
+                    topOpeningApp.mAppAnimator.clearThumbnail();
                 }
             }
 
@@ -8632,9 +8639,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Make sure there is no animation running on this token,
                 // so any windows associated with it will be removed as
                 // soon as their animations are complete
-                token.clearAnimation();
-                token.animation = null;
-                token.animating = false;
+                token.mAppAnimator.clearAnimation();
+                token.mAppAnimator.animating = false;
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                         "performLayout: App token exiting now removed" + token);
                 mAppTokens.remove(token);
