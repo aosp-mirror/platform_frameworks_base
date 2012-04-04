@@ -170,7 +170,7 @@ public class CameraStressTest extends ActivityInstrumentationTestCase2<MediaFram
                     }
                 }
                 catch (IOException e) {
-                    Log.v(TAG, "Error closing file: " + e.toString();
+                    Log.v(TAG, "Error closing file: " + e.toString());
                 }
             }
         }
