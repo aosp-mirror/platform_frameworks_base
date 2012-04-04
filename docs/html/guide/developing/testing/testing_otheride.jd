@@ -209,7 +209,7 @@ $ android create test-project -m ../HelloAndroid -n HelloAndroidTest -p HelloAnd
 <p>
   To update a test project with the <code>android</code> tool, enter:
 </p>
-<pre>android update-test-project -m &lt;main_path&gt; -p &lt;test_path&gt;</pre>
+<pre>android update test-project -m &lt;main_path&gt; -p &lt;test_path&gt;</pre>
 
 <table>
     <tr>
