@@ -870,6 +870,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return true;
     }
 
+    @Override
     public boolean hideLw(boolean doAnimation) {
         return hideLw(doAnimation, true);
     }
@@ -910,6 +911,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mService.scheduleAnimationLocked();
         }
         return true;
+    }
+
+    @Override
+    public boolean isAlive() {
+        return mClient.asBinder().isBinderAlive();
     }
 
     private static void applyInsets(Region outRegion, Rect frame, Rect inset) {

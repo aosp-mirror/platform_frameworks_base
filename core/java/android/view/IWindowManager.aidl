@@ -62,8 +62,8 @@ interface IWindowManager
     void setForcedDisplaySize(int longDimen, int shortDimen);
     void clearForcedDisplaySize();
 
-    // Is device configured with a hideable status bar or a tablet system bar?
-    boolean canStatusBarHide();
+    // Is the device configured to have a full system bar for larger screens?
+    boolean hasSystemNavBar();
 
     // These can only be called when injecting events to your own window,
     // or by holding the INJECT_EVENTS permission.  These methods may block
@@ -171,8 +171,10 @@ interface IWindowManager
      * @param alwaysSendConfiguration Flag to force a new configuration to
      * be evaluated.  This can be used when there are other parameters in
      * configuration that are changing.
+     * @param forceRelayout If true, the window manager will always do a relayout
+     * of its windows even if the rotation hasn't changed.
      */
-    void updateRotation(boolean alwaysSendConfiguration);
+    void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout);
 
     /**
      * Retrieve the current screen orientation, constants as per

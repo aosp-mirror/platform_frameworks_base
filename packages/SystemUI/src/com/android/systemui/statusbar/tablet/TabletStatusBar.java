@@ -87,7 +87,6 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.Prefs;
 
 public class TabletStatusBar extends BaseStatusBar implements
-        HeightReceiver.OnBarHeightChangedListener,
         InputMethodsPanel.OnHardKeyboardEnabledChangeListener,
         RecentsPanelView.OnRecentsPanelVisibilityChangedListener {
     public static final boolean DEBUG = false;
@@ -162,7 +161,6 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     ViewGroup mPile;
 
-    HeightReceiver mHeightReceiver;
     BatteryController mBatteryController;
     BluetoothController mBluetoothController;
     LocationController mLocationController;
@@ -204,12 +202,11 @@ public class TabletStatusBar extends BaseStatusBar implements
     
     private void addStatusBarWindow() {
         final View sb = makeStatusBarView();
-        final int height = getStatusBarHeight();
 
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                height,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
@@ -218,20 +215,14 @@ public class TabletStatusBar extends BaseStatusBar implements
                 // HWComposer is unable to handle SW-rendered RGBX_8888 layers.
                 PixelFormat.RGB_565);
 
-        // the status bar should be in an overlay if possible
-        final Display defaultDisplay
-            = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay();
-
         // We explicitly leave FLAG_HARDWARE_ACCELERATED out of the flags.  The status bar occupies
         // very little screen real-estate and is updated fairly frequently.  By using CPU rendering
         // for the status bar, we prevent the GPU from having to wake up just to do these small
         // updates, which should help keep power consumption down.
 
         lp.gravity = getStatusBarGravity();
-        lp.setTitle("StatusBar");
+        lp.setTitle("SystemBar");
         lp.packageName = mContext.getPackageName();
-        lp.windowAnimations = R.style.Animation_StatusBar;
         WindowManagerImpl.getDefault().addView(sb, lp);
     }
 
@@ -414,7 +405,6 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        mHeightReceiver.updateHeight(); // display size may have changed
         loadDimens();
         mNotificationPanelParams.height = getNotificationPanelHeight();
         WindowManagerImpl.getDefault().updateViewLayout(mNotificationPanel,
@@ -426,7 +416,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         final Resources res = mContext.getResources();
 
         mNaturalBarHeight = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.system_bar_height);
+                com.android.internal.R.dimen.navigation_bar_height);
 
         int newIconSize = res.getDimensionPixelSize(
             com.android.internal.R.dimen.system_bar_icon_size);
@@ -478,10 +468,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         mWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
 
-        // This guy will listen for HDMI plugged broadcasts so we can resize the
-        // status bar as appropriate.
-        mHeightReceiver = new HeightReceiver(mContext);
-        mHeightReceiver.registerReceiver();
         loadDimens();
 
         final TabletStatusBarView sb = (TabletStatusBarView)View.inflate(
@@ -637,8 +623,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         // set the initial view visibility
         setAreThereNotifications();
 
-        mHeightReceiver.addOnBarHeightChangedListener(this);
-
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -674,7 +658,9 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public int getStatusBarHeight() {
-        return mHeightReceiver.getHeight();
+        return mStatusBarView != null ? mStatusBarView.getHeight()
+                : mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.navigation_bar_height);
     }
 
     protected int getStatusBarGravity() {

@@ -69,9 +69,9 @@ public class SystemUIService extends Service {
         IWindowManager wm = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         try {
-            SERVICES[0] = wm.canStatusBarHide()
-                    ? R.string.config_statusBarComponent
-                    : R.string.config_systemBarComponent;
+            SERVICES[0] = wm.hasSystemNavBar()
+                    ? R.string.config_systemBarComponent
+                    : R.string.config_statusBarComponent;
         } catch (RemoteException e) {
             Slog.w(TAG, "Failing checking whether status bar can hide", e);
         }
