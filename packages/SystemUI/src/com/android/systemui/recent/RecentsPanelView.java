@@ -68,6 +68,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private Context mContext;
     private BaseStatusBar mBar;
+    private PopupMenu mPopup;
     private View mRecentsScrim;
     private View mRecentsNoApps;
     private ViewGroup mRecentsContainer;
@@ -313,6 +314,10 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             setFocusable(true);
             setFocusableInTouchMode(true);
             requestFocus();
+        } else {
+            if (mPopup != null) {
+                mPopup.dismiss();
+            }
         }
     }
 
@@ -325,6 +330,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             setVisibility(View.GONE);
         }
         if (mBar != null) {
+            // This will indirectly cause show(false, ...) to get called
             mBar.animateCollapse();
         }
     }
@@ -729,10 +735,20 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         getContext().startActivity(intent);
     }
 
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mPopup != null) {
+            return true;
+        } else {
+            return super.onInterceptTouchEvent(ev);
+        }
+    }
+
     public void handleLongPress(
             final View selectedView, final View anchorView, final View thumbnailView) {
         thumbnailView.setSelected(true);
-        PopupMenu popup = new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
+        final PopupMenu popup =
+            new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
+        mPopup = popup;
         popup.getMenuInflater().inflate(R.menu.recent_popup_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
@@ -756,6 +772,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
             public void onDismiss(PopupMenu menu) {
                 thumbnailView.setSelected(false);
+                mPopup = null;
             }
         });
         popup.show();
