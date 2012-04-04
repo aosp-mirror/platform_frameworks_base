@@ -1609,7 +1609,6 @@ public class Editor {
         private boolean mCancelled;
 
         public void run() {
-            Log.d("GILLES", "blinking !!!");
             if (mCancelled) {
                 return;
             }
