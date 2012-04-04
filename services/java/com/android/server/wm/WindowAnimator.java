@@ -6,6 +6,9 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_MAY_CHANGE;
+import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
+
+import static com.android.server.wm.WindowManagerService.H.SET_DIM_PARAMETERS;
 
 import android.content.Context;
 import android.os.SystemClock;
@@ -67,6 +70,9 @@ public class WindowAnimator {
 
     int mBulkUpdateParams = 0;
 
+    DimAnimator mDimAnimator = null;
+    DimAnimator.Parameters mDimParams = null;
+
     WindowAnimator(final WindowManagerService service, final Context context,
             final WindowManagerPolicy policy) {
         mService = service;
@@ -91,7 +97,8 @@ public class WindowAnimator {
             if (mService.mWallpaperTarget == target
                     || mService.mLowerWallpaperTarget == target
                     || mService.mUpperWallpaperTarget == target) {
-                for (int i=0; i<mService.mWindows.size(); i++) {
+                final int N = mService.mWindows.size();
+                for (int i = 0; i < N; i++) {
                     WindowState w = mService.mWindows.get(i);
                     if (w.mIsWallpaper) {
                         target = w;
@@ -125,7 +132,8 @@ public class WindowAnimator {
                 // stopped animating, do one more pass through the layout
                 mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                    mService.debugLayoutRepeats("appToken " + appToken + " done");
+                    mService.debugLayoutRepeats("appToken " + appToken + " done",
+                        mPendingLayoutChanges);
                 }
             }
         }
@@ -141,7 +149,8 @@ public class WindowAnimator {
                 // stopped animating, do one more pass through the layout
                 mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                 if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                    mService.debugLayoutRepeats("exiting appToken " + appToken + " done");
+                    mService.debugLayoutRepeats("exiting appToken " + appToken + " done",
+                        mPendingLayoutChanges);
                 }
             }
         }
@@ -185,13 +194,13 @@ public class WindowAnimator {
                                 && winAnimator.mAnimation.getDetachWallpaper()) {
                             mDetachedWallpaper = w;
                         }
-                        if (winAnimator.mAnimation.getBackgroundColor() != 0) {
+                        final int backgroundColor = winAnimator.mAnimation.getBackgroundColor();
+                        if (backgroundColor != 0) {
                             if (mWindowAnimationBackground == null
                                     || (winAnimator.mAnimLayer <
                                             mWindowAnimationBackground.mWinAnimator.mAnimLayer)) {
                                 mWindowAnimationBackground = w;
-                                mWindowAnimationBackgroundColor =
-                                        winAnimator.mAnimation.getBackgroundColor();
+                                mWindowAnimationBackgroundColor = backgroundColor;
                             }
                         }
                     }
@@ -207,13 +216,13 @@ public class WindowAnimator {
                             && w.mAppToken.animation.getDetachWallpaper()) {
                         mDetachedWallpaper = w;
                     }
-                    if (w.mAppToken.animation.getBackgroundColor() != 0) {
+                    final int backgroundColor = w.mAppToken.animation.getBackgroundColor();
+                    if (backgroundColor != 0) {
                         if (mWindowAnimationBackground == null
                                 || (winAnimator.mAnimLayer <
                                         mWindowAnimationBackground.mWinAnimator.mAnimLayer)) {
                             mWindowAnimationBackground = w;
-                            mWindowAnimationBackgroundColor =
-                                    w.mAppToken.animation.getBackgroundColor();
+                            mWindowAnimationBackgroundColor = backgroundColor;
                         }
                     }
                 }
@@ -222,7 +231,8 @@ public class WindowAnimator {
                     mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
                     mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                     if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                        mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 2");
+                        mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 2",
+                            mPendingLayoutChanges);
                     }
                 }
 
@@ -231,17 +241,18 @@ public class WindowAnimator {
                         if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
                                 "Animation started that could impact force hide: "
                                 + w);
-                        mService.mInnerFields.mWallpaperForceHidingChanged = true;
+                        mBulkUpdateParams |= SET_FORCE_HIDING_CHANGED;
                         mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 3");
+                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 3",
+                                mPendingLayoutChanges);
                         }
                         mService.mFocusMayChange = true;
                     } else if (w.isReadyForDisplay() && winAnimator.mAnimation == null) {
                         mForceHiding = true;
                     }
                 } else if (mPolicy.canBeForceHidden(w, attrs)) {
-                    boolean changed;
+                    final boolean changed;
                     if (mForceHiding) {
                         changed = w.hideLw(false, false);
                         if (WindowManagerService.DEBUG_VISIBILITY && changed) Slog.v(TAG,
@@ -251,7 +262,7 @@ public class WindowAnimator {
                         if (WindowManagerService.DEBUG_VISIBILITY && changed) Slog.v(TAG,
                                 "Now policy shown: " + w);
                         if (changed) {
-                            if (mService.mInnerFields.mWallpaperForceHidingChanged
+                            if ((mBulkUpdateParams & SET_FORCE_HIDING_CHANGED) != 0
                                     && w.isVisibleNow() /*w.isReadyForDisplay()*/) {
                                 // Assume we will need to animate.  If
                                 // we don't (because the wallpaper will
@@ -275,7 +286,8 @@ public class WindowAnimator {
                         mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
                         mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
                         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 4");
+                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 4",
+                                mPendingLayoutChanges);
                         }
                     }
                 }
@@ -326,7 +338,8 @@ public class WindowAnimator {
                 if (winAnimator.performShowLocked()) {
                     mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
                     if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                        mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 5");
+                        mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 5",
+                            mPendingLayoutChanges);
                     }
                 }
             }
@@ -361,7 +374,6 @@ public class WindowAnimator {
                             "Setting mOrientationChangeComplete=true because wtoken "
                             + wtoken + " numInteresting=" + numInteresting
                             + " numDrawn=" + wtoken.numDrawnWindows);
-                    mService.mInnerFields.mOrientationChangeComplete = true;
                 }
             } else if (!wtoken.allDrawn) {
                 int numInteresting = wtoken.numInterestingWindows;
@@ -373,7 +385,8 @@ public class WindowAnimator {
                     wtoken.allDrawn = true;
                     mPendingLayoutChanges |= PhoneWindowManager.FINISH_LAYOUT_REDO_ANIM;
                     if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                        mService.debugLayoutRepeats("testTokenMayBeDrawnLocked");
+                        mService.debugLayoutRepeats("testTokenMayBeDrawnLocked",
+                            mPendingLayoutChanges);
                     }
 
                     // We can now show all of the drawn windows!
@@ -419,14 +432,13 @@ public class WindowAnimator {
                 mScreenRotationAnimation.updateSurfaces();
             }
 
-            final int N = mService.mWindows.size();
-            for (int i=N-1; i>=0; i--) {
+            for (int i = mService.mWindows.size() - 1; i >= 0; i--) {
                 WindowState w = mService.mWindows.get(i);
                 w.mWinAnimator.prepareSurfaceLocked(true);
             }
 
-            if (mService.mDimAnimator != null && mService.mDimAnimator.mDimShown) {
-                mAnimating |= mService.mDimAnimator.updateSurface(mService.mInnerFields.mDimming,
+            if (mDimAnimator != null && mDimAnimator.mDimShown) {
+                mAnimating |= mDimAnimator.updateSurface(mService.mInnerFields.mDimming,
                             mCurrentTime, !mService.okToDisplay());
             }
 
@@ -437,6 +449,10 @@ public class WindowAnimator {
                 } else {
                     mService.mBlackFrame.clearMatrix();
                 }
+            }
+
+            if (mDimParams != null) {
+                mDimAnimator.updateParameters(mContext.getResources(), mDimParams, mCurrentTime);
             }
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
@@ -450,7 +466,7 @@ public class WindowAnimator {
     }
 
     WindowState mCurrentFocus;
-    void setCurrentFocus(WindowState currentFocus) {
+    void setCurrentFocus(final WindowState currentFocus) {
         mCurrentFocus = currentFocus;
     }
 
@@ -462,6 +478,20 @@ public class WindowAnimator {
         mInnerDh = appHeight;
     }
 
+    void startDimming(final WindowStateAnimator winAnimator, final float target,
+                      final int width, final int height) {
+        if (mDimAnimator == null) {
+            mDimAnimator = new DimAnimator(mService.mFxSession);
+        }
+        mService.mH.sendMessage(mService.mH.obtainMessage(SET_DIM_PARAMETERS,
+                new DimAnimator.Parameters(winAnimator, width, height, target)));
+    }
+
+    // TODO(cmautner): Move into Handler
+    void stopDimming() {
+        mService.mH.sendMessage(mService.mH.obtainMessage(SET_DIM_PARAMETERS, null));
+    }
+
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (mWindowDetachedWallpaper != null) {
             pw.print("  mWindowDetachedWallpaper="); pw.println(mWindowDetachedWallpaper);
@@ -469,6 +499,12 @@ public class WindowAnimator {
         if (mWindowAnimationBackgroundSurface != null) {
             pw.println("  mWindowAnimationBackgroundSurface:");
             mWindowAnimationBackgroundSurface.printTo("    ", pw);
+        }
+        if (mDimAnimator != null) {
+            pw.println("  mDimAnimator:");
+            mDimAnimator.printTo("    ", pw);
+        } else {
+            pw.println( "  no DimAnimator ");
         }
     }
 }

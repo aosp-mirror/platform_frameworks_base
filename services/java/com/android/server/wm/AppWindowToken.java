@@ -48,6 +48,8 @@ class AppWindowToken extends WindowToken {
     // application token.  Note this list is NOT sorted!
     final ArrayList<WindowState> allAppWindows = new ArrayList<WindowState>();
 
+    final WindowAnimator mAnimator;
+
     int groupId = -1;
     boolean appFullscreen;
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -88,6 +90,7 @@ class AppWindowToken extends WindowToken {
     boolean removed;
 
     // Have we been asked to have this token keep the screen frozen?
+    // Protect with mAnimator.
     boolean freezingScreen;
 
     boolean animating;
@@ -126,6 +129,7 @@ class AppWindowToken extends WindowToken {
         appWindowToken = this;
         appToken = _token;
         mInputApplicationHandle = new InputApplicationHandle(this);
+        mAnimator = service.mAnimator;
     }
 
     public void setAnimation(Animation anim, boolean initialized) {
@@ -235,11 +239,11 @@ class AppWindowToken extends WindowToken {
         thumbnailTransformation.clear();
         thumbnailAnimation.getTransformation(currentTime, thumbnailTransformation);
         thumbnailTransformation.getMatrix().preTranslate(thumbnailX, thumbnailY);
-        final boolean screenAnimation = service.mAnimator.mScreenRotationAnimation != null
-                && service.mAnimator.mScreenRotationAnimation.isAnimating();
+        final boolean screenAnimation = mAnimator.mScreenRotationAnimation != null
+                && mAnimator.mScreenRotationAnimation.isAnimating();
         if (screenAnimation) {
             thumbnailTransformation.postCompose(
-                    service.mAnimator.mScreenRotationAnimation.getEnterTransformation());
+                    mAnimator.mScreenRotationAnimation.getEnterTransformation());
         }
         // cache often used attributes locally
         final float tmpFloats[] = service.mTmpFloats;
@@ -336,9 +340,9 @@ class AppWindowToken extends WindowToken {
             return false;
         }
 
-        service.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+        mAnimator.mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
         if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-            service.debugLayoutRepeats("AppWindowToken");
+            service.debugLayoutRepeats("AppWindowToken", mAnimator.mPendingLayoutChanges);
         }
 
         clearAnimation();
