@@ -13,3 +13,23 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_MODULE:= app_process
 
 include $(BUILD_EXECUTABLE)
+
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:= \
+	app_main.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+	libcutils \
+	libutils \
+	libbinder \
+	libandroid_runtime
+
+LOCAL_MODULE := app_process__asan
+LOCAL_MODULE_TAGS := eng
+LOCAL_MODULE_PATH := $(TARGET_OUT_EXECUTABLES)/asan
+LOCAL_MODULE_STEM := app_process
+LOCAL_ADDRESS_SANITIZER := true
+
+include $(BUILD_EXECUTABLE)
