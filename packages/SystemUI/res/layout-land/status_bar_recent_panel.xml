@@ -41,7 +41,7 @@
             android:stackFromBottom="true"
             android:fadingEdge="horizontal"
             android:scrollbars="none"
-            android:fadingEdgeLength="@dimen/status_bar_recents_fading_edge_length"
+            android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length"
             android:layout_gravity="bottom|left"
             android:orientation="horizontal"
             android:clipToPadding="false"
