@@ -580,7 +580,18 @@ public final class NfcAdapter {
      * and/or {@link #setNdefPushMessageCallback} is called with a null callback,
      * then NDEF push will be completely disabled for the specified activity(s).
      * This also disables any default NDEF message the Android OS would have
-     * otherwise sent on your behalf.
+     * otherwise sent on your behalf for those activity(s).
+     *
+     * <p>If you want to prevent the Android OS from sending default NDEF
+     * messages completely (for all activities), you can include a
+     * <code><meta-data></code> element inside the <code><application></code>
+     * element of your AndroidManifest.xml file, like this:
+     * <pre>{@code
+     *  <application ...>
+     *      <meta-data android:name="android.nfc.disable_beam_default"
+     *          android:value="true" />
+     *  </application>
+     * }</pre>
      *
      * <p>The API allows for multiple activities to be specified at a time,
      * but it is strongly recommended to just register one at a time,
@@ -664,7 +675,18 @@ public final class NfcAdapter {
      * and/or {@link #setNdefPushMessageCallback} is called with a null callback,
      * then NDEF push will be completely disabled for the specified activity(s).
      * This also disables any default NDEF message the Android OS would have
-     * otherwise sent on your behalf.
+     * otherwise sent on your behalf for those activity(s).
+     *
+     * <p>If you want to prevent the Android OS from sending default NDEF
+     * messages completely (for all activities), you can include a
+     * <code><meta-data></code> element inside the <code><application></code>
+     * element of your AndroidManifest.xml file, like this:
+     * <pre>{@code
+     *  <application ...>
+     *      <meta-data android:name="android.nfc.disable_beam_default"
+     *          android:value="true" />
+     *  </application>
+     * }</pre>
      *
      * <p>The API allows for multiple activities to be specified at a time,
      * but it is strongly recommended to just register one at a time,
