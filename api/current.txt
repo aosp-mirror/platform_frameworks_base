@@ -23314,6 +23314,8 @@ package android.view {
     method public final int getMeasuredState();
     method public final int getMeasuredWidth();
     method public final int getMeasuredWidthAndState();
+    method public int getMinimumHeight();
+    method public int getMinimumWidth();
     method public int getNextFocusDownId();
     method public int getNextFocusForwardId();
     method public int getNextFocusLeftId();
@@ -23344,6 +23346,9 @@ package android.view {
     method public float getRotationY();
     method public float getScaleX();
     method public float getScaleY();
+    method public int getScrollBarDefaultDelayBeforeFade();
+    method public int getScrollBarFadeDuration();
+    method public int getScrollBarSize();
     method public int getScrollBarStyle();
     method public final int getScrollX();
     method public final int getScrollY();
@@ -23414,6 +23419,7 @@ package android.view {
     method public boolean isPressed();
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
+    method public boolean isScrollContainer();
     method public boolean isScrollbarFadingEnabled();
     method public boolean isSelected();
     method public boolean isShown();
@@ -23522,8 +23528,9 @@ package android.view {
     method public void setActivated(boolean);
     method public void setAlpha(float);
     method public void setAnimation(android.view.animation.Animation);
+    method public void setBackground(android.graphics.drawable.Drawable);
     method public void setBackgroundColor(int);
-    method public void setBackgroundDrawable(android.graphics.drawable.Drawable);
+    method public deprecated void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setBackgroundResource(int);
     method public final void setBottom(int);
     method public void setCameraDistance(float);
@@ -23583,6 +23590,9 @@ package android.view {
     method public void setSaveFromParentEnabled(boolean);
     method public void setScaleX(float);
     method public void setScaleY(float);
+    method public void setScrollBarDefaultDelayBeforeFade(int);
+    method public void setScrollBarFadeDuration(int);
+    method public void setScrollBarSize(int);
     method public void setScrollBarStyle(int);
     method public void setScrollContainer(boolean);
     method public void setScrollX(int);
