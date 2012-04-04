@@ -40,14 +40,8 @@ public class Canvas {
     // assigned in constructors, freed in finalizer
     final int mNativeCanvas;
     
-    /*  Our native canvas can be either a raster, gl, or picture canvas.
-        If we are raster, then mGL will be null, and mBitmap may or may not be
-        present (our default constructor creates a raster canvas but no
-        java-bitmap is). If we are a gl-based, then mBitmap will be null, and
-        mGL will not be null. Thus both cannot be non-null, but its possible
-        for both to be null.
-    */
-    private Bitmap  mBitmap;    // if not null, mGL must be null
+    // may be null
+    private Bitmap mBitmap;
     
     // optional field set by the caller
     private DrawFilter mDrawFilter;
@@ -66,7 +60,7 @@ public class Canvas {
     
     // Used by native code
     @SuppressWarnings({"UnusedDeclaration"})
-    private int         mSurfaceFormat;
+    private int mSurfaceFormat;
 
     /**
      * Flag for drawTextRun indicating left-to-right run direction.
