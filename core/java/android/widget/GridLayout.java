@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -559,9 +560,9 @@ public class GridLayout extends ViewGroup {
         int flags = (gravity & mask) >> shift;
         switch (flags) {
             case (AXIS_SPECIFIED | AXIS_PULL_BEFORE):
-                return LEADING;
+                return horizontal ? LEFT : TOP;
             case (AXIS_SPECIFIED | AXIS_PULL_AFTER):
-                return TRAILING;
+                return horizontal ? RIGHT : BOTTOM;
             case (AXIS_SPECIFIED | AXIS_PULL_BEFORE | AXIS_PULL_AFTER):
                 return FILL;
             case AXIS_SPECIFIED:
@@ -1042,12 +1043,15 @@ public class GridLayout extends ViewGroup {
             int rightMargin = getMargin(c, true, false);
             int bottomMargin = getMargin(c, false, false);
 
-            // Alignment offsets: the location of the view relative to its alignment group.
-            int alignmentOffsetX = boundsX.getOffset(c, hAlign, leftMargin + pWidth + rightMargin);
-            int alignmentOffsetY = boundsY.getOffset(c, vAlign, topMargin + pHeight + bottomMargin);
+            int sumMarginsX = leftMargin + rightMargin;
+            int sumMarginsY = topMargin + bottomMargin;
 
-            int width = hAlign.getSizeInCell(c, pWidth, cellWidth - leftMargin - rightMargin);
-            int height = vAlign.getSizeInCell(c, pHeight, cellHeight - topMargin - bottomMargin);
+            // Alignment offsets: the location of the view relative to its alignment group.
+            int alignmentOffsetX = boundsX.getOffset(this, c, hAlign, pWidth + sumMarginsX, true);
+            int alignmentOffsetY = boundsY.getOffset(this, c, vAlign, pHeight + sumMarginsY, false);
+
+            int width = hAlign.getSizeInCell(c, pWidth, cellWidth - sumMarginsX);
+            int height = vAlign.getSizeInCell(c, pHeight, cellHeight - sumMarginsY);
 
             int dx = x1 + gravityOffsetX + alignmentOffsetX;
 
@@ -1181,7 +1185,7 @@ public class GridLayout extends ViewGroup {
                 View c = getChildAt(i);
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
-                groupBounds.getValue(i).include(c, spec, GridLayout.this, this);
+                groupBounds.getValue(i).include(GridLayout.this, c, spec, this);
             }
         }
 
@@ -2138,16 +2142,30 @@ public class GridLayout extends ViewGroup {
             return before + after;
         }
 
-        protected int getOffset(View c, Alignment alignment, int size) {
-            return before - alignment.getAlignmentValue(c, size);
+        private int getAlignmentValue(GridLayout gl, View c, int size, Alignment a, boolean horiz) {
+            boolean useLayoutBounds = gl.getLayoutMode() == LAYOUT_BOUNDS;
+            if (!useLayoutBounds) {
+                return a.getAlignmentValue(c, size);
+            } else {
+                Insets insets = c.getLayoutInsets();
+                int leadingInset = horiz ? insets.left : insets.top; // RTL?
+                int trailingInset = horiz ? insets.right : insets.bottom; // RTL?
+                int totalInset = leadingInset + trailingInset;
+                return leadingInset + a.getAlignmentValue(c, size - totalInset);
+            }
         }
 
-        protected final void include(View c, Spec spec, GridLayout gridLayout, Axis axis) {
+        protected int getOffset(GridLayout gl, View c, Alignment a, int size, boolean horizontal) {
+            return before - getAlignmentValue(gl, c, size, a, horizontal);
+        }
+
+        protected final void include(GridLayout gl, View c, Spec spec, Axis axis) {
             this.flexibility &= spec.getFlexibility();
-            int size = gridLayout.getMeasurementIncludingMargin(c, axis.horizontal);
-            Alignment alignment = gridLayout.getAlignment(spec.alignment, axis.horizontal);
+            boolean horizontal = axis.horizontal;
+            int size = gl.getMeasurementIncludingMargin(c, horizontal);
+            Alignment alignment = gl.getAlignment(spec.alignment, horizontal);
             // todo test this works correctly when the returned value is UNDEFINED
-            int before = alignment.getAlignmentValue(c, size);
+            int before = getAlignmentValue(gl, c, size, alignment, horizontal);
             include(before, size - before);
         }
 
@@ -2614,8 +2632,8 @@ public class GridLayout extends ViewGroup {
                 }
 
                 @Override
-                protected int getOffset(View c, Alignment alignment, int size) {
-                    return max(0, super.getOffset(c, alignment, size));
+                protected int getOffset(GridLayout gl, View c, Alignment a, int size, boolean hrz) {
+                    return max(0, super.getOffset(gl, c, a, size, hrz));
                 }
             };
         }

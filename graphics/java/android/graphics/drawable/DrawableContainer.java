@@ -90,6 +90,18 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public boolean getLayoutInsets(Rect insets) {
+        if (mCurrDrawable != null) {
+            return mCurrDrawable.getLayoutInsets(insets);
+        } else {
+            return super.getLayoutInsets(insets);
+        }
+    }
+
     @Override
     public void setAlpha(int alpha) {
         if (mAlpha != alpha) {

@@ -705,6 +705,20 @@ public abstract class Drawable {
     }
 
     /**
+     * Return in insets the layout insets suggested by this Drawable for use with alignment
+     * operations during layout. Positive values move toward the
+     * center of the Drawable. Returns true if this drawable
+     * actually has a layout insets, else false. When false is returned, the padding
+     * is always set to 0.
+     *
+     * @hide
+     */
+    public boolean getLayoutInsets(Rect insets) {
+        insets.set(0, 0, 0, 0);
+        return false;
+    }
+
+    /**
      * Make this drawable mutable. This operation cannot be reversed. A mutable
      * drawable is guaranteed to not share its state with any other drawable.
      * This is especially useful when you need to modify properties of drawables
@@ -965,9 +979,7 @@ public abstract class Drawable {
             Rect pad, Rect layoutBounds, String srcName) {
 
         if (np != null) {
-            NinePatchDrawable npd = new NinePatchDrawable(res, bm, np, pad, srcName);
-            npd.setLayoutBounds(layoutBounds);
-            return npd;
+            return new NinePatchDrawable(res, bm, np, pad, layoutBounds, srcName);
         }
 
         return new BitmapDrawable(res, bm);
