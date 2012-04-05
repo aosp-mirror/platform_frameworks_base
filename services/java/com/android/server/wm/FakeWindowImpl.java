@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import com.android.server.input.InputApplicationHandle;
+import com.android.server.input.InputWindowHandle;
+
 import android.os.Looper;
 import android.os.Process;
 import android.util.Slog;

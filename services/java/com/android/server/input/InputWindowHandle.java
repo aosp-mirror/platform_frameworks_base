@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server.wm;
+package com.android.server.input;
 
 import android.graphics.Region;
 import android.view.InputChannel;
-import android.view.WindowManagerPolicy;
 
 /**
  * Functions as a handle for a window that can receive input.
@@ -35,7 +34,7 @@ public final class InputWindowHandle {
     public final InputApplicationHandle inputApplicationHandle;
 
     // The window manager's window state.
-    public final WindowManagerPolicy.WindowState windowState;
+    public final Object windowState;
 
     // The input channel associated with the window.
     public InputChannel inputChannel;
@@ -91,7 +90,7 @@ public final class InputWindowHandle {
     private native void nativeDispose();
 
     public InputWindowHandle(InputApplicationHandle inputApplicationHandle,
-            WindowManagerPolicy.WindowState windowState) {
+            Object windowState) {
         this.inputApplicationHandle = inputApplicationHandle;
         this.windowState = windowState;
     }

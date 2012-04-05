@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.server.wm;
+package com.android.server.input;
 
 import com.android.internal.util.XmlUtils;
 import com.android.server.Watchdog;
+import com.android.server.input.InputFilter.Host;
+import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -25,7 +27,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.hardware.input.IInputManager;
+import android.os.Binder;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.SystemProperties;
@@ -44,6 +49,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -53,61 +59,66 @@ import java.util.ArrayList;
 /*
  * Wraps the C++ InputManager and provides its callbacks.
  */
-public class InputManager implements Watchdog.Monitor {
+public class InputManagerService extends IInputManager.Stub implements Watchdog.Monitor {
     static final String TAG = "InputManager";
-    
-    private static final boolean DEBUG = false;
+    static final boolean DEBUG = false;
 
-    private final Callbacks mCallbacks;
+    private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
+
+    // Pointer to native input manager service object.
+    private final int mPtr;
+
     private final Context mContext;
-    private final WindowManagerService mWindowManagerService;
+    private final Callbacks mCallbacks;
+    private final Handler mHandler;
 
-    private static native void nativeInit(Context context,
-            Callbacks callbacks, MessageQueue messageQueue);
-    private static native void nativeStart();
-    private static native void nativeSetDisplaySize(int displayId, int width, int height,
-            int externalWidth, int externalHeight);
-    private static native void nativeSetDisplayOrientation(int displayId, int rotation);
+    private static native int nativeInit(InputManagerService service,
+            Context context, MessageQueue messageQueue);
+    private static native void nativeStart(int ptr);
+    private static native void nativeSetDisplaySize(int ptr, int displayId,
+            int width, int height, int externalWidth, int externalHeight);
+    private static native void nativeSetDisplayOrientation(int ptr, int displayId, int rotation);
     
-    private static native int nativeGetScanCodeState(int deviceId, int sourceMask,
-            int scanCode);
-    private static native int nativeGetKeyCodeState(int deviceId, int sourceMask,
-            int keyCode);
-    private static native int nativeGetSwitchState(int deviceId, int sourceMask,
-            int sw);
-    private static native boolean nativeHasKeys(int deviceId, int sourceMask,
-            int[] keyCodes, boolean[] keyExists);
-    private static native void nativeRegisterInputChannel(InputChannel inputChannel,
+    private static native int nativeGetScanCodeState(int ptr,
+            int deviceId, int sourceMask, int scanCode);
+    private static native int nativeGetKeyCodeState(int ptr,
+            int deviceId, int sourceMask, int keyCode);
+    private static native int nativeGetSwitchState(int ptr,
+            int deviceId, int sourceMask, int sw);
+    private static native boolean nativeHasKeys(int ptr,
+            int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
+    private static native void nativeRegisterInputChannel(int ptr, InputChannel inputChannel,
             InputWindowHandle inputWindowHandle, boolean monitor);
-    private static native void nativeUnregisterInputChannel(InputChannel inputChannel);
-    private static native void nativeSetInputFilterEnabled(boolean enable);
-    private static native int nativeInjectInputEvent(InputEvent event,
+    private static native void nativeUnregisterInputChannel(int ptr, InputChannel inputChannel);
+    private static native void nativeSetInputFilterEnabled(int ptr, boolean enable);
+    private static native int nativeInjectInputEvent(int ptr, InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
-    private static native void nativeSetInputWindows(InputWindowHandle[] windowHandles);
-    private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
-    private static native void nativeSetSystemUiVisibility(int visibility);
-    private static native void nativeSetFocusedApplication(InputApplicationHandle application);
-    private static native InputDevice nativeGetInputDevice(int deviceId);
-    private static native void nativeGetInputConfiguration(Configuration configuration);
-    private static native int[] nativeGetInputDeviceIds();
-    private static native boolean nativeTransferTouchFocus(InputChannel fromChannel,
-            InputChannel toChannel);
-    private static native void nativeSetPointerSpeed(int speed);
-    private static native void nativeSetShowTouches(boolean enabled);
-    private static native String nativeDump();
-    private static native void nativeMonitor();
+    private static native void nativeSetInputWindows(int ptr, InputWindowHandle[] windowHandles);
+    private static native void nativeSetInputDispatchMode(int ptr, boolean enabled, boolean frozen);
+    private static native void nativeSetSystemUiVisibility(int ptr, int visibility);
+    private static native void nativeSetFocusedApplication(int ptr,
+            InputApplicationHandle application);
+    private static native InputDevice nativeGetInputDevice(int ptr, int deviceId);
+    private static native void nativeGetInputConfiguration(int ptr, Configuration configuration);
+    private static native int[] nativeGetInputDeviceIds(int ptr);
+    private static native boolean nativeTransferTouchFocus(int ptr,
+            InputChannel fromChannel, InputChannel toChannel);
+    private static native void nativeSetPointerSpeed(int ptr, int speed);
+    private static native void nativeSetShowTouches(int ptr, boolean enabled);
+    private static native String nativeDump(int ptr);
+    private static native void nativeMonitor(int ptr);
     
     // Input event injection constants defined in InputDispatcher.h.
-    static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
-    static final int INPUT_EVENT_INJECTION_PERMISSION_DENIED = 1;
-    static final int INPUT_EVENT_INJECTION_FAILED = 2;
-    static final int INPUT_EVENT_INJECTION_TIMED_OUT = 3;
-    
+    public static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
+    public static final int INPUT_EVENT_INJECTION_PERMISSION_DENIED = 1;
+    public static final int INPUT_EVENT_INJECTION_FAILED = 2;
+    public static final int INPUT_EVENT_INJECTION_TIMED_OUT = 3;
+
     // Input event injection synchronization modes defined in InputDispatcher.h
-    static final int INPUT_EVENT_INJECTION_SYNC_NONE = 0;
-    static final int INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT = 1;
-    static final int INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH = 2;
+    public static final int INPUT_EVENT_INJECTION_SYNC_NONE = 0;
+    public static final int INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT = 1;
+    public static final int INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH = 2;
     
     // Key states (may be returned by queries about the current state of a
     // particular key code, scan code or switch).
@@ -129,23 +140,21 @@ public class InputManager implements Watchdog.Monitor {
     InputFilter mInputFilter;
     InputFilterHost mInputFilterHost;
 
-    public InputManager(Context context, WindowManagerService windowManagerService) {
+    public InputManagerService(Context context, Callbacks callbacks) {
         this.mContext = context;
-        this.mWindowManagerService = windowManagerService;
-        this.mCallbacks = new Callbacks();
-
-        Looper looper = windowManagerService.mH.getLooper();
+        this.mCallbacks = callbacks;
+        this.mHandler = new Handler();
 
         Slog.i(TAG, "Initializing input manager");
-        nativeInit(mContext, mCallbacks, looper.getQueue());
-
-        // Add ourself to the Watchdog monitors.
-        Watchdog.getInstance().addMonitor(this);
+        mPtr = nativeInit(this, mContext, mHandler.getLooper().getQueue());
     }
 
     public void start() {
         Slog.i(TAG, "Starting input manager");
-        nativeStart();
+        nativeStart(mPtr);
+
+        // Add ourself to the Watchdog monitors.
+        Watchdog.getInstance().addMonitor(this);
 
         registerPointerSpeedSettingObserver();
         registerShowTouchesSettingObserver();
@@ -164,7 +173,7 @@ public class InputManager implements Watchdog.Monitor {
             Slog.d(TAG, "Setting display #" + displayId + " size to " + width + "x" + height
                     + " external size " + externalWidth + "x" + externalHeight);
         }
-        nativeSetDisplaySize(displayId, width, height, externalWidth, externalHeight);
+        nativeSetDisplaySize(mPtr, displayId, width, height, externalWidth, externalHeight);
     }
     
     public void setDisplayOrientation(int displayId, int rotation) {
@@ -175,7 +184,7 @@ public class InputManager implements Watchdog.Monitor {
         if (DEBUG) {
             Slog.d(TAG, "Setting display #" + displayId + " orientation to " + rotation);
         }
-        nativeSetDisplayOrientation(displayId, rotation);
+        nativeSetDisplayOrientation(mPtr, displayId, rotation);
     }
     
     public void getInputConfiguration(Configuration config) {
@@ -183,7 +192,7 @@ public class InputManager implements Watchdog.Monitor {
             throw new IllegalArgumentException("config must not be null.");
         }
         
-        nativeGetInputConfiguration(config);
+        nativeGetInputConfiguration(mPtr, config);
     }
     
     /**
@@ -196,7 +205,7 @@ public class InputManager implements Watchdog.Monitor {
      * @return The key state.
      */
     public int getKeyCodeState(int deviceId, int sourceMask, int keyCode) {
-        return nativeGetKeyCodeState(deviceId, sourceMask, keyCode);
+        return nativeGetKeyCodeState(mPtr, deviceId, sourceMask, keyCode);
     }
     
     /**
@@ -209,7 +218,7 @@ public class InputManager implements Watchdog.Monitor {
      * @return The key state.
      */
     public int getScanCodeState(int deviceId, int sourceMask, int scanCode) {
-        return nativeGetScanCodeState(deviceId, sourceMask, scanCode);
+        return nativeGetScanCodeState(mPtr, deviceId, sourceMask, scanCode);
     }
     
     /**
@@ -222,7 +231,7 @@ public class InputManager implements Watchdog.Monitor {
      * @return The switch state.
      */
     public int getSwitchState(int deviceId, int sourceMask, int switchCode) {
-        return nativeGetSwitchState(deviceId, sourceMask, switchCode);
+        return nativeGetSwitchState(mPtr, deviceId, sourceMask, switchCode);
     }
 
     /**
@@ -246,7 +255,7 @@ public class InputManager implements Watchdog.Monitor {
                     + "least as large as keyCodes.");
         }
         
-        return nativeHasKeys(deviceId, sourceMask, keyCodes, keyExists);
+        return nativeHasKeys(mPtr, deviceId, sourceMask, keyCodes, keyExists);
     }
     
     /**
@@ -260,7 +269,7 @@ public class InputManager implements Watchdog.Monitor {
         }
         
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
-        nativeRegisterInputChannel(inputChannels[0], null, true);
+        nativeRegisterInputChannel(mPtr, inputChannels[0], null, true);
         inputChannels[0].dispose(); // don't need to retain the Java object reference
         return inputChannels[1];
     }
@@ -277,7 +286,7 @@ public class InputManager implements Watchdog.Monitor {
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
         
-        nativeRegisterInputChannel(inputChannel, inputWindowHandle, false);
+        nativeRegisterInputChannel(mPtr, inputChannel, inputWindowHandle, false);
     }
     
     /**
@@ -289,7 +298,7 @@ public class InputManager implements Watchdog.Monitor {
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
         
-        nativeUnregisterInputChannel(inputChannel);
+        nativeUnregisterInputChannel(mPtr, inputChannel);
     }
 
     /**
@@ -323,7 +332,7 @@ public class InputManager implements Watchdog.Monitor {
                 filter.install(mInputFilterHost);
             }
 
-            nativeSetInputFilterEnabled(filter != null);
+            nativeSetInputFilterEnabled(mPtr, filter != null);
         }
     }
 
@@ -362,8 +371,8 @@ public class InputManager implements Watchdog.Monitor {
             throw new IllegalArgumentException("timeoutMillis must be positive");
         }
 
-        return nativeInjectInputEvent(event, injectorPid, injectorUid, syncMode, timeoutMillis,
-                WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
+        return nativeInjectInputEvent(mPtr, event, injectorPid, injectorUid, syncMode,
+                timeoutMillis, WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
     }
 
     /**
@@ -372,7 +381,7 @@ public class InputManager implements Watchdog.Monitor {
      * @return The input device or null if not found.
      */
     public InputDevice getInputDevice(int deviceId) {
-        return nativeGetInputDevice(deviceId);
+        return nativeGetInputDevice(mPtr, deviceId);
     }
     
     /**
@@ -380,23 +389,23 @@ public class InputManager implements Watchdog.Monitor {
      * @return The input device ids.
      */
     public int[] getInputDeviceIds() {
-        return nativeGetInputDeviceIds();
+        return nativeGetInputDeviceIds(mPtr);
     }
     
     public void setInputWindows(InputWindowHandle[] windowHandles) {
-        nativeSetInputWindows(windowHandles);
+        nativeSetInputWindows(mPtr, windowHandles);
     }
     
     public void setFocusedApplication(InputApplicationHandle application) {
-        nativeSetFocusedApplication(application);
+        nativeSetFocusedApplication(mPtr, application);
     }
     
     public void setInputDispatchMode(boolean enabled, boolean frozen) {
-        nativeSetInputDispatchMode(enabled, frozen);
+        nativeSetInputDispatchMode(mPtr, enabled, frozen);
     }
 
     public void setSystemUiVisibility(int visibility) {
-        nativeSetSystemUiVisibility(visibility);
+        nativeSetSystemUiVisibility(mPtr, visibility);
     }
 
     /**
@@ -419,7 +428,7 @@ public class InputManager implements Watchdog.Monitor {
         if (toChannel == null) {
             throw new IllegalArgumentException("toChannel must not be null.");
         }
-        return nativeTransferTouchFocus(fromChannel, toChannel);
+        return nativeTransferTouchFocus(mPtr, fromChannel, toChannel);
     }
 
     /**
@@ -429,7 +438,7 @@ public class InputManager implements Watchdog.Monitor {
      */
     public void setPointerSpeed(int speed) {
         speed = Math.min(Math.max(speed, -7), 7);
-        nativeSetPointerSpeed(speed);
+        nativeSetPointerSpeed(mPtr, speed);
     }
 
     public void updatePointerSpeedFromSettings() {
@@ -440,7 +449,7 @@ public class InputManager implements Watchdog.Monitor {
     private void registerPointerSpeedSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.POINTER_SPEED), true,
-                new ContentObserver(mWindowManagerService.mH) {
+                new ContentObserver(mHandler) {
                     @Override
                     public void onChange(boolean selfChange) {
                         updatePointerSpeedFromSettings();
@@ -460,13 +469,13 @@ public class InputManager implements Watchdog.Monitor {
 
     public void updateShowTouchesFromSettings() {
         int setting = getShowTouchesSetting(0);
-        nativeSetShowTouches(setting != 0);
+        nativeSetShowTouches(mPtr, setting != 0);
     }
 
     private void registerShowTouchesSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.SHOW_TOUCHES), true,
-                new ContentObserver(mWindowManagerService.mH) {
+                new ContentObserver(mHandler) {
                     @Override
                     public void onChange(boolean selfChange) {
                         updateShowTouchesFromSettings();
@@ -484,19 +493,202 @@ public class InputManager implements Watchdog.Monitor {
         return result;
     }
 
-    public void dump(PrintWriter pw) {
-        String dumpStr = nativeDump();
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission("android.permission.DUMP")
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump InputManager from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        pw.println("INPUT MANAGER (dumpsys input)\n");
+        String dumpStr = nativeDump(mPtr);
         if (dumpStr != null) {
             pw.println(dumpStr);
         }
     }
 
-    // Called by the heartbeat to ensure locks are not held indefnitely (for deadlock detection).
+    // Called by the heartbeat to ensure locks are not held indefinitely (for deadlock detection).
     public void monitor() {
         synchronized (mInputFilterLock) { }
-        nativeMonitor();
+        nativeMonitor(mPtr);
     }
 
+    // Native callback.
+    private void notifyConfigurationChanged(long whenNanos) {
+        mCallbacks.notifyConfigurationChanged();
+    }
+
+    // Native callback.
+    private void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
+        mCallbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
+    }
+
+    // Native callback.
+    private void notifyInputChannelBroken(InputWindowHandle inputWindowHandle) {
+        mCallbacks.notifyInputChannelBroken(inputWindowHandle);
+    }
+
+    // Native callback.
+    private long notifyANR(InputApplicationHandle inputApplicationHandle,
+            InputWindowHandle inputWindowHandle) {
+        return mCallbacks.notifyANR(inputApplicationHandle, inputWindowHandle);
+    }
+
+    // Native callback.
+    final boolean filterInputEvent(InputEvent event, int policyFlags) {
+        synchronized (mInputFilterLock) {
+            if (mInputFilter != null) {
+                mInputFilter.filterInputEvent(event, policyFlags);
+                return false;
+            }
+        }
+        event.recycle();
+        return true;
+    }
+
+    // Native callback.
+    private int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
+        return mCallbacks.interceptKeyBeforeQueueing(
+                event, policyFlags, isScreenOn);
+    }
+
+    // Native callback.
+    private int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
+        return mCallbacks.interceptMotionBeforeQueueingWhenScreenOff(policyFlags);
+    }
+
+    // Native callback.
+    private long interceptKeyBeforeDispatching(InputWindowHandle focus,
+            KeyEvent event, int policyFlags) {
+        return mCallbacks.interceptKeyBeforeDispatching(focus, event, policyFlags);
+    }
+
+    // Native callback.
+    private KeyEvent dispatchUnhandledKey(InputWindowHandle focus,
+            KeyEvent event, int policyFlags) {
+        return mCallbacks.dispatchUnhandledKey(focus, event, policyFlags);
+    }
+
+    // Native callback.
+    private boolean checkInjectEventsPermission(int injectorPid, int injectorUid) {
+        return mContext.checkPermission(android.Manifest.permission.INJECT_EVENTS,
+                injectorPid, injectorUid) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    // Native callback.
+    private int getVirtualKeyQuietTimeMillis() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_virtualKeyQuietTimeMillis);
+    }
+
+    // Native callback.
+    private String[] getExcludedDeviceNames() {
+        ArrayList<String> names = new ArrayList<String>();
+
+        // Read partner-provided list of excluded input devices
+        XmlPullParser parser = null;
+        // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
+        File confFile = new File(Environment.getRootDirectory(), EXCLUDED_DEVICES_PATH);
+        FileReader confreader = null;
+        try {
+            confreader = new FileReader(confFile);
+            parser = Xml.newPullParser();
+            parser.setInput(confreader);
+            XmlUtils.beginDocument(parser, "devices");
+
+            while (true) {
+                XmlUtils.nextElement(parser);
+                if (!"device".equals(parser.getName())) {
+                    break;
+                }
+                String name = parser.getAttributeValue(null, "name");
+                if (name != null) {
+                    names.add(name);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // It's ok if the file does not exist.
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
+        } finally {
+            try { if (confreader != null) confreader.close(); } catch (IOException e) { }
+        }
+
+        return names.toArray(new String[names.size()]);
+    }
+
+    // Native callback.
+    private int getKeyRepeatTimeout() {
+        return ViewConfiguration.getKeyRepeatTimeout();
+    }
+
+    // Native callback.
+    private int getKeyRepeatDelay() {
+        return ViewConfiguration.getKeyRepeatDelay();
+    }
+
+    // Native callback.
+    private int getHoverTapTimeout() {
+        return ViewConfiguration.getHoverTapTimeout();
+    }
+
+    // Native callback.
+    private int getHoverTapSlop() {
+        return ViewConfiguration.getHoverTapSlop();
+    }
+
+    // Native callback.
+    private int getDoubleTapTimeout() {
+        return ViewConfiguration.getDoubleTapTimeout();
+    }
+
+    // Native callback.
+    private int getLongPressTimeout() {
+        return ViewConfiguration.getLongPressTimeout();
+    }
+
+    // Native callback.
+    private int getPointerLayer() {
+        return mCallbacks.getPointerLayer();
+    }
+
+    // Native callback.
+    private PointerIcon getPointerIcon() {
+        return PointerIcon.getDefaultIcon(mContext);
+    }
+
+    /**
+     * Callback interface implemented by the Window Manager.
+     */
+    public interface Callbacks {
+        public void notifyConfigurationChanged();
+
+        public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
+
+        public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle);
+
+        public long notifyANR(InputApplicationHandle inputApplicationHandle,
+                InputWindowHandle inputWindowHandle);
+
+        public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn);
+
+        public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags);
+
+        public long interceptKeyBeforeDispatching(InputWindowHandle focus,
+                KeyEvent event, int policyFlags);
+
+        public KeyEvent dispatchUnhandledKey(InputWindowHandle focus,
+                KeyEvent event, int policyFlags);
+
+        public int getPointerLayer();
+    }
+
+    /**
+     * Hosting interface for input filters to call back into the input manager.
+     */
     private final class InputFilterHost implements InputFilter.Host {
         private boolean mDisconnected;
 
@@ -511,173 +703,10 @@ public class InputManager implements Watchdog.Monitor {
 
             synchronized (mInputFilterLock) {
                 if (!mDisconnected) {
-                    nativeInjectInputEvent(event, 0, 0, INPUT_EVENT_INJECTION_SYNC_NONE, 0,
+                    nativeInjectInputEvent(mPtr, event, 0, 0, INPUT_EVENT_INJECTION_SYNC_NONE, 0,
                             policyFlags | WindowManagerPolicy.FLAG_FILTERED);
                 }
             }
-        }
-    }
-
-    /*
-     * Callbacks from native.
-     */
-    private final class Callbacks {
-        static final String TAG = "InputManager-Callbacks";
-        
-        private static final boolean DEBUG_VIRTUAL_KEYS = false;
-        private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
-        private static final String CALIBRATION_DIR_PATH = "usr/idc/";
-        
-        @SuppressWarnings("unused")
-        public void notifyConfigurationChanged(long whenNanos) {
-            mWindowManagerService.mInputMonitor.notifyConfigurationChanged();
-        }
-        
-        @SuppressWarnings("unused")
-        public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
-            mWindowManagerService.mInputMonitor.notifyLidSwitchChanged(whenNanos, lidOpen);
-        }
-        
-        @SuppressWarnings("unused")
-        public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle) {
-            mWindowManagerService.mInputMonitor.notifyInputChannelBroken(inputWindowHandle);
-        }
-        
-        @SuppressWarnings("unused")
-        public long notifyANR(InputApplicationHandle inputApplicationHandle,
-                InputWindowHandle inputWindowHandle) {
-            return mWindowManagerService.mInputMonitor.notifyANR(
-                    inputApplicationHandle, inputWindowHandle);
-        }
-
-        @SuppressWarnings("unused")
-        final boolean filterInputEvent(InputEvent event, int policyFlags) {
-            synchronized (mInputFilterLock) {
-                if (mInputFilter != null) {
-                    mInputFilter.filterInputEvent(event, policyFlags);
-                    return false;
-                }
-            }
-            event.recycle();
-            return true;
-        }
-
-        @SuppressWarnings("unused")
-        public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
-            return mWindowManagerService.mInputMonitor.interceptKeyBeforeQueueing(
-                    event, policyFlags, isScreenOn);
-        }
-
-        @SuppressWarnings("unused")
-        public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
-            return mWindowManagerService.mInputMonitor.interceptMotionBeforeQueueingWhenScreenOff(
-                    policyFlags);
-        }
-
-        @SuppressWarnings("unused")
-        public long interceptKeyBeforeDispatching(InputWindowHandle focus,
-                KeyEvent event, int policyFlags) {
-            return mWindowManagerService.mInputMonitor.interceptKeyBeforeDispatching(
-                    focus, event, policyFlags);
-        }
-        
-        @SuppressWarnings("unused")
-        public KeyEvent dispatchUnhandledKey(InputWindowHandle focus,
-                KeyEvent event, int policyFlags) {
-            return mWindowManagerService.mInputMonitor.dispatchUnhandledKey(
-                    focus, event, policyFlags);
-        }
-        
-        @SuppressWarnings("unused")
-        public boolean checkInjectEventsPermission(int injectorPid, int injectorUid) {
-            return mContext.checkPermission(
-                    android.Manifest.permission.INJECT_EVENTS, injectorPid, injectorUid)
-                    == PackageManager.PERMISSION_GRANTED;
-        }
-
-        @SuppressWarnings("unused")
-        public int getVirtualKeyQuietTimeMillis() {
-            return mContext.getResources().getInteger(
-                    com.android.internal.R.integer.config_virtualKeyQuietTimeMillis);
-        }
-
-        @SuppressWarnings("unused")
-        public String[] getExcludedDeviceNames() {
-            ArrayList<String> names = new ArrayList<String>();
-            
-            // Read partner-provided list of excluded input devices
-            XmlPullParser parser = null;
-            // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
-            File confFile = new File(Environment.getRootDirectory(), EXCLUDED_DEVICES_PATH);
-            FileReader confreader = null;
-            try {
-                confreader = new FileReader(confFile);
-                parser = Xml.newPullParser();
-                parser.setInput(confreader);
-                XmlUtils.beginDocument(parser, "devices");
-
-                while (true) {
-                    XmlUtils.nextElement(parser);
-                    if (!"device".equals(parser.getName())) {
-                        break;
-                    }
-                    String name = parser.getAttributeValue(null, "name");
-                    if (name != null) {
-                        names.add(name);
-                    }
-                }
-            } catch (FileNotFoundException e) {
-                // It's ok if the file does not exist.
-            } catch (Exception e) {
-                Slog.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
-            } finally {
-                try { if (confreader != null) confreader.close(); } catch (IOException e) { }
-            }
-            
-            return names.toArray(new String[names.size()]);
-        }
-
-        @SuppressWarnings("unused")
-        public int getKeyRepeatTimeout() {
-            return ViewConfiguration.getKeyRepeatTimeout();
-        }
-
-        @SuppressWarnings("unused")
-        public int getKeyRepeatDelay() {
-            return ViewConfiguration.getKeyRepeatDelay();
-        }
-
-        @SuppressWarnings("unused")
-        public int getHoverTapTimeout() {
-            return ViewConfiguration.getHoverTapTimeout();
-        }
-
-        @SuppressWarnings("unused")
-        public int getHoverTapSlop() {
-            return ViewConfiguration.getHoverTapSlop();
-        }
-
-        @SuppressWarnings("unused")
-        public int getDoubleTapTimeout() {
-            return ViewConfiguration.getDoubleTapTimeout();
-        }
-
-        @SuppressWarnings("unused")
-        public int getLongPressTimeout() {
-            return ViewConfiguration.getLongPressTimeout();
-        }
-
-        @SuppressWarnings("unused")
-        public int getPointerLayer() {
-            return mWindowManagerService.mPolicy.windowTypeToLayerLw(
-                    WindowManager.LayoutParams.TYPE_POINTER)
-                    * WindowManagerService.TYPE_LAYER_MULTIPLIER
-                    + WindowManagerService.TYPE_LAYER_OFFSET;
-        }
-
-        @SuppressWarnings("unused")
-        public PointerIcon getPointerIcon() {
-            return PointerIcon.getDefaultIcon(mContext);
         }
     }
 }

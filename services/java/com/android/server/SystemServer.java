@@ -221,6 +221,7 @@ class ServerThread extends Thread {
                     factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
                     !firstBoot);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
+            ServiceManager.addService(Context.INPUT_SERVICE, wm.getInputManagerService());
 
             ActivityManagerService.self().setWindowManager(wm);
 

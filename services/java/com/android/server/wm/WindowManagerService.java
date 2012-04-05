@@ -44,6 +44,8 @@ import com.android.server.EventLogTags;
 import com.android.server.PowerManagerService;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.input.InputFilter;
+import com.android.server.input.InputManagerService;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;
@@ -626,7 +628,7 @@ public class WindowManagerService extends IWindowManager.Stub
     float mTransitionAnimationScale = 1.0f;
     float mAnimatorDurationScale = 1.0f;
 
-    final InputManager mInputManager;
+    final InputManagerService mInputManager;
 
     // Who is holding the screen on.
     Session mHoldingScreenOn;
@@ -894,7 +896,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "KEEP_SCREEN_ON_FLAG");
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
-        mInputManager = new InputManager(context, this);
+        mInputManager = new InputManagerService(context, mInputMonitor);
         mAnimator = new WindowAnimator(this, context, mPolicy);
 
         PolicyThread thr = new PolicyThread(mPolicy, this, context, pm);
@@ -913,6 +915,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
+    }
+
+    public InputManagerService getInputManagerService() {
+        return mInputManager;
     }
 
     @Override
@@ -6476,8 +6482,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final long ident = Binder.clearCallingIdentity();
         
         final int result = mInputManager.injectInputEvent(newEvent, pid, uid,
-                sync ? InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
-                        : InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
+                sync ? InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
+                        : InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
                 INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
@@ -6506,8 +6512,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         final int result = mInputManager.injectInputEvent(newEvent, pid, uid,
-                sync ? InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
-                        : InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
+                sync ? InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
+                        : InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
                 INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
@@ -6536,8 +6542,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         final int result = mInputManager.injectInputEvent(newEvent, pid, uid,
-                sync ? InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
-                        : InputManager.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
+                sync ? InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
+                        : InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
                 INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
@@ -6558,7 +6564,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final long ident = Binder.clearCallingIdentity();
         
         final int result = mInputManager.injectInputEvent(ev, pid, uid,
-                InputManager.INPUT_EVENT_INJECTION_SYNC_NONE,
+                InputManagerService.INPUT_EVENT_INJECTION_SYNC_NONE,
                 INJECTION_TIMEOUT_MILLIS);
         
         Binder.restoreCallingIdentity(ident);
@@ -6567,16 +6573,16 @@ public class WindowManagerService extends IWindowManager.Stub
     
     private boolean reportInjectionResult(int result, int pid) {
         switch (result) {
-            case InputManager.INPUT_EVENT_INJECTION_PERMISSION_DENIED:
+            case InputManagerService.INPUT_EVENT_INJECTION_PERMISSION_DENIED:
                 Slog.w(TAG, "Input event injection from pid " + pid + " permission denied.");
                 throw new SecurityException(
                         "Injecting to another application requires INJECT_EVENTS permission");
-            case InputManager.INPUT_EVENT_INJECTION_SUCCEEDED:
+            case InputManagerService.INPUT_EVENT_INJECTION_SUCCEEDED:
                 return true;
-            case InputManager.INPUT_EVENT_INJECTION_TIMED_OUT:
+            case InputManagerService.INPUT_EVENT_INJECTION_TIMED_OUT:
                 Slog.w(TAG, "Input event injection from pid " + pid + " timed out.");
                 return false;
-            case InputManager.INPUT_EVENT_INJECTION_FAILED:
+            case InputManagerService.INPUT_EVENT_INJECTION_FAILED:
             default:
                 Slog.w(TAG, "Input event injection from pid " + pid + " failed.");
                 return false;
@@ -9280,11 +9286,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.lockNow();
     }
 
-    void dumpInput(FileDescriptor fd, PrintWriter pw, boolean dumpAll) {
-        pw.println("WINDOW MANAGER INPUT (dumpsys window input)");
-        mInputManager.dump(pw);
-    }
-
     void dumpPolicyLocked(FileDescriptor fd, PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
         mPolicy.dump("    ", fd, pw, args);
@@ -9674,7 +9675,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("Window manager dump options:");
                 pw.println("  [-a] [-h] [cmd] ...");
                 pw.println("  cmd may be one of:");
-                pw.println("    i[input]: input subsystem state");
                 pw.println("    p[policy]: policy state");
                 pw.println("    s[essions]: active sessions");
                 pw.println("    t[okens]: token list");
@@ -9695,10 +9695,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (opti < args.length) {
             String cmd = args[opti];
             opti++;
-            if ("input".equals(cmd) || "i".equals(cmd)) {
-                dumpInput(fd, pw, true);
-                return;
-            } else if ("policy".equals(cmd) || "p".equals(cmd)) {
+            if ("policy".equals(cmd) || "p".equals(cmd)) {
                 synchronized(mWindowMap) {
                     dumpPolicyLocked(fd, pw, args, true);
                 }
@@ -9732,8 +9729,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
         }
-
-        dumpInput(fd, pw, dumpAll);
 
         synchronized(mWindowMap) {
             if (dumpAll) {

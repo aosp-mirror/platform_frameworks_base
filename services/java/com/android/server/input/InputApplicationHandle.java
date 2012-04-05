@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm;
-
+package com.android.server.input;
 
 /**
  * Functions as a handle for an application that can receive input.
@@ -30,7 +29,7 @@ public final class InputApplicationHandle {
     private int ptr;
 
     // The window manager's application window token.
-    public final AppWindowToken appWindowToken;
+    public final Object appWindowToken;
 
     // Application name.
     public String name;
@@ -40,7 +39,7 @@ public final class InputApplicationHandle {
 
     private native void nativeDispose();
 
-    public InputApplicationHandle(AppWindowToken appWindowToken) {
+    public InputApplicationHandle(Object appWindowToken) {
         this.appWindowToken = appWindowToken;
     }
 

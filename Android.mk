@@ -110,6 +110,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
 	core/java/android/database/IContentObserver.aidl \
 	core/java/android/hardware/ISerialManager.aidl \
+	core/java/android/hardware/input/IInputManager.aidl \
 	core/java/android/hardware/usb/IUsbManager.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
 	core/java/android/net/INetworkManagementEventObserver.aidl \
