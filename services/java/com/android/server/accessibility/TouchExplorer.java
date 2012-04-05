@@ -29,7 +29,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.server.accessibility.AccessibilityInputFilter.Explorer;
-import com.android.server.wm.InputFilter;
+import com.android.server.input.InputFilter;
 
 import java.util.Arrays;
 

@@ -46,8 +46,8 @@
 #include <android/graphics/GraphicsJNI.h>
 
 #include "com_android_server_PowerManagerService.h"
-#include "com_android_server_InputApplicationHandle.h"
-#include "com_android_server_InputWindowHandle.h"
+#include "com_android_server_input_InputApplicationHandle.h"
+#include "com_android_server_input_InputWindowHandle.h"
 
 namespace android {
 
@@ -77,7 +77,7 @@ static struct {
     jmethodID getLongPressTimeout;
     jmethodID getPointerLayer;
     jmethodID getPointerIcon;
-} gCallbacksClassInfo;
+} gServiceClassInfo;
 
 static struct {
     jclass clazz;
@@ -166,7 +166,7 @@ protected:
     virtual ~NativeInputManager();
 
 public:
-    NativeInputManager(jobject contextObj, jobject callbacksObj, const sp<Looper>& looper);
+    NativeInputManager(jobject contextObj, jobject serviceObj, const sp<Looper>& looper);
 
     inline sp<InputManager> getInputManager() const { return mInputManager; }
 
@@ -222,7 +222,7 @@ private:
     sp<InputManager> mInputManager;
 
     jobject mContextObj;
-    jobject mCallbacksObj;
+    jobject mServiceObj;
     sp<Looper> mLooper;
 
     Mutex mLock;
@@ -269,12 +269,12 @@ private:
 
 
 NativeInputManager::NativeInputManager(jobject contextObj,
-        jobject callbacksObj, const sp<Looper>& looper) :
+        jobject serviceObj, const sp<Looper>& looper) :
         mLooper(looper) {
     JNIEnv* env = jniEnv();
 
     mContextObj = env->NewGlobalRef(contextObj);
-    mCallbacksObj = env->NewGlobalRef(callbacksObj);
+    mServiceObj = env->NewGlobalRef(serviceObj);
 
     {
         AutoMutex _l(mLock);
@@ -298,7 +298,7 @@ NativeInputManager::~NativeInputManager() {
     JNIEnv* env = jniEnv();
 
     env->DeleteGlobalRef(mContextObj);
-    env->DeleteGlobalRef(mCallbacksObj);
+    env->DeleteGlobalRef(mServiceObj);
 }
 
 void NativeInputManager::dump(String8& dump) {
@@ -387,15 +387,15 @@ status_t NativeInputManager::unregisterInputChannel(JNIEnv* env,
 void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outConfig) {
     JNIEnv* env = jniEnv();
 
-    jint virtualKeyQuietTime = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.getVirtualKeyQuietTimeMillis);
+    jint virtualKeyQuietTime = env->CallIntMethod(mServiceObj,
+            gServiceClassInfo.getVirtualKeyQuietTimeMillis);
     if (!checkAndClearExceptionFromCallback(env, "getVirtualKeyQuietTimeMillis")) {
         outConfig->virtualKeyQuietTime = milliseconds_to_nanoseconds(virtualKeyQuietTime);
     }
 
     outConfig->excludedDeviceNames.clear();
-    jobjectArray excludedDeviceNames = jobjectArray(env->CallObjectMethod(mCallbacksObj,
-            gCallbacksClassInfo.getExcludedDeviceNames));
+    jobjectArray excludedDeviceNames = jobjectArray(env->CallObjectMethod(mServiceObj,
+            gServiceClassInfo.getExcludedDeviceNames));
     if (!checkAndClearExceptionFromCallback(env, "getExcludedDeviceNames") && excludedDeviceNames) {
         jsize length = env->GetArrayLength(excludedDeviceNames);
         for (jsize i = 0; i < length; i++) {
@@ -408,14 +408,14 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         env->DeleteLocalRef(excludedDeviceNames);
     }
 
-    jint hoverTapTimeout = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.getHoverTapTimeout);
+    jint hoverTapTimeout = env->CallIntMethod(mServiceObj,
+            gServiceClassInfo.getHoverTapTimeout);
     if (!checkAndClearExceptionFromCallback(env, "getHoverTapTimeout")) {
-        jint doubleTapTimeout = env->CallIntMethod(mCallbacksObj,
-                gCallbacksClassInfo.getDoubleTapTimeout);
+        jint doubleTapTimeout = env->CallIntMethod(mServiceObj,
+                gServiceClassInfo.getDoubleTapTimeout);
         if (!checkAndClearExceptionFromCallback(env, "getDoubleTapTimeout")) {
-            jint longPressTimeout = env->CallIntMethod(mCallbacksObj,
-                    gCallbacksClassInfo.getLongPressTimeout);
+            jint longPressTimeout = env->CallIntMethod(mServiceObj,
+                    gServiceClassInfo.getLongPressTimeout);
             if (!checkAndClearExceptionFromCallback(env, "getLongPressTimeout")) {
                 outConfig->pointerGestureTapInterval = milliseconds_to_nanoseconds(hoverTapTimeout);
 
@@ -430,8 +430,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         }
     }
 
-    jint hoverTapSlop = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.getHoverTapSlop);
+    jint hoverTapSlop = env->CallIntMethod(mServiceObj,
+            gServiceClassInfo.getHoverTapSlop);
     if (!checkAndClearExceptionFromCallback(env, "getHoverTapSlop")) {
         outConfig->pointerGestureTapSlop = hoverTapSlop;
     }
@@ -467,8 +467,8 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
         controller->setDisplayOrientation(mLocked.displayOrientation);
 
         JNIEnv* env = jniEnv();
-        jobject pointerIconObj = env->CallObjectMethod(mCallbacksObj,
-                gCallbacksClassInfo.getPointerIcon);
+        jobject pointerIconObj = env->CallObjectMethod(mServiceObj,
+                gServiceClassInfo.getPointerIcon);
         if (!checkAndClearExceptionFromCallback(env, "getPointerIcon")) {
             PointerIcon pointerIcon;
             status_t status = android_view_PointerIcon_load(env, pointerIconObj,
@@ -490,7 +490,7 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
 void NativeInputManager::ensureSpriteControllerLocked() {
     if (mLocked.spriteController == NULL) {
         JNIEnv* env = jniEnv();
-        jint layer = env->CallIntMethod(mCallbacksObj, gCallbacksClassInfo.getPointerLayer);
+        jint layer = env->CallIntMethod(mServiceObj, gServiceClassInfo.getPointerLayer);
         if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
             layer = -1;
         }
@@ -509,7 +509,7 @@ void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
 
     switch (switchCode) {
     case SW_LID:
-        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyLidSwitchChanged,
+        env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyLidSwitchChanged,
                 when, switchValue == 0);
         checkAndClearExceptionFromCallback(env, "notifyLidSwitchChanged");
         break;
@@ -523,7 +523,7 @@ void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
 
     JNIEnv* env = jniEnv();
 
-    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyConfigurationChanged, when);
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyConfigurationChanged, when);
     checkAndClearExceptionFromCallback(env, "notifyConfigurationChanged");
 }
 
@@ -540,8 +540,8 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
     jobject inputWindowHandleObj =
             getInputWindowHandleObjLocalRef(env, inputWindowHandle);
 
-    jlong newTimeout = env->CallLongMethod(mCallbacksObj,
-                gCallbacksClassInfo.notifyANR, inputApplicationHandleObj, inputWindowHandleObj);
+    jlong newTimeout = env->CallLongMethod(mServiceObj,
+                gServiceClassInfo.notifyANR, inputApplicationHandleObj, inputWindowHandleObj);
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
         newTimeout = 0; // abort dispatch
     } else {
@@ -563,7 +563,7 @@ void NativeInputManager::notifyInputChannelBroken(const sp<InputWindowHandle>& i
     jobject inputWindowHandleObj =
             getInputWindowHandleObjLocalRef(env, inputWindowHandle);
     if (inputWindowHandleObj) {
-        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyInputChannelBroken,
+        env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyInputChannelBroken,
                 inputWindowHandleObj);
         checkAndClearExceptionFromCallback(env, "notifyInputChannelBroken");
 
@@ -574,14 +574,14 @@ void NativeInputManager::notifyInputChannelBroken(const sp<InputWindowHandle>& i
 void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) {
     JNIEnv* env = jniEnv();
 
-    jint keyRepeatTimeout = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.getKeyRepeatTimeout);
+    jint keyRepeatTimeout = env->CallIntMethod(mServiceObj,
+            gServiceClassInfo.getKeyRepeatTimeout);
     if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatTimeout")) {
         outConfig->keyRepeatTimeout = milliseconds_to_nanoseconds(keyRepeatTimeout);
     }
 
-    jint keyRepeatDelay = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.getKeyRepeatDelay);
+    jint keyRepeatDelay = env->CallIntMethod(mServiceObj,
+            gServiceClassInfo.getKeyRepeatDelay);
     if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatDelay")) {
         outConfig->keyRepeatDelay = milliseconds_to_nanoseconds(keyRepeatDelay);
     }
@@ -734,7 +734,7 @@ bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t
     }
 
     // The callee is responsible for recycling the event.
-    jboolean pass = env->CallBooleanMethod(mCallbacksObj, gCallbacksClassInfo.filterInputEvent,
+    jboolean pass = env->CallBooleanMethod(mServiceObj, gServiceClassInfo.filterInputEvent,
             inputEventObj, policyFlags);
     if (checkAndClearExceptionFromCallback(env, "filterInputEvent")) {
         pass = true;
@@ -758,8 +758,8 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         jint wmActions;
         if (keyEventObj) {
-            wmActions = env->CallIntMethod(mCallbacksObj,
-                    gCallbacksClassInfo.interceptKeyBeforeQueueing,
+            wmActions = env->CallIntMethod(mServiceObj,
+                    gServiceClassInfo.interceptKeyBeforeQueueing,
                     keyEventObj, policyFlags, isScreenOn);
             if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
                 wmActions = 0;
@@ -802,8 +802,8 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
             }
         } else {
             JNIEnv* env = jniEnv();
-            jint wmActions = env->CallIntMethod(mCallbacksObj,
-                        gCallbacksClassInfo.interceptMotionBeforeQueueingWhenScreenOff,
+            jint wmActions = env->CallIntMethod(mServiceObj,
+                        gServiceClassInfo.interceptMotionBeforeQueueingWhenScreenOff,
                         policyFlags);
             if (checkAndClearExceptionFromCallback(env,
                     "interceptMotionBeforeQueueingWhenScreenOff")) {
@@ -858,8 +858,8 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
         jobject inputWindowHandleObj = getInputWindowHandleObjLocalRef(env, inputWindowHandle);
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         if (keyEventObj) {
-            jlong delayMillis = env->CallLongMethod(mCallbacksObj,
-                    gCallbacksClassInfo.interceptKeyBeforeDispatching,
+            jlong delayMillis = env->CallLongMethod(mServiceObj,
+                    gServiceClassInfo.interceptKeyBeforeDispatching,
                     inputWindowHandleObj, keyEventObj, policyFlags);
             bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
             android_view_KeyEvent_recycle(env, keyEventObj);
@@ -891,8 +891,8 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<InputWindowHandle>& input
         jobject inputWindowHandleObj = getInputWindowHandleObjLocalRef(env, inputWindowHandle);
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         if (keyEventObj) {
-            jobject fallbackKeyEventObj = env->CallObjectMethod(mCallbacksObj,
-                    gCallbacksClassInfo.dispatchUnhandledKey,
+            jobject fallbackKeyEventObj = env->CallObjectMethod(mServiceObj,
+                    gServiceClassInfo.dispatchUnhandledKey,
                     inputWindowHandleObj, keyEventObj, policyFlags);
             if (checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey")) {
                 fallbackKeyEventObj = NULL;
@@ -925,8 +925,8 @@ void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) 
 bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
         int32_t injectorPid, int32_t injectorUid) {
     JNIEnv* env = jniEnv();
-    jboolean result = env->CallBooleanMethod(mCallbacksObj,
-            gCallbacksClassInfo.checkInjectEventsPermission, injectorPid, injectorUid);
+    jboolean result = env->CallBooleanMethod(mServiceObj,
+            gServiceClassInfo.checkInjectEventsPermission, injectorPid, injectorUid);
     if (checkAndClearExceptionFromCallback(env, "checkInjectEventsPermission")) {
         result = false;
     }
@@ -947,103 +947,75 @@ void NativeInputManager::loadPointerResources(PointerResources* outResources) {
 
 // ----------------------------------------------------------------------------
 
-static sp<NativeInputManager> gNativeInputManager;
-
-static bool checkInputManagerUnitialized(JNIEnv* env) {
-    if (gNativeInputManager == NULL) {
-        ALOGE("Input manager not initialized.");
-        jniThrowRuntimeException(env, "Input manager not initialized.");
-        return true;
-    }
-    return false;
+static jint nativeInit(JNIEnv* env, jclass clazz,
+        jobject serviceObj, jobject contextObj, jobject messageQueueObj) {
+    sp<Looper> looper = android_os_MessageQueue_getLooper(env, messageQueueObj);
+    NativeInputManager* im = new NativeInputManager(contextObj, serviceObj, looper);
+    im->incStrong(serviceObj);
+    return reinterpret_cast<jint>(im);
 }
 
-static void android_server_InputManager_nativeInit(JNIEnv* env, jclass clazz,
-        jobject contextObj, jobject callbacksObj, jobject messageQueueObj) {
-    if (gNativeInputManager == NULL) {
-        sp<Looper> looper = android_os_MessageQueue_getLooper(env, messageQueueObj);
-        gNativeInputManager = new NativeInputManager(contextObj, callbacksObj, looper);
-    } else {
-        ALOGE("Input manager already initialized.");
-        jniThrowRuntimeException(env, "Input manager already initialized.");
-    }
-}
+static void nativeStart(JNIEnv* env, jclass clazz, jint ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-static void android_server_InputManager_nativeStart(JNIEnv* env, jclass clazz) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
-
-    status_t result = gNativeInputManager->getInputManager()->start();
+    status_t result = im->getInputManager()->start();
     if (result) {
         jniThrowRuntimeException(env, "Input manager could not be started.");
     }
 }
 
-static void android_server_InputManager_nativeSetDisplaySize(JNIEnv* env, jclass clazz,
+static void nativeSetDisplaySize(JNIEnv* env, jclass clazz, jint ptr,
         jint displayId, jint width, jint height, jint externalWidth, jint externalHeight) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     // XXX we could get this from the SurfaceFlinger directly instead of requiring it
     // to be passed in like this, not sure which is better but leaving it like this
     // keeps the window manager in direct control of when display transitions propagate down
     // to the input dispatcher
-    gNativeInputManager->setDisplaySize(displayId, width, height, externalWidth, externalHeight);
+    im->setDisplaySize(displayId, width, height, externalWidth, externalHeight);
 }
 
-static void android_server_InputManager_nativeSetDisplayOrientation(JNIEnv* env, jclass clazz,
-        jint displayId, jint orientation) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeSetDisplayOrientation(JNIEnv* env, jclass clazz,
+        jint ptr, jint displayId, jint orientation) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    gNativeInputManager->setDisplayOrientation(displayId, orientation);
+    im->setDisplayOrientation(displayId, orientation);
 }
 
-static jint android_server_InputManager_nativeGetScanCodeState(JNIEnv* env, jclass clazz,
-        jint deviceId, jint sourceMask, jint scanCode) {
-    if (checkInputManagerUnitialized(env)) {
-        return AKEY_STATE_UNKNOWN;
-    }
+static jint nativeGetScanCodeState(JNIEnv* env, jclass clazz,
+        jint ptr, jint deviceId, jint sourceMask, jint scanCode) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    return gNativeInputManager->getInputManager()->getReader()->getScanCodeState(
+    return im->getInputManager()->getReader()->getScanCodeState(
             deviceId, uint32_t(sourceMask), scanCode);
 }
 
-static jint android_server_InputManager_nativeGetKeyCodeState(JNIEnv* env, jclass clazz,
-        jint deviceId, jint sourceMask, jint keyCode) {
-    if (checkInputManagerUnitialized(env)) {
-        return AKEY_STATE_UNKNOWN;
-    }
+static jint nativeGetKeyCodeState(JNIEnv* env, jclass clazz,
+        jint ptr, jint deviceId, jint sourceMask, jint keyCode) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    return gNativeInputManager->getInputManager()->getReader()->getKeyCodeState(
+    return im->getInputManager()->getReader()->getKeyCodeState(
             deviceId, uint32_t(sourceMask), keyCode);
 }
 
-static jint android_server_InputManager_nativeGetSwitchState(JNIEnv* env, jclass clazz,
-        jint deviceId, jint sourceMask, jint sw) {
-    if (checkInputManagerUnitialized(env)) {
-        return AKEY_STATE_UNKNOWN;
-    }
+static jint nativeGetSwitchState(JNIEnv* env, jclass clazz,
+        jint ptr, jint deviceId, jint sourceMask, jint sw) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    return gNativeInputManager->getInputManager()->getReader()->getSwitchState(
+    return im->getInputManager()->getReader()->getSwitchState(
             deviceId, uint32_t(sourceMask), sw);
 }
 
-static jboolean android_server_InputManager_nativeHasKeys(JNIEnv* env, jclass clazz,
-        jint deviceId, jint sourceMask, jintArray keyCodes, jbooleanArray outFlags) {
-    if (checkInputManagerUnitialized(env)) {
-        return JNI_FALSE;
-    }
+static jboolean nativeHasKeys(JNIEnv* env, jclass clazz,
+        jint ptr, jint deviceId, jint sourceMask, jintArray keyCodes, jbooleanArray outFlags) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     int32_t* codes = env->GetIntArrayElements(keyCodes, NULL);
     uint8_t* flags = env->GetBooleanArrayElements(outFlags, NULL);
     jsize numCodes = env->GetArrayLength(keyCodes);
     jboolean result;
     if (numCodes == env->GetArrayLength(keyCodes)) {
-        result = gNativeInputManager->getInputManager()->getReader()->hasKeys(
+        result = im->getInputManager()->getReader()->hasKeys(
                 deviceId, uint32_t(sourceMask), numCodes, codes, flags);
     } else {
         result = JNI_FALSE;
@@ -1059,21 +1031,18 @@ static void throwInputChannelNotInitialized(JNIEnv* env) {
              "inputChannel is not initialized");
 }
 
-static void android_server_InputManager_handleInputChannelDisposed(JNIEnv* env,
+static void handleInputChannelDisposed(JNIEnv* env,
         jobject inputChannelObj, const sp<InputChannel>& inputChannel, void* data) {
+    NativeInputManager* im = static_cast<NativeInputManager*>(data);
+
     ALOGW("Input channel object '%s' was disposed without first being unregistered with "
             "the input manager!", inputChannel->getName().string());
-
-    if (gNativeInputManager != NULL) {
-        gNativeInputManager->unregisterInputChannel(env, inputChannel);
-    }
+    im->unregisterInputChannel(env, inputChannel);
 }
 
-static void android_server_InputManager_nativeRegisterInputChannel(JNIEnv* env, jclass clazz,
-        jobject inputChannelObj, jobject inputWindowHandleObj, jboolean monitor) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeRegisterInputChannel(JNIEnv* env, jclass clazz,
+        jint ptr, jobject inputChannelObj, jobject inputWindowHandleObj, jboolean monitor) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
             inputChannelObj);
@@ -1085,7 +1054,7 @@ static void android_server_InputManager_nativeRegisterInputChannel(JNIEnv* env, 
     sp<InputWindowHandle> inputWindowHandle =
             android_server_InputWindowHandle_getHandle(env, inputWindowHandleObj);
 
-    status_t status = gNativeInputManager->registerInputChannel(
+    status_t status = im->registerInputChannel(
             env, inputChannel, inputWindowHandle, monitor);
     if (status) {
         String8 message;
@@ -1096,15 +1065,13 @@ static void android_server_InputManager_nativeRegisterInputChannel(JNIEnv* env, 
 
     if (! monitor) {
         android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
-                android_server_InputManager_handleInputChannelDisposed, NULL);
+                handleInputChannelDisposed, im);
     }
 }
 
-static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env, jclass clazz,
-        jobject inputChannelObj) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeUnregisterInputChannel(JNIEnv* env, jclass clazz,
+        jint ptr, jobject inputChannelObj) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
             inputChannelObj);
@@ -1115,7 +1082,7 @@ static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env
 
     android_view_InputChannel_setDisposeCallback(env, inputChannelObj, NULL, NULL);
 
-    status_t status = gNativeInputManager->unregisterInputChannel(env, inputChannel);
+    status_t status = im->unregisterInputChannel(env, inputChannel);
     if (status && status != BAD_VALUE) { // ignore already unregistered channel
         String8 message;
         message.appendFormat("Failed to unregister input channel.  status=%d", status);
@@ -1123,21 +1090,17 @@ static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env
     }
 }
 
-static void android_server_InputManager_nativeSetInputFilterEnabled(JNIEnv* env, jclass clazz,
-        jboolean enabled) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeSetInputFilterEnabled(JNIEnv* env, jclass clazz,
+        jint ptr, jboolean enabled) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    gNativeInputManager->getInputManager()->getDispatcher()->setInputFilterEnabled(enabled);
+    im->getInputManager()->getDispatcher()->setInputFilterEnabled(enabled);
 }
 
-static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jclass clazz,
-        jobject inputEventObj, jint injectorPid, jint injectorUid,
+static jint nativeInjectInputEvent(JNIEnv* env, jclass clazz,
+        jint ptr, jobject inputEventObj, jint injectorPid, jint injectorUid,
         jint syncMode, jint timeoutMillis, jint policyFlags) {
-    if (checkInputManagerUnitialized(env)) {
-        return INPUT_EVENT_INJECTION_FAILED;
-    }
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
         KeyEvent keyEvent;
@@ -1147,7 +1110,7 @@ static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jcla
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        return gNativeInputManager->getInputManager()->getDispatcher()->injectInputEvent(
+        return im->getInputManager()->getDispatcher()->injectInputEvent(
                 & keyEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
                 uint32_t(policyFlags));
     } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
@@ -1157,7 +1120,7 @@ static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jcla
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        return gNativeInputManager->getInputManager()->getDispatcher()->injectInputEvent(
+        return im->getInputManager()->getDispatcher()->injectInputEvent(
                 motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
                 uint32_t(policyFlags));
     } else {
@@ -1166,50 +1129,40 @@ static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jcla
     }
 }
 
-static void android_server_InputManager_nativeSetInputWindows(JNIEnv* env, jclass clazz,
-        jobjectArray windowHandleObjArray) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeSetInputWindows(JNIEnv* env, jclass clazz,
+        jint ptr, jobjectArray windowHandleObjArray) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    gNativeInputManager->setInputWindows(env, windowHandleObjArray);
+    im->setInputWindows(env, windowHandleObjArray);
 }
 
-static void android_server_InputManager_nativeSetFocusedApplication(JNIEnv* env, jclass clazz,
-        jobject applicationHandleObj) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeSetFocusedApplication(JNIEnv* env, jclass clazz,
+        jint ptr, jobject applicationHandleObj) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    gNativeInputManager->setFocusedApplication(env, applicationHandleObj);
+    im->setFocusedApplication(env, applicationHandleObj);
 }
 
-static void android_server_InputManager_nativeSetInputDispatchMode(JNIEnv* env,
-        jclass clazz, jboolean enabled, jboolean frozen) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeSetInputDispatchMode(JNIEnv* env,
+        jclass clazz, jint ptr, jboolean enabled, jboolean frozen) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    gNativeInputManager->setInputDispatchMode(enabled, frozen);
+    im->setInputDispatchMode(enabled, frozen);
 }
 
-static void android_server_InputManager_nativeSetSystemUiVisibility(JNIEnv* env,
-        jclass clazz, jint visibility) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeSetSystemUiVisibility(JNIEnv* env,
+        jclass clazz, jint ptr, jint visibility) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    gNativeInputManager->setSystemUiVisibility(visibility);
+    im->setSystemUiVisibility(visibility);
 }
 
-static jobject android_server_InputManager_nativeGetInputDevice(JNIEnv* env,
-        jclass clazz, jint deviceId) {
-    if (checkInputManagerUnitialized(env)) {
-        return NULL;
-    }
+static jobject nativeGetInputDevice(JNIEnv* env,
+        jclass clazz, jint ptr, jint deviceId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     InputDeviceInfo deviceInfo;
-    status_t status = gNativeInputManager->getInputManager()->getReader()->getInputDeviceInfo(
+    status_t status = im->getInputManager()->getReader()->getInputDeviceInfo(
             deviceId, & deviceInfo);
     if (status) {
         return NULL;
@@ -1249,14 +1202,12 @@ static jobject android_server_InputManager_nativeGetInputDevice(JNIEnv* env,
     return deviceObj;
 }
 
-static jintArray android_server_InputManager_nativeGetInputDeviceIds(JNIEnv* env,
-        jclass clazz) {
-    if (checkInputManagerUnitialized(env)) {
-        return NULL;
-    }
+static jintArray nativeGetInputDeviceIds(JNIEnv* env,
+        jclass clazz, jint ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     Vector<int> deviceIds;
-    gNativeInputManager->getInputManager()->getReader()->getInputDeviceIds(deviceIds);
+    im->getInputManager()->getReader()->getInputDeviceIds(deviceIds);
 
     jintArray deviceIdsObj = env->NewIntArray(deviceIds.size());
     if (! deviceIdsObj) {
@@ -1267,25 +1218,21 @@ static jintArray android_server_InputManager_nativeGetInputDeviceIds(JNIEnv* env
     return deviceIdsObj;
 }
 
-static void android_server_InputManager_nativeGetInputConfiguration(JNIEnv* env,
-        jclass clazz, jobject configObj) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeGetInputConfiguration(JNIEnv* env,
+        jclass clazz, jint ptr, jobject configObj) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     InputConfiguration config;
-    gNativeInputManager->getInputManager()->getReader()->getInputConfiguration(& config);
+    im->getInputManager()->getReader()->getInputConfiguration(& config);
 
     env->SetIntField(configObj, gConfigurationClassInfo.touchscreen, config.touchScreen);
     env->SetIntField(configObj, gConfigurationClassInfo.keyboard, config.keyboard);
     env->SetIntField(configObj, gConfigurationClassInfo.navigation, config.navigation);
 }
 
-static jboolean android_server_InputManager_nativeTransferTouchFocus(JNIEnv* env,
-        jclass clazz, jobject fromChannelObj, jobject toChannelObj) {
-    if (checkInputManagerUnitialized(env)) {
-        return false;
-    }
+static jboolean nativeTransferTouchFocus(JNIEnv* env,
+        jclass clazz, jint ptr, jobject fromChannelObj, jobject toChannelObj) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     sp<InputChannel> fromChannel =
             android_view_InputChannel_getInputChannel(env, fromChannelObj);
@@ -1296,101 +1243,93 @@ static jboolean android_server_InputManager_nativeTransferTouchFocus(JNIEnv* env
         return false;
     }
 
-    return gNativeInputManager->getInputManager()->getDispatcher()->
+    return im->getInputManager()->getDispatcher()->
             transferTouchFocus(fromChannel, toChannel);
 }
 
-static void android_server_InputManager_nativeSetPointerSpeed(JNIEnv* env,
-        jclass clazz, jint speed) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeSetPointerSpeed(JNIEnv* env,
+        jclass clazz, jint ptr, jint speed) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    gNativeInputManager->setPointerSpeed(speed);
+    im->setPointerSpeed(speed);
 }
 
-static void android_server_InputManager_nativeSetShowTouches(JNIEnv* env,
-        jclass clazz, jboolean enabled) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeSetShowTouches(JNIEnv* env,
+        jclass clazz, jint ptr, jboolean enabled) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    gNativeInputManager->setShowTouches(enabled);
+    im->setShowTouches(enabled);
 }
 
-static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz) {
-    if (checkInputManagerUnitialized(env)) {
-        return NULL;
-    }
+static jstring nativeDump(JNIEnv* env, jclass clazz, jint ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     String8 dump;
-    gNativeInputManager->dump(dump);
+    im->dump(dump);
     return env->NewStringUTF(dump.string());
 }
 
-static void android_server_InputManager_nativeMonitor(JNIEnv* env, jclass clazz) {
-    if (checkInputManagerUnitialized(env)) {
-        return;
-    }
+static void nativeMonitor(JNIEnv* env, jclass clazz, jint ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    gNativeInputManager->getInputManager()->getReader()->monitor();
-    gNativeInputManager->getInputManager()->getDispatcher()->monitor();
+    im->getInputManager()->getReader()->monitor();
+    im->getInputManager()->getDispatcher()->monitor();
 }
 
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gInputManagerMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeInit", "(Landroid/content/Context;"
-            "Lcom/android/server/wm/InputManager$Callbacks;Landroid/os/MessageQueue;)V",
-            (void*) android_server_InputManager_nativeInit },
-    { "nativeStart", "()V",
-            (void*) android_server_InputManager_nativeStart },
-    { "nativeSetDisplaySize", "(IIIII)V",
-            (void*) android_server_InputManager_nativeSetDisplaySize },
-    { "nativeSetDisplayOrientation", "(II)V",
-            (void*) android_server_InputManager_nativeSetDisplayOrientation },
-    { "nativeGetScanCodeState", "(III)I",
-            (void*) android_server_InputManager_nativeGetScanCodeState },
-    { "nativeGetKeyCodeState", "(III)I",
-            (void*) android_server_InputManager_nativeGetKeyCodeState },
-    { "nativeGetSwitchState", "(III)I",
-            (void*) android_server_InputManager_nativeGetSwitchState },
-    { "nativeHasKeys", "(II[I[Z)Z",
-            (void*) android_server_InputManager_nativeHasKeys },
+    { "nativeInit",
+            "(Lcom/android/server/input/InputManagerService;Landroid/content/Context;Landroid/os/MessageQueue;)I",
+            (void*) nativeInit },
+    { "nativeStart", "(I)V",
+            (void*) nativeStart },
+    { "nativeSetDisplaySize", "(IIIIII)V",
+            (void*) nativeSetDisplaySize },
+    { "nativeSetDisplayOrientation", "(III)V",
+            (void*) nativeSetDisplayOrientation },
+    { "nativeGetScanCodeState", "(IIII)I",
+            (void*) nativeGetScanCodeState },
+    { "nativeGetKeyCodeState", "(IIII)I",
+            (void*) nativeGetKeyCodeState },
+    { "nativeGetSwitchState", "(IIII)I",
+            (void*) nativeGetSwitchState },
+    { "nativeHasKeys", "(III[I[Z)Z",
+            (void*) nativeHasKeys },
     { "nativeRegisterInputChannel",
-            "(Landroid/view/InputChannel;Lcom/android/server/wm/InputWindowHandle;Z)V",
-            (void*) android_server_InputManager_nativeRegisterInputChannel },
-    { "nativeUnregisterInputChannel", "(Landroid/view/InputChannel;)V",
-            (void*) android_server_InputManager_nativeUnregisterInputChannel },
-    { "nativeSetInputFilterEnabled", "(Z)V",
-            (void*) android_server_InputManager_nativeSetInputFilterEnabled },
-    { "nativeInjectInputEvent", "(Landroid/view/InputEvent;IIIII)I",
-            (void*) android_server_InputManager_nativeInjectInputEvent },
-    { "nativeSetInputWindows", "([Lcom/android/server/wm/InputWindowHandle;)V",
-            (void*) android_server_InputManager_nativeSetInputWindows },
-    { "nativeSetFocusedApplication", "(Lcom/android/server/wm/InputApplicationHandle;)V",
-            (void*) android_server_InputManager_nativeSetFocusedApplication },
-    { "nativeSetInputDispatchMode", "(ZZ)V",
-            (void*) android_server_InputManager_nativeSetInputDispatchMode },
-    { "nativeSetSystemUiVisibility", "(I)V",
-            (void*) android_server_InputManager_nativeSetSystemUiVisibility },
-    { "nativeGetInputDevice", "(I)Landroid/view/InputDevice;",
-            (void*) android_server_InputManager_nativeGetInputDevice },
-    { "nativeGetInputDeviceIds", "()[I",
-            (void*) android_server_InputManager_nativeGetInputDeviceIds },
-    { "nativeGetInputConfiguration", "(Landroid/content/res/Configuration;)V",
-            (void*) android_server_InputManager_nativeGetInputConfiguration },
-    { "nativeTransferTouchFocus", "(Landroid/view/InputChannel;Landroid/view/InputChannel;)Z",
-            (void*) android_server_InputManager_nativeTransferTouchFocus },
-    { "nativeSetPointerSpeed", "(I)V",
-            (void*) android_server_InputManager_nativeSetPointerSpeed },
-    { "nativeSetShowTouches", "(Z)V",
-            (void*) android_server_InputManager_nativeSetShowTouches },
-    { "nativeDump", "()Ljava/lang/String;",
-            (void*) android_server_InputManager_nativeDump },
-    { "nativeMonitor", "()V",
-            (void*) android_server_InputManager_nativeMonitor },
+            "(ILandroid/view/InputChannel;Lcom/android/server/input/InputWindowHandle;Z)V",
+            (void*) nativeRegisterInputChannel },
+    { "nativeUnregisterInputChannel", "(ILandroid/view/InputChannel;)V",
+            (void*) nativeUnregisterInputChannel },
+    { "nativeSetInputFilterEnabled", "(IZ)V",
+            (void*) nativeSetInputFilterEnabled },
+    { "nativeInjectInputEvent", "(ILandroid/view/InputEvent;IIIII)I",
+            (void*) nativeInjectInputEvent },
+    { "nativeSetInputWindows", "(I[Lcom/android/server/input/InputWindowHandle;)V",
+            (void*) nativeSetInputWindows },
+    { "nativeSetFocusedApplication", "(ILcom/android/server/input/InputApplicationHandle;)V",
+            (void*) nativeSetFocusedApplication },
+    { "nativeSetInputDispatchMode", "(IZZ)V",
+            (void*) nativeSetInputDispatchMode },
+    { "nativeSetSystemUiVisibility", "(II)V",
+            (void*) nativeSetSystemUiVisibility },
+    { "nativeGetInputDevice", "(II)Landroid/view/InputDevice;",
+            (void*) nativeGetInputDevice },
+    { "nativeGetInputDeviceIds", "(I)[I",
+            (void*) nativeGetInputDeviceIds },
+    { "nativeGetInputConfiguration", "(ILandroid/content/res/Configuration;)V",
+            (void*) nativeGetInputConfiguration },
+    { "nativeTransferTouchFocus", "(ILandroid/view/InputChannel;Landroid/view/InputChannel;)Z",
+            (void*) nativeTransferTouchFocus },
+    { "nativeSetPointerSpeed", "(II)V",
+            (void*) nativeSetPointerSpeed },
+    { "nativeSetShowTouches", "(IZ)V",
+            (void*) nativeSetShowTouches },
+    { "nativeDump", "(I)Ljava/lang/String;",
+            (void*) nativeDump },
+    { "nativeMonitor", "(I)V",
+            (void*) nativeMonitor },
 };
 
 #define FIND_CLASS(var, className) \
@@ -1406,84 +1345,83 @@ static JNINativeMethod gInputManagerMethods[] = {
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_server_InputManager(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "com/android/server/wm/InputManager",
+    int res = jniRegisterNativeMethods(env, "com/android/server/input/InputManagerService",
             gInputManagerMethods, NELEM(gInputManagerMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
     // Callbacks
 
     jclass clazz;
-    FIND_CLASS(clazz, "com/android/server/wm/InputManager$Callbacks");
+    FIND_CLASS(clazz, "com/android/server/input/InputManagerService");
 
-    GET_METHOD_ID(gCallbacksClassInfo.notifyConfigurationChanged, clazz,
+    GET_METHOD_ID(gServiceClassInfo.notifyConfigurationChanged, clazz,
             "notifyConfigurationChanged", "(J)V");
 
-    GET_METHOD_ID(gCallbacksClassInfo.notifyLidSwitchChanged, clazz,
+    GET_METHOD_ID(gServiceClassInfo.notifyLidSwitchChanged, clazz,
             "notifyLidSwitchChanged", "(JZ)V");
 
-    GET_METHOD_ID(gCallbacksClassInfo.notifyInputChannelBroken, clazz,
-            "notifyInputChannelBroken", "(Lcom/android/server/wm/InputWindowHandle;)V");
+    GET_METHOD_ID(gServiceClassInfo.notifyInputChannelBroken, clazz,
+            "notifyInputChannelBroken", "(Lcom/android/server/input/InputWindowHandle;)V");
 
-    GET_METHOD_ID(gCallbacksClassInfo.notifyANR, clazz,
+    GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",
-            "(Lcom/android/server/wm/InputApplicationHandle;Lcom/android/server/wm/InputWindowHandle;)J");
+            "(Lcom/android/server/input/InputApplicationHandle;Lcom/android/server/input/InputWindowHandle;)J");
 
-    GET_METHOD_ID(gCallbacksClassInfo.filterInputEvent, clazz,
+    GET_METHOD_ID(gServiceClassInfo.filterInputEvent, clazz,
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");
 
-    GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeQueueing, clazz,
+    GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeQueueing, clazz,
             "interceptKeyBeforeQueueing", "(Landroid/view/KeyEvent;IZ)I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.interceptMotionBeforeQueueingWhenScreenOff,
+    GET_METHOD_ID(gServiceClassInfo.interceptMotionBeforeQueueingWhenScreenOff,
             clazz,
             "interceptMotionBeforeQueueingWhenScreenOff", "(I)I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeDispatching, clazz,
+    GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",
-            "(Lcom/android/server/wm/InputWindowHandle;Landroid/view/KeyEvent;I)J");
+            "(Lcom/android/server/input/InputWindowHandle;Landroid/view/KeyEvent;I)J");
 
-    GET_METHOD_ID(gCallbacksClassInfo.dispatchUnhandledKey, clazz,
+    GET_METHOD_ID(gServiceClassInfo.dispatchUnhandledKey, clazz,
             "dispatchUnhandledKey",
-            "(Lcom/android/server/wm/InputWindowHandle;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
+            "(Lcom/android/server/input/InputWindowHandle;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
 
-    GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, clazz,
+    GET_METHOD_ID(gServiceClassInfo.checkInjectEventsPermission, clazz,
             "checkInjectEventsPermission", "(II)Z");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getVirtualKeyQuietTimeMillis, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getVirtualKeyQuietTimeMillis, clazz,
             "getVirtualKeyQuietTimeMillis", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getExcludedDeviceNames, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getExcludedDeviceNames, clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatTimeout, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getKeyRepeatTimeout, clazz,
             "getKeyRepeatTimeout", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatDelay, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getKeyRepeatDelay, clazz,
             "getKeyRepeatDelay", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getHoverTapTimeout, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getHoverTapTimeout, clazz,
             "getHoverTapTimeout", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getHoverTapSlop, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getHoverTapSlop, clazz,
             "getHoverTapSlop", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getDoubleTapTimeout, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getDoubleTapTimeout, clazz,
             "getDoubleTapTimeout", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getLongPressTimeout, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getLongPressTimeout, clazz,
             "getLongPressTimeout", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getPointerLayer, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getPointerLayer, clazz,
             "getPointerLayer", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getPointerIcon, clazz,
+    GET_METHOD_ID(gServiceClassInfo.getPointerIcon, clazz,
             "getPointerIcon", "()Landroid/view/PointerIcon;");
 
     // KeyEvent
 
     FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
     gKeyEventClassInfo.clazz = jclass(env->NewGlobalRef(gKeyEventClassInfo.clazz));
-
 
     // MotionEvent
 

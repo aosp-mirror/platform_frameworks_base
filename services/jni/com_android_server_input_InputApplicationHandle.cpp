@@ -21,7 +21,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
 
-#include "com_android_server_InputApplicationHandle.h"
+#include "com_android_server_input_InputApplicationHandle.h"
 
 namespace android {
 
@@ -135,12 +135,12 @@ static JNINativeMethod gInputApplicationHandleMethods[] = {
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_server_InputApplicationHandle(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "com/android/server/wm/InputApplicationHandle",
+    int res = jniRegisterNativeMethods(env, "com/android/server/input/InputApplicationHandle",
             gInputApplicationHandleMethods, NELEM(gInputApplicationHandleMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
     jclass clazz;
-    FIND_CLASS(clazz, "com/android/server/wm/InputApplicationHandle");
+    FIND_CLASS(clazz, "com/android/server/input/InputApplicationHandle");
 
     GET_FIELD_ID(gInputApplicationHandleClassInfo.ptr, clazz,
             "ptr", "I");

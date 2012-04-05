@@ -16,7 +16,7 @@
 
 package com.android.server.accessibility;
 
-import com.android.server.wm.InputFilter;
+import com.android.server.input.InputFilter;
 
 import android.content.Context;
 import android.util.Slog;

@@ -24,8 +24,8 @@
 #include <android_view_InputChannel.h>
 #include <android/graphics/Region.h>
 
-#include "com_android_server_InputWindowHandle.h"
-#include "com_android_server_InputApplicationHandle.h"
+#include "com_android_server_input_InputWindowHandle.h"
+#include "com_android_server_input_InputApplicationHandle.h"
 
 namespace android {
 
@@ -218,19 +218,19 @@ static JNINativeMethod gInputWindowHandleMethods[] = {
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_server_InputWindowHandle(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "com/android/server/wm/InputWindowHandle",
+    int res = jniRegisterNativeMethods(env, "com/android/server/input/InputWindowHandle",
             gInputWindowHandleMethods, NELEM(gInputWindowHandleMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
     jclass clazz;
-    FIND_CLASS(clazz, "com/android/server/wm/InputWindowHandle");
+    FIND_CLASS(clazz, "com/android/server/input/InputWindowHandle");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.ptr, clazz,
             "ptr", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.inputApplicationHandle,
             clazz,
-            "inputApplicationHandle", "Lcom/android/server/wm/InputApplicationHandle;");
+            "inputApplicationHandle", "Lcom/android/server/input/InputApplicationHandle;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.inputChannel, clazz,
             "inputChannel", "Landroid/view/InputChannel;");

@@ -16,6 +16,10 @@
 
 package com.android.server.wm;
 
+import com.android.server.input.InputManagerService;
+import com.android.server.input.InputApplicationHandle;
+import com.android.server.input.InputWindowHandle;
+
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
@@ -27,7 +31,7 @@ import android.view.WindowManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-final class InputMonitor {
+final class InputMonitor implements InputManagerService.Callbacks {
     private final WindowManagerService mService;
     
     // Current window with input focus for keys and other non-touch events.  May be null.
@@ -93,7 +97,7 @@ final class InputMonitor {
         }
         
         if (appWindowToken == null && inputApplicationHandle != null) {
-            appWindowToken = inputApplicationHandle.appWindowToken;
+            appWindowToken = (AppWindowToken)inputApplicationHandle.appWindowToken;
             if (appWindowToken != null) {
                 Slog.i(WindowManagerService.TAG,
                         "Input event dispatching timed out sending to application "
@@ -301,7 +305,14 @@ final class InputMonitor {
         WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
         return mService.mPolicy.dispatchUnhandledKey(windowState, event, policyFlags);
     }
-    
+
+    /* Callback to get pointer layer. */
+    public int getPointerLayer() {
+        return mService.mPolicy.windowTypeToLayerLw(WindowManager.LayoutParams.TYPE_POINTER)
+                * WindowManagerService.TYPE_LAYER_MULTIPLIER
+                + WindowManagerService.TYPE_LAYER_OFFSET;
+    }
+
     /* Called when the current input focus changes.
      * Layer assignment is assumed to be complete by the time this is called.
      */

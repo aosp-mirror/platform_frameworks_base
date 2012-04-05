@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.wm;
+package com.android.server.input;
+
+import com.android.server.wm.WindowManagerService;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -33,7 +35,7 @@ import android.view.WindowManagerPolicy;
  * system's behavior changes as follows:
  * <ul>
  * <li>Input events are first delivered to the {@link WindowManagerPolicy}
- * interception methods before queueing as usual.  This critical step takes care of managing
+ * interception methods before queuing as usual.  This critical step takes care of managing
  * the power state of the device and handling wake keys.</li>
  * <li>Input events are then asynchronously delivered to the input filter's
  * {@link #onInputEvent(InputEvent)} method instead of being enqueued for dispatch to
@@ -79,7 +81,7 @@ import android.view.WindowManagerPolicy;
  * {@link WindowManagerPolicy#FLAG_PASS_TO_USER} policy flag.  The input filter may
  * sometimes receive events that do not have this flag set.  It should take note of
  * the fact that the policy intends to drop the event, clean up its state, and
- * then send appropriate cancelation events to the dispatcher if needed.
+ * then send appropriate cancellation events to the dispatcher if needed.
  * </p><p>
  * For example, suppose the input filter is processing a gesture and one of the touch events
  * it receives does not have the {@link WindowManagerPolicy#FLAG_PASS_TO_USER} flag set.
@@ -89,8 +91,8 @@ import android.view.WindowManagerPolicy;
  * Corollary: Events that set sent to the dispatcher should usually include the
  * {@link WindowManagerPolicy#FLAG_PASS_TO_USER} flag.  Otherwise, they will be dropped!
  * </p><p>
- * It may be prudent to disable automatic key repeating for synthetically generated
- * keys by setting the {@link WindowManagerPolicy#FLAG_DISABLE_KEY_REPEAT} policy flag.
+ * It may be prudent to disable automatic key repeating for synthetic key events
+ * by setting the {@link WindowManagerPolicy#FLAG_DISABLE_KEY_REPEAT} policy flag.
  * </p>
  */
 public abstract class InputFilter {

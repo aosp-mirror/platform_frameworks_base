@@ -23,6 +23,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import com.android.server.input.InputWindowHandle;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
