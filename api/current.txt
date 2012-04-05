@@ -570,7 +570,7 @@ package android {
     field public static final int itemIconDisabledAlpha = 16843057; // 0x1010131
     field public static final int itemPadding = 16843565; // 0x101032d
     field public static final int itemTextAppearance = 16843052; // 0x101012c
-    field public static final int kcm = 16843694; // 0x10103ae
+    field public static final int kcm = 16843696; // 0x10103b0
     field public static final int keepScreenOn = 16843286; // 0x1010216
     field public static final int key = 16843240; // 0x10101e8
     field public static final int keyBackground = 16843315; // 0x1010233
@@ -728,7 +728,7 @@ package android {
     field public static final int panelColorForeground = 16842848; // 0x1010060
     field public static final int panelFullBackground = 16842847; // 0x101005f
     field public static final int panelTextAppearance = 16842850; // 0x1010062
-    field public static final int parentActivityName = 16843696; // 0x10103b0
+    field public static final int parentActivityName = 16843697; // 0x10103b1
     field public static final deprecated int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
     field public static final int pathPattern = 16842796; // 0x101002c
