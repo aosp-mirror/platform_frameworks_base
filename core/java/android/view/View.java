@@ -4032,8 +4032,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * <p>
      * <strong>Note:</strong> When a View clears focus the framework is trying
      * to give focus to the first focusable View from the top. Hence, if this
-     * View is the first from the top that can take focus, then its focus will
-     * not be cleared nor will the focus change callback be invoked.
+     * View is the first from the top that can take focus, then all callbacks
+     * related to clearing focus will be invoked after wich the framework will
+     * give focus to this view.
      * </p>
      */
     public void clearFocus() {
@@ -4050,25 +4051,22 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             onFocusChanged(false, 0, null);
             refreshDrawableState();
+
+            ensureInputFocusOnFirstFocusable();
         }
     }
 
-    /**
-     * Called to clear the focus of a view that is about to be removed.
-     * Doesn't call clearChildFocus, which prevents this view from taking
-     * focus again before it has been removed from the parent
-     */
-    void clearFocusForRemoval() {
-        if ((mPrivateFlags & FOCUSED) != 0) {
-            mPrivateFlags &= ~FOCUSED;
-
-            onFocusChanged(false, 0, null);
-            refreshDrawableState();
-
-            // The view cleared focus and invoked the callbacks, so  now is the
-            // time to give focus to the the first focusable from the top to
-            // ensure that the gain focus is announced after clear focus.
-            getRootView().requestFocus(FOCUS_FORWARD);
+    void ensureInputFocusOnFirstFocusable() {
+        View root = getRootView();
+        if (root != null) {
+            // Find the first focusble from the top.
+            View next = root.focusSearch(FOCUS_FORWARD);
+            if (next != null) {
+                // Giving focus to the found focusable will not
+                // perform a search since we found a view that is
+                // guaranteed to be able to take focus.
+                next.requestFocus(FOCUS_FORWARD);
+            }
         }
     }
 
