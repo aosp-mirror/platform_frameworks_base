@@ -33,7 +33,7 @@ import java.util.Locale;
  */
 public class WebSettingsClassic extends WebSettings {
     // TODO: Keep this up to date
-    private static final String PREVIOUS_VERSION = "4.0.3";
+    private static final String PREVIOUS_VERSION = "4.0.4";
 
     // WebView associated with this WebSettings.
     private WebViewClassic mWebView;
