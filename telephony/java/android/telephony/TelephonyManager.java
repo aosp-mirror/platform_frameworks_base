@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.util.Log;
 
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
@@ -85,6 +84,10 @@ public class TelephonyManager {
         return sInstance;
     }
 
+    /** {@hide} */
+    public static TelephonyManager from(Context context) {
+        return (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+    }
 
     //
     // Broadcast Intent actions

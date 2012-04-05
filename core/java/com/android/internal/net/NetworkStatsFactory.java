@@ -16,7 +16,7 @@
 
 package com.android.internal.net;
 
-import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
@@ -101,7 +101,7 @@ public class NetworkStatsFactory {
             while (reader.hasMoreData()) {
                 entry.iface = reader.nextString();
                 entry.uid = UID_ALL;
-                entry.set = SET_DEFAULT;
+                entry.set = SET_ALL;
                 entry.tag = TAG_NONE;
 
                 final boolean active = reader.nextInt() != 0;
@@ -165,7 +165,7 @@ public class NetworkStatsFactory {
 
             entry.iface = iface;
             entry.uid = UID_ALL;
-            entry.set = SET_DEFAULT;
+            entry.set = SET_ALL;
             entry.tag = TAG_NONE;
             entry.rxBytes = readSingleLongFromFile(new File(ifacePath, "rx_bytes"));
             entry.rxPackets = readSingleLongFromFile(new File(ifacePath, "rx_packets"));
@@ -193,7 +193,7 @@ public class NetworkStatsFactory {
                 try {
                     entry.iface = values.get(0);
                     entry.uid = UID_ALL;
-                    entry.set = SET_DEFAULT;
+                    entry.set = SET_ALL;
                     entry.tag = TAG_NONE;
                     entry.rxBytes = Long.parseLong(values.get(1));
                     entry.rxPackets = Long.parseLong(values.get(2));

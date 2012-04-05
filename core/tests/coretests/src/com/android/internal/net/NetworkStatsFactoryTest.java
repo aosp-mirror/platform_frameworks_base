@@ -16,6 +16,7 @@
 
 package com.android.internal.net;
 
+import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
@@ -84,12 +85,12 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
 
         final NetworkStats stats = mFactory.readNetworkStatsSummary();
         assertEquals(6, stats.size());
-        assertStatsEntry(stats, "lo", UID_ALL, SET_DEFAULT, TAG_NONE, 8308L, 8308L);
-        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 1507570L, 489339L);
-        assertStatsEntry(stats, "ifb0", UID_ALL, SET_DEFAULT, TAG_NONE, 52454L, 0L);
-        assertStatsEntry(stats, "ifb1", UID_ALL, SET_DEFAULT, TAG_NONE, 52454L, 0L);
-        assertStatsEntry(stats, "sit0", UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L);
-        assertStatsEntry(stats, "ip6tnl0", UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L);
+        assertStatsEntry(stats, "lo", UID_ALL, SET_ALL, TAG_NONE, 8308L, 8308L);
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 1507570L, 489339L);
+        assertStatsEntry(stats, "ifb0", UID_ALL, SET_ALL, TAG_NONE, 52454L, 0L);
+        assertStatsEntry(stats, "ifb1", UID_ALL, SET_ALL, TAG_NONE, 52454L, 0L);
+        assertStatsEntry(stats, "sit0", UID_ALL, SET_ALL, TAG_NONE, 0L, 0L);
+        assertStatsEntry(stats, "ip6tnl0", UID_ALL, SET_ALL, TAG_NONE, 0L, 0L);
     }
 
     public void testNetworkStatsSummaryDown() throws Exception {
@@ -102,8 +103,8 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
 
         final NetworkStats stats = mFactory.readNetworkStatsSummary();
         assertEquals(7, stats.size());
-        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 1507570L, 489339L);
-        assertStatsEntry(stats, "wlan0", UID_ALL, SET_DEFAULT, TAG_NONE, 1024L, 2048L);
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 1507570L, 489339L);
+        assertStatsEntry(stats, "wlan0", UID_ALL, SET_ALL, TAG_NONE, 1024L, 2048L);
     }
 
     public void testNetworkStatsCombined() throws Exception {
@@ -115,7 +116,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         stageLong(40L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_packets"));
 
         final NetworkStats stats = mFactory.readNetworkStatsSummary();
-        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 1507570L + 10L,
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 1507570L + 10L,
                 2205L + 20L, 489339L + 30L, 2237L + 40L);
     }
 
@@ -128,7 +129,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
         stageLong(40L, new File(mTestProc, "net/xt_qtaguid/iface_stat/rmnet0/tx_packets"));
 
         final NetworkStats stats = mFactory.readNetworkStatsSummary();
-        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 10L, 20L, 30L, 40L);
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 10L, 20L, 30L, 40L);
     }
 
     public void testKernelTags() throws Exception {
@@ -153,9 +154,9 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
 
         final NetworkStats stats = mFactory.readNetworkStatsSummary();
         assertEquals(6, stats.size());
-        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 2112L, 24L, 700L, 10L);
-        assertStatsEntry(stats, "test1", UID_ALL, SET_DEFAULT, TAG_NONE, 6L, 8L, 10L, 12L);
-        assertStatsEntry(stats, "test2", UID_ALL, SET_DEFAULT, TAG_NONE, 1L, 2L, 3L, 4L);
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 2112L, 24L, 700L, 10L);
+        assertStatsEntry(stats, "test1", UID_ALL, SET_ALL, TAG_NONE, 6L, 8L, 10L, 12L);
+        assertStatsEntry(stats, "test2", UID_ALL, SET_ALL, TAG_NONE, 1L, 2L, 3L, 4L);
     }
 
     /**

@@ -43,15 +43,10 @@ import com.android.internal.util.Objects;
  */
 public class NetworkTemplate implements Parcelable {
 
-    /** {@hide} */
     public static final int MATCH_MOBILE_ALL = 1;
-    /** {@hide} */
     public static final int MATCH_MOBILE_3G_LOWER = 2;
-    /** {@hide} */
     public static final int MATCH_MOBILE_4G = 3;
-    /** {@hide} */
     public static final int MATCH_WIFI = 4;
-    /** {@hide} */
     public static final int MATCH_ETHERNET = 5;
 
     /**
@@ -65,37 +60,50 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
-     * networks together. Only uses statistics for requested IMSI.
+     * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks with
+     * the given IMSI.
      */
     public static NetworkTemplate buildTemplateMobileAll(String subscriberId) {
-        return new NetworkTemplate(MATCH_MOBILE_ALL, subscriberId);
+        return new NetworkTemplate(MATCH_MOBILE_ALL, subscriberId, null);
     }
 
     /**
-     * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
-     * networks together that roughly meet a "3G" definition, or lower. Only
-     * uses statistics for requested IMSI.
+     * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks with
+     * the given IMSI that roughly meet a "3G" definition, or lower.
      */
+    @Deprecated
     public static NetworkTemplate buildTemplateMobile3gLower(String subscriberId) {
-        return new NetworkTemplate(MATCH_MOBILE_3G_LOWER, subscriberId);
+        return new NetworkTemplate(MATCH_MOBILE_3G_LOWER, subscriberId, null);
     }
 
     /**
-     * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
-     * networks together that meet a "4G" definition. Only uses statistics for
-     * requested IMSI.
+     * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks with
+     * the given IMSI that roughly meet a "4G" definition.
      */
+    @Deprecated
     public static NetworkTemplate buildTemplateMobile4g(String subscriberId) {
-        return new NetworkTemplate(MATCH_MOBILE_4G, subscriberId);
+        return new NetworkTemplate(MATCH_MOBILE_4G, subscriberId, null);
     }
 
     /**
-     * Template to combine all {@link ConnectivityManager#TYPE_WIFI} style
-     * networks together.
+     * Template to match all {@link ConnectivityManager#TYPE_WIFI} networks,
+     * regardless of SSID.
      */
+    public static NetworkTemplate buildTemplateWifiWildcard() {
+        return new NetworkTemplate(MATCH_WIFI, null, null);
+    }
+
+    @Deprecated
     public static NetworkTemplate buildTemplateWifi() {
-        return new NetworkTemplate(MATCH_WIFI, null);
+        return buildTemplateWifiWildcard();
+    }
+
+    /**
+     * Template to match {@link ConnectivityManager#TYPE_WIFI} networks with the
+     * given SSID.
+     */
+    public static NetworkTemplate buildTemplateWifi(String networkId) {
+        return new NetworkTemplate(MATCH_WIFI, null, networkId);
     }
 
     /**
@@ -103,44 +111,53 @@ public class NetworkTemplate implements Parcelable {
      * networks together.
      */
     public static NetworkTemplate buildTemplateEthernet() {
-        return new NetworkTemplate(MATCH_ETHERNET, null);
+        return new NetworkTemplate(MATCH_ETHERNET, null, null);
     }
 
     private final int mMatchRule;
     private final String mSubscriberId;
+    private final String mNetworkId;
 
-    /** {@hide} */
-    public NetworkTemplate(int matchRule, String subscriberId) {
-        this.mMatchRule = matchRule;
-        this.mSubscriberId = subscriberId;
+    public NetworkTemplate(int matchRule, String subscriberId, String networkId) {
+        mMatchRule = matchRule;
+        mSubscriberId = subscriberId;
+        mNetworkId = networkId;
     }
 
     private NetworkTemplate(Parcel in) {
         mMatchRule = in.readInt();
         mSubscriberId = in.readString();
+        mNetworkId = in.readString();
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mMatchRule);
         dest.writeString(mSubscriberId);
+        dest.writeString(mNetworkId);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
     public String toString() {
-        final String scrubSubscriberId = scrubSubscriberId(mSubscriberId);
-        return "NetworkTemplate: matchRule=" + getMatchRuleName(mMatchRule) + ", subscriberId="
-                + scrubSubscriberId;
+        final StringBuilder builder = new StringBuilder("NetworkTemplate: ");
+        builder.append("matchRule=").append(getMatchRuleName(mMatchRule));
+        if (mSubscriberId != null) {
+            builder.append(", subscriberId=").append(scrubSubscriberId(mSubscriberId));
+        }
+        if (mNetworkId != null) {
+            builder.append(", networkId=").append(mNetworkId);
+        }
+        return builder.toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mMatchRule, mSubscriberId);
+        return Objects.hashCode(mMatchRule, mSubscriberId, mNetworkId);
     }
 
     @Override
@@ -148,19 +165,22 @@ public class NetworkTemplate implements Parcelable {
         if (obj instanceof NetworkTemplate) {
             final NetworkTemplate other = (NetworkTemplate) obj;
             return mMatchRule == other.mMatchRule
-                    && Objects.equal(mSubscriberId, other.mSubscriberId);
+                    && Objects.equal(mSubscriberId, other.mSubscriberId)
+                    && Objects.equal(mNetworkId, other.mNetworkId);
         }
         return false;
     }
 
-    /** {@hide} */
     public int getMatchRule() {
         return mMatchRule;
     }
 
-    /** {@hide} */
     public String getSubscriberId() {
         return mSubscriberId;
+    }
+
+    public String getNetworkId() {
+        return mNetworkId;
     }
 
     /**
@@ -237,8 +257,13 @@ public class NetworkTemplate implements Parcelable {
     private boolean matchesWifi(NetworkIdentity ident) {
         switch (ident.mType) {
             case TYPE_WIFI:
+                if (mNetworkId == null) {
+                    return true;
+                } else {
+                    return Objects.equal(mNetworkId, ident.mNetworkId);
+                }
             case TYPE_WIFI_P2P:
-                return true;
+                return mNetworkId == null;
             default:
                 return false;
         }
@@ -279,10 +304,12 @@ public class NetworkTemplate implements Parcelable {
     }
 
     public static final Creator<NetworkTemplate> CREATOR = new Creator<NetworkTemplate>() {
+        @Override
         public NetworkTemplate createFromParcel(Parcel in) {
             return new NetworkTemplate(in);
         }
 
+        @Override
         public NetworkTemplate[] newArray(int size) {
             return new NetworkTemplate[size];
         }

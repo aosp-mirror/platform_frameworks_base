@@ -70,6 +70,7 @@ import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.IPowerManager;
 import android.os.MessageQueue.IdleHandler;
+import android.os.SystemClock;
 import android.os.UserId;
 import android.test.AndroidTestCase;
 import android.test.mock.MockPackageManager;
