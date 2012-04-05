@@ -5109,7 +5109,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.enableScreenAfterBoot();
 
         // Make sure the last requested orientation has been applied.
-        updateRotationUnchecked(false);
+        updateRotationUnchecked(false, false);
     }
 
     public void showBootMessage(final CharSequence msg, final boolean always) {
@@ -5383,7 +5383,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED,
                 rotation == -1 ? mRotation : rotation);
-        updateRotationUnchecked(false);
+        updateRotationUnchecked(false, false);
     }
 
     /**
@@ -5399,7 +5399,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_ORIENTATION) Slog.v(TAG, "thawRotation: mRotation=" + mRotation);
 
         mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_FREE, 777); // rot not used
-        updateRotationUnchecked(false);
+        updateRotationUnchecked(false, false);
     }
 
     /**
@@ -5409,8 +5409,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * such that the current rotation might need to be updated, such as when the
      * device is docked or rotated into a new posture.
      */
-    public void updateRotation(boolean alwaysSendConfiguration) {
-        updateRotationUnchecked(alwaysSendConfiguration);
+    public void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout) {
+        updateRotationUnchecked(alwaysSendConfiguration, forceRelayout);
     }
 
     /**
@@ -5440,8 +5440,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void updateRotationUnchecked(
-            boolean alwaysSendConfiguration) {
+    public void updateRotationUnchecked(boolean alwaysSendConfiguration, boolean forceRelayout) {
         if(DEBUG_ORIENTATION) Slog.v(TAG, "updateRotationUnchecked("
                    + "alwaysSendConfiguration=" + alwaysSendConfiguration + ")");
 
@@ -5449,6 +5448,10 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean changed;
         synchronized(mWindowMap) {
             changed = updateRotationUncheckedLocked(false);
+            if (!changed || forceRelayout) {
+                mLayoutNeeded = true;
+                performLayoutAndPlaceSurfacesLocked();
+            }
         }
 
         if (changed || alwaysSendConfiguration) {
@@ -6641,7 +6644,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mInputManager.setDisplaySize(Display.DEFAULT_DISPLAY,
                     mDisplay.getRawWidth(), mDisplay.getRawHeight(),
                     mDisplay.getRawExternalWidth(), mDisplay.getRawExternalHeight());
-            mPolicy.setInitialDisplaySize(mInitialDisplayWidth, mInitialDisplayHeight);
+            mPolicy.setInitialDisplaySize(mDisplay, mInitialDisplayWidth, mInitialDisplayHeight);
         }
 
         try {
@@ -7361,7 +7364,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mBaseDisplayWidth = width;
             mBaseDisplayHeight = height;
         }
-        mPolicy.setInitialDisplaySize(mBaseDisplayWidth, mBaseDisplayHeight);
+        mPolicy.setInitialDisplaySize(mDisplay, mBaseDisplayWidth, mBaseDisplayHeight);
 
         mLayoutNeeded = true;
 
@@ -7393,8 +7396,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public boolean canStatusBarHide() {
-        return mPolicy.canStatusBarHide();
+    public boolean hasSystemNavBar() {
+        return mPolicy.hasSystemNavBar();
     }
 
     // -------------------------------------------------------------

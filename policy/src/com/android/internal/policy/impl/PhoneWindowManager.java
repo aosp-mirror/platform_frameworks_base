@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +71,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.IApplicationToken;
@@ -299,11 +299,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHeadless;
     boolean mSafeMode;
     WindowState mStatusBar = null;
-    boolean mStatusBarCanHide;
+    boolean mHasSystemNavBar;
     int mStatusBarHeight;
     final ArrayList<WindowState> mStatusBarPanels = new ArrayList<WindowState>();
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
+    boolean mCanHideNavigationBar = false;
+    boolean mNavigationBarOnBottom = true;
     int mNavigationBarWidth = 0, mNavigationBarHeight = 0;
 
     WindowState mKeyguard = null;
@@ -329,6 +331,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSystemReady;
     boolean mSystemBooted;
     boolean mHdmiPlugged;
+    int mExternalDisplayWidth;
+    int mExternalDisplayHeight;
     int mUiMode;
     int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
@@ -463,6 +467,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Behavior of POWER button while in-call and screen on.
     // (See Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR.)
     int mIncallPowerBehavior;
+
+    Display mDisplay;
 
     int mLandscapeRotation = 0;  // default landscape rotation
     int mSeascapeRotation = 0;   // "other" landscape rotation, 180 degrees from mLandscapeRotation
@@ -927,10 +933,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    public void setInitialDisplaySize(int width, int height) {
-        int shortSize;
+    public void setInitialDisplaySize(Display display, int width, int height) {
+        mDisplay = display;
+
+        int shortSize, longSize;
         if (width > height) {
             shortSize = height;
+            longSize = width;
             mLandscapeRotation = Surface.ROTATION_0;
             mSeascapeRotation = Surface.ROTATION_180;
             if (mContext.getResources().getBoolean(
@@ -943,6 +952,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         } else {
             shortSize = width;
+            longSize = height;
             mPortraitRotation = Surface.ROTATION_0;
             mUpsideDownRotation = Surface.ROTATION_180;
             if (mContext.getResources().getBoolean(
@@ -955,36 +965,61 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        mExternalDisplayWidth = mDisplay.getRawExternalWidth();
+        mExternalDisplayHeight = mDisplay.getRawExternalHeight();
+
+        mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+        mNavigationBarHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_height);
+        mNavigationBarWidth = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_width);
+
         // Determine whether the status bar can hide based on the size
         // of the screen.  We assume sizes > 600dp are tablets where we
         // will use the system bar.
         int shortSizeDp = shortSize
                 * DisplayMetrics.DENSITY_DEFAULT
                 / DisplayMetrics.DENSITY_DEVICE;
-        mStatusBarCanHide = shortSizeDp < 600;
-        mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
-                mStatusBarCanHide
-                ? com.android.internal.R.dimen.status_bar_height
-                : com.android.internal.R.dimen.system_bar_height);
+        mHasSystemNavBar = shortSizeDp > 600;
 
-        mHasNavigationBar = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_showNavigationBar);
-        // Allow a system property to override this. Used by the emulator.
-        // See also hasNavigationBar().
-        String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
-        if (! "".equals(navBarOverride)) {
-            if      (navBarOverride.equals("1")) mHasNavigationBar = false;
-            else if (navBarOverride.equals("0")) mHasNavigationBar = true;
+        if (!mHasSystemNavBar) {
+            mHasNavigationBar = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_showNavigationBar);
+            // Allow a system property to override this. Used by the emulator.
+            // See also hasNavigationBar().
+            String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
+            if (! "".equals(navBarOverride)) {
+                if      (navBarOverride.equals("1")) mHasNavigationBar = false;
+                else if (navBarOverride.equals("0")) mHasNavigationBar = true;
+            }
+        } else {
+            mHasNavigationBar = false;
         }
 
-        mNavigationBarHeight = mHasNavigationBar
-                ? mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.navigation_bar_height)
-                : 0;
-        mNavigationBarWidth = mHasNavigationBar
-                ? mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.navigation_bar_width)
-                : 0;
+        if (mHasSystemNavBar) {
+            // The system bar is always at the bottom.  If you are watching
+            // a video in landscape, we don't need to hide it if we can still
+            // show a 16:9 aspect ratio with it.
+            int longSizeDp = longSize
+                    * DisplayMetrics.DENSITY_DEFAULT
+                    / DisplayMetrics.DENSITY_DEVICE;
+            int barHeightDp = mNavigationBarHeight
+                    * DisplayMetrics.DENSITY_DEFAULT
+                    / DisplayMetrics.DENSITY_DEVICE;
+            int aspect = ((shortSizeDp-barHeightDp) * 16) / longSizeDp;
+            // We have computed the aspect ratio with the bar height taken
+            // out to be 16:aspect.  If this is less than 9, then hiding
+            // the navigation bar will provide more useful space for wide
+            // screen movies.
+            mCanHideNavigationBar = aspect < 9;
+        } else if (mHasNavigationBar) {
+            // The navigation bar is at the right in landscape; it seems always
+            // useful to hide it for showing a video.
+            mCanHideNavigationBar = true;
+        } else {
+            mCanHideNavigationBar = false;
+        }
 
         if ("portrait".equals(SystemProperties.get("persist.demo.hdmirotation"))) {
             mHdmiRotation = mPortraitRotation;
@@ -1318,13 +1353,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return STATUS_BAR_LAYER;
     }
 
-    public boolean canStatusBarHide() {
-        return mStatusBarCanHide;
+    public boolean hasSystemNavBar() {
+        return mHasSystemNavBar;
     }
 
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation) {
         // Assumes that the navigation bar appears on the side of the display in landscape.
-        if (fullWidth > fullHeight) {
+        if (mHasNavigationBar && fullWidth > fullHeight) {
             return fullWidth - mNavigationBarWidth;
         }
         return fullWidth;
@@ -1333,8 +1368,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation) {
         // Assumes the navigation bar appears on the bottom of the display in portrait.
         return fullHeight
-            - (mStatusBarCanHide ? 0 : mStatusBarHeight)
-            - ((fullWidth > fullHeight) ? 0 : mNavigationBarHeight);
+            - (mHasSystemNavBar ? mNavigationBarHeight : 0)
+            - ((mHasNavigationBar && fullWidth > fullHeight) ? 0 : mNavigationBarHeight);
     }
 
     public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation) {
@@ -1348,7 +1383,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // exclude it since applications can't generally use that part of the
         // screen.
         return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation)
-                - (mStatusBarCanHide ? mStatusBarHeight : 0);
+                - (mHasSystemNavBar ? 0 : mStatusBarHeight);
     }
 
     public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
@@ -1357,6 +1392,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs) {
         return attrs.type != WindowManager.LayoutParams.TYPE_STATUS_BAR
+                && attrs.type != WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
                 && attrs.type != WindowManager.LayoutParams.TYPE_WALLPAPER;
     }
     
@@ -1495,10 +1531,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE,
                         "PhoneWindowManager");
-                // TODO: Need to handle the race condition of the status bar proc
-                // dying and coming back before the removeWindowLw cleanup has happened.
                 if (mStatusBar != null) {
-                    return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
+                    if (mStatusBar.isAlive()) {
+                        return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
+                    }
                 }
                 mStatusBar = win;
                 break;
@@ -1506,6 +1542,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE,
                         "PhoneWindowManager");
+                if (mNavigationBar != null) {
+                    if (mNavigationBar.isAlive()) {
+                        return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
+                    }
+                }
                 mNavigationBar = win;
                 if (DEBUG_LAYOUT) Log.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
@@ -1550,7 +1591,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int selectAnimationLw(WindowState win, int transit) {
         if (PRINT_ANIM) Log.i(TAG, "selectAnimation in " + win
               + ": transit=" + transit);
-        if (transit == TRANSIT_PREVIEW_DONE) {
+        if (win == mStatusBar) {
+            if (transit == TRANSIT_EXIT || transit == TRANSIT_HIDE) {
+                return R.anim.dock_top_exit;
+            } else if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
+                return R.anim.dock_top_enter;
+            }
+        } else if (win == mNavigationBar) {
+            // This can be on either the bottom or the right.
+            if (mNavigationBarOnBottom) {
+                if (transit == TRANSIT_EXIT || transit == TRANSIT_HIDE) {
+                    return R.anim.dock_bottom_exit;
+                } else if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
+                    return R.anim.dock_bottom_enter;
+                }
+            } else {
+                if (transit == TRANSIT_EXIT || transit == TRANSIT_HIDE) {
+                    return R.anim.dock_right_exit;
+                } else if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
+                    return R.anim.dock_right_enter;
+                }
+            }
+        } if (transit == TRANSIT_PREVIEW_DONE) {
             if (win.hasAppShownWindows()) {
                 if (PRINT_ANIM) Log.i(TAG, "**** STARTING EXIT");
                 return com.android.internal.R.anim.app_starting_exit;
@@ -2036,7 +2098,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
                 == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
             int availRight, availBottom;
-            if ((attrs.systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
+            if (mCanHideNavigationBar &&
+                    (attrs.systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
                 availRight = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
                 availBottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
             } else {
@@ -2082,8 +2145,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pf.right = df.right = vf.right = mDockRight;
         pf.bottom = df.bottom = vf.bottom = mDockBottom;
 
-        final boolean navVisible = (mNavigationBar == null || mNavigationBar.isVisibleLw()) &&
-                (mLastSystemUiFlags&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
+        // For purposes of putting out fake window up to steal focus, we will
+        // drive nav being hidden only by whether it is requested.
+        boolean navVisible = (mLastSystemUiFlags&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
 
         // When the navigation bar isn't visible, we put up a fake
         // input window to catch all touch events.  This way we can
@@ -2101,57 +2165,71 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     0, false, false, true);
         }
 
-        // decide where the status bar goes ahead of time
-        if (mStatusBar != null) {
-            if (mNavigationBar != null) {
-                // Force the navigation bar to its appropriate place and
-                // size.  We need to do this directly, instead of relying on
-                // it to bubble up from the nav bar, because this needs to
-                // change atomically with screen rotations.
-                if (displayWidth < displayHeight) {
-                    // Portrait screen; nav bar goes on bottom.
-                    mTmpNavigationFrame.set(0, displayHeight-mNavigationBarHeight,
-                            displayWidth, displayHeight);
-                    mStableBottom = mTmpNavigationFrame.top;
-                    if (navVisible) {
-                        mDockBottom = mTmpNavigationFrame.top;
-                        mRestrictedScreenHeight = mDockBottom - mDockTop;
-                    } else {
-                        // We currently want to hide the navigation UI.  Do this by just
-                        // moving it off the screen, so it can still receive input events
-                        // to know when to be re-shown.
-                        mTmpNavigationFrame.offset(0, mNavigationBarHeight);
-                    }
-                } else {
-                    // Landscape screen; nav bar goes to the right.
-                    mTmpNavigationFrame.set(displayWidth-mNavigationBarWidth, 0,
-                            displayWidth, displayHeight);
-                    mStableRight = mTmpNavigationFrame.left;
-                    if (navVisible) {
-                        mDockRight = mTmpNavigationFrame.left;
-                        mRestrictedScreenWidth = mDockRight - mDockLeft;
-                    } else {
-                        // We currently want to hide the navigation UI.  Do this by just
-                        // moving it off the screen, so it can still receive input events
-                        // to know when to be re-shown.
-                        mTmpNavigationFrame.offset(mNavigationBarWidth, 0);
+        // For purposes of positioning and showing the nav bar, if we have
+        // decided that it can't be hidden (because of the screen aspect ratio),
+        // then take that into account.
+        navVisible |= !mCanHideNavigationBar;
+
+        if (mNavigationBar != null) {
+            // Force the navigation bar to its appropriate place and
+            // size.  We need to do this directly, instead of relying on
+            // it to bubble up from the nav bar, because this needs to
+            // change atomically with screen rotations.
+            mNavigationBarOnBottom = !mHasNavigationBar || displayWidth < displayHeight;
+            if (mNavigationBarOnBottom) {
+                // It's a system nav bar or a portrait screen; nav bar goes on bottom.
+                int top = displayHeight - mNavigationBarHeight;
+                if (mHdmiPlugged) {
+                    if (top > mExternalDisplayHeight) {
+                        top = mExternalDisplayHeight;
                     }
                 }
-                // Make sure the content and current rectangles are updated to
-                // account for the restrictions from the navigation bar.
-                mContentTop = mCurTop = mDockTop;
-                mContentBottom = mCurBottom = mDockBottom;
-                mContentLeft = mCurLeft = mDockLeft;
-                mContentRight = mCurRight = mDockRight;
-                // And compute the final frame.
-                mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
-                        mTmpNavigationFrame, mTmpNavigationFrame);
-                if (DEBUG_LAYOUT) Log.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
+                mTmpNavigationFrame.set(0, top, displayWidth, displayHeight);
+                mStableBottom = mTmpNavigationFrame.top;
+                if (navVisible) {
+                    mNavigationBar.showLw(true);
+                    mDockBottom = mTmpNavigationFrame.top;
+                    mRestrictedScreenHeight = mDockBottom - mDockTop;
+                } else {
+                    // We currently want to hide the navigation UI.
+                    mNavigationBar.hideLw(true);
+                }
+            } else {
+                // Landscape screen; nav bar goes to the right.
+                int left = displayWidth - mNavigationBarWidth;
+                if (mHdmiPlugged) {
+                    if (left > mExternalDisplayWidth) {
+                        left = mExternalDisplayWidth;
+                    }
+                }
+                mTmpNavigationFrame.set(left, 0, displayWidth, displayHeight);
+                mStableRight = mTmpNavigationFrame.left;
+                if (navVisible) {
+                    mNavigationBar.showLw(true);
+                    mDockRight = mTmpNavigationFrame.left;
+                    mRestrictedScreenWidth = mDockRight - mDockLeft;
+                } else {
+                    // We currently want to hide the navigation UI.
+                    mNavigationBar.hideLw(true);
+                }
             }
-            if (DEBUG_LAYOUT) Log.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
-                    mDockLeft, mDockTop, mDockRight, mDockBottom));
+            // Make sure the content and current rectangles are updated to
+            // account for the restrictions from the navigation bar.
+            mContentTop = mCurTop = mDockTop;
+            mContentBottom = mCurBottom = mDockBottom;
+            mContentLeft = mCurLeft = mDockLeft;
+            mContentRight = mCurRight = mDockRight;
+            // And compute the final frame.
+            mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
+                    mTmpNavigationFrame, mTmpNavigationFrame);
+            if (DEBUG_LAYOUT) Log.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
+        }
+        if (DEBUG_LAYOUT) Log.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
+                mDockLeft, mDockTop, mDockRight, mDockBottom));
 
-            // apply navigation bar insets
+        // decide where the status bar goes ahead of time
+        if (mStatusBar != null) {
+            // apply any navigation bar insets
             pf.left = df.left = vf.left = mDockLeft;
             pf.top = df.top = vf.top = mDockTop;
             pf.right = df.right = vf.right = mDockRight;
@@ -2161,57 +2239,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             final Rect r = mStatusBar.getFrameLw();
 
             // Compute the stable dimensions whether or not the status bar is hidden.
-            if (mStatusBarCanHide) {
-                if (mDockTop == r.top) mStableTop = r.bottom;
-                else if (mDockBottom == r.bottom) mStableBottom = r.top;
-            } else {
-                if (mStableTop == r.top) {
-                    mStableTop = r.bottom;
-                } else if (mStableBottom == r.bottom) {
-                    mStableBottom = r.top;
-                }
-            }
+            if (mDockTop == r.top) mStableTop = r.bottom;
+            else if (mDockBottom == r.bottom) mStableBottom = r.top;
 
+            // If the status bar is hidden, we don't want to cause
+            // windows behind it to scroll.
             if (mStatusBar.isVisibleLw()) {
-                // If the status bar is hidden, we don't want to cause
-                // windows behind it to scroll.
-                if (mStatusBarCanHide) {
-                    // Status bar may go away, so the screen area it occupies
-                    // is available to apps but just covering them when the
-                    // status bar is visible.
-                    if (mDockTop == r.top) mDockTop = r.bottom;
-                    else if (mDockBottom == r.bottom) mDockBottom = r.top;
-                    
-                    mContentTop = mCurTop = mDockTop;
-                    mContentBottom = mCurBottom = mDockBottom;
-                    mContentLeft = mCurLeft = mDockLeft;
-                    mContentRight = mCurRight = mDockRight;
+                // Status bar may go away, so the screen area it occupies
+                // is available to apps but just covering them when the
+                // status bar is visible.
+                if (mDockTop == r.top) mDockTop = r.bottom;
+                else if (mDockBottom == r.bottom) mDockBottom = r.top;
+                
+                mContentTop = mCurTop = mDockTop;
+                mContentBottom = mCurBottom = mDockBottom;
+                mContentLeft = mCurLeft = mDockLeft;
+                mContentRight = mCurRight = mDockRight;
 
-                    if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: " +
-                        String.format(
-                            "dock=[%d,%d][%d,%d] content=[%d,%d][%d,%d] cur=[%d,%d][%d,%d]",
-                            mDockLeft, mDockTop, mDockRight, mDockBottom,
-                            mContentLeft, mContentTop, mContentRight, mContentBottom,
-                            mCurLeft, mCurTop, mCurRight, mCurBottom));
-                } else {
-                    // Status bar can't go away; the part of the screen it
-                    // covers does not exist for anything behind it.
-                    if (mRestrictedScreenTop == r.top) {
-                        mRestrictedScreenTop = r.bottom;
-                        mRestrictedScreenHeight -= (r.bottom-r.top);
-                    } else if ((mRestrictedScreenHeight-mRestrictedScreenTop) == r.bottom) {
-                        mRestrictedScreenHeight -= (r.bottom-r.top);
-                    }
-
-                    mContentTop = mCurTop = mDockTop = mRestrictedScreenTop;
-                    mContentBottom = mCurBottom = mDockBottom
-                            = mRestrictedScreenTop + mRestrictedScreenHeight;
-                    if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: restricted screen area: ("
-                            + mRestrictedScreenLeft + ","
-                            + mRestrictedScreenTop + ","
-                            + (mRestrictedScreenLeft + mRestrictedScreenWidth) + ","
-                            + (mRestrictedScreenTop + mRestrictedScreenHeight) + ")");
-                }
+                if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: " +
+                    String.format(
+                        "dock=[%d,%d][%d,%d] content=[%d,%d][%d,%d] cur=[%d,%d][%d,%d]",
+                        mDockLeft, mDockTop, mDockRight, mDockBottom,
+                        mContentLeft, mContentTop, mContentRight, mContentBottom,
+                        mCurLeft, mCurTop, mCurRight, mCurBottom));
             }
         }
     }
@@ -2333,7 +2383,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                         "Laying out status bar window: (%d,%d - %d,%d)",
                                         pf.left, pf.top, pf.right, pf.bottom));
                         }
-                    } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                    } else if (mCanHideNavigationBar
+                            && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                             && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                             && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
                         // Asking for layout as if the nav bar is hidden, lets the
@@ -2426,7 +2477,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pf.right = df.right = cf.right = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
                     pf.bottom = df.bottom = cf.bottom
                             = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
-                } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+                } else if (mCanHideNavigationBar
+                        && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                         && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                         && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
                     // Asking for layout as if the nav bar is hidden, lets the
@@ -2623,19 +2675,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // has the FLAG_FULLSCREEN set.  Not sure if there is another way that to be the
                 // case though.
                 if (topIsFullscreen) {
-                    if (mStatusBarCanHide) {
-                        if (DEBUG_LAYOUT) Log.v(TAG, "** HIDING status bar");
-                        if (mStatusBar.hideLw(true)) {
-                            changes |= FINISH_LAYOUT_REDO_LAYOUT;
+                    if (DEBUG_LAYOUT) Log.v(TAG, "** HIDING status bar");
+                    if (mStatusBar.hideLw(true)) {
+                        changes |= FINISH_LAYOUT_REDO_LAYOUT;
 
-                            mHandler.post(new Runnable() { public void run() {
-                                if (mStatusBarService != null) {
-                                    try {
-                                        mStatusBarService.collapse();
-                                    } catch (RemoteException ex) {}
-                                }
-                            }});
-                        }
+                        mHandler.post(new Runnable() { public void run() {
+                            if (mStatusBarService != null) {
+                                try {
+                                    mStatusBarService.collapse();
+                                } catch (RemoteException ex) {}
+                            }
+                        }});
                     } else if (DEBUG_LAYOUT) {
                         Log.v(TAG, "Preventing status bar from hiding by policy");
                     }
@@ -2699,29 +2749,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // behind it.
             return false;
         }
-        if (false) {
-            // Don't do this on the tablet, since the system bar never completely
-            // covers the screen, and with all its transparency this will
-            // incorrectly think it does cover it when it doesn't.  We'll revisit
-            // this later when we re-do the phone status bar.
-            if (mStatusBar != null && mStatusBar.isVisibleLw()) {
-                RectF rect = new RectF(mStatusBar.getShownFrameLw());
-                for (int i=mStatusBarPanels.size()-1; i>=0; i--) {
-                    WindowState w = mStatusBarPanels.get(i);
-                    if (w.isVisibleLw()) {
-                        rect.union(w.getShownFrameLw());
-                    }
+        if (mStatusBar != null && mStatusBar.isVisibleLw()) {
+            RectF rect = new RectF(mStatusBar.getShownFrameLw());
+            for (int i=mStatusBarPanels.size()-1; i>=0; i--) {
+                WindowState w = mStatusBarPanels.get(i);
+                if (w.isVisibleLw()) {
+                    rect.union(w.getShownFrameLw());
                 }
-                final int insetw = mRestrictedScreenWidth/10;
-                final int inseth = mRestrictedScreenHeight/10;
-                if (rect.contains(insetw, inseth, mRestrictedScreenWidth-insetw,
-                            mRestrictedScreenHeight-inseth)) {
-                    // All of the status bar windows put together cover the
-                    // screen, so the app can't be seen.  (Note this test doesn't
-                    // work if the rects of these windows are at off offsets or
-                    // sizes, causing gaps in the rect union we have computed.)
-                    return false;
-                }
+            }
+            final int insetw = mRestrictedScreenWidth/10;
+            final int inseth = mRestrictedScreenHeight/10;
+            if (rect.contains(insetw, inseth, mRestrictedScreenWidth-insetw,
+                        mRestrictedScreenHeight-inseth)) {
+                // All of the status bar windows put together cover the
+                // screen, so the app can't be seen.  (Note this test doesn't
+                // work if the rects of these windows are at odd offsets or
+                // sizes, causing gaps in the rect union we have computed.)
+                return false;
             }
         }
         return true;
@@ -2776,7 +2820,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     void setHdmiPlugged(boolean plugged) {
         if (mHdmiPlugged != plugged) {
             mHdmiPlugged = plugged;
-            updateRotation(true);
+            if (plugged && mDisplay != null) {
+                mExternalDisplayWidth = mDisplay.getRawExternalWidth();
+                mExternalDisplayHeight = mDisplay.getRawExternalHeight();
+            }
+            updateRotation(true, true);
             Intent intent = new Intent(ACTION_HDMI_PLUGGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             intent.putExtra(EXTRA_HDMI_PLUGGED_STATE, plugged);
@@ -3871,7 +3919,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     void updateRotation(boolean alwaysSendConfiguration) {
         try {
             //set orientation on WindowManager
-            mWindowManager.updateRotation(alwaysSendConfiguration);
+            mWindowManager.updateRotation(alwaysSendConfiguration, false);
+        } catch (RemoteException e) {
+            // Ignore
+        }
+    }
+
+    void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout) {
+        try {
+            //set orientation on WindowManager
+            mWindowManager.updateRotation(alwaysSendConfiguration, forceRelayout);
         } catch (RemoteException e) {
             // Ignore
         }

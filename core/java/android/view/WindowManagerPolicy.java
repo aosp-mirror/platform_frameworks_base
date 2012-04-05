@@ -326,6 +326,11 @@ public interface WindowManagerPolicy {
          * Returns true if {@link #hideLw} was last called for the window.
          */
         public boolean showLw(boolean doAnimation);
+
+        /**
+         * Check whether the process hosting this window is currently alive.
+         */
+        public boolean isAlive();
     }
 
     /**
@@ -447,7 +452,7 @@ public interface WindowManagerPolicy {
      * Called by window manager once it has the initial, default native
      * display dimensions.
      */
-    public void setInitialDisplaySize(int width, int height);
+    public void setInitialDisplaySize(Display display, int width, int height);
 
     /**
      * Check permissions when adding a window.
@@ -514,10 +519,10 @@ public interface WindowManagerPolicy {
     public int getMaxWallpaperLayer();
     
     /**
-     * Return true if the policy allows the status bar to hide.  Otherwise,
-     * it is a tablet-style system bar.
+     * Return true if the policy desires a full unified system nav bar.  Otherwise,
+     * it is a phone-style status bar with optional nav bar.
      */
-    public boolean canStatusBarHide();
+    public boolean hasSystemNavBar();
 
     /**
      * Return the display width available after excluding any screen

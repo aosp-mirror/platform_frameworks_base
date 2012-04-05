@@ -88,7 +88,7 @@ public class BridgeWindowManager implements IWindowManager {
     // ---- unused implementation of IWindowManager ----
 
     @Override
-    public boolean canStatusBarHide() throws RemoteException {
+    public boolean hasSystemNavBar() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -468,9 +468,8 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public void updateRotation(boolean arg0) throws RemoteException {
+    public void updateRotation(boolean arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
-
     }
 
     @Override

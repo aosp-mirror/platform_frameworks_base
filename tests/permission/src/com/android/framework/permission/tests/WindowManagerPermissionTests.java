@@ -412,7 +412,7 @@ public class WindowManagerPermissionTests extends TestCase {
     @SmallTest
     public void testSET_ORIENTATION() {
         try {
-            mWm.updateRotation(true);
+            mWm.updateRotation(true, false);
             mWm.getSwitchState(0);
             fail("IWindowManager.updateRotation did not throw SecurityException as"
                     + " expected");

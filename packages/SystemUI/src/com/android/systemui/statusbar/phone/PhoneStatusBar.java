@@ -1766,11 +1766,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 // HWComposer is unable to handle SW-rendered RGBX_8888 layers.
                 PixelFormat.RGB_565);
 
-        // the status bar should be in an overlay if possible
-        final Display defaultDisplay
-            = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay();
-
         // We explicitly leave FLAG_HARDWARE_ACCELERATED out of the flags.  The status bar occupies
         // very little screen real-estate and is updated fairly frequently.  By using CPU rendering
         // for the status bar, we prevent the GPU from having to wake up just to do these small
@@ -1779,9 +1774,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.gravity = getStatusBarGravity();
         lp.setTitle("StatusBar");
         lp.packageName = mContext.getPackageName();
-        lp.windowAnimations = R.style.Animation_StatusBar;
         WindowManagerImpl.getDefault().addView(makeStatusBarView(), lp);
-
     }
     
     void addExpandedWindow() {

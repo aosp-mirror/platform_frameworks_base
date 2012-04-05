@@ -1128,6 +1128,14 @@
   <!-- From android.policy -->
   <java-symbol type="anim" name="app_starting_exit" />
   <java-symbol type="anim" name="lock_screen_behind_enter" />
+  <java-symbol type="anim" name="dock_top_enter" />
+  <java-symbol type="anim" name="dock_top_exit" />
+  <java-symbol type="anim" name="dock_bottom_enter" />
+  <java-symbol type="anim" name="dock_bottom_exit" />
+  <java-symbol type="anim" name="dock_left_enter" />
+  <java-symbol type="anim" name="dock_left_exit" />
+  <java-symbol type="anim" name="dock_right_enter" />
+  <java-symbol type="anim" name="dock_right_exit" />
   <java-symbol type="array" name="config_keyboardTapVibePattern" />
   <java-symbol type="array" name="config_longPressVibePattern" />
   <java-symbol type="array" name="config_safeModeDisabledVibePattern" />
@@ -1153,7 +1161,6 @@
   <java-symbol type="dimen" name="navigation_bar_height" />
   <java-symbol type="dimen" name="navigation_bar_width" />
   <java-symbol type="dimen" name="status_bar_height" />
-  <java-symbol type="dimen" name="system_bar_height" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
   <java-symbol type="drawable" name="ic_jog_dial_unlock" />

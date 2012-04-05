@@ -67,8 +67,6 @@
 
     <!-- Standard animations for hiding and showing the status bar. -->
     <style name="Animation.StatusBar">
-        <item name="android:windowEnterAnimation">@anim/status_bar_enter</item>
-        <item name="android:windowExitAnimation">@anim/status_bar_exit</item>
     </style>
 
     <style name="Animation.StatusBar.IntruderAlert">
