@@ -124,19 +124,6 @@ class AppWindowToken extends WindowToken {
         }
     }
 
-    boolean showAllWindowsLocked() {
-        boolean isAnimating = false;
-        final int NW = allAppWindows.size();
-        for (int i=0; i<NW; i++) {
-            WindowStateAnimator winAnimator = allAppWindows.get(i).mWinAnimator;
-            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG,
-                    "performing show on: " + winAnimator);
-            winAnimator.performShowLocked();
-            isAnimating |= winAnimator.isAnimating();
-        }
-        return isAnimating;
-    }
-
     void updateReportedVisibilityLocked() {
         if (appToken == null) {
             return;

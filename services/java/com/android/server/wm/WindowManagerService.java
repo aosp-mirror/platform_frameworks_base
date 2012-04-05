@@ -351,32 +351,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * controlling the ordering of windows in different applications.  This
      * contains AppWindowToken objects.
      */
-    final ArrayList<AppWindowToken> mAppTokens = new ArrayList<AppWindowToken>() {
-        @Override
-        public void add(int index, AppWindowToken object) {
-            synchronized (mAnimator) {
-                super.add(index, object);
-            }
-        };
-        @Override
-        public boolean add(AppWindowToken object) {
-            synchronized (mAnimator) {
-                return super.add(object);
-            }
-        };
-        @Override
-        public AppWindowToken remove(int index) {
-            synchronized (mAnimator) {
-                return super.remove(index);
-            }
-        };
-        @Override
-        public boolean remove(Object object) {
-            synchronized (mAnimator) {
-                return super.remove(object);
-            }
-        };
-    };
+    final ArrayList<AppWindowToken> mAppTokens = new ArrayList<AppWindowToken>();
 
     /**
      * Application tokens that are in the process of exiting, but still
@@ -393,32 +368,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Z-ordered (bottom-most first) list of all Window objects.
      */
-    final ArrayList<WindowState> mWindows = new ArrayList<WindowState>() {
-        @Override
-        public void add(int index, WindowState object) {
-            synchronized (mAnimator) {
-                super.add(index, object);
-            }
-        };
-        @Override
-        public boolean add(WindowState object) {
-            synchronized (mAnimator) {
-                return super.add(object);
-            }
-        };
-        @Override
-        public WindowState remove(int index) {
-            synchronized (mAnimator) {
-                return super.remove(index);
-            }
-        };
-        @Override
-        public boolean remove(Object object) {
-            synchronized (mAnimator) {
-                return super.remove(object);
-            }
-        };
-    };
+    final ArrayList<WindowState> mWindows = new ArrayList<WindowState>();
 
     /**
      * Fake windows added to the window manager.  Note: ordered from top to
@@ -6504,6 +6454,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SET_TRANSPARENT_REGION = ANIMATOR_WHAT_OFFSET + 1;
         public static final int SET_WALLPAPER_OFFSET = ANIMATOR_WHAT_OFFSET + 2;
         public static final int SET_DIM_PARAMETERS = ANIMATOR_WHAT_OFFSET + 3;
+        public static final int SET_MOVE_ANIMATION = ANIMATOR_WHAT_OFFSET + 4;
 
         private Session mLastReportedHold;
 
@@ -6942,33 +6893,37 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // Animation messages. Move to Window{State}Animator
                 case SET_TRANSPARENT_REGION: {
-                    // TODO(cmautner): Remove sync.
-                    synchronized (mAnimator) {
-                        Pair<WindowStateAnimator, Region> pair =
+                    Pair<WindowStateAnimator, Region> pair =
                                 (Pair<WindowStateAnimator, Region>) msg.obj;
-                        final WindowStateAnimator winAnimator = pair.first;
-                        winAnimator.setTransparentRegionHint(pair.second);
-                    }
+                    final WindowStateAnimator winAnimator = pair.first;
+                    winAnimator.setTransparentRegionHint(pair.second);
 
                     scheduleAnimationLocked();
                     break;
                 }
 
                 case SET_WALLPAPER_OFFSET: {
-                    // TODO(cmautner): Remove sync.
-                    synchronized (mAnimator) {
-                        final WindowStateAnimator winAnimator = (WindowStateAnimator) msg.obj;
-                        winAnimator.setWallpaperOffset(msg.arg1, msg.arg2);
-                    }
+                    final WindowStateAnimator winAnimator = (WindowStateAnimator) msg.obj;
+                    winAnimator.setWallpaperOffset(msg.arg1, msg.arg2);
 
                     scheduleAnimationLocked();
                     break;
                 }
 
                 case SET_DIM_PARAMETERS: {
-                    synchronized (mAnimator) {
-                        mAnimator.mDimParams = (DimAnimator.Parameters) msg.obj;
-                    }
+                    mAnimator.mDimParams = (DimAnimator.Parameters) msg.obj;
+
+                    scheduleAnimationLocked();
+                    break;
+                }
+
+                case SET_MOVE_ANIMATION: {
+                    WindowAnimator.SetAnimationParams params =
+                            (WindowAnimator.SetAnimationParams) msg.obj;
+                    WindowStateAnimator winAnimator = params.mWinAnimator;
+                    winAnimator.setAnimation(params.mAnimation);
+                    winAnimator.mAnimDw = params.mAnimDw;
+                    winAnimator.mAnimDh = params.mAnimDh;
 
                     scheduleAnimationLocked();
                     break;
@@ -7752,20 +7707,19 @@ public class WindowManagerService extends IWindowManager.Stub
             AppWindowToken topOpeningApp = null;
             int topOpeningLayer = 0;
 
+            // TODO(cmautner): Move to animation side.
             NN = mOpeningApps.size();
             for (i=0; i<NN; i++) {
                 AppWindowToken wtoken = mOpeningApps.get(i);
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                        "Now opening app" + wtoken);
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
                 wtoken.mAppAnimator.clearThumbnail();
                 wtoken.reportedVisible = false;
                 wtoken.inPendingTransaction = false;
                 wtoken.mAppAnimator.animation = null;
-                setTokenVisibilityLocked(wtoken, animLp, true,
-                        transit, false);
+                setTokenVisibilityLocked(wtoken, animLp, true, transit, false);
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToShow = false;
-                mAnimator.mAnimating |= wtoken.showAllWindowsLocked();
+                mAnimator.mAnimating |= wtoken.mAppAnimator.showAllWindowsLocked();
                 if (animLp != null) {
                     int layer = -1;
                     for (int j=0; j<wtoken.windows.size(); j++) {
@@ -8624,6 +8578,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         wsa.mSurfaceShown = false;
                         wsa.mSurface = null;
                         ws.mHasSurface = false;
+                        mAnimator.mWinAnimators.remove(wsa);
                         mForceRemoves.add(ws);
                         i--;
                         N--;
@@ -8637,6 +8592,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         wsa.mSurfaceShown = false;
                         wsa.mSurface = null;
                         ws.mHasSurface = false;
+                        mAnimator.mWinAnimators.remove(wsa);
                         leakedSurface = true;
                     }
                 }
@@ -8676,6 +8632,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     winAnimator.mSurfaceShown = false;
                     winAnimator.mSurface = null;
                     winAnimator.mWin.mHasSurface = false;
+                    mAnimator.mWinAnimators.remove(winAnimator);
                 }
 
                 try {
