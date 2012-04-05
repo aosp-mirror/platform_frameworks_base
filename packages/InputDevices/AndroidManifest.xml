@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.inputdevices"
+        coreApp="true"
+        android:sharedUserId="android.uid.system">
+
+    <application
+            android:allowClearUserData="false"
+            android:label="@string/app_label"
+            android:process="system">
+
+        <receiver android:name=".InputDeviceReceiver">
+            <intent-filter>
+                <action android:name="android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS" />
+            </intent-filter>
+            <meta-data android:name="android.hardware.input.metadata.KEYBOARD_LAYOUTS"
+                    android:resource="@xml/keyboard_layouts" />
+        </receiver>
+    </application>
+</manifest>

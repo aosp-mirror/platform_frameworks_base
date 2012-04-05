@@ -1907,6 +1907,15 @@ public abstract class Context {
     public static final String SERIAL_SERVICE = "serial";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.hardware.input.InputManager} for interacting with input devices.
+     *
+     * @see #getSystemService
+     * @see android.hardware.input.InputManager
+     */
+    public static final String INPUT_SERVICE = "input";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
