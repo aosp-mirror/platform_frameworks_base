@@ -2130,7 +2130,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * @return true if drawing was succesful, false if an error occured
+     * @return true if drawing was succesfull, false if an error occurred
      */
     private boolean drawSoftware(Surface surface, AttachInfo attachInfo, int yoff,
             boolean scalingRequired, Rect dirty) {
@@ -3843,30 +3843,33 @@ public final class ViewRootImpl implements ViewParent,
         if (LOCAL_LOGV) Log.v(TAG, "DIE in " + this + " of " + mSurface);
         synchronized (this) {
             if (mAdded) {
-                mAdded = false;
                 dispatchDetachedFromWindow();
             }
 
             if (mAdded && !mFirst) {
                 destroyHardwareRenderer();
 
-                int viewVisibility = mView.getVisibility();
-                boolean viewVisibilityChanged = mViewVisibility != viewVisibility;
-                if (mWindowAttributesChanged || viewVisibilityChanged) {
-                    // If layout params have been changed, first give them
-                    // to the window manager to make sure it has the correct
-                    // animation info.
-                    try {
-                        if ((relayoutWindow(mWindowAttributes, viewVisibility, false)
-                                & WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0) {
-                            sWindowSession.finishDrawing(mWindow);
+                if (mView != null) {
+                    int viewVisibility = mView.getVisibility();
+                    boolean viewVisibilityChanged = mViewVisibility != viewVisibility;
+                    if (mWindowAttributesChanged || viewVisibilityChanged) {
+                        // If layout params have been changed, first give them
+                        // to the window manager to make sure it has the correct
+                        // animation info.
+                        try {
+                            if ((relayoutWindow(mWindowAttributes, viewVisibility, false)
+                                    & WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0) {
+                                sWindowSession.finishDrawing(mWindow);
+                            }
+                        } catch (RemoteException e) {
                         }
-                    } catch (RemoteException e) {
                     }
+    
+                    mSurface.release();
                 }
-
-                mSurface.release();
             }
+
+            mAdded = false;
         }
     }
 
