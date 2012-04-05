@@ -3,6 +3,43 @@ parent.title=UI Guidelines
 parent.link=index.html
 @jd:body
 
+
+
+
+<div id="deprecatedSticker">
+  <a href="#" 
+     onclick="$('#naMessage').show();$('#deprecatedSticker').hide();return false">
+    <strong>This doc is deprecated</strong></a>
+</div>
+
+
+<div id="naMessage" style="display:block">
+<div><p><strong>This document has been deprecated.</strong></p>
+ <p>For information about designing an activity structure and navigation, read the design guidelines
+for <a href="{@docRoot}design/patterns/app-structure.html">App Structure</a> and
+<a href="{@docRoot}design/patterns/navigation.html">Navigation</a>, or the developer guide
+about <a
+href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>.</p>
+
+ <input style="margin-top:1em;padding:5px" type="button"
+        value="That's nice, but I still want to read this document"
+onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div id="qv-wrapper">
 <div id="qv">
 
