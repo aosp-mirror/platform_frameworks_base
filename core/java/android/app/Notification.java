@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.IntProperty;
 import android.util.Log;
@@ -942,6 +943,7 @@ public class Notification implements Parcelable
         private ArrayList<Action> mActions = new ArrayList<Action>(3);
         private boolean mCanHasIntruder;
         private boolean mIntruderActionsShowText;
+        private boolean mUseChronometer;
 
         /**
          * Constructs a new Builder with the defaults:
@@ -979,6 +981,18 @@ public class Notification implements Parcelable
          */
         public Builder setWhen(long when) {
             mWhen = when;
+            return this;
+        }
+
+        /**
+         * @hide
+         * 
+         * Show the {@link Notification#when} field as a countdown (or count-up) timer instead of a timestamp.  
+         *
+         * @see Notification#when
+         */
+        public Builder setUsesChronometer(boolean b) {
+            mUseChronometer = b;
             return this;
         }
 
@@ -1434,7 +1448,15 @@ public class Notification implements Parcelable
                 }
             }
             if (mWhen != 0) {
-                contentView.setLong(R.id.time, "setTime", mWhen);
+                if (mUseChronometer) {
+                    contentView.setViewVisibility(R.id.chronometer, View.VISIBLE);
+                    contentView.setLong(R.id.chronometer, "setBase",
+                            mWhen + (SystemClock.elapsedRealtime() - System.currentTimeMillis()));
+                    contentView.setBoolean(R.id.chronometer, "setStarted", true);
+                } else {
+                    contentView.setViewVisibility(R.id.time, View.VISIBLE);
+                    contentView.setLong(R.id.time, "setTime", mWhen);
+                }
             }
             contentView.setViewVisibility(R.id.line3, hasLine3 ? View.VISIBLE : View.GONE);
             return contentView;

@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
@@ -247,6 +248,7 @@ public class Chronometer extends TextView {
             }
         }
         setText(text);
+        Slog.v("Chronometer", "updateText: sec=" + seconds + " mFormat=" + mFormat + " text=" + text);
     }
 
     private void updateRunning() {
