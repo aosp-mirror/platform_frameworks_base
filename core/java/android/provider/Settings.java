@@ -36,13 +36,18 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserId;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Log;
 import android.view.WindowOrientationListener;
+
+import com.android.internal.widget.ILockSettings;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -2253,6 +2258,16 @@ public final class Settings {
         // Populated lazily, guarded by class object:
         private static NameValueCache sNameValueCache = null;
 
+        private static ILockSettings sLockSettings = null;
+
+        private static final HashSet<String> MOVED_TO_LOCK_SETTINGS;
+        static {
+            MOVED_TO_LOCK_SETTINGS = new HashSet<String>(3);
+            MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_ENABLED);
+            MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_VISIBLE);
+            MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+        }
+
         /**
          * Look up a name in the database.
          * @param resolver to access the database with
@@ -2264,6 +2279,19 @@ public final class Settings {
                 sNameValueCache = new NameValueCache(SYS_PROP_SETTING_VERSION, CONTENT_URI,
                                                      CALL_METHOD_GET_SECURE);
             }
+
+            if (sLockSettings == null) {
+                sLockSettings = ILockSettings.Stub.asInterface(
+                        (IBinder) ServiceManager.getService("lock_settings"));
+            }
+            if (sLockSettings != null && MOVED_TO_LOCK_SETTINGS.contains(name)) {
+                try {
+                    return sLockSettings.getString(name, "0", UserId.getCallingUserId());
+                } catch (RemoteException re) {
+                    // Fall through
+                }
+            }
+
             return sNameValueCache.getString(resolver, name);
         }
 

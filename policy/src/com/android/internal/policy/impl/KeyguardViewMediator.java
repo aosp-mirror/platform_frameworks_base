@@ -342,6 +342,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         if (soundPath == null || mUnlockSoundId == 0) {
             if (DEBUG) Log.d(TAG, "failed to load sound from " + soundPath);
         }
+        IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(mUserChangeReceiver, userFilter);
     }
 
     /**
@@ -800,6 +804,29 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     public boolean isSecure() {
         return mKeyguardViewProperties.isSecure();
     }
+
+    private void onUserSwitched(int userId) {
+        mLockPatternUtils.setCurrentUser(userId);
+        synchronized (KeyguardViewMediator.this) {
+            resetStateLocked();
+        }
+    }
+
+    private void onUserRemoved(int userId) {
+        mLockPatternUtils.removeUser(userId);
+    }
+
+    private BroadcastReceiver mUserChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                onUserSwitched(intent.getIntExtra(Intent.EXTRA_USERID, 0));
+            } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                onUserRemoved(intent.getIntExtra(Intent.EXTRA_USERID, 0));
+            }
+        }
+    };
 
     private BroadcastReceiver mBroadCastReceiver = new BroadcastReceiver() {
         @Override
