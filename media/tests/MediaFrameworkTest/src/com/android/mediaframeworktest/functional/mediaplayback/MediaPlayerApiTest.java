@@ -22,7 +22,7 @@ import com.android.mediaframeworktest.MediaProfileReader;
 import com.android.mediaframeworktest.functional.CodecTest;
 
 import android.content.Context;
-import android.test.ActivityInstrumentationTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -33,25 +33,28 @@ import java.io.File;
 /**
  * Junit / Instrumentation test case for the media player api
  */
-public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFrameworkTest> {
-   private boolean duratoinWithinTolerence = false;
-   private String TAG = "MediaPlayerApiTest";
-   private boolean isWMAEnable = false;
-   private boolean isWMVEnable = false;
+public class MediaPlayerApiTest extends  ActivityInstrumentationTestCase2<MediaFrameworkTest> {
+    private boolean duratoinWithinTolerence = false;
+    private String TAG = "MediaPlayerApiTest";
+    private boolean isWMAEnable = false;
+    private boolean isWMVEnable = false;
 
-   Context mContext;
+    Context mContext;
 
-   public MediaPlayerApiTest() {
-     super("com.android.mediaframeworktest", MediaFrameworkTest.class);
-     isWMAEnable = MediaProfileReader.getWMAEnable();
-     isWMVEnable = MediaProfileReader.getWMVEnable();
-   }
+    public MediaPlayerApiTest() {
+       super("com.android.mediaframeworktest", MediaFrameworkTest.class);
+       isWMAEnable = MediaProfileReader.getWMAEnable();
+       isWMVEnable = MediaProfileReader.getWMVEnable();
+    }
 
     protected void setUp() throws Exception {
-      super.setUp();
-   
-  }
-    
+       //Insert a 2 second before launching the test activity. This is
+       //the workaround for the race condition of requesting the updated surface.
+       Thread.sleep(2000);
+       getActivity();
+       super.setUp();
+    }
+
     public boolean verifyDuration(int duration, int expectedDuration){
       if ((duration > expectedDuration * 1.1) || (duration < expectedDuration * 0.9))
          return false;
