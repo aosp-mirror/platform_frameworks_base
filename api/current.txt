@@ -570,6 +570,7 @@ package android {
     field public static final int itemIconDisabledAlpha = 16843057; // 0x1010131
     field public static final int itemPadding = 16843565; // 0x101032d
     field public static final int itemTextAppearance = 16843052; // 0x101012c
+    field public static final int kcm = 16843694; // 0x10103ae
     field public static final int keepScreenOn = 16843286; // 0x1010216
     field public static final int key = 16843240; // 0x10101e8
     field public static final int keyBackground = 16843315; // 0x1010233
@@ -5232,6 +5233,7 @@ package android.content {
     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
+    field public static final java.lang.String INPUT_SERVICE = "input";
     field public static final java.lang.String KEYGUARD_SERVICE = "keyguard";
     field public static final java.lang.String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final java.lang.String LOCATION_SERVICE = "location";
@@ -9813,6 +9815,15 @@ package android.hardware {
     field public static final deprecated int SENSOR_TEMPERATURE = 4; // 0x4
     field public static final deprecated int SENSOR_TRICORDER = 64; // 0x40
     field public static final float STANDARD_GRAVITY = 9.80665f;
+  }
+
+}
+
+package android.hardware.input {
+
+  public final class InputManager {
+    field public static final java.lang.String ACTION_QUERY_KEYBOARD_LAYOUTS = "android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS";
+    field public static final java.lang.String META_DATA_KEYBOARD_LAYOUTS = "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
   }
 
 }
@@ -22247,6 +22258,7 @@ package android.view {
 
   public final class InputDevice implements android.os.Parcelable {
     method public int describeContents();
+    method public java.lang.String getDescriptor();
     method public static android.view.InputDevice getDevice(int);
     method public static int[] getDeviceIds();
     method public int getId();

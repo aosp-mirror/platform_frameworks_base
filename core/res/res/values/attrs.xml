@@ -5552,4 +5552,21 @@
         <attr name="settingsActivity" />
     </declare-styleable>
 
+    <!-- Use <code>keyboard-layouts</code> as the root tag of the XML resource that
+         describes a collection of keyboard layouts provided by an application.
+         Each keyboard layout is declared by a <code>keyboard-layout</code> tag
+         with these attributes.
+
+         The XML resource that contains the keyboard layouts must be referenced from its
+         {@link android.hardware.input.InputManager#META_DATA_KEYBOARD_LAYOUTS}
+         meta-data entry used with broadcast receivers for
+         {@link android.hardware.input.InputManager#ACTION_QUERY_KEYBOARD_LAYOUTS}. -->
+    <declare-styleable name="KeyboardLayout">
+        <!-- The name of the keyboard layout, must be unique in the receiver. -->
+        <attr name="name" />
+        <!-- The display label of the keyboard layout. -->
+        <attr name="label" />
+        <!-- The key character map file resource. -->
+        <attr name="kcm" format="reference" />
+    </declare-styleable>
 </resources>

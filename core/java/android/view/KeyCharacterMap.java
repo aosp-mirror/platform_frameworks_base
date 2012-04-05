@@ -22,6 +22,7 @@ import android.util.SparseIntArray;
 import android.os.RemoteException;
 import android.util.SparseArray;
 
+import java.io.Reader;
 import java.lang.Character;
 
 /**
@@ -193,6 +194,14 @@ public class KeyCharacterMap {
             }
             return map;
         }
+    }
+
+    /**
+     * TODO implement this
+     * @hide
+     */
+    public static KeyCharacterMap load(CharSequence contents) {
+        return null;
     }
 
     /**
@@ -456,7 +465,8 @@ public class KeyCharacterMap {
 
     /**
      * Gets the keyboard type.
-     * Returns {@link #NUMERIC}, {@link #PREDICTIVE}, {@link #ALPHA} or {@link #FULL}.
+     * Returns {@link #NUMERIC}, {@link #PREDICTIVE}, {@link #ALPHA}, {@link #FULL}
+     * or {@link #SPECIAL_FUNCTION}.
      * <p>
      * Different keyboard types have different semantics.  Refer to the documentation
      * associated with the keyboard type constants for details.

@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Describes the capabilities of a particular input device.
  * <p>
- * Each input device may support multiple classes of input.  For example, a multifunction
+ * Each input device may support multiple classes of input.  For example, a multi-function
  * keyboard may compose the capabilities of a standard keyboard together with a track pad mouse
  * or other pointing device.
  * </p><p>
@@ -118,7 +118,11 @@ public final class InputDevice implements Parcelable {
     
     /**
      * The input source is a keyboard.
-     * 
+     *
+     * This source indicates pretty much anything that has buttons.  Use
+     * {@link #getKeyboardType()} to determine whether the keyboard has alphabetic keys
+     * and can be used to enter text.
+     *
      * @see #SOURCE_CLASS_BUTTON
      */
     public static final int SOURCE_KEYBOARD = 0x00000100 | SOURCE_CLASS_BUTTON;
@@ -319,15 +323,37 @@ public final class InputDevice implements Parcelable {
                     "Could not get input device ids from Window Manager.", ex);
         }
     }
-    
+
     /**
      * Gets the input device id.
+     * <p>
+     * Each input device receives a unique id when it is first configured
+     * by the system.  The input device id may change when the system is restarted or if the
+     * input device is disconnected, reconnected or reconfigured at any time.
+     * If you require a stable identifier for a device that persists across
+     * boots and reconfigurations, use {@link #getDescriptor()}.
+     * </p>
+     *
      * @return The input device id.
      */
     public int getId() {
         return mId;
     }
-    
+
+    /**
+     * Gets the input device descriptor, which is a stable identifier for an input device.
+     * <p>
+     * An input device descriptor uniquely identifies an input device.  Its value
+     * is intended to be persistent across system restarts, and should not change even
+     * if the input device is disconnected, reconnected or reconfigured at any time.
+     * </p>
+     *
+     * @return The input device descriptor.
+     */
+    public String getDescriptor() {
+        return "PLACEHOLDER"; // TODO: implement for real
+    }
+
     /**
      * Gets the name of this input device.
      * @return The input device name.
