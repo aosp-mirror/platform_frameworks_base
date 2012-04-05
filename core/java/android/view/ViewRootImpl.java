@@ -2039,9 +2039,10 @@ public final class ViewRootImpl implements ViewParent,
 
         scrollToRectOrFocus(null, false);
 
-        if (mAttachInfo.mViewScrollChanged) {
-            mAttachInfo.mViewScrollChanged = false;
-            mAttachInfo.mTreeObserver.dispatchOnScrollChanged();
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo.mViewScrollChanged) {
+            attachInfo.mViewScrollChanged = false;
+            attachInfo.mTreeObserver.dispatchOnScrollChanged();
         }
 
         int yoff;
@@ -2056,8 +2057,8 @@ public final class ViewRootImpl implements ViewParent,
             fullRedrawNeeded = true;
         }
 
-        final float appScale = mAttachInfo.mApplicationScale;
-        final boolean scalingRequired = mAttachInfo.mScalingRequired;
+        final float appScale = attachInfo.mApplicationScale;
+        final boolean scalingRequired = attachInfo.mScalingRequired;
 
         int resizeAlpha = 0;
         if (mResizeBuffer != null) {
@@ -2086,7 +2087,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (fullRedrawNeeded) {
-            mAttachInfo.mIgnoreDirtyState = true;
+            attachInfo.mIgnoreDirtyState = true;
             dirty.set(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
         }
 
@@ -2099,8 +2100,10 @@ public final class ViewRootImpl implements ViewParent,
                     appScale + ", width=" + mWidth + ", height=" + mHeight);
         }
 
+        attachInfo.mTreeObserver.dispatchOnDraw();
+
         if (!dirty.isEmpty() || mIsAnimating) {
-            if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
+            if (attachInfo.mHardwareRenderer != null && attachInfo.mHardwareRenderer.isEnabled()) {
                 // Draw with hardware renderer.
                 mIsAnimating = false;
                 mHardwareYOffset = yoff;
@@ -2111,147 +2114,12 @@ public final class ViewRootImpl implements ViewParent,
                 mPreviousDirty.set(dirty);
                 dirty.setEmpty();
 
-                if (mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this,
+                if (attachInfo.mHardwareRenderer.draw(mView, attachInfo, this,
                         animating ? null : mCurrentDirty)) {
                     mPreviousDirty.set(0, 0, mWidth, mHeight);
                 }
-            } else {
-                // Draw with software renderer.
-                Canvas canvas;
-                try {
-                    int left = dirty.left;
-                    int top = dirty.top;
-                    int right = dirty.right;
-                    int bottom = dirty.bottom;
-
-                    final long lockCanvasStartTime;
-                    if (ViewDebug.DEBUG_LATENCY) {
-                        lockCanvasStartTime = System.nanoTime();
-                    }
-
-                    canvas = mSurface.lockCanvas(dirty);
-
-                    if (ViewDebug.DEBUG_LATENCY) {
-                        long now = System.nanoTime();
-                        Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- lockCanvas() took "
-                                + ((now - lockCanvasStartTime) * 0.000001f) + "ms");
-                    }
-
-                    if (left != dirty.left || top != dirty.top || right != dirty.right ||
-                            bottom != dirty.bottom) {
-                        mAttachInfo.mIgnoreDirtyState = true;
-                    }
-
-                    // TODO: Do this in native
-                    canvas.setDensity(mDensity);
-                } catch (Surface.OutOfResourcesException e) {
-                    Log.e(TAG, "OutOfResourcesException locking surface", e);
-                    try {
-                        if (!sWindowSession.outOfMemory(mWindow)) {
-                            Slog.w(TAG, "No processes killed for memory; killing self");
-                            Process.killProcess(Process.myPid());
-                        }
-                    } catch (RemoteException ex) {
-                    }
-                    mLayoutRequested = true;    // ask wm for a new surface next time.
-                    return;
-                } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "IllegalArgumentException locking surface", e);
-                    // Don't assume this is due to out of memory, it could be
-                    // something else, and if it is something else then we could
-                    // kill stuff (or ourself) for no reason.
-                    mLayoutRequested = true;    // ask wm for a new surface next time.
-                    return;
-                }
-
-                try {
-                    if (DEBUG_ORIENTATION || DEBUG_DRAW) {
-                        Log.v(TAG, "Surface " + surface + " drawing to bitmap w="
-                                + canvas.getWidth() + ", h=" + canvas.getHeight());
-                        //canvas.drawARGB(255, 255, 0, 0);
-                    }
-
-                    long startTime = 0L;
-                    if (ViewDebug.DEBUG_PROFILE_DRAWING) {
-                        startTime = SystemClock.elapsedRealtime();
-                    }
-
-                    // If this bitmap's format includes an alpha channel, we
-                    // need to clear it before drawing so that the child will
-                    // properly re-composite its drawing on a transparent
-                    // background. This automatically respects the clip/dirty region
-                    // or
-                    // If we are applying an offset, we need to clear the area
-                    // where the offset doesn't appear to avoid having garbage
-                    // left in the blank areas.
-                    if (!canvas.isOpaque() || yoff != 0) {
-                        canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-                    }
-
-                    dirty.setEmpty();
-                    mIsAnimating = false;
-                    mAttachInfo.mDrawingTime = SystemClock.uptimeMillis();
-                    mView.mPrivateFlags |= View.DRAWN;
-
-                    if (DEBUG_DRAW) {
-                        Context cxt = mView.getContext();
-                        Log.i(TAG, "Drawing: package:" + cxt.getPackageName() +
-                                ", metrics=" + cxt.getResources().getDisplayMetrics() +
-                                ", compatibilityInfo=" + cxt.getResources().getCompatibilityInfo());
-                    }
-                    try {
-                        canvas.translate(0, -yoff);
-                        if (mTranslator != null) {
-                            mTranslator.translateCanvas(canvas);
-                        }
-                        canvas.setScreenDensity(scalingRequired
-                                ? DisplayMetrics.DENSITY_DEVICE : 0);
-                        mAttachInfo.mSetIgnoreDirtyState = false;
-
-                        final long drawStartTime;
-                        if (ViewDebug.DEBUG_LATENCY) {
-                            drawStartTime = System.nanoTime();
-                        }
-
-                        mView.draw(canvas);
-
-                        if (ViewDebug.DEBUG_LATENCY) {
-                            long now = System.nanoTime();
-                            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- draw() took "
-                                    + ((now - drawStartTime) * 0.000001f) + "ms");
-                        }
-                    } finally {
-                        if (!mAttachInfo.mSetIgnoreDirtyState) {
-                            // Only clear the flag if it was not set during the mView.draw() call
-                            mAttachInfo.mIgnoreDirtyState = false;
-                        }
-                    }
-
-                    if (false && ViewDebug.consistencyCheckEnabled) {
-                        mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
-                    }
-
-                    if (ViewDebug.DEBUG_PROFILE_DRAWING) {
-                        EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
-                    }
-                } finally {
-                    final long unlockCanvasAndPostStartTime;
-                    if (ViewDebug.DEBUG_LATENCY) {
-                        unlockCanvasAndPostStartTime = System.nanoTime();
-                    }
-
-                    surface.unlockCanvasAndPost(canvas);
-
-                    if (ViewDebug.DEBUG_LATENCY) {
-                        long now = System.nanoTime();
-                        Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- unlockCanvasAndPost() took "
-                                + ((now - unlockCanvasAndPostStartTime) * 0.000001f) + "ms");
-                    }
-
-                    if (LOCAL_LOGV) {
-                        Log.v(TAG, "Surface " + surface + " unlockCanvasAndPost");
-                    }
-                }
+            } else if (!drawSoftware(surface, attachInfo, yoff, scalingRequired, dirty)) {
+                return;
             }
         }
 
@@ -2259,6 +2127,151 @@ public final class ViewRootImpl implements ViewParent,
             mFullRedrawNeeded = true;
             scheduleTraversals();
         }
+    }
+
+    /**
+     * @return true if drawing was succesful, false if an error occured
+     */
+    private boolean drawSoftware(Surface surface, AttachInfo attachInfo, int yoff,
+            boolean scalingRequired, Rect dirty) {
+
+        // Draw with software renderer.
+        Canvas canvas;
+        try {
+            int left = dirty.left;
+            int top = dirty.top;
+            int right = dirty.right;
+            int bottom = dirty.bottom;
+
+            final long lockCanvasStartTime;
+            if (ViewDebug.DEBUG_LATENCY) {
+                lockCanvasStartTime = System.nanoTime();
+            }
+
+            canvas = mSurface.lockCanvas(dirty);
+
+            if (ViewDebug.DEBUG_LATENCY) {
+                long now = System.nanoTime();
+                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- lockCanvas() took "
+                        + ((now - lockCanvasStartTime) * 0.000001f) + "ms");
+            }
+
+            if (left != dirty.left || top != dirty.top || right != dirty.right ||
+                    bottom != dirty.bottom) {
+                attachInfo.mIgnoreDirtyState = true;
+            }
+
+            // TODO: Do this in native
+            canvas.setDensity(mDensity);
+        } catch (Surface.OutOfResourcesException e) {
+            Log.e(TAG, "OutOfResourcesException locking surface", e);
+            try {
+                if (!sWindowSession.outOfMemory(mWindow)) {
+                    Slog.w(TAG, "No processes killed for memory; killing self");
+                    Process.killProcess(Process.myPid());
+                }
+            } catch (RemoteException ex) {
+            }
+            mLayoutRequested = true;    // ask wm for a new surface next time.
+            return false;
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "IllegalArgumentException locking surface", e);
+            // Don't assume this is due to out of memory, it could be
+            // something else, and if it is something else then we could
+            // kill stuff (or ourself) for no reason.
+            mLayoutRequested = true;    // ask wm for a new surface next time.
+            return false;
+        }
+
+        try {
+            if (DEBUG_ORIENTATION || DEBUG_DRAW) {
+                Log.v(TAG, "Surface " + surface + " drawing to bitmap w="
+                        + canvas.getWidth() + ", h=" + canvas.getHeight());
+                //canvas.drawARGB(255, 255, 0, 0);
+            }
+
+            long startTime = 0L;
+            if (ViewDebug.DEBUG_PROFILE_DRAWING) {
+                startTime = SystemClock.elapsedRealtime();
+            }
+
+            // If this bitmap's format includes an alpha channel, we
+            // need to clear it before drawing so that the child will
+            // properly re-composite its drawing on a transparent
+            // background. This automatically respects the clip/dirty region
+            // or
+            // If we are applying an offset, we need to clear the area
+            // where the offset doesn't appear to avoid having garbage
+            // left in the blank areas.
+            if (!canvas.isOpaque() || yoff != 0) {
+                canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+            }
+
+            dirty.setEmpty();
+            mIsAnimating = false;
+            attachInfo.mDrawingTime = SystemClock.uptimeMillis();
+            mView.mPrivateFlags |= View.DRAWN;
+
+            if (DEBUG_DRAW) {
+                Context cxt = mView.getContext();
+                Log.i(TAG, "Drawing: package:" + cxt.getPackageName() +
+                        ", metrics=" + cxt.getResources().getDisplayMetrics() +
+                        ", compatibilityInfo=" + cxt.getResources().getCompatibilityInfo());
+            }
+            try {
+                canvas.translate(0, -yoff);
+                if (mTranslator != null) {
+                    mTranslator.translateCanvas(canvas);
+                }
+                canvas.setScreenDensity(scalingRequired
+                        ? DisplayMetrics.DENSITY_DEVICE : 0);
+                attachInfo.mSetIgnoreDirtyState = false;
+
+                final long drawStartTime;
+                if (ViewDebug.DEBUG_LATENCY) {
+                    drawStartTime = System.nanoTime();
+                }
+
+                mView.draw(canvas);
+
+                if (ViewDebug.DEBUG_LATENCY) {
+                    long now = System.nanoTime();
+                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- draw() took "
+                            + ((now - drawStartTime) * 0.000001f) + "ms");
+                }
+            } finally {
+                if (!attachInfo.mSetIgnoreDirtyState) {
+                    // Only clear the flag if it was not set during the mView.draw() call
+                    attachInfo.mIgnoreDirtyState = false;
+                }
+            }
+
+            if (false && ViewDebug.consistencyCheckEnabled) {
+                mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
+            }
+
+            if (ViewDebug.DEBUG_PROFILE_DRAWING) {
+                EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
+            }
+        } finally {
+            final long unlockCanvasAndPostStartTime;
+            if (ViewDebug.DEBUG_LATENCY) {
+                unlockCanvasAndPostStartTime = System.nanoTime();
+            }
+
+            surface.unlockCanvasAndPost(canvas);
+
+            if (ViewDebug.DEBUG_LATENCY) {
+                long now = System.nanoTime();
+                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- unlockCanvasAndPost() took "
+                        + ((now - unlockCanvasAndPostStartTime) * 0.000001f) + "ms");
+            }
+
+            if (LOCAL_LOGV) {
+                Log.v(TAG, "Surface " + surface + " unlockCanvasAndPost");
+            }
+        }
+        return true;
     }
 
     void invalidateDisplayLists() {

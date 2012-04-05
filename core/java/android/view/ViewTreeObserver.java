@@ -38,6 +38,7 @@ public final class ViewTreeObserver {
     private CopyOnWriteArrayList<OnComputeInternalInsetsListener> mOnComputeInternalInsetsListeners;
     private CopyOnWriteArrayList<OnScrollChangedListener> mOnScrollChangedListeners;
     private ArrayList<OnPreDrawListener> mOnPreDrawListeners;
+    private ArrayList<OnDrawListener> mOnDrawListeners;
 
     private boolean mAlive = true;
 
@@ -87,6 +88,27 @@ public final class ViewTreeObserver {
          * @see android.view.View#onDraw
          */
         public boolean onPreDraw();
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the view tree is about to be drawn.
+     */
+    public interface OnDrawListener {
+        /**
+         * <p>Callback method to be invoked when the view tree is about to be drawn. At this point,
+         * views cannot be modified in any way.</p>
+         * 
+         * <p>Unlike with {@link OnPreDrawListener}, this method cannot be used to cancel the
+         * current drawing pass.</p>
+         * 
+         * <p>An {@link OnDrawListener} listener <strong>cannot be added or removed</strong>
+         * from this method.</p>
+         *
+         * @see android.view.View#onMeasure
+         * @see android.view.View#onLayout
+         * @see android.view.View#onDraw
+         */
+        public void onDraw();
     }
 
     /**
@@ -171,11 +193,7 @@ public final class ViewTreeObserver {
         public void setTouchableInsets(int val) {
             mTouchableInsets = val;
         }
-        
-        public int getTouchableInsets() {
-            return mTouchableInsets;
-        }
-        
+
         int mTouchableInsets;
         
         void reset() {
@@ -184,29 +202,28 @@ public final class ViewTreeObserver {
             touchableRegion.setEmpty();
             mTouchableInsets = TOUCHABLE_INSETS_FRAME;
         }
-        
+
+        @Override
+        public int hashCode() {
+            int result = contentInsets != null ? contentInsets.hashCode() : 0;
+            result = 31 * result + (visibleInsets != null ? visibleInsets.hashCode() : 0);
+            result = 31 * result + (touchableRegion != null ? touchableRegion.hashCode() : 0);
+            result = 31 * result + mTouchableInsets;
+            return result;
+        }
+
         @Override
         public boolean equals(Object o) {
-            try {
-                if (o == null) {
-                    return false;
-                }
-                InternalInsetsInfo other = (InternalInsetsInfo)o;
-                if (mTouchableInsets != other.mTouchableInsets) {
-                    return false;
-                }
-                if (!contentInsets.equals(other.contentInsets)) {
-                    return false;
-                }
-                if (!visibleInsets.equals(other.visibleInsets)) {
-                    return false;
-                }
-                return touchableRegion.equals(other.touchableRegion);
-            } catch (ClassCastException e) {
-                return false;
-            }
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            InternalInsetsInfo other = (InternalInsetsInfo)o;
+            return mTouchableInsets == other.mTouchableInsets &&
+                    contentInsets.equals(other.contentInsets) &&
+                    visibleInsets.equals(other.visibleInsets) &&
+                    touchableRegion.equals(other.touchableRegion);
         }
-        
+
         void set(InternalInsetsInfo other) {
             contentInsets.set(other.contentInsets);
             visibleInsets.set(other.visibleInsets);
@@ -420,6 +437,44 @@ public final class ViewTreeObserver {
     }
 
     /**
+     * <p>Register a callback to be invoked when the view tree is about to be drawn.</p>
+     * <p><strong>Note:</strong> this method <strong>cannot</strong> be invoked from
+     * {@link android.view.ViewTreeObserver.OnDrawListener#onDraw()}.</p>
+     *
+     * @param listener The callback to add
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     */
+    public void addOnDrawListener(OnDrawListener listener) {
+        checkIsAlive();
+
+        if (mOnDrawListeners == null) {
+            mOnDrawListeners = new ArrayList<OnDrawListener>();
+        }
+
+        mOnDrawListeners.add(listener);
+    }
+
+    /**
+     * <p>Remove a previously installed pre-draw callback.</p>
+     * <p><strong>Note:</strong> this method <strong>cannot</strong> be invoked from
+     * {@link android.view.ViewTreeObserver.OnDrawListener#onDraw()}.</p>
+     *
+     * @param victim The callback to remove
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     *
+     * @see #addOnDrawListener(OnDrawListener)
+     */
+    public void removeOnDrawListener(OnDrawListener victim) {
+        checkIsAlive();
+        if (mOnDrawListeners == null) {
+            return;
+        }
+        mOnDrawListeners.remove(victim);
+    }
+
+    /**
      * Register a callback to be invoked when a view has been scrolled.
      *
      * @param listener The callback to add
@@ -601,6 +656,7 @@ public final class ViewTreeObserver {
      *
      * @return True if the current draw should be canceled and resceduled, false otherwise.
      */
+    @SuppressWarnings("unchecked")
     public final boolean dispatchOnPreDraw() {
         // NOTE: we *must* clone the listener list to perform the dispatching.
         // The clone is a safe guard against listeners that
@@ -616,6 +672,19 @@ public final class ViewTreeObserver {
             }
         }
         return cancelDraw;
+    }
+
+    /**
+     * Notifies registered listeners that the drawing pass is about to start.
+     */
+    public final void dispatchOnDraw() {
+        if (mOnDrawListeners != null) {
+            final ArrayList<OnDrawListener> listeners = mOnDrawListeners;
+            int numListeners = listeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                listeners.get(i).onDraw();
+            }
+        }
     }
 
     /**
