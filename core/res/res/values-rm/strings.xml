@@ -1509,6 +1509,8 @@
     <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
     <skip />
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
+    <!-- no translation found for date_time_done (2507683751759308828) -->
+    <skip />
     <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
     <!-- no translation found for perms_new_perm_prefix (8257740710754301407) -->
     <skip />
@@ -1746,37 +1748,37 @@
     <skip />
     <!-- no translation found for add_account_button_label (3611982894853435874) -->
     <skip />
-    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
+    <!-- no translation found for number_picker_increment_button (2412072272832284313) -->
     <skip />
-    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
+    <!-- no translation found for number_picker_decrement_button (476050778386779067) -->
     <skip />
     <!-- no translation found for number_picker_increment_scroll_mode (3073101067441638428) -->
     <skip />
-    <!-- no translation found for number_picker_increment_scroll_action (4628981789985093179) -->
+    <!-- no translation found for number_picker_increment_scroll_action (9101473045891835490) -->
     <skip />
-    <!-- no translation found for time_picker_increment_minute_button (2843066823236250329) -->
+    <!-- no translation found for time_picker_increment_minute_button (8865885114028614321) -->
     <skip />
-    <!-- no translation found for time_picker_decrement_minute_button (4357907223628449595) -->
+    <!-- no translation found for time_picker_decrement_minute_button (6246834937080684791) -->
     <skip />
-    <!-- no translation found for time_picker_increment_hour_button (2484204991937119057) -->
+    <!-- no translation found for time_picker_increment_hour_button (3652056055810223139) -->
     <skip />
-    <!-- no translation found for time_picker_decrement_hour_button (4659353501775842780) -->
+    <!-- no translation found for time_picker_decrement_hour_button (1377479863429214792) -->
     <skip />
     <!-- no translation found for time_picker_increment_set_pm_button (4147590696151230863) -->
     <skip />
     <!-- no translation found for time_picker_decrement_set_am_button (8302140353539486752) -->
     <skip />
-    <!-- no translation found for date_picker_increment_month_button (6324978841467899081) -->
+    <!-- no translation found for date_picker_increment_month_button (5369998479067934110) -->
     <skip />
-    <!-- no translation found for date_picker_decrement_month_button (7304349355000398077) -->
+    <!-- no translation found for date_picker_decrement_month_button (1832698995541726019) -->
     <skip />
-    <!-- no translation found for date_picker_increment_day_button (4397040141921413183) -->
+    <!-- no translation found for date_picker_increment_day_button (7130465412308173903) -->
     <skip />
-    <!-- no translation found for date_picker_decrement_day_button (2427816793443629131) -->
+    <!-- no translation found for date_picker_decrement_day_button (4131881521818750031) -->
     <skip />
-    <!-- no translation found for date_picker_increment_year_button (3058553394722295105) -->
+    <!-- no translation found for date_picker_increment_year_button (6318697384310808899) -->
     <skip />
-    <!-- no translation found for date_picker_decrement_year_button (5193062846559743823) -->
+    <!-- no translation found for date_picker_decrement_year_button (4482021813491121717) -->
     <skip />
     <!-- no translation found for checkbox_checked (7222044992652711167) -->
     <skip />
@@ -1816,13 +1818,13 @@
     <skip />
     <!-- no translation found for content_description_sliding_handle (415975056159262248) -->
     <skip />
-    <!-- no translation found for description_direction_up (1983114130441878529) -->
+    <!-- no translation found for description_direction_up (7169032478259485180) -->
     <skip />
-    <!-- no translation found for description_direction_down (4294993639091088240) -->
+    <!-- no translation found for description_direction_down (5087739728639014595) -->
     <skip />
-    <!-- no translation found for description_direction_left (6814008463839915747) -->
+    <!-- no translation found for description_direction_left (7207478719805562165) -->
     <skip />
-    <!-- no translation found for description_direction_right (4296057241963012862) -->
+    <!-- no translation found for description_direction_right (8034433242579600980) -->
     <skip />
     <!-- no translation found for description_target_unlock (2228524900439801453) -->
     <skip />
