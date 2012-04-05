@@ -34,7 +34,7 @@ import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
-import static android.net.NetworkTemplate.buildTemplateWifi;
+import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.provider.Settings.Secure.NETSTATS_DEV_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_DEV_DELETE_AGE;
@@ -836,7 +836,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 trustedTime);
 
         // collect wifi sample
-        template = buildTemplateWifi();
+        template = buildTemplateWifiWildcard();
         devTotal = mDevRecorder.getTotalSinceBootLocked(template);
         xtTotal = new NetworkStats.Entry();
         uidTotal = mUidRecorder.getTotalSinceBootLocked(template);

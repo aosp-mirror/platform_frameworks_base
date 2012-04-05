@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.Context;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.RemoteException;
@@ -608,6 +609,11 @@ public class ConnectivityManager {
      */
     public ConnectivityManager(IConnectivityManager service) {
         mService = checkNotNull(service, "missing IConnectivityManager");
+    }
+
+    /** {@hide} */
+    public static ConnectivityManager from(Context context) {
+        return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     /**

@@ -17,6 +17,7 @@
 package android.net;
 
 import static android.content.pm.PackageManager.GET_SIGNATURES;
+import static android.net.NetworkPolicy.CYCLE_NONE;
 import static android.text.format.Time.MONTH_DAY;
 
 import android.content.Context;
@@ -66,25 +67,8 @@ public class NetworkPolicyManager {
         mService = service;
     }
 
-    public static NetworkPolicyManager getSystemService(Context context) {
+    public static NetworkPolicyManager from(Context context) {
         return (NetworkPolicyManager) context.getSystemService(Context.NETWORK_POLICY_SERVICE);
-    }
-
-    /** {@hide} */
-    public void setNetworkPolicies(NetworkPolicy[] policies) {
-        try {
-            mService.setNetworkPolicies(policies);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /** {@hide} */
-    public NetworkPolicy[] getNetworkPolicies() {
-        try {
-            return mService.getNetworkPolicies();
-        } catch (RemoteException e) {
-            return null;
-        }
     }
 
     /**
@@ -122,6 +106,36 @@ public class NetworkPolicyManager {
         }
     }
 
+    public void setNetworkPolicies(NetworkPolicy[] policies) {
+        try {
+            mService.setNetworkPolicies(policies);
+        } catch (RemoteException e) {
+        }
+    }
+
+    public NetworkPolicy[] getNetworkPolicies() {
+        try {
+            return mService.getNetworkPolicies();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    public void setRestrictBackground(boolean restrictBackground) {
+        try {
+            mService.setRestrictBackground(restrictBackground);
+        } catch (RemoteException e) {
+        }
+    }
+
+    public boolean getRestrictBackground() {
+        try {
+            return mService.getRestrictBackground();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     /**
      * Compute the last cycle boundary for the given {@link NetworkPolicy}. For
      * example, if cycle day is 20th, and today is June 15th, it will return May
@@ -131,6 +145,10 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static long computeLastCycleBoundary(long currentTime, NetworkPolicy policy) {
+        if (policy.cycleDay == CYCLE_NONE) {
+            throw new IllegalArgumentException("Unable to compute boundary without cycleDay");
+        }
+
         final Time now = new Time(policy.cycleTimezone);
         now.set(currentTime);
 
@@ -157,6 +175,10 @@ public class NetworkPolicyManager {
 
     /** {@hide} */
     public static long computeNextCycleBoundary(long currentTime, NetworkPolicy policy) {
+        if (policy.cycleDay == CYCLE_NONE) {
+            throw new IllegalArgumentException("Unable to compute boundary without cycleDay");
+        }
+
         final Time now = new Time(policy.cycleTimezone);
         now.set(currentTime);
 

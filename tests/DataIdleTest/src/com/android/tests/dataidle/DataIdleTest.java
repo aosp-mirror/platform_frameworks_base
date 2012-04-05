@@ -52,7 +52,7 @@ public class DataIdleTest extends InstrumentationTestCase {
      * Test that dumps all the data usage metrics for wifi to instrumentation out.
      */
     public void testWifiIdle() {
-        NetworkTemplate template = NetworkTemplate.buildTemplateWifi();
+        NetworkTemplate template = NetworkTemplate.buildTemplateWifiWildcard();
         fetchStats(template);
     }
 

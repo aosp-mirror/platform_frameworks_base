@@ -1097,6 +1097,18 @@ public class DownloadManager {
         }
     }
 
+    /** {@hide} */
+    public static boolean isActiveNetworkExpensive(Context context) {
+        // TODO: connect to NetworkPolicyManager
+        return false;
+    }
+
+    /** {@hide} */
+    public static long getActiveNetworkWarningBytes(Context context) {
+        // TODO: connect to NetworkPolicyManager
+        return -1;
+    }
+
     /**
      * Adds a file to the downloads database system, so it could appear in Downloads App
      * (and thus become eligible for management by the Downloads App).

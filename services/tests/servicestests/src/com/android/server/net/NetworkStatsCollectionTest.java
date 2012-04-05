@@ -20,8 +20,6 @@ import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import android.content.res.Resources;
-import android.net.ConnectivityManager;
-import android.net.NetworkIdentity;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.test.AndroidTestCase;
@@ -143,12 +141,6 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
             IoUtils.closeQuietly(in);
             IoUtils.closeQuietly(out);
         }
-    }
-
-    public static NetworkIdentitySet buildWifiIdent() {
-        final NetworkIdentitySet set = new NetworkIdentitySet();
-        set.add(new NetworkIdentity(ConnectivityManager.TYPE_WIFI, 0, null, false));
-        return set;
     }
 
     private static void assertSummaryTotal(NetworkStatsCollection collection,

@@ -48,6 +48,7 @@ import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.telephony.TelephonyManager.SIM_STATE_READY;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
@@ -113,6 +114,7 @@ import android.util.Xml;
 import com.android.internal.R;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Objects;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -160,6 +162,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_ADDED_TIMEZONE = 6;
     private static final int VERSION_ADDED_INFERRED = 7;
     private static final int VERSION_SWITCH_APP_ID = 8;
+    private static final int VERSION_ADDED_NETWORK_ID = 9;
+    private static final int VERSION_LATEST = VERSION_ADDED_NETWORK_ID;
 
     // @VisibleForTesting
     public static final int TYPE_WARNING = 0x1;
@@ -175,6 +179,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_RESTRICT_BACKGROUND = "restrictBackground";
     private static final String ATTR_NETWORK_TEMPLATE = "networkTemplate";
     private static final String ATTR_SUBSCRIBER_ID = "subscriberId";
+    private static final String ATTR_NETWORK_ID = "networkId";
     private static final String ATTR_CYCLE_DAY = "cycleDay";
     private static final String ATTR_CYCLE_TIMEZONE = "cycleTimezone";
     private static final String ATTR_WARNING_BYTES = "warningBytes";
@@ -491,6 +496,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (NetworkPolicy policy : mNetworkPolicy.values()) {
             // ignore policies that aren't relevant to user
             if (!isTemplateRelevant(policy.template)) continue;
+            if (!policy.hasCycle()) continue;
 
             final long start = computeLastCycleBoundary(currentTime, policy);
             final long end = currentTime;
@@ -528,21 +534,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /**
      * Test if given {@link NetworkTemplate} is relevant to user based on
-     * current device state, such as when {@link #getActiveSubscriberId()}
-     * matches. This is regardless of data connection status.
+     * current device state, such as when
+     * {@link TelephonyManager#getSubscriberId()} matches. This is regardless of
+     * data connection status.
      */
     private boolean isTemplateRelevant(NetworkTemplate template) {
+        final TelephonyManager tele = TelephonyManager.from(mContext);
+
         switch (template.getMatchRule()) {
             case MATCH_MOBILE_3G_LOWER:
             case MATCH_MOBILE_4G:
             case MATCH_MOBILE_ALL:
-                // mobile templates aren't relevant in airplane mode
-                if (isAirplaneModeOn(mContext)) {
+                // mobile templates are relevant when SIM is ready and
+                // subscriberId matches.
+                if (tele.getSimState() == SIM_STATE_READY) {
+                    return Objects.equal(tele.getSubscriberId(), template.getSubscriberId());
+                } else {
                     return false;
                 }
-
-                // mobile templates are relevant when subscriberid is active
-                return Objects.equal(getActiveSubscriberId(), template.getSubscriberId());
         }
         return true;
     }
@@ -761,7 +770,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final long currentTime = currentTimeMillis();
         for (NetworkPolicy policy : mNetworkPolicy.values()) {
             // shortcut when policy has no limit
-            if (policy.limitBytes == LIMIT_DISABLED) {
+            if (policy.limitBytes == LIMIT_DISABLED || !policy.hasCycle()) {
                 setNetworkTemplateEnabled(policy.template, true);
                 continue;
             }
@@ -784,13 +793,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * for the given {@link NetworkTemplate}.
      */
     private void setNetworkTemplateEnabled(NetworkTemplate template, boolean enabled) {
+        final TelephonyManager tele = TelephonyManager.from(mContext);
+
         switch (template.getMatchRule()) {
             case MATCH_MOBILE_3G_LOWER:
             case MATCH_MOBILE_4G:
             case MATCH_MOBILE_ALL:
                 // TODO: offer more granular control over radio states once
                 // 4965893 is available.
-                if (Objects.equal(getActiveSubscriberId(), template.getSubscriberId())) {
+                if (tele.getSimState() == SIM_STATE_READY
+                        && Objects.equal(tele.getSubscriberId(), template.getSubscriberId())) {
                     setPolicyDataEnable(TYPE_MOBILE, enabled);
                     setPolicyDataEnable(TYPE_WIMAX, enabled);
                 }
@@ -863,9 +875,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (NetworkPolicy policy : mNetworkRules.keySet()) {
             final String[] ifaces = mNetworkRules.get(policy);
 
-            final long start = computeLastCycleBoundary(currentTime, policy);
-            final long end = currentTime;
-            final long totalBytes = getTotalBytes(policy.template, start, end);
+            final long start;
+            final long totalBytes;
+            if (policy.hasCycle()) {
+                start = computeLastCycleBoundary(currentTime, policy);
+                totalBytes = getTotalBytes(policy.template, start, currentTime);
+            } else {
+                start = Long.MAX_VALUE;
+                totalBytes = 0;
+            }
 
             if (LOGD) {
                 Slog.d(TAG, "applying policy " + policy.toString() + " to ifaces "
@@ -923,9 +941,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "ensureActiveMobilePolicyLocked()");
         if (mSuppressDefaultPolicy) return;
 
-        final String subscriberId = getActiveSubscriberId();
+        final TelephonyManager tele = TelephonyManager.from(mContext);
+
+        // avoid creating policy when SIM isn't ready
+        if (tele.getSimState() != SIM_STATE_READY) return;
+
+        final String subscriberId = tele.getSubscriberId();
         final NetworkIdentity probeIdent = new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, false);
+                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false);
 
         // examine to see if any policy is defined for active mobile
         boolean mobileDefined = false;
@@ -986,6 +1009,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     } else if (TAG_NETWORK_POLICY.equals(tag)) {
                         final int networkTemplate = readIntAttribute(in, ATTR_NETWORK_TEMPLATE);
                         final String subscriberId = in.getAttributeValue(null, ATTR_SUBSCRIBER_ID);
+                        final String networkId;
+                        if (version >= VERSION_ADDED_NETWORK_ID) {
+                            networkId = in.getAttributeValue(null, ATTR_NETWORK_ID);
+                        } else {
+                            networkId = null;
+                        }
                         final int cycleDay = readIntAttribute(in, ATTR_CYCLE_DAY);
                         final String cycleTimezone;
                         if (version >= VERSION_ADDED_TIMEZONE) {
@@ -1031,12 +1060,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
 
                         final NetworkTemplate template = new NetworkTemplate(
-                                networkTemplate, subscriberId);
+                                networkTemplate, subscriberId, networkId);
                         mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay,
                                 cycleTimezone, warningBytes, limitBytes, lastWarningSnooze,
                                 lastLimitSnooze, metered, inferred));
 
-                    } else if (TAG_UID_POLICY.equals(tag)) {
+                    } else if (TAG_UID_POLICY.equals(tag) && version < VERSION_SWITCH_APP_ID) {
                         final int uid = readIntAttribute(in, ATTR_UID);
                         final int policy = readIntAttribute(in, ATTR_POLICY);
 
@@ -1046,7 +1075,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         } else {
                             Slog.w(TAG, "unable to apply policy to UID " + uid + "; ignoring");
                         }
-                    } else if (TAG_APP_POLICY.equals(tag)) {
+                    } else if (TAG_APP_POLICY.equals(tag) && version >= VERSION_SWITCH_APP_ID) {
                         final int appId = readIntAttribute(in, ATTR_APP_ID);
                         final int policy = readIntAttribute(in, ATTR_POLICY);
 
@@ -1099,7 +1128,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             out.startDocument(null, true);
 
             out.startTag(null, TAG_POLICY_LIST);
-            writeIntAttribute(out, ATTR_VERSION, VERSION_SWITCH_APP_ID);
+            writeIntAttribute(out, ATTR_VERSION, VERSION_LATEST);
             writeBooleanAttribute(out, ATTR_RESTRICT_BACKGROUND, mRestrictBackground);
 
             // write all known network policies
@@ -1111,6 +1140,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final String subscriberId = template.getSubscriberId();
                 if (subscriberId != null) {
                     out.attribute(null, ATTR_SUBSCRIBER_ID, subscriberId);
+                }
+                final String networkId = template.getNetworkId();
+                if (networkId != null) {
+                    out.attribute(null, ATTR_NETWORK_ID, networkId);
                 }
                 writeIntAttribute(out, ATTR_CYCLE_DAY, policy.cycleDay);
                 out.attribute(null, ATTR_CYCLE_TIMEZONE, policy.cycleTimezone);
@@ -1318,7 +1351,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             policy = findPolicyForNetworkLocked(ident);
         }
 
-        if (policy == null) {
+        if (policy == null || !policy.hasCycle()) {
             // missing policy means we can't derive useful quota info
             return null;
         }
@@ -1340,8 +1373,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(DUMP, TAG);
+
+        final IndentingPrintWriter fout = new IndentingPrintWriter(writer, "  ");
 
         final HashSet<String> argSet = new HashSet<String>();
         for (String arg : args) {
@@ -1365,31 +1400,36 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             fout.print("Restrict background: "); fout.println(mRestrictBackground);
             fout.println("Network policies:");
+            fout.increaseIndent();
             for (NetworkPolicy policy : mNetworkPolicy.values()) {
-                fout.print("  "); fout.println(policy.toString());
+                fout.println(policy.toString());
             }
+            fout.decreaseIndent();
 
             fout.println("Policy for apps:");
+            fout.increaseIndent();
             int size = mAppPolicy.size();
             for (int i = 0; i < size; i++) {
                 final int appId = mAppPolicy.keyAt(i);
                 final int policy = mAppPolicy.valueAt(i);
-                fout.print("  appId=");
+                fout.print("appId=");
                 fout.print(appId);
                 fout.print(" policy=");
                 dumpPolicy(fout, policy);
                 fout.println();
             }
+            fout.decreaseIndent();
 
             final SparseBooleanArray knownUids = new SparseBooleanArray();
             collectKeys(mUidForeground, knownUids);
             collectKeys(mUidRules, knownUids);
 
             fout.println("Status for known UIDs:");
+            fout.increaseIndent();
             size = knownUids.size();
             for (int i = 0; i < size; i++) {
                 final int uid = knownUids.keyAt(i);
-                fout.print("  UID=");
+                fout.print("UID=");
                 fout.print(uid);
 
                 fout.print(" foreground=");
@@ -1410,6 +1450,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 fout.println();
             }
+            fout.decreaseIndent();
         }
     }
 
@@ -1695,12 +1736,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
-    }
-
-    private String getActiveSubscriberId() {
-        final TelephonyManager telephony = (TelephonyManager) mContext.getSystemService(
-                Context.TELEPHONY_SERVICE);
-        return telephony.getSubscriberId();
     }
 
     private long getTotalBytes(NetworkTemplate template, long start, long end) {

@@ -30,6 +30,7 @@ import com.android.internal.util.Objects;
  * @hide
  */
 public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
+    public static final int CYCLE_NONE = -1;
     public static final long WARNING_DISABLED = -1;
     public static final long LIMIT_DISABLED = -1;
     public static final long SNOOZE_NEVER = -1;
@@ -123,6 +124,13 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         lastLimitSnooze = SNOOZE_NEVER;
     }
 
+    /**
+     * Test if this policy has a cycle defined, after which usage should reset.
+     */
+    public boolean hasCycle() {
+        return cycleDay != CYCLE_NONE;
+    }
+
     @Override
     public int compareTo(NetworkPolicy another) {
         if (another == null || another.limitBytes == LIMIT_DISABLED) {
@@ -159,10 +167,17 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
     @Override
     public String toString() {
-        return "NetworkPolicy[" + template + "]: cycleDay=" + cycleDay + ", cycleTimezone="
-                + cycleTimezone + ", warningBytes=" + warningBytes + ", limitBytes=" + limitBytes
-                + ", lastWarningSnooze=" + lastWarningSnooze + ", lastLimitSnooze="
-                + lastLimitSnooze + ", metered=" + metered + ", inferred=" + inferred;
+        final StringBuilder builder = new StringBuilder("NetworkPolicy");
+        builder.append("[").append(template).append("]:");
+        builder.append(" cycleDay=").append(cycleDay);
+        builder.append(", cycleTimezone=").append(cycleTimezone);
+        builder.append(", warningBytes=").append(warningBytes);
+        builder.append(", limitBytes=").append(limitBytes);
+        builder.append(", lastWarningSnooze=").append(lastWarningSnooze);
+        builder.append(", lastLimitSnooze=").append(lastLimitSnooze);
+        builder.append(", metered=").append(metered);
+        builder.append(", inferred=").append(inferred);
+        return builder.toString();
     }
 
     public static final Creator<NetworkPolicy> CREATOR = new Creator<NetworkPolicy>() {

@@ -84,7 +84,7 @@ import libcore.io.IoUtils;
  */
 @LargeTest
 public class NetworkStatsServiceTest extends AndroidTestCase {
-    private static final String TAG = "NetworkStatsServiceTest";
+    private static final String TAG  = "NetworkStatsServiceTest";
 
     private static final String TEST_IFACE = "test0";
     private static final String TEST_IFACE2 = "test1";
