@@ -114,6 +114,10 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             if (activity.getWindow().isDestroyed()) {
                 throw new IllegalStateException("activity is already destroyed");
             }
+            // Check if activity is resumed right now, as we will not
+            // immediately get a callback for that.
+            resumed = activity.isResumed();
+
             this.activity = activity;
             registerApplication(activity.getApplication());
         }
