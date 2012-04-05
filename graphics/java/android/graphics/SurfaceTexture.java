@@ -161,7 +161,31 @@ public class SurfaceTexture {
     public void updateTexImage() {
         int err = nativeUpdateTexImage(); 
         if (err != 0) {
-            throw new RuntimeException("Error during updateTexImage (see logs)");
+            throw new RuntimeException("Error during updateTexImage (see logcat for details)");
+        }
+    }
+
+    /**
+     * Detach the SurfaceTexture from the OpenGL ES context with which it is currently associated.
+     * This can be used to change from one OpenGL ES context to another.
+     *
+     * @hide
+     */
+    public void detachFromGLContext() {
+        int err = nativeDetachFromGLContext();
+        if (err != 0) {
+            throw new RuntimeException("Error during detachFromGLContext (see logcat for details)");
+        }
+    }
+
+    /**
+     *
+     * @hide
+     */
+    public void attachToGLContext(int texName) {
+        int err = nativeAttachToGLContext(texName);
+        if (err != 0) {
+            throw new RuntimeException("Error during detachFromGLContext (see logcat for details)");
         }
     }
 
@@ -269,6 +293,8 @@ public class SurfaceTexture {
     private native long nativeGetTimestamp();
     private native void nativeSetDefaultBufferSize(int width, int height);
     private native int nativeUpdateTexImage();
+    private native int nativeDetachFromGLContext();
+    private native int nativeAttachToGLContext(int texName);
     private native int nativeGetQueuedCount();
     private native void nativeRelease();
 

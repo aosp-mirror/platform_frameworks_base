@@ -218,6 +218,18 @@ static jint SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
     return surfaceTexture->updateTexImage();
 }
 
+static jint SurfaceTexture_detachFromGLContext(JNIEnv* env, jobject thiz)
+{
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    return surfaceTexture->detachFromContext();
+}
+
+static jint SurfaceTexture_attachToGLContext(JNIEnv* env, jobject thiz, jint tex)
+{
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    return surfaceTexture->attachToContext((GLuint)tex);
+}
+
 static void SurfaceTexture_getTransformMatrix(JNIEnv* env, jobject thiz,
         jfloatArray jmtx)
 {
@@ -242,14 +254,16 @@ static void SurfaceTexture_release(JNIEnv* env, jobject thiz)
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
-    {"nativeClassInit",          "()V",   (void*)SurfaceTexture_classInit },
-    {"nativeInit",               "(ILjava/lang/Object;Z)V", (void*)SurfaceTexture_init },
-    {"nativeFinalize",           "()V",   (void*)SurfaceTexture_finalize },
+    {"nativeClassInit",            "()V",   (void*)SurfaceTexture_classInit },
+    {"nativeInit",                 "(ILjava/lang/Object;Z)V", (void*)SurfaceTexture_init },
+    {"nativeFinalize",             "()V",   (void*)SurfaceTexture_finalize },
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
-    {"nativeUpdateTexImage",     "()I",   (void*)SurfaceTexture_updateTexImage },
-    {"nativeGetTransformMatrix", "([F)V", (void*)SurfaceTexture_getTransformMatrix },
-    {"nativeGetTimestamp",       "()J",   (void*)SurfaceTexture_getTimestamp },
-    {"nativeRelease",            "()V",   (void*)SurfaceTexture_release },
+    {"nativeUpdateTexImage",       "()I",   (void*)SurfaceTexture_updateTexImage },
+    {"nativeDetachFromGLContext",  "()I",   (void*)SurfaceTexture_detachFromGLContext },
+    {"nativeAttachToGLContext",    "(I)I",   (void*)SurfaceTexture_attachToGLContext },
+    {"nativeGetTransformMatrix",   "([F)V", (void*)SurfaceTexture_getTransformMatrix },
+    {"nativeGetTimestamp",         "()J",   (void*)SurfaceTexture_getTimestamp },
+    {"nativeRelease",              "()V",   (void*)SurfaceTexture_release },
 };
 
 int register_android_graphics_SurfaceTexture(JNIEnv* env)
