@@ -24148,20 +24148,27 @@ package android.view {
   }
 
   public final class ViewTreeObserver {
+    method public void addOnDrawListener(android.view.ViewTreeObserver.OnDrawListener);
     method public void addOnGlobalFocusChangeListener(android.view.ViewTreeObserver.OnGlobalFocusChangeListener);
     method public void addOnGlobalLayoutListener(android.view.ViewTreeObserver.OnGlobalLayoutListener);
     method public void addOnPreDrawListener(android.view.ViewTreeObserver.OnPreDrawListener);
     method public void addOnScrollChangedListener(android.view.ViewTreeObserver.OnScrollChangedListener);
     method public void addOnTouchModeChangeListener(android.view.ViewTreeObserver.OnTouchModeChangeListener);
+    method public final void dispatchOnDraw();
     method public final void dispatchOnGlobalLayout();
     method public final boolean dispatchOnPreDraw();
     method public boolean isAlive();
     method public deprecated void removeGlobalOnLayoutListener(android.view.ViewTreeObserver.OnGlobalLayoutListener);
+    method public void removeOnDrawListener(android.view.ViewTreeObserver.OnDrawListener);
     method public void removeOnGlobalFocusChangeListener(android.view.ViewTreeObserver.OnGlobalFocusChangeListener);
     method public void removeOnGlobalLayoutListener(android.view.ViewTreeObserver.OnGlobalLayoutListener);
     method public void removeOnPreDrawListener(android.view.ViewTreeObserver.OnPreDrawListener);
     method public void removeOnScrollChangedListener(android.view.ViewTreeObserver.OnScrollChangedListener);
     method public void removeOnTouchModeChangeListener(android.view.ViewTreeObserver.OnTouchModeChangeListener);
+  }
+
+  public static abstract interface ViewTreeObserver.OnDrawListener {
+    method public abstract void onDraw();
   }
 
   public static abstract interface ViewTreeObserver.OnGlobalFocusChangeListener {
