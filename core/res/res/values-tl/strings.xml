@@ -50,10 +50,8 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Mag-type ng PUK na may 8 numbero o mas mahaba."</string>
     <string name="needPuk" msgid="919668385956251611">"Na-PUK-lock ang iyong SIM card. I-type ang PUK code upang i-unlock ito."</string>
     <string name="needPuk2" msgid="4526033371987193070">"I-type ang PUK2 upang i-unblock ang SIM card."</string>
-    <!-- no translation found for imei (2625429890869005782) -->
-    <skip />
-    <!-- no translation found for meid (4841221237681254195) -->
-    <skip />
+    <string name="imei" msgid="2625429890869005782">"IMEI"</string>
+    <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Papasok na Caller ID"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Papalabas na Caller ID"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Pagpapasa ng tawag"</string>
@@ -1021,6 +1019,8 @@
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Magtakda ng oras"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Itakda ang petsa"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Itakda"</string>
+    <!-- no translation found for date_time_done (2507683751759308828) -->
+    <skip />
     <string name="default_permission_group" msgid="2690160991405646128">"Default"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"BAGO: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Walang mga kinakailangang pahintulot"</string>
@@ -1170,22 +1170,35 @@
     <string name="add_account_label" msgid="2935267344849993553">"Magdagdag ng account"</string>
     <string name="choose_account_text" msgid="6303348737197849675">"Aling account ang nais mong gamitin?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Magdagdag ng account"</string>
-    <string name="number_picker_increment_button" msgid="4830170763103463443">"Taasan"</string>
-    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Babaan"</string>
+    <!-- no translation found for number_picker_increment_button (2412072272832284313) -->
+    <skip />
+    <!-- no translation found for number_picker_decrement_button (476050778386779067) -->
+    <skip />
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> pindutin nang matagal."</string>
-    <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"I-slide pataas upang magdagdag at pababa upang magbawas."</string>
-    <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Minuto ng pagdaragdag"</string>
-    <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Minuto ng pagbawas"</string>
-    <string name="time_picker_increment_hour_button" msgid="2484204991937119057">"Oras ng pagdaragdag"</string>
-    <string name="time_picker_decrement_hour_button" msgid="4659353501775842780">"Oras ng pagbawas"</string>
+    <!-- no translation found for number_picker_increment_scroll_action (9101473045891835490) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_minute_button (8865885114028614321) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_minute_button (6246834937080684791) -->
+    <skip />
+    <!-- no translation found for time_picker_increment_hour_button (3652056055810223139) -->
+    <skip />
+    <!-- no translation found for time_picker_decrement_hour_button (1377479863429214792) -->
+    <skip />
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Itakda ang PM"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Itakda ang AM"</string>
-    <string name="date_picker_increment_month_button" msgid="6324978841467899081">"Buwan ng pagdagdag"</string>
-    <string name="date_picker_decrement_month_button" msgid="7304349355000398077">"Buwan ng pagbawas"</string>
-    <string name="date_picker_increment_day_button" msgid="4397040141921413183">"Araw ng pagdaragdag"</string>
-    <string name="date_picker_decrement_day_button" msgid="2427816793443629131">"Araw ng pagbawas"</string>
-    <string name="date_picker_increment_year_button" msgid="3058553394722295105">"Taon ng pagdaragdag"</string>
-    <string name="date_picker_decrement_year_button" msgid="5193062846559743823">"Taon ng pagbawas"</string>
+    <!-- no translation found for date_picker_increment_month_button (5369998479067934110) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_month_button (1832698995541726019) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_day_button (7130465412308173903) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_day_button (4131881521818750031) -->
+    <skip />
+    <!-- no translation found for date_picker_increment_year_button (6318697384310808899) -->
+    <skip />
+    <!-- no translation found for date_picker_decrement_year_button (4482021813491121717) -->
+    <skip />
     <string name="checkbox_checked" msgid="7222044992652711167">"nilagyan ng check"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"hindi nilagyan ng check"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"pinili"</string>
@@ -1205,10 +1218,14 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Ibahagi sa"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Ibahagi sa <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Hawakan sa pag-slide. Pindutin nang matagal."</string>
-    <string name="description_direction_up" msgid="1983114130441878529">"Nakataas para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_down" msgid="4294993639091088240">"Nakababa para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="6814008463839915747">"Pakaliwa para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_right" msgid="4296057241963012862">"Pakanan para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
+    <!-- no translation found for description_direction_up (7169032478259485180) -->
+    <skip />
+    <!-- no translation found for description_direction_down (5087739728639014595) -->
+    <skip />
+    <!-- no translation found for description_direction_left (7207478719805562165) -->
+    <skip />
+    <!-- no translation found for description_direction_right (8034433242579600980) -->
+    <skip />
     <string name="description_target_unlock" msgid="2228524900439801453">"I-unlock"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Camera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Tahimik"</string>
