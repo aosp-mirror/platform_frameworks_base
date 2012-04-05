@@ -139,7 +139,7 @@ public class WindowAnimator {
 
         final int NEAT = mService.mExitingAppTokens.size();
         for (i=0; i<NEAT; i++) {
-            final AppWindowAnimator appAnimator = mService.mAppTokens.get(i).mAppAnimator;
+            final AppWindowAnimator appAnimator = mService.mExitingAppTokens.get(i).mAppAnimator;
             final boolean wasAnimating = appAnimator.animation != null
                     && appAnimator.animation != WindowManagerService.sDummyAnimation;
             if (appAnimator.stepAnimationLocked(mCurrentTime, mInnerDw, mInnerDh)) {
