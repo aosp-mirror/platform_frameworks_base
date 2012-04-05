@@ -160,8 +160,6 @@ http://developer.android.com/guide/practices/ui_guidelines/icon_design_tab.html
 http://developer.android.com/guide/practices/ui_guidelines/icon_design_dialog.html
 http://developer.android.com/guide/practices/ui_guidelines/icon_design_list.html
 http://developer.android.com/guide/practices/ui_guidelines/widget_design.html
-http://developer.android.com/guide/practices/ui_guidelines/activity_task_design.html
-http://developer.android.com/guide/practices/ui_guidelines/menu_design.html
 http://developer.android.com/guide/practices/design/performance.html
 http://developer.android.com/guide/practices/design/responsiveness.html
 http://developer.android.com/guide/practices/design/seamlessness.html
