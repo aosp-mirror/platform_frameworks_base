@@ -1141,4 +1141,24 @@ public class TelephonyManager {
         return sContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sms_capable);
     }
+
+    /**
+     * Returns all observed cell information of the device.
+     *
+     * @return List of CellInfo or null if info unavailable.
+     *
+     * <p>Requires Permission:
+     * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
+     *
+     * @hide pending API review
+     */
+    public List<CellInfo> getAllCellInfo() {
+        try {
+            return getITelephony().getAllCellInfo();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
+        }
+    }
 }

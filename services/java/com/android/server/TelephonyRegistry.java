@@ -29,6 +29,7 @@ import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import android.telephony.CellInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -106,6 +107,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private int mDataConnectionNetworkType;
 
     private int mOtaspMode = ServiceStateTracker.OTASP_UNKNOWN;
+
+    private CellInfo mCellInfo = null;
 
     static final int PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
@@ -236,6 +239,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             remove(r.binder);
                         }
                     }
+                    if ((events & PhoneStateListener.LISTEN_CELL_INFO) != 0) {
+                        try {
+                            r.callback.onCellInfoChanged(new CellInfo(mCellInfo));
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
                 }
             }
         } else {
@@ -323,6 +333,26 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             handleRemoveListLocked();
         }
         broadcastSignalStrengthChanged(signalStrength);
+    }
+
+    public void notifyCellInfo(CellInfo cellInfo) {
+        if (!checkNotifyPermission("notifyCellInfo()")) {
+            return;
+        }
+
+        synchronized (mRecords) {
+            mCellInfo = cellInfo;
+            for (Record r : mRecords) {
+                if ((r.events & PhoneStateListener.LISTEN_CELL_INFO) != 0) {
+                    try {
+                        r.callback.onCellInfoChanged(new CellInfo(cellInfo));
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
     }
 
     public void notifyMessageWaitingChanged(boolean mwi) {
@@ -530,6 +560,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("  mDataConnectionLinkProperties=" + mDataConnectionLinkProperties);
             pw.println("  mDataConnectionLinkCapabilities=" + mDataConnectionLinkCapabilities);
             pw.println("  mCellLocation=" + mCellLocation);
+            pw.println("  mCellInfo=" + mCellInfo);
             pw.println("registrations: count=" + recordCount);
             for (Record r : mRecords) {
                 pw.println("  " + r.pkgForDebug + " 0x" + Integer.toHexString(r.events));
@@ -650,6 +681,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void checkListenerPermission(int events) {
         if ((events & PhoneStateListener.LISTEN_CELL_LOCATION) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
+
+        }
+
+        if ((events & PhoneStateListener.LISTEN_CELL_INFO) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
 

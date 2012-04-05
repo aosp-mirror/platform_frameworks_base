@@ -1,4 +1,4 @@
-/* //device/java/android/android/content/Intent.aidl
+/*
 **
 ** Copyright 2007, The Android Open Source Project
 **

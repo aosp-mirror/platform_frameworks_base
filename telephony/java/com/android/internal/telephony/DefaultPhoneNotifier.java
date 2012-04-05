@@ -21,6 +21,7 @@ import android.net.LinkProperties;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.CellInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -153,6 +154,14 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
             mRegistry.notifyCellLocation(data);
         } catch (RemoteException ex) {
             // system process is dead
+        }
+    }
+
+    public void notifyCellInfo(Phone sender, CellInfo cellInfo) {
+        try {
+            mRegistry.notifyCellInfo(cellInfo);
+        } catch (RemoteException ex) {
+
         }
     }
 
