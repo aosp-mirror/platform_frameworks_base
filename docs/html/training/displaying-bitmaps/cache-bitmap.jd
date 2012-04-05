@@ -1,0 +1,337 @@
+page.title=Caching Bitmaps
+parent.title=Displaying Bitmaps Efficiently
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Displaying Bitmaps in Your UI
+next.link=display-bitmap.html
+previous.title=Processing Bitmaps Off the UI Thread
+previous.link=process-bitmap.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#memory-cache">Use a Memory Cache</a></li>
+  <li><a href="#disk-cache">Use a Disk Cache</a></li>
+  <li><a href="#config-changes">Handle Configuration Changes</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a></li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/BitmapFun.zip" class="button">Download the sample</a>
+  <p class="filename">BitmapFun.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>Loading a single bitmap into your user interface (UI) is straightforward, however things get more
+complicated if you need to load a larger set of images at once. In many cases (such as with
+components like {@link android.widget.ListView}, {@link android.widget.GridView} or {@link
+android.support.v4.view.ViewPager }), the total number of images on-screen combined with images that
+might soon scroll onto the screen are essentially unlimited.</p>
+
+<p>Memory usage is kept down with components like this by recycling the child views as they move
+off-screen. The garbage collector also frees up your loaded bitmaps, assuming you don't keep any
+long lived references. This is all good and well, but in order to keep a fluid and fast-loading UI
+you want to avoid continually processing these images each time they come back on-screen. A memory
+and disk cache can often help here, allowing components to quickly reload processed images.</p>
+
+<p>This lesson walks you through using a memory and disk bitmap cache to improve the responsiveness
+and fluidity of your UI when loading multiple bitmaps.</p>
+
+<h2 id="memory-cache">Use a Memory Cache</h2>
+
+<p>A memory cache offers fast access to bitmaps at the cost of taking up valuable application
+memory. The {@link android.util.LruCache} class (also available in the <a
+href="{@docRoot}reference/android/support/v4/util/LruCache.html">Support Library</a> for use back
+to API Level 4) is particularly well suited to the task of caching bitmaps, keeping recently
+referenced objects in a strong referenced {@link java.util.LinkedHashMap} and evicting the least
+recently used member before the cache exceeds its designated size.</p>
+
+<p class="note"><strong>Note:</strong> In the past, a popular memory cache implementation was a
+{@link java.lang.ref.SoftReference} or {@link java.lang.ref.WeakReference} bitmap cache, however
+this is not recommended. Starting from Android 2.3 (API Level 9) the garbage collector is more
+aggressive with collecting soft/weak references which makes them fairly ineffective. In addition,
+prior to Android 3.0 (API Level 11), the backing data of a bitmap was stored in native memory which
+is not released in a predictable manner, potentially causing an application to briefly exceed its
+memory limits and crash.</p>
+
+<p>In order to choose a suitable size for a {@link android.util.LruCache}, a number of factors
+should be taken into consideration, for example:</p>
+
+<ul>
+  <li>How memory intensive is the rest of your activity and/or application?</li>
+  <li>How many images will be on-screen at once? How many need to be available ready to come
+  on-screen?</li>
+  <li>What is the screen size and density of the device? An extra high density screen (xhdpi) device
+  like <a href="http://www.android.com/devices/detail/galaxy-nexus">Galaxy Nexus</a> will need a
+  larger cache to hold the same number of images in memory compared to a device like <a
+  href="http://www.android.com/devices/detail/nexus-s">Nexus S</a> (hdpi).</li>
+  <li>What dimensions and configuration are the bitmaps and therefore how much memory will each take
+  up?</li>
+  <li>How frequently will the images be accessed? Will some be accessed more frequently than others?
+  If so, perhaps you may want to keep certain items always in memory or even have multiple {@link
+  android.util.LruCache} objects for different groups of bitmaps.</li>
+  <li>Can you balance quality against quantity? Sometimes it can be more useful to store a larger
+  number of lower quality bitmaps, potentially loading a higher quality version in another
+  background task.</li>
+</ul>
+
+<p>There is no specific size or formula that suits all applications, it's up to you to analyze your
+usage and come up with a suitable solution. A cache that is too small causes additional overhead with
+no benefit, a cache that is too large can once again cause {@code java.lang.OutOfMemory} exceptions
+and leave the rest of your app little memory to work with.</p>
+
+<p>Here’s an example of setting up a {@link android.util.LruCache} for bitmaps:</p>
+
+<pre>
+private LruCache<String, Bitmap> mMemoryCache;
+
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    ...
+    // Get memory class of this device, exceeding this amount will throw an
+    // OutOfMemory exception.
+    final int memClass = ((ActivityManager) context.getSystemService(
+            Context.ACTIVITY_SERVICE)).getMemoryClass();
+
+    // Use 1/8th of the available memory for this memory cache.
+    final int cacheSize = 1024 * 1024 * memClass / 8;
+
+    mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+        &#64;Override
+        protected int sizeOf(String key, Bitmap bitmap) {
+            // The cache size will be measured in bytes rather than number of items.
+            return bitmap.getByteCount();
+        }
+    };
+    ...
+}
+
+public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+    if (getBitmapFromMemCache(key) == null) {
+        mMemoryCache.put(key, bitmap);
+    }
+}
+
+public Bitmap getBitmapFromMemCache(String key) {
+    return mMemoryCache.get(key);
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> In this example, one eighth of the application memory is
+allocated for our cache. On a normal/hdpi device this is a minimum of around 4MB (32/8). A full
+screen {@link android.widget.GridView} filled with images on a device with 800x480 resolution would
+use around 1.5MB (800*480*4 bytes), so this would cache a minimum of around 2.5 pages of images in
+memory.</p>
+
+<p>When loading a bitmap into an {@link android.widget.ImageView}, the {@link android.util.LruCache}
+is checked first. If an entry is found, it is used immediately to update the {@link
+android.widget.ImageView}, otherwise a background thread is spawned to process the image:</p>
+
+<pre>
+public void loadBitmap(int resId, ImageView imageView) {
+    final String imageKey = String.valueOf(resId);
+
+    final Bitmap bitmap = getBitmapFromMemCache(imageKey);
+    if (bitmap != null) {
+        mImageView.setImageBitmap(bitmap);
+    } else {
+        mImageView.setImageResource(R.drawable.image_placeholder);
+        BitmapWorkerTask task = new BitmapWorkerTask(mImageView);
+        task.execute(resId);
+    }
+}
+</pre>
+
+<p>The <a href="process-bitmap.html#BitmapWorkerTask">{@code BitmapWorkerTask}</a> also needs to be
+updated to add entries to the memory cache:</p>
+
+<pre>
+class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
+    ...
+    // Decode image in background.
+    &#64;Override
+    protected Bitmap doInBackground(Integer... params) {
+        final Bitmap bitmap = decodeSampledBitmapFromResource(
+                getResources(), params[0], 100, 100));
+        addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
+        return bitmap;
+    }
+    ...
+}
+</pre>
+
+<h2 id="disk-cache">Use a Disk Cache</h2>
+
+<p>A memory cache is useful in speeding up access to recently viewed bitmaps, however you cannot
+rely on images being available in this cache. Components like {@link android.widget.GridView} with
+larger datasets can easily fill up a memory cache. Your application could be interrupted by another
+task like a phone call, and while in the background it might be killed and the memory cache
+destroyed. Once the user resumes, your application it has to process each image again.</p>
+
+<p>A disk cache can be used in these cases to persist processed bitmaps and help decrease loading
+times where images are no longer available in a memory cache. Of course, fetching images from disk
+is slower than loading from memory and should be done in a background thread, as disk read times can
+be unpredictable.</p>
+
+<p class="note"><strong>Note:</strong> A {@link android.content.ContentProvider} might be a more
+appropriate place to store cached images if they are accessed more frequently, for example in an
+image gallery application.</p>
+
+<p>Included in the sample code of this class is a basic {@code DiskLruCache} implementation.
+However, a more robust and recommended {@code DiskLruCache} solution is included in the Android 4.0
+source code ({@code libcore/luni/src/main/java/libcore/io/DiskLruCache.java}). Back-porting this
+class for use on previous Android releases should be fairly straightforward (a <a
+href="http://www.google.com/search?q=disklrucache">quick search</a> shows others who have already
+implemented this solution).</p>
+
+<p>Here’s updated example code that uses the simple {@code DiskLruCache} included in the sample
+application of this class:</p>
+
+<pre>
+private DiskLruCache mDiskCache;
+private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
+private static final String DISK_CACHE_SUBDIR = "thumbnails";
+
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    ...
+    // Initialize memory cache
+    ...
+    File cacheDir = getCacheDir(this, DISK_CACHE_SUBDIR);
+    mDiskCache = DiskLruCache.openCache(this, cacheDir, DISK_CACHE_SIZE);
+    ...
+}
+
+class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
+    ...
+    // Decode image in background.
+    &#64;Override
+    protected Bitmap doInBackground(Integer... params) {
+        final String imageKey = String.valueOf(params[0]);
+
+        // Check disk cache in background thread
+        Bitmap bitmap = getBitmapFromDiskCache(imageKey);
+
+        if (bitmap == null) { // Not found in disk cache
+            // Process as normal
+            final Bitmap bitmap = decodeSampledBitmapFromResource(
+                    getResources(), params[0], 100, 100));
+        }
+
+        // Add final bitmap to caches
+        addBitmapToCache(String.valueOf(imageKey, bitmap);
+
+        return bitmap;
+    }
+    ...
+}
+
+public void addBitmapToCache(String key, Bitmap bitmap) {
+    // Add to memory cache as before
+    if (getBitmapFromMemCache(key) == null) {
+        mMemoryCache.put(key, bitmap);
+    }
+
+    // Also add to disk cache
+    if (!mDiskCache.containsKey(key)) {
+        mDiskCache.put(key, bitmap);
+    }
+}
+
+public Bitmap getBitmapFromDiskCache(String key) {
+    return mDiskCache.get(key);
+}
+
+// Creates a unique subdirectory of the designated app cache directory. Tries to use external
+// but if not mounted, falls back on internal storage.
+public static File getCacheDir(Context context, String uniqueName) {
+    // Check if media is mounted or storage is built-in, if so, try and use external cache dir
+    // otherwise use internal cache dir
+    final String cachePath = Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
+            || !Environment.isExternalStorageRemovable() ?
+                    context.getExternalCacheDir().getPath() : context.getCacheDir().getPath();
+
+    return new File(cachePath + File.separator + uniqueName);
+}
+</pre>
+
+<p>While the memory cache is checked in the UI thread, the disk cache is checked in the background
+thread. Disk operations should never take place on the UI thread. When image processing is
+complete, the final bitmap is added to both the memory and disk cache for future use.</p>
+
+<h2 id="config-changes">Handle Configuration Changes</h2>
+
+<p>Runtime configuration changes, such as a screen orientation change, cause Android to destroy and
+restart the running activity with the new configuration (For more information about this behavior,
+see <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a>).
+You want to avoid having to process all your images again so the user has a smooth and fast
+experience when a configuration change occurs.</p>
+
+<p>Luckily, you have a nice memory cache of bitmaps that you built in the <a
+href="#memory-cache">Use a Memory Cache</a> section. This cache can be passed through to the new
+activity instance using a {@link android.app.Fragment} which is preserved by calling {@link
+android.app.Fragment#setRetainInstance setRetainInstance(true)}). After the activity has been
+recreated, this retained {@link android.app.Fragment} is reattached and you gain access to the
+existing cache object, allowing images to be quickly fetched and re-populated into the {@link
+android.widget.ImageView} objects.</p>
+
+<p>Here’s an example of retaining a {@link android.util.LruCache} object across configuration
+changes using a {@link android.app.Fragment}:</p>
+
+<pre>
+private LruCache<String, Bitmap> mMemoryCache;
+
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    ...
+    RetainFragment mRetainFragment =
+            RetainFragment.findOrCreateRetainFragment(getFragmentManager());
+    mMemoryCache = RetainFragment.mRetainedCache;
+    if (mMemoryCache == null) {
+        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+            ... // Initialize cache here as usual
+        }
+        mRetainFragment.mRetainedCache = mMemoryCache;
+    }
+    ...
+}
+
+class RetainFragment extends Fragment {
+    private static final String TAG = "RetainFragment";
+    public LruCache<String, Bitmap> mRetainedCache;
+
+    public RetainFragment() {}
+
+    public static RetainFragment findOrCreateRetainFragment(FragmentManager fm) {
+        RetainFragment fragment = (RetainFragment) fm.findFragmentByTag(TAG);
+        if (fragment == null) {
+            fragment = new RetainFragment();
+        }
+        return fragment;
+    }
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        <strong>setRetainInstance(true);</strong>
+    }
+}
+</pre>
+
+<p>To test this out, try rotating a device both with and without retaining the {@link
+android.app.Fragment}. You should notice little to no lag as the images populate the activity almost
+instantly from memory when you retain the cache. Any images not found in the memory cache are
+hopefully available in the disk cache, if not, they are processed as usual.</p>
