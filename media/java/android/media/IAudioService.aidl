@@ -45,7 +45,7 @@ interface IAudioService {
 
     boolean isStreamMute(int streamType);
 
-    void setMasterMute(boolean state, IBinder cb);
+    void setMasterMute(boolean state, int flags, IBinder cb);
 
     boolean isMasterMute();
 

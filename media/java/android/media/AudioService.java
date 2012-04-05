@@ -779,13 +779,13 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** @see AudioManager#setMasterMute(boolean, IBinder) */
-    public void setMasterMute(boolean state, IBinder cb) {
+    public void setMasterMute(boolean state, int flags, IBinder cb) {
         if (state != AudioSystem.getMasterMute()) {
             AudioSystem.setMasterMute(state);
             // Post a persist master volume msg
             sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, 0, SENDMSG_REPLACE, state ? 1
                     : 0, 0, null, PERSIST_DELAY);
-            sendMasterMuteUpdate(state, AudioManager.FLAG_SHOW_UI);
+            sendMasterMuteUpdate(state, flags);
         }
     }
 

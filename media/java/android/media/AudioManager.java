@@ -911,9 +911,18 @@ public class AudioManager {
      * @hide
      */
     public void setMasterMute(boolean state) {
+        setMasterMute(state, FLAG_SHOW_UI);
+    }
+
+    /**
+     * set master mute state with optional flags.
+     *
+     * @hide
+     */
+    public void setMasterMute(boolean state, int flags) {
         IAudioService service = getService();
         try {
-            service.setMasterMute(state, mICallBack);
+            service.setMasterMute(state, flags, mICallBack);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setMasterMute", e);
         }
