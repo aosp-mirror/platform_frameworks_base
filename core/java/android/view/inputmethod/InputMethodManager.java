@@ -405,7 +405,9 @@ public final class InputMethodManager {
                             }
                             // Check focus again in case that "onWindowFocus" is called before
                             // handling this message.
-                            checkFocus(mHasBeenInactive);
+                            if (mServedView != null && mServedView.hasWindowFocus()) {
+                                checkFocus(mHasBeenInactive);
+                            }
                         }
                     }
                     return;
@@ -1202,7 +1204,9 @@ public final class InputMethodManager {
             }
             if (DEBUG) Log.v(TAG, "checkFocus: view=" + mServedView
                     + " next=" + mNextServedView
-                    + " forceNewFocus=" + forceNewFocus);
+                    + " forceNewFocus=" + forceNewFocus
+                    + " package="
+                    + (mServedView != null ? mServedView.getContext().getPackageName() : "<none>"));
 
             if (mNextServedView == null) {
                 finishInputLocked();
