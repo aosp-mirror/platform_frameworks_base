@@ -299,6 +299,31 @@ class="new">&nbsp;new!</span></span>
           </li>
         </ul>
       </li>
+      
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/displaying-bitmaps/index.html">
+            <span class="en">Displaying Bitmaps Efficiently<span class="new">&nbsp;new!</span></span>
+          </a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/displaying-bitmaps/load-bitmap.html">
+            <span class="en">Loading Large Bitmaps Efficiently</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/displaying-bitmaps/process-bitmap.html">
+            <span class="en">Processing Bitmaps Off the UI Thread</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/displaying-bitmaps/cache-bitmap.html">
+            <span class="en">Caching Bitmaps</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/displaying-bitmaps/display-bitmap.html">
+            <span class="en">Displaying Bitmaps in Your UI</span>
+          </a>
+          </li>
+        </ul>
+      </li>
 
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/accessibility/index.html">
