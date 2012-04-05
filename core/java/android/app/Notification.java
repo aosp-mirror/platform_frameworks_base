@@ -809,6 +809,7 @@ public class Notification implements Parcelable
     @Deprecated
     public void setLatestEventInfo(Context context,
             CharSequence contentTitle, CharSequence contentText, PendingIntent contentIntent) {
+        // TODO: rewrite this to use Builder
         RemoteViews contentView = new RemoteViews(context.getPackageName(),
                 R.layout.notification_template_base);
         if (this.icon != 0) {
@@ -821,6 +822,7 @@ public class Notification implements Parcelable
             contentView.setTextViewText(R.id.text, contentText);
         }
         if (this.when != 0) {
+            contentView.setViewVisibility(R.id.time, View.VISIBLE);
             contentView.setLong(R.id.time, "setTime", when);
         }
 
