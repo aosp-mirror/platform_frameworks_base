@@ -42,6 +42,12 @@ class GLES20TextureLayer extends GLES20Layer {
         }        
     }
 
+    GLES20TextureLayer(SurfaceTexture surface, boolean isOpaque) {
+        this(isOpaque);
+        mSurface = surface;
+        mSurface.attachToGLContext(mTexture);
+    }
+
     @Override
     boolean isValid() {
         return mLayer != 0 && mTexture != 0;
@@ -70,6 +76,14 @@ class GLES20TextureLayer extends GLES20Layer {
             mSurface = new SurfaceTexture(mTexture, false);
         }
         return mSurface;
+    }
+
+    void setSurfaceTexture(SurfaceTexture surfaceTexture) {
+        if (mSurface != null) {
+            mSurface.release();
+        }
+        mSurface = surfaceTexture;
+        mSurface.attachToGLContext(mTexture);
     }
 
     @Override

@@ -115,6 +115,7 @@ public class TextureView extends View {
 
     private final Object[] mLock = new Object[0];
     private boolean mUpdateLayer;
+    private boolean mUpdateSurface;
 
     private SurfaceTexture.OnFrameAvailableListener mUpdateListener;
 
@@ -208,6 +209,8 @@ public class TextureView extends View {
 
     private void destroySurface() {
         if (mLayer != null) {
+            mSurface.detachFromGLContext();
+
             boolean shouldRelease = true;
             if (mListener != null) {
                 shouldRelease = mListener.onSurfaceTextureDestroyed(mSurface);
@@ -322,9 +325,13 @@ public class TextureView extends View {
             }
 
             mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(mOpaque);
-            mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
+            if (!mUpdateSurface) {
+                // We already have a SurfaceTexture to use, and we will pass it
+                // to mLayer below.
+                mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
+            }
             nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
-            nCreateNativeWindow(mSurface);            
+            nCreateNativeWindow(mSurface);
 
             mUpdateListener = new SurfaceTexture.OnFrameAvailableListener() {
                 @Override
@@ -342,6 +349,15 @@ public class TextureView extends View {
             if (mListener != null) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
             }
+        }
+
+        if (mUpdateSurface) {
+            // Someone has requested that we use a specific SurfaceTexture, so
+            // tell mLayer about it and set the SurfaceTexture to use the
+            // current view size.
+            mUpdateSurface = false;
+            mAttachInfo.mHardwareRenderer.setSurfaceTexture(mLayer, mSurface);
+            nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
         }
 
         applyUpdate();
@@ -371,7 +387,7 @@ public class TextureView extends View {
         mUpdateLayer = true;
         invalidate();
     }
-    
+
     private void applyUpdate() {
         if (mLayer == null) {
             return;
@@ -633,6 +649,32 @@ public class TextureView extends View {
      */
     public SurfaceTexture getSurfaceTexture() {
         return mSurface;
+    }
+
+    /**
+     * Set the {@link SurfaceTexture} for this view to use. If a {@link
+     * SurfaceTexture} is already being used by this view, it is immediately
+     * released and not be usable any more.  The {@link
+     * SurfaceTextureListener#onSurfaceTextureDestroyed} callback is <b>not</b>
+     * called.
+     *
+     * The {@link SurfaceTexture} object must be detached from all OpenGL ES
+     * contexts prior to calling this method.
+     *
+     * @param surfaceTexture The {@link SurfaceTexture} that the view should use.
+     * @see SurfaceTexture#detachFromGLContext()
+     * @hide
+     */
+    public void setSurfaceTexture(SurfaceTexture surfaceTexture) {
+        if (surfaceTexture == null) {
+            throw new NullPointerException("surfaceTexture must not be null");
+        }
+        if (mSurface != null) {
+            mSurface.release();
+        }
+        mSurface = surfaceTexture;
+        mUpdateSurface = true;
+        invalidateParentIfNeeded();
     }
 
     /**
