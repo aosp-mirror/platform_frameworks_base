@@ -10262,6 +10262,29 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             pw.println();
             pw.print("Total PSS: "); pw.print(totalPss); pw.println(" kB");
+            final int[] SINGLE_LONG_FORMAT = new int[] {
+                Process.PROC_SPACE_TERM|Process.PROC_OUT_LONG
+            };
+            long[] longOut = new long[1];
+            Process.readProcFile("/sys/kernel/mm/ksm/pages_shared",
+                    SINGLE_LONG_FORMAT, null, longOut, null);
+            long shared = longOut[0] * ProcessList.PAGE_SIZE / 1024;
+            longOut[0] = 0;
+            Process.readProcFile("/sys/kernel/mm/ksm/pages_sharing",
+                    SINGLE_LONG_FORMAT, null, longOut, null);
+            long sharing = longOut[0] * ProcessList.PAGE_SIZE / 1024;
+            longOut[0] = 0;
+            Process.readProcFile("/sys/kernel/mm/ksm/pages_unshared",
+                    SINGLE_LONG_FORMAT, null, longOut, null);
+            long unshared = longOut[0] * ProcessList.PAGE_SIZE / 1024;
+            longOut[0] = 0;
+            Process.readProcFile("/sys/kernel/mm/ksm/pages_volatile",
+                    SINGLE_LONG_FORMAT, null, longOut, null);
+            long voltile = longOut[0] * ProcessList.PAGE_SIZE / 1024;
+            pw.print("      KSM: "); pw.print(sharing); pw.print(" kB saved from shared ");
+                    pw.print(shared); pw.println(" kB");
+            pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
+                    pw.print(voltile); pw.println(" kB volatile");
         }
     }
 
