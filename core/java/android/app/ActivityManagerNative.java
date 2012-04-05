@@ -17,10 +17,10 @@
 package android.app;
 
 import android.content.ComponentName;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IIntentSender;
-import android.content.IIntentReceiver;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -32,11 +32,11 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.Parcelable;
-import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.text.TextUtils;
@@ -1602,6 +1602,31 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             dismissKeyguardOnNextActivity();
             reply.writeNoException();
+            return true;
+        }
+
+        case TARGET_TASK_AFFINITY_MATCHES_ACTIVITY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            String destAffinity = data.readString();
+            boolean res = targetTaskAffinityMatchesActivity(token, destAffinity);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+
+        case NAVIGATE_UP_TO_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            Intent target = Intent.CREATOR.createFromParcel(data);
+            int resultCode = data.readInt();
+            Intent resultData = null;
+            if (data.readInt() != 0) {
+                resultData = Intent.CREATOR.createFromParcel(data);
+            }
+            boolean res = navigateUpTo(token, target, resultCode, resultData);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
             return true;
         }
 
@@ -3660,6 +3685,43 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    public boolean targetTaskAffinityMatchesActivity(IBinder token, String destAffinity)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        data.writeString(destAffinity);
+        mRemote.transact(TARGET_TASK_AFFINITY_MATCHES_ACTIVITY_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean result = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return result;
+    }
+
+    public boolean navigateUpTo(IBinder token, Intent target, int resultCode, Intent resultData)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        target.writeToParcel(data, 0);
+        data.writeInt(resultCode);
+        if (resultData != null) {
+            data.writeInt(1);
+            resultData.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        mRemote.transact(NAVIGATE_UP_TO_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean result = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return result;
     }
 
     private IBinder mRemote;

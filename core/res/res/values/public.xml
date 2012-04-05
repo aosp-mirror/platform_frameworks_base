@@ -3574,4 +3574,6 @@
   <public type="attr" name="layout_marginStart"/>
   <public type="attr" name="layout_marginEnd"/>
 
+  <public type="attr" name="parentActivityName" />
+
 </resources>

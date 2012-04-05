@@ -2030,6 +2030,19 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestActivity_uiOptions,
                 a.info.applicationInfo.uiOptions);
 
+        String parentName = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestActivity_parentActivityName, 0);
+        if (parentName != null) {
+            String parentClassName = buildClassName(a.info.packageName, parentName, outError);
+            if (outError[0] == null) {
+                a.info.parentActivityName = parentClassName;
+            } else {
+                Log.e(TAG, "Activity " + a.info.name + " specified invalid parentActivityName " +
+                        parentName);
+                outError[0] = null;
+            }
+        }
+
         String str;
         str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestActivity_permission, 0);
@@ -2274,6 +2287,7 @@ public class PackageParser {
         info.theme = target.info.theme;
         info.softInputMode = target.info.softInputMode;
         info.uiOptions = target.info.uiOptions;
+        info.parentActivityName = target.info.parentActivityName;
         
         Activity a = new Activity(mParseActivityAliasArgs, info);
         if (outError[0] != null) {
@@ -2293,6 +2307,20 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestActivityAlias_permission, 0);
         if (str != null) {
             a.info.permission = str.length() > 0 ? str.toString().intern() : null;
+        }
+
+        String parentName = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestActivityAlias_parentActivityName,
+                0);
+        if (parentName != null) {
+            String parentClassName = buildClassName(a.info.packageName, parentName, outError);
+            if (outError[0] == null) {
+                a.info.parentActivityName = parentClassName;
+            } else {
+                Log.e(TAG, "Activity alias " + a.info.name +
+                        " specified invalid parentActivityName " + parentName);
+                outError[0] = null;
+            }
         }
 
         sa.recycle();

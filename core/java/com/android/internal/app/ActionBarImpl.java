@@ -85,6 +85,8 @@ public class ActionBarImpl extends ActionBar {
     private TabImpl mSelectedTab;
     private int mSavedTabPosition = INVALID_POSITION;
     
+    private boolean mDisplayHomeAsUpSet;
+
     ActionModeImpl mActionMode;
     ActionMode mDeferredDestroyActionMode;
     ActionMode.Callback mDeferredModeDestroyCallback;
@@ -375,11 +377,17 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public void setDisplayOptions(int options) {
+        if ((options & DISPLAY_HOME_AS_UP) != 0) {
+            mDisplayHomeAsUpSet = true;
+        }
         mActionView.setDisplayOptions(options);
     }
 
     public void setDisplayOptions(int options, int mask) {
         final int current = mActionView.getDisplayOptions(); 
+        if ((mask & DISPLAY_HOME_AS_UP) != 0) {
+            mDisplayHomeAsUpSet = true;
+        }
         mActionView.setDisplayOptions((options & mask) | (current & ~mask));
     }
 
@@ -1071,5 +1079,11 @@ public class ActionBarImpl extends ActionBar {
     @Override
     public void setLogo(Drawable logo) {
         mActionView.setLogo(logo);
+    }
+
+    public void setDefaultDisplayHomeAsUpEnabled(boolean enable) {
+        if (!mDisplayHomeAsUpSet) {
+            setDisplayHomeAsUpEnabled(enable);
+        }
     }
 }
