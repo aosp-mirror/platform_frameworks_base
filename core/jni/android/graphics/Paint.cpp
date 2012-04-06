@@ -254,6 +254,13 @@ public:
         obj->setTextAlign(align);
     }
 
+    static void setTextLocale(JNIEnv* env, jobject clazz, SkPaint* obj, jstring locale) {
+        const char* localeArray = env->GetStringUTFChars(locale, NULL);
+        SkString skLocale(localeArray);
+        obj->setTextLocale(skLocale);
+        env->ReleaseStringUTFChars(locale, localeArray);
+    }
+
     static jfloat getTextSize(JNIEnv* env, jobject paint) {
         NPE_CHECK_RETURN_ZERO(env, paint);
         return SkScalarToFloat(GraphicsJNI::getNativePaint(env, paint)->getTextSize());
@@ -817,6 +824,7 @@ static JNINativeMethod methods[] = {
     {"native_setRasterizer","(II)I", (void*) SkPaintGlue::setRasterizer},
     {"native_getTextAlign","(I)I", (void*) SkPaintGlue::getTextAlign},
     {"native_setTextAlign","(II)V", (void*) SkPaintGlue::setTextAlign},
+    {"native_setTextLocale","(ILjava/lang/String;)V", (void*) SkPaintGlue::setTextLocale},
     {"getTextSize","()F", (void*) SkPaintGlue::getTextSize},
     {"setTextSize","(F)V", (void*) SkPaintGlue::setTextSize},
     {"getTextScaleX","()F", (void*) SkPaintGlue::getTextScaleX},
