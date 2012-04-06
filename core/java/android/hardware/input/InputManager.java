@@ -39,12 +39,9 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
-import android.view.Display;
-import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyCharacterMap;
-import android.view.WindowManagerPolicy;
 import android.view.KeyCharacterMap.UnavailableException;
 
 import java.util.ArrayList;

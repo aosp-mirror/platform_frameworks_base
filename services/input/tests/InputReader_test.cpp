@@ -274,7 +274,7 @@ class FakeEventHub : public EventHubInterface {
     };
 
     struct Device {
-        String8 name;
+        InputDeviceIdentifier identifier;
         uint32_t classes;
         PropertyMap configuration;
         KeyedVector<int, RawAbsoluteAxisInfo> absoluteAxes;
@@ -287,8 +287,8 @@ class FakeEventHub : public EventHubInterface {
         KeyedVector<int32_t, bool> leds;
         Vector<VirtualKeyDefinition> virtualKeys;
 
-        Device(const String8& name, uint32_t classes) :
-                name(name), classes(classes) {
+        Device(uint32_t classes) :
+                classes(classes) {
         }
     };
 
@@ -307,7 +307,8 @@ public:
     FakeEventHub() { }
 
     void addDevice(int32_t deviceId, const String8& name, uint32_t classes) {
-        Device* device = new Device(name, classes);
+        Device* device = new Device(classes);
+        device->identifier.name = name;
         mDevices.add(deviceId, device);
 
         enqueueEvent(ARBITRARY_TIME, deviceId, EventHubInterface::DEVICE_ADDED, 0, 0, 0, 0);
@@ -433,9 +434,9 @@ private:
         return device ? device->classes : 0;
     }
 
-    virtual String8 getDeviceName(int32_t deviceId) const {
+    virtual InputDeviceIdentifier getDeviceIdentifier(int32_t deviceId) const {
         Device* device = getDevice(deviceId);
-        return device ? device->name : String8("unknown");
+        return device ? device->identifier : InputDeviceIdentifier();
     }
 
     virtual void getConfiguration(int32_t deviceId, PropertyMap* outConfiguration) const {
@@ -857,18 +858,20 @@ public:
     }
 
     InputDevice* newDevice(int32_t deviceId, const String8& name, uint32_t classes) {
-        return new InputDevice(&mContext, deviceId, name, classes);
+        InputDeviceIdentifier identifier;
+        identifier.name = name;
+        return new InputDevice(&mContext, deviceId, identifier, classes);
     }
 
 protected:
     virtual InputDevice* createDeviceLocked(int32_t deviceId,
-            const String8& name, uint32_t classes) {
+            const InputDeviceIdentifier& identifier, uint32_t classes) {
         if (mNextDevice) {
             InputDevice* device = mNextDevice;
             mNextDevice = NULL;
             return device;
         }
-        return InputReader::createDeviceLocked(deviceId, name, classes);
+        return InputReader::createDeviceLocked(deviceId, identifier, classes);
     }
 
     friend class InputReaderTest;
@@ -1231,7 +1234,9 @@ protected:
         mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeListener);
 
         mFakeEventHub->addDevice(DEVICE_ID, String8(DEVICE_NAME), 0);
-        mDevice = new InputDevice(mFakeContext, DEVICE_ID, String8(DEVICE_NAME), DEVICE_CLASSES);
+        InputDeviceIdentifier identifier;
+        identifier.name = DEVICE_NAME;
+        mDevice = new InputDevice(mFakeContext, DEVICE_ID, identifier, DEVICE_CLASSES);
     }
 
     virtual void TearDown() {
@@ -1411,7 +1416,9 @@ protected:
         mFakePolicy = new FakeInputReaderPolicy();
         mFakeListener = new FakeInputListener();
         mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeListener);
-        mDevice = new InputDevice(mFakeContext, DEVICE_ID, String8(DEVICE_NAME), DEVICE_CLASSES);
+        InputDeviceIdentifier identifier;
+        identifier.name = DEVICE_NAME;
+        mDevice = new InputDevice(mFakeContext, DEVICE_ID, identifier, DEVICE_CLASSES);
 
         mFakeEventHub->addDevice(DEVICE_ID, String8(DEVICE_NAME), 0);
     }

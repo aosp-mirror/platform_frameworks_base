@@ -41,6 +41,7 @@ import java.util.List;
 public final class InputDevice implements Parcelable {
     private int mId;
     private String mName;
+    private String mDescriptor;
     private int mSources;
     private int mKeyboardType;
     private String mKeyCharacterMapFile;
@@ -334,12 +335,24 @@ public final class InputDevice implements Parcelable {
      * An input device descriptor uniquely identifies an input device.  Its value
      * is intended to be persistent across system restarts, and should not change even
      * if the input device is disconnected, reconnected or reconfigured at any time.
+     * </p><p>
+     * It is possible for there to be multiple {@link InputDevice} instances that have the
+     * same input device descriptor.  This might happen in situations where a single
+     * human input device registers multiple {@link InputDevice} instances (HID collections)
+     * that describe separate features of the device, such as a keyboard that also
+     * has a trackpad.  Alternately, it may be that the input devices are simply
+     * indistinguishable, such as two keyboards made by the same manufacturer.
+     * </p><p>
+     * The input device descriptor returned by {@link #getDescriptor} should only bt
+     * used when an application needs to remember settings associated with a particular
+     * input device.  For all other purposes when referring to a logical
+     * {@link InputDevice} instance at runtime use the id returned by {@link #getId()}.
      * </p>
      *
      * @return The input device descriptor.
      */
     public String getDescriptor() {
-        return "PLACEHOLDER"; // TODO: implement for real
+        return mDescriptor;
     }
 
     /**
@@ -548,6 +561,7 @@ public final class InputDevice implements Parcelable {
     private void readFromParcel(Parcel in) {
         mId = in.readInt();
         mName = in.readString();
+        mDescriptor = in.readString();
         mSources = in.readInt();
         mKeyboardType = in.readInt();
         mKeyCharacterMapFile = in.readString();
@@ -566,6 +580,7 @@ public final class InputDevice implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mId);
         out.writeString(mName);
+        out.writeString(mDescriptor);
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
         out.writeString(mKeyCharacterMapFile);
@@ -592,7 +607,8 @@ public final class InputDevice implements Parcelable {
     public String toString() {
         StringBuilder description = new StringBuilder();
         description.append("Input Device ").append(mId).append(": ").append(mName).append("\n");
-        
+        description.append("  Descriptor: ").append(mDescriptor).append("\n");
+
         description.append("  Keyboard Type: ");
         switch (mKeyboardType) {
             case KEYBOARD_TYPE_NONE:

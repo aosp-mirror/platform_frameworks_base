@@ -95,6 +95,7 @@ static struct {
 
     jfieldID mId;
     jfieldID mName;
+    jfieldID mDescriptor;
     jfieldID mSources;
     jfieldID mKeyboardType;
     jfieldID mKeyCharacterMapFile;
@@ -1169,12 +1170,17 @@ static jobject nativeGetInputDevice(JNIEnv* env,
     }
 
     jobject deviceObj = env->NewObject(gInputDeviceClassInfo.clazz, gInputDeviceClassInfo.ctor);
-    if (! deviceObj) {
+    if (!deviceObj) {
         return NULL;
     }
 
     jstring deviceNameObj = env->NewStringUTF(deviceInfo.getName().string());
-    if (! deviceNameObj) {
+    if (!deviceNameObj) {
+        return NULL;
+    }
+
+    jstring deviceDescriptorObj = env->NewStringUTF(deviceInfo.getDescriptor().string());
+    if (!deviceDescriptorObj) {
         return NULL;
     }
 
@@ -1185,6 +1191,7 @@ static jobject nativeGetInputDevice(JNIEnv* env,
 
     env->SetIntField(deviceObj, gInputDeviceClassInfo.mId, deviceInfo.getId());
     env->SetObjectField(deviceObj, gInputDeviceClassInfo.mName, deviceNameObj);
+    env->SetObjectField(deviceObj, gInputDeviceClassInfo.mDescriptor, deviceDescriptorObj);
     env->SetIntField(deviceObj, gInputDeviceClassInfo.mSources, deviceInfo.getSources());
     env->SetIntField(deviceObj, gInputDeviceClassInfo.mKeyboardType, deviceInfo.getKeyboardType());
     env->SetObjectField(deviceObj, gInputDeviceClassInfo.mKeyCharacterMapFile, fileStr);
@@ -1444,6 +1451,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gInputDeviceClassInfo.mName, gInputDeviceClassInfo.clazz,
             "mName", "Ljava/lang/String;");
+
+    GET_FIELD_ID(gInputDeviceClassInfo.mDescriptor, gInputDeviceClassInfo.clazz,
+            "mDescriptor", "Ljava/lang/String;");
 
     GET_FIELD_ID(gInputDeviceClassInfo.mSources, gInputDeviceClassInfo.clazz,
             "mSources", "I");

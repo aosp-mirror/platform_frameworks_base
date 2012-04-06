@@ -344,18 +344,19 @@ void InputReader::processEventsLocked(const RawEvent* rawEvents, size_t count) {
 }
 
 void InputReader::addDeviceLocked(nsecs_t when, int32_t deviceId) {
-    String8 name = mEventHub->getDeviceName(deviceId);
+    InputDeviceIdentifier identifier = mEventHub->getDeviceIdentifier(deviceId);
     uint32_t classes = mEventHub->getDeviceClasses(deviceId);
 
-    InputDevice* device = createDeviceLocked(deviceId, name, classes);
+    InputDevice* device = createDeviceLocked(deviceId, identifier, classes);
     device->configure(when, &mConfig, 0);
     device->reset(when);
 
     if (device->isIgnored()) {
-        ALOGI("Device added: id=%d, name='%s' (ignored non-input device)", deviceId, name.string());
+        ALOGI("Device added: id=%d, name='%s' (ignored non-input device)", deviceId,
+                identifier.name.string());
     } else {
-        ALOGI("Device added: id=%d, name='%s', sources=0x%08x", deviceId, name.string(),
-                device->getSources());
+        ALOGI("Device added: id=%d, name='%s', sources=0x%08x", deviceId,
+                identifier.name.string(), device->getSources());
     }
 
     ssize_t deviceIndex = mDevices.indexOfKey(deviceId);
@@ -392,8 +393,8 @@ void InputReader::removeDeviceLocked(nsecs_t when, int32_t deviceId) {
 }
 
 InputDevice* InputReader::createDeviceLocked(int32_t deviceId,
-        const String8& name, uint32_t classes) {
-    InputDevice* device = new InputDevice(&mContext, deviceId, name, classes);
+        const InputDeviceIdentifier& identifier, uint32_t classes) {
+    InputDevice* device = new InputDevice(&mContext, deviceId, identifier, classes);
 
     // External devices.
     if (classes & INPUT_DEVICE_CLASS_EXTERNAL) {
@@ -851,9 +852,9 @@ bool InputReaderThread::threadLoop() {
 
 // --- InputDevice ---
 
-InputDevice::InputDevice(InputReaderContext* context, int32_t id, const String8& name,
-        uint32_t classes) :
-        mContext(context), mId(id), mName(name), mClasses(classes),
+InputDevice::InputDevice(InputReaderContext* context, int32_t id,
+        const InputDeviceIdentifier& identifier, uint32_t classes) :
+        mContext(context), mId(id), mIdentifier(identifier), mClasses(classes),
         mSources(0), mIsExternal(false), mDropUntilNextSync(false) {
 }
 
@@ -961,7 +962,7 @@ void InputDevice::process(const RawEvent* rawEvents, size_t count) {
 #endif
             }
         } else if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_DROPPED) {
-            ALOGI("Detected input event buffer overrun for device %s.", mName.string());
+            ALOGI("Detected input event buffer overrun for device %s.", getName().string());
             mDropUntilNextSync = true;
             reset(rawEvent->when);
         } else {
@@ -982,7 +983,7 @@ void InputDevice::timeoutExpired(nsecs_t when) {
 }
 
 void InputDevice::getDeviceInfo(InputDeviceInfo* outDeviceInfo) {
-    outDeviceInfo->initialize(mId, mName);
+    outDeviceInfo->initialize(mId, mIdentifier.name, mIdentifier.descriptor);
 
     size_t numMappers = mMappers.size();
     for (size_t i = 0; i < numMappers; i++) {
