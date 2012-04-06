@@ -60,6 +60,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 /**
  * UsbDeviceManager manages USB state in device mode.
@@ -81,6 +82,8 @@ public class UsbDeviceManager {
             "/sys/class/android_usb/android0/f_mass_storage/lun/file";
     private static final String RNDIS_ETH_ADDR_PATH =
             "/sys/class/android_usb/android0/f_rndis/ethaddr";
+    private static final String AUDIO_SOURCE_PCM_PATH =
+            "/sys/class/android_usb/android0/f_audio_source/pcm";
 
     private static final int MSG_UPDATE_STATE = 0;
     private static final int MSG_ENABLE_ADB = 1;
@@ -105,6 +108,7 @@ public class UsbDeviceManager {
     private final boolean mHasUsbAccessory;
     private boolean mUseUsbNotification;
     private boolean mAdbEnabled;
+    private boolean mAudioSourceEnabled;
     private Map<String, List<Pair<String, String>>> mOemModeMap;
 
     private class AdbSettingsObserver extends ContentObserver {
@@ -291,6 +295,8 @@ public class UsbDeviceManager {
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
                 mAdbEnabled = containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ADB);
+                mAudioSourceEnabled = containsFunction(mCurrentFunctions,
+                        UsbManager.USB_FUNCTION_AUDIO_SOURCE);
 
                 // Upgrade step for previous versions that used persist.service.adb.enable
                 String value = SystemProperties.get("persist.service.adb.enable", "");
@@ -504,6 +510,28 @@ public class UsbDeviceManager {
             mContext.sendStickyBroadcast(intent);
         }
 
+        private void updateAudioSourceFunction(boolean enabled) {
+            // send a sticky broadcast containing current USB state
+            Intent intent = new Intent(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            intent.putExtra("state", (enabled ? 1 : 0));
+            if (enabled) {
+                try {
+                    Scanner scanner = new Scanner(new File(AUDIO_SOURCE_PCM_PATH));
+                    int card = scanner.nextInt();
+                    int device = scanner.nextInt();
+                    intent.putExtra("card", card);
+                    intent.putExtra("device", device);
+                } catch (FileNotFoundException e) {
+                    Slog.e(TAG, "could not open audio source PCM file", e);
+                }
+            }
+
+            mContext.sendStickyBroadcast(intent);
+            mAudioSourceEnabled = enabled;
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -523,6 +551,11 @@ public class UsbDeviceManager {
                     }
                     if (mBootCompleted) {
                         updateUsbState();
+                        boolean audioSourceEnabled = containsFunction(mCurrentFunctions,
+                                UsbManager.USB_FUNCTION_AUDIO_SOURCE);
+                        if (audioSourceEnabled != mAudioSourceEnabled) {
+                            updateAudioSourceFunction(audioSourceEnabled);
+                        }
                     }
                     break;
                 case MSG_ENABLE_ADB:
@@ -543,6 +576,7 @@ public class UsbDeviceManager {
                     if (mCurrentAccessory != null) {
                         mSettingsManager.accessoryAttached(mCurrentAccessory);
                     }
+                    updateAudioSourceFunction(mAudioSourceEnabled);
                     break;
             }
         }
