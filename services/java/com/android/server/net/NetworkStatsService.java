@@ -70,6 +70,7 @@ import android.content.IntentFilter;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
+import android.net.INetworkStatsSession;
 import android.net.LinkProperties;
 import android.net.NetworkIdentity;
 import android.net.NetworkInfo;
@@ -412,40 +413,75 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
-        return mDevStatsCached.getHistory(template, UID_ALL, SET_ALL, TAG_NONE, fields);
+    public INetworkStatsSession openSession() {
+        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+
+        // return an IBinder which holds strong references to any loaded stats
+        // for its lifetime; when caller closes only weak references remain.
+
+        return new INetworkStatsSession.Stub() {
+            private NetworkStatsCollection mUidComplete;
+            private NetworkStatsCollection mUidTagComplete;
+
+            private NetworkStatsCollection getUidComplete() {
+                if (mUidComplete == null) {
+                    mUidComplete = mUidRecorder.getOrLoadCompleteLocked();
+                }
+                return mUidComplete;
+            }
+
+            private NetworkStatsCollection getUidTagComplete() {
+                if (mUidTagComplete == null) {
+                    mUidTagComplete = mUidTagRecorder.getOrLoadCompleteLocked();
+                }
+                return mUidTagComplete;
+            }
+
+            @Override
+            public NetworkStats getSummaryForNetwork(
+                    NetworkTemplate template, long start, long end) {
+                return mDevStatsCached.getSummary(template, start, end);
+            }
+
+            @Override
+            public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
+                return mDevStatsCached.getHistory(template, UID_ALL, SET_ALL, TAG_NONE, fields);
+            }
+
+            @Override
+            public NetworkStats getSummaryForAllUid(
+                    NetworkTemplate template, long start, long end, boolean includeTags) {
+                final NetworkStats stats = getUidComplete().getSummary(template, start, end);
+                if (includeTags) {
+                    final NetworkStats tagStats = getUidTagComplete()
+                            .getSummary(template, start, end);
+                    stats.combineAllValues(tagStats);
+                }
+                return stats;
+            }
+
+            @Override
+            public NetworkStatsHistory getHistoryForUid(
+                    NetworkTemplate template, int uid, int set, int tag, int fields) {
+                if (tag == TAG_NONE) {
+                    return getUidComplete().getHistory(template, uid, set, tag, fields);
+                } else {
+                    return getUidTagComplete().getHistory(template, uid, set, tag, fields);
+                }
+            }
+
+            @Override
+            public void close() {
+                mUidComplete = null;
+                mUidTagComplete = null;
+            }
+        };
     }
 
     @Override
-    public NetworkStats getSummaryForNetwork(NetworkTemplate template, long start, long end) {
-        return mDevStatsCached.getSummary(template, start, end);
-    }
-
-    @Override
-    public NetworkStatsHistory getHistoryForUid(
-            NetworkTemplate template, int uid, int set, int tag, int fields) {
-        // TODO: transition to stats sessions to avoid WeakReferences
-        if (tag == TAG_NONE) {
-            return mUidRecorder.getOrLoadCompleteLocked().getHistory(
-                    template, uid, set, tag, fields);
-        } else {
-            return mUidTagRecorder.getOrLoadCompleteLocked().getHistory(
-                    template, uid, set, tag, fields);
-        }
-    }
-
-    @Override
-    public NetworkStats getSummaryForAllUid(
-            NetworkTemplate template, long start, long end, boolean includeTags) {
-        // TODO: transition to stats sessions to avoid WeakReferences
-        final NetworkStats stats = mUidRecorder.getOrLoadCompleteLocked().getSummary(
-                template, start, end);
-        if (includeTags) {
-            final NetworkStats tagStats = mUidTagRecorder.getOrLoadCompleteLocked().getSummary(
-                    template, start, end);
-            stats.combineAllValues(tagStats);
-        }
-        return stats;
+    public long getNetworkTotalBytes(NetworkTemplate template, long start, long end) {
+        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+        return mDevStatsCached.getSummary(template, start, end).getTotalBytes();
     }
 
     @Override

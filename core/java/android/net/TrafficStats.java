@@ -238,6 +238,19 @@ public class TrafficStats {
         }
     }
 
+    /** {@hide} */
+    public static void closeQuietly(INetworkStatsSession session) {
+        // TODO: move to NetworkStatsService once it exists
+        if (session != null) {
+            try {
+                session.close();
+            } catch (RuntimeException rethrown) {
+                throw rethrown;
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
     /**
      * Get the total number of packets transmitted through the mobile interface.
      *

@@ -54,6 +54,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
+import android.net.INetworkStatsSession;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
@@ -84,7 +85,7 @@ import libcore.io.IoUtils;
  */
 @LargeTest
 public class NetworkStatsServiceTest extends AndroidTestCase {
-    private static final String TAG  = "NetworkStatsServiceTest";
+    private static final String TAG = "NetworkStatsServiceTest";
 
     private static final String TEST_IFACE = "test0";
     private static final String TEST_IFACE2 = "test1";
@@ -113,6 +114,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     private IConnectivityManager mConnManager;
 
     private NetworkStatsService mService;
+    private INetworkStatsSession mSession;
     private INetworkManagementEventObserver mNetworkObserver;
 
     @Override
@@ -134,6 +136,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService = new NetworkStatsService(
                 mServiceContext, mNetManager, mAlarmManager, mTime, mStatsDir, mSettings);
         mService.bindConnectivityManager(mConnManager);
+        mSession = mService.openSession();
 
         mElapsedRealtime = 0L;
 
@@ -172,6 +175,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mSettings = null;
         mConnManager = null;
 
+        mSession.close();
         mService = null;
 
         super.tearDown();
@@ -349,7 +353,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
 
         // verify service recorded history
-        history = mService.getHistoryForNetwork(sTemplateWifi, FIELD_ALL);
+        history = mSession.getHistoryForNetwork(sTemplateWifi, FIELD_ALL);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 4L, 512L, 4L, 0);
         assertEquals(HOUR_IN_MILLIS, history.getBucketDuration());
         assertEquals(2, history.size());
@@ -367,7 +371,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
 
         // verify identical stats, but spread across 4 buckets now
-        history = mService.getHistoryForNetwork(sTemplateWifi, FIELD_ALL);
+        history = mSession.getHistoryForNetwork(sTemplateWifi, FIELD_ALL);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 4L, 512L, 4L, 0);
         assertEquals(30 * MINUTE_IN_MILLIS, history.getBucketDuration());
         assertEquals(4, history.size());
@@ -652,7 +656,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
 
         // first verify entire history present
-        NetworkStats stats = mService.getSummaryForAllUid(
+        NetworkStats stats = mSession.getSummaryForAllUid(
                 sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
         assertEquals(3, stats.size());
         assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, 50L, 5L, 50L, 5L, 1);
@@ -661,7 +665,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         // now verify that recent history only contains one uid
         final long currentTime = currentTimeMillis();
-        stats = mService.getSummaryForAllUid(
+        stats = mSession.getSummaryForAllUid(
                 sTemplateWifi, currentTime - HOUR_IN_MILLIS, currentTime, true);
         assertEquals(1, stats.size());
         assertValues(stats, IFACE_ALL, UID_BLUE, SET_DEFAULT, TAG_NONE, 1024L, 8L, 512L, 4L, 0);
@@ -723,7 +727,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         assertUidTotal(sTemplateWifi, UID_RED, 160L, 4L, 160L, 4L, 2);
 
         // verify entire history present
-        final NetworkStats stats = mService.getSummaryForAllUid(
+        final NetworkStats stats = mSession.getSummaryForAllUid(
                 sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
         assertEquals(4, stats.size());
         assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, 128L, 2L, 128L, 2L, 1);
@@ -775,20 +779,20 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private void assertNetworkTotal(NetworkTemplate template, long rxBytes, long rxPackets,
-            long txBytes, long txPackets, int operations) {
-        final NetworkStatsHistory history = mService.getHistoryForNetwork(template, FIELD_ALL);
+            long txBytes, long txPackets, int operations) throws Exception {
+        final NetworkStatsHistory history = mSession.getHistoryForNetwork(template, FIELD_ALL);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, rxBytes, rxPackets, txBytes,
                 txPackets, operations);
     }
 
     private void assertUidTotal(NetworkTemplate template, int uid, long rxBytes, long rxPackets,
-            long txBytes, long txPackets, int operations) {
+            long txBytes, long txPackets, int operations) throws Exception {
         assertUidTotal(template, uid, SET_ALL, rxBytes, rxPackets, txBytes, txPackets, operations);
     }
 
     private void assertUidTotal(NetworkTemplate template, int uid, int set, long rxBytes,
-            long rxPackets, long txBytes, long txPackets, int operations) {
-        final NetworkStatsHistory history = mService.getHistoryForUid(
+            long rxPackets, long txBytes, long txPackets, int operations) throws Exception {
+        final NetworkStatsHistory history = mSession.getHistoryForUid(
                 template, uid, set, TAG_NONE, FIELD_ALL);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, rxBytes, rxPackets, txBytes,
                 txPackets, operations);

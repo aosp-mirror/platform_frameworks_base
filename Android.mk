@@ -118,6 +118,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/net/INetworkPolicyListener.aidl \
 	core/java/android/net/INetworkPolicyManager.aidl \
 	core/java/android/net/INetworkStatsService.aidl \
+	core/java/android/net/INetworkStatsSession.aidl \
 	core/java/android/net/nsd/INsdManager.aidl \
 	core/java/android/nfc/INdefPushCallback.aidl \
 	core/java/android/nfc/INfcAdapter.aidl \

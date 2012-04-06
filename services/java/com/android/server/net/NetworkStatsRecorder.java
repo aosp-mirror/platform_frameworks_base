@@ -221,6 +221,11 @@ public class NetworkStatsRecorder {
         if (mLastSnapshot != null) {
             mLastSnapshot = mLastSnapshot.withoutUid(uid);
         }
+
+        final NetworkStatsCollection complete = mComplete != null ? mComplete.get() : null;
+        if (complete != null) {
+            complete.removeUid(uid);
+        }
     }
 
     /**
