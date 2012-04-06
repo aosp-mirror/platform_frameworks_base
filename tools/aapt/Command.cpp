@@ -639,6 +639,12 @@ int doDump(Bundle* bundle)
             // If an app requests write storage, they will also get read storage.
             bool hasReadExternalStoragePermission = false;
 
+            // Implement transition to read and write call log.
+            bool hasReadContactsPermission = false;
+            bool hasWriteContactsPermission = false;
+            bool hasReadCallLogPermission = false;
+            bool hasWriteCallLogPermission = false;
+
             // This next group of variables is used to implement a group of
             // backward-compatibility heuristics necessitated by the addition of
             // some new uses-feature constants in 2.1 and 2.2. In most cases, the
@@ -1006,6 +1012,14 @@ int doDump(Bundle* bundle)
                                 hasReadExternalStoragePermission = true;
                             } else if (name == "android.permission.READ_PHONE_STATE") {
                                 hasReadPhoneStatePermission = true;
+                            } else if (name == "android.permission.READ_CONTACTS") {
+                                hasReadContactsPermission = true;
+                            } else if (name == "android.permission.WRITE_CONTACTS") {
+                                hasWriteContactsPermission = true;
+                            } else if (name == "android.permission.READ_CALL_LOG") {
+                                hasReadCallLogPermission = true;
+                            } else if (name == "android.permission.WRITE_CALL_LOG") {
+                                hasWriteCallLogPermission = true;
                             }
                             printf("uses-permission:'%s'\n", name.string());
                         } else {
@@ -1179,6 +1193,16 @@ int doDump(Bundle* bundle)
             // force them to always take READ_EXTERNAL_STORAGE as well.
             if (!hasReadExternalStoragePermission && hasWriteExternalStoragePermission) {
                 printf("uses-permission:'android.permission.READ_EXTERNAL_STORAGE'\n");
+            }
+
+            // Pre-JellyBean call log permission compatibility.
+            if (targetSdk < 16) {
+                if (!hasReadCallLogPermission && hasReadContactsPermission) {
+                    printf("uses-permission:'android.permission.READ_CALL_LOG'\n");
+                }
+                if (!hasWriteCallLogPermission && hasWriteContactsPermission) {
+                    printf("uses-permission:'android.permission.WRITE_CALL_LOG'\n");
+                }
             }
 
             /* The following blocks handle printing "inferred" uses-features, based

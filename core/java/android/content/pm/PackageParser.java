@@ -94,10 +94,12 @@ public class PackageParser {
     public static class SplitPermissionInfo {
         public final String rootPerm;
         public final String[] newPerms;
+        public final int targetSdk;
 
-        public SplitPermissionInfo(String rootPerm, String[] newPerms) {
+        public SplitPermissionInfo(String rootPerm, String[] newPerms, int targetSdk) {
             this.rootPerm = rootPerm;
             this.newPerms = newPerms;
+            this.targetSdk = targetSdk;
         }
     }
 
@@ -126,7 +128,14 @@ public class PackageParser {
     public static final PackageParser.SplitPermissionInfo SPLIT_PERMISSIONS[] =
         new PackageParser.SplitPermissionInfo[] {
             new PackageParser.SplitPermissionInfo(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    new String[] { android.Manifest.permission.READ_EXTERNAL_STORAGE })
+                    new String[] { android.Manifest.permission.READ_EXTERNAL_STORAGE },
+                    android.os.Build.VERSION_CODES.CUR_DEVELOPMENT+1),
+            new PackageParser.SplitPermissionInfo(android.Manifest.permission.READ_CONTACTS,
+                    new String[] { android.Manifest.permission.READ_CALL_LOG },
+                    android.os.Build.VERSION_CODES.JELLY_BEAN),
+            new PackageParser.SplitPermissionInfo(android.Manifest.permission.WRITE_CONTACTS,
+                    new String[] { android.Manifest.permission.WRITE_CALL_LOG },
+                    android.os.Build.VERSION_CODES.JELLY_BEAN)
     };
 
     private String mArchiveSourcePath;
@@ -1293,7 +1302,8 @@ public class PackageParser {
         for (int is=0; is<NS; is++) {
             final PackageParser.SplitPermissionInfo spi
                     = PackageParser.SPLIT_PERMISSIONS[is];
-            if (!pkg.requestedPermissions.contains(spi.rootPerm)) {
+            if (pkg.applicationInfo.targetSdkVersion >= spi.targetSdk
+                    || !pkg.requestedPermissions.contains(spi.rootPerm)) {
                 break;
             }
             for (int in=0; in<spi.newPerms.length; in++) {
