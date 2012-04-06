@@ -45,10 +45,16 @@ final public class MediaCodec {
         public int mFlags;
     };
 
+    // The follow flag constants MUST stay in sync with their equivalents
+    // in MediaCodec.h !
     public static int FLAG_SYNCFRAME   = 1;
     public static int FLAG_CODECCONFIG = 2;
     public static int FLAG_EOS         = 4;
-    public static int FLAG_ENCRYPTED   = 8;
+
+    // The following mode constants MUST stay in sync with their equivalents
+    // in media/hardware/CryptoAPI.h !
+    public static int MODE_UNENCRYPTED = 0;
+    public static int MODE_AES_CTR     = 1;
 
     /** Instantiate a codec component by mime type. For decoder components
         this is the mime type of media that this decoder should be able to
@@ -175,6 +181,36 @@ final public class MediaCodec {
     public native final void queueInputBuffer(
             int index,
             int offset, int size, long presentationTimeUs, int flags);
+
+    /** Similar to {@link queueInputBuffer} but submits a buffer that is
+     *  potentially encrypted. The buffer's data is considered to be
+     *  partitioned into "subSamples", each subSample starts with a
+     *  (potentially empty) run of plain, unencrypted bytes followed
+     *  by a (also potentially empty) run of encrypted bytes.
+     *  @param numBytesOfClearData The number of leading unencrypted bytes in
+     *                             each subSample.
+     *  @param numBytesOfEncryptedData The number of trailing encrypted bytes
+     *                             in each subSample.
+     *  @param numSubSamples    The number of subSamples that make up the
+     *                          buffer's contents.
+     *  @param key              A 16-byte opaque key
+     *  @param iv               A 16-byte initialization vector
+     *  @param mode             The type of encryption that has been applied
+     *
+     *  Either numBytesOfClearData or numBytesOfEncryptedData (but not both)
+     *  can be null to indicate that all respective sizes are 0.
+     */
+    public native final void queueSecureInputBuffer(
+            int index,
+            int offset,
+            int[] numBytesOfClearData,
+            int[] numBytesOfEncryptedData,
+            int numSubSamples,
+            byte[] key,
+            byte[] iv,
+            int mode,
+            long presentationTimeUs,
+            int flags);
 
     // Returns the index of an input buffer to be filled with valid data
     // or -1 if no such buffer is currently available.
