@@ -26,6 +26,7 @@
     android:orientation="vertical"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
+    android:fitsSystemWindows="true"
     >
 
     <LinearLayout android:id="@+id/icons"
