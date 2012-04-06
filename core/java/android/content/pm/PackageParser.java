@@ -1304,7 +1304,7 @@ public class PackageParser {
                     = PackageParser.SPLIT_PERMISSIONS[is];
             if (pkg.applicationInfo.targetSdkVersion >= spi.targetSdk
                     || !pkg.requestedPermissions.contains(spi.rootPerm)) {
-                break;
+                continue;
             }
             for (int in=0; in<spi.newPerms.length; in++) {
                 final String perm = spi.newPerms[in];
