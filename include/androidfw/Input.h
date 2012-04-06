@@ -811,6 +811,31 @@ private:
     VelocityTracker mVelocityTracker;
 };
 
+/*
+ * Identifies a device.
+ */
+struct InputDeviceIdentifier {
+    inline InputDeviceIdentifier() :
+            bus(0), vendor(0), product(0), version(0) {
+    }
+
+    // Information provided by the kernel.
+    String8 name;
+    String8 location;
+    String8 uniqueId;
+    uint16_t bus;
+    uint16_t vendor;
+    uint16_t product;
+    uint16_t version;
+
+    // A composite input device descriptor string that uniquely identifies the device
+    // even across reboots or reconnections.  The value of this field is used by
+    // upper layers of the input system to associate settings with individual devices.
+    // It is hashed from whatever kernel provided information is available.
+    // Ideally, the way this value is computed should not change between Android releases
+    // because that would invalidate persistent settings that rely on it.
+    String8 descriptor;
+};
 
 /*
  * Describes the characteristics and capabilities of an input device.
@@ -830,10 +855,11 @@ public:
         float fuzz;
     };
 
-    void initialize(int32_t id, const String8& name);
+    void initialize(int32_t id, const String8& name, const String8& descriptor);
 
     inline int32_t getId() const { return mId; }
     inline const String8 getName() const { return mName; }
+    inline const String8 getDescriptor() const { return mDescriptor; }
     inline uint32_t getSources() const { return mSources; }
 
     const MotionRange* getMotionRange(int32_t axis, uint32_t source) const;
@@ -856,28 +882,12 @@ public:
 private:
     int32_t mId;
     String8 mName;
+    String8 mDescriptor;
     uint32_t mSources;
     int32_t mKeyboardType;
     String8 mKeyCharacterMapFile;
 
     Vector<MotionRange> mMotionRanges;
-};
-
-/*
- * Identifies a device.
- */
-struct InputDeviceIdentifier {
-    inline InputDeviceIdentifier() :
-            bus(0), vendor(0), product(0), version(0) {
-    }
-
-    String8 name;
-    String8 location;
-    String8 uniqueId;
-    uint16_t bus;
-    uint16_t vendor;
-    uint16_t product;
-    uint16_t version;
 };
 
 /* Types of input device configuration files. */

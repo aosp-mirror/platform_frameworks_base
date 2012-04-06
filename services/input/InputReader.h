@@ -338,7 +338,7 @@ public:
 protected:
     // These members are protected so they can be instrumented by test cases.
     virtual InputDevice* createDeviceLocked(int32_t deviceId,
-            const String8& name, uint32_t classes);
+            const InputDeviceIdentifier& identifier, uint32_t classes);
 
     class ContextImpl : public InputReaderContext {
         InputReader* mReader;
@@ -432,12 +432,13 @@ private:
 /* Represents the state of a single input device. */
 class InputDevice {
 public:
-    InputDevice(InputReaderContext* context, int32_t id, const String8& name, uint32_t classes);
+    InputDevice(InputReaderContext* context, int32_t id,
+            const InputDeviceIdentifier& identifier, uint32_t classes);
     ~InputDevice();
 
     inline InputReaderContext* getContext() { return mContext; }
     inline int32_t getId() { return mId; }
-    inline const String8& getName() { return mName; }
+    inline const String8& getName() { return mIdentifier.name; }
     inline uint32_t getClasses() { return mClasses; }
     inline uint32_t getSources() { return mSources; }
 
@@ -486,7 +487,7 @@ public:
 private:
     InputReaderContext* mContext;
     int32_t mId;
-    String8 mName;
+    InputDeviceIdentifier mIdentifier;
     uint32_t mClasses;
 
     Vector<InputMapper*> mMappers;

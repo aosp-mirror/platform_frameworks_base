@@ -40,6 +40,7 @@
 #include <androidfw/KeyCharacterMap.h>
 #include <androidfw/VirtualKeyMap.h>
 
+#include <sha1.h>
 #include <string.h>
 #include <stdint.h>
 #include <dirent.h>
@@ -76,6 +77,20 @@ static inline int max(int v1, int v2)
 
 static inline const char* toString(bool value) {
     return value ? "true" : "false";
+}
+
+static String8 sha1(const String8& in) {
+    SHA1_CTX ctx;
+    SHA1Init(&ctx);
+    SHA1Update(&ctx, reinterpret_cast<const u_char*>(in.string()), in.size());
+    u_char digest[SHA1_DIGEST_LENGTH];
+    SHA1Final(digest, &ctx);
+
+    String8 out;
+    for (size_t i = 0; i < SHA1_DIGEST_LENGTH; i++) {
+        out.appendFormat("%02x", digest[i]);
+    }
+    return out;
 }
 
 // --- Global Functions ---
@@ -209,11 +224,11 @@ EventHub::~EventHub(void) {
     release_wake_lock(WAKE_LOCK_ID);
 }
 
-String8 EventHub::getDeviceName(int32_t deviceId) const {
+InputDeviceIdentifier EventHub::getDeviceIdentifier(int32_t deviceId) const {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
-    if (device == NULL) return String8();
-    return device->identifier.name;
+    if (device == NULL) return InputDeviceIdentifier();
+    return device->identifier;
 }
 
 uint32_t EventHub::getDeviceClasses(int32_t deviceId) const {
@@ -893,6 +908,30 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
         identifier.uniqueId.setTo(buffer);
     }
 
+    // Compute a device descriptor that uniquely identifies the device.
+    // The descriptor is assumed to be a stable identifier.  Its value should not
+    // change between reboots, reconnections, firmware updates or new releases of Android.
+    // Ideally, we also want the descriptor to be short and relatively opaque.
+    String8 rawDescriptor;
+    rawDescriptor.appendFormat(":%04x:%04x:", identifier.vendor, identifier.product);
+    if (!identifier.uniqueId.isEmpty()) {
+        rawDescriptor.append("uniqueId:");
+        rawDescriptor.append(identifier.uniqueId);
+    } if (identifier.vendor == 0 && identifier.product == 0) {
+        // If we don't know the vendor and product id, then the device is probably
+        // built-in so we need to rely on other information to uniquely identify
+        // the input device.  Usually we try to avoid relying on the device name or
+        // location but for built-in input device, they are unlikely to ever change.
+        if (!identifier.name.isEmpty()) {
+            rawDescriptor.append("name:");
+            rawDescriptor.append(identifier.name);
+        } else if (!identifier.location.isEmpty()) {
+            rawDescriptor.append("location:");
+            rawDescriptor.append(identifier.location);
+        }
+    }
+    identifier.descriptor = sha1(rawDescriptor);
+
     // Make file descriptor non-blocking for use with poll().
     if (fcntl(fd, F_SETFL, O_NONBLOCK)) {
         ALOGE("Error %d making device file descriptor non-blocking.", errno);
@@ -904,19 +943,18 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     int32_t deviceId = mNextDeviceId++;
     Device* device = new Device(fd, deviceId, String8(devicePath), identifier);
 
-#if 0
-    ALOGI("add device %d: %s\n", deviceId, devicePath);
-    ALOGI("  bus:       %04x\n"
-         "  vendor     %04x\n"
-         "  product    %04x\n"
-         "  version    %04x\n",
+    ALOGV("add device %d: %s\n", deviceId, devicePath);
+    ALOGV("  bus:        %04x\n"
+         "  vendor      %04x\n"
+         "  product     %04x\n"
+         "  version     %04x\n",
         identifier.bus, identifier.vendor, identifier.product, identifier.version);
-    ALOGI("  name:      \"%s\"\n", identifier.name.string());
-    ALOGI("  location:  \"%s\"\n", identifier.location.string());
-    ALOGI("  unique id: \"%s\"\n", identifier.uniqueId.string());
-    ALOGI("  driver:    v%d.%d.%d\n",
+    ALOGV("  name:       \"%s\"\n", identifier.name.string());
+    ALOGV("  location:   \"%s\"\n", identifier.location.string());
+    ALOGV("  unique id:  \"%s\"\n", identifier.uniqueId.string());
+    ALOGV("  descriptor: \"%s\" (%s)\n", identifier.descriptor.string(), rawDescriptor.string());
+    ALOGV("  driver:     v%d.%d.%d\n",
         driverVersion >> 16, (driverVersion >> 8) & 0xff, driverVersion & 0xff);
-#endif
 
     // Load the configuration file for the device.
     loadConfigurationLocked(device);
@@ -1303,6 +1341,7 @@ void EventHub::dump(String8& dump) {
             }
             dump.appendFormat(INDENT3 "Classes: 0x%08x\n", device->classes);
             dump.appendFormat(INDENT3 "Path: %s\n", device->path.string());
+            dump.appendFormat(INDENT3 "Descriptor: %s\n", device->identifier.descriptor.string());
             dump.appendFormat(INDENT3 "Location: %s\n", device->identifier.location.string());
             dump.appendFormat(INDENT3 "UniqueId: %s\n", device->identifier.uniqueId.string());
             dump.appendFormat(INDENT3 "Identifier: bus=0x%04x, vendor=0x%04x, "

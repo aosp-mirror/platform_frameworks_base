@@ -1226,21 +1226,24 @@ void VelocityControl::move(nsecs_t eventTime, float* deltaX, float* deltaY) {
 // --- InputDeviceInfo ---
 
 InputDeviceInfo::InputDeviceInfo() {
-    initialize(-1, String8("uninitialized device info"));
+    initialize(-1, String8("uninitialized device info"), String8("unknown"));
 }
 
 InputDeviceInfo::InputDeviceInfo(const InputDeviceInfo& other) :
-        mId(other.mId), mName(other.mName), mSources(other.mSources),
+        mId(other.mId), mName(other.mName), mDescriptor(other.mDescriptor),
+        mSources(other.mSources),
         mKeyboardType(other.mKeyboardType),
+        mKeyCharacterMapFile(other.mKeyCharacterMapFile),
         mMotionRanges(other.mMotionRanges) {
 }
 
 InputDeviceInfo::~InputDeviceInfo() {
 }
 
-void InputDeviceInfo::initialize(int32_t id, const String8& name) {
+void InputDeviceInfo::initialize(int32_t id, const String8& name, const String8& descriptor) {
     mId = id;
     mName = name;
+    mDescriptor = descriptor;
     mSources = 0;
     mKeyboardType = AINPUT_KEYBOARD_TYPE_NONE;
     mMotionRanges.clear();

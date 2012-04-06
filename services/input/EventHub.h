@@ -151,7 +151,7 @@ public:
 
     virtual uint32_t getDeviceClasses(int32_t deviceId) const = 0;
 
-    virtual String8 getDeviceName(int32_t deviceId) const = 0;
+    virtual InputDeviceIdentifier getDeviceIdentifier(int32_t deviceId) const = 0;
 
     virtual void getConfiguration(int32_t deviceId, PropertyMap* outConfiguration) const = 0;
 
@@ -230,7 +230,7 @@ public:
 
     virtual uint32_t getDeviceClasses(int32_t deviceId) const;
 
-    virtual String8 getDeviceName(int32_t deviceId) const;
+    virtual InputDeviceIdentifier getDeviceIdentifier(int32_t deviceId) const;
 
     virtual void getConfiguration(int32_t deviceId, PropertyMap* outConfiguration) const;
 
