@@ -8419,7 +8419,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateWallpaperVisibilityLocked();
                 }
             }
-            if (!mInnerFields.mDimming) {
+            if (!mInnerFields.mDimming && mAnimator.mDimParams != null) {
                 mAnimator.stopDimming();
             }
         } catch (RuntimeException e) {
