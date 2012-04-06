@@ -396,16 +396,38 @@ public class WifiNative {
         }
     }
 
+    public boolean startWpsPbc(String iface, String bssid) {
+        if (TextUtils.isEmpty(bssid)) {
+            return doBooleanCommand("WPS_PBC interface=" + iface);
+        } else {
+            return doBooleanCommand("WPS_PBC interface=" + iface + " " + bssid);
+        }
+    }
+
     public boolean startWpsPinKeypad(String pin) {
         if (TextUtils.isEmpty(pin)) return false;
         return doBooleanCommand("WPS_PIN any " + pin);
     }
+
+    public boolean startWpsPinKeypad(String iface, String pin) {
+        if (TextUtils.isEmpty(pin)) return false;
+        return doBooleanCommand("WPS_PIN interface=" + iface + " any " + pin);
+    }
+
 
     public String startWpsPinDisplay(String bssid) {
         if (TextUtils.isEmpty(bssid)) {
             return doStringCommand("WPS_PIN any");
         } else {
             return doStringCommand("WPS_PIN " + bssid);
+        }
+    }
+
+    public String startWpsPinDisplay(String iface, String bssid) {
+        if (TextUtils.isEmpty(bssid)) {
+            return doStringCommand("WPS_PIN interface=" + iface + " any");
+        } else {
+            return doStringCommand("WPS_PIN interface=" + iface + " " + bssid);
         }
     }
 
@@ -438,6 +460,26 @@ public class WifiNative {
 
     public boolean setP2pSsidPostfix(String postfix) {
         return doBooleanCommand("SET p2p_ssid_postfix " + postfix);
+    }
+
+    public boolean setP2pGroupIdle(String iface, int time) {
+        return doBooleanCommand("SET interface=" + iface + " p2p_group_idle " + time);
+    }
+
+    public boolean setP2pPowerSave(String iface, boolean enabled) {
+        if (enabled) {
+            return doBooleanCommand("P2P_SET interface=" + iface + " ps 1");
+        } else {
+            return doBooleanCommand("P2P_SET interface=" + iface + " ps 0");
+        }
+    }
+
+    /**
+     * "sta" prioritizes STA connection over P2P and "p2p" prioritizes
+     * P2P connection over STA
+     */
+    public boolean setConcurrencyPriority(String s) {
+        return doBooleanCommand("P2P_SET conc_priority " + s);
     }
 
     public boolean p2pFind() {
