@@ -440,9 +440,12 @@ public class WindowAnimator {
                 w.mWinAnimator.prepareSurfaceLocked(true);
             }
 
+            if (mDimParams != null) {
+                mDimAnimator.updateParameters(mContext.getResources(), mDimParams, mCurrentTime);
+            }
             if (mDimAnimator != null && mDimAnimator.mDimShown) {
-                mAnimating |= mDimAnimator.updateSurface(mService.mInnerFields.mDimming,
-                            mCurrentTime, !mService.okToDisplay());
+                mAnimating |= mDimAnimator.updateSurface(mDimParams != null, mCurrentTime,
+                        !mService.okToDisplay());
             }
 
             if (mService.mBlackFrame != null) {
@@ -452,10 +455,6 @@ public class WindowAnimator {
                 } else {
                     mService.mBlackFrame.clearMatrix();
                 }
-            }
-
-            if (mDimParams != null) {
-                mDimAnimator.updateParameters(mContext.getResources(), mDimParams, mCurrentTime);
             }
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);
