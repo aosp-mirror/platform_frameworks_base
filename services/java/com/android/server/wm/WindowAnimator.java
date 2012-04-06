@@ -431,6 +431,10 @@ public class WindowAnimator {
         mPendingLayoutChanges = 0;
         mCurrentTime = SystemClock.uptimeMillis();
         mBulkUpdateParams = 0;
+        mAnimating = false;
+        if (WindowManagerService.DEBUG_WINDOW_TRACE) {
+            Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
+        }
 
         // Update animations of all applications, including those
         // associated with exiting/removed apps
@@ -478,7 +482,16 @@ public class WindowAnimator {
             Surface.closeTransaction();
         }
 
-        mService.bulkSetParameters(mBulkUpdateParams);
+        mService.bulkSetParameters(mBulkUpdateParams, mPendingLayoutChanges);
+
+        if (mAnimating) {
+            mService.scheduleAnimationLocked();
+        }
+        if (WindowManagerService.DEBUG_WINDOW_TRACE) {
+            Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
+                + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
+                + " mPendingLayoutChanges=" + Integer.toHexString(mPendingLayoutChanges));
+        }
     }
 
     WindowState mCurrentFocus;
