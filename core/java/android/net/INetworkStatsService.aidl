@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.net.INetworkStatsSession;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
@@ -23,15 +24,11 @@ import android.net.NetworkTemplate;
 /** {@hide} */
 interface INetworkStatsService {
 
-    /** Return historical network layer stats for traffic that matches template. */
-    NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template, int fields);
-    /** Return historical network layer stats for specific UID traffic that matches template. */
-    NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int set, int tag, int fields);
+    /** Start a statistics query session. */
+    INetworkStatsSession openSession();
 
-    /** Return network layer usage summary for traffic that matches template. */
-    NetworkStats getSummaryForNetwork(in NetworkTemplate template, long start, long end);
-    /** Return network layer usage summary per UID for traffic that matches template. */
-    NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end, boolean includeTags);
+    /** Return network layer usage total for traffic that matches template. */
+    long getNetworkTotalBytes(in NetworkTemplate template, long start, long end);
 
     /** Return data layer snapshot of UID network usage. */
     NetworkStats getDataLayerSnapshotForUid(int uid);

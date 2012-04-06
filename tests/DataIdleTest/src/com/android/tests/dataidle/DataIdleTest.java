@@ -17,15 +17,16 @@ package com.android.tests.dataidle;
 
 import android.content.Context;
 import android.net.INetworkStatsService;
+import android.net.INetworkStatsSession;
+import android.net.NetworkStats;
 import android.net.NetworkStats.Entry;
 import android.net.NetworkTemplate;
-import android.net.NetworkStats;
+import android.net.TrafficStats;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 import android.test.InstrumentationTestCase;
-import android.test.InstrumentationTestRunner;
 import android.util.Log;
 
 /**
@@ -71,13 +72,17 @@ public class DataIdleTest extends InstrumentationTestCase {
      * @param template {link {@link NetworkTemplate} to match.
      */
     private void fetchStats(NetworkTemplate template) {
+        INetworkStatsSession session = null;
         try {
             mStatsService.forceUpdate();
-            NetworkStats stats = mStatsService.getSummaryForAllUid(template, Long.MIN_VALUE,
-                    Long.MAX_VALUE, false);
+            session = mStatsService.openSession();
+            final NetworkStats stats = session.getSummaryForAllUid(
+                    template, Long.MIN_VALUE, Long.MAX_VALUE, false);
             reportStats(stats);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Failed to fetch network stats.");
+        } finally {
+            TrafficStats.closeQuietly(session);
         }
     }
 

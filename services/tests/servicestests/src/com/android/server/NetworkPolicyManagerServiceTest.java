@@ -70,7 +70,6 @@ import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.IPowerManager;
 import android.os.MessageQueue.IdleHandler;
-import android.os.SystemClock;
 import android.os.UserId;
 import android.test.AndroidTestCase;
 import android.test.mock.MockPackageManager;
@@ -628,8 +627,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(getElapsedRealtime(), 1)
                 .addIfaceValues(TEST_IFACE, 256L, 2L, 256L, 2L);
-        expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, TIME_MAR_10))
-                .andReturn(stats).atLeastOnce();
+        expect(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15, TIME_MAR_10))
+                .andReturn(stats.getTotalBytes()).atLeastOnce();
         expectPolicyDataEnable(TYPE_WIFI, true);
 
         // TODO: consider making strongly ordered mock
@@ -699,8 +698,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         {
             expectCurrentTime();
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
-                    .andReturn(stats).atLeastOnce();
+            expect(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
+                    .andReturn(stats.getTotalBytes()).atLeastOnce();
             expectPolicyDataEnable(TYPE_WIFI, true);
 
             expectClearNotifications();
@@ -722,8 +721,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         {
             expectCurrentTime();
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
-                    .andReturn(stats).atLeastOnce();
+            expect(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
+                    .andReturn(stats.getTotalBytes()).atLeastOnce();
             expectPolicyDataEnable(TYPE_WIFI, true);
 
             expectRemoveInterfaceQuota(TEST_IFACE);
@@ -745,8 +744,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         {
             expectCurrentTime();
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
-                    .andReturn(stats).atLeastOnce();
+            expect(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
+                    .andReturn(stats.getTotalBytes()).atLeastOnce();
             expectPolicyDataEnable(TYPE_WIFI, true);
 
             expectForceUpdate();
@@ -766,8 +765,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         {
             expectCurrentTime();
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
-                    .andReturn(stats).atLeastOnce();
+            expect(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
+                    .andReturn(stats.getTotalBytes()).atLeastOnce();
             expectPolicyDataEnable(TYPE_WIFI, false);
 
             expectForceUpdate();
@@ -786,8 +785,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         {
             expectCurrentTime();
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
-                    .andReturn(stats).atLeastOnce();
+            expect(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
+                    .andReturn(stats.getTotalBytes()).atLeastOnce();
             expectPolicyDataEnable(TYPE_WIFI, true);
 
             // snoozed interface still has high quota so background data is
@@ -827,8 +826,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         {
             expectCurrentTime();
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
-            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
-                    .andReturn(stats).atLeastOnce();
+            expect(mStatsService.getNetworkTotalBytes(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
+                    .andReturn(stats.getTotalBytes()).atLeastOnce();
             expectPolicyDataEnable(TYPE_WIFI, true);
 
             expectRemoveInterfaceQuota(TEST_IFACE);
