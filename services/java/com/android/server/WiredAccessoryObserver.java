@@ -301,13 +301,13 @@ class WiredAccessoryObserver extends UEventObserver {
 
                 //  Pack up the values and broadcast them to everyone
                 if (headset == BIT_USB_HEADSET_ANLG) {
-                    intent = new Intent(Intent.ACTION_USB_ANLG_HEADSET_PLUG);
+                    intent = new Intent(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     intent.putExtra("state", state);
                     intent.putExtra("name", headsetName);
                     ActivityManagerNative.broadcastStickyIntent(intent, null);
                 } else if (headset == BIT_USB_HEADSET_DGTL) {
-                    intent = new Intent(Intent.ACTION_USB_DGTL_HEADSET_PLUG);
+                    intent = new Intent(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     intent.putExtra("state", state);
                     intent.putExtra("name", headsetName);

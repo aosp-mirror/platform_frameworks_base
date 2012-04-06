@@ -2000,8 +2000,8 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_USB_ANLG_HEADSET_PLUG =
-            "android.intent.action.USB_ANLG_HEADSET_PLUG";
+    public static final String ACTION_ANALOG_AUDIO_DOCK_PLUG =
+            "android.intent.action.ANALOG_AUDIO_DOCK_PLUG";
 
     /**
      * Broadcast Action: A digital audio speaker/headset plugged in or unplugged.
@@ -2015,8 +2015,8 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_USB_DGTL_HEADSET_PLUG =
-            "android.intent.action.USB_DGTL_HEADSET_PLUG";
+    public static final String ACTION_DIGITAL_AUDIO_DOCK_PLUG =
+            "android.intent.action.DIGITAL_AUDIO_DOCK_PLUG";
 
     /**
      * Broadcast Action: A HMDI cable was plugged or unplugged
@@ -2034,22 +2034,6 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.HDMI_AUDIO_PLUG";
 
     /**
-     * Broadcast Action: A USB audio device was plugged in or unplugged.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>card</em> - ALSA card number (integer) </li>
-     *   <li><em>device</em> - ALSA device number (integer) </li>
-     * </ul>
-     * </ul>
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_USB_AUDIO_DEVICE_PLUG =
-            "android.intent.action.USB_AUDIO_DEVICE_PLUG";
-
-    /**
      * Broadcast Action: A USB audio accessory was plugged in or unplugged.
      *
      * <p>The intent will have the following extra values:
@@ -2064,6 +2048,22 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_USB_AUDIO_ACCESSORY_PLUG =
             "android.intent.action.USB_AUDIO_ACCESSORY_PLUG";
+
+    /**
+     * Broadcast Action: A USB audio device was plugged in or unplugged.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>card</em> - ALSA card number (integer) </li>
+     *   <li><em>device</em> - ALSA device number (integer) </li>
+     * </ul>
+     * </ul>
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_USB_AUDIO_DEVICE_PLUG =
+            "android.intent.action.USB_AUDIO_DEVICE_PLUG";
 
     /**
      * <p>Broadcast Action: The user has switched on advanced settings in the settings app:</p>
