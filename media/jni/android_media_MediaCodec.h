@@ -19,6 +19,7 @@
 
 #include "jni.h"
 
+#include <media/hardware/CryptoAPI.h>
 #include <media/stagefright/foundation/ABase.h>
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
@@ -52,6 +53,17 @@ struct JMediaCodec : public RefBase {
     status_t queueInputBuffer(
             size_t index,
             size_t offset, size_t size, int64_t timeUs, uint32_t flags);
+
+    status_t queueSecureInputBuffer(
+            size_t index,
+            size_t offset,
+            const CryptoPlugin::SubSample *subSamples,
+            size_t numSubSamples,
+            const uint8_t key[16],
+            const uint8_t iv[16],
+            CryptoPlugin::Mode mode,
+            int64_t presentationTimeUs,
+            uint32_t flags);
 
     status_t dequeueInputBuffer(size_t *index, int64_t timeoutUs);
 

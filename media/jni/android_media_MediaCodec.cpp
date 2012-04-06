@@ -126,6 +126,21 @@ status_t JMediaCodec::queueInputBuffer(
     return mCodec->queueInputBuffer(index, offset, size, timeUs, flags);
 }
 
+status_t JMediaCodec::queueSecureInputBuffer(
+        size_t index,
+        size_t offset,
+        const CryptoPlugin::SubSample *subSamples,
+        size_t numSubSamples,
+        const uint8_t key[16],
+        const uint8_t iv[16],
+        CryptoPlugin::Mode mode,
+        int64_t presentationTimeUs,
+        uint32_t flags) {
+    return mCodec->queueSecureInputBuffer(
+            index, offset, subSamples, numSubSamples, key, iv, mode,
+            presentationTimeUs, flags);
+}
+
 status_t JMediaCodec::dequeueInputBuffer(size_t *index, int64_t timeoutUs) {
     return mCodec->dequeueInputBuffer(index, timeoutUs);
 }
@@ -367,6 +382,125 @@ static void android_media_MediaCodec_queueInputBuffer(
     throwExceptionAsNecessary(env, err);
 }
 
+static void android_media_MediaCodec_queueSecureInputBuffer(
+        JNIEnv *env,
+        jobject thiz,
+        jint index,
+        jint offset,
+        jintArray numBytesOfClearDataObj,
+        jintArray numBytesOfEncryptedDataObj,
+        jint numSubSamples,
+        jbyteArray keyObj,
+        jbyteArray ivObj,
+        jint mode,
+        jlong timestampUs,
+        jint flags) {
+    ALOGV("android_media_MediaCodec_queueSecureInputBuffer");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    status_t err = OK;
+
+    CryptoPlugin::SubSample *subSamples = NULL;
+    jbyte *key = NULL;
+    jbyte *iv = NULL;
+
+    if (numSubSamples <= 0) {
+        err = -EINVAL;
+    } else if (numBytesOfClearDataObj == NULL
+            && numBytesOfEncryptedDataObj == NULL) {
+        err = -EINVAL;
+    } else if (numBytesOfEncryptedDataObj != NULL
+            && env->GetArrayLength(numBytesOfEncryptedDataObj) < numSubSamples) {
+        err = -ERANGE;
+    } else if (numBytesOfClearDataObj != NULL
+            && env->GetArrayLength(numBytesOfClearDataObj) < numSubSamples) {
+        err = -ERANGE;
+    } else {
+        jboolean isCopy;
+
+        jint *numBytesOfClearData =
+            (numBytesOfClearDataObj == NULL)
+                ? NULL
+                : env->GetIntArrayElements(numBytesOfClearDataObj, &isCopy);
+
+        jint *numBytesOfEncryptedData =
+            (numBytesOfEncryptedDataObj == NULL)
+                ? NULL
+                : env->GetIntArrayElements(numBytesOfEncryptedDataObj, &isCopy);
+
+        subSamples = new CryptoPlugin::SubSample[numSubSamples];
+
+        for (jint i = 0; i < numSubSamples; ++i) {
+            subSamples[i].mNumBytesOfClearData =
+                (numBytesOfClearData == NULL) ? 0 : numBytesOfClearData[i];
+
+            subSamples[i].mNumBytesOfEncryptedData =
+                (numBytesOfEncryptedData == NULL)
+                    ? 0 : numBytesOfEncryptedData[i];
+        }
+
+        if (numBytesOfEncryptedData != NULL) {
+            env->ReleaseIntArrayElements(
+                    numBytesOfEncryptedDataObj, numBytesOfEncryptedData, 0);
+            numBytesOfEncryptedData = NULL;
+        }
+
+        if (numBytesOfClearData != NULL) {
+            env->ReleaseIntArrayElements(
+                    numBytesOfClearDataObj, numBytesOfClearData, 0);
+            numBytesOfClearData = NULL;
+        }
+    }
+
+    if (err == OK && keyObj != NULL) {
+        if (env->GetArrayLength(keyObj) != 16) {
+            err = -EINVAL;
+        } else {
+            jboolean isCopy;
+            key = env->GetByteArrayElements(keyObj, &isCopy);
+        }
+    }
+
+    if (err == OK && ivObj != NULL) {
+        if (env->GetArrayLength(ivObj) != 16) {
+            err = -EINVAL;
+        } else {
+            jboolean isCopy;
+            iv = env->GetByteArrayElements(ivObj, &isCopy);
+        }
+    }
+
+    if (err == OK) {
+        err = codec->queueSecureInputBuffer(
+                index, offset,
+                subSamples, numSubSamples,
+                (const uint8_t *)key, (const uint8_t *)iv,
+                (CryptoPlugin::Mode)mode,
+                timestampUs, flags);
+    }
+
+    if (iv != NULL) {
+        env->ReleaseByteArrayElements(ivObj, iv, 0);
+        iv = NULL;
+    }
+
+    if (key != NULL) {
+        env->ReleaseByteArrayElements(keyObj, key, 0);
+        key = NULL;
+    }
+
+    delete[] subSamples;
+    subSamples = NULL;
+
+    throwExceptionAsNecessary(env, err);
+}
+
 static jint android_media_MediaCodec_dequeueInputBuffer(
         JNIEnv *env, jobject thiz, jlong timeoutUs) {
     ALOGV("android_media_MediaCodec_dequeueInputBuffer");
@@ -531,6 +665,9 @@ static JNINativeMethod gMethods[] = {
 
     { "queueInputBuffer", "(IIIJI)V",
       (void *)android_media_MediaCodec_queueInputBuffer },
+
+    { "queueSecureInputBuffer", "(II[I[II[B[BIJI)V",
+      (void *)android_media_MediaCodec_queueSecureInputBuffer },
 
     { "dequeueInputBuffer", "(J)I",
       (void *)android_media_MediaCodec_dequeueInputBuffer },
