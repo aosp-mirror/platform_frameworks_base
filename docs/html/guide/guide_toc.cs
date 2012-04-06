@@ -834,12 +834,6 @@ applications</span>
           <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">
                 <span class="en">App Widget Design</span>
               </a></li>
-          <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/activity_task_design.html">
-                <span class="en">Activity and Task Design</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/menu_design.html">
-                <span class="en">Menu Design</span>
-              </a></li>
         </ul>
       </li>
       </ul>
