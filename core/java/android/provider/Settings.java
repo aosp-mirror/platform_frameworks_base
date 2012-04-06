@@ -37,6 +37,7 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -2260,6 +2261,7 @@ public final class Settings {
 
         private static ILockSettings sLockSettings = null;
 
+        private static boolean sIsSystemProcess;
         private static final HashSet<String> MOVED_TO_LOCK_SETTINGS;
         static {
             MOVED_TO_LOCK_SETTINGS = new HashSet<String>(3);
@@ -2283,8 +2285,10 @@ public final class Settings {
             if (sLockSettings == null) {
                 sLockSettings = ILockSettings.Stub.asInterface(
                         (IBinder) ServiceManager.getService("lock_settings"));
+                sIsSystemProcess = Process.myUid() == Process.SYSTEM_UID;
             }
-            if (sLockSettings != null && MOVED_TO_LOCK_SETTINGS.contains(name)) {
+            if (sLockSettings != null && !sIsSystemProcess
+                    && MOVED_TO_LOCK_SETTINGS.contains(name)) {
                 try {
                     return sLockSettings.getString(name, "0", UserId.getCallingUserId());
                 } catch (RemoteException re) {
