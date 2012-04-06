@@ -16,11 +16,9 @@
 
 package android.graphics;
 
-import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
@@ -183,7 +181,7 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Sets the layout bounds as an array of left, top, right, bottom integers
-     * @param padding the array containing the padding values
+     * @param bounds the array containing the padding values
      *
      * @hide
      */
