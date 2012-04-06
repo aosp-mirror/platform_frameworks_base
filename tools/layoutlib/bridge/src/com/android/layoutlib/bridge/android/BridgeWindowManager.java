@@ -161,118 +161,13 @@ public class BridgeWindowManager implements IWindowManager {
     }
 
     @Override
-    public int getDPadKeycodeState(int arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getDPadScancodeState(int arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-
-    @Override
-    public InputDevice getInputDevice(int arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public int[] getInputDeviceIds() throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public int getKeycodeState(int arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getKeycodeStateForDevice(int arg0, int arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-
-    @Override
     public int getPendingAppTransition() throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
-
-    @Override
-    public int getScancodeState(int arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getScancodeStateForDevice(int arg0, int arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getSwitchState(int arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getSwitchStateForDevice(int arg0, int arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getTrackballKeycodeState(int arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public int getTrackballScancodeState(int arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public boolean hasKeys(int[] arg0, boolean[] arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
     @Override
     public boolean inKeyguardRestrictedInputMode() throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean injectInputEventNoWait(InputEvent arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean injectKeyEvent(KeyEvent arg0, boolean arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean injectPointerEvent(MotionEvent arg0, boolean arg1) throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean injectTrackballEvent(MotionEvent arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -299,12 +194,6 @@ public class BridgeWindowManager implements IWindowManager {
     public boolean isViewServerRunning() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    @Override
-    public InputChannel monitorInput(String arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -457,12 +346,6 @@ public class BridgeWindowManager implements IWindowManager {
 
     @Override
     public void setNewConfiguration(Configuration arg0) throws RemoteException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void setPointerSpeed(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }

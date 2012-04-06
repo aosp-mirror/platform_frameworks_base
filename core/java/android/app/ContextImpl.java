@@ -45,6 +45,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
 import android.hardware.SerialManager;
+import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
@@ -325,9 +326,9 @@ class ContextImpl extends Context {
                 }});
 
         registerService(INPUT_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                return new InputManager(ctx);
-            }});
+                public Object createService(ContextImpl ctx) {
+                    return new InputManager(ctx);
+                }});
 
         registerService(INPUT_METHOD_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {

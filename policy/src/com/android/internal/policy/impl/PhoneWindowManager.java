@@ -132,6 +132,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
@@ -237,8 +240,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SYSTEM_UI_CHANGING_LAYOUT =
             View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
 
-    // Useful scan codes.
-    private static final int SW_LID = 0x00;
     private static final int BTN_MOUSE = 0x110;
 
     /* Table of Application Launch keys.  Maps from key codes to intent categories.
@@ -321,10 +322,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     RecentApplicationsDialog mRecentAppsDialog;
     int mRecentAppsDialogHeldModifiers;
-
-    private static final int LID_ABSENT = -1;
-    private static final int LID_CLOSED = 0;
-    private static final int LID_OPEN = 1;
 
     int mLidOpen = LID_ABSENT;
 
@@ -1120,16 +1117,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
             wm.addView(mPointerLocationView, lp);
 
-            try {
-                mPointerLocationInputChannel =
-                        mWindowManager.monitorInput("PointerLocationView");
-                mPointerLocationInputEventReceiver =
-                        new PointerLocationInputEventReceiver(mPointerLocationInputChannel,
-                                Looper.myLooper(), mPointerLocationView);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Could not set up input monitoring channel for PointerLocation.",
-                        ex);
-            }
+            mPointerLocationInputChannel =
+                    mWindowManagerFuncs.monitorInput("PointerLocationView");
+            mPointerLocationInputEventReceiver =
+                    new PointerLocationInputEventReceiver(mPointerLocationInputChannel,
+                            Looper.myLooper(), mPointerLocationView);
         }
     }
 
@@ -1223,18 +1215,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     void readLidState() {
-        try {
-            int sw = mWindowManager.getSwitchState(SW_LID);
-            if (sw > 0) {
-                mLidOpen = LID_OPEN;
-            } else if (sw == 0) {
-                mLidOpen = LID_CLOSED;
-            } else {
-                mLidOpen = LID_ABSENT;
-            }
-        } catch (RemoteException e) {
-            // Ignore
-        }
+        mLidOpen = mWindowManagerFuncs.getLidState();
     }
     
     private int determineHiddenState(int mode, int hiddenValue, int visibleValue) {
@@ -3648,29 +3629,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    public boolean detectSafeMode() {
-        try {
-            int menuState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_MENU);
-            int sState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_S);
-            int dpadState = mWindowManager.getDPadKeycodeState(KeyEvent.KEYCODE_DPAD_CENTER);
-            int trackballState = mWindowManager.getTrackballScancodeState(BTN_MOUSE);
-            int volumeDownState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_VOLUME_DOWN);
-            mSafeMode = menuState > 0 || sState > 0 || dpadState > 0 || trackballState > 0
-                    || volumeDownState > 0;
-            performHapticFeedbackLw(null, mSafeMode
-                    ? HapticFeedbackConstants.SAFE_MODE_ENABLED
-                    : HapticFeedbackConstants.SAFE_MODE_DISABLED, true);
-            if (mSafeMode) {
-                Log.i(TAG, "SAFE MODE ENABLED (menu=" + menuState + " s=" + sState
-                        + " dpad=" + dpadState + " trackball=" + trackballState + ")");
-            } else {
-                Log.i(TAG, "SAFE MODE not enabled");
-            }
-            return mSafeMode;
-        } catch (RemoteException e) {
-            // Doom! (it's also local)
-            throw new RuntimeException("window manager dead");
-        }
+    public void setSafeMode(boolean safeMode) {
+        mSafeMode = safeMode;
+        performHapticFeedbackLw(null, safeMode
+                ? HapticFeedbackConstants.SAFE_MODE_ENABLED
+                : HapticFeedbackConstants.SAFE_MODE_DISABLED, true);
     }
     
     static long[] getLongIntArray(Resources r, int resid) {

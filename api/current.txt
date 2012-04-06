@@ -80,7 +80,7 @@ package android {
     field public static final java.lang.String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     field public static final java.lang.String READ_FRAME_BUFFER = "android.permission.READ_FRAME_BUFFER";
     field public static final java.lang.String READ_HISTORY_BOOKMARKS = "com.android.browser.permission.READ_HISTORY_BOOKMARKS";
-    field public static final java.lang.String READ_INPUT_STATE = "android.permission.READ_INPUT_STATE";
+    field public static final deprecated java.lang.String READ_INPUT_STATE = "android.permission.READ_INPUT_STATE";
     field public static final java.lang.String READ_LOGS = "android.permission.READ_LOGS";
     field public static final java.lang.String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
     field public static final java.lang.String READ_PROFILE = "android.permission.READ_PROFILE";

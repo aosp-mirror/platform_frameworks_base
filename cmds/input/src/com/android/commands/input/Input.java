@@ -16,11 +16,12 @@
 
 package com.android.commands.input;
 
+import android.hardware.input.InputManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.IWindowManager;
+import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -33,8 +34,6 @@ import android.view.MotionEvent;
 public class Input {
     private static final String TAG = "Input";
 
-    private IWindowManager mWindowManager;
-
     /**
      * Command-line entry point.
      *
@@ -42,13 +41,6 @@ public class Input {
      */
     public static void main(String[] args) {
         (new Input()).run(args);
-    }
-
-    private IWindowManager getWindowManager() {
-        if (mWindowManager == null) {
-            mWindowManager = (IWindowManager.Stub.asInterface(ServiceManager.getService("window")));
-        }
-        return mWindowManager;
     }
 
     private void run(String[] args) {
@@ -127,8 +119,10 @@ public class Input {
 
     private void sendKeyEvent(int keyCode) {
         long now = SystemClock.uptimeMillis();
-        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0));
-        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0));
+        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0, 0,
+                KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
+        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0, 0,
+                KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
     }
 
     private void sendTap(float x, float y) {
@@ -150,23 +144,14 @@ public class Input {
     }
 
     private void injectKeyEvent(KeyEvent event) {
-        try {
-            Log.i(TAG, "InjectKeyEvent: " + event);
-            getWindowManager().injectKeyEvent(event, true);
-        } catch (RemoteException ex) {
-            Log.i(TAG, "RemoteException", ex);
-        }
+        Log.i(TAG, "InjectKeyEvent: " + event);
+        InputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
     private void injectPointerEvent(MotionEvent event) {
-        try {
-            Log.i("Input", "InjectPointerEvent: " + event);
-            getWindowManager().injectPointerEvent(event, true);
-        } catch (RemoteException ex) {
-            Log.i(TAG, "RemoteException", ex);
-        } finally {
-            event.recycle();
-        }
+        event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        Log.i("Input", "InjectPointerEvent: " + event);
+        InputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
     private static final float lerp(float a, float b, float alpha) {
@@ -174,7 +159,7 @@ public class Input {
     }
 
     private void showUsage() {
-        System.err.println("usage: input [text|keyevent]");
+        System.err.println("usage: input ...");
         System.err.println("       input text <string>");
         System.err.println("       input keyevent <key code>");
         System.err.println("       input tap <x> <y>");

@@ -245,10 +245,6 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final boolean CUSTOM_SCREEN_ROTATION = true;
 
-    // Maximum number of milliseconds to wait for input event injection.
-    // FIXME is this value reasonable?
-    private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
-
     // Maximum number of milliseconds to wait for input devices to be enumerated before
     // proceding with safe mode detection.
     private static final int INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS = 1000;
@@ -4855,90 +4851,22 @@ public class WindowManagerService extends IWindowManager.Stub
                 mAnimatorDurationScale };
     }
 
-    public int getSwitchState(int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getSwitchState()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
+    // Called by window manager policy. Not exposed externally.
+    @Override
+    public int getLidState() {
+        final int SW_LID = 0x00;
+        int sw = mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY, SW_LID);
+        if (sw > 0) {
+            return LID_OPEN;
+        } else if (sw == 0) {
+            return LID_CLOSED;
+        } else {
+            return LID_ABSENT;
         }
-        return mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY, sw);
     }
 
-    public int getSwitchStateForDevice(int devid, int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getSwitchStateForDevice()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
-        return mInputManager.getSwitchState(devid, InputDevice.SOURCE_ANY, sw);
-    }
-
-    public int getScancodeState(int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getScancodeState()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
-        return mInputManager.getScanCodeState(-1, InputDevice.SOURCE_ANY, sw);
-    }
-
-    public int getScancodeStateForDevice(int devid, int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getScancodeStateForDevice()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
-        return mInputManager.getScanCodeState(devid, InputDevice.SOURCE_ANY, sw);
-    }
-
-    public int getTrackballScancodeState(int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getTrackballScancodeState()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
-        return mInputManager.getScanCodeState(-1, InputDevice.SOURCE_TRACKBALL, sw);
-    }
-
-    public int getDPadScancodeState(int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getDPadScancodeState()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
-        return mInputManager.getScanCodeState(-1, InputDevice.SOURCE_DPAD, sw);
-    }
-
-    public int getKeycodeState(int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getKeycodeState()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
-        return mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY, sw);
-    }
-
-    public int getKeycodeStateForDevice(int devid, int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getKeycodeStateForDevice()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
-        return mInputManager.getKeyCodeState(devid, InputDevice.SOURCE_ANY, sw);
-    }
-
-    public int getTrackballKeycodeState(int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getTrackballKeycodeState()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
-        return mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_TRACKBALL, sw);
-    }
-
-    public int getDPadKeycodeState(int sw) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "getDPadKeycodeState()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
-        return mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_DPAD, sw);
-    }
-    
-    public boolean hasKeys(int[] keycodes, boolean[] keyExists) {
-        return mInputManager.hasKeys(-1, InputDevice.SOURCE_ANY, keycodes, keyExists);
-    }
-
+    // Called by window manager policy.  Not exposed externally.
+    @Override
     public InputChannel monitorInput(String inputChannelName) {
         if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
                 "monitorInput()")) {
@@ -4949,14 +4877,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setInputFilter(InputFilter filter) {
         mInputManager.setInputFilter(filter);
-    }
-
-    public InputDevice getInputDevice(int deviceId) {
-        return mInputManager.getInputDevice(deviceId);
-    }
-
-    public int[] getInputDeviceIds() {
-        return mInputManager.getInputDeviceIds();
     }
 
     public void enableScreenAfterBoot() {
@@ -6444,164 +6364,6 @@ public class WindowManagerService extends IWindowManager.Stub
         sendScreenStatusToClients();
     }
 
-    /**
-     * Injects a keystroke event into the UI.
-     * Even when sync is false, this method may block while waiting for current
-     * input events to be dispatched.
-     *
-     * @param ev A motion event describing the keystroke action.  (Be sure to use
-     * {@link SystemClock#uptimeMillis()} as the timebase.)
-     * @param sync If true, wait for the event to be completed before returning to the caller.
-     * @return Returns true if event was dispatched, false if it was dropped for any reason
-     */
-    public boolean injectKeyEvent(KeyEvent ev, boolean sync) {
-        long downTime = ev.getDownTime();
-        long eventTime = ev.getEventTime();
-
-        int action = ev.getAction();
-        int code = ev.getKeyCode();
-        int repeatCount = ev.getRepeatCount();
-        int metaState = ev.getMetaState();
-        int deviceId = ev.getDeviceId();
-        int scancode = ev.getScanCode();
-        int source = ev.getSource();
-        int flags = ev.getFlags();
-        
-        if (source == InputDevice.SOURCE_UNKNOWN) {
-            source = InputDevice.SOURCE_KEYBOARD;
-        }
-
-        if (eventTime == 0) eventTime = SystemClock.uptimeMillis();
-        if (downTime == 0) downTime = eventTime;
-
-        KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
-                deviceId, scancode, flags | KeyEvent.FLAG_FROM_SYSTEM, source);
-
-        final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
-        final long ident = Binder.clearCallingIdentity();
-        
-        final int result = mInputManager.injectInputEvent(newEvent, pid, uid,
-                sync ? InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
-                        : InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
-                INJECTION_TIMEOUT_MILLIS);
-        
-        Binder.restoreCallingIdentity(ident);
-        return reportInjectionResult(result, pid);
-    }
-
-    /**
-     * Inject a pointer (touch) event into the UI.
-     * Even when sync is false, this method may block while waiting for current
-     * input events to be dispatched.
-     *
-     * @param ev A motion event describing the pointer (touch) action.  (As noted in
-     * {@link MotionEvent#obtain(long, long, int, float, float, int)}, be sure to use
-     * {@link SystemClock#uptimeMillis()} as the timebase.)
-     * @param sync If true, wait for the event to be completed before returning to the caller.
-     * @return Returns true if event was dispatched, false if it was dropped for any reason
-     */
-    public boolean injectPointerEvent(MotionEvent ev, boolean sync) {
-        final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
-        final long ident = Binder.clearCallingIdentity();
-        
-        MotionEvent newEvent = MotionEvent.obtain(ev);
-        if ((newEvent.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
-            newEvent.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-        }
-        
-        final int result = mInputManager.injectInputEvent(newEvent, pid, uid,
-                sync ? InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
-                        : InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
-                INJECTION_TIMEOUT_MILLIS);
-        
-        Binder.restoreCallingIdentity(ident);
-        return reportInjectionResult(result, pid);
-    }
-
-    /**
-     * Inject a trackball (navigation device) event into the UI.
-     * Even when sync is false, this method may block while waiting for current
-     * input events to be dispatched.
-     *
-     * @param ev A motion event describing the trackball action.  (As noted in
-     * {@link MotionEvent#obtain(long, long, int, float, float, int)}, be sure to use
-     * {@link SystemClock#uptimeMillis()} as the timebase.)
-     * @param sync If true, wait for the event to be completed before returning to the caller.
-     * @return Returns true if event was dispatched, false if it was dropped for any reason
-     */
-    public boolean injectTrackballEvent(MotionEvent ev, boolean sync) {
-        final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
-        final long ident = Binder.clearCallingIdentity();
-        
-        MotionEvent newEvent = MotionEvent.obtain(ev);
-        if ((newEvent.getSource() & InputDevice.SOURCE_CLASS_TRACKBALL) == 0) {
-            newEvent.setSource(InputDevice.SOURCE_TRACKBALL);
-        }
-        
-        final int result = mInputManager.injectInputEvent(newEvent, pid, uid,
-                sync ? InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH
-                        : InputManagerService.INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT,
-                INJECTION_TIMEOUT_MILLIS);
-        
-        Binder.restoreCallingIdentity(ident);
-        return reportInjectionResult(result, pid);
-    }
-    
-    /**
-     * Inject an input event into the UI without waiting for dispatch to commence.
-     * This variant is useful for fire-and-forget input event injection.  It does not
-     * block any longer than it takes to enqueue the input event.
-     *
-     * @param ev An input event.  (Be sure to set the input source correctly.)
-     * @return Returns true if event was dispatched, false if it was dropped for any reason
-     */
-    public boolean injectInputEventNoWait(InputEvent ev) {
-        final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
-        final long ident = Binder.clearCallingIdentity();
-        
-        final int result = mInputManager.injectInputEvent(ev, pid, uid,
-                InputManagerService.INPUT_EVENT_INJECTION_SYNC_NONE,
-                INJECTION_TIMEOUT_MILLIS);
-        
-        Binder.restoreCallingIdentity(ident);
-        return reportInjectionResult(result, pid);
-    }
-    
-    private boolean reportInjectionResult(int result, int pid) {
-        switch (result) {
-            case InputManagerService.INPUT_EVENT_INJECTION_PERMISSION_DENIED:
-                Slog.w(TAG, "Input event injection from pid " + pid + " permission denied.");
-                throw new SecurityException(
-                        "Injecting to another application requires INJECT_EVENTS permission");
-            case InputManagerService.INPUT_EVENT_INJECTION_SUCCEEDED:
-                return true;
-            case InputManagerService.INPUT_EVENT_INJECTION_TIMED_OUT:
-                Slog.w(TAG, "Input event injection from pid " + pid + " timed out.");
-                return false;
-            case InputManagerService.INPUT_EVENT_INJECTION_FAILED:
-            default:
-                Slog.w(TAG, "Input event injection from pid " + pid + " failed.");
-                return false;
-        }
-    }
-
-    /**
-     * Temporarily set the pointer speed.  Does not save the new setting.
-     * Used by the settings application.
-     */
-    public void setPointerSpeed(int speed) {
-        if (!checkCallingPermission(android.Manifest.permission.SET_POINTER_SPEED,
-                "setPointerSpeed()")) {
-            throw new SecurityException("Requires SET_POINTER_SPEED permission");
-        }
-
-        mInputManager.setPointerSpeed(speed);
-    }
-
     private WindowState getFocusedWindow() {
         synchronized (mWindowMap) {
             return getFocusedWindowLocked();
@@ -6616,11 +6378,29 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!mInputMonitor.waitForInputDevicesReady(
                 INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS)) {
             Slog.w(TAG, "Devices still not ready after waiting "
-                    + INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS
-                    + " milliseconds before attempting to detect safe mode.");
+                   + INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS
+                   + " milliseconds before attempting to detect safe mode.");
         }
 
-        mSafeMode = mPolicy.detectSafeMode();
+        final int BTN_MOUSE = 0x110;
+        int menuState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY,
+                KeyEvent.KEYCODE_MENU);
+        int sState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY, KeyEvent.KEYCODE_S);
+        int dpadState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_DPAD,
+                KeyEvent.KEYCODE_DPAD_CENTER);
+        int trackballState = mInputManager.getScanCodeState(-1, InputDevice.SOURCE_TRACKBALL,
+                BTN_MOUSE);
+        int volumeDownState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY,
+                KeyEvent.KEYCODE_VOLUME_DOWN);
+        mSafeMode = menuState > 0 || sState > 0 || dpadState > 0 || trackballState > 0
+                || volumeDownState > 0;
+        if (mSafeMode) {
+            Log.i(TAG, "SAFE MODE ENABLED (menu=" + menuState + " s=" + sState
+                    + " dpad=" + dpadState + " trackball=" + trackballState + ")");
+        } else {
+            Log.i(TAG, "SAFE MODE not enabled");
+        }
+        mPolicy.setSafeMode(mSafeMode);
         return mSafeMode;
     }
 

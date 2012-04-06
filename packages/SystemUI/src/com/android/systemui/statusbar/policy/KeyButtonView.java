@@ -23,6 +23,7 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.hardware.input.InputManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.ServiceManager;
@@ -47,7 +48,6 @@ public class KeyButtonView extends ImageView {
     final float GLOW_MAX_SCALE_FACTOR = 1.8f;
     final float BUTTON_QUIESCENT_ALPHA = 0.6f;
 
-    IWindowManager mWindowManager;
     long mDownTime;
     int mCode;
     int mTouchSlop;
@@ -92,9 +92,6 @@ public class KeyButtonView extends ImageView {
         }
         
         a.recycle();
-
-        mWindowManager = IWindowManager.Stub.asInterface(
-                ServiceManager.getService(Context.WINDOW_SERVICE));
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
@@ -276,12 +273,7 @@ public class KeyButtonView extends ImageView {
                 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                 flags | KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
-        try {
-            //Slog.d(TAG, "injecting event " + ev);
-            mWindowManager.injectInputEventNoWait(ev);
-        } catch (RemoteException ex) {
-            // System process is dead
-        }
+        InputManager.injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 }
 

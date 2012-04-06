@@ -16,6 +16,22 @@
 
 package android.hardware.input;
 
+import android.view.InputDevice;
+import android.view.InputEvent;
+
 /** @hide */
 interface IInputManager {
+    // Gets input device information.
+    InputDevice getInputDevice(int deviceId);
+    int[] getInputDeviceIds();
+
+    // Reports whether the hardware supports the given keys; returns true if successful
+    boolean hasKeys(int deviceId, int sourceMask, in int[] keyCodes, out boolean[] keyExists);
+
+    // Temporarily changes the pointer speed.
+    void tryPointerSpeed(int speed);
+
+    // Injects an input event into the system.  To inject into windows owned by other
+    // applications, the caller must have the INJECT_EVENTS permission.
+    boolean injectInputEvent(in InputEvent ev, int mode);
 }

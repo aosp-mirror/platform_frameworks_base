@@ -28,11 +28,13 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.hardware.input.IInputManager;
+import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -108,18 +110,16 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     private static native void nativeSetShowTouches(int ptr, boolean enabled);
     private static native String nativeDump(int ptr);
     private static native void nativeMonitor(int ptr);
-    
-    // Input event injection constants defined in InputDispatcher.h.
-    public static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
-    public static final int INPUT_EVENT_INJECTION_PERMISSION_DENIED = 1;
-    public static final int INPUT_EVENT_INJECTION_FAILED = 2;
-    public static final int INPUT_EVENT_INJECTION_TIMED_OUT = 3;
 
-    // Input event injection synchronization modes defined in InputDispatcher.h
-    public static final int INPUT_EVENT_INJECTION_SYNC_NONE = 0;
-    public static final int INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT = 1;
-    public static final int INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH = 2;
-    
+    // Input event injection constants defined in InputDispatcher.h.
+    private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
+    private static final int INPUT_EVENT_INJECTION_PERMISSION_DENIED = 1;
+    private static final int INPUT_EVENT_INJECTION_FAILED = 2;
+    private static final int INPUT_EVENT_INJECTION_TIMED_OUT = 3;
+
+    // Maximum number of milliseconds to wait for input event injection.
+    private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
+
     // Key states (may be returned by queries about the current state of a
     // particular key code, scan code or switch).
     
@@ -194,7 +194,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         
         nativeGetInputConfiguration(mPtr, config);
     }
-    
+
     /**
      * Gets the current state of a key or button by key code.
      * @param deviceId The input device id, or -1 to consult all devices.
@@ -246,6 +246,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      * key codes.
      * @return True if the lookup was successful, false otherwise.
      */
+    @Override
     public boolean hasKeys(int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists) {
         if (keyCodes == null) {
             throw new IllegalArgumentException("keyCodes must not be null.");
@@ -336,43 +337,42 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         }
     }
 
-    /**
-     * Injects an input event into the event system on behalf of an application.
-     * The synchronization mode determines whether the method blocks while waiting for
-     * input injection to proceed.
-     * 
-     * {@link #INPUT_EVENT_INJECTION_SYNC_NONE} never blocks.  Injection is asynchronous and
-     * is assumed always to be successful.
-     * 
-     * {@link #INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_RESULT} waits for previous events to be
-     * dispatched so that the input dispatcher can determine whether input event injection will
-     * be permitted based on the current input focus.  Does not wait for the input event to
-     * finish processing.
-     * 
-     * {@link #INPUT_EVENT_INJECTION_SYNC_WAIT_FOR_FINISH} waits for the input event to
-     * be completely processed.
-     * 
-     * @param event The event to inject.
-     * @param injectorPid The pid of the injecting application.
-     * @param injectorUid The uid of the injecting application.
-     * @param syncMode The synchronization mode.
-     * @param timeoutMillis The injection timeout in milliseconds.
-     * @return One of the INPUT_EVENT_INJECTION_XXX constants.
-     */
-    public int injectInputEvent(InputEvent event, int injectorPid, int injectorUid,
-            int syncMode, int timeoutMillis) {
+    @Override
+    public boolean injectInputEvent(InputEvent event, int mode) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
-        if (injectorPid < 0 || injectorUid < 0) {
-            throw new IllegalArgumentException("injectorPid and injectorUid must not be negative.");
-        }
-        if (timeoutMillis <= 0) {
-            throw new IllegalArgumentException("timeoutMillis must be positive");
+        if (mode != InputManager.INJECT_INPUT_EVENT_MODE_ASYNC
+                && mode != InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
+                && mode != InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT) {
+            throw new IllegalArgumentException("mode is invalid");
         }
 
-        return nativeInjectInputEvent(mPtr, event, injectorPid, injectorUid, syncMode,
-                timeoutMillis, WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        final int result;
+        try {
+            result = nativeInjectInputEvent(mPtr, event, pid, uid, mode,
+                    INJECTION_TIMEOUT_MILLIS, WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        switch (result) {
+            case INPUT_EVENT_INJECTION_PERMISSION_DENIED:
+                Slog.w(TAG, "Input event injection from pid " + pid + " permission denied.");
+                throw new SecurityException(
+                        "Injecting to another application requires INJECT_EVENTS permission");
+            case INPUT_EVENT_INJECTION_SUCCEEDED:
+                return true;
+            case INPUT_EVENT_INJECTION_TIMED_OUT:
+                Slog.w(TAG, "Input event injection from pid " + pid + " timed out.");
+                return false;
+            case INPUT_EVENT_INJECTION_FAILED:
+            default:
+                Slog.w(TAG, "Input event injection from pid " + pid + " failed.");
+                return false;
+        }
     }
 
     /**
@@ -380,6 +380,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      * @param id The device id.
      * @return The input device or null if not found.
      */
+    @Override
     public InputDevice getInputDevice(int deviceId) {
         return nativeGetInputDevice(mPtr, deviceId);
     }
@@ -388,6 +389,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      * Gets the ids of all input devices in the system.
      * @return The input device ids.
      */
+    @Override
     public int[] getInputDeviceIds() {
         return nativeGetInputDeviceIds(mPtr);
     }
@@ -436,14 +438,25 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      * @param speed The pointer speed as a value between -7 (slowest) and 7 (fastest)
      * where 0 is the default speed.
      */
-    public void setPointerSpeed(int speed) {
-        speed = Math.min(Math.max(speed, -7), 7);
-        nativeSetPointerSpeed(mPtr, speed);
+    @Override
+    public void tryPointerSpeed(int speed) {
+        if (!checkCallingPermission(android.Manifest.permission.SET_POINTER_SPEED,
+                "tryPointerSpeed()")) {
+            throw new SecurityException("Requires SET_POINTER_SPEED permission");
+        }
+
+        setPointerSpeedUnchecked(speed);
     }
 
     public void updatePointerSpeedFromSettings() {
-        int speed = getPointerSpeedSetting(0);
-        setPointerSpeed(speed);
+        int speed = getPointerSpeedSetting();
+        setPointerSpeedUnchecked(speed);
+    }
+
+    private void setPointerSpeedUnchecked(int speed) {
+        speed = Math.min(Math.max(speed, InputManager.MIN_POINTER_SPEED),
+                InputManager.MAX_POINTER_SPEED);
+        nativeSetPointerSpeed(mPtr, speed);
     }
 
     private void registerPointerSpeedSettingObserver() {
@@ -457,8 +470,8 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                 });
     }
 
-    private int getPointerSpeedSetting(int defaultValue) {
-        int speed = defaultValue;
+    private int getPointerSpeedSetting() {
+        int speed = InputManager.DEFAULT_POINTER_SPEED;
         try {
             speed = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.POINTER_SPEED);
@@ -508,6 +521,23 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         if (dumpStr != null) {
             pw.println(dumpStr);
         }
+    }
+
+    private boolean checkCallingPermission(String permission, String func) {
+        // Quick check: if the calling permission is me, it's all okay.
+        if (Binder.getCallingPid() == Process.myPid()) {
+            return true;
+        }
+
+        if (mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        String msg = "Permission Denial: " + func + " from pid="
+                + Binder.getCallingPid()
+                + ", uid=" + Binder.getCallingUid()
+                + " requires " + permission;
+        Slog.w(TAG, msg);
+        return false;
     }
 
     // Called by the heartbeat to ensure locks are not held indefinitely (for deadlock detection).
@@ -703,7 +733,8 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
 
             synchronized (mInputFilterLock) {
                 if (!mDisconnected) {
-                    nativeInjectInputEvent(mPtr, event, 0, 0, INPUT_EVENT_INJECTION_SYNC_NONE, 0,
+                    nativeInjectInputEvent(mPtr, event, 0, 0,
+                            InputManager.INJECT_INPUT_EVENT_MODE_ASYNC, 0,
                             policyFlags | WindowManagerPolicy.FLAG_FILTERED);
                 }
             }

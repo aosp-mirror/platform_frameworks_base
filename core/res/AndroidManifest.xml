@@ -1200,7 +1200,8 @@
         android:protectionLevel="signature|system" />
 
     <!-- Allows an application to retrieve the current state of keys and
-         switches.  This is only for use by the system.-->
+         switches.  This is only for use by the system.
+         @deprecated The API that used this permission has been removed. -->
     <permission android:name="android.permission.READ_INPUT_STATE"
         android:label="@string/permlab_readInputState"
         android:description="@string/permdesc_readInputState"

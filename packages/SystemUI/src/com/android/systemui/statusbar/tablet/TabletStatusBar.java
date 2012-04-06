@@ -1322,14 +1322,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         }
     }
 
-    private void sendKey(KeyEvent key) {
-        try {
-            if (DEBUG) Slog.d(TAG, "injecting key event: " + key);
-            mWindowManager.injectInputEventNoWait(key);
-        } catch (RemoteException ex) {
-        }
-    }
-
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             if (v == mRecentButton) {

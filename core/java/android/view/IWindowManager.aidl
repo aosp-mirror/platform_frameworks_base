@@ -65,15 +65,6 @@ interface IWindowManager
     // Is the device configured to have a full system bar for larger screens?
     boolean hasSystemNavBar();
 
-    // These can only be called when injecting events to your own window,
-    // or by holding the INJECT_EVENTS permission.  These methods may block
-    // until pending input events are finished being dispatched even when 'sync' is false.
-    // Avoid calling these methods on your UI thread or use the 'NoWait' version instead.
-    boolean injectKeyEvent(in KeyEvent ev, boolean sync);
-    boolean injectPointerEvent(in MotionEvent ev, boolean sync);
-    boolean injectTrackballEvent(in MotionEvent ev, boolean sync);
-    boolean injectInputEventNoWait(in InputEvent ev);
-    
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
     void pauseKeyDispatching(IBinder token);
     void resumeKeyDispatching(IBinder token);
@@ -127,26 +118,6 @@ interface IWindowManager
     float[] getAnimationScales();
     void setAnimationScale(int which, float scale);
     void setAnimationScales(in float[] scales);
-    
-    // These require the READ_INPUT_STATE permission.
-    int getSwitchState(int sw);
-    int getSwitchStateForDevice(int devid, int sw);
-    int getScancodeState(int sw);
-    int getScancodeStateForDevice(int devid, int sw);
-    int getTrackballScancodeState(int sw);
-    int getDPadScancodeState(int sw);
-    int getKeycodeState(int sw);
-    int getKeycodeStateForDevice(int devid, int sw);
-    int getTrackballKeycodeState(int sw);
-    int getDPadKeycodeState(int sw);
-    InputChannel monitorInput(String inputChannelName);
-
-    // Report whether the hardware supports the given keys; returns true if successful
-    boolean hasKeys(in int[] keycodes, inout boolean[] keyExists);
-    
-    // Get input device information.
-    InputDevice getInputDevice(int deviceId);
-    int[] getInputDeviceIds();
     
     // For testing
     void setInTouchMode(boolean showFocus);
@@ -218,11 +189,6 @@ interface IWindowManager
      * Called by the status bar to notify Views of changes to System UI visiblity.
      */
     void statusBarVisibilityChanged(int visibility);
-
-    /**
-     * Called by the settings application to temporarily set the pointer speed.
-     */
-    void setPointerSpeed(int speed);
 
     /**
      * Block until the given window has been drawn to the screen.

@@ -349,6 +349,10 @@ public interface WindowManagerPolicy {
      * between it and the policy.
      */
     public interface WindowManagerFuncs {
+        public static final int LID_ABSENT = -1;
+        public static final int LID_CLOSED = 0;
+        public static final int LID_OPEN = 1;
+
         /**
          * Ask the window manager to re-evaluate the system UI flags.
          */
@@ -362,6 +366,16 @@ public interface WindowManagerPolicy {
                 InputEventReceiver.Factory inputEventReceiverFactory,
                 String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
                 boolean hasFocus, boolean touchFullscreen);
+
+        /**
+         * Returns a code that describes the current state of the lid switch.
+         */
+        public int getLidState();
+
+        /**
+         * Creates an input channel that will receive all input from the input dispatcher.
+         */
+        public InputChannel monitorInput(String name);
     }
 
     /**
@@ -943,10 +957,10 @@ public interface WindowManagerPolicy {
     public void setRotationLw(int rotation);
 
     /**
-     * Called when the system is mostly done booting to determine whether
+     * Called when the system is mostly done booting to set whether
      * the system should go into safe mode.
      */
-    public boolean detectSafeMode();
+    public void setSafeMode(boolean safeMode);
     
     /**
      * Called when the system is mostly done booting.

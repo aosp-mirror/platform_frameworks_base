@@ -16,9 +16,9 @@
 
 package android.view;
 
+import android.hardware.input.InputManager;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -301,13 +301,7 @@ public final class InputDevice implements Parcelable {
      * @return The input device or null if not found.
      */
     public static InputDevice getDevice(int id) {
-        IWindowManager wm = Display.getWindowManager();
-        try {
-            return wm.getInputDevice(id);
-        } catch (RemoteException ex) {
-            throw new RuntimeException(
-                    "Could not get input device information from Window Manager.", ex);
-        }
+        return InputManager.getInputDevice(id);
     }
     
     /**
@@ -315,13 +309,7 @@ public final class InputDevice implements Parcelable {
      * @return The input device ids.
      */
     public static int[] getDeviceIds() {
-        IWindowManager wm = Display.getWindowManager();
-        try {
-            return wm.getInputDeviceIds();
-        } catch (RemoteException ex) {
-            throw new RuntimeException(
-                    "Could not get input device ids from Window Manager.", ex);
-        }
+        return InputManager.getInputDeviceIds();
     }
 
     /**

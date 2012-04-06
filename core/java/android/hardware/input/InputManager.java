@@ -31,10 +31,20 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
+import android.view.Display;
+import android.view.IWindowManager;
+import android.view.InputDevice;
+import android.view.InputEvent;
 import android.view.KeyCharacterMap;
+import android.view.WindowManagerPolicy;
 import android.view.KeyCharacterMap.UnavailableException;
 
 import java.util.ArrayList;
@@ -52,6 +62,8 @@ import java.util.List;
  */
 public final class InputManager {
     private static final String TAG = "InputManager";
+
+    private static final IInputManager sIm;
 
     private final Context mContext;
 
@@ -117,6 +129,53 @@ public final class InputManager {
      */
     public static final String META_DATA_KEYBOARD_LAYOUTS =
             "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
+
+    /**
+     * Pointer Speed: The minimum (slowest) pointer speed (-7).
+     * @hide
+     */
+    public static final int MIN_POINTER_SPEED = -7;
+
+    /**
+     * Pointer Speed: The maximum (fastest) pointer speed (7).
+     * @hide
+     */
+    public static final int MAX_POINTER_SPEED = 7;
+
+    /**
+     * Pointer Speed: The default pointer speed (0).
+     * @hide
+     */
+    public static final int DEFAULT_POINTER_SPEED = 0;
+
+    /**
+     * Input Event Injection Synchronization Mode: None.
+     * Never blocks.  Injection is asynchronous and is assumed always to be successful.
+     * @hide
+     */
+    public static final int INJECT_INPUT_EVENT_MODE_ASYNC = 0; // see InputDispatcher.h
+
+    /**
+     * Input Event Injection Synchronization Mode: Wait for result.
+     * Waits for previous events to be dispatched so that the input dispatcher can
+     * determine whether input event injection will be permitted based on the current
+     * input focus.  Does not wait for the input event to finish being handled
+     * by the application.
+     * @hide
+     */
+    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT = 1;  // see InputDispatcher.h
+
+    /**
+     * Input Event Injection Synchronization Mode: Wait for finish.
+     * Waits for the event to be delivered to the application and handled.
+     * @hide
+     */
+    public static final int INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH = 2;  // see InputDispatcher.h
+
+    static {
+        IBinder b = ServiceManager.getService(Context.INPUT_SERVICE);
+        sIm = IInputManager.Stub.asInterface(b);
+    }
 
     /** @hide */
     public InputManager(Context context) {
@@ -294,6 +353,160 @@ public final class InputManager {
                     + " because it was not declared in the keyboard layout resource.");
         }
         return null;
+    }
+
+    /**
+     * Gets the mouse pointer speed.
+     * <p>
+     * Only returns the permanent mouse pointer speed.  Ignores any temporary pointer
+     * speed set by {@link #tryPointerSpeed}.
+     * </p>
+     *
+     * @return The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
+     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     *
+     * @hide
+     */
+    public int getPointerSpeed() {
+        int speed = DEFAULT_POINTER_SPEED;
+        try {
+            speed = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.POINTER_SPEED);
+        } catch (SettingNotFoundException snfe) {
+        }
+        return speed;
+    }
+
+    /**
+     * Sets the mouse pointer speed.
+     * <p>
+     * Requires {@link android.Manifest.permissions.WRITE_SETTINGS}.
+     * </p>
+     *
+     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
+     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     *
+     * @hide
+     */
+    public void setPointerSpeed(int speed) {
+        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
+            throw new IllegalArgumentException("speed out of range");
+        }
+
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.POINTER_SPEED, speed);
+    }
+
+    /**
+     * Changes the mouse pointer speed temporarily, but does not save the setting.
+     * <p>
+     * Requires {@link android.Manifest.permission.SET_POINTER_SPEED}.
+     * </p>
+     *
+     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
+     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     *
+     * @hide
+     */
+    public void tryPointerSpeed(int speed) {
+        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
+            throw new IllegalArgumentException("speed out of range");
+        }
+
+        try {
+            sIm.tryPointerSpeed(speed);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not set temporary pointer speed.", ex);
+        }
+    }
+
+    /**
+     * Gets information about the input device with the specified id.
+     * @param id The device id.
+     * @return The input device or null if not found.
+     *
+     * @hide
+     */
+    public static InputDevice getInputDevice(int id) {
+        try {
+            return sIm.getInputDevice(id);
+        } catch (RemoteException ex) {
+            throw new RuntimeException("Could not get input device information.", ex);
+        }
+    }
+
+    /**
+     * Gets the ids of all input devices in the system.
+     * @return The input device ids.
+     *
+     * @hide
+     */
+    public static int[] getInputDeviceIds() {
+        try {
+            return sIm.getInputDeviceIds();
+        } catch (RemoteException ex) {
+            throw new RuntimeException("Could not get input device ids.", ex);
+        }
+    }
+
+    /**
+     * Queries the framework about whether any physical keys exist on the
+     * any keyboard attached to the device that are capable of producing the given
+     * array of key codes.
+     *
+     * @param keyCodes The array of key codes to query.
+     * @return A new array of the same size as the key codes array whose elements
+     * are set to true if at least one attached keyboard supports the corresponding key code
+     * at the same index in the key codes array.
+     *
+     * @hide
+     */
+    public static boolean[] deviceHasKeys(int[] keyCodes) {
+        boolean[] ret = new boolean[keyCodes.length];
+        try {
+            sIm.hasKeys(-1, InputDevice.SOURCE_ANY, keyCodes, ret);
+        } catch (RemoteException e) {
+            // no fallback; just return the empty array
+        }
+        return ret;
+    }
+
+    /**
+     * Injects an input event into the event system on behalf of an application.
+     * The synchronization mode determines whether the method blocks while waiting for
+     * input injection to proceed.
+     * <p>
+     * Requires {@link android.Manifest.permission.INJECT_EVENTS} to inject into
+     * windows that are owned by other applications.
+     * </p><p>
+     * Make sure you correctly set the event time and input source of the event
+     * before calling this method.
+     * </p>
+     *
+     * @param event The event to inject.
+     * @param mode The synchronization mode.  One of:
+     * {@link #INJECT_INPUT_EVENT_MODE_ASYNC},
+     * {@link #INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT}, or
+     * {@link #INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH}.
+     * @return True if input event injection succeeded.
+     *
+     * @hide
+     */
+    public static boolean injectInputEvent(InputEvent event, int mode) {
+        if (event == null) {
+            throw new IllegalArgumentException("event must not be null");
+        }
+        if (mode != INJECT_INPUT_EVENT_MODE_ASYNC
+                && mode != INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
+                && mode != INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT) {
+            throw new IllegalArgumentException("mode is invalid");
+        }
+
+        try {
+            return sIm.injectInputEvent(event, mode);
+        } catch (RemoteException ex) {
+            return false;
+        }
     }
 
     private static String makeKeyboardLayoutDescriptor(String packageName,

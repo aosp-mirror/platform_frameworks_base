@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -35,6 +36,7 @@ import android.os.SystemClock;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.IWindowManager;
+import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -859,11 +861,30 @@ public class Instrumentation {
      */
     public void sendKeySync(KeyEvent event) {
         validateNotAppThread();
-        try {
-            (IWindowManager.Stub.asInterface(ServiceManager.getService("window")))
-                .injectKeyEvent(event, true);
-        } catch (RemoteException e) {
+
+        long downTime = event.getDownTime();
+        long eventTime = event.getEventTime();
+        int action = event.getAction();
+        int code = event.getKeyCode();
+        int repeatCount = event.getRepeatCount();
+        int metaState = event.getMetaState();
+        int deviceId = event.getDeviceId();
+        int scancode = event.getScanCode();
+        int source = event.getSource();
+        int flags = event.getFlags();
+        if (source == InputDevice.SOURCE_UNKNOWN) {
+            source = InputDevice.SOURCE_KEYBOARD;
         }
+        if (eventTime == 0) {
+            eventTime = SystemClock.uptimeMillis();
+        }
+        if (downTime == 0) {
+            downTime = eventTime;
+        }
+        KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
+                deviceId, scancode, flags | KeyEvent.FLAG_FROM_SYSTEM, source);
+        InputManager.injectInputEvent(newEvent,
+                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
     
     /**
@@ -902,11 +923,10 @@ public class Instrumentation {
      */
     public void sendPointerSync(MotionEvent event) {
         validateNotAppThread();
-        try {
-            (IWindowManager.Stub.asInterface(ServiceManager.getService("window")))
-                .injectPointerEvent(event, true);
-        } catch (RemoteException e) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
+            event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         }
+        InputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
     /**
@@ -922,11 +942,10 @@ public class Instrumentation {
      */
     public void sendTrackballEventSync(MotionEvent event) {
         validateNotAppThread();
-        try {
-            (IWindowManager.Stub.asInterface(ServiceManager.getService("window")))
-                .injectTrackballEvent(event, true);
-        } catch (RemoteException e) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_TRACKBALL) == 0) {
+            event.setSource(InputDevice.SOURCE_TRACKBALL);
         }
+        InputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
     /**
