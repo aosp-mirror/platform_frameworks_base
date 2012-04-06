@@ -175,6 +175,7 @@ public interface IActivityManager extends IInterface {
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, int userId) throws RemoteException;
     public String getPackageForIntentSender(IIntentSender sender) throws RemoteException;
+    public int getUidForIntentSender(IIntentSender sender) throws RemoteException;
     
     public void setProcessLimit(int max) throws RemoteException;
     public int getProcessLimit() throws RemoteException;
@@ -531,6 +532,7 @@ public interface IActivityManager extends IInterface {
     int START_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+89;
     int BACKUP_AGENT_CREATED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+90;
     int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
+    int GET_UID_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
 
 
     int START_ACTIVITY_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;

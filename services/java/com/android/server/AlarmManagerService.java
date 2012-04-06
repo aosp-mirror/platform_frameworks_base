@@ -34,9 +34,9 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.WorkSource;
 import android.text.TextUtils;
 import android.text.format.Time;
-import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -50,6 +50,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -89,6 +90,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private int mDescriptor;
     private int mBroadcastRefCount = 0;
     private PowerManager.WakeLock mWakeLock;
+    private LinkedList<PendingIntent> mInFlight = new LinkedList<PendingIntent>();
     private final AlarmThread mWaitThread = new AlarmThread();
     private final AlarmHandler mHandler = new AlarmHandler();
     private ClockReceiver mClockReceiver;
@@ -668,10 +670,12 @@ class AlarmManagerService extends IAlarmManager.Stub {
                                             Intent.EXTRA_ALARM_COUNT, alarm.count),
                                     mResultReceiver, mHandler);
                             
-                            // we have an active broadcast so stay awake. 
+                            // we have an active broadcast so stay awake.
                             if (mBroadcastRefCount == 0) {
+                                setWakelockWorkSource(alarm.operation);
                                 mWakeLock.acquire();
                             }
+                            mInFlight.add(alarm.operation);
                             mBroadcastRefCount++;
                             
                             BroadcastStats bs = getStatsLocked(alarm.operation);
@@ -700,7 +704,22 @@ class AlarmManagerService extends IAlarmManager.Stub {
             }
         }
     }
-    
+
+    void setWakelockWorkSource(PendingIntent pi) {
+        try {
+            final int uid = ActivityManagerNative.getDefault()
+                    .getUidForIntentSender(pi.getTarget());
+            if (uid >= 0) {
+                mWakeLock.setWorkSource(new WorkSource(uid));
+                return;
+            }
+        } catch (Exception e) {
+        }
+
+        // Something went wrong; fall back to attributing the lock to the OS
+        mWakeLock.setWorkSource(null);
+    }
+
     private class AlarmHandler extends Handler {
         public static final int ALARM_EVENT = 1;
         public static final int MINUTE_CHANGE_EVENT = 2;
@@ -876,9 +895,20 @@ class AlarmManagerService extends IAlarmManager.Stub {
                         fs.count++;
                     }
                 }
+                mInFlight.removeFirst();
                 mBroadcastRefCount--;
                 if (mBroadcastRefCount == 0) {
                     mWakeLock.release();
+                } else {
+                    // the next of our alarms is now in flight.  reattribute the wakelock.
+                    final PendingIntent nowInFlight = mInFlight.peekFirst();
+                    if (nowInFlight != null) {
+                        setWakelockWorkSource(nowInFlight);
+                    } else {
+                        // should never happen
+                        Slog.e(TAG, "Alarm wakelock still held but sent queue empty");
+                        mWakeLock.setWorkSource(null);
+                    }
                 }
             }
         }

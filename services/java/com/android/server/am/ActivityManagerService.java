@@ -4444,6 +4444,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         return null;
     }
 
+    public int getUidForIntentSender(IIntentSender sender) {
+        if (sender instanceof PendingIntentRecord) {
+            try {
+                PendingIntentRecord res = (PendingIntentRecord)sender;
+                return res.uid;
+            } catch (ClassCastException e) {
+            }
+        }
+        return -1;
+    }
+
     public boolean isIntentSenderTargetedToPackage(IIntentSender pendingResult) {
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return false;
