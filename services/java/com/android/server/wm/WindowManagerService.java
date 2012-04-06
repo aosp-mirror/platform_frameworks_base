@@ -8400,8 +8400,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final int N = mWindows.size();
             for (i=N-1; i>=0; i--) {
                 WindowState w = mWindows.get(i);
-                //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
-                w.mContentChanged = false;
 
                 if (someoneLosingFocus && w == mCurrentFocus && w.isDisplayedLw()) {
                     focusDisplayed = true;
@@ -8503,6 +8501,27 @@ public class WindowManagerService extends IWindowManager.Stub
         for (i=N-1; i>=0; i--) {
             final WindowState w = mWindows.get(i);
             final WindowStateAnimator winAnimator = w.mWinAnimator; 
+            
+            // If the window has moved due to its containing
+            // content frame changing, then we'd like to animate
+            // it.
+            if (w.mHasSurface && w.shouldAnimateMove()) {
+                // Frame has moved, containing content frame
+                // has also moved, and we're not currently animating...
+                // let's do something.
+                Animation a = AnimationUtils.loadAnimation(mContext,
+                        com.android.internal.R.anim.window_move_from_decor);
+                winAnimator.setAnimation(a);
+                winAnimator.mAnimDw = w.mLastFrame.left - w.mFrame.left;
+                winAnimator.mAnimDh = w.mLastFrame.top - w.mFrame.top;
+            } else {
+                winAnimator.mAnimDw = innerDw;
+                winAnimator.mAnimDh = innerDh;
+            }
+
+            //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
+            w.mContentChanged = false;
+            
             // TODO(cmautner): Can this move up to the loop at the end of try/catch above?
             updateResizingWindows(w);
 
@@ -8521,24 +8540,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                 mPendingLayoutChanges);
                         }
                     }
-                }
-    
-                // If the window has moved due to its containing
-                // content frame changing, then we'd like to animate
-                // it.  The checks here are ordered by what is least
-                // likely to be true first.
-                if (w.shouldAnimateMove()) {
-                    // Frame has moved, containing content frame
-                    // has also moved, and we're not currently animating...
-                    // let's do something.
-                    Animation a = AnimationUtils.loadAnimation(mContext,
-                            com.android.internal.R.anim.window_move_from_decor);
-                    winAnimator.setAnimation(a);
-                    winAnimator.mAnimDw = w.mLastFrame.left - w.mFrame.left;
-                    winAnimator.mAnimDh = w.mLastFrame.top - w.mFrame.top;
-                } else {
-                    winAnimator.mAnimDw = innerDw;
-                    winAnimator.mAnimDh = innerDh;
                 }
             }
         }
