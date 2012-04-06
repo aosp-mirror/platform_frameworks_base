@@ -127,28 +127,24 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     }
 
     private void resizeFor(int size) {
-        int newlen = ArrayUtils.idealCharArraySize(size + 1);
-        char[] newtext = new char[newlen];
+        final int oldLength = mText.length;
+        final int newLength = ArrayUtils.idealCharArraySize(size + 1);
+        final int after = oldLength - (mGapStart + mGapLength);
 
-        int after = mText.length - (mGapStart + mGapLength);
+        char[] newText = new char[newLength];
+        System.arraycopy(mText, 0, newText, 0, mGapStart);
+        System.arraycopy(mText, oldLength - after, newText, newLength - after, after);
+        mText = newText;
 
-        System.arraycopy(mText, 0, newtext, 0, mGapStart);
-        System.arraycopy(mText, mText.length - after,
-                         newtext, newlen - after, after);
-
-        for (int i = 0; i < mSpanCount; i++) {
-            if (mSpanStarts[i] > mGapStart)
-                mSpanStarts[i] += newlen - mText.length;
-            if (mSpanEnds[i] > mGapStart)
-                mSpanEnds[i] += newlen - mText.length;
-        }
-
-        int oldlen = mText.length;
-        mText = newtext;
-        mGapLength += mText.length - oldlen;
-
+        final int delta = newLength - oldLength;
+        mGapLength += delta;
         if (mGapLength < 1)
             new Exception("mGapLength < 1").printStackTrace();
+
+        for (int i = 0; i < mSpanCount; i++) {
+            if (mSpanStarts[i] > mGapStart) mSpanStarts[i] += delta;
+            if (mSpanEnds[i] > mGapStart) mSpanEnds[i] += delta;
+        }
     }
 
     private void moveGapTo(int where) {
@@ -159,14 +155,10 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         if (where < mGapStart) {
             int overlap = mGapStart - where;
-
-            System.arraycopy(mText, where,
-                             mText, mGapStart + mGapLength - overlap, overlap);
+            System.arraycopy(mText, where, mText, mGapStart + mGapLength - overlap, overlap);
         } else /* where > mGapStart */ {
             int overlap = where - mGapStart;
-
-            System.arraycopy(mText, where + mGapLength - overlap,
-                             mText, mGapStart, overlap);
+            System.arraycopy(mText, where + mGapLength - overlap, mText, mGapStart, overlap);
         }
 
         // XXX be more clever
@@ -342,18 +334,17 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             boolean atEnd = (mGapStart + mGapLength == mText.length);
 
             for (int i = mSpanCount - 1; i >= 0; i--) {
-                if (mSpanStarts[i] >= start &&
-                        mSpanStarts[i] < mGapStart + mGapLength) {
+                if (mSpanStarts[i] >= start && mSpanStarts[i] < mGapStart + mGapLength) {
                     int flag = (mSpanFlags[i] & START_MASK) >> START_SHIFT;
 
-                if (flag == POINT || (flag == PARAGRAPH && atEnd))
-                    mSpanStarts[i] = mGapStart + mGapLength;
-                else
-                    mSpanStarts[i] = start;
+                    if (flag == POINT || (flag == PARAGRAPH && atEnd)) {
+                        mSpanStarts[i] = mGapStart + mGapLength;
+                    } else {
+                        mSpanStarts[i] = start;
+                    }
                 }
 
-                if (mSpanEnds[i] >= start &&
-                        mSpanEnds[i] < mGapStart + mGapLength) {
+                if (mSpanEnds[i] >= start && mSpanEnds[i] < mGapStart + mGapLength) {
                     int flag = (mSpanFlags[i] & END_MASK);
 
                     if (flag == POINT || (flag == PARAGRAPH && atEnd))
@@ -362,7 +353,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                         mSpanEnds[i] = start;
                 }
 
-                // remove 0-length SPAN_EXCLUSIVE_EXCLUSIVE
+                // remove 0-length SPAN_EXCLUSIVE_EXCLUSIVE, which are POINT_MARK and could
+                // get their boundaries swapped by the above code
                 if (mSpanEnds[i] < mSpanStarts[i]) {
                     removeSpan(i);
                 }
@@ -493,6 +485,11 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 if (c != '\n')
                     throw new RuntimeException("PARAGRAPH span must end at paragraph boundary");
             }
+        }
+
+        if (flags == Spanned.SPAN_EXCLUSIVE_EXCLUSIVE && start == end) {
+            throw new IllegalArgumentException(
+                    "SPAN_EXCLUSIVE_EXCLUSIVE spans cannot have a zero length");
         }
 
         if (start > mGapStart) {
