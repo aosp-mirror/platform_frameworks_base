@@ -111,7 +111,7 @@ English language interface:</p>
 <p>By including the description, speech-based accessibility services can announce "Add note" when a
 user moves focus to this button or hovers over it.</p>
 
-<p class="note">Note: For {@link android.widget.EditText} fields, provide an
+<p class="note"><strong>Note:</strong> For {@link android.widget.EditText} fields, provide an
 <a href="{@docRoot}reference/android/widget/TextView.html#attr_android:hint">android:hint</a>
 attribute to help users understand what content is expected.</p>
 
@@ -119,8 +119,10 @@ attribute to help users understand what content is expected.</p>
 
 <p>Focus navigation allows users with disabilities to step through user interface controls using a
 directional controller. Directional controllers can be physical, such as a clickable trackball,
-directional pad (D-Pad) or arrow keys, tab key navigation with an attached keyboard or a software
-application that provides an on-screen directional control.</p>
+directional pad (D-pad) or arrow keys, tab key navigation with an attached keyboard or a software
+application, such as the
+<a href="https://play.google.com/store/apps/details?id=com.googlecode.eyesfree.inputmethod.latin">
+Eyes-Free Keyboard</a>, that provides an on-screen directional control.</p>
 
 <p>A directional controller is a primary means of navigation for many users.
 Verify that all user interface (UI) controls in your application are accessible
@@ -566,5 +568,7 @@ option is not available.</p>
 <p>As part of your accessibility testing, you can test navigation of your application using focus,
 even if your test devices does not have a directional controller. The <a
 href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a> provides a
-simulated directional controller that you can easily use to test navigation. You can also use the
-arrow keys and Enter key on your keyboard with the Emulator to simulate use of a D-pad.</p>
+simulated directional controller that you can easily use to test navigation. You can also use a
+software-based directional controller, such as the one provided by the
+<a href="https://play.google.com/store/apps/details?id=com.googlecode.eyesfree.inputmethod.latin">
+Eyes-Free Keyboard</a> to simulate use of a D-pad.</p>
