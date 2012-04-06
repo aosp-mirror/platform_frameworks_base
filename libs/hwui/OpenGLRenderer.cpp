@@ -260,7 +260,7 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
             Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
             dirty.unionWith(localDirty);
 
-            if (result == DrawGlInfo::kStatusInvoke) {
+            if (result & DrawGlInfo::kStatusInvoke) {
                 mFunctors.push(f);
             }
         }
@@ -300,7 +300,7 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
         Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
         dirty.unionWith(localDirty);
 
-        if (result == DrawGlInfo::kStatusInvoke) {
+        if (result & DrawGlInfo::kStatusInvoke) {
             mFunctors.push(functor);
         }
     }
