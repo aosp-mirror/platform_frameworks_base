@@ -18,14 +18,11 @@ package com.android.internal.widget;
 
 import com.android.internal.app.ActionBarImpl;
 
-import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 /**

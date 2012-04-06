@@ -14421,9 +14421,48 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Request that the visibility of the status bar be changed.
-     * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE} or
-     * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.
+     * Request that the visibility of the status bar or other screen/window
+     * decorations be changed.
+     *
+     * <p>This method is used to put the over device UI into temporary modes
+     * where the user's attention is focused more on the application content,
+     * by dimming or hiding surrounding system affordances.  This is typically
+     * used in conjunction with {@link Window#FEATURE_ACTION_BAR_OVERLAY
+     * Window.FEATURE_ACTION_BAR_OVERLAY}, allowing the applications content
+     * to be placed behind the action bar (and with these flags other system
+     * affordances) so that smooth transitions between hiding and showing them
+     * can be done.
+     *
+     * <p>Two representative examples of the use of system UI visibility is
+     * implementing a content browsing application (like a magazine reader)
+     * and a video playing application.
+     *
+     * <p>The first code shows a typical implementation of a View in a content
+     * browsing application.  In this implementation, the application goes
+     * into a content-oriented mode by hiding the status bar and action bar,
+     * and putting the navigation elements into lights out mode.  The user can
+     * then interact with content while in this mode.  Such an application should
+     * provide an easy way for the user to toggle out of the mode (such as to
+     * check information in the status bar or access notifications).  In the
+     * implementation here, this is done simply by tapping on the content.
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/view/ContentBrowserActivity.java
+     *      content}
+     *
+     * <p>This second code sample shows a typical implementation of a View
+     * in a video playing application.  In this situation, while the video is
+     * playing the application would like to go into a complete full-screen mode,
+     * to use as much of the display as possible for the video.  When in this state
+     * the user can not interact with the application; the system intercepts
+     * touching on the screen to pop the UI out of full screen mode.
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/view/VideoPlayerActivity.java
+     *      content}
+     *
+     * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
+     * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
+     * and {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
      */
     public void setSystemUiVisibility(int visibility) {
         if (visibility != mSystemUiVisibility) {
@@ -14435,9 +14474,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Returns the status bar visibility that this view has requested.
-     * @return  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE} or
-     * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.
+     * Returns the last {@link #setSystemUiVisibility(int) that this view has requested.
+     * @return  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
+     * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
+     * and {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
      */
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;

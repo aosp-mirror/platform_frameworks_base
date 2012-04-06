@@ -2230,10 +2230,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // decide where the status bar goes ahead of time
         if (mStatusBar != null) {
             // apply any navigation bar insets
-            pf.left = df.left = vf.left = mDockLeft;
-            pf.top = df.top = vf.top = mDockTop;
-            pf.right = df.right = vf.right = mDockRight;
-            pf.bottom = df.bottom = vf.bottom = mDockBottom;
+            pf.left = df.left = mUnrestrictedScreenLeft;
+            pf.top = df.top = mUnrestrictedScreenTop;
+            pf.right = df.right = mUnrestrictedScreenWidth - mUnrestrictedScreenLeft;
+            pf.bottom = df.bottom = mUnrestrictedScreenHeight - mUnrestrictedScreenTop;
+            vf.left = mStableLeft;
+            vf.top = mStableTop;
+            vf.right = mStableRight;
+            vf.bottom = mStableBottom;
 
             mStatusBar.computeFrameLw(pf, df, vf, vf);
             final Rect r = mStatusBar.getFrameLw();
