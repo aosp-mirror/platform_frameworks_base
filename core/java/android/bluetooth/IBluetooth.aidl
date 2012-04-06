@@ -63,9 +63,7 @@ interface IBluetooth
     boolean setRemoteAlias(in BluetoothDevice device, in String name);
     int getRemoteClass(in BluetoothDevice device);
     ParcelUuid[] getRemoteUuids(in BluetoothDevice device);
-    //TODO(BT)
-    //boolean fetchRemoteUuids(in BluetoothDevice device, in ParcelUuid uuid,
-    //    in IBluetoothCallback callback);
+    boolean fetchRemoteUuids(in BluetoothDevice device);
 
     boolean setPin(in BluetoothDevice device, boolean accept, int len, in byte[] pinCode);
     boolean setPasskey(in BluetoothDevice device, boolean accept, int len, in byte[]

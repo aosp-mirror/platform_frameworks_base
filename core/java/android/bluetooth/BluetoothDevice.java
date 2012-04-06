@@ -829,12 +829,10 @@ public final class BluetoothDevice implements Parcelable {
       *               was started.
       */
      public boolean fetchUuidsWithSdp() {
-         //TODO(BT)
-         /*
         try {
-            return sService.fetchRemoteUuids(this, null, null);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}*/
-        return false;
+            return sService.fetchRemoteUuids(this);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+            return false;
     }
 
     /** @hide */
