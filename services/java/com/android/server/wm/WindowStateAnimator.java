@@ -121,6 +121,9 @@ class WindowStateAnimator {
     /** Was this window last hidden? */
     boolean mLastHidden;
 
+    int mAttrFlags;
+    int mAttrType;
+
     public WindowStateAnimator(final WindowManagerService service, final WindowState win,
                                final WindowState attachedWindow) {
         mService = service;
@@ -130,11 +133,12 @@ class WindowStateAnimator {
         mSession = win.mSession;
         mPolicy = mService.mPolicy;
         mContext = mService.mContext;
+        mAttrFlags = win.mAttrs.flags;
+        mAttrType = win.mAttrs.type;
     }
 
     public void setAnimation(Animation anim) {
-        if (localLOGV) Slog.v(
-            TAG, "Setting animation in " + this + ": " + anim);
+        if (localLOGV) Slog.v(TAG, "Setting animation in " + this + ": " + anim);
         mAnimating = false;
         mLocalAnimating = false;
         mAnimation = anim;
@@ -453,6 +457,7 @@ class WindowStateAnimator {
                         attrs.getTitle().toString(),
                         0, w, h, format, flags);
                 mWin.mHasSurface = true;
+                mAnimator.mWinAnimators.add(this);
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
                         "  CREATE SURFACE "
                         + mSurface + " IN SESSION "
@@ -463,12 +468,14 @@ class WindowStateAnimator {
                         + " / " + this);
             } catch (Surface.OutOfResourcesException e) {
                 mWin.mHasSurface = false;
+                mAnimator.mWinAnimators.remove(this);
                 Slog.w(TAG, "OutOfResourcesException creating surface");
                 mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
                 mDrawState = NO_SURFACE;
                 return null;
             } catch (Exception e) {
                 mWin.mHasSurface = false;
+                mAnimator.mWinAnimators.remove(this);
                 Slog.e(TAG, "Exception creating surface", e);
                 mDrawState = NO_SURFACE;
                 return null;
@@ -586,6 +593,7 @@ class WindowStateAnimator {
             mSurfaceShown = false;
             mSurface = null;
             mWin.mHasSurface =false;
+            mAnimator.mWinAnimators.remove(this);
         }
     }
 

@@ -259,6 +259,19 @@ public class AppWindowAnimator {
         return false;
     }
 
+    boolean showAllWindowsLocked() {
+        boolean isAnimating = false;
+        final int NW = mAppToken.allAppWindows.size();
+        for (int i=0; i<NW; i++) {
+            WindowStateAnimator winAnimator = mAppToken.allAppWindows.get(i).mWinAnimator;
+            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG,
+                    "performing show on: " + winAnimator);
+            winAnimator.performShowLocked();
+            isAnimating |= winAnimator.isAnimating();
+        }
+        return isAnimating;
+    }
+
     void dump(PrintWriter pw, String prefix) {
         if (freezingScreen) {
             pw.print(prefix); pw.print(" freezingScreen="); pw.println(freezingScreen);
