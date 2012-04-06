@@ -526,7 +526,7 @@ public abstract class HardwareRenderer {
         static final int SURFACE_STATE_SUCCESS = 1;
         static final int SURFACE_STATE_UPDATED = 2;
 
-        static final int FUNCTOR_PROCESS_DELAY = 2;
+        static final int FUNCTOR_PROCESS_DELAY = 4;
 
         static EGL10 sEgl;
         static EGLDisplay sEglDisplay;
