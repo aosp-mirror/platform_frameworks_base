@@ -391,9 +391,9 @@ public abstract class HardwareRenderer {
      * @param isOpaque Whether the layer should be opaque or not
      * 
      * @return A hardware layer
-     */    
+     */
     abstract HardwareLayer createHardwareLayer(boolean isOpaque);
-    
+
     /**
      * Creates a new hardware layer.
      * 
@@ -415,6 +415,15 @@ public abstract class HardwareRenderer {
      * @return A {@link SurfaceTexture}
      */
     abstract SurfaceTexture createSurfaceTexture(HardwareLayer layer);
+
+    /**
+     * Sets the {@link android.graphics.SurfaceTexture} that will be used to
+     * render into the specified hardware layer.
+     *
+     * @param layer The layer to render into using a {@link android.graphics.SurfaceTexture}
+     * @param surfaceTexture The {@link android.graphics.SurfaceTexture} to use for the layer
+     */
+    abstract void setSurfaceTexture(HardwareLayer layer, SurfaceTexture surfaceTexture);
 
     /**
      * Initializes the hardware renderer for the specified surface and setup the
@@ -1342,6 +1351,11 @@ public abstract class HardwareRenderer {
         @Override
         SurfaceTexture createSurfaceTexture(HardwareLayer layer) {
             return ((GLES20TextureLayer) layer).getSurfaceTexture();
+        }
+
+        @Override
+        void setSurfaceTexture(HardwareLayer layer, SurfaceTexture surfaceTexture) {
+            ((GLES20TextureLayer) layer).setSurfaceTexture(surfaceTexture);
         }
 
         @Override
