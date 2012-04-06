@@ -1488,6 +1488,31 @@ public class AccountManagerService
         }
     }
 
+    /**
+     * Returns all the accounts qualified by user.
+     * @hide
+     */
+    public AccountAndUser[] getAllAccounts() {
+        ArrayList<AccountAndUser> allAccounts = new ArrayList<AccountAndUser>();
+        List<UserInfo> users = getAllUsers();
+        if (users == null)  return new AccountAndUser[0];
+
+        synchronized(mUsers) {
+            for (UserInfo user : users) {
+                UserAccounts userAccounts = getUserAccounts(user.id);
+                if (userAccounts == null) continue;
+                synchronized (userAccounts.cacheLock) {
+                    Account[] accounts = getAccountsFromCacheLocked(userAccounts, null);
+                    for (int a = 0; a < accounts.length; a++) {
+                        allAccounts.add(new AccountAndUser(accounts[a], user.id));
+                    }
+                }
+            }
+        }
+        AccountAndUser[] accountsArray = new AccountAndUser[allAccounts.size()];
+        return allAccounts.toArray(accountsArray);
+    }
+
     public Account[] getAccounts(String type) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "getAccounts: accountType " + type

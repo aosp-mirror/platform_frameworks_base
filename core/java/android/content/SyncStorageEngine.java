@@ -25,7 +25,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.accounts.Account;
-import android.content.SyncManager.AccountAndUser;
+import android.accounts.AccountAndUser;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;

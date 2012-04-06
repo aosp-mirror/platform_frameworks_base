@@ -22,6 +22,7 @@ import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
 import android.accounts.Account;
+import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerService;
 import android.accounts.OnAccountsUpdateListener;
@@ -237,22 +238,14 @@ public class SyncManager implements OnAccountsUpdateListener {
 
         int count = 0;
 
-        // For all known users on the system, get their accounts and add them to the list
+        // Get accounts from AccountManager for all the users on the system
         // TODO: Limit this to active users, when such a concept exists.
+        AccountAndUser[] allAccounts = AccountManagerService.getSingleton().getAllAccounts();
         for (UserInfo user : users) {
-            accounts = AccountManagerService.getSingleton().getAccounts(user.id);
-            count += accounts.length;
-        }
-
-        AccountAndUser[] allAccounts = new AccountAndUser[count];
-        int index = 0;
-        for (UserInfo user : users) {
-            accounts = AccountManagerService.getSingleton().getAccounts(user.id);
-            for (Account account : accounts) {
-                allAccounts[index++] = new AccountAndUser(account, user.id);
-            }
             if (mBootCompleted) {
-                mSyncStorageEngine.doDatabaseCleanup(accounts, user.id);
+                Account[] accountsForUser =
+                        AccountManagerService.getSingleton().getAccounts(user.id);
+                mSyncStorageEngine.doDatabaseCleanup(accountsForUser, user.id);
             }
         }
 
@@ -337,33 +330,6 @@ public class SyncManager implements OnAccountsUpdateListener {
     private final SyncHandler mSyncHandler;
 
     private volatile boolean mBootCompleted = false;
-
-    static class AccountAndUser {
-        Account account;
-        int userId;
-
-        AccountAndUser(Account account, int userId) {
-            this.account = account;
-            this.userId = userId;
-        }
-
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof AccountAndUser)) return false;
-            final AccountAndUser other = (AccountAndUser) o;
-            return this.account.equals(other.account)
-                    && this.userId == other.userId;
-        }
-
-        @Override
-        public int hashCode() {
-            return account.hashCode() + userId;
-        }
-
-        public String toString() {
-            return account.toString() + " u" + userId;
-        }
-    }
 
     private ConnectivityManager getConnectivityManager() {
         synchronized (this) {
