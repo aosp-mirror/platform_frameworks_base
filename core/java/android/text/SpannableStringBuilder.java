@@ -50,6 +50,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     public SpannableStringBuilder(CharSequence text, int start, int end) {
         int srclen = end - start;
 
+        if (srclen < 0) throw new StringIndexOutOfBoundsException();
+
         int len = ArrayUtils.idealCharArraySize(srclen + 1);
         mText = new char[len];
         mGapStart = srclen;
@@ -153,7 +155,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         if (where == mGapStart)
             return;
 
-        boolean atend = (where == length());
+        boolean atEnd = (where == length());
 
         if (where < mGapStart) {
             int overlap = mGapStart - where;
@@ -179,7 +181,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             else if (start == where) {
                 int flag = (mSpanFlags[i] & START_MASK) >> START_SHIFT;
 
-                if (flag == POINT || (atend && flag == PARAGRAPH))
+                if (flag == POINT || (atEnd && flag == PARAGRAPH))
                     start += mGapLength;
             }
 
@@ -190,7 +192,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             else if (end == where) {
                 int flag = (mSpanFlags[i] & END_MASK);
 
-                if (flag == POINT || (atend && flag == PARAGRAPH))
+                if (flag == POINT || (atEnd && flag == PARAGRAPH))
                     end += mGapLength;
             }
 
@@ -397,7 +399,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
     // Documentation from interface
     public SpannableStringBuilder replace(final int start, final int end,
-                        CharSequence tb, int tbstart, int tbend) {
+            CharSequence tb, int tbstart, int tbend) {
         int filtercount = mFilters.length;
         for (int i = 0; i < filtercount; i++) {
             CharSequence repl = mFilters[i].filter(tb, tbstart, tbend, this, start, end);
@@ -419,53 +421,26 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         TextWatcher[] textWatchers = getSpans(start, start + origLen, TextWatcher.class);
         sendBeforeTextChanged(textWatchers, start, origLen, newLen);
 
-        if (origLen == 0 || newLen == 0) {
-            change(start, end, tb, tbstart, tbend);
-        } else {
-            int selstart = Selection.getSelectionStart(this);
-            int selend = Selection.getSelectionEnd(this);
+        // Try to keep the cursor / selection at the same relative position during
+        // a text replacement. If replaced or replacement text length is zero, this
+        // is already taken care of.
+        boolean adjustSelection = origLen != 0 && newLen != 0;
+        int selstart = 0;
+        int selend = 0;
+        if (adjustSelection) {
+            selstart = Selection.getSelectionStart(this);
+            selend = Selection.getSelectionEnd(this);
+        }
 
-            // XXX just make the span fixups in change() do the right thing
-            // instead of this madness!
+        checkRange("replace", start, end);
 
-            checkRange("replace", start, end);
-            moveGapTo(end);
+        change(start, end, tb, tbstart, tbend);
 
-            if (mGapLength < 2)
-                resizeFor(length() + 1);
-
-            for (int i = mSpanCount - 1; i >= 0; i--) {
-                if (mSpanStarts[i] == mGapStart)
-                    mSpanStarts[i]++;
-
-                if (mSpanEnds[i] == mGapStart)
-                    mSpanEnds[i]++;
-            }
-
-            mText[mGapStart] = ' ';
-            mGapStart++;
-            mGapLength--;
-
-            if (mGapLength < 1) {
-                new Exception("mGapLength < 1").printStackTrace();
-            }
-
-            change(start + 1, start + 1, tb, tbstart, tbend);
-            change(start, start + 1, "", 0, 0);
-            change(start + newLen, start + newLen + origLen, "", 0, 0);
-
-            /*
-             * Special case to keep the cursor in the same position
-             * if it was somewhere in the middle of the replaced region.
-             * If it was at the start or the end or crossing the whole
-             * replacement, it should already be where it belongs.
-             * TODO: Is there some more general mechanism that could
-             * accomplish this?
-             */
+        if (adjustSelection) {
             if (selstart > start && selstart < end) {
                 long off = selstart - start;
 
-                off = off * newLen / (end - start);
+                off = off * newLen / origLen;
                 selstart = (int) off + start;
 
                 setSpan(false, Selection.SELECTION_START, selstart, selstart,
@@ -474,7 +449,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             if (selend > start && selend < end) {
                 long off = selend - start;
 
-                off = off * newLen / (end - start);
+                off = off * newLen / origLen;
                 selend = (int) off + start;
 
                 setSpan(false, Selection.SELECTION_END, selend, selend, Spanned.SPAN_POINT_POINT);
