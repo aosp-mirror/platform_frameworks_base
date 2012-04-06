@@ -490,13 +490,7 @@ public class AppSecurityPermissions  implements View.OnClickListener {
         // Development permissions are only shown to the user if they are already
         // granted to the app -- if we are installing an app and they are not
         // already granted, they will not be granted as part of the install.
-        // Note we also need the app to have specified this permission is not
-        // required -- this is not technically needed, but it helps various things
-        // if we ensure apps always mark development permissions as option, so that
-        // even not knowing what a permission is we can still know whether it will
-        // be granted to the app when it is installed.
         if ((existingReqFlags&PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0
-                && (newReqFlags&PackageInfo.REQUESTED_PERMISSION_REQUIRED) == 0
                 && (pInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
             return true;
         }

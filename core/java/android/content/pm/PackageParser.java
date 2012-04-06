@@ -989,14 +989,16 @@ public class PackageParser {
                 // that may change.
                 String name = sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestUsesPermission_name);
+                /* Not supporting optional permissions yet.
                 boolean required = sa.getBoolean(
                         com.android.internal.R.styleable.AndroidManifestUsesPermission_required, true);
+                */
 
                 sa.recycle();
 
                 if (name != null && !pkg.requestedPermissions.contains(name)) {
                     pkg.requestedPermissions.add(name.intern());
-                    pkg.requestedPermissionsRequired.add(required ? Boolean.TRUE : Boolean.FALSE);
+                    pkg.requestedPermissionsRequired.add(Boolean.TRUE);
                 }
 
                 XmlUtils.skipCurrentTag(parser);
