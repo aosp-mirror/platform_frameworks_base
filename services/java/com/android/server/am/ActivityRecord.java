@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import com.android.internal.app.ResolverActivity;
 import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
 
@@ -382,7 +383,7 @@ final class ActivityRecord {
                         _intent.getData() == null &&
                         _intent.getType() == null &&
                         (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
-                        !"android".equals(realActivity.getClassName())) {
+                        !ResolverActivity.class.getName().equals(realActivity.getClassName())) {
                     // This sure looks like a home activity!
                     // Note the last check is so we don't count the resolver
                     // activity as being home...  really, we don't care about
