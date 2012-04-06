@@ -4059,14 +4059,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     void ensureInputFocusOnFirstFocusable() {
         View root = getRootView();
         if (root != null) {
-            // Find the first focusble from the top.
-            View next = root.focusSearch(FOCUS_FORWARD);
-            if (next != null) {
-                // Giving focus to the found focusable will not
-                // perform a search since we found a view that is
-                // guaranteed to be able to take focus.
-                next.requestFocus(FOCUS_FORWARD);
-            }
+            root.requestFocus(FOCUS_FORWARD);
         }
     }
 
