@@ -1,0 +1,165 @@
+page.title=Loading Large Bitmaps Efficiently
+parent.title=Displaying Bitmaps Efficiently
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Processing Bitmaps Off the UI Thread
+next.link=process-bitmap.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#read-bitmap">Read Bitmap Dimensions and Type</a></li>
+  <li><a href="#load-bitmap">Load a Scaled Down Version into Memory</a></li>
+</ol>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="{@docRoot}shareables/training/BitmapFun.zip" class="button">Download the sample</a>
+  <p class="filename">BitmapFun.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>Images come in all shapes and sizes. In many cases they are larger than required for a typical
+application user interface (UI). For example, the system Gallery application displays photos taken
+using your Android devices's camera which are typically much higher resolution than the screen
+density of your device.</p>
+
+<p>Given that you are working with limited memory, ideally you only want to load a lower resolution
+version in memory. The lower resolution version should match the size of the UI component that
+displays it. An image with a higher resolution does not provide any visible benefit, but still takes
+up precious memory and incurs additional performance overhead due to additional on the fly
+scaling.</p>
+
+<p>This lesson walks you through decoding large bitmaps without exceeding the per application
+memory limit by loading a smaller subsampled version in memory.</p>
+
+<h2 id="read-bitmap">Read Bitmap Dimensions and Type</h2>
+
+<p>The {@link android.graphics.BitmapFactory} class provides several decoding methods ({@link
+android.graphics.BitmapFactory#decodeByteArray(byte[],int,int,android.graphics.BitmapFactory.Options)
+decodeByteArray()}, {@link
+android.graphics.BitmapFactory#decodeFile(java.lang.String,android.graphics.BitmapFactory.Options)
+decodeFile()}, {@link
+android.graphics.BitmapFactory#decodeResource(android.content.res.Resources,int,android.graphics.BitmapFactory.Options)
+decodeResource()}, etc.) for creating a {@link android.graphics.Bitmap} from various sources. Choose
+the most appropriate decode method based on your image data source. These methods attempt to
+allocate memory for the constructed bitmap and therefore can easily result in an {@code OutOfMemory}
+exception. Each type of decode method has additional signatures that let you specify decoding
+options via the {@link android.graphics.BitmapFactory.Options} class. Setting the {@link
+android.graphics.BitmapFactory.Options#inJustDecodeBounds} property to {@code true} while decoding
+avoids memory allocation, returning {@code null} for the bitmap object but setting {@link
+android.graphics.BitmapFactory.Options#outWidth}, {@link
+android.graphics.BitmapFactory.Options#outHeight} and {@link
+android.graphics.BitmapFactory.Options#outMimeType}. This technique allows you to read the
+dimensions and type of the image data prior to construction (and memory allocation) of the
+bitmap.</p>
+
+<pre>
+BitmapFactory.Options options = new BitmapFactory.Options();
+options.inJustDecodeBounds = true;
+BitmapFactory.decodeResource(getResources(), R.id.myimage, options);
+int imageHeight = options.outHeight;
+int imageWidth = options.outWidth;
+String imageType = options.outMimeType;
+</pre>
+
+<p>To avoid {@code java.lang.OutOfMemory} exceptions, check the dimensions of a bitmap before
+decoding it, unless you absolutely trust the source to provide you with predictably sized image data
+that comfortably fits within the available memory.</p>
+
+<h2 id="load-bitmap">Load a Scaled Down Version into Memory</h2>
+
+<p>Now that the image dimensions are known, they can be used to decide if the full image should be
+loaded into memory or if a subsampled version should be loaded instead. Here are some factors to
+consider:</p>
+
+<ul>
+  <li>Estimated memory usage of loading the full image in memory.</li>
+  <li>Amount of memory you are willing to commit to loading this image given any other memory
+  requirements of your application.</li>
+  <li>Dimensions of the target {@link android.widget.ImageView} or UI component that the image
+  is to be loaded into.</li>
+  <li>Screen size and density of the current device.</li>
+</ul>
+
+<p>For example, it’s not worth loading a 1024x768 pixel image into memory if it will eventually be
+displayed in a 128x96 pixel thumbnail in an {@link android.widget.ImageView}.</p>
+
+<p>To tell the decoder to subsample the image, loading a smaller version into memory, set {@link
+android.graphics.BitmapFactory.Options#inSampleSize} to {@code true} in your {@link
+android.graphics.BitmapFactory.Options} object. For example, an image with resolution 2048x1536 that
+is decoded with an {@link android.graphics.BitmapFactory.Options#inSampleSize} of 4 produces a
+bitmap of approximately 512x384. Loading this into memory uses 0.75MB rather than 12MB for the full
+image (assuming a bitmap configuration of {@link android.graphics.Bitmap.Config ARGB_8888}). Here’s
+a method to calculate a the sample size value based on a target width and height:</p>
+
+<pre>
+public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    // Raw height and width of image
+    final int height = options.outHeight;
+    final int width = options.outWidth;
+    int inSampleSize = 1;
+
+    if (height > reqHeight || width > reqWidth) {
+        if (width > height) {
+            inSampleSize = Math.round((float)height / (float)reqHeight);
+        } else {
+            inSampleSize = Math.round((float)width / (float)reqWidth);
+        }
+    }
+    return inSampleSize;
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Using powers of 2 for {@link
+android.graphics.BitmapFactory.Options#inSampleSize} values is faster and more efficient for the
+decoder. However, if you plan to cache the resized versions in memory or on disk, it’s usually still
+worth decoding to the most appropriate image dimensions to save space.</p>
+
+<p>To use this method, first decode with {@link
+android.graphics.BitmapFactory.Options#inJustDecodeBounds} set to {@code true}, pass the options
+through and then decode again using the new {@link
+android.graphics.BitmapFactory.Options#inSampleSize} value and {@link
+android.graphics.BitmapFactory.Options#inJustDecodeBounds} set to {@code false}:</p>
+
+<a name="decodeSampledBitmapFromResource"></a>
+<pre>
+public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
+        int reqWidth, int reqHeight) {
+
+    // First decode with inJustDecodeBounds=true to check dimensions
+    final BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inJustDecodeBounds = true;
+    BitmapFactory.decodeResource(res, resId, options);
+
+    // Calculate inSampleSize
+    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+    // Decode bitmap with inSampleSize set
+    options.inJustDecodeBounds = false;
+    return BitmapFactory.decodeResource(res, resId, options);
+}
+</pre>
+
+<p>This method makes it easy to load a bitmap of arbitrarily large size into an {@link
+android.widget.ImageView} that displays a 100x100 pixel thumbnail, as shown in the following example
+code:</p>
+
+<pre>
+mImageView.setImageBitmap(
+    decodeSampledBitmapFromResource(getResources(), R.id.myimage, 100, 100));
+</pre>
+
+<p>You can follow a similar process to decode bitmaps from other sources, by substituting the
+appropriate {@link
+android.graphics.BitmapFactory#decodeByteArray(byte[],int,int,android.graphics.BitmapFactory.Options)
+BitmapFactory.decode*} method as needed.</p>
