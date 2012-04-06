@@ -3303,6 +3303,8 @@
     <string name="description_target_silent">Silent</string>
     <!-- Description of the sound on target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_target_soundon">Sound on</string>
+    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
+    <string name="description_target_search">Search</string>
 
     <!-- Description of the unlock handle in the Slide unlock screen for tablets. [CHAR LIMIT=NONE] -->
     <string name="description_target_unlock_tablet">Swipe to unlock.</string>
