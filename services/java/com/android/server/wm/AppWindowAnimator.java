@@ -224,7 +224,7 @@ public class AppWindowAnimator {
 
         hasTransformation = false;
 
-        if (!animating) {
+        if (!animating && animation == null) {
             return false;
         }
 
