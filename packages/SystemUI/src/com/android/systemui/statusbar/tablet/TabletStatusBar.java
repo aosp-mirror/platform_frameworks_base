@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.tablet;
 
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -174,7 +175,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     KeyEvent mSpaceBarKeyEvent = null;
 
     View mCompatibilityHelpDialog = null;
-    
+
     // for disabling the status bar
     int mDisabled = 0;
 
@@ -192,7 +193,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         addStatusBarWindow();
         addPanelWindows();
     }
-    
+
     private void addStatusBarWindow() {
         final View sb = makeStatusBarView();
 
@@ -328,6 +329,10 @@ public class TabletStatusBar extends BaseStatusBar implements
         mRecentTasksLoader = new RecentTasksLoader(context);
         updateRecentsPanel();
 
+        // Search Panel
+        mStatusBarView.setBar(this);
+        updateSearchPanel();
+
         // Input methods Panel
         mInputMethodsPanel = (InputMethodsPanel) View.inflate(context,
                 R.layout.system_bar_input_methods_panel, null);
@@ -350,7 +355,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.windowAnimations = R.style.Animation_RecentPanel;
 
         WindowManagerImpl.getDefault().addView(mInputMethodsPanel, lp);
-        
+
         // Compatibility mode selector panel
         mCompatModePanel = (CompatModePanel) View.inflate(context,
                 R.layout.system_bar_compat_mode_panel, null);
@@ -373,7 +378,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.windowAnimations = android.R.style.Animation_Dialog;
 
         WindowManagerImpl.getDefault().addView(mCompatModePanel, lp);
-        
+
         mRecentButton.setOnTouchListener(mRecentsPanel);
 
         mPile = (NotificationRowLayout)mNotificationPanel.findViewById(R.id.content);
@@ -646,9 +651,62 @@ public class TabletStatusBar extends BaseStatusBar implements
         return lp;
     }
 
+    @Override
+    protected WindowManager.LayoutParams getSearchLayoutParams(LayoutParams layoutParams) {
+        boolean opaque = false;
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
+        if (ActivityManager.isHighEndGfx(mDisplay)) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        } else {
+            lp.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+            lp.dimAmount = 0.7f;
+        }
+        lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        lp.setTitle("SearchPanel");
+        // TODO: Define custom animation for Search panel
+        lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
+                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+        return lp;
+    }
+
     protected void updateRecentsPanel() {
         super.updateRecentsPanel(R.layout.system_bar_recent_panel);
         mRecentsPanel.setStatusBarView(mStatusBarView);
+    }
+
+    @Override
+    protected void updateSearchPanel() {
+        super.updateSearchPanel();
+        mSearchPanelView.setStatusBarView(mStatusBarView);
+        mStatusBarView.setDelegateView(mSearchPanelView);
+    }
+
+    @Override
+    public void showSearchPanel() {
+        super.showSearchPanel();
+        WindowManager.LayoutParams lp =
+            (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
+        lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        lp.flags &= ~WindowManager.LayoutParams.FLAG_SLIPPERY;
+        WindowManagerImpl.getDefault().updateViewLayout(mStatusBarView, lp);
+    }
+
+    @Override
+    public void hideSearchPanel() {
+        super.hideSearchPanel();
+        WindowManager.LayoutParams lp =
+            (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
+        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
+        WindowManagerImpl.getDefault().updateViewLayout(mStatusBarView, lp);
     }
 
     public int getStatusBarHeight() {
@@ -1191,7 +1249,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         if (mCompatibilityHelpDialog != null) {
             return;
         }
-        
+
         mCompatibilityHelpDialog = View.inflate(mContext, R.layout.compat_mode_help, null);
         View button = mCompatibilityHelpDialog.findViewById(R.id.button);
 
@@ -1227,7 +1285,7 @@ public class TabletStatusBar extends BaseStatusBar implements
             mCompatibilityHelpDialog = null;
         }
     }
-    
+
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         mInputMethodSwitchButton.setImeWindowStatus(token,
                 (vis & InputMethodService.IME_ACTIVE) != 0);

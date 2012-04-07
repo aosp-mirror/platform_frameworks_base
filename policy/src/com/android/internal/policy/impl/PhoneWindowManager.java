@@ -131,6 +131,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
@@ -216,16 +217,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SYSTEM_OVERLAY_LAYER = 18;
     // the navigation bar, if available, shows atop most things
     static final int NAVIGATION_BAR_LAYER = 19;
+    // some panels (e.g. search) need to show on top of the navigation bar
+    static final int NAVIGATION_BAR_PANEL_LAYER = 20;
     // system-level error dialogs
-    static final int SYSTEM_ERROR_LAYER = 20;
+    static final int SYSTEM_ERROR_LAYER = 21;
     // the drag layer: input for drag-and-drop is associated with this window,
     // which sits above all other focusable windows
-    static final int DRAG_LAYER = 21;
-    static final int SECURE_SYSTEM_OVERLAY_LAYER = 22;
-    static final int BOOT_PROGRESS_LAYER = 23;
+    static final int DRAG_LAYER = 22;
+    static final int SECURE_SYSTEM_OVERLAY_LAYER = 23;
+    static final int BOOT_PROGRESS_LAYER = 24;
     // the (mouse) pointer layer
-    static final int POINTER_LAYER = 24;
-    static final int HIDDEN_NAV_CONSUMER_LAYER = 25;
+    static final int POINTER_LAYER = 25;
+    static final int HIDDEN_NAV_CONSUMER_LAYER = 26;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -1335,6 +1338,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return POINTER_LAYER;
         case TYPE_NAVIGATION_BAR:
             return NAVIGATION_BAR_LAYER;
+        case TYPE_NAVIGATION_BAR_PANEL:
+            return NAVIGATION_BAR_PANEL_LAYER;
         case TYPE_BOOT_PROGRESS:
             return BOOT_PROGRESS_LAYER;
         case TYPE_HIDDEN_NAV_CONSUMER:
@@ -1576,6 +1581,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mNavigationBar = win;
                 if (DEBUG_LAYOUT) Log.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
+                break;
+            case TYPE_NAVIGATION_BAR_PANEL:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                        "PhoneWindowManager");
                 break;
             case TYPE_STATUS_BAR_PANEL:
                 mContext.enforceCallingOrSelfPermission(
@@ -2480,7 +2490,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                     "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
                                     pf.left, pf.top, pf.right, pf.bottom));
                     }
-                } else if (attrs.type == TYPE_NAVIGATION_BAR) {
+                } else if (attrs.type == TYPE_NAVIGATION_BAR
+                        || attrs.type == TYPE_NAVIGATION_BAR_PANEL) {
                     // The navigation bar has Real Ultimate Power.
                     pf.left = df.left = mUnrestrictedScreenLeft;
                     pf.top = df.top = mUnrestrictedScreenTop;

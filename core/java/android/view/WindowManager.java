@@ -429,6 +429,12 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_DREAM = FIRST_SYSTEM_WINDOW+23;
 
         /**
+         * Window type: Navigation bar panel (when navigation bar is distinct from status bar)
+         * @hide
+         */
+        public static final int TYPE_NAVIGATION_BAR_PANEL = FIRST_SYSTEM_WINDOW+24;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;

@@ -59,7 +59,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_TOP_APP_WINDOW_CHANGED = 8 << MSG_SHIFT;
     private static final int MSG_SHOW_IME_BUTTON        = 9 << MSG_SHIFT;
     private static final int MSG_SET_HARD_KEYBOARD_STATUS = 10 << MSG_SHIFT;
-    
+
     private static final int MSG_TOGGLE_RECENT_APPS       = 11 << MSG_SHIFT;
     private static final int MSG_PRELOAD_RECENT_APPS      = 12 << MSG_SHIFT;
     private static final int MSG_CANCEL_PRELOAD_RECENT_APPS       = 13 << MSG_SHIFT;
@@ -95,6 +95,8 @@ public class CommandQueue extends IStatusBar.Stub {
         public void setHardKeyboardStatus(boolean available, boolean enabled);
         public void toggleRecentApps();
         public void preloadRecentApps();
+        public void showSearchPanel();
+        public void hideSearchPanel();
         public void cancelPreloadRecentApps();
         public void setNavigationIconHints(int hints);
     }

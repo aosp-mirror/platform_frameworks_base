@@ -31,10 +31,12 @@ import android.util.Slog;
 import android.view.animation.AccelerateInterpolator;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Surface;
 import android.view.WindowManager;
+import android.view.WindowManagerImpl;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -43,8 +45,9 @@ import java.io.PrintWriter;
 import java.lang.StringBuilder;
 
 import com.android.internal.statusbar.IStatusBarService;
-
 import com.android.systemui.R;
+import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.DelegateViewHelper;
 
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
@@ -67,6 +70,8 @@ public class NavigationBarView extends LinearLayout {
     boolean mHidden, mLowProfile, mShowMenu;
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
+
+    private DelegateViewHelper mDelegateHelper;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -93,6 +98,19 @@ public class NavigationBarView extends LinearLayout {
                     break;
             }
         }
+    }
+
+    public void setDelegateView(View view) {
+        mDelegateHelper.setDelegateView(view);
+    }
+
+    public void setBar(BaseStatusBar phoneStatusBar) {
+        mDelegateHelper.setBar(phoneStatusBar);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        return mDelegateHelper.onInterceptTouchEvent(event);
     }
 
     private H mHandler = new H();
@@ -127,6 +145,7 @@ public class NavigationBarView extends LinearLayout {
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
         mVertical = false;
         mShowMenu = false;
+        mDelegateHelper = new DelegateViewHelper(this);
     }
 
     View.OnTouchListener mLightsOutListener = new View.OnTouchListener() {
@@ -411,4 +430,5 @@ public class NavigationBarView extends LinearLayout {
                 );
         pw.println("    }");
     }
+
 }

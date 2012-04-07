@@ -27,7 +27,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -142,6 +141,7 @@ public class MultiWaveView extends View {
     private int mTargetResourceId;
     private int mTargetDescriptionsResourceId;
     private int mDirectionDescriptionsResourceId;
+    private boolean mAlwaysTrackFinger;
 
     public MultiWaveView(Context context) {
         this(context, null);
@@ -168,6 +168,7 @@ public class MultiWaveView extends View {
         mTapRadius = mHandleDrawable.getWidth()/2;
         mOuterRing = new TargetDrawable(res,
                 a.peekValue(R.styleable.MultiWaveView_waveDrawable).resourceId);
+        mAlwaysTrackFinger = a.getBoolean(R.styleable.MultiWaveView_alwaysTrackFinger, false);
 
         // Read chevron animation drawables
         final int chevrons[] = { R.styleable.MultiWaveView_leftChevronDrawable,
@@ -634,7 +635,6 @@ public class MultiWaveView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getAction();
-
         boolean handled = false;
         switch (action) {
             case MotionEvent.ACTION_DOWN:
@@ -805,7 +805,7 @@ public class MultiWaveView extends View {
         final float y = event.getY();
         final float dx = x - mWaveCenterX;
         final float dy = y - mWaveCenterY;
-        if (dist2(dx,dy) <= getScaledTapRadiusSquared()) {
+        if (mAlwaysTrackFinger || dist2(dx,dy) <= getScaledTapRadiusSquared()) {
             if (DEBUG) Log.v(TAG, "** Handle HIT");
             switchToState(STATE_FIRST_TOUCH, x, y);
             moveHandleTo(x, y, false);
