@@ -950,8 +950,9 @@ void NativeInputManager::loadPointerResources(PointerResources* outResources) {
 
 static jint nativeInit(JNIEnv* env, jclass clazz,
         jobject serviceObj, jobject contextObj, jobject messageQueueObj) {
-    sp<Looper> looper = android_os_MessageQueue_getLooper(env, messageQueueObj);
-    NativeInputManager* im = new NativeInputManager(contextObj, serviceObj, looper);
+    sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
+    NativeInputManager* im = new NativeInputManager(contextObj, serviceObj,
+            messageQueue->getLooper());
     im->incStrong(serviceObj);
     return reinterpret_cast<jint>(im);
 }
