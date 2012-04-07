@@ -4531,8 +4531,6 @@ public final class ContactsContract {
         /**
          * The phone number's E164 representation.
          * <P>Type: TEXT</P>
-         *
-         * @hide
          */
         public static final String NORMALIZED_NUMBER = "normalized_number";
     }
@@ -5408,10 +5406,10 @@ public final class ContactsContract {
             public static final String NUMBER = DATA;
 
             /**
-             * The phone number's E164 representation.
+             * The phone number's E164 representation. This value can be omitted in which
+             * case the provider will try to automatically infer it. If present, {@link #NUMBER}
+             * has to be set as well (it will be ignored otherwise).
              * <P>Type: TEXT</P>
-             *
-             * @hide
              */
             public static final String NORMALIZED_NUMBER = DATA4;
 
