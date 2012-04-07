@@ -416,8 +416,8 @@ struct NativeCode : public ANativeActivity {
         if (env != NULL && clazz != NULL) {
             env->DeleteGlobalRef(clazz);
         }
-        if (looper != NULL && mainWorkRead >= 0) {
-            looper->removeFd(mainWorkRead);
+        if (messageQueue != NULL && mainWorkRead >= 0) {
+            messageQueue->getLooper()->removeFd(mainWorkRead);
         }
         if (nativeInputQueue != NULL) {
             nativeInputQueue->mWorkWrite = -1;
@@ -481,7 +481,7 @@ struct NativeCode : public ANativeActivity {
     // These are used to wake up the main thread to process work.
     int mainWorkRead;
     int mainWorkWrite;
-    sp<Looper> looper;
+    sp<MessageQueue> messageQueue;
 };
 
 void android_NativeActivity_finish(ANativeActivity* activity) {
@@ -515,16 +515,6 @@ void android_NativeActivity_hideSoftInput(
 
 // ------------------------------------------------------------------------
 
-static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
-   if (env->ExceptionCheck()) {
-       ALOGE("An exception was thrown by callback '%s'.", methodName);
-       LOGE_EX(env);
-       env->ExceptionClear();
-       return true;
-   }
-   return false;
-}
-
 /*
  * Callback for handling native events on the application's main thread.
  */
@@ -551,7 +541,8 @@ static int mainWorkCallback(int fd, int events, void* data) {
                 if (inputEventObj) {
                     handled = code->env->CallBooleanMethod(code->clazz,
                             gNativeActivityClassInfo.dispatchUnhandledKeyEvent, inputEventObj);
-                    checkAndClearExceptionFromCallback(code->env, "dispatchUnhandledKeyEvent");
+                    code->messageQueue->raiseAndClearException(
+                            code->env, "dispatchUnhandledKeyEvent");
                     code->env->DeleteLocalRef(inputEventObj);
                 } else {
                     ALOGE("Failed to obtain key event for dispatchUnhandledKeyEvent.");
@@ -566,7 +557,7 @@ static int mainWorkCallback(int fd, int events, void* data) {
                 if (inputEventObj) {
                     code->env->CallVoidMethod(code->clazz,
                             gNativeActivityClassInfo.preDispatchKeyEvent, inputEventObj, seq);
-                    checkAndClearExceptionFromCallback(code->env, "preDispatchKeyEvent");
+                    code->messageQueue->raiseAndClearException(code->env, "preDispatchKeyEvent");
                     code->env->DeleteLocalRef(inputEventObj);
                 } else {
                     ALOGE("Failed to obtain key event for preDispatchKeyEvent.");
@@ -575,27 +566,27 @@ static int mainWorkCallback(int fd, int events, void* data) {
         } break;
         case CMD_FINISH: {
             code->env->CallVoidMethod(code->clazz, gNativeActivityClassInfo.finish);
-            checkAndClearExceptionFromCallback(code->env, "finish");
+            code->messageQueue->raiseAndClearException(code->env, "finish");
         } break;
         case CMD_SET_WINDOW_FORMAT: {
             code->env->CallVoidMethod(code->clazz,
                     gNativeActivityClassInfo.setWindowFormat, work.arg1);
-            checkAndClearExceptionFromCallback(code->env, "setWindowFormat");
+            code->messageQueue->raiseAndClearException(code->env, "setWindowFormat");
         } break;
         case CMD_SET_WINDOW_FLAGS: {
             code->env->CallVoidMethod(code->clazz,
                     gNativeActivityClassInfo.setWindowFlags, work.arg1, work.arg2);
-            checkAndClearExceptionFromCallback(code->env, "setWindowFlags");
+            code->messageQueue->raiseAndClearException(code->env, "setWindowFlags");
         } break;
         case CMD_SHOW_SOFT_INPUT: {
             code->env->CallVoidMethod(code->clazz,
                     gNativeActivityClassInfo.showIme, work.arg1);
-            checkAndClearExceptionFromCallback(code->env, "showIme");
+            code->messageQueue->raiseAndClearException(code->env, "showIme");
         } break;
         case CMD_HIDE_SOFT_INPUT: {
             code->env->CallVoidMethod(code->clazz,
                     gNativeActivityClassInfo.hideIme, work.arg1);
-            checkAndClearExceptionFromCallback(code->env, "hideIme");
+            code->messageQueue->raiseAndClearException(code->env, "hideIme");
         } break;
         default:
             ALOGW("Unknown work command: %d", work.cmd);
@@ -634,9 +625,9 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
             return 0;
         }
         
-        code->looper = android_os_MessageQueue_getLooper(env, messageQueue);
-        if (code->looper == NULL) {
-            ALOGW("Unable to retrieve MessageQueue's Looper");
+        code->messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueue);
+        if (code->messageQueue == NULL) {
+            ALOGW("Unable to retrieve native MessageQueue");
             delete code;
             return 0;
         }
@@ -655,7 +646,8 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
         result = fcntl(code->mainWorkWrite, F_SETFL, O_NONBLOCK);
         SLOGW_IF(result != 0, "Could not make main work write pipe "
                 "non-blocking: %s", strerror(errno));
-        code->looper->addFd(code->mainWorkRead, 0, ALOOPER_EVENT_INPUT, mainWorkCallback, code);
+        code->messageQueue->getLooper()->addFd(
+                code->mainWorkRead, 0, ALOOPER_EVENT_INPUT, mainWorkCallback, code);
         
         code->ANativeActivity::callbacks = &code->callbacks;
         if (env->GetJavaVM(&code->vm) < 0) {

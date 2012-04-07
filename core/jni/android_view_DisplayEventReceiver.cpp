@@ -45,7 +45,7 @@ static struct {
 class NativeDisplayEventReceiver : public RefBase {
 public:
     NativeDisplayEventReceiver(JNIEnv* env,
-            jobject receiverObj, const sp<Looper>& looper);
+            jobject receiverObj, const sp<MessageQueue>& messageQueue);
 
     status_t initialize();
     status_t scheduleVsync();
@@ -55,7 +55,7 @@ protected:
 
 private:
     jobject mReceiverObjGlobal;
-    sp<Looper> mLooper;
+    sp<MessageQueue> mMessageQueue;
     DisplayEventReceiver mReceiver;
     bool mWaitingForVsync;
 
@@ -65,9 +65,9 @@ private:
 
 
 NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env,
-        jobject receiverObj, const sp<Looper>& looper) :
+        jobject receiverObj, const sp<MessageQueue>& messageQueue) :
         mReceiverObjGlobal(env->NewGlobalRef(receiverObj)),
-        mLooper(looper), mWaitingForVsync(false) {
+        mMessageQueue(messageQueue), mWaitingForVsync(false) {
     ALOGV("receiver %p ~ Initializing input event receiver.", this);
 }
 
@@ -75,7 +75,7 @@ NativeDisplayEventReceiver::~NativeDisplayEventReceiver() {
     ALOGV("receiver %p ~ Disposing display event receiver.", this);
 
     if (!mReceiver.initCheck()) {
-        mLooper->removeFd(mReceiver.getFd());
+        mMessageQueue->getLooper()->removeFd(mReceiver.getFd());
     }
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -89,7 +89,7 @@ status_t NativeDisplayEventReceiver::initialize() {
         return result;
     }
 
-    int rc = mLooper->addFd(mReceiver.getFd(), 0, ALOOPER_EVENT_INPUT,
+    int rc = mMessageQueue->getLooper()->addFd(mReceiver.getFd(), 0, ALOOPER_EVENT_INPUT,
             handleReceiveCallback, this);
     if (rc < 0) {
         return UNKNOWN_ERROR;
@@ -151,12 +151,7 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
             gDisplayEventReceiverClassInfo.dispatchVsync, vsyncTimestamp, vsyncCount);
     ALOGV("receiver %p ~ Returned from vsync handler.", data);
 
-    if (env->ExceptionCheck()) {
-        ALOGE("An exception occurred while dispatching a vsync event.");
-        LOGE_EX(env);
-        env->ExceptionClear();
-    }
-
+    r->mMessageQueue->raiseAndClearException(env, "dispatchVsync");
     return 1; // keep the callback
 }
 
@@ -183,14 +178,14 @@ bool NativeDisplayEventReceiver::readLastVsyncMessage(
 
 static jint nativeInit(JNIEnv* env, jclass clazz, jobject receiverObj,
         jobject messageQueueObj) {
-    sp<Looper> looper = android_os_MessageQueue_getLooper(env, messageQueueObj);
-    if (looper == NULL) {
+    sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
+    if (messageQueue == NULL) {
         jniThrowRuntimeException(env, "MessageQueue is not initialized.");
         return 0;
     }
 
     sp<NativeDisplayEventReceiver> receiver = new NativeDisplayEventReceiver(env,
-            receiverObj, looper);
+            receiverObj, messageQueue);
     status_t status = receiver->initialize();
     if (status) {
         String8 message;
