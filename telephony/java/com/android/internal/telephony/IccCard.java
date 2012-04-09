@@ -580,7 +580,9 @@ public class IccCard {
             mHandler.sendMessage(mHandler.obtainMessage(EVENT_CARD_ADDED, null));
         }
 
-        if (oldState != State.READY && newState == State.READY) {
+        // Call onReady only when SIM or RUIM card becomes ready (not NV)
+        if (oldState != State.READY && newState == State.READY &&
+                (is3gpp || isSubscriptionFromIccCard)) {
             mIccFileHandler.setAid(getAid());
             mIccRecords.onReady();
         }
