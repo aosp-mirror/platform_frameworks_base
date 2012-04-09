@@ -21,7 +21,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:paddingBottom="28dip"
+    android:paddingBottom="7dip"
     android:orientation="vertical"
     android:visibility="gone">
     <View
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dip"
             android:orientation="vertical"
-            android:background="@*android:drawable/dialog_full_holo_dark">
+            android:background="@drawable/notify_panel_clock_bg">
             <!-- Hard keyboard switch -->
             <LinearLayout
                 android:id="@+id/hard_keyboard_section"
@@ -51,7 +51,7 @@
                     android:orientation="horizontal">
                     <TextView
                         android:id="@+id/use_physical_keyboard_label"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dip"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:minHeight="?android:attr/listPreferredItemHeight"
@@ -82,7 +82,7 @@
             <!-- Input method list -->
             <ScrollView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="0dip"
                 android:overScrollMode="ifContentScrolls"
                 android:layout_marginTop="3dip"
                 android:layout_weight="1"

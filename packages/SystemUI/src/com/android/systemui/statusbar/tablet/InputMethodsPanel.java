@@ -201,7 +201,6 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
         if (closeKeyboard) {
             mImm.hideSoftInputFromWindow(getWindowToken(), 0);
         }
-        updateHardKeyboardEnabled();
     }
 
     private void startActivity(Intent intent) {
@@ -329,6 +328,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
             mHardKeyboardSection.setVisibility(View.VISIBLE);
             if (mHardKeyboardSwitch.isChecked() != mHardKeyboardEnabled) {
                 mHardKeyboardSwitch.setChecked(mHardKeyboardEnabled);
+                updateHardKeyboardEnabled();
             }
         } else {
             mHardKeyboardSection.setVisibility(View.GONE);

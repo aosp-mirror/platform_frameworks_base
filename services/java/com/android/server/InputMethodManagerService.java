@@ -27,6 +27,7 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 import com.android.server.EventLogTags;
+import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -91,7 +92,10 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.RadioButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.io.File;
@@ -134,6 +138,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_UNBIND_METHOD = 3000;
     static final int MSG_BIND_METHOD = 3010;
 
+    static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
+
     static final long TIME_TO_RECONNECT = 10*1000;
 
     static final int SECURE_SUGGESTION_SPANS_MAX_SIZE = 20;
@@ -156,6 +162,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final HandlerCaller mCaller;
     private final InputMethodFileManager mFileManager;
     private final InputMethodAndSubtypeListManager mImListManager;
+    private final HardKeyboardListener mHardKeyboardListener;
+    private final WindowManagerService mWindowManagerService;
 
     final InputBindResult mNoBinding = new InputBindResult(null, null, -1);
 
@@ -360,6 +368,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private AlertDialog.Builder mDialogBuilder;
     private AlertDialog mSwitchingDialog;
+    private View mSwitchingDialogTitleView;
     private InputMethodInfo[] mIms;
     private int[] mSubtypeIds;
 
@@ -528,7 +537,31 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    public InputMethodManagerService(Context context) {
+    private class HardKeyboardListener
+            implements WindowManagerService.OnHardKeyboardStatusChangeListener {
+        @Override
+        public void onHardKeyboardStatusChange(boolean available, boolean enabled) {
+            mHandler.sendMessage(mHandler.obtainMessage(
+                    MSG_HARD_KEYBOARD_SWITCH_CHANGED, available ? 1 : 0, enabled ? 1 : 0));
+        }
+
+        public void handleHardKeyboardStatusChange(boolean available, boolean enabled) {
+            if (DEBUG) {
+                Slog.w(TAG, "HardKeyboardStatusChanged: available = " + available + ", enabled = "
+                        + enabled);
+            }
+            synchronized(mMethodMap) {
+                if (mSwitchingDialog != null && mSwitchingDialogTitleView != null
+                        && mSwitchingDialog.isShowing()) {
+                    mSwitchingDialogTitleView.findViewById(
+                            com.android.internal.R.id.hard_keyboard_section).setVisibility(
+                                    available ? View.VISIBLE : View.GONE);
+                }
+            }
+        }
+    }
+
+    public InputMethodManagerService(Context context, WindowManagerService windowManager) {
         mContext = context;
         mRes = context.getResources();
         mHandler = new Handler(this);
@@ -540,6 +573,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 handleMessage(msg);
             }
         });
+        mWindowManagerService = windowManager;
+        mHardKeyboardListener = new HardKeyboardListener();
 
         mImeSwitcherNotification = new Notification();
         mImeSwitcherNotification.icon = com.android.internal.R.drawable.ic_notification_ime_default;
@@ -633,6 +668,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 updateImeWindowStatusLocked();
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
+                if (mShowOngoingImeSwitcherForPhones) {
+                    mWindowManagerService.setOnHardKeyboardStatusChangeListener(
+                            mHardKeyboardListener);
+                }
                 try {
                     startInputInnerLocked();
                 } catch (RuntimeException e) {
@@ -1994,6 +2033,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.w(TAG, "Client died receiving input method " + args.arg2);
                 }
                 return true;
+
+            // --------------------------------------------------------------
+            case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
+                mHardKeyboardListener.handleHardKeyboardStatusChange(
+                        msg.arg1 == 1, msg.arg2 == 1);
+                return true;
         }
         return false;
     }
@@ -2204,12 +2249,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
             }
-
             final TypedArray a = context.obtainStyledAttributes(null,
                     com.android.internal.R.styleable.DialogPreference,
                     com.android.internal.R.attr.alertDialogStyle, 0);
             mDialogBuilder = new AlertDialog.Builder(context)
-                    .setTitle(com.android.internal.R.string.select_input_method)
                     .setOnCancelListener(new OnCancelListener() {
                         @Override
                         public void onCancel(DialogInterface dialog) {
@@ -2219,6 +2262,29 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     .setIcon(a.getDrawable(
                             com.android.internal.R.styleable.DialogPreference_dialogTitle));
             a.recycle();
+            final LayoutInflater inflater =
+                    (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final View tv = inflater.inflate(
+                    com.android.internal.R.layout.input_method_switch_dialog_title, null);
+            mDialogBuilder.setCustomTitle(tv);
+
+            // Setup layout for a toggle switch of the hardware keyboard
+            mSwitchingDialogTitleView = tv;
+            mSwitchingDialogTitleView.findViewById(
+                    com.android.internal.R.id.hard_keyboard_section).setVisibility(
+                            mWindowManagerService.isHardKeyboardAvailable() ?
+                                    View.VISIBLE : View.GONE);
+            final Switch hardKeySwitch =  ((Switch)mSwitchingDialogTitleView.findViewById(
+                    com.android.internal.R.id.hard_keyboard_switch));
+            hardKeySwitch.setChecked(mWindowManagerService.isHardKeyboardEnabled());
+            hardKeySwitch.setOnCheckedChangeListener(
+                    new OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(
+                                CompoundButton buttonView, boolean isChecked) {
+                            mWindowManagerService.setHardKeyboardEnabled(isChecked);
+                        }
+                    });
 
             final ImeSubtypeListAdapter adapter = new ImeSubtypeListAdapter(context,
                     com.android.internal.R.layout.simple_list_item_2_single_choice, imList,

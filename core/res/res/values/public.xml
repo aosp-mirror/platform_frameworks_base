@@ -85,6 +85,8 @@
   <java-symbol type="id" name="fillInIntent" />
   <java-symbol type="id" name="find" />
   <java-symbol type="id" name="fullscreenArea" />
+  <java-symbol type="id" name="hard_keyboard_section" />
+  <java-symbol type="id" name="hard_keyboard_switch" />
   <java-symbol type="id" name="headers" />
   <java-symbol type="id" name="hour" />
   <java-symbol type="id" name="icon" />
@@ -1042,6 +1044,7 @@
   <java-symbol type="layout" name="icon_menu_layout" />
   <java-symbol type="layout" name="input_method" />
   <java-symbol type="layout" name="input_method_extract_view" />
+  <java-symbol type="layout" name="input_method_switch_dialog_title" />
   <java-symbol type="layout" name="js_prompt" />
   <java-symbol type="layout" name="list_content_simple" />
   <java-symbol type="layout" name="list_menu_item_checkbox" />
@@ -1449,6 +1452,7 @@
   <java-symbol type="string" name="factorytest_no_action" />
   <java-symbol type="string" name="factorytest_not_system" />
   <java-symbol type="string" name="factorytest_reboot" />
+  <java-symbol type="string" name="hardware" />
   <java-symbol type="string" name="heavy_weight_notification" />
   <java-symbol type="string" name="heavy_weight_notification_detail" />
   <java-symbol type="string" name="input_method_binding_label" />
@@ -1471,6 +1475,7 @@
   <java-symbol type="string" name="usb_cd_installer_notification_title" />
   <java-symbol type="string" name="usb_mtp_notification_title" />
   <java-symbol type="string" name="usb_notification_message" />
+  <java-symbol type="string" name="use_physical_keyboard" />
   <java-symbol type="string" name="usb_ptp_notification_title" />
   <java-symbol type="string" name="vpn_text" />
   <java-symbol type="string" name="vpn_text_long" />
