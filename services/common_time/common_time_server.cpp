@@ -80,14 +80,14 @@ const int CommonTimeServer::kInitial_WhoIsMasterTimeoutMs = 500;
 
 // number of sync requests that can fail before a client assumes its master
 // is dead
-const int CommonTimeServer::kClient_NumSyncRequestRetries = 5;
+const int CommonTimeServer::kClient_NumSyncRequestRetries = 10;
 
 /*** Master state constants ***/
 
 /*** Ronin state constants ***/
 
 // number of WhoIsMaster attempts sent before declaring ourselves master
-const int CommonTimeServer::kRonin_NumWhoIsMasterRetries = 4;
+const int CommonTimeServer::kRonin_NumWhoIsMasterRetries = 20;
 
 // timeout used when waiting for a response to a WhoIsMaster request
 const int CommonTimeServer::kRonin_WhoIsMasterTimeoutMs = 500;
@@ -96,7 +96,7 @@ const int CommonTimeServer::kRonin_WhoIsMasterTimeoutMs = 500;
 
 // how long do we wait for an announcement from a master before
 // trying another election?
-const int CommonTimeServer::kWaitForElection_TimeoutMs = 5000;
+const int CommonTimeServer::kWaitForElection_TimeoutMs = 12500;
 
 CommonTimeServer::CommonTimeServer()
     : Thread(false)
@@ -279,10 +279,14 @@ bool CommonTimeServer::runStateMachine_l() {
                     // If we were in the master state, then either we were the
                     // master in a no-network situation, or we were the master
                     // of a different network and have moved to a new interface.
-                    // In either case, immediately send out a master
-                    // announcement at low priority.
+                    // In either case, immediately transition to Ronin at low
+                    // priority.  If there is no one in the network we just
+                    // joined, we will become master soon enough.  If there is,
+                    // we want to be certain to defer master status to the
+                    // existing timeline currently running on the network.
+                    //
                     case CommonClockService::STATE_MASTER:
-                        sendMasterAnnouncement();
+                        becomeRonin("leaving networkless mode");
                         break;
                         
                     // If we were in any other state (CLIENT, RONIN, or
@@ -1071,6 +1075,12 @@ bool CommonTimeServer::becomeClient(const sockaddr_storage& masterEP,
 
     mMasterEP = masterEP;
     mMasterEPValid = true;
+
+    // If we are on a real network as a client of a real master, then we should
+    // no longer force low priority.  If our master disappears, we should have
+    // the high priority bit set during the election to replace the master
+    // because this group was a real group and not a singleton created in
+    // networkless mode.
     setForceLowPriority(false);
 
     mClient_MasterDeviceID = masterDeviceID;
@@ -1112,7 +1122,6 @@ bool CommonTimeServer::becomeMaster(const char* cause) {
 
     memset(&mMasterEP, 0, sizeof(mMasterEP));
     mMasterEPValid = false;
-    setForceLowPriority(false);
     mClient_MasterDevicePriority = effectivePriority();
     mClient_MasterDeviceID = mDeviceID;
     mClockRecovery.reset(false, true);
