@@ -191,9 +191,7 @@
       <span style="display:none" class="zh-TW"></span>
     </span>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r7c</a>
-        <span class="new">new!</span>
-        </li>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r7c</a></li>
       <li><a href="<?cs var:toroot ?>sdk/ndk/overview.html">What is the NDK?</a></li>
     </ul>
   </li>
