@@ -202,6 +202,9 @@ public class AudioSystem
     public static final int DEVICE_OUT_AUX_DIGITAL = 0x400;
     public static final int DEVICE_OUT_ANLG_DOCK_HEADSET = 0x800;
     public static final int DEVICE_OUT_DGTL_DOCK_HEADSET = 0x1000;
+    public static final int DEVICE_OUT_USB_ACCESSORY = 0x2000;
+    public static final int DEVICE_OUT_USB_DEVICE = 0x4000;
+
     public static final int DEVICE_OUT_DEFAULT = 0x8000;
     public static final int DEVICE_OUT_ALL = (DEVICE_OUT_EARPIECE |
                                               DEVICE_OUT_SPEAKER |
@@ -216,10 +219,18 @@ public class AudioSystem
                                               DEVICE_OUT_AUX_DIGITAL |
                                               DEVICE_OUT_ANLG_DOCK_HEADSET |
                                               DEVICE_OUT_DGTL_DOCK_HEADSET |
+                                              DEVICE_OUT_USB_ACCESSORY |
+                                              DEVICE_OUT_USB_DEVICE |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER);
+    public static final int DEVICE_OUT_ALL_SCO = (DEVICE_OUT_BLUETOOTH_SCO |
+                                                  DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
+                                                  DEVICE_OUT_BLUETOOTH_SCO_CARKIT);
+    public static final int DEVICE_OUT_ALL_USB = (DEVICE_OUT_USB_ACCESSORY |
+                                                  DEVICE_OUT_USB_DEVICE);
+
     // input devices
     public static final int DEVICE_IN_COMMUNICATION = 0x10000;
     public static final int DEVICE_IN_AMBIENT = 0x20000;
