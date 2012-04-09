@@ -340,8 +340,12 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final int childHeightMode = MeasureSpec.getMode(parentHeightMeasureSpec);
         final int childHeightSpec = MeasureSpec.makeMeasureSpec(childHeightSize, childHeightMode);
 
+        final ActionMenuItemView itemView = child instanceof ActionMenuItemView ?
+                (ActionMenuItemView) child : null;
+        final boolean hasText = itemView != null && itemView.hasText();
+
         int cellsUsed = 0;
-        if (cellsRemaining > 0) {
+        if (cellsRemaining > 0 && (!hasText || cellsRemaining >= 2)) {
             final int childWidthSpec = MeasureSpec.makeMeasureSpec(
                     cellSize * cellsRemaining, MeasureSpec.AT_MOST);
             child.measure(childWidthSpec, childHeightSpec);
@@ -349,11 +353,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             final int measuredWidth = child.getMeasuredWidth();
             cellsUsed = measuredWidth / cellSize;
             if (measuredWidth % cellSize != 0) cellsUsed++;
+            if (hasText && cellsUsed < 2) cellsUsed = 2;
         }
 
-        final ActionMenuItemView itemView = child instanceof ActionMenuItemView ?
-                (ActionMenuItemView) child : null;
-        final boolean expandable = !lp.isOverflowButton && itemView != null && itemView.hasText();
+        final boolean expandable = !lp.isOverflowButton && hasText;
         lp.expandable = expandable;
 
         lp.cellsUsed = cellsUsed;
