@@ -205,6 +205,8 @@ public class CDMAPhone extends PhoneBase {
 
         // Sets operator numeric property by retrieving from build-time system property
         String operatorNumeric = SystemProperties.get(PROPERTY_CDMA_HOME_OPERATOR_NUMERIC);
+        log("CDMAPhone: init set 'gsm.sim.operator.numeric' to operator='" +
+                operatorNumeric + "'");
         setSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, operatorNumeric);
 
         // Sets iso country property by retrieving from build-time system property
