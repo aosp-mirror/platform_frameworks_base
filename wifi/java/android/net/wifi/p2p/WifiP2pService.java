@@ -109,6 +109,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     /* Set a two minute discover timeout to avoid STA scans from being blocked */
     private static final int DISCOVER_TIMEOUT_S = 120;
 
+    /* Idle time after a peer is gone when the group is torn down */
+    private static final int GROUP_IDLE_TIME_S = 2;
+
     /**
      * Delay between restarts upon failure to setup connection with supplicant
      */
@@ -343,9 +346,20 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.P2P_GROUP_REMOVED_EVENT:
                 case PEER_CONNECTION_USER_ACCEPT:
                 case PEER_CONNECTION_USER_REJECT:
                 case GROUP_CREATING_TIMED_OUT:
+                    break;
+                /* unexpected group created, remove */
+                case WifiMonitor.P2P_GROUP_STARTED_EVENT:
+                    mGroup = (WifiP2pGroup) message.obj;
+                    loge("Unexpected group creation, remove " + mGroup);
+                    mWifiNative.p2pGroupRemove(mGroup.getInterface());
+                    break;
+                case WifiMonitor.P2P_GROUP_FORMATION_FAILURE_EVENT:
+                    loge("Unexpected group failure, flush peers");
+                    mWifiNative.p2pFlush();
                     break;
                 default:
                     loge("Unhandled message " + message);
@@ -476,6 +490,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             if (DBG) logd(getName());
             sendP2pStateChangedBroadcast(true);
             mNetworkInfo.setIsAvailable(true);
+            sendP2pConnectionChangedBroadcast();
             initializeP2pSettings();
         }
 
@@ -561,9 +576,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         //If peer is a GO, we do not need to send provisional discovery,
                         //the supplicant takes care of it.
                         if (mWifiNative.isGroupOwner(mSavedPeerConfig.deviceAddress)) {
+                            if (DBG) logd("Sending join to GO");
                             p2pConnectWithPinDisplay(mSavedPeerConfig, JOIN_GROUP);
                             transitionTo(mGroupNegotiationState);
                         } else {
+                            if (DBG) logd("Sending prov disc");
                             transitionTo(mProvisionDiscoveryState);
                         }
                     }
@@ -651,9 +668,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                case GROUP_CREATING_TIMED_OUT:
                     if (mGroupCreatingTimeoutIndex == message.arg1) {
                         if (DBG) logd("Group negotiation timed out");
-                        updateDeviceStatus(mSavedPeerConfig.deviceAddress, WifiP2pDevice.FAILED);
-                        mSavedPeerConfig = null;
-                        sendP2pPeersChangedBroadcast();
+                        handleGroupCreationFailure();
                         transitionTo(mInactiveState);
                     }
                     break;
@@ -663,12 +678,15 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             WifiP2pManager.BUSY);
                     break;
                 case WifiP2pManager.CANCEL_CONNECT:
-                    if (mWifiNative.p2pCancelConnect()) {
-                        replyToMessage(message, WifiP2pManager.CANCEL_CONNECT_SUCCEEDED);
-                    } else {
-                        replyToMessage(message, WifiP2pManager.CANCEL_CONNECT_FAILED,
-                                WifiP2pManager.ERROR);
-                    }
+                    //Do a supplicant p2p_cancel which only cancels an ongoing
+                    //group negotiation. This will fail for a pending provision
+                    //discovery or for a pending user action, but at the framework
+                    //level, we always treat cancel as succeded and enter
+                    //an inactive state
+                    mWifiNative.p2pCancelConnect();
+                    handleGroupCreationFailure();
+                    transitionTo(mInactiveState);
+                    replyToMessage(message, WifiP2pManager.CANCEL_CONNECT_SUCCEEDED);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -811,9 +829,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.P2P_GO_NEGOTIATION_FAILURE_EVENT:
                 case WifiMonitor.P2P_GROUP_FORMATION_FAILURE_EVENT:
                     if (DBG) logd(getName() + " go failure");
-                    updateDeviceStatus(mSavedPeerConfig.deviceAddress, WifiP2pDevice.FAILED);
-                    mSavedPeerConfig = null;
-                    sendP2pPeersChangedBroadcast();
+                    handleGroupCreationFailure();
                     transitionTo(mInactiveState);
                     break;
                 default:
@@ -837,6 +853,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             if (mGroup.isGroupOwner()) {
                 setWifiP2pInfoOnGroupFormation(SERVER_ADDRESS);
                 sendP2pConnectionChangedBroadcast();
+            }
+
+            if (!mPersistGroup) {
+                mWifiNative.setP2pGroupIdle(mGroup.getInterface(), GROUP_IDLE_TIME_S);
             }
         }
 
@@ -886,6 +906,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         if (DBG) logd("DhcpInfo: " + dhcpInfo);
                         setWifiP2pInfoOnGroupFormation(dhcpInfo.serverAddress);
                         sendP2pConnectionChangedBroadcast();
+                        //Turn on power save on client
+                        mWifiNative.setP2pPowerSave(mGroup.getInterface(), true);
                     } else {
                         loge("DHCP failed");
                         mWifiNative.p2pGroupRemove(mGroup.getInterface());
@@ -1258,6 +1280,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         //The supplicant default is to support everything, but a bug necessitates
         //the framework to specify this explicitly
         mWifiNative.setConfigMethods("keypad display push_button");
+        //STA has higher priority over P2P
+        mWifiNative.setConcurrencyPriority("sta");
 
         mThisDevice.deviceAddress = mWifiNative.p2pGetDeviceAddress();
         updateThisDevice(WifiP2pDevice.AVAILABLE);
@@ -1267,6 +1291,14 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private void updateThisDevice(int status) {
         mThisDevice.status = status;
         sendThisDeviceChangedBroadcast();
+    }
+
+    private void handleGroupCreationFailure() {
+        mSavedPeerConfig = null;
+        /* After cancelling group formation, new connections on existing peers can fail
+         * at supplicant. Flush and restart discovery */
+        mWifiNative.p2pFlush();
+        sendMessage(WifiP2pManager.DISCOVER_PEERS);
     }
 
     //State machine initiated requests can have replyTo set to null indicating
