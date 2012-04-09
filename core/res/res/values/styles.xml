@@ -1158,6 +1158,7 @@ please see styles_device_defaults.xml.
         <item name="android:minWidth">@android:dimen/action_button_min_width</item>
         <item name="android:minHeight">?android:attr/actionBarSize</item>
         <item name="android:gravity">center</item>
+        <item name="android:maxLines">2</item>
     </style>
 
     <style name="Widget.ActionButton.Overflow">
@@ -1861,6 +1862,7 @@ please see styles_device_defaults.xml.
         <item name="android:paddingLeft">12dip</item>
         <item name="android:paddingRight">12dip</item>
         <item name="android:scaleType">center</item>
+        <item name="android:maxLines">2</item>
     </style>
 
     <style name="Widget.Holo.ActionButton.Overflow">
