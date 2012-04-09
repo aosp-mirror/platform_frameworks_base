@@ -352,10 +352,9 @@ public class NetworkStats implements Parcelable {
      * on matching {@link #uid} and {@link #tag} rows. Ignores {@link #iface},
      * since operation counts are at data layer.
      */
-    @Deprecated
     public void spliceOperationsFrom(NetworkStats stats) {
         for (int i = 0; i < size; i++) {
-            final int j = stats.findIndex(IFACE_ALL, uid[i], set[i], tag[i]);
+            final int j = stats.findIndex(iface[i], uid[i], set[i], tag[i]);
             if (j == -1) {
                 operations[i] = 0;
             } else {

@@ -500,6 +500,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             Binder.restoreCallingIdentity(token);
         }
 
+        // splice in operation counts
+        networkLayer.spliceOperationsFrom(mUidOperations);
+
         final NetworkStats dataLayer = new NetworkStats(
                 networkLayer.getElapsedRealtime(), networkLayer.size());
 
@@ -510,8 +513,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             dataLayer.combineValues(entry);
         }
 
-        // splice in operation counts
-        dataLayer.spliceOperationsFrom(mUidOperations);
         return dataLayer;
     }
 
