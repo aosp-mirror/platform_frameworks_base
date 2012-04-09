@@ -1340,18 +1340,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation) {
-        // Assumes that the navigation bar appears on the side of the display in landscape.
-        if (mHasNavigationBar && fullWidth > fullHeight) {
-            return fullWidth - mNavigationBarWidth;
+        if (mHasNavigationBar) {
+            // For a basic navigation bar, when we are in landscape mode we place
+            // the navigation bar to the side.
+            if (fullWidth > fullHeight) {
+                return fullWidth - mNavigationBarWidth;
+            }
         }
         return fullWidth;
     }
 
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation) {
-        // Assumes the navigation bar appears on the bottom of the display in portrait.
-        return fullHeight
-            - (mHasSystemNavBar ? mNavigationBarHeight : 0)
-            - ((mHasNavigationBar && fullWidth > fullHeight) ? 0 : mNavigationBarHeight);
+        if (mHasSystemNavBar) {
+            // For the system navigation bar, we always place it at the bottom.
+            return fullHeight - mNavigationBarHeight;
+        }
+        if (mHasNavigationBar) {
+            // For a basic navigation bar, when we are in portrait mode we place
+            // the navigation bar to the bottom.
+            if (fullWidth < fullHeight) {
+                return fullHeight - mNavigationBarHeight;
+            }
+        }
+        return fullHeight;
     }
 
     public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation) {
@@ -1359,13 +1370,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation) {
-        // This is the same as getNonDecorDisplayHeight, unless the status bar
-        // can hide.  If the status bar can hide, we don't count that as part
-        // of the decor; however for purposes of configurations, we do want to
-        // exclude it since applications can't generally use that part of the
-        // screen.
-        return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation)
-                - (mHasSystemNavBar ? 0 : mStatusBarHeight);
+        // If we don't have a system nav bar, then there is a separate status
+        // bar at the top of the display.  We don't count that as part of the
+        // fixed decor, since it can hide; however, for purposes of configurations,
+        // we do want to exclude it since applications can't generally use that part
+        // of the screen.
+        if (!mHasSystemNavBar) {
+            return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation) - mStatusBarHeight;
+        }
+        return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation);
     }
 
     public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
