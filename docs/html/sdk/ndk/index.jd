@@ -62,7 +62,7 @@ padding: .25em 1em;
 <div class="toggleable open">
   <a href="#" onclick="return toggleDiv(this)"><img src=
   "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
-  Android NDK, Revision 7c</a> <em>(March 2012)</em>
+  Android NDK, Revision 7c</a> <em>(April 2012)</em>
 
   <div class="toggleme">
     <p>This release of the NDK includes an important fix for Tegra2-based devices, and a few
