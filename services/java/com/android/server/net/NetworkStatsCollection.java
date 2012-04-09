@@ -57,8 +57,6 @@ import libcore.io.IoUtils;
  * {@link NetworkIdentitySet}, UID, set, and tag. Knows how to persist itself.
  */
 public class NetworkStatsCollection implements FileRotator.Reader {
-    private static final String TAG = "NetworkStatsCollection";
-
     /** File header magic number: "ANET" */
     private static final int FILE_MAGIC = 0x414E4554;
 
@@ -173,7 +171,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
     }
 
     /**
-     * Record given {@link NetworkStats.Entry} into this collection.
+     * Record given {@link android.net.NetworkStats.Entry} into this collection.
      */
     public void recordData(NetworkIdentitySet ident, int uid, int set, int tag, long start,
             long end, NetworkStats.Entry entry) {
@@ -227,7 +225,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         }
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void read(InputStream in) throws IOException {
         read(new DataInputStream(in));
     }
@@ -502,7 +500,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
             return false;
         }
 
-        /** {@inheritDoc} */
+        @Override
         public int compareTo(Key another) {
             return Integer.compare(uid, another.uid);
         }

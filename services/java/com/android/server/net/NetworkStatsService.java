@@ -999,7 +999,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private Handler.Callback mHandlerCallback = new Handler.Callback() {
-        /** {@inheritDoc} */
+        @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_PERFORM_POLL: {
@@ -1038,7 +1038,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private class DropBoxNonMonotonicObserver implements NonMonotonicObserver<String> {
-        /** {@inheritDoc} */
+        @Override
         public void foundNonMonotonic(NetworkStats left, int leftIndex, NetworkStats right,
                 int rightIndex, String cookie) {
             Log.w(TAG, "found non-monotonic values; saving to dropbox");
@@ -1057,7 +1057,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     /**
-     * Default external settings that read from {@link Settings.Secure}.
+     * Default external settings that read from
+     * {@link android.provider.Settings.Secure}.
      */
     private static class DefaultNetworkStatsSettings implements NetworkStatsSettings {
         private final ContentResolver mResolver;
@@ -1075,19 +1076,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return Settings.Secure.getInt(mResolver, name, defInt) != 0;
         }
 
+        @Override
         public long getPollInterval() {
             return getSecureLong(NETSTATS_POLL_INTERVAL, 30 * MINUTE_IN_MILLIS);
         }
+        @Override
         public long getTimeCacheMaxAge() {
             return getSecureLong(NETSTATS_TIME_CACHE_MAX_AGE, DAY_IN_MILLIS);
         }
+        @Override
         public long getGlobalAlertBytes() {
             return getSecureLong(NETSTATS_GLOBAL_ALERT_BYTES, 2 * MB_IN_BYTES);
         }
+        @Override
         public boolean getSampleEnabled() {
             return getSecureBoolean(NETSTATS_SAMPLE_ENABLED, true);
         }
 
+        @Override
         public Config getDevConfig() {
             return new Config(getSecureLong(NETSTATS_DEV_BUCKET_DURATION, HOUR_IN_MILLIS),
                     getSecureLong(NETSTATS_DEV_PERSIST_BYTES, 2 * MB_IN_BYTES),
@@ -1095,6 +1101,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     getSecureLong(NETSTATS_DEV_DELETE_AGE, 90 * DAY_IN_MILLIS));
         }
 
+        @Override
         public Config getUidConfig() {
             return new Config(getSecureLong(NETSTATS_UID_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
                     getSecureLong(NETSTATS_UID_PERSIST_BYTES, 2 * MB_IN_BYTES),
@@ -1102,6 +1109,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     getSecureLong(NETSTATS_UID_DELETE_AGE, 90 * DAY_IN_MILLIS));
         }
 
+        @Override
         public Config getUidTagConfig() {
             return new Config(getSecureLong(NETSTATS_UID_BUCKET_DURATION, 2 * HOUR_IN_MILLIS),
                     getSecureLong(NETSTATS_UID_PERSIST_BYTES, 2 * MB_IN_BYTES),

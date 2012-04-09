@@ -981,7 +981,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             }
         }
 
-        /** {@inheritDoc} */
+        @Override
         public boolean queueIdle() {
             set(null);
             return false;

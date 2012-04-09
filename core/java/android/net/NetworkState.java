@@ -52,12 +52,12 @@ public class NetworkState implements Parcelable {
         subscriberId = in.readString();
     }
 
-    /** {@inheritDoc} */
+    @Override
     public int describeContents() {
         return 0;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(networkInfo, flags);
         out.writeParcelable(linkProperties, flags);
@@ -66,10 +66,12 @@ public class NetworkState implements Parcelable {
     }
 
     public static final Creator<NetworkState> CREATOR = new Creator<NetworkState>() {
+        @Override
         public NetworkState createFromParcel(Parcel in) {
             return new NetworkState(in);
         }
 
+        @Override
         public NetworkState[] newArray(int size) {
             return new NetworkState[size];
         }

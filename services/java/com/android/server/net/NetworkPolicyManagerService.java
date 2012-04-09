@@ -1588,7 +1588,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private Handler.Callback mHandlerCallback = new Handler.Callback() {
-        /** {@inheritDoc} */
+        @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_RULES_CHANGED: {

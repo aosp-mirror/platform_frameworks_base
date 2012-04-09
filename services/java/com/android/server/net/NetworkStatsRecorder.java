@@ -240,22 +240,22 @@ public class NetworkStatsRecorder {
             mCollection = checkNotNull(collection, "missing NetworkStatsCollection");
         }
 
-        /** {@inheritDoc} */
+        @Override
         public void reset() {
             // ignored
         }
 
-        /** {@inheritDoc} */
+        @Override
         public void read(InputStream in) throws IOException {
             mCollection.read(in);
         }
 
-        /** {@inheritDoc} */
+        @Override
         public boolean shouldWrite() {
             return true;
         }
 
-        /** {@inheritDoc} */
+        @Override
         public void write(OutputStream out) throws IOException {
             mCollection.write(new DataOutputStream(out));
             mCollection.reset();
@@ -275,24 +275,24 @@ public class NetworkStatsRecorder {
             mUid = uid;
         }
 
-        /** {@inheritDoc} */
+        @Override
         public void reset() {
             mTemp.reset();
         }
 
-        /** {@inheritDoc} */
+        @Override
         public void read(InputStream in) throws IOException {
             mTemp.read(in);
             mTemp.clearDirty();
             mTemp.removeUid(mUid);
         }
 
-        /** {@inheritDoc} */
+        @Override
         public boolean shouldWrite() {
             return mTemp.isDirty();
         }
 
-        /** {@inheritDoc} */
+        @Override
         public void write(OutputStream out) throws IOException {
             mTemp.write(new DataOutputStream(out));
         }
