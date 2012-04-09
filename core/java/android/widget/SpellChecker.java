@@ -227,8 +227,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
         for (int i = 0; i < length; i++) {
             final SpellParser spellParser = mSpellParsers[i];
             if (spellParser.isFinished()) {
-                spellParser.init(start, end);
-                spellParser.parse();
+                spellParser.parse(start, end);
                 return;
             }
         }
@@ -240,8 +239,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         SpellParser spellParser = new SpellParser();
         mSpellParsers[length] = spellParser;
-        spellParser.init(start, end);
-        spellParser.parse();
+        spellParser.parse(start, end);
     }
 
     private void spellCheck() {
@@ -421,8 +419,11 @@ public class SpellChecker implements SpellCheckerSessionListener {
     private class SpellParser {
         private Object mRange = new Object();
 
-        public void init(int start, int end) {
-            setRangeSpan((Editable) mTextView.getText(), start, end);
+        public void parse(int start, int end) {
+            if (end > start) {
+                setRangeSpan((Editable) mTextView.getText(), start, end);
+                parse();
+            }
         }
 
         public boolean isFinished() {
