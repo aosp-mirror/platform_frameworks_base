@@ -155,7 +155,7 @@ public class NetworkStats implements Parcelable {
         operations = parcel.createLongArray();
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(elapsedRealtime);
         dest.writeInt(size);
@@ -662,16 +662,18 @@ public class NetworkStats implements Parcelable {
         return writer.toString();
     }
 
-    /** {@inheritDoc} */
+    @Override
     public int describeContents() {
         return 0;
     }
 
     public static final Creator<NetworkStats> CREATOR = new Creator<NetworkStats>() {
+        @Override
         public NetworkStats createFromParcel(Parcel in) {
             return new NetworkStats(in);
         }
 
+        @Override
         public NetworkStats[] newArray(int size) {
             return new NetworkStats[size];
         }

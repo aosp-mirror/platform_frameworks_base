@@ -130,7 +130,7 @@ public class NetworkStatsHistory implements Parcelable {
         totalBytes = in.readLong();
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(bucketDuration);
         writeLongArray(out, bucketStart, bucketCount);
@@ -191,7 +191,7 @@ public class NetworkStatsHistory implements Parcelable {
         writeVarLongArray(out, operations, bucketCount);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -586,10 +586,12 @@ public class NetworkStatsHistory implements Parcelable {
     }
 
     public static final Creator<NetworkStatsHistory> CREATOR = new Creator<NetworkStatsHistory>() {
+        @Override
         public NetworkStatsHistory createFromParcel(Parcel in) {
             return new NetworkStatsHistory(in);
         }
 
+        @Override
         public NetworkStatsHistory[] newArray(int size) {
             return new NetworkStatsHistory[size];
         }
