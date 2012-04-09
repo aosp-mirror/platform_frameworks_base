@@ -510,8 +510,9 @@ void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
 
     switch (switchCode) {
     case SW_LID:
+        // When switch value is set indicates lid is closed.
         env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyLidSwitchChanged,
-                when, switchValue == 0);
+                when, switchValue == 0 /*lidOpen*/);
         checkAndClearExceptionFromCallback(env, "notifyLidSwitchChanged");
         break;
     }
