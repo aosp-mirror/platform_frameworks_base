@@ -291,7 +291,8 @@ public class FaceUnlock implements Handler.Callback {
                 if (!mServiceRunning) {
                     if (DEBUG) Log.d(TAG, "Starting FaceLock");
                     try {
-                        mService.startUi(windowToken, x, y, w, h);
+                        mService.startUi(windowToken, x, y, w, h,
+                                mLockPatternUtils.isBiometricWeakLivelinessEnabled());
                     } catch (RemoteException e) {
                         Log.e(TAG, "Caught exception starting FaceLock: " + e.toString());
                         return;
