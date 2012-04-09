@@ -4807,10 +4807,13 @@ public class WindowManagerService extends IWindowManager.Stub
         final int SW_LID = 0x00;
         int sw = mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY, SW_LID);
         if (sw > 0) {
-            return LID_OPEN;
-        } else if (sw == 0) {
+            // Switch state: AKEY_STATE_DOWN or AKEY_STATE_VIRTUAL.
             return LID_CLOSED;
+        } else if (sw == 0) {
+            // Switch state: AKEY_STATE_UP.
+            return LID_OPEN;
         } else {
+            // Switch state: AKEY_STATE_UNKNOWN.
             return LID_ABSENT;
         }
     }
@@ -4818,10 +4821,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // Called by window manager policy.  Not exposed externally.
     @Override
     public InputChannel monitorInput(String inputChannelName) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
-                "monitorInput()")) {
-            throw new SecurityException("Requires READ_INPUT_STATE permission");
-        }
         return mInputManager.monitorInput(inputChannelName);
     }
 
