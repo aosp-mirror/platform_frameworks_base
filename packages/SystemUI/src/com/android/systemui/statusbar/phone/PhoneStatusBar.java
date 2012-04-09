@@ -591,10 +591,14 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         final StatusBarNotification oldNotification = oldEntry.notification;
-        final RemoteViews oldContentView = oldNotification.notification.contentView;
 
-        final RemoteViews contentView = notification.notification.contentView;
-
+        // XXX: modify when we do something more intelligent with the two content views
+        final RemoteViews oldContentView = (oldNotification.notification.bigContentView != null) 
+                ? oldNotification.notification.bigContentView
+                : oldNotification.notification.contentView;
+        final RemoteViews contentView = (notification.notification.bigContentView != null) 
+                ? notification.notification.bigContentView
+                : notification.notification.contentView;
 
         if (DEBUG) {
             Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
