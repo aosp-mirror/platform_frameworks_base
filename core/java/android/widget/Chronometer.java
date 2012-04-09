@@ -248,7 +248,6 @@ public class Chronometer extends TextView {
             }
         }
         setText(text);
-        Slog.v("Chronometer", "updateText: sec=" + seconds + " mFormat=" + mFormat + " text=" + text);
     }
 
     private void updateRunning() {
