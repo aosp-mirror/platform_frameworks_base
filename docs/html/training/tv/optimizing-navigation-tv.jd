@@ -5,7 +5,7 @@ parent.link=index.html
 trainingnavtop=true
 previous.title=Optimizing Layouts for TV
 previous.link=optimizing-layouts-tv.html
-next.title=Handling features not supported on TV
+next.title=Handling Features Not Supported on TV
 next.link=unsupported-features-tv.html
 
 @jd:body
