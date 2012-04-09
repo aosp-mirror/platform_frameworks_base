@@ -194,7 +194,7 @@ contains property types that define the size and position for each child view, a
 appropriate for the view group. As you can see in figure 1, the parent
 view group defines layout parameters for each child view (including the child view group).</p>
 
-<img src="{@docRoot}images/layoutparams.png" alt="" height="300" align="center"/>
+<img src="{@docRoot}images/layoutparams.png" alt="" />
 <p class="img-caption"><strong>Figure 1.</strong> Visualization of a view hierarchy with layout
 parameters associated with each view.</p>
 
