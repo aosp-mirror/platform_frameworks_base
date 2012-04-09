@@ -13444,7 +13444,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // an earlier hidden adjustment that isn't really for us... if
             // so, use the new hidden adjustment.
             if (!recursed && app.hidden) {
-                app.curAdj = app.curRawAdj = hiddenAdj;
+                app.curAdj = app.curRawAdj = app.nonStoppingAdj = hiddenAdj;
             }
             return app.curRawAdj;
         }
@@ -13468,7 +13468,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // below foreground, so it is not worth doing work for it.
             app.adjType = "fixed";
             app.adjSeq = mAdjSeq;
-            app.curRawAdj = app.maxAdj;
+            app.curRawAdj = app.nonStoppingAdj = app.maxAdj;
             app.foregroundActivities = false;
             app.keeping = true;
             app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
@@ -13545,6 +13545,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.adjType = "bg-empty";
         }
 
+        boolean hasStoppingActivities = false;
+
         // Examine all activities if not already foreground.
         if (!app.foregroundActivities && activitiesSize > 0) {
             for (int j = 0; j < activitiesSize; j++) {
@@ -13559,15 +13561,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.hidden = false;
                     app.foregroundActivities = true;
                     break;
-                } else if (r.state == ActivityState.PAUSING || r.state == ActivityState.PAUSED
-                        || r.state == ActivityState.STOPPING) {
-                    // Only upgrade adjustment.
+                } else if (r.state == ActivityState.PAUSING || r.state == ActivityState.PAUSED) {
                     if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
-                        app.adjType = "stopping";
+                        app.adjType = "pausing";
                     }
                     app.hidden = false;
                     app.foregroundActivities = true;
+                } else if (r.state == ActivityState.STOPPING) {
+                    // We will apply the actual adjustment later, because
+                    // we want to allow this process to immediately go through
+                    // any memory trimming that is in effect.
+                    app.hidden = false;
+                    app.foregroundActivities = true;
+                    hasStoppingActivities = true;
                 }
             }
         }
@@ -13625,7 +13632,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // this gives us a baseline and makes sure we don't get into an
         // infinite recursion.
         app.adjSeq = mAdjSeq;
-        app.curRawAdj = adj;
+        app.curRawAdj = app.nonStoppingAdj = adj;
 
         if (mBackupTarget != null && app == mBackupTarget.app) {
             // If possible we want to avoid killing apps while they're being backed up
@@ -13882,6 +13889,28 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        if (adj == ProcessList.SERVICE_ADJ) {
+            if (doingAll) {
+                app.serviceb = mNewNumServiceProcs > (mNumServiceProcs/3);
+                mNewNumServiceProcs++;
+            }
+            if (app.serviceb) {
+                adj = ProcessList.SERVICE_B_ADJ;
+            }
+        } else {
+            app.serviceb = false;
+        }
+
+        app.nonStoppingAdj = adj;
+
+        if (hasStoppingActivities) {
+            // Only upgrade adjustment.
+            if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                app.adjType = "stopping";
+            }
+        }
+
         app.curRawAdj = adj;
         
         //Slog.i(TAG, "OOM ADJ " + app + ": pid=" + app.pid +
@@ -13913,18 +13942,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else if (adj < ProcessList.HIDDEN_APP_MAX_ADJ) {
                 adj++;
             }
-        }
-
-        if (adj == ProcessList.SERVICE_ADJ) {
-            if (doingAll) {
-                app.serviceb = mNewNumServiceProcs > (mNumServiceProcs/3);
-                mNewNumServiceProcs++;
-            }
-            if (app.serviceb) {
-                adj = ProcessList.SERVICE_B_ADJ;
-            }
-        } else {
-            app.serviceb = false;
         }
 
         app.curAdj = adj;
@@ -14138,7 +14155,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 // If a process has held a wake lock for more
                 // than 50% of the time during this period,
-                // that sounds pad.  Kill!
+                // that sounds bad.  Kill!
                 if (doWakeKills && realtimeSince > 0
                         && ((wtimeUsed*100)/realtimeSince) >= 50) {
                     synchronized (stats) {
@@ -14186,23 +14203,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         computeOomAdjLocked(app, hiddenAdj, TOP_APP, false, doingAll);
 
         if (app.curRawAdj != app.setRawAdj) {
-            if (false) {
-                // Removing for now.  Forcing GCs is not so useful anymore
-                // with Dalvik, and the new memory level hint facility is
-                // better for what we need to do these days.
-                if (app.curRawAdj > ProcessList.FOREGROUND_APP_ADJ
-                        && app.setRawAdj <= ProcessList.FOREGROUND_APP_ADJ) {
-                    // If this app is transitioning from foreground to
-                    // non-foreground, have it do a gc.
-                    scheduleAppGcLocked(app);
-                } else if (app.curRawAdj >= ProcessList.HIDDEN_APP_MIN_ADJ
-                        && app.setRawAdj < ProcessList.HIDDEN_APP_MIN_ADJ) {
-                    // Likewise do a gc when an app is moving in to the
-                    // background (such as a service stopping).
-                    scheduleAppGcLocked(app);
-                }
-            }
-
             if (wasKeeping && !app.keeping) {
                 // This app is no longer something we want to keep.  Note
                 // its current wake lock time to later know to kill it if
@@ -14319,6 +14319,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (factor < 1) factor = 1;
         int step = 0;
         int numHidden = 0;
+        int numTrimming = 0;
         
         // First update the OOM adjustment for each of the
         // application processes based on their current state.
@@ -14363,6 +14364,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.killedBackground = true;
                     Process.killProcessQuiet(app.pid);
                 }
+                if (app.nonStoppingAdj >= ProcessList.HOME_APP_ADJ
+                        && app.nonStoppingAdj != ProcessList.SERVICE_B_ADJ
+                        && !app.killedBackground) {
+                    numTrimming++;
+                }
             }
         }
 
@@ -14376,7 +14382,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // memory they want.
         if (numHidden <= (ProcessList.MAX_HIDDEN_APPS/2)) {
             final int N = mLruProcesses.size();
-            factor = numHidden/3;
+            factor = numTrimming/3;
             int minFactor = 2;
             if (mHomeProcess != null) minFactor++;
             if (mPreviousProcess != null) minFactor++;
@@ -14393,8 +14399,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             for (i=0; i<N; i++) {
                 ProcessRecord app = mLruProcesses.get(i);
-                if (app.curAdj >= ProcessList.HOME_APP_ADJ
-                        && app.curAdj != ProcessList.SERVICE_B_ADJ
+                if (app.nonStoppingAdj >= ProcessList.HOME_APP_ADJ
+                        && app.nonStoppingAdj != ProcessList.SERVICE_B_ADJ
                         && !app.killedBackground) {
                     if (app.trimMemoryLevel < curLevel && app.thread != null) {
                         try {
@@ -14426,7 +14432,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 break;
                         }
                     }
-                } else if (app.curAdj == ProcessList.HEAVY_WEIGHT_APP_ADJ) {
+                } else if (app.nonStoppingAdj == ProcessList.HEAVY_WEIGHT_APP_ADJ) {
                     if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
                             && app.thread != null) {
                         try {
@@ -14437,7 +14443,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     app.trimMemoryLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
                 } else {
-                    if ((app.curAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
+                    if ((app.nonStoppingAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
                             && app.pendingUiClean) {
                         // If this application is now in the background and it
                         // had done UI, then give it the special trim level to
@@ -14464,7 +14470,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final int N = mLruProcesses.size();
             for (i=0; i<N; i++) {
                 ProcessRecord app = mLruProcesses.get(i);
-                if ((app.curAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
+                if ((app.nonStoppingAdj > ProcessList.VISIBLE_APP_ADJ || app.systemNoUi)
                         && app.pendingUiClean) {
                     if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
                             && app.thread != null) {

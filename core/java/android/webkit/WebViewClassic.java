@@ -886,7 +886,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // the existing GL resources for the html5 video will be destroyed
             // at native side.
             // Here we just need to clean up the Surface Texture which is static.
-            HTML5VideoInline.cleanupSurfaceTexture();
+            if (level >= TRIM_MEMORY_UI_HIDDEN) {
+                HTML5VideoInline.cleanupSurfaceTexture();
+            }
             WebViewClassic.nativeOnTrimMemory(level);
         }
 

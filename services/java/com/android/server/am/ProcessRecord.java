@@ -63,6 +63,7 @@ class ProcessRecord {
     int hiddenAdj;              // If hidden, this is the adjustment to use
     int curRawAdj;              // Current OOM unlimited adjustment for this process
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
+    int nonStoppingAdj;         // Adjustment not counting any stopping activities
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
     int curSchedGroup;          // Currently desired scheduling class
@@ -199,6 +200,7 @@ class ProcessRecord {
                 pw.print(" hidden="); pw.print(hiddenAdj);
                 pw.print(" curRaw="); pw.print(curRawAdj);
                 pw.print(" setRaw="); pw.print(setRawAdj);
+                pw.print(" nonStopping="); pw.print(nonStoppingAdj);
                 pw.print(" cur="); pw.print(curAdj);
                 pw.print(" set="); pw.println(setAdj);
         pw.print(prefix); pw.print("curSchedGroup="); pw.print(curSchedGroup);

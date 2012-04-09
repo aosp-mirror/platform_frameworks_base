@@ -432,23 +432,24 @@ public class WindowManagerImpl implements WindowManager {
      */
     public void trimMemory(int level) {
         if (HardwareRenderer.isAvailable()) {
-            // On low and medium end gfx devices
-            if (!ActivityManager.isHighEndGfx(getDefaultDisplay())) {
-                if (level >= ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
-                    // Destroy all hardware surfaces and resources associated to
-                    // known windows
-                    synchronized (this) {
-                        if (mViews == null) return;
-                        int count = mViews.length;
-                        for (int i = 0; i < count; i++) {
-                            mRoots[i].terminateHardwareResources();
-                        }
+            // On low-end gfx devices we trim when memory is moderate;
+            // on high-end devices we do this when low.
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
+                    || (level >= ComponentCallbacks2.TRIM_MEMORY_MODERATE
+                            && !ActivityManager.isHighEndGfx(getDefaultDisplay()))) {
+                // Destroy all hardware surfaces and resources associated to
+                // known windows
+                synchronized (this) {
+                    if (mViews == null) return;
+                    int count = mViews.length;
+                    for (int i = 0; i < count; i++) {
+                        mRoots[i].terminateHardwareResources();
                     }
-                    // Force a full memory flush
-                    HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
-                    mNeedsEglTerminate = true;
-                    return;
                 }
+                // Force a full memory flush
+                HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+                mNeedsEglTerminate = true;
+                return;
             }
             HardwareRenderer.trimMemory(level);
         }
