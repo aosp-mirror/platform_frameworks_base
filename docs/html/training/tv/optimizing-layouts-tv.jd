@@ -16,7 +16,7 @@ next.link=optimizing-navigation-tv.html
   <li><a href="#DesignLandscapeLayouts">Design Landscape Layouts</a></li>
   <li><a href="#MakeTextControlsEasyToSee">Make Text and Controls Easy to See</a></li>
   <li><a href="#DesignForLargeScreens">Design for High-Density Large Screens</a></li>
-  <li><a href="#HandleLargeBitmaps">Handle Large Bitmaps in Your Application</a></li>
+  <li><a href="#HandleLargeBitmaps">Design to Handle Large Bitmaps</a></li>
 </ol>
 
 <h2>You should also read</h2>
