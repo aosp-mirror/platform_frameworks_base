@@ -2522,7 +2522,19 @@ public class Activity extends ContextThemeWrapper
                 if (onOptionsItemSelected(item)) {
                     return true;
                 }
-                return mFragments.dispatchOptionsItemSelected(item);
+                if (mFragments.dispatchOptionsItemSelected(item)) {
+                    return true;
+                }
+                if (item.getItemId() == android.R.id.home && mActionBar != null &&
+                        (mActionBar.getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+                    if (mParent == null) {
+                        onNavigateUp();
+                    } else {
+                        mParent.onNavigateUpFromChild(this);
+                    }
+                    return true;
+                }
+                return false;
                 
             case Window.FEATURE_CONTEXT_MENU:
                 EventLog.writeEvent(50000, 1, item.getTitleCondensed());
@@ -2653,15 +2665,6 @@ public class Activity extends ContextThemeWrapper
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mParent != null) {
             return mParent.onOptionsItemSelected(item);
-        }
-        if (item.getItemId() == android.R.id.home && mActionBar != null &&
-                (mActionBar.getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-            if (mParent == null) {
-                onNavigateUp();
-            } else {
-                mParent.onNavigateUpFromChild(this);
-            }
-            return true;
         }
         return false;
     }
@@ -4865,11 +4868,19 @@ public class Activity extends ContextThemeWrapper
      * Obtain an {@link Intent} that will launch an explicit target activity specified by
      * this activity's logical parent. The logical parent is named in the application's manifest
      * by the {@link android.R.attr#parentActivityName parentActivityName} attribute.
+     * Activity subclasses may override this method to modify the Intent returned by
+     * super.getParentActivityIntent() or to implement a different mechanism of retrieving
+     * the parent intent entirely.
      *
-     * @return a new Intent targeting the defined parent of this activity
+     * @return a new Intent targeting the defined parent of this activity or null if
+     *         there is no valid parent.
      */
     public Intent getParentActivityIntent() {
-        return new Intent().setClassName(this, mActivityInfo.parentActivityName);
+        final String parentName = mActivityInfo.parentActivityName;
+        if (TextUtils.isEmpty(parentName)) {
+            return null;
+        }
+        return new Intent().setClassName(this, parentName);
     }
 
     // ------------------ Internal API ------------------
