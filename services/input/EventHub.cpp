@@ -1103,18 +1103,35 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
 
     // Enable wake-lock behavior on kernels that support it.
     // TODO: Only need this for devices that can really wake the system.
-    bool usingSuspendBlock = ioctl(fd, EVIOCSSUSPENDBLOCK, 1) == 0;
+    bool usingSuspendBlockIoctl = !ioctl(fd, EVIOCSSUSPENDBLOCK, 1);
+
+    // Tell the kernel that we want to use the monotonic clock for reporting timestamps
+    // associated with input events.  This is important because the input system
+    // uses the timestamps extensively and assumes they were recorded using the monotonic
+    // clock.
+    //
+    // In older kernel, before Linux 3.4, there was no way to tell the kernel which
+    // clock to use to input event timestamps.  The standard kernel behavior was to
+    // record a real time timestamp, which isn't what we want.  Android kernels therefore
+    // contained a patch to the evdev_event() function in drivers/input/evdev.c to
+    // replace the call to do_gettimeofday() with ktime_get_ts() to cause the monotonic
+    // clock to be used instead of the real time clock.
+    //
+    // As of Linux 3.4, there is a new EVIOCSCLOCKID ioctl to set the desired clock.
+    // Therefore, we no longer require the Android-specific kernel patch described above
+    // as long as we make sure to set select the monotonic clock.  We do that here.
+    bool usingClockIoctl = !ioctl(fd, EVIOCSCLOCKID, CLOCK_MONOTONIC);
 
     ALOGI("New device: id=%d, fd=%d, path='%s', name='%s', classes=0x%x, "
             "configuration='%s', keyLayout='%s', keyCharacterMap='%s', builtinKeyboard=%s, "
-            "usingSuspendBlock=%s",
+            "usingSuspendBlockIoctl=%s, usingClockIoctl=%s",
          deviceId, fd, devicePath, device->identifier.name.string(),
          device->classes,
          device->configurationFile.string(),
          device->keyMap.keyLayoutFile.string(),
          device->keyMap.keyCharacterMapFile.string(),
          toString(mBuiltInKeyboardId == deviceId),
-         toString(usingSuspendBlock));
+         toString(usingSuspendBlockIoctl), toString(usingClockIoctl));
 
     mDevices.add(deviceId, device);
 
