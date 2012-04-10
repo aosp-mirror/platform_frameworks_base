@@ -38,7 +38,6 @@ import android.util.Log;
  * state on a particular AudioRecord session.
  * <p>See {@link android.media.audiofx.AudioEffect} class for more details on
  * controlling audio effects.
- * @hide
  */
 
 public class NoiseSuppressor extends AudioEffect {
@@ -92,7 +91,6 @@ public class NoiseSuppressor extends AudioEffect {
      * @throws java.lang.IllegalArgumentException
      * @throws java.lang.UnsupportedOperationException
      * @throws java.lang.RuntimeException
-     * @hide
      */
     private NoiseSuppressor(int audioSession)
             throws IllegalArgumentException, UnsupportedOperationException, RuntimeException {

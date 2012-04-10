@@ -37,7 +37,6 @@ import android.util.Log;
  * state on a particular AudioRecord session.
  * <p>See {@link android.media.audiofx.AudioEffect} class for more details on
  * controlling audio effects.
- * @hide
  */
 
 public class AutomaticGainControl extends AudioEffect {
@@ -90,9 +89,8 @@ public class AutomaticGainControl extends AudioEffect {
      * @throws java.lang.IllegalArgumentException
      * @throws java.lang.UnsupportedOperationException
      * @throws java.lang.RuntimeException
-     * @hide
      */
-    public AutomaticGainControl(int audioSession)
+    private AutomaticGainControl(int audioSession)
             throws IllegalArgumentException, UnsupportedOperationException, RuntimeException {
         super(EFFECT_TYPE_AGC, EFFECT_TYPE_NULL, 0, audioSession);
     }
