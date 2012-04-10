@@ -817,7 +817,7 @@
     <bool name="config_allowActionMenuItemTextWithIcon">false</bool>
 
     <!-- Remote server that can provide NTP responses. -->
-    <string translatable="false" name="config_ntpServer">pool.ntp.org</string>
+    <string translatable="false" name="config_ntpServer">2.android.pool.ntp.org</string>
     <!-- Timeout to wait for NTP server response. -->
     <integer name="config_ntpTimeout">20000</integer>
 
