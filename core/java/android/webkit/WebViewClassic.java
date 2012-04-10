@@ -8089,10 +8089,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mWebView.invalidate();
         }
 
-        if (mPictureListener != null) {
-            mPictureListener.onNewPicture(getWebView(), capturePicture());
-        }
-
         // update the zoom information based on the new picture
         mZoomManager.onNewPicture(draw);
 
@@ -8100,6 +8096,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mViewManager.postReadyToDrawAll();
         }
         scrollEditWithCursor();
+
+        if (mPictureListener != null) {
+            mPictureListener.onNewPicture(getWebView(), capturePicture());
+        }
     }
 
     /**
