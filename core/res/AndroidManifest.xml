@@ -1082,7 +1082,7 @@
     <!-- Configure an application for debugging. -->
     <permission android:name="android.permission.SET_DEBUG_APP"
         android:permissionGroup="android.permission-group.DEVELOPMENT_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature|system|development"
         android:label="@string/permlab_setDebugApp"
         android:description="@string/permdesc_setDebugApp" />
 
@@ -1090,7 +1090,7 @@
          application processes that can be running. -->
     <permission android:name="android.permission.SET_PROCESS_LIMIT"
         android:permissionGroup="android.permission-group.DEVELOPMENT_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature|system|development"
         android:label="@string/permlab_setProcessLimit"
         android:description="@string/permdesc_setProcessLimit" />
 
@@ -1098,14 +1098,14 @@
          finished when put in the background. -->
     <permission android:name="android.permission.SET_ALWAYS_FINISH"
         android:permissionGroup="android.permission-group.DEVELOPMENT_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature|system|development"
         android:label="@string/permlab_setAlwaysFinish"
         android:description="@string/permdesc_setAlwaysFinish" />
 
     <!-- Allow an application to request that a signal be sent to all persistent processes -->
     <permission android:name="android.permission.SIGNAL_PERSISTENT_PROCESSES"
         android:permissionGroup="android.permission-group.DEVELOPMENT_TOOLS"
-        android:protectionLevel="dangerous"
+        android:protectionLevel="signature|system|development"
         android:label="@string/permlab_signalPersistentProcesses"
         android:description="@string/permdesc_signalPersistentProcesses" />
 
