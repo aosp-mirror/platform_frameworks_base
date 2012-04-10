@@ -1,0 +1,180 @@
+page.title=Supporting Different Screens
+parent.title=Supporting Different Devices
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Supporting Different Languages
+previous.link=languages.html
+next.title=Supporting Different Platform Versions
+next.link=platforms.html
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>This lesson teaches you to</h2>
+    <ol>
+      <li><a href="#create-layouts">Create Different Layouts</a></li>
+      <li><a href="#create-bitmaps">Create Different Bitmaps</a></li>
+    </ol>
+    
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple
+Screens</a></li>
+      <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
+      <li><a href="{@docRoot}design/style/iconography.html">Iconography design guide</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>Android categorizes device screens using two general properties:  size and density.  You should 
+expect that your app will be installed on devices with screens that range in both size 
+and density. As such, you should include some alternative resources that optimize your app’s 
+appearance for different screen sizes and densities.</p>
+
+<ul>
+  <li>There are four generalized sizes: small, normal, large, xlarge</li>
+  <li>And four generalized densities: low (ldpi), medium (mdpi), high (hdpi), extra high
+(xhdpi)</li>
+</ul>
+
+<p>To declare different layouts and bitmaps you'd like to use for different screens, you must place
+these alternative resources in separate directories, similar to how you do for different language
+strings.</p>
+
+<p>Also be aware that the screens orientation (landscape or portrait) is considered a variation of
+screen size, so many apps should revise the layout to optimize the user experience in each
+orientation.</p>
+
+
+<h2 id="create-layouts">Create Different Layouts</h2> 
+
+<p>To optimize your user experience on different screen sizes, you should create a unique layout XML
+file for each screen size you want to support. Each layout should be 
+saved into the appropriate resources directory, named with a <code>-&lt;screen_size></code> 
+suffix.  For example, a unique layout for large screens should be saved under 
+<code>res/layout-large/</code>.</p>
+
+<p class="note"><strong>Note:</strong> Android automatically scales your layout in order to
+properly fit the screen. Thus, your layouts for different screen sizes don't
+need to worry about the absolute size of UI elements but instead focus on the layout structure that
+affects the user experience (such as the size or position of important views relative to sibling
+views).</p>
+
+<p>For example, this project includes a default layout and an alternative layout for <em>large</em>
+screens:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+    res/
+        layout/
+            main.xml
+        layout-large/
+            main.xml
+</pre>
+
+<p>The file names must be exactly the same, but their contents are different in order to provide
+an optimized UI for the corresponding screen size.</p>
+
+<p>Simply reference the layout file in your app as usual:</p>
+
+<pre>
+&#64;Override
+ protected void onCreate(Bundle savedInstanceState) {
+     super.onCreate(savedInstanceState);
+     setContentView(R.layout.main);
+}
+</pre>
+
+<p>The system loads the layout file from the appropriate layout directory based on screen size of 
+the device on which your app is running. More information about how Android selects the
+appropriate resource is available in the <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#BestMatch">Providing Resources</a>
+guide.</p>
+
+<p>As another example, here's a project with an alternative layout for landscape orientation:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+    res/
+        layout/
+            main.xml
+        layout-land/
+            main.xml
+</pre>
+
+<p>By default, the <code>layout/main.xml</code> file is used for portrait orientation.</p>
+
+<p>If you want a provide a special layout for landscape, including while on large screens, then
+you need to use both the <code>large</code> and <code>land</code> qualifier:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+    res/
+        layout/              # default (portrait)
+            main.xml
+        layout-land/         # landscape
+            main.xml
+        layout-large/        # large (portrait)
+            main.xml
+        layout-large-land/   # large landscape
+            main.xml
+</pre>
+
+<p class="note"><strong>Note:</strong> Android 3.2 and above supports an advanced method of 
+defining screen sizes that allows you to specify resources for screen sizes based on
+the minimum width and height in terms of density-independent pixels. This lesson does not cover
+this new technique. For more information, read <a
+href="{@docRoot}training/multiscreen/index.html">Designing for Multiple
+Screens</a>.</p>
+
+
+ 
+<h2 id="create-bitmaps">Create Different Bitmaps</h2>
+
+<p>You should always provide bitmap resources that are properly scaled to each of the generalized
+density buckets: low, medium, high and extra-high density. This helps you achieve good graphical
+quality and performance on all screen densities.</p>
+
+<p>To generate these images, you should start with your raw resource in vector format and generate 
+the images for each density using the following size scale:</p>
+<ul>
+<li>xhdpi: 2.0</li>
+<li>hdpi: 1.5</li>
+<li>mdpi: 1.0 (baseline)</li>
+<li>ldpi: 0.75</li>
+</ul>
+
+<p>This means that if you generate a 200x200 image for xhdpi devices, you should generate the same 
+resource in 150x150 for hdpi, 100x100 for mdpi, and 75x75 for ldpi devices.</p>
+
+<p>Then, place the files in the appropriate drawable resource directory:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+    res/
+        drawable-xhdpi/
+            awesomeimage.png
+        drawable-hdpi/
+            awesomeimage.png
+        drawable-mdpi/
+            awesomeimage.png
+        drawable-ldpi/
+            awesomeimage.png
+</pre>
+
+<p>Any time you reference <code>@drawable/awesomeimage</code>, the system selects the 
+appropriate bitmap based on the screen's density.</p>
+
+<p class="note"><strong>Note:</strong> Low-density (ldpi) resources aren’t always necessary.  When
+you provide hdpi assets, the system scales them down by one half to properly fit ldpi
+screens.</p>
+
+<p>For more tips and guidelines about creating icon assets for your app, see the 
+<a href="{@docRoot}design/style/iconography.html">Iconography design guide</a>.</p>
+
+
+
