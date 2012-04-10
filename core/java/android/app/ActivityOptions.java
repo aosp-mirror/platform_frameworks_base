@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
-import android.os.Message;
 import android.os.RemoteException;
 import android.view.View;
 
@@ -121,9 +120,29 @@ public class ActivityOptions {
     /**
      * Callback for use with {@link ActivityOptions#makeThumbnailScaleUpAnimation}
      * to find out when the given animation has started running.
+     * @hide
      */
     public interface OnAnimationStartedListener {
         void onAnimationStarted();
+    }
+
+    /**
+     * Create an ActivityOptions specifying an animation where a thumbnail
+     * is scaled from a given position to the new activity window that is
+     * being started.
+     *
+     * @param source The View that this thumbnail is animating from.  This
+     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
+     * @param thumbnail The bitmap that will be shown as the initial thumbnail
+     * of the animation.
+     * @param startX The x starting location of the bitmap, in screen coordiantes.
+     * @param startY The y starting location of the bitmap, in screen coordinates.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     */
+    public static ActivityOptions makeThumbnailScaleUpAnimation(View source,
+            Bitmap thumbnail, int startX, int startY) {
+        return makeThumbnailScaleUpAnimation(source, thumbnail, startX, startY, null);
     }
 
     /**
@@ -142,6 +161,7 @@ public class ActivityOptions {
      * is not executed, the callback will happen immediately.
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
+     * @hide
      */
     public static ActivityOptions makeThumbnailScaleUpAnimation(View source,
             Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
