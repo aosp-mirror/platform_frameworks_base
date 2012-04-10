@@ -3181,7 +3181,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Log the ANR to the main log.
-        StringBuilder info = mStringBuilder;
+        StringBuilder info = new StringBuilder();
         info.setLength(0);
         info.append("ANR in ").append(app.processName);
         if (activity != null && activity.shortComponentName != null) {
