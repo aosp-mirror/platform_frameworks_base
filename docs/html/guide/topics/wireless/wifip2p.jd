@@ -491,10 +491,10 @@ manager.connect(channel, config, new ActionListener() {
   </ol>
 
   <p>The following example, modified from the <a href=
-  "{@docRoot}resources/samples/WifiDirectDemo/index.html">Wi-Fi Direct Demo</a> sample, shows you how
+  "{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi Direct Demo</a> sample, shows you how
   to create this client-server socket communication and transfer JPEG images from a client
   to a server with a service. For a complete working example, compile and run the <a href=
-  "{@docRoot}resources/samples/WifiDirectDemo/index.html">Wi-Fi Direct Demo</a> sample.</p>
+  "{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi Direct Demo</a> sample.</p>
 <pre>
 public static class FileServerAsyncTask extends AsyncTask<Void, Void, String> {
 
