@@ -223,6 +223,14 @@ public class LockPatternUtils {
         }
     }
 
+    public int getCurrentUser() {
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            return mCurrentUserId;
+        } else {
+            throw new SecurityException("Only the system process can get the current user");
+        }
+    }
+
     public void removeUser(int userId) {
         if (Process.myUid() == Process.SYSTEM_UID) {
             try {
