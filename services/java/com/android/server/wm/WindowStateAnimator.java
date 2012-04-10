@@ -943,6 +943,10 @@ class WindowStateAnimator {
     }
 
     void setTransparentRegionHint(final Region region) {
+        if (mSurface == null) {
+            Slog.w(TAG, "setTransparentRegionHint: null mSurface after mHasSurface true");
+            return;
+        }
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
             ">>> OPEN TRANSACTION setTransparentRegion");
         Surface.openTransaction();
