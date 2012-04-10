@@ -471,9 +471,7 @@ public class WindowAnimator {
             Surface.closeTransaction();
         }
 
-        if (mBulkUpdateParams != 0) {
-            mService.bulkSetParameters(mBulkUpdateParams);
-        }
+        mService.bulkSetParameters(mBulkUpdateParams);
     }
 
     WindowState mCurrentFocus;
