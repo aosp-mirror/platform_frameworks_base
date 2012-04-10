@@ -34,7 +34,7 @@ interface INfcAdapter
     INfcAdapterExtras getNfcAdapterExtrasInterface(in String pkg);
 
     int getState();
-    boolean disable();
+    boolean disable(boolean saveState);
     boolean enable();
     boolean enableNdefPush();
     boolean disableNdefPush();

@@ -24,6 +24,8 @@ import android.app.IActivityManager;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetooth;
+import android.nfc.NfcAdapter;
+import android.nfc.INfcAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -47,7 +49,7 @@ import android.view.WindowManager;
 public final class ShutdownThread extends Thread {
     // constants
     private static final String TAG = "ShutdownThread";
-    private static final int MAX_NUM_PHONE_STATE_READS = 16;
+    private static final int MAX_NUM_PHONE_STATE_READS = 24;
     private static final int PHONE_STATE_POLL_SLEEP_MSEC = 500;
     // maximum time we wait for the shutdown broadcast before going on.
     private static final int MAX_BROADCAST_TIME = 10*1000;
@@ -230,6 +232,7 @@ public final class ShutdownThread extends Thread {
      * Shuts off power regardless of radio and bluetooth state if the alloted time has passed.
      */
     public void run() {
+        boolean nfcOff;
         boolean bluetoothOff;
         boolean radioOff;
 
@@ -283,16 +286,29 @@ public final class ShutdownThread extends Thread {
             }
         }
         
+        final INfcAdapter nfc =
+                INfcAdapter.Stub.asInterface(ServiceManager.checkService("nfc"));
         final ITelephony phone =
                 ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
         final IBluetooth bluetooth =
                 IBluetooth.Stub.asInterface(ServiceManager.checkService(
                         BluetoothAdapter.BLUETOOTH_SERVICE));
-
         final IMountService mount =
                 IMountService.Stub.asInterface(
                         ServiceManager.checkService("mount"));
-        
+
+        try {
+            nfcOff = nfc == null ||
+                     nfc.getState() == NfcAdapter.STATE_OFF;
+            if (!nfcOff) {
+                Log.w(TAG, "Turning off NFC...");
+                nfc.disable(false); // Don't persist new state
+            }
+        } catch (RemoteException ex) {
+	    Log.e(TAG, "RemoteException during NFC shutdown", ex);
+            nfcOff = true;
+        }
+
         try {
             bluetoothOff = bluetooth == null ||
                            bluetooth.getBluetoothState() == BluetoothAdapter.STATE_OFF;
@@ -316,7 +332,7 @@ public final class ShutdownThread extends Thread {
             radioOff = true;
         }
 
-        Log.i(TAG, "Waiting for Bluetooth and Radio...");
+        Log.i(TAG, "Waiting for NFC, Bluetooth and Radio...");
         
         // Wait a max of 32 seconds for clean shutdown
         for (int i = 0; i < MAX_NUM_PHONE_STATE_READS; i++) {
@@ -337,8 +353,17 @@ public final class ShutdownThread extends Thread {
                     radioOff = true;
                 }
             }
-            if (radioOff && bluetoothOff) {
-                Log.i(TAG, "Radio and Bluetooth shutdown complete.");
+            if (!nfcOff) {
+                try {
+                    nfcOff = nfc.getState() == NfcAdapter.STATE_OFF;
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "RemoteException during NFC shutdown", ex);
+                    nfcOff = true;
+                }
+            }
+
+            if (radioOff && bluetoothOff && nfcOff) {
+                Log.i(TAG, "NFC, Radio and Bluetooth shutdown complete.");
                 break;
             }
             SystemClock.sleep(PHONE_STATE_POLL_SLEEP_MSEC);
