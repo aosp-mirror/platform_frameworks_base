@@ -178,7 +178,7 @@ static jboolean jni_eglQuerySurface(JNIEnv *_env, jobject _this, jobject display
 
 static jint jni_getInitCount(JNIEnv *_env, jobject _clazz, jobject display) {
     EGLDisplay dpy = getDisplay(_env, display);
-    egl_display_t* eglDisplay = get_display(dpy); 
+    egl_display_t* eglDisplay = get_display_nowake(dpy);
     return eglDisplay ? eglDisplay->getRefsCount() : 0;
 }
 
