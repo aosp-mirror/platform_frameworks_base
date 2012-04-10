@@ -129,13 +129,13 @@ class AutoCompletePopup implements OnItemClickListener, Filter.FilterListener {
     }
 
     public void resetRect() {
-        int left = mWebView.contentToViewX(mWebView.mEditTextContentBounds.left);
-        int right = mWebView.contentToViewX(mWebView.mEditTextContentBounds.right);
+        int left = mWebView.contentToViewX(mWebView.mEditTextBounds.left);
+        int right = mWebView.contentToViewX(mWebView.mEditTextBounds.right);
         int width = right - left;
         mPopup.setWidth(width);
 
-        int bottom = mWebView.contentToViewY(mWebView.mEditTextContentBounds.bottom);
-        int top = mWebView.contentToViewY(mWebView.mEditTextContentBounds.top);
+        int bottom = mWebView.contentToViewY(mWebView.mEditTextBounds.bottom);
+        int top = mWebView.contentToViewY(mWebView.mEditTextBounds.top);
         int height = bottom - top;
 
         AbsoluteLayout.LayoutParams lp =
