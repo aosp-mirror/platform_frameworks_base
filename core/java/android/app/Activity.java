@@ -55,6 +55,7 @@ import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.ContextMenu;
@@ -642,6 +643,7 @@ public class Activity extends ContextThemeWrapper
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2 {
     private static final String TAG = "Activity";
+    private static final boolean DEBUG_LIFECYCLE = false;
 
     /** Standard activity result: operation canceled. */
     public static final int RESULT_CANCELED    = 0;
@@ -865,6 +867,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onPostCreate
      */
     protected void onCreate(Bundle savedInstanceState) {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
         if (mLastNonConfigurationInstances != null) {
             mAllLoaderManagers = mLastNonConfigurationInstances.loaders;
         }
@@ -1013,6 +1016,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onResume
      */
     protected void onStart() {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStart " + this);
         mCalled = true;
         
         if (!mLoadersStarted) {
@@ -1073,6 +1077,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onPause
      */
     protected void onResume() {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         getApplication().dispatchActivityResumed(this);
         mCalled = true;
     }
@@ -1131,6 +1136,7 @@ public class Activity extends ContextThemeWrapper
     final void performSaveInstanceState(Bundle outState) {
         onSaveInstanceState(outState);
         saveManagedDialogs(outState);
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onSaveInstanceState " + this + ": " + outState);
     }
 
     /**
@@ -1261,6 +1267,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onStop
      */
     protected void onPause() {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onPause " + this);
         getApplication().dispatchActivityPaused(this);
         mCalled = true;
     }
@@ -1347,6 +1354,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onDestroy
      */
     protected void onStop() {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
         getApplication().dispatchActivityStopped(this);
         mCalled = true;
@@ -1381,6 +1389,7 @@ public class Activity extends ContextThemeWrapper
      * @see #isFinishing
      */
     protected void onDestroy() {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onDestroy " + this);
         mCalled = true;
 
         // dismiss any dialogs we are managing.
@@ -1432,6 +1441,7 @@ public class Activity extends ContextThemeWrapper
      * @param newConfig The new device configuration.
      */
     public void onConfigurationChanged(Configuration newConfig) {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onConfigurationChanged " + this + ": " + newConfig);
         mCalled = true;
 
         mFragments.dispatchConfigurationChanged(newConfig);
@@ -1613,11 +1623,13 @@ public class Activity extends ContextThemeWrapper
     }
 
     public void onLowMemory() {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onLowMemory " + this);
         mCalled = true;
         mFragments.dispatchLowMemory();
     }
 
     public void onTrimMemory(int level) {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG, "onTrimMemory " + this + ": " + level);
         mCalled = true;
         mFragments.dispatchTrimMemory(level);
     }

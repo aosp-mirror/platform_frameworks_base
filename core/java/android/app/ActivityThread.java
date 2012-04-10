@@ -138,6 +138,7 @@ public final class ActivityThread {
     private static final boolean DEBUG_BACKUP = true;
     private static final boolean DEBUG_CONFIGURATION = false;
     private static final boolean DEBUG_SERVICE = false;
+    private static final boolean DEBUG_MEMORY_TRIM = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
@@ -2779,9 +2780,21 @@ public final class ActivityThread {
         performStopActivityInner(r, null, false, saveState);
     }
 
-    private static class StopInfo {
+    private static class StopInfo implements Runnable {
+        ActivityClientRecord activity;
+        Bundle state;
         Bitmap thumbnail;
         CharSequence description;
+
+        @Override public void run() {
+            // Tell activity manager we have been stopped.
+            try {
+                if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Reporting activity stopped: " + activity);
+                ActivityManagerNative.getDefault().activityStopped(
+                    activity.token, state, thumbnail, description);
+            } catch (RemoteException ex) {
+            }
+        }
     }
 
     private static final class ProviderRefCount {
@@ -2911,12 +2924,14 @@ public final class ActivityThread {
             QueuedWork.waitToFinish();
         }
 
-        // Tell activity manager we have been stopped.
-        try {
-            ActivityManagerNative.getDefault().activityStopped(
-                r.token, r.state, info.thumbnail, info.description);
-        } catch (RemoteException ex) {
-        }
+        // Schedule the call to tell the activity manager we have
+        // stopped.  We don't do this immediately, because we want to
+        // have a chance for any other pending work (in particular memory
+        // trim requests) to complete before you tell the activity
+        // manager to proceed and allow us to go fully into the background.
+        info.activity = r;
+        info.state = r.state;
+        mH.post(info);
     }
 
     final void performRestartActivity(IBinder token) {
@@ -3749,6 +3764,7 @@ public final class ActivityThread {
     }
 
     final void handleTrimMemory(int level) {
+        if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Trimming memory to level: " + level);
         WindowManagerImpl.getDefault().trimMemory(level);
         ArrayList<ComponentCallbacks2> callbacks;
 

@@ -97,6 +97,11 @@ final class ActivityStack {
     // next activity.
     static final int PAUSE_TIMEOUT = 500;
 
+    // How long we wait for the activity to tell us it has stopped before
+    // giving up.  This is a good amount of time because we really need this
+    // from the application in order to get its saved state.
+    static final int STOP_TIMEOUT = 10*1000;
+
     // How long we can hold the sleep wake lock before giving up.
     static final int SLEEP_TIMEOUT = 5*1000;
 
@@ -280,6 +285,7 @@ final class ActivityStack {
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
     static final int RESUME_TOP_ACTIVITY_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
     static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 7;
+    static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 8;
     
     final Handler mHandler = new Handler() {
         //public Handler() {
@@ -362,6 +368,17 @@ final class ActivityStack {
                 case RESUME_TOP_ACTIVITY_MSG: {
                     synchronized (mService) {
                         resumeTopActivityLocked(null);
+                    }
+                } break;
+                case STOP_TIMEOUT_MSG: {
+                    ActivityRecord r = (ActivityRecord)msg.obj;
+                    // We don't at this point know if the activity is fullscreen,
+                    // so we need to be conservative and assume it isn't.
+                    Slog.w(TAG, "Activity stop timeout for " + r);
+                    synchronized (mService) {
+                        if (r.isInHistory()) {
+                            activityStoppedLocked(r, null, null, null);
+                        }
                     }
                 } break;
             }
@@ -1000,31 +1017,38 @@ final class ActivityStack {
     final void activityStoppedLocked(ActivityRecord r, Bundle icicle, Bitmap thumbnail,
             CharSequence description) {
         if (DEBUG_SAVED_STATE) Slog.i(TAG, "Saving icicle of " + r + ": " + icicle);
-        r.icicle = icicle;
-        r.haveState = true;
-        r.updateThumbnail(thumbnail, description);
-        r.stopped = true;
-        if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPED: " + r + " (stop complete)");
-        r.state = ActivityState.STOPPED;
-        if (!r.finishing) {
-            if (r.configDestroy) {
-                destroyActivityLocked(r, true, false, "stop-config");
-                resumeTopActivityLocked(null);
-            } else {
-                // Now that this process has stopped, we may want to consider
-                // it to be the previous app to try to keep around in case
-                // the user wants to return to it.
-                ProcessRecord fgApp = null;
-                if (mResumedActivity != null) {
-                    fgApp = mResumedActivity.app;
-                } else if (mPausingActivity != null) {
-                    fgApp = mPausingActivity.app;
-                }
-                if (r.app != null && fgApp != null && r.app != fgApp
-                        && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
-                        && r.app != mService.mHomeProcess) {
-                    mService.mPreviousProcess = r.app;
-                    mService.mPreviousProcessVisibleTime = r.lastVisibleTime;
+        if (icicle != null) {
+            // If icicle is null, this is happening due to a timeout, so we
+            // haven't really saved the state.
+            r.icicle = icicle;
+            r.haveState = true;
+            r.updateThumbnail(thumbnail, description);
+        }
+        if (!r.stopped) {
+            if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPED: " + r + " (stop complete)");
+            mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
+            r.stopped = true;
+            r.state = ActivityState.STOPPED;
+            if (!r.finishing) {
+                if (r.configDestroy) {
+                    destroyActivityLocked(r, true, false, "stop-config");
+                    resumeTopActivityLocked(null);
+                } else {
+                    // Now that this process has stopped, we may want to consider
+                    // it to be the previous app to try to keep around in case
+                    // the user wants to return to it.
+                    ProcessRecord fgApp = null;
+                    if (mResumedActivity != null) {
+                        fgApp = mResumedActivity.app;
+                    } else if (mPausingActivity != null) {
+                        fgApp = mPausingActivity.app;
+                    }
+                    if (r.app != null && fgApp != null && r.app != fgApp
+                            && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
+                            && r.app != mService.mHomeProcess) {
+                        mService.mPreviousProcess = r.app;
+                        mService.mPreviousProcessVisibleTime = r.lastVisibleTime;
+                    }
                 }
             }
         }
@@ -3228,6 +3252,9 @@ final class ActivityStack {
                 if (mService.isSleeping()) {
                     r.setSleeping(true);
                 }
+                Message msg = mHandler.obtainMessage(STOP_TIMEOUT_MSG);
+                msg.obj = r;
+                mHandler.sendMessageDelayed(msg, STOP_TIMEOUT);
             } catch (Exception e) {
                 // Maybe just ignore exceptions here...  if the process
                 // has crashed, our death notification will clean things
@@ -3694,6 +3721,7 @@ final class ActivityStack {
 
         // Get rid of any pending idle timeouts.
         mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
+        mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
         mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
         mHandler.removeMessages(DESTROY_TIMEOUT_MSG, r);
         r.finishLaunchTickingLocked();
