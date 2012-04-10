@@ -38,6 +38,12 @@ namespace android {
 class IGraphicBufferAlloc;
 class String8;
 
+class BufferQueue : public RefBase {
+public:
+    BufferQueue(bool allowSynchronousMode) {};
+    status_t setBufferCount(int bufferCount) { return 0; }
+};
+
 class SurfaceTexture : public BnSurfaceTexture {
 public:
     enum { MIN_UNDEQUEUED_BUFFERS = 2 };
@@ -69,7 +75,8 @@ public:
     // fences should be used to synchronize access to buffers if that behavior
     // is enabled at compile-time.
     SurfaceTexture(GLuint tex, bool allowSynchronousMode = true,
-            GLenum texTarget = GL_TEXTURE_EXTERNAL_OES, bool useFenceSync = true);
+            GLenum texTarget = GL_TEXTURE_EXTERNAL_OES, bool useFenceSync = true,
+            const sp<BufferQueue> &bufferQueue = 0);
 
     virtual ~SurfaceTexture();
 
