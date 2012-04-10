@@ -1019,8 +1019,7 @@
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Idő beállítása"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Dátum beállítása"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Beállítás"</string>
-    <!-- no translation found for date_time_done (2507683751759308828) -->
-    <skip />
+    <string name="date_time_done" msgid="2507683751759308828">"Kész"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Alapértelmezett"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ffffa3a3">"ÚJ: "</font></string>
     <string name="no_permissions" msgid="7283357728219338112">"Nincs szükség engedélyre"</string>
@@ -1170,35 +1169,22 @@
     <string name="add_account_label" msgid="2935267344849993553">"Fiók hozzáadása"</string>
     <string name="choose_account_text" msgid="6303348737197849675">"Melyik fiókot szeretné használni?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Fiók hozzáadása"</string>
-    <!-- no translation found for number_picker_increment_button (2412072272832284313) -->
-    <skip />
-    <!-- no translation found for number_picker_decrement_button (476050778386779067) -->
-    <skip />
+    <string name="number_picker_increment_button" msgid="2412072272832284313">"Növelés"</string>
+    <string name="number_picker_decrement_button" msgid="476050778386779067">"Csökkentés"</string>
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> érintse meg és tartsa lenyomva."</string>
-    <!-- no translation found for number_picker_increment_scroll_action (9101473045891835490) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_minute_button (8865885114028614321) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_minute_button (6246834937080684791) -->
-    <skip />
-    <!-- no translation found for time_picker_increment_hour_button (3652056055810223139) -->
-    <skip />
-    <!-- no translation found for time_picker_decrement_hour_button (1377479863429214792) -->
-    <skip />
+    <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"A növeléshez csúsztassa felfelé, a csökkentéshez pedig lefelé."</string>
+    <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Perc értékének növelése"</string>
+    <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Perc értékének csökkentése"</string>
+    <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"Óra értékének növelése"</string>
+    <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Óra értékének csökkentése"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Állítsa du. értékre"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Állítsa de. értékre"</string>
-    <!-- no translation found for date_picker_increment_month_button (5369998479067934110) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_month_button (1832698995541726019) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_day_button (7130465412308173903) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_day_button (4131881521818750031) -->
-    <skip />
-    <!-- no translation found for date_picker_increment_year_button (6318697384310808899) -->
-    <skip />
-    <!-- no translation found for date_picker_decrement_year_button (4482021813491121717) -->
-    <skip />
+    <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Hónap értékének növelése"</string>
+    <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Hónap értékének csökkentése"</string>
+    <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Dátum értékének növelése"</string>
+    <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Dátum értékének csökkentése"</string>
+    <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Év értékének növelése"</string>
+    <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Év értékének csökkentése"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"bejelölve"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"nincs bejelölve"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"bejelölve"</string>
@@ -1218,20 +1204,15 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Megosztás a következővel:"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Ossza meg a következő alkalmazással: <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Csúsztatható fogantyú. Érintse meg és tartsa."</string>
-    <!-- no translation found for description_direction_up (7169032478259485180) -->
-    <skip />
-    <!-- no translation found for description_direction_down (5087739728639014595) -->
-    <skip />
-    <!-- no translation found for description_direction_left (7207478719805562165) -->
-    <skip />
-    <!-- no translation found for description_direction_right (8034433242579600980) -->
-    <skip />
+    <string name="description_direction_up" msgid="7169032478259485180">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa felfelé."</string>
+    <string name="description_direction_down" msgid="5087739728639014595">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa lefelé."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa balra."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa jobbra."</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"Feloldás"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Némítás"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Hang bekapcsolása"</string>
-    <!-- no translation found for description_target_search (3091587249776033139) -->
-    <skip />
+    <string name="description_target_search" msgid="3091587249776033139">"Keresés"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"A feloldásához húzza végig az ujját."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Csatlakoztasson egy fülhallgatót, ha hallani szeretné a jelszó betűit felolvasva."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Pont."</string>

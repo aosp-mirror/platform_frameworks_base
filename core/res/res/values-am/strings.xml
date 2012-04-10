@@ -1172,7 +1172,7 @@
     <string name="number_picker_increment_button" msgid="2412072272832284313">"ጨምር"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"ቀንስ"</string>
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> ንካ እና ያዝ።"</string>
-    <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"ለመጨመር ወደ ላይ አንሸራትት እና ለመቀነስ ወደ ታች አንሸራትት።"</string>
+    <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"ለመጨመር ወደ ላይ እና ለመቀነስ ወደ ታች አንሸራትት።"</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"ደቂቃ ጨምር"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"ደቂቃ ቀንስ"</string>
     <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"ሰዓት ጨምር"</string>
