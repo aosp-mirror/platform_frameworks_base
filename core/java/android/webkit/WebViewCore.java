@@ -949,7 +949,7 @@ public final class WebViewCore {
         public String mName;
         public String mLabel;
         public int mMaxLength;
-        public Rect mNodeBounds;
+        public Rect mContentBounds;
         public int mNodeLayerId;
         public Rect mContentRect;
     }
@@ -1299,7 +1299,13 @@ public final class WebViewCore {
                             } else {
                                 xPercent = ((Float) msg.obj).floatValue();
                             }
-                            nativeScrollFocusedTextInput(mNativeClass, xPercent, msg.arg2);
+                            Rect contentBounds = new Rect();
+                            nativeScrollFocusedTextInput(mNativeClass, xPercent,
+                                    msg.arg2, contentBounds);
+                            Message.obtain(
+                                    mWebViewClassic.mPrivateHandler,
+                                    WebViewClassic.UPDATE_CONTENT_BOUNDS,
+                                    contentBounds).sendToTarget();
                             break;
 
                         case LOAD_URL: {
@@ -2845,7 +2851,7 @@ public final class WebViewCore {
      * Scroll the focused textfield to (xPercent, y) in document space
      */
     private native void nativeScrollFocusedTextInput(int nativeClass,
-            float xPercent, int y);
+            float xPercent, int y, Rect contentBounds);
 
     // these must be in document space (i.e. not scaled/zoomed).
     private native void nativeSetScrollOffset(int nativeClass,
