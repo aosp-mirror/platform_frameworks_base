@@ -1049,6 +1049,31 @@ public interface WindowManagerPolicy {
     public void lockNow();
 
     /**
+     * Check to see if a screensaver should be run instead of powering off the screen on timeout. 
+     * 
+     * @return true if the screensaver should run, false if the screen should turn off.
+     * 
+     * @hide
+     */
+    public boolean isScreenSaverEnabled();
+
+    /**
+     * Start the screensaver (if it is enabled and not yet running).
+     * 
+     * @return Whether the screensaver was successfully started.
+     * 
+     * @hide
+     */
+    public boolean startScreenSaver();
+
+    /**
+     * Stop the screensaver if it is running.
+     * 
+     * @hide
+     */
+    public void stopScreenSaver();
+
+    /**
      * Print the WindowManagerPolicy's state into the given stream.
      *
      * @param prefix Text to print at the front of each line.

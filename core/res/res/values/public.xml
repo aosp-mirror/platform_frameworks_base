@@ -1110,6 +1110,7 @@
   <java-symbol type="style" name="Animation.PopupWindow" />
   <java-symbol type="style" name="Animation.TypingFilter" />
   <java-symbol type="style" name="Animation.TypingFilterRestore" />
+  <java-symbol type="style" name="Animation.Dream" />
   <java-symbol type="style" name="Theme.DeviceDefault.Dialog.Alert" />
   <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" />
   <java-symbol type="style" name="Theme.Dialog.Alert" />
@@ -1262,7 +1263,6 @@
   <java-symbol type="layout" name="screen_title_icons" />
   <java-symbol type="string" name="abbrev_wday_month_day_no_year" />
   <java-symbol type="string" name="android_upgrading_title" />
-  <java-symbol type="string" name="config_defaultDreamComponent" />
   <java-symbol type="string" name="faceunlock_multiple_failures" />
   <java-symbol type="string" name="global_action_power_off" />
   <java-symbol type="string" name="global_actions_airplane_mode_off_status" />
@@ -1480,6 +1480,8 @@
   <java-symbol type="style" name="Theme.Dialog.AppError" />
   <java-symbol type="style" name="Theme.Toast" />
   <java-symbol type="xml" name="storage_list" />
+  <java-symbol type="bool" name="config_enableDreams" />
+  <java-symbol type="string" name="config_defaultDreamComponent" />
 
   <!-- From SystemUI -->
   <java-symbol type="anim" name="push_down_in" />

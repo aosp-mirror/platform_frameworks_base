@@ -1752,7 +1752,7 @@ public class PowerManagerService extends IPowerManager.Stub
                         + " noChangeLights=" + noChangeLights
                         + " reason=" + reason);
             }
-
+            
             if (noChangeLights) {
                 newState = (newState & ~LIGHTS_MASK) | (mPowerState & LIGHTS_MASK);
             }
@@ -1793,6 +1793,19 @@ public class PowerManagerService extends IPowerManager.Stub
             }
 
             final boolean stateChanged = mPowerState != newState;
+
+            if (stateChanged && reason == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT) {
+                if (mPolicy.isScreenSaverEnabled()) {
+                    if (mSpew) {
+                        Slog.d(TAG, "setPowerState: running screen saver instead of turning off screen");
+                    }
+                    if (mPolicy.startScreenSaver()) {
+                        // was successful
+                        return;
+                    }
+                }
+            }
+
 
             if (oldScreenOn != newScreenOn) {
                 if (newScreenOn) {

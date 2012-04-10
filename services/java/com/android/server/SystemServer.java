@@ -38,6 +38,7 @@ import android.provider.Settings;
 import android.server.BluetoothA2dpService;
 import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
+import android.service.dreams.DreamManagerService;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -269,6 +270,7 @@ class ServerThread extends Thread {
         CountryDetectorService countryDetector = null;
         TextServicesManagerService tsms = null;
         LockSettingsService lockSettings = null;
+        DreamManagerService dreamy = null;
 
         // Bring up services needed for UI.
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
@@ -613,6 +615,18 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 reportWtf("starting CommonTimeManagementService service", e);
             }
+            
+            if (context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_enableDreams)) {
+                try {
+                    Slog.i(TAG, "Dreams Service");
+                    // Dreams (interactive idle-time views, a/k/a screen savers)
+                    dreamy = new DreamManagerService(context);
+                    ServiceManager.addService("dreams", dreamy);
+                } catch (Throwable e) {
+                    reportWtf("starting DreamManagerService", e);
+                }
+            }
         }
 
         // Before things start rolling, be sure we have decided whether
@@ -699,6 +713,7 @@ class ServerThread extends Thread {
         final CommonTimeManagementService commonTimeMgmtServiceF = commonTimeMgmtService;
         final TextServicesManagerService textServiceManagerServiceF = tsms;
         final StatusBarManagerService statusBarF = statusBar;
+        final DreamManagerService dreamyF = dreamy;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -804,6 +819,11 @@ class ServerThread extends Thread {
                     if (textServiceManagerServiceF != null) textServiceManagerServiceF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Text Services Manager Service ready", e);
+                }
+                try {
+                    if (dreamyF != null) dreamyF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making DreamManagerService ready", e);
                 }
             }
         });

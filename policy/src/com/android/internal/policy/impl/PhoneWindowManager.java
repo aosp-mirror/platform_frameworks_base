@@ -65,6 +65,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
 
+import android.service.dreams.IDreamManager;
 import android.speech.RecognizerIntent;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -108,6 +109,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
+import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
@@ -202,26 +204,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // responsible for power management when displayed.
     static final int KEYGUARD_LAYER = 11;
     static final int KEYGUARD_DIALOG_LAYER = 12;
-    static final int STATUS_BAR_SUB_PANEL_LAYER = 13;
-    static final int STATUS_BAR_LAYER = 14;
-    static final int STATUS_BAR_PANEL_LAYER = 15;
+    // used for Dreams (screensavers with TYPE_DREAM windows)
+    static final int SCREENSAVER_LAYER = 13; 
+    static final int STATUS_BAR_SUB_PANEL_LAYER = 14;
+    static final int STATUS_BAR_LAYER = 15;
+    static final int STATUS_BAR_PANEL_LAYER = 16;
     // the on-screen volume indicator and controller shown when the user
     // changes the device volume
-    static final int VOLUME_OVERLAY_LAYER = 16;
+    static final int VOLUME_OVERLAY_LAYER = 17;
     // things in here CAN NOT take focus, but are shown on top of everything else.
-    static final int SYSTEM_OVERLAY_LAYER = 17;
+    static final int SYSTEM_OVERLAY_LAYER = 18;
     // the navigation bar, if available, shows atop most things
-    static final int NAVIGATION_BAR_LAYER = 18;
+    static final int NAVIGATION_BAR_LAYER = 19;
     // system-level error dialogs
-    static final int SYSTEM_ERROR_LAYER = 19;
+    static final int SYSTEM_ERROR_LAYER = 20;
     // the drag layer: input for drag-and-drop is associated with this window,
     // which sits above all other focusable windows
-    static final int DRAG_LAYER = 20;
-    static final int SECURE_SYSTEM_OVERLAY_LAYER = 21;
-    static final int BOOT_PROGRESS_LAYER = 22;
+    static final int DRAG_LAYER = 21;
+    static final int SECURE_SYSTEM_OVERLAY_LAYER = 22;
+    static final int BOOT_PROGRESS_LAYER = 23;
     // the (mouse) pointer layer
-    static final int POINTER_LAYER = 23;
-    static final int HIDDEN_NAV_CONSUMER_LAYER = 24;
+    static final int POINTER_LAYER = 24;
+    static final int HIDDEN_NAV_CONSUMER_LAYER = 25;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -453,6 +457,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mLockScreenTimerActive;
 
     // visual screen saver support
+    boolean mScreenSaverFeatureAvailable;
     int mScreenSaverTimeout = 0;
     boolean mScreenSaverEnabledByUser = false;
     boolean mScreenSaverMayRun = true; // false if a wakelock is held
@@ -1076,6 +1081,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateRotation = true;
             }
 
+            // dreams
+            mScreenSaverFeatureAvailable = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_enableDreams);
+            
             mScreenSaverEnabledByUser = 0 != Settings.Secure.getInt(resolver,
                     Settings.Secure.SCREENSAVER_ENABLED, 1);
 
@@ -1091,7 +1100,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mScreenSaverTimeout -= 5000;
                 }
             }
-            updateScreenSaverTimeoutLocked();
         }
         if (updateRotation) {
             updateRotation(true);
@@ -1179,6 +1187,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // this...  should introduce a token to let the system
                 // monitor/control what they are doing.
                 break;
+            case TYPE_DREAM:
             case TYPE_INPUT_METHOD:
             case TYPE_WALLPAPER:
                 // The window manager will check these.
@@ -1309,6 +1318,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return BOOT_PROGRESS_LAYER;
         case TYPE_HIDDEN_NAV_CONSUMER:
             return HIDDEN_NAV_CONSUMER_LAYER;
+        case TYPE_DREAM:
+            return SCREENSAVER_LAYER;
         }
         Log.e(TAG, "Unknown window type: " + type);
         return APPLICATION_LAYER;
@@ -3330,7 +3341,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         synchronized (mLock) {
             updateOrientationListenerLp();
             updateLockScreenTimeout();
-            updateScreenSaverTimeoutLocked();
         }
     }
 
@@ -3379,7 +3389,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mScreenOnEarly = true;
             updateOrientationListenerLp();
             updateLockScreenTimeout();
-            updateScreenSaverTimeoutLocked();
         }
     }
 
@@ -3769,83 +3778,58 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHandler.postDelayed(mScreenLockTimeout, mLockScreenTimeout);
             }
         }
-
-        synchronized (mLock) {
-            // Only posts messages; holds no additional locks.
-            updateScreenSaverTimeoutLocked();
-        }
     }
 
-    Runnable mScreenSaverActivator = new Runnable() {
-        public void run() {
-            if (!(mScreenSaverMayRun && mScreenOnEarly)) {
-                Log.w(TAG, "mScreenSaverActivator ran, but the screensaver should not be showing. Who's driving this thing?");
-                return;
-            }
-            if (!mPluggedIn) {
-                if (localLOGV) Log.v(TAG, "mScreenSaverActivator: not running screen saver when not plugged in");
-                return;
-            }
-            // Quick fix for automation tests.
-            // The correct fix is to move this triggering logic to PowerManager, where more complete
-            // information about wakelocks (including StayOnWhilePluggedIn) is available.
-            if (Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.STAY_ON_WHILE_PLUGGED_IN,
-                        BatteryManager.BATTERY_PLUGGED_AC) != 0) {
-                Log.v(TAG, "mScreenSaverActivator: not running screen saver when STAY_ON_WHILE_PLUGGED_IN");
-                return;
-            }
+    private IDreamManager getDreamManager() {
+        if (!mScreenSaverFeatureAvailable) {
+            return null;
+        }
+        
+        IDreamManager sandman = IDreamManager.Stub.asInterface(
+                ServiceManager.checkService("dreams"));
+        if (sandman == null) {
+            Log.w(TAG, "Unable to find IDreamManager");
+        }
+        return sandman;
+    }
 
-            if (localLOGV) Log.v(TAG, "mScreenSaverActivator entering dreamland");
+    @Override
+    public boolean isScreenSaverEnabled() {
+        return (mScreenSaverFeatureAvailable && mScreenSaverEnabledByUser
+                && mScreenSaverMayRun && mScreenOnEarly && mPluggedIn);
+    }
 
-            try {
-                String component = Settings.Secure.getString(
-                        mContext.getContentResolver(), Settings.Secure.SCREENSAVER_COMPONENT);
-                if (component == null) {
-                    component = mContext.getResources().getString(R.string.config_defaultDreamComponent);
+    @Override
+    public boolean startScreenSaver() {
+        synchronized (mLock) {
+            if (isScreenSaverEnabled()) {
+                IDreamManager dm = getDreamManager();
+                if (dm == null) return false;
+                
+                try {
+                    if (localLOGV) Log.v(TAG, "startScreenSaver: entering dreamland...");
+
+                    dm.dream();
+                    return true;
+                } catch (RemoteException ex) {
+                    // too bad, so sad, oh mom, oh dad
                 }
-                if (component != null) {
-                    // dismiss the notification shade, recents, etc.
-                    mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-                            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT));
-
-                    ComponentName cn = ComponentName.unflattenFromString(component);
-                    Intent intent = new Intent(Intent.ACTION_MAIN)
-                        .setComponent(cn)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                            | Intent.FLAG_ACTIVITY_NO_USER_ACTION
-                            | Intent.FLAG_FROM_BACKGROUND
-                            | Intent.FLAG_ACTIVITY_NO_HISTORY
-                            );
-                    mContext.startActivity(intent);
-                } else {
-                    Log.e(TAG, "Couldn't start screen saver: none selected");
-                }
-            } catch (android.content.ActivityNotFoundException exc) {
-                // no screensaver? give up
-                Log.e(TAG, "Couldn't start screen saver: none installed");
             }
         }
-    };
+        return false;
+    }
 
-    // Must call while holding mLock
-    private void updateScreenSaverTimeoutLocked() {
-        if (mScreenSaverActivator == null) return;
-
-        mHandler.removeCallbacks(mScreenSaverActivator);
-        if (mScreenSaverEnabledByUser && mScreenSaverMayRun && mScreenOnEarly && mScreenSaverTimeout > 0) {
-            if (localLOGV)
-                Log.v(TAG, "scheduling screensaver for " + mScreenSaverTimeout + "ms from now");
-            mHandler.postDelayed(mScreenSaverActivator, mScreenSaverTimeout);
-        } else {
-            if (localLOGV) {
-                if (!mScreenSaverEnabledByUser || mScreenSaverTimeout == 0)
-                    Log.v(TAG, "screen saver disabled by user");
-                else if (!mScreenOnEarly)
-                    Log.v(TAG, "screen saver disabled while screen off");
-                else
-                    Log.v(TAG, "screen saver disabled by wakelock");
+    @Override
+    public void stopScreenSaver() {
+        synchronized (mLock) {
+            IDreamManager dm = getDreamManager();
+            if (dm == null) return;
+            
+            try {
+                if (localLOGV) Log.v(TAG, "startScreenSaver: awakening...");
+                
+                dm.awaken();
+            } catch (RemoteException ex) {
             }
         }
     }
@@ -4091,7 +4075,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // even if the keyguard is up, now that all the wakelocks have been released, we
                 // should re-enable the screen saver
                 mScreenSaverMayRun = true;
-                updateScreenSaverTimeoutLocked();
             }
         }
     }
