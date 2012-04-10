@@ -32,7 +32,6 @@
 using android::InputEvent;
 using android::KeyEvent;
 using android::MotionEvent;
-using android::InputDeviceInfo;
 using android::sp;
 using android::Vector;
 

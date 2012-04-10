@@ -93,6 +93,32 @@ static String8 sha1(const String8& in) {
     return out;
 }
 
+static void setDescriptor(InputDeviceIdentifier& identifier) {
+    // Compute a device descriptor that uniquely identifies the device.
+    // The descriptor is assumed to be a stable identifier.  Its value should not
+    // change between reboots, reconnections, firmware updates or new releases of Android.
+    // Ideally, we also want the descriptor to be short and relatively opaque.
+    String8 rawDescriptor;
+    rawDescriptor.appendFormat(":%04x:%04x:", identifier.vendor, identifier.product);
+    if (!identifier.uniqueId.isEmpty()) {
+        rawDescriptor.append("uniqueId:");
+        rawDescriptor.append(identifier.uniqueId);
+    } if (identifier.vendor == 0 && identifier.product == 0) {
+        // If we don't know the vendor and product id, then the device is probably
+        // built-in so we need to rely on other information to uniquely identify
+        // the input device.  Usually we try to avoid relying on the device name or
+        // location but for built-in input device, they are unlikely to ever change.
+        if (!identifier.name.isEmpty()) {
+            rawDescriptor.append("name:");
+            rawDescriptor.append(identifier.name);
+        } else if (!identifier.location.isEmpty()) {
+            rawDescriptor.append("location:");
+            rawDescriptor.append(identifier.location);
+        }
+    }
+    identifier.descriptor = sha1(rawDescriptor);
+}
+
 // --- Global Functions ---
 
 uint32_t getAbsAxisUsage(int32_t axis, uint32_t deviceClasses) {
@@ -164,7 +190,7 @@ const int EventHub::EPOLL_SIZE_HINT;
 const int EventHub::EPOLL_MAX_EVENTS;
 
 EventHub::EventHub(void) :
-        mBuiltInKeyboardId(-1), mNextDeviceId(1),
+        mBuiltInKeyboardId(NO_BUILT_IN_KEYBOARD), mNextDeviceId(1),
         mOpeningDevices(0), mClosingDevices(0),
         mNeedToSendFinishedDeviceScan(false),
         mNeedToReopenDevices(false), mNeedToScanDevices(true),
@@ -256,7 +282,7 @@ status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
         AutoMutex _l(mLock);
 
         Device* device = getDeviceLocked(deviceId);
-        if (device && test_bit(axis, device->absBitmask)) {
+        if (device && !device->isVirtual() && test_bit(axis, device->absBitmask)) {
             struct input_absinfo info;
             if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
                 ALOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
@@ -307,7 +333,7 @@ int32_t EventHub::getScanCodeState(int32_t deviceId, int32_t scanCode) const {
         AutoMutex _l(mLock);
 
         Device* device = getDeviceLocked(deviceId);
-        if (device && test_bit(scanCode, device->keyBitmask)) {
+        if (device && !device->isVirtual() && test_bit(scanCode, device->keyBitmask)) {
             uint8_t keyState[sizeof_bit_array(KEY_MAX + 1)];
             memset(keyState, 0, sizeof(keyState));
             if (ioctl(device->fd, EVIOCGKEY(sizeof(keyState)), keyState) >= 0) {
@@ -322,7 +348,7 @@ int32_t EventHub::getKeyCodeState(int32_t deviceId, int32_t keyCode) const {
     AutoMutex _l(mLock);
 
     Device* device = getDeviceLocked(deviceId);
-    if (device && device->keyMap.haveKeyLayout()) {
+    if (device && !device->isVirtual() && device->keyMap.haveKeyLayout()) {
         Vector<int32_t> scanCodes;
         device->keyMap.keyLayoutMap->findScanCodesForKey(keyCode, &scanCodes);
         if (scanCodes.size() != 0) {
@@ -347,7 +373,7 @@ int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
         AutoMutex _l(mLock);
 
         Device* device = getDeviceLocked(deviceId);
-        if (device && test_bit(sw, device->swBitmask)) {
+        if (device && !device->isVirtual() && test_bit(sw, device->swBitmask)) {
             uint8_t swState[sizeof_bit_array(SW_MAX + 1)];
             memset(swState, 0, sizeof(swState));
             if (ioctl(device->fd, EVIOCGSW(sizeof(swState)), swState) >= 0) {
@@ -365,7 +391,7 @@ status_t EventHub::getAbsoluteAxisValue(int32_t deviceId, int32_t axis, int32_t*
         AutoMutex _l(mLock);
 
         Device* device = getDeviceLocked(deviceId);
-        if (device && test_bit(axis, device->absBitmask)) {
+        if (device && !device->isVirtual() && test_bit(axis, device->absBitmask)) {
             struct input_absinfo info;
             if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
                 ALOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
@@ -421,7 +447,7 @@ status_t EventHub::mapKey(int32_t deviceId, int scancode,
         }
     }
     
-    if (mBuiltInKeyboardId != -1) {
+    if (mBuiltInKeyboardId != NO_BUILT_IN_KEYBOARD) {
         device = getDeviceLocked(mBuiltInKeyboardId);
         
         if (device && device->keyMap.haveKeyLayout()) {
@@ -449,7 +475,7 @@ status_t EventHub::mapAxis(int32_t deviceId, int scancode, AxisInfo* outAxisInfo
         }
     }
 
-    if (mBuiltInKeyboardId != -1) {
+    if (mBuiltInKeyboardId != NO_BUILT_IN_KEYBOARD) {
         device = getDeviceLocked(mBuiltInKeyboardId);
 
         if (device && device->keyMap.haveKeyLayout()) {
@@ -494,7 +520,7 @@ bool EventHub::hasLed(int32_t deviceId, int32_t led) const {
 void EventHub::setLedState(int32_t deviceId, int32_t led, bool on) {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
-    if (device && led >= 0 && led <= LED_MAX) {
+    if (device && !device->isVirtual() && led >= 0 && led <= LED_MAX) {
         struct input_event ev;
         ev.time.tv_sec = 0;
         ev.time.tv_usec = 0;
@@ -520,17 +546,17 @@ void EventHub::getVirtualKeyDefinitions(int32_t deviceId,
     }
 }
 
-String8 EventHub::getKeyCharacterMapFile(int32_t deviceId) const {
+sp<KeyCharacterMap> EventHub::getKeyCharacterMap(int32_t deviceId) const {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
     if (device) {
-        return device->keyMap.keyCharacterMapFile;
+        return device->keyMap.keyCharacterMap;
     }
-    return String8();
+    return NULL;
 }
 
 EventHub::Device* EventHub::getDeviceLocked(int32_t deviceId) const {
-    if (deviceId == 0) {
+    if (deviceId == BUILT_IN_KEYBOARD_ID) {
         deviceId = mBuiltInKeyboardId;
     }
     ssize_t index = mDevices.indexOfKey(deviceId);
@@ -578,7 +604,7 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                  device->id, device->path.string());
             mClosingDevices = device->next;
             event->when = now;
-            event->deviceId = device->id == mBuiltInKeyboardId ? 0 : device->id;
+            event->deviceId = device->id == mBuiltInKeyboardId ? BUILT_IN_KEYBOARD_ID : device->id;
             event->type = DEVICE_REMOVED;
             event += 1;
             delete device;
@@ -813,6 +839,9 @@ void EventHub::scanDevicesLocked() {
     if(res < 0) {
         ALOGE("scan dir failed for %s\n", DEVICE_PATH);
     }
+    if (mDevices.indexOfKey(VIRTUAL_KEYBOARD_ID) < 0) {
+        createVirtualKeyboardLocked();
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -908,29 +937,8 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
         identifier.uniqueId.setTo(buffer);
     }
 
-    // Compute a device descriptor that uniquely identifies the device.
-    // The descriptor is assumed to be a stable identifier.  Its value should not
-    // change between reboots, reconnections, firmware updates or new releases of Android.
-    // Ideally, we also want the descriptor to be short and relatively opaque.
-    String8 rawDescriptor;
-    rawDescriptor.appendFormat(":%04x:%04x:", identifier.vendor, identifier.product);
-    if (!identifier.uniqueId.isEmpty()) {
-        rawDescriptor.append("uniqueId:");
-        rawDescriptor.append(identifier.uniqueId);
-    } if (identifier.vendor == 0 && identifier.product == 0) {
-        // If we don't know the vendor and product id, then the device is probably
-        // built-in so we need to rely on other information to uniquely identify
-        // the input device.  Usually we try to avoid relying on the device name or
-        // location but for built-in input device, they are unlikely to ever change.
-        if (!identifier.name.isEmpty()) {
-            rawDescriptor.append("name:");
-            rawDescriptor.append(identifier.name);
-        } else if (!identifier.location.isEmpty()) {
-            rawDescriptor.append("location:");
-            rawDescriptor.append(identifier.location);
-        }
-    }
-    identifier.descriptor = sha1(rawDescriptor);
+    // Fill in the descriptor.
+    setDescriptor(identifier);
 
     // Make file descriptor non-blocking for use with poll().
     if (fcntl(fd, F_SETFL, O_NONBLOCK)) {
@@ -1048,7 +1056,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     if (device->classes & INPUT_DEVICE_CLASS_KEYBOARD) {
         // Register the keyboard as a built-in keyboard if it is eligible.
         if (!keyMapStatus
-                && mBuiltInKeyboardId == -1
+                && mBuiltInKeyboardId == NO_BUILT_IN_KEYBOARD
                 && isEligibleBuiltInKeyboard(device->identifier,
                         device->configuration, &device->keyMap)) {
             mBuiltInKeyboardId = device->id;
@@ -1133,11 +1141,29 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
          toString(mBuiltInKeyboardId == deviceId),
          toString(usingSuspendBlockIoctl), toString(usingClockIoctl));
 
-    mDevices.add(deviceId, device);
+    addDeviceLocked(device);
+    return 0;
+}
 
+void EventHub::createVirtualKeyboardLocked() {
+    InputDeviceIdentifier identifier;
+    identifier.name = "Virtual";
+    identifier.uniqueId = "<virtual>";
+    setDescriptor(identifier);
+
+    Device* device = new Device(-1, VIRTUAL_KEYBOARD_ID, String8("<virtual>"), identifier);
+    device->classes = INPUT_DEVICE_CLASS_KEYBOARD
+            | INPUT_DEVICE_CLASS_ALPHAKEY
+            | INPUT_DEVICE_CLASS_DPAD
+            | INPUT_DEVICE_CLASS_VIRTUAL;
+    loadKeyMapLocked(device);
+    addDeviceLocked(device);
+}
+
+void EventHub::addDeviceLocked(Device* device) {
+    mDevices.add(device->id, device);
     device->next = mOpeningDevices;
     mOpeningDevices = device;
-    return 0;
 }
 
 void EventHub::loadConfigurationLocked(Device* device) {
@@ -1224,11 +1250,13 @@ void EventHub::closeDeviceLocked(Device* device) {
     if (device->id == mBuiltInKeyboardId) {
         ALOGW("built-in keyboard device %s (id=%d) is closing! the apps will not like this",
                 device->path.string(), mBuiltInKeyboardId);
-        mBuiltInKeyboardId = -1;
+        mBuiltInKeyboardId = NO_BUILT_IN_KEYBOARD;
     }
 
-    if (epoll_ctl(mEpollFd, EPOLL_CTL_DEL, device->fd, NULL)) {
-        ALOGW("Could not remove device fd from epoll instance.  errno=%d", errno);
+    if (!device->isVirtual()) {
+        if (epoll_ctl(mEpollFd, EPOLL_CTL_DEL, device->fd, NULL)) {
+            ALOGW("Could not remove device fd from epoll instance.  errno=%d", errno);
+        }
     }
 
     mDevices.removeItem(device->id);

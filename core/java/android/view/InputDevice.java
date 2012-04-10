@@ -39,13 +39,12 @@ import java.util.List;
  * </p>
  */
 public final class InputDevice implements Parcelable {
-    private int mId;
-    private String mName;
-    private String mDescriptor;
-    private int mSources;
-    private int mKeyboardType;
-    private String mKeyCharacterMapFile;
-
+    private final int mId;
+    private final String mName;
+    private final String mDescriptor;
+    private final int mSources;
+    private final int mKeyboardType;
+    private final KeyCharacterMap mKeyCharacterMap;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
     /**
@@ -292,8 +291,43 @@ public final class InputDevice implements Parcelable {
      */
     public static final int KEYBOARD_TYPE_ALPHABETIC = 2;
 
+    public static final Parcelable.Creator<InputDevice> CREATOR =
+            new Parcelable.Creator<InputDevice>() {
+        public InputDevice createFromParcel(Parcel in) {
+            return new InputDevice(in);
+        }
+        public InputDevice[] newArray(int size) {
+            return new InputDevice[size];
+        }
+    };
+
     // Called by native code.
-    private InputDevice() {
+    private InputDevice(int id, String name, String descriptor, int sources,
+            int keyboardType, KeyCharacterMap keyCharacterMap) {
+        mId = id;
+        mName = name;
+        mDescriptor = descriptor;
+        mSources = sources;
+        mKeyboardType = keyboardType;
+        mKeyCharacterMap = keyCharacterMap;
+    }
+
+    private InputDevice(Parcel in) {
+        mId = in.readInt();
+        mName = in.readString();
+        mDescriptor = in.readString();
+        mSources = in.readInt();
+        mKeyboardType = in.readInt();
+        mKeyCharacterMap = KeyCharacterMap.CREATOR.createFromParcel(in);
+
+        for (;;) {
+            int axis = in.readInt();
+            if (axis < 0) {
+                break;
+            }
+            addMotionRange(axis, in.readInt(),
+                    in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat());
+        }
     }
 
     /**
@@ -302,7 +336,7 @@ public final class InputDevice implements Parcelable {
      * @return The input device or null if not found.
      */
     public static InputDevice getDevice(int id) {
-        return InputManager.getInputDevice(id);
+        return InputManager.getInstance().getInputDevice(id);
     }
     
     /**
@@ -310,7 +344,7 @@ public final class InputDevice implements Parcelable {
      * @return The input device ids.
      */
     public static int[] getDeviceIds() {
-        return InputManager.getInputDeviceIds();
+        return InputManager.getInstance().getInputDeviceIds();
     }
 
     /**
@@ -356,6 +390,22 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Returns true if the device is a virtual input device rather than a real one,
+     * such as the virtual keyboard (see {@link KeyCharacterMap#VIRTUAL_KEYBOARD}).
+     * <p>
+     * Virtual input devices are provided to implement system-level functionality
+     * and should not be seen or configured by users.
+     * </p>
+     *
+     * @return True if the device is virtual.
+     *
+     * @see KeyCharacterMap#VIRTUAL_KEYBOARD
+     */
+    public boolean isVirtual() {
+        return mId < 0;
+    }
+
+    /**
      * Gets the name of this input device.
      * @return The input device name.
      */
@@ -384,11 +434,7 @@ public final class InputDevice implements Parcelable {
      * @return The key character map.
      */
     public KeyCharacterMap getKeyCharacterMap() {
-        return KeyCharacterMap.load(mId);
-    }
-
-    String getKeyCharacterMapFile() {
-        return mKeyCharacterMapFile;
+        return mKeyCharacterMap;
     }
 
     /**
@@ -453,6 +499,7 @@ public final class InputDevice implements Parcelable {
         return mMotionRanges;
     }
 
+    // Called from native code.
     private void addMotionRange(int axis, int source,
             float min, float max, float flat, float fuzz) {
         mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz));
@@ -545,37 +592,6 @@ public final class InputDevice implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<InputDevice> CREATOR
-            = new Parcelable.Creator<InputDevice>() {
-        public InputDevice createFromParcel(Parcel in) {
-            InputDevice result = new InputDevice();
-            result.readFromParcel(in);
-            return result;
-        }
-        
-        public InputDevice[] newArray(int size) {
-            return new InputDevice[size];
-        }
-    };
-    
-    private void readFromParcel(Parcel in) {
-        mId = in.readInt();
-        mName = in.readString();
-        mDescriptor = in.readString();
-        mSources = in.readInt();
-        mKeyboardType = in.readInt();
-        mKeyCharacterMapFile = in.readString();
-
-        for (;;) {
-            int axis = in.readInt();
-            if (axis < 0) {
-                break;
-            }
-            addMotionRange(axis, in.readInt(),
-                    in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat());
-        }
-    }
-
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mId);
@@ -583,7 +599,7 @@ public final class InputDevice implements Parcelable {
         out.writeString(mDescriptor);
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
-        out.writeString(mKeyCharacterMapFile);
+        mKeyCharacterMap.writeToParcel(out, flags);
 
         final int numRanges = mMotionRanges.size();
         for (int i = 0; i < numRanges; i++) {
@@ -622,8 +638,6 @@ public final class InputDevice implements Parcelable {
                 break;
         }
         description.append("\n");
-
-        description.append("  Key Character Map: ").append(mKeyCharacterMapFile).append("\n");
 
         description.append("  Sources: 0x").append(Integer.toHexString(mSources)).append(" (");
         appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");

@@ -18,6 +18,7 @@
 #define _ANDROIDFW_KEYBOARD_H
 
 #include <androidfw/Input.h>
+#include <androidfw/InputDevice.h>
 #include <utils/Errors.h>
 #include <utils/String8.h>
 #include <utils/PropertyMap.h>
@@ -42,10 +43,10 @@ class KeyCharacterMap;
 class KeyMap {
 public:
     String8 keyLayoutFile;
-    KeyLayoutMap* keyLayoutMap;
+    sp<KeyLayoutMap> keyLayoutMap;
 
     String8 keyCharacterMapFile;
-    KeyCharacterMap* keyCharacterMap;
+    sp<KeyCharacterMap> keyCharacterMap;
 
     KeyMap();
     ~KeyMap();

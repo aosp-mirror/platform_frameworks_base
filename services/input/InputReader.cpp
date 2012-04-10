@@ -523,19 +523,21 @@ void InputReader::updateInputConfigurationLocked() {
     InputDeviceInfo deviceInfo;
     for (size_t i = 0; i < mDevices.size(); i++) {
         InputDevice* device = mDevices.valueAt(i);
-        device->getDeviceInfo(& deviceInfo);
-        uint32_t sources = deviceInfo.getSources();
+        if (!(device->getClasses() & INPUT_DEVICE_CLASS_VIRTUAL)) {
+            device->getDeviceInfo(& deviceInfo);
+            uint32_t sources = deviceInfo.getSources();
 
-        if ((sources & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN) {
-            touchScreenConfig = InputConfiguration::TOUCHSCREEN_FINGER;
-        }
-        if ((sources & AINPUT_SOURCE_TRACKBALL) == AINPUT_SOURCE_TRACKBALL) {
-            navigationConfig = InputConfiguration::NAVIGATION_TRACKBALL;
-        } else if ((sources & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD) {
-            navigationConfig = InputConfiguration::NAVIGATION_DPAD;
-        }
-        if (deviceInfo.getKeyboardType() == AINPUT_KEYBOARD_TYPE_ALPHABETIC) {
-            keyboardConfig = InputConfiguration::KEYBOARD_QWERTY;
+            if ((sources & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN) {
+                touchScreenConfig = InputConfiguration::TOUCHSCREEN_FINGER;
+            }
+            if ((sources & AINPUT_SOURCE_TRACKBALL) == AINPUT_SOURCE_TRACKBALL) {
+                navigationConfig = InputConfiguration::NAVIGATION_TRACKBALL;
+            } else if ((sources & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD) {
+                navigationConfig = InputConfiguration::NAVIGATION_DPAD;
+            }
+            if (deviceInfo.getKeyboardType() == AINPUT_KEYBOARD_TYPE_ALPHABETIC) {
+                keyboardConfig = InputConfiguration::KEYBOARD_QWERTY;
+            }
         }
     }
 
@@ -1789,7 +1791,7 @@ void KeyboardInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
     InputMapper::populateDeviceInfo(info);
 
     info->setKeyboardType(mKeyboardType);
-    info->setKeyCharacterMapFile(getEventHub()->getKeyCharacterMapFile(getDeviceId()));
+    info->setKeyCharacterMap(getEventHub()->getKeyCharacterMap(getDeviceId()));
 }
 
 void KeyboardInputMapper::dump(String8& dump) {

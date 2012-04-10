@@ -883,7 +883,7 @@ public class Instrumentation {
         }
         KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
                 deviceId, scancode, flags | KeyEvent.FLAG_FROM_SYSTEM, source);
-        InputManager.injectInputEvent(newEvent,
+        InputManager.getInstance().injectInputEvent(newEvent,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
     
@@ -926,7 +926,8 @@ public class Instrumentation {
         if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
             event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         }
-        InputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+        InputManager.getInstance().injectInputEvent(event,
+                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
     /**
@@ -945,7 +946,8 @@ public class Instrumentation {
         if ((event.getSource() & InputDevice.SOURCE_CLASS_TRACKBALL) == 0) {
             event.setSource(InputDevice.SOURCE_TRACKBALL);
         }
-        InputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+        InputManager.getInstance().injectInputEvent(event,
+                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
     /**

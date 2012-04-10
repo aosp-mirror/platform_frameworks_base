@@ -16,6 +16,7 @@
 
 package android.hardware.input;
 
+import android.hardware.input.KeyboardLayout;
 import android.view.InputDevice;
 import android.view.InputEvent;
 
@@ -34,4 +35,11 @@ interface IInputManager {
     // Injects an input event into the system.  To inject into windows owned by other
     // applications, the caller must have the INJECT_EVENTS permission.
     boolean injectInputEvent(in InputEvent ev, int mode);
+
+    // Keyboard layouts configuration.
+    KeyboardLayout[] getKeyboardLayouts();
+    KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor);
+    String getKeyboardLayoutForInputDevice(String inputDeviceDescriptor);
+    void setKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+            String keyboardLayoutDescriptor);
 }

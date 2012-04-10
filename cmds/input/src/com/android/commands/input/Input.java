@@ -145,13 +145,15 @@ public class Input {
 
     private void injectKeyEvent(KeyEvent event) {
         Log.i(TAG, "InjectKeyEvent: " + event);
-        InputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+        InputManager.getInstance().injectInputEvent(event,
+                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
     private void injectPointerEvent(MotionEvent event) {
         event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         Log.i("Input", "InjectPointerEvent: " + event);
-        InputManager.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+        InputManager.getInstance().injectInputEvent(event,
+                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
     private static final float lerp(float a, float b, float alpha) {

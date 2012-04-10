@@ -325,9 +325,9 @@ class ContextImpl extends Context {
                     return createDropBoxManager();
                 }});
 
-        registerService(INPUT_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new InputManager(ctx);
+        registerService(INPUT_SERVICE, new StaticServiceFetcher() {
+                public Object createStaticService() {
+                    return InputManager.getInstance();
                 }});
 
         registerService(INPUT_METHOD_SERVICE, new ServiceFetcher() {

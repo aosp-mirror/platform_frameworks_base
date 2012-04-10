@@ -16,18 +16,21 @@
 
 package android.view;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
 import android.util.AndroidRuntimeException;
 import android.util.SparseIntArray;
 import android.hardware.input.InputManager;
 import android.util.SparseArray;
+import android.view.InputDevice.MotionRange;
 
 import java.lang.Character;
 
 /**
  * Describes the keys provided by a keyboard device and their associated labels.
  */
-public class KeyCharacterMap {
+public class KeyCharacterMap implements Parcelable {
     /**
      * The id of the device's primary built in keyboard is always 0.
      *
@@ -134,12 +137,20 @@ public class KeyCharacterMap {
      */
     public static final int MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED = 1;
 
-    private static SparseArray<KeyCharacterMap> sInstances = new SparseArray<KeyCharacterMap>();
+    public static final Parcelable.Creator<KeyCharacterMap> CREATOR =
+            new Parcelable.Creator<KeyCharacterMap>() {
+        public KeyCharacterMap createFromParcel(Parcel in) {
+            return new KeyCharacterMap(in);
+        }
+        public KeyCharacterMap[] newArray(int size) {
+            return new KeyCharacterMap[size];
+        }
+    };
 
-    private final int mDeviceId;
     private int mPtr;
 
-    private static native int nativeLoad(String file);
+    private static native int nativeReadFromParcel(Parcel in);
+    private static native void nativeWriteToParcel(int ptr, Parcel out);
     private static native void nativeDispose(int ptr);
 
     private static native char nativeGetCharacter(int ptr, int keyCode, int metaState);
@@ -149,10 +160,20 @@ public class KeyCharacterMap {
     private static native char nativeGetMatch(int ptr, int keyCode, char[] chars, int metaState);
     private static native char nativeGetDisplayLabel(int ptr, int keyCode);
     private static native int nativeGetKeyboardType(int ptr);
-    private static native KeyEvent[] nativeGetEvents(int ptr, int deviceId, char[] chars);
+    private static native KeyEvent[] nativeGetEvents(int ptr, char[] chars);
 
-    private KeyCharacterMap(int deviceId, int ptr) {
-        mDeviceId = deviceId;
+    private KeyCharacterMap(Parcel in) {
+        if (in == null) {
+            throw new IllegalArgumentException("parcel must not be null");
+        }
+        mPtr = nativeReadFromParcel(in);
+        if (mPtr == 0) {
+            throw new RuntimeException("Could not read KeyCharacterMap from parcel.");
+        }
+    }
+
+    // Called from native
+    private KeyCharacterMap(int ptr) {
         mPtr = ptr;
     }
 
@@ -174,33 +195,16 @@ public class KeyCharacterMap {
      * is missing from the system.
      */
     public static KeyCharacterMap load(int deviceId) {
-        synchronized (sInstances) {
-            KeyCharacterMap map = sInstances.get(deviceId);
-            if (map == null) {
-                String kcm = null;
-                if (deviceId != VIRTUAL_KEYBOARD) {
-                    InputDevice device = InputDevice.getDevice(deviceId);
-                    if (device != null) {
-                        kcm = device.getKeyCharacterMapFile();
-                    }
-                }
-                if (kcm == null || kcm.length() == 0) {
-                    kcm = "/system/usr/keychars/Virtual.kcm";
-                }
-                int ptr = nativeLoad(kcm); // might throw
-                map = new KeyCharacterMap(deviceId, ptr);
-                sInstances.put(deviceId, map);
+        final InputManager im = InputManager.getInstance();
+        InputDevice inputDevice = im.getInputDevice(deviceId);
+        if (inputDevice == null) {
+            inputDevice = im.getInputDevice(VIRTUAL_KEYBOARD);
+            if (inputDevice == null) {
+                throw new UnavailableException(
+                        "Could not load key character map for device " + deviceId);
             }
-            return map;
         }
-    }
-
-    /**
-     * TODO implement this
-     * @hide
-     */
-    public static KeyCharacterMap load(CharSequence contents) {
-        return null;
+        return inputDevice.getKeyCharacterMap();
     }
 
     /**
@@ -437,7 +441,7 @@ public class KeyCharacterMap {
         if (chars == null) {
             throw new IllegalArgumentException("chars must not be null.");
         }
-        return nativeGetEvents(mPtr, mDeviceId, chars);
+        return nativeGetEvents(mPtr, chars);
     }
 
     /**
@@ -527,7 +531,7 @@ public class KeyCharacterMap {
      * @return True if at least one attached keyboard supports the specified key code.
      */
     public static boolean deviceHasKey(int keyCode) {
-        return InputManager.deviceHasKeys(new int[] { keyCode })[0];
+        return InputManager.getInstance().deviceHasKeys(new int[] { keyCode })[0];
     }
 
     /**
@@ -541,7 +545,20 @@ public class KeyCharacterMap {
      * at the same index in the key codes array.
      */
     public static boolean[] deviceHasKeys(int[] keyCodes) {
-        return InputManager.deviceHasKeys(keyCodes);
+        return InputManager.getInstance().deviceHasKeys(keyCodes);
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        if (out == null) {
+            throw new IllegalArgumentException("parcel must not be null");
+        }
+        nativeWriteToParcel(mPtr, out);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     /**

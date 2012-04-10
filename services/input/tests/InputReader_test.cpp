@@ -610,8 +610,8 @@ private:
         }
     }
 
-    virtual String8 getKeyCharacterMapFile(int32_t deviceId) const {
-        return String8();
+    virtual sp<KeyCharacterMap> getKeyCharacterMap(int32_t deviceId) const {
+        return NULL;
     }
 
     virtual bool isExternal(int32_t deviceId) const {

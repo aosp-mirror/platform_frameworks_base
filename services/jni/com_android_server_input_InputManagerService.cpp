@@ -39,6 +39,7 @@
 #include <input/SpriteController.h>
 
 #include <android_os_MessageQueue.h>
+#include <android_view_InputDevice.h>
 #include <android_view_KeyEvent.h>
 #include <android_view_MotionEvent.h>
 #include <android_view_InputChannel.h>
@@ -86,20 +87,6 @@ static struct {
 static struct {
     jclass clazz;
 } gMotionEventClassInfo;
-
-static struct {
-    jclass clazz;
-
-    jmethodID ctor;
-    jmethodID addMotionRange;
-
-    jfieldID mId;
-    jfieldID mName;
-    jfieldID mDescriptor;
-    jfieldID mSources;
-    jfieldID mKeyboardType;
-    jfieldID mKeyCharacterMapFile;
-} gInputDeviceClassInfo;
 
 static struct {
     jfieldID touchscreen;
@@ -1171,44 +1158,7 @@ static jobject nativeGetInputDevice(JNIEnv* env,
         return NULL;
     }
 
-    jobject deviceObj = env->NewObject(gInputDeviceClassInfo.clazz, gInputDeviceClassInfo.ctor);
-    if (!deviceObj) {
-        return NULL;
-    }
-
-    jstring deviceNameObj = env->NewStringUTF(deviceInfo.getName().string());
-    if (!deviceNameObj) {
-        return NULL;
-    }
-
-    jstring deviceDescriptorObj = env->NewStringUTF(deviceInfo.getDescriptor().string());
-    if (!deviceDescriptorObj) {
-        return NULL;
-    }
-
-    jstring fileStr = env->NewStringUTF(deviceInfo.getKeyCharacterMapFile());
-    if (!fileStr) {
-        return NULL;
-    }
-
-    env->SetIntField(deviceObj, gInputDeviceClassInfo.mId, deviceInfo.getId());
-    env->SetObjectField(deviceObj, gInputDeviceClassInfo.mName, deviceNameObj);
-    env->SetObjectField(deviceObj, gInputDeviceClassInfo.mDescriptor, deviceDescriptorObj);
-    env->SetIntField(deviceObj, gInputDeviceClassInfo.mSources, deviceInfo.getSources());
-    env->SetIntField(deviceObj, gInputDeviceClassInfo.mKeyboardType, deviceInfo.getKeyboardType());
-    env->SetObjectField(deviceObj, gInputDeviceClassInfo.mKeyCharacterMapFile, fileStr);
-
-    const Vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
-    for (size_t i = 0; i < ranges.size(); i++) {
-        const InputDeviceInfo::MotionRange& range = ranges.itemAt(i);
-        env->CallVoidMethod(deviceObj, gInputDeviceClassInfo.addMotionRange,
-                range.axis, range.source, range.min, range.max, range.flat, range.fuzz);
-        if (env->ExceptionCheck()) {
-            return NULL;
-        }
-    }
-
-    return deviceObj;
+    return android_view_InputDevice_create(env, deviceInfo);
 }
 
 static jintArray nativeGetInputDeviceIds(JNIEnv* env,
@@ -1436,35 +1386,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
     gMotionEventClassInfo.clazz = jclass(env->NewGlobalRef(gMotionEventClassInfo.clazz));
-
-    // InputDevice
-
-    FIND_CLASS(gInputDeviceClassInfo.clazz, "android/view/InputDevice");
-    gInputDeviceClassInfo.clazz = jclass(env->NewGlobalRef(gInputDeviceClassInfo.clazz));
-
-    GET_METHOD_ID(gInputDeviceClassInfo.ctor, gInputDeviceClassInfo.clazz,
-            "<init>", "()V");
-
-    GET_METHOD_ID(gInputDeviceClassInfo.addMotionRange, gInputDeviceClassInfo.clazz,
-            "addMotionRange", "(IIFFFF)V");
-
-    GET_FIELD_ID(gInputDeviceClassInfo.mId, gInputDeviceClassInfo.clazz,
-            "mId", "I");
-
-    GET_FIELD_ID(gInputDeviceClassInfo.mName, gInputDeviceClassInfo.clazz,
-            "mName", "Ljava/lang/String;");
-
-    GET_FIELD_ID(gInputDeviceClassInfo.mDescriptor, gInputDeviceClassInfo.clazz,
-            "mDescriptor", "Ljava/lang/String;");
-
-    GET_FIELD_ID(gInputDeviceClassInfo.mSources, gInputDeviceClassInfo.clazz,
-            "mSources", "I");
-
-    GET_FIELD_ID(gInputDeviceClassInfo.mKeyboardType, gInputDeviceClassInfo.clazz,
-            "mKeyboardType", "I");
-
-    GET_FIELD_ID(gInputDeviceClassInfo.mKeyCharacterMapFile, gInputDeviceClassInfo.clazz,
-            "mKeyCharacterMapFile", "Ljava/lang/String;");
 
     // Configuration
 

@@ -21,6 +21,7 @@
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/Tokenizer.h>
+#include <utils/RefBase.h>
 
 namespace android {
 
@@ -56,17 +57,20 @@ struct AxisInfo {
 
 /**
  * Describes a mapping from keyboard scan codes and joystick axes to Android key codes and axes.
+ *
+ * This object is immutable after it has been loaded.
  */
-class KeyLayoutMap {
+class KeyLayoutMap : public RefBase {
 public:
-    ~KeyLayoutMap();
-
-    static status_t load(const String8& filename, KeyLayoutMap** outMap);
+    static status_t load(const String8& filename, sp<KeyLayoutMap>* outMap);
 
     status_t mapKey(int32_t scanCode, int32_t* keyCode, uint32_t* flags) const;
     status_t findScanCodesForKey(int32_t keyCode, Vector<int32_t>* outScanCodes) const;
 
     status_t mapAxis(int32_t scanCode, AxisInfo* outAxisInfo) const;
+
+protected:
+    virtual ~KeyLayoutMap();
 
 private:
     struct Key {

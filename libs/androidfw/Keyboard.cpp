@@ -24,6 +24,7 @@
 #include <androidfw/KeycodeLabels.h>
 #include <androidfw/KeyLayoutMap.h>
 #include <androidfw/KeyCharacterMap.h>
+#include <androidfw/InputDevice.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
 #include <cutils/properties.h>
@@ -32,13 +33,10 @@ namespace android {
 
 // --- KeyMap ---
 
-KeyMap::KeyMap() :
-        keyLayoutMap(NULL), keyCharacterMap(NULL) {
+KeyMap::KeyMap() {
 }
 
 KeyMap::~KeyMap() {
-    delete keyLayoutMap;
-    delete keyCharacterMap;
 }
 
 status_t KeyMap::load(const InputDeviceIdentifier& deviceIdenfifier,
@@ -114,14 +112,12 @@ status_t KeyMap::loadKeyLayout(const InputDeviceIdentifier& deviceIdentifier,
         return NAME_NOT_FOUND;
     }
 
-    KeyLayoutMap* map;
-    status_t status = KeyLayoutMap::load(path, &map);
+    status_t status = KeyLayoutMap::load(path, &keyLayoutMap);
     if (status) {
         return status;
     }
 
     keyLayoutFile.setTo(path);
-    keyLayoutMap = map;
     return OK;
 }
 
@@ -133,14 +129,12 @@ status_t KeyMap::loadKeyCharacterMap(const InputDeviceIdentifier& deviceIdentifi
         return NAME_NOT_FOUND;
     }
 
-    KeyCharacterMap* map;
-    status_t status = KeyCharacterMap::load(path, &map);
+    status_t status = KeyCharacterMap::load(path, &keyCharacterMap);
     if (status) {
         return status;
     }
 
     keyCharacterMapFile.setTo(path);
-    keyCharacterMap = map;
     return OK;
 }
 

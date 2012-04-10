@@ -48,6 +48,7 @@ LOCAL_SRC_FILES:= \
 	android_view_Surface.cpp \
 	android_view_TextureView.cpp \
 	android_view_InputChannel.cpp \
+	android_view_InputDevice.cpp \
 	android_view_InputEventReceiver.cpp \
 	android_view_KeyEvent.cpp \
 	android_view_KeyCharacterMap.cpp \

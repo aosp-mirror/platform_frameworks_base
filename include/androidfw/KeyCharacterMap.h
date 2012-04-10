@@ -19,12 +19,17 @@
 
 #include <stdint.h>
 
+#if HAVE_ANDROID_OS
+#include <binder/IBinder.h>
+#endif
+
 #include <androidfw/Input.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/Tokenizer.h>
 #include <utils/String8.h>
 #include <utils/Unicode.h>
+#include <utils/RefBase.h>
 
 namespace android {
 
@@ -32,8 +37,10 @@ namespace android {
  * Describes a mapping from Android key codes to characters.
  * Also specifies other functions of the keyboard such as the keyboard type
  * and key modifier semantics.
+ *
+ * This object is immutable after it has been loaded.
  */
-class KeyCharacterMap {
+class KeyCharacterMap : public RefBase {
 public:
     enum KeyboardType {
         KEYBOARD_TYPE_UNKNOWN = 0,
@@ -50,9 +57,11 @@ public:
         int32_t metaState;
     };
 
-    ~KeyCharacterMap();
+    /* Loads a key character map from a file. */
+    static status_t load(const String8& filename, sp<KeyCharacterMap>* outMap);
 
-    static status_t load(const String8& filename, KeyCharacterMap** outMap);
+    /* Returns an empty key character map. */
+    static sp<KeyCharacterMap> empty();
 
     /* Gets the keyboard type. */
     int32_t getKeyboardType() const;
@@ -91,6 +100,17 @@ public:
      */
     bool getEvents(int32_t deviceId, const char16_t* chars, size_t numChars,
             Vector<KeyEvent>& outEvents) const;
+
+#if HAVE_ANDROID_OS
+    /* Reads a key map from a parcel. */
+    static sp<KeyCharacterMap> readFromParcel(Parcel* parcel);
+
+    /* Writes a key map to a parcel. */
+    void writeToParcel(Parcel* parcel) const;
+#endif
+
+protected:
+    virtual ~KeyCharacterMap();
 
 private:
     struct Behavior {
@@ -161,6 +181,8 @@ private:
         status_t parseModifier(const String8& token, int32_t* outMetaState);
         status_t parseCharacterLiteral(char16_t* outCharacter);
     };
+
+    static sp<KeyCharacterMap> sEmpty;
 
     KeyedVector<int32_t, Key*> mKeys;
     int mType;

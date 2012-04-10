@@ -19,6 +19,7 @@
 #define _RUNTIME_EVENT_HUB_H
 
 #include <androidfw/Input.h>
+#include <androidfw/InputDevice.h>
 #include <androidfw/Keyboard.h>
 #include <androidfw/KeyLayoutMap.h>
 #include <androidfw/KeyCharacterMap.h>
@@ -42,6 +43,13 @@
 #define BTN_LAST 0x15f   // last button scancode
 
 namespace android {
+
+enum {
+    // Device id of a special "virtual" keyboard that is always present.
+    VIRTUAL_KEYBOARD_ID = -1,
+    // Device id of the "built-in" keyboard if there is one.
+    BUILT_IN_KEYBOARD_ID = 0,
+};
 
 /*
  * A raw event as retrieved from the EventHub.
@@ -106,6 +114,9 @@ enum {
 
     /* The input device is a joystick (implies gamepad, has joystick absolute axes). */
     INPUT_DEVICE_CLASS_JOYSTICK      = 0x00000100,
+
+    /* The input device is virtual (not a real device, not part of UI configuration). */
+    INPUT_DEVICE_CLASS_VIRTUAL       = 0x40000000,
 
     /* The input device is external (not built-in). */
     INPUT_DEVICE_CLASS_EXTERNAL      = 0x80000000,
@@ -208,7 +219,7 @@ public:
     virtual void getVirtualKeyDefinitions(int32_t deviceId,
             Vector<VirtualKeyDefinition>& outVirtualKeys) const = 0;
 
-    virtual String8 getKeyCharacterMapFile(int32_t deviceId) const = 0;
+    virtual sp<KeyCharacterMap> getKeyCharacterMap(int32_t deviceId) const = 0;
 
     /* Requests the EventHub to reopen all input devices on the next call to getEvents(). */
     virtual void requestReopenDevices() = 0;
@@ -266,7 +277,7 @@ public:
     virtual void getVirtualKeyDefinitions(int32_t deviceId,
             Vector<VirtualKeyDefinition>& outVirtualKeys) const;
 
-    virtual String8 getKeyCharacterMapFile(int32_t deviceId) const;
+    virtual sp<KeyCharacterMap> getKeyCharacterMap(int32_t deviceId) const;
 
     virtual void requestReopenDevices();
 
@@ -282,7 +293,7 @@ private:
     struct Device {
         Device* next;
 
-        int fd;
+        int fd; // may be -1 if device is virtual
         const int32_t id;
         const String8 path;
         const InputDeviceIdentifier identifier;
@@ -305,11 +316,15 @@ private:
         ~Device();
 
         void close();
+
+        inline bool isVirtual() const { return fd < 0; }
     };
 
     status_t openDeviceLocked(const char *devicePath);
-    status_t closeDeviceByPathLocked(const char *devicePath);
+    void createVirtualKeyboardLocked();
+    void addDeviceLocked(Device* device);
 
+    status_t closeDeviceByPathLocked(const char *devicePath);
     void closeDeviceLocked(Device* device);
     void closeAllDevicesLocked();
 
@@ -331,8 +346,13 @@ private:
     // Protect all internal state.
     mutable Mutex mLock;
 
-    // The actual id of the built-in keyboard, or -1 if none.
+    // The actual id of the built-in keyboard, or NO_BUILT_IN_KEYBOARD if none.
     // EventHub remaps the built-in keyboard to id 0 externally as required by the API.
+    enum {
+        // Must not conflict with any other assigned device ids, including
+        // the virtual keyboard id (-1).
+        NO_BUILT_IN_KEYBOARD = -2,
+    };
     int32_t mBuiltInKeyboardId;
 
     int32_t mNextDeviceId;

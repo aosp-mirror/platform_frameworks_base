@@ -43,6 +43,8 @@ struct VirtualKeyDefinition {
 /**
  * Describes a collection of virtual keys on a touch screen in terms of
  * virtual scan codes and hit rectangles.
+ *
+ * This object is immutable after it has been loaded.
  */
 class VirtualKeyMap {
 public:

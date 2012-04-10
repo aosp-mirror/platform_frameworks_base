@@ -768,6 +768,12 @@
         the mouse or trackpad pointer speed at any time. Should never be needed for
         normal apps.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
+    <string name="permlab_setKeyboardLayout">change keyboard layout</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_setKeyboardLayout">Allows the app to change
+        the keyboard layout. Should never be needed for normal apps.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_signalPersistentProcesses">send Linux signals to apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

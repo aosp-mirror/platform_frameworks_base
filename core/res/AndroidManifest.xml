@@ -1256,6 +1256,13 @@
         android:description="@string/permdesc_setPointerSpeed"
         android:protectionLevel="signature" />
 
+    <!-- Allows low-level access to setting the keyboard layout.
+         Not for use by normal applications. -->
+    <permission android:name="android.permission.SET_KEYBOARD_LAYOUT"
+        android:label="@string/permlab_setKeyboardLayout"
+        android:description="@string/permdesc_setKeyboardLayout"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to install packages. -->
     <permission android:name="android.permission.INSTALL_PACKAGES"
         android:label="@string/permlab_installPackages"

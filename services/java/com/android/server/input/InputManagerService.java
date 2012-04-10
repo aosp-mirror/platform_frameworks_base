@@ -18,37 +18,45 @@ package com.android.server.input;
 
 import com.android.internal.util.XmlUtils;
 import com.android.server.Watchdog;
-import com.android.server.input.InputFilter.Host;
-import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
+import android.hardware.input.KeyboardLayout;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.ViewConfiguration;
-import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
+import android.view.KeyCharacterMap.UnavailableException;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -57,6 +65,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -134,6 +144,10 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
 
     /** The key is down but is a virtual key press that is being emulated by the system. */
     public static final int KEY_STATE_VIRTUAL = 2;
+
+    // Used to simulate a persistent data store for keyboard layouts.
+    // TODO: Replace with the real thing.
+    private final HashMap<String, String> mFakeRegistry = new HashMap<String, String>();
 
     // State for the currently installed input filter.
     final Object mInputFilterLock = new Object();
@@ -246,7 +260,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      * key codes.
      * @return True if the lookup was successful, false otherwise.
      */
-    @Override
+    @Override // Binder call
     public boolean hasKeys(int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists) {
         if (keyCodes == null) {
             throw new IllegalArgumentException("keyCodes must not be null.");
@@ -337,7 +351,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         }
     }
 
-    @Override
+    @Override // Binder call
     public boolean injectInputEvent(InputEvent event, int mode) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
@@ -380,7 +394,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      * @param id The device id.
      * @return The input device or null if not found.
      */
-    @Override
+    @Override // Binder call
     public InputDevice getInputDevice(int deviceId) {
         return nativeGetInputDevice(mPtr, deviceId);
     }
@@ -389,11 +403,187 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      * Gets the ids of all input devices in the system.
      * @return The input device ids.
      */
-    @Override
+    @Override // Binder call
     public int[] getInputDeviceIds() {
         return nativeGetInputDeviceIds(mPtr);
     }
-    
+
+    @Override // Binder call
+    public KeyboardLayout[] getKeyboardLayouts() {
+        ArrayList<KeyboardLayout> list = new ArrayList<KeyboardLayout>();
+
+        final PackageManager pm = mContext.getPackageManager();
+        Intent intent = new Intent(InputManager.ACTION_QUERY_KEYBOARD_LAYOUTS);
+        for (ResolveInfo resolveInfo : pm.queryBroadcastReceivers(intent,
+                PackageManager.GET_META_DATA)) {
+            loadKeyboardLayouts(pm, resolveInfo.activityInfo, list, null);
+        }
+        return list.toArray(new KeyboardLayout[list.size()]);
+    }
+
+    @Override // Binder call
+    public KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor) {
+        if (keyboardLayoutDescriptor == null) {
+            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
+        }
+
+        KeyboardLayoutDescriptor d = KeyboardLayoutDescriptor.parse(keyboardLayoutDescriptor);
+        if (d == null) {
+            return null;
+        }
+
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            ActivityInfo receiver = pm.getReceiverInfo(
+                    new ComponentName(d.packageName, d.receiverName),
+                    PackageManager.GET_META_DATA);
+            return loadKeyboardLayouts(pm, receiver, null, d.keyboardLayoutName);
+        } catch (NameNotFoundException ex) {
+            Log.w(TAG, "Could not load keyboard layout '" + d.keyboardLayoutName
+                    + "' from receiver " + d.packageName + "/" + d.receiverName, ex);
+            return null;
+        }
+    }
+
+    private KeyboardLayout loadKeyboardLayouts(
+            PackageManager pm, ActivityInfo receiver,
+            List<KeyboardLayout> list, String keyboardName) {
+        Bundle metaData = receiver.metaData;
+        if (metaData == null) {
+            return null;
+        }
+
+        int configResId = metaData.getInt(InputManager.META_DATA_KEYBOARD_LAYOUTS);
+        if (configResId == 0) {
+            Log.w(TAG, "Missing meta-data '" + InputManager.META_DATA_KEYBOARD_LAYOUTS
+                    + "' on receiver " + receiver.packageName + "/" + receiver.name);
+            return null;
+        }
+
+        try {
+            Resources resources = pm.getResourcesForApplication(receiver.applicationInfo);
+            XmlResourceParser parser = resources.getXml(configResId);
+            try {
+                XmlUtils.beginDocument(parser, "keyboard-layouts");
+
+                for (;;) {
+                    XmlUtils.nextElement(parser);
+                    String element = parser.getName();
+                    if (element == null) {
+                        break;
+                    }
+                    if (element.equals("keyboard-layout")) {
+                        TypedArray a = resources.obtainAttributes(
+                                parser, com.android.internal.R.styleable.KeyboardLayout);
+                        try {
+                            String name = a.getString(
+                                    com.android.internal.R.styleable.KeyboardLayout_name);
+                            String label = a.getString(
+                                    com.android.internal.R.styleable.KeyboardLayout_label);
+                            int kcmResId = a.getResourceId(
+                                     com.android.internal.R.styleable.KeyboardLayout_kcm, 0);
+                            if (name == null || label == null || kcmResId == 0) {
+                                Log.w(TAG, "Missing required 'name', 'label' or 'kcm' "
+                                        + "attributes in keyboard layout "
+                                        + "resource from receiver "
+                                        + receiver.packageName + "/" + receiver.name);
+                            } else {
+                                String descriptor = KeyboardLayoutDescriptor.format(
+                                        receiver.packageName, receiver.name, name);
+                                KeyboardLayout c = new KeyboardLayout(descriptor, label);
+                                if (keyboardName != null && name.equals(keyboardName)) {
+                                    return c;
+                                }
+                                if (list != null) {
+                                    list.add(c);
+                                }
+                            }
+                        } finally {
+                            a.recycle();
+                        }
+                    } else {
+                        Log.w(TAG, "Skipping unrecognized element '" + element
+                                + "' in keyboard layout resource from receiver "
+                                + receiver.packageName + "/" + receiver.name);
+                    }
+                }
+            } finally {
+                parser.close();
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, "Could not load keyboard layout resource from receiver "
+                    + receiver.packageName + "/" + receiver.name, ex);
+            return null;
+        }
+        if (keyboardName != null) {
+            Log.w(TAG, "Could not load keyboard layout '" + keyboardName
+                    + "' from receiver " + receiver.packageName + "/" + receiver.name
+                    + " because it was not declared in the keyboard layout resource.");
+        }
+        return null;
+    }
+
+    @Override // Binder call
+    public String getKeyboardLayoutForInputDevice(String inputDeviceDescriptor) {
+        if (inputDeviceDescriptor == null) {
+            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+        }
+
+        return mFakeRegistry.get(inputDeviceDescriptor);
+    }
+
+    @Override // Binder call
+    public void setKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
+            String keyboardLayoutDescriptor) {
+        if (!checkCallingPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT,
+                "setKeyboardLayoutForInputDevice()")) {
+            throw new SecurityException("Requires SET_KEYBOARD_LAYOUT permission");
+        }
+
+        if (inputDeviceDescriptor == null) {
+            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+        }
+
+        mFakeRegistry.put(inputDeviceDescriptor, keyboardLayoutDescriptor);
+    }
+
+    /**
+     * Loads the key character map associated with the keyboard layout.
+     *
+     * @param pm The package manager.
+     * @return The key character map, or null if it could not be loaded for any reason.
+     *
+    public KeyCharacterMap loadKeyCharacterMap(PackageManager pm) {
+        if (pm == null) {
+            throw new IllegalArgumentException("pm must not be null");
+        }
+
+        if (mKeyCharacterMap == null) {
+            KeyboardLayoutDescriptor d = InputManager.parseKeyboardLayoutDescriptor(mDescriptor);
+            if (d == null) {
+                Log.e(InputManager.TAG, "Could not load key character map '" + mDescriptor
+                        + "' because the descriptor could not be parsed.");
+                return null;
+            }
+
+            CharSequence cs = pm.getText(d.packageName, mKeyCharacterMapResId, null);
+            if (cs == null) {
+                Log.e(InputManager.TAG, "Could not load key character map '" + mDescriptor
+                        + "' because its associated resource could not be loaded.");
+                return null;
+            }
+
+            try {
+                mKeyCharacterMap = KeyCharacterMap.load(cs);
+            } catch (UnavailableException ex) {
+                Log.e(InputManager.TAG, "Could not load key character map '" + mDescriptor
+                        + "' due to an error while parsing.", ex);
+                return null;
+            }
+        }
+        return mKeyCharacterMap;
+    }*/
+
     public void setInputWindows(InputWindowHandle[] windowHandles) {
         nativeSetInputWindows(mPtr, windowHandles);
     }
@@ -433,16 +623,15 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         return nativeTransferTouchFocus(mPtr, fromChannel, toChannel);
     }
 
-    /**
-     * Set the pointer speed.
-     * @param speed The pointer speed as a value between -7 (slowest) and 7 (fastest)
-     * where 0 is the default speed.
-     */
-    @Override
+    @Override // Binder call
     public void tryPointerSpeed(int speed) {
         if (!checkCallingPermission(android.Manifest.permission.SET_POINTER_SPEED,
                 "tryPointerSpeed()")) {
             throw new SecurityException("Requires SET_POINTER_SPEED permission");
+        }
+
+        if (speed < InputManager.MIN_POINTER_SPEED || speed > InputManager.MAX_POINTER_SPEED) {
+            throw new IllegalArgumentException("speed out of range");
         }
 
         setPointerSpeedUnchecked(speed);
@@ -738,6 +927,34 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                             policyFlags | WindowManagerPolicy.FLAG_FILTERED);
                 }
             }
+        }
+    }
+
+    private static final class KeyboardLayoutDescriptor {
+        public String packageName;
+        public String receiverName;
+        public String keyboardLayoutName;
+
+        public static String format(String packageName,
+                String receiverName, String keyboardName) {
+            return packageName + "/" + receiverName + "/" + keyboardName;
+        }
+
+        public static KeyboardLayoutDescriptor parse(String descriptor) {
+            int pos = descriptor.indexOf('/');
+            if (pos < 0 || pos + 1 == descriptor.length()) {
+                return null;
+            }
+            int pos2 = descriptor.indexOf('/', pos + 1);
+            if (pos2 < pos + 2 || pos2 + 1 == descriptor.length()) {
+                return null;
+            }
+
+            KeyboardLayoutDescriptor result = new KeyboardLayoutDescriptor();
+            result.packageName = descriptor.substring(0, pos);
+            result.receiverName = descriptor.substring(pos + 1, pos2);
+            result.keyboardLayoutName = descriptor.substring(pos2 + 1);
+            return result;
         }
     }
 }

@@ -47,23 +47,23 @@ KeyLayoutMap::KeyLayoutMap() {
 KeyLayoutMap::~KeyLayoutMap() {
 }
 
-status_t KeyLayoutMap::load(const String8& filename, KeyLayoutMap** outMap) {
-    *outMap = NULL;
+status_t KeyLayoutMap::load(const String8& filename, sp<KeyLayoutMap>* outMap) {
+    outMap->clear();
 
     Tokenizer* tokenizer;
     status_t status = Tokenizer::open(filename, &tokenizer);
     if (status) {
         ALOGE("Error %d opening key layout map file %s.", status, filename.string());
     } else {
-        KeyLayoutMap* map = new KeyLayoutMap();
-        if (!map) {
+        sp<KeyLayoutMap> map = new KeyLayoutMap();
+        if (!map.get()) {
             ALOGE("Error allocating key layout map.");
             status = NO_MEMORY;
         } else {
 #if DEBUG_PARSER_PERFORMANCE
             nsecs_t startTime = systemTime(SYSTEM_TIME_MONOTONIC);
 #endif
-            Parser parser(map, tokenizer);
+            Parser parser(map.get(), tokenizer);
             status = parser.parse();
 #if DEBUG_PARSER_PERFORMANCE
             nsecs_t elapsedTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
@@ -71,9 +71,7 @@ status_t KeyLayoutMap::load(const String8& filename, KeyLayoutMap** outMap) {
                     tokenizer->getFilename().string(), tokenizer->getLineNumber(),
                     elapsedTime / 1000000.0);
 #endif
-            if (status) {
-                delete map;
-            } else {
+            if (!status) {
                 *outMap = map;
             }
         }

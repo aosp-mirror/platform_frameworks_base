@@ -102,6 +102,7 @@ package android {
     field public static final java.lang.String SET_ALWAYS_FINISH = "android.permission.SET_ALWAYS_FINISH";
     field public static final java.lang.String SET_ANIMATION_SCALE = "android.permission.SET_ANIMATION_SCALE";
     field public static final java.lang.String SET_DEBUG_APP = "android.permission.SET_DEBUG_APP";
+    field public static final java.lang.String SET_KEYBOARD_LAYOUT = "android.permission.SET_KEYBOARD_LAYOUT";
     field public static final java.lang.String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
     field public static final java.lang.String SET_POINTER_SPEED = "android.permission.SET_POINTER_SPEED";
     field public static final deprecated java.lang.String SET_PREFERRED_APPLICATIONS = "android.permission.SET_PREFERRED_APPLICATIONS";
@@ -22268,6 +22269,7 @@ package android.view {
     method public java.util.List<android.view.InputDevice.MotionRange> getMotionRanges();
     method public java.lang.String getName();
     method public int getSources();
+    method public boolean isVirtual();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int KEYBOARD_TYPE_ALPHABETIC = 2; // 0x2
@@ -22327,7 +22329,8 @@ package android.view {
     method public abstract void onInputQueueDestroyed(android.view.InputQueue);
   }
 
-  public class KeyCharacterMap {
+  public class KeyCharacterMap implements android.os.Parcelable {
+    method public int describeContents();
     method public static boolean deviceHasKey(int);
     method public static boolean[] deviceHasKeys(int[]);
     method public int get(int, int);
@@ -22342,10 +22345,12 @@ package android.view {
     method public char getNumber(int);
     method public boolean isPrintingKey(int);
     method public static android.view.KeyCharacterMap load(int);
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final int ALPHA = 3; // 0x3
     field public static final deprecated int BUILT_IN_KEYBOARD = 0; // 0x0
     field public static final int COMBINING_ACCENT = -2147483648; // 0x80000000
     field public static final int COMBINING_ACCENT_MASK = 2147483647; // 0x7fffffff
+    field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FULL = 4; // 0x4
     field public static final char HEX_INPUT = 61184; // 0xef00 '\uef00'
     field public static final int MODIFIER_BEHAVIOR_CHORDED = 0; // 0x0

@@ -29,6 +29,7 @@ commonUtilsSources:= \
 # formerly in libui
 commonUiSources:= \
     Input.cpp \
+    InputDevice.cpp \
     Keyboard.cpp \
     KeyCharacterMap.cpp \
     KeyLayoutMap.cpp \
