@@ -847,7 +847,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private int mFieldPointer;
     private PastePopupWindow mPasteWindow;
     private AutoCompletePopup mAutoCompletePopup;
-    Rect mEditTextBounds = new Rect();
+    Rect mEditTextContentBounds = new Rect();
     Rect mEditTextContent = new Rect();
     int mEditTextLayerId;
     boolean mIsEditingText = false;
@@ -1231,6 +1231,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     static final int ANIMATE_TEXT_SCROLL                = 149;
     static final int EDIT_TEXT_SIZE_CHANGED             = 150;
     static final int SHOW_CARET_HANDLE                  = 151;
+    static final int UPDATE_CONTENT_BOUNDS              = 152;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -3866,7 +3867,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
         if (mAutoCompletePopup != null &&
                 mCurrentScrollingLayerId == mEditTextLayerId) {
-            mEditTextBounds.offset(dx, dy);
+            mEditTextContentBounds.offset(dx, dy);
             mAutoCompletePopup.resetRect();
         }
         nativeScrollLayer(mCurrentScrollingLayerId, x, y);
@@ -6095,7 +6096,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 }
                 startTouch(x, y, eventTime);
                 if (mIsEditingText) {
-                    mTouchInEditText = mEditTextBounds.contains(contentX, contentY);
+                    mTouchInEditText = mEditTextContentBounds
+                            .contains(contentX, contentY);
                 }
                 break;
             }
@@ -6121,8 +6123,23 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         parent.requestDisallowInterceptTouchEvent(true);
                     }
                     if (deltaX != 0 || deltaY != 0) {
-                        snapDraggingCursor(contentX, contentY);
+                        int handleX = contentX +
+                                viewToContentDimension(mSelectDraggingOffset.x);
+                        int handleY = contentY +
+                                viewToContentDimension(mSelectDraggingOffset.y);
+                        mSelectDraggingCursor.set(handleX, handleY);
+                        boolean inCursorText =
+                                mSelectDraggingTextQuad.containsPoint(handleX, handleY);
+                        boolean inEditBounds = mEditTextContentBounds
+                                .contains(handleX, handleY);
+                        if (inCursorText || (mIsEditingText && !inEditBounds)) {
+                            snapDraggingCursor();
+                        }
                         updateWebkitSelection();
+                        if (!inCursorText && mIsEditingText && inEditBounds) {
+                            // Visually snap even if we have moved the handle.
+                            snapDraggingCursor();
+                        }
                         mLastTouchX = x;
                         mLastTouchY = y;
                         invalidate();
@@ -6736,23 +6753,22 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         mTouchMode = TOUCH_DONE_MODE;
     }
 
-    private void snapDraggingCursor(int x, int y) {
-        x += viewToContentDimension(mSelectDraggingOffset.x);
-        y += viewToContentDimension(mSelectDraggingOffset.y);
-        if (mSelectDraggingTextQuad.containsPoint(x, y)) {
-            float scale = scaleAlongSegment(x, y,
-                    mSelectDraggingTextQuad.p4, mSelectDraggingTextQuad.p3);
-            // clamp scale to ensure point is on the bottom segment
-            scale = Math.max(0.0f, scale);
-            scale = Math.min(scale, 1.0f);
-            float newX = scaleCoordinate(scale,
-                    mSelectDraggingTextQuad.p4.x, mSelectDraggingTextQuad.p3.x);
-            float newY = scaleCoordinate(scale,
-                    mSelectDraggingTextQuad.p4.y, mSelectDraggingTextQuad.p3.y);
-            mSelectDraggingCursor.set(Math.round(newX), Math.round(newY));
-        } else {
-            mSelectDraggingCursor.set(x, y);
-        }
+    private void snapDraggingCursor() {
+        float scale = scaleAlongSegment(
+                mSelectDraggingCursor.x, mSelectDraggingCursor.y,
+                mSelectDraggingTextQuad.p4, mSelectDraggingTextQuad.p3);
+        // clamp scale to ensure point is on the bottom segment
+        scale = Math.max(0.0f, scale);
+        scale = Math.min(scale, 1.0f);
+        float newX = scaleCoordinate(scale,
+                mSelectDraggingTextQuad.p4.x, mSelectDraggingTextQuad.p3.x);
+        float newY = scaleCoordinate(scale,
+                mSelectDraggingTextQuad.p4.y, mSelectDraggingTextQuad.p3.y);
+        int x = Math.max(mEditTextContentBounds.left,
+                    Math.min(mEditTextContentBounds.right, Math.round(newX)));
+        int y = Math.max(mEditTextContentBounds.top,
+                    Math.min(mEditTextContentBounds.bottom, Math.round(newY)));
+        mSelectDraggingCursor.set(x, y);
     }
 
     private static float scaleCoordinate(float scale, float coord1, float coord2) {
@@ -7544,11 +7560,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     private int getMaxTextScrollX() {
-        return Math.max(0, mEditTextContent.width() - mEditTextBounds.width());
+        return Math.max(0, mEditTextContent.width() - mEditTextContentBounds.width());
     }
 
     private int getMaxTextScrollY() {
-        return Math.max(0, mEditTextContent.height() - mEditTextBounds.height());
+        return Math.max(0, mEditTextContent.height() - mEditTextContentBounds.height());
     }
 
     /**
@@ -8456,10 +8472,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         mFieldPointer = initData.mFieldPointer;
                         mInputConnection.initEditorInfo(initData);
                         mInputConnection.setTextAndKeepSelection(initData.mText);
-                        mEditTextBounds.set(initData.mNodeBounds);
+                        mEditTextContentBounds.set(initData.mContentBounds);
                         mEditTextLayerId = initData.mNodeLayerId;
                         nativeMapLayerRect(mNativeClass, mEditTextLayerId,
-                                mEditTextBounds);
+                                mEditTextContentBounds);
                         mEditTextContent.set(initData.mContentRect);
                         relocateAutoCompletePopup();
                     }
@@ -8530,6 +8546,10 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         resetCaretTimer();
                         showPasteWindow();
                     }
+                    break;
+
+                case UPDATE_CONTENT_BOUNDS:
+                    mEditTextContentBounds.set((Rect) msg.obj);
                     break;
 
                 default:
