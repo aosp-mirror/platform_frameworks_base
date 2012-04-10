@@ -638,8 +638,10 @@ not generated.</p>
 <code>rs_program_fragment</code> and <code>rs_allocation</code>, you have to obtain an object of the
 corresponding Android framework class first and then call the <code>set</code> method for that
 structure to bind the memory to the Renderscript runtime. You cannot directly manipulate these structures
-at the Renderscript runtime layer. Keep in mind that user-defined structures
-cannot contain pointers, so this restriction only applies to certain structures that are provided by Renderscript. 
+at the Renderscript runtime layer. This restriction is not applicable to user-defined structures
+that contain pointers, because they cannot be exported to a reflected layer class
+in the first place. A compiler error is generated if you try to declare a non-static, global
+struct that contains a pointer.
 </p>
 
 <p>Renderscript also has support for pointers, but you must explicitly allocate the memory in your
