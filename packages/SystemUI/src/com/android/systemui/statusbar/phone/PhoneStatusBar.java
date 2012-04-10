@@ -2047,7 +2047,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                         snapshot.add(child);
                     }
                 }
-                final int N = snapshot.size();
+                if (snapshot.isEmpty()) {
+                    animateCollapse(false);
+                    return;
+                }
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -2063,6 +2066,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                         mPile.setViewRemoval(false);
 
                         mPostCollapseCleanup = new Runnable() {
+                            @Override
                             public void run() {
                                 try {
                                     mPile.setViewRemoval(true);
@@ -2073,9 +2077,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
                         View sampleView = snapshot.get(0);
                         int width = sampleView.getWidth();
-                        final int velocity = (int)(width * 8); // 1000/8 = 125 ms duration
-                        for (View v : snapshot) {
-                            final View _v = v;
+                        final int velocity = width * 8; // 1000/8 = 125 ms duration
+                        for (final View _v : snapshot) {
                             mHandler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
@@ -2091,6 +2094,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                         // synchronize the end of those animations with the start of the collaps
                         // exactly.
                         mHandler.postDelayed(new Runnable() {
+                            @Override
                             public void run() {
                                 animateCollapse(false);
                             }
