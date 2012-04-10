@@ -30,6 +30,15 @@ import android.os.RemoteException;
 import android.util.Pair;
 
 /**
+ * <p>
+ * The contract between the browser provider and applications. Contains the definition
+ * for the supported URIS and columns.
+ * </p>
+ * <h3>Overview</h3>
+ * <p>
+ * BrowserContract defines an database of browser-related information which are bookmarks,
+ * history, images and the mapping between the image and URL.
+ * </p>
  * @hide
  */
 public class BrowserContract {
@@ -45,12 +54,14 @@ public class BrowserContract {
      * the dirty flag is not automatically set and the "syncToNetwork" parameter
      * is set to false when calling
      * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}.
+     * @hide
      */
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
     /**
      * A parameter for use when querying any table that allows specifying a limit on the number
      * of rows returned.
+     * @hide
      */
     public static final String PARAM_LIMIT = "limit";
 
@@ -58,6 +69,8 @@ public class BrowserContract {
      * Generic columns for use by sync adapters. The specific functions of
      * these columns are private to the sync adapter. Other clients of the API
      * should not attempt to either read or write these columns.
+     *
+     * @hide
      */
     interface BaseSyncColumns {
         /** Generic column for use by sync adapters. */
@@ -74,6 +87,7 @@ public class BrowserContract {
 
     /**
      * Convenience definitions for use in implementing chrome bookmarks sync in the Bookmarks table.
+     * @hide
      */
     public static final class ChromeSyncColumns {
         private ChromeSyncColumns() {}
@@ -93,6 +107,7 @@ public class BrowserContract {
     /**
      * Columns that appear when each row of a table belongs to a specific
      * account, including sync information that an account may need.
+     * @hide
      */
     interface SyncColumns extends BaseSyncColumns {
         /**
@@ -144,13 +159,14 @@ public class BrowserContract {
         public static final String _ID = "_id";
 
         /**
-         * The URL of the bookmark.
+         * This column is valid when the row is a URL. The history table's URL
+         * can not be updated.
          * <P>Type: TEXT (URL)</P>
          */
         public static final String URL = "url";
 
         /**
-         * The user visible title of the bookmark.
+         * The user visible title.
          * <P>Type: TEXT</P>
          */
         public static final String TITLE = "title";
@@ -159,10 +175,14 @@ public class BrowserContract {
          * The time that this row was created on its originating client (msecs
          * since the epoch).
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String DATE_CREATED = "created";
     }
 
+    /**
+     * @hide
+     */
     interface ImageColumns {
         /**
          * The favicon of the bookmark, may be NULL.
@@ -182,7 +202,6 @@ public class BrowserContract {
          * The touch icon for the web page, may be NULL.
          * Must decode via {@link BitmapFactory#decodeByteArray}.
          * <p>Type: BLOB (image)</p>
-         * @hide
          */
         public static final String TOUCH_ICON = "touch_icon";
     }
@@ -200,7 +219,24 @@ public class BrowserContract {
          */
         public static final String VISITS = "visits";
 
+        /**
+         * @hide
+         */
         public static final String USER_ENTERED = "user_entered";
+    }
+
+    interface ImageMappingColumns {
+        /**
+         * The ID of the image in Images. One image can map onto the multiple URLs.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String IMAGE_ID = "image_id";
+
+        /**
+         * The URL. The URL can map onto the different type of images.
+         * <P>Type: TEXT (URL)</P>
+         */
+        public static final String URL = "url";
     }
 
     /**
@@ -218,24 +254,71 @@ public class BrowserContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "bookmarks");
 
         /**
+         * Used in {@link Bookmarks#TYPE} column and indicats the row is a bookmark.
+         */
+        public static final int BOOKMARK_TYPE_BOOKMARK = 1;
+
+        /**
+         * Used in {@link Bookmarks#TYPE} column and indicats the row is a folder.
+         */
+        public static final int BOOKMARK_TYPE_FOLDER = 2;
+
+        /**
+         * Used in {@link Bookmarks#TYPE} column and indicats the row is the bookmark bar folder.
+         */
+        public static final int BOOKMARK_TYPE_BOOKMARK_BAR_FOLDER = 3;
+
+        /**
+         * Used in {@link Bookmarks#TYPE} column and indicats the row is other folder and
+         */
+        public static final int BOOKMARK_TYPE_OTHER_FOLDER = 4;
+
+        /**
+         * Used in {@link Bookmarks#TYPE} column and indicats the row is other folder, .
+         */
+        public static final int BOOKMARK_TYPE_MOBILE_FOLDER = 5;
+
+        /**
+         * The type of the item.
+         * <P>Type: INTEGER</P>
+         * <p>Allowed values are:</p>
+         * <p>
+         * <ul>
+         * <li>{@link #BOOKMARK_TYPE_BOOKMARK}</li>
+         * <li>{@link #BOOKMARK_TYPE_FOLDER}</li>
+         * <li>{@link #BOOKMARK_TYPE_BOOKMARK_BAR_FOLDER}</li>
+         * <li>{@link #BOOKMARK_TYPE_OTHER_FOLDER}</li>
+         * <li>{@link #BOOKMARK_TYPE_MOBILE_FOLDER}</li>
+         * </ul>
+         * </p>
+         * <p> The TYPE_BOOKMARK_BAR_FOLDER, TYPE_OTHER_FOLDER and TYPE_MOBILE_FOLDER
+         * can not be updated or deleted.</p>
+         */
+        public static final String TYPE = "type";
+
+        /**
          * The content:// style URI for the default folder
+         * @hide
          */
         public static final Uri CONTENT_URI_DEFAULT_FOLDER =
                 Uri.withAppendedPath(CONTENT_URI, "folder");
 
         /**
          * Query parameter used to specify an account name
+         * @hide
          */
         public static final String PARAM_ACCOUNT_NAME = "acct_name";
 
         /**
          * Query parameter used to specify an account type
+         * @hide
          */
         public static final String PARAM_ACCOUNT_TYPE = "acct_type";
 
         /**
          * Builds a URI that points to a specific folder.
          * @param folderId the ID of the folder to point to
+         * @hide
          */
         public static final Uri buildFolderUri(long folderId) {
             return ContentUris.withAppendedId(CONTENT_URI_DEFAULT_FOLDER, folderId);
@@ -255,6 +338,7 @@ public class BrowserContract {
          * Query parameter to use if you want to see deleted bookmarks that are still
          * around on the device and haven't been synced yet.
          * @see #IS_DELETED
+         * @hide
          */
         public static final String QUERY_PARAMETER_SHOW_DELETED = "show_deleted";
 
@@ -262,6 +346,7 @@ public class BrowserContract {
          * Flag indicating if an item is a folder or bookmark. Non-zero values indicate
          * a folder and zero indicates a bookmark.
          * <P>Type: INTEGER (boolean)</P>
+         * @hide
          */
         public static final String IS_FOLDER = "folder";
 
@@ -274,6 +359,7 @@ public class BrowserContract {
         /**
          * The source ID for an item's parent. Read-only.
          * @see #PARENT
+         * @hide
          */
         public static final String PARENT_SOURCE_ID = "parent_source";
 
@@ -281,6 +367,7 @@ public class BrowserContract {
          * The position of the bookmark in relation to it's siblings that share the same
          * {@link #PARENT}. May be negative.
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String POSITION = "position";
 
@@ -288,6 +375,7 @@ public class BrowserContract {
          * The item that the bookmark should be inserted after.
          * May be negative.
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String INSERT_AFTER = "insert_after";
 
@@ -296,6 +384,7 @@ public class BrowserContract {
          * May be negative.
          * <P>Type: INTEGER</P>
          * @see #INSERT_AFTER
+         * @hide
          */
         public static final String INSERT_AFTER_SOURCE_ID = "insert_after_source";
 
@@ -305,12 +394,14 @@ public class BrowserContract {
          * to the URI when performing your query.
          * <p>Type: INTEGER (non-zero if the item has been deleted, zero if it hasn't)
          * @see #QUERY_PARAMETER_SHOW_DELETED
+         * @hide
          */
         public static final String IS_DELETED = "deleted";
     }
 
     /**
      * Read-only table that lists all the accounts that are used to provide bookmarks.
+     * @hide
      */
     public static final class Accounts {
         /**
@@ -410,6 +501,7 @@ public class BrowserContract {
      * A table provided for sync adapters to use for storing private sync state data.
      *
      * @see SyncStateContract
+     * @hide
      */
     public static final class SyncState implements SyncStateContract.Columns {
         /**
@@ -459,8 +551,18 @@ public class BrowserContract {
     }
 
     /**
-     * Stores images for URLs. Only support query() and update().
-     * @hide
+     * <p>
+     * Stores images for URLs.
+     * </p>
+     * <p>
+     * The rows in this table can not be updated since there might have multiple URLs mapping onto
+     * the same image. If you want to update a URL's image, you need to add the new image in this
+     * table, then update the mapping onto the added image.
+     * </p>
+     * <p>
+     * Every image should be at least associated with one URL, otherwise it will be removed after a
+     * while.
+     * </p>
      */
     public static final class Images implements ImageColumns {
         /**
@@ -474,15 +576,93 @@ public class BrowserContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "images");
 
         /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of images.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/images";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} of a single image.
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/images";
+
+        /**
+         * Used in {@link Images#TYPE} column and indicats the row is a favicon.
+         */
+        public static final int IMAGE_TYPE_FAVICON = 1;
+
+        /**
+         * Used in {@link Images#TYPE} column and indicats the row is a precomposed touch icon.
+         */
+        public static final int IMAGE_TYPE_PRECOMPOSED_TOUCH_ICON = 2;
+
+        /**
+         * Used in {@link Images#TYPE} column and indicats the row is a touch icon.
+         */
+        public static final int IMAGE_TYPE_TOUCH_ICON = 4;
+
+        /**
+         * The type of item in the table.
+         * <P>Type: INTEGER</P>
+         * <p>Allowed values are:</p>
+         * <p>
+         * <ul>
+         * <li>{@link #IMAGE_TYPE_FAVICON}</li>
+         * <li>{@link #IMAGE_TYPE_PRECOMPOSED_TOUCH_ICON}</li>
+         * <li>{@link #IMAGE_TYPE_TOUCH_ICON}</li>
+         * </ul>
+         * </p>
+         */
+        public static final String TYPE = "type";
+
+        /**
+         * The image data.
+         * <p>Type: BLOB (image)</p>
+         */
+        public static final String DATA = "data";
+
+        /**
          * The URL the images came from.
          * <P>Type: TEXT (URL)</P>
+         * @hide
          */
         public static final String URL = "url_key";
     }
 
     /**
+     * <p>
+     * A table that stores the mappings between the image and the URL.
+     * </p>
+     * <p>
+     * Deleting or Updating a mapping might also deletes the mapped image if there is no other URL
+     * maps onto it.
+     * </p>
+     */
+    public static final class ImageMappings implements ImageMappingColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private ImageMappings() {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "image_mappings");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of image mappings.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/image_mappings";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} of a single image mapping.
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/image_mappings";
+    }
+
+    /**
      * A combined view of bookmarks and history. All bookmarks in all folders are included and
      * no folders are included.
+     * @hide
      */
     public static final class Combined implements CommonColumns, HistoryColumns, ImageColumns {
         /**
@@ -505,6 +685,7 @@ public class BrowserContract {
 
     /**
      * A table that stores settings specific to the browser. Only support query and insert.
+     * @hide
      */
     public static final class Settings {
         /**
