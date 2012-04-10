@@ -6897,8 +6897,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                 (Pair<WindowStateAnimator, Region>) msg.obj;
                     final WindowStateAnimator winAnimator = pair.first;
                     winAnimator.setTransparentRegionHint(pair.second);
-
-                    scheduleAnimationLocked();
                     break;
                 }
 
