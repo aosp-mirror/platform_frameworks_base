@@ -697,32 +697,28 @@ private:
                 TimedBuffer(const sp<IMemory>& buffer, int64_t pts);
                 const sp<IMemory>& buffer() const { return mBuffer; }
                 int64_t pts() const { return mPTS; }
-                int position() const { return mPosition; }
-                void setPosition(int pos) { mPosition = pos; }
+                uint32_t position() const { return mPosition; }
+                void setPosition(uint32_t pos) { mPosition = pos; }
               private:
                 sp<IMemory> mBuffer;
-                int64_t mPTS;
-                int mPosition;
+                int64_t     mPTS;
+                uint32_t    mPosition;
             };
 
+            // Mixer facing methods.
             virtual bool isTimedTrack() const { return true; }
-
             virtual uint32_t framesReady() const;
-
             virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer,
                                            int64_t pts);
             virtual void releaseBuffer(AudioBufferProvider::Buffer* buffer);
-            void timedYieldSamples_l(AudioBufferProvider::Buffer* buffer);
-            void timedYieldSilence_l(uint32_t numFrames,
-                                     AudioBufferProvider::Buffer* buffer);
 
+            // Client/App facing methods.
             status_t    allocateTimedBuffer(size_t size,
                                             sp<IMemory>* buffer);
             status_t    queueTimedBuffer(const sp<IMemory>& buffer,
                                          int64_t pts);
             status_t    setMediaTimeTransform(const LinearTransform& xform,
                                               TimedAudioTrack::TargetTimeline target);
-            void        trimTimedBufferQueue_l();
 
           private:
             TimedTrack(const wp<ThreadBase>& thread,
@@ -735,6 +731,14 @@ private:
                        const sp<IMemory>& sharedBuffer,
                        int sessionId);
 
+            void timedYieldSamples_l(AudioBufferProvider::Buffer* buffer);
+            void timedYieldSilence_l(uint32_t numFrames,
+                                     AudioBufferProvider::Buffer* buffer);
+            void trimTimedBufferQueue_l();
+            void trimTimedBufferQueueHead_l(const char* logTag);
+            void updateFramesPendingAfterTrim_l(const TimedBuffer& buf,
+                                                const char* logTag);
+
             uint64_t            mLocalTimeFreq;
             LinearTransform     mLocalTimeToSampleTransform;
             LinearTransform     mMediaTimeToSampleTransform;
@@ -743,6 +747,7 @@ private:
             Vector<TimedBuffer> mTimedBufferQueue;
             bool                mQueueHeadInFlight;
             bool                mTrimQueueHeadOnRelease;
+            uint32_t            mFramesPendingInQueue;
 
             uint8_t*            mTimedSilenceBuffer;
             uint32_t            mTimedSilenceBufferSize;
