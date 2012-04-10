@@ -1394,6 +1394,11 @@ public abstract class HardwareRenderer {
 
                 destroyResources(view);
                 GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
+
+                if (needsContext) {
+                    sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE,
+                            EGL_NO_SURFACE, EGL_NO_CONTEXT);
+                }
             }
         }
 
@@ -1434,6 +1439,9 @@ public abstract class HardwareRenderer {
             } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
                 GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_MODERATE);
             }
+
+            sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                    EGL_NO_CONTEXT);
         }
 
         private static void usePbufferSurface(EGLContext eglContext) {
