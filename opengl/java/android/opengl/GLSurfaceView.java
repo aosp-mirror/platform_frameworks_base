@@ -1459,7 +1459,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             Log.w("GLThread", "egl createSurface");
                         }
                         if (!mEglHelper.createSurface()) {
-                            mSurfaceIsBad = true;
+                            synchronized(sGLThreadManager) {
+                                mSurfaceIsBad = true;
+                                sGLThreadManager.notifyAll();
+                            }
                             continue;
                         }
                         createEglSurface = false;
@@ -1519,7 +1522,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             // but we haven't been notified yet.
                             // Log the error to help developers understand why rendering stopped.
                             EglHelper.logEglErrorAsWarning("GLThread", "eglSwapBuffers", swapError);
-                            mSurfaceIsBad = true;
+
+                            synchronized(sGLThreadManager) {
+                                mSurfaceIsBad = true;
+                                sGLThreadManager.notifyAll();
+                            }
                             break;
                     }
 
