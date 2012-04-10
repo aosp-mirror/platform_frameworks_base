@@ -6882,22 +6882,33 @@ public class WindowManagerService extends IWindowManager.Stub
                 case BULK_UPDATE_PARAMETERS: {
                     // Used to send multiple changes from the animation side to the layout side.
                     synchronized (mWindowMap) {
+                        boolean doRequest = false;
                         // TODO(cmautner): As the number of bits grows, use masks of bit groups to
                         //  eliminate unnecessary tests.
                         if ((msg.arg1 & LayoutFields.SET_UPDATE_ROTATION) != 0) {
                             mInnerFields.mUpdateRotation = true;
+                            doRequest = true;
                         }
                         if ((msg.arg1 & LayoutFields.SET_WALLPAPER_MAY_CHANGE) != 0) {
                             mInnerFields.mWallpaperMayChange = true;
+                            doRequest = true;
                         }
                         if ((msg.arg1 & LayoutFields.SET_FORCE_HIDING_CHANGED) != 0) {
                             mInnerFields.mWallpaperForceHidingChanged = true;
+                            doRequest = true;
                         }
                         if ((msg.arg1 & LayoutFields.CLEAR_ORIENTATION_CHANGE_COMPLETE) != 0) {
                             mInnerFields.mOrientationChangeComplete = false;
+                        } else {
+                            mInnerFields.mOrientationChangeComplete = true;
+                            if (mWindowsFreezingScreen) {
+                                doRequest = true;
+                            }
                         }
 
-                        requestTraversalLocked();
+                        if (doRequest) {
+                            requestTraversalLocked();
+                        }
                     }
                     break;
                 }
@@ -8472,11 +8483,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 !mInnerFields.mUpdateRotation) {
             checkDrawnWindowsLocked();
         }
-        mInnerFields.mOrientationChangeComplete = true;
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
         enableScreenIfNeededLocked();
+//        Slog.e(TAG, "performLayoutAndPlaceSurfacesLockedInner exit: mPendingLayoutChanges="
+//                + Integer.toHexString(mPendingLayoutChanges) + " mLayoutNeeded=" + mLayoutNeeded
+//                + " animating=" + mAnimator.mAnimating);
     }
 
     void checkDrawnWindowsLocked() {
@@ -9510,11 +9523,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public interface OnHardKeyboardStatusChangeListener {
         public void onHardKeyboardStatusChange(boolean available, boolean enabled);
-    }
-
-    void notifyAnimationChangedLayout(final int pendingLayoutChanges) {
-        mPendingLayoutChanges |= pendingLayoutChanges;
-        requestTraversalLocked();
     }
 
     void debugLayoutRepeats(final String msg, int pendingLayoutChanges) {
