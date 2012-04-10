@@ -270,11 +270,11 @@ page.title=What is the NDK?
   <ul>
     <li>If you are developing in Eclipse with ADT, use the New Project Wizard to create a new
     Android project for each sample, using the "Import from Existing Source" option and importing
-    the source from <code>&lt;ndk&gt;/apps/&lt;app_name&gt;/project/</code>. Then, set up an AVD,
+    the source from <code>&lt;ndk&gt;/samples/&lt;name&gt;/</code>. Then, set up an AVD,
     if necessary, and build/run the application in the emulator.</li>
 
     <li>If you are developing with Ant, use the <code>android</code> tool to create the build file
-    for each of the sample projects at <code>&lt;ndk&gt;/apps/&lt;app_name&gt;/project/</code>.
+    for each of the sample projects at <code>&lt;ndk&gt;/samples/&lt;name&gt;/</code>.
     Then set up an AVD, if necessary, build your project in the usual way, and run it in the
     emulator.</li>    
     
