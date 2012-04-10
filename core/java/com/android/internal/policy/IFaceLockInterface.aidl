@@ -20,7 +20,8 @@ import com.android.internal.policy.IFaceLockCallback;
 
 /** {@hide} */
 interface IFaceLockInterface {
-    void startUi(IBinder containingWindowToken, int x, int y, int width, int height);
+    void startUi(IBinder containingWindowToken, int x, int y, int width, int height,
+            boolean useLiveliness);
     void stopUi();
     void registerCallback(IFaceLockCallback cb);
     void unregisterCallback(IFaceLockCallback cb);
