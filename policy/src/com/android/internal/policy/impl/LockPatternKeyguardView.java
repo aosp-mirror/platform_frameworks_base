@@ -818,7 +818,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             if (force || mUnlockScreen == null || unlockMode != mUnlockScreenMode) {
                 boolean restartFaceLock = mFaceUnlock.stopIfRunning();
                 recreateUnlockScreen(unlockMode);
-                if (restartFaceLock || force) {
+                if (restartFaceLock) {
                     mFaceUnlock.activateIfAble(mHasOverlay);
                 }
             }
