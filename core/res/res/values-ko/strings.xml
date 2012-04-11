@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"앱이 언제든지 화면 회전을 변경할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"포인터 속도 변경"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"앱이 언제든지 마우스 또는 트랙패드 포인터의 속도를 변경할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"앱에 Linux 시그널 보내기"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"제공된 시그널을 모든 영구 프로세스로 전송하는 것을 앱이 요청할 수 있도록 허용합니다."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"앱이 항상 실행되도록 설정"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB 디버깅을 사용하지 않으려면 터치하세요."</string>
     <string name="select_input_method" msgid="4653387336791222978">"입력 방법 선택"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"입력 방법 설정"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>

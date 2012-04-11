@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Дозволяє програмі будь-коли змінювати обертання екрана. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"змінювати швидкість указівника"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Дозволяє програмі будь-коли змінювати швидкість вказівника миші чи сенсорної панелі. Ніколи не застосовується для звичайних програм."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"надсилати сигнали Linux програмам"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Дозволяє програмі подавати запит щодо надсилання наданого сигналу всім сталим процесам."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"заставляти програму постійно функціонувати"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Торкніться, щоб вимкнути налагодження USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Вибрати метод введення"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Налаштувати методи введення"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"кандидати"</u></string>
@@ -1173,18 +1181,18 @@
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Зменшити"</string>
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> – торкніться й утримуйте."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Проведіть пальцем угору, щоб збільшити, і вниз, щоб зменшити."</string>
-    <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Вибрати хвилину в майбутньому"</string>
-    <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Вибрати хвилину в минулому"</string>
-    <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"Вибрати годину в майбутньому"</string>
-    <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Вибрати годину в минулому"</string>
+    <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"На хвилину вперед"</string>
+    <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"На хвилину назад"</string>
+    <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"На годину вперед"</string>
+    <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"На годину назад"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Установити час \"пп\""</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Установити час \"дп\""</string>
-    <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Вибрати місяць у майбутньому"</string>
-    <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Вибрати місяць у минулому"</string>
-    <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Вибрати день у майбутньому"</string>
-    <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Вибрати день у минулому"</string>
-    <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Вибрати рік у майбутньому"</string>
-    <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Вибрати рік у минулому"</string>
+    <string name="date_picker_increment_month_button" msgid="5369998479067934110">"На місяць уперед"</string>
+    <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"На місяць назад"</string>
+    <string name="date_picker_increment_day_button" msgid="7130465412308173903">"На день уперед"</string>
+    <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"На день назад"</string>
+    <string name="date_picker_increment_year_button" msgid="6318697384310808899">"На рік уперед"</string>
+    <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"На рік назад"</string>
     <string name="checkbox_checked" msgid="7222044992652711167">"перевірено"</string>
     <string name="checkbox_not_checked" msgid="5174639551134444056">"не перевірено"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"вибрано"</string>

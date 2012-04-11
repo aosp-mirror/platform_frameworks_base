@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Laat die program toe om die skerm se rotasie te eniger tyd te verander. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"verander wyserspoed"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Laat die program toe om die muis of stuurpaneel se wyserspoed te eniger tyd te verander. Dit moet nooit vir normale programme nodig wees nie."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"stuur Linux-seine na programme"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Laat die program toe om te versoek dat die voorsiende sein na alle aanhoudende prosesse gestuur word."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"laat program altyd loop"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Raak om USB-ontfouting te deaktiveer."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Kies invoermetode"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Stel invoermetodes op"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidate"</u></string>

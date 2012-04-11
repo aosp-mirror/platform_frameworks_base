@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Pozwala aplikacji na zmianę obrotu ekranu w dowolnym momencie. To uprawnienie nie powinno być potrzebne zwykłym aplikacjom."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"zmiana szybkości wskaźnika"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Pozwala aplikacji zmienić szybkość wskaźnika myszy lub touchpada w dowolnym momencie. Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"wysyłanie sygnałów systemu Linux do aplikacji"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Pozwala aplikacji na żądanie, aby dostarczony sygnał został wysłany do wszystkich trwałych procesów."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sprawianie, że aplikacja jest cały czas uruchomiona"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotknij, aby wyłączyć debugowanie USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Wybierz metodę wprowadzania"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Konfiguruj metody wprowadzania"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandydaci"</u></string>

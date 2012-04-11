@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Gör att appen när som helst kan ändra skärmläget. Behövs inte för vanliga appar."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ändra markörens hastighet"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Tillåter att appen när som helst ändrar hastigheten för musens eller styrplattans markör. Ska inte behövas för vanliga appar."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"skicka Linux-signaler till appar"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Tillåter att appen begär att den angivna signalen skickas till alla beständiga processer."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"se till att appen alltid körs"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tryck om du vill inaktivera USB-felsökning."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Välj inmatningsmetod"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Konfigurera inmatningsmetoder"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidater"</u></string>
