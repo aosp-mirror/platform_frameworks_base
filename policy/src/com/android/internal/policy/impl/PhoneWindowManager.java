@@ -2245,12 +2245,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             vf.right = mStableRight;
             vf.bottom = mStableBottom;
 
+            // Let the status bar determine its size.
             mStatusBar.computeFrameLw(pf, df, vf, vf);
-            final Rect r = mStatusBar.getFrameLw();
 
-            // Compute the stable dimensions whether or not the status bar is hidden.
-            if (mDockTop == r.top) mStableTop = r.bottom;
-            else if (mDockBottom == r.bottom) mStableBottom = r.top;
+            // For layout, the status bar is always at the top with our fixed height.
+            mStableTop = mUnrestrictedScreenTop + mStatusBarHeight;
 
             // If the status bar is hidden, we don't want to cause
             // windows behind it to scroll.
@@ -2258,8 +2257,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Status bar may go away, so the screen area it occupies
                 // is available to apps but just covering them when the
                 // status bar is visible.
-                if (mDockTop == r.top) mDockTop = r.bottom;
-                else if (mDockBottom == r.bottom) mDockBottom = r.top;
+                mDockTop = mUnrestrictedScreenTop + mStatusBarHeight;
                 
                 mContentTop = mCurTop = mDockTop;
                 mContentBottom = mCurBottom = mDockBottom;
