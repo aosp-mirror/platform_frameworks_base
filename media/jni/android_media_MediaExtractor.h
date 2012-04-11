@@ -19,7 +19,9 @@
 
 #include <media/stagefright/foundation/ABase.h>
 #include <utils/Errors.h>
+#include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
+#include <utils/String8.h>
 
 #include "jni.h"
 
@@ -30,7 +32,11 @@ struct NuMediaExtractor;
 struct JMediaExtractor : public RefBase {
     JMediaExtractor(JNIEnv *env, jobject thiz);
 
-    status_t setDataSource(const char *path);
+    status_t setDataSource(
+            const char *path,
+            const KeyedVector<String8, String8> *headers);
+
+    status_t setDataSource(int fd, off64_t offset, off64_t size);
 
     size_t countTracks() const;
     status_t getTrackFormat(size_t index, jobject *format) const;

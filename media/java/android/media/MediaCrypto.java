@@ -17,17 +17,34 @@
 package android.media;
 
 /**
- * Crypto class can be used in conjunction with MediaCodec to decode
- * encrypted media data.
- * @hide
+ * MediaCrypto class can be used in conjunction with {@link android.media.MediaCodec}
+ * to decode encrypted media data.
+ *
+ * Crypto schemes are assigned 16 byte UUIDs,
+ * the method {@link #isCryptoSchemeSupported} can be used to query if a given
+ * scheme is supported on the device.
+ *
 */
-public final class Crypto {
+public final class MediaCrypto {
+    /** Query if the given scheme identified by its UUID is supported on
+      * this device.
+      * @param uuid The UUID of the crypto scheme.
+    */
     public static final native boolean isCryptoSchemeSupported(byte[] uuid);
 
-    public Crypto(byte[] uuid, byte[] initData) {
+    /** Instantiate a MediaCrypto object using opaque, crypto scheme specific
+      * data.
+      * @param uuid The UUID of the crypto scheme.
+      * @param initData Opaque initialization data specific to the crypto scheme.
+    */
+    public MediaCrypto(byte[] uuid, byte[] initData) {
         native_setup(uuid, initData);
     }
 
+    /** Query if the crypto scheme requires the use of a secure decoder
+      * to decode data of the given mime type.
+      * @param mime The mime type of the media data
+    */
     public final native boolean requiresSecureDecoderComponent(String mime);
 
     @Override

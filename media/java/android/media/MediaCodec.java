@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.media.Crypto;
+import android.media.MediaCrypto;
 import android.view.Surface;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -24,7 +24,122 @@ import java.util.Map;
 /**
  * MediaCodec class can be used to access low-level media codec, i.e.
  * encoder/decoder components.
- * @hide
+ *
+ * <p>MediaCodec is generally used like this:
+ * <pre>
+ * MediaCodec codec = MediaCodec.createDecoderByType(type);
+ * codec.configure(format, ...);
+ * codec.start();
+ * ByteBuffer[] inputBuffers = codec.getInputBuffers();
+ * ByteBuffer[] outputBuffers = codec.getOutputBuffers();
+ * Map<String, Object> format = codec.getOutputFormat();
+ * for (;;) {
+ *   int inputBufferIndex = codec.dequeueInputBuffer(timeoutUs);
+ *   if (inputBufferIndex &gt;= 0) {
+ *     // fill inputBuffers[inputBufferIndex] with valid data
+ *     ...
+ *     codec.queueInputBuffer(inputBufferIndex, ...);
+ *   }
+ *
+ *   int outputBufferIndex = codec.dequeueOutputBuffer(timeoutUs);
+ *   if (outputBufferIndex &gt;= 0) {
+ *     // outputBuffer is ready to be processed or rendered.
+ *     ...
+ *     codec.releaseOutputBuffer(outputBufferIndex, ...);
+ *   } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+ *     outputBuffers = codec.getOutputBuffers();
+ *   } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+ *     // Subsequent data will conform to new format.
+ *     format = codec.getOutputFormat();
+ *     ...
+ *   }
+ * }
+ * codec.stop();
+ * codec.release();
+ * codec = null;
+ * </pre>
+ *
+ * Each codec maintains a number of input and output buffers that are
+ * referred to by index in API calls.
+ * The contents of these buffers is represented by the ByteBuffer[] arrays
+ * accessible through getInputBuffers() and getOutputBuffers().
+ *
+ * After a successful call to {@link #start} the client "owns" neither
+ * input nor output buffers, subsequent calls to {@link #dequeueInputBuffer}
+ * and {@link #dequeueOutputBuffer} then transfer ownership from the codec
+ * to the client.<p>
+ * The client is not required to resubmit/release buffers immediately
+ * to the codec, the sample code above simply does this for simplicity's sake.<p>
+ * Once the client has an input buffer available it can fill it with data
+ * and submit it it to the codec via a call to {@link #queueInputBuffer}.<p>
+ * The codec in turn will return an output buffer to the client in response
+ * to {@link #dequeueOutputBuffer}. After the output buffer has been processed
+ * a call to {@link #releaseOutputBuffer} will return it to the codec.
+ * If a video surface has been provided in the call to {@link #configure},
+ * {@link #releaseOutputBuffer} optionally allows rendering of the buffer
+ * to the surface.<p>
+ *
+ * Input buffers (for decoders) and Output buffers (for encoders) contain
+ * encoded data according to the format's type. For video types this data
+ * is all the encoded data representing a single moment in time, for audio
+ * data this is slightly relaxed in that a buffer may contain multiple
+ * encoded frames of audio. In either case, buffers do not start and end on
+ * arbitrary byte boundaries, this is not a stream of bytes, it's a stream
+ * of access units.<p>
+ *
+ * Most formats also require the actual data to be prefixed by a number
+ * of buffers containing setup data, or codec specific data, i.e. the
+ * first few buffers submitted to the codec object after starting it must
+ * be codec specific data marked as such using the flag {@link #FLAG_CODECCONFIG}
+ * in a call to {@link #queueInputBuffer}.
+ *
+ * Once the client reaches the end of the input data it signals the end of
+ * the input stream by specifying a flag of {@link #FLAG_EOS} in the call to
+ * {@link #queueInputBuffer}. The codec will continue to return output buffers
+ * until it eventually signals the end of the output stream by specifying
+ * the same flag ({@link #FLAG_EOS}) on the BufferInfo returned in
+ * {@link #dequeueOutputBuffer}.
+ *
+ * In order to start decoding data that's not adjacent to previously submitted
+ * data (i.e. after a seek) it is necessary to {@link #flush} the decoder.
+ * Any input or output buffers the client may own at the point of the flush are
+ * immediately revoked, i.e. after a call to {@link #flush} the client does not
+ * own any buffers anymore.
+ * Note that the format of the data submitted after a flush must not change,
+ * flush does not support format discontinuities,
+ * for this a full stop(), configure(), start() cycle is necessary.
+ *
+ * The format of the media data is specified as string/value pairs represented
+ * as a Map<String, Object>.<p>
+ *
+ * Fields common to all formats:
+ *
+ * <table>
+ * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
+ * <tr><td>mime</td><td>String</td><td>The type of the format.</td></tr>
+ * <tr><td>max-input-size</td><td>Integer</td><td>optional, maximum size of a buffer of input data</td></tr>
+ * <tr><td>bitrate</td><td>Integer</td><td><b>encoder-only</b>, desired bitrate in bits/second</td></tr>
+ * </table>
+ *
+ * Video formats have the following fields:
+ * <table>
+ * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
+ * <tr><td>width</td><td>Integer</td><td></td></tr>
+ * <tr><td>height</td><td>Integer</td><td></td></tr>
+ * <tr><td>color-format</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>frame-rate</td><td>Integer or Float</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>i-frame-interval</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>stride</td><td>Integer</td><td><b>encoder-only</b>, optional, defaults to width</td></tr>
+ * <tr><td>slice-height</td><td>Integer</td><td><b>encoder-only</b>, optional, defaults to height</td></tr>
+ * </table>
+ *
+ * Audio formats have the following fields:
+ * <table>
+ * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
+ * <tr><td>channel-count</td><td>Integer</td><td></td></tr>
+ * <tr><td>sample-rate</td><td>Integer</td><td></td></tr>
+ * </table>
+ *
 */
 final public class MediaCodec {
     /** Per buffer metadata includes an offset and size specifying
@@ -32,43 +147,62 @@ final public class MediaCodec {
     */
     public final static class BufferInfo {
         public void set(
-                int offset, int size, long timeUs, int flags) {
-            mOffset = offset;
-            mSize = size;
-            mPresentationTimeUs = timeUs;
-            mFlags = flags;
+                int newOffset, int newSize, long newTimeUs, int newFlags) {
+            offset = newOffset;
+            size = newSize;
+            presentationTimeUs = newTimeUs;
+            flags = newFlags;
         }
 
-        public int mOffset;
-        public int mSize;
-        public long mPresentationTimeUs;
-        public int mFlags;
+        public int offset;
+        public int size;
+        public long presentationTimeUs;
+        public int flags;
     };
 
     // The follow flag constants MUST stay in sync with their equivalents
     // in MediaCodec.h !
-    public static int FLAG_SYNCFRAME   = 1;
-    public static int FLAG_CODECCONFIG = 2;
-    public static int FLAG_EOS         = 4;
+
+    /** This indicates that the buffer marked as such contains the data
+        for a sync frame.
+    */
+    public static final int FLAG_SYNCFRAME   = 1;
+
+    /** This indicated that the buffer marked as such contains codec
+        initialization / codec specific data instead of media data.
+    */
+    public static final int FLAG_CODECCONFIG = 2;
+
+    /** This signals the end of stream, i.e. no buffers will be available
+        after this, unless of course, {@link #flush} follows.
+    */
+    public static final int FLAG_EOS         = 4;
 
     // The following mode constants MUST stay in sync with their equivalents
     // in media/hardware/CryptoAPI.h !
-    public static int MODE_UNENCRYPTED = 0;
-    public static int MODE_AES_CTR     = 1;
+    public static final int MODE_UNENCRYPTED = 0;
+    public static final int MODE_AES_CTR     = 1;
 
-    /** Instantiate a codec component by mime type. For decoder components
-        this is the mime type of media that this decoder should be able to
-        decoder, for encoder components it's the type of media this encoder
-        should encode _to_.
+    /** Instantiate a decoder supporting input data of the given mime type.
+      * @param type The mime type of the input data.
     */
-    public static MediaCodec CreateByType(String type, boolean encoder) {
-        return new MediaCodec(type, true /* nameIsType */, encoder);
+    public static MediaCodec createDecoderByType(String type) {
+        return new MediaCodec(type, true /* nameIsType */, false /* encoder */);
+    }
+
+    /** Instantiate an encoder supporting output data of the given mime type.
+      * @param type The desired mime type of the output data.
+    */
+    public static MediaCodec createEncoderByType(String type) {
+        return new MediaCodec(type, true /* nameIsType */, true /* encoder */);
     }
 
     /** If you know the exact name of the component you want to instantiate
         use this method to instantiate it. Use with caution.
+        Likely to be used with information obtained from {@link android.media.MediaCodecList}
+        @param name The name of the codec to be instantiated.
     */
-    public static MediaCodec CreateByComponentName(String name) {
+    public static MediaCodec createByCodecName(String name) {
         return new MediaCodec(
                 name, false /* nameIsType */, false /* unused */);
     }
@@ -88,35 +222,14 @@ final public class MediaCodec {
     // to do this for you at some point in the future.
     public native final void release();
 
+    /** If this codec is to be used as an encoder, pass this flag.
+      */
     public static int CONFIGURE_FLAG_ENCODE = 1;
 
     /** Configures a component.
-     *  @param format A map of string/value pairs describing the input format
-     *                (decoder) or the desired output format.
      *
-     *                Video formats have the following fields:
-     *                  "mime"          - String
-     *                  "width"         - Integer
-     *                  "height"        - Integer
-     *                  optional "max-input-size"       - Integer
-     *
-     *                Audio formats have the following fields:
-     *                  "mime"          - String
-     *                  "channel-count" - Integer
-     *                  "sample-rate"   - Integer
-     *                  optional "max-input-size"       - Integer
-     *
-     *                If the format is used to configure an encoder, additional
-     *                fields must be included:
-     *                  "bitrate" - Integer (in bits/sec)
-     *
-     *                for video formats:
-     *                  "color-format"          - Integer
-     *                  "frame-rate"            - Integer or Float
-     *                  "i-frame-interval"      - Integer
-     *                  optional "stride"       - Integer, defaults to "width"
-     *                  optional "slice-height" - Integer, defaults to "height"
-     *
+     *  @param format The format of the input data (decoder) or the desired
+     *                format of the output data (encoder).
      *  @param surface Specify a surface on which to render the output of this
      *                 decoder.
      *  @param crypto  Specify a crypto object to facilitate secure decryption
@@ -126,7 +239,7 @@ final public class MediaCodec {
     */
     public void configure(
             Map<String, Object> format,
-            Surface surface, Crypto crypto, int flags) {
+            Surface surface, MediaCrypto crypto, int flags) {
         String[] keys = null;
         Object[] values = null;
 
@@ -147,18 +260,23 @@ final public class MediaCodec {
 
     private native final void native_configure(
             String[] keys, Object[] values,
-            Surface surface, Crypto crypto, int flags);
+            Surface surface, MediaCrypto crypto, int flags);
 
     /** After successfully configuring the component, call start. On return
      *  you can query the component for its input/output buffers.
     */
     public native final void start();
 
+    /** Finish the decode/encode session, note that the codec instance
+      * remains active and ready to be {@link #start}ed again.
+      * To ensure that it is available to other client call {@link #release}
+      * and don't just rely on garbage collection to eventually do this for you.
+    */
     public native final void stop();
 
     /** Flush both input and output ports of the component, all indices
-     *  previously returned in calls to dequeueInputBuffer and
-     *  dequeueOutputBuffer become invalid.
+     *  previously returned in calls to {@link #dequeueInputBuffer} and
+     *  {@link #dequeueOutputBuffer} become invalid.
     */
     public native final void flush();
 
@@ -169,24 +287,36 @@ final public class MediaCodec {
      *  preceded by "codec specific data", i.e. setup data used to initialize
      *  the codec such as PPS/SPS in the case of AVC video or code tables
      *  in the case of vorbis audio.
-     *  The class MediaExtractor provides codec specific data as part of
+     *  The class {@link android.media.MediaExtractor} provides codec
+     *  specific data as part of
      *  the returned track format in entries named "csd-0", "csd-1" ...
      *
      *  These buffers should be submitted using the flag {@link #FLAG_CODECCONFIG}.
      *
      *  To indicate that this is the final piece of input data (or rather that
      *  no more input data follows unless the decoder is subsequently flushed)
-     *  specify the flag {@link FLAG_EOS}.
+     *  specify the flag {@link #FLAG_EOS}.
+     *
+     *  @param index The index of a client-owned input buffer previously returned
+     *               in a call to {@link #dequeueInputBuffer}.
+     *  @param offset The byte offset into the input buffer at which the data starts.
+     *  @param size The number of bytes of valid input data.
+     *  @param presentationTimeUs The time at which this buffer should be rendered.
+     *  @param flags A bitmask of flags {@link #FLAG_SYNCFRAME},
+     *               {@link #FLAG_CODECCONFIG} or {@link #FLAG_EOS}.
     */
     public native final void queueInputBuffer(
             int index,
             int offset, int size, long presentationTimeUs, int flags);
 
-    /** Similar to {@link queueInputBuffer} but submits a buffer that is
+    /** Similar to {@link #queueInputBuffer} but submits a buffer that is
      *  potentially encrypted. The buffer's data is considered to be
      *  partitioned into "subSamples", each subSample starts with a
      *  (potentially empty) run of plain, unencrypted bytes followed
      *  by a (also potentially empty) run of encrypted bytes.
+     *  @param index The index of a client-owned input buffer previously returned
+     *               in a call to {@link #dequeueInputBuffer}.
+     *  @param offset The byte offset into the input buffer at which the data starts.
      *  @param numBytesOfClearData The number of leading unencrypted bytes in
      *                             each subSample.
      *  @param numBytesOfEncryptedData The number of trailing encrypted bytes
@@ -212,27 +342,48 @@ final public class MediaCodec {
             long presentationTimeUs,
             int flags);
 
-    // Returns the index of an input buffer to be filled with valid data
-    // or -1 if no such buffer is currently available.
-    // This method will return immediately if timeoutUs == 0, wait indefinitely
-    // for the availability of an input buffer if timeoutUs < 0 or wait up
-    // to "timeoutUs" microseconds if timeoutUs > 0.
+    /** Returns the index of an input buffer to be filled with valid data
+     *  or -1 if no such buffer is currently available.
+     *  This method will return immediately if timeoutUs == 0, wait indefinitely
+     *  for the availability of an input buffer if timeoutUs &lt; 0 or wait up
+     *  to "timeoutUs" microseconds if timeoutUs &gt; 0.
+     *  @param timeoutUs The timeout in microseconds, a negative timeout indicates "infinite".
+    */
     public native final int dequeueInputBuffer(long timeoutUs);
 
-    // Returns the index of an output buffer that has been successfully
-    // decoded or one of the INFO_* constants below.
-    // The provided "info" will be filled with buffer meta data.
+    /** If a non-negative timeout had been specified in the call
+     * to {@link #dequeueOutputBuffer}, indicates that the call timed out.
+    */
     public static final int INFO_TRY_AGAIN_LATER        = -1;
+
+    /** The output format has changed, subsequent data will follow the new
+     *  format. {@link #getOutputFormat} returns the new format.
+    */
     public static final int INFO_OUTPUT_FORMAT_CHANGED  = -2;
+
+    /** The output buffers have changed, the client must refer to the new
+     *  set of output buffers returned by {@link #getOutputBuffers} from
+     *  this point on.
+    */
     public static final int INFO_OUTPUT_BUFFERS_CHANGED = -3;
 
-    /** Dequeue an output buffer, block at most "timeoutUs" microseconds. */
+    /** Dequeue an output buffer, block at most "timeoutUs" microseconds.
+     *  Returns the index of an output buffer that has been successfully
+     *  decoded or one of the INFO_* constants below.
+     *  @param info Will be filled with buffer meta data.
+     *  @param timeoutUs The timeout in microseconds, a negative timeout indicates "infinite".
+    */
     public native final int dequeueOutputBuffer(
             BufferInfo info, long timeoutUs);
 
-    // If you are done with a buffer, use this call to return the buffer to
-    // the codec. If you previously specified a surface when configuring this
-    // video decoder you can optionally render the buffer.
+    /** If you are done with a buffer, use this call to return the buffer to
+     *  the codec. If you previously specified a surface when configuring this
+     *  video decoder you can optionally render the buffer.
+     *  @param index The index of a client-owned output buffer previously returned
+     *               in a call to {@link #dequeueOutputBuffer}.
+     *  @param render If a valid surface was specified when configuring the codec,
+     *                passing true renders this output buffer to the surface.
+    */
     public native final void releaseOutputBuffer(int index, boolean render);
 
     /** Call this after dequeueOutputBuffer signals a format change by returning

@@ -85,6 +85,16 @@ static jobject makeIntegerObject(JNIEnv *env, int32_t value) {
     return env->NewObject(clazz, integerConstructID, value);
 }
 
+static jobject makeLongObject(JNIEnv *env, int64_t value) {
+    jclass clazz = env->FindClass("java/lang/Long");
+    CHECK(clazz != NULL);
+
+    jmethodID longConstructID = env->GetMethodID(clazz, "<init>", "(J)V");
+    CHECK(longConstructID != NULL);
+
+    return env->NewObject(clazz, longConstructID, value);
+}
+
 static jobject makeFloatObject(JNIEnv *env, float value) {
     jclass clazz = env->FindClass("java/lang/Float");
     CHECK(clazz != NULL);
@@ -155,6 +165,15 @@ status_t ConvertMessageToMap(
                 CHECK(msg->findInt32(key, &val));
 
                 valueObj = makeIntegerObject(env, val);
+                break;
+            }
+
+            case AMessage::kTypeInt64:
+            {
+                int64_t val;
+                CHECK(msg->findInt64(key, &val));
+
+                valueObj = makeLongObject(env, val);
                 break;
             }
 

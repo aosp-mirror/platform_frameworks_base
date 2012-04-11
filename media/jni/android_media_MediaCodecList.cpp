@@ -118,10 +118,10 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
         env->NewObjectArray(profileLevels.size(), profileLevelClazz, NULL);
 
     jfieldID profileField =
-        env->GetFieldID(profileLevelClazz, "mProfile", "I");
+        env->GetFieldID(profileLevelClazz, "profile", "I");
 
     jfieldID levelField =
-        env->GetFieldID(profileLevelClazz, "mLevel", "I");
+        env->GetFieldID(profileLevelClazz, "level", "I");
 
     for (size_t i = 0; i < profileLevels.size(); ++i) {
         const MediaCodecList::ProfileLevel &src = profileLevels.itemAt(i);
@@ -139,7 +139,7 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
 
     jfieldID profileLevelsField = env->GetFieldID(
             capsClazz,
-            "mProfileLevels",
+            "profileLevels",
             "[Landroid/media/MediaCodecList$CodecProfileLevel;");
 
     env->SetObjectField(caps, profileLevelsField, profileLevelArray);
@@ -155,7 +155,7 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     }
 
     jfieldID colorFormatsField = env->GetFieldID(
-            capsClazz, "mColorFormats", "[I");
+            capsClazz, "colorFormats", "[I");
 
     env->SetObjectField(caps, colorFormatsField, colorFormatsArray);
 

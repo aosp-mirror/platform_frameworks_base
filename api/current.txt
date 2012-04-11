@@ -10935,6 +10935,91 @@ package android.media {
     field public static final int STOP_VIDEO_RECORDING = 3; // 0x3
   }
 
+  public final class MediaCodec {
+    method public void configure(java.util.Map<java.lang.String, java.lang.Object>, android.view.Surface, android.media.MediaCrypto, int);
+    method public static android.media.MediaCodec createByCodecName(java.lang.String);
+    method public static android.media.MediaCodec createDecoderByType(java.lang.String);
+    method public static android.media.MediaCodec createEncoderByType(java.lang.String);
+    method public final int dequeueInputBuffer(long);
+    method public final int dequeueOutputBuffer(android.media.MediaCodec.BufferInfo, long);
+    method public final void flush();
+    method public java.nio.ByteBuffer[] getInputBuffers();
+    method public java.nio.ByteBuffer[] getOutputBuffers();
+    method public final java.util.Map<java.lang.String, java.lang.Object> getOutputFormat();
+    method public final void queueInputBuffer(int, int, int, long, int);
+    method public final void queueSecureInputBuffer(int, int, int[], int[], int, byte[], byte[], int, long, int);
+    method public final void release();
+    method public final void releaseOutputBuffer(int, boolean);
+    method public final void start();
+    method public final void stop();
+    field public static int CONFIGURE_FLAG_ENCODE;
+    field public static final int FLAG_CODECCONFIG = 2; // 0x2
+    field public static final int FLAG_EOS = 4; // 0x4
+    field public static final int FLAG_SYNCFRAME = 1; // 0x1
+    field public static final int INFO_OUTPUT_BUFFERS_CHANGED = -3; // 0xfffffffd
+    field public static final int INFO_OUTPUT_FORMAT_CHANGED = -2; // 0xfffffffe
+    field public static final int INFO_TRY_AGAIN_LATER = -1; // 0xffffffff
+    field public static final int MODE_AES_CTR = 1; // 0x1
+    field public static final int MODE_UNENCRYPTED = 0; // 0x0
+  }
+
+  public static final class MediaCodec.BufferInfo {
+    ctor public MediaCodec.BufferInfo();
+    method public void set(int, int, long, int);
+    field public int flags;
+    field public int offset;
+    field public long presentationTimeUs;
+    field public int size;
+  }
+
+  public final class MediaCodecList {
+    method public static final int countCodecs();
+    method public static final android.media.MediaCodecList.CodecCapabilities getCodecCapabilities(int, java.lang.String);
+    method public static final java.lang.String getCodecName(int);
+    method public static final java.lang.String[] getSupportedTypes(int);
+    method public static final boolean isEncoder(int);
+  }
+
+  public static final class MediaCodecList.CodecCapabilities {
+    ctor public MediaCodecList.CodecCapabilities();
+    field public int[] colorFormats;
+    field public android.media.MediaCodecList.CodecProfileLevel[] profileLevels;
+  }
+
+  public static final class MediaCodecList.CodecProfileLevel {
+    ctor public MediaCodecList.CodecProfileLevel();
+    field public int level;
+    field public int profile;
+  }
+
+  public final class MediaCrypto {
+    ctor public MediaCrypto(byte[], byte[]);
+    method public static final boolean isCryptoSchemeSupported(byte[]);
+    method public final void release();
+    method public final boolean requiresSecureDecoderComponent(java.lang.String);
+  }
+
+  public final class MediaExtractor {
+    ctor public MediaExtractor();
+    method public boolean advance();
+    method public int countTracks();
+    method public int getSampleFlags();
+    method public long getSampleTime();
+    method public int getSampleTrackIndex();
+    method public java.util.Map<java.lang.String, java.lang.Object> getTrackFormat(int);
+    method public int readSampleData(java.nio.ByteBuffer, int);
+    method public final void release();
+    method public void seekTo(long);
+    method public void selectTrack(int);
+    method public final void setDataSource(android.content.Context, android.net.Uri, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
+    method public final void setDataSource(java.lang.String, java.util.Map<java.lang.String, java.lang.String>);
+    method public final void setDataSource(java.lang.String);
+    method public final void setDataSource(java.io.FileDescriptor);
+    method public final void setDataSource(java.io.FileDescriptor, long, long);
+    field public static final int SAMPLE_FLAG_ENCRYPTED = 2; // 0x2
+    field public static final int SAMPLE_FLAG_SYNC = 1; // 0x1
+  }
+
   public class MediaMetadataRetriever {
     ctor public MediaMetadataRetriever();
     method public java.lang.String extractMetadata(int);

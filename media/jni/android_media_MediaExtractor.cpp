@@ -63,8 +63,13 @@ JMediaExtractor::~JMediaExtractor() {
     mClass = NULL;
 }
 
-status_t JMediaExtractor::setDataSource(const char *path) {
-    return mImpl->setDataSource(path);
+status_t JMediaExtractor::setDataSource(
+        const char *path, const KeyedVector<String8, String8> *headers) {
+    return mImpl->setDataSource(path, headers);
+}
+
+status_t JMediaExtractor::setDataSource(int fd, off64_t offset, off64_t size) {
+    return mImpl->setDataSource(fd, offset, size);
 }
 
 size_t JMediaExtractor::countTracks() const {
@@ -200,7 +205,7 @@ static jint android_media_MediaExtractor_countTracks(
 
     if (extractor == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return NULL;
+        return -1;
     }
 
     return extractor->countTracks();
@@ -380,24 +385,42 @@ static void android_media_MediaExtractor_native_init(JNIEnv *env) {
 }
 
 static void android_media_MediaExtractor_native_setup(
-        JNIEnv *env, jobject thiz, jstring path) {
+        JNIEnv *env, jobject thiz) {
     sp<JMediaExtractor> extractor = new JMediaExtractor(env, thiz);
+    setMediaExtractor(env,thiz, extractor);
+}
 
-    if (path == NULL) {
+static void android_media_MediaExtractor_setDataSource(
+        JNIEnv *env, jobject thiz,
+        jstring pathObj, jobjectArray keysArray, jobjectArray valuesArray) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (pathObj == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
 
-    const char *tmp = env->GetStringUTFChars(path, NULL);
-
-    if (tmp == NULL) {
+    KeyedVector<String8, String8> headers;
+    if (!ConvertKeyValueArraysToKeyedVector(
+                env, keysArray, valuesArray, &headers)) {
         return;
     }
 
-    status_t err = extractor->setDataSource(tmp);
+    const char *path = env->GetStringUTFChars(pathObj, NULL);
 
-    env->ReleaseStringUTFChars(path, tmp);
-    tmp = NULL;
+    if (path == NULL) {
+        return;
+    }
+
+    status_t err = extractor->setDataSource(path, &headers);
+
+    env->ReleaseStringUTFChars(pathObj, path);
+    path = NULL;
 
     if (err != OK) {
         jniThrowException(
@@ -406,8 +429,34 @@ static void android_media_MediaExtractor_native_setup(
                 "Failed to instantiate extractor.");
         return;
     }
+}
 
-    setMediaExtractor(env,thiz, extractor);
+static void android_media_MediaExtractor_setDataSourceFd(
+        JNIEnv *env, jobject thiz,
+        jobject fileDescObj, jlong offset, jlong length) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (fileDescObj == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    int fd = jniGetFDFromFileDescriptor(env, fileDescObj);
+
+    status_t err = extractor->setDataSource(fd, offset, length);
+
+    if (err != OK) {
+        jniThrowException(
+                env,
+                "java/io/IOException",
+                "Failed to instantiate extractor.");
+        return;
+    }
 }
 
 static void android_media_MediaExtractor_native_finalize(
@@ -443,11 +492,18 @@ static JNINativeMethod gMethods[] = {
 
     { "native_init", "()V", (void *)android_media_MediaExtractor_native_init },
 
-    { "native_setup", "(Ljava/lang/String;)V",
+    { "native_setup", "()V",
       (void *)android_media_MediaExtractor_native_setup },
 
     { "native_finalize", "()V",
       (void *)android_media_MediaExtractor_native_finalize },
+
+    { "setDataSource", "(Ljava/lang/String;[Ljava/lang/String;"
+                       "[Ljava/lang/String;)V",
+      (void *)android_media_MediaExtractor_setDataSource },
+
+    { "setDataSource", "(Ljava/io/FileDescriptor;JJ)V",
+      (void *)android_media_MediaExtractor_setDataSourceFd },
 };
 
 int register_android_media_MediaExtractor(JNIEnv *env) {
