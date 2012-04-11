@@ -323,8 +323,9 @@
          true here reverses that logic. -->
     <bool name="config_reverseDefaultRotation">false</bool>
 
-    <!-- The number of degrees to rotate the display when the keyboard is open. -->
-    <integer name="config_lidOpenRotation">90</integer>
+    <!-- The number of degrees to rotate the display when the keyboard is open.
+         A value of -1 means no change in orientation by default. -->
+    <integer name="config_lidOpenRotation">-1</integer>
 
     <!-- The number of degrees to rotate the display when the device is in a desk dock.
          A value of -1 means no change in orientation by default. -->
@@ -370,8 +371,8 @@
     <!-- Indicate whether the lid state impacts the accessibility of
          the physical keyboard.  0 means it doesn't, 1 means it is accessible
          when the lid is open, 2 means it is accessible when the lid is
-         closed.  The default is 1. -->
-    <integer name="config_lidKeyboardAccessibility">1</integer>
+         closed.  The default is 0. -->
+    <integer name="config_lidKeyboardAccessibility">0</integer>
 
     <!-- Indicate whether the lid state impacts the accessibility of
          the physical keyboard.  0 means it doesn't, 1 means it is accessible
