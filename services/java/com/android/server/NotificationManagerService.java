@@ -16,7 +16,9 @@
 
 package com.android.server;
 
+import com.android.internal.os.AtomicFile;
 import com.android.internal.statusbar.StatusBarNotification;
+import com.android.internal.util.FastXmlSerializer;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -37,9 +39,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
+import android.net.NetworkPolicy;
+import android.net.NetworkTemplate;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -53,14 +56,36 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.Xml;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+
+import libcore.io.IoUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import static android.net.NetworkPolicyManager.POLICY_NONE;
+import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeBooleanAttribute;
+import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeIntAttribute;
+import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeLongAttribute;
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.END_TAG;
+import static org.xmlpull.v1.XmlPullParser.START_TAG;
+
 
 /** {@hide} */
 public class NotificationManagerService extends INotificationManager.Stub
@@ -80,6 +105,13 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     private static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_NOTIFICATION;
     private static final boolean SCORE_ONGOING_HIGHER = false;
+
+    private static final int JUNK_SCORE = -1000;
+    private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10;
+    private static final int SCORE_DISPLAY_THRESHOLD = Notification.PRIORITY_MIN * NOTIFICATION_PRIORITY_MULTIPLIER;
+
+    private static final boolean ENABLE_BLOCKED_NOTIFICATIONS = true;
+    private static final boolean ENABLE_BLOCKED_TOASTS = true;
 
     final Context mContext;
     final IActivityManager mAm;
@@ -114,6 +146,144 @@ public class NotificationManagerService extends INotificationManager.Stub
 
     private ArrayList<NotificationRecord> mLights = new ArrayList<NotificationRecord>();
     private NotificationRecord mLedNotification;
+
+    // Notification control database. For now just contains disabled packages.
+    private AtomicFile mPolicyFile;
+    private HashSet<String> mBlockedPackages = new HashSet<String>();
+
+    private static final int DB_VERSION = 1;
+
+    private static final String TAG_BODY = "notification-policy";
+    private static final String ATTR_VERSION = "version";
+
+    private static final String TAG_BLOCKED_PKGS = "blocked-packages";
+    private static final String TAG_PACKAGE = "package";
+    private static final String ATTR_NAME = "name";
+
+    private void loadBlockDb() {
+        synchronized(mBlockedPackages) {
+            if (mPolicyFile == null) {
+                File dir = new File("/data/system");
+                mPolicyFile = new AtomicFile(new File(dir, "notification_policy.xml"));
+
+                mBlockedPackages.clear();
+
+                FileInputStream infile = null;
+                try {
+                    infile = mPolicyFile.openRead();
+                    final XmlPullParser parser = Xml.newPullParser();
+                    parser.setInput(infile, null);
+
+                    int type;
+                    String tag;
+                    int version = DB_VERSION;
+                    while ((type = parser.next()) != END_DOCUMENT) {
+                        tag = parser.getName();
+                        if (type == START_TAG) {
+                            if (TAG_BODY.equals(tag)) {
+                                version = Integer.parseInt(parser.getAttributeValue(null, ATTR_VERSION));
+                            } else if (TAG_BLOCKED_PKGS.equals(tag)) {
+                                while ((type = parser.next()) != END_DOCUMENT) {
+                                    tag = parser.getName();
+                                    if (TAG_PACKAGE.equals(tag)) {
+                                        mBlockedPackages.add(parser.getAttributeValue(null, ATTR_NAME));
+                                    } else if (TAG_BLOCKED_PKGS.equals(tag) && type == END_TAG) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (FileNotFoundException e) {
+                    // No data yet
+                } catch (IOException e) {
+                    Log.wtf(TAG, "Unable to read blocked notifications database", e);
+                } catch (NumberFormatException e) {
+                    Log.wtf(TAG, "Unable to parse blocked notifications database", e);
+                } catch (XmlPullParserException e) {
+                    Log.wtf(TAG, "Unable to parse blocked notifications database", e);
+                } finally {
+                    IoUtils.closeQuietly(infile);
+                }
+            }
+        }
+    }
+
+    private void writeBlockDb() {
+        synchronized(mBlockedPackages) {
+            FileOutputStream outfile = null;
+            try {
+                outfile = mPolicyFile.startWrite();
+
+                XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(outfile, "utf-8");
+
+                out.startDocument(null, true);
+
+                out.startTag(null, TAG_BODY); {
+                    out.attribute(null, ATTR_VERSION, String.valueOf(DB_VERSION));
+                    out.startTag(null, TAG_BLOCKED_PKGS); {
+                        // write all known network policies
+                        for (String pkg : mBlockedPackages) {
+                            out.startTag(null, TAG_PACKAGE); {
+                                out.attribute(null, ATTR_NAME, pkg);
+                            } out.endTag(null, TAG_PACKAGE);
+                        }
+                    } out.endTag(null, TAG_BLOCKED_PKGS);
+                } out.endTag(null, TAG_BODY);
+
+                out.endDocument();
+
+                mPolicyFile.finishWrite(outfile);
+            } catch (IOException e) {
+                if (outfile != null) {
+                    mPolicyFile.failWrite(outfile);
+                }
+            }
+        }
+    }
+
+    public boolean areNotificationsEnabledForPackage(String pkg) {
+        checkCallerIsSystem();
+        return areNotificationsEnabledForPackageInt(pkg);
+    }
+
+    // Unchecked. Not exposed via Binder, but can be called in the course of enqueue*().
+    private boolean areNotificationsEnabledForPackageInt(String pkg) {
+        final boolean enabled = !mBlockedPackages.contains(pkg);
+        if (DBG) {
+            Slog.v(TAG, "notifications are " + (enabled?"en":"dis") + "abled for " + pkg);
+        }
+        return enabled;
+    }
+
+    public void setNotificationsEnabledForPackage(String pkg, boolean enabled) {
+        checkCallerIsSystem();
+        if (DBG) {
+            Slog.v(TAG, (enabled?"en":"dis") + "abling notifications for " + pkg);
+        }
+        if (enabled) {
+            mBlockedPackages.remove(pkg);
+        } else {
+            mBlockedPackages.add(pkg);
+
+            // Now, cancel any outstanding notifications that are part of a just-disabled app
+            if (ENABLE_BLOCKED_NOTIFICATIONS) {
+                synchronized (mNotificationList) {
+                    final int N = mNotificationList.size();
+                    for (int i=0; i<N; i++) {
+                        final NotificationRecord r = mNotificationList.get(i);
+                        if (r.pkg.equals(pkg)) {
+                            cancelNotificationLocked(r, false);
+                        }
+                    }
+                }
+            }
+            // Don't bother canceling toasts, they'll go away soon enough.
+        }
+        writeBlockDb();
+    }
+
 
     private static String idDebugString(Context baseContext, String packageName, int id) {
         Context c = null;
@@ -405,6 +575,8 @@ public class NotificationManagerService extends INotificationManager.Stub
         mToastQueue = new ArrayList<ToastRecord>();
         mHandler = new WorkerHandler();
 
+        loadBlockDb();
+
         mStatusBar = statusBar;
         statusBar.setNotificationCallbacks(mNotificationCallbacks);
 
@@ -465,6 +637,13 @@ public class NotificationManagerService extends INotificationManager.Stub
             return ;
         }
 
+        final boolean isSystemToast = ("android".equals(pkg));
+
+        if (ENABLE_BLOCKED_TOASTS && !isSystemToast && !areNotificationsEnabledForPackageInt(pkg)) {
+            Slog.e(TAG, "Suppressing toast from package " + pkg + " by user request.");
+            return;
+        }
+
         synchronized (mToastQueue) {
             int callingPid = Binder.getCallingPid();
             long callingId = Binder.clearCallingIdentity();
@@ -479,7 +658,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 } else {
                     // Limit the number of toasts that any given package except the android
                     // package can enqueue.  Prevents DOS attacks and deals with leaks.
-                    if (!"android".equals(pkg)) {
+                    if (!isSystemToast) {
                         int count = 0;
                         final int N = mToastQueue.size();
                         for (int i=0; i<N; i++) {
@@ -675,11 +854,15 @@ public class NotificationManagerService extends INotificationManager.Stub
     public void enqueueNotificationInternal(String pkg, int callingUid, int callingPid,
             String tag, int id, Notification notification, int[] idOut)
     {
-        checkIncomingCall(pkg);
+        if (DBG) {
+            Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id + " notification=" + notification);
+        }
+        checkCallerIsSystemOrSameApp(pkg);
+        final boolean isSystemNotification = ("android".equals(pkg));
 
         // Limit the number of notifications that any given package except the android
         // package can enqueue.  Prevents DOS attacks and deals with leaks.
-        if (!"android".equals(pkg)) {
+        if (!isSystemNotification) {
             synchronized (mNotificationList) {
                 int count = 0;
                 final int N = mNotificationList.size();
@@ -717,7 +900,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
 
         // === Scoring ===
-        
+
         // 0. Sanitize inputs
         notification.priority = clamp(notification.priority, Notification.PRIORITY_MIN, Notification.PRIORITY_MAX);
         // Migrate notification flags to scores
@@ -726,19 +909,27 @@ public class NotificationManagerService extends INotificationManager.Stub
         } else if (SCORE_ONGOING_HIGHER && 0 != (notification.flags & Notification.FLAG_ONGOING_EVENT)) {
             if (notification.priority < Notification.PRIORITY_HIGH) notification.priority = Notification.PRIORITY_HIGH;
         }
-        
+
         // 1. initial score: buckets of 10, around the app 
-        int score = notification.priority * 10; //[-20..20]
+        int score = notification.priority * NOTIFICATION_PRIORITY_MULTIPLIER; //[-20..20]
 
-        // 2. Consult oracles (external heuristics)
-        // TODO(dsandler): oracles
+        // 2. Consult external heuristics (TBD)
 
-        // 3. Apply local heuristics & overrides
+        // 3. Apply local rules
 
         // blocked apps
-        // TODO(dsandler): add block db
-        if (pkg.startsWith("com.test.spammer.")) {
-            score = -1000;
+        if (ENABLE_BLOCKED_NOTIFICATIONS && !isSystemNotification && !areNotificationsEnabledForPackageInt(pkg)) {
+            score = JUNK_SCORE;
+            Slog.e(TAG, "Suppressing notification from package " + pkg + " by user request.");
+        }
+
+        if (DBG) {
+            Slog.v(TAG, "Assigned score=" + score + " to " + notification);
+        }
+
+        if (score < SCORE_DISPLAY_THRESHOLD) {
+            // Notification will be blocked because the score is too low.
+            return;
         }
 
         synchronized (mNotificationList) {
@@ -1030,7 +1221,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     }
 
     public void cancelNotificationWithTag(String pkg, String tag, int id) {
-        checkIncomingCall(pkg);
+        checkCallerIsSystemOrSameApp(pkg);
         // Don't allow client applications to cancel foreground service notis.
         cancelNotification(pkg, tag, id, 0,
                 Binder.getCallingUid() == Process.SYSTEM_UID
@@ -1038,14 +1229,22 @@ public class NotificationManagerService extends INotificationManager.Stub
     }
 
     public void cancelAllNotifications(String pkg) {
-        checkIncomingCall(pkg);
+        checkCallerIsSystemOrSameApp(pkg);
 
         // Calling from user space, don't allow the canceling of actively
         // running foreground services.
         cancelAllNotificationsInt(pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true);
     }
 
-    void checkIncomingCall(String pkg) {
+    void checkCallerIsSystem() {
+        int uid = Binder.getCallingUid();
+        if (uid == Process.SYSTEM_UID || uid == 0) {
+            return;
+        }
+        throw new SecurityException("Disallowed call for uid " + uid);
+    }
+
+    void checkCallerIsSystemOrSameApp(String pkg) {
         int uid = Binder.getCallingUid();
         if (uid == Process.SYSTEM_UID || uid == 0) {
             return;
