@@ -1,0 +1,182 @@
+page.title=Getting a Result from an Activity
+parent.title=Interacting with Other Apps
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Sending the User to Another App
+previous.link=sending.html
+next.title=Allowing Other Apps to Start Your Activity
+next.link=filters.html
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#StartActivity">Start the Activity</a></li>
+  <li><a href="#ReceiveResult">Receive the Result</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/sharing/index.html">Sharing Content</a></li>
+</ul>
+
+  </div>
+</div>
+
+<p>Starting another activity doesn't have to be one-way. You can also start another activity and
+receive a result back. To receive a result, call {@link android.app.Activity#startActivityForResult
+startActivityForResult()} (instead of {@link android.app.Activity#startActivity
+startActivity()}).</p>
+
+<p>For example, your app can start a camera app and receive the captured photo as a result. Or, you
+might start the People app in order for the user to select a
+contact and you'll receive the contact details as a result.</p>
+
+<p>Of course, the activity that responds must be designed to return a result. When it does, it
+sends the result as another {@link android.content.Intent} object. Your activity receives it in
+the {@link android.app.Activity#onActivityResult onActivityResult()} callback.</p>
+
+<p class="note"><strong>Note:</strong> You can use explicit or implicit intents when you call
+{@link android.app.Activity#startActivityForResult startActivityForResult()}. When starting one of
+your own activities to receive a result, you should use an explicit intent to ensure that you
+receive the expected result.</p>
+
+
+<h2 id="StartActivity">Start the Activity</h2>
+
+<p>There's nothing special about the {@link android.content.Intent} object you use when starting
+an activity for a result, but you do need to pass an additional integer argument to the {@link
+android.app.Activity#startActivityForResult startActivityForResult()} method.</p>
+
+<p>The integer argument is a "request code" that identifies your request. When you receive the
+result {@link android.content.Intent}, the callback provides the same request code so that your
+app can properly identify the result and determine how to handle it.</p>
+
+<p>For example, here's how to start an activity that allows the user to pick a contact:</p>
+
+<pre>
+static final int PICK_CONTACT_REQUEST = 1;  // The request code
+...
+private void pickContact() {
+    Intent pickContactIntent = new Intent(Intent.ACTION_PICK, new Uri("content://contacts"));
+    pickContactIntent.setType(Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+    startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
+}
+</pre>
+
+
+<h2 id="ReceiveResult">Receive the Result</h2>
+
+<p>When the user is done with the subsequent activity and returns, the system calls your activity's 
+{@link android.app.Activity#onActivityResult onActivityResult()} method. This method includes three
+arguments:</p>
+
+<ul>
+  <li>The request code you passed to {@link
+android.app.Activity#startActivityForResult startActivityForResult()}.</li>
+  <li>A result code specified by the second activity. This is either {@link
+android.app.Activity#RESULT_OK} if the operation was successful or {@link
+android.app.Activity#RESULT_CANCELED} if the user backed out or the operation failed for some
+reason.</li>
+  <li>An {@link android.content.Intent} that carries the result data.</li>
+</ul>
+
+<p>For example, here's how you can handle the result for the "pick a contact" intent:</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // The user picked a contact.
+            // The Intent's data Uri identifies which contact was selected.
+
+            // Do something with the contact here (bigger example below)
+        }
+    }
+}
+</pre>
+
+<p>In this example, the result {@link android.content.Intent} returned by
+Android's Contacts or People app provides a content {@link android.net.Uri} that identifies the
+contact the user selected.</p>
+
+<p>In order to successfully handle the result, you must understand what the format of the result
+{@link android.content.Intent} will be. Doing so is easy when the activity returning a result is
+one of your own activities. Apps included with the Android platform offer their own APIs that
+you can count on for specific result data. For instance, the People app (Contacts app on some older
+versions) always returns a result with the content URI that identifies the selected contact, and the
+Camera app returns a {@link android.graphics.Bitmap} in the {@code "data"} extra (see the class
+about <a href="{@docRoot}training/camera/index.html">Capturing Photos</a>).</p>
+
+
+<h4>Bonus: Read the contact data</h4>
+
+<p>The code above showing how to get a result from the People app doesn't go into
+details about how to actually read the data from the result, because it requires more advanced
+discussion about <a href="{@docRoot}guide/topics/providers/content-providers.html">content
+providers</a>. However, if you're curious, here's some more code that shows how to query the
+result data to get the phone number from the selected contact:</p>
+
+<pre>
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Check which request it is that we're responding to
+    if (requestCode == PICK_CONTACT_REQUEST) {
+        // Make sure the request was successful
+        if (resultCode == RESULT_OK) {
+            // Get the URI that points to the selected contact
+            Uri contactUri = data.getData();
+            // We only need the NUMBER column, because there will be only one row in the result
+            String[] projection = {Phone.NUMBER};
+
+            // Perform the query on the contact to get the NUMBER column
+            // We don't need a selection or sort order (there's only one result for the given URI)
+            // CAUTION: The query() method should be called from a separate thread to avoid blocking
+            // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
+            // Consider using {@link android.content.CursorLoader} to perform the query.
+            Cursor cursor = getContentResolver()
+                    .query(contactUri, projection, null, null, null);
+            cursor.moveToFirst();
+
+            // Retrieve the phone number from the NUMBER column
+            int column = cursor.getColumnIndex(Phone.NUMBER);
+            String number = cursor.getString(column);
+
+            // Do something with the phone number...
+        }
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Before Android 2.3 (API level 9), performing a query
+on the {@link android.provider.ContactsContract.Contacts Contacts Provider} (like the one shown
+above) requires that your app declare the {@link
+android.Manifest.permission#READ_CONTACTS} permission (see <a
+href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>). However,
+beginning with Android 2.3, the Contacts/People app grants your app a temporary
+permission to read from the Contacts Provider when it returns you a result. The temporary permission
+applies only to the specific contact requested, so you cannot query a contact other than the one
+specified by the intent's {@link android.net.Uri}, unless you do declare the {@link
+android.Manifest.permission#READ_CONTACTS} permission.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
