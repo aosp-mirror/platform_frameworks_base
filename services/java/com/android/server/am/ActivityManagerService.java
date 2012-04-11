@@ -8309,7 +8309,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + android.Manifest.permission.DUMP);
             return;
         }
-        
+
         boolean dumpAll = false;
         boolean dumpClient = false;
         String dumpPackage = null;
@@ -8352,7 +8352,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("Unknown argument: " + opt + "; use -h for help");
             }
         }
-        
+
+        long origId = Binder.clearCallingIdentity();
+        boolean more = false;
         // Is the caller requesting to dump a particular piece of data?
         if (opti < args.length) {
             String cmd = args[opti];
@@ -8361,7 +8363,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     dumpActivitiesLocked(fd, pw, args, opti, true, dumpClient, null);
                 }
-                return;
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
                 String[] newArgs;
                 String name;
@@ -8378,7 +8379,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     dumpBroadcastsLocked(fd, pw, args, opti, true, name);
                 }
-                return;
             } else if ("intents".equals(cmd) || "i".equals(cmd)) {
                 String[] newArgs;
                 String name;
@@ -8395,7 +8395,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     dumpPendingIntentsLocked(fd, pw, args, opti, true, name);
                 }
-                return;
             } else if ("processes".equals(cmd) || "p".equals(cmd)) {
                 String[] newArgs;
                 String name;
@@ -8412,12 +8411,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     dumpProcessesLocked(fd, pw, args, opti, true, name);
                 }
-                return;
             } else if ("oom".equals(cmd) || "o".equals(cmd)) {
                 synchronized (this) {
                     dumpOomLocked(fd, pw, args, opti, true);
                 }
-                return;
             } else if ("provider".equals(cmd)) {
                 String[] newArgs;
                 String name;
@@ -8434,12 +8431,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pw.println("No providers match: " + name);
                     pw.println("Use -h for help.");
                 }
-                return;
             } else if ("providers".equals(cmd) || "prov".equals(cmd)) {
                 synchronized (this) {
                     dumpProvidersLocked(fd, pw, args, opti, true, null);
                 }
-                return;
             } else if ("service".equals(cmd)) {
                 String[] newArgs;
                 String name;
@@ -8457,13 +8452,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pw.println("No services match: " + name);
                     pw.println("Use -h for help.");
                 }
-                return;
             } else if ("package".equals(cmd)) {
                 String[] newArgs;
                 if (opti >= args.length) {
                     pw.println("package: no package name specified");
                     pw.println("Use -h for help.");
-                    return;
                 } else {
                     dumpPackage = args[opti];
                     opti++;
@@ -8472,22 +8465,25 @@ public final class ActivityManagerService extends ActivityManagerNative
                             args.length - opti);
                     args = newArgs;
                     opti = 0;
+                    more = true;
                 }
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 synchronized (this) {
                     dumpServicesLocked(fd, pw, args, opti, true, dumpClient, null);
                 }
-                return;
             } else {
                 // Dumping a single activity?
                 if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll)) {
                     pw.println("Bad activity command, or no activities match: " + cmd);
                     pw.println("Use -h for help.");
                 }
+            }
+            if (!more) {
+                Binder.restoreCallingIdentity(origId);
                 return;
             }
         }
-        
+
         // No piece of data specified, dump everything.
         synchronized (this) {
             boolean needSep;
@@ -8528,8 +8524,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage);
         }
+        Binder.restoreCallingIdentity(origId);
     }
-    
+
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
         pw.println("ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)");
