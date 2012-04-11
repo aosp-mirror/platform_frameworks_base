@@ -2715,6 +2715,67 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
+     * Adds all of the movement samples of the specified event to this one if
+     * it is compatible.  To be compatible, the event must have the same device id,
+     * source, action, flags, pointer count, pointer properties.
+     *
+     * Only applies to {@link #ACTION_MOVE} or {@link #ACTION_HOVER_MOVE} events.
+     *
+     * @param event The event whose movements samples should be added to this one
+     * if possible.
+     * @return True if batching was performed or false if batching was not possible.
+     * @hide
+     */
+    public final boolean addBatch(MotionEvent event) {
+        final int action = nativeGetAction(mNativePtr);
+        if (action != ACTION_MOVE && action != ACTION_HOVER_MOVE) {
+            return false;
+        }
+        if (action != nativeGetAction(event.mNativePtr)) {
+            return false;
+        }
+
+        if (nativeGetDeviceId(mNativePtr) != nativeGetDeviceId(event.mNativePtr)
+                || nativeGetSource(mNativePtr) != nativeGetSource(event.mNativePtr)
+                || nativeGetFlags(mNativePtr) != nativeGetFlags(event.mNativePtr)) {
+            return false;
+        }
+
+        final int pointerCount = nativeGetPointerCount(mNativePtr);
+        if (pointerCount != nativeGetPointerCount(event.mNativePtr)) {
+            return false;
+        }
+
+        synchronized (gSharedTempLock) {
+            ensureSharedTempPointerCapacity(Math.max(pointerCount, 2));
+            final PointerProperties[] pp = gSharedTempPointerProperties;
+            final PointerCoords[] pc = gSharedTempPointerCoords;
+
+            for (int i = 0; i < pointerCount; i++) {
+                nativeGetPointerProperties(mNativePtr, i, pp[0]);
+                nativeGetPointerProperties(event.mNativePtr, i, pp[1]);
+                if (!pp[0].equals(pp[1])) {
+                    return false;
+                }
+            }
+
+            final int metaState = nativeGetMetaState(event.mNativePtr);
+            final int historySize = nativeGetHistorySize(event.mNativePtr);
+            for (int h = 0; h <= historySize; h++) {
+                final int historyPos = (h == historySize ? HISTORY_CURRENT : h);
+
+                for (int i = 0; i < pointerCount; i++) {
+                    nativeGetPointerCoords(event.mNativePtr, i, historyPos, pc[i]);
+                }
+
+                final long eventTimeNanos = nativeGetEventTimeNanos(event.mNativePtr, historyPos);
+                nativeAddBatch(mNativePtr, eventTimeNanos, pc, metaState);
+            }
+        }
+        return true;
+    }
+
+    /**
      * Returns true if all points in the motion event are completely within the specified bounds.
      * @hide
      */
@@ -3415,6 +3476,23 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         public void copyFrom(PointerProperties other) {
             id = other.id;
             toolType = other.toolType;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other instanceof PointerProperties) {
+                return equals((PointerProperties)other);
+            }
+            return false;
+        }
+
+        private boolean equals(PointerProperties other) {
+            return other != null && id == other.id && toolType == other.toolType;
+        }
+
+        @Override
+        public int hashCode() {
+            return id | (toolType << 8);
         }
     }
 }

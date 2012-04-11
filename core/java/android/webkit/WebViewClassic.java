@@ -57,6 +57,7 @@ import android.net.http.SslCertificate;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -100,7 +101,6 @@ import android.webkit.WebView.PictureListener;
 import android.webkit.WebViewCore.DrawData;
 import android.webkit.WebViewCore.EventHub;
 import android.webkit.WebViewCore.TextFieldInitData;
-import android.webkit.WebViewCore.TouchEventData;
 import android.webkit.WebViewCore.TouchHighlightData;
 import android.webkit.WebViewCore.WebKitHitTest;
 import android.widget.AbsoluteLayout;
@@ -981,6 +981,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
     /**
      * Touch mode
+     * TODO: Some of this is now unnecessary as it is handled by
+     * WebInputTouchDispatcher (such as click, long press, and double tap).
      */
     private int mTouchMode = TOUCH_DONE_MODE;
     private static final int TOUCH_INIT_MODE = 1;
@@ -994,34 +996,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private static final int TOUCH_DRAG_LAYER_MODE = 9;
     private static final int TOUCH_DRAG_TEXT_MODE = 10;
 
-    // Whether to forward the touch events to WebCore
-    // Can only be set by WebKit via JNI.
-    private boolean mForwardTouchEvents = false;
-
-    // Whether to prevent default during touch. The initial value depends on
-    // mForwardTouchEvents. If WebCore wants all the touch events, it says yes
-    // for touch down. Otherwise UI will wait for the answer of the first
-    // confirmed move before taking over the control.
-    private static final int PREVENT_DEFAULT_NO = 0;
-    private static final int PREVENT_DEFAULT_MAYBE_YES = 1;
-    private static final int PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN = 2;
-    private static final int PREVENT_DEFAULT_YES = 3;
-    private static final int PREVENT_DEFAULT_IGNORE = 4;
-    private int mPreventDefault = PREVENT_DEFAULT_IGNORE;
-
     // true when the touch movement exceeds the slop
     private boolean mConfirmMove;
     private boolean mTouchInEditText;
-
-    // if true, touch events will be first processed by WebCore, if prevent
-    // default is not set, the UI will continue handle them.
-    private boolean mDeferTouchProcess;
-
-    // to avoid interfering with the current touch events, track them
-    // separately. Currently no snapping or fling in the deferred process mode
-    private int mDeferTouchMode = TOUCH_DONE_MODE;
-    private float mLastDeferTouchX;
-    private float mLastDeferTouchY;
 
     // Whether or not to draw the cursor ring.
     private boolean mDrawCursorRing = true;
@@ -1410,7 +1387,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     private boolean mSentAutoScrollMessage = false;
 
     // used for serializing asynchronously handled touch events.
-    private final TouchEventQueue mTouchEventQueue = new TouchEventQueue();
+    private WebViewInputDispatcher mInputDispatcher;
 
     // Used to track whether picture updating was paused due to a window focus change.
     private boolean mPictureUpdatePausedForFocusChange = false;
@@ -1498,6 +1475,68 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             }
         }
 
+    }
+
+    private void onHandleUiEvent(MotionEvent event, int eventType, int flags) {
+        switch (eventType) {
+        case WebViewInputDispatcher.EVENT_TYPE_LONG_PRESS:
+            HitTestResult hitTest = getHitTestResult();
+            if (hitTest != null
+                    && hitTest.getType() != HitTestResult.UNKNOWN_TYPE) {
+                performLongClick();
+            }
+            break;
+        case WebViewInputDispatcher.EVENT_TYPE_DOUBLE_TAP:
+            mZoomManager.handleDoubleTap(event.getX(), event.getY());
+            break;
+        case WebViewInputDispatcher.EVENT_TYPE_TOUCH:
+            onHandleUiTouchEvent(event);
+            break;
+        }
+    }
+
+    private void onHandleUiTouchEvent(MotionEvent ev) {
+        final ScaleGestureDetector detector =
+                mZoomManager.getMultiTouchGestureDetector();
+
+        float x = ev.getX();
+        float y = ev.getY();
+
+        if (detector != null) {
+            detector.onTouchEvent(ev);
+            if (detector.isInProgress()) {
+                mLastTouchTime = ev.getEventTime();
+                x = detector.getFocusX();
+                y = detector.getFocusY();
+
+                mWebView.cancelLongPress();
+                mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+                if (!mZoomManager.supportsPanDuringZoom()) {
+                    return;
+                }
+                mTouchMode = TOUCH_DRAG_MODE;
+                if (mVelocityTracker == null) {
+                    mVelocityTracker = VelocityTracker.obtain();
+                }
+            }
+        }
+
+        int action = ev.getActionMasked();
+        if (action == MotionEvent.ACTION_POINTER_DOWN) {
+            cancelTouch();
+            action = MotionEvent.ACTION_DOWN;
+        } else if (action == MotionEvent.ACTION_POINTER_UP && ev.getPointerCount() >= 2) {
+            // set mLastTouchX/Y to the remaining points for multi-touch.
+            mLastTouchX = Math.round(x);
+            mLastTouchY = Math.round(y);
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            // negative x or y indicate it is on the edge, skip it.
+            if (x < 0 || y < 0) {
+                return;
+            }
+        }
+
+        handleTouchEventCommon(ev, action, Math.round(x), Math.round(y));
     }
 
     // The webview that is bound to this WebViewClassic instance. Primarily needed for supplying
@@ -4372,8 +4411,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         boolean animateScroll = ((!mScroller.isFinished()
                 || mVelocityTracker != null)
                 && (mTouchMode != TOUCH_DRAG_MODE ||
-                mHeldMotionless != MOTIONLESS_TRUE))
-                || mDeferTouchMode == TOUCH_DRAG_MODE;
+                mHeldMotionless != MOTIONLESS_TRUE));
         if (mTouchMode == TOUCH_DRAG_MODE) {
             if (mHeldMotionless == MOTIONLESS_PENDING) {
                 mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
@@ -5573,7 +5611,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         addAccessibilityApisToJavaScript();
 
-        mTouchEventQueue.reset();
         updateHwAccelerated();
     }
 
@@ -5822,20 +5859,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     private static final float MMA_WEIGHT_N = 5;
 
-    private boolean hitFocusedPlugin(int contentX, int contentY) {
-        // TODO: Figure out what to do with this (b/6111517)
-        return false;
-    }
-
-    private boolean shouldForwardTouchEvent() {
-        if (mFullScreenHolder != null) return true;
-        if (mBlockWebkitViewMessages) return false;
-        return mForwardTouchEvents
-                && !mSelectingText
-                && mPreventDefault != PREVENT_DEFAULT_IGNORE
-                && mPreventDefault != PREVENT_DEFAULT_NO;
-    }
-
     private boolean inFullScreenMode() {
         return mFullScreenHolder != null;
     }
@@ -5905,23 +5928,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             mWebView.requestFocus();
         }
 
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, ev + " at " + ev.getEventTime()
-                + " mTouchMode=" + mTouchMode
-                + " numPointers=" + ev.getPointerCount());
+        if (mInputDispatcher == null) {
+            return false;
         }
 
-        // If WebKit wasn't interested in this multitouch gesture, enqueue
-        // the event for handling directly rather than making the round trip
-        // to WebKit and back.
-        if (ev.getPointerCount() > 1 && mPreventDefault != PREVENT_DEFAULT_NO) {
-            passMultiTouchToWebKit(ev, mTouchEventQueue.nextTouchSequence());
+        if (mInputDispatcher.postPointerEvent(ev, getScrollX(),
+                getScrollY() - getTitleHeight(), mZoomManager.getInvScale())) {
+            return true;
         } else {
-            mTouchEventQueue.enqueueTouchEvent(ev);
+            Log.w(LOGTAG, "mInputDispatcher rejected the event!");
+            return false;
         }
-
-        // Since all events are handled asynchronously, we always want the gesture stream.
-        return true;
     }
 
     private float calculateDragAngle(int dx, int dy) {
@@ -5931,12 +5948,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /*
-     * Common code for single touch and multi-touch.
-     * (x, y) denotes current focus point, which is the touch point for single touch
-     * and the middle point for multi-touch.
-     */
-    private boolean handleTouchEventCommon(MotionEvent ev, int action, int x, int y) {
-        long eventTime = ev.getEventTime();
+    * Common code for single touch and multi-touch.
+    * (x, y) denotes current focus point, which is the touch point for single touch
+    * and the middle point for multi-touch.
+    */
+    private void handleTouchEventCommon(MotionEvent event, int action, int x, int y) {
+        ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
+
+        long eventTime = event.getEventTime();
 
         // Due to the touch screen edge effect, a touch closer to the edge
         // always snapped to the edge. As getViewWidth() can be different from
@@ -5952,7 +5971,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                mPreventDefault = PREVENT_DEFAULT_NO;
                 mConfirmMove = false;
                 mInitialHitTestResult = null;
                 if (!mEditTextScroller.isFinished()) {
@@ -5972,20 +5990,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     if (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare) {
                         mTouchMode = TOUCH_DOUBLE_TAP_MODE;
                     } else {
-                        // commit the short press action for the previous tap
-                        doShortPress();
                         mTouchMode = TOUCH_INIT_MODE;
-                        mDeferTouchProcess = !mBlockWebkitViewMessages
-                                && (!inFullScreenMode() && mForwardTouchEvents)
-                                ? hitFocusedPlugin(contentX, contentY)
-                                : false;
                     }
                 } else { // the normal case
                     mTouchMode = TOUCH_INIT_MODE;
-                    mDeferTouchProcess = !mBlockWebkitViewMessages
-                            && (!inFullScreenMode() && mForwardTouchEvents)
-                            ? hitFocusedPlugin(contentX, contentY)
-                            : false;
+                    // TODO: Have WebViewInputDispatch handle this
                     TouchHighlightData data = new TouchHighlightData();
                     data.mX = contentX;
                     data.mY = contentY;
@@ -5998,19 +6007,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         mTouchHighlightRequested = System.currentTimeMillis();
                         mWebViewCore.sendMessageAtFrontOfQueue(
                                 EventHub.HIT_TEST, data);
-                    }
-                    if (DEBUG_TOUCH_HIGHLIGHT) {
-                        if (getSettings().getNavDump()) {
-                            mTouchHighlightX = x + getScrollX();
-                            mTouchHighlightY = y + getScrollY();
-                            mPrivateHandler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mTouchHighlightX = mTouchHighlightY = 0;
-                                    invalidate();
-                                }
-                            }, TOUCH_HIGHLIGHT_ELAPSE_TIME);
-                        }
                     }
                     if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
                         EventLog.writeEvent(EventLogTags.BROWSER_DOUBLE_TAP_DURATION,
@@ -6058,43 +6054,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                             SWITCH_TO_SHORTPRESS, TAP_TIMEOUT);
                     mPrivateHandler.sendEmptyMessageDelayed(
                             SWITCH_TO_LONGPRESS, LONG_PRESS_TIMEOUT);
-                    if (inFullScreenMode() || mDeferTouchProcess) {
-                        mPreventDefault = PREVENT_DEFAULT_YES;
-                    } else if (!mBlockWebkitViewMessages && mForwardTouchEvents) {
-                        mPreventDefault = PREVENT_DEFAULT_MAYBE_YES;
-                    } else {
-                        mPreventDefault = PREVENT_DEFAULT_NO;
-                    }
-                    // pass the touch events from UI thread to WebCore thread
-                    if (shouldForwardTouchEvent()) {
-                        TouchEventData ted = new TouchEventData();
-                        ted.mAction = action;
-                        ted.mIds = new int[1];
-                        ted.mIds[0] = ev.getPointerId(0);
-                        ted.mPoints = new Point[1];
-                        ted.mPoints[0] = new Point(contentX, contentY);
-                        ted.mPointsInView = new Point[1];
-                        ted.mPointsInView[0] = new Point(x, y);
-                        ted.mMetaState = ev.getMetaState();
-                        ted.mReprocess = mDeferTouchProcess;
-                        ted.mNativeLayer = nativeScrollableLayer(
-                                contentX, contentY, ted.mNativeLayerRect, null);
-                        ted.mSequence = mTouchEventQueue.nextTouchSequence();
-                        mTouchEventQueue.preQueueTouchEventData(ted);
-                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                        if (mDeferTouchProcess) {
-                            // still needs to set them for compute deltaX/Y
-                            mLastTouchX = x;
-                            mLastTouchY = y;
-                            break;
-                        }
-                        if (!inFullScreenMode()) {
-                            mPrivateHandler.removeMessages(PREVENT_DEFAULT_TIMEOUT);
-                            mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                    .obtainMessage(PREVENT_DEFAULT_TIMEOUT,
-                                            action, 0), TAP_TIMEOUT);
-                        }
-                    }
                 }
                 startTouch(x, y, eventTime);
                 if (mIsEditingText) {
@@ -6104,13 +6063,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-                boolean firstMove = false;
                 if (!mConfirmMove && (deltaX * deltaX + deltaY * deltaY)
                         >= mTouchSlopSquare) {
                     mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                     mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
                     mConfirmMove = true;
-                    firstMove = true;
                     if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
                         mTouchMode = TOUCH_INIT_MODE;
                     }
@@ -6149,48 +6106,16 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     break;
                 }
 
-                // pass the touch events from UI thread to WebCore thread
-                if (shouldForwardTouchEvent() && mConfirmMove && (firstMove
-                        || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
-                    TouchEventData ted = new TouchEventData();
-                    ted.mAction = action;
-                    ted.mIds = new int[1];
-                    ted.mIds[0] = ev.getPointerId(0);
-                    ted.mPoints = new Point[1];
-                    ted.mPoints[0] = new Point(contentX, contentY);
-                    ted.mPointsInView = new Point[1];
-                    ted.mPointsInView[0] = new Point(x, y);
-                    ted.mMetaState = ev.getMetaState();
-                    ted.mReprocess = mDeferTouchProcess;
-                    ted.mNativeLayer = mCurrentScrollingLayerId;
-                    ted.mNativeLayerRect.set(mScrollingLayerRect);
-                    ted.mMotionEvent = MotionEvent.obtain(ev);
-                    ted.mSequence = mTouchEventQueue.nextTouchSequence();
-                    mTouchEventQueue.preQueueTouchEventData(ted);
-                    mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                    mLastSentTouchTime = eventTime;
-                    if (mDeferTouchProcess) {
-                        break;
-                    }
-                    if (firstMove && !inFullScreenMode()) {
-                        mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                                .obtainMessage(PREVENT_DEFAULT_TIMEOUT,
-                                        action, 0), TAP_TIMEOUT);
-                    }
-                }
-                if (mTouchMode == TOUCH_DONE_MODE
-                        || mPreventDefault == PREVENT_DEFAULT_YES) {
+                if (mTouchMode == TOUCH_DONE_MODE) {
                     // no dragging during scroll zoom animation, or when prevent
                     // default is yes
                     break;
                 }
                 if (mVelocityTracker == null) {
                     Log.e(LOGTAG, "Got null mVelocityTracker when "
-                            + "mPreventDefault = " + mPreventDefault
-                            + " mDeferTouchProcess = " + mDeferTouchProcess
                             + " mTouchMode = " + mTouchMode);
                 } else {
-                    mVelocityTracker.addMovement(ev);
+                    mVelocityTracker.addMovement(event);
                 }
 
                 if (mTouchMode != TOUCH_DRAG_MODE &&
@@ -6201,19 +6126,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         break;
                     }
 
-                    if (mPreventDefault == PREVENT_DEFAULT_MAYBE_YES
-                            || mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN) {
-                        // track mLastTouchTime as we may need to do fling at
-                        // ACTION_UP
-                        mLastTouchTime = eventTime;
-                        break;
-                    }
-
                     // Only lock dragging to one axis if we don't have a scale in progress.
                     // Scaling implies free-roaming movement. Note this is only ever a question
                     // if mZoomManager.supportsPanDuringZoom() is true.
-                    final ScaleGestureDetector detector =
-                      mZoomManager.getMultiTouchGestureDetector();
                     mAverageAngle = calculateDragAngle(deltaX, deltaY);
                     if (detector == null || !detector.isInProgress()) {
                         // if it starts nearly horizontal or vertical, enforce it
@@ -6239,10 +6154,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 }
 
                 // do pan
-                boolean done = false;
                 boolean keepScrollBarsVisible = false;
                 if (deltaX == 0 && deltaY == 0) {
-                    keepScrollBarsVisible = done = true;
+                    keepScrollBarsVisible = true;
                 } else {
                     mAverageAngle +=
                         (calculateDragAngle(deltaX, deltaY) - mAverageAngle)
@@ -6319,7 +6233,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                             ViewConfiguration.getScrollDefaultDelay());
                     // return false to indicate that we can't pan out of the
                     // view space
-                    return !done;
+                    return;
                 } else {
                     mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
                 }
@@ -6332,24 +6246,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     stopTouch();
                     break;
                 }
-                // pass the touch events from UI thread to WebCore thread
-                if (shouldForwardTouchEvent()) {
-                    TouchEventData ted = new TouchEventData();
-                    ted.mIds = new int[1];
-                    ted.mIds[0] = ev.getPointerId(0);
-                    ted.mAction = action;
-                    ted.mPoints = new Point[1];
-                    ted.mPoints[0] = new Point(contentX, contentY);
-                    ted.mPointsInView = new Point[1];
-                    ted.mPointsInView[0] = new Point(x, y);
-                    ted.mMetaState = ev.getMetaState();
-                    ted.mReprocess = mDeferTouchProcess;
-                    ted.mNativeLayer = mCurrentScrollingLayerId;
-                    ted.mNativeLayerRect.set(mScrollingLayerRect);
-                    ted.mSequence = mTouchEventQueue.nextTouchSequence();
-                    mTouchEventQueue.preQueueTouchEventData(ted);
-                    mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                }
                 mLastTouchUpTime = eventTime;
                 if (mSentAutoScrollMessage) {
                     mAutoScrollX = mAutoScrollY = 0;
@@ -6358,66 +6254,14 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     case TOUCH_DOUBLE_TAP_MODE: // double tap
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                        if (inFullScreenMode() || mDeferTouchProcess) {
-                            TouchEventData ted = new TouchEventData();
-                            ted.mIds = new int[1];
-                            ted.mIds[0] = ev.getPointerId(0);
-                            ted.mAction = WebViewCore.ACTION_DOUBLETAP;
-                            ted.mPoints = new Point[1];
-                            ted.mPoints[0] = new Point(contentX, contentY);
-                            ted.mPointsInView = new Point[1];
-                            ted.mPointsInView[0] = new Point(x, y);
-                            ted.mMetaState = ev.getMetaState();
-                            ted.mReprocess = mDeferTouchProcess;
-                            ted.mNativeLayer = nativeScrollableLayer(
-                                    contentX, contentY,
-                                    ted.mNativeLayerRect, null);
-                            ted.mSequence = mTouchEventQueue.nextTouchSequence();
-                            mTouchEventQueue.preQueueTouchEventData(ted);
-                            mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                        } else if (mPreventDefault != PREVENT_DEFAULT_YES){
-                            mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
-                            mTouchMode = TOUCH_DONE_MODE;
-                        }
+                        mTouchMode = TOUCH_DONE_MODE;
                         break;
                     case TOUCH_INIT_MODE: // tap
                     case TOUCH_SHORTPRESS_START_MODE:
                     case TOUCH_SHORTPRESS_MODE:
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                        if (mConfirmMove) {
-                            Log.w(LOGTAG, "Miss a drag as we are waiting for" +
-                                    " WebCore's response for touch down.");
-                            if (mPreventDefault != PREVENT_DEFAULT_YES
-                                    && (computeMaxScrollX() > 0
-                                            || computeMaxScrollY() > 0)) {
-                                // If the user has performed a very quick touch
-                                // sequence it is possible that we may get here
-                                // before WebCore has had a chance to process the events.
-                                // In this case, any call to preventDefault in the
-                                // JS touch handler will not have been executed yet.
-                                // Hence we will see both the UI (now) and WebCore
-                                // (when context switches) handling the event,
-                                // regardless of whether the web developer actually
-                                // doeses preventDefault in their touch handler. This
-                                // is the nature of our asynchronous touch model.
-
-                                // we will not rewrite drag code here, but we
-                                // will try fling if it applies.
-                                WebViewCore.reducePriority();
-                                // to get better performance, pause updating the
-                                // picture
-                                WebViewCore.pauseUpdatePicture(mWebViewCore);
-                                // fall through to TOUCH_DRAG_MODE
-                            } else {
-                                // WebKit may consume the touch event and modify
-                                // DOM. drawContentPicture() will be called with
-                                // animateSroll as true for better performance.
-                                // Force redraw in high-quality.
-                                invalidate();
-                                break;
-                            }
-                        } else {
+                        if (!mConfirmMove) {
                             if (mSelectingText) {
                                 // tapping on selection or controls does nothing
                                 if (!mSelectionStarted) {
@@ -6432,8 +6276,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                                 mPrivateHandler.sendEmptyMessageDelayed(
                                         RELEASE_SINGLE_TAP, ViewConfiguration
                                                 .getDoubleTapTimeout());
-                            } else {
-                                doShortPress();
                             }
                             break;
                         }
@@ -6446,13 +6288,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                         // up, we don't want to do a fling
                         if (eventTime - mLastTouchTime <= MIN_FLING_TIME) {
                             if (mVelocityTracker == null) {
-                                Log.e(LOGTAG, "Got null mVelocityTracker when "
-                                        + "mPreventDefault = "
-                                        + mPreventDefault
-                                        + " mDeferTouchProcess = "
-                                        + mDeferTouchProcess);
+                                Log.e(LOGTAG, "Got null mVelocityTracker");
                             } else {
-                                mVelocityTracker.addMovement(ev);
+                                mVelocityTracker.addMovement(event);
                             }
                             // set to MOTIONLESS_IGNORE so that it won't keep
                             // removing and sending message in
@@ -6491,126 +6329,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                             computeMaxScrollX(), 0, computeMaxScrollY());
                     invalidate();
                 }
-                cancelWebCoreTouchEvent(contentX, contentY, false);
                 cancelTouch();
                 break;
-            }
-        }
-        return true;
-    }
-
-    private void passMultiTouchToWebKit(MotionEvent ev, long sequence) {
-        TouchEventData ted = new TouchEventData();
-        ted.mAction = ev.getActionMasked();
-        final int count = ev.getPointerCount();
-        ted.mIds = new int[count];
-        ted.mPoints = new Point[count];
-        ted.mPointsInView = new Point[count];
-        for (int c = 0; c < count; c++) {
-            ted.mIds[c] = ev.getPointerId(c);
-            int x = viewToContentX((int) ev.getX(c) + getScrollX());
-            int y = viewToContentY((int) ev.getY(c) + getScrollY());
-            ted.mPoints[c] = new Point(x, y);
-            ted.mPointsInView[c] = new Point((int) ev.getX(c), (int) ev.getY(c));
-        }
-        if (ted.mAction == MotionEvent.ACTION_POINTER_DOWN
-            || ted.mAction == MotionEvent.ACTION_POINTER_UP) {
-            ted.mActionIndex = ev.getActionIndex();
-        }
-        ted.mMetaState = ev.getMetaState();
-        ted.mReprocess = true;
-        ted.mMotionEvent = MotionEvent.obtain(ev);
-        ted.mSequence = sequence;
-        mTouchEventQueue.preQueueTouchEventData(ted);
-        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-        mWebView.cancelLongPress();
-        mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-    }
-
-    void handleMultiTouchInWebView(MotionEvent ev) {
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "multi-touch: " + ev + " at " + ev.getEventTime()
-                + " mTouchMode=" + mTouchMode
-                + " numPointers=" + ev.getPointerCount()
-                + " scrolloffset=(" + getScrollX() + "," + getScrollY() + ")");
-        }
-
-        final ScaleGestureDetector detector =
-            mZoomManager.getMultiTouchGestureDetector();
-
-        // A few apps use WebView but don't instantiate gesture detector.
-        // We don't need to support multi touch for them.
-        if (detector == null) return;
-
-        float x = ev.getX();
-        float y = ev.getY();
-
-        if (mPreventDefault != PREVENT_DEFAULT_YES) {
-            detector.onTouchEvent(ev);
-
-            if (detector.isInProgress()) {
-                if (DebugFlags.WEB_VIEW) {
-                    Log.v(LOGTAG, "detector is in progress");
-                }
-                mLastTouchTime = ev.getEventTime();
-                x = detector.getFocusX();
-                y = detector.getFocusY();
-
-                mWebView.cancelLongPress();
-                mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                if (!mZoomManager.supportsPanDuringZoom()) {
-                    return;
-                }
-                mTouchMode = TOUCH_DRAG_MODE;
-                if (mVelocityTracker == null) {
-                    mVelocityTracker = VelocityTracker.obtain();
-                }
-            }
-        }
-
-        int action = ev.getActionMasked();
-        if (action == MotionEvent.ACTION_POINTER_DOWN) {
-            cancelTouch();
-            action = MotionEvent.ACTION_DOWN;
-        } else if (action == MotionEvent.ACTION_POINTER_UP && ev.getPointerCount() >= 2) {
-            // set mLastTouchX/Y to the remaining points for multi-touch.
-            mLastTouchX = Math.round(x);
-            mLastTouchY = Math.round(y);
-        } else if (action == MotionEvent.ACTION_MOVE) {
-            // negative x or y indicate it is on the edge, skip it.
-            if (x < 0 || y < 0) {
-                return;
-            }
-        }
-
-        handleTouchEventCommon(ev, action, Math.round(x), Math.round(y));
-    }
-
-    private void cancelWebCoreTouchEvent(int x, int y, boolean removeEvents) {
-        if (shouldForwardTouchEvent()) {
-            if (removeEvents) {
-                mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
-            }
-            TouchEventData ted = new TouchEventData();
-            ted.mIds = new int[1];
-            ted.mIds[0] = 0;
-            ted.mPoints = new Point[1];
-            ted.mPoints[0] = new Point(x, y);
-            ted.mPointsInView = new Point[1];
-            int viewX = contentToViewX(x) - getScrollX();
-            int viewY = contentToViewY(y) - getScrollY();
-            ted.mPointsInView[0] = new Point(viewX, viewY);
-            ted.mAction = MotionEvent.ACTION_CANCEL;
-            ted.mNativeLayer = nativeScrollableLayer(
-                    x, y, ted.mNativeLayerRect, null);
-            ted.mSequence = mTouchEventQueue.nextTouchSequence();
-            mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-            mPreventDefault = PREVENT_DEFAULT_IGNORE;
-
-            if (removeEvents) {
-                // Mark this after sending the message above; we should
-                // be willing to ignore the cancel event that we just sent.
-                mTouchEventQueue.ignoreCurrentlyMissingEvents();
             }
         }
     }
@@ -7249,39 +6969,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return mZoomManager.zoomOut();
     }
 
-    private void doShortPress() {
-        if (mNativeClass == 0) {
-            return;
-        }
-        if (mPreventDefault == PREVENT_DEFAULT_YES) {
-            return;
-        }
-        mTouchMode = TOUCH_DONE_MODE;
-        switchOutDrawHistory();
-        if (!mTouchHighlightRegion.isEmpty()) {
-            // set mTouchHighlightRequested to 0 to cause an immediate
-            // drawing of the touch rings
-            mTouchHighlightRequested = 0;
-            mWebView.invalidate(mTouchHighlightRegion.getBounds());
-            mPrivateHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    removeTouchHighlight();
-                }
-            }, ViewConfiguration.getPressedStateDuration());
-        }
-        if (mFocusedNode != null && mFocusedNode.mIntentUrl != null) {
-            mWebView.playSoundEffect(SoundEffectConstants.CLICK);
-            overrideLoading(mFocusedNode.mIntentUrl);
-        } else {
-            WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
-            // use "0" as generation id to inform WebKit to use the same x/y as
-            // it used when processing GET_TOUCH_HIGHLIGHT_RECTS
-            touchUpData.mMoveGeneration = 0;
-            mWebViewCore.sendMessage(EventHub.TOUCH_UP, touchUpData);
-        }
-    }
-
     /*
      * Return true if the rect (e.g. plugin) is fully visible and maximized
      * inside the WebView.
@@ -7569,485 +7256,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return Math.max(0, mEditTextContent.height() - mEditTextContentBounds.height());
     }
 
-    /**
-     * Used only by TouchEventQueue to store pending touch events.
-     */
-    private static class QueuedTouch {
-        long mSequence;
-        MotionEvent mEvent; // Optional
-        TouchEventData mTed; // Optional
-
-        QueuedTouch mNext;
-
-        public QueuedTouch set(TouchEventData ted) {
-            mSequence = ted.mSequence;
-            mTed = ted;
-            mEvent = null;
-            mNext = null;
-            return this;
-        }
-
-        public QueuedTouch set(MotionEvent ev, long sequence) {
-            mEvent = MotionEvent.obtain(ev);
-            mSequence = sequence;
-            mTed = null;
-            mNext = null;
-            return this;
-        }
-
-        public QueuedTouch add(QueuedTouch other) {
-            if (other.mSequence < mSequence) {
-                other.mNext = this;
-                return other;
-            }
-
-            QueuedTouch insertAt = this;
-            while (insertAt.mNext != null && insertAt.mNext.mSequence < other.mSequence) {
-                insertAt = insertAt.mNext;
-            }
-            other.mNext = insertAt.mNext;
-            insertAt.mNext = other;
-            return this;
-        }
-    }
-
-    /**
-     * WebView handles touch events asynchronously since some events must be passed to WebKit
-     * for potentially slower processing. TouchEventQueue serializes touch events regardless
-     * of which path they take to ensure that no events are ever processed out of order
-     * by WebView.
-     */
-    private class TouchEventQueue {
-        private long mNextTouchSequence = Long.MIN_VALUE + 1;
-        private long mLastHandledTouchSequence = Long.MIN_VALUE;
-        private long mIgnoreUntilSequence = Long.MIN_VALUE + 1;
-
-        // Events waiting to be processed.
-        private QueuedTouch mTouchEventQueue;
-
-        // Known events that are waiting on a response before being enqueued.
-        private QueuedTouch mPreQueue;
-
-        // Pool of QueuedTouch objects saved for later use.
-        private QueuedTouch mQueuedTouchRecycleBin;
-        private int mQueuedTouchRecycleCount;
-
-        private long mLastEventTime = Long.MAX_VALUE;
-        private static final int MAX_RECYCLED_QUEUED_TOUCH = 15;
-
-        // milliseconds until we abandon hope of getting all of a previous gesture
-        private static final int QUEUED_GESTURE_TIMEOUT = 1000;
-
-        private QueuedTouch obtainQueuedTouch() {
-            if (mQueuedTouchRecycleBin != null) {
-                QueuedTouch result = mQueuedTouchRecycleBin;
-                mQueuedTouchRecycleBin = result.mNext;
-                mQueuedTouchRecycleCount--;
-                return result;
-            }
-            return new QueuedTouch();
-        }
-
-        /**
-         * Allow events with any currently missing sequence numbers to be skipped in processing.
-         */
-        public void ignoreCurrentlyMissingEvents() {
-            mIgnoreUntilSequence = mNextTouchSequence;
-
-            // Run any events we have available and complete, pre-queued or otherwise.
-            runQueuedAndPreQueuedEvents();
-        }
-
-        private void runQueuedAndPreQueuedEvents() {
-            QueuedTouch qd = mPreQueue;
-            boolean fromPreQueue = true;
-            while (qd != null && qd.mSequence == mLastHandledTouchSequence + 1) {
-                handleQueuedTouch(qd);
-                QueuedTouch recycleMe = qd;
-                if (fromPreQueue) {
-                    mPreQueue = qd.mNext;
-                } else {
-                    mTouchEventQueue = qd.mNext;
-                }
-                recycleQueuedTouch(recycleMe);
-                mLastHandledTouchSequence++;
-
-                long nextPre = mPreQueue != null ? mPreQueue.mSequence : Long.MAX_VALUE;
-                long nextQueued = mTouchEventQueue != null ?
-                        mTouchEventQueue.mSequence : Long.MAX_VALUE;
-                fromPreQueue = nextPre < nextQueued;
-                qd = fromPreQueue ? mPreQueue : mTouchEventQueue;
-            }
-        }
-
-        /**
-         * Add a TouchEventData to the pre-queue.
-         *
-         * An event in the pre-queue is an event that we know about that
-         * has been sent to webkit, but that we haven't received back and
-         * enqueued into the normal touch queue yet. If webkit ever times
-         * out and we need to ignore currently missing events, we'll run
-         * events from the pre-queue to patch the holes.
-         *
-         * @param ted TouchEventData to pre-queue
-         */
-        public void preQueueTouchEventData(TouchEventData ted) {
-            QueuedTouch newTouch = obtainQueuedTouch().set(ted);
-            if (mPreQueue == null) {
-                mPreQueue = newTouch;
-            } else {
-                QueuedTouch insertionPoint = mPreQueue;
-                while (insertionPoint.mNext != null &&
-                        insertionPoint.mNext.mSequence < newTouch.mSequence) {
-                    insertionPoint = insertionPoint.mNext;
-                }
-                newTouch.mNext = insertionPoint.mNext;
-                insertionPoint.mNext = newTouch;
-            }
-        }
-
-        private void recycleQueuedTouch(QueuedTouch qd) {
-            if (mQueuedTouchRecycleCount < MAX_RECYCLED_QUEUED_TOUCH) {
-                qd.mNext = mQueuedTouchRecycleBin;
-                mQueuedTouchRecycleBin = qd;
-                mQueuedTouchRecycleCount++;
-            }
-        }
-
-        /**
-         * Reset the touch event queue. This will dump any pending events
-         * and reset the sequence numbering.
-         */
-        public void reset() {
-            mNextTouchSequence = Long.MIN_VALUE + 1;
-            mLastHandledTouchSequence = Long.MIN_VALUE;
-            mIgnoreUntilSequence = Long.MIN_VALUE + 1;
-            while (mTouchEventQueue != null) {
-                QueuedTouch recycleMe = mTouchEventQueue;
-                mTouchEventQueue = mTouchEventQueue.mNext;
-                recycleQueuedTouch(recycleMe);
-            }
-            while (mPreQueue != null) {
-                QueuedTouch recycleMe = mPreQueue;
-                mPreQueue = mPreQueue.mNext;
-                recycleQueuedTouch(recycleMe);
-            }
-        }
-
-        /**
-         * Return the next valid sequence number for tagging incoming touch events.
-         * @return The next touch event sequence number
-         */
-        public long nextTouchSequence() {
-            return mNextTouchSequence++;
-        }
-
-        /**
-         * Enqueue a touch event in the form of TouchEventData.
-         * The sequence number will be read from the mSequence field of the argument.
-         *
-         * If the touch event's sequence number is the next in line to be processed, it will
-         * be handled before this method returns. Any subsequent events that have already
-         * been queued will also be processed in their proper order.
-         *
-         * @param ted Touch data to be processed in order.
-         * @return true if the event was processed before returning, false if it was just enqueued.
-         */
-        public boolean enqueueTouchEvent(TouchEventData ted) {
-            // Remove from the pre-queue if present
-            QueuedTouch preQueue = mPreQueue;
-            if (preQueue != null) {
-                // On exiting this block, preQueue is set to the pre-queued QueuedTouch object
-                // if it was present in the pre-queue, and removed from the pre-queue itself.
-                if (preQueue.mSequence == ted.mSequence) {
-                    mPreQueue = preQueue.mNext;
-                } else {
-                    QueuedTouch prev = preQueue;
-                    preQueue = null;
-                    while (prev.mNext != null) {
-                        if (prev.mNext.mSequence == ted.mSequence) {
-                            preQueue = prev.mNext;
-                            prev.mNext = preQueue.mNext;
-                            break;
-                        } else {
-                            prev = prev.mNext;
-                        }
-                    }
-                }
-            }
-
-            if (ted.mSequence < mLastHandledTouchSequence) {
-                // Stale event and we already moved on; drop it. (Should not be common.)
-                Log.w(LOGTAG, "Stale touch event " + MotionEvent.actionToString(ted.mAction) +
-                        " received from webcore; ignoring");
-                return false;
-            }
-
-            if (dropStaleGestures(ted.mMotionEvent, ted.mSequence)) {
-                return false;
-            }
-
-            // dropStaleGestures above might have fast-forwarded us to
-            // an event we have already.
-            runNextQueuedEvents();
-
-            if (mLastHandledTouchSequence + 1 == ted.mSequence) {
-                if (preQueue != null) {
-                    recycleQueuedTouch(preQueue);
-                    preQueue = null;
-                }
-                handleQueuedTouchEventData(ted);
-
-                mLastHandledTouchSequence++;
-
-                // Do we have any more? Run them if so.
-                runNextQueuedEvents();
-            } else {
-                // Reuse the pre-queued object if we had it.
-                QueuedTouch qd = preQueue != null ? preQueue : obtainQueuedTouch().set(ted);
-                mTouchEventQueue = mTouchEventQueue == null ? qd : mTouchEventQueue.add(qd);
-            }
-            return true;
-        }
-
-        /**
-         * Enqueue a touch event in the form of a MotionEvent from the framework.
-         *
-         * If the touch event's sequence number is the next in line to be processed, it will
-         * be handled before this method returns. Any subsequent events that have already
-         * been queued will also be processed in their proper order.
-         *
-         * @param ev MotionEvent to be processed in order
-         */
-        public void enqueueTouchEvent(MotionEvent ev) {
-            final long sequence = nextTouchSequence();
-
-            if (dropStaleGestures(ev, sequence)) {
-                return;
-            }
-
-            // dropStaleGestures above might have fast-forwarded us to
-            // an event we have already.
-            runNextQueuedEvents();
-
-            if (mLastHandledTouchSequence + 1 == sequence) {
-                handleQueuedMotionEvent(ev);
-
-                mLastHandledTouchSequence++;
-
-                // Do we have any more? Run them if so.
-                runNextQueuedEvents();
-            } else {
-                QueuedTouch qd = obtainQueuedTouch().set(ev, sequence);
-                mTouchEventQueue = mTouchEventQueue == null ? qd : mTouchEventQueue.add(qd);
-            }
-        }
-
-        private void runNextQueuedEvents() {
-            QueuedTouch qd = mTouchEventQueue;
-            while (qd != null && qd.mSequence == mLastHandledTouchSequence + 1) {
-                handleQueuedTouch(qd);
-                QueuedTouch recycleMe = qd;
-                qd = qd.mNext;
-                recycleQueuedTouch(recycleMe);
-                mLastHandledTouchSequence++;
-            }
-            mTouchEventQueue = qd;
-        }
-
-        private boolean dropStaleGestures(MotionEvent ev, long sequence) {
-            if (ev != null && ev.getAction() == MotionEvent.ACTION_MOVE && !mConfirmMove) {
-                // This is to make sure that we don't attempt to process a tap
-                // or long press when webkit takes too long to get back to us.
-                // The movement will be properly confirmed when we process the
-                // enqueued event later.
-                final int dx = Math.round(ev.getX()) - mLastTouchX;
-                final int dy = Math.round(ev.getY()) - mLastTouchY;
-                if (dx * dx + dy * dy > mTouchSlopSquare) {
-                    mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
-                    mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                }
-            }
-
-            if (mTouchEventQueue == null) {
-                return sequence <= mLastHandledTouchSequence;
-            }
-
-            // If we have a new down event and it's been a while since the last event
-            // we saw, catch up as best we can and keep going.
-            if (ev != null && ev.getAction() == MotionEvent.ACTION_DOWN) {
-                long eventTime = ev.getEventTime();
-                long lastHandledEventTime = mLastEventTime;
-                if (eventTime > lastHandledEventTime + QUEUED_GESTURE_TIMEOUT) {
-                    Log.w(LOGTAG, "Got ACTION_DOWN but still waiting on stale event. " +
-                            "Catching up.");
-                    runQueuedAndPreQueuedEvents();
-
-                    // Drop leftovers that we truly don't have.
-                    QueuedTouch qd = mTouchEventQueue;
-                    while (qd != null && qd.mSequence < sequence) {
-                        QueuedTouch recycleMe = qd;
-                        qd = qd.mNext;
-                        recycleQueuedTouch(recycleMe);
-                    }
-                    mTouchEventQueue = qd;
-                    mLastHandledTouchSequence = sequence - 1;
-                }
-            }
-
-            if (mIgnoreUntilSequence - 1 > mLastHandledTouchSequence) {
-                QueuedTouch qd = mTouchEventQueue;
-                while (qd != null && qd.mSequence < mIgnoreUntilSequence) {
-                    QueuedTouch recycleMe = qd;
-                    qd = qd.mNext;
-                    recycleQueuedTouch(recycleMe);
-                }
-                mTouchEventQueue = qd;
-                mLastHandledTouchSequence = mIgnoreUntilSequence - 1;
-            }
-
-            if (mPreQueue != null) {
-                // Drop stale prequeued events
-                QueuedTouch qd = mPreQueue;
-                while (qd != null && qd.mSequence < mIgnoreUntilSequence) {
-                    QueuedTouch recycleMe = qd;
-                    qd = qd.mNext;
-                    recycleQueuedTouch(recycleMe);
-                }
-                mPreQueue = qd;
-            }
-
-            return sequence <= mLastHandledTouchSequence;
-        }
-
-        private void handleQueuedTouch(QueuedTouch qt) {
-            if (qt.mTed != null) {
-                handleQueuedTouchEventData(qt.mTed);
-            } else {
-                handleQueuedMotionEvent(qt.mEvent);
-                qt.mEvent.recycle();
-            }
-        }
-
-        private void handleQueuedMotionEvent(MotionEvent ev) {
-            mLastEventTime = ev.getEventTime();
-            int action = ev.getActionMasked();
-            if (ev.getPointerCount() > 1) {  // Multi-touch
-                handleMultiTouchInWebView(ev);
-            } else {
-                final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
-                if (detector != null && mPreventDefault != PREVENT_DEFAULT_YES) {
-                    // ScaleGestureDetector needs a consistent event stream to operate properly.
-                    // It won't take any action with fewer than two pointers, but it needs to
-                    // update internal bookkeeping state.
-                    detector.onTouchEvent(ev);
-                }
-
-                handleTouchEventCommon(ev, action, Math.round(ev.getX()), Math.round(ev.getY()));
-            }
-        }
-
-        private void handleQueuedTouchEventData(TouchEventData ted) {
-            if (ted.mMotionEvent != null) {
-                mLastEventTime = ted.mMotionEvent.getEventTime();
-            }
-            if (!ted.mReprocess) {
-                if (ted.mAction == MotionEvent.ACTION_DOWN
-                        && mPreventDefault == PREVENT_DEFAULT_MAYBE_YES) {
-                    // if prevent default is called from WebCore, UI
-                    // will not handle the rest of the touch events any
-                    // more.
-                    mPreventDefault = ted.mNativeResult ? PREVENT_DEFAULT_YES
-                            : PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN;
-                } else if (ted.mAction == MotionEvent.ACTION_MOVE
-                        && mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN) {
-                    // the return for the first ACTION_MOVE will decide
-                    // whether UI will handle touch or not. Currently no
-                    // support for alternating prevent default
-                    mPreventDefault = ted.mNativeResult ? PREVENT_DEFAULT_YES
-                            : PREVENT_DEFAULT_NO;
-                }
-                if (mPreventDefault == PREVENT_DEFAULT_YES) {
-                    mTouchHighlightRegion.setEmpty();
-                }
-            } else {
-                if (ted.mPoints.length > 1) {  // multi-touch
-                    if (!ted.mNativeResult && mPreventDefault != PREVENT_DEFAULT_YES) {
-                        mPreventDefault = PREVENT_DEFAULT_NO;
-                        handleMultiTouchInWebView(ted.mMotionEvent);
-                    } else {
-                        mPreventDefault = PREVENT_DEFAULT_YES;
-                    }
-                    return;
-                }
-
-                // prevent default is not called in WebCore, so the
-                // message needs to be reprocessed in UI
-                if (!ted.mNativeResult) {
-                    // Following is for single touch.
-                    switch (ted.mAction) {
-                        case MotionEvent.ACTION_DOWN:
-                            mLastDeferTouchX = ted.mPointsInView[0].x;
-                            mLastDeferTouchY = ted.mPointsInView[0].y;
-                            mDeferTouchMode = TOUCH_INIT_MODE;
-                            break;
-                        case MotionEvent.ACTION_MOVE: {
-                            // no snapping in defer process
-                            int x = ted.mPointsInView[0].x;
-                            int y = ted.mPointsInView[0].y;
-
-                            if (mDeferTouchMode != TOUCH_DRAG_MODE) {
-                                mDeferTouchMode = TOUCH_DRAG_MODE;
-                                mLastDeferTouchX = x;
-                                mLastDeferTouchY = y;
-                                startScrollingLayer(x, y);
-                                startDrag();
-                            }
-                            int deltaX = pinLocX((int) (getScrollX()
-                                    + mLastDeferTouchX - x))
-                                    - getScrollX();
-                            int deltaY = pinLocY((int) (getScrollY()
-                                    + mLastDeferTouchY - y))
-                                    - getScrollY();
-                            doDrag(deltaX, deltaY);
-                            if (deltaX != 0) mLastDeferTouchX = x;
-                            if (deltaY != 0) mLastDeferTouchY = y;
-                            break;
-                        }
-                        case MotionEvent.ACTION_UP:
-                        case MotionEvent.ACTION_CANCEL:
-                            if (mDeferTouchMode == TOUCH_DRAG_MODE) {
-                                // no fling in defer process
-                                mScroller.springBack(getScrollX(), getScrollY(), 0,
-                                        computeMaxScrollX(), 0,
-                                        computeMaxScrollY());
-                                invalidate();
-                                WebViewCore.resumePriority();
-                                WebViewCore.resumeUpdatePicture(mWebViewCore);
-                            }
-                            mDeferTouchMode = TOUCH_DONE_MODE;
-                            break;
-                        case WebViewCore.ACTION_DOUBLETAP:
-                            // doDoubleTap() needs mLastTouchX/Y as anchor
-                            mLastDeferTouchX = ted.mPointsInView[0].x;
-                            mLastDeferTouchY = ted.mPointsInView[0].y;
-                            mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
-                            mDeferTouchMode = TOUCH_DONE_MODE;
-                            break;
-                        case WebViewCore.ACTION_LONGPRESS:
-                            HitTestResult hitTest = getHitTestResult();
-                            if (hitTest != null && hitTest.getType()
-                                    != HitTestResult.UNKNOWN_TYPE) {
-                                performLongClick();
-                            }
-                            mDeferTouchMode = TOUCH_DONE_MODE;
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
     //-------------------------------------------------------------------------
     // Methods can be called from a separate thread, like WebViewCore
     // If it needs to call the View system, it has to send message.
@@ -8056,7 +7264,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     /**
      * General handler to receive message coming from webkit thread
      */
-    class PrivateHandler extends Handler {
+    class PrivateHandler extends Handler implements WebViewInputDispatcher.UiCallbacks {
         @Override
         public void handleMessage(Message msg) {
             // exclude INVAL_RECT_MSG_ID since it is frequently output
@@ -8097,20 +7305,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     ((Message) msg.obj).sendToTarget();
                     break;
                 }
-                case PREVENT_DEFAULT_TIMEOUT: {
-                    // if timeout happens, cancel it so that it won't block UI
-                    // to continue handling touch events
-                    if ((msg.arg1 == MotionEvent.ACTION_DOWN
-                            && mPreventDefault == PREVENT_DEFAULT_MAYBE_YES)
-                            || (msg.arg1 == MotionEvent.ACTION_MOVE
-                            && mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN)) {
-                        cancelWebCoreTouchEvent(
-                                viewToContentX(mLastTouchX + getScrollX()),
-                                viewToContentY(mLastTouchY + getScrollY()),
-                                true);
-                    }
-                    break;
-                }
                 case SCROLL_SELECT_TEXT: {
                     if (mAutoScrollX == 0 && mAutoScrollY == 0) {
                         mSentAutoScrollMessage = false;
@@ -8124,48 +7318,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     }
                     sendEmptyMessageDelayed(
                             SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
-                    break;
-                }
-                case SWITCH_TO_SHORTPRESS: {
-                    if (mTouchMode == TOUCH_INIT_MODE) {
-                        mTouchMode = TOUCH_SHORTPRESS_MODE;
-                    } else if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
-                        mTouchMode = TOUCH_DONE_MODE;
-                    }
-                    break;
-                }
-                case SWITCH_TO_LONGPRESS: {
-                    removeTouchHighlight();
-                    if (inFullScreenMode() || mDeferTouchProcess) {
-                        TouchEventData ted = new TouchEventData();
-                        ted.mAction = WebViewCore.ACTION_LONGPRESS;
-                        ted.mIds = new int[1];
-                        ted.mIds[0] = 0;
-                        ted.mPoints = new Point[1];
-                        ted.mPoints[0] = new Point(viewToContentX(mLastTouchX + getScrollX()),
-                                                   viewToContentY(mLastTouchY + getScrollY()));
-                        ted.mPointsInView = new Point[1];
-                        ted.mPointsInView[0] = new Point(mLastTouchX, mLastTouchY);
-                        // metaState for long press is tricky. Should it be the
-                        // state when the press started or when the press was
-                        // released? Or some intermediary key state? For
-                        // simplicity for now, we don't set it.
-                        ted.mMetaState = 0;
-                        ted.mReprocess = mDeferTouchProcess;
-                        ted.mNativeLayer = nativeScrollableLayer(
-                                ted.mPoints[0].x, ted.mPoints[0].y,
-                                ted.mNativeLayerRect, null);
-                        ted.mSequence = mTouchEventQueue.nextTouchSequence();
-                        mTouchEventQueue.preQueueTouchEventData(ted);
-                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                    } else if (mPreventDefault != PREVENT_DEFAULT_YES) {
-                        mTouchMode = TOUCH_DONE_MODE;
-                        performLongClick();
-                    }
-                    break;
-                }
-                case RELEASE_SINGLE_TAP: {
-                    doShortPress();
                     break;
                 }
                 case SCROLL_TO_MSG_ID: {
@@ -8225,6 +7377,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     if (mIsPaused) {
                         nativeSetPauseDrawing(mNativeClass, true);
                     }
+                    mInputDispatcher = new WebViewInputDispatcher(this,
+                            mWebViewCore.getInputDispatcherCallbacks());
                     break;
                 case UPDATE_TEXTFIELD_TEXT_MSG_ID:
                     // Make sure that the textfield is currently focused
@@ -8281,20 +7435,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     break;
 
                 case WEBCORE_NEED_TOUCH_EVENTS:
-                    mForwardTouchEvents = (msg.arg1 != 0);
-                    break;
-
-                case PREVENT_TOUCH_ID:
-                    if (inFullScreenMode()) {
-                        break;
-                    }
-                    TouchEventData ted = (TouchEventData) msg.obj;
-
-                    if (mTouchEventQueue.enqueueTouchEvent(ted)) {
-                        // WebCore is responding to us; remove pending timeout.
-                        // It will be re-posted when needed.
-                        removeMessages(PREVENT_DEFAULT_TIMEOUT);
-                    }
+                    mInputDispatcher.setWebKitWantsTouchEvents(msg.arg1 != 0);
                     break;
 
                 case REQUEST_KEYBOARD:
@@ -8558,6 +7699,21 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     super.handleMessage(msg);
                     break;
             }
+        }
+
+        @Override
+        public Looper getUiLooper() {
+            return getLooper();
+        }
+
+        @Override
+        public void dispatchUiEvent(MotionEvent event, int eventType, int flags) {
+            onHandleUiEvent(event, eventType, flags);
+        }
+
+        @Override
+        public Context getContext() {
+            return WebViewClassic.this.getContext();
         }
     }
 
