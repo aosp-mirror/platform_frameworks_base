@@ -213,7 +213,8 @@ public class FaceUnlock implements Handler.Callback {
                 if (DEBUG) Log.d(TAG, "before bind to FaceLock service");
                 mContext.bindService(new Intent(IFaceLockInterface.class.getName()),
                         mConnection,
-                        Context.BIND_AUTO_CREATE);
+                        Context.BIND_AUTO_CREATE,
+                        mLockPatternUtils.getCurrentUser());
                 if (DEBUG) Log.d(TAG, "after bind to FaceLock service");
                 mBoundToService = true;
             } else {

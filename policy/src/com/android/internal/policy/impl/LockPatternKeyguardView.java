@@ -703,6 +703,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
         @Override
         public void onUserChanged(int userId) {
+            mFaceUnlock.stopAndUnbind();
             mLockPatternUtils.setCurrentUser(userId);
             updateScreen(getInitialMode(), true);
         }
@@ -817,7 +818,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             if (force || mUnlockScreen == null || unlockMode != mUnlockScreenMode) {
                 boolean restartFaceLock = mFaceUnlock.stopIfRunning();
                 recreateUnlockScreen(unlockMode);
-                if (restartFaceLock) mFaceUnlock.activateIfAble(mHasOverlay);
+                if (restartFaceLock || force) {
+                    mFaceUnlock.activateIfAble(mHasOverlay);
+                }
             }
         }
 
