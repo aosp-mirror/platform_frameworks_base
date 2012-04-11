@@ -8698,7 +8698,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             invalidateParentCaches();
             onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             if (!awakenScrollBars()) {
-                invalidate(true);
+                postInvalidateOnAnimation();
             }
         }
     }
@@ -8852,7 +8852,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             if (invalidate) {
                 // Invalidate to show the scrollbars
-                invalidate(true);
+                postInvalidateOnAnimation();
             }
 
             if (scrollCache.state == ScrollabilityCache.OFF) {

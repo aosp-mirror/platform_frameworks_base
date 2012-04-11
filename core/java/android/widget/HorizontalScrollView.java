@@ -77,7 +77,7 @@ public class HorizontalScrollView extends FrameLayout {
     /**
      * Position of the last motion event.
      */
-    private float mLastMotionX;
+    private int mLastMotionX;
 
     /**
      * True when the layout has changed but the traversal has not come through yet.
@@ -460,7 +460,7 @@ public class HorizontalScrollView extends FrameLayout {
                 }
 
                 final int pointerIndex = ev.findPointerIndex(activePointerId);
-                final float x = ev.getX(pointerIndex);
+                final int x = (int) ev.getX(pointerIndex);
                 final int xDiff = (int) Math.abs(x - mLastMotionX);
                 if (xDiff > mTouchSlop) {
                     mIsBeingDragged = true;
@@ -473,7 +473,7 @@ public class HorizontalScrollView extends FrameLayout {
             }
 
             case MotionEvent.ACTION_DOWN: {
-                final float x = ev.getX();
+                final int x = (int) ev.getX();
                 if (!inChild((int) x, (int) ev.getY())) {
                     mIsBeingDragged = false;
                     recycleVelocityTracker();
@@ -505,18 +505,18 @@ public class HorizontalScrollView extends FrameLayout {
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
                 if (mScroller.springBack(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
-                    invalidate();
+                    postInvalidateOnAnimation();
                 }
                 break;
             case MotionEvent.ACTION_POINTER_DOWN: {
                 final int index = ev.getActionIndex();
-                mLastMotionX = ev.getX(index);
+                mLastMotionX = (int) ev.getX(index);
                 mActivePointerId = ev.getPointerId(index);
                 break;
             }
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
-                mLastMotionX = ev.getX(ev.findPointerIndex(mActivePointerId));
+                mLastMotionX = (int) ev.getX(ev.findPointerIndex(mActivePointerId));
                 break;
         }
 
@@ -550,7 +550,7 @@ public class HorizontalScrollView extends FrameLayout {
                 }
 
                 // Remember where the motion event started
-                mLastMotionX = ev.getX();
+                mLastMotionX = (int) ev.getX();
                 mActivePointerId = ev.getPointerId(0);
                 break;
             }
@@ -558,7 +558,7 @@ public class HorizontalScrollView extends FrameLayout {
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
                     final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
-                    final float x = ev.getX(activePointerIndex);
+                    final int x = (int) ev.getX(activePointerIndex);
                     final int deltaX = (int) (mLastMotionX - x);
                     mLastMotionX = x;
 
@@ -591,7 +591,7 @@ public class HorizontalScrollView extends FrameLayout {
                         }
                         if (mEdgeGlowLeft != null
                                 && (!mEdgeGlowLeft.isFinished() || !mEdgeGlowRight.isFinished())) {
-                            invalidate();
+                            postInvalidateOnAnimation();
                         }
                     }
                 }
@@ -608,7 +608,7 @@ public class HorizontalScrollView extends FrameLayout {
                         } else {
                             if (mScroller.springBack(mScrollX, mScrollY, 0,
                                     getScrollRange(), 0, 0)) {
-                                invalidate();
+                                postInvalidateOnAnimation();
                             }
                         }
                     }
@@ -626,7 +626,7 @@ public class HorizontalScrollView extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
                     if (mScroller.springBack(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
-                        invalidate();
+                        postInvalidateOnAnimation();
                     }
                     mActivePointerId = INVALID_POINTER;
                     mIsBeingDragged = false;
@@ -654,7 +654,7 @@ public class HorizontalScrollView extends FrameLayout {
             // active pointer and adjust accordingly.
             // TODO: Make this decision more intelligent.
             final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-            mLastMotionX = ev.getX(newPointerIndex);
+            mLastMotionX = (int) ev.getX(newPointerIndex);
             mActivePointerId = ev.getPointerId(newPointerIndex);
             if (mVelocityTracker != null) {
                 mVelocityTracker.clear();
@@ -1084,7 +1084,7 @@ public class HorizontalScrollView extends FrameLayout {
             dx = Math.max(0, Math.min(scrollX + dx, maxX)) - scrollX;
 
             mScroller.startScroll(scrollX, mScrollY, dx, 0);
-            invalidate();
+            postInvalidateOnAnimation();
         } else {
             if (!mScroller.isFinished()) {
                 mScroller.abortAnimation();
@@ -1206,7 +1206,7 @@ public class HorizontalScrollView extends FrameLayout {
             }
 
             if (!awakenScrollBars()) {
-                invalidate();
+                postInvalidateOnAnimation();
             }
         }
     }
@@ -1452,7 +1452,7 @@ public class HorizontalScrollView extends FrameLayout {
                 newFocused.requestFocus(movingRight ? View.FOCUS_RIGHT : View.FOCUS_LEFT);
             }
 
-            invalidate();
+            postInvalidateOnAnimation();
         }
     }
 
@@ -1503,7 +1503,7 @@ public class HorizontalScrollView extends FrameLayout {
                 canvas.translate(-height + mPaddingTop, Math.min(0, scrollX));
                 mEdgeGlowLeft.setSize(height, getWidth());
                 if (mEdgeGlowLeft.draw(canvas)) {
-                    invalidate();
+                    postInvalidateOnAnimation();
                 }
                 canvas.restoreToCount(restoreCount);
             }
@@ -1517,7 +1517,7 @@ public class HorizontalScrollView extends FrameLayout {
                         -(Math.max(getScrollRange(), scrollX) + width));
                 mEdgeGlowRight.setSize(height, width);
                 if (mEdgeGlowRight.draw(canvas)) {
-                    invalidate();
+                    postInvalidateOnAnimation();
                 }
                 canvas.restoreToCount(restoreCount);
             }
