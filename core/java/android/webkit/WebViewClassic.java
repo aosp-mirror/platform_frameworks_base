@@ -9440,13 +9440,11 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 && mWebView.getLayerType() != View.LAYER_TYPE_SOFTWARE) {
             hwAccelerated = true;
         }
+
+        // result is of type LayerAndroid::InvalidateFlags, non zero means invalidate/redraw
         int result = nativeSetHwAccelerated(mNativeClass, hwAccelerated);
-        if (mWebViewCore == null || mBlockWebkitViewMessages) {
-            return;
-        }
-        if (result == 1) {
-            // Sync layers
-            mWebViewCore.layersDraw();
+        if (mWebViewCore != null && !mBlockWebkitViewMessages && result != 0) {
+            mWebViewCore.contentDraw();
         }
     }
 

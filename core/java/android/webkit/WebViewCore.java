@@ -595,11 +595,6 @@ public final class WebViewCore {
             Point wh);
 
     /**
-     * Update the layers' content
-     */
-    private native boolean nativeUpdateLayers(int nativeClass, int baseLayer);
-
-    /**
      * Notify webkit that animations have begun (on the hardware accelerated content)
      */
     private native void nativeNotifyAnimationStarted(int nativeClass);
@@ -1115,9 +1110,6 @@ public final class WebViewCore {
         // Load and save web archives
         static final int SAVE_WEBARCHIVE = 147;
 
-        // Update layers
-        static final int WEBKIT_DRAW_LAYERS = 148;
-
         static final int REMOVE_JS_INTERFACE = 149;
 
         // Network-based messaging
@@ -1264,10 +1256,6 @@ public final class WebViewCore {
                     switch (msg.what) {
                         case WEBKIT_DRAW:
                             webkitDraw();
-                            break;
-
-                        case WEBKIT_DRAW_LAYERS:
-                            webkitDrawLayers();
                             break;
 
                         case DESTROY:
@@ -2154,7 +2142,6 @@ public final class WebViewCore {
 
     // Used to avoid posting more than one draw message.
     private boolean mDrawIsScheduled;
-    private boolean mDrawLayersIsScheduled;
 
     // Used to avoid posting more than one split picture message.
     private boolean mSplitPictureIsScheduled;
@@ -2199,25 +2186,6 @@ public final class WebViewCore {
     }
 
     DrawData mLastDrawData = null;
-
-    // Only update the layers' content, not the base surface
-    // PictureSet.
-    private void webkitDrawLayers() {
-        mDrawLayersIsScheduled = false;
-        if (mDrawIsScheduled || mLastDrawData == null) {
-            removeMessages(EventHub.WEBKIT_DRAW);
-            webkitDraw();
-            return;
-        }
-        // Directly update the layers we last passed to the UI side
-        if (nativeUpdateLayers(mNativeClass, mLastDrawData.mBaseLayer)) {
-            // If anything more complex than position has been touched, let's do a full draw
-            webkitDraw();
-        }
-        mWebViewClassic.mPrivateHandler.removeMessages(WebViewClassic.INVAL_RECT_MSG_ID);
-        mWebViewClassic.mPrivateHandler.sendMessageAtFrontOfQueue(mWebViewClassic.mPrivateHandler
-                .obtainMessage(WebViewClassic.INVAL_RECT_MSG_ID));
-    }
 
     private Boolean m_skipDrawFlag = false;
     private boolean m_drawWasSkipped = false;
@@ -2391,15 +2359,6 @@ public final class WebViewCore {
             if (mDrawIsScheduled) return;
             mDrawIsScheduled = true;
             mEventHub.sendMessage(Message.obtain(null, EventHub.WEBKIT_DRAW));
-        }
-    }
-
-    // called from JNI
-    void layersDraw() {
-        synchronized (this) {
-            if (mDrawLayersIsScheduled) return;
-            mDrawLayersIsScheduled = true;
-            mEventHub.sendMessage(Message.obtain(null, EventHub.WEBKIT_DRAW_LAYERS));
         }
     }
 
