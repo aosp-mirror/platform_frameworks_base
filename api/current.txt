@@ -23534,6 +23534,10 @@ package android.view {
     method public void postInvalidate(int, int, int, int);
     method public void postInvalidateDelayed(long);
     method public void postInvalidateDelayed(long, int, int, int, int);
+    method public void postInvalidateOnAnimation();
+    method public void postInvalidateOnAnimation(int, int, int, int);
+    method public void postOnAnimation(java.lang.Runnable);
+    method public void postOnAnimationDelayed(java.lang.Runnable, long);
     method public void refreshDrawableState();
     method public boolean removeCallbacks(java.lang.Runnable);
     method public void removeOnAttachStateChangeListener(android.view.View.OnAttachStateChangeListener);
