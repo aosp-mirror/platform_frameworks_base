@@ -48,7 +48,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"התראות"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth קשור"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"הגדר שיטות קלט"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"השתמש במקלדת הפיזית"</string>
+    <!-- no translation found for status_bar_use_physical_keyboard (7551903084416057810) -->
+    <skip />
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"לאפשר ליישום <xliff:g id="APPLICATION">%1$s</xliff:g> גישה להתקן ה-USB?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"לאפשר ליישום <xliff:g id="APPLICATION">%1$s</xliff:g> גישה לאביזר ה-USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"האם לפתוח את <xliff:g id="ACTIVITY">%1$s</xliff:g> כאשר מכשיר USB זה מחובר?"</string>

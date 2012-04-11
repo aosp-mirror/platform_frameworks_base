@@ -48,7 +48,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Mga Notification"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Na-tether ang bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"I-set up paraan ng pag-input"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Gamitin ang pisikal na keyboard"</string>
+    <!-- no translation found for status_bar_use_physical_keyboard (7551903084416057810) -->
+    <skip />
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"Payagan ang app na <xliff:g id="APPLICATION">%1$s</xliff:g> na i-access ang USB device?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Payagan ang app na <xliff:g id="APPLICATION">%1$s</xliff:g> na i-access ang USB accessory?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Buksan ang <xliff:g id="ACTIVITY">%1$s</xliff:g> kapag nakakonekta ang USB device na ito?"</string>
