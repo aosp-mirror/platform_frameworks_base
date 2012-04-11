@@ -19,6 +19,8 @@ package android.net.nsd;
 import android.os.Parcelable;
 import android.os.Parcel;
 
+import java.net.InetAddress;
+
 /**
  * Defines a service based on DNS service discovery
  * {@hide}
@@ -27,20 +29,20 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
 
     private String mServiceName;
 
-    private String mRegistrationType;
+    private String mServiceType;
 
     private DnsSdTxtRecord mTxtRecord;
 
-    private String mHostname;
+    private InetAddress mHost;
 
     private int mPort;
 
-    DnsSdServiceInfo() {
+    public DnsSdServiceInfo() {
     }
 
-    DnsSdServiceInfo(String sn, String rt, DnsSdTxtRecord tr) {
+    public DnsSdServiceInfo(String sn, String rt, DnsSdTxtRecord tr) {
         mServiceName = sn;
-        mRegistrationType = rt;
+        mServiceType = rt;
         mTxtRecord = tr;
     }
 
@@ -59,13 +61,13 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
     @Override
     /** @hide */
     public String getServiceType() {
-        return mRegistrationType;
+        return mServiceType;
     }
 
     @Override
     /** @hide */
     public void setServiceType(String s) {
-        mRegistrationType = s;
+        mServiceType = s;
     }
 
     public DnsSdTxtRecord getTxtRecord() {
@@ -76,12 +78,12 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
         mTxtRecord = new DnsSdTxtRecord(t);
     }
 
-    public String getHostName() {
-        return mHostname;
+    public InetAddress getHost() {
+        return mHost;
     }
 
-    public void setHostName(String s) {
-        mHostname = s;
+    public void setHost(InetAddress s) {
+        mHost = s;
     }
 
     public int getPort() {
@@ -96,7 +98,9 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
         StringBuffer sb = new StringBuffer();
 
         sb.append("name: ").append(mServiceName).
-            append("type: ").append(mRegistrationType).
+            append("type: ").append(mServiceType).
+            append("host: ").append(mHost).
+            append("port: ").append(mPort).
             append("txtRecord: ").append(mTxtRecord);
         return sb.toString();
     }
@@ -109,9 +113,14 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
     /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mServiceName);
-        dest.writeString(mRegistrationType);
+        dest.writeString(mServiceType);
         dest.writeParcelable(mTxtRecord, flags);
-        dest.writeString(mHostname);
+        if (mHost != null) {
+            dest.writeByte((byte)1);
+            dest.writeByteArray(mHost.getAddress());
+        } else {
+            dest.writeByte((byte)0);
+        }
         dest.writeInt(mPort);
     }
 
@@ -121,9 +130,15 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
             public DnsSdServiceInfo createFromParcel(Parcel in) {
                 DnsSdServiceInfo info = new DnsSdServiceInfo();
                 info.mServiceName = in.readString();
-                info.mRegistrationType = in.readString();
+                info.mServiceType = in.readString();
                 info.mTxtRecord = in.readParcelable(null);
-                info.mHostname = in.readString();
+
+                if (in.readByte() == 1) {
+                    try {
+                        info.mHost = InetAddress.getByAddress(in.createByteArray());
+                    } catch (java.net.UnknownHostException e) {}
+                }
+
                 info.mPort = in.readInt();
                 return info;
             }

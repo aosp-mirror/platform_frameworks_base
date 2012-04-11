@@ -93,6 +93,15 @@ public class NsdManager {
     /** @hide */
     public static final int RESOLVE_SERVICE_SUCCEEDED               = BASE + 17;
 
+    /** @hide */
+    public static final int STOP_RESOLVE                            = BASE + 18;
+    /** @hide */
+    public static final int STOP_RESOLVE_FAILED                     = BASE + 19;
+    /** @hide */
+    public static final int STOP_RESOLVE_SUCCEEDED                  = BASE + 20;
+
+
+
     /**
      * Create a new Nsd instance. Applications use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
@@ -117,9 +126,22 @@ public class NsdManager {
 
     /**
      * Indicates that the operation failed because the framework is busy and
-     * unable to service the request
+     * unable to service the request.
      */
     public static final int BUSY                = 2;
+
+    /**
+     * Indicates that the operation failed because it is already active.
+     */
+    public static final int ALREADY_ACTIVE      = 3;
+
+    /**
+     * Indicates that the operation failed because maximum limit on
+     * service registrations has reached.
+     */
+    public static final int MAX_REGS_REACHED    = 4;
+
+
 
     /** Interface for callback invocation when framework channel is connected or lost */
     public interface ChannelListener {
@@ -188,6 +210,7 @@ public class NsdManager {
         private DnsSdRegisterListener mDnsSdRegisterListener;
         private DnsSdUpdateRegistrationListener mDnsSdUpdateListener;
         private DnsSdResolveListener mDnsSdResolveListener;
+        private ActionListener mDnsSdStopResolveListener;
 
         AsyncChannel mAsyncChannel;
         ServiceHandler mHandler;
@@ -278,6 +301,16 @@ public class NsdManager {
                                     (DnsSdServiceInfo) message.obj);
                         }
                         break;
+                    case STOP_RESOLVE_FAILED:
+                        if (mDnsSdStopResolveListener!= null) {
+                            mDnsSdStopResolveListener.onFailure(message.arg1);
+                        }
+                        break;
+                    case STOP_RESOLVE_SUCCEEDED:
+                        if (mDnsSdStopResolveListener != null) {
+                            mDnsSdStopResolveListener.onSuccess();
+                        }
+                        break;
                     default:
                         Log.d(TAG, "Ignored " + message);
                         break;
@@ -345,6 +378,14 @@ public class NsdManager {
         c.mDnsSdResolveListener = b;
     }
 
+    /**
+     * Set the listener for stopping service resolution. Can be null.
+     */
+    public void setStopResolveListener(Channel c, ActionListener b) {
+        if (c == null) throw new IllegalArgumentException("Channel needs to be initialized");
+        c.mDnsSdStopResolveListener = b;
+    }
+
     public void registerService(Channel c, DnsSdServiceInfo serviceInfo) {
         if (c == null) throw new IllegalArgumentException("Channel needs to be initialized");
         if (serviceInfo == null) throw new IllegalArgumentException("Null serviceInfo");
@@ -376,6 +417,13 @@ public class NsdManager {
         if (c.mDnsSdResolveListener == null) throw new
                 IllegalStateException("Resolve listener needs to be set first");
         c.mAsyncChannel.sendMessage(RESOLVE_SERVICE, serviceInfo);
+    }
+
+    public void stopServiceResolve(Channel c) {
+        if (c == null) throw new IllegalArgumentException("Channel needs to be initialized");
+        if (c.mDnsSdResolveListener == null) throw new
+                IllegalStateException("Resolve listener needs to be set first");
+        c.mAsyncChannel.sendMessage(STOP_RESOLVE);
     }
 
     /**
