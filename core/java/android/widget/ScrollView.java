@@ -73,7 +73,7 @@ public class ScrollView extends FrameLayout {
     /**
      * Position of the last motion event.
      */
-    private float mLastMotionY;
+    private int mLastMotionY;
 
     /**
      * True when the layout has changed but the traversal has not come through yet.
@@ -472,8 +472,8 @@ public class ScrollView extends FrameLayout {
                 }
 
                 final int pointerIndex = ev.findPointerIndex(activePointerId);
-                final float y = ev.getY(pointerIndex);
-                final int yDiff = (int) Math.abs(y - mLastMotionY);
+                final int y = (int) ev.getY(pointerIndex);
+                final int yDiff = Math.abs(y - mLastMotionY);
                 if (yDiff > mTouchSlop) {
                     mIsBeingDragged = true;
                     mLastMotionY = y;
@@ -487,7 +487,7 @@ public class ScrollView extends FrameLayout {
             }
 
             case MotionEvent.ACTION_DOWN: {
-                final float y = ev.getY();
+                final int y = (int) ev.getY();
                 if (!inChild((int) ev.getX(), (int) y)) {
                     mIsBeingDragged = false;
                     recycleVelocityTracker();
@@ -522,7 +522,7 @@ public class ScrollView extends FrameLayout {
                 mActivePointerId = INVALID_POINTER;
                 recycleVelocityTracker();
                 if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
-                    invalidate();
+                    postInvalidateOnAnimation();
                 }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -564,7 +564,7 @@ public class ScrollView extends FrameLayout {
                 }
 
                 // Remember where the motion event started
-                mLastMotionY = ev.getY();
+                mLastMotionY = (int) ev.getY();
                 mActivePointerId = ev.getPointerId(0);
                 break;
             }
@@ -572,8 +572,8 @@ public class ScrollView extends FrameLayout {
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
                     final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
-                    final float y = ev.getY(activePointerIndex);
-                    final int deltaY = (int) (mLastMotionY - y);
+                    final int y = (int) ev.getY(activePointerIndex);
+                    final int deltaY = mLastMotionY - y;
                     mLastMotionY = y;
 
                     final int oldX = mScrollX;
@@ -605,7 +605,7 @@ public class ScrollView extends FrameLayout {
                         }
                         if (mEdgeGlowTop != null
                                 && (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished())) {
-                            invalidate();
+                            postInvalidateOnAnimation();
                         }
                     }
                 }
@@ -622,7 +622,7 @@ public class ScrollView extends FrameLayout {
                         } else {
                             if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0,
                                     getScrollRange())) {
-                                invalidate();
+                                postInvalidateOnAnimation();
                             }
                         }
                     }
@@ -634,7 +634,7 @@ public class ScrollView extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
                     if (mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange())) {
-                        invalidate();
+                        postInvalidateOnAnimation();
                     }
                     mActivePointerId = INVALID_POINTER;
                     endDrag();
@@ -642,13 +642,13 @@ public class ScrollView extends FrameLayout {
                 break;
             case MotionEvent.ACTION_POINTER_DOWN: {
                 final int index = ev.getActionIndex();
-                mLastMotionY = ev.getY(index);
+                mLastMotionY = (int) ev.getY(index);
                 mActivePointerId = ev.getPointerId(index);
                 break;
             }
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
-                mLastMotionY = ev.getY(ev.findPointerIndex(mActivePointerId));
+                mLastMotionY = (int) ev.getY(ev.findPointerIndex(mActivePointerId));
                 break;
         }
         return true;
@@ -663,7 +663,7 @@ public class ScrollView extends FrameLayout {
             // active pointer and adjust accordingly.
             // TODO: Make this decision more intelligent.
             final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-            mLastMotionY = ev.getY(newPointerIndex);
+            mLastMotionY = (int) ev.getY(newPointerIndex);
             mActivePointerId = ev.getPointerId(newPointerIndex);
             if (mVelocityTracker != null) {
                 mVelocityTracker.clear();
@@ -1047,7 +1047,7 @@ public class ScrollView extends FrameLayout {
             dy = Math.max(0, Math.min(scrollY + dy, maxY)) - scrollY;
 
             mScroller.startScroll(mScrollX, scrollY, 0, dy);
-            invalidate();
+            postInvalidateOnAnimation();
         } else {
             if (!mScroller.isFinished()) {
                 mScroller.abortAnimation();
@@ -1174,7 +1174,7 @@ public class ScrollView extends FrameLayout {
 
             if (!awakenScrollBars()) {
                 // Keep on drawing until the animation has finished.
-                invalidate();
+                postInvalidateOnAnimation();
             }
         } else {
             if (mFlingStrictSpan != null) {
@@ -1430,7 +1430,7 @@ public class ScrollView extends FrameLayout {
                 mFlingStrictSpan = StrictMode.enterCriticalSpan("ScrollView-fling");
             }
 
-            invalidate();
+            postInvalidateOnAnimation();
         }
     }
 
@@ -1495,7 +1495,7 @@ public class ScrollView extends FrameLayout {
                 canvas.translate(mPaddingLeft, Math.min(0, scrollY));
                 mEdgeGlowTop.setSize(width, getHeight());
                 if (mEdgeGlowTop.draw(canvas)) {
-                    invalidate();
+                    postInvalidateOnAnimation();
                 }
                 canvas.restoreToCount(restoreCount);
             }
@@ -1509,7 +1509,7 @@ public class ScrollView extends FrameLayout {
                 canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
-                    invalidate();
+                    postInvalidateOnAnimation();
                 }
                 canvas.restoreToCount(restoreCount);
             }
