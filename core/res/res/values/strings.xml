@@ -2927,6 +2927,10 @@
     <string name="select_input_method">Choose input method</string>
     <!-- Title of a button to open the settings for input methods [CHAR LIMIT=30] -->
     <string name="configure_input_methods">Set up input methods</string>
+    <!-- Summary text of a toggle switch to enable/disable use of the physical keyboard in the input method selector [CHAR LIMIT=25] -->
+    <string name="use_physical_keyboard">Physical keyboard</string>
+    <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=10] -->
+    <string name="hardware">Hardware</string>
 
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>

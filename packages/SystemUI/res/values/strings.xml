@@ -125,7 +125,7 @@
     <string name="status_bar_input_method_settings_configure_input_methods">Set up input methods</string>
 
     <!-- Label of a toggle switch to disable use of the physical keyboard in favor of the IME. [CHAR LIMIT=25] -->
-    <string name="status_bar_use_physical_keyboard">Use physical keyboard</string>
+    <string name="status_bar_use_physical_keyboard">Physical keyboard</string>
 
     <!-- Prompt for the USB device permission dialog [CHAR LIMIT=80] -->
     <string name="usb_device_permission_prompt">Allow the app <xliff:g id="application">%1$s</xliff:g> to access the USB device?</string>

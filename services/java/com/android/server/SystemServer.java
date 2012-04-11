@@ -276,7 +276,7 @@ class ServerThread extends Thread {
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
                 Slog.i(TAG, "Input Method Service");
-                imm = new InputMethodManagerService(context);
+                imm = new InputMethodManagerService(context, wm);
                 ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
             } catch (Throwable e) {
                 reportWtf("starting Input Manager Service", e);
