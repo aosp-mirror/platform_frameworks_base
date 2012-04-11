@@ -131,13 +131,6 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
             "setDataSource failed");
 }
 
-
-static void android_media_MediaMetadataRetriever_setDataSource(
-        JNIEnv *env, jobject thiz, jstring path) {
-    android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
-            env, thiz, path, NULL, NULL);
-}
-
 static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
 {
     ALOGV("setDataSource");
@@ -447,8 +440,6 @@ static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobje
 
 // JNI mapping between Java methods and native methods
 static JNINativeMethod nativeMethods[] = {
-        {"setDataSource",   "(Ljava/lang/String;)V", (void *)android_media_MediaMetadataRetriever_setDataSource},
-
         {
             "_setDataSource",
             "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
