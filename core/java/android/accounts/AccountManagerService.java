@@ -1844,9 +1844,12 @@ public class AccountManagerService
         File systemDir = Environment.getSystemSecureDirectory();
         File databaseFile = new File(systemDir, "users/" + userId + "/" + DATABASE_NAME);
         if (userId == 0) {
-            // Migrate old file, if it exists, to the new location
+            // Migrate old file, if it exists, to the new location.
+            // Make sure the new file doesn't already exist. A dummy file could have been
+            // accidentally created in the old location, causing the new one to become corrupted
+            // as well.
             File oldFile = new File(systemDir, DATABASE_NAME);
-            if (oldFile.exists()) {
+            if (oldFile.exists() && !databaseFile.exists()) {
                 // Check for use directory; create if it doesn't exist, else renameTo will fail
                 File userDir = new File(systemDir, "users/" + userId);
                 if (!userDir.exists()) {
