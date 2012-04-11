@@ -3686,6 +3686,7 @@ package android.app {
     field public static final int PRIORITY_MIN = -2; // 0xfffffffe
     field public static final int STREAM_DEFAULT = -1; // 0xffffffff
     field public int audioStreamType;
+    field public android.widget.RemoteViews bigContentView;
     field public android.app.PendingIntent contentIntent;
     field public android.widget.RemoteViews contentView;
     field public int defaults;
@@ -3706,6 +3707,18 @@ package android.app {
     field public android.widget.RemoteViews tickerView;
     field public long[] vibrate;
     field public long when;
+  }
+
+  public static class Notification.BigPictureStyle {
+    ctor public Notification.BigPictureStyle(android.app.Notification.Builder);
+    method public android.app.Notification.BigPictureStyle bigPicture(android.graphics.Bitmap);
+    method public android.app.Notification build();
+  }
+
+  public static class Notification.BigTextStyle {
+    ctor public Notification.BigTextStyle(android.app.Notification.Builder);
+    method public android.app.Notification.BigTextStyle bigText(java.lang.CharSequence);
+    method public android.app.Notification build();
   }
 
   public static class Notification.Builder {
@@ -3737,6 +3750,7 @@ package android.app {
     method public android.app.Notification.Builder setSubText(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence, android.widget.RemoteViews);
+    method public android.app.Notification.Builder setUsesChronometer(boolean);
     method public android.app.Notification.Builder setUsesIntruderAlert(boolean);
     method public android.app.Notification.Builder setVibrate(long[]);
     method public android.app.Notification.Builder setWhen(long);

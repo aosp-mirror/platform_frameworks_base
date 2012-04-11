@@ -196,10 +196,9 @@ public class Notification implements Parcelable
     public RemoteViews intruderView;
 
     /**
-     * A larger version of {@link #contentView}, giving the Notification an
+     * A large-format version of {@link #contentView}, giving the Notification an
      * opportunity to show more detail. The system UI may choose to show this
      * instead of the normal content view at its discretion.
-     * @hide
      */
     public RemoteViews bigContentView;
 
@@ -987,8 +986,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @hide
-         * 
          * Show the {@link Notification#when} field as a countdown (or count-up) timer instead of a timestamp.  
          *
          * @see Notification#when
@@ -1609,23 +1606,21 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @hide because this API is still very rough
+     * Helper class for generating large-format notifications that include a large image attachment.
      * 
-     * This is a "rebuilder": It consumes a Builder object and modifies its output.
-     * 
-     * This represents the "big picture" style notification, with a large Bitmap atop the usual notification.
-     *
-     * Usage:
+     * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
      * <pre class="prettyprint">
      * Notification noti = new Notification.BigPictureStyle(
      *      new Notification.Builder()
-     *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
+     *         .setContentTitle(&quot;New photo from &quot; + sender.toString())
      *         .setContentText(subject)
-     *         .setSmallIcon(R.drawable.new_mail)
+     *         .setSmallIcon(R.drawable.new_post)
      *         .setLargeIcon(aBitmap))
      *      .bigPicture(aBigBitmap)
      *      .build();
      * </pre>
+     * 
+     * @see Notification#bigContentView
      */
     public static class BigPictureStyle {
         private Builder mBuilder;
@@ -1656,13 +1651,9 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @hide because this API is still very rough
+     * Helper class for generating large-format notifications that include a lot of text.
      * 
-     * This is a "rebuilder": It consumes a Builder object and modifies its output.
-     * 
-     * This represents the "big text" style notification, with more area for the main content text to be read in its entirety.
-     *
-     * Usage:
+     * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
      * <pre class="prettyprint">
      * Notification noti = new Notification.BigPictureStyle(
      *      new Notification.Builder()
@@ -1673,6 +1664,8 @@ public class Notification implements Parcelable
      *      .bigText(aVeryLongString)
      *      .build();
      * </pre>
+     * 
+     * @see Notification#bigContentView
      */
     public static class BigTextStyle {
         private Builder mBuilder;
