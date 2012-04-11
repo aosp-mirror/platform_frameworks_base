@@ -2869,7 +2869,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 if (rect.width() < mFocusedNode.mHitTestSlop) {
                     // ignore bounding boxes that are too small
                     continue;
-                } else if (left != NO_LEFTEDGE && rect.width() > readingWidth) {
+                } else if (rect.width() > readingWidth) {
                     // stop when bounding box doesn't fit the screen width
                     // at reading scale
                     break;
