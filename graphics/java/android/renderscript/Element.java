@@ -85,13 +85,13 @@ public class Element extends BaseObj {
     }
 
     /**
-    * @hide
     * @return element size in bytes
     */
-    public int getSizeBytes() {return mSize;}
+    public int getBytesSize() {return mSize;}
 
     /**
-    * @hide
+    * Returns the number of vector components. 2 for float2, 4 for
+    * float4, etc.
     * @return element vector size
     */
     public int getVectorSize() {return mVectorSize;}
@@ -114,10 +114,6 @@ public class Element extends BaseObj {
      * RS_* objects.  32 bit opaque handles.
      */
     public enum DataType {
-        /**
-        * @hide
-        * new enum
-        */
         NONE (0, 0),
         //FLOAT_16 (1, 2),
         FLOAT_32 (2, 4),
@@ -201,7 +197,10 @@ public class Element extends BaseObj {
     }
 
     /**
-    * @hide
+    * Elements could be simple, such as an int or a float, or a
+    * structure with multiple sub elements, such as a collection of
+    * floats, float2, float4. This function returns zero for simple
+    * elements or the number of sub-elements otherwise.
     * @return number of sub-elements in this element
     */
     public int getSubElementCount() {
@@ -212,7 +211,8 @@ public class Element extends BaseObj {
     }
 
     /**
-    * @hide
+    * For complex elements, this function will return the
+    * sub-element at index
     * @param index index of the sub-element to return
     * @return sub-element in this element at given index
     */
@@ -227,7 +227,8 @@ public class Element extends BaseObj {
     }
 
     /**
-    * @hide
+    * For complex elements, this function will return the
+    * sub-element name at index
     * @param index index of the sub-element
     * @return sub-element in this element at given index
     */
@@ -242,7 +243,9 @@ public class Element extends BaseObj {
     }
 
     /**
-    * @hide
+    * For complex elements, some sub-elements could be statically
+    * sized arrays. This function will return the array size for
+    * sub-element at index
     * @param index index of the sub-element
     * @return array size of sub-element in this element at given index
     */
@@ -257,7 +260,8 @@ public class Element extends BaseObj {
     }
 
     /**
-    * @hide
+    * This function specifies the location of a sub-element within
+    * the element
     * @param index index of the sub-element
     * @return offset in bytes of sub-element in this element at given index
     */
@@ -272,7 +276,6 @@ public class Element extends BaseObj {
     }
 
     /**
-    * @hide
     * @return element data type
     */
     public DataType getDataType() {
@@ -280,7 +283,6 @@ public class Element extends BaseObj {
     }
 
     /**
-    * @hide
     * @return element data kind
     */
     public DataKind getDataKind() {

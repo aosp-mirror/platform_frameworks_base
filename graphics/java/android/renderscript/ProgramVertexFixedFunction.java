@@ -204,7 +204,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
         public Constants(RenderScript rs) {
             Type constInputType = ProgramVertexFixedFunction.Builder.getConstantInputType(rs);
             mAlloc = Allocation.createTyped(rs, constInputType);
-            int bufferSize = constInputType.getElement().getSizeBytes()*
+            int bufferSize = constInputType.getElement().getBytesSize()*
                              constInputType.getCount();
             mIOBuffer = new FieldPacker(bufferSize);
             mModel = new Matrix4f();

@@ -78,14 +78,20 @@ public class Program extends BaseObj {
     }
 
     /**
-     * @hide
+     * Program object can have zero or more constant allocations
+     * associated with it. This method returns the total count.
+     * @return number of constant input types
      */
     public int getConstantCount() {
         return mConstants != null ? mConstants.length : 0;
     }
 
     /**
-     * @hide
+     * Returns the type of the constant buffer used in the program
+     * object. It could be used to query internal elements or create
+     * an allocation to store constant data.
+     * @param slot index of the constant input type to return
+     * @return constant input type
      */
     public Type getConstant(int slot) {
         if (slot < 0 || slot >= mConstants.length) {
@@ -95,14 +101,17 @@ public class Program extends BaseObj {
     }
 
     /**
-     * @hide
+     * Returns the number of textures used in this program object
+     * @return number of texture inputs
      */
     public int getTextureCount() {
         return mTextureCount;
     }
 
     /**
-     * @hide
+     * Returns the type of texture at a given slot. e.g. 2D or Cube
+     * @param slot index of the texture input
+     * @return texture input type
      */
     public TextureType getTextureType(int slot) {
         if ((slot < 0) || (slot >= mTextureCount)) {
@@ -112,7 +121,10 @@ public class Program extends BaseObj {
     }
 
     /**
-     * @hide
+     * Returns the name of the texture input at a given slot. e.g.
+     * tex0, diffuse, spec
+     * @param slot index of the texture input
+     * @return texture input name
      */
     public String getTextureName(int slot) {
         if ((slot < 0) || (slot >= mTextureCount)) {
@@ -318,7 +330,6 @@ public class Program extends BaseObj {
         }
 
         /**
-         * @hide
          * Adds a texture input to the Program
          *
          * @param texType describes that the texture to append it (2D,

@@ -55,14 +55,15 @@ public class ProgramVertex extends Program {
     }
 
     /**
-     * @hide
+     * @return number of input attribute elements
      */
     public int getInputCount() {
         return mInputs != null ? mInputs.length : 0;
     }
 
     /**
-     * @hide
+     * @param slot location of the input to return
+     * @return input attribute element
      */
     public Element getInput(int slot) {
         if (slot < 0 || slot >= mInputs.length) {
