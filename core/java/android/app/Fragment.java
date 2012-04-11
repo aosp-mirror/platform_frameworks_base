@@ -203,7 +203,7 @@ final class FragmentState implements Parcelable {
  * <li> {@link #onCreateView} creates and returns the view hierarchy associated
  * with the fragment.
  * <li> {@link #onActivityCreated} tells the fragment that its activity has
- * completed its own {@link Activity#onCreate Activity.onCreaate}.
+ * completed its own {@link Activity#onCreate Activity.onCreate()}.
  * <li> {@link #onStart} makes the fragment visible to the user (based on its
  * containing activity being started).
  * <li> {@link #onResume} makes the fragment interacting with the user (based on its
