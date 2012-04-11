@@ -48,7 +48,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"通知"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"已通过蓝牙共享网络"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"设置输入法"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"使用物理键盘"</string>
+    <!-- no translation found for status_bar_use_physical_keyboard (7551903084416057810) -->
+    <skip />
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"允许应用“<xliff:g id="APPLICATION">%1$s</xliff:g>”访问该 USB 设备吗？"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"允许应用“<xliff:g id="APPLICATION">%1$s</xliff:g>”访问该 USB 配件吗？"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"要在连接此 USB 设备时打开<xliff:g id="ACTIVITY">%1$s</xliff:g>吗？"</string>

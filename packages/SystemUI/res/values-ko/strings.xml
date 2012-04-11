@@ -48,7 +48,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"알림"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"블루투스 테더링됨"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"입력 방법 설정"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"물리적 키보드 사용"</string>
+    <!-- no translation found for status_bar_use_physical_keyboard (7551903084416057810) -->
+    <skip />
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"<xliff:g id="APPLICATION">%1$s</xliff:g> 앱이 USB 기기에 액세스하도록 허용하시겠습니까?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"<xliff:g id="APPLICATION">%1$s</xliff:g> 앱이 USB 액세서리에 액세스하도록 허용하시겠습니까?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"USB 기기가 연결될 때 <xliff:g id="ACTIVITY">%1$s</xliff:g>(을)를 여시겠습니까?"</string>

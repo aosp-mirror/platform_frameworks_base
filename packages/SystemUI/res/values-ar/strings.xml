@@ -48,7 +48,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"التنبيهات"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"تم إنشاء الاتصال بالإنترنت عن طريق البلوتوث."</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"إعداد أسلوب الإدخال"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"استخدام لوحة المفاتيح الفعلية"</string>
+    <!-- no translation found for status_bar_use_physical_keyboard (7551903084416057810) -->
+    <skip />
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"هل تريد السماح للتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى جهاز USB؟"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"هل تريد السماح للتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى ملحق USB؟"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"هل تريد فتح <xliff:g id="ACTIVITY">%1$s</xliff:g> عند توصيل جهاز USB هذا؟"</string>

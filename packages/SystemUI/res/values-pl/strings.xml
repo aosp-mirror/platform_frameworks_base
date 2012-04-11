@@ -48,7 +48,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Powiadomienia"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth – podłączono"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Konfiguruj metody wprowadzania"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Używaj klawiatury fizycznej"</string>
+    <!-- no translation found for status_bar_use_physical_keyboard (7551903084416057810) -->
+    <skip />
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do urządzenia USB?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do urządzenia USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Czy otworzyć <xliff:g id="ACTIVITY">%1$s</xliff:g> po podłączeniu tego urządzenia USB?"</string>
