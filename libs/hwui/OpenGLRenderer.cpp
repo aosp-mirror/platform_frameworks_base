@@ -249,6 +249,8 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
     info.clipRight = 0;
     info.clipBottom = 0;
     info.isLayer = false;
+    info.width = 0;
+    info.height = 0;
     memset(info.transform, 0, sizeof(float) * 16);
 
     size_t count = functors.size();
@@ -292,6 +294,8 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     info.clipRight = clip.right;
     info.clipBottom = clip.bottom;
     info.isLayer = hasLayer();
+    info.width = getSnapshot()->viewport.getWidth();
+    info.height = getSnapshot()->height;
     getSnapshot()->transform->copyTo(&info.transform[0]);
 
     status_t result = (*functor)(DrawGlInfo::kModeDraw, &info);

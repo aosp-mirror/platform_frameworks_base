@@ -31,6 +31,10 @@ struct DrawGlInfo {
     int clipRight;
     int clipBottom;
 
+    // Input: current width/height of destination surface
+    int width;
+    int height;
+
     // Input: is the render target an FBO
     bool isLayer;
 
