@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
@@ -336,7 +337,9 @@ public class DeviceStorageMonitorService extends Binder {
         //log the event to event log with the amount of free storage(in bytes) left on the device
         EventLog.writeEvent(EventLogTags.LOW_STORAGE, mFreeMem);
         //  Pack up the values and broadcast them to everyone
-        Intent lowMemIntent = new Intent(Intent.ACTION_MANAGE_PACKAGE_STORAGE);
+        Intent lowMemIntent = new Intent(Environment.isExternalStorageEmulated()
+                ? Settings.ACTION_INTERNAL_STORAGE_SETTINGS
+                : Intent.ACTION_MANAGE_PACKAGE_STORAGE);
         lowMemIntent.putExtra("memory", mFreeMem);
         lowMemIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         NotificationManager mNotificationMgr =
