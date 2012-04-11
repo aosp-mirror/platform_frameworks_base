@@ -8021,16 +8021,18 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!mInnerFields.mDimming) {
                 //Slog.i(TAG, "DIM BEHIND: " + w);
                 mInnerFields.mDimming = true;
-                final int width, height;
-                if (attrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
-                    width = mCurDisplayWidth;
-                    height = mCurDisplayHeight;
-                } else {
-                    width = innerDw;
-                    height = innerDh;
+                if (!mAnimator.isDimming()) {
+                    final int width, height;
+                    if (attrs.type == WindowManager.LayoutParams.TYPE_BOOT_PROGRESS) {
+                        width = mCurDisplayWidth;
+                        height = mCurDisplayHeight;
+                    } else {
+                        width = innerDw;
+                        height = innerDh;
+                    }
+                    mAnimator.startDimming(w.mWinAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount,
+                            width, height);
                 }
-                mAnimator.startDimming(w.mWinAnimator, w.mExiting ? 0 : w.mAttrs.dimAmount,
-                        width, height);
             }
         }
     }
@@ -8180,7 +8182,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateWallpaperVisibilityLocked();
                 }
             }
-            if (!mInnerFields.mDimming && mAnimator.mDimParams != null) {
+            if (!mInnerFields.mDimming && mAnimator.isDimming()) {
                 mAnimator.stopDimming();
             }
         } catch (RuntimeException e) {

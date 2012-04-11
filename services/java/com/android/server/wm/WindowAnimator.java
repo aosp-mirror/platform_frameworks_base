@@ -453,7 +453,7 @@ public class WindowAnimator {
                 mDimAnimator.updateParameters(mContext.getResources(), mDimParams, mCurrentTime);
             }
             if (mDimAnimator != null && mDimAnimator.mDimShown) {
-                mAnimating |= mDimAnimator.updateSurface(mDimParams != null, mCurrentTime,
+                mAnimating |= mDimAnimator.updateSurface(isDimming(), mCurrentTime,
                         !mService.okToDisplay());
             }
 
@@ -499,6 +499,10 @@ public class WindowAnimator {
     // TODO(cmautner): Move into Handler
     void stopDimming() {
         mService.mH.sendMessage(mService.mH.obtainMessage(SET_DIM_PARAMETERS, null));
+    }
+
+    boolean isDimming() {
+        return mDimParams != null;
     }
 
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
