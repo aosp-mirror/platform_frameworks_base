@@ -45,7 +45,6 @@ public final class SpellCheckerInfo implements Parcelable {
     private final ResolveInfo mService;
     private final String mId;
     private final int mLabel;
-    private final boolean mSupportsSentenceSpellCheck;
 
     /**
      * The spell checker setting activity's name, used by the system settings to
@@ -98,9 +97,6 @@ public final class SpellCheckerInfo implements Parcelable {
             label = sa.getResourceId(com.android.internal.R.styleable.SpellChecker_label, 0);
             settingsActivityComponent = sa.getString(
                     com.android.internal.R.styleable.SpellChecker_settingsActivity);
-            mSupportsSentenceSpellCheck = sa.getBoolean(
-                    com.android.internal.R.styleable.SpellChecker_supportsSentenceSpellCheck,
-                    false);
             sa.recycle();
 
             final int depth = parser.getDepth();
@@ -142,7 +138,6 @@ public final class SpellCheckerInfo implements Parcelable {
      */
     public SpellCheckerInfo(Parcel source) {
         mLabel = source.readInt();
-        mSupportsSentenceSpellCheck = source.readInt() != 0;
         mId = source.readString();
         mSettingsActivityName = source.readString();
         mService = ResolveInfo.CREATOR.createFromParcel(source);
@@ -155,13 +150,6 @@ public final class SpellCheckerInfo implements Parcelable {
      */
     public String getId() {
         return mId;
-    }
-
-    /**
-     * @hide
-     */
-    public boolean isSentenceSpellCheckSupported() {
-        return mSupportsSentenceSpellCheck;
     }
 
     /**
@@ -188,7 +176,6 @@ public final class SpellCheckerInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mLabel);
-        dest.writeInt(mSupportsSentenceSpellCheck ? 1 : 0);
         dest.writeString(mId);
         dest.writeString(mSettingsActivityName);
         mService.writeToParcel(dest, flags);

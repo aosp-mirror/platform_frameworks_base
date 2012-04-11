@@ -534,7 +534,7 @@ package android {
     field public static final int imeSubtypeLocale = 16843500; // 0x10102ec
     field public static final int imeSubtypeMode = 16843501; // 0x10102ed
     field public static final int immersive = 16843456; // 0x10102c0
-    field public static final int importantForAccessibility = 16843699; // 0x10103b3
+    field public static final int importantForAccessibility = 16843698; // 0x10103b2
     field public static final int inAnimation = 16843127; // 0x1010177
     field public static final int includeFontPadding = 16843103; // 0x101015f
     field public static final int includeInGlobalSearch = 16843374; // 0x101026e
@@ -936,7 +936,6 @@ package android {
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
     field public static final int supportsRtl = 16843688; // 0x10103a8
-    field public static final int supportsSentenceSpellCheck = 16843698; // 0x10103b2
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
@@ -25425,9 +25424,8 @@ package android.view.textservice {
     method public void close();
     method public void getSentenceSuggestions(android.view.textservice.TextInfo[], int);
     method public android.view.textservice.SpellCheckerInfo getSpellChecker();
-    method public void getSuggestions(android.view.textservice.TextInfo, int);
-    method public void getSuggestions(android.view.textservice.TextInfo[], int, boolean);
-    method public boolean isSentenceSpellCheckSupported();
+    method public deprecated void getSuggestions(android.view.textservice.TextInfo, int);
+    method public deprecated void getSuggestions(android.view.textservice.TextInfo[], int, boolean);
     method public boolean isSessionDisconnected();
     field public static final java.lang.String SERVICE_META_DATA = "android.view.textservice.scs";
   }
