@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"एप्‍लिकेशन को किसी भी समय स्‍क्रीन का रोटेशन बदलने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"सूचक गति बदलें"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"एप्लिकेशन को माउस या ट्रैकपैड सूचक गति को किसी भी समय बदलने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"एप्लिकेशन को Linux सिग्नल भेजें"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"एप्‍लिकेशन को यह अनुरोध करने देता है कि दिया गया सिग्नल सभी जारी प्रक्रियाओं को भेजा जाए."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"एप्‍लिकेशन को हमेशा चलने वाला बनाएं"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डीबग करना अक्षम करने के लिए स्‍पर्श करें."</string>
     <string name="select_input_method" msgid="4653387336791222978">"इनपुट पद्धति चुनें"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"इनपुट पद्धतियां सेट करें"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"उम्‍मीदवार"</u></string>

@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permite que a aplicação altere a rotação do ecrã em qualquer momento. Nunca deve ser necessário para aplicações normais."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"alterar a veloc. do ponteiro"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Permite à aplicação mudar em qualquer altura a velocidade do ponteiro do rato ou do trackpad. Nunca deverá ser necessário para aplicações normais."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"enviar sinais Linux para aplicações"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Permite à aplicação pedir que o sinal fornecido seja enviado a todos os processos persistentes."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"fazer com que a aplicação seja sempre executada"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toque para desativar a depuração USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Escolher o método de entrada"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Configurar métodos de introdução"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
@@ -1173,7 +1181,7 @@
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Diminuir"</string>
     <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"Toque sem soltar em <xliff:g id="VALUE">%s</xliff:g>."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Deslizar para cima para aumentar e para baixo para diminuir."</string>
-    <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Aumentar minutos."</string>
+    <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Aumentar minutos"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Diminuir minutos"</string>
     <string name="time_picker_increment_hour_button" msgid="3652056055810223139">"Aumentar horas"</string>
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Diminuir hora"</string>
@@ -1206,13 +1214,13 @@
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Barra deslizante. Toque &amp; não solte."</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Deslize para cima para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="description_direction_down" msgid="5087739728639014595">"Deslize para baixo para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"Deslize à esquerda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"Deslize para a direita <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
+    <string name="description_direction_left" msgid="7207478719805562165">"Deslize para a esquerda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
+    <string name="description_direction_right" msgid="8034433242579600980">"Deslize para a direita para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="description_target_unlock" msgid="2228524900439801453">"Desbloquear"</string>
     <string name="description_target_camera" msgid="969071997552486814">"Câmara"</string>
     <string name="description_target_silent" msgid="893551287746522182">"Silencioso"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Som ativado"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Pesquisa"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"Pesquisar"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Deslizar rapidamente para desbloquear."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Ligue os auscultadores com microfone integrado para ouvir as teclas da palavra-passe."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Ponto."</string>

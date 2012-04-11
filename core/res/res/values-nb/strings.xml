@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Gir appen tillatelse til når som helst å endre rotasjonen av skjermen. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"endre pekerhastighet"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Lar appen når som helst endre markørhastigheten til musen eller styreflaten. Skal aldri være nødvendig for vanlige apper."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"sende Linux-signaler til apper"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Lar appen be om at det leverte signalet sendes til alle vedvarende prosesser."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"angi at appen alltid skal kjøre"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Trykk for å deaktivere USB-feilsøking."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Velg inndatametode"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Konfigurer inndatametoder"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="candidates_style" msgid="4333913089637062257">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>

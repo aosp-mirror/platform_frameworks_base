@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Cho phép ứng dụng thay đổi độ xoay màn hình bất cứ lúc nào. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"thay đổi tốc độ con trỏ"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Cho phép ứng dụng thay đổi tốc độ của chuột hoặc con trỏ trên ô di chuột bất kỳ lúc nào. Không cần thiết cho các ứng dụng thông thường."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"gửi tín hiệu Linux đến ứng dụng"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Cho phép ứng dụng yêu cầu tín hiệu đã cung cấp được gửi đến tất cả các quá trình liên tục."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"đặt ứng dụng luôn chạy"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Chạm để vô hiệu hóa gỡ lỗi USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Chọn phương thức nhập"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Thiết lập phương thức nhập"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"ứng viên"</u></string>

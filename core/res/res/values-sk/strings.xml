@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Umožňuje aplikácii kedykoľvek zmeniť otáčanie obrazovky. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"zmena rýchlosti ukazovateľa"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Umožňuje aplikácii kedykoľvek zmeniť rýchlosť kurzora myši alebo touchpadu. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"odoslať aplikáciám signály systému Linux"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Umožňuje aplikácii vyžiadať odoslanie poskytnutého signálu všetkým trvalým procesom."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"nastaviť, aby bola aplikácia neustále spustená"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotknutím zakážete ladenie USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Zvoliť metódu vstupu"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Nastavenie metód vstupu"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AÁÄBCČDĎDZDŽEÉFGHCHIÍJKLĽMNŇOÓÔPRŔSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidáti"</u></string>

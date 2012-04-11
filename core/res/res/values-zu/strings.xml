@@ -286,6 +286,10 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Ivumela insiza ukuthi iguqule ukujikeleza kweskrini nganoma isiphi isikhathi. Akudingakeli izinsiza ezejwayelekile."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"guqula isivinini sesikhombi"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Ivumela insiza ukuthi iguqule ijubane legundane noma lendawo yokukhomba ngomunwe. Akufanele kudingakele izinsiza ezijwayelekile."</string>
+    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
+    <skip />
+    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Thumela imifanekiso ye-Linu ezinsizeni"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Ivumela insiza ukuthi icele ukuthi isiginali ethunyelwe idluliselwe kuzo zonke izinqubeko ezisalelayo."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"yenza insiza ukuthi ihlale isebenza"</string>
@@ -1059,6 +1063,10 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Thinta ukwenza ukuthi ukudibhaga kwe-USB kungasebenzi."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Khetha indlela yokufaka"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Izilungiselelo zezindlela zokufakwayo"</string>
+    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
+    <skip />
+    <!-- no translation found for hardware (7517821086888990278) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"abahlanganyeli"</u></string>
