@@ -9212,6 +9212,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return Returns true if the Runnable was successfully placed in to the
      *         message queue.  Returns false on failure, usually because the
      *         looper processing the message queue is exiting.
+     *
+     * @see #postDelayed
+     * @see #removeCallbacks
      */
     public boolean post(Runnable action) {
         final AttachInfo attachInfo = mAttachInfo;
@@ -9241,6 +9244,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         result of true does not mean the Runnable will be processed --
      *         if the looper is quit before the delivery time of the message
      *         occurs then the message will be dropped.
+     *
+     * @see #post
+     * @see #removeCallbacks
      */
     public boolean postDelayed(Runnable action, long delayMillis) {
         final AttachInfo attachInfo = mAttachInfo;
@@ -9261,7 +9267,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param action The Runnable that will be executed.
      *
-     * @hide
+     * @see #postOnAnimationDelayed
+     * @see #removeCallbacks
      */
     public void postOnAnimation(Runnable action) {
         final AttachInfo attachInfo = mAttachInfo;
@@ -9286,7 +9293,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param delayMillis The delay (in milliseconds) until the Runnable
      *        will be executed.
      *
-     * @hide
+     * @see #postOnAnimation
+     * @see #removeCallbacks
      */
     public void postOnAnimationDelayed(Runnable action, long delayMillis) {
         final AttachInfo attachInfo = mAttachInfo;
@@ -9311,6 +9319,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *         false otherwise. When the returned value is true, the Runnable
      *         may or may not have been actually removed from the message queue
      *         (for instance, if the Runnable was not in the queue already.)
+     *
+     * @see #post
+     * @see #postDelayed
+     * @see #postOnAnimation
+     * @see #postOnAnimationDelayed
      */
     public boolean removeCallbacks(Runnable action) {
         if (action != null) {
@@ -9335,6 +9348,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * only when this View is attached to a window.</p>
      *
      * @see #invalidate()
+     * @see #postInvalidateDelayed(long)
      */
     public void postInvalidate() {
         postInvalidateDelayed(0);
@@ -9354,6 +9368,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @see #invalidate(int, int, int, int)
      * @see #invalidate(Rect)
+     * @see #postInvalidateDelayed(long, int, int, int, int)
      */
     public void postInvalidate(int left, int top, int right, int bottom) {
         postInvalidateDelayed(0, left, top, right, bottom);
@@ -9368,6 +9383,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @param delayMilliseconds the duration in milliseconds to delay the
      *         invalidation by
+     *
+     * @see #invalidate()
+     * @see #postInvalidate()
      */
     public void postInvalidateDelayed(long delayMilliseconds) {
         // We try only with the AttachInfo because there's no point in invalidating
@@ -9391,6 +9409,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param top The top coordinate of the rectangle to invalidate.
      * @param right The right coordinate of the rectangle to invalidate.
      * @param bottom The bottom coordinate of the rectangle to invalidate.
+     *
+     * @see #invalidate(int, int, int, int)
+     * @see #invalidate(Rect)
+     * @see #postInvalidate(int, int, int, int)
      */
     public void postInvalidateDelayed(long delayMilliseconds, int left, int top,
             int right, int bottom) {
@@ -9417,7 +9439,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * <p>This method can be invoked from outside of the UI thread
      * only when this View is attached to a window.</p>
      *
-     * @hide
+     * @see #invalidate()
      */
     public void postInvalidateOnAnimation() {
         // We try only with the AttachInfo because there's no point in invalidating
@@ -9440,7 +9462,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param right The right coordinate of the rectangle to invalidate.
      * @param bottom The bottom coordinate of the rectangle to invalidate.
      *
-     * @hide
+     * @see #invalidate(int, int, int, int)
+     * @see #invalidate(Rect)
      */
     public void postInvalidateOnAnimation(int left, int top, int right, int bottom) {
         // We try only with the AttachInfo because there's no point in invalidating
