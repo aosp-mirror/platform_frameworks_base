@@ -31,6 +31,9 @@
 
 namespace android {
 
+static const uint64_t VALUE_UNKNOWN = -1;
+static const char* IFACE_STAT_ALL = "/proc/net/xt_qtaguid/iface_stat_all";
+
 enum Tx_Rx {
     TX,
     RX
@@ -40,6 +43,21 @@ enum Tcp_Udp {
     TCP,
     UDP,
     TCP_AND_UDP
+};
+
+// NOTE: keep these in sync with TrafficStats.java
+enum IfaceStatType {
+    RX_BYTES = 0,
+    RX_PACKETS = 1,
+    TX_BYTES = 2,
+    TX_PACKETS = 3
+};
+
+struct IfaceStat {
+    uint64_t rxBytes;
+    uint64_t rxPackets;
+    uint64_t txBytes;
+    uint64_t txPackets;
 };
 
 // Returns an ASCII decimal number read from the specified file, -1 on error.
@@ -63,130 +81,82 @@ static jlong readNumber(char const* filename) {
     return atoll(buf);
 }
 
-static const char* mobile_iface_list[] = {
-    "rmnet0",
-    "rmnet1",
-    "rmnet2",
-    "rmnet3",
-    "cdma_rmnet4",
-    "ppp0",
-    0
-};
+static int parseIfaceStat(const char* iface, struct IfaceStat* stat) {
+    FILE *fp = fopen(IFACE_STAT_ALL, "r");
+    if (!fp) {
+        return errno;
+    }
 
-static jlong getAll(const char** iface_list, const char* what) {
+    char buffer[256];
+    char cur_iface[32];
+    int active;
+    uint64_t rxBytes, rxPackets, txBytes, txPackets, devRxBytes, devRxPackets, devTxBytes,
+            devTxPackets;
 
-    char filename[80];
-    int idx = 0;
-    bool supported = false;
-    jlong total = 0;
-    while (iface_list[idx] != 0) {
-
-        snprintf(filename, sizeof(filename), "/sys/class/net/%s/statistics/%s",
-                 iface_list[idx], what);
-        jlong number = readNumber(filename);
-        if (number >= 0) {
-            supported = true;
-            total += number;
+    while (fgets(buffer, 256, fp) != NULL) {
+        if (sscanf(buffer, "%31s %d %llu %llu %llu %llu %llu %llu %llu %llu", cur_iface, &active,
+                   &rxBytes, &rxPackets, &txBytes, &txPackets, &devRxBytes, &devRxPackets,
+                   &devTxBytes, &devTxPackets) != 10) {
+            continue;
         }
-        idx++;
-    }
-    if (supported) return total;
 
-    return -1;
-}
+        if (!iface || !strcmp(iface, cur_iface)) {
+            stat->rxBytes += rxBytes;
+            stat->rxPackets += rxPackets;
+            stat->txBytes += txBytes;
+            stat->txPackets += txPackets;
 
-// Returns the sum of numbers from the specified path under /sys/class/net/*,
-// -1 if no such file exists.
-static jlong readTotal(char const* suffix) {
-    char filename[PATH_MAX] = "/sys/class/net/";
-    DIR *dir = opendir(filename);
-    if (dir == NULL) {
-        ALOGE("Can't list %s: %s", filename, strerror(errno));
-        return -1;
-    }
-
-    int len = strlen(filename);
-    jlong total = -1;
-    while (struct dirent *entry = readdir(dir)) {
-        // Skip ., .., and localhost interfaces.
-        if (entry->d_name[0] != '.' && strncmp(entry->d_name, "lo", 2) != 0) {
-            strlcpy(filename + len, entry->d_name, sizeof(filename) - len);
-            strlcat(filename, suffix, sizeof(filename));
-            jlong num = readNumber(filename);
-            if (num >= 0) total = total < 0 ? num : total + num;
+            if (active) {
+                stat->rxBytes += devRxBytes;
+                stat->rxPackets += devRxPackets;
+                stat->txBytes += devTxBytes;
+                stat->txPackets += devTxPackets;
+            }
         }
     }
 
-    closedir(dir);
-    return total;
+    fclose(fp);
+    return 0;
 }
 
-// Mobile stats get accessed a lot more often than total stats.
-// Note the individual files can come and go at runtime, so we check
-// each file every time (rather than caching which ones exist).
+static uint64_t getIfaceStatType(const char* iface, IfaceStatType type) {
+    struct IfaceStat stat;
+    memset(&stat, 0, sizeof(IfaceStat));
 
-static jlong getMobileTxPackets(JNIEnv* env, jobject clazz) {
-    return getAll(mobile_iface_list, "tx_packets");
-}
-
-static jlong getMobileRxPackets(JNIEnv* env, jobject clazz) {
-    return getAll(mobile_iface_list, "rx_packets");
-}
-
-static jlong getMobileTxBytes(JNIEnv* env, jobject clazz) {
-    return getAll(mobile_iface_list, "tx_bytes");
-}
-
-static jlong getMobileRxBytes(JNIEnv* env, jobject clazz) {
-    return getAll(mobile_iface_list, "rx_bytes");
-}
-
-static jlong getData(JNIEnv* env, const char* what, jstring javaInterface) {
-    ScopedUtfChars interface(env, javaInterface);
-    if (interface.c_str() == NULL) {
-        return -1;
+    if (parseIfaceStat(iface, &stat)) {
+        return VALUE_UNKNOWN;
     }
 
-    char filename[80];
-    snprintf(filename, sizeof(filename), "/sys/class/net/%s/statistics/%s", interface.c_str(), what);
-    return readNumber(filename);
+    switch (type) {
+        case RX_BYTES:
+            return stat.rxBytes;
+        case RX_PACKETS:
+            return stat.rxPackets;
+        case TX_BYTES:
+            return stat.txBytes;
+        case TX_PACKETS:
+            return stat.txPackets;
+        default:
+            return VALUE_UNKNOWN;
+    }
 }
 
-static jlong getTxPackets(JNIEnv* env, jobject clazz, jstring interface) {
-    return getData(env, "tx_packets", interface);
+static jlong getTotalStat(JNIEnv* env, jclass clazz, jint type) {
+    return getIfaceStatType(NULL, (IfaceStatType) type);
 }
 
-static jlong getRxPackets(JNIEnv* env, jobject clazz, jstring interface) {
-    return getData(env, "rx_packets", interface);
+static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type) {
+    struct IfaceStat stat;
+    const char* ifaceChars = env->GetStringUTFChars(iface, NULL);
+    if (ifaceChars) {
+        uint64_t stat = getIfaceStatType(ifaceChars, (IfaceStatType) type);
+        env->ReleaseStringUTFChars(iface, ifaceChars);
+        return stat;
+    } else {
+        return VALUE_UNKNOWN;
+    }
 }
 
-static jlong getTxBytes(JNIEnv* env, jobject clazz, jstring interface) {
-    return getData(env, "tx_bytes", interface);
-}
-
-static jlong getRxBytes(JNIEnv* env, jobject clazz, jstring interface) {
-    return getData(env, "rx_bytes", interface);
-}
-
-
-// Total stats are read less often, so we're willing to put up
-// with listing the directory and concatenating filenames.
-
-static jlong getTotalTxPackets(JNIEnv* env, jobject clazz) {
-    return readTotal("/statistics/tx_packets");
-}
-
-static jlong getTotalRxPackets(JNIEnv* env, jobject clazz) {
-    return readTotal("/statistics/rx_packets");
-}
-
-static jlong getTotalTxBytes(JNIEnv* env, jobject clazz) {
-    return readTotal("/statistics/tx_bytes");
-}
-
-static jlong getTotalRxBytes(JNIEnv* env, jobject clazz) {
-    return readTotal("/statistics/rx_bytes");
-}
 
 // Per-UID stats require reading from a constructed filename.
 
@@ -323,18 +293,8 @@ static jlong getUidUdpRxPackets(JNIEnv* env, jobject clazz, jint uid) {
 }
 
 static JNINativeMethod gMethods[] = {
-    {"getMobileTxPackets", "()J", (void*) getMobileTxPackets},
-    {"getMobileRxPackets", "()J", (void*) getMobileRxPackets},
-    {"getMobileTxBytes", "()J", (void*) getMobileTxBytes},
-    {"getMobileRxBytes", "()J", (void*) getMobileRxBytes},
-    {"getTxPackets", "(Ljava/lang/String;)J", (void*) getTxPackets},
-    {"getRxPackets", "(Ljava/lang/String;)J", (void*) getRxPackets},
-    {"getTxBytes", "(Ljava/lang/String;)J", (void*) getTxBytes},
-    {"getRxBytes", "(Ljava/lang/String;)J", (void*) getRxBytes},
-    {"getTotalTxPackets", "()J", (void*) getTotalTxPackets},
-    {"getTotalRxPackets", "()J", (void*) getTotalRxPackets},
-    {"getTotalTxBytes", "()J", (void*) getTotalTxBytes},
-    {"getTotalRxBytes", "()J", (void*) getTotalRxBytes},
+    {"nativeGetTotalStat", "(I)J", (void*) getTotalStat},
+    {"nativeGetIfaceStat", "(Ljava/lang/String;I)J", (void*) getIfaceStat},
 
     /* Per-UID Stats */
     {"getUidTxBytes", "(I)J", (void*) getUidTxBytes},

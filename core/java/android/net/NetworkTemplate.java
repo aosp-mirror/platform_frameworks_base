@@ -48,6 +48,8 @@ public class NetworkTemplate implements Parcelable {
     public static final int MATCH_MOBILE_4G = 3;
     public static final int MATCH_WIFI = 4;
     public static final int MATCH_ETHERNET = 5;
+    public static final int MATCH_MOBILE_WILDCARD = 6;
+    public static final int MATCH_WIFI_WILDCARD = 7;
 
     /**
      * Set of {@link NetworkInfo#getType()} that reflect data usage.
@@ -86,11 +88,19 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
+     * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks,
+     * regardless of IMSI.
+     */
+    public static NetworkTemplate buildTemplateMobileWildcard() {
+        return new NetworkTemplate(MATCH_MOBILE_WILDCARD, null, null);
+    }
+
+    /**
      * Template to match all {@link ConnectivityManager#TYPE_WIFI} networks,
      * regardless of SSID.
      */
     public static NetworkTemplate buildTemplateWifiWildcard() {
-        return new NetworkTemplate(MATCH_WIFI, null, null);
+        return new NetworkTemplate(MATCH_WIFI_WILDCARD, null, null);
     }
 
     @Deprecated
@@ -198,6 +208,10 @@ public class NetworkTemplate implements Parcelable {
                 return matchesWifi(ident);
             case MATCH_ETHERNET:
                 return matchesEthernet(ident);
+            case MATCH_MOBILE_WILDCARD:
+                return matchesMobileWildcard(ident);
+            case MATCH_WIFI_WILDCARD:
+                return matchesWifiWildcard(ident);
             default:
                 throw new IllegalArgumentException("unknown network template");
         }
@@ -257,13 +271,7 @@ public class NetworkTemplate implements Parcelable {
     private boolean matchesWifi(NetworkIdentity ident) {
         switch (ident.mType) {
             case TYPE_WIFI:
-                if (mNetworkId == null) {
-                    return true;
-                } else {
-                    return Objects.equal(mNetworkId, ident.mNetworkId);
-                }
-            case TYPE_WIFI_P2P:
-                return mNetworkId == null;
+                return Objects.equal(mNetworkId, ident.mNetworkId);
             default:
                 return false;
         }
@@ -279,6 +287,24 @@ public class NetworkTemplate implements Parcelable {
         return false;
     }
 
+    private boolean matchesMobileWildcard(NetworkIdentity ident) {
+        if (ident.mType == TYPE_WIMAX) {
+            return true;
+        } else {
+            return contains(DATA_USAGE_NETWORK_TYPES, ident.mType);
+        }
+    }
+
+    private boolean matchesWifiWildcard(NetworkIdentity ident) {
+        switch (ident.mType) {
+            case TYPE_WIFI:
+            case TYPE_WIFI_P2P:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private static String getMatchRuleName(int matchRule) {
         switch (matchRule) {
             case MATCH_MOBILE_3G_LOWER:
@@ -291,6 +317,10 @@ public class NetworkTemplate implements Parcelable {
                 return "WIFI";
             case MATCH_ETHERNET:
                 return "ETHERNET";
+            case MATCH_MOBILE_WILDCARD:
+                return "MOBILE_WILDCARD";
+            case MATCH_WIFI_WILDCARD:
+                return "WIFI_WILDCARD";
             default:
                 return "UNKNOWN";
         }

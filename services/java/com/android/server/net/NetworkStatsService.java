@@ -26,6 +26,7 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
+import static android.net.ConnectivityManager.isNetworkTypeMobile;
 import static android.net.NetworkIdentity.COMBINE_SUBTYPE_ENABLED;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
@@ -33,7 +34,7 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
-import static android.net.NetworkTemplate.buildTemplateMobileAll;
+import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.provider.Settings.Secure.NETSTATS_DEV_BUCKET_DURATION;
@@ -54,6 +55,8 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
+import static com.android.internal.util.ArrayUtils.appendElement;
+import static com.android.internal.util.ArrayUtils.contains;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
@@ -194,6 +197,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private HashMap<String, NetworkIdentitySet> mActiveIfaces = Maps.newHashMap();
     /** Current default active iface. */
     private String mActiveIface;
+    /** Set of any ifaces associated with mobile networks since boot. */
+    private String[] mMobileIfaces = new String[0];
 
     private final DropBoxNonMonotonicObserver mNonMonotonicObserver =
             new DropBoxNonMonotonicObserver();
@@ -517,6 +522,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
+    public String[] getMobileIfaces() {
+        return mMobileIfaces;
+    }
+
+    @Override
     public void incrementOperationCount(int uid, int tag, int operationCount) {
         if (Binder.getCallingUid() != uid) {
             mContext.enforceCallingOrSelfPermission(MODIFY_NETWORK_ACCOUNTING, TAG);
@@ -735,6 +745,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
 
                 ident.add(NetworkIdentity.buildNetworkIdentity(mContext, state));
+
+                // remember any ifaces associated with mobile networks
+                if (isNetworkTypeMobile(state.networkInfo.getType())) {
+                    if (!contains(mMobileIfaces, iface)) {
+                        mMobileIfaces = appendElement(String.class, mMobileIfaces, iface);
+                    }
+                }
             }
         }
     }
@@ -861,7 +878,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         NetworkStats.Entry uidTotal;
 
         // collect mobile sample
-        template = buildTemplateMobileAll(getActiveSubscriberId(mContext));
+        template = buildTemplateMobileWildcard();
         devTotal = mDevRecorder.getTotalSinceBootLocked(template);
         xtTotal = new NetworkStats.Entry();
         uidTotal = mUidRecorder.getTotalSinceBootLocked(template);
@@ -1021,12 +1038,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         }
     };
-
-    private static String getActiveSubscriberId(Context context) {
-        final TelephonyManager telephony = (TelephonyManager) context.getSystemService(
-                Context.TELEPHONY_SERVICE);
-        return telephony.getSubscriberId();
-    }
 
     private boolean isBandwidthControlEnabled() {
         try {
