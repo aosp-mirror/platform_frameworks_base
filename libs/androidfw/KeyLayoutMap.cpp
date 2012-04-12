@@ -80,32 +80,49 @@ status_t KeyLayoutMap::load(const String8& filename, sp<KeyLayoutMap>* outMap) {
     return status;
 }
 
-status_t KeyLayoutMap::mapKey(int32_t scanCode, int32_t* keyCode, uint32_t* flags) const {
-    ssize_t index = mKeys.indexOfKey(scanCode);
-    if (index < 0) {
+status_t KeyLayoutMap::mapKey(int32_t scanCode, int32_t usageCode,
+        int32_t* outKeyCode, uint32_t* outFlags) const {
+    const Key* key = getKey(scanCode, usageCode);
+    if (!key) {
 #if DEBUG_MAPPING
-        ALOGD("mapKey: scanCode=%d ~ Failed.", scanCode);
+        ALOGD("mapKey: scanCode=%d, usageCode=0x%08x ~ Failed.", scanCode, usageCode);
 #endif
-        *keyCode = AKEYCODE_UNKNOWN;
-        *flags = 0;
+        *outKeyCode = AKEYCODE_UNKNOWN;
+        *outFlags = 0;
         return NAME_NOT_FOUND;
     }
 
-    const Key& k = mKeys.valueAt(index);
-    *keyCode = k.keyCode;
-    *flags = k.flags;
+    *outKeyCode = key->keyCode;
+    *outFlags = key->flags;
 
 #if DEBUG_MAPPING
-    ALOGD("mapKey: scanCode=%d ~ Result keyCode=%d, flags=0x%08x.", scanCode, *keyCode, *flags);
+    ALOGD("mapKey: scanCode=%d, usageCode=0x%08x ~ Result keyCode=%d, outFlags=0x%08x.",
+            scanCode, usageCode, *outKeyCode, *outFlags);
 #endif
     return NO_ERROR;
 }
 
+const KeyLayoutMap::Key* KeyLayoutMap::getKey(int32_t scanCode, int32_t usageCode) const {
+    if (scanCode) {
+        ssize_t index = mKeysByScanCode.indexOfKey(scanCode);
+        if (index >= 0) {
+            return &mKeysByScanCode.valueAt(index);
+        }
+    }
+    if (usageCode) {
+        ssize_t index = mKeysByUsageCode.indexOfKey(usageCode);
+        if (index >= 0) {
+            return &mKeysByUsageCode.valueAt(index);
+        }
+    }
+    return NULL;
+}
+
 status_t KeyLayoutMap::findScanCodesForKey(int32_t keyCode, Vector<int32_t>* outScanCodes) const {
-    const size_t N = mKeys.size();
+    const size_t N = mKeysByScanCode.size();
     for (size_t i=0; i<N; i++) {
-        if (mKeys.valueAt(i).keyCode == keyCode) {
-            outScanCodes->add(mKeys.keyAt(i));
+        if (mKeysByScanCode.valueAt(i).keyCode == keyCode) {
+            outScanCodes->add(mKeysByScanCode.keyAt(i));
         }
     }
     return NO_ERROR;
@@ -190,7 +207,7 @@ status_t KeyLayoutMap::Parser::parseKey() {
                 scanCodeToken.string());
         return BAD_VALUE;
     }
-    if (mMap->mKeys.indexOfKey(scanCode) >= 0) {
+    if (mMap->mKeysByScanCode.indexOfKey(scanCode) >= 0) {
         ALOGE("%s: Duplicate entry for key scan code '%s'.", mTokenizer->getLocation().string(),
                 scanCodeToken.string());
         return BAD_VALUE;
@@ -231,7 +248,7 @@ status_t KeyLayoutMap::Parser::parseKey() {
     Key key;
     key.keyCode = keyCode;
     key.flags = flags;
-    mMap->mKeys.add(scanCode, key);
+    mMap->mKeysByScanCode.add(scanCode, key);
     return NO_ERROR;
 }
 
