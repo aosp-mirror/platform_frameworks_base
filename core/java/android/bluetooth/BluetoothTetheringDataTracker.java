@@ -16,6 +16,9 @@
 
 package android.bluetooth;
 
+import android.os.IBinder;
+import android.os.ServiceManager;
+import android.os.INetworkManagementService;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfoInternal;
@@ -28,6 +31,11 @@ import android.net.NetworkUtils;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import java.net.InterfaceAddress;
+import android.net.LinkAddress;
+import android.net.RouteInfo;
+import java.net.Inet4Address;
+import android.os.SystemProperties;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,7 +62,6 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
     private NetworkInfo mNetworkInfo;
 
     private BluetoothPan mBluetoothPan;
-    private BluetoothDevice mDevice;
     private static String mIface;
 
     /* For sending events to connectivity service handler */
@@ -92,8 +99,10 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
      * Begin monitoring connectivity
      */
     public void startMonitoring(Context context, Handler target) {
+        Log.d(TAG, "startMonitoring: target: " + target);
         mContext = context;
         mCsHandler = target;
+        Log.d(TAG, "startMonitoring: mCsHandler: " + mCsHandler);
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null) {
             adapter.getProfileProxy(mContext, mProfileServiceListener, BluetoothProfile.PAN);
@@ -259,38 +268,87 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
         return "net.tcp.buffersize.wifi";
     }
 
+    private static short countPrefixLength(byte [] mask) {
+        short count = 0;
+        for (byte b : mask) {
+            for (int i = 0; i < 8; ++i) {
+                if ((b & (1 << i)) != 0) {
+                    ++count;
+                }
+            }
+        }
+        return count;
+    }
 
-    public synchronized void startReverseTether(String iface, BluetoothDevice device) {
+
+    private boolean readLinkProperty(String iface) {
+        String DhcpPrefix = "dhcp." + iface + ".";
+        String ip = SystemProperties.get(DhcpPrefix + "ipaddress");
+        String dns1 = SystemProperties.get(DhcpPrefix + "dns1");
+        String dns2 = SystemProperties.get(DhcpPrefix + "dns2");
+        String gateway = SystemProperties.get(DhcpPrefix + "gateway");
+        String mask = SystemProperties.get(DhcpPrefix + "mask");
+        if(ip.isEmpty() || gateway.isEmpty()) {
+            Log.e(TAG, "readLinkProperty, ip: " +  ip + ", gateway: " + gateway + ", can not be empty");
+            return false;
+        }
+        int PrefixLen = countPrefixLength(NetworkUtils.numericToInetAddress(mask).getAddress());
+        mLinkProperties.addLinkAddress(new LinkAddress(NetworkUtils.numericToInetAddress(ip), PrefixLen));
+        RouteInfo ri = new RouteInfo(NetworkUtils.numericToInetAddress(gateway));
+        mLinkProperties.addRoute(ri);
+        if(!dns1.isEmpty())
+            mLinkProperties.addDns(NetworkUtils.numericToInetAddress(dns1));
+        if(!dns2.isEmpty())
+            mLinkProperties.addDns(NetworkUtils.numericToInetAddress(dns2));
+        mLinkProperties.setInterfaceName(iface);
+        return true;
+    }
+    public synchronized void startReverseTether(String iface) {
         mIface = iface;
-        mDevice = device;
+        Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
         Thread dhcpThread = new Thread(new Runnable() {
             public void run() {
                 //TODO(): Add callbacks for failure and success case.
                 //Currently this thread runs independently.
-                DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
-                if (!NetworkUtils.runDhcp(mIface, dhcpInfoInternal)) {
-                    Log.e(TAG, "DHCP request error:" + NetworkUtils.getDhcpError());
-                    return;
+                Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
+                String DhcpResultName = "dhcp." + mIface + ".result";;
+                String result = "";
+                Log.d(TAG, "waiting for change of sys prop dhcp result: " + DhcpResultName);
+                for(int i = 0; i < 30*5; i++) {
+                    try { Thread.sleep(200); } catch (InterruptedException ie) { }
+                    result = SystemProperties.get(DhcpResultName);
+                    Log.d(TAG, "read " + DhcpResultName + ": " + result);
+                    if(result.equals("failed")) {
+                        Log.e(TAG, "startReverseTether, failed to start dhcp service");
+                        return;
+                    }
+                    if(result.equals("ok")) {
+                        Log.d(TAG, "startReverseTether, dhcp resut: " + result);
+                        if(readLinkProperty(mIface)) {
+
+                            mNetworkInfo.setIsAvailable(true);
+                            mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
+
+                            Log.d(TAG, "startReverseTether mCsHandler: " + mCsHandler);
+                            if(mCsHandler != null) {
+                                Message msg = mCsHandler.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
+                                msg.sendToTarget();
+
+                                msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
+                                msg.sendToTarget();
+                            }
+                        }
+                        return;
+                    }
                 }
-                mLinkProperties = dhcpInfoInternal.makeLinkProperties();
-                mLinkProperties.setInterfaceName(mIface);
-
-                mNetworkInfo.setIsAvailable(true);
-                mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
-
-                Message msg = mCsHandler.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
-                msg.sendToTarget();
-
-                msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
-                msg.sendToTarget();
+                Log.d(TAG, "startReverseTether, dhcp failed, resut: " + result);
             }
         });
         dhcpThread.start();
     }
 
-    public synchronized void stopReverseTether(String iface) {
-        NetworkUtils.stopDhcp(iface);
-
+    public synchronized void stopReverseTether() {
+        //NetworkUtils.stopDhcp(iface);
         mLinkProperties.clear();
         mNetworkInfo.setIsAvailable(false);
         mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED, null, null);

@@ -102,7 +102,6 @@ public final class BluetoothSocket implements Closeable {
     private int mPort;  /* RFCOMM channel or L2CAP psm */
     private int mFd;
     private String mServiceName;
-    private static IBluetooth sBluetoothProxy;
     private static int PROXY_CONNECTION_TIMEOUT = 5000;
 
     private static int SOCK_SIGNAL_SIZE = 16;
@@ -158,17 +157,6 @@ public final class BluetoothSocket implements Closeable {
         }
         mInputStream = new BluetoothInputStream(this);
         mOutputStream = new BluetoothOutputStream(this);
-
-        if (sBluetoothProxy == null) {
-            synchronized (BluetoothSocket.class) {
-                if (sBluetoothProxy == null) {
-                    IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_SERVICE);
-                    if (b == null)
-                        throw new RuntimeException("Bluetooth service not available");
-                    sBluetoothProxy = IBluetooth.Stub.asInterface(b);
-                }
-            }
-        }
     }
     private BluetoothSocket(BluetoothSocket s) {
         mUuid = s.mUuid;
@@ -297,8 +285,9 @@ public final class BluetoothSocket implements Closeable {
         try {
             // TODO(BT) derive flag from auth and encrypt
             if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
-
-            mPfd = sBluetoothProxy.connectSocket(mDevice, mType,
+            IBluetooth bluetoothProxy = BluetoothAdapter.getDefaultAdapter().getBluetoothService();
+            if (bluetoothProxy == null) throw new IOException("Bluetooth is off");
+            mPfd = bluetoothProxy.connectSocket(mDevice, mType,
                     mUuid, mPort, getSecurityFlags());
             synchronized(this)
             {
@@ -333,8 +322,13 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ int bindListen() {
         int ret;
         if (mSocketState == SocketState.CLOSED) return EBADFD;
+        IBluetooth bluetoothProxy = BluetoothAdapter.getDefaultAdapter().getBluetoothService();
+        if (bluetoothProxy == null) {
+            Log.e(TAG, "bindListen fail, reason: bluetooth is off");
+            return -1;
+        }
         try {
-            mPfd = sBluetoothProxy.createSocketChannel(mType, mServiceName,
+            mPfd = bluetoothProxy.createSocketChannel(mType, mServiceName,
                     mUuid, mPort, getSecurityFlags());
         } catch (RemoteException e) {
             Log.e(TAG, Log.getStackTraceString(new Throwable()));

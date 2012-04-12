@@ -45,7 +45,7 @@ import java.util.List;
  */
 public final class BluetoothHeadset implements BluetoothProfile {
     private static final String TAG = "BluetoothHeadset";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     /**
      * Intent used to broadcast the change in connection state of the Headset
@@ -221,6 +221,37 @@ public final class BluetoothHeadset implements BluetoothProfile {
     private IBluetoothHeadset mService;
     private BluetoothAdapter mAdapter;
 
+    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+            new IBluetoothStateChangeCallback.Stub() {
+                public void onBluetoothStateChange(boolean up) {
+                    if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
+                    if (!up) {
+                        if (DBG) Log.d(TAG,"Unbinding service...");
+                        synchronized (mConnection) {
+                            try {
+                                mService = null;
+                                mContext.unbindService(mConnection);
+                            } catch (Exception re) {
+                                Log.e(TAG,"",re);
+                            }
+                        }
+                    } else {
+                        synchronized (mConnection) {
+                            try {
+                                if (mService == null) {
+                                    if (DBG) Log.d(TAG,"Binding service...");
+                                    if (!mContext.bindService(new Intent(IBluetoothHeadset.class.getName()), mConnection, 0)) {
+                                        Log.e(TAG, "Could not bind to Bluetooth Headset Service");
+                                    }
+                                }
+                            } catch (Exception re) {
+                                Log.e(TAG,"",re);
+                            }
+                        }
+                    }
+                }
+        };
+
     /**
      * Create a BluetoothHeadset proxy object.
      */
@@ -228,6 +259,16 @@ public final class BluetoothHeadset implements BluetoothProfile {
         mContext = context;
         mServiceListener = l;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        IBluetoothManager mgr = mAdapter.getBluetoothManager();
+        if (mgr != null) {
+            try {
+                mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG,"",e);
+            }
+        }
+
         if (!context.bindService(new Intent(IBluetoothHeadset.class.getName()), mConnection, 0)) {
             Log.e(TAG, "Could not bind to Bluetooth Headset Service");
         }
@@ -241,9 +282,25 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     /*package*/ void close() {
         if (DBG) log("close()");
-        if (mConnection != null) {
-            mContext.unbindService(mConnection);
-            mConnection = null;
+
+        IBluetoothManager mgr = mAdapter.getBluetoothManager();
+        if (mgr != null) {
+            try {
+                mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
+            } catch (Exception e) {
+                Log.e(TAG,"",e);
+            }
+        }
+
+        synchronized (mConnection) {
+            if (mService != null) {
+                try {
+                    mService = null;
+                    mContext.unbindService(mConnection);
+                } catch (Exception re) {
+                    Log.e(TAG,"",re);
+                }
+            }
         }
         mServiceListener = null;
     }

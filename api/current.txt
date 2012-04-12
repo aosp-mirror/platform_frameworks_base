@@ -72,6 +72,7 @@ package android {
     field public static final java.lang.String MODIFY_PHONE_STATE = "android.permission.MODIFY_PHONE_STATE";
     field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
     field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
+    field public static final java.lang.String NET_TUNNELING = "android.permission.NET_TUNNELING";
     field public static final java.lang.String NFC = "android.permission.NFC";
     field public static final deprecated java.lang.String PERSISTENT_ACTIVITY = "android.permission.PERSISTENT_ACTIVITY";
     field public static final java.lang.String PROCESS_OUTGOING_CALLS = "android.permission.PROCESS_OUTGOING_CALLS";
@@ -4438,6 +4439,7 @@ package android.appwidget {
 package android.bluetooth {
 
   public final class BluetoothA2dp implements android.bluetooth.BluetoothProfile {
+    method public void finalize();
     method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method public int getConnectionState(android.bluetooth.BluetoothDevice);
     method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);

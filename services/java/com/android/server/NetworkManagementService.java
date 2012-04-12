@@ -78,6 +78,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
+import android.bluetooth.BluetoothTetheringDataTracker;
 
 /**
  * @hide
@@ -778,6 +779,34 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         // 210 Tethering services started
         event.checkCode(TetherStatusResult);
         return event.getMessage().endsWith("started");
+    }
+    public void startReverseTethering(String iface)
+             throws IllegalStateException {
+        if (DBG) Slog.d(TAG, "startReverseTethering in");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        // cmd is "tether start first_start first_stop second_start second_stop ..."
+        // an odd number of addrs will fail
+        String cmd = "tether start-reverse";
+        cmd += " " + iface;
+        if (DBG) Slog.d(TAG, "startReverseTethering cmd: " + cmd);
+        try {
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Unable to communicate to native daemon");
+        }
+        BluetoothTetheringDataTracker.getInstance().startReverseTether(iface);
+
+    }
+    public void stopReverseTethering() throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        try {
+            mConnector.doCommand("tether stop-reverse");
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Unable to communicate to native daemon to stop tether");
+        }
+        BluetoothTetheringDataTracker.getInstance().stopReverseTether();
     }
 
     @Override

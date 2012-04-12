@@ -42,6 +42,10 @@
         <group gid="net_bt" />
     </permission>
 
+    <permission name="android.permission.NET_TUNNELING" >
+        <group gid="vpn" />
+    </permission>
+
     <permission name="android.permission.INTERNET" >
         <group gid="inet" />
     </permission>

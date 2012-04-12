@@ -1409,6 +1409,11 @@
         android:description="@string/permdesc_devicePower"
         android:protectionLevel="signature" />
 
+   <!-- Allows low-level access to tun tap driver -->
+    <permission android:name="android.permission.NET_TUNNELING"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature" />
+
     <!-- Run as a manufacturer test application, running as the root user.
          Only available when the device is running in manufacturer test mode. -->
     <permission android:name="android.permission.FACTORY_TEST"

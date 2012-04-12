@@ -44,7 +44,7 @@ import java.util.List;
  */
 public final class BluetoothInputDevice implements BluetoothProfile {
     private static final String TAG = "BluetoothInputDevice";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     /**
      * Intent used to broadcast the change in connection state of the Input
@@ -186,6 +186,37 @@ public final class BluetoothInputDevice implements BluetoothProfile {
     private BluetoothAdapter mAdapter;
     private IBluetoothInputDevice mService;
 
+    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+            new IBluetoothStateChangeCallback.Stub() {
+                public void onBluetoothStateChange(boolean up) {
+                    if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
+                    if (!up) {
+                        if (DBG) Log.d(TAG,"Unbinding service...");
+                        synchronized (mConnection) {
+                            try {
+                                mService = null;
+                                mContext.unbindService(mConnection);
+                            } catch (Exception re) {
+                                Log.e(TAG,"",re);
+                            }
+                        }
+                    } else {
+                        synchronized (mConnection) {
+                            try {
+                                if (mService == null) {
+                                    if (DBG) Log.d(TAG,"Binding service...");
+                                    if (!mContext.bindService(new Intent(IBluetoothInputDevice.class.getName()), mConnection, 0)) {
+                                        Log.e(TAG, "Could not bind to Bluetooth HID Service");
+                                    }
+                                }
+                            } catch (Exception re) {
+                                Log.e(TAG,"",re);
+                            }
+                        }
+                    }
+                }
+        };
+
     /**
      * Create a BluetoothInputDevice proxy object for interacting with the local
      * Bluetooth Service which handles the InputDevice profile
@@ -195,6 +226,16 @@ public final class BluetoothInputDevice implements BluetoothProfile {
         mContext = context;
         mServiceListener = l;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        IBluetoothManager mgr = mAdapter.getBluetoothManager();
+        if (mgr != null) {
+            try {
+                mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG,"",e);
+            }
+        }
+
         if (!context.bindService(new Intent(IBluetoothInputDevice.class.getName()),
                                  mConnection, 0)) {
             Log.e(TAG, "Could not bind to Bluetooth HID Service");
@@ -203,9 +244,24 @@ public final class BluetoothInputDevice implements BluetoothProfile {
 
     /*package*/ void close() {
         if (DBG) log("close()");
-        if (mConnection != null) {
-            mContext.unbindService(mConnection);
-            mConnection = null;
+        IBluetoothManager mgr = mAdapter.getBluetoothManager();
+        if (mgr != null) {
+            try {
+                mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
+            } catch (Exception e) {
+                Log.e(TAG,"",e);
+            }
+        }
+
+        synchronized (mConnection) {
+            if (mService != null) {
+                try {
+                    mService = null;
+                    mContext.unbindService(mConnection);
+                } catch (Exception re) {
+                    Log.e(TAG,"",re);
+                }
+           }
         }
         mServiceListener = null;
     }

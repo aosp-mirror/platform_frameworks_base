@@ -108,6 +108,36 @@ public final class BluetoothA2dp implements BluetoothProfile {
     private IBluetoothA2dp mService;
     private BluetoothAdapter mAdapter;
 
+    final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
+            new IBluetoothStateChangeCallback.Stub() {
+                public void onBluetoothStateChange(boolean up) {
+                    if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
+                    if (!up) {
+                        if (DBG) Log.d(TAG,"Unbinding service...");
+                        synchronized (mConnection) {
+                            try {
+                                mService = null;
+                                mContext.unbindService(mConnection);
+                            } catch (Exception re) {
+                                Log.e(TAG,"",re);
+                            }
+                        }
+                    } else {
+                        synchronized (mConnection) {
+                            try {
+                                if (mService == null) {
+                                    if (DBG) Log.d(TAG,"Binding service...");
+                                    if (!mContext.bindService(new Intent(IBluetoothA2dp.class.getName()), mConnection, 0)) {
+                                        Log.e(TAG, "Could not bind to Bluetooth A2DP Service");
+                                    }
+                                }
+                            } catch (Exception re) {
+                                Log.e(TAG,"",re);
+                            }
+                        }
+                    }
+                }
+        };
     /**
      * Create a BluetoothA2dp proxy object for interacting with the local
      * Bluetooth A2DP service.
@@ -117,6 +147,15 @@ public final class BluetoothA2dp implements BluetoothProfile {
         mContext = context;
         mServiceListener = l;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+        IBluetoothManager mgr = mAdapter.getBluetoothManager();
+        if (mgr != null) {
+            try {
+                mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG,"",e);
+            }
+        }
+
         if (!context.bindService(new Intent(IBluetoothA2dp.class.getName()), mConnection, 0)) {
             Log.e(TAG, "Could not bind to Bluetooth A2DP Service");
         }
@@ -124,8 +163,30 @@ public final class BluetoothA2dp implements BluetoothProfile {
 
     /*package*/ void close() {
         mServiceListener = null;
+        IBluetoothManager mgr = mAdapter.getBluetoothManager();
+        if (mgr != null) {
+            try {
+                mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
+            } catch (Exception e) {
+                Log.e(TAG,"",e);
+            }
+        }
+
+        synchronized (mConnection) {
+            if (mService != null) {
+                try {
+                    mService = null;
+                    mContext.unbindService(mConnection);
+                } catch (Exception re) {
+                    Log.e(TAG,"",re);
+                }
+            }
+        }
     }
 
+    public void finalize() {
+        close();
+    }
     /**
      * Initiate connection to a profile of the remote bluetooth device.
      *
@@ -260,7 +321,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * Set priority of the profile
      *
      * <p> The device should already be paired.
-     *  Priority can be one of {@link #PRIORITY_ON} or
+     *  Priority can be one of {@link #PRIORITY_ON} orgetBluetoothManager
      * {@link #PRIORITY_OFF},
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}

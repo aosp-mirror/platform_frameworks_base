@@ -128,6 +128,7 @@ class ServerThread extends Thread {
         IPackageManager pm = null;
         Context context = null;
         WindowManagerService wm = null;
+        BluetoothManagerService bluetooth = null;
         DockObserver dock = null;
         UsbService usb = null;
         SerialService serial = null;
@@ -241,17 +242,9 @@ class ServerThread extends Thread {
             } else if (factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 Slog.i(TAG, "No Bluetooth Service (factory test)");
             } else {
-                int airplaneModeOn = Settings.System.getInt(mContentResolver,
-                        Settings.System.AIRPLANE_MODE_ON, 0);
-                int bluetoothOn = Settings.Secure.getInt(mContentResolver,
-                    Settings.Secure.BLUETOOTH_ON, 0);
-                BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-                // TODO(BT): This will not work as the Bluetooth process is not
-                // up. Depending on the process architecture, BluetoothAdapter
-                // will have to bind to the service.
-                if (adapter != null && airplaneModeOn == 0 &&  bluetoothOn != 0) {
-                    adapter.enable();
-                }
+                Slog.i(TAG, "Bluetooth Manager Service");
+                bluetooth = new BluetoothManagerService(context);
+                ServiceManager.addService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE, bluetooth);
             }
 
         } catch (RuntimeException e) {

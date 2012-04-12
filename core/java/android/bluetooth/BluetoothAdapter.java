@@ -73,7 +73,7 @@ import java.util.UUID;
  */
 public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     /**
      * Sentinel error value for this class. Guaranteed to not equal any other
@@ -343,7 +343,7 @@ public final class BluetoothAdapter {
     public static final int STATE_DISCONNECTING = 3;
 
     /** @hide */
-    public static final String BLUETOOTH_SERVICE = "bluetooth";
+    public static final String BLUETOOTH_MANAGER_SERVICE = "bluetooth_manager";
 
     private static final int ADDRESS_LENGTH = 17;
 
@@ -353,7 +353,8 @@ public final class BluetoothAdapter {
      */
     private static BluetoothAdapter sAdapter;
 
-    private final IBluetooth mService;
+    private final IBluetoothManager mManagerService;
+    private IBluetooth mService;
 
     private Handler mServiceRecordHandler;
 
@@ -367,10 +368,10 @@ public final class BluetoothAdapter {
      */
     public static synchronized BluetoothAdapter getDefaultAdapter() {
         if (sAdapter == null) {
-            IBinder b = ServiceManager.getService("bluetooth");
+            IBinder b = ServiceManager.getService(BLUETOOTH_MANAGER_SERVICE);
             if (b != null) {
-                IBluetooth service = IBluetooth.Stub.asInterface(b);
-                sAdapter = new BluetoothAdapter(service);
+                IBluetoothManager managerService = IBluetoothManager.Stub.asInterface(b);
+                sAdapter = new BluetoothAdapter(managerService);
             } else {
                 Log.e(TAG, "Bluetooth binder is null");
             }
@@ -381,11 +382,15 @@ public final class BluetoothAdapter {
     /**
      * Use {@link #getDefaultAdapter} to get the BluetoothAdapter instance.
      */
-    BluetoothAdapter(IBluetooth service) {
-        if (service == null) {
-            throw new IllegalArgumentException("service is null");
+    BluetoothAdapter(IBluetoothManager managerService) {
+
+        if (managerService == null) {
+            throw new IllegalArgumentException("bluetooth manager service is null");
         }
-        mService = service;
+        try {
+            mService = managerService.registerAdapter(mManagerCallback);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        mManagerService = managerService;
         mServiceRecordHandler = null;
     }
 
@@ -402,6 +407,10 @@ public final class BluetoothAdapter {
      * @throws IllegalArgumentException if address is invalid
      */
     public BluetoothDevice getRemoteDevice(String address) {
+        if (mService == null) {
+            Log.e(TAG, "BT not enabled. Cannot create Remote Device");
+            return null;
+        }
         return new BluetoothDevice(address);
     }
 
@@ -433,8 +442,11 @@ public final class BluetoothAdapter {
      * @return true if the local adapter is turned on
      */
     public boolean isEnabled() {
+
         try {
-            return mService.isEnabled();
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.isEnabled();
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -451,9 +463,15 @@ public final class BluetoothAdapter {
      * @return current state of Bluetooth adapter
      */
     public int getState() {
-        if (mService == null) return STATE_OFF;
         try {
-            return mService.getState();
+            synchronized(mManagerCallback) {
+                if (mService != null)
+                {
+                    return mService.getState();
+                }
+                // TODO(BT) there might be a small gap during STATE_TURNING_ON that
+                //          mService is null, handle that case
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return STATE_OFF;
     }
@@ -486,8 +504,13 @@ public final class BluetoothAdapter {
      *         immediate error
      */
     public boolean enable() {
+
+        boolean enabled = false;
         try {
-            return mService.enable();
+            enabled = mManagerService.enable();
+            if (enabled) {
+                // TODO(BT)
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -518,7 +541,7 @@ public final class BluetoothAdapter {
      */
     public boolean disable() {
         try {
-            return mService.disable(true);
+            return mManagerService.disable(true);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -534,8 +557,9 @@ public final class BluetoothAdapter {
      * @hide
      */
     public boolean disable(boolean persist) {
+
         try {
-            return mService.disable(persist);
+            return mManagerService.disable(persist);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -549,7 +573,7 @@ public final class BluetoothAdapter {
      */
     public String getAddress() {
         try {
-            return mService.getAddress();
+            return mManagerService.getAddress();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
@@ -563,7 +587,7 @@ public final class BluetoothAdapter {
      */
     public String getName() {
         try {
-            return mService.getName();
+            return mManagerService.getName();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
@@ -579,7 +603,9 @@ public final class BluetoothAdapter {
     public ParcelUuid[] getUuids() {
         if (getState() != STATE_ON) return null;
         try {
-            return mService.getUuids();
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.getUuids();
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
@@ -602,7 +628,9 @@ public final class BluetoothAdapter {
     public boolean setName(String name) {
         if (getState() != STATE_ON) return false;
         try {
-            return mService.setName(name);
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.setName(name);
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -626,7 +654,9 @@ public final class BluetoothAdapter {
     public int getScanMode() {
         if (getState() != STATE_ON) return SCAN_MODE_NONE;
         try {
-            return mService.getScanMode();
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.getScanMode();
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return SCAN_MODE_NONE;
     }
@@ -662,7 +692,9 @@ public final class BluetoothAdapter {
     public boolean setScanMode(int mode, int duration) {
         if (getState() != STATE_ON) return false;
         try {
-            return mService.setScanMode(mode, duration);
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.setScanMode(mode, duration);
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -678,7 +710,9 @@ public final class BluetoothAdapter {
     public int getDiscoverableTimeout() {
         if (getState() != STATE_ON) return -1;
         try {
-            return mService.getDiscoverableTimeout();
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.getDiscoverableTimeout();
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return -1;
     }
@@ -687,7 +721,9 @@ public final class BluetoothAdapter {
     public void setDiscoverableTimeout(int timeout) {
         if (getState() != STATE_ON) return;
         try {
-            mService.setDiscoverableTimeout(timeout);
+            synchronized(mManagerCallback) {
+                if (mService != null) mService.setDiscoverableTimeout(timeout);
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
     }
 
@@ -724,7 +760,9 @@ public final class BluetoothAdapter {
     public boolean startDiscovery() {
         if (getState() != STATE_ON) return false;
         try {
-            return mService.startDiscovery();
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.startDiscovery();
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -749,7 +787,9 @@ public final class BluetoothAdapter {
     public boolean cancelDiscovery() {
         if (getState() != STATE_ON) return false;
         try {
-            return mService.cancelDiscovery();
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.cancelDiscovery();
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -776,7 +816,9 @@ public final class BluetoothAdapter {
     public boolean isDiscovering() {
         if (getState() != STATE_ON) return false;
         try {
-            return mService.isDiscovering();
+            synchronized(mManagerCallback) {
+                if (mService != null ) return mService.isDiscovering();
+            }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -797,7 +839,10 @@ public final class BluetoothAdapter {
             return toDeviceSet(new BluetoothDevice[0]);
         }
         try {
-            return toDeviceSet(mService.getBondedDevices());
+            synchronized(mManagerCallback) {
+                if (mService != null) return toDeviceSet(mService.getBondedDevices());
+            }
+            return toDeviceSet(new BluetoothDevice[0]);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
@@ -818,7 +863,9 @@ public final class BluetoothAdapter {
     public int getConnectionState() {
         if (getState() != STATE_ON) return BluetoothAdapter.STATE_DISCONNECTED;
         try {
-            return mService.getAdapterConnectionState();
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.getAdapterConnectionState();
+            }
         } catch (RemoteException e) {Log.e(TAG, "getConnectionState:", e);}
         return BluetoothAdapter.STATE_DISCONNECTED;
     }
@@ -841,7 +888,9 @@ public final class BluetoothAdapter {
     public int getProfileConnectionState(int profile) {
         if (getState() != STATE_ON) return BluetoothProfile.STATE_DISCONNECTED;
         try {
-            return mService.getProfileConnectionState(profile);
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.getProfileConnectionState(profile);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "getProfileConnectionState:", e);
         }
@@ -1160,6 +1209,23 @@ public final class BluetoothAdapter {
         }
     }
 
+    final private IBluetoothManagerCallback mManagerCallback =
+        new IBluetoothManagerCallback.Stub() {
+            public void onBluetoothServiceUp(IBluetooth bluetoothService) {
+                if (DBG) Log.d(TAG, "onBluetoothServiceUp: " + bluetoothService);
+                synchronized (mManagerCallback) {
+                    mService = bluetoothService;
+                }
+            }
+
+            public void onBluetoothServiceDown() {
+                if (DBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
+                synchronized (mManagerCallback) {
+                    mService = null;
+                }
+            }
+    };
+
     /**
      * Enable the Bluetooth Adapter, but don't auto-connect devices
      * and don't persist state. Only for use by system applications.
@@ -1245,6 +1311,17 @@ public final class BluetoothAdapter {
         return Collections.unmodifiableSet(deviceSet);
     }
 
+    protected void finalize() throws Throwable {
+        try {
+            mManagerService.unregisterAdapter(mManagerCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            super.finalize();
+        }
+    }
+
+
     /**
      * Validate a String Bluetooth address, such as "00:43:A8:23:10:F0"
      * <p>Alphabetic characters must be uppercase to be valid.
@@ -1274,5 +1351,15 @@ public final class BluetoothAdapter {
             }
         }
         return true;
+    }
+
+    /*package*/ IBluetoothManager getBluetoothManager() {
+            return mManagerService;
+    }
+
+    /*package*/ IBluetooth getBluetoothService() {
+        synchronized (mManagerCallback) {
+            return mService;
+        }
     }
 }

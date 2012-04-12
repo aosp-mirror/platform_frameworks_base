@@ -12931,7 +12931,8 @@ public final class ActivityManagerService extends ActivityManagerNative
          * processes) from sending protected broadcasts.
          */
         if (callingUid == Process.SYSTEM_UID || callingUid == Process.PHONE_UID
-                || callingUid == Process.SHELL_UID || callingUid == 0) {
+            || callingUid == Process.SHELL_UID || callingUid == Process.BLUETOOTH_UID ||
+            callingUid == 0) {
             // Always okay.
         } else if (callerApp == null || !callerApp.persistent) {
             try {

@@ -152,6 +152,16 @@ interface INetworkManagementService
     boolean isTetheringStarted();
 
     /**
+     * Start bluetooth reverse tethering services
+     */
+    void startReverseTethering(in String iface);
+
+    /**
+     * Stop currently running bluetooth reserse tethering services
+     */
+    void stopReverseTethering();
+
+    /**
      * Tethers the specified interface
      */
     void tetherInterface(String iface);
