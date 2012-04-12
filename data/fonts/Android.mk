@@ -124,8 +124,8 @@ font_src_files := \
     Roboto-Bold.ttf \
     Roboto-Italic.ttf \
     Roboto-BoldItalic.ttf \
-    DroidSansArabic.ttf \
     DroidNaskh-Regular.ttf \
+    DroidNaskh-Regular-Shift.ttf \
     DroidSansHebrew-Regular.ttf \
     DroidSansHebrew-Bold.ttf \
     DroidSansThai.ttf \
