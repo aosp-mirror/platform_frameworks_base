@@ -1127,7 +1127,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
     /**
      * Print the Provider's state into the given stream.  This gets invoked if
-     * you run "adb shell dumpsys activity provider <provider_component_name>".
+     * you run "adb shell dumpsys activity provider &lt;provider_component_name&gt;".
      *
      * @param prefix Desired prefix to prepend at each line of output.
      * @param fd The raw file descriptor that the dump is being sent to.
