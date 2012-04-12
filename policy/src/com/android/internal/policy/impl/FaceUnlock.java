@@ -21,6 +21,7 @@ import com.android.internal.policy.IFaceLockCallback;
 import com.android.internal.policy.IFaceLockInterface;
 import com.android.internal.widget.LockPatternUtils;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,7 +34,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 
-public class FaceUnlock implements Handler.Callback {
+public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "FULLockscreen";
@@ -51,10 +52,6 @@ public class FaceUnlock implements Handler.Callback {
 
     private boolean mServiceRunning = false;
     private final Object mServiceRunningLock = new Object();
-
-    // Long enough to stay visible while dialer comes up
-    // Short enough to not be visible if the user goes back immediately
-    private final int VIEW_AREA_EMERGENCY_DIALER_TIMEOUT = 1000;
 
     // Long enough to stay visible while the service starts
     // Short enough to not have to wait long for backup if service fails to start or crashes
@@ -80,22 +77,65 @@ public class FaceUnlock implements Handler.Callback {
         mHandler = new Handler(this);
     }
 
-    public void cleanUp() {
-        if (mService != null) {
-            try {
-                mService.unregisterCallback(mFaceLockCallback);
-            } catch (RemoteException e) {
-                // Not much we can do
-            }
-            stop();
-            mService = null;
-        }
+    // Indicates whether FaceLock is in use
+    public boolean installedAndSelected() {
+        return (mLockPatternUtils.usingBiometricWeak() &&
+                mLockPatternUtils.isBiometricWeakInstalled());
     }
 
-    /** When screen is turned on and focused, need to bind to FaceLock service if we are using
-     *  FaceLock, but only if we're not dealing with a call
-    */
-    public void activateIfAble(boolean hasOverlay) {
+    public boolean isRunning() {
+        return mServiceRunning;
+    }
+
+    // Shows the FaceLock area for a period of time
+    public void show(long timeoutMillis) {
+        showArea();
+        if (timeoutMillis > 0)
+            mHandler.sendEmptyMessageDelayed(MSG_HIDE_AREA_VIEW, timeoutMillis);
+    }
+
+    // Hides the FaceLock area immediately
+    public void hide() {
+        // Remove messages to prevent a delayed show message from undo-ing the hide
+        removeAreaDisplayMessages();
+        mHandler.sendEmptyMessage(MSG_HIDE_AREA_VIEW);
+    }
+
+    // Tells FaceLock to stop and then unbinds from the FaceLock service
+    public boolean stop() {
+        boolean wasRunning = false;
+        if (installedAndSelected()) {
+            stopUi();
+
+            if (mBoundToService) {
+                wasRunning = true;
+                if (DEBUG) Log.d(TAG, "before unbind from FaceLock service");
+                if (mService != null) {
+                    try {
+                        mService.unregisterCallback(mFaceLockCallback);
+                    } catch (RemoteException e) {
+                        // Not much we can do
+                    }
+                }
+                mContext.unbindService(mConnection);
+                if (DEBUG) Log.d(TAG, "after unbind from FaceLock service");
+                mBoundToService = false;
+            } else {
+                // This is usually not an error when this happens.  Sometimes we will tell it to
+                // unbind multiple times because it's called from both onWindowFocusChanged and
+                // onDetachedFromWindow.
+                if (DEBUG) Log.d(TAG, "Attempt to unbind from FaceLock when not bound");
+            }
+        }
+
+        return wasRunning;
+    }
+
+    /**
+     * When screen is turned on and focused, need to bind to FaceLock service if we are using
+     * FaceLock, but only if we're not dealing with a call
+     */
+    public boolean start(boolean suppressBiometricUnlock) {
         final boolean tooManyFaceUnlockTries = mUpdateMonitor.getMaxFaceUnlockAttemptsReached();
         final int failedBackupAttempts = mUpdateMonitor.getFailedAttempts();
         final boolean backupIsTimedOut =
@@ -103,42 +143,31 @@ public class FaceUnlock implements Handler.Callback {
         if (tooManyFaceUnlockTries) Log.i(TAG, "tooManyFaceUnlockTries: " + tooManyFaceUnlockTries);
         if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
                 && installedAndSelected()
-                && !hasOverlay
+                && !suppressBiometricUnlock
                 && !tooManyFaceUnlockTries
                 && !backupIsTimedOut) {
             bind();
 
             // Show FaceLock area, but only for a little bit so lockpattern will become visible if
             // FaceLock fails to start or crashes
-            showAreaWithTimeout(VIEW_AREA_SERVICE_TIMEOUT);
+            show(VIEW_AREA_SERVICE_TIMEOUT);
 
             // When switching between portrait and landscape view while FaceLock is running, the
             // screen will eventually go dark unless we poke the wakelock when FaceLock is
             // restarted
             mKeyguardScreenCallback.pokeWakelock();
         } else {
-            hideArea();
+            hide();
+            return false;
         }
-    }
 
-    public boolean isServiceRunning() {
-        return mServiceRunning;
-    }
-
-    public int viewAreaEmergencyDialerTimeout() {
-        return VIEW_AREA_EMERGENCY_DIALER_TIMEOUT;
-    }
-
-    // Indicates whether FaceLock is in use
-    public boolean installedAndSelected() {
-        return (mLockPatternUtils.usingBiometricWeak() &&
-                mLockPatternUtils.isBiometricWeakInstalled());
+        return true;
     }
 
     // Takes care of FaceLock area when layout is created
-    public void initializeAreaView(View view) {
+    public void initializeAreaView(View topView) {
         if (installedAndSelected()) {
-            mAreaView = view.findViewById(R.id.faceLockAreaView);
+            mAreaView = topView.findViewById(R.id.faceLockAreaView);
             if (mAreaView == null) {
                 Log.e(TAG, "Layout does not have areaView and FaceLock is enabled");
             }
@@ -147,13 +176,20 @@ public class FaceUnlock implements Handler.Callback {
         }
     }
 
-    // Stops FaceLock if it is running and reports back whether it was running or not
-    public boolean stopIfRunning() {
-        if (installedAndSelected() && mBoundToService) {
-            stopAndUnbind();
-            return true;
+    public void cleanUp() {
+        if (mService != null) {
+            try {
+                mService.unregisterCallback(mFaceLockCallback);
+            } catch (RemoteException e) {
+                // Not much we can do
+            }
+            stopUi();
+            mService = null;
         }
-        return false;
+    }
+
+    public int getQuality() {
+        return DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
     }
 
     // Handles covering or exposing FaceLock area on the client side when FaceLock starts or stops
@@ -186,28 +222,15 @@ public class FaceUnlock implements Handler.Callback {
     }
 
     // Shows the FaceLock area immediately
-    public void showArea() {
+    private void showArea() {
         // Remove messages to prevent a delayed hide message from undo-ing the show
         removeAreaDisplayMessages();
         mHandler.sendEmptyMessage(MSG_SHOW_AREA_VIEW);
     }
 
-    // Hides the FaceLock area immediately
-    public void hideArea() {
-        // Remove messages to prevent a delayed show message from undo-ing the hide
-        removeAreaDisplayMessages();
-        mHandler.sendEmptyMessage(MSG_HIDE_AREA_VIEW);
-    }
-
-    // Shows the FaceLock area for a period of time
-    public void showAreaWithTimeout(long timeoutMillis) {
-        showArea();
-        mHandler.sendEmptyMessageDelayed(MSG_HIDE_AREA_VIEW, timeoutMillis);
-    }
-
     // Binds to FaceLock service.  This call does not tell it to start, but it causes the service
     // to call the onServiceConnected callback, which then starts FaceLock.
-    public void bind() {
+    private void bind() {
         if (installedAndSelected()) {
             if (!mBoundToService) {
                 if (DEBUG) Log.d(TAG, "before bind to FaceLock service");
@@ -219,32 +242,6 @@ public class FaceUnlock implements Handler.Callback {
                 mBoundToService = true;
             } else {
                 Log.w(TAG, "Attempt to bind to FaceLock when already bound");
-            }
-        }
-    }
-
-    // Tells FaceLock to stop and then unbinds from the FaceLock service
-    public void stopAndUnbind() {
-        if (installedAndSelected()) {
-            stop();
-
-            if (mBoundToService) {
-                if (DEBUG) Log.d(TAG, "before unbind from FaceLock service");
-                if (mService != null) {
-                    try {
-                        mService.unregisterCallback(mFaceLockCallback);
-                    } catch (RemoteException e) {
-                        // Not much we can do
-                    }
-                }
-                mContext.unbindService(mConnection);
-                if (DEBUG) Log.d(TAG, "after unbind from FaceLock service");
-                mBoundToService = false;
-            } else {
-                // This is usually not an error when this happens.  Sometimes we will tell it to
-                // unbind multiple times because it's called from both onWindowFocusChanged and
-                // onDetachedFromWindow.
-                if (DEBUG) Log.d(TAG, "Attempt to unbind from FaceLock when not bound");
             }
         }
     }
@@ -268,7 +265,7 @@ public class FaceUnlock implements Handler.Callback {
                 int[] position;
                 position = new int[2];
                 mAreaView.getLocationInWindow(position);
-                start(mAreaView.getWindowToken(), position[0], position[1],
+                startUi(mAreaView.getWindowToken(), position[0], position[1],
                         mAreaView.getWidth(), mAreaView.getHeight());
             }
         }
@@ -286,7 +283,7 @@ public class FaceUnlock implements Handler.Callback {
     };
 
     // Tells the FaceLock service to start displaying its UI and perform recognition
-    public void start(IBinder windowToken, int x, int y, int w, int h) {
+    private void startUi(IBinder windowToken, int x, int y, int w, int h) {
         if (installedAndSelected()) {
             synchronized (mServiceRunningLock) {
                 if (!mServiceRunning) {
@@ -300,14 +297,14 @@ public class FaceUnlock implements Handler.Callback {
                     }
                     mServiceRunning = true;
                 } else {
-                    if (DEBUG) Log.w(TAG, "start() attempted while running");
+                    if (DEBUG) Log.w(TAG, "startUi() attempted while running");
                 }
             }
         }
     }
 
     // Tells the FaceLock service to stop displaying its UI and stop recognition
-    public void stop() {
+    private void stopUi() {
         if (installedAndSelected()) {
             // Note that attempting to stop FaceLock when it's not running is not an issue.
             // FaceLock can return, which stops it and then we try to stop it when the
@@ -333,7 +330,7 @@ public class FaceUnlock implements Handler.Callback {
         public void unlock() {
             if (DEBUG) Log.d(TAG, "FaceLock unlock()");
             showArea(); // Keep fallback covered
-            stopAndUnbind();
+            stop();
 
             mKeyguardScreenCallback.keyguardDone(true);
             mKeyguardScreenCallback.reportSuccessfulUnlockAttempt();
@@ -344,8 +341,8 @@ public class FaceUnlock implements Handler.Callback {
         @Override
         public void cancel() {
             if (DEBUG) Log.d(TAG, "FaceLock cancel()");
-            hideArea(); // Expose fallback
-            stopAndUnbind();
+            hide(); // Expose fallback
+            stop();
             mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
         }
 
@@ -355,8 +352,8 @@ public class FaceUnlock implements Handler.Callback {
         public void reportFailedAttempt() {
             if (DEBUG) Log.d(TAG, "FaceLock reportFailedAttempt()");
             mUpdateMonitor.reportFailedFaceUnlockAttempt();
-            hideArea(); // Expose fallback
-            stopAndUnbind();
+            hide(); // Expose fallback
+            stop();
             mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
         }
 
@@ -364,7 +361,7 @@ public class FaceUnlock implements Handler.Callback {
         @Override
         public void exposeFallback() {
             if (DEBUG) Log.d(TAG, "FaceLock exposeFallback()");
-            hideArea(); // Expose fallback
+            hide(); // Expose fallback
         }
 
         // Allows the Face Unlock service to poke the wake lock to keep the lockscreen alive
