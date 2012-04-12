@@ -4483,10 +4483,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         getDrawingRect(bounds);
         info.setBoundsInParent(bounds);
 
-        int[] locationOnScreen = mAttachInfo.mInvalidateChildLocation;
-        getLocationOnScreen(locationOnScreen);
-        bounds.offsetTo(0, 0);
-        bounds.offset(locationOnScreen[0], locationOnScreen[1]);
+        getGlobalVisibleRect(bounds);
+        bounds.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
         info.setBoundsInScreen(bounds);
 
         if ((mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {

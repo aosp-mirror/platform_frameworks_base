@@ -5065,6 +5065,19 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Computes whether a view is visible on the screen.
+     *
+     * @param view The view to check.
+     * @return Whether the view is visible on the screen.
+     */
+    private boolean isDisplayedOnScreen(View view) {
+        return (view.mAttachInfo != null
+                && view.mAttachInfo.mWindowVisibility == View.VISIBLE
+                && view.getVisibility() == View.VISIBLE
+                && view.getGlobalVisibleRect(mTempRect));
+    }
+
+    /**
      * Class for managing accessibility interactions initiated from the system
      * and targeting the view hierarchy. A *ClientThread method is to be
      * called from the interaction connection this ViewAncestor gives the
@@ -5175,7 +5188,7 @@ public final class ViewRootImpl implements ViewParent,
                 } else {
                     target = findViewByAccessibilityId(accessibilityViewId);
                 }
-                if (target != null && target.getVisibility() == View.VISIBLE) {
+                if (target != null && isDisplayedOnScreen(target)) {
                     getAccessibilityNodePrefetcher().prefetchAccessibilityNodeInfos(target,
                             virtualDescendantId, prefetchFlags, infos);
                 }
@@ -5231,7 +5244,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 if (root != null) {
                     View target = root.findViewById(viewId);
-                    if (target != null && target.getVisibility() == View.VISIBLE) {
+                    if (target != null && isDisplayedOnScreen(target)) {
                         info = target.createAccessibilityNodeInfo();
                     }
                 }
@@ -5287,7 +5300,7 @@ public final class ViewRootImpl implements ViewParent,
                 } else {
                     target = ViewRootImpl.this.mView;
                 }
-                if (target != null && target.getVisibility() == View.VISIBLE) {
+                if (target != null && isDisplayedOnScreen(target)) {
                     AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
                     if (provider != null) {
                         infos = provider.findAccessibilityNodeInfosByText(text,
@@ -5304,7 +5317,7 @@ public final class ViewRootImpl implements ViewParent,
                             final int viewCount = foundViews.size();
                             for (int i = 0; i < viewCount; i++) {
                                 View foundView = foundViews.get(i);
-                                if (foundView.getVisibility() == View.VISIBLE) {
+                                if (isDisplayedOnScreen(foundView)) {
                                     provider = foundView.getAccessibilityNodeProvider();
                                     if (provider != null) {
                                         List<AccessibilityNodeInfo> infosFromProvider =
@@ -5367,7 +5380,7 @@ public final class ViewRootImpl implements ViewParent,
             boolean succeeded = false;
             try {
                 View target = findViewByAccessibilityId(accessibilityViewId);
-                if (target != null && target.getVisibility() == View.VISIBLE) {
+                if (target != null && isDisplayedOnScreen(target)) {
                     AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
                     if (provider != null) {
                         succeeded = provider.performAccessibilityAction(action,
@@ -5505,7 +5518,7 @@ public final class ViewRootImpl implements ViewParent,
                     View child = parentGroup.getChildAt(i);
                     if (outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE
                             && child.getAccessibilityViewId() != current.getAccessibilityViewId()
-                            && child.getVisibility() == View.VISIBLE) {
+                            && isDisplayedOnScreen(child)) {
                         final long childNodeId = AccessibilityNodeInfo.makeNodeId(
                                 child.getAccessibilityViewId(), AccessibilityNodeInfo.UNDEFINED);
                         AccessibilityNodeInfo info = null;
@@ -5533,7 +5546,7 @@ public final class ViewRootImpl implements ViewParent,
                 final int childCount = rootGroup.getChildCount();
                 for (int i = 0; i < childCount; i++) {
                     View child = rootGroup.getChildAt(i);
-                    if (child.getVisibility() == View.VISIBLE
+                    if (isDisplayedOnScreen(child)
                             && outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
                         final long childNodeId = AccessibilityNodeInfo.makeNodeId(
                                 child.getAccessibilityViewId(), AccessibilityNodeInfo.UNDEFINED);
