@@ -549,6 +549,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     opt.optionString = heapsizeOptsBuf;
     mOptions.add(opt);
 
+    // Increase the main thread's interpreter stack size for bug 6315322.
+    opt.optionString = "-XX:mainThreadStackSize=24K";
+    mOptions.add(opt);
+
     strcpy(heapgrowthlimitOptsBuf, "-XX:HeapGrowthLimit=");
     property_get("dalvik.vm.heapgrowthlimit", heapgrowthlimitOptsBuf+20, "");
     if (heapgrowthlimitOptsBuf[20] != '\0') {
