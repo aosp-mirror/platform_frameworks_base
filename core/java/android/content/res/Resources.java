@@ -32,7 +32,6 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.LongSparseArray;
 
@@ -86,8 +85,8 @@ public class Resources {
     // single-threaded, and after that these are immutable.
     private static final LongSparseArray<Drawable.ConstantState> sPreloadedDrawables
             = new LongSparseArray<Drawable.ConstantState>();
-    private static final SparseArray<ColorStateList> mPreloadedColorStateLists
-            = new SparseArray<ColorStateList>();
+    private static final LongSparseArray<ColorStateList> sPreloadedColorStateLists
+            = new LongSparseArray<ColorStateList>();
     private static final LongSparseArray<Drawable.ConstantState> sPreloadedColorDrawables
             = new LongSparseArray<Drawable.ConstantState>();
     private static boolean mPreloaded;
@@ -98,8 +97,8 @@ public class Resources {
     // These are protected by the mTmpValue lock.
     private final LongSparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
             = new LongSparseArray<WeakReference<Drawable.ConstantState> >();
-    private final SparseArray<WeakReference<ColorStateList> > mColorStateListCache
-            = new SparseArray<WeakReference<ColorStateList> >();
+    private final LongSparseArray<WeakReference<ColorStateList> > mColorStateListCache
+            = new LongSparseArray<WeakReference<ColorStateList> >();
     private final LongSparseArray<WeakReference<Drawable.ConstantState> > mColorDrawableCache
             = new LongSparseArray<WeakReference<Drawable.ConstantState> >();
     private boolean mPreloading;
@@ -117,22 +116,6 @@ public class Resources {
     private NativePluralRules mPluralRule;
     
     private CompatibilityInfo mCompatibilityInfo;
-
-    private static final LongSparseArray<Object> EMPTY_ARRAY = new LongSparseArray<Object>(0) {
-        @Override
-        public void put(long k, Object o) {
-            throw new UnsupportedOperationException();
-        }
-        @Override
-        public void append(long k, Object o) {
-            throw new UnsupportedOperationException();
-        }
-    };
-
-    @SuppressWarnings("unchecked")
-    private static <T> LongSparseArray<T> emptySparseArray() {
-        return (LongSparseArray<T>) EMPTY_ARRAY;
-    }
 
     /** @hide */
     public static int selectDefaultTheme(int curTheme, int targetSdkVersion) {
@@ -180,9 +163,8 @@ public class Resources {
      * @param config Desired device configuration to consider when 
      *               selecting/computing resource values (optional).
      */
-    public Resources(AssetManager assets, DisplayMetrics metrics,
-            Configuration config) {
-        this(assets, metrics, config, (CompatibilityInfo) null);
+    public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config) {
+        this(assets, metrics, config, null);
     }
 
     /**
@@ -1883,7 +1865,8 @@ public class Resources {
             return dr;
         }
 
-        Drawable.ConstantState cs = isColorDrawable ? sPreloadedColorDrawables.get(key) : sPreloadedDrawables.get(key);
+        Drawable.ConstantState cs = isColorDrawable ?
+                sPreloadedColorDrawables.get(key) : sPreloadedDrawables.get(key);
         if (cs != null) {
             dr = cs.newDrawable(this);
         } else {
@@ -2005,21 +1988,21 @@ public class Resources {
             }
         }
 
-        final int key = (value.assetCookie << 24) | value.data;
+        final long key = (((long) value.assetCookie) << 32) | value.data;
 
         ColorStateList csl;
 
         if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT &&
                 value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
 
-            csl = mPreloadedColorStateLists.get(key);
+            csl = sPreloadedColorStateLists.get(key);
             if (csl != null) {
                 return csl;
             }
 
             csl = ColorStateList.valueOf(value.data);
             if (mPreloading) {
-                mPreloadedColorStateLists.put(key, csl);
+                sPreloadedColorStateLists.put(key, csl);
             }
 
             return csl;
@@ -2030,7 +2013,7 @@ public class Resources {
             return csl;
         }
 
-        csl = mPreloadedColorStateLists.get(key);
+        csl = sPreloadedColorStateLists.get(key);
         if (csl != null) {
             return csl;
         }
@@ -2063,14 +2046,13 @@ public class Resources {
 
         if (csl != null) {
             if (mPreloading) {
-                mPreloadedColorStateLists.put(key, csl);
+                sPreloadedColorStateLists.put(key, csl);
             } else {
                 synchronized (mTmpValue) {
                     //Log.i(TAG, "Saving cached color state list @ #" +
                     //        Integer.toHexString(key.intValue())
                     //        + " in " + this + ": " + csl);
-                    mColorStateListCache.put(
-                        key, new WeakReference<ColorStateList>(csl));
+                    mColorStateListCache.put(key, new WeakReference<ColorStateList>(csl));
                 }
             }
         }
@@ -2078,7 +2060,7 @@ public class Resources {
         return csl;
     }
 
-    private ColorStateList getCachedColorStateList(int key) {
+    private ColorStateList getCachedColorStateList(long key) {
         synchronized (mTmpValue) {
             WeakReference<ColorStateList> wr = mColorStateListCache.get(key);
             if (wr != null) {   // we have the key
@@ -2088,8 +2070,7 @@ public class Resources {
                     //        Integer.toHexString(((Integer)key).intValue())
                     //        + " in " + this + ": " + entry);
                     return entry;
-                }
-                else {  // our entry has been purged
+                } else {  // our entry has been purged
                     mColorStateListCache.delete(key);
                 }
             }
