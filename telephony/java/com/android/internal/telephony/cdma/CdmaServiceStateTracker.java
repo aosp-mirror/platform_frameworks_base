@@ -866,6 +866,12 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         // If the offset is (0, false) and the time zone property
         // is set, use the time zone property rather than GMT.
         String zoneName = SystemProperties.get(TIMEZONE_PROPERTY);
+        if (DBG) {
+            log("fixTimeZone zoneName='" + zoneName +
+                "' mZoneOffset=" + mZoneOffset + " mZoneDst=" + mZoneDst +
+                " iso-cc='" + isoCountryCode +
+                "' iso-cc-idx=" + Arrays.binarySearch(GMT_COUNTRY_CODES, isoCountryCode));
+        }
         if ((mZoneOffset == 0) && (mZoneDst == false) && (zoneName != null)
                 && (zoneName.length() > 0)
                 && (Arrays.binarySearch(GMT_COUNTRY_CODES, isoCountryCode) < 0)) {
@@ -880,19 +886,25 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 // Adjust the saved NITZ time to account for tzOffset.
                 mSavedTime = mSavedTime - tzOffset;
             }
+            if (DBG) log("fixTimeZone: using default TimeZone");
         } else if (isoCountryCode.equals("")) {
             // Country code not found. This is likely a test network.
             // Get a TimeZone based only on the NITZ parameters (best guess).
             zone = getNitzTimeZone(mZoneOffset, mZoneDst, mZoneTime);
+            if (DBG) log("fixTimeZone: using NITZ TimeZone");
         } else {
             zone = TimeUtils.getTimeZone(mZoneOffset, mZoneDst, mZoneTime, isoCountryCode);
+            if (DBG) log("fixTimeZone: using getTimeZone(off, dst, time, iso)");
         }
 
         mNeedFixZone = false;
 
         if (zone != null) {
+            log("fixTimeZone: zone != null zone.getID=" + zone.getID());
             if (getAutoTimeZone()) {
                 setAndBroadcastNetworkSetTimeZone(zone.getID());
+            } else {
+                log("fixTimeZone: zone == null");
             }
             saveNitzTimeZone(zone.getID());
         }
@@ -985,14 +997,23 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ALPHA,
                     ss.getOperatorAlphaLong());
 
+            String prevOperatorNumeric =
+                    SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, "");
             operatorNumeric = ss.getOperatorNumeric();
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, operatorNumeric);
 
             if (operatorNumeric == null) {
+                if (DBG) {
+                    log("pollStateDone: operatorNumeric=" + operatorNumeric +
+                            " prevOperatorNumeric=" + prevOperatorNumeric +
+                            " mNeedFixZone=" + mNeedFixZone +
+                            " clear PROPERTY_OPERATOR_ISO_COUNTRY");
+                }
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
                 mGotCountryCode = false;
             } else {
                 String isoCountryCode = "";
+                String mcc = operatorNumeric.substring(0, 3);
                 try{
                     isoCountryCode = MccTable.countryCodeForMcc(Integer.parseInt(
                             operatorNumeric.substring(0,3)));
@@ -1001,11 +1022,20 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 } catch ( StringIndexOutOfBoundsException ex) {
                     loge("pollStateDone: countryCodeForMcc error" + ex);
                 }
+                if (DBG) {
+                    log("pollStateDone: operatorNumeric=" + operatorNumeric +
+                            " prevOperatorNumeric=" + prevOperatorNumeric +
+                            " mNeedFixZone=" + mNeedFixZone +
+                            " mcc=" + mcc + " iso-cc=" + isoCountryCode);
+                }
 
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY,
                         isoCountryCode);
                 mGotCountryCode = true;
-                if (mNeedFixZone) {
+
+                // Fix the time zone If the operator changed or we need to fix it because
+                // when the NITZ time came in we didn't know the country code.
+                if ( ! operatorNumeric.equals(prevOperatorNumeric) || mNeedFixZone) {
                     fixTimeZone(isoCountryCode);
                 }
             }
@@ -1316,7 +1346,6 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             String iso = SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY);
 
             if (zone == null) {
-
                 if (mGotCountryCode) {
                     if (iso != null && iso.length() > 0) {
                         zone = TimeUtils.getTimeZone(tzOffset, dst != 0,
@@ -1332,15 +1361,20 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 }
             }
 
-            if (zone == null) {
-                // We got the time before the country, so we don't know
-                // how to identify the DST rules yet.  Save the information
-                // and hope to fix it up later.
+            if ((zone == null) || (mZoneOffset != tzOffset) || (mZoneDst != (dst != 0))){
+                // We got the time before the country or the zone has changed
+                // so we don't know how to identify the DST rules yet.  Save
+                // the information and hope to fix it up later.
 
                 mNeedFixZone = true;
                 mZoneOffset  = tzOffset;
                 mZoneDst     = dst != 0;
                 mZoneTime    = c.getTimeInMillis();
+            }
+            if (DBG) {
+                log("NITZ: tzOffset=" + tzOffset + " dst=" + dst + " zone=" + zone.getID() +
+                        " iso=" + iso + " mGotCountryCode=" + mGotCountryCode +
+                        " mNeedFixZone=" + mNeedFixZone);
             }
 
             if (zone != null) {
@@ -1461,6 +1495,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
      * @param zoneId timezone set by carrier
      */
     private void setAndBroadcastNetworkSetTimeZone(String zoneId) {
+        if (DBG) log("setAndBroadcastNetworkSetTimeZone: setTimeZone=" + zoneId);
         AlarmManager alarm =
             (AlarmManager) phone.getContext().getSystemService(Context.ALARM_SERVICE);
         alarm.setTimeZone(zoneId);
@@ -1477,6 +1512,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
      * @param time time set by network
      */
     private void setAndBroadcastNetworkSetTime(long time) {
+        if (DBG) log("setAndBroadcastNetworkSetTime: time=" + time + "ms");
         SystemClock.setCurrentTimeMillis(time);
         Intent intent = new Intent(TelephonyIntents.ACTION_NETWORK_SET_TIME);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);

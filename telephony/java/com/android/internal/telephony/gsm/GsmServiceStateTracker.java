@@ -852,12 +852,16 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ALPHA,
                 ss.getOperatorAlphaLong());
 
+            String prevOperatorNumeric =
+                    SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, "");
             operatorNumeric = ss.getOperatorNumeric();
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, operatorNumeric);
 
             if (operatorNumeric == null) {
                 if (DBG) {
-                    log("pollStateDone: operatorNumeric is null:" +
+                    log("pollStateDone: operatorNumeric=" + operatorNumeric +
+                            " prevOperatorNumeric=" + prevOperatorNumeric +
+                            " mNeedFixZone=" + mNeedFixZone +
                             " clear PROPERTY_OPERATOR_ISO_COUNTRY");
                 }
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
@@ -875,7 +879,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 }
                 if (DBG) {
                     log("pollStateDone: operatorNumeric=" + operatorNumeric +
-                            " mcc=" + mcc + " iso=" + iso);
+                            " prevOperatorNumeric=" + prevOperatorNumeric +
+                            " mNeedFixZone=" + mNeedFixZone +
+                            " mcc=" + mcc + " iso-cc=" + iso);
                 }
 
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, iso);
@@ -895,7 +901,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     if ((uniqueZones.size() == 1) || testOneUniqueOffsetPath) {
                         zone = uniqueZones.get(0);
                         if (DBG) {
-                           log("pollStateDone: no nitz but one TZ for iso=" + iso +
+                           log("pollStateDone: no nitz but one TZ for iso-cc=" + iso +
                                    " with zone.getID=" + zone.getID() +
                                    " testOneUniqueOffsetPath=" + testOneUniqueOffsetPath);
                         }
@@ -903,22 +909,24 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     } else {
                         if (DBG) {
                             log("pollStateDone: there are " + uniqueZones.size() +
-                                " unique offsets for iso='" + iso +
+                                " unique offsets for iso-cc='" + iso +
                                 " testOneUniqueOffsetPath=" + testOneUniqueOffsetPath +
                                 "', do nothing");
                         }
                     }
                 }
 
-                if (mNeedFixZone) {
+                // Fix the time zone If the operator changed or we need to fix it because
+                // when the NITZ time came in we didn't know the country code.
+                if ( ! operatorNumeric.equals(prevOperatorNumeric) || mNeedFixZone) {
                     // If the offset is (0, false) and the timezone property
                     // is set, use the timezone property rather than
                     // GMT.
                     String zoneName = SystemProperties.get(TIMEZONE_PROPERTY);
                     if (DBG) {
-                        log("pollStateDone: mNeedFixZone==true zoneName='" + zoneName +
+                        log("pollStateDone: fix time zone zoneName='" + zoneName +
                             "' mZoneOffset=" + mZoneOffset + " mZoneDst=" + mZoneDst +
-                            " iso='" + iso +
+                            " iso-cc='" + iso +
                             "' iso-cc-idx=" + Arrays.binarySearch(GMT_COUNTRY_CODES, iso));
                     }
                     if ((mZoneOffset == 0) && (mZoneDst == false) &&
@@ -956,15 +964,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                         saveNitzTimeZone(zone.getID());
                     } else {
                         log("pollStateDone: zone == null");
-                    }
-                } else {
-                    if (DBG) {
-                        String zoneName = SystemProperties.get(TIMEZONE_PROPERTY);
-                        zone = TimeZone.getDefault();
-                        log("pollStateDone: mNeedFixZone==false zoneName='" + zoneName +
-                                "' mZoneOffset=" + mZoneOffset + " mZoneDst=" + mZoneDst +
-                                " iso='" + iso +
-                                "' iso-cc-idx=" + Arrays.binarySearch(GMT_COUNTRY_CODES, iso));
                     }
                 }
             }
@@ -1442,10 +1441,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 }
             }
 
-            if (zone == null) {
-                // We got the time before the country, so we don't know
-                // how to identify the DST rules yet.  Save the information
-                // and hope to fix it up later.
+            if ((zone == null) || (mZoneOffset != tzOffset) || (mZoneDst != (dst != 0))){
+                // We got the time before the country or the zone has changed
+                // so we don't know how to identify the DST rules yet.  Save
+                // the information and hope to fix it up later.
 
                 mNeedFixZone = true;
                 mZoneOffset  = tzOffset;
@@ -1556,6 +1555,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * @param zoneId timezone set by carrier
      */
     private void setAndBroadcastNetworkSetTimeZone(String zoneId) {
+        if (DBG) log("setAndBroadcastNetworkSetTimeZone: setTimeZone=" + zoneId);
         AlarmManager alarm =
             (AlarmManager) phone.getContext().getSystemService(Context.ALARM_SERVICE);
         alarm.setTimeZone(zoneId);
@@ -1576,6 +1576,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * @param time time set by network
      */
     private void setAndBroadcastNetworkSetTime(long time) {
+        if (DBG) log("setAndBroadcastNetworkSetTime: time=" + time + "ms");
         SystemClock.setCurrentTimeMillis(time);
         Intent intent = new Intent(TelephonyIntents.ACTION_NETWORK_SET_TIME);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
