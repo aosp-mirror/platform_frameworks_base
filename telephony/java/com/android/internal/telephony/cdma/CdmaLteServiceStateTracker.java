@@ -28,6 +28,7 @@ import android.telephony.ServiceState;
 import android.telephony.cdma.CdmaCellLocation;
 import android.os.AsyncResult;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.Telephony.Intents;
 
 import android.text.TextUtils;
@@ -370,14 +371,23 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ALPHA,
                     ss.getOperatorAlphaLong());
 
+            String prevOperatorNumeric =
+                    SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, "");
             operatorNumeric = ss.getOperatorNumeric();
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, operatorNumeric);
 
             if (operatorNumeric == null) {
+                if (DBG) {
+                    log("pollStateDone: operatorNumeric=" + operatorNumeric +
+                            " prevOperatorNumeric=" + prevOperatorNumeric +
+                            " mNeedFixZone=" + mNeedFixZone +
+                            " clear PROPERTY_OPERATOR_ISO_COUNTRY");
+                }
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
                 mGotCountryCode = false;
             } else {
                 String isoCountryCode = "";
+                String mcc = operatorNumeric.substring(0, 3);
                 try {
                     isoCountryCode = MccTable.countryCodeForMcc(Integer.parseInt(operatorNumeric
                             .substring(0, 3)));
@@ -386,11 +396,20 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 } catch (StringIndexOutOfBoundsException ex) {
                     loge("countryCodeForMcc error" + ex);
                 }
+                if (DBG) {
+                    log("pollStateDone: operatorNumeric=" + operatorNumeric +
+                            " prevOperatorNumeric=" + prevOperatorNumeric +
+                            " mNeedFixZone=" + mNeedFixZone +
+                            " mcc=" + mcc + " iso-cc=" + isoCountryCode);
+                }
 
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY,
                         isoCountryCode);
                 mGotCountryCode = true;
-                if (mNeedFixZone) {
+
+                // Fix the time zone If the operator changed or we need to fix it because
+                // when the NITZ time came in we didn't know the country code.
+                if ( ! operatorNumeric.equals(prevOperatorNumeric) || mNeedFixZone) {
                     fixTimeZone(isoCountryCode);
                 }
             }
