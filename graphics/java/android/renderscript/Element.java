@@ -146,7 +146,8 @@ public class Element extends BaseObj {
         RS_PROGRAM_FRAGMENT (1006, 4),
         RS_PROGRAM_VERTEX (1007, 4),
         RS_PROGRAM_RASTER (1008, 4),
-        RS_PROGRAM_STORE (1009, 4);
+        RS_PROGRAM_STORE (1009, 4),
+        RS_FONT (1010, 4);
 
         int mID;
         int mSize;
@@ -455,6 +456,13 @@ public class Element extends BaseObj {
             rs.mElement_PROGRAM_STORE = createUser(rs, DataType.RS_PROGRAM_STORE);
         }
         return rs.mElement_PROGRAM_STORE;
+    }
+
+    public static Element FONT(RenderScript rs) {
+        if(rs.mElement_FONT == null) {
+            rs.mElement_FONT = createUser(rs, DataType.RS_FONT);
+        }
+        return rs.mElement_FONT;
     }
 
 

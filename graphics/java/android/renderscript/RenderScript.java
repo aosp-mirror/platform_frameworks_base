@@ -664,6 +664,7 @@ public class RenderScript {
     Element mElement_PROGRAM_VERTEX;
     Element mElement_PROGRAM_RASTER;
     Element mElement_PROGRAM_STORE;
+    Element mElement_FONT;
 
     Element mElement_A_8;
     Element mElement_RGB_565;
