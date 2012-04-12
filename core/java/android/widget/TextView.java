@@ -3176,22 +3176,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (text instanceof Spannable && !mAllowTransformationLengthChange) {
             Spannable sp = (Spannable) text;
 
-            // Remove any ChangeWatchers that might have come
-            // from other TextViews.
+            // Remove any ChangeWatchers that might have come from other TextViews.
             final ChangeWatcher[] watchers = sp.getSpans(0, sp.length(), ChangeWatcher.class);
             final int count = watchers.length;
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++) {
                 sp.removeSpan(watchers[i]);
+            }
 
-            if (mChangeWatcher == null)
-                mChangeWatcher = new ChangeWatcher();
+            if (mChangeWatcher == null) mChangeWatcher = new ChangeWatcher();
 
             sp.setSpan(mChangeWatcher, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE |
                        (CHANGE_WATCHER_PRIORITY << Spanned.SPAN_PRIORITY_SHIFT));
 
-            if (mEditor != null && getEditor().mKeyListener != null) {
-                sp.setSpan(getEditor().mKeyListener, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-            }
+            if (mEditor != null) mEditor.addSpanWatchers(sp);
 
             if (mTransformation != null) {
                 sp.setSpan(mTransformation, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
@@ -5231,7 +5228,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public void setExtracting(ExtractedTextRequest req) {
         if (getEditor().mInputMethodState != null) {
-            getEditor().mInputMethodState.mExtracting = req;
+            getEditor().mInputMethodState.mExtractedTextRequest = req;
         }
         // This would stop a possible selection mode, but no such mode is started in case
         // extracted mode will start. Some text is selected though, and will trigger an action mode
@@ -6876,7 +6873,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (what instanceof ParcelableSpan) {
             // If this is a span that can be sent to a remote process,
             // the current extract editor would be interested in it.
-            if (ims != null && ims.mExtracting != null) {
+            if (ims != null && ims.mExtractedTextRequest != null) {
                 if (ims.mBatchEditNesting != 0) {
                     if (oldStart >= 0) {
                         if (ims.mChangedStart > oldStart) {
@@ -6897,7 +6894,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } else {
                     if (DEBUG_EXTRACT) Log.v(LOG_TAG, "Span change outside of batch: "
                             + oldStart + "-" + oldEnd + ","
-                            + newStart + "-" + newEnd + what);
+                            + newStart + "-" + newEnd + " " + what);
                     ims.mContentChanged = true;
                 }
             }

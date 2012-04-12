@@ -47,7 +47,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.method.KeyListener;
 import android.text.method.MetaKeyKeyListener;
 import android.text.method.MovementMethod;
@@ -183,8 +182,6 @@ public class Editor {
 
     Editor(TextView textView) {
         mTextView = textView;
-        mEasyEditSpanController = new EasyEditSpanController();
-        mTextView.addTextChangedListener(mEasyEditSpanController);
     }
 
     void onAttachedToWindow() {
@@ -1120,7 +1117,7 @@ public class Editor {
             if (contentChanged || ims.mSelectionModeChanged) {
                 ims.mContentChanged = false;
                 ims.mSelectionModeChanged = false;
-                final ExtractedTextRequest req = ims.mExtracting;
+                final ExtractedTextRequest req = ims.mExtractedTextRequest;
                 if (req != null) {
                     InputMethodManager imm = InputMethodManager.peekInstance();
                     if (imm != null) {
@@ -1132,13 +1129,14 @@ public class Editor {
                             ims.mChangedStart = EXTRACT_NOTHING;
                         }
                         if (extractTextInternal(req, ims.mChangedStart, ims.mChangedEnd,
-                                ims.mChangedDelta, ims.mTmpExtracted)) {
+                                ims.mChangedDelta, ims.mExtractedText)) {
                             if (TextView.DEBUG_EXTRACT) Log.v(TextView.LOG_TAG,
                                     "Reporting extracted start=" +
-                                    ims.mTmpExtracted.partialStartOffset +
-                                    " end=" + ims.mTmpExtracted.partialEndOffset +
-                                    ": " + ims.mTmpExtracted.text);
-                            imm.updateExtractedText(mTextView, req.token, ims.mTmpExtracted);
+                                    ims.mExtractedText.partialStartOffset +
+                                    " end=" + ims.mExtractedText.partialEndOffset +
+                                    ": " + ims.mExtractedText.text);
+
+                            imm.updateExtractedText(mTextView, req.token, ims.mExtractedText);
                             ims.mChangedStart = EXTRACT_UNKNOWN;
                             ims.mChangedEnd = EXTRACT_UNKNOWN;
                             ims.mChangedDelta = 0;
@@ -1734,138 +1732,92 @@ public class Editor {
         }
     }
 
+    public void addSpanWatchers(Spannable text) {
+        final int textLength = text.length();
+
+        if (mKeyListener != null) {
+            text.setSpan(mKeyListener, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        }
+
+        if (mEasyEditSpanController == null) {
+            mEasyEditSpanController = new EasyEditSpanController();
+        }
+        text.setSpan(mEasyEditSpanController, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+    }
+
     /**
      * Controls the {@link EasyEditSpan} monitoring when it is added, and when the related
      * pop-up should be displayed.
      */
-    class EasyEditSpanController implements TextWatcher {
+    class EasyEditSpanController implements SpanWatcher {
 
         private static final int DISPLAY_TIMEOUT_MS = 3000; // 3 secs
 
         private EasyEditPopupWindow mPopupWindow;
 
-        private EasyEditSpan mEasyEditSpan;
-
         private Runnable mHidePopup;
+
+        @Override
+        public void onSpanAdded(Spannable text, Object span, int start, int end) {
+            if (span instanceof EasyEditSpan) {
+                if (mPopupWindow == null) {
+                    mPopupWindow = new EasyEditPopupWindow();
+                    mHidePopup = new Runnable() {
+                        @Override
+                        public void run() {
+                            hide();
+                        }
+                    };
+                }
+
+                // Make sure there is only at most one EasyEditSpan in the text
+                if (mPopupWindow.mEasyEditSpan != null) {
+                    text.removeSpan(mPopupWindow.mEasyEditSpan);
+                }
+
+                mPopupWindow.setEasyEditSpan((EasyEditSpan) span);
+
+                if (mTextView.getWindowVisibility() != View.VISIBLE) {
+                    // The window is not visible yet, ignore the text change.
+                    return;
+                }
+
+                if (mTextView.getLayout() == null) {
+                    // The view has not been laid out yet, ignore the text change
+                    return;
+                }
+
+                if (extractedTextModeWillBeStarted()) {
+                    // The input is in extract mode. Do not handle the easy edit in
+                    // the original TextView, as the ExtractEditText will do
+                    return;
+                }
+
+                mPopupWindow.show();
+                mTextView.removeCallbacks(mHidePopup);
+                mTextView.postDelayed(mHidePopup, DISPLAY_TIMEOUT_MS);
+            }
+        }
+
+        @Override
+        public void onSpanRemoved(Spannable text, Object span, int start, int end) {
+            if (mPopupWindow != null && span == mPopupWindow.mEasyEditSpan) {
+                hide();
+            }
+        }
+
+        @Override
+        public void onSpanChanged(Spannable text, Object span, int previousStart, int previousEnd,
+                int newStart, int newEnd) {
+            if (mPopupWindow != null && span == mPopupWindow.mEasyEditSpan) {
+                text.removeSpan(mPopupWindow.mEasyEditSpan);
+            }
+        }
 
         public void hide() {
             if (mPopupWindow != null) {
                 mPopupWindow.hide();
                 mTextView.removeCallbacks(mHidePopup);
-            }
-            removeSpans(mTextView.getText());
-            mEasyEditSpan = null;
-        }
-
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            // Intentionally empty
-        }
-
-        public void afterTextChanged(Editable s) {
-            // Intentionally empty
-        }
-
-        /**
-         * Monitors the changes in the text.
-         *
-         * <p>{@link SpanWatcher#onSpanAdded(Spannable, Object, int, int)} cannot be used,
-         * as the notifications are not sent when a spannable (with spans) is inserted.
-         */
-        public void onTextChanged(CharSequence buffer, int start, int before, int after) {
-            adjustSpans(buffer, start, after);
-
-            if (mTextView.getWindowVisibility() != View.VISIBLE) {
-                // The window is not visible yet, ignore the text change.
-                return;
-            }
-
-            if (mTextView.getLayout() == null) {
-                // The view has not been layout yet, ignore the text change
-                return;
-            }
-
-            InputMethodManager imm = InputMethodManager.peekInstance();
-            if (!(mTextView instanceof ExtractEditText) && imm != null && imm.isFullscreenMode()) {
-                // The input is in extract mode. We do not have to handle the easy edit in the
-                // original TextView, as the ExtractEditText will do
-                return;
-            }
-
-            // Remove the current easy edit span, as the text changed, and remove the pop-up
-            // (if any)
-            if (mEasyEditSpan != null) {
-                if (buffer instanceof Spannable) {
-                    ((Spannable) buffer).removeSpan(mEasyEditSpan);
-                }
-                mEasyEditSpan = null;
-            }
-            if (mPopupWindow != null && mPopupWindow.isShowing()) {
-                mPopupWindow.hide();
-            }
-
-            // Display the new easy edit span (if any).
-            if (buffer instanceof Spanned) {
-                mEasyEditSpan = getSpan((Spanned) buffer);
-                if (mEasyEditSpan != null) {
-                    if (mPopupWindow == null) {
-                        mPopupWindow = new EasyEditPopupWindow();
-                        mHidePopup = new Runnable() {
-                            @Override
-                            public void run() {
-                                hide();
-                            }
-                        };
-                    }
-                    mPopupWindow.show(mEasyEditSpan);
-                    mTextView.removeCallbacks(mHidePopup);
-                    mTextView.postDelayed(mHidePopup, DISPLAY_TIMEOUT_MS);
-                }
-            }
-        }
-
-        /**
-         * Adjusts the spans by removing all of them except the last one.
-         */
-        private void adjustSpans(CharSequence buffer, int start, int after) {
-            // This method enforces that only one easy edit span is attached to the text.
-            // A better way to enforce this would be to listen for onSpanAdded, but this method
-            // cannot be used in this scenario as no notification is triggered when a text with
-            // spans is inserted into a text.
-            if (buffer instanceof Spannable) {
-                Spannable spannable = (Spannable) buffer;
-                EasyEditSpan[] spans = spannable.getSpans(start, start + after, EasyEditSpan.class);
-                if (spans.length > 0) {
-                    // Assuming there was only one EasyEditSpan before, we only need check to
-                    // check for a duplicate if a new one is found in the modified interval
-                    spans = spannable.getSpans(0, spannable.length(),  EasyEditSpan.class);
-                    for (int i = 1; i < spans.length; i++) {
-                        spannable.removeSpan(spans[i]);
-                    }
-                }
-            }
-        }
-
-        /**
-         * Removes all the {@link EasyEditSpan} currently attached.
-         */
-        private void removeSpans(CharSequence buffer) {
-            if (buffer instanceof Spannable) {
-                Spannable spannable = (Spannable) buffer;
-                EasyEditSpan[] spans = spannable.getSpans(0, spannable.length(),
-                        EasyEditSpan.class);
-                for (int i = 0; i < spans.length; i++) {
-                    spannable.removeSpan(spans[i]);
-                }
-            }
-        }
-
-        private EasyEditSpan getSpan(Spanned spanned) {
-            EasyEditSpan[] easyEditSpans = spanned.getSpans(0, spanned.length(),
-                    EasyEditSpan.class);
-            if (easyEditSpans.length == 0) {
-                return null;
-            } else {
-                return easyEditSpans[0];
             }
         }
     }
@@ -1910,9 +1862,8 @@ public class Editor {
             mContentView.addView(mDeleteTextView);
         }
 
-        public void show(EasyEditSpan easyEditSpan) {
+        public void setEasyEditSpan(EasyEditSpan easyEditSpan) {
             mEasyEditSpan = easyEditSpan;
-            super.show();
         }
 
         @Override
@@ -3738,8 +3689,8 @@ public class Editor {
         Rect mCursorRectInWindow = new Rect();
         RectF mTmpRectF = new RectF();
         float[] mTmpOffset = new float[2];
-        ExtractedTextRequest mExtracting;
-        final ExtractedText mTmpExtracted = new ExtractedText();
+        ExtractedTextRequest mExtractedTextRequest;
+        final ExtractedText mExtractedText = new ExtractedText();
         int mBatchEditNesting;
         boolean mCursorChanged;
         boolean mSelectionModeChanged;
