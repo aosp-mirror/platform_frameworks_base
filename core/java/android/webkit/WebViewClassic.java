@@ -7896,8 +7896,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 if (viewRect.width() < getWidth() >> 1
                         || viewRect.height() < getHeight() >> 1) {
                     mTouchHighlightRegion.union(viewRect);
-                } else {
-                    Log.w(LOGTAG, "Skip the huge selection rect:"
+                } else if (DebugFlags.WEB_VIEW) {
+                    Log.d(LOGTAG, "Skip the huge selection rect:"
                             + viewRect);
                 }
             }
