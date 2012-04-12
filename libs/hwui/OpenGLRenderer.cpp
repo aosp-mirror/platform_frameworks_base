@@ -520,6 +520,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     layer->texCoords.set(0.0f, bounds.getHeight() / float(layer->getHeight()),
             bounds.getWidth() / float(layer->getWidth()), 0.0f);
     layer->setColorFilter(mColorFilter);
+    layer->setBlend(true);
 
     // Save the layer in the snapshot
     snapshot->flags |= Snapshot::kFlagIsLayer;
@@ -1056,6 +1057,10 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
         dirtyClip();
     }
     return !mSnapshot->clipRect->isEmpty();
+}
+
+Rect* OpenGLRenderer::getClipRect() {
+    return mSnapshot->clipRect;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

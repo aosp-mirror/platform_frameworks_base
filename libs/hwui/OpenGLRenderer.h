@@ -101,6 +101,7 @@ public:
     ANDROID_API const Rect& getClipBounds();
     ANDROID_API bool quickReject(float left, float top, float right, float bottom);
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
+    virtual Rect* getClipRect();
 
     virtual status_t drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
             Rect& dirty, int32_t flags, uint32_t level = 0);
