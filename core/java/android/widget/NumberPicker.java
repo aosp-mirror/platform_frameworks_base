@@ -1098,12 +1098,7 @@ public class NumberPicker extends LinearLayout {
      * @see #setMaxValue(int)
      */
     public void setValue(int value) {
-        if (mValue == value) {
-            return;
-        }
         setValueInternal(value, false);
-        initializeSelectorWheelIndices();
-        invalidate();
     }
 
     /**
@@ -1500,6 +1495,8 @@ public class NumberPicker extends LinearLayout {
         if (notifyChange) {
             notifyChange(previous, current);
         }
+        initializeSelectorWheelIndices();
+        invalidate();
     }
 
     /**
