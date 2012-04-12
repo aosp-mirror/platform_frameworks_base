@@ -9792,7 +9792,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @attr ref android.R.styleable#View_scrollbarSize
      */
     public int getScrollBarSize() {
-        return mScrollCache == null ? ViewConfiguration.getScrollBarSize() :
+        return mScrollCache == null ? ViewConfiguration.get(mContext).getScaledScrollBarSize() :
                 mScrollCache.scrollBarSize;
     }
 
@@ -12971,6 +12971,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *        background
      */
     public void setBackground(Drawable background) {
+        //noinspection deprecation
         setBackgroundDrawable(background);
     }
 
@@ -14296,7 +14297,15 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void setAnimation(Animation animation) {
         mCurrentAnimation = animation;
+
         if (animation != null) {
+            // If the screen is off assume the animation start time is now instead of
+            // the next frame we draw. Keeping the START_ON_FIRST_FRAME start time
+            // would cause the animation to start when the screen turns back on
+            if (mAttachInfo != null && !mAttachInfo.mScreenOn &&
+                    animation.getStartTime() == Animation.START_ON_FIRST_FRAME) {
+                animation.setStartTime(AnimationUtils.currentAnimationTimeMillis());
+            }
             animation.reset();
         }
     }
