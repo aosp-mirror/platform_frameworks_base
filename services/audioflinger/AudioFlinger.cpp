@@ -3936,20 +3936,38 @@ void AudioFlinger::PlaybackThread::TimedTrack::trimTimedBufferQueue_l() {
 
     size_t trimEnd;
     for (trimEnd = 0; trimEnd < mTimedBufferQueue.size(); trimEnd++) {
-        int64_t frameCount = mTimedBufferQueue[trimEnd].buffer()->size()
-                           / mCblk->frameSize;
         int64_t bufEnd;
 
-        if (!mMediaTimeToSampleTransform.doReverseTransform(frameCount,
-                                                            &bufEnd)) {
-            LOGE("Failed to convert frame count of %lld to media time duration"
-                 " (scale factor %d/%u) in %s", frameCount,
-                 mMediaTimeToSampleTransform.a_to_b_numer,
-                 mMediaTimeToSampleTransform.a_to_b_denom,
-                 __PRETTY_FUNCTION__);
-            break;
+        if ((trimEnd + 1) < mTimedBufferQueue.size()) {
+            // We have a next buffer.  Just use its PTS as the PTS of the frame
+            // following the last frame in this buffer.  If the stream is sparse
+            // (ie, there are deliberate gaps left in the stream which should be
+            // filled with silence by the TimedAudioTrack), then this can result
+            // in one extra buffer being left un-trimmed when it could have
+            // been.  In general, this is not typical, and we would rather
+            // optimized away the TS calculation below for the more common case
+            // where PTSes are contiguous.
+            bufEnd = mTimedBufferQueue[trimEnd + 1].pts();
+        } else {
+            // We have no next buffer.  Compute the PTS of the frame following
+            // the last frame in this buffer by computing the duration of of
+            // this frame in media time units and adding it to the PTS of the
+            // buffer.
+            int64_t frameCount = mTimedBufferQueue[trimEnd].buffer()->size()
+                               / mCblk->frameSize;
+
+            if (!mMediaTimeToSampleTransform.doReverseTransform(frameCount,
+                                                                &bufEnd)) {
+                LOGE("Failed to convert frame count of %lld to media time"
+                     " duration" " (scale factor %d/%u) in %s",
+                     frameCount,
+                     mMediaTimeToSampleTransform.a_to_b_numer,
+                     mMediaTimeToSampleTransform.a_to_b_denom,
+                     __PRETTY_FUNCTION__);
+                break;
+            }
+            bufEnd += mTimedBufferQueue[trimEnd].pts();
         }
-        bufEnd += mTimedBufferQueue[trimEnd].pts();
 
         if (bufEnd > mediaTimeNow)
             break;
