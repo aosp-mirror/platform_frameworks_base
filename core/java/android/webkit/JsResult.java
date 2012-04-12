@@ -22,8 +22,6 @@ package android.webkit;
  * and provides a means for the client to indicate whether this action should proceed.
  */
 public class JsResult {
-    // This is a basic result of a confirm or prompt dialog.
-    protected boolean mResult;
     /**
      * Callback interface, implemented by the WebViewProvider implementation to receive
      * notifications when the JavaScript result represented by a JsResult instance has
@@ -32,11 +30,10 @@ public class JsResult {
     public interface ResultReceiver {
         public void onJsResultComplete(JsResult result);
     }
-    /**
-     * This is the caller of the prompt and is the object that is waiting.
-     * @hide
-     */
-    protected final ResultReceiver mReceiver;
+    // This is the caller of the prompt and is the object that is waiting.
+    private final ResultReceiver mReceiver;
+    // This is a basic result of a confirm or prompt dialog.
+    private boolean mResult;
 
     /**
      * Handle the result if the user cancelled the dialog.
@@ -69,7 +66,7 @@ public class JsResult {
     }
 
     /* Notify the caller that the JsResult has completed */
-    protected final void wakeUp() {
+    private final void wakeUp() {
         mReceiver.onJsResultComplete(this);
     }
 }

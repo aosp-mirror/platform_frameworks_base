@@ -26,7 +26,7 @@ import android.util.Log;
  * Manages the cookies used by an application's {@link WebView} instances.
  * Cookies are manipulated according to RFC2109.
  */
-public final class CookieManager {
+public class CookieManager {
 
     private static CookieManager sRef;
 
