@@ -1125,6 +1125,7 @@
   <!-- From android.policy -->
   <java-symbol type="anim" name="app_starting_exit" />
   <java-symbol type="anim" name="lock_screen_behind_enter" />
+  <java-symbol type="anim" name="lock_screen_wallpaper_behind_enter" />
   <java-symbol type="anim" name="dock_top_enter" />
   <java-symbol type="anim" name="dock_top_exit" />
   <java-symbol type="anim" name="dock_bottom_enter" />

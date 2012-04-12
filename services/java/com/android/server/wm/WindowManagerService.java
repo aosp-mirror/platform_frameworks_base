@@ -7894,28 +7894,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_WALLPAPER) Slog.v(TAG, "****** OLD: " + oldWallpaper
                 + " NEW: " + mWallpaperTarget
                 + " LOWER: " + mLowerWallpaperTarget);
-        if (mLowerWallpaperTarget == null) {
-            // Whoops, we don't need a special wallpaper animation.
-            // Clear them out.
-            mAnimator.mForceHiding = false;
-            for (int i=mWindows.size()-1; i>=0; i--) {
-                WindowState w = mWindows.get(i);
-                if (w.mHasSurface) {
-                    final WindowManager.LayoutParams attrs = w.mAttrs;
-                    if (mPolicy.doesForceHide(w, attrs) && w.isVisibleLw()) {
-                        if (DEBUG_FOCUS) Slog.i(TAG, "win=" + w + " force hides other windows");
-                        mAnimator.mForceHiding = true;
-                    } else if (mPolicy.canBeForceHidden(w, attrs)) {
-                        if (!w.mWinAnimator.mAnimating) {
-                            // We set the animation above so it
-                            // is not yet running.
-                            // TODO(cmautner): We lose the enter animation when this occurs.
-                            w.mWinAnimator.clearAnimation();
-                        }
-                    }
-                }
-            }
-        }
         return changes;
     }
 
