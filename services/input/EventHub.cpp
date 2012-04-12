@@ -117,6 +117,8 @@ static void setDescriptor(InputDeviceIdentifier& identifier) {
         }
     }
     identifier.descriptor = sha1(rawDescriptor);
+    ALOGV("Created descriptor: raw=%s, cooked=%s", rawDescriptor.string(),
+            identifier.descriptor.string());
 }
 
 // --- Global Functions ---
@@ -434,55 +436,32 @@ bool EventHub::markSupportedKeyCodes(int32_t deviceId, size_t numCodes,
     return false;
 }
 
-status_t EventHub::mapKey(int32_t deviceId, int scancode,
-        int32_t* outKeycode, uint32_t* outFlags) const
-{
+status_t EventHub::mapKey(int32_t deviceId, int32_t scanCode, int32_t usageCode,
+        int32_t* outKeycode, uint32_t* outFlags) const {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
-    
+
     if (device && device->keyMap.haveKeyLayout()) {
-        status_t err = device->keyMap.keyLayoutMap->mapKey(scancode, outKeycode, outFlags);
+        status_t err = device->keyMap.keyLayoutMap->mapKey(
+                scanCode, usageCode, outKeycode, outFlags);
         if (err == NO_ERROR) {
             return NO_ERROR;
         }
     }
-    
-    if (mBuiltInKeyboardId != NO_BUILT_IN_KEYBOARD) {
-        device = getDeviceLocked(mBuiltInKeyboardId);
-        
-        if (device && device->keyMap.haveKeyLayout()) {
-            status_t err = device->keyMap.keyLayoutMap->mapKey(scancode, outKeycode, outFlags);
-            if (err == NO_ERROR) {
-                return NO_ERROR;
-            }
-        }
-    }
-    
+
     *outKeycode = 0;
     *outFlags = 0;
     return NAME_NOT_FOUND;
 }
 
-status_t EventHub::mapAxis(int32_t deviceId, int scancode, AxisInfo* outAxisInfo) const
-{
+status_t EventHub::mapAxis(int32_t deviceId, int32_t scanCode, AxisInfo* outAxisInfo) const {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
 
     if (device && device->keyMap.haveKeyLayout()) {
-        status_t err = device->keyMap.keyLayoutMap->mapAxis(scancode, outAxisInfo);
+        status_t err = device->keyMap.keyLayoutMap->mapAxis(scanCode, outAxisInfo);
         if (err == NO_ERROR) {
             return NO_ERROR;
-        }
-    }
-
-    if (mBuiltInKeyboardId != NO_BUILT_IN_KEYBOARD) {
-        device = getDeviceLocked(mBuiltInKeyboardId);
-
-        if (device && device->keyMap.haveKeyLayout()) {
-            status_t err = device->keyMap.keyLayoutMap->mapAxis(scancode, outAxisInfo);
-            if (err == NO_ERROR) {
-                return NO_ERROR;
-            }
         }
     }
 
@@ -729,16 +708,8 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
 #endif
                         event->deviceId = deviceId;
                         event->type = iev.type;
-                        event->scanCode = iev.code;
+                        event->code = iev.code;
                         event->value = iev.value;
-                        event->keyCode = AKEYCODE_UNKNOWN;
-                        event->flags = 0;
-                        if (iev.type == EV_KEY && device->keyMap.haveKeyLayout()) {
-                            status_t err = device->keyMap.keyLayoutMap->mapKey(iev.code,
-                                        &event->keyCode, &event->flags);
-                            ALOGV("iev.code=%d keyCode=%d flags=0x%08x err=%d\n",
-                                    iev.code, event->keyCode, event->flags, err);
-                        }
                         event += 1;
                     }
                     capacity -= count;
@@ -960,7 +931,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     ALOGV("  name:       \"%s\"\n", identifier.name.string());
     ALOGV("  location:   \"%s\"\n", identifier.location.string());
     ALOGV("  unique id:  \"%s\"\n", identifier.uniqueId.string());
-    ALOGV("  descriptor: \"%s\" (%s)\n", identifier.descriptor.string(), rawDescriptor.string());
+    ALOGV("  descriptor: \"%s\"\n", identifier.descriptor.string());
     ALOGV("  driver:     v%d.%d.%d\n",
         driverVersion >> 16, (driverVersion >> 8) & 0xff, driverVersion & 0xff);
 

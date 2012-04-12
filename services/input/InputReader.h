@@ -904,6 +904,8 @@ private:
     int32_t mMetaState;
     nsecs_t mDownTime; // time of most recent key down
 
+    int32_t mCurrentHidUsage; // most recent HID usage seen this packet, or 0 if none
+
     struct LedState {
         bool avail; // led is available
         bool on;    // we think the led is currently on

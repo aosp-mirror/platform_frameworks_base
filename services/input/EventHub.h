@@ -39,8 +39,8 @@
 
 /* Convenience constants. */
 
-#define BTN_FIRST 0x100  // first button scancode
-#define BTN_LAST 0x15f   // last button scancode
+#define BTN_FIRST 0x100  // first button code
+#define BTN_LAST 0x15f   // last button code
 
 namespace android {
 
@@ -58,10 +58,8 @@ struct RawEvent {
     nsecs_t when;
     int32_t deviceId;
     int32_t type;
-    int32_t scanCode;
-    int32_t keyCode;
+    int32_t code;
     int32_t value;
-    uint32_t flags;
 };
 
 /* Describes an absolute axis. */
@@ -173,10 +171,10 @@ public:
 
     virtual bool hasInputProperty(int32_t deviceId, int property) const = 0;
 
-    virtual status_t mapKey(int32_t deviceId, int scancode,
+    virtual status_t mapKey(int32_t deviceId, int32_t scanCode, int32_t usageCode,
             int32_t* outKeycode, uint32_t* outFlags) const = 0;
 
-    virtual status_t mapAxis(int32_t deviceId, int scancode,
+    virtual status_t mapAxis(int32_t deviceId, int32_t scanCode,
             AxisInfo* outAxisInfo) const = 0;
 
     // Sets devices that are excluded from opening.
@@ -252,10 +250,10 @@ public:
 
     virtual bool hasInputProperty(int32_t deviceId, int property) const;
 
-    virtual status_t mapKey(int32_t deviceId, int scancode,
+    virtual status_t mapKey(int32_t deviceId, int32_t scanCode, int32_t usageCode,
             int32_t* outKeycode, uint32_t* outFlags) const;
 
-    virtual status_t mapAxis(int32_t deviceId, int scancode,
+    virtual status_t mapAxis(int32_t deviceId, int32_t scanCode,
             AxisInfo* outAxisInfo) const;
 
     virtual void setExcludedDevices(const Vector<String8>& devices);

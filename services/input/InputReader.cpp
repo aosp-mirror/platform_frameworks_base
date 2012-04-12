@@ -946,14 +946,12 @@ void InputDevice::process(const RawEvent* rawEvents, size_t count) {
     size_t numMappers = mMappers.size();
     for (const RawEvent* rawEvent = rawEvents; count--; rawEvent++) {
 #if DEBUG_RAW_EVENTS
-        ALOGD("Input event: device=%d type=0x%04x scancode=0x%04x "
-                "keycode=0x%04x value=0x%08x flags=0x%08x",
-                rawEvent->deviceId, rawEvent->type, rawEvent->scanCode, rawEvent->keyCode,
-                rawEvent->value, rawEvent->flags);
+        ALOGD("Input event: device=%d type=0x%04x code=0x%04x value=0x%08x",
+                rawEvent->deviceId, rawEvent->type, rawEvent->code, rawEvent->value);
 #endif
 
         if (mDropUntilNextSync) {
-            if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_REPORT) {
+            if (rawEvent->type == EV_SYN && rawEvent->code == SYN_REPORT) {
                 mDropUntilNextSync = false;
 #if DEBUG_RAW_EVENTS
                 ALOGD("Recovered from input event buffer overrun.");
@@ -963,7 +961,7 @@ void InputDevice::process(const RawEvent* rawEvents, size_t count) {
                 ALOGD("Dropped input event while waiting for next input sync.");
 #endif
             }
-        } else if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_DROPPED) {
+        } else if (rawEvent->type == EV_SYN && rawEvent->code == SYN_DROPPED) {
             ALOGI("Detected input event buffer overrun for device %s.", getName().string());
             mDropUntilNextSync = true;
             reset(rawEvent->when);
@@ -1092,7 +1090,7 @@ void CursorButtonAccumulator::clearButtons() {
 
 void CursorButtonAccumulator::process(const RawEvent* rawEvent) {
     if (rawEvent->type == EV_KEY) {
-        switch (rawEvent->scanCode) {
+        switch (rawEvent->code) {
         case BTN_LEFT:
             mBtnLeft = rawEvent->value;
             break;
@@ -1159,7 +1157,7 @@ void CursorMotionAccumulator::clearRelativeAxes() {
 
 void CursorMotionAccumulator::process(const RawEvent* rawEvent) {
     if (rawEvent->type == EV_REL) {
-        switch (rawEvent->scanCode) {
+        switch (rawEvent->code) {
         case REL_X:
             mRelX = rawEvent->value;
             break;
@@ -1198,7 +1196,7 @@ void CursorScrollAccumulator::clearRelativeAxes() {
 
 void CursorScrollAccumulator::process(const RawEvent* rawEvent) {
     if (rawEvent->type == EV_REL) {
-        switch (rawEvent->scanCode) {
+        switch (rawEvent->code) {
         case REL_WHEEL:
             mRelWheel = rawEvent->value;
             break;
@@ -1261,7 +1259,7 @@ void TouchButtonAccumulator::clearButtons() {
 
 void TouchButtonAccumulator::process(const RawEvent* rawEvent) {
     if (rawEvent->type == EV_KEY) {
-        switch (rawEvent->scanCode) {
+        switch (rawEvent->code) {
         case BTN_TOUCH:
             mBtnTouch = rawEvent->value;
             break;
@@ -1467,7 +1465,7 @@ void SingleTouchMotionAccumulator::clearAbsoluteAxes() {
 
 void SingleTouchMotionAccumulator::process(const RawEvent* rawEvent) {
     if (rawEvent->type == EV_ABS) {
-        switch (rawEvent->scanCode) {
+        switch (rawEvent->code) {
         case ABS_X:
             mAbsX = rawEvent->value;
             break;
@@ -1551,7 +1549,7 @@ void MultiTouchMotionAccumulator::process(const RawEvent* rawEvent) {
     if (rawEvent->type == EV_ABS) {
         bool newSlot = false;
         if (mUsingSlotsProtocol) {
-            if (rawEvent->scanCode == ABS_MT_SLOT) {
+            if (rawEvent->code == ABS_MT_SLOT) {
                 mCurrentSlot = rawEvent->value;
                 newSlot = true;
             }
@@ -1570,7 +1568,7 @@ void MultiTouchMotionAccumulator::process(const RawEvent* rawEvent) {
         } else {
             Slot* slot = &mSlots[mCurrentSlot];
 
-            switch (rawEvent->scanCode) {
+            switch (rawEvent->code) {
             case ABS_MT_POSITION_X:
                 slot->mInUse = true;
                 slot->mAbsMTPositionX = rawEvent->value;
@@ -1626,7 +1624,7 @@ void MultiTouchMotionAccumulator::process(const RawEvent* rawEvent) {
                 break;
             }
         }
-    } else if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_MT_REPORT) {
+    } else if (rawEvent->type == EV_SYN && rawEvent->code == SYN_MT_REPORT) {
         // MultiTouch Sync: The driver has returned all data for *one* of the pointers.
         mCurrentSlot += 1;
     }
@@ -1757,7 +1755,7 @@ uint32_t SwitchInputMapper::getSources() {
 void SwitchInputMapper::process(const RawEvent* rawEvent) {
     switch (rawEvent->type) {
     case EV_SW:
-        processSwitch(rawEvent->when, rawEvent->scanCode, rawEvent->value);
+        processSwitch(rawEvent->when, rawEvent->code, rawEvent->value);
         break;
     }
 }
@@ -1849,6 +1847,7 @@ void KeyboardInputMapper::reset(nsecs_t when) {
     mMetaState = AMETA_NONE;
     mDownTime = 0;
     mKeyDowns.clear();
+    mCurrentHidUsage = 0;
 
     resetLedState();
 
@@ -1858,12 +1857,31 @@ void KeyboardInputMapper::reset(nsecs_t when) {
 void KeyboardInputMapper::process(const RawEvent* rawEvent) {
     switch (rawEvent->type) {
     case EV_KEY: {
-        int32_t scanCode = rawEvent->scanCode;
+        int32_t scanCode = rawEvent->code;
+        int32_t usageCode = mCurrentHidUsage;
+        mCurrentHidUsage = 0;
+
         if (isKeyboardOrGamepadKey(scanCode)) {
-            processKey(rawEvent->when, rawEvent->value != 0, rawEvent->keyCode, scanCode,
-                    rawEvent->flags);
+            int32_t keyCode;
+            uint32_t flags;
+            if (getEventHub()->mapKey(getDeviceId(), scanCode, usageCode, &keyCode, &flags)) {
+                keyCode = AKEYCODE_UNKNOWN;
+                flags = 0;
+            }
+            processKey(rawEvent->when, rawEvent->value != 0, keyCode, scanCode, flags);
         }
         break;
+    }
+    case EV_MSC: {
+        if (rawEvent->code == MSC_SCAN) {
+            mCurrentHidUsage = rawEvent->value;
+        }
+        break;
+    }
+    case EV_SYN: {
+        if (rawEvent->code == SYN_REPORT) {
+            mCurrentHidUsage = 0;
+        }
     }
     }
 }
@@ -2183,7 +2201,7 @@ void CursorInputMapper::process(const RawEvent* rawEvent) {
     mCursorMotionAccumulator.process(rawEvent);
     mCursorScrollAccumulator.process(rawEvent);
 
-    if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_REPORT) {
+    if (rawEvent->type == EV_SYN && rawEvent->code == SYN_REPORT) {
         sync(rawEvent->when);
     }
 }
@@ -3016,8 +3034,7 @@ void TouchInputMapper::configureVirtualKeys() {
         virtualKey.scanCode = virtualKeyDefinition.scanCode;
         int32_t keyCode;
         uint32_t flags;
-        if (getEventHub()->mapKey(getDeviceId(), virtualKey.scanCode,
-                & keyCode, & flags)) {
+        if (getEventHub()->mapKey(getDeviceId(), virtualKey.scanCode, 0, &keyCode, &flags)) {
             ALOGW(INDENT "VirtualKey %d: could not obtain key code, ignoring",
                     virtualKey.scanCode);
             mVirtualKeys.pop(); // drop the key
@@ -3311,7 +3328,7 @@ void TouchInputMapper::process(const RawEvent* rawEvent) {
     mCursorScrollAccumulator.process(rawEvent);
     mTouchButtonAccumulator.process(rawEvent);
 
-    if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_REPORT) {
+    if (rawEvent->type == EV_SYN && rawEvent->code == SYN_REPORT) {
         sync(rawEvent->when);
     }
 }
@@ -5920,7 +5937,7 @@ void JoystickInputMapper::reset(nsecs_t when) {
 void JoystickInputMapper::process(const RawEvent* rawEvent) {
     switch (rawEvent->type) {
     case EV_ABS: {
-        ssize_t index = mAxes.indexOfKey(rawEvent->scanCode);
+        ssize_t index = mAxes.indexOfKey(rawEvent->code);
         if (index >= 0) {
             Axis& axis = mAxes.editValueAt(index);
             float newValue, highNewValue;
@@ -5956,7 +5973,7 @@ void JoystickInputMapper::process(const RawEvent* rawEvent) {
     }
 
     case EV_SYN:
-        switch (rawEvent->scanCode) {
+        switch (rawEvent->code) {
         case SYN_REPORT:
             sync(rawEvent->when, false /*force*/);
             break;
