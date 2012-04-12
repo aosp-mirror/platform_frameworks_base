@@ -203,6 +203,27 @@ public final class NfcAdapter {
     /** @hide */
     public static final int STATE_TURNING_OFF = 4;
 
+    /** @hide */
+    public static final String ACTION_HANDOVER_TRANSFER_STARTED =
+            "android.nfc.action.HANDOVER_TRANSFER_STARTED";
+
+    /** @hide */
+    public static final String ACTION_HANDOVER_TRANSFER_DONE =
+            "android.nfc.action.HANDOVER_TRANSFER_DONE";
+
+    /** @hide */
+    public static final String EXTRA_HANDOVER_TRANSFER_STATUS =
+            "android.nfc.extra.HANDOVER_TRANSFER_STATUS";
+
+    /** @hide */
+    public static final int HANDOVER_TRANSFER_STATUS_SUCCESS = 0;
+    /** @hide */
+    public static final int HANDOVER_TRANSFER_STATUS_FAILURE = 1;
+
+    /** @hide */
+    public static final String EXTRA_HANDOVER_TRANSFER_URI =
+            "android.nfc.extra.HANDOVER_TRANSFER_URI";
+
     // Guarded by NfcAdapter.class
     static boolean sIsInitialized = false;
 
@@ -279,6 +300,12 @@ public final class NfcAdapter {
          * @return NDEF message to push, or null to not provide a message
          */
         public NdefMessage createNdefMessage(NfcEvent event);
+    }
+
+
+    // TODO javadoc
+    public interface CreateBeamUrisCallback {
+        public Uri[] createBeamUris(NfcEvent event);
     }
 
     /**
@@ -556,16 +583,22 @@ public final class NfcAdapter {
         }
     }
 
-    //TODO: Consider a callback alternative
-    //TOOD: See if we get rid of mimeType
     //TODO: make sure NFC service has permission for URI
+    //TODO: see if we will eventually support multiple URIs
     //TODO: javadoc
-    /** @hide */
-    public void setBeamPushUri(String mimeType, Uri uri, Activity activity) {
+    public void setBeamPushUris(Uri[] uris, Activity activity) {
         if (activity == null) {
             throw new NullPointerException("activity cannot be null");
         }
-        mNfcActivityManager.setNdefPushContentUri(activity, mimeType, uri);
+        mNfcActivityManager.setNdefPushContentUri(activity, uris);
+    }
+
+    // TODO javadoc
+    public void setBeamPushUrisCallback(CreateBeamUrisCallback callback, Activity activity) {
+        if (activity == null) {
+            throw new NullPointerException("activity cannot be null");
+        }
+        mNfcActivityManager.setNdefPushContentUriCallback(activity, callback);
     }
 
     /**

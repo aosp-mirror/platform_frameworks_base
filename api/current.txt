@@ -12874,6 +12874,8 @@ package android.nfc {
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method public boolean isEnabled();
     method public boolean isNdefPushEnabled();
+    method public void setBeamPushUris(android.net.Uri[], android.app.Activity);
+    method public void setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity);
     method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
     method public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
     method public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
@@ -12883,6 +12885,10 @@ package android.nfc {
     field public static final java.lang.String EXTRA_ID = "android.nfc.extra.ID";
     field public static final java.lang.String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
     field public static final java.lang.String EXTRA_TAG = "android.nfc.extra.TAG";
+  }
+
+  public static abstract interface NfcAdapter.CreateBeamUrisCallback {
+    method public abstract android.net.Uri[] createBeamUris(android.nfc.NfcEvent);
   }
 
   public static abstract interface NfcAdapter.CreateNdefMessageCallback {
