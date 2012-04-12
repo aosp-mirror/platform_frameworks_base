@@ -204,6 +204,9 @@ public class SyncManager implements OnAccountsUpdateListener {
 
     private final PowerManager mPowerManager;
 
+    // Use this as a random offset to seed all periodic syncs
+    private int mSyncRandomOffsetMillis;
+
     private static final long SYNC_ALARM_TIMEOUT_MIN = 30 * 1000; // 30 seconds
     private static final long SYNC_ALARM_TIMEOUT_MAX = 2 * 60 * 60 * 1000; // two hours
 
@@ -472,6 +475,9 @@ public class SyncManager implements OnAccountsUpdateListener {
             // do this synchronously to ensure we have the accounts before this call returns
             onAccountsUpdated(null);
         }
+
+        // Pick a random second in a day to seed all periodic syncs
+        mSyncRandomOffsetMillis = mSyncStorageEngine.getSyncRandomOffset() * 1000;
     }
 
     /**
@@ -700,6 +706,7 @@ public class SyncManager implements OnAccountsUpdateListener {
 
     private void sendCheckAlarmsMessage() {
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "sending MESSAGE_CHECK_ALARMS");
+        mSyncHandler.removeMessages(SyncHandler.MESSAGE_CHECK_ALARMS);
         mSyncHandler.sendEmptyMessage(SyncHandler.MESSAGE_CHECK_ALARMS);
     }
 
@@ -748,6 +755,8 @@ public class SyncManager implements OnAccountsUpdateListener {
     }
 
     private void increaseBackoffSetting(SyncOperation op) {
+        // TODO: Use this function to align it to an already scheduled sync
+        //       operation in the specified window
         final long now = SystemClock.elapsedRealtime();
 
         final Pair<Long, Long> previousSettings =
@@ -1094,6 +1103,8 @@ public class SyncManager implements OnAccountsUpdateListener {
         final long now = SystemClock.elapsedRealtime();
         pw.print("now: "); pw.print(now);
         pw.println(" (" + formatTime(System.currentTimeMillis()) + ")");
+        pw.print("offset: "); pw.print(DateUtils.formatElapsedTime(mSyncRandomOffsetMillis/1000));
+        pw.println(" (HH:MM:SS)");
         pw.print("uptime: "); pw.print(DateUtils.formatElapsedTime(now/1000));
                 pw.println(" (HH:MM:SS)");
         pw.print("time spent syncing: ");
@@ -1805,6 +1816,9 @@ public class SyncManager implements OnAccountsUpdateListener {
             AccountAndUser[] accounts = mAccounts;
 
             final long nowAbsolute = System.currentTimeMillis();
+            final long shiftedNowAbsolute = (0 < nowAbsolute - mSyncRandomOffsetMillis)
+                                               ? (nowAbsolute  - mSyncRandomOffsetMillis) : 0;
+
             ArrayList<SyncStorageEngine.AuthorityInfo> infos = mSyncStorageEngine.getAuthorities();
             for (SyncStorageEngine.AuthorityInfo info : infos) {
                 // skip the sync if the account of this operation no longer exists
@@ -1826,16 +1840,32 @@ public class SyncManager implements OnAccountsUpdateListener {
                 SyncStatusInfo status = mSyncStorageEngine.getOrCreateSyncStatus(info);
                 for (int i = 0, N = info.periodicSyncs.size(); i < N; i++) {
                     final Bundle extras = info.periodicSyncs.get(i).first;
-                    final Long periodInSeconds = info.periodicSyncs.get(i).second;
+                    final Long periodInMillis = info.periodicSyncs.get(i).second * 1000;
                     // find when this periodic sync was last scheduled to run
                     final long lastPollTimeAbsolute = status.getPeriodicSyncTime(i);
-                    // compute when this periodic sync should next run - this can be in the future
-                    // for example if the user changed the time, synced and changed back.
-                    final long nextPollTimeAbsolute = lastPollTimeAbsolute > nowAbsolute
-                            ? nowAbsolute
-                            : lastPollTimeAbsolute + periodInSeconds * 1000;
-                    // if it is ready to run then schedule it and mark it as having been scheduled
-                    if (nextPollTimeAbsolute <= nowAbsolute) {
+
+                    long remainingMillis
+                            = periodInMillis - (shiftedNowAbsolute % periodInMillis);
+
+                    /*
+                     * Sync scheduling strategy:
+                     *    Set the next periodic sync based on a random offset (in seconds).
+                     *
+                     *    Also sync right now if any of the following cases hold
+                     *    and mark it as having been scheduled
+                     *
+                     * Case 1:  This sync is ready to run now.
+                     * Case 2:  If the lastPollTimeAbsolute is in the future,
+                     *          sync now and reinitialize. This can happen for
+                     *          example if the user changed the time, synced and
+                     *          changed back.
+                     * Case 3:  If we failed to sync at the last scheduled time
+                     */
+                    if (remainingMillis == periodInMillis  // Case 1
+                            || lastPollTimeAbsolute > nowAbsolute // Case 2
+                            || (nowAbsolute - lastPollTimeAbsolute
+                                    >= periodInMillis)) { // Case 3
+                        // Sync now
                         final Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(
                                 info.account, info.userId, info.authority);
                         final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
@@ -1853,12 +1883,13 @@ public class SyncManager implements OnAccountsUpdateListener {
                                                 info.account, info.userId, info.authority),
                                         syncAdapterInfo.type.allowParallelSyncs()));
                         status.setPeriodicSyncTime(i, nowAbsolute);
-                    } else {
-                        // it isn't ready to run, remember this time if it is earlier than
-                        // earliestFuturePollTime
-                        if (nextPollTimeAbsolute < earliestFuturePollTime) {
-                            earliestFuturePollTime = nextPollTimeAbsolute;
-                        }
+                    }
+                    // Compute when this periodic sync should next run
+                    final long nextPollTimeAbsolute = nowAbsolute + remainingMillis;
+
+                    // remember this time if it is earlier than earliestFuturePollTime
+                    if (nextPollTimeAbsolute < earliestFuturePollTime) {
+                        earliestFuturePollTime = nextPollTimeAbsolute;
                     }
                 }
             }
