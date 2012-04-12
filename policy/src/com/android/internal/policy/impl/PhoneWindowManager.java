@@ -1628,9 +1628,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return 0;
     }
 
-    public Animation createForceHideEnterAnimation() {
-        return AnimationUtils.loadAnimation(mContext,
-                com.android.internal.R.anim.lock_screen_behind_enter);
+    public Animation createForceHideEnterAnimation(boolean onWallpaper) {
+        return AnimationUtils.loadAnimation(mContext, onWallpaper
+                ? com.android.internal.R.anim.lock_screen_wallpaper_behind_enter
+                : com.android.internal.R.anim.lock_screen_behind_enter);
     }
     
     static ITelephony getTelephonyService() {

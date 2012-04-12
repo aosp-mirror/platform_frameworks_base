@@ -22,6 +22,7 @@ import android.view.animation.Animation;
 import com.android.internal.policy.impl.PhoneWindowManager;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -172,6 +173,9 @@ public class WindowAnimator {
     private void updateWindowsAndWallpaperLocked() {
         ++mTransactionSequence;
 
+        ArrayList<WindowStateAnimator> unForceHiding = null;
+        boolean wallpaperInUnForceHiding = false;
+
         for (int i = mService.mWindows.size() - 1; i >= 0; i--) {
             WindowState win = mService.mWindows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
@@ -267,13 +271,12 @@ public class WindowAnimator {
                         if (changed) {
                             if ((mBulkUpdateParams & SET_FORCE_HIDING_CHANGED) != 0
                                     && win.isVisibleNow() /*w.isReadyForDisplay()*/) {
-                                // Assume we will need to animate.  If
-                                // we don't (because the wallpaper will
-                                // stay with the lock screen), then we will
-                                // clean up later.
-                                Animation a = mPolicy.createForceHideEnterAnimation();
-                                if (a != null) {
-                                    winAnimator.setAnimation(a);
+                                if (unForceHiding == null) {
+                                    unForceHiding = new ArrayList<WindowStateAnimator>();
+                                }
+                                unForceHiding.add(winAnimator);
+                                if ((win.mAttrs.flags&WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
+                                    wallpaperInUnForceHiding = true;
                                 }
                             }
                             if (mCurrentFocus == null || mCurrentFocus.mLayer < win.mLayer) {
@@ -356,6 +359,17 @@ public class WindowAnimator {
                 }
             }
         } // end forall windows
+
+        // If we have windows that are being show due to them no longer
+        // being force-hidden, apply the appropriate animation to them.
+        if (unForceHiding != null) {
+            for (int i=unForceHiding.size()-1; i>=0; i--) {
+                Animation a = mPolicy.createForceHideEnterAnimation(wallpaperInUnForceHiding);
+                if (a != null) {
+                    unForceHiding.get(i).setAnimation(a);
+                }
+            }
+        }
     }
 
     private void testTokenMayBeDrawnLocked() {

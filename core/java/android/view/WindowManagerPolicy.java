@@ -667,7 +667,7 @@ public interface WindowManagerPolicy {
     /**
      * Create and return an animation to re-display a force hidden window.
      */
-    public Animation createForceHideEnterAnimation();
+    public Animation createForceHideEnterAnimation(boolean onWallpaper);
     
     /**
      * Called from the input reader thread before a key is enqueued.
