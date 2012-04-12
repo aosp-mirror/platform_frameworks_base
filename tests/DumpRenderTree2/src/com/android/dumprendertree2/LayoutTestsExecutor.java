@@ -394,7 +394,7 @@ public class LayoutTestsExecutor extends Activity {
         webViewSettings.setPageCacheCapacity(0);
 
         // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
-        WebViewClassic.fromWebView(mCurrentWebView).useMockDeviceOrientation();
+        WebViewClassic.fromWebView(mCurrentWebView).setUseMockDeviceOrientation();
 
         // Must do this after setting the AppCache path.
         WebStorage.getInstance().deleteAllData();

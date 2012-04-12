@@ -184,6 +184,7 @@ final class DeviceOrientationService implements SensorEventListener {
      * SensorEventListener implementation.
      * Callbacks happen on the thread on which we registered - the WebCore thread.
      */
+    @Override
     public void onSensorChanged(SensorEvent event) {
         assert(event.values.length == 3);
         assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
@@ -217,6 +218,7 @@ final class DeviceOrientationService implements SensorEventListener {
         }
     }
 
+    @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
     }
