@@ -3974,7 +3974,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         wtoken.willBeHidden = false;
         if (wtoken.hidden == visible) {
-            final int N = wtoken.allAppWindows.size();
             boolean changed = false;
             if (DEBUG_APP_TRANSITIONS) Slog.v(
                 TAG, "Changing app " + wtoken + " hidden=" + wtoken.hidden
@@ -3986,21 +3985,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (wtoken.mAppAnimator.animation == sDummyAnimation) {
                     wtoken.mAppAnimator.animation = null;
                 }
-                applyAnimationLocked(wtoken, lp, transit, visible);
-                changed = true;
-                if (wtoken.mAppAnimator.animation != null) {
+                if (applyAnimationLocked(wtoken, lp, transit, visible)) {
                     delayed = runningAppAnimation = true;
                 }
+                changed = true;
             }
 
+            final int N = wtoken.allAppWindows.size();
             for (int i=0; i<N; i++) {
                 WindowState win = wtoken.allAppWindows.get(i);
                 if (win == wtoken.startingWindow) {
                     continue;
-                }
-
-                if (win.mWinAnimator.isAnimating()) {
-                    delayed = true;
                 }
 
                 //Slog.i(TAG, "Window " + win + ": vis=" + win.isVisible());
@@ -4053,6 +4048,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (wtoken.mAppAnimator.animation != null) {
             delayed = true;
+        }
+
+        for (int i = wtoken.allAppWindows.size() - 1; i >= 0 && !delayed; i--) {
+            if (wtoken.allAppWindows.get(i).mWinAnimator.isWindowAnimating()) {
+                delayed = true;
+            }
         }
 
         return delayed;
@@ -7262,6 +7263,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.flush();
                     Slog.w(TAG, "This window was lost: " + ws);
                     Slog.w(TAG, sw.toString());
+                    ws.mWinAnimator.destroySurfaceLocked();
                 }
             }
             Slog.w(TAG, "Current app token list:");
@@ -9333,7 +9335,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" mWaitingForConfig="); pw.println(mWaitingForConfig);
             pw.print("  mRotation="); pw.print(mRotation);
                     pw.print(" mAltOrientation="); pw.println(mAltOrientation);
-            pw.print("  mLastWindowForcedOrientation"); pw.print(mLastWindowForcedOrientation);
+            pw.print("  mLastWindowForcedOrientation="); pw.print(mLastWindowForcedOrientation);
                     pw.print(" mForcedAppOrientation="); pw.println(mForcedAppOrientation);
             pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
             if (mAnimator.mScreenRotationAnimation != null) {
@@ -9534,5 +9536,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void bulkSetParameters(final int bulkUpdateParams) {
         mH.sendMessage(mH.obtainMessage(H.BULK_UPDATE_PARAMETERS, bulkUpdateParams, 0));
+    }
+
+    static String getCaller() {
+        StackTraceElement caller = Thread.currentThread().getStackTrace()[4];
+        return caller.getClassName() + "." + caller.getMethodName() + ":" + caller.getLineNumber();
     }
 }
