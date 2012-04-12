@@ -147,6 +147,40 @@ class CallbackProxy extends Handler {
         }
     }
 
+    private class JsResultReceiver implements JsResult.ResultReceiver {
+        // This prevents a user from interacting with the result before WebCore is
+        // ready to handle it.
+        private boolean mReady;
+        // Tells us if the user tried to confirm or cancel the result before WebCore
+        // is ready.
+        private boolean mTriedToNotifyBeforeReady;
+
+        public JsPromptResult mJsResult = new JsPromptResult(this);
+
+        final void setReady() {
+            mReady = true;
+            if (mTriedToNotifyBeforeReady) {
+                notifyCallbackProxy();
+            }
+        }
+
+        /* Wake up the WebCore thread. */
+        @Override
+        public void onJsResultComplete(JsResult result) {
+            if (mReady) {
+                notifyCallbackProxy();
+            } else {
+                mTriedToNotifyBeforeReady = true;
+            }
+        }
+
+        private void notifyCallbackProxy() {
+            synchronized (CallbackProxy.this) {
+                CallbackProxy.this.notify();
+            }
+        }
+}
+
     /**
      * Construct a new CallbackProxy.
      */
@@ -531,14 +565,15 @@ class CallbackProxy extends Handler {
 
             case JS_ALERT:
                 if (mWebChromeClient != null) {
-                    final JsResult res = (JsResult) msg.obj;
+                    final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
+                    final JsResult res = receiver.mJsResult;
                     String message = msg.getData().getString("message");
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsAlert(mWebView.getWebView(), url, message,
                             res)) {
                         if (!canShowAlertDialog()) {
                             res.cancel();
-                            res.setReady();
+                            receiver.setReady();
                             break;
                         }
                         new AlertDialog.Builder(mContext)
@@ -561,20 +596,21 @@ class CallbackProxy extends Handler {
                                         })
                                 .show();
                     }
-                    res.setReady();
+                    receiver.setReady();
                 }
                 break;
 
             case JS_CONFIRM:
                 if (mWebChromeClient != null) {
-                    final JsResult res = (JsResult) msg.obj;
+                    final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
+                    final JsResult res = receiver.mJsResult;
                     String message = msg.getData().getString("message");
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsConfirm(mWebView.getWebView(), url, message,
                             res)) {
                         if (!canShowAlertDialog()) {
                             res.cancel();
-                            res.setReady();
+                            receiver.setReady();
                             break;
                         }
                         new AlertDialog.Builder(mContext)
@@ -605,13 +641,14 @@ class CallbackProxy extends Handler {
                     }
                     // Tell the JsResult that it is ready for client
                     // interaction.
-                    res.setReady();
+                    receiver.setReady();
                 }
                 break;
 
             case JS_PROMPT:
                 if (mWebChromeClient != null) {
-                    final JsPromptResult res = (JsPromptResult) msg.obj;
+                    final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
+                    final JsPromptResult res = receiver.mJsResult;
                     String message = msg.getData().getString("message");
                     String defaultVal = msg.getData().getString("default");
                     String url = msg.getData().getString("url");
@@ -619,7 +656,7 @@ class CallbackProxy extends Handler {
                                 defaultVal, res)) {
                         if (!canShowAlertDialog()) {
                             res.cancel();
-                            res.setReady();
+                            receiver.setReady();
                             break;
                         }
                         final LayoutInflater factory = LayoutInflater
@@ -662,20 +699,21 @@ class CallbackProxy extends Handler {
                     }
                     // Tell the JsResult that it is ready for client
                     // interaction.
-                    res.setReady();
+                    receiver.setReady();
                 }
                 break;
 
             case JS_UNLOAD:
                 if (mWebChromeClient != null) {
-                    final JsResult res = (JsResult) msg.obj;
+                    final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
+                    final JsResult res = receiver.mJsResult;
                     String message = msg.getData().getString("message");
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsBeforeUnload(mWebView.getWebView(), url,
                             message, res)) {
                         if (!canShowAlertDialog()) {
                             res.cancel();
-                            res.setReady();
+                            receiver.setReady();
                             break;
                         }
                         final String m = mContext.getString(
@@ -700,19 +738,20 @@ class CallbackProxy extends Handler {
                                         })
                                 .show();
                     }
-                    res.setReady();
+                    receiver.setReady();
                 }
                 break;
 
             case JS_TIMEOUT:
                 if(mWebChromeClient != null) {
-                    final JsResult res = (JsResult) msg.obj;
+                    final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
+                    final JsResult res = receiver.mJsResult;
                     if(mWebChromeClient.onJsTimeout()) {
                         res.confirm();
                     } else {
                         res.cancel();
                     }
-                    res.setReady();
+                    receiver.setReady();
                 }
                 break;
 
@@ -1331,7 +1370,7 @@ class CallbackProxy extends Handler {
         if (mWebChromeClient == null) {
             return;
         }
-        JsResult result = new JsResult(this, false);
+        JsResultReceiver result = new JsResultReceiver();
         Message alert = obtainMessage(JS_ALERT, result);
         alert.getData().putString("message", message);
         alert.getData().putString("url", url);
@@ -1352,7 +1391,7 @@ class CallbackProxy extends Handler {
         if (mWebChromeClient == null) {
             return false;
         }
-        JsResult result = new JsResult(this, false);
+        JsResultReceiver result = new JsResultReceiver();
         Message confirm = obtainMessage(JS_CONFIRM, result);
         confirm.getData().putString("message", message);
         confirm.getData().putString("url", url);
@@ -1365,7 +1404,7 @@ class CallbackProxy extends Handler {
                 Log.e(LOGTAG, Log.getStackTraceString(e));
             }
         }
-        return result.getResult();
+        return result.mJsResult.getResult();
     }
 
     public String onJsPrompt(String url, String message, String defaultValue) {
@@ -1374,7 +1413,7 @@ class CallbackProxy extends Handler {
         if (mWebChromeClient == null) {
             return null;
         }
-        JsPromptResult result = new JsPromptResult(this);
+        JsResultReceiver result = new JsResultReceiver();
         Message prompt = obtainMessage(JS_PROMPT, result);
         prompt.getData().putString("message", message);
         prompt.getData().putString("default", defaultValue);
@@ -1388,7 +1427,7 @@ class CallbackProxy extends Handler {
                 Log.e(LOGTAG, Log.getStackTraceString(e));
             }
         }
-        return result.getStringResult();
+        return result.mJsResult.getStringResult();
     }
 
     public boolean onJsBeforeUnload(String url, String message) {
@@ -1397,7 +1436,7 @@ class CallbackProxy extends Handler {
         if (mWebChromeClient == null) {
             return true;
         }
-        JsResult result = new JsResult(this, true);
+        JsResultReceiver result = new JsResultReceiver();
         Message confirm = obtainMessage(JS_UNLOAD, result);
         confirm.getData().putString("message", message);
         confirm.getData().putString("url", url);
@@ -1410,7 +1449,7 @@ class CallbackProxy extends Handler {
                 Log.e(LOGTAG, Log.getStackTraceString(e));
             }
         }
-        return result.getResult();
+        return result.mJsResult.getResult();
     }
 
     /**
@@ -1540,7 +1579,7 @@ class CallbackProxy extends Handler {
         if (mWebChromeClient == null) {
             return true;
         }
-        JsResult result = new JsResult(this, true);
+        JsResultReceiver result = new JsResultReceiver();
         Message timeout = obtainMessage(JS_TIMEOUT, result);
         synchronized (this) {
             sendMessage(timeout);
@@ -1551,7 +1590,7 @@ class CallbackProxy extends Handler {
                 Log.e(LOGTAG, Log.getStackTraceString(e));
             }
         }
-        return result.getResult();
+        return result.mJsResult.getResult();
     }
 
     public void getVisitedHistory(ValueCallback<String[]> callback) {

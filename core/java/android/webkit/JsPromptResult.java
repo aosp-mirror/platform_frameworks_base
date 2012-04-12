@@ -18,11 +18,11 @@ package android.webkit;
 
 
 /**
- * Public class for handling javascript prompt requests. A
- * JsDialogHandlerInterface implentation will receive a jsPrompt call with a
- * JsPromptResult parameter. This parameter is used to return a result to
- * WebView. The client can call cancel() to cancel the dialog or confirm() with
- * the user's input to confirm the dialog.
+ * Public class for handling JavaScript prompt requests. The WebChromeClient will receive a
+ * {@link WebChromeClient#onJsPrompt(WebView, String, String, String, JsPromptResult)} call with a
+ * JsPromptResult instance as a parameter. This parameter is used to return the result of this user
+ * dialog prompt back to the WebView instance. The client can call cancel() to cancel the dialog or
+ * confirm() with the user's input to confirm the dialog.
  */
 public class JsPromptResult extends JsResult {
     // String result of the prompt
@@ -36,17 +36,17 @@ public class JsPromptResult extends JsResult {
         confirm();
     }
 
-    /*package*/ JsPromptResult(CallbackProxy proxy) {
-        super(proxy, /* unused */ false);
+    /**
+     * @hide Only for use by WebViewProvider implementations
+     */
+    public JsPromptResult(ResultReceiver receiver) {
+        super(receiver);
     }
 
-    /*package*/ String getStringResult() {
+    /**
+     * @hide Only for use by WebViewProvider implementations
+     */
+    public String getStringResult() {
         return mStringResult;
-    }
-
-    @Override
-    /*package*/ void handleDefault() {
-        mStringResult = null;
-        super.handleDefault();
     }
 }
