@@ -349,6 +349,12 @@ final class WebViewInputDispatcher {
         }
     }
 
+    public boolean shouldShowTapHighlight() {
+        synchronized (mLock) {
+            return mPostLongPressScheduled || mPostClickScheduled;
+        }
+    }
+
     private void postLongPress() {
         synchronized (mLock) {
             if (!mPostLongPressScheduled) {
