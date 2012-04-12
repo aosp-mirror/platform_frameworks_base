@@ -37,6 +37,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.List;
 
@@ -65,6 +67,7 @@ public class SyncStorageEngine extends Handler {
 
     private static final String XML_ATTR_NEXT_AUTHORITY_ID = "nextAuthorityId";
     private static final String XML_ATTR_LISTEN_FOR_TICKLES = "listen-for-tickles";
+    private static final String XML_ATTR_SYNC_RANDOM_OFFSET = "offsetInSeconds";
     private static final String XML_ATTR_ENABLED = "enabled";
     private static final String XML_ATTR_USER = "user";
     private static final String XML_TAG_LISTEN_FOR_TICKLES = "listenForTickles";
@@ -277,6 +280,8 @@ public class SyncStorageEngine extends Handler {
 
     private static volatile SyncStorageEngine sSyncStorageEngine = null;
 
+    private int mSyncRandomOffset;
+
     /**
      * This file contains the core engine state: all accounts and the
      * settings for them.  It must never be lost, and should be changed
@@ -373,6 +378,10 @@ public class SyncStorageEngine extends Handler {
                 writeStatisticsLocked();
             }
         }
+    }
+
+    public int getSyncRandomOffset() {
+        return mSyncRandomOffset;
     }
 
     public void addStatusChangeListener(int mask, ISyncStatusObserver callback) {
@@ -1465,6 +1474,16 @@ public class SyncStorageEngine extends Handler {
                 } catch (NumberFormatException e) {
                     // don't care
                 }
+                String offsetString = parser.getAttributeValue(null, XML_ATTR_SYNC_RANDOM_OFFSET);
+                try {
+                    mSyncRandomOffset = (offsetString == null) ? 0 : Integer.parseInt(offsetString);
+                } catch (NumberFormatException e) {
+                    mSyncRandomOffset = 0;
+                }
+                if (mSyncRandomOffset == 0) {
+                    Random random = new Random(System.currentTimeMillis());
+                    mSyncRandomOffset = random.nextInt(86400);
+                }
                 mMasterSyncAutomatically.put(0, listen == null || Boolean.parseBoolean(listen));
                 eventType = parser.next();
                 AuthorityInfo authority = null;
@@ -1705,6 +1724,7 @@ public class SyncStorageEngine extends Handler {
             out.startTag(null, "accounts");
             out.attribute(null, "version", Integer.toString(ACCOUNTS_VERSION));
             out.attribute(null, XML_ATTR_NEXT_AUTHORITY_ID, Integer.toString(mNextAuthorityId));
+            out.attribute(null, XML_ATTR_SYNC_RANDOM_OFFSET, Integer.toString(mSyncRandomOffset));
 
             // Write the Sync Automatically flags for each user
             final int M = mMasterSyncAutomatically.size();
