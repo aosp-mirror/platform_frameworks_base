@@ -1281,8 +1281,10 @@ public class WebView extends AbsoluteLayout
      * @deprecated {@link #findAllAsync} is preferred.
      * @see #setFindListener
      */
+    @Deprecated
     public int findAll(String find) {
         checkThread();
+        StrictMode.noteSlowCall("findAll blocks UI: prefer findAllAsync");
         return mProvider.findAll(find);
     }
 
