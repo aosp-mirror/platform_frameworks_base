@@ -19,8 +19,7 @@ package android.test;
 /**
  * Thrown when an assertion failed.
  * 
- * Note:  Most users of this class should simply use junit.framework.AssertionFailedError,
- * which provides the same functionality.
+ * @deprecated use junit.framework.AssertionFailedError
  */
 public class AssertionFailedError extends Error {
     
