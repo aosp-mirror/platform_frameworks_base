@@ -237,6 +237,17 @@ public abstract class HardwareRenderer {
     abstract boolean validate();
 
     /**
+     * This method ensures the hardware renderer is in a valid state
+     * before executing the specified action.
+     * 
+     * This method will attempt to set a valid state even if the window
+     * the renderer is attached to was destroyed.
+     *
+     * @return true if the action was run
+     */
+    abstract boolean safelyRun(Runnable action);
+
+    /**
      * Setup the hardware renderer for drawing. This is called whenever the
      * size of the target surface changes or when the surface is first created.
      * 
@@ -1380,25 +1391,39 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void destroyHardwareResources(View view) {
-            if (view != null) {
-                boolean needsContext = true;
-                if (isEnabled() && checkCurrent() != SURFACE_STATE_ERROR) needsContext = false;
+        boolean safelyRun(Runnable action) {
+            boolean needsContext = true;
+            if (isEnabled() && checkCurrent() != SURFACE_STATE_ERROR) needsContext = false;
 
-                if (needsContext) {
-                    Gl20RendererEglContext managedContext =
-                            (Gl20RendererEglContext) sEglContextStorage.get();
-                    if (managedContext == null) return;
-                    usePbufferSurface(managedContext.getContext());
-                }
+            if (needsContext) {
+                Gl20RendererEglContext managedContext =
+                        (Gl20RendererEglContext) sEglContextStorage.get();
+                if (managedContext == null) return false;
+                usePbufferSurface(managedContext.getContext());
+            }
 
-                destroyResources(view);
-                GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
-
+            try {
+                action.run();
+            } finally {
                 if (needsContext) {
                     sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE,
                             EGL_NO_SURFACE, EGL_NO_CONTEXT);
                 }
+            }
+
+            return true;
+        }
+
+        @Override
+        void destroyHardwareResources(final View view) {
+            if (view != null) {
+                safelyRun(new Runnable() {
+                    @Override
+                    public void run() {
+                        destroyResources(view);
+                        GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
+                    }
+                });
             }
         }
 
