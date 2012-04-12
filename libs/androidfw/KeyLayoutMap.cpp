@@ -103,16 +103,16 @@ status_t KeyLayoutMap::mapKey(int32_t scanCode, int32_t usageCode,
 }
 
 const KeyLayoutMap::Key* KeyLayoutMap::getKey(int32_t scanCode, int32_t usageCode) const {
-    if (scanCode) {
-        ssize_t index = mKeysByScanCode.indexOfKey(scanCode);
-        if (index >= 0) {
-            return &mKeysByScanCode.valueAt(index);
-        }
-    }
     if (usageCode) {
         ssize_t index = mKeysByUsageCode.indexOfKey(usageCode);
         if (index >= 0) {
             return &mKeysByUsageCode.valueAt(index);
+        }
+    }
+    if (scanCode) {
+        ssize_t index = mKeysByScanCode.indexOfKey(scanCode);
+        if (index >= 0) {
+            return &mKeysByScanCode.valueAt(index);
         }
     }
     return NULL;

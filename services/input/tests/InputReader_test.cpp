@@ -480,19 +480,7 @@ private:
             int32_t* outKeycode, uint32_t* outFlags) const {
         Device* device = getDevice(deviceId);
         if (device) {
-            const KeyInfo* key = NULL;
-            if (scanCode) {
-                ssize_t index = device->keysByScanCode.indexOfKey(scanCode);
-                if (index >= 0) {
-                    key = &device->keysByScanCode.valueAt(index);
-                }
-            }
-            if (!key && usageCode) {
-                ssize_t index = device->keysByUsageCode.indexOfKey(usageCode);
-                if (index >= 0) {
-                    key = &device->keysByUsageCode.valueAt(index);
-                }
-            }
+            const KeyInfo* key = getKey(device, scanCode, usageCode);
             if (key) {
                 if (outKeycode) {
                     *outKeycode = key->keyCode;
@@ -504,6 +492,22 @@ private:
             }
         }
         return NAME_NOT_FOUND;
+    }
+
+    const KeyInfo* getKey(Device* device, int32_t scanCode, int32_t usageCode) const {
+        if (usageCode) {
+            ssize_t index = device->keysByUsageCode.indexOfKey(usageCode);
+            if (index >= 0) {
+                return &device->keysByUsageCode.valueAt(index);
+            }
+        }
+        if (scanCode) {
+            ssize_t index = device->keysByScanCode.indexOfKey(scanCode);
+            if (index >= 0) {
+                return &device->keysByScanCode.valueAt(index);
+            }
+        }
+        return NULL;
     }
 
     virtual status_t mapAxis(int32_t deviceId, int32_t scanCode,
