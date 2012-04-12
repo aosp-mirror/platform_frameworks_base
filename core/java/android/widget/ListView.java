@@ -1926,6 +1926,9 @@ public class ListView extends AbsListView {
                 mSyncRowId = mAdapter.getItemId(position);
             }
 
+            if (mPositionScroller != null) {
+                mPositionScroller.stop();
+            }
             requestLayout();
         }
     }
@@ -1948,6 +1951,10 @@ public class ListView extends AbsListView {
             } else if (position == selectedPosition + 1) {
                 awakeScrollbars = true;
             }
+        }
+
+        if (mPositionScroller != null) {
+            mPositionScroller.stop();
         }
 
         layoutChildren();
