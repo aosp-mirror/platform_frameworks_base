@@ -33,6 +33,7 @@ class ScreenRotationAnimation {
     static final String TAG = "ScreenRotationAnimation";
     static final boolean DEBUG_STATE = false;
     static final boolean DEBUG_TRANSFORMS = false;
+    static final boolean TWO_PHASE_ANIMATION = false;
     static final boolean USE_CUSTOM_BLACK_FRAME = false;
 
     static final int FREEZE_LAYER = WindowManagerService.TYPE_LAYER_MULTIPLIER * 200;
@@ -44,7 +45,6 @@ class ScreenRotationAnimation {
     BlackFrame mEnteringBlackFrame;
     int mWidth, mHeight;
 
-    int mSnapshotDeltaRotation;
     int mOriginalRotation;
     int mOriginalWidth, mOriginalHeight;
     int mCurRotation;
@@ -138,10 +138,9 @@ class ScreenRotationAnimation {
         if (mEnteringBlackFrame != null) {
             mEnteringBlackFrame.printTo(prefix + "  ", pw);
         }
-        pw.print(prefix); pw.print(" mSnapshotDeltaRotation="); pw.print(mSnapshotDeltaRotation);
-                pw.print(" mCurRotation="); pw.println(mCurRotation);
-        pw.print(prefix); pw.print("mOriginalRotation="); pw.print(mOriginalRotation);
-                pw.print(" mOriginalWidth="); pw.print(mOriginalWidth);
+        pw.print(prefix); pw.print("mCurRotation="); pw.print(mCurRotation);
+                pw.print(" mOriginalRotation="); pw.println(mOriginalRotation);
+        pw.print(prefix); pw.print("mOriginalWidth="); pw.print(mOriginalWidth);
                 pw.print(" mOriginalHeight="); pw.println(mOriginalHeight);
         pw.print(prefix); pw.print("mStarted="); pw.print(mStarted);
                 pw.print(" mAnimRunning="); pw.print(mAnimRunning);
@@ -306,8 +305,13 @@ class ScreenRotationAnimation {
     public boolean setRotation(int rotation, SurfaceSession session,
             long maxAnimationDuration, float animationScale, int finalWidth, int finalHeight) {
         setRotation(rotation);
-        return startAnimation(session, maxAnimationDuration, animationScale,
-                finalWidth, finalHeight, false);
+        if (TWO_PHASE_ANIMATION) {
+            return startAnimation(session, maxAnimationDuration, animationScale,
+                    finalWidth, finalHeight, false);
+        } else {
+            // Don't start animation yet.
+            return false;
+        }
     }
 
     /**
@@ -330,7 +334,8 @@ class ScreenRotationAnimation {
         // Figure out how the screen has moved from the original rotation.
         int delta = deltaRotation(mCurRotation, mOriginalRotation);
 
-        if (mFinishExitAnimation == null && (!dismissing || delta != Surface.ROTATION_0)) {
+        if (TWO_PHASE_ANIMATION && mFinishExitAnimation == null
+                && (!dismissing || delta != Surface.ROTATION_0)) {
             if (DEBUG_STATE) Slog.v(TAG, "Creating start and finish animations");
             firstStart = true;
             mStartExitAnimation = AnimationUtils.loadAnimation(mContext,
@@ -406,7 +411,7 @@ class ScreenRotationAnimation {
         // means to allow supplying the last and next size.  In this definition
         // "%p" is the original (let's call it "previous") size, and "%" is the
         // screen's current/new size.
-        if (firstStart) {
+        if (TWO_PHASE_ANIMATION && firstStart) {
             if (DEBUG_STATE) Slog.v(TAG, "Initializing start and finish animations");
             mStartEnterAnimation.initialize(finalWidth, finalHeight,
                     halfWidth, halfHeight);
@@ -433,7 +438,7 @@ class ScreenRotationAnimation {
         mFinishAnimReady = false;
         mFinishAnimStartTime = -1;
 
-        if (firstStart) {
+        if (TWO_PHASE_ANIMATION && firstStart) {
             mStartExitAnimation.restrictDuration(maxAnimationDuration);
             mStartExitAnimation.scaleCurrentDuration(animationScale);
             mStartEnterAnimation.restrictDuration(maxAnimationDuration);
@@ -624,6 +629,14 @@ class ScreenRotationAnimation {
     }
 
     public boolean isAnimating() {
+        if (TWO_PHASE_ANIMATION) {
+            return hasAnimations() || mFinishAnimReady;
+        } else {
+            return hasAnimations();
+        }
+    }
+
+    private boolean hasAnimations() {
         return mStartEnterAnimation != null || mStartExitAnimation != null
                 || mStartFrameAnimation != null
                 || mFinishEnterAnimation != null || mFinishExitAnimation != null
@@ -633,7 +646,6 @@ class ScreenRotationAnimation {
     }
 
     private boolean stepAnimation(long now) {
-
         if (mFinishAnimReady && mFinishAnimStartTime < 0) {
             if (DEBUG_STATE) Slog.v(TAG, "Step: finish anim now ready");
             mFinishAnimStartTime = now;
@@ -794,6 +806,10 @@ class ScreenRotationAnimation {
     }
 
     void updateSurfaces() {
+        if (!mStarted) {
+            return;
+        }
+
         if (mSurface != null) {
             if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
                 if (DEBUG_STATE) Slog.v(TAG, "Exit animations done, hiding screenshot surface");
@@ -834,7 +850,7 @@ class ScreenRotationAnimation {
     }
     
     public boolean stepAnimationLocked(long now) {
-        if (!isAnimating()) {
+        if (!hasAnimations()) {
             if (DEBUG_STATE) Slog.v(TAG, "Step: no animations running");
             mFinishAnimReady = false;
             return false;

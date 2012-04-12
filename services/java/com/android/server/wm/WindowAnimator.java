@@ -158,9 +158,7 @@ public class WindowAnimator {
             }
         }
 
-        if (mScreenRotationAnimation != null &&
-                (mScreenRotationAnimation.isAnimating() ||
-                        mScreenRotationAnimation.mFinishAnimReady)) {
+        if (mScreenRotationAnimation != null && mScreenRotationAnimation.isAnimating()) {
             if (mScreenRotationAnimation.stepAnimationLocked(mCurrentTime)) {
                 mAnimating = true;
             } else {
