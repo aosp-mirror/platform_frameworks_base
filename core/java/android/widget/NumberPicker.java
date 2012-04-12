@@ -579,7 +579,7 @@ public class NumberPicker extends LinearLayout {
             throw new IllegalArgumentException("minWidth > maxWidth");
         }
 
-        mComputeMaxWidth = (mMaxWidth == Integer.MAX_VALUE);
+        mComputeMaxWidth = (mMaxWidth == SIZE_UNSPECIFIED);
 
         attributesArray.recycle();
 
