@@ -128,9 +128,7 @@ parent.link=index.html
   classes and threads are allocating the objects. This allows you to track, in real time, where
   objects are being allocated when you perform certain actions in your application. This
   information is valuable for assessing memory usage that can affect application performance.
-  If you want more granular control over where allocation data is collected, use the
-  {@link android.os.Debug#startAllocCounting()} and {@link android.os.Debug#stopAllocCounting()}
-  methods.</p>
+  </p>
   
   <p>To track memory allocation of objects:</p>
   <ol>
