@@ -1712,8 +1712,8 @@ public class InputMethodService extends AbstractInputMethodService {
     
     /**
      * Override this to intercept key down events before they are processed by the
-     * application.  If you return true, the application will not itself
-     * process the event.  If you return true, the normal application processing
+     * application.  If you return true, the application will not 
+     * process the event itself.  If you return false, the normal application processing
      * will occur as if the IME had not seen the event at all.
      * 
      * <p>The default implementation intercepts {@link KeyEvent#KEYCODE_BACK
