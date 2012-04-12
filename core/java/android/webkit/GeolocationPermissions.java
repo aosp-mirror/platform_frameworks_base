@@ -16,13 +16,7 @@
 
 package android.webkit;
 
-import android.os.Handler;
-import android.os.Message;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 /**
  * This class is used to manage permissions for the WebView's Geolocation
@@ -44,9 +38,6 @@ import java.util.Vector;
  * The methods of this class can be used to modify and interrogate the stored
  * Geolocation permissions at any time.
  */
-// This class is the Java counterpart of the WebKit C++ GeolocationPermissions
-// class. It simply marshals calls from the UI thread to the WebKit thread.
-//
 // Within WebKit, Geolocation permissions may be applied either temporarily
 // (for the duration of the page) or permanently. This class deals only with
 // permanent permissions.
@@ -68,144 +59,12 @@ public class GeolocationPermissions {
         public void invoke(String origin, boolean allow, boolean retain);
     };
 
-    // Global instance
-    private static GeolocationPermissions sInstance;
-
-    private Handler mHandler;
-    private Handler mUIHandler;
-
-    // A queue to store messages until the handler is ready.
-    private Vector<Message> mQueuedMessages;
-
-    // Message ids
-    static final int GET_ORIGINS = 0;
-    static final int GET_ALLOWED = 1;
-    static final int CLEAR = 2;
-    static final int ALLOW = 3;
-    static final int CLEAR_ALL = 4;
-
-    // Message ids on the UI thread
-    static final int RETURN_ORIGINS = 0;
-    static final int RETURN_ALLOWED = 1;
-
-    private static final String ORIGINS = "origins";
-    private static final String ORIGIN = "origin";
-    private static final String CALLBACK = "callback";
-    private static final String ALLOWED = "allowed";
-
     /**
      * Get the singleton instance of this class.
      * @return The singleton {@link GeolocationPermissions} instance.
      */
     public static GeolocationPermissions getInstance() {
-      if (sInstance == null) {
-          sInstance = new GeolocationPermissions();
-      }
-      return sInstance;
-    }
-
-    /**
-     * Creates the UI message handler. Must be called on the UI thread.
-     * @hide
-     */
-    public void createUIHandler() {
-        if (mUIHandler == null) {
-            mUIHandler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    // Runs on the UI thread.
-                    switch (msg.what) {
-                        case RETURN_ORIGINS: {
-                            Map values = (Map) msg.obj;
-                            Set<String> origins = (Set<String>) values.get(ORIGINS);
-                            ValueCallback<Set<String> > callback = (ValueCallback<Set<String> >) values.get(CALLBACK);
-                            callback.onReceiveValue(origins);
-                        } break;
-                        case RETURN_ALLOWED: {
-                            Map values = (Map) msg.obj;
-                            Boolean allowed = (Boolean) values.get(ALLOWED);
-                            ValueCallback<Boolean> callback = (ValueCallback<Boolean>) values.get(CALLBACK);
-                            callback.onReceiveValue(allowed);
-                        } break;
-                    }
-                }
-            };
-        }
-    }
-
-    /**
-     * Creates the message handler. Must be called on the WebKit thread.
-     * @hide
-     */
-    public synchronized void createHandler() {
-        if (mHandler == null) {
-            mHandler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    // Runs on the WebKit thread.
-                    switch (msg.what) {
-                        case GET_ORIGINS: {
-                            Set origins = nativeGetOrigins();
-                            ValueCallback callback = (ValueCallback) msg.obj;
-                            Map values = new HashMap<String, Object>();
-                            values.put(CALLBACK, callback);
-                            values.put(ORIGINS, origins);
-                            postUIMessage(Message.obtain(null, RETURN_ORIGINS, values));
-                            } break;
-                        case GET_ALLOWED: {
-                            Map values = (Map) msg.obj;
-                            String origin = (String) values.get(ORIGIN);
-                            ValueCallback callback = (ValueCallback) values.get(CALLBACK);
-                            boolean allowed = nativeGetAllowed(origin);
-                            Map retValues = new HashMap<String, Object>();
-                            retValues.put(CALLBACK, callback);
-                            retValues.put(ALLOWED, Boolean.valueOf(allowed));
-                            postUIMessage(Message.obtain(null, RETURN_ALLOWED, retValues));
-                            } break;
-                        case CLEAR:
-                            nativeClear((String) msg.obj);
-                            break;
-                        case ALLOW:
-                            nativeAllow((String) msg.obj);
-                            break;
-                        case CLEAR_ALL:
-                            nativeClearAll();
-                            break;
-                    }
-                }
-            };
-
-            // Handle the queued messages
-            if (mQueuedMessages != null) {
-                while (!mQueuedMessages.isEmpty()) {
-                    mHandler.sendMessage(mQueuedMessages.remove(0));
-                }
-                mQueuedMessages = null;
-            }
-        }
-    }
-
-    /**
-     * Utility function to send a message to our handler.
-     */
-    private synchronized void postMessage(Message msg) {
-        if (mHandler == null) {
-            if (mQueuedMessages == null) {
-                mQueuedMessages = new Vector<Message>();
-            }
-            mQueuedMessages.add(msg);
-        } else {
-            mHandler.sendMessage(msg);
-        }
-    }
-
-    /**
-     * Utility function to send a message to the handler on the UI thread
-     */
-    private void postUIMessage(Message msg) {
-        if (mUIHandler != null) {
-            mUIHandler.sendMessage(msg);
-        }
+      return WebViewFactory.getProvider().getGeolocationPermissions();
     }
 
     /**
@@ -222,14 +81,7 @@ public class GeolocationPermissions {
     // (Database, Geolocation etc) do so, it's safe to match up origins based
     // on this string.
     public void getOrigins(ValueCallback<Set<String> > callback) {
-        if (callback != null) {
-            if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
-                Set origins = nativeGetOrigins();
-                callback.onReceiveValue(origins);
-            } else {
-                postMessage(Message.obtain(null, GET_ORIGINS, callback));
-            }
-        }
+        // Must be a no-op for backward compatibility: see the hidden constructor for reason.
     }
 
     /**
@@ -243,54 +95,30 @@ public class GeolocationPermissions {
      *                 Geolocation API.
      */
     public void getAllowed(String origin, ValueCallback<Boolean> callback) {
-        if (callback == null) {
-            return;
-        }
-        if (origin == null) {
-            callback.onReceiveValue(null);
-            return;
-        }
-        if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
-            boolean allowed = nativeGetAllowed(origin);
-            callback.onReceiveValue(Boolean.valueOf(allowed));
-        } else {
-            Map values = new HashMap<String, Object>();
-            values.put(ORIGIN, origin);
-            values.put(CALLBACK, callback);
-            postMessage(Message.obtain(null, GET_ALLOWED, values));
-        }
+        // Must be a no-op for backward compatibility: see the hidden constructor for reason.
     }
 
     /**
      * Clear the Geolocation permission state for the specified origin.
      * @param origin The origin for which Geolocation permissions are cleared.
      */
-    // This method may be called before the WebKit
-    // thread has intialized the message handler. Messages will be queued until
-    // this time.
     public void clear(String origin) {
-        // Called on the UI thread.
-        postMessage(Message.obtain(null, CLEAR, origin));
+        // Must be a no-op for backward compatibility: see the hidden constructor for reason.
     }
 
     /**
      * Allow the specified origin to use the Geolocation API.
      * @param origin The origin for which Geolocation API use is allowed.
      */
-    // This method may be called before the WebKit
-    // thread has intialized the message handler. Messages will be queued until
-    // this time.
     public void allow(String origin) {
-        // Called on the UI thread.
-        postMessage(Message.obtain(null, ALLOW, origin));
+        // Must be a no-op for backward compatibility: see the hidden constructor for reason.
     }
 
     /**
      * Clear the Geolocation permission state for all origins.
      */
     public void clearAll() {
-        // Called on the UI thread.
-        postMessage(Message.obtain(null, CLEAR_ALL));
+        // Must be a no-op for backward compatibility: see the hidden constructor for reason.
     }
 
     /**
@@ -299,14 +127,7 @@ public class GeolocationPermissions {
      * Note this constructor was erroneously public and published in SDK levels prior to 16, but
      * applications using it would receive a non-functional instance of this class (there was no
      * way to call createHandler() and createUIHandler(), so it would not work).
-     * @hide
+     * @hide Only for use by WebViewProvider implementations
      */
     public GeolocationPermissions() {}
-
-    // Native functions, run on the WebKit thread.
-    private static native Set nativeGetOrigins();
-    private static native boolean nativeGetAllowed(String origin);
-    private static native void nativeClear(String origin);
-    private static native void nativeAllow(String origin);
-    private static native void nativeClearAll();
 }

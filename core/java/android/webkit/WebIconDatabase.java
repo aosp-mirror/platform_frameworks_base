@@ -17,16 +17,7 @@
 package android.webkit;
 
 import android.content.ContentResolver;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.Browser;
-import android.util.Log;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Vector;
 
 /**
  * Functions for manipulating the icon database used by WebView.
@@ -36,149 +27,6 @@ import java.util.Vector;
  * single object.
  */
 public class WebIconDatabase {
-    private static final String LOGTAG = "WebIconDatabase";
-    // Global instance of a WebIconDatabase
-    private static WebIconDatabase sIconDatabase;
-    // EventHandler for handling messages before and after the WebCore thread is
-    // ready.
-    private final EventHandler mEventHandler = new EventHandler();
-
-    // Class to handle messages before WebCore is ready
-    private static class EventHandler extends Handler {
-        // Message ids
-        static final int OPEN         = 0;
-        static final int CLOSE        = 1;
-        static final int REMOVE_ALL   = 2;
-        static final int REQUEST_ICON = 3;
-        static final int RETAIN_ICON  = 4;
-        static final int RELEASE_ICON = 5;
-        static final int BULK_REQUEST_ICON = 6;
-        // Message for dispatching icon request results
-        private static final int ICON_RESULT = 10;
-        // Actual handler that runs in WebCore thread
-        private Handler mHandler;
-        // Vector of messages before the WebCore thread is ready
-        private Vector<Message> mMessages = new Vector<Message>();
-        // Class to handle a result dispatch
-        private class IconResult {
-            private final String mUrl;
-            private final Bitmap mIcon;
-            private final IconListener mListener;
-            IconResult(String url, Bitmap icon, IconListener l) {
-                mUrl = url;
-                mIcon = icon;
-                mListener = l;
-            }
-            void dispatch() {
-                mListener.onReceivedIcon(mUrl, mIcon);
-            }
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            // Note: This is the message handler for the UI thread.
-            switch (msg.what) {
-                case ICON_RESULT:
-                    ((IconResult) msg.obj).dispatch();
-                    break;
-            }
-        }
-
-        // Called by WebCore thread to create the actual handler
-        private synchronized void createHandler() {
-            if (mHandler == null) {
-                mHandler = new Handler() {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        // Note: This is the message handler for the WebCore
-                        // thread.
-                        switch (msg.what) {
-                            case OPEN:
-                                nativeOpen((String) msg.obj);
-                                break;
-
-                            case CLOSE:
-                                nativeClose();
-                                break;
-
-                            case REMOVE_ALL:
-                                nativeRemoveAllIcons();
-                                break;
-
-                            case REQUEST_ICON:
-                                IconListener l = (IconListener) msg.obj;
-                                String url = msg.getData().getString("url");
-                                requestIconAndSendResult(url, l);
-                                break;
-
-                            case BULK_REQUEST_ICON:
-                                bulkRequestIcons(msg);
-                                break;
-
-                            case RETAIN_ICON:
-                                nativeRetainIconForPageUrl((String) msg.obj);
-                                break;
-
-                            case RELEASE_ICON:
-                                nativeReleaseIconForPageUrl((String) msg.obj);
-                                break;
-                        }
-                    }
-                };
-                // Transfer all pending messages
-                for (int size = mMessages.size(); size > 0; size--) {
-                    mHandler.sendMessage(mMessages.remove(0));
-                }
-                mMessages = null;
-            }
-        }
-
-        private synchronized boolean hasHandler() {
-            return mHandler != null;
-        }
-
-        private synchronized void postMessage(Message msg) {
-            if (mMessages != null) {
-                mMessages.add(msg);
-            } else {
-                mHandler.sendMessage(msg);
-            }
-        }
-
-        private void bulkRequestIcons(Message msg) {
-            HashMap map = (HashMap) msg.obj;
-            IconListener listener = (IconListener) map.get("listener");
-            ContentResolver cr = (ContentResolver) map.get("contentResolver");
-            String where = (String) map.get("where");
-
-            Cursor c = null;
-            try {
-                c = cr.query(
-                        Browser.BOOKMARKS_URI,
-                        new String[] { Browser.BookmarkColumns.URL },
-                        where, null, null);
-                if (c.moveToFirst()) {
-                    do {
-                        String url = c.getString(0);
-                        requestIconAndSendResult(url, listener);
-                    } while (c.moveToNext());
-                }
-            } catch (IllegalStateException e) {
-                Log.e(LOGTAG, "BulkRequestIcons", e);
-            } finally {
-                if (c != null) c.close();
-            }
-        }
-
-        private void requestIconAndSendResult(String url, IconListener listener) {
-            Bitmap icon = nativeIconForPageUrl(url);
-            if (icon != null) {
-                sendMessage(obtainMessage(ICON_RESULT,
-                            new IconResult(url, icon, listener)));
-            }
-        }
-    }
-
     /**
      * Interface for receiving icons from the database.
      */
@@ -197,31 +45,21 @@ public class WebIconDatabase {
      * @param path The directory path where the icon database will be stored.
      */
     public void open(String path) {
-        if (path != null) {
-            // Make the directories and parents if they don't exist
-            File db = new File(path);
-            if (!db.exists()) {
-                db.mkdirs();
-            }
-            mEventHandler.postMessage(
-                    Message.obtain(null, EventHandler.OPEN, db.getAbsolutePath()));
-        }
+        throw new MustOverrideException();
     }
 
     /**
      * Close the shared instance of the icon database.
      */
     public void close() {
-        mEventHandler.postMessage(
-                Message.obtain(null, EventHandler.CLOSE));
+        throw new MustOverrideException();
     }
 
     /**
      * Removes all the icons in the database.
      */
     public void removeAllIcons() {
-        mEventHandler.postMessage(
-                Message.obtain(null, EventHandler.REMOVE_ALL));
+        throw new MustOverrideException();
     }
 
     /**
@@ -231,36 +69,14 @@ public class WebIconDatabase {
      * @param listener An implementation on IconListener to receive the result.
      */
     public void requestIconForPageUrl(String url, IconListener listener) {
-        if (listener == null || url == null) {
-            return;
-        }
-        Message msg = Message.obtain(null, EventHandler.REQUEST_ICON, listener);
-        msg.getData().putString("url", url);
-        mEventHandler.postMessage(msg);
+        throw new MustOverrideException();
     }
 
     /** {@hide}
      */
     public void bulkRequestIconForPageUrl(ContentResolver cr, String where,
             IconListener listener) {
-        if (listener == null) {
-            return;
-        }
-
-        // Special case situation: we don't want to add this message to the
-        // queue if there is no handler because we may never have a real
-        // handler to service the messages and the cursor will never get
-        // closed.
-        if (mEventHandler.hasHandler()) {
-            // Don't use Bundle as it is parcelable.
-            HashMap<String, Object> map = new HashMap<String, Object>();
-            map.put("contentResolver", cr);
-            map.put("where", where);
-            map.put("listener", listener);
-            Message msg =
-                    Message.obtain(null, EventHandler.BULK_REQUEST_ICON, map);
-            mEventHandler.postMessage(msg);
-        }
+        throw new MustOverrideException();
     }
 
     /**
@@ -268,10 +84,7 @@ public class WebIconDatabase {
      * @param url The page's url.
      */
     public void retainIconForPageUrl(String url) {
-        if (url != null) {
-            mEventHandler.postMessage(
-                    Message.obtain(null, EventHandler.RETAIN_ICON, url));
-        }
+        throw new MustOverrideException();
     }
 
     /**
@@ -279,10 +92,7 @@ public class WebIconDatabase {
      * @param url The page's url.
      */
     public void releaseIconForPageUrl(String url) {
-        if (url != null) {
-            mEventHandler.postMessage(
-                    Message.obtain(null, EventHandler.RELEASE_ICON, url));
-        }
+        throw new MustOverrideException();
     }
 
     /**
@@ -293,30 +103,11 @@ public class WebIconDatabase {
      */
     public static WebIconDatabase getInstance() {
         // XXX: Must be created in the UI thread.
-        if (sIconDatabase == null) {
-            sIconDatabase = new WebIconDatabase();
-        }
-        return sIconDatabase;
+        return WebViewFactory.getProvider().getWebIconDatabase();
     }
 
     /**
-     * Create the internal handler and transfer all pending messages.
-     * XXX: Called by WebCore thread only!
+     * @hide Only for use by WebViewProvider implementations
      */
-    /*package*/ void createHandler() {
-        mEventHandler.createHandler();
-    }
-
-    /**
-     * Private constructor to avoid anyone else creating an instance.
-     */
-    private WebIconDatabase() {}
-
-    // Native functions
-    private static native void nativeOpen(String path);
-    private static native void nativeClose();
-    private static native void nativeRemoveAllIcons();
-    private static native Bitmap nativeIconForPageUrl(String url);
-    private static native void nativeRetainIconForPageUrl(String url);
-    private static native void nativeReleaseIconForPageUrl(String url);
+    protected WebIconDatabase() {}
 }

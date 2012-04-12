@@ -487,7 +487,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     }
 
     public void setAppCacheMaximumSize(long size) {
-        WebStorage.getInstance().setAppCacheMaximumSize(size);
+        android.webkit.WebStorageClassic.getInstance().setAppCacheMaximumSize(size);
     }
 
     public void setCanOpenWindows() {
