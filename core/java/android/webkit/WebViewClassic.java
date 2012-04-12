@@ -6002,9 +6002,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                     data.mNativeLayer = nativeScrollableLayer(
                             contentX, contentY, data.mNativeLayerRect, null);
                     data.mSlop = viewToContentDimension(mNavSlop);
-                    mTouchHighlightRegion.setEmpty();
+                    removeTouchHighlight();
                     if (!mBlockWebkitViewMessages) {
-                        mTouchHighlightRequested = System.currentTimeMillis();
+                        mTouchHighlightRequested = SystemClock.uptimeMillis();
                         mWebViewCore.sendMessageAtFrontOfQueue(
                                 EventHub.HIT_TEST, data);
                     }
@@ -7777,13 +7777,16 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mFocusedNode.mHasFocus && mFocusedNode.mEditable) {
             return false;
         }
-        long delay = System.currentTimeMillis() - mTouchHighlightRequested;
+        long delay = SystemClock.uptimeMillis() - mTouchHighlightRequested;
         if (delay < ViewConfiguration.getTapTimeout()) {
             Rect r = mTouchHighlightRegion.getBounds();
             mWebView.postInvalidateDelayed(delay, r.left, r.top, r.right, r.bottom);
             return false;
         }
-        return true;
+        if (mInputDispatcher == null) {
+            return false;
+        }
+        return mInputDispatcher.shouldShowTapHighlight();
     }
 
 
