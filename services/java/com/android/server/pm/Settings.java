@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.ENFORCEMENT_DEFAULT;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
@@ -2558,9 +2559,13 @@ final class Settings {
             if (p.perm != null) {
                 pw.print("    perm="); pw.println(p.perm);
             }
+            if (READ_EXTERNAL_STORAGE.equals(p.name)) {
+                pw.print("    enforcement=");
+                pw.println(PackageManager.enforcementToString(mReadExternalStorageEnforcement));
+            }
         }
     }
-    
+
     void dumpSharedUsersLPr(PrintWriter pw, String packageName, DumpState dumpState) {
         boolean printedSomething = false;
         for (SharedUserSetting su : mSharedUsers.values()) {
