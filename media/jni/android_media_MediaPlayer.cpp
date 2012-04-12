@@ -216,12 +216,6 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
 }
 
 static void
-android_media_MediaPlayer_setDataSource(JNIEnv *env, jobject thiz, jstring path)
-{
-    android_media_MediaPlayer_setDataSourceAndHeaders(env, thiz, path, NULL, NULL);
-}
-
-static void
 android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
@@ -825,8 +819,6 @@ android_media_MediaPlayer_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject 
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"setDataSource",       "(Ljava/lang/String;)V",            (void *)android_media_MediaPlayer_setDataSource},
-
     {
         "_setDataSource",
         "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",

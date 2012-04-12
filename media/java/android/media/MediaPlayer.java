@@ -34,7 +34,9 @@ import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -847,8 +849,10 @@ public class MediaPlayer
      * As an alternative, the application could first open the file for reading,
      * and then use the file descriptor form {@link #setDataSource(FileDescriptor)}.
      */
-    public native void setDataSource(String path)
-            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+    public void setDataSource(String path)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        setDataSource(path, null, null);
+    }
 
     /**
      * Sets the data source (file-path or http/rtsp URL) to use.
@@ -875,7 +879,20 @@ public class MediaPlayer
                 ++i;
             }
         }
-        _setDataSource(path, keys, values);
+        setDataSource(path, keys, values);
+    }
+
+    private void setDataSource(String path, String[] keys, String[] values)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        File file = new File(path);
+        if (file.exists()) {
+            FileInputStream is = new FileInputStream(file);
+            FileDescriptor fd = is.getFD();
+            setDataSource(fd);
+            is.close();
+        } else {
+            _setDataSource(path, keys, values);
+        }
     }
 
     private native void _setDataSource(
