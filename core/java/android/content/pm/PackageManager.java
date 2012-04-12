@@ -1095,6 +1095,18 @@ public abstract class PackageManager {
     /** {@hide} */
     public static final int ENFORCEMENT_YES = 1;
 
+    /** {@hide} */
+    public static String enforcementToString(int enforcement) {
+        switch (enforcement) {
+            case ENFORCEMENT_DEFAULT:
+                return "DEFAULT";
+            case ENFORCEMENT_YES:
+                return "YES";
+            default:
+                return Integer.toString(enforcement);
+        }
+    }
+
     /**
      * Retrieve overall information about an application package that is
      * installed on the system.
