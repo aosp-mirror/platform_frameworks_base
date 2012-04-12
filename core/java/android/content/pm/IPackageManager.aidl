@@ -373,6 +373,6 @@ interface IPackageManager {
     List<UserInfo> getUsers();
     UserInfo getUser(int userId);
 
-    void setPermissionEnforcement(String permission, int enforcement);
-    int getPermissionEnforcement(String permission);
+    void setPermissionEnforced(String permission, boolean enforced);
+    boolean isPermissionEnforced(String permission);
 }
