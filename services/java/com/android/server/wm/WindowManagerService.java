@@ -4918,7 +4918,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 // have been drawn.
                 boolean haveBootMsg = false;
                 boolean haveApp = false;
+                // if the wallpaper service is disabled on the device, we're never going to have
+                // wallpaper, don't bother waiting for it
                 boolean haveWallpaper = false;
+                boolean wallpaperEnabled = mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_enableWallpaperService);
                 boolean haveKeyguard = true;
                 final int N = mWindows.size();
                 for (int i=0; i<N; i++) {
@@ -4954,7 +4958,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_SCREEN_ON || DEBUG_BOOT) {
                     Slog.i(TAG, "******** booted=" + mSystemBooted + " msg=" + mShowingBootMessages
                             + " haveBoot=" + haveBootMsg + " haveApp=" + haveApp
-                            + " haveWall=" + haveWallpaper + " haveKeyguard=" + haveKeyguard);
+                            + " haveWall=" + haveWallpaper + " wallEnabled=" + wallpaperEnabled
+                            + " haveKeyguard=" + haveKeyguard);
                 }
 
                 // If we are turning on the screen to show the boot message,
@@ -4966,7 +4971,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // If we are turning on the screen after the boot is completed
                 // normally, don't do so until we have the application and
                 // wallpaper.
-                if (mSystemBooted && ((!haveApp && !haveKeyguard) || !haveWallpaper)) {
+                if (mSystemBooted && ((!haveApp && !haveKeyguard) ||
+                        (wallpaperEnabled && !haveWallpaper))) {
                     return;
                 }
             }
