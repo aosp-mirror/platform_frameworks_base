@@ -616,9 +616,6 @@ public final class WebViewCore {
             int unichar, int repeatCount, boolean isShift, boolean isAlt,
             boolean isSym, boolean isDown);
 
-    private native void nativeClick(int nativeClass, int framePtr, int nodePtr,
-            boolean fake);
-
     private native void nativeSendListBoxChoices(int nativeClass,
             boolean[] choices, int size);
 
@@ -661,8 +658,6 @@ public final class WebViewCore {
             int x, int y);
     private native String nativeRetrieveImageSource(int nativeClass,
             int x, int y);
-    private native void nativeTouchUp(int nativeClass,
-            int touchGeneration, int framePtr, int nodePtr, int x, int y);
     private native boolean nativeMouseClick(int nativeClass);
 
     private native boolean nativeHandleTouchEvent(int nativeClass, int action,
@@ -1073,10 +1068,8 @@ public final class WebViewCore {
         static final int REPLACE_TEXT = 114;
         static final int PASS_TO_JS = 115;
         static final int SET_GLOBAL_BOUNDS = 116;
-        static final int CLICK = 118;
         static final int SET_NETWORK_STATE = 119;
         static final int DOC_HAS_IMAGES = 120;
-        static final int FAKE_CLICK = 121;
         static final int DELETE_SELECTION = 122;
         static final int LISTBOX_CHOICES = 123;
         static final int SINGLE_LISTBOX_CHOICE = 124;
@@ -1369,14 +1362,6 @@ public final class WebViewCore {
 
                         case KEY_PRESS:
                             keyPress(msg.arg1);
-                            break;
-
-                        case FAKE_CLICK:
-                            nativeClick(mNativeClass, msg.arg1, msg.arg2, true);
-                            break;
-
-                        case CLICK:
-                            nativeClick(mNativeClass, msg.arg1, msg.arg2, false);
                             break;
 
                         case VIEW_SIZE_CHANGED: {
