@@ -771,6 +771,8 @@ public class NumberPicker extends LinearLayout {
                 mLastDownEventTime = event.getEventTime();
                 mIngonreMoveEvents = false;
                 mShowSoftInputOnTap = false;
+                // Make sure we wupport flinging inside scrollables.
+                getParent().requestDisallowInterceptTouchEvent(true);
                 if (!mFlingScroller.isFinished()) {
                     mFlingScroller.forceFinished(true);
                     mAdjustScroller.forceFinished(true);
