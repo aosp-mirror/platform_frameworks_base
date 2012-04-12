@@ -21,8 +21,6 @@ import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.android.internal.R;
-
 
 /**
  * <p>
@@ -68,16 +66,6 @@ public class CheckBox extends CompoundButton {
 
     public CheckBox(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    }
-
-    @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
-        if (isChecked()) {
-            event.getText().add(mContext.getString(R.string.checkbox_checked));
-        } else {
-            event.getText().add(mContext.getString(R.string.checkbox_not_checked));
-        }
     }
 
     @Override
