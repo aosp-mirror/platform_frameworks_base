@@ -398,8 +398,6 @@
   <java-symbol type="string" name="cfTemplateNotForwarded" />
   <java-symbol type="string" name="cfTemplateRegistered" />
   <java-symbol type="string" name="cfTemplateRegisteredTime" />
-  <java-symbol type="string" name="checkbox_checked" />
-  <java-symbol type="string" name="checkbox_not_checked" />
   <java-symbol type="string" name="chooseActivity" />
   <java-symbol type="string" name="config_default_dns_server" />
   <java-symbol type="string" name="config_ethernet_iface_regex" />
@@ -699,8 +697,6 @@
   <java-symbol type="string" name="preposition_for_time" />
   <java-symbol type="string" name="progress_erasing" />
   <java-symbol type="string" name="progress_unmounting" />
-  <java-symbol type="string" name="radiobutton_not_selected" />
-  <java-symbol type="string" name="radiobutton_selected" />
   <java-symbol type="string" name="relationTypeAssistant" />
   <java-symbol type="string" name="relationTypeBrother" />
   <java-symbol type="string" name="relationTypeChild" />
@@ -795,8 +791,6 @@
   <java-symbol type="string" name="sms_control_title" />
   <java-symbol type="string" name="sms_control_yes" />
   <java-symbol type="string" name="submit" />
-  <java-symbol type="string" name="switch_off" />
-  <java-symbol type="string" name="switch_on" />
   <java-symbol type="string" name="sync_binding_label" />
   <java-symbol type="string" name="sync_do_nothing" />
   <java-symbol type="string" name="sync_really_delete" />
@@ -818,8 +812,6 @@
   <java-symbol type="string" name="time_wday" />
   <java-symbol type="string" name="time_wday_date" />
   <java-symbol type="string" name="today" />
-  <java-symbol type="string" name="togglebutton_not_pressed" />
-  <java-symbol type="string" name="togglebutton_pressed" />
   <java-symbol type="string" name="tomorrow" />
   <java-symbol type="string" name="twelve_hour_time_format" />
   <java-symbol type="string" name="twenty_four_hour_time_format" />
