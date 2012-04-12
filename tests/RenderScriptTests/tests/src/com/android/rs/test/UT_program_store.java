@@ -112,15 +112,15 @@ public class UT_program_store extends UnitTest {
                      boolean B,
                      boolean A,
                      boolean dither) {
-        _RS_ASSERT("ps.getDepthMaskEnabled() == depthMask", ps.getDepthMaskEnabled() == depthMask);
+        _RS_ASSERT("ps.isDepthMaskEnabled() == depthMask", ps.isDepthMaskEnabled() == depthMask);
         _RS_ASSERT("ps.getDepthFunc() == df", ps.getDepthFunc() == df);
         _RS_ASSERT("ps.getBlendSrcFunc() == bsf", ps.getBlendSrcFunc() == bsf);
         _RS_ASSERT("ps.getBlendDstFunc() == bdf", ps.getBlendDstFunc() == bdf);
-        _RS_ASSERT("ps.getColorMaskREnabled() == R", ps.getColorMaskREnabled() == R);
-        _RS_ASSERT("ps.getColorMaskGEnabled() == G", ps.getColorMaskGEnabled() == G);
-        _RS_ASSERT("ps.getColorMaskBEnabled() == B", ps.getColorMaskBEnabled() == B);
-        _RS_ASSERT("ps.getColorMaskAEnabled() == A", ps.getColorMaskAEnabled() == A);
-        _RS_ASSERT("ps.getDitherEnabled() == dither", ps.getDitherEnabled() == dither);
+        _RS_ASSERT("ps.isColorMaskRedEnabled() == R", ps.isColorMaskRedEnabled() == R);
+        _RS_ASSERT("ps.isColorMaskGreenEnabled() == G", ps.isColorMaskGreenEnabled() == G);
+        _RS_ASSERT("ps.isColorMaskBlueEnabled () == B", ps.isColorMaskBlueEnabled () == B);
+        _RS_ASSERT("ps.isColorMaskAlphaEnabled() == A", ps.isColorMaskAlphaEnabled() == A);
+        _RS_ASSERT("ps.isDitherEnabled() == dither", ps.isDitherEnabled() == dither);
     }
 
     void varyBuilderColorAndDither(ProgramStore.Builder pb,

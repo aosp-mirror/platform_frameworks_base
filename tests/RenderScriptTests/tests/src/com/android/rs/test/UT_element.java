@@ -108,7 +108,7 @@ public class UT_element extends UnitTest {
         _RS_ASSERT("complexElemsimpleElem.getDataType() == NONE",
                    complexElem.getDataType() == DataType.NONE);
         _RS_ASSERT("complexElem.getSizeBytes() == ScriptField_ComplexStruct.Item.sizeof",
-                   complexElem.getSizeBytes() == ScriptField_ComplexStruct.Item.sizeof);
+                   complexElem.getBytesSize() == ScriptField_ComplexStruct.Item.sizeof);
 
         for (int i = 0; i < subElemCount; i ++) {
             _RS_ASSERT("complexElem.getSubElement(i) != null",

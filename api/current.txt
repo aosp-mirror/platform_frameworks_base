@@ -17993,15 +17993,24 @@ package android.renderscript {
     method public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type, int);
     method public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type);
     method public void generateMipmaps();
+    method public int getBytesSize();
+    method public android.renderscript.Element getElement();
+    method public android.view.Surface getSurface();
     method public android.renderscript.Type getType();
+    method public int getUsage();
+    method public void ioReceive();
+    method public void ioSend();
     method public synchronized void resize(int);
     method public void setFromFieldPacker(int, android.renderscript.FieldPacker);
     method public void setFromFieldPacker(int, int, android.renderscript.FieldPacker);
+    method public void setSurface(android.view.Surface);
     method public void syncAll(int);
     field public static final int USAGE_GRAPHICS_CONSTANTS = 8; // 0x8
     field public static final int USAGE_GRAPHICS_RENDER_TARGET = 16; // 0x10
     field public static final int USAGE_GRAPHICS_TEXTURE = 2; // 0x2
     field public static final int USAGE_GRAPHICS_VERTEX = 4; // 0x4
+    field public static final int USAGE_IO_INPUT = 32; // 0x20
+    field public static final int USAGE_IO_OUTPUT = 64; // 0x40
     field public static final int USAGE_SCRIPT = 1; // 0x1
   }
 
@@ -18140,6 +18149,15 @@ package android.renderscript {
     method public static android.renderscript.Element U8_4(android.renderscript.RenderScript);
     method public static android.renderscript.Element createPixel(android.renderscript.RenderScript, android.renderscript.Element.DataType, android.renderscript.Element.DataKind);
     method public static android.renderscript.Element createVector(android.renderscript.RenderScript, android.renderscript.Element.DataType, int);
+    method public int getBytesSize();
+    method public android.renderscript.Element.DataKind getDataKind();
+    method public android.renderscript.Element.DataType getDataType();
+    method public android.renderscript.Element getSubElement(int);
+    method public int getSubElementArraySize(int);
+    method public int getSubElementCount();
+    method public java.lang.String getSubElementName(int);
+    method public int getSubElementOffsetBytes(int);
+    method public int getVectorSize();
     method public boolean isCompatible(android.renderscript.Element);
     method public boolean isComplex();
   }
@@ -18172,6 +18190,7 @@ package android.renderscript {
     enum_constant public static final android.renderscript.Element.DataType MATRIX_2X2;
     enum_constant public static final android.renderscript.Element.DataType MATRIX_3X3;
     enum_constant public static final android.renderscript.Element.DataType MATRIX_4X4;
+    enum_constant public static final android.renderscript.Element.DataType NONE;
     enum_constant public static final android.renderscript.Element.DataType RS_ALLOCATION;
     enum_constant public static final android.renderscript.Element.DataType RS_ELEMENT;
     enum_constant public static final android.renderscript.Element.DataType RS_MESH;
@@ -18486,12 +18505,18 @@ package android.renderscript {
     method public void bindConstants(android.renderscript.Allocation, int);
     method public void bindSampler(android.renderscript.Sampler, int) throws java.lang.IllegalArgumentException;
     method public void bindTexture(android.renderscript.Allocation, int) throws java.lang.IllegalArgumentException;
+    method public android.renderscript.Type getConstant(int);
+    method public int getConstantCount();
+    method public int getTextureCount();
+    method public java.lang.String getTextureName(int);
+    method public android.renderscript.Program.TextureType getTextureType(int);
   }
 
   public static class Program.BaseProgramBuilder {
     ctor protected Program.BaseProgramBuilder(android.renderscript.RenderScript);
     method public android.renderscript.Program.BaseProgramBuilder addConstant(android.renderscript.Type) throws java.lang.IllegalStateException;
     method public android.renderscript.Program.BaseProgramBuilder addTexture(android.renderscript.Program.TextureType) throws java.lang.IllegalArgumentException;
+    method public android.renderscript.Program.BaseProgramBuilder addTexture(android.renderscript.Program.TextureType, java.lang.String) throws java.lang.IllegalArgumentException;
     method public int getCurrentConstantIndex();
     method public int getCurrentTextureIndex();
     method protected void initProgram(android.renderscript.Program);
@@ -18547,6 +18572,8 @@ package android.renderscript {
     method public static android.renderscript.ProgramRaster CULL_BACK(android.renderscript.RenderScript);
     method public static android.renderscript.ProgramRaster CULL_FRONT(android.renderscript.RenderScript);
     method public static android.renderscript.ProgramRaster CULL_NONE(android.renderscript.RenderScript);
+    method public android.renderscript.ProgramRaster.CullMode getCullMode();
+    method public boolean isPointSpriteEnabled();
   }
 
   public static class ProgramRaster.Builder {
@@ -18569,6 +18596,15 @@ package android.renderscript {
     method public static android.renderscript.ProgramStore BLEND_ALPHA_DEPTH_TEST(android.renderscript.RenderScript);
     method public static android.renderscript.ProgramStore BLEND_NONE_DEPTH_NONE(android.renderscript.RenderScript);
     method public static android.renderscript.ProgramStore BLEND_NONE_DEPTH_TEST(android.renderscript.RenderScript);
+    method public android.renderscript.ProgramStore.BlendDstFunc getBlendDstFunc();
+    method public android.renderscript.ProgramStore.BlendSrcFunc getBlendSrcFunc();
+    method public android.renderscript.ProgramStore.DepthFunc getDepthFunc();
+    method public boolean isColorMaskAlphaEnabled();
+    method public boolean isColorMaskBlueEnabled();
+    method public boolean isColorMaskGreenEnabled();
+    method public boolean isColorMaskRedEnabled();
+    method public boolean isDepthMaskEnabled();
+    method public boolean isDitherEnabled();
   }
 
   public static final class ProgramStore.BlendDstFunc extends java.lang.Enum {
@@ -18621,6 +18657,8 @@ package android.renderscript {
   }
 
   public class ProgramVertex extends android.renderscript.Program {
+    method public android.renderscript.Element getInput(int);
+    method public int getInputCount();
   }
 
   public static class ProgramVertex.Builder extends android.renderscript.Program.BaseProgramBuilder {
@@ -18758,6 +18796,11 @@ package android.renderscript {
     method public static android.renderscript.Sampler WRAP_LINEAR(android.renderscript.RenderScript);
     method public static android.renderscript.Sampler WRAP_LINEAR_MIP_LINEAR(android.renderscript.RenderScript);
     method public static android.renderscript.Sampler WRAP_NEAREST(android.renderscript.RenderScript);
+    method public float getAnisotropy();
+    method public android.renderscript.Sampler.Value getMagnification();
+    method public android.renderscript.Sampler.Value getMinification();
+    method public android.renderscript.Sampler.Value getWrapS();
+    method public android.renderscript.Sampler.Value getWrapT();
   }
 
   public static class Sampler.Builder {

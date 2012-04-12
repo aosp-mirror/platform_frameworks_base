@@ -48,15 +48,16 @@ public class ProgramRaster extends BaseObj {
     }
 
     /**
-     * @hide
+     * Specifies whether vertices are rendered as screen aligned
+     * elements of a specified size
      * @return whether point sprites are enabled
      */
-    public boolean getPointSpriteEnabled() {
+    public boolean isPointSpriteEnabled() {
         return mPointSprite;
     }
 
     /**
-     * @hide
+     * Specifies how triangles are culled based on their orientation
      * @return cull mode
      */
     public CullMode getCullMode() {

@@ -60,13 +60,13 @@ public class UT_program_raster extends UnitTest {
     }
 
     private void testJavaSide(RenderScript RS) {
-        _RS_ASSERT("pointSpriteEnabled.getPointSpriteEnabled() == true",
-                    pointSpriteEnabled.getPointSpriteEnabled() == true);
+        _RS_ASSERT("pointSpriteEnabled.isPointSpriteEnabled() == true",
+                    pointSpriteEnabled.isPointSpriteEnabled() == true);
         _RS_ASSERT("pointSpriteEnabled.getCullMode() == ProgramRaster.CullMode.BACK",
                     pointSpriteEnabled.getCullMode() == ProgramRaster.CullMode.BACK);
 
-        _RS_ASSERT("cullMode.getPointSpriteEnabled() == false",
-                    cullMode.getPointSpriteEnabled() == false);
+        _RS_ASSERT("cullMode.isPointSpriteEnabled() == false",
+                    cullMode.isPointSpriteEnabled() == false);
         _RS_ASSERT("cullMode.getCullMode() == ProgramRaster.CullMode.FRONT",
                     cullMode.getCullMode() == ProgramRaster.CullMode.FRONT);
     }

@@ -150,7 +150,8 @@ public class ProgramStore extends BaseObj {
     }
 
     /**
-    * @hide
+    * Returns the function used to test writing into the depth
+    * buffer
     * @return depth function
     */
     public DepthFunc getDepthFunc() {
@@ -158,47 +159,47 @@ public class ProgramStore extends BaseObj {
     }
 
     /**
-    * @hide
-    * @return whether depth writes are enabled
+    * Queries whether writes are enabled into the depth buffer
+    * @return depth mask
     */
-    public boolean getDepthMaskEnabled() {
+    public boolean isDepthMaskEnabled() {
         return mDepthMask;
     }
 
     /**
-    * @hide
+    * Queries whether red channel is written
     * @return red color channel mask
     */
-    public boolean getColorMaskREnabled() {
+    public boolean isColorMaskRedEnabled() {
         return mColorMaskR;
     }
 
     /**
-    * @hide
+    * Queries whether green channel is written
     * @return green color channel mask
     */
-    public boolean getColorMaskGEnabled() {
+    public boolean isColorMaskGreenEnabled() {
         return mColorMaskG;
     }
 
     /**
-    * @hide
+    * Queries whether blue channel is written
     * @return blue color channel mask
     */
-    public boolean getColorMaskBEnabled() {
+    public boolean isColorMaskBlueEnabled() {
         return mColorMaskB;
     }
 
     /**
-    * @hide
+    * Queries whether alpha channel is written
     * @return alpha channel mask
     */
-    public boolean getColorMaskAEnabled() {
+    public boolean isColorMaskAlphaEnabled() {
         return mColorMaskA;
     }
 
     /**
-    * @hide
+    * Specifies how the source blending factor is computed
     * @return source blend function
     */
     public BlendSrcFunc getBlendSrcFunc() {
@@ -206,7 +207,7 @@ public class ProgramStore extends BaseObj {
     }
 
     /**
-    * @hide
+    * Specifies how the destination blending factor is computed
     * @return destination blend function
     */
     public BlendDstFunc getBlendDstFunc() {
@@ -214,10 +215,11 @@ public class ProgramStore extends BaseObj {
     }
 
     /**
-    * @hide
+    * Specifies whether colors are dithered before writing into the
+    * framebuffer
     * @return whether dither is enabled
     */
-    public boolean getDitherEnabled() {
+    public boolean isDitherEnabled() {
         return mDither;
     }
 

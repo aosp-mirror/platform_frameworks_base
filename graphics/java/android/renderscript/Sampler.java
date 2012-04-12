@@ -59,7 +59,6 @@ public class Sampler extends BaseObj {
     }
 
     /**
-     * @hide
      * @return minification setting for the sampler
      */
     public Value getMinification() {
@@ -67,7 +66,6 @@ public class Sampler extends BaseObj {
     }
 
     /**
-     * @hide
      * @return magnification setting for the sampler
      */
     public Value getMagnification() {
@@ -75,7 +73,6 @@ public class Sampler extends BaseObj {
     }
 
     /**
-     * @hide
      * @return S wrapping mode for the sampler
      */
     public Value getWrapS() {
@@ -83,7 +80,6 @@ public class Sampler extends BaseObj {
     }
 
     /**
-     * @hide
      * @return T wrapping mode for the sampler
      */
     public Value getWrapT() {
@@ -91,7 +87,6 @@ public class Sampler extends BaseObj {
     }
 
     /**
-     * @hide
      * @return anisotropy setting for the sampler
      */
     public float getAnisotropy() {
@@ -288,7 +283,7 @@ public class Sampler extends BaseObj {
 
         public Sampler create() {
             mRS.validate();
-            int id = mRS.nSamplerCreate(mMag.mID, mMin.mID, 
+            int id = mRS.nSamplerCreate(mMag.mID, mMin.mID,
                                         mWrapS.mID, mWrapT.mID, mWrapR.mID, mAniso);
             Sampler sampler = new Sampler(id, mRS);
             sampler.mMin = mMin;
