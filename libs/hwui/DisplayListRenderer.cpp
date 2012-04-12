@@ -818,7 +818,10 @@ status_t DisplayList::replay(OpenGLRenderer& renderer, uint32_t width,
         indent[i] = ' ';
     }
     indent[count] = '\0';
-    DISPLAY_LIST_LOGD("%sStart display list (%p, %s)", (char*) indent + 2, this, mName.string());
+    Rect* clipRect = renderer.getClipRect();
+    DISPLAY_LIST_LOGD("%sStart display list (%p, %s), clipRect: %.0f, %.f, %.0f, %.0f",
+            (char*) indent + 2, this, mName.string(), clipRect->left, clipRect->top,
+            clipRect->right, clipRect->bottom);
 #endif
 
     renderer.startMark(mName.string());
