@@ -668,6 +668,9 @@ class MountService extends IMountService.Stub
                     updatePublicVolumeState(mExternalStoragePath, Environment.MEDIA_REMOVED);
                 }
 
+                // Let package manager load internal ASECs.
+                mPms.updateExternalMediaStatus(true, false);
+
                 /*
                  * Now that we've done our initialization, release
                  * the hounds!
@@ -1435,15 +1438,16 @@ class MountService extends IMountService.Stub
         }
     }
 
-    public int createSecureContainer(String id, int sizeMb, String fstype,
-                                    String key, int ownerUid) {
+    public int createSecureContainer(String id, int sizeMb, String fstype, String key,
+            int ownerUid, boolean external) {
         validatePermission(android.Manifest.permission.ASEC_CREATE);
         waitForReady();
         warnOnNotMounted();
 
         int rc = StorageResultCode.OperationSucceeded;
         try {
-            mConnector.execute("asec", "create", id, sizeMb, fstype, key, ownerUid);
+            mConnector.execute("asec", "create", id, sizeMb, fstype, key, ownerUid,
+                    external ? "1" : "0");
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
@@ -1466,6 +1470,23 @@ class MountService extends IMountService.Stub
             /*
              * Finalization does a remount, so no need
              * to update mAsecMountSet
+             */
+        } catch (NativeDaemonConnectorException e) {
+            rc = StorageResultCode.OperationFailedInternalError;
+        }
+        return rc;
+    }
+
+    public int fixPermissionsSecureContainer(String id, int gid, String filename) {
+        validatePermission(android.Manifest.permission.ASEC_CREATE);
+        warnOnNotMounted();
+
+        int rc = StorageResultCode.OperationSucceeded;
+        try {
+            mConnector.execute("asec", "fixperms", id, gid, filename);
+            /*
+             * Fix permissions does a remount, so no need to update
+             * mAsecMountSet
              */
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
