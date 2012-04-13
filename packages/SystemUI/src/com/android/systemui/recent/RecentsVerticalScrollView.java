@@ -77,6 +77,17 @@ public class RecentsVerticalScrollView extends ScrollView
         }
     }
 
+    public View findViewForTask(TaskDescription task) {
+        for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
+            View v = mLinearLayout.getChildAt(i);
+            RecentsPanelView.ViewHolder holder = (RecentsPanelView.ViewHolder) v.getTag();
+            if (holder.taskDescription == task) {
+                return v;
+            }
+        }
+        return null;
+    }
+
     private void update() {
         for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
             View v = mLinearLayout.getChildAt(i);
@@ -146,7 +157,9 @@ public class RecentsVerticalScrollView extends ScrollView
             appTitle.setContentDescription(" ");
             appTitle.setOnTouchListener(noOpListener);
             final View calloutLine = view.findViewById(R.id.recents_callout_line);
-            calloutLine.setOnTouchListener(noOpListener);
+            if (calloutLine != null) {
+                calloutLine.setOnTouchListener(noOpListener);
+            }
 
             mLinearLayout.addView(view);
         }

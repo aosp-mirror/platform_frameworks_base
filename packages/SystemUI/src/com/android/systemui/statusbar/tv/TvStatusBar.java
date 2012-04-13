@@ -148,6 +148,10 @@ public class TvStatusBar extends BaseStatusBar {
         return mView;
     }
 
+    public View getStatusBarView() {
+        return null;
+    }
+
     protected int getStatusBarGravity() {
         return 0;
     }
