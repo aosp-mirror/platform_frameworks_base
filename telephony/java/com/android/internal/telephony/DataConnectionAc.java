@@ -82,6 +82,51 @@ public class DataConnectionAc extends AsyncChannel {
     public static final int REQ_GET_RECONNECT_INTENT = BASE + 26;
     public static final int RSP_GET_RECONNECT_INTENT = BASE + 27;
 
+    private static final int CMD_TO_STRING_COUNT = RSP_GET_RECONNECT_INTENT + 1;
+    private static String[] sCmdToString = new String[CMD_TO_STRING_COUNT];
+    static {
+        sCmdToString[REQ_IS_INACTIVE - BASE] = "REQ_IS_INACTIVE";
+        sCmdToString[RSP_IS_INACTIVE - BASE] = "RSP_IS_INACTIVE";
+        sCmdToString[REQ_GET_CID - BASE] = "REQ_GET_CID";
+        sCmdToString[RSP_GET_CID - BASE] = "RSP_GET_CID";
+        sCmdToString[REQ_GET_APNSETTING - BASE] = "REQ_GET_APNSETTING";
+        sCmdToString[RSP_GET_APNSETTING - BASE] = "RSP_GET_APNSETTING";
+        sCmdToString[REQ_GET_LINK_PROPERTIES - BASE] = "REQ_GET_LINK_PROPERTIES";
+        sCmdToString[RSP_GET_LINK_PROPERTIES - BASE] = "RSP_GET_LINK_PROPERTIES";
+        sCmdToString[REQ_SET_LINK_PROPERTIES_HTTP_PROXY - BASE] =
+                "REQ_SET_LINK_PROPERTIES_HTTP_PROXY";
+        sCmdToString[RSP_SET_LINK_PROPERTIES_HTTP_PROXY - BASE] =
+                "RSP_SET_LINK_PROPERTIES_HTTP_PROXY";
+        sCmdToString[REQ_GET_LINK_CAPABILITIES - BASE] = "REQ_GET_LINK_CAPABILITIES";
+        sCmdToString[RSP_GET_LINK_CAPABILITIES - BASE] = "RSP_GET_LINK_CAPABILITIES";
+        sCmdToString[REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE - BASE] =
+                "REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE";
+        sCmdToString[RSP_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE - BASE] =
+                "RSP_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE";
+        sCmdToString[REQ_RESET - BASE] = "REQ_RESET";
+        sCmdToString[RSP_RESET - BASE] = "RSP_RESET";
+        sCmdToString[REQ_GET_REFCOUNT - BASE] = "REQ_GET_REFCOUNT";
+        sCmdToString[RSP_GET_REFCOUNT - BASE] = "RSP_GET_REFCOUNT";
+        sCmdToString[REQ_ADD_APNCONTEXT - BASE] = "REQ_ADD_APNCONTEXT";
+        sCmdToString[RSP_ADD_APNCONTEXT - BASE] = "RSP_ADD_APNCONTEXT";
+        sCmdToString[REQ_REMOVE_APNCONTEXT - BASE] = "REQ_REMOVE_APNCONTEXT";
+        sCmdToString[RSP_REMOVE_APNCONTEXT - BASE] = "RSP_REMOVE_APNCONTEXT";
+        sCmdToString[REQ_GET_APNCONTEXT_LIST - BASE] = "REQ_GET_APNCONTEXT_LIST";
+        sCmdToString[RSP_GET_APNCONTEXT_LIST - BASE] = "RSP_GET_APNCONTEXT_LIST";
+        sCmdToString[REQ_SET_RECONNECT_INTENT - BASE] = "REQ_SET_RECONNECT_INTENT";
+        sCmdToString[RSP_SET_RECONNECT_INTENT - BASE] = "RSP_SET_RECONNECT_INTENT";
+        sCmdToString[REQ_GET_RECONNECT_INTENT - BASE] = "REQ_GET_RECONNECT_INTENT";
+        sCmdToString[RSP_GET_RECONNECT_INTENT - BASE] = "RSP_GET_RECONNECT_INTENT";
+    }
+    protected static String cmdToString(int cmd) {
+        cmd -= BASE;
+        if ((cmd >= 0) && (cmd < sCmdToString.length)) {
+            return sCmdToString[cmd];
+        } else {
+            return AsyncChannel.cmdToString(cmd + BASE);
+        }
+    }
+
     /**
      * enum used to notify action taken or necessary to be
      * taken after the link property is changed.

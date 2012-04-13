@@ -150,6 +150,24 @@ public class AsyncChannel {
      */
     public static final int CMD_CHANNEL_DISCONNECTED = BASE + 4;
 
+    private static final int CMD_TO_STRING_COUNT = CMD_CHANNEL_DISCONNECTED + 1;
+    private static String[] sCmdToString = new String[CMD_TO_STRING_COUNT];
+    static {
+        sCmdToString[CMD_CHANNEL_HALF_CONNECTED - BASE] = "CMD_CHANNEL_HALF_CONNECTED";
+        sCmdToString[CMD_CHANNEL_FULL_CONNECTION - BASE] = "CMD_CHANNEL_FULL_CONNECTION";
+        sCmdToString[CMD_CHANNEL_FULLY_CONNECTED - BASE] = "CMD_CHANNEL_FULLY_CONNECTED";
+        sCmdToString[CMD_CHANNEL_DISCONNECT - BASE] = "CMD_CHANNEL_DISCONNECT";
+        sCmdToString[CMD_CHANNEL_DISCONNECTED - BASE] = "CMD_CHANNEL_DISCONNECTED";
+    }
+    protected static String cmdToString(int cmd) {
+        cmd -= BASE;
+        if ((cmd >= 0) && (cmd < sCmdToString.length)) {
+            return sCmdToString[cmd];
+        } else {
+            return null;
+        }
+    }
+
     /** Successful status always 0, !0 is an unsuccessful status */
     public static final int STATUS_SUCCESSFUL = 0;
 
