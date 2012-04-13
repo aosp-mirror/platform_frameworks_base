@@ -23,7 +23,6 @@ import com.android.internal.policy.impl.PhoneWindowManager;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Singleton class that carries out the animations and Surface operations in a separate task
@@ -36,8 +35,7 @@ public class WindowAnimator {
     final Context mContext;
     final WindowManagerPolicy mPolicy;
 
-    HashSet<WindowStateAnimator> mWinAnimators = new HashSet<WindowStateAnimator>();
-    HashSet<WindowStateAnimator> mFinished = new HashSet<WindowStateAnimator>();
+    ArrayList<WindowStateAnimator> mWinAnimators = new ArrayList<WindowStateAnimator>();
 
     boolean mAnimating;
     boolean mTokenMayBeDrawn;
@@ -449,16 +447,9 @@ public class WindowAnimator {
                 mScreenRotationAnimation.updateSurfaces();
             }
 
-            mFinished.clear();
-            for (final WindowStateAnimator winAnimator : mWinAnimators) {
-                if (winAnimator.mSurface == null) {
-                    mFinished.add(winAnimator);
-                } else {
-                    winAnimator.prepareSurfaceLocked(true);
-                }
-            }
-            for (final WindowStateAnimator winAnimator : mFinished) {
-                mWinAnimators.remove(winAnimator);
+            final int N = mWinAnimators.size();
+            for (int i = 0; i < N; i++) {
+                mWinAnimators.get(i).prepareSurfaceLocked(true);
             }
 
             if (mDimParams != null) {
@@ -476,6 +467,10 @@ public class WindowAnimator {
                 } else {
                     mService.mBlackFrame.clearMatrix();
                 }
+            }
+
+            if (mService.mWatermark != null) {
+                mService.mWatermark.drawIfNeeded();
             }
         } catch (RuntimeException e) {
             Log.wtf(TAG, "Unhandled exception in Window Manager", e);

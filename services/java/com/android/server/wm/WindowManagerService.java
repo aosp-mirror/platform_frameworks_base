@@ -175,6 +175,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_SCREENSHOT = false;
     static final boolean DEBUG_BOOT = false;
     static final boolean DEBUG_LAYOUT_REPEATS = true;
+    static final boolean DEBUG_SURFACE_TRACE = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
@@ -425,7 +426,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     IInputMethodManager mInputMethodManager;
 
-    SurfaceSession mFxSession;
+    final SurfaceSession mFxSession;
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
 
@@ -862,6 +863,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
+        mFxSession = new SurfaceSession();
+
+        Surface.openTransaction();
+        createWatermark();
+        Surface.closeTransaction();
     }
 
     public InputManagerService getInputManagerService() {
@@ -7592,7 +7598,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                         "Check opening app" + wtoken + ": allDrawn="
                         + wtoken.allDrawn + " startingDisplayed="
-                        + wtoken.startingDisplayed);
+                        + wtoken.startingDisplayed + " startingMoved="
+                        + wtoken.startingMoved);
                 if (!wtoken.allDrawn && !wtoken.startingDisplayed
                         && !wtoken.startingMoved) {
                     goodToGo = false;
@@ -8058,23 +8065,13 @@ public class WindowManagerService extends IWindowManager.Stub
         mInnerFields.mHoldScreen = null;
         mInnerFields.mScreenBrightness = -1;
         mInnerFields.mButtonBrightness = -1;
-        boolean focusDisplayed = false;
         mAnimator.mAnimating = false;
-        boolean createWatermark = false;
-
-        if (mFxSession == null) {
-            mFxSession = new SurfaceSession();
-            createWatermark = true;
-        }
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
 
         Surface.openTransaction();
 
-        if (createWatermark) {
-            createWatermark();
-        }
         if (mWatermark != null) {
             mWatermark.positionSurface(dw, dh);
         }
@@ -8145,6 +8142,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mInnerFields.mDimming = false;
             mInnerFields.mSyswin = false;
             
+            boolean focusDisplayed = false;
             final int N = mWindows.size();
             for (i=N-1; i>=0; i--) {
                 WindowState w = mWindows.get(i);
@@ -8168,6 +8166,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     updateWallpaperVisibilityLocked();
                 }
             }
+            if (focusDisplayed) {
+                mH.sendEmptyMessage(H.REPORT_LOSING_FOCUS);
+            }
+
             if (!mInnerFields.mDimming && mAnimator.isDimming()) {
                 mAnimator.stopDimming();
             }
@@ -8294,15 +8296,18 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Update animations of all applications, including those
         // associated with exiting/removed apps
-        mAnimator.animate();
-        mPendingLayoutChanges |= mAnimator.mPendingLayoutChanges;
-        if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after animate()", mPendingLayoutChanges);
-
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
-
-        if (mWatermark != null) {
-            mWatermark.drawIfNeeded();
+        synchronized (mAnimator) {
+            final ArrayList<WindowStateAnimator> winAnimators = mAnimator.mWinAnimators;
+            winAnimators.clear();
+            for (i = 0; i < N; i++) {
+                final WindowStateAnimator winAnimator = mWindows.get(i).mWinAnimator;
+                if (winAnimator.mSurface != null) {
+                    winAnimators.add(winAnimator);
+                }
+            }
+            mAnimator.animate();
+            mPendingLayoutChanges |= mAnimator.mPendingLayoutChanges;
+            if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("after animate()", mPendingLayoutChanges);
         }
 
         if (DEBUG_ORIENTATION && mDisplayFrozen) Slog.v(TAG,
@@ -8415,9 +8420,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mToBottomApps.clear();
         }
 
-        if (focusDisplayed) {
-            mH.sendEmptyMessage(H.REPORT_LOSING_FOCUS);
-        }
         if (wallpaperDestroyed) {
             mLayoutNeeded |= adjustWallpaperWindowsLocked() != 0;
         }
@@ -8588,7 +8590,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         wsa.mSurfaceShown = false;
                         wsa.mSurface = null;
                         ws.mHasSurface = false;
-                        mAnimator.mWinAnimators.remove(wsa);
                         mForceRemoves.add(ws);
                         i--;
                         N--;
@@ -8602,7 +8603,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         wsa.mSurfaceShown = false;
                         wsa.mSurface = null;
                         ws.mHasSurface = false;
-                        mAnimator.mWinAnimators.remove(wsa);
                         leakedSurface = true;
                     }
                 }
@@ -8642,7 +8642,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     winAnimator.mSurfaceShown = false;
                     winAnimator.mSurface = null;
                     winAnimator.mWin.mHasSurface = false;
-                    mAnimator.mWinAnimators.remove(winAnimator);
                 }
 
                 try {

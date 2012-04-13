@@ -10,11 +10,14 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.CLEAR_ORIE
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Surface;
+import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
@@ -25,6 +28,7 @@ import android.view.animation.Transformation;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * Keep track of animations and surface operations for a single WindowState.
@@ -39,6 +43,7 @@ class WindowStateAnimator {
     static final boolean SHOW_SURFACE_ALLOC = WindowManagerService.SHOW_SURFACE_ALLOC;
     static final boolean localLOGV = WindowManagerService.localLOGV;
     static final boolean DEBUG_ORIENTATION = WindowManagerService.DEBUG_ORIENTATION;
+    static final boolean DEBUG_SURFACE_TRACE = WindowManagerService.DEBUG_SURFACE_TRACE;
 
     static final String TAG = "WindowStateAnimator";
 
@@ -398,6 +403,105 @@ class WindowStateAnimator {
         return true;
     }
 
+    static class MySurface extends Surface {
+        final static ArrayList<MySurface> sSurfaces = new ArrayList<MySurface>();
+
+        private float mMySurfaceAlpha = 0xff;
+        private int mLayer;
+        private PointF mPosition = new PointF();
+        private Point mSize = new Point();
+        private boolean mShown = false;
+        private String mName = "Not named";
+
+        public MySurface(SurfaceSession s,
+                       int pid, int display, int w, int h, int format, int flags) throws
+                       OutOfResourcesException {
+            super(s, pid, display, w, h, format, flags);
+            mSize = new Point(w, h);
+            Slog.v("SurfaceTrace", "ctor: " + this);
+        }
+
+        public MySurface(SurfaceSession s,
+                       int pid, String name, int display, int w, int h, int format, int flags)
+                   throws OutOfResourcesException {
+            super(s, pid, name, display, w, h, format, flags);
+            mName = name;
+            mSize = new Point(w, h);
+            Slog.v("SurfaceTrace", "ctor: " + this);
+        }
+
+        @Override
+        public void setAlpha(float alpha) {
+            super.setAlpha(alpha);
+            mMySurfaceAlpha = alpha;
+            Slog.v("SurfaceTrace", "setAlpha: " + this);
+        }
+
+        @Override
+        public void setLayer(int zorder) {
+            super.setLayer(zorder);
+            mLayer = zorder;
+            Slog.v("SurfaceTrace", "setLayer: " + this);
+
+            sSurfaces.remove(this);
+            int i;
+            for (i = sSurfaces.size() - 1; i >= 0; i--) {
+                MySurface s = sSurfaces.get(i);
+                if (s.mLayer < zorder) {
+                    break;
+                }
+            }
+            sSurfaces.add(i + 1, this);
+        }
+
+        @Override
+        public void setPosition(float x, float y) {
+            super.setPosition(x, y);
+            mPosition = new PointF(x, y);
+        }
+
+        @Override
+        public void setSize(int w, int h) {
+            super.setSize(w, h);
+            mSize = new Point(w, h);
+        }
+
+        @Override
+        public void hide() {
+            super.hide();
+            mShown = false;
+            Slog.v("SurfaceTrace", "hide: " + this);
+        }
+        @Override
+        public void show() {
+            super.show();
+            mShown = true;
+            Slog.v("SurfaceTrace", "show: " + this);
+        }
+
+        @Override
+        public void destroy() {
+            super.destroy();
+            Slog.v("SurfaceTrace", "destroy: " + this + ". Called by "
+                    + WindowManagerService.getCaller());
+            sSurfaces.remove(this);
+        }
+
+        static void dumpAllSurfaces() {
+            final int N = sSurfaces.size();
+            for (int i = 0; i < N; i++) {
+                Slog.i(TAG, "SurfaceDump: " + sSurfaces.get(i));
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "Surface " + mName + ": shown=" + mShown + " layer=" + mLayer
+                    + " alpha=" + mMySurfaceAlpha + " " + mPosition.x + "," + mPosition.y
+                    + " " + mSize.x + "x" + mSize.y;
+        }
+    }
+
     Surface createSurfaceLocked() {
         if (mSurface == null) {
             mReportDestroySurface = false;
@@ -452,12 +556,18 @@ class WindowStateAnimator {
                 if (!PixelFormat.formatHasAlpha(attrs.format)) {
                     flags |= Surface.OPAQUE;
                 }
-                mSurface = new Surface(
+                if (DEBUG_SURFACE_TRACE) {
+                    mSurface = new MySurface(
+                            mSession.mSurfaceSession, mSession.mPid,
+                            attrs.getTitle().toString(),
+                            0, w, h, format, flags);
+                } else {
+                    mSurface = new Surface(
                         mSession.mSurfaceSession, mSession.mPid,
                         attrs.getTitle().toString(),
                         0, w, h, format, flags);
+                }
                 mWin.mHasSurface = true;
-                mAnimator.mWinAnimators.add(this);
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
                         "  CREATE SURFACE "
                         + mSurface + " IN SESSION "
@@ -468,14 +578,12 @@ class WindowStateAnimator {
                         + " / " + this);
             } catch (Surface.OutOfResourcesException e) {
                 mWin.mHasSurface = false;
-                mAnimator.mWinAnimators.remove(this);
                 Slog.w(TAG, "OutOfResourcesException creating surface");
                 mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
                 mDrawState = NO_SURFACE;
                 return null;
             } catch (Exception e) {
                 mWin.mHasSurface = false;
-                mAnimator.mWinAnimators.remove(this);
                 Slog.e(TAG, "Exception creating surface", e);
                 mDrawState = NO_SURFACE;
                 return null;
@@ -593,7 +701,6 @@ class WindowStateAnimator {
             mSurfaceShown = false;
             mSurface = null;
             mWin.mHasSurface =false;
-            mAnimator.mWinAnimators.remove(this);
         }
     }
 
