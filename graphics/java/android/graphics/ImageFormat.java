@@ -25,34 +25,38 @@ public class ImageFormat {
     public static final int UNKNOWN = 0;
 
     /**
-     * RGB format used for pictures encoded as RGB_565 see
+     * RGB format used for pictures encoded as RGB_565. See
      * {@link android.hardware.Camera.Parameters#setPictureFormat(int)}.
      */
     public static final int RGB_565 = 4;
 
     /**
-     * Android YUV format:
+     * <p>Android YUV format.</p>
      *
-     * This format is exposed to software decoders and applications.
+     * <p>This format is exposed to software decoders and applications.</p>
      *
-     * YV12 is a 4:2:0 YCrCb planar format comprised of a WxH Y plane followed
-     * by (W/2) x (H/2) Cr and Cb planes.
+     * <p>YV12 is a 4:2:0 YCrCb planar format comprised of a WxH Y plane followed
+     * by (W/2) x (H/2) Cr and Cb planes.</p>
      *
-     * This format assumes
-     * - an even width
-     * - an even height
-     * - a horizontal stride multiple of 16 pixels
-     * - a vertical stride equal to the height
+     * <p>This format assumes
+     * <ul>
+     * <li>an even width</li>
+     * <li>an even height</li>
+     * <li>a horizontal stride multiple of 16 pixels</li>
+     * <li>a vertical stride equal to the height</li>
+     * </ul>
+     * </p>
      *
-     *   y_size = stride * height
-     *   c_size = ALIGN(stride/2, 16) * height/2
-     *   size = y_size + c_size * 2
-     *   cr_offset = y_size
-     *   cb_offset = y_size + c_size
+     * <pre> y_size = stride * height
+     * c_size = ALIGN(stride/2, 16) * height/2
+     * size = y_size + c_size * 2
+     * cr_offset = y_size
+     * cb_offset = y_size + c_size</pre>
      *
-     * Whether this format is supported by the camera hardware can be determined
-     * by
+     * This format is guaranteed to be supported for camera preview images since
+     * API level 12; for earlier API versions, check
      * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
+     * </p>
      */
     public static final int YV12 = 0x32315659;
 
