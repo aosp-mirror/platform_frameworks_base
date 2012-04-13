@@ -704,6 +704,37 @@ public final class Downloads {
          */
         public static final int STATUS_BLOCKED = 498;
 
+        /** {@hide} */
+        public static String statusToString(int status) {
+            switch (status) {
+                case STATUS_PENDING: return "PENDING";
+                case STATUS_RUNNING: return "RUNNING";
+                case STATUS_PAUSED_BY_APP: return "PAUSED_BY_APP";
+                case STATUS_WAITING_TO_RETRY: return "WAITING_TO_RETRY";
+                case STATUS_WAITING_FOR_NETWORK: return "WAITING_FOR_NETWORK";
+                case STATUS_QUEUED_FOR_WIFI: return "QUEUED_FOR_WIFI";
+                case STATUS_INSUFFICIENT_SPACE_ERROR: return "INSUFFICIENT_SPACE_ERROR";
+                case STATUS_DEVICE_NOT_FOUND_ERROR: return "DEVICE_NOT_FOUND_ERROR";
+                case STATUS_SUCCESS: return "SUCCESS";
+                case STATUS_BAD_REQUEST: return "BAD_REQUEST";
+                case STATUS_NOT_ACCEPTABLE: return "NOT_ACCEPTABLE";
+                case STATUS_LENGTH_REQUIRED: return "LENGTH_REQUIRED";
+                case STATUS_PRECONDITION_FAILED: return "PRECONDITION_FAILED";
+                case STATUS_FILE_ALREADY_EXISTS_ERROR: return "FILE_ALREADY_EXISTS_ERROR";
+                case STATUS_CANNOT_RESUME: return "CANNOT_RESUME";
+                case STATUS_CANCELED: return "CANCELED";
+                case STATUS_UNKNOWN_ERROR: return "UNKNOWN_ERROR";
+                case STATUS_FILE_ERROR: return "FILE_ERROR";
+                case STATUS_UNHANDLED_REDIRECT: return "UNHANDLED_REDIRECT";
+                case STATUS_UNHANDLED_HTTP_CODE: return "UNHANDLED_HTTP_CODE";
+                case STATUS_HTTP_DATA_ERROR: return "HTTP_DATA_ERROR";
+                case STATUS_HTTP_EXCEPTION: return "HTTP_EXCEPTION";
+                case STATUS_TOO_MANY_REDIRECTS: return "TOO_MANY_REDIRECTS";
+                case STATUS_BLOCKED: return "BLOCKED";
+                default: return Integer.toString(status);
+            }
+        }
+
         /**
          * This download is visible but only shows in the notifications
          * while it's in progress.
