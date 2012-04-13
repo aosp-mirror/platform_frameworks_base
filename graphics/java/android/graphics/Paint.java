@@ -21,6 +21,8 @@ import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
 
+import java.util.Locale;
+
 /**
  * The Paint class holds the style and color information about how to draw
  * geometries, text and bitmaps.
@@ -43,6 +45,8 @@ public class Paint {
     private boolean     mHasCompatScaling;
     private float       mCompatScaling;
     private float       mInvCompatScaling;
+
+    private Locale      mLocale;
 
     /**
      * @hide
@@ -348,6 +352,7 @@ public class Paint {
         // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
         //        ? HINTING_OFF : HINTING_ON);
         mCompatScaling = mInvCompatScaling = 1;
+        mLocale = Locale.getDefault();
     }
 
     /**
@@ -360,6 +365,7 @@ public class Paint {
     public Paint(Paint paint) {
         mNativePaint = native_initWithPaint(paint.mNativePaint);
         setClassVariablesFrom(paint);
+        mLocale = paint.mLocale;
     }
 
     /** Restores the paint to its default settings. */
@@ -373,6 +379,7 @@ public class Paint {
         mHasCompatScaling = false;
         mCompatScaling = mInvCompatScaling = 1;
         mBidiFlags = BIDI_DEFAULT_LTR;
+        mLocale = Locale.getDefault();
     }
     
     /**
@@ -412,6 +419,7 @@ public class Paint {
         shadowColor = paint.shadowColor;
 
         mBidiFlags = paint.mBidiFlags;
+        mLocale = paint.mLocale;
     }
 
     /** @hide */
@@ -1042,6 +1050,36 @@ public class Paint {
      */
     public void setTextAlign(Align align) {
         native_setTextAlign(mNativePaint, align.nativeInt);
+    }
+
+    /**
+     * Get the text Locale.
+     *
+     * @return the paint's Locale used for drawing text, never null.
+     */
+    public Locale getTextLocale() {
+        return mLocale;
+    }
+
+    /**
+     * Set the text locale.
+     *
+     * This controls how the text will be drawn. Providing the ROOT Locale (default case)
+     * means that the text will be drawn with the font corresponding to its script.
+     *
+     * Using the CHINESE or CHINA Locale means that the text will be drawn with a Chinese font.
+     * Using the JAPANESE or JAPAN Locale means that the text will be drawn with a Japanese font.
+     * Using the KOREAN or KOREA Locale means that the text will be drawn with a Korean font.
+     *
+     * @param locale the paint's locale value for drawing text, must not be null.
+     */
+    public void setTextLocale(Locale locale) {
+        if (locale == null) {
+            throw new IllegalArgumentException("locale cannot be null");
+        }
+        if (locale.equals(mLocale)) return;
+        mLocale = locale;
+        native_setTextLocale(mNativePaint, locale.toString());
     }
 
     /**
@@ -2143,6 +2181,9 @@ public class Paint {
     private static native int native_getTextAlign(int native_object);
     private static native void native_setTextAlign(int native_object,
                                                    int align);
+
+    private static native void native_setTextLocale(int native_object,
+                                                    String locale);
 
     private static native int native_getTextWidths(int native_object,
                             char[] text, int index, int count, float[] widths);
