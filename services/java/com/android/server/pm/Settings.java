@@ -20,7 +20,6 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.ENFORCEMENT_DEFAULT;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -112,7 +111,7 @@ final class Settings {
     int mInternalSdkPlatform;
     int mExternalSdkPlatform;
 
-    int mReadExternalStorageEnforcement = ENFORCEMENT_DEFAULT;
+    boolean mReadExternalStorageEnforced = PackageManager.DEFAULT_ENFORCE_READ_EXTERNAL_STORAGE;
 
     /** Device identity for the purpose of package verification. */
     private VerifierDeviceIdentity mVerifierDeviceIdentity;
@@ -1140,10 +1139,11 @@ final class Settings {
                 serializer.endTag(null, "verifier");
             }
 
-            if (mReadExternalStorageEnforcement != ENFORCEMENT_DEFAULT) {
+            if (mReadExternalStorageEnforced
+                    != PackageManager.DEFAULT_ENFORCE_READ_EXTERNAL_STORAGE) {
                 serializer.startTag(null, TAG_READ_EXTERNAL_STORAGE);
                 serializer.attribute(
-                        null, ATTR_ENFORCEMENT, Integer.toString(mReadExternalStorageEnforcement));
+                        null, ATTR_ENFORCEMENT, mReadExternalStorageEnforced ? "1" : "0");
                 serializer.endTag(null, TAG_READ_EXTERNAL_STORAGE);
             }
 
@@ -1548,10 +1548,7 @@ final class Settings {
                     }
                 } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
                     final String enforcement = parser.getAttributeValue(null, ATTR_ENFORCEMENT);
-                    try {
-                        mReadExternalStorageEnforcement = Integer.parseInt(enforcement);
-                    } catch (NumberFormatException e) {
-                    }
+                    mReadExternalStorageEnforced = "1".equals(enforcement);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
@@ -2560,8 +2557,8 @@ final class Settings {
                 pw.print("    perm="); pw.println(p.perm);
             }
             if (READ_EXTERNAL_STORAGE.equals(p.name)) {
-                pw.print("    enforcement=");
-                pw.println(PackageManager.enforcementToString(mReadExternalStorageEnforcement));
+                pw.print("    enforced=");
+                pw.println(mReadExternalStorageEnforced);
             }
         }
     }

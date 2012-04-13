@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
@@ -1091,21 +1092,7 @@ public abstract class PackageManager {
             = "android.content.pm.extra.VERIFICATION_INSTALL_FLAGS";
 
     /** {@hide} */
-    public static final int ENFORCEMENT_DEFAULT = 0;
-    /** {@hide} */
-    public static final int ENFORCEMENT_YES = 1;
-
-    /** {@hide} */
-    public static String enforcementToString(int enforcement) {
-        switch (enforcement) {
-            case ENFORCEMENT_DEFAULT:
-                return "DEFAULT";
-            case ENFORCEMENT_YES:
-                return "YES";
-            default:
-                return Integer.toString(enforcement);
-        }
-    }
+    public static final boolean DEFAULT_ENFORCE_READ_EXTERNAL_STORAGE = !"user".equals(Build.TYPE);
 
     /**
      * Retrieve overall information about an application package that is

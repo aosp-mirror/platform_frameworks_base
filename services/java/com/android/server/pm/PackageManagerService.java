@@ -20,8 +20,6 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.ENFORCEMENT_DEFAULT;
-import static android.content.pm.PackageManager.ENFORCEMENT_YES;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.GRANT_REVOKE_PERMISSIONS;
 import static libcore.io.OsConstants.S_ISLNK;
@@ -9030,12 +9028,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void setPermissionEnforcement(String permission, int enforcement) {
+    public void setPermissionEnforced(String permission, boolean enforced) {
         mContext.enforceCallingOrSelfPermission(GRANT_REVOKE_PERMISSIONS, null);
         if (READ_EXTERNAL_STORAGE.equals(permission)) {
             synchronized (mPackages) {
-                if (mSettings.mReadExternalStorageEnforcement != enforcement) {
-                    mSettings.mReadExternalStorageEnforcement = enforcement;
+                if (mSettings.mReadExternalStorageEnforced != enforced) {
+                    mSettings.mReadExternalStorageEnforced = enforced;
                     mSettings.writeLPr();
 
                     // kill any non-foreground processes so we restart them and
@@ -9058,27 +9056,18 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public int getPermissionEnforcement(String permission) {
+    public boolean isPermissionEnforced(String permission) {
         mContext.enforceCallingOrSelfPermission(GRANT_REVOKE_PERMISSIONS, null);
-        if (READ_EXTERNAL_STORAGE.equals(permission)) {
-            synchronized (mPackages) {
-                return mSettings.mReadExternalStorageEnforcement;
-            }
-        } else {
-            throw new IllegalArgumentException("No selective enforcement for " + permission);
+        synchronized (mPackages) {
+            return isPermissionEnforcedLocked(permission);
         }
     }
 
     private boolean isPermissionEnforcedLocked(String permission) {
         if (READ_EXTERNAL_STORAGE.equals(permission)) {
-            switch (mSettings.mReadExternalStorageEnforcement) {
-                case ENFORCEMENT_DEFAULT:
-                    return false;
-                case ENFORCEMENT_YES:
-                    return true;
-            }
+            return mSettings.mReadExternalStorageEnforced;
+        } else {
+            return true;
         }
-
-        return true;
     }
 }
