@@ -7500,7 +7500,7 @@ public final class ContactsContract {
      * <p>
      * Applications can also clear all usage information with:
      * <pre>
-     * boolean successful = resolver.delete(DataUsageFeedback.FEEDBACK_URI, null, null) > 0;
+     * boolean successful = resolver.delete(DataUsageFeedback.DELETE_USAGE_URI, null, null) > 0;
      * </pre>
      * </p>
      */
@@ -7512,6 +7512,14 @@ public final class ContactsContract {
          */
         public static final Uri FEEDBACK_URI =
                 Uri.withAppendedPath(Data.CONTENT_URI, "usagefeedback");
+
+        /**
+         * The content:// style URI for deleting all usage information.
+         * Must be used with {@link ContentResolver#delete(Uri, String, String[])}.
+         * The {@code where} and {@code selectionArgs} parameters are ignored.
+         */
+        public static final Uri DELETE_USAGE_URI =
+                Uri.withAppendedPath(Contacts.CONTENT_URI, "delete_usage");
 
         /**
          * <p>
