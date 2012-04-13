@@ -7710,7 +7710,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (clip != null) {
             boolean didFirst = false;
             for (int i=0; i<clip.getItemCount(); i++) {
-                CharSequence paste = clip.getItemAt(i).coerceToText(getContext());
+                CharSequence paste = clip.getItemAt(i).coerceToStyledText(getContext());
                 if (paste != null) {
                     if (!didFirst) {
                         long minMax = prepareSpacesAroundPaste(min, max, paste);

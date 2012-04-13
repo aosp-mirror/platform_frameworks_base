@@ -21,7 +21,12 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.URLSpan;
 import android.util.Log;
 
 import java.io.FileInputStream;
@@ -144,6 +149,8 @@ import java.util.ArrayList;
 public class ClipData implements Parcelable {
     static final String[] MIMETYPES_TEXT_PLAIN = new String[] {
         ClipDescription.MIMETYPE_TEXT_PLAIN };
+    static final String[] MIMETYPES_TEXT_HTML = new String[] {
+        ClipDescription.MIMETYPE_TEXT_HTML };
     static final String[] MIMETYPES_TEXT_URILIST = new String[] {
         ClipDescription.MIMETYPE_TEXT_URILIST };
     static final String[] MIMETYPES_TEXT_INTENT = new String[] {
@@ -176,6 +183,7 @@ public class ClipData implements Parcelable {
      */
     public static class Item {
         final CharSequence mText;
+        final String mHtmlText;
         final Intent mIntent;
         final Uri mUri;
 
@@ -184,6 +192,20 @@ public class ClipData implements Parcelable {
          */
         public Item(CharSequence text) {
             mText = text;
+            mHtmlText = null;
+            mIntent = null;
+            mUri = null;
+        }
+
+        /**
+         * Create an Item consisting of a single block of (possibly styled) text,
+         * with an alternative HTML formatted representation.  You <em>must</em>
+         * supply a plain text representation in addition to HTML text; coercion
+         * will not be done from HTML formated text into plain text.
+         */
+        public Item(CharSequence text, String htmlText) {
+            mText = text;
+            mHtmlText = htmlText;
             mIntent = null;
             mUri = null;
         }
@@ -193,6 +215,7 @@ public class ClipData implements Parcelable {
          */
         public Item(Intent intent) {
             mText = null;
+            mHtmlText = null;
             mIntent = intent;
             mUri = null;
         }
@@ -202,16 +225,35 @@ public class ClipData implements Parcelable {
          */
         public Item(Uri uri) {
             mText = null;
+            mHtmlText = null;
             mIntent = null;
             mUri = uri;
         }
 
         /**
          * Create a complex Item, containing multiple representations of
-         * text, intent, and/or URI.
+         * text, Intent, and/or URI.
          */
         public Item(CharSequence text, Intent intent, Uri uri) {
             mText = text;
+            mHtmlText = null;
+            mIntent = intent;
+            mUri = uri;
+        }
+
+        /**
+         * Create a complex Item, containing multiple representations of
+         * text, HTML text, Intent, and/or URI.  If providing HTML text, you
+         * <em>must</em> supply a plain text representation as well; coercion
+         * will not be done from HTML formated text into plain text.
+         */
+        public Item(CharSequence text, String htmlText, Intent intent, Uri uri) {
+            if (htmlText != null && text == null) {
+                throw new IllegalArgumentException(
+                        "Plain text must be supplied if HTML text is supplied");
+            }
+            mText = text;
+            mHtmlText = htmlText;
             mIntent = intent;
             mUri = uri;
         }
@@ -221,6 +263,13 @@ public class ClipData implements Parcelable {
          */
         public CharSequence getText() {
             return mText;
+        }
+
+        /**
+         * Retrieve the raw HTML text contained in this Item.
+         */
+        public String getHtmlText() {
+            return mHtmlText;
         }
 
         /**
@@ -250,7 +299,7 @@ public class ClipData implements Parcelable {
          * the content provider does not supply a text representation, return
          * the raw URI as a string.
          * <li> If {@link #getIntent} is non-null, convert that to an intent:
-         * URI and returnit.
+         * URI and return it.
          * <li> Otherwise, return an empty string.
          * </ul>
          *
@@ -261,12 +310,14 @@ public class ClipData implements Parcelable {
 //BEGIN_INCLUDE(coerceToText)
         public CharSequence coerceToText(Context context) {
             // If this Item has an explicit textual value, simply return that.
-            if (mText != null) {
-                return mText;
+            CharSequence text = getText();
+            if (text != null) {
+                return text;
             }
 
             // If this Item has a URI value, try using that.
-            if (mUri != null) {
+            Uri uri = getUri();
+            if (uri != null) {
 
                 // First see if the URI can be opened as a plain text stream
                 // (of any sub-type).  If so, this is the best textual
@@ -275,7 +326,7 @@ public class ClipData implements Parcelable {
                 try {
                     // Ask for a stream of the desired type.
                     AssetFileDescriptor descr = context.getContentResolver()
-                            .openTypedAssetFileDescriptor(mUri, "text/*", null);
+                            .openTypedAssetFileDescriptor(uri, "text/*", null);
                     stream = descr.createInputStream();
                     InputStreamReader reader = new InputStreamReader(stream, "UTF-8");
 
@@ -308,19 +359,224 @@ public class ClipData implements Parcelable {
 
                 // If we couldn't open the URI as a stream, then the URI itself
                 // probably serves fairly well as a textual representation.
-                return mUri.toString();
+                return uri.toString();
             }
 
             // Finally, if all we have is an Intent, then we can just turn that
             // into text.  Not the most user-friendly thing, but it's something.
-            if (mIntent != null) {
-                return mIntent.toUri(Intent.URI_INTENT_SCHEME);
+            Intent intent = getIntent();
+            if (intent != null) {
+                return intent.toUri(Intent.URI_INTENT_SCHEME);
             }
 
             // Shouldn't get here, but just in case...
             return "";
         }
 //END_INCLUDE(coerceToText)
+
+        /**
+         * Like {@link #coerceToHtmlText(Context)}, but any text that would
+         * be returned as HTML formatting will be returned as text with
+         * style spans.
+         * @param context The caller's Context, from which its ContentResolver
+         * and other things can be retrieved.
+         * @return Returns the item's textual representation.
+         */
+        public CharSequence coerceToStyledText(Context context) {
+            CharSequence text = getText();
+            if (text instanceof Spanned) {
+                return text;
+            }
+            String htmlText = getHtmlText();
+            if (htmlText != null) {
+                try {
+                    CharSequence newText = Html.fromHtml(htmlText);
+                    if (newText != null) {
+                        return newText;
+                    }
+                } catch (RuntimeException e) {
+                    // If anything bad happens, we'll fall back on the plain text.
+                }
+            }
+
+            if (text != null) {
+                return text;
+            }
+            return coerceToHtmlOrStyledText(context, true);
+        }
+
+        /**
+         * Turn this item into HTML text, regardless of the type of data it
+         * actually contains.
+         *
+         * <p>The algorithm for deciding what text to return is:
+         * <ul>
+         * <li> If {@link #getHtmlText} is non-null, return that.
+         * <li> If {@link #getText} is non-null, return that, converting to
+         * valid HTML text.  If this text contains style spans,
+         * {@link Html#toHtml(Spanned) Html.toHtml(Spanned)} is used to
+         * convert them to HTML formatting.
+         * <li> If {@link #getUri} is non-null, try to retrieve its data
+         * as a text stream from its content provider.  If the provider can
+         * supply text/html data, that will be preferred and returned as-is.
+         * Otherwise, any text/* data will be returned and escaped to HTML.
+         * If it is not a content: URI or the content provider does not supply
+         * a text representation, HTML text containing a link to the URI
+         * will be returned.
+         * <li> If {@link #getIntent} is non-null, convert that to an intent:
+         * URI and return as an HTML link.
+         * <li> Otherwise, return an empty string.
+         * </ul>
+         *
+         * @param context The caller's Context, from which its ContentResolver
+         * and other things can be retrieved.
+         * @return Returns the item's representation as HTML text.
+         */
+        public String coerceToHtmlText(Context context) {
+            // If the item has an explicit HTML value, simply return that.
+            String htmlText = getHtmlText();
+            if (htmlText != null) {
+                return htmlText;
+            }
+
+            // If this Item has a plain text value, return it as HTML.
+            CharSequence text = getText();
+            if (text != null) {
+                if (text instanceof Spanned) {
+                    return Html.toHtml((Spanned)text);
+                }
+                return Html.escapeHtml(text);
+            }
+
+            text = coerceToHtmlOrStyledText(context, false);
+            return text != null ? text.toString() : null;
+        }
+
+        private CharSequence coerceToHtmlOrStyledText(Context context, boolean styled) {
+            // If this Item has a URI value, try using that.
+            if (mUri != null) {
+
+                // Check to see what data representations the content
+                // provider supports.  We would like HTML text, but if that
+                // is not possible we'll live with plan text.
+                String[] types = context.getContentResolver().getStreamTypes(mUri, "text/*");
+                boolean hasHtml = false;
+                boolean hasText = false;
+                if (types != null) {
+                    for (String type : types) {
+                        if ("text/html".equals(type)) {
+                            hasHtml = true;
+                        } else if (type.startsWith("text/")) {
+                            hasText = true;
+                        }
+                    }
+                }
+
+                // If the provider can serve data we can use, open and load it.
+                if (hasHtml || hasText) {
+                    FileInputStream stream = null;
+                    try {
+                        // Ask for a stream of the desired type.
+                        AssetFileDescriptor descr = context.getContentResolver()
+                                .openTypedAssetFileDescriptor(mUri,
+                                        hasHtml ? "text/html" : "text/plain", null);
+                        stream = descr.createInputStream();
+                        InputStreamReader reader = new InputStreamReader(stream, "UTF-8");
+
+                        // Got it...  copy the stream into a local string and return it.
+                        StringBuilder builder = new StringBuilder(128);
+                        char[] buffer = new char[8192];
+                        int len;
+                        while ((len=reader.read(buffer)) > 0) {
+                            builder.append(buffer, 0, len);
+                        }
+                        String text = builder.toString();
+                        if (hasHtml) {
+                            if (styled) {
+                                // We loaded HTML formatted text and the caller
+                                // want styled text, convert it.
+                                try {
+                                    CharSequence newText = Html.fromHtml(text);
+                                    return newText != null ? newText : text;
+                                } catch (RuntimeException e) {
+                                    return text;
+                                }
+                            } else {
+                                // We loaded HTML formatted text and that is what
+                                // the caller wants, just return it.
+                                return text.toString();
+                            }
+                        }
+                        if (styled) {
+                            // We loaded plain text and the caller wants styled
+                            // text, that is all we have so return it.
+                            return text;
+                        } else {
+                            // We loaded plain text and the caller wants HTML
+                            // text, escape it for HTML.
+                            return Html.escapeHtml(text);
+                        }
+
+                    } catch (FileNotFoundException e) {
+                        // Unable to open content URI as text...  not really an
+                        // error, just something to ignore.
+
+                    } catch (IOException e) {
+                        // Something bad has happened.
+                        Log.w("ClippedData", "Failure loading text", e);
+                        return Html.escapeHtml(e.toString());
+
+                    } finally {
+                        if (stream != null) {
+                            try {
+                                stream.close();
+                            } catch (IOException e) {
+                            }
+                        }
+                    }
+                }
+
+                // If we couldn't open the URI as a stream, then we can build
+                // some HTML text with the URI itself.
+                // probably serves fairly well as a textual representation.
+                if (styled) {
+                    return uriToStyledText(mUri.toString());
+                } else {
+                    return uriToHtml(mUri.toString());
+                }
+            }
+
+            // Finally, if all we have is an Intent, then we can just turn that
+            // into text.  Not the most user-friendly thing, but it's something.
+            if (mIntent != null) {
+                if (styled) {
+                    return uriToStyledText(mIntent.toUri(Intent.URI_INTENT_SCHEME));
+                } else {
+                    return uriToHtml(mIntent.toUri(Intent.URI_INTENT_SCHEME));
+                }
+            }
+
+            // Shouldn't get here, but just in case...
+            return "";
+        }
+
+        private String uriToHtml(String uri) {
+            StringBuilder builder = new StringBuilder(256);
+            builder.append("<a href=\"");
+            builder.append(uri);
+            builder.append("\">");
+            builder.append(Html.escapeHtml(uri));
+            builder.append("</a>");
+            return builder.toString();
+        }
+
+        private CharSequence uriToStyledText(String uri) {
+            SpannableStringBuilder builder = new SpannableStringBuilder();
+            builder.append(uri);
+            builder.setSpan(new URLSpan(uri), 0, builder.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            return builder;
+        }
 
         @Override
         public String toString() {
@@ -335,7 +591,10 @@ public class ClipData implements Parcelable {
 
         /** @hide */
         public void toShortString(StringBuilder b) {
-            if (mText != null) {
+            if (mHtmlText != null) {
+                b.append("H:");
+                b.append(mHtmlText);
+            } else if (mText != null) {
                 b.append("T:");
                 b.append(mText);
             } else if (mUri != null) {
@@ -406,6 +665,22 @@ public class ClipData implements Parcelable {
     static public ClipData newPlainText(CharSequence label, CharSequence text) {
         Item item = new Item(text);
         return new ClipData(label, MIMETYPES_TEXT_PLAIN, item);
+    }
+
+    /**
+     * Create a new ClipData holding data of the type
+     * {@link ClipDescription#MIMETYPE_TEXT_HTML}.
+     *
+     * @param label User-visible label for the clip data.
+     * @param text The text of clip as plain text, for receivers that don't
+     * handle HTML.  This is required.
+     * @param htmlText The actual HTML text in the clip.
+     * @return Returns a new ClipData containing the specified data.
+     */
+    static public ClipData newHtmlText(CharSequence label, CharSequence text,
+            String htmlText) {
+        Item item = new Item(text, htmlText);
+        return new ClipData(label, MIMETYPES_TEXT_HTML, item);
     }
 
     /**
@@ -574,6 +849,7 @@ public class ClipData implements Parcelable {
         for (int i=0; i<N; i++) {
             Item item = mItems.get(i);
             TextUtils.writeToParcel(item.mText, dest, flags);
+            dest.writeString(item.mHtmlText);
             if (item.mIntent != null) {
                 dest.writeInt(1);
                 item.mIntent.writeToParcel(dest, flags);
@@ -600,9 +876,10 @@ public class ClipData implements Parcelable {
         final int N = in.readInt();
         for (int i=0; i<N; i++) {
             CharSequence text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            String htmlText = in.readString();
             Intent intent = in.readInt() != 0 ? Intent.CREATOR.createFromParcel(in) : null;
             Uri uri = in.readInt() != 0 ? Uri.CREATOR.createFromParcel(in) : null;
-            mItems.add(new Item(text, intent, uri));
+            mItems.add(new Item(text, htmlText, intent, uri));
         }
     }
 

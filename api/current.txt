@@ -4819,6 +4819,7 @@ package android.content {
     method public android.content.ClipDescription getDescription();
     method public android.content.ClipData.Item getItemAt(int);
     method public int getItemCount();
+    method public static android.content.ClipData newHtmlText(java.lang.CharSequence, java.lang.CharSequence, java.lang.String);
     method public static android.content.ClipData newIntent(java.lang.CharSequence, android.content.Intent);
     method public static android.content.ClipData newPlainText(java.lang.CharSequence, java.lang.CharSequence);
     method public static android.content.ClipData newRawUri(java.lang.CharSequence, android.net.Uri);
@@ -4829,10 +4830,15 @@ package android.content {
 
   public static class ClipData.Item {
     ctor public ClipData.Item(java.lang.CharSequence);
+    ctor public ClipData.Item(java.lang.CharSequence, java.lang.String);
     ctor public ClipData.Item(android.content.Intent);
     ctor public ClipData.Item(android.net.Uri);
     ctor public ClipData.Item(java.lang.CharSequence, android.content.Intent, android.net.Uri);
+    ctor public ClipData.Item(java.lang.CharSequence, java.lang.String, android.content.Intent, android.net.Uri);
+    method public java.lang.String coerceToHtmlText(android.content.Context);
+    method public java.lang.CharSequence coerceToStyledText(android.content.Context);
     method public java.lang.CharSequence coerceToText(android.content.Context);
+    method public java.lang.String getHtmlText();
     method public android.content.Intent getIntent();
     method public java.lang.CharSequence getText();
     method public android.net.Uri getUri();
@@ -4850,6 +4856,7 @@ package android.content {
     method public boolean hasMimeType(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final java.lang.String MIMETYPE_TEXT_HTML = "text/html";
     field public static final java.lang.String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
     field public static final java.lang.String MIMETYPE_TEXT_PLAIN = "text/plain";
     field public static final java.lang.String MIMETYPE_TEXT_URILIST = "text/uri-list";
@@ -5687,6 +5694,7 @@ package android.content {
     field public static final int EXTRA_DOCK_STATE_UNDOCKED = 0; // 0x0
     field public static final java.lang.String EXTRA_DONT_KILL_APP = "android.intent.extra.DONT_KILL_APP";
     field public static final java.lang.String EXTRA_EMAIL = "android.intent.extra.EMAIL";
+    field public static final java.lang.String EXTRA_HTML_TEXT = "android.intent.extra.HTML_TEXT";
     field public static final java.lang.String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
     field public static final java.lang.String EXTRA_INSTALLER_PACKAGE_NAME = "android.intent.extra.INSTALLER_PACKAGE_NAME";
     field public static final java.lang.String EXTRA_INTENT = "android.intent.extra.INTENT";
@@ -20385,6 +20393,7 @@ package android.text {
   }
 
   public class Html {
+    method public static java.lang.String escapeHtml(java.lang.CharSequence);
     method public static android.text.Spanned fromHtml(java.lang.String);
     method public static android.text.Spanned fromHtml(java.lang.String, android.text.Html.ImageGetter, android.text.Html.TagHandler);
     method public static java.lang.String toHtml(android.text.Spanned);

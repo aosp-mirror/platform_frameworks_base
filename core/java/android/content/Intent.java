@@ -954,7 +954,18 @@ public class Intent implements Parcelable, Cloneable {
      * using EXTRA_TEXT, the MIME type should be "text/plain"; otherwise it
      * should be the MIME type of the data in EXTRA_STREAM.  Use {@literal *}/*
      * if the MIME type is unknown (this will only allow senders that can
-     * handle generic data streams).
+     * handle generic data streams).  If using {@link #EXTRA_TEXT}, you can
+     * also optionally supply {@link #EXTRA_HTML_TEXT} for clients to retrieve
+     * your text with HTML formatting.
+     * <p>
+     * As of {@link android.os.Build.VERSION_CODES#JELLY_BEAN}, the data
+     * being sent can be supplied through {@link #setClipData(ClipData)}.  This
+     * allows you to use {@link #FLAG_GRANT_READ_URI_PERMISSION} when sharing
+     * content: URIs and other advanced features of {@link ClipData}.  If
+     * using this approach, you still must supply the same data through the
+     * {@link #EXTRA_TEXT} or {@link #EXTRA_STREAM} fields described below
+     * for compatibility with old applications.  If you don't set a ClipData,
+     * it will be copied there for you when calling {@link Context#startActivity(Intent)}.
      * <p>
      * Optional standard extras, which may be interpreted by some recipients as
      * appropriate, are: {@link #EXTRA_EMAIL}, {@link #EXTRA_CC},
@@ -967,11 +978,13 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity Action: Deliver multiple data to someone else.
      * <p>
-     * Like ACTION_SEND, except the data is multiple.
+     * Like {@link #ACTION_SEND}, except the data is multiple.
      * <p>
      * Input: {@link #getType} is the MIME type of the data being sent.
      * get*ArrayListExtra can have either a {@link #EXTRA_TEXT} or {@link
-     * #EXTRA_STREAM} field, containing the data to be sent.
+     * #EXTRA_STREAM} field, containing the data to be sent.  If using
+     * {@link #EXTRA_TEXT}, you can also optionally supply {@link #EXTRA_HTML_TEXT}
+     * for clients to retrieve your text with HTML formatting.
      * <p>
      * Multiple types are supported, and receivers should handle mixed types
      * whenever possible. The right way for the receiver to check them is to
@@ -982,6 +995,15 @@ public class Intent implements Parcelable, Cloneable {
      * e.g. if you are sending image/jpg and image/jpg, the intent's type can
      * be image/jpg, but if you are sending image/jpg and image/png, then the
      * intent's type should be image/*.
+     * <p>
+     * As of {@link android.os.Build.VERSION_CODES#JELLY_BEAN}, the data
+     * being sent can be supplied through {@link #setClipData(ClipData)}.  This
+     * allows you to use {@link #FLAG_GRANT_READ_URI_PERMISSION} when sharing
+     * content: URIs and other advanced features of {@link ClipData}.  If
+     * using this approach, you still must supply the same data through the
+     * {@link #EXTRA_TEXT} or {@link #EXTRA_STREAM} fields described below
+     * for compatibility with old applications.  If you don't set a ClipData,
+     * it will be copied there for you when calling {@link Context#startActivity(Intent)}.
      * <p>
      * Optional standard extras, which may be interpreted by some recipients as
      * appropriate, are: {@link #EXTRA_EMAIL}, {@link #EXTRA_CC},
@@ -2499,6 +2521,14 @@ public class Intent implements Parcelable, Cloneable {
      * retrieve it.
      */
     public static final String EXTRA_TEXT = "android.intent.extra.TEXT";
+
+    /**
+     * A constant String that is associated with the Intent, used with
+     * {@link #ACTION_SEND} to supply an alternative to {@link #EXTRA_TEXT}
+     * as HTML formatted text.  Note that you <em>must</em> also supply
+     * {@link #EXTRA_TEXT}.
+     */
+    public static final String EXTRA_HTML_TEXT = "android.intent.extra.HTML_TEXT";
 
     /**
      * A content: URI holding a stream of data associated with the Intent,

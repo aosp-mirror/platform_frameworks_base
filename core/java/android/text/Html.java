@@ -147,6 +147,15 @@ public class Html {
         return out.toString();
     }
 
+    /**
+     * Returns an HTML escaped representation of the given plain text.
+     */
+    public static String escapeHtml(CharSequence text) {
+        StringBuilder out = new StringBuilder();
+        withinStyle(out, text, 0, text.length());
+        return out.toString();
+    }
+
     private static void withinHtml(StringBuilder out, Spanned text) {
         int len = text.length();
 
@@ -370,7 +379,7 @@ public class Html {
         }
     }
 
-    private static void withinStyle(StringBuilder out, Spanned text,
+    private static void withinStyle(StringBuilder out, CharSequence text,
                                     int start, int end) {
         for (int i = start; i < end; i++) {
             char c = text.charAt(i);
