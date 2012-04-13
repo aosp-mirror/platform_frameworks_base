@@ -676,7 +676,6 @@ public class TextureView extends View {
      *
      * @param surfaceTexture The {@link SurfaceTexture} that the view should use.
      * @see SurfaceTexture#detachFromGLContext()
-     * @hide
      */
     public void setSurfaceTexture(SurfaceTexture surfaceTexture) {
         if (surfaceTexture == null) {

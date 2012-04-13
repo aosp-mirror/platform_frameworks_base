@@ -9003,6 +9003,8 @@ package android.graphics {
 
   public class SurfaceTexture {
     ctor public SurfaceTexture(int);
+    method public void attachToGLContext(int);
+    method public void detachFromGLContext();
     method public long getTimestamp();
     method public void getTransformMatrix(float[]);
     method public void release();
@@ -23289,6 +23291,7 @@ package android.view {
     method public android.graphics.Canvas lockCanvas(android.graphics.Rect);
     method protected final void onDraw(android.graphics.Canvas);
     method public void setOpaque(boolean);
+    method public void setSurfaceTexture(android.graphics.SurfaceTexture);
     method public void setSurfaceTextureListener(android.view.TextureView.SurfaceTextureListener);
     method public void setTransform(android.graphics.Matrix);
     method public void unlockCanvasAndPost(android.graphics.Canvas);
