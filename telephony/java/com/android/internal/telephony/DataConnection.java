@@ -35,6 +35,7 @@ import android.text.TextUtils;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -208,6 +209,27 @@ public abstract class DataConnection extends StateMachine {
     protected static final int EVENT_RIL_CONNECTED = BASE + 5;
     protected static final int EVENT_DISCONNECT_ALL = BASE + 6;
 
+    private static final int CMD_TO_STRING_COUNT = EVENT_DISCONNECT_ALL + 1;
+    private static String[] sCmdToString = new String[CMD_TO_STRING_COUNT];
+    static {
+        sCmdToString[EVENT_CONNECT - BASE] = "EVENT_CONNECT";
+        sCmdToString[EVENT_SETUP_DATA_CONNECTION_DONE - BASE] =
+                "EVENT_SETUP_DATA_CONNECTION_DONE";
+        sCmdToString[EVENT_GET_LAST_FAIL_DONE - BASE] = "EVENT_GET_LAST_FAIL_DONE";
+        sCmdToString[EVENT_DEACTIVATE_DONE - BASE] = "EVENT_DEACTIVATE_DONE";
+        sCmdToString[EVENT_DISCONNECT - BASE] = "EVENT_DISCONNECT";
+        sCmdToString[EVENT_RIL_CONNECTED - BASE] = "EVENT_RIL_CONNECTED";
+        sCmdToString[EVENT_DISCONNECT_ALL - BASE] = "EVENT_DISCONNECT_ALL";
+    }
+    protected static String cmdToString(int cmd) {
+        cmd -= BASE;
+        if ((cmd >= 0) && (cmd < sCmdToString.length)) {
+            return sCmdToString[cmd];
+        } else {
+            return null;
+        }
+    }
+
     //***** Tag IDs for EventLog
     protected static final int EVENT_LOG_BAD_DNS_ADDRESS = 50100;
 
@@ -242,6 +264,7 @@ public abstract class DataConnection extends StateMachine {
     protected DataConnection(PhoneBase phone, String name, int id, RetryManager rm,
             DataConnectionTracker dct) {
         super(name);
+        setProcessedMessagesSize(100);
         if (DBG) log("DataConnection constructor E");
         this.phone = phone;
         this.mDataConnectionTracker = dct;
@@ -1188,26 +1211,65 @@ public abstract class DataConnection extends StateMachine {
                 new DisconnectParams(reason, onCompletedMsg)));
     }
 
+    /**
+     * @return the string for msg.what as our info.
+     */
+    @Override
+    protected String getMessageInfo(Message msg) {
+        String info = null;
+        info = cmdToString(msg.what);
+        if (info == null) {
+            info = DataConnectionAc.cmdToString(msg.what);
+        }
+        return info;
+    }
+
+    /**
+     * Convert a System.currentTimeMillis() value to a time of day value.
+     *
+     * @param millis since the epoch (1/1/1970)
+     * @return String representation of the time.
+     */
+    private String timeMillisToTimeOfDay(long millis) {
+        Calendar c = Calendar.getInstance();
+        if (millis >= 0) {
+            c.setTimeInMillis(millis);
+            return String.format("%tm-%td %tH:%tM:%tS.%tL", c, c, c, c, c, c);
+        } else {
+            return Long.toString(millis);
+        }
+    }
+    /**
+     * Dump the current state.
+     *
+     * @param fd
+     * @param pw
+     * @param args
+     */
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("DataConnection name=" + getName() + ":");
+        pw.print("DataConnection ");
+        super.dump(fd, pw, args);
         pw.println(" mApnList=" + mApnList);
+        pw.flush();
         pw.println(" mDataConnectionTracker=" + mDataConnectionTracker);
         pw.println(" mApn=" + mApn);
         pw.println(" mTag=" + mTag);
+        pw.flush();
         pw.println(" phone=" + phone);
         pw.println(" mRilVersion=" + mRilVersion);
         pw.println(" cid=" + cid);
+        pw.flush();
         pw.println(" mLinkProperties=" + mLinkProperties);
+        pw.flush();
         pw.println(" mCapabilities=" + mCapabilities);
-        pw.println(" createTime=" + createTime);
-        pw.println(" lastFailTime=" + lastFailTime);
+        pw.println(" createTime=" + timeMillisToTimeOfDay(createTime));
+        pw.println(" lastFailTime=" + timeMillisToTimeOfDay(lastFailTime));
         pw.println(" lastFailCause=" + lastFailCause);
+        pw.flush();
         pw.println(" mRetryOverride=" + mRetryOverride);
         pw.println(" mRefCount=" + mRefCount);
         pw.println(" userData=" + userData);
-        pw.println(" total messages=" + getProcessedMessagesCount());
-        for (int i=0; i < getProcessedMessagesSize(); i++) {
-            pw.printf("  msg[%d]=%s\n", i, getProcessedMessageInfo(i));
-        }
+        pw.flush();
     }
 }

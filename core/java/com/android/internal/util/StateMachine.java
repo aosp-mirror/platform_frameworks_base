@@ -20,9 +20,13 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -444,9 +448,11 @@ public class StateMachine {
      * The information maintained for a processed message.
      */
     public static class ProcessedMessageInfo {
-        private int what;
-        private State state;
-        private State orgState;
+        private long mTime;
+        private int mWhat;
+        private String mInfo;
+        private State mState;
+        private State mOrgState;
 
         /**
          * Constructor
@@ -455,8 +461,8 @@ public class StateMachine {
          * @param orgState is the first state the received the message but
          * did not processes the message.
          */
-        ProcessedMessageInfo(Message message, State state, State orgState) {
-            update(message, state, orgState);
+        ProcessedMessageInfo(Message msg, String info, State state, State orgState) {
+            update(msg, info, state, orgState);
         }
 
         /**
@@ -465,31 +471,47 @@ public class StateMachine {
          * @param orgState is the first state the received the message but
          * did not processes the message.
          */
-        public void update(Message message, State state, State orgState) {
-            this.what = message.what;
-            this.state = state;
-            this.orgState = orgState;
+        public void update(Message msg, String info, State state, State orgState) {
+            mTime = System.currentTimeMillis();
+            mWhat = msg.what;
+            mInfo = info;
+            mState = state;
+            mOrgState = orgState;
+        }
+
+        /**
+         * @return time stamp
+         */
+        public long getTime() {
+            return mTime;
+        }
+
+        /**
+         * @return msg.what
+         */
+        public long getWhat() {
+            return mWhat;
         }
 
         /**
          * @return the command that was executing
          */
-        public int getWhat() {
-            return what;
+        public String getInfo() {
+            return mInfo;
         }
 
         /**
          * @return the state that handled this message
          */
         public State getState() {
-            return state;
+            return mState;
         }
 
         /**
          * @return the original state that received the message.
          */
         public State getOriginalState() {
-            return orgState;
+            return mOrgState;
         }
 
         /**
@@ -498,26 +520,24 @@ public class StateMachine {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append("what=");
-            sb.append(what);
+            sb.append("time=");
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(mTime);
+            sb.append(String.format("%tm-%td %tH:%tM:%tS.%tL", c, c, c, c, c, c));
             sb.append(" state=");
-            sb.append(cn(state));
+            sb.append(mState == null ? "<null>" : mState.getName());
             sb.append(" orgState=");
-            sb.append(cn(orgState));
-            return sb.toString();
-        }
-
-        /**
-         * @return an objects class name
-         */
-        private String cn(Object n) {
-            if (n == null) {
-                return "null";
-            } else {
-                String name = n.getClass().getName();
-                int lastDollar = name.lastIndexOf('$');
-                return name.substring(lastDollar + 1);
+            sb.append(mOrgState == null ? "<null>" : mOrgState.getName());
+            sb.append(" what=");
+            sb.append(mWhat);
+            sb.append("(0x");
+            sb.append(Integer.toHexString(mWhat));
+            sb.append(")");
+            if ( ! TextUtils.isEmpty(mInfo)) {
+                sb.append(" ");
+                sb.append(mInfo);
             }
+            return sb.toString();
         }
     }
 
@@ -542,9 +562,9 @@ public class StateMachine {
         private int mCount = 0;
 
         /**
-         * Constructor
+         * private constructor use add
          */
-        ProcessedMessages() {
+        private ProcessedMessages() {
         }
 
         /**
@@ -599,22 +619,23 @@ public class StateMachine {
         /**
          * Add a processed message.
          *
-         * @param message
+         * @param msg
+         * @param messageInfo to be stored
          * @param state that handled the message
          * @param orgState is the first state the received the message but
          * did not processes the message.
          */
-        void add(Message message, State state, State orgState) {
+        void add(Message msg, String messageInfo, State state, State orgState) {
             mCount += 1;
             if (mMessages.size() < mMaxSize) {
-                mMessages.add(new ProcessedMessageInfo(message, state, orgState));
+                mMessages.add(new ProcessedMessageInfo(msg, messageInfo, state, orgState));
             } else {
                 ProcessedMessageInfo pmi = mMessages.get(mOldestIndex);
                 mOldestIndex += 1;
                 if (mOldestIndex >= mMaxSize) {
                     mOldestIndex = 0;
                 }
-                pmi.update(message, state, orgState);
+                pmi.update(msg, messageInfo, state, orgState);
             }
         }
     }
@@ -894,11 +915,14 @@ public class StateMachine {
             /**
              * Record that we processed the message
              */
-            if (curStateInfo != null) {
-                State orgState = mStateStack[mStateStackTopIndex].state;
-                mProcessedMessages.add(msg, curStateInfo.state, orgState);
-            } else {
-                mProcessedMessages.add(msg, null, null);
+            if (mSm.recordProcessedMessage(msg)) {
+                if (curStateInfo != null) {
+                    State orgState = mStateStack[mStateStackTopIndex].state;
+                    mProcessedMessages.add(msg, mSm.getMessageInfo(msg), curStateInfo.state,
+                            orgState);
+                } else {
+                    mProcessedMessages.add(msg, mSm.getMessageInfo(msg), null, null);
+                }
             }
         }
 
@@ -1546,6 +1570,24 @@ public class StateMachine {
     }
 
     /**
+     * @return true if msg should be saved in ProcessedMessage, default is true.
+     */
+    protected boolean recordProcessedMessage(Message msg) {
+        return true;
+    }
+
+    /**
+     * Return message info to be logged by ProcessedMessageInfo, default
+     * is an empty string. Override if additional information is desired.
+     *
+     * @param msg that was processed
+     * @return information to be logged as a String
+     */
+    protected String getMessageInfo(Message msg) {
+        return "";
+    }
+
+    /**
      * @return if debugging is enabled
      */
     public boolean isDbg() {
@@ -1576,5 +1618,22 @@ public class StateMachine {
 
         /** Send the complete construction message */
         mSmHandler.completeConstruction();
+    }
+
+    /**
+     * Dump the current state.
+     *
+     * @param fd
+     * @param pw
+     * @param args
+     */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(getName() + ":");
+        pw.println(" total messages=" + getProcessedMessagesCount());
+        for (int i=0; i < getProcessedMessagesSize(); i++) {
+            pw.printf(" msg[%d]: %s\n", i, getProcessedMessageInfo(i));
+            pw.flush();
+        }
+        pw.println("curState=" + getCurrentState().getName());
     }
 }
