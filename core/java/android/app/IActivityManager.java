@@ -205,7 +205,8 @@ public interface IActivityManager extends IInterface {
     // Note: probably don't want to allow applications access to these.
     public void goingToSleep() throws RemoteException;
     public void wakingUp() throws RemoteException;
-    
+    public void setLockScreenShown(boolean shown) throws RemoteException;
+
     public void unhandledBack() throws RemoteException;
     public ParcelFileDescriptor openContentUri(Uri uri) throws RemoteException;
     public void setDebugApp(
@@ -588,4 +589,5 @@ public interface IActivityManager extends IInterface {
     int GET_CURRENT_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+144;
     int TARGET_TASK_AFFINITY_MATCHES_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+145;
     int NAVIGATE_UP_TO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+146;
+    int SET_LOCK_SCREEN_SHOWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+147;
 }
