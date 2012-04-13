@@ -884,7 +884,7 @@ public final class BluetoothDevice implements Parcelable {
     /** @hide */
     public boolean cancelPairingUserInput() {
         try {
-            return sService.setPairingConfirmation(this, false);
+            return sService.cancelBondProcess(this);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
