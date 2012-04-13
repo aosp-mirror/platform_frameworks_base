@@ -269,9 +269,8 @@ final class WebViewInputDispatcher {
      */
     public boolean postPointerEvent(MotionEvent event,
             int webKitXOffset, int webKitYOffset, float webKitScale) {
-        if (event == null
-                || (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
-            throw new IllegalArgumentException("event must be a pointer event");
+        if (event == null) {
+            throw new IllegalArgumentException("event cannot be null");
         }
 
         if (DEBUG) {
