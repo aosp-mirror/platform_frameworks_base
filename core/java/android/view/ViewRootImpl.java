@@ -5071,9 +5071,13 @@ public final class ViewRootImpl implements ViewParent,
      * @return Whether the view is visible on the screen.
      */
     private boolean isDisplayedOnScreen(View view) {
+        // The first two checks are made also made by isShown() which
+        // however traverses the tree up to the parent to catch that.
+        // Therefore, we do some fail fast check to minimize the up
+        // tree traversal.
         return (view.mAttachInfo != null
                 && view.mAttachInfo.mWindowVisibility == View.VISIBLE
-                && view.getVisibility() == View.VISIBLE
+                && view.isShown()
                 && view.getGlobalVisibleRect(mTempRect));
     }
 
