@@ -16,12 +16,14 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.GRANT_REVOKE_PERMISSIONS;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.GRANT_REVOKE_PERMISSIONS;
+import static com.android.internal.util.ArrayUtils.appendInt;
+import static com.android.internal.util.ArrayUtils.removeInt;
 import static libcore.io.OsConstants.S_ISLNK;
 
 import com.android.internal.app.IMediaContainerService;
@@ -1451,48 +1453,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    static int[] appendInt(int[] cur, int val) {
-        if (cur == null) {
-            return new int[] { val };
-        }
-        final int N = cur.length;
-        for (int i=0; i<N; i++) {
-            if (cur[i] == val) {
-                return cur;
-            }
-        }
-        int[] ret = new int[N+1];
-        System.arraycopy(cur, 0, ret, 0, N);
-        ret[N] = val;
-        return ret;
-    }
-
     static int[] appendInts(int[] cur, int[] add) {
         if (add == null) return cur;
         if (cur == null) return add;
         final int N = add.length;
         for (int i=0; i<N; i++) {
             cur = appendInt(cur, add[i]);
-        }
-        return cur;
-    }
-
-    static int[] removeInt(int[] cur, int val) {
-        if (cur == null) {
-            return null;
-        }
-        final int N = cur.length;
-        for (int i=0; i<N; i++) {
-            if (cur[i] == val) {
-                int[] ret = new int[N-1];
-                if (i > 0) {
-                    System.arraycopy(cur, 0, ret, 0, i);
-                }
-                if (i < (N-1)) {
-                    System.arraycopy(cur, i + 1, ret, i, N - i - 1);
-                }
-                return ret;
-            }
         }
         return cur;
     }

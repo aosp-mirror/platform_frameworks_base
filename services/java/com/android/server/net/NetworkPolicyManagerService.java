@@ -50,6 +50,7 @@ import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.telephony.TelephonyManager.SIM_STATE_READY;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
+import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readBooleanAttribute;
@@ -1213,6 +1214,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             return mAppPolicy.get(appId, POLICY_NONE);
         }
+    }
+
+    @Override
+    public int[] getAppsWithPolicy(int policy) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        int[] appIds = new int[0];
+        synchronized (mRulesLock) {
+            for (int i = 0; i < mAppPolicy.size(); i++) {
+                final int appId = mAppPolicy.keyAt(i);
+                final int appPolicy = mAppPolicy.valueAt(i);
+                if (appPolicy == policy) {
+                    appIds = appendInt(appIds, appId);
+                }
+            }
+        }
+        return appIds;
     }
 
     @Override

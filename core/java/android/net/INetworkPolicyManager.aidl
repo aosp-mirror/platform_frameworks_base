@@ -32,6 +32,7 @@ interface INetworkPolicyManager {
     /** Control UID policies. */
     void setAppPolicy(int appId, int policy);
     int getAppPolicy(int appId);
+    int[] getAppsWithPolicy(int policy);
 
     boolean isUidForeground(int uid);
 
