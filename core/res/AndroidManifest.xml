@@ -1472,6 +1472,13 @@
         android:description="@string/permdesc_bindGadget"
         android:protectionLevel="signature|system" />
 
+    <!-- Internal permission allowing an application to query/set which
+         applications can bind AppWidgets.
+         @hide -->
+    <permission android:name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature|system" />
+
     <!-- Allows applications to change the background data setting
          @hide pending API council -->
     <permission android:name="android.permission.CHANGE_BACKGROUND_DATA_SETTING"

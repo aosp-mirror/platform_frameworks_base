@@ -4313,7 +4313,7 @@ package android.appwidget {
   }
 
   public class AppWidgetManager {
-    method public void bindAppWidgetId(int, android.content.ComponentName);
+    method public boolean bindAppWidgetIdIfAllowed(int, android.content.ComponentName);
     method public android.os.Bundle getAppWidgetExtras(int);
     method public int[] getAppWidgetIds(android.content.ComponentName);
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo(int);
@@ -4327,6 +4327,7 @@ package android.appwidget {
     method public void updateAppWidget(int, android.widget.RemoteViews);
     method public void updateAppWidget(android.content.ComponentName, android.widget.RemoteViews);
     method public void updateAppWidgetExtras(int, android.os.Bundle);
+    field public static final java.lang.String ACTION_APPWIDGET_BIND = "android.appwidget.action.APPWIDGET_BIND";
     field public static final java.lang.String ACTION_APPWIDGET_CONFIGURE = "android.appwidget.action.APPWIDGET_CONFIGURE";
     field public static final java.lang.String ACTION_APPWIDGET_DELETED = "android.appwidget.action.APPWIDGET_DELETED";
     field public static final java.lang.String ACTION_APPWIDGET_DISABLED = "android.appwidget.action.APPWIDGET_DISABLED";
@@ -4341,6 +4342,7 @@ package android.appwidget {
     field public static final java.lang.String EXTRA_APPWIDGET_MAX_WIDTH = "appWidgetMaxWidth";
     field public static final java.lang.String EXTRA_APPWIDGET_MIN_HEIGHT = "appWidgetMinHeight";
     field public static final java.lang.String EXTRA_APPWIDGET_MIN_WIDTH = "appWidgetMinWidth";
+    field public static final java.lang.String EXTRA_APPWIDGET_PROVIDER = "appWidgetProvider";
     field public static final java.lang.String EXTRA_CUSTOM_EXTRAS = "customExtras";
     field public static final java.lang.String EXTRA_CUSTOM_INFO = "customInfo";
     field public static final int INVALID_APPWIDGET_ID = 0; // 0x0

@@ -208,6 +208,23 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     @Override
+    public boolean bindAppWidgetIdIfAllowed(
+            String packageName, int appWidgetId, ComponentName provider) throws RemoteException {
+        return getImplForUser().bindAppWidgetIdIfAllowed(packageName, appWidgetId, provider);
+    }
+
+    @Override
+    public boolean hasBindAppWidgetPermission(String packageName) throws RemoteException {
+        return getImplForUser().hasBindAppWidgetPermission(packageName);
+    }
+
+    @Override
+    public void setBindAppWidgetPermission(String packageName, boolean permission)
+            throws RemoteException {
+        getImplForUser().setBindAppWidgetPermission(packageName, permission);
+    }
+
+    @Override
     public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection)
             throws RemoteException {
         getImplForUser().bindRemoteViewsService(appWidgetId, intent, connection);
