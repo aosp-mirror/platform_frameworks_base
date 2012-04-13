@@ -24,6 +24,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 
 /**
  * A class representing a Wi-Fi P2p device list
@@ -32,24 +33,28 @@ import java.util.Collections;
  */
 public class WifiP2pDeviceList implements Parcelable {
 
-    private Collection<WifiP2pDevice> mDevices;
+    private HashMap<String, WifiP2pDevice> mDevices;
 
     public WifiP2pDeviceList() {
-        mDevices = new ArrayList<WifiP2pDevice>();
+        mDevices = new HashMap<String, WifiP2pDevice>();
     }
 
     /** copy constructor */
     public WifiP2pDeviceList(WifiP2pDeviceList source) {
         if (source != null) {
-            mDevices = source.getDeviceList();
+            for (WifiP2pDevice d : source.getDeviceList()) {
+                mDevices.put(d.deviceAddress, d);
+            }
         }
     }
 
     /** @hide */
     public WifiP2pDeviceList(ArrayList<WifiP2pDevice> devices) {
-        mDevices = new ArrayList<WifiP2pDevice>();
+        mDevices = new HashMap<String, WifiP2pDevice>();
         for (WifiP2pDevice device : devices) {
-            mDevices.add(device);
+            if (device.deviceAddress != null) {
+                mDevices.put(device.deviceAddress, device);
+            }
         }
     }
 
@@ -62,37 +67,42 @@ public class WifiP2pDeviceList implements Parcelable {
 
     /** @hide */
     public void update(WifiP2pDevice device) {
-        if (device == null) return;
-        for (WifiP2pDevice d : mDevices) {
-            //Found, update fields that can change
-            if (d.equals(device)) {
-                d.deviceName = device.deviceName;
-                d.primaryDeviceType = device.primaryDeviceType;
-                d.secondaryDeviceType = device.secondaryDeviceType;
-                d.wpsConfigMethodsSupported = device.wpsConfigMethodsSupported;
-                d.deviceCapability = device.deviceCapability;
-                d.groupCapability = device.groupCapability;
-                return;
-            }
+        if (device == null || device.deviceAddress == null) return;
+        WifiP2pDevice d = mDevices.get(device.deviceAddress);
+        if (d != null) {
+            d.deviceName = device.deviceName;
+            d.primaryDeviceType = device.primaryDeviceType;
+            d.secondaryDeviceType = device.secondaryDeviceType;
+            d.wpsConfigMethodsSupported = device.wpsConfigMethodsSupported;
+            d.deviceCapability = device.deviceCapability;
+            d.groupCapability = device.groupCapability;
+            return;
         }
         //Not found, add a new one
-        mDevices.add(device);
+        mDevices.put(device.deviceAddress, device);
+    }
+
+    /** @hide */
+    public WifiP2pDevice get(String deviceAddress) {
+        if (deviceAddress == null) return null;
+
+        return mDevices.get(deviceAddress);
     }
 
     /** @hide */
     public boolean remove(WifiP2pDevice device) {
-        if (device == null) return false;
-        return mDevices.remove(device);
+        if (device == null || device.deviceAddress == null) return false;
+        return mDevices.remove(device.deviceAddress) != null;
     }
 
     /** Get the list of devices */
     public Collection<WifiP2pDevice> getDeviceList() {
-        return Collections.unmodifiableCollection(mDevices);
+        return Collections.unmodifiableCollection(mDevices.values());
     }
 
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
-        for (WifiP2pDevice device : mDevices) {
+        for (WifiP2pDevice device : mDevices.values()) {
             sbuf.append("\n").append(device);
         }
         return sbuf.toString();
@@ -106,7 +116,7 @@ public class WifiP2pDeviceList implements Parcelable {
     /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mDevices.size());
-        for(WifiP2pDevice device : mDevices) {
+        for(WifiP2pDevice device : mDevices.values()) {
             dest.writeParcelable(device, flags);
         }
     }

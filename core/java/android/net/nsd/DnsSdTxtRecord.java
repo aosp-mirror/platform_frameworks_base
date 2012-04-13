@@ -24,6 +24,8 @@ package android.net.nsd;
 import android.os.Parcelable;
 import android.os.Parcel;
 
+import java.util.Arrays;
+
 /**
  * This class handles TXT record data for DNS based service discovery as specified at
  * http://tools.ietf.org/html/draft-cheshire-dnsext-dns-sd-11
@@ -160,7 +162,7 @@ public class DnsSdTxtRecord implements Parcelable {
 
     /* Gets the raw data in bytes */
     public byte[] getRawData() {
-        return mData;
+        return (byte[]) mData.clone();
     }
 
     private void insert(byte[] keyBytes, byte[] value, int index) {
@@ -277,6 +279,24 @@ public class DnsSdTxtRecord implements Parcelable {
                 result = result + ", " + av;
         }
         return result != null ? result : "";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof DnsSdTxtRecord)) {
+            return false;
+        }
+
+        DnsSdTxtRecord record = (DnsSdTxtRecord)o;
+        return  Arrays.equals(record.mData, mData);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(mData);
     }
 
     /** Implement the Parcelable interface */

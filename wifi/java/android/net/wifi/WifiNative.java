@@ -19,8 +19,9 @@ package android.net.wifi;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pDevice;
-import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
+import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.util.Log;
 
 import java.io.InputStream;
@@ -643,5 +644,79 @@ public class WifiNative {
 
     public String p2pPeer(String deviceAddress) {
         return doStringCommand("P2P_PEER " + deviceAddress);
+    }
+
+    public boolean p2pServiceAdd(WifiP2pServiceInfo servInfo) {
+        /*
+         * P2P_SERVICE_ADD bonjour <query hexdump> <RDATA hexdump>
+         * P2P_SERVICE_ADD upnp <version hex> <service>
+         *
+         * e.g)
+         * [Bonjour]
+         * # IP Printing over TCP (PTR) (RDATA=MyPrinter._ipp._tcp.local.)
+         * P2P_SERVICE_ADD bonjour 045f697070c00c000c01 094d795072696e746572c027
+         * # IP Printing over TCP (TXT) (RDATA=txtvers=1,pdl=application/postscript)
+         * P2P_SERVICE_ADD bonjour 096d797072696e746572045f697070c00c001001
+         *  09747874766572733d311a70646c3d6170706c69636174696f6e2f706f7374736372797074
+         *
+         * [UPnP]
+         * P2P_SERVICE_ADD upnp 10 uuid:6859dede-8574-59ab-9332-123456789012
+         * P2P_SERVICE_ADD upnp 10 uuid:6859dede-8574-59ab-9332-123456789012::upnp:rootdevice
+         * P2P_SERVICE_ADD upnp 10 uuid:6859dede-8574-59ab-9332-123456789012::urn:schemas-upnp
+         * -org:device:InternetGatewayDevice:1
+         * P2P_SERVICE_ADD upnp 10 uuid:6859dede-8574-59ab-9322-123456789012::urn:schemas-upnp
+         * -org:service:ContentDirectory:2
+         */
+        for (String s : servInfo.getSupplicantQueryList()) {
+            String command = "P2P_SERVICE_ADD";
+            command += (" " + s);
+            if (!doBooleanCommand(command)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean p2pServiceDel(WifiP2pServiceInfo servInfo) {
+        /*
+         * P2P_SERVICE_DEL bonjour <query hexdump>
+         * P2P_SERVICE_DEL upnp <version hex> <service>
+         */
+        for (String s : servInfo.getSupplicantQueryList()) {
+            String command = "P2P_SERVICE_DEL ";
+
+            String[] data = s.split(" ");
+            if (data.length < 2) {
+                return false;
+            }
+            if ("upnp".equals(data[0])) {
+                command += s;
+            } else if ("bonjour".equals(data[0])) {
+                command += data[0];
+                command += (" " + data[1]);
+            } else {
+                return false;
+            }
+            if (!doBooleanCommand(command)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean p2pServiceFlush() {
+        return doBooleanCommand("P2P_SERVICE_FLUSH");
+    }
+
+    public String p2pServDiscReq(String addr, String query) {
+        String command = "P2P_SERV_DISC_REQ";
+        command += (" " + addr);
+        command += (" " + query);
+
+        return doStringCommand(command);
+    }
+
+    public boolean p2pServDiscCancelReq(String id) {
+        return doBooleanCommand("P2P_SERV_DISC_CANCEL_REQ " + id);
     }
 }

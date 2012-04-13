@@ -27,6 +27,7 @@
 
 #define WIFI_PKG_NAME "android/net/wifi/WifiNative"
 #define BUF_SIZE 256
+#define EVENT_BUF_SIZE 2048
 
 namespace android {
 
@@ -140,7 +141,7 @@ static void android_net_wifi_closeSupplicantConnection(JNIEnv* env, jobject, jst
 
 static jstring android_net_wifi_waitForEvent(JNIEnv* env, jobject, jstring jIface)
 {
-    char buf[BUF_SIZE];
+    char buf[EVENT_BUF_SIZE];
     ScopedUtfChars ifname(env, jIface);
     int nread = ::wifi_wait_for_event(ifname.c_str(), buf, sizeof buf);
     if (nread > 0) {
