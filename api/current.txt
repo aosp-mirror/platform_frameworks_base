@@ -3768,7 +3768,6 @@ package android.app {
     method public android.app.Notification.Builder setDefaults(int);
     method public android.app.Notification.Builder setDeleteIntent(android.app.PendingIntent);
     method public android.app.Notification.Builder setFullScreenIntent(android.app.PendingIntent, boolean);
-    method public android.app.Notification.Builder setIntruderActionsShowText(boolean);
     method public android.app.Notification.Builder setLargeIcon(android.graphics.Bitmap);
     method public android.app.Notification.Builder setLights(int, int, int);
     method public android.app.Notification.Builder setNumber(int);
@@ -3784,7 +3783,6 @@ package android.app {
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence);
     method public android.app.Notification.Builder setTicker(java.lang.CharSequence, android.widget.RemoteViews);
     method public android.app.Notification.Builder setUsesChronometer(boolean);
-    method public android.app.Notification.Builder setUsesIntruderAlert(boolean);
     method public android.app.Notification.Builder setVibrate(long[]);
     method public android.app.Notification.Builder setWhen(long);
   }

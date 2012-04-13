@@ -94,7 +94,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
-    private static final boolean ENABLE_INTRUDERS = true;
+    private static final boolean ENABLE_INTRUDERS = false;
 
     static final int EXPANDED_LEAVE_ALONE = -10000;
     static final int EXPANDED_FULL_OPEN = -10001;
@@ -280,9 +280,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
         mNotificationPanel = expanded.findViewById(R.id.notification_panel);
 
-        mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
-        mIntruderAlertView.setVisibility(View.GONE);
-        mIntruderAlertView.setBar(this);
+        if (ENABLE_INTRUDERS) {
+            mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
+            mIntruderAlertView.setVisibility(View.GONE);
+            mIntruderAlertView.setBar(this);
+        }
 
         PhoneStatusBarView sb = (PhoneStatusBarView)View.inflate(context,
                 R.layout.status_bar, null);
@@ -520,12 +522,12 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         } catch (RemoteException ex) {
         }
+
+        /*
+         * DISABLED due to missing API
         if (ENABLE_INTRUDERS && (
                    // TODO(dsandler): Only if the screen is on
                 notification.notification.intruderView != null)) {
-//                   notification.notification.fullScreenIntent != null
-//                || (notification.score >= mIntruderInImmersiveMinScore)
-//                || (!immersive && (notification.score > mIntruderMinScore)))) {
             Slog.d(TAG, "Presenting high-priority notification");
             // special new transient ticker mode
             // 1. Populate mIntruderAlertView
@@ -554,7 +556,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (INTRUDER_ALERT_DECAY_MS > 0) {
                 mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
             }
-        } else if (notification.notification.fullScreenIntent != null) {
+        } else 
+         */
+        
+        if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
             Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
             try {
@@ -675,7 +680,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
         // See if we need to update the intruder.
-        if (oldNotification == mCurrentlyIntrudingNotification) {
+        if (ENABLE_INTRUDERS && oldNotification == mCurrentlyIntrudingNotification) {
             if (DEBUG) Slog.d(TAG, "updating the current intruder:" + notification);
             // XXX: this is a hack for Alarms. The real implementation will need to *update* 
             // the intruder.
@@ -697,7 +702,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             // Recalculate the position of the sliding windows and the titles.
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
             
-            if (old == mCurrentlyIntrudingNotification) {
+            if (ENABLE_INTRUDERS && old == mCurrentlyIntrudingNotification) {
                 mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
             }
 
@@ -2039,6 +2044,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     };
 
     private void setIntruderAlertVisibility(boolean vis) {
+        if (!ENABLE_INTRUDERS) return;
         if (DEBUG) {
             Slog.v(TAG, (vis ? "showing" : "hiding") + " intruder alert window");
         }

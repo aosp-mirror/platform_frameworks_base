@@ -190,12 +190,6 @@ public class Notification implements Parcelable
     public RemoteViews contentView;
 
     /**
-     * The view that will represent this notification in the pop-up "intruder alert" dialog.
-     * @hide
-     */
-    public RemoteViews intruderView;
-
-    /**
      * A large-format version of {@link #contentView}, giving the Notification an
      * opportunity to show more detail. The system UI may choose to show this
      * instead of the normal content view at its discretion.
@@ -590,9 +584,6 @@ public class Notification implements Parcelable
 
         actions = parcel.createTypedArray(Action.CREATOR);
         if (parcel.readInt() != 0) {
-            intruderView = RemoteViews.CREATOR.createFromParcel(parcel);
-        }
-        if (parcel.readInt() != 0) {
             bigContentView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
     }
@@ -657,9 +648,6 @@ public class Notification implements Parcelable
         that.actions = new Action[this.actions.length];
         for(int i=0; i<this.actions.length; i++) {
             that.actions[i] = this.actions[i].clone();
-        }
-        if (this.intruderView != null) {
-            that.intruderView = this.intruderView.clone();
         }
         if (this.bigContentView != null) {
             that.bigContentView = this.bigContentView.clone();
@@ -754,13 +742,6 @@ public class Notification implements Parcelable
         }
 
         parcel.writeTypedArray(actions, 0);
-
-        if (intruderView != null) {
-            parcel.writeInt(1);
-            intruderView.writeToParcel(parcel, 0);
-        } else {
-            parcel.writeInt(0);
-        }
 
         if (bigContentView != null) {
             parcel.writeInt(1);
@@ -942,8 +923,6 @@ public class Notification implements Parcelable
         private Bundle mExtras;
         private int mPriority;
         private ArrayList<Action> mActions = new ArrayList<Action>(3);
-        private boolean mCanHasIntruder;
-        private boolean mIntruderActionsShowText;
         private boolean mUseChronometer;
 
         /**
@@ -1349,38 +1328,6 @@ public class Notification implements Parcelable
             return this;
         }
 
-        /**
-         * Specify whether this notification should pop up as an
-         * "intruder alert" (a small window that shares the screen with the
-         * current activity). This sort of notification is (as the name implies)
-         * very intrusive, so use it sparingly for notifications that require
-         * the user's attention.
-         *
-         * Notes:
-         * <ul>
-         * <li>Intruder alerts only show when the screen is on.</li>
-         * <li>Intruder alerts take precedence over fullScreenIntents.</li>
-         * </ul>
-         *
-         * @param intrude Whether to pop up an intruder alert (default false).
-         */
-        public Builder setUsesIntruderAlert(boolean intrude) {
-            mCanHasIntruder = intrude;
-            return this;
-        }
-
-        /**
-         * Control text on intruder alert action buttons. By default, action
-         * buttons in intruders do not show textual labels.
-         * 
-         * @param showActionText Whether to show text labels beneath action
-         *            icons (default false).
-         */
-        public Builder setIntruderActionsShowText(boolean showActionText) {
-            mIntruderActionsShowText = showActionText;
-            return this;
-        }
-
         private void setFlag(int mask, boolean value) {
             if (value) {
                 mFlags |= mask;
@@ -1506,45 +1453,6 @@ public class Notification implements Parcelable
             return applyStandardTemplateWithActions(R.layout.notification_template_base);
         }
 
-        private RemoteViews makeIntruderView(boolean showLabels) {
-            RemoteViews intruderView = new RemoteViews(mContext.getPackageName(),
-                    R.layout.notification_intruder_content);
-            if (mLargeIcon != null) {
-                intruderView.setImageViewBitmap(R.id.icon, mLargeIcon);
-                intruderView.setViewVisibility(R.id.icon, View.VISIBLE);
-            } else if (mSmallIcon != 0) {
-                intruderView.setImageViewResource(R.id.icon, mSmallIcon);
-                intruderView.setViewVisibility(R.id.icon, View.VISIBLE);
-            } else {
-                intruderView.setViewVisibility(R.id.icon, View.GONE);
-            }
-            if (mContentTitle != null) {
-                intruderView.setTextViewText(R.id.title, mContentTitle);
-            }
-            if (mContentText != null) {
-                intruderView.setTextViewText(R.id.text, mContentText);
-            }
-            if (mActions.size() > 0) {
-                intruderView.setViewVisibility(R.id.actions, View.VISIBLE);
-                int N = mActions.size();
-                if (N>3) N=3;
-                final int[] BUTTONS = { R.id.action0, R.id.action1, R.id.action2 };
-                for (int i=0; i<N; i++) {
-                    final Action action = mActions.get(i);
-                    final int buttonId = BUTTONS[i];
-
-                    intruderView.setViewVisibility(buttonId, View.VISIBLE);
-                    intruderView.setTextViewText(buttonId, showLabels ? action.title : null);
-                    intruderView.setTextViewCompoundDrawables(buttonId, 0, action.icon, 0, 0);
-                    intruderView.setContentDescription(buttonId, action.title);
-                    intruderView.setOnClickPendingIntent(buttonId, action.actionIntent);
-                }
-            } else {
-                intruderView.setViewVisibility(R.id.actions, View.GONE);
-            }
-            return intruderView;
-        }
-
         private RemoteViews generateActionButton(Action action) {
             RemoteViews button = new RemoteViews(mContext.getPackageName(), R.layout.notification_action);
             button.setTextViewCompoundDrawables(R.id.action0, action.icon, 0, 0, 0);
@@ -1579,9 +1487,6 @@ public class Notification implements Parcelable
             n.ledOffMS = mLedOffMs;
             n.defaults = mDefaults;
             n.flags = mFlags;
-            if (mCanHasIntruder) {
-                n.intruderView = makeIntruderView(mIntruderActionsShowText);
-            }
             n.bigContentView = makeBigContentView();
             if (mLedOnMs != 0 && mLedOffMs != 0) {
                 n.flags |= FLAG_SHOW_LIGHTS;
