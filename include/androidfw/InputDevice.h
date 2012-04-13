@@ -93,6 +93,9 @@ public:
         return mKeyCharacterMap;
     }
 
+    inline void setVibrator(bool hasVibrator) { mHasVibrator = hasVibrator; }
+    inline bool hasVibrator() const { return mHasVibrator; }
+
     inline const Vector<MotionRange>& getMotionRanges() const {
         return mMotionRanges;
     }
@@ -105,6 +108,7 @@ private:
     uint32_t mSources;
     int32_t mKeyboardType;
     sp<KeyCharacterMap> mKeyCharacterMap;
+    bool mHasVibrator;
 
     Vector<MotionRange> mMotionRanges;
 };

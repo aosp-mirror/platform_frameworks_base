@@ -1226,6 +1226,38 @@ static void nativeSetShowTouches(JNIEnv* env,
     im->setShowTouches(enabled);
 }
 
+static void nativeVibrate(JNIEnv* env,
+        jclass clazz, jint ptr, jint deviceId, jlongArray patternObj,
+        jint repeat, jint token) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    size_t patternSize = env->GetArrayLength(patternObj);
+    if (patternSize > MAX_VIBRATE_PATTERN_SIZE) {
+        ALOGI("Skipped requested vibration because the pattern size is %d "
+                "which is more than the maximum supported size of %d.",
+                patternSize, MAX_VIBRATE_PATTERN_SIZE);
+        return; // limit to reasonable size
+    }
+
+    jlong* patternMillis = static_cast<jlong*>(env->GetPrimitiveArrayCritical(
+            patternObj, NULL));
+    nsecs_t pattern[patternSize];
+    for (size_t i = 0; i < patternSize; i++) {
+        pattern[i] = max(jlong(0), min(patternMillis[i],
+                MAX_VIBRATE_PATTERN_DELAY_NSECS / 1000000LL)) * 1000000LL;
+    }
+    env->ReleasePrimitiveArrayCritical(patternObj, patternMillis, JNI_ABORT);
+
+    im->getInputManager()->getReader()->vibrate(deviceId, pattern, patternSize, repeat, token);
+}
+
+static void nativeCancelVibrate(JNIEnv* env,
+        jclass clazz, jint ptr, jint deviceId, jint token) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getReader()->cancelVibrate(deviceId, token);
+}
+
 static jstring nativeDump(JNIEnv* env, jclass clazz, jint ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
@@ -1287,6 +1319,10 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetPointerSpeed },
     { "nativeSetShowTouches", "(IZ)V",
             (void*) nativeSetShowTouches },
+    { "nativeVibrate", "(II[JII)V",
+            (void*) nativeVibrate },
+    { "nativeCancelVibrate", "(III)V",
+            (void*) nativeCancelVibrate },
     { "nativeDump", "(I)Ljava/lang/String;",
             (void*) nativeDump },
     { "nativeMonitor", "(I)V",

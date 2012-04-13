@@ -16,9 +16,12 @@
 
 package android.view;
 
+import android.content.Context;
 import android.hardware.input.InputManager;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Vibrator;
+import android.os.NullVibrator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +49,10 @@ public final class InputDevice implements Parcelable {
     private final int mSources;
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
+    private final boolean mHasVibrator;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
+
+    private Vibrator mVibrator; // guarded by mMotionRanges during initialization
 
     /**
      * A mask for input source classes.
@@ -304,7 +310,7 @@ public final class InputDevice implements Parcelable {
 
     // Called by native code.
     private InputDevice(int id, int generation, String name, String descriptor, int sources,
-            int keyboardType, KeyCharacterMap keyCharacterMap) {
+            int keyboardType, KeyCharacterMap keyCharacterMap, boolean hasVibrator) {
         mId = id;
         mGeneration = generation;
         mName = name;
@@ -312,6 +318,7 @@ public final class InputDevice implements Parcelable {
         mSources = sources;
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
+        mHasVibrator = hasVibrator;
     }
 
     private InputDevice(Parcel in) {
@@ -322,6 +329,7 @@ public final class InputDevice implements Parcelable {
         mSources = in.readInt();
         mKeyboardType = in.readInt();
         mKeyCharacterMap = KeyCharacterMap.CREATOR.createFromParcel(in);
+        mHasVibrator = in.readInt() != 0;
 
         for (;;) {
             int axis = in.readInt();
@@ -522,6 +530,31 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Gets the vibrator service associated with the device, if there is one.
+     * Even if the device does not have a vibrator, the result is never null.
+     * Use {@link Vibrator#hasVibrator} to determine whether a vibrator is
+     * present.
+     *
+     * Note that the vibrator associated with the device may be different from
+     * the system vibrator.  To obtain an instance of the system vibrator instead, call
+     * {@link Context#getSystemService} with {@link Context#VIBRATOR_SERVICE} as argument.
+     *
+     * @return The vibrator service associated with the device, never null.
+     */
+    public Vibrator getVibrator() {
+        synchronized (mMotionRanges) {
+            if (mVibrator == null) {
+                if (mHasVibrator) {
+                    mVibrator = InputManager.getInstance().getInputDeviceVibrator(mId);
+                } else {
+                    mVibrator = NullVibrator.getInstance();
+                }
+            }
+            return mVibrator;
+        }
+    }
+
+    /**
      * Provides information about the range of values for a particular {@link MotionEvent} axis.
      *
      * @see InputDevice#getMotionRange(int)
@@ -617,6 +650,7 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
         mKeyCharacterMap.writeToParcel(out, flags);
+        out.writeInt(mHasVibrator ? 1 : 0);
 
         final int numRanges = mMotionRanges.size();
         for (int i = 0; i < numRanges; i++) {
@@ -656,6 +690,8 @@ public final class InputDevice implements Parcelable {
                 break;
         }
         description.append("\n");
+
+        description.append("  Has Vibrator: ").append(mHasVibrator).append("\n");
 
         description.append("  Sources: 0x").append(Integer.toHexString(mSources)).append(" (");
         appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");

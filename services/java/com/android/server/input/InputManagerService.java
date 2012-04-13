@@ -105,6 +105,12 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             mTempInputDevicesChangedListenersToNotify =
                     new ArrayList<InputDevicesChangedListenerRecord>(); // handler thread only
 
+    // State for vibrator tokens.
+    private Object mVibratorLock = new Object();
+    private HashMap<IBinder, VibratorToken> mVibratorTokens =
+            new HashMap<IBinder, VibratorToken>();
+    private int mNextVibratorTokenValue;
+
     // State for the currently installed input filter.
     final Object mInputFilterLock = new Object();
     InputFilter mInputFilter; // guarded by mInputFilterLock
@@ -142,6 +148,9 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             InputChannel fromChannel, InputChannel toChannel);
     private static native void nativeSetPointerSpeed(int ptr, int speed);
     private static native void nativeSetShowTouches(int ptr, boolean enabled);
+    private static native void nativeVibrate(int ptr, int deviceId, long[] pattern,
+            int repeat, int token);
+    private static native void nativeCancelVibrate(int ptr, int deviceId, int token);
     private static native String nativeDump(int ptr);
     private static native void nativeMonitor(int ptr);
 
@@ -792,6 +801,65 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
         return result;
     }
 
+    // Binder call
+    @Override
+    public void vibrate(int deviceId, long[] pattern, int repeat, IBinder token) {
+        if (repeat >= pattern.length) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+
+        VibratorToken v;
+        synchronized (mVibratorLock) {
+            v = mVibratorTokens.get(token);
+            if (v == null) {
+                v = new VibratorToken(deviceId, token, mNextVibratorTokenValue++);
+                try {
+                    token.linkToDeath(v, 0);
+                } catch (RemoteException ex) {
+                    // give up
+                    throw new RuntimeException(ex);
+                }
+                mVibratorTokens.put(token, v);
+            }
+        }
+
+        synchronized (v) {
+            v.mVibrating = true;
+            nativeVibrate(mPtr, deviceId, pattern, repeat, v.mTokenValue);
+        }
+    }
+
+    // Binder call
+    @Override
+    public void cancelVibrate(int deviceId, IBinder token) {
+        VibratorToken v;
+        synchronized (mVibratorLock) {
+            v = mVibratorTokens.get(token);
+            if (v == null || v.mDeviceId != deviceId) {
+                return; // nothing to cancel
+            }
+        }
+
+        cancelVibrateIfNeeded(v);
+    }
+
+    void onVibratorTokenDied(VibratorToken v) {
+        synchronized (mVibratorLock) {
+            mVibratorTokens.remove(v.mToken);
+        }
+
+        cancelVibrateIfNeeded(v);
+    }
+
+    private void cancelVibrateIfNeeded(VibratorToken v) {
+        synchronized (v) {
+            if (v.mVibrating) {
+                nativeCancelVibrate(mPtr, v.mDeviceId, v.mTokenValue);
+                v.mVibrating = false;
+            }
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission("android.permission.DUMP")
@@ -1106,6 +1174,28 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
                         + mPid + " that input devices changed, assuming it died.", ex);
                 binderDied();
             }
+        }
+    }
+
+    private final class VibratorToken implements DeathRecipient {
+        public final int mDeviceId;
+        public final IBinder mToken;
+        public final int mTokenValue;
+
+        public boolean mVibrating;
+
+        public VibratorToken(int deviceId, IBinder token, int tokenValue) {
+            mDeviceId = deviceId;
+            mToken = token;
+            mTokenValue = tokenValue;
+        }
+
+        @Override
+        public void binderDied() {
+            if (DEBUG) {
+                Slog.d(TAG, "Vibrator token died.");
+            }
+            onVibratorTokenDied(this);
         }
     }
 }
