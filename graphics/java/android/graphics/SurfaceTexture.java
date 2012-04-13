@@ -155,19 +155,23 @@ public class SurfaceTexture {
 
     /**
      * Update the texture image to the most recent frame from the image stream.  This may only be
-     * called while the OpenGL ES context that owns the texture is bound to the thread.  It will
-     * implicitly bind its texture to the GL_TEXTURE_EXTERNAL_OES texture target.
+     * called while the OpenGL ES context that owns the texture is current on the calling thread.
+     * It will implicitly bind its texture to the GL_TEXTURE_EXTERNAL_OES texture target.
      */
     public void updateTexImage() {
-        int err = nativeUpdateTexImage(); 
-        if (err != 0) {
-            throw new RuntimeException("Error during updateTexImage (see logcat for details)");
-        }
+        nativeUpdateTexImage(); 
     }
 
     /**
-     * Detach the SurfaceTexture from the OpenGL ES context with which it is currently associated.
-     * This can be used to change from one OpenGL ES context to another.
+     * Detach the SurfaceTexture from the OpenGL ES context that owns the OpenGL ES texture object.
+     * This call must be made with the OpenGL ES context current on the calling thread.  The OpenGL
+     * ES texture object will be deleted as a result of this call.  After calling this method all
+     * calls to {@link #updateTexImage} will throw an {@link java.lang.IllegalStateException} until
+     * a successful call to {@link #attachToGLContext} is made.
+     *
+     * This can be used to access the SurfaceTexture image contents from multiple OpenGL ES
+     * contexts.  Note, however, that the image contents are only accessible from one OpenGL ES
+     * context at a time.
      *
      * @hide
      */
@@ -179,6 +183,17 @@ public class SurfaceTexture {
     }
 
     /**
+     * Attach the SurfaceTexture to the OpenGL ES context that is current on the calling thread.  A
+     * new OpenGL ES texture object is created and populated with the SurfaceTexture image frame
+     * that was current at the time of the last call to {@link #detachFromGLContext}.  This new
+     * texture is bound to the GL_TEXTURE_EXTERNAL_OES texture target.
+     *
+     * This can be used to access the SurfaceTexture image contents from multiple OpenGL ES
+     * contexts.  Note, however, that the image contents are only accessible from one OpenGL ES
+     * context at a time.
+     *
+     * @param texName The name of the OpenGL ES texture that will be created.  This texture name
+     * must be unusued in the OpenGL ES context that is current on the calling thread.
      *
      * @hide
      */
@@ -292,7 +307,7 @@ public class SurfaceTexture {
     private native void nativeGetTransformMatrix(float[] mtx);
     private native long nativeGetTimestamp();
     private native void nativeSetDefaultBufferSize(int width, int height);
-    private native int nativeUpdateTexImage();
+    private native void nativeUpdateTexImage();
     private native int nativeDetachFromGLContext();
     private native int nativeAttachToGLContext(int texName);
     private native int nativeGetQueuedCount();
