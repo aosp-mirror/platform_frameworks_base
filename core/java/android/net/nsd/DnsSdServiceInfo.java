@@ -22,8 +22,8 @@ import android.os.Parcel;
 import java.net.InetAddress;
 
 /**
- * Defines a service based on DNS service discovery
- * {@hide}
+ * A class representing service information for network service discovery
+ * {@see NsdManager}
  */
 public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
 
@@ -40,56 +40,63 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
     public DnsSdServiceInfo() {
     }
 
+    /** @hide */
     public DnsSdServiceInfo(String sn, String rt, DnsSdTxtRecord tr) {
         mServiceName = sn;
         mServiceType = rt;
         mTxtRecord = tr;
     }
 
+    /** Get the service name */
     @Override
-    /** @hide */
     public String getServiceName() {
         return mServiceName;
     }
 
+    /** Set the service name */
     @Override
-    /** @hide */
     public void setServiceName(String s) {
         mServiceName = s;
     }
 
+    /** Get the service type */
     @Override
-    /** @hide */
     public String getServiceType() {
         return mServiceType;
     }
 
+    /** Set the service type */
     @Override
-    /** @hide */
     public void setServiceType(String s) {
         mServiceType = s;
     }
 
+    /** @hide */
     public DnsSdTxtRecord getTxtRecord() {
         return mTxtRecord;
     }
 
+    /** @hide */
     public void setTxtRecord(DnsSdTxtRecord t) {
         mTxtRecord = new DnsSdTxtRecord(t);
     }
 
+    /** Get the host address. The host address is valid for a resolved service. */
     public InetAddress getHost() {
         return mHost;
     }
 
+    /** Set the host address */
     public void setHost(InetAddress s) {
         mHost = s;
     }
 
+    /** Get port number. The port number is valid for a resolved service. */
     public int getPort() {
         return mPort;
     }
 
+    /** Set port number */
     public void setPort(int p) {
         mPort = p;
     }
@@ -147,5 +154,4 @@ public class DnsSdServiceInfo implements NetworkServiceInfo, Parcelable {
                 return new DnsSdServiceInfo[size];
             }
         };
-
 }
