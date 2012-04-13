@@ -66,9 +66,11 @@ public:
         float fuzz;
     };
 
-    void initialize(int32_t id, const String8& name, const String8& descriptor);
+    void initialize(int32_t id, int32_t generation,
+            const String8& name, const String8& descriptor);
 
     inline int32_t getId() const { return mId; }
+    inline int32_t getGeneration() const { return mGeneration; }
     inline const String8 getName() const { return mName; }
     inline const String8 getDescriptor() const { return mDescriptor; }
     inline uint32_t getSources() const { return mSources; }
@@ -97,6 +99,7 @@ public:
 
 private:
     int32_t mId;
+    int32_t mGeneration;
     String8 mName;
     String8 mDescriptor;
     uint32_t mSources;

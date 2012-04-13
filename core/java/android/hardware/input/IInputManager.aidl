@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import android.hardware.input.KeyboardLayout;
+import android.hardware.input.IInputDevicesChangedListener;
 import android.view.InputDevice;
 import android.view.InputEvent;
 
@@ -42,4 +43,7 @@ interface IInputManager {
     String getKeyboardLayoutForInputDevice(String inputDeviceDescriptor);
     void setKeyboardLayoutForInputDevice(String inputDeviceDescriptor,
             String keyboardLayoutDescriptor);
+
+    // Registers an input devices changed listener.
+    void registerInputDevicesChangedListener(IInputDevicesChangedListener listener);
 }

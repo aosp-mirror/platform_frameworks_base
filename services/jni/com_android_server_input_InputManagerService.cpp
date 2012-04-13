@@ -59,6 +59,7 @@ static const float POINTER_SPEED_EXPONENT = 1.0f / 4;
 
 static struct {
     jmethodID notifyConfigurationChanged;
+    jmethodID notifyInputDevicesChanged;
     jmethodID notifyLidSwitchChanged;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyANR;
@@ -79,6 +80,10 @@ static struct {
     jmethodID getPointerLayer;
     jmethodID getPointerIcon;
 } gServiceClassInfo;
+
+static struct {
+    jclass clazz;
+} gInputDeviceClassInfo;
 
 static struct {
     jclass clazz;
@@ -179,6 +184,7 @@ public:
 
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
+    virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -484,6 +490,36 @@ void NativeInputManager::ensureSpriteControllerLocked() {
         }
         mLocked.spriteController = new SpriteController(mLooper, layer);
     }
+}
+
+void NativeInputManager::notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices) {
+    JNIEnv* env = jniEnv();
+
+    size_t count = inputDevices.size();
+    jobjectArray inputDevicesObjArray = env->NewObjectArray(
+            count, gInputDeviceClassInfo.clazz, NULL);
+    if (inputDevicesObjArray) {
+        bool error = false;
+        for (size_t i = 0; i < count; i++) {
+            jobject inputDeviceObj = android_view_InputDevice_create(env, inputDevices.itemAt(i));
+            if (!inputDeviceObj) {
+                error = true;
+                break;
+            }
+
+            env->SetObjectArrayElement(inputDevicesObjArray, i, inputDeviceObj);
+            env->DeleteLocalRef(inputDeviceObj);
+        }
+
+        if (!error) {
+            env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyInputDevicesChanged,
+                    inputDevicesObjArray);
+        }
+
+        env->DeleteLocalRef(inputDevicesObjArray);
+    }
+
+    checkAndClearExceptionFromCallback(env, "notifyInputDevicesChanged");
 }
 
 void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
@@ -1147,36 +1183,6 @@ static void nativeSetSystemUiVisibility(JNIEnv* env,
     im->setSystemUiVisibility(visibility);
 }
 
-static jobject nativeGetInputDevice(JNIEnv* env,
-        jclass clazz, jint ptr, jint deviceId) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-
-    InputDeviceInfo deviceInfo;
-    status_t status = im->getInputManager()->getReader()->getInputDeviceInfo(
-            deviceId, & deviceInfo);
-    if (status) {
-        return NULL;
-    }
-
-    return android_view_InputDevice_create(env, deviceInfo);
-}
-
-static jintArray nativeGetInputDeviceIds(JNIEnv* env,
-        jclass clazz, jint ptr) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-
-    Vector<int> deviceIds;
-    im->getInputManager()->getReader()->getInputDeviceIds(deviceIds);
-
-    jintArray deviceIdsObj = env->NewIntArray(deviceIds.size());
-    if (! deviceIdsObj) {
-        return NULL;
-    }
-
-    env->SetIntArrayRegion(deviceIdsObj, 0, deviceIds.size(), deviceIds.array());
-    return deviceIdsObj;
-}
-
 static void nativeGetInputConfiguration(JNIEnv* env,
         jclass clazz, jint ptr, jobject configObj) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1273,10 +1279,6 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetInputDispatchMode },
     { "nativeSetSystemUiVisibility", "(II)V",
             (void*) nativeSetSystemUiVisibility },
-    { "nativeGetInputDevice", "(II)Landroid/view/InputDevice;",
-            (void*) nativeGetInputDevice },
-    { "nativeGetInputDeviceIds", "(I)[I",
-            (void*) nativeGetInputDeviceIds },
     { "nativeGetInputConfiguration", "(ILandroid/content/res/Configuration;)V",
             (void*) nativeGetInputConfiguration },
     { "nativeTransferTouchFocus", "(ILandroid/view/InputChannel;Landroid/view/InputChannel;)Z",
@@ -1315,6 +1317,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyConfigurationChanged, clazz,
             "notifyConfigurationChanged", "(J)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifyInputDevicesChanged, clazz,
+            "notifyInputDevicesChanged", "([Landroid/view/InputDevice;)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyLidSwitchChanged, clazz,
             "notifyLidSwitchChanged", "(JZ)V");
@@ -1376,6 +1381,11 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.getPointerIcon, clazz,
             "getPointerIcon", "()Landroid/view/PointerIcon;");
+
+    // InputDevice
+
+    FIND_CLASS(gInputDeviceClassInfo.clazz, "android/view/InputDevice");
+    gInputDeviceClassInfo.clazz = jclass(env->NewGlobalRef(gInputDeviceClassInfo.clazz));
 
     // KeyEvent
 

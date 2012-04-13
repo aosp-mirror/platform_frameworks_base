@@ -9822,8 +9822,18 @@ package android.hardware {
 package android.hardware.input {
 
   public final class InputManager {
+    method public android.view.InputDevice getInputDevice(int);
+    method public int[] getInputDeviceIds();
+    method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
+    method public void unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener);
     field public static final java.lang.String ACTION_QUERY_KEYBOARD_LAYOUTS = "android.hardware.input.action.QUERY_KEYBOARD_LAYOUTS";
     field public static final java.lang.String META_DATA_KEYBOARD_LAYOUTS = "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
+  }
+
+  public static abstract interface InputManager.InputDeviceListener {
+    method public abstract void onInputDeviceAdded(int);
+    method public abstract void onInputDeviceChanged(int);
+    method public abstract void onInputDeviceRemoved(int);
   }
 
 }

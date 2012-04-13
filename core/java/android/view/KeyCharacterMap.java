@@ -22,8 +22,6 @@ import android.text.method.MetaKeyKeyListener;
 import android.util.AndroidRuntimeException;
 import android.util.SparseIntArray;
 import android.hardware.input.InputManager;
-import android.util.SparseArray;
-import android.view.InputDevice.MotionRange;
 
 import java.lang.Character;
 

@@ -209,6 +209,11 @@ public:
 
     /* Gets a pointer controller associated with the specified cursor device (ie. a mouse). */
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) = 0;
+
+    /* Notifies the input reader policy that some input devices have changed
+     * and provides information about all current input devices.
+     */
+    virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices) = 0;
 };
 
 
@@ -240,16 +245,11 @@ public:
      */
     virtual void getInputConfiguration(InputConfiguration* outConfiguration) = 0;
 
-    /* Gets information about the specified input device.
-     * Returns OK if the device information was obtained or NAME_NOT_FOUND if there
-     * was no such device.
+    /* Gets information about all input devices.
      *
      * This method may be called on any thread (usually by the input manager).
      */
-    virtual status_t getInputDeviceInfo(int32_t deviceId, InputDeviceInfo* outDeviceInfo) = 0;
-
-    /* Gets the list of all registered device ids. */
-    virtual void getInputDeviceIds(Vector<int32_t>& outDeviceIds) = 0;
+    virtual void getInputDevices(Vector<InputDeviceInfo>& outInputDevices) = 0;
 
     /* Query current input state. */
     virtual int32_t getScanCodeState(int32_t deviceId, uint32_t sourceMask,
@@ -288,6 +288,7 @@ public:
     virtual void fadePointer() = 0;
 
     virtual void requestTimeoutAtTime(nsecs_t when) = 0;
+    virtual int32_t bumpGeneration() = 0;
 
     virtual InputReaderPolicyInterface* getPolicy() = 0;
     virtual InputListenerInterface* getListener() = 0;
@@ -319,9 +320,7 @@ public:
     virtual void loopOnce();
 
     virtual void getInputConfiguration(InputConfiguration* outConfiguration);
-
-    virtual status_t getInputDeviceInfo(int32_t deviceId, InputDeviceInfo* outDeviceInfo);
-    virtual void getInputDeviceIds(Vector<int32_t>& outDeviceIds);
+    virtual void getInputDevices(Vector<InputDeviceInfo>& outInputDevices);
 
     virtual int32_t getScanCodeState(int32_t deviceId, uint32_t sourceMask,
             int32_t scanCode);
@@ -353,6 +352,7 @@ protected:
                 InputDevice* device, int32_t keyCode, int32_t scanCode);
         virtual void fadePointer();
         virtual void requestTimeoutAtTime(nsecs_t when);
+        virtual int32_t bumpGeneration();
         virtual InputReaderPolicyInterface* getPolicy();
         virtual InputListenerInterface* getListener();
         virtual EventHubInterface* getEventHub();
@@ -393,8 +393,13 @@ private:
 
     void fadePointerLocked();
 
+    int32_t mGeneration;
+    int32_t bumpGenerationLocked();
+
     InputConfiguration mInputConfiguration;
     void updateInputConfigurationLocked();
+
+    void getInputDevicesLocked(Vector<InputDeviceInfo>& outInputDevices);
 
     nsecs_t mDisableVirtualKeysTimeout;
     void disableVirtualKeysUntilLocked(nsecs_t time);
@@ -432,12 +437,13 @@ private:
 /* Represents the state of a single input device. */
 class InputDevice {
 public:
-    InputDevice(InputReaderContext* context, int32_t id,
+    InputDevice(InputReaderContext* context, int32_t id, int32_t generation,
             const InputDeviceIdentifier& identifier, uint32_t classes);
     ~InputDevice();
 
     inline InputReaderContext* getContext() { return mContext; }
     inline int32_t getId() { return mId; }
+    inline int32_t getGeneration() { return mGeneration; }
     inline const String8& getName() { return mIdentifier.name; }
     inline uint32_t getClasses() { return mClasses; }
     inline uint32_t getSources() { return mSources; }
@@ -465,6 +471,8 @@ public:
 
     void fadePointer();
 
+    void bumpGeneration();
+
     void notifyReset(nsecs_t when);
 
     inline const PropertyMap& getConfiguration() { return mConfiguration; }
@@ -487,6 +495,7 @@ public:
 private:
     InputReaderContext* mContext;
     int32_t mId;
+    int32_t mGeneration;
     InputDeviceIdentifier mIdentifier;
     uint32_t mClasses;
 
@@ -849,6 +858,7 @@ protected:
     InputReaderContext* mContext;
 
     status_t getAbsoluteAxisInfo(int32_t axis, RawAbsoluteAxisInfo* axisInfo);
+    void bumpGeneration();
 
     static void dumpRawAbsoluteAxisInfo(String8& dump,
             const RawAbsoluteAxisInfo& axis, const char* name);

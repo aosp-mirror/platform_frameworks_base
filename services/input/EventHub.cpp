@@ -720,6 +720,11 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                         break;
                     }
                 }
+            } else if (eventItem.events & EPOLLHUP) {
+                ALOGI("Removing device %s due to epoll hang-up event.",
+                        device->identifier.name.string());
+                deviceChanged = true;
+                closeDeviceLocked(device);
             } else {
                 ALOGW("Received unexpected epoll event 0x%08x for device %s.",
                         eventItem.events, device->identifier.name.string());

@@ -21,6 +21,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Paint.FontMetricsInt;
+import android.hardware.input.InputManager;
+import android.hardware.input.InputManager.InputDeviceListener;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -32,7 +34,7 @@ import android.view.MotionEvent.PointerCoords;
 
 import java.util.ArrayList;
 
-public class PointerLocationView extends View {
+public class PointerLocationView extends View implements InputDeviceListener {
     private static final String TAG = "Pointer";
     
     public static class PointerState {
@@ -82,6 +84,8 @@ public class PointerLocationView extends View {
     private final int ESTIMATE_FUTURE_POINTS = 2;
     private final float ESTIMATE_INTERVAL = 0.02f;
 
+    private final InputManager mIm;
+
     private final ViewConfiguration mVC;
     private final Paint mTextPaint;
     private final Paint mTextBackgroundPaint;
@@ -107,6 +111,8 @@ public class PointerLocationView extends View {
     public PointerLocationView(Context c) {
         super(c);
         setFocusableInTouchMode(true);
+
+        mIm = (InputManager)c.getSystemService(Context.INPUT_SERVICE);
 
         mVC = ViewConfiguration.get(c);
         mTextPaint = new Paint();
@@ -139,18 +145,6 @@ public class PointerLocationView extends View {
         mActivePointerId = 0;
         
         mVelocity = VelocityTracker.obtain();
-        
-        logInputDeviceCapabilities();
-    }
-    
-    private void logInputDeviceCapabilities() {
-        int[] deviceIds = InputDevice.getDeviceIds();
-        for (int i = 0; i < deviceIds.length; i++) {
-            InputDevice device = InputDevice.getDevice(deviceIds[i]);
-            if (device != null) {
-                Log.i(TAG, device.toString());
-            }
-        }
     }
 
     public void setPrintCoords(boolean state) {
@@ -631,7 +625,53 @@ public class PointerLocationView extends View {
         logMotionEvent("Trackball", event);
         return true;
     }
-    
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        mIm.registerInputDeviceListener(this, getHandler());
+        logInputDevices();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        mIm.unregisterInputDeviceListener(this);
+    }
+
+    @Override
+    public void onInputDeviceAdded(int deviceId) {
+        logInputDeviceState(deviceId, "Device Added");
+    }
+
+    @Override
+    public void onInputDeviceChanged(int deviceId) {
+        logInputDeviceState(deviceId, "Device Changed");
+    }
+
+    @Override
+    public void onInputDeviceRemoved(int deviceId) {
+        logInputDeviceState(deviceId, "Device Removed");
+    }
+
+    private void logInputDevices() {
+        int[] deviceIds = InputDevice.getDeviceIds();
+        for (int i = 0; i < deviceIds.length; i++) {
+            logInputDeviceState(deviceIds[i], "Device Enumerated");
+        }
+    }
+
+    private void logInputDeviceState(int deviceId, String state) {
+        InputDevice device = mIm.getInputDevice(deviceId);
+        if (device != null) {
+            Log.i(TAG, state + ": " + device);
+        } else {
+            Log.i(TAG, state + ": " + deviceId);
+        }
+    }
+
     // HACK
     // A quick and dirty string builder implementation optimized for GC.
     // Using String.format causes the application grind to a halt when

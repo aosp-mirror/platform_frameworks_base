@@ -34,18 +34,23 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.hardware.input.IInputManager;
+import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.InputManager;
 import android.hardware.input.KeyboardLayout;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Process;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -77,12 +82,33 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
 
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
 
+    private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
+
     // Pointer to native input manager service object.
     private final int mPtr;
 
     private final Context mContext;
     private final Callbacks mCallbacks;
-    private final Handler mHandler;
+    private final InputManagerHandler mHandler;
+
+    // Used to simulate a persistent data store for keyboard layouts.
+    // TODO: Replace with the real thing.
+    private final HashMap<String, String> mFakeRegistry = new HashMap<String, String>();
+
+    // List of currently registered input devices changed listeners by process id.
+    private Object mInputDevicesLock = new Object();
+    private boolean mInputDevicesChangedPending; // guarded by mInputDevicesLock
+    private InputDevice[] mInputDevices = new InputDevice[0];
+    private final SparseArray<InputDevicesChangedListenerRecord> mInputDevicesChangedListeners =
+            new SparseArray<InputDevicesChangedListenerRecord>(); // guarded by mInputDevicesLock
+    private final ArrayList<InputDevicesChangedListenerRecord>
+            mTempInputDevicesChangedListenersToNotify =
+                    new ArrayList<InputDevicesChangedListenerRecord>(); // handler thread only
+
+    // State for the currently installed input filter.
+    final Object mInputFilterLock = new Object();
+    InputFilter mInputFilter; // guarded by mInputFilterLock
+    InputFilterHost mInputFilterHost; // guarded by mInputFilterLock
 
     private static native int nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
@@ -111,9 +137,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     private static native void nativeSetSystemUiVisibility(int ptr, int visibility);
     private static native void nativeSetFocusedApplication(int ptr,
             InputApplicationHandle application);
-    private static native InputDevice nativeGetInputDevice(int ptr, int deviceId);
     private static native void nativeGetInputConfiguration(int ptr, Configuration configuration);
-    private static native int[] nativeGetInputDeviceIds(int ptr);
     private static native boolean nativeTransferTouchFocus(int ptr,
             InputChannel fromChannel, InputChannel toChannel);
     private static native void nativeSetPointerSpeed(int ptr, int speed);
@@ -145,19 +169,10 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     /** The key is down but is a virtual key press that is being emulated by the system. */
     public static final int KEY_STATE_VIRTUAL = 2;
 
-    // Used to simulate a persistent data store for keyboard layouts.
-    // TODO: Replace with the real thing.
-    private final HashMap<String, String> mFakeRegistry = new HashMap<String, String>();
-
-    // State for the currently installed input filter.
-    final Object mInputFilterLock = new Object();
-    InputFilter mInputFilter;
-    InputFilterHost mInputFilterHost;
-
     public InputManagerService(Context context, Callbacks callbacks) {
         this.mContext = context;
         this.mCallbacks = callbacks;
-        this.mHandler = new Handler();
+        this.mHandler = new InputManagerHandler();
 
         Slog.i(TAG, "Initializing input manager");
         mPtr = nativeInit(this, mContext, mHandler.getLooper().getQueue());
@@ -396,16 +411,98 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
      */
     @Override // Binder call
     public InputDevice getInputDevice(int deviceId) {
-        return nativeGetInputDevice(mPtr, deviceId);
+        synchronized (mInputDevicesLock) {
+            final int count = mInputDevices.length;
+            for (int i = 0; i < count; i++) {
+                final InputDevice inputDevice = mInputDevices[i];
+                if (inputDevice.getId() == deviceId) {
+                    return inputDevice;
+                }
+            }
+        }
+        return null;
     }
-    
+
     /**
      * Gets the ids of all input devices in the system.
      * @return The input device ids.
      */
     @Override // Binder call
     public int[] getInputDeviceIds() {
-        return nativeGetInputDeviceIds(mPtr);
+        synchronized (mInputDevicesLock) {
+            final int count = mInputDevices.length;
+            int[] ids = new int[count];
+            for (int i = 0; i < count; i++) {
+                ids[i] = mInputDevices[i].getId();
+            }
+            return ids;
+        }
+    }
+
+    @Override // Binder call
+    public void registerInputDevicesChangedListener(IInputDevicesChangedListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+
+        synchronized (mInputDevicesLock) {
+            int callingPid = Binder.getCallingPid();
+            if (mInputDevicesChangedListeners.get(callingPid) != null) {
+                throw new SecurityException("The calling process has already "
+                        + "registered an InputDevicesChangedListener.");
+            }
+
+            InputDevicesChangedListenerRecord record =
+                    new InputDevicesChangedListenerRecord(callingPid, listener);
+            try {
+                IBinder binder = listener.asBinder();
+                binder.linkToDeath(record, 0);
+            } catch (RemoteException ex) {
+                // give up
+                throw new RuntimeException(ex);
+            }
+
+            mInputDevicesChangedListeners.put(callingPid, record);
+        }
+    }
+
+    private void onInputDevicesChangedListenerDied(int pid) {
+        synchronized (mInputDevicesLock) {
+            mInputDevicesChangedListeners.remove(pid);
+        }
+    }
+
+    // Must be called on handler.
+    private void deliverInputDevicesChanged() {
+        mTempInputDevicesChangedListenersToNotify.clear();
+
+        final int numListeners;
+        final int[] deviceIdAndGeneration;
+        synchronized (mInputDevicesLock) {
+            if (!mInputDevicesChangedPending) {
+                return;
+            }
+            mInputDevicesChangedPending = false;
+
+            numListeners = mInputDevicesChangedListeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                mTempInputDevicesChangedListenersToNotify.add(
+                        mInputDevicesChangedListeners.valueAt(i));
+            }
+
+            final int numDevices = mInputDevices.length;
+            deviceIdAndGeneration = new int[numDevices * 2];
+            for (int i = 0; i < numDevices; i++) {
+                final InputDevice inputDevice = mInputDevices[i];
+                deviceIdAndGeneration[i * 2] = inputDevice.getId();
+                deviceIdAndGeneration[i * 2 + 1] = inputDevice.getGeneration();
+            }
+        }
+
+        for (int i = 0; i < numListeners; i++) {
+            mTempInputDevicesChangedListenersToNotify.get(i).notifyInputDevicesChanged(
+                    deviceIdAndGeneration);
+        }
     }
 
     @Override // Binder call
@@ -741,6 +838,18 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     }
 
     // Native callback.
+    private void notifyInputDevicesChanged(InputDevice[] inputDevices) {
+        synchronized (mInputDevicesLock) {
+            mInputDevices = inputDevices;
+
+            if (!mInputDevicesChangedPending) {
+                mInputDevicesChangedPending = true;
+                mHandler.sendEmptyMessage(MSG_DELIVER_INPUT_DEVICES_CHANGED);
+            }
+        }
+    }
+
+    // Native callback.
     private void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
         mCallbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
     }
@@ -906,6 +1015,20 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     }
 
     /**
+     * Private handler for the input manager.
+     */
+    private final class InputManagerHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_DELIVER_INPUT_DEVICES_CHANGED:
+                    deliverInputDevicesChanged();
+                    break;
+            }
+        }
+    }
+
+    /**
      * Hosting interface for input filters to call back into the input manager.
      */
     private final class InputFilterHost implements InputFilter.Host {
@@ -955,6 +1078,34 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             result.receiverName = descriptor.substring(pos + 1, pos2);
             result.keyboardLayoutName = descriptor.substring(pos2 + 1);
             return result;
+        }
+    }
+
+    private final class InputDevicesChangedListenerRecord implements DeathRecipient {
+        private final int mPid;
+        private final IInputDevicesChangedListener mListener;
+
+        public InputDevicesChangedListenerRecord(int pid, IInputDevicesChangedListener listener) {
+            mPid = pid;
+            mListener = listener;
+        }
+
+        @Override
+        public void binderDied() {
+            if (DEBUG) {
+                Slog.d(TAG, "Input devices changed listener for pid " + mPid + " died.");
+            }
+            onInputDevicesChangedListenerDied(mPid);
+        }
+
+        public void notifyInputDevicesChanged(int[] info) {
+            try {
+                mListener.onInputDevicesChanged(info);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify process "
+                        + mPid + " that input devices changed, assuming it died.", ex);
+                binderDied();
+            }
         }
     }
 }
