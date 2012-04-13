@@ -100,7 +100,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     private int mDisabledNotifications;
 
     private NotificationRecord mVibrateNotification;
-    private Vibrator mVibrator = new Vibrator();
+    private Vibrator mVibrator;
 
     // for enabling and disabling notification pulse behavior
     private boolean mScreenOn = true;
@@ -398,6 +398,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     {
         super();
         mContext = context;
+        mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mAm = ActivityManagerNative.getDefault();
         mSound = new NotificationPlayer(TAG);
         mSound.setUsesWakeLock(context);

@@ -263,7 +263,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 
         mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
-        mVibrator = new Vibrator();
+        mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
 
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
         mShowCombinedVolumes = !mVoiceCapable && !useMasterVolume;

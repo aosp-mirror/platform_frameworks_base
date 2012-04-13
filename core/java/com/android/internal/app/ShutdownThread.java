@@ -37,6 +37,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Vibrator;
+import android.os.SystemVibrator;
 import android.os.storage.IMountService;
 import android.os.storage.IMountShutdownObserver;
 
@@ -399,7 +400,7 @@ public final class ShutdownThread extends Thread {
             }
         } else if (SHUTDOWN_VIBRATE_MS > 0) {
             // vibrate before shutting down
-            Vibrator vibrator = new Vibrator();
+            Vibrator vibrator = new SystemVibrator();
             try {
                 vibrator.vibrate(SHUTDOWN_VIBRATE_MS);
             } catch (Exception e) {
