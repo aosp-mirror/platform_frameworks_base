@@ -352,7 +352,7 @@ public class Paint {
         // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
         //        ? HINTING_OFF : HINTING_ON);
         mCompatScaling = mInvCompatScaling = 1;
-        mLocale = Locale.getDefault();
+        setTextLocale(Locale.getDefault());
     }
 
     /**
@@ -365,7 +365,6 @@ public class Paint {
     public Paint(Paint paint) {
         mNativePaint = native_initWithPaint(paint.mNativePaint);
         setClassVariablesFrom(paint);
-        mLocale = paint.mLocale;
     }
 
     /** Restores the paint to its default settings. */
@@ -379,7 +378,7 @@ public class Paint {
         mHasCompatScaling = false;
         mCompatScaling = mInvCompatScaling = 1;
         mBidiFlags = BIDI_DEFAULT_LTR;
-        mLocale = Locale.getDefault();
+        setTextLocale(Locale.getDefault());
     }
     
     /**
@@ -1064,12 +1063,26 @@ public class Paint {
     /**
      * Set the text locale.
      *
-     * This controls how the text will be drawn. Providing the ROOT Locale (default case)
-     * means that the text will be drawn with the font corresponding to its script.
+     * The text locale affects how the text is drawn for some languages.
      *
-     * Using the CHINESE or CHINA Locale means that the text will be drawn with a Chinese font.
-     * Using the JAPANESE or JAPAN Locale means that the text will be drawn with a Japanese font.
-     * Using the KOREAN or KOREA Locale means that the text will be drawn with a Korean font.
+     * For example, if the locale is {@link Locale#CHINESE} or {@link Locale#CHINA},
+     * then the text renderer will prefer to draw text using a Chinese font. Likewise,
+     * if the locale is {@link Locale#JAPANESE} or {@link Locale#JAPAN}, then the text
+     * renderer will prefer to draw text using a Japanese font.
+     *
+     * This distinction is important because Chinese and Japanese text both use many
+     * of the same Unicode code points but their appearance is subtly different for
+     * each language.
+     *
+     * By default, the text locale is initialized to the system locale (as returned
+     * by {@link Locale#getDefault}). This assumes that the text to be rendered will
+     * most likely be in the user's preferred language.
+     *
+     * If the actual language of the text is known, then it can be provided to the
+     * text renderer using this method. The text renderer may attempt to guess the
+     * language script based on the contents of the text to be drawn independent of
+     * the text locale here. Specifying the text locale just helps it do a better
+     * job in certain ambiguous cases
      *
      * @param locale the paint's locale value for drawing text, must not be null.
      */
