@@ -7452,7 +7452,7 @@ public final class ContactsContract {
     /**
      * <p>
      * API allowing applications to send usage information for each {@link Data} row to the
-     * Contacts Provider.
+     * Contacts Provider.  Applications can also clear all usage information.
      * </p>
      * <p>
      * With the feedback, Contacts Provider may return more contextually appropriate results for
@@ -7495,6 +7495,12 @@ public final class ContactsContract {
      *                 DataUsageFeedback.USAGE_TYPE_CALL)
      *         .build();
      * boolean successful = resolver.update(uri, new ContentValues(), null, null) > 0;
+     * </pre>
+     * </p>
+     * <p>
+     * Applications can also clear all usage information with:
+     * <pre>
+     * boolean successful = resolver.delete(DataUsageFeedback.FEEDBACK_URI, null, null) > 0;
      * </pre>
      * </p>
      */
