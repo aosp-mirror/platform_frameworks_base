@@ -950,11 +950,10 @@ public class Camera {
     /**
      * Callback interface used to notify on auto focus start and stop.
      *
-     * <p>This is useful for continuous autofocus -- {@link Parameters#FOCUS_MODE_CONTINUOUS_VIDEO}
-     * and {@link Parameters#FOCUS_MODE_CONTINUOUS_PICTURE}. Applications can
-     * show autofocus animation.</p>
-     *
-     * @hide
+     * <p>This is only supported in continuous autofocus modes -- {@link
+     * Parameters#FOCUS_MODE_CONTINUOUS_VIDEO} and {@link
+     * Parameters#FOCUS_MODE_CONTINUOUS_PICTURE}. Applications can show
+     * autofocus animation based on this.</p>
      */
     public interface AutoFocusMoveCallback
     {
@@ -962,7 +961,7 @@ public class Camera {
          * Called when the camera auto focus starts or stops.
          *
          * @param start true if focus starts to move, false if focus stops to move
-         * @param camera  the Camera service object
+         * @param camera the Camera service object
          */
         void onAutoFocusMoving(boolean start, Camera camera);
     }
@@ -971,7 +970,6 @@ public class Camera {
      * Sets camera auto-focus move callback.
      *
      * @param cb the callback to run
-     * @hide
      */
     public void setAutoFocusMoveCallback(AutoFocusMoveCallback cb) {
         mAutoFocusMoveCallback = cb;

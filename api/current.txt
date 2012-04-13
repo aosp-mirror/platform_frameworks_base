@@ -9453,6 +9453,7 @@ package android.hardware {
     method public static android.hardware.Camera open();
     method public final void reconnect() throws java.io.IOException;
     method public final void release();
+    method public void setAutoFocusMoveCallback(android.hardware.Camera.AutoFocusMoveCallback);
     method public final void setDisplayOrientation(int);
     method public final void setErrorCallback(android.hardware.Camera.ErrorCallback);
     method public final void setFaceDetectionListener(android.hardware.Camera.FaceDetectionListener);
@@ -9486,6 +9487,10 @@ package android.hardware {
 
   public static abstract interface Camera.AutoFocusCallback {
     method public abstract void onAutoFocus(boolean, android.hardware.Camera);
+  }
+
+  public static abstract interface Camera.AutoFocusMoveCallback {
+    method public abstract void onAutoFocusMoving(boolean, android.hardware.Camera);
   }
 
   public static class Camera.CameraInfo {
