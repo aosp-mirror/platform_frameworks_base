@@ -1619,18 +1619,22 @@ public class MediaPlayer
     // FIXME: define error codes and throws exceptions according to the error codes.
     // (IllegalStateException, IOException).
     public void addExternalSource(String path, String mimeType)
-            throws IllegalArgumentException {
+            throws IOException, IllegalArgumentException {
         if (!availableMimeTypeForExternalSource(mimeType)) {
-            throw new IllegalArgumentException("Illegal mimeType for external source: " + mimeType);
+            final String msg = "Illegal mimeType for external source: " + mimeType;
+            throw new IllegalArgumentException(msg);
         }
 
-        Parcel request = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        request.writeInterfaceToken(IMEDIA_PLAYER);
-        request.writeInt(INVOKE_ID_ADD_EXTERNAL_SOURCE);
-        request.writeString(path);
-        request.writeString(mimeType);
-        invoke(request, reply);
+        File file = new File(path);
+        if (file.exists()) {
+            FileInputStream is = new FileInputStream(file);
+            FileDescriptor fd = is.getFD();
+            addExternalSource(fd, mimeType);
+            is.close();
+        } else {
+            // We do not support the case where the path is not a file.
+            throw new IOException(path);
+        }
     }
 
     /**
@@ -1671,8 +1675,6 @@ public class MediaPlayer
                 fd.close();
             }
         }
-
-        // TODO: try server side.
     }
 
     /* Do not change these values without updating their counterparts
@@ -1732,6 +1734,7 @@ public class MediaPlayer
         if (!availableMimeTypeForExternalSource(mimeType)) {
             throw new IllegalArgumentException("Illegal mimeType for external source: " + mimeType);
         }
+
         Parcel request = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         request.writeInterfaceToken(IMEDIA_PLAYER);
