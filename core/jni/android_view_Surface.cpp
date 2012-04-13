@@ -198,7 +198,7 @@ sp<Surface> Surface_getSurface(JNIEnv* env, jobject clazz) {
     return surface;
 }
 
-static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
+void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
 {
     Surface* const p = (Surface*)env->GetIntField(clazz, so.surface);
     if (surface.get()) {
