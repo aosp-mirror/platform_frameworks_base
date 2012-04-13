@@ -1193,14 +1193,6 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Lagere waarde voor dag"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Hogere waarde voor jaar"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Lagere waarde voor jaar"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"aangevinkt"</string>
-    <string name="checkbox_not_checked" msgid="5174639551134444056">"niet aangevinkt"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"geselecteerd"</string>
-    <string name="radiobutton_not_selected" msgid="2908760184307722393">"niet geselecteerd"</string>
-    <string name="switch_on" msgid="551417728476977311">"aan"</string>
-    <string name="switch_off" msgid="7249798614327155088">"uit"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"ingedrukt"</string>
-    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"niet ingedrukt"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Annuleren"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
