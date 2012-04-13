@@ -88,7 +88,9 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     }
 
     // Shows the FaceLock area for a period of time
+    // Called on the UI thread
     public void show(long timeoutMillis) {
+        removeAreaDisplayMessages();
         showArea();
         if (timeoutMillis > 0)
             mHandler.sendEmptyMessageDelayed(MSG_HIDE_AREA_VIEW, timeoutMillis);
@@ -134,6 +136,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     /**
      * When screen is turned on and focused, need to bind to FaceLock service if we are using
      * FaceLock, but only if we're not dealing with a call
+     * Called on the UI thread
      */
     public boolean start(boolean suppressBiometricUnlock) {
         final boolean tooManyFaceUnlockTries = mUpdateMonitor.getMaxFaceUnlockAttemptsReached();
@@ -146,11 +149,12 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
                 && !suppressBiometricUnlock
                 && !tooManyFaceUnlockTries
                 && !backupIsTimedOut) {
-            bind();
-
             // Show FaceLock area, but only for a little bit so lockpattern will become visible if
             // FaceLock fails to start or crashes
+            // This must show before bind to guarantee that Face Unlock has a place to display
             show(VIEW_AREA_SERVICE_TIMEOUT);
+
+            bind();
 
             // When switching between portrait and landscape view while FaceLock is running, the
             // screen will eventually go dark unless we poke the wakelock when FaceLock is
@@ -170,6 +174,8 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
             mAreaView = topView.findViewById(R.id.faceLockAreaView);
             if (mAreaView == null) {
                 Log.e(TAG, "Layout does not have areaView and FaceLock is enabled");
+            } else {
+                show(0);
             }
         } else {
             mAreaView = null; // Set to null if not using FaceLock
@@ -192,6 +198,14 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         return DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
     }
 
+    // Shows the FaceLock area
+    // Called on the UI thread
+    private void showArea() {
+        if (mAreaView != null) {
+            mAreaView.setVisibility(View.VISIBLE);
+        }
+    }
+
     // Handles covering or exposing FaceLock area on the client side when FaceLock starts or stops
     // This needs to be done in a handler because the call could be coming from a callback from the
     // FaceLock service that is in a thread that can't modify the UI
@@ -199,9 +213,7 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
         case MSG_SHOW_AREA_VIEW:
-            if (mAreaView != null) {
-                mAreaView.setVisibility(View.VISIBLE);
-            }
+            showArea();
             break;
         case MSG_HIDE_AREA_VIEW:
             if (mAreaView != null) {
@@ -219,13 +231,6 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
     private void removeAreaDisplayMessages() {
         mHandler.removeMessages(MSG_SHOW_AREA_VIEW);
         mHandler.removeMessages(MSG_HIDE_AREA_VIEW);
-    }
-
-    // Shows the FaceLock area immediately
-    private void showArea() {
-        // Remove messages to prevent a delayed hide message from undo-ing the show
-        removeAreaDisplayMessages();
-        mHandler.sendEmptyMessage(MSG_SHOW_AREA_VIEW);
     }
 
     // Binds to FaceLock service.  This call does not tell it to start, but it causes the service
@@ -329,7 +334,11 @@ public class FaceUnlock implements BiometricSensorUnlock, Handler.Callback {
         @Override
         public void unlock() {
             if (DEBUG) Log.d(TAG, "FaceLock unlock()");
-            showArea(); // Keep fallback covered
+
+            // Keep fallback covered
+            removeAreaDisplayMessages();
+            mHandler.sendEmptyMessage(MSG_SHOW_AREA_VIEW);
+
             stop();
 
             mKeyguardScreenCallback.keyguardDone(true);

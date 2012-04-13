@@ -613,13 +613,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             ((KeyguardScreen) mUnlockScreen).onResume();
         }
 
-        if (mBiometricUnlock.installedAndSelected() && !mSupressBiometricUnlock) {
-            // Note that show() gets called before the screen turns off to set it up for next time
-            // it is turned on.  We don't want to set a timeout on the biometric unlock here because
-            // it may be gone by the time the screen is turned on again.  We set the timeout when
-            // the screen turns on instead.
-            mBiometricUnlock.show(0);
-        } else {
+        if (!mBiometricUnlock.installedAndSelected() || mSupressBiometricUnlock) {
             mBiometricUnlock.hide();
         }
     }
