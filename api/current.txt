@@ -16839,7 +16839,7 @@ package android.provider {
     method public static android.net.Uri getLookupUri(android.content.ContentResolver, android.net.Uri);
     method public static android.net.Uri getLookupUri(long, java.lang.String);
     method public static android.net.Uri lookupContact(android.content.ContentResolver, android.net.Uri);
-    method public static void markAsContacted(android.content.ContentResolver, long);
+    method public static deprecated void markAsContacted(android.content.ContentResolver, long);
     method public static java.io.InputStream openContactPhotoInputStream(android.content.ContentResolver, android.net.Uri, boolean);
     method public static java.io.InputStream openContactPhotoInputStream(android.content.ContentResolver, android.net.Uri);
     field public static final android.net.Uri CONTENT_FILTER_URI;

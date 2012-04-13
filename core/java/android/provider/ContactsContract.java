@@ -1536,7 +1536,11 @@ public final class ContactsContract {
          *
          * @param resolver the ContentResolver to use
          * @param contactId the person who was contacted
+         *
+         * @deprecated The class DataUsageStatUpdater of the Android support library should
+         *     be used instead.
          */
+        @Deprecated
         public static void markAsContacted(ContentResolver resolver, long contactId) {
             Uri uri = ContentUris.withAppendedId(CONTENT_URI, contactId);
             ContentValues values = new ContentValues();
