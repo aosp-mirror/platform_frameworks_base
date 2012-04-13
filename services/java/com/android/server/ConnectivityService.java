@@ -875,6 +875,19 @@ private NetworkStateTracker makeWimaxStateTracker() {
         return null;
     }
 
+    @Override
+    public boolean isActiveNetworkMetered() {
+        enforceAccessPermission();
+        final NetworkState state = getNetworkStateUnchecked(mActiveDefaultNetwork);
+        if (state != null) {
+            try {
+                return mPolicyManager.isNetworkMetered(state);
+            } catch (RemoteException e) {
+            }
+        }
+        return false;
+    }
+
     public boolean setRadios(boolean turnOn) {
         boolean result = true;
         enforceChangePermission();

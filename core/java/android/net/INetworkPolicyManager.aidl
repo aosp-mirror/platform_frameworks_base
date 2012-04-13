@@ -50,5 +50,6 @@ interface INetworkPolicyManager {
     boolean getRestrictBackground();
 
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
+    boolean isNetworkMetered(in NetworkState state);
 
 }

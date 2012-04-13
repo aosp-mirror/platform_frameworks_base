@@ -51,6 +51,7 @@ interface IConnectivityManager
     NetworkState[] getAllNetworkState();
 
     NetworkQuotaInfo getActiveNetworkQuotaInfo();
+    boolean isActiveNetworkMetered();
 
     boolean setRadios(boolean onOff);
 

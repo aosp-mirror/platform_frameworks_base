@@ -1373,6 +1373,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
+    public boolean isNetworkMetered(NetworkState state) {
+        final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
+
+        final NetworkPolicy policy;
+        synchronized (mRulesLock) {
+            policy = findPolicyForNetworkLocked(ident);
+        }
+
+        if (policy != null) {
+            return policy.metered;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(DUMP, TAG);
 
@@ -1794,11 +1810,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // @VisibleForTesting
     public void addIdleHandler(IdleHandler handler) {
         mHandler.getLooper().getQueue().addIdleHandler(handler);
-    }
-
-    public static boolean isAirplaneModeOn(Context context) {
-        return Settings.System.getInt(
-                context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
     }
 
     private static void collectKeys(SparseIntArray source, SparseBooleanArray target) {
