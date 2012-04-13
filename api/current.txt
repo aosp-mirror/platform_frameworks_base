@@ -16944,6 +16944,7 @@ package android.provider {
 
   public static final class ContactsContract.DataUsageFeedback {
     ctor public ContactsContract.DataUsageFeedback();
+    field public static final android.net.Uri DELETE_USAGE_URI;
     field public static final android.net.Uri FEEDBACK_URI;
     field public static final java.lang.String USAGE_TYPE = "type";
     field public static final java.lang.String USAGE_TYPE_CALL = "call";
