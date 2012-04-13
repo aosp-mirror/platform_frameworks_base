@@ -294,7 +294,8 @@ void DeblockMb(AVCCommonObj *video, int mb_x, int mb_y, uint8 *SrcY, uint8 *SrcU
     int     filterLeftMbEdgeFlag = (mb_x != 0);
     int     filterTopMbEdgeFlag  = (mb_y != 0);
     int     pitch = video->currPic->pitch;
-    int     indexA, indexB, tmp;
+    int     indexA, indexB;
+    int     *tmp;
     int     Alpha, Beta, Alpha_c, Beta_c;
     int     mbNum = mb_y * video->PicWidthInMbs + mb_x;
     int     *clipTable, *clipTable_c, *qp_clip_tab;
@@ -386,7 +387,7 @@ void DeblockMb(AVCCommonObj *video, int mb_x, int mb_y, uint8 *SrcY, uint8 *SrcU
     /* Save Alpha,  Beta and clipTable for future use, with the obselete variables filterLeftMbEdgeFlag, mbNum amd tmp */
     filterLeftMbEdgeFlag = Alpha;
     mbNum = Beta;
-    tmp = (int)clipTable;
+    tmp = clipTable;
 
     indexA = MbQ->QPc + video->FilterOffsetA;
     indexB = MbQ->QPc + video->FilterOffsetB;
@@ -486,7 +487,7 @@ void DeblockMb(AVCCommonObj *video, int mb_x, int mb_y, uint8 *SrcY, uint8 *SrcU
     /* Note that Alpha_c, Beta_c and clipTable_c for chroma is already calculated */
     Alpha = filterLeftMbEdgeFlag;
     Beta = mbNum;
-    clipTable = (int *)tmp;
+    clipTable = tmp;
 
     GetStrength_HorizontalEdges(Strength + 4, MbQ); // Strength for 4 blks in 1 stripe, 0 => vertical edge
 
