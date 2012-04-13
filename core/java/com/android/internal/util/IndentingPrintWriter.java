@@ -46,6 +46,10 @@ public class IndentingPrintWriter extends PrintWriter {
         mCurrent = mBuilder.toString();
     }
 
+    public void printPair(String key, Object value) {
+        print(key + "=" + String.valueOf(value) + " ");
+    }
+
     @Override
     public void println() {
         super.println();
