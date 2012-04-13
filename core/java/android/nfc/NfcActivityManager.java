@@ -108,8 +108,8 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
         NdefMessage ndefMessage = null;  // static NDEF message
         NfcAdapter.CreateNdefMessageCallback ndefMessageCallback = null;
         NfcAdapter.OnNdefPushCompleteCallback onNdefPushCompleteCallback = null;
-        Uri uri = null;
-        String mimeType = null;
+        NfcAdapter.CreateBeamUrisCallback uriCallback = null;
+        Uri[] uris = null;
         public NfcActivityState(Activity activity) {
             if (activity.getWindow().isDestroyed()) {
                 throw new IllegalStateException("activity is already destroyed");
@@ -128,14 +128,19 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             ndefMessage = null;
             ndefMessageCallback = null;
             onNdefPushCompleteCallback = null;
-            uri = null;
-            mimeType = null;
+            uriCallback = null;
+            uris = null;
         }
         @Override
         public String toString() {
             StringBuilder s = new StringBuilder("[").append(" ");
             s.append(ndefMessage).append(" ").append(ndefMessageCallback).append(" ");
-            s.append(onNdefPushCompleteCallback).append(" ").append(uri).append("]");
+            s.append(uriCallback).append(" ");
+            if (uris != null) {
+                for (Uri uri : uris) {
+                    s.append(onNdefPushCompleteCallback).append(" ").append(uri).append("]");
+                }
+            }
             return s.toString();
         }
     }
@@ -184,12 +189,25 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
         mDefaultEvent = new NfcEvent(mAdapter);
     }
 
-    public void setNdefPushContentUri(Activity activity, String mimeType, Uri uri) {
+    public void setNdefPushContentUri(Activity activity, Uri[] uris) {
         boolean isResumed;
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = getActivityState(activity);
-            state.uri = uri;
-            state.mimeType = mimeType;
+            state.uris = uris;
+            isResumed = state.resumed;
+        }
+        if (isResumed) {
+            requestNfcServiceCallback(true);
+        }
+    }
+
+
+    public void setNdefPushContentUriCallback(Activity activity,
+            NfcAdapter.CreateBeamUrisCallback callback) {
+        boolean isResumed;
+        synchronized (NfcActivityManager.this) {
+            NfcActivityState state = getActivityState(activity);
+            state.uriCallback = callback;
             isResumed = state.resumed;
         }
         if (isResumed) {
@@ -271,24 +289,22 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
 
     /** Callback from NFC service, usually on binder thread */
     @Override
-    public Uri getUri() {
+    public Uri[] getUris() {
+        Uri[] uris;
+        NfcAdapter.CreateBeamUrisCallback callback;
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = findResumedActivityState();
             if (state == null) return null;
-
-            return state.uri;
+            uris = state.uris;
+            callback = state.uriCallback;
+        }
+        if (callback != null) {
+            return callback.createBeamUris(mDefaultEvent);
+        } else {
+            return uris;
         }
     }
-    /** Callback from NFC service, usually on binder thread */
-    @Override
-    public String getMimeType() {
-        synchronized (NfcActivityManager.this) {
-            NfcActivityState state = findResumedActivityState();
-            if (state == null) return null;
 
-            return state.mimeType;
-        }
-    }
     /** Callback from NFC service, usually on binder thread */
     @Override
     public void onNdefPushComplete() {
@@ -358,4 +374,5 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             }
         }
     }
+
 }

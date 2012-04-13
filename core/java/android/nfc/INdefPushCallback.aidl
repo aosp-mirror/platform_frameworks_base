@@ -25,7 +25,6 @@ import android.net.Uri;
 interface INdefPushCallback
 {
     NdefMessage createMessage();
-    Uri getUri();
-    String getMimeType();
+    Uri[] getUris();
     void onNdefPushComplete();
 }
