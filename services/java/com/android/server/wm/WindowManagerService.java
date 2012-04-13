@@ -512,7 +512,8 @@ public class WindowManagerService extends IWindowManager.Stub
     int mNextAppTransitionType = ActivityOptions.ANIM_NONE;
     String mNextAppTransitionPackage;
     Bitmap mNextAppTransitionThumbnail;
-    boolean mNextAppTransitionDelayed;
+    // Used for thumbnail transitions. True if we're scaling up, false if scaling down
+    boolean mNextAppTransitionScaleUp;
     IRemoteCallback mNextAppTransitionCallback;
     int mNextAppTransitionEnter;
     int mNextAppTransitionExit;
@@ -3224,7 +3225,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private Animation createThumbnailAnimationLocked(int transit,
-            boolean enter, boolean thumb, boolean delayed) {
+            boolean enter, boolean thumb, boolean scaleUp) {
         Animation a;
         final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -3234,7 +3235,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // it  is the standard duration for that.  Otherwise we use the longer
         // task transition duration.
         int duration;
-        int delayDuration = delayed ? 270 : 0;
         switch (transit) {
             case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
             case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
@@ -3242,7 +3242,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         com.android.internal.R.integer.config_shortAnimTime);
                 break;
             default:
-                duration = delayed ? 250 : 300;
+                duration = 250;
                 break;
         }
         // TOOD(multidisplay): For now assume all app animation is on the main screen.
@@ -3250,48 +3250,86 @@ public class WindowManagerService extends IWindowManager.Stub
         if (thumb) {
             // Animation for zooming thumbnail from its initial size to
             // filling the screen.
-            float scaleW = displayInfo.appWidth/thumbWidth;
-            float scaleH = displayInfo.appHeight/thumbHeight;
+            if (scaleUp) {
+                float scaleW = displayInfo.appWidth / thumbWidth;
+                float scaleH = displayInfo.appHeight / thumbHeight;
 
-            Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
-                    computePivot(mNextAppTransitionStartX, 1/scaleW),
-                    computePivot(mNextAppTransitionStartY, 1/scaleH));
-            AnimationSet set = new AnimationSet(true);
-            Animation alpha = new AlphaAnimation(1, 0);
-            scale.setDuration(duration);
-            scale.setInterpolator(
-                    new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-            set.addAnimation(scale);
-            alpha.setDuration(duration);
-            set.addAnimation(alpha);
-            set.setFillBefore(true);
-            if (delayDuration > 0) {
-                set.setStartOffset(delayDuration);
+                Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
+                        computePivot(mNextAppTransitionStartX, 1 / scaleW),
+                        computePivot(mNextAppTransitionStartY, 1 / scaleH));
+                AnimationSet set = new AnimationSet(true);
+                Animation alpha = new AlphaAnimation(1, 0);
+                scale.setDuration(duration);
+                scale.setInterpolator(
+                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
+                set.addAnimation(scale);
+                alpha.setDuration(duration);
+                set.addAnimation(alpha);
+                set.setFillBefore(true);
+                a = set;
+            } else {
+                float scaleW = displayInfo.appWidth / thumbWidth;
+                float scaleH = displayInfo.appHeight / thumbHeight;
+
+                Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
+                        computePivot(mNextAppTransitionStartX, 1 / scaleW),
+                        computePivot(mNextAppTransitionStartY, 1 / scaleH));
+                AnimationSet set = new AnimationSet(true);
+                Animation alpha = new AlphaAnimation(1, 1);
+                scale.setDuration(duration);
+                scale.setInterpolator(
+                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
+                set.addAnimation(scale);
+                alpha.setDuration(duration);
+                set.addAnimation(alpha);
+                set.setFillBefore(true);
+
+                a = set;
             }
-            a = set;
         } else if (enter) {
             // Entering app zooms out from the center of the thumbnail.
-            float scaleW = thumbWidth / displayInfo.appWidth;
-            float scaleH = thumbHeight / displayInfo.appHeight;
-            Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
-                    computePivot(mNextAppTransitionStartX, scaleW),
-                    computePivot(mNextAppTransitionStartY, scaleH));
-            scale.setDuration(duration);
-            scale.setInterpolator(
-                    new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
-            scale.setFillBefore(true);
-            if (delayDuration > 0) {
-                scale.setStartOffset(delayDuration);
-            }
-            a = scale;
-        } else {
-            if (delayed) {
-                a = new AlphaAnimation(1, 0);
-                a.setStartOffset(0);
-                a.setDuration(delayDuration - 120);
-                a.setBackgroundColor(0xFF000000);
+            if (scaleUp) {
+                float scaleW = thumbWidth / displayInfo.appWidth;
+                float scaleH = thumbHeight / displayInfo.appHeight;
+                Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
+                        computePivot(mNextAppTransitionStartX, scaleW),
+                        computePivot(mNextAppTransitionStartY, scaleH));
+                scale.setDuration(duration);
+                scale.setInterpolator(
+                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
+                scale.setFillBefore(true);
+                a = scale;
             } else {
-                a = createExitAnimationLocked(transit, duration);
+                // noop animation
+                a = new AlphaAnimation(1, 1);
+                a.setDuration(duration);
+            }
+        } else {
+            // Exiting app
+            if (scaleUp) {
+                // noop animation
+                a = new AlphaAnimation(1, 1);
+                a.setDuration(duration);
+            } else {
+                float scaleW = thumbWidth / displayInfo.appWidth;
+                float scaleH = thumbHeight / displayInfo.appHeight;
+                Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
+                        computePivot(mNextAppTransitionStartX, scaleW),
+                        computePivot(mNextAppTransitionStartY, scaleH));
+                scale.setDuration(duration);
+                scale.setInterpolator(
+                        new DecelerateInterpolator(THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
+                scale.setFillBefore(true);
+                AnimationSet set = new AnimationSet(true);
+                Animation alpha = new AlphaAnimation(1, 0);
+                set.addAnimation(scale);
+                alpha.setDuration(duration);
+                alpha.setInterpolator(new DecelerateInterpolator(
+                        THUMBNAIL_ANIMATION_DECELERATE_FACTOR));
+                set.addAnimation(alpha);
+                set.setFillBefore(true);
+                set.setZAdjustment(Animation.ZORDER_TOP);
+                a = set;
             }
         }
         a.setFillAfter(true);
@@ -3326,14 +3364,14 @@ public class WindowManagerService extends IWindowManager.Stub
                         "applyAnimation: wtoken=" + wtoken
                         + " anim=" + a + " nextAppTransition=ANIM_SCALE_UP"
                         + " transit=" + transit + " Callers " + Debug.getCallers(3));
-            } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL ||
-                    mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_DELAYED) {
-                boolean delayed = (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_DELAYED);
-                a = createThumbnailAnimationLocked(transit, enter, false, delayed);
+            } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP ||
+                    mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN) {
+                boolean scaleUp = (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL_SCALE_UP);
+                a = createThumbnailAnimationLocked(transit, enter, false, scaleUp);
                 initialized = true;
 
                 if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                    String animName = delayed ? "ANIM_THUMBNAIL_DELAYED" : "ANIM_THUMBNAIL";
+                    String animName = scaleUp ? "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN";
                     Slog.v(TAG, "applyAnimation: wtoken=" + wtoken
                             + " anim=" + a + " nextAppTransition=" + animName
                             + " transit=" + transit + " Callers " + Debug.getCallers(3));
@@ -4008,14 +4046,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
-            int startY, IRemoteCallback startedCallback, boolean delayed) {
+            int startY, IRemoteCallback startedCallback, boolean scaleUp) {
         synchronized(mWindowMap) {
             if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
-                mNextAppTransitionType = delayed
-                        ? ActivityOptions.ANIM_THUMBNAIL_DELAYED : ActivityOptions.ANIM_THUMBNAIL;
+                mNextAppTransitionType = scaleUp
+                        ? ActivityOptions.ANIM_THUMBNAIL_SCALE_UP : ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
                 mNextAppTransitionPackage = null;
                 mNextAppTransitionThumbnail = srcThumb;
-                mNextAppTransitionDelayed = delayed;
+                mNextAppTransitionScaleUp = scaleUp;
                 mNextAppTransitionStartX = startX;
                 mNextAppTransitionStartY = startY;
                 scheduleAnimationCallback(mNextAppTransitionCallback);
@@ -8387,7 +8425,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     drawSurface.release();
                     topOpeningApp.mAppAnimator.thumbnailLayer = topOpeningLayer;
                     Animation anim = createThumbnailAnimationLocked(
-                            transit, true, true, mNextAppTransitionDelayed);
+                            transit, true, true, mNextAppTransitionScaleUp);
                     topOpeningApp.mAppAnimator.thumbnailAnimation = anim;
                     anim.restrictDuration(MAX_ANIMATION_DURATION);
                     anim.scaleCurrentDuration(mTransitionAnimationScale);
@@ -10158,15 +10196,15 @@ public class WindowManagerService extends IWindowManager.Stub
                             pw.print(" mNextAppTransitionStartHeight=");
                             pw.println(mNextAppTransitionStartHeight);
                     break;
-                case ActivityOptions.ANIM_THUMBNAIL:
-                case ActivityOptions.ANIM_THUMBNAIL_DELAYED:
+                case ActivityOptions.ANIM_THUMBNAIL_SCALE_UP:
+                case ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN:
                     pw.print("  mNextAppTransitionThumbnail=");
                             pw.print(mNextAppTransitionThumbnail);
                             pw.print(" mNextAppTransitionStartX=");
                             pw.print(mNextAppTransitionStartX);
                             pw.print(" mNextAppTransitionStartY=");
                             pw.println(mNextAppTransitionStartY);
-                    pw.print("  mNextAppTransitionDelayed="); pw.println(mNextAppTransitionDelayed);
+                    pw.print("  mNextAppTransitionScaleUp="); pw.println(mNextAppTransitionScaleUp);
                     break;
             }
             if (mNextAppTransitionCallback != null) {
