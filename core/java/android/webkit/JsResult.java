@@ -16,23 +16,27 @@
 
 package android.webkit;
 
-
+/**
+ * An instance of this class is passed as a parameter in various {@link WebChromeClient} action
+ * notifications. The object is used as a handle onto the underlying JavaScript-originated request,
+ * and provides a means for the client to indicate whether this action should proceed.
+ */
 public class JsResult {
-    // This prevents a user from interacting with the result before WebCore is
-    // ready to handle it.
-    private boolean mReady;
-    // Tells us if the user tried to confirm or cancel the result before WebCore
-    // is ready.
-    private boolean mTriedToNotifyBeforeReady;
     // This is a basic result of a confirm or prompt dialog.
     protected boolean mResult;
     /**
-     *  This is the caller of the prompt and is the object that is waiting.
-     *  @hide
+     * Callback interface, implemented by the WebViewProvider implementation to receive
+     * notifications when the JavaScript result represented by a JsResult instance has
+     * @hide Only for use by WebViewProvider implementations
      */
-    protected final CallbackProxy mProxy;
-    // This is the default value of the result.
-    private final boolean mDefaultValue;
+    public interface ResultReceiver {
+        public void onJsResultComplete(JsResult result);
+    }
+    /**
+     * This is the caller of the prompt and is the object that is waiting.
+     * @hide
+     */
+    protected final ResultReceiver mReceiver;
 
     /**
      * Handle the result if the user cancelled the dialog.
@@ -50,36 +54,22 @@ public class JsResult {
         wakeUp();
     }
 
-    /*package*/ JsResult(CallbackProxy proxy, boolean defaultVal) {
-        mProxy = proxy;
-        mDefaultValue = defaultVal;
+    /**
+     * @hide Only for use by WebViewProvider implementations
+     */
+    public JsResult(ResultReceiver receiver) {
+        mReceiver = receiver;
     }
 
-    /*package*/ final boolean getResult() {
+    /**
+     * @hide Only for use by WebViewProvider implementations
+     */
+    public final boolean getResult() {
         return mResult;
     }
 
-    /*package*/ final void setReady() {
-        mReady = true;
-        if (mTriedToNotifyBeforeReady) {
-            wakeUp();
-        }
-    }
-
-    /*package*/ void handleDefault() {
-        setReady();
-        mResult = mDefaultValue;
-        wakeUp();
-    }
-
-    /* Wake up the WebCore thread. */
+    /* Notify the caller that the JsResult has completed */
     protected final void wakeUp() {
-        if (mReady) {
-            synchronized (mProxy) {
-                mProxy.notify();
-            }
-        } else {
-            mTriedToNotifyBeforeReady = true;
-        }
+        mReceiver.onJsResultComplete(this);
     }
 }
