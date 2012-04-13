@@ -697,6 +697,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mSleeping = false;
 
     /**
+     * State of external calls telling us if the device is asleep.
+     */
+    boolean mWentToSleep = false;
+
+    /**
+     * State of external call telling us if the lock screen is shown.
+     */
+    boolean mLockScreenShown = false;
+
+    /**
      * Set if we are shutting down the system, similar to sleeping.
      */
     boolean mShuttingDown = false;
@@ -6656,17 +6666,26 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void goingToSleep() {
+        if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.DEVICE_POWER);
+        }
+
         synchronized(this) {
-            mSleeping = true;
+            mWentToSleep = true;
             mWindowManager.setEventDispatching(false);
 
-            mMainStack.stopIfSleepingLocked();
+            if (!mSleeping) {
+                mSleeping = true;
+                mMainStack.stopIfSleepingLocked();
 
-            // Initialize the wake times of all processes.
-            checkExcessivePowerUsageLocked(false);
-            mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-            Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-            mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
+                // Initialize the wake times of all processes.
+                checkExcessivePowerUsageLocked(false);
+                mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+                Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+                mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
+            }
         }
     }
 
@@ -6726,12 +6745,40 @@ public final class ActivityManagerService extends ActivityManagerNative
         Binder.restoreCallingIdentity(origId);
     }
 
+    private void comeOutOfSleepIfNeededLocked() {
+        if (!mWentToSleep && !mLockScreenShown) {
+            if (mSleeping) {
+                mSleeping = false;
+                mMainStack.awakeFromSleepingLocked();
+                mMainStack.resumeTopActivityLocked(null);
+            }
+        }
+    }
+
     public void wakingUp() {
+        if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.DEVICE_POWER);
+        }
+
         synchronized(this) {
+            mWentToSleep = false;
             mWindowManager.setEventDispatching(true);
-            mSleeping = false;
-            mMainStack.awakeFromSleepingLocked();
-            mMainStack.resumeTopActivityLocked(null);
+            comeOutOfSleepIfNeededLocked();
+        }
+    }
+
+    public void setLockScreenShown(boolean shown) {
+        if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.DEVICE_POWER);
+        }
+
+        synchronized(this) {
+            mLockScreenShown = shown;
+            comeOutOfSleepIfNeededLocked();
         }
     }
 
@@ -8815,7 +8862,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
-        pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
+        if (mSleeping || mWentToSleep || mLockScreenShown) {
+            pw.println("  mSleeping=" + mSleeping + " mWentToSleep=" + mWentToSleep
+                    + " mLockScreenShown " + mLockScreenShown);
+        }
+        if (mShuttingDown) {
+            pw.println("  mShuttingDown=" + mShuttingDown);
+        }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
             pw.println("  mDebugApp=" + mDebugApp + "/orig=" + mOrigDebugApp

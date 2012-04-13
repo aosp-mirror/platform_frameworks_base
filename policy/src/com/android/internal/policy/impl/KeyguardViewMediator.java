@@ -567,6 +567,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         synchronized (KeyguardViewMediator.this) {
             if (mHidden != isHidden) {
                 mHidden = isHidden;
+                updateActivityLockScreenState();
                 adjustUserActivityLocked();
                 adjustStatusBarLocked();
             }
@@ -1162,6 +1163,14 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         }
     }
 
+    private void updateActivityLockScreenState() {
+        try {
+            ActivityManagerNative.getDefault().setLockScreenShown(
+                    mShowing && !mHidden);
+        } catch (RemoteException e) {
+        }
+    }
+
     /**
      * Handle message sent by {@link #showLocked}.
      * @see #SHOW
@@ -1173,6 +1182,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
             mKeyguardViewManager.show();
             mShowing = true;
+            updateActivityLockScreenState();
             adjustUserActivityLocked();
             adjustStatusBarLocked();
             try {
@@ -1207,6 +1217,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
             mKeyguardViewManager.hide();
             mShowing = false;
+            updateActivityLockScreenState();
             adjustUserActivityLocked();
             adjustStatusBarLocked();
         }
@@ -1324,6 +1335,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             if (DEBUG) Log.d(TAG, "handleVerifyUnlock");
             mKeyguardViewManager.verifyUnlock();
             mShowing = true;
+            updateActivityLockScreenState();
         }
     }
 

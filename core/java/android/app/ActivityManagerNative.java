@@ -1000,7 +1000,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             }
             return true;
         }
-        
+
         case GOING_TO_SLEEP_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             goingToSleep();
@@ -1011,6 +1011,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case WAKING_UP_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             wakingUp();
+            reply.writeNoException();
+            return true;
+        }
+
+        case SET_LOCK_SCREEN_SHOWN_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            setLockScreenShown(data.readInt() != 0);
             reply.writeNoException();
             return true;
         }
@@ -2908,6 +2915,17 @@ class ActivityManagerProxy implements IActivityManager
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         mRemote.transact(WAKING_UP_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    public void setLockScreenShown(boolean shown) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(shown ? 1 : 0);
+        mRemote.transact(SET_LOCK_SCREEN_SHOWN_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
