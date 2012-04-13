@@ -141,16 +141,34 @@ package android {
   public static final class Manifest.permission_group {
     ctor public Manifest.permission_group();
     field public static final java.lang.String ACCOUNTS = "android.permission-group.ACCOUNTS";
+    field public static final java.lang.String APP_INFO = "android.permission-group.APP_INFO";
+    field public static final java.lang.String AUDIO_SETTINGS = "android.permission-group.AUDIO_SETTINGS";
+    field public static final java.lang.String BOOKMARKS = "android.permission-group.BOOKMARKS";
+    field public static final java.lang.String CALENDAR = "android.permission-group.CALENDAR";
+    field public static final java.lang.String CAMERA = "android.permission-group.CAMERA";
     field public static final java.lang.String COST_MONEY = "android.permission-group.COST_MONEY";
     field public static final java.lang.String DEVELOPMENT_TOOLS = "android.permission-group.DEVELOPMENT_TOOLS";
+    field public static final java.lang.String DEVICE_ALARMS = "android.permission-group.DEVICE_ALARMS";
+    field public static final java.lang.String DISPLAY = "android.permission-group.DISPLAY";
+    field public static final java.lang.String AFFECTS_BATTERY = "android.permission-group.AFFECTS_BATTERY";
     field public static final java.lang.String HARDWARE_CONTROLS = "android.permission-group.HARDWARE_CONTROLS";
     field public static final java.lang.String LOCATION = "android.permission-group.LOCATION";
     field public static final java.lang.String MESSAGES = "android.permission-group.MESSAGES";
+    field public static final java.lang.String MICROPHONE = "android.permission-group.MICROPHONE";
     field public static final java.lang.String NETWORK = "android.permission-group.NETWORK";
     field public static final java.lang.String PERSONAL_INFO = "android.permission-group.PERSONAL_INFO";
     field public static final java.lang.String PHONE_CALLS = "android.permission-group.PHONE_CALLS";
+    field public static final java.lang.String SCREENLOCK = "android.permission-group.SCREENLOCK";
+    field public static final java.lang.String SHORTRANGE_NETWORK = "android.permission-group.SHORTRANGE_NETWORK";
+    field public static final java.lang.String SOCIAL_INFO = "android.permission-group.SOCIAL_INFO";
+    field public static final java.lang.String STATUS_BAR = "android.permission-group.STATUS_BAR";
     field public static final java.lang.String STORAGE = "android.permission-group.STORAGE";
+    field public static final java.lang.String SYNC_SETTINGS = "android.permission-group.SYNC_SETTINGS";
+    field public static final java.lang.String SYSTEM_CLOCK = "android.permission-group.SYSTEM_CLOCK";
     field public static final java.lang.String SYSTEM_TOOLS = "android.permission-group.SYSTEM_TOOLS";
+    field public static final java.lang.String USER_DICTIONARY = "android.permission-group.USER_DICTIONARY";
+    field public static final java.lang.String VOICEMAIL = "android.permission-group.VOICEMAIL";
+    field public static final java.lang.String WALLPAPER = "android.permission-group.WALLPAPER";
   }
 
   public final class R {
