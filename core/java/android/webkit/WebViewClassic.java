@@ -7144,7 +7144,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         if (mFindIsUp) return false;
         boolean result = false;
         result = mWebViewPrivate.super_requestFocus(direction, previouslyFocusedRect);
-        if (mWebViewCore.getSettings().getNeedInitialFocus() && !mWebView.isInTouchMode()) {
+        if (mWebViewCore.getSettings().getNeedInitialFocus()
+                && !mWebView.isInTouchMode()) {
             // For cases such as GMail, where we gain focus from a direction,
             // we want to move to the first available link.
             // FIXME: If there are no visible links, we may not want to
@@ -7165,7 +7166,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 default:
                     return result;
             }
-            // TODO: Send initial focus request to webkit (b/6108927)
+            mWebViewCore.sendMessage(EventHub.SET_INITIAL_FOCUS, fakeKeyDirection);
         }
         return result;
     }

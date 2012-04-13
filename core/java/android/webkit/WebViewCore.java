@@ -1176,6 +1176,7 @@ public final class WebViewCore {
 
         // key was pressed (down and up)
         static final int KEY_PRESS = 223;
+        static final int SET_INITIAL_FOCUS = 224;
 
         // Private handler for WebCore messages.
         private Handler mHandler;
@@ -1748,6 +1749,9 @@ public final class WebViewCore {
                                     WebViewClassic.UPDATE_MATCH_COUNT, request).sendToTarget();
                             break;
                         }
+                        case SET_INITIAL_FOCUS:
+                            nativeSetInitialFocus(mNativeClass, msg.arg1);
+                            break;
                     }
                 }
             };
@@ -3071,6 +3075,7 @@ public final class WebViewCore {
     private native void nativeClearTextSelection(int nativeClass);
     private native boolean nativeSelectWordAt(int nativeClass, int x, int y);
     private native void nativeSelectAll(int nativeClass);
+    private native void nativeSetInitialFocus(int nativeClass, int keyDirection);
 
     private static native void nativeCertTrustChanged();
 }
