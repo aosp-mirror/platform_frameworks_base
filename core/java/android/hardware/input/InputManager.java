@@ -19,7 +19,10 @@ package android.hardware.input;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -28,6 +31,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
+
+import java.util.ArrayList;
 
 /**
  * Provides information about input devices and available key layouts.
@@ -40,11 +45,22 @@ import android.view.InputEvent;
  */
 public final class InputManager {
     private static final String TAG = "InputManager";
+    private static final boolean DEBUG = false;
+
+    private static final int MSG_DEVICE_ADDED = 1;
+    private static final int MSG_DEVICE_REMOVED = 2;
+    private static final int MSG_DEVICE_CHANGED = 3;
 
     private static InputManager sInstance;
 
     private final IInputManager mIm;
-    private final SparseArray<InputDevice> mInputDevices = new SparseArray<InputDevice>();
+
+    // Guarded by mInputDevicesLock
+    private final Object mInputDevicesLock = new Object();
+    private SparseArray<InputDevice> mInputDevices;
+    private InputDevicesChangedListener mInputDevicesChangedListener;
+    private final ArrayList<InputDeviceListenerDelegate> mInputDeviceListeners =
+            new ArrayList<InputDeviceListenerDelegate>();
 
     /**
      * Broadcast Action: Query available keyboard layouts.
@@ -166,6 +182,103 @@ public final class InputManager {
             }
             return sInstance;
         }
+    }
+
+    /**
+     * Gets information about the input device with the specified id.
+     * @param id The device id.
+     * @return The input device or null if not found.
+     */
+    public InputDevice getInputDevice(int id) {
+        synchronized (mInputDevicesLock) {
+            populateInputDevicesLocked();
+
+            int index = mInputDevices.indexOfKey(id);
+            if (index < 0) {
+                return null;
+            }
+
+            InputDevice inputDevice = mInputDevices.valueAt(index);
+            if (inputDevice == null) {
+                try {
+                    inputDevice = mIm.getInputDevice(id);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException("Could not get input device information.", ex);
+                }
+            }
+            mInputDevices.setValueAt(index, inputDevice);
+            return inputDevice;
+        }
+    }
+
+    /**
+     * Gets the ids of all input devices in the system.
+     * @return The input device ids.
+     */
+    public int[] getInputDeviceIds() {
+        synchronized (mInputDevicesLock) {
+            populateInputDevicesLocked();
+
+            final int count = mInputDevices.size();
+            final int[] ids = new int[count];
+            for (int i = 0; i < count; i++) {
+                ids[i] = mInputDevices.keyAt(i);
+            }
+            return ids;
+        }
+    }
+
+    /**
+     * Registers an input device listener to receive notifications about when
+     * input devices are added, removed or changed.
+     *
+     * @param listener The listener to register.
+     * @param handler The handler on which the listener should be invoked, or null
+     * if the listener should be invoked on the calling thread's looper.
+     *
+     * @see #unregisterInputDeviceListener
+     */
+    public void registerInputDeviceListener(InputDeviceListener listener, Handler handler) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+
+        synchronized (mInputDevicesLock) {
+            int index = findInputDeviceListenerLocked(listener);
+            if (index < 0) {
+                mInputDeviceListeners.add(new InputDeviceListenerDelegate(listener, handler));
+            }
+        }
+    }
+
+    /**
+     * Unregisters an input device listener.
+     *
+     * @param listener The listener to unregister.
+     *
+     * @see #registerInputDeviceListener
+     */
+    public void unregisterInputDeviceListener(InputDeviceListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+
+        synchronized (mInputDevicesLock) {
+            int index = findInputDeviceListenerLocked(listener);
+            if (index >= 0) {
+                mInputDeviceListeners.remove(index);
+            }
+        }
+    }
+
+    private int findInputDeviceListenerLocked(InputDeviceListener listener) {
+        final int numListeners = mInputDeviceListeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            if (mInputDeviceListeners.get(i).mListener == listener) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -327,50 +440,6 @@ public final class InputManager {
     }
 
     /**
-     * Gets information about the input device with the specified id.
-     * @param id The device id.
-     * @return The input device or null if not found.
-     *
-     * @hide
-     */
-    public InputDevice getInputDevice(int id) {
-        synchronized (mInputDevices) {
-            InputDevice inputDevice = mInputDevices.get(id);
-            if (inputDevice != null) {
-                return inputDevice;
-            }
-        }
-        final InputDevice newInputDevice;
-        try {
-            newInputDevice = mIm.getInputDevice(id);
-        } catch (RemoteException ex) {
-            throw new RuntimeException("Could not get input device information.", ex);
-        }
-        synchronized (mInputDevices) {
-            InputDevice inputDevice = mInputDevices.get(id);
-            if (inputDevice != null) {
-                return inputDevice;
-            }
-            mInputDevices.put(id, newInputDevice);
-            return newInputDevice;
-        }
-    }
-
-    /**
-     * Gets the ids of all input devices in the system.
-     * @return The input device ids.
-     *
-     * @hide
-     */
-    public int[] getInputDeviceIds() {
-        try {
-            return mIm.getInputDeviceIds();
-        } catch (RemoteException ex) {
-            throw new RuntimeException("Could not get input device ids.", ex);
-        }
-    }
-
-    /**
      * Queries the framework about whether any physical keys exist on the
      * any keyboard attached to the device that are capable of producing the given
      * array of key codes.
@@ -427,6 +496,153 @@ public final class InputManager {
             return mIm.injectInputEvent(event, mode);
         } catch (RemoteException ex) {
             return false;
+        }
+    }
+
+    private void populateInputDevicesLocked() {
+        if (mInputDevicesChangedListener == null) {
+            final InputDevicesChangedListener listener = new InputDevicesChangedListener();
+            try {
+                mIm.registerInputDevicesChangedListener(listener);
+            } catch (RemoteException ex) {
+                throw new RuntimeException(
+                        "Could not get register input device changed listener", ex);
+            }
+            mInputDevicesChangedListener = listener;
+        }
+
+        if (mInputDevices == null) {
+            final int[] ids;
+            try {
+                ids = mIm.getInputDeviceIds();
+            } catch (RemoteException ex) {
+                throw new RuntimeException("Could not get input device ids.", ex);
+            }
+
+            mInputDevices = new SparseArray<InputDevice>();
+            for (int i = 0; i < ids.length; i++) {
+                mInputDevices.put(ids[i], null);
+            }
+        }
+    }
+
+    private void onInputDevicesChanged(int[] deviceIdAndGeneration) {
+        if (DEBUG) {
+            Log.d(TAG, "Received input devices changed.");
+        }
+
+        synchronized (mInputDevicesLock) {
+            for (int i = mInputDevices.size(); --i > 0; ) {
+                final int deviceId = mInputDevices.keyAt(i);
+                if (!containsDeviceId(deviceIdAndGeneration, deviceId)) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Device removed: " + deviceId);
+                    }
+                    mInputDevices.removeAt(i);
+                    sendMessageToInputDeviceListenersLocked(MSG_DEVICE_REMOVED, deviceId);
+                }
+            }
+
+            for (int i = 0; i < deviceIdAndGeneration.length; i += 2) {
+                final int deviceId = deviceIdAndGeneration[i];
+                int index = mInputDevices.indexOfKey(deviceId);
+                if (index >= 0) {
+                    final InputDevice device = mInputDevices.valueAt(index);
+                    if (device != null) {
+                        final int generation = deviceIdAndGeneration[i + 1];
+                        if (device.getGeneration() != generation) {
+                            if (DEBUG) {
+                                Log.d(TAG, "Device changed: " + deviceId);
+                            }
+                            mInputDevices.setValueAt(index, null);
+                            sendMessageToInputDeviceListenersLocked(MSG_DEVICE_CHANGED, deviceId);
+                        }
+                    }
+                } else {
+                    if (DEBUG) {
+                        Log.d(TAG, "Device added: " + deviceId);
+                    }
+                    mInputDevices.put(deviceId, null);
+                    sendMessageToInputDeviceListenersLocked(MSG_DEVICE_ADDED, deviceId);
+                }
+            }
+        }
+    }
+
+    private void sendMessageToInputDeviceListenersLocked(int what, int deviceId) {
+        final int numListeners = mInputDeviceListeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            InputDeviceListenerDelegate listener = mInputDeviceListeners.get(i);
+            listener.sendMessage(listener.obtainMessage(what, deviceId, 0));
+        }
+    }
+
+    private static boolean containsDeviceId(int[] deviceIdAndGeneration, int deviceId) {
+        for (int i = 0; i < deviceIdAndGeneration.length; i += 2) {
+            if (deviceIdAndGeneration[i] == deviceId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Listens for changes in input devices.
+     */
+    public interface InputDeviceListener {
+        /**
+         * Called whenever an input device has been added to the system.
+         * Use {@link InputManager#getInputDevice} to get more information about the device.
+         *
+         * @param deviceId The id of the input device that was added.
+         */
+        void onInputDeviceAdded(int deviceId);
+
+        /**
+         * Called whenever an input device has been removed from the system.
+         *
+         * @param deviceId The id of the input device that was removed.
+         */
+        void onInputDeviceRemoved(int deviceId);
+
+        /**
+         * Called whenever the properties of an input device have changed since they
+         * were last queried.  Use {@link InputManager#getInputDevice} to get
+         * a fresh {@link InputDevice} object with the new properties.
+         *
+         * @param deviceId The id of the input device that changed.
+         */
+        void onInputDeviceChanged(int deviceId);
+    }
+
+    private final class InputDevicesChangedListener extends IInputDevicesChangedListener.Stub {
+        @Override
+        public void onInputDevicesChanged(int[] deviceIdAndGeneration) throws RemoteException {
+            InputManager.this.onInputDevicesChanged(deviceIdAndGeneration);
+        }
+    }
+
+    private static final class InputDeviceListenerDelegate extends Handler {
+        public final InputDeviceListener mListener;
+
+        public InputDeviceListenerDelegate(InputDeviceListener listener, Handler handler) {
+            super(handler != null ? handler.getLooper() : Looper.myLooper());
+            mListener = listener;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_DEVICE_ADDED:
+                    mListener.onInputDeviceAdded(msg.arg1);
+                    break;
+                case MSG_DEVICE_REMOVED:
+                    mListener.onInputDeviceRemoved(msg.arg1);
+                    break;
+                case MSG_DEVICE_CHANGED:
+                    mListener.onInputDeviceChanged(msg.arg1);
+                    break;
+            }
         }
     }
 }

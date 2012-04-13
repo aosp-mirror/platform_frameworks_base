@@ -127,11 +127,12 @@ String8 getInputDeviceConfigurationFilePathByName(
 // --- InputDeviceInfo ---
 
 InputDeviceInfo::InputDeviceInfo() {
-    initialize(-1, String8("uninitialized device info"), String8("unknown"));
+    initialize(-1, -1, String8("uninitialized device info"), String8("unknown"));
 }
 
 InputDeviceInfo::InputDeviceInfo(const InputDeviceInfo& other) :
-        mId(other.mId), mName(other.mName), mDescriptor(other.mDescriptor),
+        mId(other.mId), mGeneration(other.mGeneration),
+        mName(other.mName), mDescriptor(other.mDescriptor),
         mSources(other.mSources),
         mKeyboardType(other.mKeyboardType),
         mKeyCharacterMap(other.mKeyCharacterMap),
@@ -141,8 +142,10 @@ InputDeviceInfo::InputDeviceInfo(const InputDeviceInfo& other) :
 InputDeviceInfo::~InputDeviceInfo() {
 }
 
-void InputDeviceInfo::initialize(int32_t id, const String8& name, const String8& descriptor) {
+void InputDeviceInfo::initialize(int32_t id, int32_t generation,
+        const String8& name, const String8& descriptor) {
     mId = id;
+    mGeneration = generation;
     mName = name;
     mDescriptor = descriptor;
     mSources = 0;

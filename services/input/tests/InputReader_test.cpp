@@ -127,6 +127,7 @@ private:
 class FakeInputReaderPolicy : public InputReaderPolicyInterface {
     InputReaderConfiguration mConfig;
     KeyedVector<int32_t, sp<FakePointerController> > mPointerControllers;
+    Vector<InputDeviceInfo> mInputDevices;
 
 protected:
     virtual ~FakeInputReaderPolicy() { }
@@ -141,10 +142,6 @@ public:
         mConfig.setDisplayInfo(displayId, true /*external*/, width, height, orientation);
     }
 
-    virtual nsecs_t getVirtualKeyQuietTime() {
-        return 0;
-    }
-
     void addExcludedDeviceName(const String8& deviceName) {
         mConfig.excludedDeviceNames.push(deviceName);
     }
@@ -157,6 +154,10 @@ public:
         return &mConfig;
     }
 
+    const Vector<InputDeviceInfo>& getInputDevices() const {
+        return mInputDevices;
+    }
+
 private:
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig) {
         *outConfig = mConfig;
@@ -164,6 +165,10 @@ private:
 
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) {
         return mPointerControllers.valueFor(deviceId);
+    }
+
+    virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices) {
+        mInputDevices = inputDevices;
     }
 };
 
@@ -667,6 +672,7 @@ class FakeInputReaderContext : public InputReaderContext {
     sp<InputListenerInterface> mListener;
     int32_t mGlobalMetaState;
     bool mUpdateGlobalMetaStateWasCalled;
+    int32_t mGeneration;
 
 public:
     FakeInputReaderContext(const sp<EventHubInterface>& eventHub,
@@ -721,6 +727,10 @@ private:
     }
 
     virtual void requestTimeoutAtTime(nsecs_t when) {
+    }
+
+    virtual int32_t bumpGeneration() {
+        return ++mGeneration;
     }
 };
 
@@ -887,7 +897,8 @@ public:
     InputDevice* newDevice(int32_t deviceId, const String8& name, uint32_t classes) {
         InputDeviceIdentifier identifier;
         identifier.name = name;
-        return new InputDevice(&mContext, deviceId, identifier, classes);
+        int32_t generation = deviceId + 1;
+        return new InputDevice(&mContext, deviceId, generation, identifier, classes);
     }
 
 protected:
@@ -1045,52 +1056,30 @@ TEST_F(InputReaderTest, GetInputConfiguration_WhenDPadPresent_ReturnsDPadNavigat
     ASSERT_EQ(InputConfiguration::TOUCHSCREEN_NOTOUCH, config.touchScreen);
 }
 
-TEST_F(InputReaderTest, GetInputDeviceInfo_WhenDeviceIdIsValid) {
+TEST_F(InputReaderTest, GetInputDevices) {
     ASSERT_NO_FATAL_FAILURE(addDevice(1, String8("keyboard"),
             INPUT_DEVICE_CLASS_KEYBOARD, NULL));
+    ASSERT_NO_FATAL_FAILURE(addDevice(2, String8("ignored"),
+            0, NULL)); // no classes so device will be ignored
 
-    InputDeviceInfo info;
-    status_t result = mReader->getInputDeviceInfo(1, &info);
+    Vector<InputDeviceInfo> inputDevices;
+    mReader->getInputDevices(inputDevices);
 
-    ASSERT_EQ(OK, result);
-    ASSERT_EQ(1, info.getId());
-    ASSERT_STREQ("keyboard", info.getName().string());
-    ASSERT_EQ(AINPUT_KEYBOARD_TYPE_NON_ALPHABETIC, info.getKeyboardType());
-    ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, info.getSources());
-    ASSERT_EQ(size_t(0), info.getMotionRanges().size());
-}
+    ASSERT_EQ(1U, inputDevices.size());
+    ASSERT_EQ(1, inputDevices[0].getId());
+    ASSERT_STREQ("keyboard", inputDevices[0].getName().string());
+    ASSERT_EQ(AINPUT_KEYBOARD_TYPE_NON_ALPHABETIC, inputDevices[0].getKeyboardType());
+    ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, inputDevices[0].getSources());
+    ASSERT_EQ(size_t(0), inputDevices[0].getMotionRanges().size());
 
-TEST_F(InputReaderTest, GetInputDeviceInfo_WhenDeviceIdIsInvalid) {
-    InputDeviceInfo info;
-    status_t result = mReader->getInputDeviceInfo(-1, &info);
-
-    ASSERT_EQ(NAME_NOT_FOUND, result);
-}
-
-TEST_F(InputReaderTest, GetInputDeviceInfo_WhenDeviceIdIsIgnored) {
-    addDevice(1, String8("ignored"), 0, NULL); // no classes so device will be ignored
-
-    InputDeviceInfo info;
-    status_t result = mReader->getInputDeviceInfo(1, &info);
-
-    ASSERT_EQ(NAME_NOT_FOUND, result);
-}
-
-TEST_F(InputReaderTest, GetInputDeviceIds) {
-    sp<FakePointerController> controller = new FakePointerController();
-    mFakePolicy->setPointerController(2, controller);
-
-    ASSERT_NO_FATAL_FAILURE(addDevice(1, String8("keyboard"),
-            INPUT_DEVICE_CLASS_KEYBOARD | INPUT_DEVICE_CLASS_ALPHAKEY, NULL));
-    ASSERT_NO_FATAL_FAILURE(addDevice(2, String8("mouse"),
-            INPUT_DEVICE_CLASS_CURSOR, NULL));
-
-    Vector<int32_t> ids;
-    mReader->getInputDeviceIds(ids);
-
-    ASSERT_EQ(size_t(2), ids.size());
-    ASSERT_EQ(1, ids[0]);
-    ASSERT_EQ(2, ids[1]);
+    // Should also have received a notification describing the new input devices.
+    inputDevices = mFakePolicy->getInputDevices();
+    ASSERT_EQ(1U, inputDevices.size());
+    ASSERT_EQ(1, inputDevices[0].getId());
+    ASSERT_STREQ("keyboard", inputDevices[0].getName().string());
+    ASSERT_EQ(AINPUT_KEYBOARD_TYPE_NON_ALPHABETIC, inputDevices[0].getKeyboardType());
+    ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, inputDevices[0].getSources());
+    ASSERT_EQ(size_t(0), inputDevices[0].getMotionRanges().size());
 }
 
 TEST_F(InputReaderTest, GetKeyCodeState_ForwardsRequestsToMappers) {
@@ -1243,6 +1232,7 @@ class InputDeviceTest : public testing::Test {
 protected:
     static const char* DEVICE_NAME;
     static const int32_t DEVICE_ID;
+    static const int32_t DEVICE_GENERATION;
     static const uint32_t DEVICE_CLASSES;
 
     sp<FakeEventHub> mFakeEventHub;
@@ -1261,7 +1251,8 @@ protected:
         mFakeEventHub->addDevice(DEVICE_ID, String8(DEVICE_NAME), 0);
         InputDeviceIdentifier identifier;
         identifier.name = DEVICE_NAME;
-        mDevice = new InputDevice(mFakeContext, DEVICE_ID, identifier, DEVICE_CLASSES);
+        mDevice = new InputDevice(mFakeContext, DEVICE_ID, DEVICE_GENERATION,
+                identifier, DEVICE_CLASSES);
     }
 
     virtual void TearDown() {
@@ -1276,6 +1267,7 @@ protected:
 
 const char* InputDeviceTest::DEVICE_NAME = "device";
 const int32_t InputDeviceTest::DEVICE_ID = 1;
+const int32_t InputDeviceTest::DEVICE_GENERATION = 2;
 const uint32_t InputDeviceTest::DEVICE_CLASSES = INPUT_DEVICE_CLASS_KEYBOARD
         | INPUT_DEVICE_CLASS_TOUCH | INPUT_DEVICE_CLASS_JOYSTICK;
 
@@ -1428,6 +1420,7 @@ class InputMapperTest : public testing::Test {
 protected:
     static const char* DEVICE_NAME;
     static const int32_t DEVICE_ID;
+    static const int32_t DEVICE_GENERATION;
     static const uint32_t DEVICE_CLASSES;
 
     sp<FakeEventHub> mFakeEventHub;
@@ -1443,7 +1436,8 @@ protected:
         mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeListener);
         InputDeviceIdentifier identifier;
         identifier.name = DEVICE_NAME;
-        mDevice = new InputDevice(mFakeContext, DEVICE_ID, identifier, DEVICE_CLASSES);
+        mDevice = new InputDevice(mFakeContext, DEVICE_ID, DEVICE_GENERATION,
+                identifier, DEVICE_CLASSES);
 
         mFakeEventHub->addDevice(DEVICE_ID, String8(DEVICE_NAME), 0);
     }
@@ -1522,6 +1516,7 @@ protected:
 
 const char* InputMapperTest::DEVICE_NAME = "device";
 const int32_t InputMapperTest::DEVICE_ID = 1;
+const int32_t InputMapperTest::DEVICE_GENERATION = 2;
 const uint32_t InputMapperTest::DEVICE_CLASSES = 0; // not needed for current tests
 
 

@@ -237,7 +237,8 @@ InputReader::InputReader(const sp<EventHubInterface>& eventHub,
         const sp<InputReaderPolicyInterface>& policy,
         const sp<InputListenerInterface>& listener) :
         mContext(this), mEventHub(eventHub), mPolicy(policy),
-        mGlobalMetaState(0), mDisableVirtualKeysTimeout(LLONG_MIN), mNextTimeout(LLONG_MAX),
+        mGlobalMetaState(0), mGeneration(1),
+        mDisableVirtualKeysTimeout(LLONG_MIN), mNextTimeout(LLONG_MAX),
         mConfigurationChangesToRefresh(0) {
     mQueuedListener = new QueuedInputListener(listener);
 
@@ -257,18 +258,24 @@ InputReader::~InputReader() {
 }
 
 void InputReader::loopOnce() {
+    int32_t oldGeneration;
     int32_t timeoutMillis;
+    bool inputDevicesChanged = false;
+    Vector<InputDeviceInfo> inputDevices;
     { // acquire lock
         AutoMutex _l(mLock);
+
+        oldGeneration = mGeneration;
+        timeoutMillis = -1;
 
         uint32_t changes = mConfigurationChangesToRefresh;
         if (changes) {
             mConfigurationChangesToRefresh = 0;
+            timeoutMillis = 0;
             refreshConfigurationLocked(changes);
         }
 
-        timeoutMillis = -1;
-        if (mNextTimeout != LLONG_MAX) {
+        if (timeoutMillis < 0 && mNextTimeout != LLONG_MAX) {
             nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
             timeoutMillis = toMillisecondTimeoutDelay(now, mNextTimeout);
         }
@@ -283,7 +290,8 @@ void InputReader::loopOnce() {
         if (count) {
             processEventsLocked(mEventBuffer, count);
         }
-        if (!count || timeoutMillis == 0) {
+
+        if (mNextTimeout != LLONG_MAX) {
             nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
             if (now >= mNextTimeout) {
 #if DEBUG_RAW_EVENTS
@@ -293,7 +301,17 @@ void InputReader::loopOnce() {
                 timeoutExpiredLocked(now);
             }
         }
+
+        if (oldGeneration != mGeneration) {
+            inputDevicesChanged = true;
+            getInputDevicesLocked(inputDevices);
+        }
     } // release lock
+
+    // Send out a message that the describes the changed input devices.
+    if (inputDevicesChanged) {
+        mPolicy->notifyInputDevicesChanged(inputDevices);
+    }
 
     // Flush queued events out to the listener.
     // This must happen outside of the lock because the listener could potentially call
@@ -344,6 +362,12 @@ void InputReader::processEventsLocked(const RawEvent* rawEvents, size_t count) {
 }
 
 void InputReader::addDeviceLocked(nsecs_t when, int32_t deviceId) {
+    ssize_t deviceIndex = mDevices.indexOfKey(deviceId);
+    if (deviceIndex >= 0) {
+        ALOGW("Ignoring spurious device added event for deviceId %d.", deviceId);
+        return;
+    }
+
     InputDeviceIdentifier identifier = mEventHub->getDeviceIdentifier(deviceId);
     uint32_t classes = mEventHub->getDeviceClasses(deviceId);
 
@@ -359,26 +383,21 @@ void InputReader::addDeviceLocked(nsecs_t when, int32_t deviceId) {
                 identifier.name.string(), device->getSources());
     }
 
-    ssize_t deviceIndex = mDevices.indexOfKey(deviceId);
-    if (deviceIndex < 0) {
-        mDevices.add(deviceId, device);
-    } else {
-        ALOGW("Ignoring spurious device added event for deviceId %d.", deviceId);
-        delete device;
-        return;
-    }
+    mDevices.add(deviceId, device);
+    bumpGenerationLocked();
 }
 
 void InputReader::removeDeviceLocked(nsecs_t when, int32_t deviceId) {
     InputDevice* device = NULL;
     ssize_t deviceIndex = mDevices.indexOfKey(deviceId);
-    if (deviceIndex >= 0) {
-        device = mDevices.valueAt(deviceIndex);
-        mDevices.removeItemsAt(deviceIndex, 1);
-    } else {
+    if (deviceIndex < 0) {
         ALOGW("Ignoring spurious device removed event for deviceId %d.", deviceId);
         return;
     }
+
+    device = mDevices.valueAt(deviceIndex);
+    mDevices.removeItemsAt(deviceIndex, 1);
+    bumpGenerationLocked();
 
     if (device->isIgnored()) {
         ALOGI("Device removed: id=%d, name='%s' (ignored non-input device)",
@@ -394,7 +413,8 @@ void InputReader::removeDeviceLocked(nsecs_t when, int32_t deviceId) {
 
 InputDevice* InputReader::createDeviceLocked(int32_t deviceId,
         const InputDeviceIdentifier& identifier, uint32_t classes) {
-    InputDevice* device = new InputDevice(&mContext, deviceId, identifier, classes);
+    InputDevice* device = new InputDevice(&mContext, deviceId, bumpGenerationLocked(),
+            identifier, classes);
 
     // External devices.
     if (classes & INPUT_DEVICE_CLASS_EXTERNAL) {
@@ -577,39 +597,30 @@ void InputReader::requestTimeoutAtTimeLocked(nsecs_t when) {
     }
 }
 
+int32_t InputReader::bumpGenerationLocked() {
+    return ++mGeneration;
+}
+
 void InputReader::getInputConfiguration(InputConfiguration* outConfiguration) {
     AutoMutex _l(mLock);
 
     *outConfiguration = mInputConfiguration;
 }
 
-status_t InputReader::getInputDeviceInfo(int32_t deviceId, InputDeviceInfo* outDeviceInfo) {
+void InputReader::getInputDevices(Vector<InputDeviceInfo>& outInputDevices) {
     AutoMutex _l(mLock);
-
-    ssize_t deviceIndex = mDevices.indexOfKey(deviceId);
-    if (deviceIndex < 0) {
-        return NAME_NOT_FOUND;
-    }
-
-    InputDevice* device = mDevices.valueAt(deviceIndex);
-    if (device->isIgnored()) {
-        return NAME_NOT_FOUND;
-    }
-
-    device->getDeviceInfo(outDeviceInfo);
-    return OK;
+    getInputDevicesLocked(outInputDevices);
 }
 
-void InputReader::getInputDeviceIds(Vector<int32_t>& outDeviceIds) {
-    AutoMutex _l(mLock);
-
-    outDeviceIds.clear();
+void InputReader::getInputDevicesLocked(Vector<InputDeviceInfo>& outInputDevices) {
+    outInputDevices.clear();
 
     size_t numDevices = mDevices.size();
     for (size_t i = 0; i < numDevices; i++) {
         InputDevice* device = mDevices.valueAt(i);
         if (!device->isIgnored()) {
-            outDeviceIds.add(device->getId());
+            outInputDevices.push();
+            device->getDeviceInfo(&outInputDevices.editTop());
         }
     }
 }
@@ -824,6 +835,11 @@ void InputReader::ContextImpl::requestTimeoutAtTime(nsecs_t when) {
     mReader->requestTimeoutAtTimeLocked(when);
 }
 
+int32_t InputReader::ContextImpl::bumpGeneration() {
+    // lock is already held by the input loop
+    return mReader->bumpGenerationLocked();
+}
+
 InputReaderPolicyInterface* InputReader::ContextImpl::getPolicy() {
     return mReader->mPolicy.get();
 }
@@ -854,9 +870,10 @@ bool InputReaderThread::threadLoop() {
 
 // --- InputDevice ---
 
-InputDevice::InputDevice(InputReaderContext* context, int32_t id,
+InputDevice::InputDevice(InputReaderContext* context, int32_t id, int32_t generation,
         const InputDeviceIdentifier& identifier, uint32_t classes) :
-        mContext(context), mId(id), mIdentifier(identifier), mClasses(classes),
+        mContext(context), mId(id), mGeneration(generation),
+        mIdentifier(identifier), mClasses(classes),
         mSources(0), mIsExternal(false), mDropUntilNextSync(false) {
 }
 
@@ -874,6 +891,7 @@ void InputDevice::dump(String8& dump) {
 
     dump.appendFormat(INDENT "Device %d: %s\n", deviceInfo.getId(),
             deviceInfo.getName().string());
+    dump.appendFormat(INDENT2 "Generation: %d\n", mGeneration);
     dump.appendFormat(INDENT2 "IsExternal: %s\n", toString(mIsExternal));
     dump.appendFormat(INDENT2 "Sources: 0x%08x\n", deviceInfo.getSources());
     dump.appendFormat(INDENT2 "KeyboardType: %d\n", deviceInfo.getKeyboardType());
@@ -983,7 +1001,7 @@ void InputDevice::timeoutExpired(nsecs_t when) {
 }
 
 void InputDevice::getDeviceInfo(InputDeviceInfo* outDeviceInfo) {
-    outDeviceInfo->initialize(mId, mIdentifier.name, mIdentifier.descriptor);
+    outDeviceInfo->initialize(mId, mGeneration, mIdentifier.name, mIdentifier.descriptor);
 
     size_t numMappers = mMappers.size();
     for (size_t i = 0; i < numMappers; i++) {
@@ -1052,6 +1070,10 @@ void InputDevice::fadePointer() {
         InputMapper* mapper = mMappers[i];
         mapper->fadePointer();
     }
+}
+
+void InputDevice::bumpGeneration() {
+    mGeneration = mContext->bumpGeneration();
 }
 
 void InputDevice::notifyReset(nsecs_t when) {
@@ -1728,6 +1750,10 @@ status_t InputMapper::getAbsoluteAxisInfo(int32_t axis, RawAbsoluteAxisInfo* axi
     return getEventHub()->getAbsoluteAxisInfo(getDeviceId(), axis, axisInfo);
 }
 
+void InputMapper::bumpGeneration() {
+    mDevice->bumpGeneration();
+}
+
 void InputMapper::dumpRawAbsoluteAxisInfo(String8& dump,
         const RawAbsoluteAxisInfo& axis, const char* name) {
     if (axis.valid) {
@@ -2137,6 +2163,7 @@ void CursorInputMapper::configure(nsecs_t when,
         } else {
             mOrientation = DISPLAY_ORIENTATION_0;
         }
+        bumpGeneration();
     }
 }
 
@@ -2998,6 +3025,7 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
 
         // Inform the dispatcher about the changes.
         *outResetNeeded = true;
+        bumpGeneration();
     }
 }
 

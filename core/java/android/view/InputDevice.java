@@ -40,6 +40,7 @@ import java.util.List;
  */
 public final class InputDevice implements Parcelable {
     private final int mId;
+    private final int mGeneration;
     private final String mName;
     private final String mDescriptor;
     private final int mSources;
@@ -302,9 +303,10 @@ public final class InputDevice implements Parcelable {
     };
 
     // Called by native code.
-    private InputDevice(int id, String name, String descriptor, int sources,
+    private InputDevice(int id, int generation, String name, String descriptor, int sources,
             int keyboardType, KeyCharacterMap keyCharacterMap) {
         mId = id;
+        mGeneration = generation;
         mName = name;
         mDescriptor = descriptor;
         mSources = sources;
@@ -314,6 +316,7 @@ public final class InputDevice implements Parcelable {
 
     private InputDevice(Parcel in) {
         mId = in.readInt();
+        mGeneration = in.readInt();
         mName = in.readString();
         mDescriptor = in.readString();
         mSources = in.readInt();
@@ -361,6 +364,19 @@ public final class InputDevice implements Parcelable {
      */
     public int getId() {
         return mId;
+    }
+
+    /**
+     * Gets a generation number for this input device.
+     * The generation number is incremented whenever the device is reconfigured and its
+     * properties may have changed.
+     *
+     * @return The generation number.
+     *
+     * @hide
+     */
+    public int getGeneration() {
+        return mGeneration;
     }
 
     /**
@@ -595,6 +611,7 @@ public final class InputDevice implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mId);
+        out.writeInt(mGeneration);
         out.writeString(mName);
         out.writeString(mDescriptor);
         out.writeInt(mSources);
@@ -624,6 +641,7 @@ public final class InputDevice implements Parcelable {
         StringBuilder description = new StringBuilder();
         description.append("Input Device ").append(mId).append(": ").append(mName).append("\n");
         description.append("  Descriptor: ").append(mDescriptor).append("\n");
+        description.append("  Generation: ").append(mGeneration).append("\n");
 
         description.append("  Keyboard Type: ");
         switch (mKeyboardType) {
