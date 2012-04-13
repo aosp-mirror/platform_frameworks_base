@@ -907,7 +907,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 public void onItemClick(AdapterView parent, View v, int position, long id) {
                     Spinner.this.setSelection(position);
                     if (mOnItemClickListener != null) {
-                        Spinner.this.performItemClick(null, position, mAdapter.getItemId(position));
+                        Spinner.this.performItemClick(v, position, mAdapter.getItemId(position));
                     }
                     dismiss();
                 }
