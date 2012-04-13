@@ -346,9 +346,11 @@ public class WebChromeClient {
      *      onReceiveValue must be called to wake up the thread.a
      * @param acceptType The value of the 'accept' attribute of the input tag
      *         associated with this file picker.
+     * @param capture The value of the 'capture' attribute of the input tag
+     *         associated with this file picker.
      * @hide
      */
-    public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType) {
+    public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType, String capture) {
         uploadFile.onReceiveValue(null);
     }
 
