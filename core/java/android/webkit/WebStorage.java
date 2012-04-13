@@ -418,6 +418,16 @@ public final class WebStorage {
         }
     }
 
+    /**
+     * This class should not be instantiated directly, applications must only use
+     * {@link #getInstance()} to obtain the instance.
+     * Note this constructor was erroneously public and published in SDK levels prior to 16, but
+     * applications using it would receive a non-functional instance of this class (there was no
+     * way to call createHandler() and createUIHandler(), so it would not work).
+     * @hide
+     */
+    public WebStorage() {}
+
     // Native functions
     private static native Set nativeGetOrigins();
     private static native long nativeGetUsageForOrigin(String origin);

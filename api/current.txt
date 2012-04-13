@@ -25492,7 +25492,6 @@ package android.webkit {
   }
 
   public final class GeolocationPermissions {
-    ctor public GeolocationPermissions();
     method public void allow(java.lang.String);
     method public void clear(java.lang.String);
     method public void clearAll();
@@ -25782,7 +25781,6 @@ package android.webkit {
   }
 
   public final class WebStorage {
-    ctor public WebStorage();
     method public void deleteAllData();
     method public void deleteOrigin(java.lang.String);
     method public static android.webkit.WebStorage getInstance();
