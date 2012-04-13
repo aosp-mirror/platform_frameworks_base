@@ -1681,7 +1681,7 @@ public class Editor {
         final int itemCount = clipData.getItemCount();
         for (int i=0; i < itemCount; i++) {
             Item item = clipData.getItemAt(i);
-            content.append(item.coerceToText(mTextView.getContext()));
+            content.append(item.coerceToStyledText(mTextView.getContext()));
         }
 
         final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());

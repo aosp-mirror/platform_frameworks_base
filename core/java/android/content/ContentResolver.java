@@ -248,7 +248,7 @@ public abstract class ContentResolver {
      * @param mimeTypeFilter The desired MIME type.  This may be a pattern,
      * such as *\/*, to query for all available MIME types that match the
      * pattern.
-     * @return Returns an array of MIME type strings for all availablle
+     * @return Returns an array of MIME type strings for all available
      * data streams that match the given mimeTypeFilter.  If there are none,
      * null is returned.
      */

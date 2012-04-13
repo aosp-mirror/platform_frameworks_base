@@ -41,6 +41,11 @@ public class ClipDescription implements Parcelable {
     public static final String MIMETYPE_TEXT_PLAIN = "text/plain";
 
     /**
+     * The MIME type for a clip holding HTML text.
+     */
+    public static final String MIMETYPE_TEXT_HTML = "text/html";
+
+    /**
      * The MIME type for a clip holding one or more URIs.  This should be
      * used for URIs that are meaningful to a user (such as an http: URI).
      * It should <em>not</em> be used for a content: URI that references some
