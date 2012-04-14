@@ -6580,6 +6580,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             oldPackage = mPackages.get(pkgName);
             if (compareSignatures(oldPackage.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
+                Slog.w(TAG, "New package has a different signature: " + pkgName);
                 res.returnCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
                 return;
             }
