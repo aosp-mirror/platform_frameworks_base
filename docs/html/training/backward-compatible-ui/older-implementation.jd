@@ -1,0 +1,126 @@
+page.title=Creating an Implementation with Older APIs
+parent.title=Creating Backward-Compatible UIs
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Proxying to the New APIs
+previous.link=new-implementation.html
+next.title=Using the Version-Aware Component
+next.link=using-component.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to:</h2>
+<ol>
+  <li><a href="#decide-substitute">Decide on a Substitute Solution</a></li>
+  <li><a href="#older-tabs">Implement Tabs Using Older APIs</a></li>
+</ol>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+<a href="http://developer.android.com/shareables/training/TabCompat.zip"
+  class="button">Download the sample app</a>
+<p class="filename">TabCompat.zip</p>
+</div>
+
+</div>
+</div>
+
+
+<p>This lesson discusses how to create an implementation that mirrors newer APIs yet supports older devices.</p>
+
+<h2 id="decide-substitute">Decide on a Substitute Solution</h2>
+
+<p>The most challenging task in using newer UI features in a backward-compatible way is deciding on and implementing an older (fallback) solution for older platform versions. In many cases, it's possible to fulfill the purpose of these newer UI components using older UI framework features. For example:</p>
+
+<ul>
+
+<li>
+<p>Action bars can be implemented using a horizontal {@link android.widget.LinearLayout} containing image buttons, either as custom title bars or as views in your activity layout. Overflow actions can be presented under the device <em>Menu</em> button.</p>
+</li>
+
+<li>
+<p>Action bar tabs can be implemented using a horizontal {@link android.widget.LinearLayout} containing buttons, or using the {@link android.widget.TabWidget} UI element.</p>
+</li>
+
+<li>
+<p>{@link android.widget.NumberPicker} and {@link android.widget.Switch} widgets can be implemented using {@link android.widget.Spinner} and {@link android.widget.ToggleButton} widgets, respectively.</p>
+</li>
+
+<li>
+<p>{@link android.widget.ListPopupWindow} and {@link android.widget.PopupMenu} widgets can be implemented using {@link android.widget.PopupWindow} widgets.</p>
+</li>
+
+</ul>
+
+<p>There generally isn't a one-size-fits-all solution for backporting newer UI components to older devices. Be mindful of the user experience: on older devices, users may not be familiar with newer design patterns and UI components. Give some thought as to how the same functionality can be delivered using familiar elements. In many cases this is less of a concern&mdash;if newer UI components are prominent in the application ecosystem (such as the action bar), or where the interaction model is extremely simple and intuitive (such as swipe views using a {@link android.support.v4.view.ViewPager}).</p>
+
+<h2 id="older-tabs">Implement Tabs Using Older APIs</h2>
+
+<p>To create an older implementation of action bar tabs, you can use a {@link android.widget.TabWidget} and {@link android.widget.TabHost} (although one can alternatively use horizontally laid-out {@link android.widget.Button} widgets). Implement this in classes called <code>TabHelperEclair</code> and <code>CompatTabEclair</code>, since this implementation uses APIs introduced no later than Android 2.0 (Eclair).</p>
+
+
+<img src="{@docRoot}images/training/backward-compatible-ui-classes-eclair.png"
+  alt="Class diagram for the Eclair implementation of tabs." id="figure-classes">
+
+<p class="img-caption"><strong>Figure 1.</strong> Class diagram for the Eclair implementation of tabs.</p>
+
+<p>The <code>CompatTabEclair</code> implementation stores tab properties such as the tab text and icon in instance variables, since there isn't an {@link android.app.ActionBar.Tab ActionBar.Tab} object available to handle this storage:</p>
+
+<pre>
+public class CompatTabEclair extends CompatTab {
+    // Store these properties in the instance,
+    // as there is no ActionBar.Tab object.
+    private CharSequence mText;
+    ...
+
+    public CompatTab setText(int resId) {
+        // Our older implementation simply stores this
+        // information in the object instance.
+        mText = mActivity.getResources().getText(resId);
+        return this;
+    }
+
+    ...
+    // Do the same for other properties (icon, callback, etc.)
+}
+</pre>
+
+<p>The <code>TabHelperEclair</code> implementation makes use of methods on the
+{@link android.widget.TabHost} widget for creating {@link android.widget.TabHost.TabSpec}
+objects and tab indicators:</p>
+
+<pre>
+public class TabHelperEclair extends TabHelper {
+    private TabHost mTabHost;
+    ...
+
+    protected void setUp() {
+        if (mTabHost == null) {
+            // Our activity layout for pre-Honeycomb devices
+            // must contain a TabHost.
+            mTabHost = (TabHost) mActivity.findViewById(
+                    android.R.id.tabhost);
+            mTabHost.setup();
+        }
+    }
+
+    public void addTab(CompatTab tab) {
+        ...
+        TabSpec spec = mTabHost
+                .newTabSpec(tag)
+                .setIndicator(tab.getText()); // And optional icon
+        ...
+        mTabHost.addTab(spec);
+    }
+
+    // The other important method, newTab() is part of
+    // the base implementation.
+}
+</pre>
+
+<p>You now have two implementations of <code>CompatTab</code> and <code>TabHelper</code>: one that works on devices running Android 3.0 or later and uses new APIs, and another that works on devices running Android 2.0 or later and uses older APIs. The next lesson discusses using these implementations in your application.</p>
