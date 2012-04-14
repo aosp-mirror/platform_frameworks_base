@@ -21,24 +21,26 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A class for a request of service discovery.
+ * A class for creating a service discovery request for use with
+ * {@link WifiP2pManager#addServiceRequest} and {@link WifiP2pManager#removeServiceRequest}
  *
- * <p>This class is used when you create customized service discovery request.
- * e.g) vendor specific request/ws discovery etc.
+ * <p>This class is used to create service discovery request for custom
+ * vendor specific service discovery protocol {@link WifiP2pServiceInfo#SERVICE_TYPE_VENDOR_SPECIFIC}
+ * or to search all service protocols {@link WifiP2pServiceInfo#SERVICE_TYPE_ALL}.
  *
- * <p>If you want to create UPnP or Bonjour service request, then you had better
- * use {@link WifiP2pUpnpServiceRequest} or {@link WifiP2pBonjourServiceRequest}.
+ * <p>For the purpose of creating a UPnP or Bonjour service request, use
+ * {@link WifiP2pUpnpServiceRequest} or {@link WifiP2pDnsSdServiceRequest} respectively.
  *
- * @see WifiP2pUpnpServiceRequest
- * @see WifiP2pBonjourServiceRequest
- * @hide
+ * {@see WifiP2pManager}
+ * {@see WifiP2pUpnpServiceRequest}
+ * {@see WifiP2pDnsSdServiceRequest}
  */
 public class WifiP2pServiceRequest implements Parcelable {
 
     /**
-     * Service type. It's defined in table63 in Wi-Fi Direct specification.
+     * Service discovery protocol. It's defined in table63 in Wi-Fi Direct specification.
      */
-    private int mServiceType;
+    private int mProtocolType;
 
     /**
      * The length of the service request TLV.
@@ -56,7 +58,7 @@ public class WifiP2pServiceRequest implements Parcelable {
     /**
      * The hex dump string of query data for the requested service information.
      *
-     * e.g) Bonjour apple file sharing over tcp (dns name=_afpovertcp._tcp.local.)
+     * e.g) DnsSd apple file sharing over tcp (dns name=_afpovertcp._tcp.local.)
      * 0b5f6166706f766572746370c00c000c01
      */
     private String mQuery;
@@ -64,14 +66,14 @@ public class WifiP2pServiceRequest implements Parcelable {
     /**
      * This constructor is only used in newInstance().
      *
-     * @param serviceType service discovery type.
+     * @param protocolType service discovery protocol.
      * @param query The part of service specific query.
      * @hide
      */
-    protected WifiP2pServiceRequest(int serviceType, String query) {
+    protected WifiP2pServiceRequest(int protocolType, String query) {
         validateQuery(query);
 
-        mServiceType = serviceType;
+        mProtocolType = protocolType;
         mQuery = query;
         if (query != null) {
             mLength = query.length()/2 + 2;
@@ -90,7 +92,7 @@ public class WifiP2pServiceRequest implements Parcelable {
      */
     private WifiP2pServiceRequest(int serviceType, int length,
             int transId, String query) {
-        mServiceType = serviceType;
+        mProtocolType = serviceType;
         mLength = length;
         mTransId = transId;
         mQuery = query;
@@ -134,7 +136,7 @@ public class WifiP2pServiceRequest implements Parcelable {
         // length is retained as little endian format.
         sb.append(String.format("%02x", (mLength) & 0xff));
         sb.append(String.format("%02x", (mLength >> 8) & 0xff));
-        sb.append(String.format("%02x", mServiceType));
+        sb.append(String.format("%02x", mProtocolType));
         sb.append(String.format("%02x", mTransId));
         if (mQuery != null) {
             sb.append(mQuery);
@@ -177,42 +179,34 @@ public class WifiP2pServiceRequest implements Parcelable {
     }
 
     /**
-     * Create service discovery request.
+     * Create a service discovery request.
      *
-     * <p>The created instance is set to framework by
-     * {@link WifiP2pManager#addLocalService}.
+     * @param protocolType can be {@link WifiP2pServiceInfo#SERVICE_TYPE_ALL}
+     * or {@link WifiP2pServiceInfo#SERVICE_TYPE_VENDOR_SPECIFIC}.
+     * In order to create a UPnP or Bonjour service request, use
+     * {@link WifiP2pUpnpServiceRequest} or {@link WifiP2pDnsSdServiceRequest}
+     * respectively
      *
-     * @param serviceType service type.<br>
-     * e.g) {@link WifiP2pServiceInfo#SERVICE_TYPE_ALL},
-     *  {@link WifiP2pServiceInfo#SERVICE_TYPE_WS_DISCOVERY},
-     * {@link WifiP2pServiceInfo#SERVICE_TYPE_VENDOR_SPECIFIC}.
-     * If you want to use UPnP or Bonjour, you create  the request by
-     * {@link WifiP2pUpnpServiceRequest} or {@link WifiP2pBonjourServiceRequest}
-     *
-     * @param query hex string. if null, all specified services are requested.
+     * @param queryData hex string that is vendor specific.  Can be null.
      * @return service discovery request.
      */
-    public static WifiP2pServiceRequest newInstance(int serviceType, String query) {
-        return new WifiP2pServiceRequest(serviceType, query);
+    public static WifiP2pServiceRequest newInstance(int protocolType, String queryData) {
+        return new WifiP2pServiceRequest(protocolType, queryData);
     }
 
     /**
-     * Create all service discovery request.
+     * Create a service discovery request.
      *
-     * <p>The created instance is set to framework by
-     * {@link WifiP2pManager#addLocalService}.
-     *
-     * @param serviceType service type.<br>
-     * e.g) {@link WifiP2pServiceInfo#SERVICE_TYPE_ALL},
-     *  {@link WifiP2pServiceInfo#SERVICE_TYPE_WS_DISCOVERY},
-     * {@link WifiP2pServiceInfo#SERVICE_TYPE_VENDOR_SPECIFIC}.
-     * If you want to use UPnP or Bonjour, you create  the request by
-     * {@link WifiP2pUpnpServiceRequest} or {@link WifiP2pBonjourServiceRequest}
+     * @param protocolType can be {@link WifiP2pServiceInfo#SERVICE_TYPE_ALL}
+     * or {@link WifiP2pServiceInfo#SERVICE_TYPE_VENDOR_SPECIFIC}.
+     * In order to create a UPnP or Bonjour service request, use
+     * {@link WifiP2pUpnpServiceRequest} or {@link WifiP2pDnsSdServiceRequest}
+     * respectively
      *
      * @return service discovery request.
      */
-    public static WifiP2pServiceRequest newInstance(int serviceType) {
-        return new WifiP2pServiceRequest(serviceType, null);
+    public static WifiP2pServiceRequest newInstance(int protocolType ) {
+        return new WifiP2pServiceRequest(protocolType, null);
     }
 
     @Override
@@ -230,7 +224,7 @@ public class WifiP2pServiceRequest implements Parcelable {
          * Not compare transaction id.
          * Transaction id may be changed on each service discovery operation.
          */
-        if ((req.mServiceType != mServiceType) ||
+        if ((req.mProtocolType != mProtocolType) ||
                 (req.mLength != mLength)) {
             return false;
         }
@@ -246,7 +240,7 @@ public class WifiP2pServiceRequest implements Parcelable {
     @Override
     public int hashCode() {
         int result = 17;
-        result = 31 * result + mServiceType;
+        result = 31 * result + mProtocolType;
         result = 31 * result + mLength;
         result = 31 * result + (mQuery == null ? 0 : mQuery.hashCode());
         return result;
@@ -259,7 +253,7 @@ public class WifiP2pServiceRequest implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mServiceType);
+        dest.writeInt(mProtocolType);
         dest.writeInt(mLength);
         dest.writeInt(mTransId);
         dest.writeString(mQuery);

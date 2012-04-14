@@ -22,8 +22,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.nsd.DnsSdTxtRecord;
-import android.net.wifi.p2p.nsd.WifiP2pBonjourServiceInfo;
-import android.net.wifi.p2p.nsd.WifiP2pBonjourServiceResponse;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceResponse;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pServiceRequest;
 import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
@@ -56,21 +56,20 @@ import java.util.List;
  * callbacks provided by the application. The application needs to do an initialization with
  * {@link #initialize} before doing any p2p operation.
  *
- * <p> Application actions {@link #discoverPeers}, {@link #connect}, {@link #cancelConnect},
- * {@link #createGroup} and {@link #removeGroup} need a {@link ActionListener} instance for
- * receiving callbacks {@link ActionListener#onSuccess} or {@link ActionListener#onFailure}.
- * Action callbacks indicate whether the initiation of the action was a success or a failure.
+ * <p> Most application calls need a {@link ActionListener} instance for receiving callbacks
+ * {@link ActionListener#onSuccess} or {@link ActionListener#onFailure}. Action callbacks
+ * indicate whether the initiation of the action was a success or a failure.
  * Upon failure, the reason of failure can be one of {@link #ERROR}, {@link #P2P_UNSUPPORTED}
  * or {@link #BUSY}.
  *
  * <p> An application can initiate discovery of peers with {@link #discoverPeers}. An initiated
  * discovery request from an application stays active until the device starts connecting to a peer
- * or forms a p2p group. The {@link ActionListener} callbacks provide feedback on whether the
- * discovery initiation was successful or failure. Additionally, applications can listen
- * to {@link #WIFI_P2P_PEERS_CHANGED_ACTION} intent action to know when the peer list changes.
+ * ,forms a p2p group or there is an explicit {@link #stopPeerDiscovery}.
+ * Applications can listen to {@link #WIFI_P2P_DISCOVERY_CHANGED_ACTION} to know if a peer-to-peer
+ * discovery is running or stopped. Additionally, {@link #WIFI_P2P_PEERS_CHANGED_ACTION} indicates
+ * if the peer list has changed.
  *
- * <p> When the peer list change intent {@link #WIFI_P2P_PEERS_CHANGED_ACTION} is received
- * or when an application needs to fetch the current list of peers, it can request the list
+ * <p> When an application needs to fetch the current list of peers, it can request the list
  * of peers with {@link #requestPeers}. When the peer list is available
  * {@link PeerListListener#onPeersAvailable} is called with the device list.
  *
@@ -78,7 +77,7 @@ import java.util.List;
  * {@link WifiP2pConfig} for details on setting up the configuration. For communication with legacy
  * Wi-Fi devices that do not support p2p, an app can create a group using {@link #createGroup}
  * which creates an access point whose details can be fetched with {@link #requestGroupInfo}.
-*
+ *
  * <p> After a successful group formation through {@link #createGroup} or through {@link #connect},
  * use {@link #requestConnectionInfo} to fetch the connection details. The connection info
  * {@link WifiP2pInfo} contains the address of the group owner
@@ -86,8 +85,36 @@ import java.util.List;
  * if the current device is a p2p group owner. A p2p client can thus communicate with
  * the p2p group owner through a socket connection.
  *
- * <p> Android has no platform support for service discovery yet, so applications could
- * run a service discovery protocol to discover services on the peer-to-peer netework.
+ * <p> With peer discovery using {@link  #discoverPeers}, an application discovers the neighboring
+ * peers, but has no good way to figure out which peer to establish a connection with. For example,
+ * if a game application is interested in finding all the neighboring peers that are also running
+ * the same game, it has no way to find out until after the connection is setup. Pre-association
+ * service discovery is meant to address this issue of filtering the peers based on the running
+ * services.
+ *
+ * <p>With pre-association service discovery, an application can advertise a service for a
+ * application on a peer device prior to a connection setup between the devices.
+ * Currently, DNS based service discovery (Bonjour) and Upnp are the higher layer protocols
+ * supported. Get Bonjour resources at dns-sd.org and Upnp resources at upnp.org
+ * As an example, a video application can discover a Upnp capable media renderer
+ * prior to setting up a Wi-fi p2p connection with the device.
+ *
+ * <p> An application can advertise a Upnp or a Bonjour service with a call to
+ * {@link #addLocalService}. After a local service is added,
+ * the framework automatically responds to a peer application discovering the service prior
+ * to establishing a p2p connection. A call to {@link #removeLocalService} removes a local
+ * service and {@link #clearLocalServices} can be used to clear all local services.
+ *
+ * <p> An application that is looking for peer devices that support certain services
+ * can do so with a call to  {@link #discoverServices}. Prior to initiating the discovery,
+ * application can add service discovery request with a call to {@link #addServiceRequest},
+ * remove a service discovery request with a call to {@link #removeServiceRequest} or clear
+ * all requests with a call to {@link #clearServiceRequests}. When no service requests remain,
+ * a previously running service discovery will stop.
+ *
+ * The application is notified of a result of service discovery request through listener callbacks
+ * set through {@link #setDnsSdResponseListeners} for Bonjour or
+ * {@link #setUpnpServiceResponseListener} for Upnp.
  *
  * <p class="note"><strong>Note:</strong>
  * Registering an application handler with {@link #initialize} requires the permissions
@@ -443,30 +470,28 @@ public class WifiP2pManager {
 
     /**
     * Interface for callback invocation when service discovery response other than
-    * UPnP or Bonjour is received
-    * @hide
+    * Upnp or Bonjour is received
     */
     public interface ServiceResponseListener {
 
         /**
          * The requested service response is available.
          *
-         * @param serviceType service type. see the service type of
-         * {@link WifiP2pServiceInfo}
+         * @param protocolType protocol type. currently only
+         * {@link WifiP2pServiceInfo#SERVICE_TYPE_VENDOR_SPECIFIC}.
          * @param responseData service discovery response data based on the requested
          *  service protocol type. The format depends on the service type.
          * @param srcDevice source device.
          */
-        public void onServiceAvailable(int serviceType,
+        public void onServiceAvailable(int protocolType,
                 byte[] responseData, WifiP2pDevice srcDevice);
     }
 
     /**
      * Interface for callback invocation when Bonjour service discovery response
      * is received
-     * @hide
      */
-    public interface BonjourServiceResponseListener {
+    public interface DnsSdServiceResponseListener {
 
         /**
          * The requested Bonjour service response is available.
@@ -479,7 +504,7 @@ public class WifiP2pManager {
          * e.g) "_ipp._tcp.local."
          * @param srcDevice source device.
          */
-        public void onBonjourServiceAvailable(String instanceName,
+        public void onDnsSdServiceAvailable(String instanceName,
                 String registrationType, WifiP2pDevice srcDevice);
 
    }
@@ -487,9 +512,8 @@ public class WifiP2pManager {
     /**
      * Interface for callback invocation when Bonjour TXT record is available
      * for a service
-     * @hide
      */
-   public interface BonjourTxtRecordListener {
+   public interface DnsSdTxtRecordListener {
         /**
          * The requested Bonjour service response is available.
          *
@@ -501,7 +525,7 @@ public class WifiP2pManager {
          * @param record txt record.
          * @param srcDevice source device.
          */
-        public void onBonjourTxtRecordAvailable(String fullDomainName,
+        public void onDnsSdTxtRecordAvailable(String fullDomainName,
                 DnsSdTxtRecord record,
                 WifiP2pDevice srcDevice);
    }
@@ -509,7 +533,6 @@ public class WifiP2pManager {
     /**
      * Interface for callback invocation when upnp service discovery response
      * is received
-     * @hide
      * */
     public interface UpnpServiceResponseListener {
 
@@ -542,8 +565,8 @@ public class WifiP2pManager {
         private final static int INVALID_LISTENER_KEY = 0;
         private ChannelListener mChannelListener;
         private ServiceResponseListener mServRspListener;
-        private BonjourServiceResponseListener mBonjourServRspListener;
-        private BonjourTxtRecordListener mBonjourTxtListener;
+        private DnsSdServiceResponseListener mDnsSdServRspListener;
+        private DnsSdTxtRecordListener mDnsSdTxtListener;
         private UpnpServiceResponseListener mUpnpServRspListener;
         private HashMap<Integer, Object> mListenerMap = new HashMap<Integer, Object>();
         private Object mListenerMapLock = new Object();
@@ -632,8 +655,8 @@ public class WifiP2pManager {
         }
 
         private void handleServiceResponse(WifiP2pServiceResponse resp) {
-            if (resp instanceof WifiP2pBonjourServiceResponse) {
-                handleBonjourServiceResponse((WifiP2pBonjourServiceResponse)resp);
+            if (resp instanceof WifiP2pDnsSdServiceResponse) {
+                handleDnsSdServiceResponse((WifiP2pDnsSdServiceResponse)resp);
             } else if (resp instanceof WifiP2pUpnpServiceResponse) {
                 if (mUpnpServRspListener != null) {
                     handleUpnpServiceResponse((WifiP2pUpnpServiceResponse)resp);
@@ -651,17 +674,17 @@ public class WifiP2pManager {
                     resp.getSrcDevice());
         }
 
-        private void handleBonjourServiceResponse(WifiP2pBonjourServiceResponse resp) {
-            if (resp.getDnsType() == WifiP2pBonjourServiceInfo.DNS_TYPE_PTR) {
-                if (mBonjourServRspListener != null) {
-                    mBonjourServRspListener.onBonjourServiceAvailable(
+        private void handleDnsSdServiceResponse(WifiP2pDnsSdServiceResponse resp) {
+            if (resp.getDnsType() == WifiP2pDnsSdServiceInfo.DNS_TYPE_PTR) {
+                if (mDnsSdServRspListener != null) {
+                    mDnsSdServRspListener.onDnsSdServiceAvailable(
                             resp.getInstanceName(),
                             resp.getDnsQueryName(),
                             resp.getSrcDevice());
                 }
-            } else if (resp.getDnsType() == WifiP2pBonjourServiceInfo.DNS_TYPE_TXT) {
-                if (mBonjourTxtListener != null) {
-                    mBonjourTxtListener.onBonjourTxtRecordAvailable(
+            } else if (resp.getDnsType() == WifiP2pDnsSdServiceInfo.DNS_TYPE_TXT) {
+                if (mDnsSdTxtListener != null) {
+                    mDnsSdTxtListener.onDnsSdTxtRecordAvailable(
                             resp.getDnsQueryName(),
                             resp.getTxtRecord(),
                             resp.getSrcDevice());
@@ -749,10 +772,16 @@ public class WifiP2pManager {
         c.mAsyncChannel.sendMessage(DISCOVER_PEERS, 0, c.putListener(listener));
     }
 
-    /**
-     * TODO: Add more documentation before opening up
-     * Cancel peer discovery
-     * @hide
+   /**
+     * Stop an ongoing peer discovery
+     *
+     * <p> The function call immediately returns after sending a stop request
+     * to the framework. The application is notified of a success or failure to initiate
+     * stop through listener callbacks {@link ActionListener#onSuccess} or
+     * {@link ActionListener#onFailure}.
+     *
+     * @param c is the channel created at {@link #initialize}
+     * @param listener for callbacks on success or failure. Can be null.
      */
     public void stopPeerDiscovery(Channel c, ActionListener listener) {
         checkChannel(c);
@@ -843,27 +872,25 @@ public class WifiP2pManager {
     }
 
     /**
-     * Register a local service of service discovery.
+     * Register a local service for service discovery. If a local service is registered,
+     * the framework automatically responds to a service discovery request from a peer.
      *
      * <p> The function call immediately returns after sending a request to add a local
      * service to the framework. The application is notified of a success or failure to
      * add service through listener callbacks {@link ActionListener#onSuccess} or
      * {@link ActionListener#onFailure}.
      *
-     * <p>The service information is set through the subclass of {@link WifiP2pServiceInfo}.<br>
-     * e.g )  {@link WifiP2pUpnpServiceInfo#newInstance} or
-     *  {@link WifiP2pBonjourServiceInfo#newInstance}
+     * <p>The service information is set through {@link WifiP2pServiceInfo}.<br>
+     * or its subclass calls  {@link WifiP2pUpnpServiceInfo#newInstance} or
+     *  {@link WifiP2pDnsSdServiceInfo#newInstance} for a Upnp or Bonjour service
+     * respectively
      *
-     * <p>If a local service is added, the framework responds the appropriate service discovery
-     *  request automatically.
-     *
-     * <p>These service information will be clear when p2p is disabled or call
+     * <p>The service information can be cleared with calls to
      *  {@link #removeLocalService} or {@link #clearLocalServices}.
      *
      * @param c is the channel created at {@link #initialize}
      * @param servInfo is a local service information.
      * @param listener for callbacks on success or failure. Can be null.
-     * @hide
      */
     public void addLocalService(Channel c, WifiP2pServiceInfo servInfo, ActionListener listener) {
         checkChannel(c);
@@ -872,7 +899,7 @@ public class WifiP2pManager {
     }
 
     /**
-     * Unregister a specified local service of service discovery.
+     * Remove a registered local service added with {@link #addLocalService}
      *
      * <p> The function call immediately returns after sending a request to remove a
      * local service to the framework. The application is notified of a success or failure to
@@ -882,7 +909,6 @@ public class WifiP2pManager {
      * @param c is the channel created at {@link #initialize}
      * @param servInfo is the local service information.
      * @param listener for callbacks on success or failure. Can be null.
-     * @hide
      */
     public void removeLocalService(Channel c, WifiP2pServiceInfo servInfo,
             ActionListener listener) {
@@ -901,7 +927,6 @@ public class WifiP2pManager {
      *
      * @param c is the channel created at {@link #initialize}
      * @param listener for callbacks on success or failure. Can be null.
-     * @hide
      */
     public void clearLocalServices(Channel c, ActionListener listener) {
         checkChannel(c);
@@ -910,12 +935,14 @@ public class WifiP2pManager {
 
     /**
      * Register a callback to be invoked on receiving service discovery response.
+     * Used only for vendor specific protocol right now. For Bonjour or Upnp, use
+     * {@link #setDnsSdResponseListeners} or {@link #setUpnpServiceResponseListener}
+     * respectively.
      *
      * <p> see {@link #discoverServices} for the detail.
      *
      * @param c is the channel created at {@link #initialize}
      * @param listener for callbacks on receiving service discovery response.
-     * @hide
      */
     public void setServiceResponseListener(Channel c,
             ServiceResponseListener listener) {
@@ -930,15 +957,14 @@ public class WifiP2pManager {
      * <p> see {@link #discoverServices} for the detail.
      *
      * @param c
-     * @param servlistener is for listening to a Bonjour service response
-     * @param txtListener is for listening to a Bonjour TXT record
-     * @hide
+     * @param servListener is for listening to a Bonjour service response
+     * @param txtListener is for listening to a Bonjour TXT record response
      */
-    public void setBonjourResponseListeners(Channel c,
-            BonjourServiceResponseListener servListener, BonjourTxtRecordListener txtListener) {
+    public void setDnsSdResponseListeners(Channel c,
+            DnsSdServiceResponseListener servListener, DnsSdTxtRecordListener txtListener) {
         checkChannel(c);
-        c.mBonjourServRspListener = servListener;
-        c.mBonjourTxtListener = txtListener;
+        c.mDnsSdServRspListener = servListener;
+        c.mDnsSdTxtListener = txtListener;
     }
 
     /**
@@ -949,7 +975,6 @@ public class WifiP2pManager {
      *
      * @param c is the channel created at {@link #initialize}
      * @param listener for callbacks on receiving service discovery response.
-     * @hide
      */
     public void setUpnpServiceResponseListener(Channel c,
             UpnpServiceResponseListener listener) {
@@ -971,11 +996,10 @@ public class WifiP2pManager {
      *
      * <p>The application is notified of the response against the service discovery request
      * through listener callbacks registered by {@link #setServiceResponseListener} or
-     * {@link #setBonjourServiceResponseListener}, or {@link #setUpnpServiceResponseListener}.
+     * {@link #setDnsSdResponseListeners}, or {@link #setUpnpServiceResponseListener}.
      *
      * @param c is the channel created at {@link #initialize}
      * @param listener for callbacks on success or failure. Can be null.
-     * @hide
      */
     public void discoverServices(Channel c, ActionListener listener) {
         checkChannel(c);
@@ -993,14 +1017,13 @@ public class WifiP2pManager {
      * <p>After service discovery request is added, you can initiate service discovery by
      * {@link #discoverServices}.
      *
-     * <p>These information will be clear when wifi p2p is disabled or
+     * <p>The added service requests can be cleared with calls to
      * {@link #removeServiceRequest(Channel, WifiP2pServiceRequest, ActionListener)} or
-     * {@link #clearServiceRequests(Channel, ActionListener)} is called.
+     * {@link #clearServiceRequests(Channel, ActionListener)}.
      *
      * @param c is the channel created at {@link #initialize}
      * @param req is the service discovery request.
      * @param listener for callbacks on success or failure. Can be null.
-     * @hide
      */
     public void addServiceRequest(Channel c,
             WifiP2pServiceRequest req, ActionListener listener) {
@@ -1011,7 +1034,7 @@ public class WifiP2pManager {
     }
 
     /**
-     * Remove a specified service discovery request.
+     * Remove a specified service discovery request added with {@link #addServiceRequest}
      *
      * <p> The function call immediately returns after sending a request to remove service
      * discovery request to the framework. The application is notified of a success or failure to
@@ -1021,7 +1044,6 @@ public class WifiP2pManager {
      * @param c is the channel created at {@link #initialize}
      * @param req is the service discovery request.
      * @param listener for callbacks on success or failure. Can be null.
-     * @hide
      */
     public void removeServiceRequest(Channel c, WifiP2pServiceRequest req,
             ActionListener listener) {
@@ -1041,7 +1063,6 @@ public class WifiP2pManager {
      *
      * @param c is the channel created at {@link #initialize}
      * @param listener for callbacks on success or failure. Can be null.
-     * @hide
      */
     public void clearServiceRequests(Channel c, ActionListener listener) {
         checkChannel(c);

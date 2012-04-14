@@ -37,7 +37,6 @@ import java.util.Arrays;
  * The DnsSdTxtRecord object stores the entire TXT data as a single byte array, traversing it
  * as need be to implement its various methods.
  *
- * @hide
  */
 public class DnsSdTxtRecord implements Parcelable {
     private static final byte mSeperator = '=';
