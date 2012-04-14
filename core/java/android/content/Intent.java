@@ -6576,40 +6576,67 @@ public class Intent implements Parcelable, Cloneable {
 
         final String action = getAction();
         if (ACTION_SEND.equals(action)) {
-            final Uri stream;
+            Uri stream = null;
             try {
                 stream = getParcelableExtra(EXTRA_STREAM);
             } catch (ClassCastException e) {
-                return;
             }
-            if (stream != null) {
+            final CharSequence text = getCharSequenceExtra(EXTRA_TEXT);
+            final String htmlText = getStringExtra(EXTRA_HTML_TEXT);
+            if (stream != null || text != null || htmlText != null) {
                 final ClipData clipData = new ClipData(
-                        null, new String[] { getType() }, new ClipData.Item(stream));
-
+                        null, new String[] { getType() },
+                        new ClipData.Item(text, htmlText, null, stream));
                 setClipData(clipData);
                 addFlags(FLAG_GRANT_READ_URI_PERMISSION);
             }
 
         } else if (ACTION_SEND_MULTIPLE.equals(action)) {
-            final ArrayList<Uri> streams;
+            ArrayList<Uri> streams = null;
             try {
                 streams = getParcelableArrayListExtra(EXTRA_STREAM);
             } catch (ClassCastException e) {
-                return;
             }
-            if (streams != null && streams.size() > 0) {
-                final Uri firstStream = streams.get(0);
+            final ArrayList<CharSequence> texts = getCharSequenceArrayListExtra(EXTRA_TEXT);
+            final ArrayList<String> htmlTexts = getStringArrayListExtra(EXTRA_HTML_TEXT);
+            int num = -1;
+            if (streams != null) {
+                num = streams.size();
+            }
+            if (texts != null) {
+                if (num >= 0 && num != texts.size()) {
+                    // Wha...!  F- you.
+                    return;
+                }
+                num = texts.size();
+            }
+            if (htmlTexts != null) {
+                if (num >= 0 && num != htmlTexts.size()) {
+                    // Wha...!  F- you.
+                    return;
+                }
+                num = htmlTexts.size();
+            }
+            if (num > 0) {
                 final ClipData clipData = new ClipData(
-                        null, new String[] { getType() }, new ClipData.Item(firstStream));
+                        null, new String[] { getType() },
+                        makeClipItem(streams, texts, htmlTexts, 0));
 
-                final int size = streams.size();
-                for (int i = 1; i < size; i++) {
-                    clipData.addItem(new ClipData.Item(streams.get(i)));
+                for (int i = 1; i < num; i++) {
+                    clipData.addItem(makeClipItem(streams, texts, htmlTexts, i));
                 }
 
                 setClipData(clipData);
                 addFlags(FLAG_GRANT_READ_URI_PERMISSION);
             }
         }
+    }
+
+    private static ClipData.Item makeClipItem(ArrayList<Uri> streams, ArrayList<CharSequence> texts,
+            ArrayList<String> htmlTexts, int which) {
+        Uri uri = streams != null ? streams.get(which) : null;
+        CharSequence text = texts != null ? texts.get(which) : null;
+        String htmlText = htmlTexts != null ? htmlTexts.get(which) : null;
+        return new ClipData.Item(text, htmlText, null, uri);
     }
 }
