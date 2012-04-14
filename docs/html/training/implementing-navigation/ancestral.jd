@@ -1,0 +1,124 @@
+page.title=Implementing Ancestral Navigation
+parent.title=Implementing Effective Navigation
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Implementing Lateral Navigation
+previous.link=lateral.html
+next.title=Implementing Temporal Navigation
+next.link=temporal.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to:</h2>
+<ol>
+  <li><a href="#up">Implement <em>Up</em> Navigation</a></li>
+  <li><a href="#app-home">Properly Handle the Application Home Screen</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/design-navigation/ancestral-temporal.html">Providing Ancestral and Temporal Navigation</a></li>
+  <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
+  <li><a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a></li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+<a href="http://developer.android.com/shareables/training/EffectiveNavigation.zip"
+  class="button">Download the sample app</a>
+<p class="filename">EffectiveNavigation.zip</p>
+</div>
+
+</div>
+</div>
+
+
+<p><em>Ancestral navigation</em> is up the application's information hierarchy, where the top of the hierarchy (or root) is the application's home screen. This navigation concept is described in <a href="{@docRoot}training/design-navigation/ancestral-temporal.html">Designing Effective Navigation</a>. This lesson discusses how to provide ancestral navigation using the <em>Up</em> button in the action bar.</p>
+
+
+<h2 id="up">Implement <em>Up</em> Navigation</h2>
+
+<p>When implementing ancestral navigation, all screens in your application that aren't the home screen should offer a means of navigating to the immediate parent screen in the hierarchy via the <em>Up</em> button in the action bar.</p>
+
+
+<img src="{@docRoot}images/training/implementing-navigation-up.png"
+  alt="The Up button in the action bar." id="figure-up">
+
+<p class="img-caption"><strong>Figure 1.</strong> The <em>Up</em> button in the action bar.</p>
+
+<p>Regardless of how the current screen was reached, pressing this button should always take the user to the same screen in the hierarchy.</p>
+
+<p>To implement <em>Up</em>, enable it in the action bar in your activity's {@link android.app.Activity#onCreate onCreate()} method:</p>
+
+<pre>
+{@literal @}Override
+public void onCreate(Bundle savedInstanceState) {
+    ...
+    getActionBar().setDisplayHomeAsUpEnabled(true);
+    ...
+}
+</pre>
+
+<p>You should also handle <code>android.R.id.home</code> in {@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()}. This resource is the menu item ID for the <em>Home</em> (or <em>Up</em>) button. To ensure that a specific parent activity is shown, <em>DO NOT</em> simply call {@link android.app.Activity#finish finish()}. Instead, use an intent such as the one described below.</p>
+
+<pre>
+{@literal @}Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case android.R.id.home:
+            // This is called when the Home (Up) button is pressed
+            // in the Action Bar.
+            Intent parentActivityIntent = new Intent(this, MyParentActivity.class);
+            parentActivityIntent.addFlags(
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(parentActivityIntent);
+            finish();
+            return true;
+    }
+    return super.onOptionsItemSelected(item);
+}
+</pre>
+
+<p>When the current activity belongs to a task from a different application&mdash;for example if it was reached via an intent from another application&mdash;pressing <em>Up</em> should create a new task for the application with a synthesized back stack. This approach is described in <a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a> and the {@link android.support.v4.app.TaskStackBuilder} class reference.</p>
+
+<p>The {@link android.support.v4.app.NavUtils} and {@link android.support.v4.app.TaskStackBuilder} classes in the <a href="{@docRoot}sdk/compatibility-library.html">Android Support Package</a> provide helpers for implementing this behavior correctly. An example usage of these two helper classes is below:</p>
+
+<pre>
+{@literal @}Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case android.R.id.home:
+            Intent upIntent = new Intent(this, MyParentActivity.class);
+            if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+                // This activity is not part of the application's task, so create a new task
+                // with a synthesized back stack.
+                TaskStackBuilder.from(this)
+                        .addNextIntent(new Intent(this, MyGreatGrandParentActivity.class))
+                        .addNextIntent(new Intent(this, MyGrandParentActivity.class))
+                        .addNextIntent(upIntent)
+                        .startActivities();
+                finish();
+            } else {
+                // This activity is part of the application's task, so simply
+                // navigate up to the hierarchical parent activity.
+                NavUtils.navigateUpTo(this, upIntent);
+            }
+            return true;
+    }
+    return super.onOptionsItemSelected(item);
+}
+</pre>
+
+<h2 id="app-home">Properly Handle the Application Home Screen</h2>
+
+<p>By default, the <em>Home</em> button in the action bar is interactive. Since it does not make much sense to navigate home&mdash;or up one level&mdash;while on the home screen, you should disable the button like so:</p>
+
+<pre>
+getActionBar().setHomeButtonEnabled(false);
+</pre>
