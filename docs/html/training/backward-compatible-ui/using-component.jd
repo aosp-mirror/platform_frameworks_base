@@ -1,0 +1,143 @@
+page.title=Using the Version-Aware Component
+parent.title=Creating Backward-Compatible UIs
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Creating an Implementation with Older APIs
+previous.link=older-implementation.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to:</h2>
+<ol>
+  <li><a href="#switching-logic">Add the Switching Logic</a></li>
+  <li><a href="#layout">Create a Version-Aware Activity Layout</a></li>
+  <li><a href="#use-tabhelper">Use TabHelper in Your Activity</a></li>
+</ol>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+<a href="http://developer.android.com/shareables/training/TabCompat.zip"
+  class="button">Download the sample app</a>
+<p class="filename">TabCompat.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>Now that you have two implementations of <code>TabHelper</code> and <code>CompatTab</code>&mdash;one for Android 3.0 and later and one for earlier versions of the platform&mdash;it's time to do something with these implementations. This lesson discusses creating the logic for switching between these implementations, creating version-aware layouts, and finally using the backward-compatible UI component.</p>
+
+<h2 id="switching-logic">Add the Switching Logic</h2>
+
+<p>The <code>TabHelper</code> abstract class acts as a <a href="http://en.wikipedia.org/wiki/Factory_(software_concept)">factory</a> for creating version-appropriate <code>TabHelper</code> and <code>CompatTab</code> instances, based on the current device's platform version:</p>
+
+<pre>
+public abstract class TabHelper {
+    ...
+    // Usage is TabHelper.createInstance(activity)
+    public static TabHelper createInstance(FragmentActivity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            return new TabHelperHoneycomb(activity);
+        } else {
+            return new TabHelperEclair(activity);
+        }
+    }
+
+    // Usage is mTabHelper.newTab("tag")
+    public CompatTab newTab(String tag) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            return new CompatTabHoneycomb(mActivity, tag);
+        } else {
+            return new CompatTabEclair(mActivity, tag);
+        }
+    }
+    ...
+}
+</pre>
+
+<h2 id="layout">Create a Version-Aware Activity Layout</h2>
+
+<p>The next step is to provide layouts for your activity that can support the two tab implementations. For the older implementation (<code>TabHelperEclair</code>), you need to ensure that your activity layout contains a {@link android.widget.TabWidget} and {@link android.widget.TabHost}, along with a container for tab contents:</p>
+
+<p><strong>res/layout/main.xml:</strong></p>
+
+<pre>
+&lt;!-- This layout is for API level 5-10 only. --&gt;
+&lt;TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabhost"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"&gt;
+
+        &lt;TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" /&gt;
+
+        &lt;FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" /&gt;
+
+    &lt;/LinearLayout&gt;
+&lt;/TabHost&gt;
+</pre>
+
+<p>For the <code>TabHelperHoneycomb</code> implementation, all you need is a {@link android.widget.FrameLayout} to contain the tab contents, since the tab indicators are provided by the {@link android.app.ActionBar}:</p>
+
+<p><strong>res/layout-v11/main.xml:</strong></p>
+
+<pre>
+&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabcontent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" /&gt;
+</pre>
+
+<p>At runtime, Android will decide which version of the <code>main.xml</code> layout to inflate depending on the platform version. This is the same logic shown in the previous section to determine which <code>TabHelper</code> implementation to use.</p>
+
+<h2 id="use-tabhelper">Use TabHelper in Your Activity</h2>
+
+<p>In your activity's {@link android.app.Activity#onCreate onCreate()} method, you can obtain a <code>TabHelper</code> object and add tabs with the following code:</p>
+
+<pre>
+{@literal @}Override
+public void onCreate(Bundle savedInstanceState) {
+    setContentView(R.layout.main);
+
+    TabHelper tabHelper = TabHelper.createInstance(this);
+    tabHelper.setUp();
+
+    CompatTab photosTab = tabHelper
+            .newTab("photos")
+            .setText(R.string.tab_photos);
+    tabHelper.addTab(photosTab);
+
+    CompatTab videosTab = tabHelper
+            .newTab("videos")
+            .setText(R.string.tab_videos);
+    tabHelper.addTab(videosTab);
+}
+</pre>
+
+<p>When running the application, this code inflates the correct activity layout and instantiates either a <code>TabHelperHoneycomb</code> or <code>TabHelperEclair</code> object. The concrete class that's actually used is opaque to the activity, since they share the common <code>TabHelper</code> interface.</p>
+
+<p>Below are two screenshots of this implementation running on an Android 2.3 and Android 4.0 device.</p>
+
+<img src="{@docRoot}images/training/backward-compatible-ui-gb.png"
+  alt="Example screenshot of tabs running on an Android 2.3 device (using TabHelperEclair)." width="200">
+
+<img src="{@docRoot}images/training/backward-compatible-ui-ics.png"
+  alt="Example screenshots of tabs running on an Android 4.0 device (using TabHelperHoneycomb)." width="200">
+
+<p class="img-caption"><strong>Figure 1.</strong> Example screenshots of backward-compatible tabs running on an Android 2.3 device (using <code>TabHelperEclair</code>) and an Android 4.0 device (using <code>TabHelperHoneycomb</code>).</p>
