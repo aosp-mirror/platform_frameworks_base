@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Laat die program toe om die skerm se rotasie te eniger tyd te verander. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"verander wyserspoed"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Laat die program toe om die muis of stuurpaneel se wyserspoed te eniger tyd te verander. Dit moet nooit vir normale programme nodig wees nie."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"verander sleutelborduitleg"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Laat die program toe om die uitleg van die sleutelbord te verander. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"stuur Linux-seine na programme"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Laat die program toe om te versoek dat die voorsiende sein na alle aanhoudende prosesse gestuur word."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"laat program altyd loop"</string>
@@ -1063,10 +1061,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Raak om USB-ontfouting te deaktiveer."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Kies invoermetode"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Stel invoermetodes op"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Fisiese sleutelbord"</string>
+    <string name="hardware" msgid="7517821086888990278">"Hardeware"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidate"</u></string>
@@ -1193,14 +1189,6 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Verminder dag"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Vermeerder jaar"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Verminder jaar"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"gekontroleer"</string>
-    <string name="checkbox_not_checked" msgid="5174639551134444056">"nie gekontroleer nie"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"gekies"</string>
-    <string name="radiobutton_not_selected" msgid="2908760184307722393">"nie gekies nie"</string>
-    <string name="switch_on" msgid="551417728476977311">"aan"</string>
-    <string name="switch_off" msgid="7249798614327155088">"af"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"gedruk"</string>
-    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"nie gedruk nie"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Kanselleer"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Vee uit"</string>

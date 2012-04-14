@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Tillader, at appen kan ændre skærmretningen på et hvilket som helst tidspunkt. Bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ændre markørens hastighed"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Tillader, at appen til enhver tid kan ændre musemarkørens hastighed. Bør aldrig være nødvendigt for normale apps."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"skift tastaturlayout"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Tillader, at appen må ændre tastaturlayoutet. Bør aldrig være nødvendig for normale apps."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"sende Linux-signaler til apps"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Tillader, at appen kan anmode om, at det leverede signal sendes til alle vedholdende processer."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sørge for, at appen altid kører"</string>
@@ -1063,10 +1061,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tryk for at deaktivere USB-fejlretning."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Vælg inputmetode"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Konfigurer inputmetoder"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Fysisk tastatur"</string>
+    <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidater"</u></string>
@@ -1193,14 +1189,6 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Tidligere dag"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Senere år"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Tidligere år"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"markeret"</string>
-    <string name="checkbox_not_checked" msgid="5174639551134444056">"ikke markeret"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"udvalgt"</string>
-    <string name="radiobutton_not_selected" msgid="2908760184307722393">"ikke valgt"</string>
-    <string name="switch_on" msgid="551417728476977311">"tændt"</string>
-    <string name="switch_off" msgid="7249798614327155088">"slukket"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"trykket på"</string>
-    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"ikke trykket på"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Annuller"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Slet"</string>

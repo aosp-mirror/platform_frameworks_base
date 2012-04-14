@@ -1193,14 +1193,6 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Smanjenje dana"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Povećanje godine"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Smanjenje godine"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"označeno"</string>
-    <string name="checkbox_not_checked" msgid="5174639551134444056">"nije označeno"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"odabran"</string>
-    <string name="radiobutton_not_selected" msgid="2908760184307722393">"nije odabrano"</string>
-    <string name="switch_on" msgid="551417728476977311">"uključeno"</string>
-    <string name="switch_off" msgid="7249798614327155088">"isključeno"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"pritisnut"</string>
-    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"nije pritisnut"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Odustani"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Izbriši"</string>

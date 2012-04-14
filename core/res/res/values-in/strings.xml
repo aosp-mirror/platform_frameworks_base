@@ -109,7 +109,7 @@
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Tidak diteruskan"</string>
     <string name="fcComplete" msgid="3118848230966886575">"Kode fitur selesai."</string>
     <string name="fcError" msgid="3327560126588500777">"Masalah sambungan atau kode fitur tidak valid."</string>
-    <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
+    <string name="httpErrorOk" msgid="1191919378083472204">"Oke"</string>
     <string name="httpError" msgid="7956392511146698522">"Terjadi kesalahan jaringan."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"Tidak dapat menemukan URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Skema autentikasi situs tidak didukung."</string>
@@ -744,7 +744,7 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Mulai ulang"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Laman pada \"<xliff:g id="TITLE">%s</xliff:g>\" menyatakan:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload" msgid="730366588032430474">"Beranjak dari laman ini?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Sentuh OK untuk melanjutkan atau Batal untuk tetap pada laman ini."</string>
+    <string name="js_dialog_before_unload" msgid="730366588032430474">"Beranjak dari laman ini?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Sentuh Oke untuk melanjutkan atau Batal untuk tetap pada laman ini."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kiat: Ketuk dua kali untuk memperbesar dan memperkecil."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Isiotomatis"</string>
@@ -892,7 +892,7 @@
     <string name="VideoView_error_title" msgid="3534509135438353077">"Masalah video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Video ini tidak valid untuk pengaliran ke perangkat ini."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Tidak dapat memutar video ini."</string>
-    <string name="VideoView_error_button" msgid="2822238215100679592">"OK"</string>
+    <string name="VideoView_error_button" msgid="2822238215100679592">"Oke"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"tengah hari"</string>
     <string name="Noon" msgid="3342127745230013127">"Tengah hari"</string>
@@ -916,9 +916,9 @@
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Ruang penyimpanan tinggal sedikit"</string>
     <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Ruang penyimpanan tablet semakin sedikit."</string>
     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Ruang penyimpanan ponsel tersisa sedikit."</string>
-    <string name="ok" msgid="5970060430562524910">"OK"</string>
+    <string name="ok" msgid="5970060430562524910">"Oke"</string>
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
-    <string name="yes" msgid="5362982303337969312">"OK"</string>
+    <string name="yes" msgid="5362982303337969312">"Oke"</string>
     <string name="no" msgid="5141531044935541497">"Batal"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Perhatian"</string>
     <string name="loading" msgid="7933681260296021180">"Memuat..."</string>
@@ -938,7 +938,7 @@
     <string name="anr_activity_process" msgid="5776209883299089767">"Aktivitas <xliff:g id="ACTIVITY">%1$s</xliff:g> tidak menanggapi."\n\n"Anda ingin menutupnya?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> tidak menanggapi. Anda ingin menutupnya?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> tidak menanggapi."\n\n"Anda ingin menutupnya?"</string>
-    <string name="force_close" msgid="8346072094521265605">"OK"</string>
+    <string name="force_close" msgid="8346072094521265605">"Oke"</string>
     <string name="report" msgid="4060218260984795706">"Laporkan"</string>
     <string name="wait" msgid="7147118217226317732">"Tunggu"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Laman ini tidak menanggapi."\n\n"Apakah Anda ingin menutupnya?"</string>
@@ -1011,8 +1011,8 @@
     <string name="select_character" msgid="3365550120617701745">"Sisipkan huruf"</string>
     <string name="sms_control_default_app_name" msgid="3058577482636640465">"Apl tak dikenal"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Mengirim pesan SMS"</string>
-    <string name="sms_control_message" msgid="4073755190243093924">"Pesan SMS dalam jumlah besar sedang dikirimkan. Sentuh OK untuk melanjutkan, atau Batal untuk menghentikan pengiriman."</string>
-    <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
+    <string name="sms_control_message" msgid="4073755190243093924">"Pesan SMS dalam jumlah besar sedang dikirimkan. Sentuh Oke untuk melanjutkan, atau Batal untuk menghentikan pengiriman."</string>
+    <string name="sms_control_yes" msgid="2532062172402615953">"Oke"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Batal"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kartu SIM dihapus"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Jaringan seluler tidak akan tersedia sampai Anda memulai lagi dengan memasukkan kartu SIM yang valid."</string>
@@ -1048,7 +1048,7 @@
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Hidupkan penyimpanan USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Jika Anda menyalakan penyimpanan USB, beberapa apl yang Anda gunakan akan berhenti dan mungkin tidak dapat dibuka hingga penyimpanan USB dimatikan."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operasi USB gagal"</string>
-    <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
+    <string name="dlg_ok" msgid="7376953167039865701">"Oke"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Tersambung sebagai perangkat media"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Tersambung sebagai kamera"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tersambung sebagai pemasang"</string>
@@ -1193,14 +1193,6 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Kurangi hari"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Tambah tahun"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Kurangi tahun"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"dicentang"</string>
-    <string name="checkbox_not_checked" msgid="5174639551134444056">"tidak diperiksa"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"dipilih"</string>
-    <string name="radiobutton_not_selected" msgid="2908760184307722393">"tidak dipilih"</string>
-    <string name="switch_on" msgid="551417728476977311">"nyala"</string>
-    <string name="switch_off" msgid="7249798614327155088">"mati"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"ditekan"</string>
-    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"tidak ditekan"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Batal"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Hapus"</string>

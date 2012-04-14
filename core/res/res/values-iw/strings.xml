@@ -1193,14 +1193,6 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"הפחת יום"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"הוסף שנה"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"הפחת שנה"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"מסומן"</string>
-    <string name="checkbox_not_checked" msgid="5174639551134444056">"לא מסומן"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"נבחר"</string>
-    <string name="radiobutton_not_selected" msgid="2908760184307722393">"לא נבחר"</string>
-    <string name="switch_on" msgid="551417728476977311">"מופעל"</string>
-    <string name="switch_off" msgid="7249798614327155088">"כבוי"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"לחוץ"</string>
-    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"לא לחוץ"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ביטול"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"מחק"</string>

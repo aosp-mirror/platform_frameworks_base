@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Allows the app to change the rotation of the screen at any time. Should never be needed for normal apps."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"change pointer speed"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Allows the app to change the mouse or touch pad pointer speed at any time. Should never be needed for normal apps."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"change keyboard layout"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Allows the app to change the keyboard layout. Should never be needed for normal apps."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"send Linux signals to apps"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Allows the app to request that the supplied signal be sent to all persistent processes."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"make app always run"</string>
@@ -1063,10 +1061,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Touch to disable USB debugging."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Choose input method"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Set up input methods"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Physical keyboard"</string>
+    <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidates"</u></string>
@@ -1193,14 +1189,6 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Decrease day"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Increase year"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Decrease year"</string>
-    <string name="checkbox_checked" msgid="7222044992652711167">"ticked"</string>
-    <string name="checkbox_not_checked" msgid="5174639551134444056">"not ticked"</string>
-    <string name="radiobutton_selected" msgid="8603599808486581511">"selected"</string>
-    <string name="radiobutton_not_selected" msgid="2908760184307722393">"not selected"</string>
-    <string name="switch_on" msgid="551417728476977311">"on"</string>
-    <string name="switch_off" msgid="7249798614327155088">"off"</string>
-    <string name="togglebutton_pressed" msgid="4180411746647422233">"pressed"</string>
-    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"not pressed"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Cancel"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
