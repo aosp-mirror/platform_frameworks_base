@@ -139,6 +139,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import libcore.io.ErrnoException;
+import libcore.io.IoUtils;
 import libcore.io.Libcore;
 
 /**
@@ -6979,9 +6980,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             } catch (IOException e) {
                 Slog.e(TAG, "Couldn't create a new zip file for the public parts of a" +
                            " forward-locked app.");
+                destResourceFile.delete();
                 return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-            } finally {
-                //TODO clean up the extracted public files
             }
             retCode = mInstaller.setForwardLockPerm(getApkName(newPackage.mPath),
                     newPackage.applicationInfo.uid);
@@ -7023,38 +7023,34 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     File publicZipFile) throws IOException {
         final FileOutputStream fstr = new FileOutputStream(publicZipFile);
         final ZipOutputStream publicZipOutStream = new ZipOutputStream(fstr);
-        final ZipFile privateZip = new ZipFile(newPackage.mPath);
+        try {
+            final ZipFile privateZip = new ZipFile(newPackage.mPath);
+            try {
+                // Copy manifest, resources.arsc and res directory to public zip
 
-        // Copy manifest, resources.arsc and res directory to public zip
-
-        final Enumeration<? extends ZipEntry> privateZipEntries = privateZip.entries();
-        while (privateZipEntries.hasMoreElements()) {
-            final ZipEntry zipEntry = privateZipEntries.nextElement();
-            final String zipEntryName = zipEntry.getName();
-            if ("AndroidManifest.xml".equals(zipEntryName)
-                || "resources.arsc".equals(zipEntryName)
-                || zipEntryName.startsWith("res/")) {
-                try {
-                    copyZipEntry(zipEntry, privateZip, publicZipOutStream);
-                } catch (IOException e) {
-                    try {
-                        publicZipOutStream.close();
-                        throw e;
-                    } finally {
-                        publicZipFile.delete();
+                final Enumeration<? extends ZipEntry> privateZipEntries = privateZip.entries();
+                while (privateZipEntries.hasMoreElements()) {
+                    final ZipEntry zipEntry = privateZipEntries.nextElement();
+                    final String zipEntryName = zipEntry.getName();
+                    if ("AndroidManifest.xml".equals(zipEntryName)
+                            || "resources.arsc".equals(zipEntryName)
+                            || zipEntryName.startsWith("res/")) {
+                        copyZipEntry(zipEntry, privateZip, publicZipOutStream);
                     }
                 }
+            } finally {
+                try { privateZip.close(); } catch (IOException e) { }
             }
-        }
 
-        publicZipOutStream.finish();
-        publicZipOutStream.flush();
-        FileUtils.sync(fstr);
-        publicZipOutStream.close();
-        FileUtils.setPermissions(
-                publicZipFile.getAbsolutePath(),
-                FileUtils.S_IRUSR|FileUtils.S_IWUSR|FileUtils.S_IRGRP|FileUtils.S_IROTH,
-                -1, -1);
+            publicZipOutStream.finish();
+            publicZipOutStream.flush();
+            FileUtils.sync(fstr);
+            publicZipOutStream.close();
+            FileUtils.setPermissions(publicZipFile.getAbsolutePath(), FileUtils.S_IRUSR
+                    | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IROTH, -1, -1);
+        } finally {
+            IoUtils.closeQuietly(publicZipOutStream);
+        }
     }
 
     private static void copyZipEntry(ZipEntry zipEntry,
@@ -7073,11 +7069,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         outZipStream.putNextEntry(newEntry);
 
-        InputStream data = inZipFile.getInputStream(zipEntry);
-        while ((num = data.read(buffer)) > 0) {
-            outZipStream.write(buffer, 0, num);
+        final InputStream data = inZipFile.getInputStream(zipEntry);
+        try {
+            while ((num = data.read(buffer)) > 0) {
+                outZipStream.write(buffer, 0, num);
+            }
+            outZipStream.flush();
+        } finally {
+            IoUtils.closeQuietly(data);
         }
-        outZipStream.flush();
     }
 
     private void deleteTempPackageFiles() {
