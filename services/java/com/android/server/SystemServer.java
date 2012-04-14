@@ -115,6 +115,7 @@ class ServerThread extends Thread {
         LightsService lights = null;
         PowerManagerService power = null;
         BatteryService battery = null;
+        VibratorService vibrator = null;
         AlarmManagerService alarm = null;
         NetworkManagementService networkManagement = null;
         NetworkStatsService networkStats = null;
@@ -203,7 +204,8 @@ class ServerThread extends Thread {
             ServiceManager.addService("battery", battery);
 
             Slog.i(TAG, "Vibrator Service");
-            ServiceManager.addService("vibrator", new VibratorService(context));
+            vibrator = new VibratorService(context);
+            ServiceManager.addService("vibrator", vibrator);
 
             // only initialize the power service after we have started the
             // lights service, content providers and the battery service.
@@ -644,6 +646,12 @@ class ServerThread extends Thread {
         }
 
         // It is now time to start up the app processes...
+
+        try {
+            vibrator.systemReady();
+        } catch (Throwable e) {
+            reportWtf("making Vibrator Service ready", e);
+        }
 
         if (devicePolicy != null) {
             try {
