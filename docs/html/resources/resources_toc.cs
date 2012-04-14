@@ -278,7 +278,32 @@ class="new">&nbsp;new!</span></span>
           </a>
           </li>
         </ul>
-       </li>
+      </li>
+
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/implementing-navigation/index.html">
+            <span class="en">Implementing Effective Navigation<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/implementing-navigation/lateral.html">
+            <span class="en">Implementing Lateral Navigation</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/implementing-navigation/ancestral.html">
+            <span class="en">Implementing Ancestral Navigation</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/implementing-navigation/temporal.html">
+            <span class="en">Implementing Temporal Navigation</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/implementing-navigation/descendant.html">
+            <span class="en">Implementing Descendant Navigation</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
        <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/tv/index.html">
            <span class="en">Designing for TV<span class="new">&nbsp;new!</span></span>
