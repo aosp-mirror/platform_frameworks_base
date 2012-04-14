@@ -201,4 +201,40 @@ public class ArrayUtils
         }
         return array;
     }
+
+    public static int[] appendInt(int[] cur, int val) {
+        if (cur == null) {
+            return new int[] { val };
+        }
+        final int N = cur.length;
+        for (int i = 0; i < N; i++) {
+            if (cur[i] == val) {
+                return cur;
+            }
+        }
+        int[] ret = new int[N + 1];
+        System.arraycopy(cur, 0, ret, 0, N);
+        ret[N] = val;
+        return ret;
+    }
+
+    public static int[] removeInt(int[] cur, int val) {
+        if (cur == null) {
+            return null;
+        }
+        final int N = cur.length;
+        for (int i = 0; i < N; i++) {
+            if (cur[i] == val) {
+                int[] ret = new int[N - 1];
+                if (i > 0) {
+                    System.arraycopy(cur, 0, ret, 0, i);
+                }
+                if (i < (N - 1)) {
+                    System.arraycopy(cur, i + 1, ret, i, N - i - 1);
+                }
+                return ret;
+            }
+        }
+        return cur;
+    }
 }

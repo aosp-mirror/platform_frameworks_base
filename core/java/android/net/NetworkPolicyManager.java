@@ -92,6 +92,14 @@ public class NetworkPolicyManager {
         }
     }
 
+    public int[] getAppsWithPolicy(int policy) {
+        try {
+            return mService.getAppsWithPolicy(policy);
+        } catch (RemoteException e) {
+            return new int[0];
+        }
+    }
+
     public void registerListener(INetworkPolicyListener listener) {
         try {
             mService.registerListener(listener);
