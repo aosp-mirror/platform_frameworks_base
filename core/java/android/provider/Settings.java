@@ -1464,6 +1464,20 @@ public final class Settings {
         public static final String VIBRATE_ON = "vibrate_on";
 
         /**
+         * If 1, redirects the system vibrator to all currently attached input devices
+         * that support vibration.  If there are no such input devices, then the system
+         * vibrator is used instead.
+         * If 0, does not register the system vibrator.
+         *
+         * This setting is mainly intended to provide a compatibility mechanism for
+         * applications that only know about the system vibrator and do not use the
+         * input device vibrator API.
+         *
+         * @hide
+         */
+        public static final String VIBRATE_INPUT_DEVICES = "vibrate_input_devices";
+
+        /**
          * Ringer volume. This is used internally, changing this value will not
          * change the volume. See AudioManager.
          */
@@ -1970,6 +1984,7 @@ public final class Settings {
             SCREEN_BRIGHTNESS_MODE,
             SCREEN_AUTO_BRIGHTNESS_ADJ,
             VIBRATE_ON,
+            VIBRATE_INPUT_DEVICES,
             MODE_RINGER,
             MODE_RINGER_STREAMS_AFFECTED,
             MUTE_STREAMS_AFFECTED,
