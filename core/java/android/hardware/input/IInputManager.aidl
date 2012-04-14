@@ -18,6 +18,7 @@ package android.hardware.input;
 
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
+import android.os.IBinder;
 import android.view.InputDevice;
 import android.view.InputEvent;
 
@@ -46,4 +47,8 @@ interface IInputManager {
 
     // Registers an input devices changed listener.
     void registerInputDevicesChangedListener(IInputDevicesChangedListener listener);
+
+    // Input device vibrator control.
+    void vibrate(int deviceId, in long[] pattern, int repeat, IBinder token);
+    void cancelVibrate(int deviceId, IBinder token);
 }

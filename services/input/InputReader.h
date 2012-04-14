@@ -33,6 +33,14 @@
 #include <stddef.h>
 #include <unistd.h>
 
+// Maximum supported size of a vibration pattern.
+// Must be at least 2.
+#define MAX_VIBRATE_PATTERN_SIZE 100
+
+// Maximum allowable delay value in a vibration pattern before
+// which the delay will be truncated.
+#define MAX_VIBRATE_PATTERN_DELAY_NSECS (1000000 * 1000000000LL)
+
 namespace android {
 
 class InputDevice;
@@ -267,6 +275,11 @@ public:
      * The changes flag is a bitfield that indicates what has changed and whether
      * the input devices must all be reopened. */
     virtual void requestRefreshConfiguration(uint32_t changes) = 0;
+
+    /* Controls the vibrator of a particular input device. */
+    virtual void vibrate(int32_t deviceId, const nsecs_t* pattern, size_t patternSize,
+            ssize_t repeat, int32_t token) = 0;
+    virtual void cancelVibrate(int32_t deviceId, int32_t token) = 0;
 };
 
 
@@ -333,6 +346,10 @@ public:
             size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags);
 
     virtual void requestRefreshConfiguration(uint32_t changes);
+
+    virtual void vibrate(int32_t deviceId, const nsecs_t* pattern, size_t patternSize,
+            ssize_t repeat, int32_t token);
+    virtual void cancelVibrate(int32_t deviceId, int32_t token);
 
 protected:
     // These members are protected so they can be instrumented by test cases.
@@ -466,6 +483,8 @@ public:
     int32_t getSwitchState(uint32_t sourceMask, int32_t switchCode);
     bool markSupportedKeyCodes(uint32_t sourceMask, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags);
+    void vibrate(const nsecs_t* pattern, size_t patternSize, ssize_t repeat, int32_t token);
+    void cancelVibrate(int32_t token);
 
     int32_t getMetaState();
 
@@ -848,6 +867,9 @@ public:
     virtual int32_t getSwitchState(uint32_t sourceMask, int32_t switchCode);
     virtual bool markSupportedKeyCodes(uint32_t sourceMask, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags);
+    virtual void vibrate(const nsecs_t* pattern, size_t patternSize, ssize_t repeat,
+            int32_t token);
+    virtual void cancelVibrate(int32_t token);
 
     virtual int32_t getMetaState();
 
@@ -877,6 +899,35 @@ public:
 
 private:
     void processSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue);
+};
+
+
+class VibratorInputMapper : public InputMapper {
+public:
+    VibratorInputMapper(InputDevice* device);
+    virtual ~VibratorInputMapper();
+
+    virtual uint32_t getSources();
+    virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
+    virtual void process(const RawEvent* rawEvent);
+
+    virtual void vibrate(const nsecs_t* pattern, size_t patternSize, ssize_t repeat,
+            int32_t token);
+    virtual void cancelVibrate(int32_t token);
+    virtual void timeoutExpired(nsecs_t when);
+    virtual void dump(String8& dump);
+
+private:
+    bool mVibrating;
+    nsecs_t mPattern[MAX_VIBRATE_PATTERN_SIZE];
+    size_t mPatternSize;
+    ssize_t mRepeat;
+    int32_t mToken;
+    ssize_t mIndex;
+    nsecs_t mNextStepTime;
+
+    void nextStep();
+    void stopVibrating();
 };
 
 

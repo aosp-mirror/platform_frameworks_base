@@ -161,12 +161,14 @@ EventHub::Device::Device(int fd, int32_t id, const String8& path,
         const InputDeviceIdentifier& identifier) :
         next(NULL),
         fd(fd), id(id), path(path), identifier(identifier),
-        classes(0), configuration(NULL), virtualKeyMap(NULL) {
+        classes(0), configuration(NULL), virtualKeyMap(NULL),
+        ffEffectPlaying(false), ffEffectId(-1) {
     memset(keyBitmask, 0, sizeof(keyBitmask));
     memset(absBitmask, 0, sizeof(absBitmask));
     memset(relBitmask, 0, sizeof(relBitmask));
     memset(swBitmask, 0, sizeof(swBitmask));
     memset(ledBitmask, 0, sizeof(ledBitmask));
+    memset(ffBitmask, 0, sizeof(ffBitmask));
     memset(propBitmask, 0, sizeof(propBitmask));
 }
 
@@ -532,6 +534,62 @@ sp<KeyCharacterMap> EventHub::getKeyCharacterMap(int32_t deviceId) const {
         return device->keyMap.keyCharacterMap;
     }
     return NULL;
+}
+
+void EventHub::vibrate(int32_t deviceId, nsecs_t duration) {
+    AutoMutex _l(mLock);
+    Device* device = getDeviceLocked(deviceId);
+    if (device && !device->isVirtual()) {
+        ff_effect effect;
+        memset(&effect, 0, sizeof(effect));
+        effect.type = FF_RUMBLE;
+        effect.id = device->ffEffectId;
+        effect.u.rumble.strong_magnitude = 0xc000;
+        effect.u.rumble.weak_magnitude = 0xc000;
+        effect.replay.length = (duration + 999999LL) / 1000000LL;
+        effect.replay.delay = 0;
+        if (ioctl(device->fd, EVIOCSFF, &effect)) {
+            ALOGW("Could not upload force feedback effect to device %s due to error %d.",
+                    device->identifier.name.string(), errno);
+            return;
+        }
+        device->ffEffectId = effect.id;
+
+        struct input_event ev;
+        ev.time.tv_sec = 0;
+        ev.time.tv_usec = 0;
+        ev.type = EV_FF;
+        ev.code = device->ffEffectId;
+        ev.value = 1;
+        if (write(device->fd, &ev, sizeof(ev)) != sizeof(ev)) {
+            ALOGW("Could not start force feedback effect on device %s due to error %d.",
+                    device->identifier.name.string(), errno);
+            return;
+        }
+        device->ffEffectPlaying = true;
+    }
+}
+
+void EventHub::cancelVibrate(int32_t deviceId) {
+    AutoMutex _l(mLock);
+    Device* device = getDeviceLocked(deviceId);
+    if (device && !device->isVirtual()) {
+        if (device->ffEffectPlaying) {
+            device->ffEffectPlaying = false;
+
+            struct input_event ev;
+            ev.time.tv_sec = 0;
+            ev.time.tv_usec = 0;
+            ev.type = EV_FF;
+            ev.code = device->ffEffectId;
+            ev.value = 0;
+            if (write(device->fd, &ev, sizeof(ev)) != sizeof(ev)) {
+                ALOGW("Could not stop force feedback effect on device %s due to error %d.",
+                        device->identifier.name.string(), errno);
+                return;
+            }
+        }
+    }
 }
 
 EventHub::Device* EventHub::getDeviceLocked(int32_t deviceId) const {
@@ -949,6 +1007,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     ioctl(fd, EVIOCGBIT(EV_REL, sizeof(device->relBitmask)), device->relBitmask);
     ioctl(fd, EVIOCGBIT(EV_SW, sizeof(device->swBitmask)), device->swBitmask);
     ioctl(fd, EVIOCGBIT(EV_LED, sizeof(device->ledBitmask)), device->ledBitmask);
+    ioctl(fd, EVIOCGBIT(EV_FF, sizeof(device->ffBitmask)), device->ffBitmask);
     ioctl(fd, EVIOCGPROP(sizeof(device->propBitmask)), device->propBitmask);
 
     // See if this is a keyboard.  Ignore everything in the button range except for
@@ -1008,6 +1067,11 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
             device->classes |= INPUT_DEVICE_CLASS_SWITCH;
             break;
         }
+    }
+
+    // Check whether this device supports the vibrator.
+    if (test_bit(FF_RUMBLE, device->ffBitmask)) {
+        device->classes |= INPUT_DEVICE_CLASS_VIBRATOR;
     }
 
     // Configure virtual keys.

@@ -646,6 +646,12 @@ private:
         return NULL;
     }
 
+    virtual void vibrate(int32_t deviceId, nsecs_t duration) {
+    }
+
+    virtual void cancelVibrate(int32_t deviceId) {
+    }
+
     virtual bool isExternal(int32_t deviceId) const {
         return false;
     }

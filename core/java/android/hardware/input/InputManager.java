@@ -19,12 +19,14 @@ package android.hardware.input;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
@@ -587,6 +589,15 @@ public final class InputManager {
     }
 
     /**
+     * Gets a vibrator service associated with an input device, assuming it has one.
+     * @return The vibrator, never null.
+     * @hide
+     */
+    public Vibrator getInputDeviceVibrator(int deviceId) {
+        return new InputDeviceVibrator(deviceId);
+    }
+
+    /**
      * Listens for changes in input devices.
      */
     public interface InputDeviceListener {
@@ -642,6 +653,47 @@ public final class InputManager {
                 case MSG_DEVICE_CHANGED:
                     mListener.onInputDeviceChanged(msg.arg1);
                     break;
+            }
+        }
+    }
+
+    private final class InputDeviceVibrator extends Vibrator {
+        private final int mDeviceId;
+        private final Binder mToken;
+
+        public InputDeviceVibrator(int deviceId) {
+            mDeviceId = deviceId;
+            mToken = new Binder();
+        }
+
+        @Override
+        public boolean hasVibrator() {
+            return true;
+        }
+
+        @Override
+        public void vibrate(long milliseconds) {
+            vibrate(new long[] { 0, milliseconds}, -1);
+        }
+
+        @Override
+        public void vibrate(long[] pattern, int repeat) {
+            if (repeat >= pattern.length) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            try {
+                mIm.vibrate(mDeviceId, pattern, repeat, mToken);
+            } catch (RemoteException ex) {
+                Log.w(TAG, "Failed to vibrate.", ex);
+            }
+        }
+
+        @Override
+        public void cancel() {
+            try {
+                mIm.cancelVibrate(mDeviceId, mToken);
+            } catch (RemoteException ex) {
+                Log.w(TAG, "Failed to cancel vibration.", ex);
             }
         }
     }
