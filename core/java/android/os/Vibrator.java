@@ -16,61 +16,37 @@
 
 package android.os;
 
-import android.util.Log;
+import android.content.Context;
 
 /**
  * Class that operates the vibrator on the device.
  * <p>
  * If your process exits, any vibration you started with will stop.
  * </p>
+ *
+ * To obtain an instance of the system vibrator, call
+ * {@link Context#getSystemService} with {@link Context#VIBRATOR_SERVICE} as argument.
  */
-public class Vibrator
-{
-    private static final String TAG = "Vibrator";
-
-    IVibratorService mService;
-    private final Binder mToken = new Binder();
-
-    /** @hide */
-    public Vibrator()
-    {
-        mService = IVibratorService.Stub.asInterface(
-                ServiceManager.getService("vibrator"));
+public abstract class Vibrator {
+    /**
+     * @hide to prevent subclassing from outside of the framework
+     */
+    public Vibrator() {
     }
 
     /**
-     * Check whether the hardware has a vibrator.  Returns true if a vibrator
-     * exists, else false.
+     * Check whether the hardware has a vibrator.
+     *
+     * @return True if the hardware has a vibrator, else false.
      */
-    public boolean hasVibrator() {
-        if (mService == null) {
-            Log.w(TAG, "Failed to vibrate; no vibrator service.");
-            return false;
-        }
-        try {
-            return mService.hasVibrator();
-        } catch (RemoteException e) {
-        }
-        return false;
-    }
+    public abstract boolean hasVibrator();
     
     /**
-     * Turn the vibrator on.
+     * Vibrate constantly for the specified period of time.
      *
      * @param milliseconds The number of milliseconds to vibrate.
      */
-    public void vibrate(long milliseconds)
-    {
-        if (mService == null) {
-            Log.w(TAG, "Failed to vibrate; no vibrator service.");
-            return;
-        }
-        try {
-            mService.vibrate(milliseconds, mToken);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to vibrate.", e);
-        }
-    }
+    public abstract void vibrate(long milliseconds);
 
     /**
      * Vibrate with a given pattern.
@@ -90,38 +66,10 @@ public class Vibrator
      * @param repeat the index into pattern at which to repeat, or -1 if
      *        you don't want to repeat.
      */
-    public void vibrate(long[] pattern, int repeat)
-    {
-        if (mService == null) {
-            Log.w(TAG, "Failed to vibrate; no vibrator service.");
-            return;
-        }
-        // catch this here because the server will do nothing.  pattern may
-        // not be null, let that be checked, because the server will drop it
-        // anyway
-        if (repeat < pattern.length) {
-            try {
-                mService.vibratePattern(pattern, repeat, mToken);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to vibrate.", e);
-            }
-        } else {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-    }
+    public abstract void vibrate(long[] pattern, int repeat);
 
     /**
      * Turn the vibrator off.
      */
-    public void cancel()
-    {
-        if (mService == null) {
-            return;
-        }
-        try {
-            mService.cancelVibrate(mToken);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to cancel vibration.", e);
-        }
-    }
+    public abstract void cancel();
 }

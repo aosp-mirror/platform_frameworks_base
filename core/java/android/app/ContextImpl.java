@@ -82,7 +82,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserId;
-import android.os.Vibrator;
+import android.os.SystemVibrator;
 import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
@@ -455,7 +455,7 @@ class ContextImpl extends Context {
 
         registerService(VIBRATOR_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
-                    return new Vibrator();
+                    return new SystemVibrator();
                 }});
 
         registerService(WALLPAPER_SERVICE, WALLPAPER_FETCHER);

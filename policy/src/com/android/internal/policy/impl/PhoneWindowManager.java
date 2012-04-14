@@ -909,7 +909,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPluggedIn = (0 != intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0));
         }
 
-        mVibrator = new Vibrator();
+        mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_longPressVibePattern);
         mVirtualKeyVibePattern = getLongIntArray(mContext.getResources(),

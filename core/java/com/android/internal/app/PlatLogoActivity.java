@@ -29,9 +29,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 public class PlatLogoActivity extends Activity {
+    Vibrator mZzz;
     Toast mToast;
     ImageView mContent;
-    Vibrator mZzz = new Vibrator();
     int mCount;
     final Handler mHandler = new Handler();
 
@@ -63,7 +63,8 @@ public class PlatLogoActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
+        mZzz = (Vibrator)getSystemService(VIBRATOR_SERVICE);
         mToast = Toast.makeText(this, "Android 4.0: Ice Cream Sandwich", Toast.LENGTH_SHORT);
 
         mContent = new ImageView(this);

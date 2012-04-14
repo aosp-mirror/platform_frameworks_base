@@ -44,7 +44,7 @@ public class NotificationTestList extends TestActivity
     private final static String TAG = "NotificationTestList";
 
     NotificationManager mNM;
-    Vibrator mVibrator = new Vibrator();
+    Vibrator mVibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
     Handler mHandler = new Handler();
 
     long mActivityCreateTime = System.currentTimeMillis();
