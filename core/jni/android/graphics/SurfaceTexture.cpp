@@ -220,7 +220,7 @@ static void SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
     if (err == INVALID_OPERATION) {
         jniThrowException(env, IllegalStateException, "Unable to update texture contents (see "
                 "logcat for details)");
-    } else {
+    } else if (err < 0) {
         jniThrowRuntimeException(env, "Error during updateTexImage (see logcat for details)");
     }
 }
