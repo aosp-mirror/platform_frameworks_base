@@ -227,7 +227,31 @@ class="new">&nbsp;new!</span></span>
           </li>
         </ul>
       </li>
-      
+
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/backward-compatible-ui/index.html">
+            <span class="en">Creating Backward-Compatible UIs<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/backward-compatible-ui/abstracting.html">
+            <span class="en">Abstracting the New APIs</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/backward-compatible-ui/new-implementation.html">
+            <span class="en">Proxying to the New APIs</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/backward-compatible-ui/older-implementation.html">
+            <span class="en">Creating an Implementation with Older APIs</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/backward-compatible-ui/using-component.html">
+            <span class="en">Using the Version-Aware Component</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/enterprise/index.html">
             <span class="en">Developing for Enterprise</span>
