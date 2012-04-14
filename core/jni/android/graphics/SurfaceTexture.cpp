@@ -35,6 +35,7 @@ namespace android {
 
 static const char* const OutOfResourcesException =
     "android/graphics/SurfaceTexture$OutOfResourcesException";
+static const char* const IllegalStateException = "java/lang/IllegalStateException";
 const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTexture";
 
 struct fields_t {
@@ -212,10 +213,16 @@ static void SurfaceTexture_setDefaultBufferSize(
     surfaceTexture->setDefaultBufferSize(width, height);
 }
 
-static jint SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
+static void SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
 {
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
-    return surfaceTexture->updateTexImage();
+    status_t err = surfaceTexture->updateTexImage();
+    if (err == INVALID_OPERATION) {
+        jniThrowException(env, IllegalStateException, "Unable to update texture contents (see "
+                "logcat for details)");
+    } else {
+        jniThrowRuntimeException(env, "Error during updateTexImage (see logcat for details)");
+    }
 }
 
 static jint SurfaceTexture_detachFromGLContext(JNIEnv* env, jobject thiz)
@@ -258,7 +265,7 @@ static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeInit",                 "(ILjava/lang/Object;Z)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",             "()V",   (void*)SurfaceTexture_finalize },
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
-    {"nativeUpdateTexImage",       "()I",   (void*)SurfaceTexture_updateTexImage },
+    {"nativeUpdateTexImage",       "()V",   (void*)SurfaceTexture_updateTexImage },
     {"nativeDetachFromGLContext",  "()I",   (void*)SurfaceTexture_detachFromGLContext },
     {"nativeAttachToGLContext",    "(I)I",   (void*)SurfaceTexture_attachToGLContext },
     {"nativeGetTransformMatrix",   "([F)V", (void*)SurfaceTexture_getTransformMatrix },
