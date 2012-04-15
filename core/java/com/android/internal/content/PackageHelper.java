@@ -16,15 +16,24 @@
 
 package com.android.internal.content;
 
-import android.os.storage.IMountService;
-
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.storage.IMountService;
 import android.os.storage.StorageResultCode;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
+
+import libcore.io.IoUtils;
 
 /**
  * Constants used internally between the PackageManager
@@ -196,4 +205,64 @@ public class PackageHelper {
        }
        return false;
    }
+
+    public static void extractPublicFiles(String packagePath, File publicZipFile)
+            throws IOException {
+        final FileOutputStream fstr = new FileOutputStream(publicZipFile);
+        final ZipOutputStream publicZipOutStream = new ZipOutputStream(fstr);
+        try {
+            final ZipFile privateZip = new ZipFile(packagePath);
+            try {
+                // Copy manifest, resources.arsc and res directory to public zip
+                for (final ZipEntry zipEntry : Collections.list(privateZip.entries())) {
+                    final String zipEntryName = zipEntry.getName();
+                    if ("AndroidManifest.xml".equals(zipEntryName)
+                            || "resources.arsc".equals(zipEntryName)
+                            || zipEntryName.startsWith("res/")) {
+                        copyZipEntry(zipEntry, privateZip, publicZipOutStream);
+                    }
+                }
+            } finally {
+                try {
+                    privateZip.close();
+                } catch (IOException e) {
+                }
+            }
+
+            publicZipOutStream.finish();
+            publicZipOutStream.flush();
+            FileUtils.sync(fstr);
+            publicZipOutStream.close();
+            FileUtils.setPermissions(publicZipFile.getAbsolutePath(), FileUtils.S_IRUSR
+                    | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IROTH, -1, -1);
+        } finally {
+            IoUtils.closeQuietly(publicZipOutStream);
+        }
+    }
+
+    private static void copyZipEntry(ZipEntry zipEntry, ZipFile inZipFile,
+            ZipOutputStream outZipStream) throws IOException {
+        byte[] buffer = new byte[4096];
+        int num;
+
+        ZipEntry newEntry;
+        if (zipEntry.getMethod() == ZipEntry.STORED) {
+            // Preserve the STORED method of the input entry.
+            newEntry = new ZipEntry(zipEntry);
+        } else {
+            // Create a new entry so that the compressed len is recomputed.
+            newEntry = new ZipEntry(zipEntry.getName());
+        }
+        outZipStream.putNextEntry(newEntry);
+
+        final InputStream data = inZipFile.getInputStream(zipEntry);
+        try {
+            while ((num = data.read(buffer)) > 0) {
+                outZipStream.write(buffer, 0, num);
+            }
+            outZipStream.flush();
+        } finally {
+            IoUtils.closeQuietly(data);
+        }
+    }
 }
