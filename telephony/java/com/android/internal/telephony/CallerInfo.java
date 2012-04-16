@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.CountryDetector;
 import android.net.Uri;
@@ -107,10 +108,33 @@ public class CallerInfo {
     /**
      * Drawable representing the caller image.  This is essentially
      * a cache for the image data tied into the connection /
-     * callerinfo object.  The isCachedPhotoCurrent flag indicates
-     * if the image data needs to be reloaded.
+     * callerinfo object.
+     *
+     * This might be a high resolution picture which is more suitable
+     * for full-screen image view than for smaller icons used in some
+     * kinds of notifications.
+     *
+     * The {@link #isCachedPhotoCurrent} flag indicates if the image
+     * data needs to be reloaded.
      */
     public Drawable cachedPhoto;
+    /**
+     * Bitmap representing the caller image which has possibly lower
+     * resolution than {@link #cachedPhoto} and thus more suitable for
+     * icons (like notification icons).
+     *
+     * In usual cases this is just down-scaled image of {@link #cachedPhoto}.
+     * If the down-scaling fails, this will just become null.
+     *
+     * The {@link #isCachedPhotoCurrent} flag indicates if the image
+     * data needs to be reloaded.
+     */
+    public Bitmap cachedPhotoIcon;
+    /**
+     * Boolean which indicates if {@link #cachedPhoto} and
+     * {@link #cachedPhotoIcon} is fresh enough. If it is false,
+     * those images aren't pointing to valid objects.
+     */
     public boolean isCachedPhotoCurrent;
 
     private boolean mIsEmergency;
