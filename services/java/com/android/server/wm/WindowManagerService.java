@@ -50,6 +50,7 @@ import com.android.server.input.InputManagerService;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
@@ -497,6 +498,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // mOpeningApps and mClosingApps are the lists of tokens that will be
     // made visible or hidden at the next transition.
     int mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
+    int mNextAppTransitionType = ActivityOptions.ANIM_NONE;
     String mNextAppTransitionPackage;
     Bitmap mNextAppTransitionThumbnail;
     IRemoteCallback mNextAppTransitionCallback;
@@ -504,6 +506,8 @@ public class WindowManagerService extends IWindowManager.Stub
     int mNextAppTransitionExit;
     int mNextAppTransitionStartX;
     int mNextAppTransitionStartY;
+    int mNextAppTransitionStartWidth;
+    int mNextAppTransitionStartHeight;
     boolean mAppTransitionReady = false;
     boolean mAppTransitionRunning = false;
     boolean mAppTransitionTimeout = false;
@@ -3072,6 +3076,50 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
+    private Animation createScaleUpAnimationLocked(int transit, boolean enter) {
+        Animation a;
+        // Pick the desired duration.  If this is an inter-activity transition,
+        // it  is the standard duration for that.  Otherwise we use the longer
+        // task transition duration.
+        int duration;
+        switch (transit) {
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
+            case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+                duration = mContext.getResources().getInteger(
+                        com.android.internal.R.integer.config_shortAnimTime);
+                break;
+            default:
+                duration = 500;
+                break;
+        }
+        if (enter) {
+            // Entering app zooms out from the center of the initial rect.
+            Animation scale = new ScaleAnimation(
+                    mNextAppTransitionStartWidth/mAppDisplayWidth, 1,
+                    mNextAppTransitionStartHeight/mAppDisplayHeight, 1,
+                    mNextAppTransitionStartX + mNextAppTransitionStartWidth/2,
+                    mNextAppTransitionStartY + mNextAppTransitionStartHeight/2);
+            AnimationSet set = new AnimationSet(true);
+            Animation alpha = new AlphaAnimation(0, 1);
+            scale.setDuration(duration);
+            set.addAnimation(scale);
+            alpha.setDuration(duration);
+            set.addAnimation(alpha);
+            a = set;
+        } else {
+            // Exiting app just holds in place.
+            a = new AlphaAnimation(1, 1);
+            a.setDuration(duration);
+        }
+        a.setFillAfter(true);
+        final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
+                com.android.internal.R.interpolator.decelerate_quint);
+        a.setInterpolator(interpolator);
+        a.initialize(mAppDisplayWidth, mAppDisplayHeight,
+                mAppDisplayWidth, mAppDisplayHeight);
+        return a;
+    }
+
     private Animation createThumbnailAnimationLocked(int transit,
             boolean enter, boolean thumb) {
         Animation a;
@@ -3090,7 +3138,6 @@ public class WindowManagerService extends IWindowManager.Stub
             default:
                 duration = 500;
                 break;
-            
         }
         if (thumb) {
             // Animation for zooming thumbnail from its initial size to
@@ -3138,12 +3185,15 @@ public class WindowManagerService extends IWindowManager.Stub
         if (okToDisplay()) {
             Animation a;
             boolean initialized = false;
-            if (mNextAppTransitionThumbnail != null) {
-                a = createThumbnailAnimationLocked(transit, enter, false);
-                initialized = true;
-            } else if (mNextAppTransitionPackage != null) {
+            if (mNextAppTransitionType == ActivityOptions.ANIM_CUSTOM) {
                 a = loadAnimation(mNextAppTransitionPackage, enter ?
                         mNextAppTransitionEnter : mNextAppTransitionExit);
+            } else if (mNextAppTransitionType == ActivityOptions.ANIM_SCALE_UP) {
+                a = createScaleUpAnimationLocked(transit, enter);
+                initialized = true;
+            } else if (mNextAppTransitionType == ActivityOptions.ANIM_THUMBNAIL) {
+                a = createThumbnailAnimationLocked(transit, enter, false);
+                initialized = true;
             } else {
                 int animAttr = 0;
                 switch (transit) {
@@ -3738,6 +3788,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void overridePendingAppTransition(String packageName,
             int enterAnim, int exitAnim) {
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            mNextAppTransitionType = ActivityOptions.ANIM_CUSTOM;
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionThumbnail = null;
             mNextAppTransitionEnter = enterAnim;
@@ -3745,9 +3796,23 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
+            int startHeight) {
+        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            mNextAppTransitionType = ActivityOptions.ANIM_SCALE_UP;
+            mNextAppTransitionPackage = null;
+            mNextAppTransitionThumbnail = null;
+            mNextAppTransitionStartX = startX;
+            mNextAppTransitionStartY = startY;
+            mNextAppTransitionStartWidth = startWidth;
+            mNextAppTransitionStartHeight = startHeight;
+        }
+    }
+
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
             int startY, IRemoteCallback startedCallback) {
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            mNextAppTransitionType = ActivityOptions.ANIM_THUMBNAIL;
             mNextAppTransitionPackage = null;
             mNextAppTransitionThumbnail = srcThumb;
             mNextAppTransitionStartX = startX;
@@ -7845,6 +7910,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            mNextAppTransitionType = ActivityOptions.ANIM_NONE;
             mNextAppTransitionPackage = null;
             mNextAppTransitionThumbnail = null;
             if (mNextAppTransitionCallback != null) {
@@ -8810,6 +8876,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
+            mNextAppTransitionType = ActivityOptions.ANIM_NONE;
             mNextAppTransitionPackage = null;
             mNextAppTransitionThumbnail = null;
             mAppTransitionReady = true;
@@ -9350,20 +9417,34 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(Integer.toHexString(mNextAppTransition));
                     pw.print(" mAppTransitionReady="); pw.println(mAppTransitionReady);
             pw.print("  mAppTransitionRunning="); pw.print(mAppTransitionRunning);
-                    pw.print(" mAppTransitionTimeout="); pw.println( mAppTransitionTimeout);
-            if (mNextAppTransitionPackage != null) {
-                pw.print("  mNextAppTransitionPackage=");
-                    pw.print(mNextAppTransitionPackage);
-                    pw.print(" mNextAppTransitionEnter=0x");
-                    pw.print(Integer.toHexString(mNextAppTransitionEnter));
-                    pw.print(" mNextAppTransitionExit=0x");
-                    pw.print(Integer.toHexString(mNextAppTransitionExit));
+                    pw.print(" mAppTransitionTimeout="); pw.println(mAppTransitionTimeout);
+            if (mNextAppTransitionType != ActivityOptions.ANIM_NONE) {
+                pw.print("  mNextAppTransitionType="); pw.println(mNextAppTransitionType);
             }
-            if (mNextAppTransitionThumbnail != null) {
-                pw.print("  mNextAppTransitionThumbnail=");
-                    pw.print(mNextAppTransitionThumbnail);
-                    pw.print(" mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
-                    pw.print(" mNextAppTransitionStartY="); pw.println(mNextAppTransitionStartY);
+            switch (mNextAppTransitionType) {
+                case ActivityOptions.ANIM_CUSTOM:
+                    pw.print("  mNextAppTransitionPackage=");
+                            pw.print(mNextAppTransitionPackage);
+                            pw.print(" mNextAppTransitionEnter=0x");
+                            pw.print(Integer.toHexString(mNextAppTransitionEnter));
+                            pw.print(" mNextAppTransitionExit=0x");
+                            pw.print(Integer.toHexString(mNextAppTransitionExit));
+                    break;
+                case ActivityOptions.ANIM_SCALE_UP:
+                    pw.print("  mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
+                            pw.print(" mNextAppTransitionStartY=");
+                            pw.println(mNextAppTransitionStartY);
+                    pw.print("  mNextAppTransitionStartWidth=");
+                            pw.print(mNextAppTransitionStartWidth);
+                            pw.print(" mNextAppTransitionStartHeight=");
+                            pw.println(mNextAppTransitionStartHeight);
+                    break;
+                case ActivityOptions.ANIM_THUMBNAIL:
+                    pw.print("  mNextAppTransitionThumbnail=");
+                            pw.print(mNextAppTransitionThumbnail);
+                            pw.print(" mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
+                            pw.print(" mNextAppTransitionStartY="); pw.println(mNextAppTransitionStartY);
+                    break;
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
