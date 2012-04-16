@@ -170,11 +170,10 @@ public class PackageManagerTests extends AndroidTestCase {
         return ipm;
     }
 
-    public boolean invokeInstallPackage(Uri packageURI, int flags, GenericReceiver receiver) {
+    public void invokeInstallPackage(Uri packageURI, int flags, GenericReceiver receiver,
+            boolean shouldSucceed) {
         PackageInstallObserver observer = new PackageInstallObserver();
-        final boolean received = false;
         mContext.registerReceiver(receiver, receiver.filter);
-        final boolean DEBUG = true;
         try {
             // Wait on observer
             synchronized(observer) {
@@ -192,10 +191,24 @@ public class PackageManagerTests extends AndroidTestCase {
                     if(!observer.isDone()) {
                         fail("Timed out waiting for packageInstalled callback");
                     }
-                    if (observer.returnCode != PackageManager.INSTALL_SUCCEEDED) {
-                        Log.i(TAG, "Failed to install with error code = " + observer.returnCode);
-                        return false;
+
+                    if (shouldSucceed) {
+                        if (observer.returnCode != PackageManager.INSTALL_SUCCEEDED) {
+                            fail("Package installation should have succeeded, but got code "
+                                    + observer.returnCode);
+                        }
+                    } else {
+                        if (observer.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                            fail("Package installation should fail");
+                        }
+
+                        /*
+                         * We'll never expect get a notification since we
+                         * shouldn't succeed.
+                         */
+                        return;
                     }
+
                     // Verify we received the broadcast
                     waitTime = 0;
                     while((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
@@ -209,7 +222,6 @@ public class PackageManagerTests extends AndroidTestCase {
                     if(!receiver.isDone()) {
                         fail("Timed out waiting for PACKAGE_ADDED notification");
                     }
-                    return receiver.received;
                 }
             }
         } finally {
@@ -588,7 +600,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 }
             } else {
                 InstallReceiver receiver = new InstallReceiver(pkg.packageName);
-                assertTrue(invokeInstallPackage(packageURI, flags, receiver));
+                invokeInstallPackage(packageURI, flags, receiver, true);
                 // Verify installed information
                 assertInstall(pkg, flags, expInstallLocation);
             }
@@ -705,13 +717,9 @@ public class PackageManagerTests extends AndroidTestCase {
             receiver = new InstallReceiver(ip.pkg.packageName);
         }
         try {
-            try {
-                assertEquals(invokeInstallPackage(ip.packageURI, flags, receiver), replace);
-                if (replace) {
-                    assertInstall(ip.pkg, flags, ip.pkg.installLocation);
-                }
-            } catch (Exception e) {
-                failStr("Failed with exception : " + e);
+            invokeInstallPackage(ip.packageURI, flags, receiver, replace);
+            if (replace) {
+                assertInstall(ip.pkg, flags, ip.pkg.installLocation);
             }
         } finally {
             cleanUpInstall(ip);
@@ -1244,7 +1252,7 @@ public class PackageManagerTests extends AndroidTestCase {
         GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
         int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
         try {
-            assertEquals(invokeInstallPackage(ip.packageURI, replaceFlags, receiver), true);
+            invokeInstallPackage(ip.packageURI, replaceFlags, receiver, true);
             assertInstall(ip.pkg, rFlags, ip.pkg.installLocation);
         } catch (Exception e) {
             failStr("Failed with exception : " + e);
@@ -1271,7 +1279,7 @@ public class PackageManagerTests extends AndroidTestCase {
         GenericReceiver receiver = new ReplaceReceiver(ip.pkg.packageName);
         int replaceFlags = rFlags | PackageManager.INSTALL_REPLACE_EXISTING;
         try {
-            assertEquals(invokeInstallPackage(ip.packageURI, replaceFlags, receiver), true);
+            invokeInstallPackage(ip.packageURI, replaceFlags, receiver, true);
             assertInstall(ip.pkg, iFlags, ip.pkg.installLocation);
         } catch (Exception e) {
             failStr("Failed with exception : " + e);
