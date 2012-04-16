@@ -170,45 +170,65 @@ public class WebSettings {
     }
 
     /**
-     * Set whether the WebView supports zoom
+     * Sets whether the WebView should support zooming using its on-screen zoom
+     * controls and gestures. The particular zoom mechanisms that should be used
+     * can be set with {@link #setBuiltInZoomControls}. This setting does not
+     * affect zooming performed using the {@link WebView#zoomIn()} and
+     * {@link WebView#zoomOut()} methods.
+     * @param support Whether the WebView should support zoom.
      */
     public void setSupportZoom(boolean support) {
         throw new MustOverrideException();
     }
 
     /**
-     * Returns whether the WebView supports zoom
+     * Returns true if the WebView supports zoom. The default is true.
+     * @return True if the WebView supports zoom.
      */
     public boolean supportZoom() {
         throw new MustOverrideException();
     }
 
     /**
-     * Sets whether the zoom mechanism built into WebView is used.
+     * Sets whether the WebView should use its built-in zoom mechanisms, as
+     * opposed to separate zoom controls. The built-in zoom mechanisms comprise
+     * on-screen zoom controls, which are displayed over the WebView's content,
+     * and the use of a pinch gesture to control zooming. Whether or not these
+     * on-screen controls are displayed can be set with {@link #setDisplayZoomControls}.
+     * The separate zoom controls are provided as a View object by
+     * {@link WebView#getZoomControls()} and the caller is responsible for inserting
+     * this View into the layout hierarchy. Use of the separate controls is
+     * deprecated and it is therefore recommended that this setting is always
+     * enabled.
+     * @param enabled Whether the WebView should use the built-in zoom mechanism.
      */
     public void setBuiltInZoomControls(boolean enabled) {
         throw new MustOverrideException();
     }
 
     /**
-     * Returns true if the zoom mechanism built into WebView is being used.
+     * Returns true if the zoom mechanisms built into WebView are being used.
+     * The default is false.
+     * @return True if the zoom mechanisms built into WebView are being used.
      */
     public boolean getBuiltInZoomControls() {
         throw new MustOverrideException();
     }
 
     /**
-     * Sets whether the on screen zoom buttons are used.
-     * A combination of built in zoom controls enabled
-     * and on screen zoom controls disabled allows for pinch to zoom
-     * to work without the on screen controls
+     * Sets whether the WebView should display on-screen zoom controls when
+     * using the built-in zoom mechanisms. See {@link #setBuiltInZoomControls}.
+     * @param enabled Whether the WebView should display on-screen zoom controls.
      */
     public void setDisplayZoomControls(boolean enabled) {
         throw new MustOverrideException();
     }
 
     /**
-     * Returns true if the on screen zoom buttons are being used.
+     * Returns true if the WebView displays on-screen zoom controls when using
+     * the built-in zoom mechanisms. The default is true.
+     * @return True if the WebView displays on-screen zoom controls when using
+     * the built-in zoom mechanisms.
      */
     public boolean getDisplayZoomControls() {
         throw new MustOverrideException();
