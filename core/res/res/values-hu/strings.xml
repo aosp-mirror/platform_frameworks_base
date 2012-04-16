@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Lehetővé teszi az alkalmazás számára a képernyő elforgatásának bármikori módosítását. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"mutató sebességének módosítása"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Lehetővé teszi az alkalmazás számára, hogy bármikor módosítsa az egér vagy az érintőpad mutatójának sebességét. Normál alkalmazásoknak soha nem lehet rá szükségük."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"billentyűzetkiosztás módosítása"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a billentyűzetkiosztást. Normál alkalmazásoknak alapesetben nem lehet szükségük rá."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Linux-jelek küldése az alkalmazásoknak"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Lehetővé teszi az alkalmazás számára, hogy a megadott jelet elküldje az összes állandó folyamatnak."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"az alkalmazás állandó futtatása"</string>
@@ -1009,11 +1007,27 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Adja meg a szükséges PIN kódot:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN kód:"</string>
     <string name="select_character" msgid="3365550120617701745">"Karakter beszúrása"</string>
-    <string name="sms_control_default_app_name" msgid="3058577482636640465">"Ismeretlen alkalmazás"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-ek küldése"</string>
-    <string name="sms_control_message" msgid="4073755190243093924">"Nagy számú SMS-t kíván elküldeni. A folytatáshoz érintse meg az \"OK\", a küldés leállításához a \"Mégse\" lehetőséget."</string>
-    <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
-    <string name="sms_control_no" msgid="1715320703137199869">"Mégse"</string>
+    <!-- no translation found for sms_control_message (3867899169651496433) -->
+    <skip />
+    <!-- no translation found for sms_control_yes (3663725993855816807) -->
+    <skip />
+    <!-- no translation found for sms_control_no (625438561395534982) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
+    <skip />
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kártya eltávolítva"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"A mobilhálózat nem lesz elérhető, amíg újra nem indítja egy érvényes SIM kártya behelyezése után."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kész"</string>
@@ -1063,10 +1077,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Érintse meg az USB hibakeresés kikapcsolásához."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Beviteli mód kiválasztása"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Beviteli módok beállítása"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Fizikai billentyűzet"</string>
+    <string name="hardware" msgid="7517821086888990278">"Hardver"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"jelöltek"</u></string>
