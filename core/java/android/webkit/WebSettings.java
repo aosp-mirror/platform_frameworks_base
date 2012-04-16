@@ -195,11 +195,8 @@ public class WebSettings {
      * on-screen zoom controls, which are displayed over the WebView's content,
      * and the use of a pinch gesture to control zooming. Whether or not these
      * on-screen controls are displayed can be set with {@link #setDisplayZoomControls}.
-     * The separate zoom controls are provided as a View object by
-     * {@link WebView#getZoomControls()} and the caller is responsible for inserting
-     * this View into the layout hierarchy. Use of the separate controls is
-     * deprecated and it is therefore recommended that this setting is always
-     * enabled.
+     * The separate zoom controls are no longer supported, so it is recommended
+     * that this setting is always enabled.
      * @param enabled Whether the WebView should use the built-in zoom mechanism.
      */
     public void setBuiltInZoomControls(boolean enabled) {
