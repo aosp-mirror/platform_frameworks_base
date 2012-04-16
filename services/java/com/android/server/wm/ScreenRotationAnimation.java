@@ -121,6 +121,7 @@ class ScreenRotationAnimation {
     private boolean mMoreStartEnter;
     private boolean mMoreStartExit;
     private boolean mMoreStartFrame;
+    long mHalfwayPoint;
 
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mSurface="); pw.print(mSurface);
@@ -655,6 +656,9 @@ class ScreenRotationAnimation {
     }
 
     private boolean stepAnimation(long now) {
+        if (now > mHalfwayPoint) {
+            mHalfwayPoint = Long.MAX_VALUE;
+        }
         if (mFinishAnimReady && mFinishAnimStartTime < 0) {
             if (DEBUG_STATE) Slog.v(TAG, "Step: finish anim now ready");
             mFinishAnimStartTime = now;
@@ -915,6 +919,7 @@ class ScreenRotationAnimation {
                 mRotateExitAnimation.setStartTime(now);
             }
             mAnimRunning = true;
+            mHalfwayPoint = now + mRotateEnterAnimation.getDuration() / 2;
         }
 
         return stepAnimation(now);
