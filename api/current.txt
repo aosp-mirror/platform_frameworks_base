@@ -3251,6 +3251,7 @@ package android.app {
     method public android.app.DownloadManager.Request addRequestHeader(java.lang.String, java.lang.String);
     method public void allowScanningByMediaScanner();
     method public android.app.DownloadManager.Request setAllowedNetworkTypes(int);
+    method public android.app.DownloadManager.Request setAllowedOverMetered(boolean);
     method public android.app.DownloadManager.Request setAllowedOverRoaming(boolean);
     method public android.app.DownloadManager.Request setDescription(java.lang.CharSequence);
     method public android.app.DownloadManager.Request setDestinationInExternalFilesDir(android.content.Context, java.lang.String, java.lang.String);
