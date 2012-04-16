@@ -179,6 +179,6 @@ using namespace android;
 
 int register_android_hardware_SensorManager(JNIEnv *env)
 {
-    return jniRegisterNativeMethods(env, "android/hardware/SensorManager",
+    return jniRegisterNativeMethods(env, "android/hardware/SystemSensorManager",
             gMethods, NELEM(gMethods));
 }

@@ -9782,7 +9782,7 @@ package android.hardware {
     method public abstract void onSensorChanged(int, float[]);
   }
 
-  public class SensorManager {
+  public abstract class SensorManager {
     method public static float getAltitude(float, float);
     method public static void getAngleChange(float[], float[], float[]);
     method public android.hardware.Sensor getDefaultSensor(int);
