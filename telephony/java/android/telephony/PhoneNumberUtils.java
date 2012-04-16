@@ -64,8 +64,8 @@ public class PhoneNumberUtils
     /*
      * Calling Line Identification Restriction (CLIR)
      */
-    private static final String CLIR_ON = "*31#+";
-    private static final String CLIR_OFF = "#31#+";
+    private static final String CLIR_ON = "*31#";
+    private static final String CLIR_OFF = "#31#";
 
     /*
      * TOA = TON + NPI
@@ -213,21 +213,24 @@ public class PhoneNumberUtils
 
         int len = phoneNumber.length();
         StringBuilder ret = new StringBuilder(len);
-        boolean firstCharAdded = false;
 
         for (int i = 0; i < len; i++) {
             char c = phoneNumber.charAt(i);
-            if (isDialable(c) && (c != '+' || !firstCharAdded)) {
-                firstCharAdded = true;
+            // Character.digit() supports ASCII and Unicode digits (fullwidth, Arabic-Indic, etc.)
+            int digit = Character.digit(c, 10);
+            if (digit != -1) {
+                ret.append(digit);
+            } else if (c == '+') {
+                // Allow '+' as first character or after CLIR MMI prefix
+                String prefix = ret.toString();
+                if (prefix.length() == 0 || prefix.equals(CLIR_ON) || prefix.equals(CLIR_OFF)) {
+                    ret.append(c);
+                }
+            } else if (isDialable(c)) {
                 ret.append(c);
             } else if (isStartsPostDial (c)) {
                 break;
             }
-        }
-
-        int pos = addPlusChar(phoneNumber);
-        if (pos >= 0 && ret.length() > pos) {
-            ret.insert(pos, '+');
         }
 
         return ret.toString();
@@ -283,7 +286,11 @@ public class PhoneNumberUtils
 
         for (int i = 0; i < len; i++) {
             char c = phoneNumber.charAt(i);
-            if (isNonSeparator(c)) {
+            // Character.digit() supports ASCII and Unicode digits (fullwidth, Arabic-Indic, etc.)
+            int digit = Character.digit(c, 10);
+            if (digit != -1) {
+                ret.append(digit);
+            } else if (isNonSeparator(c)) {
                 ret.append(c);
             }
         }
@@ -369,28 +376,6 @@ public class PhoneNumberUtils
         } else {
             return trimIndex - 1;
         }
-    }
-
-    /** GSM codes
-     *  Finds if a GSM code includes the international prefix (+).
-     *
-     * @param number the number to dial.
-     *
-     * @return the position where the + char will be inserted, -1 if the GSM code was not found.
-     */
-    private static int
-    addPlusChar(String number) {
-        int pos = -1;
-
-        if (number.startsWith(CLIR_OFF)) {
-            pos = CLIR_OFF.length() - 1;
-        }
-
-        if (number.startsWith(CLIR_ON)) {
-            pos = CLIR_ON.length() - 1;
-        }
-
-        return pos;
     }
 
     /**
@@ -1504,7 +1489,11 @@ public class PhoneNumberUtils
         int len = phoneNumber.length();
         for (int i = 0; i < len; i++) {
             char c = phoneNumber.charAt(i);
-            if ((i == 0 && c == '+') || PhoneNumberUtils.isISODigit(c)) {
+            // Character.digit() supports ASCII and Unicode digits (fullwidth, Arabic-Indic, etc.)
+            int digit = Character.digit(c, 10);
+            if (digit != -1) {
+                sb.append(digit);
+            } else if (i == 0 && c == '+') {
                 sb.append(c);
             } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
                 return normalizeNumber(PhoneNumberUtils.convertKeypadLettersToDigits(phoneNumber));
