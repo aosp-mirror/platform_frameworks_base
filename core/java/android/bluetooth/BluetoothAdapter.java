@@ -507,10 +507,7 @@ public final class BluetoothAdapter {
 
         boolean enabled = false;
         try {
-            enabled = mManagerService.enable();
-            if (enabled) {
-                // TODO(BT)
-            }
+            return mManagerService.enable();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
