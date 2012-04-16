@@ -81,6 +81,20 @@ public class Visualizer {
      */
     public static final int STATE_ENABLED   = 2;
 
+    // to keep in sync with system/media/audio_effects/include/audio_effects/effect_visualizer.h
+    /**
+     * @hide
+     * Defines a capture mode where amplification is applied based on the content of the captured
+     * data. This is the default Visualizer mode, and is suitable for music visualization.
+     */
+    public static final int SCALING_MODE_NORMALIZED = 0;
+    /**
+     * @hide
+     * Defines a capture mode where the playback volume will affect (scale) the range of the
+     * captured data. A low playback volume will lead to low sample and fft values, and vice-versa.
+     */
+    public static final int SCALING_MODE_AS_PLAYED = 1;
+
     // to keep in sync with frameworks/base/media/jni/audioeffect/android_media_Visualizer.cpp
     private static final int NATIVE_EVENT_PCM_CAPTURE = 0;
     private static final int NATIVE_EVENT_FFT_CAPTURE = 1;
@@ -298,6 +312,44 @@ public class Visualizer {
                 throw(new IllegalStateException("getCaptureSize() called in wrong state: "+mState));
             }
             return native_getCaptureSize();
+        }
+    }
+
+    /**
+     * @hide
+     * Set the type of scaling applied on the captured visualization data.
+     * @param mode see {@link #SCALING_MODE_NORMALIZED}
+     *     and {@link #SCALING_MODE_AS_PLAYED}
+     * @return {@link #SUCCESS} in case of success,
+     *     {@link #ERROR_BAD_VALUE} in case of failure.
+     * @throws IllegalStateException
+     */
+    public int setScalingMode(int mode)
+    throws IllegalStateException {
+        synchronized (mStateLock) {
+            if (mState == STATE_UNINITIALIZED) {
+                throw(new IllegalStateException("setScalingMode() called in wrong state: "
+                        + mState));
+            }
+            return native_setScalingMode(mode);
+        }
+    }
+
+    /**
+     * @hide
+     * Returns the current scaling mode on the captured visualization data.
+     * @return the scaling mode, see {@link #SCALING_MODE_NORMALIZED}
+     *     and {@link #SCALING_MODE_AS_PLAYED}.
+     * @throws IllegalStateException
+     */
+    public int getScalingMode()
+    throws IllegalStateException {
+        synchronized (mStateLock) {
+            if (mState == STATE_UNINITIALIZED) {
+                throw(new IllegalStateException("getScalingMode() called in wrong state: "
+                        + mState));
+            }
+            return native_getScalingMode();
         }
     }
 
@@ -587,6 +639,10 @@ public class Visualizer {
     private native final int native_setCaptureSize(int size);
 
     private native final int native_getCaptureSize();
+
+    private native final int native_setScalingMode(int mode);
+
+    private native final int native_getScalingMode();
 
     private native final int native_getSamplingRate();
 
