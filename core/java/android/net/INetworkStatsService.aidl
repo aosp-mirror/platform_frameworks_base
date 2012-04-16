@@ -32,6 +32,9 @@ interface INetworkStatsService {
 
     /** Return data layer snapshot of UID network usage. */
     NetworkStats getDataLayerSnapshotForUid(int uid);
+    /** Return set of any ifaces associated with mobile networks since boot. */
+    String[] getMobileIfaces();
+
     /** Increment data layer count of operations performed for UID and tag. */
     void incrementOperationCount(int uid, int tag, int operationCount);
 

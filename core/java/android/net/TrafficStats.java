@@ -88,6 +88,16 @@ public class TrafficStats {
      */
     public static final int TAG_SYSTEM_BACKUP = 0xFFFFFF03;
 
+    private static INetworkStatsService sStatsService;
+
+    private synchronized static INetworkStatsService getStatsService() {
+        if (sStatsService == null) {
+            sStatsService = INetworkStatsService.Stub.asInterface(
+                    ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+        }
+        return sStatsService;
+    }
+
     /**
      * Snapshot of {@link NetworkStats} when the currently active profiling
      * session started, or {@code null} if no session active.
@@ -228,11 +238,9 @@ public class TrafficStats {
      * @param operationCount Number of operations to increment count by.
      */
     public static void incrementOperationCount(int tag, int operationCount) {
-        final INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         final int uid = android.os.Process.myUid();
         try {
-            statsService.incrementOperationCount(uid, tag, operationCount);
+            getStatsService().incrementOperationCount(uid, tag, operationCount);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -257,7 +265,13 @@ public class TrafficStats {
      * @return number of packets.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static native long getMobileTxPackets();
+    public static long getMobileTxPackets() {
+        long total = 0;
+        for (String iface : getMobileIfaces()) {
+            total += getTxPackets(iface);
+        }
+        return total;
+    }
 
     /**
      * Get the total number of packets received through the mobile interface.
@@ -265,7 +279,13 @@ public class TrafficStats {
      * @return number of packets.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static native long getMobileRxPackets();
+    public static long getMobileRxPackets() {
+        long total = 0;
+        for (String iface : getMobileIfaces()) {
+            total += getRxPackets(iface);
+        }
+        return total;
+    }
 
     /**
      * Get the total number of bytes transmitted through the mobile interface.
@@ -273,7 +293,13 @@ public class TrafficStats {
      * @return number of bytes.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-      public static native long getMobileTxBytes();
+    public static long getMobileTxBytes() {
+        long total = 0;
+        for (String iface : getMobileIfaces()) {
+            total += getTxBytes(iface);
+        }
+        return total;
+    }
 
     /**
      * Get the total number of bytes received through the mobile interface.
@@ -281,7 +307,13 @@ public class TrafficStats {
      * @return number of bytes.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static native long getMobileRxBytes();
+    public static long getMobileRxBytes() {
+        long total = 0;
+        for (String iface : getMobileIfaces()) {
+            total += getRxBytes(iface);
+        }
+        return total;
+    }
 
     /**
      * Get the total number of packets transmitted through the specified interface.
@@ -290,7 +322,9 @@ public class TrafficStats {
      * {@link #UNSUPPORTED} will be returned.
      * @hide
      */
-    public static native long getTxPackets(String iface);
+    public static long getTxPackets(String iface) {
+        return nativeGetIfaceStat(iface, TYPE_TX_PACKETS);
+    }
 
     /**
      * Get the total number of packets received through the specified interface.
@@ -299,7 +333,9 @@ public class TrafficStats {
      * {@link #UNSUPPORTED} will be returned.
      * @hide
      */
-    public static native long getRxPackets(String iface);
+    public static long getRxPackets(String iface) {
+        return nativeGetIfaceStat(iface, TYPE_RX_PACKETS);
+    }
 
     /**
      * Get the total number of bytes transmitted through the specified interface.
@@ -308,7 +344,9 @@ public class TrafficStats {
      * {@link #UNSUPPORTED} will be returned.
      * @hide
      */
-    public static native long getTxBytes(String iface);
+    public static long getTxBytes(String iface) {
+        return nativeGetIfaceStat(iface, TYPE_TX_BYTES);
+    }
 
     /**
      * Get the total number of bytes received through the specified interface.
@@ -317,8 +355,9 @@ public class TrafficStats {
      * {@link #UNSUPPORTED} will be returned.
      * @hide
      */
-    public static native long getRxBytes(String iface);
-
+    public static long getRxBytes(String iface) {
+        return nativeGetIfaceStat(iface, TYPE_RX_BYTES);
+    }
 
     /**
      * Get the total number of packets sent through all network interfaces.
@@ -326,7 +365,9 @@ public class TrafficStats {
      * @return the number of packets.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static native long getTotalTxPackets();
+    public static long getTotalTxPackets() {
+        return nativeGetTotalStat(TYPE_TX_PACKETS);
+    }
 
     /**
      * Get the total number of packets received through all network interfaces.
@@ -334,7 +375,9 @@ public class TrafficStats {
      * @return number of packets.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static native long getTotalRxPackets();
+    public static long getTotalRxPackets() {
+        return nativeGetTotalStat(TYPE_RX_PACKETS);
+    }
 
     /**
      * Get the total number of bytes sent through all network interfaces.
@@ -342,7 +385,9 @@ public class TrafficStats {
      * @return number of bytes.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static native long getTotalTxBytes();
+    public static long getTotalTxBytes() {
+        return nativeGetTotalStat(TYPE_TX_BYTES);
+    }
 
     /**
      * Get the total number of bytes received through all network interfaces.
@@ -350,7 +395,9 @@ public class TrafficStats {
      * @return number of bytes.  If the statistics are not supported by this device,
      * {@link #UNSUPPORTED} will be returned.
      */
-    public static native long getTotalRxBytes();
+    public static long getTotalRxBytes() {
+        return nativeGetTotalStat(TYPE_RX_BYTES);
+    }
 
     /**
      * Get the number of bytes sent through the network for this UID.
@@ -483,7 +530,6 @@ public class TrafficStats {
      */
     public static native long getUidTcpRxSegments(int uid);
 
-
     /**
      * Get the number of UDP packets sent for this UID.
      * Includes DNS requests.
@@ -515,13 +561,33 @@ public class TrafficStats {
      * special permission.
      */
     private static NetworkStats getDataLayerSnapshotForUid(Context context) {
-        final INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         final int uid = android.os.Process.myUid();
         try {
-            return statsService.getDataLayerSnapshotForUid(uid);
+            return getStatsService().getDataLayerSnapshotForUid(uid);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * Return set of any ifaces associated with mobile networks since boot.
+     * Interfaces are never removed from this list, so counters should always be
+     * monotonic.
+     */
+    private static String[] getMobileIfaces() {
+        try {
+            return getStatsService().getMobileIfaces();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // NOTE: keep these in sync with android_net_TrafficStats.cpp
+    private static final int TYPE_RX_BYTES = 0;
+    private static final int TYPE_RX_PACKETS = 1;
+    private static final int TYPE_TX_BYTES = 2;
+    private static final int TYPE_TX_PACKETS = 3;
+
+    private static native long nativeGetTotalStat(int type);
+    private static native long nativeGetIfaceStat(String iface, int type);
 }
