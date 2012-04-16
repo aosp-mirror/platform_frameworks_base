@@ -35,14 +35,6 @@ import java.util.List;
  * @hide
  */
 public class SystemSensorManager extends SensorManager {
-    private static final String TAG = "SensorManager";
-
-    /*-----------------------------------------------------------------------*/
-
-    final Looper mMainLooper;
-
-    /*-----------------------------------------------------------------------*/
-
     private static final int SENSOR_DISABLE = -1;
     private static boolean sSensorModuleInitialized = false;
     private static ArrayList<Sensor> sFullSensorsList = new ArrayList<Sensor>();
@@ -56,9 +48,11 @@ public class SystemSensorManager extends SensorManager {
     static final ArrayList<ListenerDelegate> sListeners =
         new ArrayList<ListenerDelegate>();
 
-    /*-----------------------------------------------------------------------*/
+    // Common pool of sensor events.
+    static SensorEventPool sPool;
 
-    private static SensorEventPool sPool;
+    // Looper associated with the context in which this instance was created.
+    final Looper mMainLooper;
 
     /*-----------------------------------------------------------------------*/
 
@@ -317,6 +311,7 @@ public class SystemSensorManager extends SensorManager {
     }
 
     /** @hide */
+    @Override
     protected boolean registerListenerImpl(SensorEventListener listener, Sensor sensor,
             int delay, Handler handler) {
         boolean result = true;
