@@ -711,6 +711,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             throw new IllegalArgumentException("sql must not be null.");
         }
 
+        int changedRows = 0;
         final int cookie = mRecentOperations.beginOperation("executeForChangedRowCount",
                 sql, bindArgs);
         try {
@@ -721,8 +722,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 applyBlockGuardPolicy(statement);
                 attachCancellationSignal(cancellationSignal);
                 try {
-                    return nativeExecuteForChangedRowCount(
+                    changedRows = nativeExecuteForChangedRowCount(
                             mConnectionPtr, statement.mStatementPtr);
+                    return changedRows;
                 } finally {
                     detachCancellationSignal(cancellationSignal);
                 }
@@ -733,7 +735,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             mRecentOperations.failOperation(cookie, ex);
             throw ex;
         } finally {
-            mRecentOperations.endOperation(cookie);
+            if (mRecentOperations.endOperationDeferLog(cookie)) {
+                mRecentOperations.logOperation(cookie, "changedRows=" + changedRows);
+            }
         }
     }
 
