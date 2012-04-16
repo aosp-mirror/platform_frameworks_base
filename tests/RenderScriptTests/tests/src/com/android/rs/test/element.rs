@@ -101,7 +101,7 @@ static bool test_element_getters() {
     _RS_ASSERT(rsElementGetDataKind(complexElem) == RS_KIND_USER);
     _RS_ASSERT(rsElementGetDataType(complexElem) == RS_TYPE_NONE);
     _RS_ASSERT(rsElementGetVectorSize(complexElem) == 1);
-    _RS_ASSERT(rsElementGetSizeBytes(complexElem) == sizeof(*complexStruct));
+    _RS_ASSERT(rsElementGetBytesSize(complexElem) == sizeof(*complexStruct));
 
     char buffer[64];
     for (uint32_t i = 0; i < subElemCount; i ++) {
