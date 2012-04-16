@@ -144,10 +144,10 @@ public class VibratorService extends IVibratorService.Stub
                 new ContentObserver(mH) {
                     @Override
                     public void onChange(boolean selfChange) {
-                        updateVibrateInputDevicesSetting();
+                        updateInputDeviceVibrators();
                     }
                 });
-        updateVibrateInputDevicesSetting();
+        updateInputDeviceVibrators();
     }
 
     public boolean hasVibrator() {
@@ -334,36 +334,30 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
-    private void updateVibrateInputDevicesSetting() {
-        synchronized (mInputDeviceVibrators) {
-            mVibrateInputDevicesSetting = false;
-            try {
-                mVibrateInputDevicesSetting = Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.VIBRATE_INPUT_DEVICES) > 0;
-            } catch (SettingNotFoundException snfe) {
-            }
-
-            if (mVibrateInputDevicesSetting) {
-                if (!mInputDeviceListenerRegistered) {
-                    mInputDeviceListenerRegistered = true;
-                    mIm.registerInputDeviceListener(this, mH);
-                }
-            } else {
-                if (mInputDeviceListenerRegistered) {
-                    mInputDeviceListenerRegistered = false;
-                    mIm.unregisterInputDeviceListener(this);
-                }
-            }
-
-            updateInputDeviceVibrators();
-        }
-    }
-
     private void updateInputDeviceVibrators() {
         synchronized (mVibrations) {
             doCancelVibrateLocked();
 
             synchronized (mInputDeviceVibrators) {
+                mVibrateInputDevicesSetting = false;
+                try {
+                    mVibrateInputDevicesSetting = Settings.System.getInt(mContext.getContentResolver(),
+                            Settings.System.VIBRATE_INPUT_DEVICES) > 0;
+                } catch (SettingNotFoundException snfe) {
+                }
+
+                if (mVibrateInputDevicesSetting) {
+                    if (!mInputDeviceListenerRegistered) {
+                        mInputDeviceListenerRegistered = true;
+                        mIm.registerInputDeviceListener(this, mH);
+                    }
+                } else {
+                    if (mInputDeviceListenerRegistered) {
+                        mInputDeviceListenerRegistered = false;
+                        mIm.unregisterInputDeviceListener(this);
+                    }
+                }
+
                 mInputDeviceVibrators.clear();
                 if (mVibrateInputDevicesSetting) {
                     int[] ids = mIm.getInputDeviceIds();
