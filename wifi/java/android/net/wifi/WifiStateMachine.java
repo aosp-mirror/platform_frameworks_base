@@ -669,6 +669,7 @@ public class WifiStateMachine extends StateMachine {
 
         setInitialState(mInitialState);
 
+        setProcessedMessagesSize(100);
         if (DBG) setDbg(true);
 
         //start the state machine
@@ -1119,6 +1120,37 @@ public class WifiStateMachine extends StateMachine {
 
         sb.append(mWifiConfigStore.dump());
         return sb.toString();
+    }
+
+    @Override
+    protected boolean recordProcessedMessage(Message msg) {
+        //Ignore screen on/off & common messages when driver has started
+        if (getCurrentState() == mConnectedState || getCurrentState() == mDisconnectedState) {
+            switch (msg.what) {
+                case CMD_LOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_START_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_HIGH_PERF_MODE:
+                case CMD_SET_SUSPEND_OPTIMIZATIONS:
+                case CMD_CLEAR_SUSPEND_OPTIMIZATIONS:
+                case CMD_ENABLE_BACKGROUND_SCAN:
+                case CMD_ENABLE_ALL_NETWORKS:
+                return false;
+            }
+        }
+
+        switch (msg.what) {
+            case CMD_START_SCAN:
+            case CMD_ENABLE_RSSI_POLL:
+            case CMD_RSSI_POLL:
+            case CMD_DELAYED_STOP_DRIVER:
+            case WifiMonitor.SCAN_RESULTS_EVENT:
+            case WifiWatchdogStateMachine.RSSI_FETCH:
+                return false;
+            default:
+                return true;
+        }
     }
 
     /*********************************************************
@@ -2015,7 +2047,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2068,7 +2099,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2148,7 +2178,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2169,7 +2198,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2250,7 +2278,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2274,7 +2301,6 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
             WifiConfiguration config;
-            boolean eventLoggingEnabled = true;
             switch(message.what) {
                 case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
                     transitionTo(mSupplicantStoppingState);
@@ -2291,7 +2317,6 @@ public class WifiStateMachine extends StateMachine {
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
-                    eventLoggingEnabled = false;
                     setScanResults(mWifiNative.scanResults());
                     sendScanResultsAvailableBroadcast();
                     mScanResultIsPending = false;
@@ -2381,9 +2406,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            if (eventLoggingEnabled) {
-                EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-            }
             return HANDLED;
         }
 
@@ -2459,7 +2481,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2505,7 +2526,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2564,14 +2584,12 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
-            boolean eventLoggingEnabled = true;
             switch(message.what) {
                case CMD_SET_SCAN_TYPE:
                     mSetScanActive = (message.arg1 == SCAN_ACTIVE);
                     mWifiNative.setScanMode(mSetScanActive);
                     break;
                 case CMD_START_SCAN:
-                    eventLoggingEnabled = false;
                     boolean forceActive = (message.arg1 == SCAN_ACTIVE);
                     if (forceActive && !mSetScanActive) {
                         mWifiNative.setScanMode(forceActive);
@@ -2681,9 +2699,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            if (eventLoggingEnabled) {
-                EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-            }
             return HANDLED;
         }
         @Override
@@ -2731,7 +2746,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2764,7 +2778,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2801,7 +2814,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2940,7 +2952,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -2959,7 +2970,6 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
-            boolean eventLoggingEnabled = true;
             switch (message.what) {
               case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
                   handlePreDhcpSetup();
@@ -2988,7 +2998,6 @@ public class WifiStateMachine extends StateMachine {
                     }
                     break;
                 case CMD_START_SCAN:
-                    eventLoggingEnabled = false;
                     /* When the network is connected, re-scanning can trigger
                      * a reconnection. Put it in scan-only mode during scan.
                      * When scan results are received, the mode is switched
@@ -3031,7 +3040,6 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
                     break;
                 case CMD_RSSI_POLL:
-                    eventLoggingEnabled = false;
                     if (message.arg1 == mRssiPollToken) {
                         // Get Info and continue polling
                         fetchRssiAndLinkSpeedNative();
@@ -3052,7 +3060,6 @@ public class WifiStateMachine extends StateMachine {
                     }
                     break;
                 case WifiWatchdogStateMachine.RSSI_FETCH:
-                    eventLoggingEnabled = false;
                     fetchRssiAndLinkSpeedNative();
                     replyToMessage(message, WifiWatchdogStateMachine.RSSI_FETCH_SUCCEEDED,
                             mWifiInfo.getRssi());
@@ -3061,9 +3068,6 @@ public class WifiStateMachine extends StateMachine {
                     return NOT_HANDLED;
             }
 
-            if (eventLoggingEnabled) {
-                EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-            }
             return HANDLED;
         }
 
@@ -3131,7 +3135,6 @@ public class WifiStateMachine extends StateMachine {
               default:
                   return NOT_HANDLED;
           }
-          EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
           return HANDLED;
       }
     }
@@ -3168,7 +3171,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -3202,7 +3204,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
         @Override
@@ -3240,7 +3241,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -3343,7 +3343,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
 
@@ -3432,7 +3431,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
 
@@ -3504,7 +3502,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -3548,7 +3545,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -3598,7 +3594,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -3629,7 +3624,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
@@ -3692,7 +3686,6 @@ public class WifiStateMachine extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
         }
     }
