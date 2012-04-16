@@ -75,7 +75,10 @@ public class RecognitionManagerService extends Binder {
             try {
                 mContext.getPackageManager().getServiceInfo(comp, 0);
             } catch (NameNotFoundException e) {
-                setCurRecognizer(null);
+                comp = findAvailRecognizer(null);
+                if (comp != null) {
+                    setCurRecognizer(comp);
+                }
             }
         } else {
             comp = findAvailRecognizer(null);
