@@ -650,7 +650,8 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         mEmptyView = emptyView;
 
         // If not explicitly specified this view is important for accessibility.
-        if (emptyView.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+        if (emptyView != null
+                && emptyView.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             emptyView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
 
