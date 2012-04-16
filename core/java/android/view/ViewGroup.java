@@ -354,8 +354,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * This constant is a {@link #setLayoutMode(int) layoutMode}.
-     * Layout bounds are derived by offsetting the component bounds using
-     * {@link View#getLayoutInsets()}.
      */
     public static final int LAYOUT_BOUNDS = 1;
 
