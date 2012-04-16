@@ -4449,8 +4449,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Returns the basis of alignment during the layout of this view group:
      * either {@link #COMPONENT_BOUNDS} or {@link #LAYOUT_BOUNDS}.
      *
-     * @return whether or not this view group should use the component or layout bounds during
-     * layout operations
+     * @return the layout mode to use during layout operations
      *
      * @see #setLayoutMode(int)
      */
@@ -4479,8 +4478,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * value is {@link #LAYOUT_BOUNDS} for target SDK's greater than JellyBean,
      * {@link #LAYOUT_BOUNDS} otherwise.
      *
-     * @return whether or not this view group should use the component or layout bounds during
-     * layout operations
+     * @param layoutMode the layout mode to use during layout operations
      *
      * @see #getLayoutMode()
      */
