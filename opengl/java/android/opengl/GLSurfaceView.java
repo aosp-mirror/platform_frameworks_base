@@ -1298,7 +1298,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             }
 
                             // Update the pause state.
+                            boolean pausing = false;
                             if (mPaused != mRequestPaused) {
+                                pausing = mRequestPaused;
                                 mPaused = mRequestPaused;
                                 sGLThreadManager.notifyAll();
                                 if (LOG_PAUSE_RESUME) {
@@ -1324,12 +1326,16 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                 lostEglContext = false;
                             }
 
-                            // Do we need to release the EGL surface?
-                            if (mHaveEglSurface && mPaused) {
+                            // When pausing, release the EGL surface:
+                            if (pausing && mHaveEglSurface) {
                                 if (LOG_SURFACE) {
                                     Log.i("GLThread", "releasing EGL surface because paused tid=" + getId());
                                 }
                                 stopEglSurfaceLocked();
+                            }
+
+                            // When pausing, optionally release the EGL Context:
+                            if (pausing && mHaveEglContext) {
                                 GLSurfaceView view = mGLSurfaceViewWeakRef.get();
                                 boolean preserveEglContextOnPause = view == null ?
                                         false : view.mPreserveEGLContextOnPause;
@@ -1339,6 +1345,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                         Log.i("GLThread", "releasing EGL context because paused tid=" + getId());
                                     }
                                 }
+                            }
+
+                            // When pausing, optionally terminate EGL:
+                            if (pausing) {
                                 if (sGLThreadManager.shouldTerminateEGLWhenPausing()) {
                                     mEglHelper.finish();
                                     if (LOG_SURFACE) {
