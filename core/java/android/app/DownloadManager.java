@@ -349,6 +349,7 @@ public class DownloadManager {
         private String mMimeType;
         private boolean mRoamingAllowed = true;
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
+        private boolean mAllowedOverMetered = true;
         private boolean mIsVisibleInDownloadsUi = true;
         private boolean mScannable = false;
         private boolean mUseSystemCache = false;
@@ -609,13 +610,27 @@ public class DownloadManager {
         }
 
         /**
-         * Restrict the types of networks over which this download may proceed.  By default, all
-         * network types are allowed.
+         * Restrict the types of networks over which this download may proceed.
+         * By default, all network types are allowed. Consider using
+         * {@link #setAllowedOverMetered(boolean)} instead, since it's more
+         * flexible.
+         *
          * @param flags any combination of the NETWORK_* bit flags.
          * @return this object
          */
         public Request setAllowedNetworkTypes(int flags) {
             mAllowedNetworkTypes = flags;
+            return this;
+        }
+
+        /**
+         * Set whether this download may proceed over a metered network
+         * connection. By default, metered networks are allowed.
+         *
+         * @see ConnectivityManager#isActiveNetworkMetered()
+         */
+        public Request setAllowedOverMetered(boolean allow) {
+            mAllowedOverMetered = allow;
             return this;
         }
 
@@ -672,6 +687,7 @@ public class DownloadManager {
             putIfNonNull(values, Downloads.Impl.COLUMN_DESCRIPTION, mDescription);
             putIfNonNull(values, Downloads.Impl.COLUMN_MIME_TYPE, mMimeType);
 
+            // TODO: add COLUMN_ALLOW_METERED and persist
             values.put(Downloads.Impl.COLUMN_VISIBILITY, mNotificationVisibility);
             values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
             values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
