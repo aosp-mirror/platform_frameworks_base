@@ -24806,7 +24806,7 @@ package android.webkit {
     enum_constant public static final android.webkit.ConsoleMessage.MessageLevel WARNING;
   }
 
-  public final class CookieManager {
+  public class CookieManager {
     method public synchronized boolean acceptCookie();
     method public static boolean allowFileSchemeCookies();
     method public java.lang.String getCookie(java.lang.String);
@@ -24838,7 +24838,7 @@ package android.webkit {
     method public abstract void onDownloadStart(java.lang.String, java.lang.String, java.lang.String, java.lang.String, long);
   }
 
-  public final class GeolocationPermissions {
+  public class GeolocationPermissions {
     method public void allow(java.lang.String);
     method public void clear(java.lang.String);
     method public void clearAll();
@@ -24864,8 +24864,6 @@ package android.webkit {
   public class JsResult {
     method public final void cancel();
     method public final void confirm();
-    method protected final void wakeUp();
-    field protected boolean mResult;
   }
 
   public class MimeTypeMap {
@@ -24958,7 +24956,7 @@ package android.webkit {
     method public java.lang.String getUrl();
   }
 
-  public final class WebIconDatabase {
+  public class WebIconDatabase {
     method public void close();
     method public static android.webkit.WebIconDatabase getInstance();
     method public void open(java.lang.String);
@@ -25127,7 +25125,7 @@ package android.webkit {
     enum_constant public static final android.webkit.WebSettings.ZoomDensity MEDIUM;
   }
 
-  public final class WebStorage {
+  public class WebStorage {
     method public void deleteAllData();
     method public void deleteOrigin(java.lang.String);
     method public static android.webkit.WebStorage getInstance();

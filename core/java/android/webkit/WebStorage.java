@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * Functionality for manipulating the webstorage databases.
  */
-public final class WebStorage {
+public class WebStorage {
 
     /**
      * Encapsulates a callback function to be executed when a new quota is made

@@ -35,7 +35,7 @@ import java.util.Vector;
  * WebIconDatabase object is a single instance and all methods operate on that
  * single object.
  */
-public final class WebIconDatabase {
+public class WebIconDatabase {
     private static final String LOGTAG = "WebIconDatabase";
     // Global instance of a WebIconDatabase
     private static WebIconDatabase sIconDatabase;

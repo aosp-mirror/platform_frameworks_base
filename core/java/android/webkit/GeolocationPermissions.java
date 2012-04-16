@@ -50,7 +50,7 @@ import java.util.Vector;
 // Within WebKit, Geolocation permissions may be applied either temporarily
 // (for the duration of the page) or permanently. This class deals only with
 // permanent permissions.
-public final class GeolocationPermissions {
+public class GeolocationPermissions {
     /**
      * A callback interface used by the host application to set the Geolocation
      * permission state for an origin.
