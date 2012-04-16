@@ -1808,16 +1808,18 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final ProcessRecord getProcessRecordLocked(
             String processName, int uid) {
-        // Temporary hack to make Settings run per user
-        if (uid == Process.SYSTEM_UID && !processName.equals("com.android.settings")) {
+        if (uid == Process.SYSTEM_UID) {
             // The system gets to run in any process.  If there are multiple
             // processes with the same uid, just pick the first (this
             // should never happen).
             SparseArray<ProcessRecord> procs = mProcessNames.getMap().get(
                     processName);
-            return procs != null ? procs.valueAt(0) : null;
+            if (procs == null) return null;
+            final int N = procs.size();
+            for (int i = 0; i < N; i++) {
+                if (UserId.isSameUser(procs.keyAt(i), uid)) return procs.valueAt(i);
+            }
         }
-        // uid = applyUserId(uid);
         ProcessRecord proc = mProcessNames.get(processName, uid);
         return proc;
     }
@@ -6183,7 +6185,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (cpi == null) {
                     return null;
                 }
-
+                if (isSingleton(cpi.processName, cpi.applicationInfo)) {
+                    userId = 0;
+                }
                 cpi.applicationInfo = getAppInfoForUser(cpi.applicationInfo, userId);
 
                 String msg;
@@ -10923,6 +10927,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return null;
                 }
                 if (userId > 0) {
+                    if (isSingleton(sInfo.processName, sInfo.applicationInfo)) {
+                        userId = 0;
+                    }
                     sInfo.applicationInfo = getAppInfoForUser(sInfo.applicationInfo, userId);
                 }
                 ComponentName name = new ComponentName(
@@ -11740,7 +11747,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
-    
+
+    boolean isSingleton(String componentProcessName, ApplicationInfo aInfo) {
+        boolean result = false;
+        if (UserId.getAppId(aInfo.uid) >= Process.FIRST_APPLICATION_UID) {
+            result = false;
+        } else if (componentProcessName == aInfo.packageName) {
+            result = (aInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0;
+        } else if ("system".equals(componentProcessName)) {
+            result = true;
+        }
+        if (DEBUG_MU) {
+            Slog.v(TAG, "isSingleton(" + componentProcessName + ", " + aInfo + ") = " + result);
+        }
+        return result;
+    }
+
     public int bindService(IApplicationThread caller, IBinder token,
             Intent service, String resolvedType,
             IServiceConnection connection, int flags, int userId) {
@@ -11807,6 +11829,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (res.record == null) {
                 return -1;
+            }
+            if (isSingleton(res.record.processName, res.record.appInfo)) {
+                userId = 0;
+                res = retrieveServiceLocked(service, resolvedType, Binder.getCallingPid(),
+                        Binder.getCallingUid(), 0);
             }
             ServiceRecord s = res.record;
 
@@ -12740,7 +12767,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (ai != null) {
                     receivers = new ArrayList();
                     ResolveInfo ri = new ResolveInfo();
-                    ri.activityInfo = getActivityInfoForUser(ai, userId);
+                    if (isSingleton(ai.processName, ai.applicationInfo)) {
+                        ri.activityInfo = getActivityInfoForUser(ai, 0);
+                    } else {
+                        ri.activityInfo = getActivityInfoForUser(ai, userId);
+                    }
                     receivers.add(ri);
                 }
             } else {
@@ -14894,16 +14925,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (info == null) return null;
         ApplicationInfo newInfo = new ApplicationInfo(info);
         newInfo.uid = applyUserId(info.uid, userId);
-        if (newInfo.uid >= Process.FIRST_APPLICATION_UID) {
-            newInfo.dataDir = USER_DATA_DIR + userId + "/"
-                    + info.packageName;
-        }
+        newInfo.dataDir = USER_DATA_DIR + userId + "/"
+                + info.packageName;
         return newInfo;
     }
 
     ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, int userId) {
-        if (aInfo == null || aInfo.applicationInfo.uid < Process.FIRST_APPLICATION_UID
-                || userId < 1) {
+        if (aInfo == null
+                || (userId < 1 && aInfo.applicationInfo.uid < UserId.PER_USER_RANGE)) {
             return aInfo;
         }
 
