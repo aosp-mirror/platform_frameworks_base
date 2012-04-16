@@ -195,10 +195,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return false;
     }
 
+    private boolean isConnected() {
+        return mBluetooth != null;
+    }
     public void getNameAndAddress() {
+        if (DBG) {
+            Log.d(TAG,"getNameAndAddress() called");
+            Log.d(TAG,"mBluetooth = " + mBluetooth);
+            Log.d(TAG,"mBinding =  "+ mBinding);
+            Log.d(TAG,"isConnected() = " + isConnected());
+        }
+
         synchronized(mConnection) {
             if (mBinding) return ;
-            mBinding = true;
+            if (!isConnected()) mBinding = true;
         }
         Message msg = mHandler.obtainMessage(MESSAGE_GET_NAME_AND_ADDRESS);
         mHandler.sendMessage(msg);
@@ -207,12 +217,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     public boolean enable() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permission");
+        if (DBG) {
+            Log.d(TAG,"enable() called");
+            Log.d(TAG,"mBluetooth = " + mBluetooth);
+            Log.d(TAG,"mBinding =  "+ mBinding);
+            Log.d(TAG,"isConnected = " + isConnected());
+        }
+
         synchronized(mConnection) {
             //if (mBluetooth != null) return false; [fc] always allow an enable() to occur.
             //If service is bound, we should not assume that bluetooth is enabled. What if
             //Bluetooth never turned on?
             if (mBinding) return true;
-            mBinding = true;
+            if (!isConnected()) mBinding = true;
+            Log.d(TAG,"enable(): setting mBinding to true" );
         }
         Message msg = mHandler.obtainMessage(MESSAGE_ENABLE);
         //msg.obj = new Boolean(true);
@@ -223,6 +241,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     public boolean disable(boolean persist) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permissicacheNameAndAddresson");
+        if (DBG) {
+            Log.d(TAG,"disable() called");
+            Log.d(TAG,"mBluetooth = " + mBluetooth);
+            Log.d(TAG,"mBinding =  "+ mBinding);
+            Log.d(TAG,"isConnected() = " + isConnected());
+        }
+
         synchronized(mConnection) {
              if (mBluetooth == null) return false;
             //if (mUnbinding) return true;
@@ -235,10 +260,17 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public void unbindAndFinish(boolean sendStop) {
+        if (DBG) {
+            Log.d(TAG,"unbindAndFinish() called");
+            Log.d(TAG,"mBluetooth = " + mBluetooth);
+            Log.d(TAG,"mBinding =  "+ mBinding);
+            Log.d(TAG,"isConnected = " + isConnected());
+        }
+
         synchronized (mConnection) {
             if (mUnbinding) return;
             mUnbinding = true;
-            if (mIsConnected) {
+            if (isConnected()) {
                 if (sendStop) {
                     if (DBG) Log.d(TAG,"Sending stop request.");
                     Intent i = new Intent(IBluetooth.class.getName());
@@ -249,6 +281,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 if (DBG) Log.d(TAG, "Sending unbind request.");
                 mContext.unbindService(mConnection);
                 mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED));
+            } else {
+                mUnbinding=false;
             }
         }
     }
@@ -267,7 +301,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private IBluetooth mBluetooth;
     private boolean mBinding;
     private boolean mUnbinding;
-    public boolean mIsConnected;
             
     private class BluetoothServiceConnection implements ServiceConnection {
 
@@ -307,7 +340,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 case MESSAGE_GET_NAME_AND_ADDRESS: {
                     if (mBluetooth == null) {
                         //Start bind request
-                        if (!mIsConnected) {
+                        if (!isConnected()) {
                             if (DBG) Log.d(TAG, "Binding to service to get name and address");
                             mConnection.setGetNameAddressOnly(true);
                             //Start bind timeout and bind
@@ -355,9 +388,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
                 break;
                 case MESSAGE_ENABLE: {
+                    if (DBG) {
+                        Log.d(TAG, "MESSAGE_ENABLE: mBluetooth = " + mBluetooth);
+                        Log.d(TAG, "MESSAGE_ENABLE: isConnected = " + isConnected());
+            }
                     if (mBluetooth == null) {
                         //Start bind request
-                        if (!mIsConnected) {
+                        if (!isConnected()) {
                             //Start bind timeout and bind
                             Message timeoutMsg=mHandler.obtainMessage(MESSAGE_TIMEOUT_BIND);
                             mHandler.sendMessageDelayed(timeoutMsg,TIMEOUT_BIND_MS);
@@ -381,7 +418,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             } catch (RemoteException e) {Log.e(TAG, "", e);};
                         }
                         try {
-                            mBluetooth.enable();
+                            boolean success = mBluetooth.enable();
+                            Log.d(TAG, "Called mBluetooth.enable() returned " + success);
                         } catch (RemoteException e) {Log.e(TAG, "", e);};
                     }
                     // TODO(BT) what if service failed to start:
@@ -441,7 +479,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                     IBinder service = (IBinder) msg.obj;
                     synchronized(mConnection) {
-                        mIsConnected=true;
                         mBinding = false;
                         mBluetooth = IBluetooth.Stub.asInterface(service);
                     }
@@ -509,7 +546,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     boolean isUnexpectedDisconnect = false;
                     synchronized(mConnection) {
                         mBluetooth = null;
-                        mIsConnected=false;
                         if (mUnbinding) {
                             mUnbinding = false;
                         } else {
