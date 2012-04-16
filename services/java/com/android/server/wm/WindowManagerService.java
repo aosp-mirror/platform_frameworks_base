@@ -4180,6 +4180,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (w.mHasSurface && !w.mOrientationChanging) {
                         if (DEBUG_ORIENTATION) Slog.v(TAG, "set mOrientationChanging of " + w);
                         w.mOrientationChanging = true;
+                        mInnerFields.mOrientationChangeComplete = false;
                     }
                     unfrozeWindows = true;
                 }
@@ -5485,6 +5486,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (w.mHasSurface) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG, "Set mOrientationChanging of " + w);
                 w.mOrientationChanging = true;
+                mInnerFields.mOrientationChangeComplete = false;
             }
         }
         for (int i=mRotationWatchers.size()-1; i>=0; i--) {
@@ -7589,6 +7591,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.v(TAG,
                     "Changing surface while display frozen: " + w);
             w.mOrientationChanging = true;
+            mInnerFields.mOrientationChangeComplete = false;
             if (!mWindowsFreezingScreen) {
                 mWindowsFreezingScreen = true;
                 // XXX should probably keep timeout from
@@ -8059,7 +8062,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private final void performLayoutAndPlaceSurfacesLockedInner(
             boolean recoveringMemory) {
         if (DEBUG_WINDOW_TRACE) {
-            Slog.v(TAG, "performLayoutAndPlaceSurfacesLockedInner: entry");
+            Slog.v(TAG, "performLayoutAndPlaceSurfacesLockedInner: entry. Called by "
+                    + getCallers(3));
         }
         if (mDisplay == null) {
             Slog.i(TAG, "skipping performLayoutAndPlaceSurfacesLockedInner with no mDisplay");
