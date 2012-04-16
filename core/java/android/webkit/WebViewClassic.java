@@ -4677,6 +4677,9 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      * Select the word at the indicated content coordinates.
      */
     boolean selectText(int x, int y) {
+        if (mWebViewCore == null) {
+            return false;
+        }
         mWebViewCore.sendMessage(EventHub.SELECT_WORD_AT, x, y);
         return true;
     }
