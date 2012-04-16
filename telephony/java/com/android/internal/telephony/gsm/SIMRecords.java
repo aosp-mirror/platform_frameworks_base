@@ -521,7 +521,7 @@ public class SIMRecords extends IccRecords {
 
         boolean isRecordLoadResponse = false;
 
-        if (mDestroyed) {
+        if (mDestroyed.get()) {
             loge("Received message " + msg + "[" + msg.what + "] " +
                     " while being destroyed. Ignoring.");
             return;
@@ -1299,12 +1299,6 @@ public class SIMRecords extends IccRecords {
 
     @Override
     public void onReady() {
-        /* broadcast intent SIM_READY here so that we can make sure
-          READY is sent before IMSI ready
-        */
-        mParentCard.broadcastIccStateChangedIntent(
-                IccCard.INTENT_VALUE_ICC_READY, null);
-
         fetchSimRecords();
     }
 

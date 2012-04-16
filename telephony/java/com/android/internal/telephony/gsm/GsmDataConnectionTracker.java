@@ -59,6 +59,8 @@ import com.android.internal.telephony.DataConnection.UpdateLinkPropertyResult;
 import com.android.internal.telephony.DataConnectionAc;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
+import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccRecords;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.RILConstants;
@@ -178,7 +180,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         p.mCM.registerForAvailable (this, EVENT_RADIO_AVAILABLE, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
-        p.mIccRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
         p.mCM.registerForDataNetworkStateChanged (this, EVENT_DATA_STATE_CHANGED, null);
         p.getCallTracker().registerForVoiceCallEnded (this, EVENT_VOICE_CALL_ENDED, null);
         p.getCallTracker().registerForVoiceCallStarted (this, EVENT_VOICE_CALL_STARTED, null);
@@ -219,7 +220,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         //Unregister for all events
         mPhone.mCM.unregisterForAvailable(this);
         mPhone.mCM.unregisterForOffOrNotAvailable(this);
-        mPhone.mIccRecords.unregisterForRecordsLoaded(this);
+        IccRecords r = mIccRecords.get();
+        if (r != null) { r.unregisterForRecordsLoaded(this);}
         mPhone.mCM.unregisterForDataNetworkStateChanged(this);
         mPhone.getCallTracker().unregisterForVoiceCallEnded(this);
         mPhone.getCallTracker().unregisterForVoiceCallStarted(this);
@@ -620,10 +622,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         int gprsState = mPhone.getServiceStateTracker().getCurrentDataConnectionState();
         boolean desiredPowerState = mPhone.getServiceStateTracker().getDesiredPowerState();
+        IccRecords r = mIccRecords.get();
+        boolean recordsLoaded = (r != null) ? r.getRecordsLoaded() : false;
 
         boolean allowed =
                     (gprsState == ServiceState.STATE_IN_SERVICE || mAutoAttachOnCreation) &&
-                    mPhone.mIccRecords.getRecordsLoaded() &&
+                    recordsLoaded &&
                     (mPhone.getState() == Phone.State.IDLE ||
                      mPhone.getServiceStateTracker().isConcurrentVoiceAndDataAllowed()) &&
                     internalDataEnabled &&
@@ -635,7 +639,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (!((gprsState == ServiceState.STATE_IN_SERVICE) || mAutoAttachOnCreation)) {
                 reason += " - gprs= " + gprsState;
             }
-            if (!mPhone.mIccRecords.getRecordsLoaded()) reason += " - SIM not loaded";
+            if (!recordsLoaded) reason += " - SIM not loaded";
             if (mPhone.getState() != Phone.State.IDLE &&
                     !mPhone.getServiceStateTracker().isConcurrentVoiceAndDataAllowed()) {
                 reason += " - PhoneState= " + mPhone.getState();
@@ -1896,7 +1900,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             log("onRadioAvailable: We're on the simulator; assuming data is connected");
         }
 
-        if (mPhone.mIccRecords.getRecordsLoaded()) {
+        IccRecords r = mIccRecords.get();
+        if (r != null && r.getRecordsLoaded()) {
             notifyOffApnsOfAvailability(null);
         }
 
@@ -2208,7 +2213,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
     private void createAllApnList() {
         mAllApns = new ArrayList<ApnSetting>();
-        String operator = mPhone.mIccRecords.getOperatorNumeric();
+        IccRecords r = mIccRecords.get();
+        String operator = (r != null) ? r.getOperatorNumeric() : "";
         if (operator != null) {
             String selection = "numeric = '" + operator + "'";
             // query only enabled apn.
@@ -2319,8 +2325,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
         }
 
-        String operator = mPhone.mIccRecords.getOperatorNumeric();
-        int networkType = mPhone.getServiceState().getNetworkType();
+        IccRecords r = mIccRecords.get();
+        String operator = (r != null) ? r.getOperatorNumeric() : "";
+        int radioTech = mPhone.getServiceState().getRadioTechnology();
 
         if (requestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
             if (canSetPreferApn && mPreferredApn != null) {
@@ -2329,7 +2336,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         + mPreferredApn.numeric + ":" + mPreferredApn);
                 }
                 if (mPreferredApn.numeric.equals(operator)) {
-                    if (mPreferredApn.bearer == 0 || mPreferredApn.bearer == networkType) {
+                    if (mPreferredApn.bearer == 0 || mPreferredApn.bearer == radioTech) {
                         apnList.add(mPreferredApn);
                         if (DBG) log("buildWaitingApns: X added preferred apnList=" + apnList);
                         return apnList;
@@ -2348,7 +2355,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (mAllApns != null) {
             for (ApnSetting apn : mAllApns) {
                 if (apn.canHandleType(requestedApnType)) {
-                    if (apn.bearer == 0 || apn.bearer == networkType) {
+                    if (apn.bearer == 0 || apn.bearer == radioTech) {
                         if (DBG) log("apn info : " +apn.toString());
                         apnList.add(apn);
                     }
@@ -2553,6 +2560,33 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
         }
         return cid;
+    }
+
+    @Override
+    protected void onUpdateIcc() {
+        if (mUiccController == null ) {
+            return;
+        }
+
+        IccCard newIccCard = mUiccController.getIccCard();
+        IccRecords newIccRecords = null;
+        if (newIccCard != null) {
+            newIccRecords = newIccCard.getIccRecords();
+        }
+
+        IccRecords r = mIccRecords.get();
+        if (r != newIccRecords) {
+            if (r != null) {
+                log("Removing stale icc objects.");
+                r.unregisterForRecordsLoaded(this);
+                mIccRecords.set(null);
+            }
+            if (newIccCard != null) {
+                log("New card found");
+                mIccRecords.set(newIccRecords);
+                newIccRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
+            }
+        }
     }
 
     @Override

@@ -35,10 +35,12 @@ import android.view.WindowManager;
 
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.CommandsInterface.RadioState;
+import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.SIMFileHandler;
 import com.android.internal.telephony.gsm.SIMRecords;
 import com.android.internal.telephony.cat.CatService;
 import com.android.internal.telephony.cdma.CDMALTEPhone;
+import com.android.internal.telephony.cdma.CDMAPhone;
 import com.android.internal.telephony.cdma.CdmaLteUiccFileHandler;
 import com.android.internal.telephony.cdma.CdmaLteUiccRecords;
 import com.android.internal.telephony.cdma.CdmaSubscriptionSourceManager;
@@ -114,8 +116,6 @@ public class IccCard {
     protected static final int EVENT_ICC_LOCKED = 1;
     private static final int EVENT_GET_ICC_STATUS_DONE = 2;
     protected static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 3;
-    private static final int EVENT_PINPUK_DONE = 4;
-    private static final int EVENT_REPOLL_STATUS_DONE = 5;
     protected static final int EVENT_ICC_READY = 6;
     private static final int EVENT_QUERY_FACILITY_LOCK_DONE = 7;
     private static final int EVENT_CHANGE_FACILITY_LOCK_DONE = 8;
@@ -178,34 +178,19 @@ public class IccCard {
         return State.UNKNOWN;
     }
 
-    public IccCard(PhoneBase phone, String logTag, Boolean is3gpp, Boolean dbg) {
+    public IccCard(PhoneBase phone, IccCardStatus ics, String logTag, boolean dbg) {
         mLogTag = logTag;
         mDbg = dbg;
-        if (mDbg) log("[IccCard] Creating card type " + (is3gpp ? "3gpp" : "3gpp2"));
-        mPhone = phone;
-        this.is3gpp = is3gpp;
+        if (mDbg) log("Creating");
+        update(phone, ics);
         mCdmaSSM = CdmaSubscriptionSourceManager.getInstance(mPhone.getContext(),
                 mPhone.mCM, mHandler, EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
-        if (phone.mCM.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE
-                && phone instanceof CDMALTEPhone) {
-            mIccFileHandler = new CdmaLteUiccFileHandler(this, "", mPhone.mCM);
-            mIccRecords = new CdmaLteUiccRecords(this, mPhone.mContext, mPhone.mCM);
-        } else {
-            // Correct aid will be set later (when GET_SIM_STATUS returns)
-            mIccFileHandler = is3gpp ? new SIMFileHandler(this, "", mPhone.mCM) :
-                                       new RuimFileHandler(this, "", mPhone.mCM);
-            mIccRecords = is3gpp ? new SIMRecords(this, mPhone.mContext, mPhone.mCM) :
-                                   new RuimRecords(this, mPhone.mContext, mPhone.mCM);
-        }
-        mCatService = CatService.getInstance(mPhone.mCM, mIccRecords,
-                mPhone.mContext, mIccFileHandler, this);
         mPhone.mCM.registerForOffOrNotAvailable(mHandler, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mPhone.mCM.registerForOn(mHandler, EVENT_RADIO_ON, null);
-        mPhone.mCM.registerForIccStatusChanged(mHandler, EVENT_ICC_STATUS_CHANGED, null);
     }
 
     public void dispose() {
-        if (mDbg) log("[IccCard] Disposing card type " + (is3gpp ? "3gpp" : "3gpp2"));
+        if (mDbg) log("Disposing card type " + (is3gpp ? "3gpp" : "3gpp2"));
         mPhone.mCM.unregisterForIccStatusChanged(mHandler);
         mPhone.mCM.unregisterForOffOrNotAvailable(mHandler);
         mPhone.mCM.unregisterForOn(mHandler);
@@ -213,6 +198,40 @@ public class IccCard {
         mCdmaSSM.dispose(mHandler);
         mIccRecords.dispose();
         mIccFileHandler.dispose();
+    }
+
+    public void update(PhoneBase phone, IccCardStatus ics) {
+        if (phone != mPhone) {
+            PhoneBase oldPhone = mPhone;
+            mPhone = phone;
+            log("Update");
+            if (phone instanceof GSMPhone) {
+                is3gpp = true;
+            } else if (phone instanceof CDMALTEPhone){
+                is3gpp = true;
+            } else if (phone instanceof CDMAPhone){
+                is3gpp = false;
+            } else {
+                throw new RuntimeException("Update: Unhandled phone type. Critical error!" +
+                        phone.getPhoneName());
+            }
+
+
+            if (phone.mCM.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE
+                    && phone instanceof CDMALTEPhone) {
+                mIccFileHandler = new CdmaLteUiccFileHandler(this, "", mPhone.mCM);
+                mIccRecords = new CdmaLteUiccRecords(this, mPhone.mContext, mPhone.mCM);
+            } else {
+                // Correct aid will be set later (when GET_SIM_STATUS returns)
+                mIccFileHandler = is3gpp ? new SIMFileHandler(this, "", mPhone.mCM) :
+                                           new RuimFileHandler(this, "", mPhone.mCM);
+                mIccRecords = is3gpp ? new SIMRecords(this, mPhone.mContext, mPhone.mCM) :
+                                       new RuimRecords(this, mPhone.mContext, mPhone.mCM);
+            }
+            mCatService = CatService.getInstance(mPhone.mCM, mIccRecords, mPhone.mContext,
+                    mIccFileHandler, this);
+        }
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_GET_ICC_STATUS_DONE, ics));
     }
 
     protected void finalize() {
@@ -344,27 +363,23 @@ public class IccCard {
      */
 
     public void supplyPin (String pin, Message onComplete) {
-        mPhone.mCM.supplyIccPin(pin, mHandler.obtainMessage(EVENT_PINPUK_DONE, onComplete));
+        mPhone.mCM.supplyIccPin(pin, onComplete);
     }
 
     public void supplyPuk (String puk, String newPin, Message onComplete) {
-        mPhone.mCM.supplyIccPuk(puk, newPin,
-                mHandler.obtainMessage(EVENT_PINPUK_DONE, onComplete));
+        mPhone.mCM.supplyIccPuk(puk, newPin, onComplete);
     }
 
     public void supplyPin2 (String pin2, Message onComplete) {
-        mPhone.mCM.supplyIccPin2(pin2,
-                mHandler.obtainMessage(EVENT_PINPUK_DONE, onComplete));
+        mPhone.mCM.supplyIccPin2(pin2, onComplete);
     }
 
     public void supplyPuk2 (String puk2, String newPin2, Message onComplete) {
-        mPhone.mCM.supplyIccPuk2(puk2, newPin2,
-                mHandler.obtainMessage(EVENT_PINPUK_DONE, onComplete));
+        mPhone.mCM.supplyIccPuk2(puk2, newPin2, onComplete);
     }
 
     public void supplyNetworkDepersonalization (String pin, Message onComplete) {
-        mPhone.mCM.supplyNetworkDepersonalization(pin,
-                mHandler.obtainMessage(EVENT_PINPUK_DONE, onComplete));
+        mPhone.mCM.supplyNetworkDepersonalization(pin, onComplete);
     }
 
     /**
@@ -494,21 +509,15 @@ public class IccCard {
      *
      */
     public String getServiceProviderName () {
-        return mPhone.mIccRecords.getServiceProviderName();
+        return mIccRecords.getServiceProviderName();
     }
 
     protected void updateStateProperty() {
         mPhone.setSystemProperty(TelephonyProperties.PROPERTY_SIM_STATE, getState().toString());
     }
 
-    private void getIccCardStatusDone(AsyncResult ar) {
-        if (ar.exception != null) {
-            Log.e(mLogTag,"Error getting ICC status. "
-                    + "RIL_REQUEST_GET_ICC_STATUS should "
-                    + "never return an error", ar.exception);
-            return;
-        }
-        handleIccCardStatus((IccCardStatus) ar.result);
+    private void getIccCardStatusDone(IccCardStatus ics) {
+        handleIccCardStatus(ics);
     }
 
     private void handleIccCardStatus(IccCardStatus newCardStatus) {
@@ -584,6 +593,7 @@ public class IccCard {
         if (oldState != State.READY && newState == State.READY &&
                 (is3gpp || isSubscriptionFromIccCard)) {
             mIccFileHandler.setAid(getAid());
+            broadcastIccStateChangedIntent(INTENT_VALUE_ICC_READY, null);
             mIccRecords.onReady();
         }
     }
@@ -704,7 +714,6 @@ public class IccCard {
                     if (!is3gpp) {
                         handleCdmaSubscriptionSource();
                     }
-                    mPhone.mCM.getIccCardStatus(obtainMessage(EVENT_GET_ICC_STATUS_DONE));
                     break;
                 case EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED:
                     handleCdmaSubscriptionSource();
@@ -725,30 +734,9 @@ public class IccCard {
                              obtainMessage(EVENT_QUERY_FACILITY_LOCK_DONE));
                      break;
                 case EVENT_GET_ICC_STATUS_DONE:
-                    ar = (AsyncResult)msg.obj;
+                    IccCardStatus cs = (IccCardStatus)msg.obj;
 
-                    getIccCardStatusDone(ar);
-                    break;
-                case EVENT_PINPUK_DONE:
-                    // a PIN/PUK/PIN2/PUK2/Network Personalization
-                    // request has completed. ar.userObj is the response Message
-                    // Repoll before returning
-                    ar = (AsyncResult)msg.obj;
-                    // TODO should abstract these exceptions
-                    AsyncResult.forMessage(((Message)ar.userObj)).exception
-                                                        = ar.exception;
-                    mPhone.mCM.getIccCardStatus(
-                        obtainMessage(EVENT_REPOLL_STATUS_DONE, ar.userObj));
-                    break;
-                case EVENT_REPOLL_STATUS_DONE:
-                    // Finished repolling status after PIN operation
-                    // ar.userObj is the response messaeg
-                    // ar.userObj.obj is already an AsyncResult with an
-                    // appropriate exception filled in if applicable
-
-                    ar = (AsyncResult)msg.obj;
-                    getIccCardStatusDone(ar);
-                    ((Message)ar.userObj).sendToTarget();
+                    getIccCardStatusDone(cs);
                     break;
                 case EVENT_QUERY_FACILITY_LOCK_DONE:
                     ar = (AsyncResult)msg.obj;
@@ -796,10 +784,6 @@ public class IccCard {
                     AsyncResult.forMessage(((Message)ar.userObj)).exception
                                                         = ar.exception;
                     ((Message)ar.userObj).sendToTarget();
-                    break;
-                case EVENT_ICC_STATUS_CHANGED:
-                    Log.d(mLogTag, "Received Event EVENT_ICC_STATUS_CHANGED");
-                    mPhone.mCM.getIccCardStatus(obtainMessage(EVENT_GET_ICC_STATUS_DONE));
                     break;
                 case EVENT_CARD_REMOVED:
                     onIccSwap(false);
@@ -965,6 +949,10 @@ public class IccCard {
 
     private void log(String msg) {
         Log.d(mLogTag, "[IccCard] " + msg);
+    }
+
+    private void loge(String msg) {
+        Log.e(mLogTag, "[IccCard] " + msg);
     }
 
     protected int getCurrentApplicationIndex() {

@@ -103,9 +103,21 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
 
     public IccPhoneBookInterfaceManager(PhoneBase phone) {
         this.phone = phone;
+        IccRecords r = phone.mIccRecords.get();
+        if (r != null) {
+            adnCache = r.getAdnCache();
+        }
     }
 
     public void dispose() {
+    }
+
+    public void updateIccRecords(IccRecords iccRecords) {
+        if (iccRecords != null) {
+            adnCache = iccRecords.getAdnCache();
+        } else {
+            adnCache = null;
+        }
     }
 
     protected void publish() {

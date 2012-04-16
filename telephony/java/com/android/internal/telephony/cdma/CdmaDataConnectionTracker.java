@@ -40,6 +40,8 @@ import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnectionAc;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
+import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.IccRecords;
 import com.android.internal.telephony.RetryManager;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.Phone;
@@ -110,7 +112,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
         p.mCM.registerForAvailable (this, EVENT_RADIO_AVAILABLE, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
-        p.mIccRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
         p.mCM.registerForDataNetworkStateChanged (this, EVENT_DATA_STATE_CHANGED, null);
         p.mCT.registerForVoiceCallEnded (this, EVENT_VOICE_CALL_ENDED, null);
         p.mCT.registerForVoiceCallStarted (this, EVENT_VOICE_CALL_STARTED, null);
@@ -152,7 +153,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         // Unregister from all events
         mPhone.mCM.unregisterForAvailable(this);
         mPhone.mCM.unregisterForOffOrNotAvailable(this);
-        mCdmaPhone.mIccRecords.unregisterForRecordsLoaded(this);
+        IccRecords r = mIccRecords.get();
+        if (r != null) { r.unregisterForRecordsLoaded(this);}
         mPhone.mCM.unregisterForDataNetworkStateChanged(this);
         mCdmaPhone.mCT.unregisterForVoiceCallEnded(this);
         mCdmaPhone.mCT.unregisterForVoiceCallStarted(this);
@@ -222,11 +224,12 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         boolean subscriptionFromNv = (mCdmaSSM.getCdmaSubscriptionSource()
                                        == CdmaSubscriptionSourceManager.SUBSCRIPTION_FROM_NV);
 
+        IccRecords r = mIccRecords.get();
         boolean allowed =
                     (psState == ServiceState.STATE_IN_SERVICE ||
                             mAutoAttachOnCreation) &&
                     (subscriptionFromNv ||
-                            mCdmaPhone.mIccRecords.getRecordsLoaded()) &&
+                            (r != null && r.getRecordsLoaded())) &&
                     (mCdmaPhone.mSST.isConcurrentVoiceAndDataAllowed() ||
                             mPhone.getState() == Phone.State.IDLE) &&
                     !roaming &&
@@ -241,7 +244,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 reason += " - psState= " + psState;
             }
             if (!subscriptionFromNv &&
-                    !mCdmaPhone.mIccRecords.getRecordsLoaded()) {
+                    !(r != null && r.getRecordsLoaded())) {
                 reason += " - RUIM not loaded";
             }
             if (!(mCdmaPhone.mSST.isConcurrentVoiceAndDataAllowed() ||
@@ -1002,6 +1005,33 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 // handle the message in the super class DataConnectionTracker
                 super.handleMessage(msg);
                 break;
+        }
+    }
+
+    @Override
+    protected void onUpdateIcc() {
+        if (mUiccController == null ) {
+            return;
+        }
+
+        IccCard newIccCard = mUiccController.getIccCard();
+        IccRecords newIccRecords = null;
+        if (newIccCard != null) {
+            newIccRecords = newIccCard.getIccRecords();
+        }
+
+        IccRecords r = mIccRecords.get();
+        if (r != newIccRecords) {
+            if (r != null) {
+                log("Removing stale icc objects.");
+                r.unregisterForRecordsLoaded(this);
+                mIccRecords.set(null);
+            }
+            if (newIccCard != null) {
+                log("New card found");
+                mIccRecords.set(newIccRecords);
+                newIccRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
+            }
         }
     }
 
