@@ -170,6 +170,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected int mGroupFlags;
 
+    /*
+     * THe layout mode: either {@link #UNDEFINED_LAYOUT_MODE}, {@link #COMPONENT_BOUNDS} or
+     * {@link #LAYOUT_BOUNDS}
+     */
+    private int mLayoutMode = UNDEFINED_LAYOUT_MODE;
+
     /**
      * NOTE: If you change the flags below make sure to reflect the changes
      *       the DisplayList class
@@ -334,6 +340,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Used to indicate that all drawing caches should be kept in memory.
      */
     public static final int PERSISTENT_ALL_CACHES = 0x3;
+
+    // Layout Modes
+
+    private static final int UNDEFINED_LAYOUT_MODE = -1;
+
+    /**
+     * This constant is a {@link #setLayoutMode(int) layoutMode}.
+     * Component bounds are the raw values of {@link #getLeft() left}, {@link #getTop() top},
+     * {@link #getRight() right} and {@link #getBottom() bottom}.
+     */
+    public static final int COMPONENT_BOUNDS = 0;
+
+    /**
+     * This constant is a {@link #setLayoutMode(int) layoutMode}.
+     * Layout bounds are derived by offsetting the component bounds using
+     * {@link View#getLayoutInsets()}.
+     */
+    public static final int LAYOUT_BOUNDS = 1;
 
     /**
      * We clip to padding when FLAG_CLIP_TO_PADDING and FLAG_PADDING_NOT_NULL
@@ -4421,6 +4445,52 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public void setPersistentDrawingCache(int drawingCacheToKeep) {
         mPersistentDrawingCache = drawingCacheToKeep & PERSISTENT_ALL_CACHES;
+    }
+
+    /**
+     * Returns the basis of alignment during the layout of this view group:
+     * either {@link #COMPONENT_BOUNDS} or {@link #LAYOUT_BOUNDS}.
+     *
+     * @return whether or not this view group should use the component or layout bounds during
+     * layout operations
+     *
+     * @see #setLayoutMode(int)
+     */
+    public int getLayoutMode() {
+        if (mLayoutMode == UNDEFINED_LAYOUT_MODE) {
+            ViewParent parent = getParent();
+            if (parent instanceof ViewGroup) {
+                ViewGroup viewGroup = (ViewGroup) parent;
+                return viewGroup.getLayoutMode();
+            } else {
+                int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+                boolean preJellyBean = targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN;
+                return preJellyBean ? COMPONENT_BOUNDS : LAYOUT_BOUNDS;
+            }
+
+        }
+        return mLayoutMode;
+    }
+
+    /**
+     * Sets the basis of alignment during alignment of this view group.
+     * Valid values are either {@link #COMPONENT_BOUNDS} or {@link #LAYOUT_BOUNDS}.
+     * <p>
+     * The default is to query the property of the parent if this view group has a parent.
+     * If this ViewGroup is the root of the view hierarchy the default
+     * value is {@link #LAYOUT_BOUNDS} for target SDK's greater than JellyBean,
+     * {@link #LAYOUT_BOUNDS} otherwise.
+     *
+     * @return whether or not this view group should use the component or layout bounds during
+     * layout operations
+     *
+     * @see #getLayoutMode()
+     */
+    public void setLayoutMode(int layoutMode) {
+        if (mLayoutMode != layoutMode) {
+            mLayoutMode = layoutMode;
+            requestLayout();
+        }
     }
 
     /**

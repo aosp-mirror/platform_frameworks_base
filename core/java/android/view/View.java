@@ -24,6 +24,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Camera;
 import android.graphics.Canvas;
+import android.graphics.Insets;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
@@ -2696,6 +2697,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     @ViewDebug.ExportedProperty(category = "padding")
     protected int mPaddingBottom;
+
+    /**
+     * The layout insets in pixels, that is the distance in pixels between the
+     * visible edges of this view its bounds.
+     */
+    private Insets mLayoutInsets;
 
     /**
      * Briefly describes the view and is primarily used for accessibility support.
@@ -13839,6 +13846,29 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public boolean isPaddingRelative() {
         return mUserPaddingRelative;
+    }
+
+    /**
+     * @hide
+     */
+    public Insets getLayoutInsets() {
+        if (mLayoutInsets == null) {
+            if (mBackground == null) {
+                mLayoutInsets = Insets.NONE;
+            } else {
+                Rect insetRect = new Rect();
+                boolean hasInsets = mBackground.getLayoutInsets(insetRect);
+                mLayoutInsets = hasInsets ? Insets.of(insetRect) : Insets.NONE;
+            }
+        }
+        return mLayoutInsets;
+    }
+
+    /**
+     * @hide
+     */
+    public void setLayoutInsets(Insets layoutInsets) {
+        mLayoutInsets = layoutInsets;
     }
 
     /**

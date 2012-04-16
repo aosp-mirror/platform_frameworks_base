@@ -16,9 +16,17 @@
 
 package android.graphics.drawable;
 
-import android.graphics.*;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.NinePatch;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.graphics.Region;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -29,7 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * 
+ *
  * A resizeable bitmap, with stretchable areas that you define. This type of image
  * is defined in a .png file with a special format.
  *
@@ -47,7 +55,6 @@ public class NinePatchDrawable extends Drawable {
     private NinePatchState mNinePatchState;
     private NinePatch mNinePatch;
     private Rect mPadding;
-    private Rect mLayoutBounds;
     private Paint mPaint;
     private boolean mMutated;
 
@@ -56,7 +63,7 @@ public class NinePatchDrawable extends Drawable {
     // These are scaled to match the target density.
     private int mBitmapWidth;
     private int mBitmapHeight;
-    
+
     NinePatchDrawable() {
     }
 
@@ -69,7 +76,7 @@ public class NinePatchDrawable extends Drawable {
     public NinePatchDrawable(Bitmap bitmap, byte[] chunk, Rect padding, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding), null);
     }
-    
+
     /**
      * Create drawable from raw nine-patch data, setting initial target density
      * based on the display metrics of the resources.
@@ -79,7 +86,19 @@ public class NinePatchDrawable extends Drawable {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding), res);
         mNinePatchState.mTargetDensity = mTargetDensity;
     }
-    
+
+    /**
+     * Create drawable from raw nine-patch data, setting initial target density
+     * based on the display metrics of the resources.
+     *
+     * @hide
+     */
+    public NinePatchDrawable(Resources res, Bitmap bitmap, byte[] chunk,
+            Rect padding, Rect layoutInsets, String srcName) {
+        this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding, layoutInsets), res);
+        mNinePatchState.mTargetDensity = mTargetDensity;
+    }
+
     /**
      * Create drawable from existing nine-patch, not dealing with density.
      * @deprecated Use {@link #NinePatchDrawable(Resources, NinePatch)}
@@ -97,13 +116,6 @@ public class NinePatchDrawable extends Drawable {
     public NinePatchDrawable(Resources res, NinePatch patch) {
         this(new NinePatchState(patch, new Rect()), res);
         mNinePatchState.mTargetDensity = mTargetDensity;
-    }
-
-    /**
-     * @hide
-     */
-    void setLayoutBounds(Rect layoutBounds) {
-        mLayoutBounds = layoutBounds;
     }
 
     private void setNinePatchState(NinePatchState state, Resources res) {
@@ -201,10 +213,23 @@ public class NinePatchDrawable extends Drawable {
     public int getChangingConfigurations() {
         return super.getChangingConfigurations() | mNinePatchState.mChangingConfigurations;
     }
-    
+
     @Override
     public boolean getPadding(Rect padding) {
         padding.set(mPadding);
+        return true;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean getLayoutInsets(Rect insets) {
+        Rect layoutInsets = mNinePatchState.mLayoutInsets;
+        if (layoutInsets == null) {
+            return super.getLayoutInsets(insets);
+        }
+        insets.set(layoutInsets);
         return true;
     }
 
@@ -217,7 +242,7 @@ public class NinePatchDrawable extends Drawable {
         getPaint().setAlpha(alpha);
         invalidateSelf();
     }
-    
+
     @Override
     public void setColorFilter(ColorFilter cf) {
         if (mPaint == null && cf == null) {
@@ -267,6 +292,7 @@ public class NinePatchDrawable extends Drawable {
         options.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
 
         final Rect padding = new Rect();
+        final Rect layoutInsets = new Rect();
         Bitmap bitmap = null;
 
         try {
@@ -290,7 +316,7 @@ public class NinePatchDrawable extends Drawable {
 
         setNinePatchState(new NinePatchState(
                 new NinePatch(bitmap, bitmap.getNinePatchChunk(), "XML 9-patch"),
-                padding, dither), r);
+                padding, layoutInsets, dither), r);
         mNinePatchState.mTargetDensity = mTargetDensity;
 
         a.recycle();
@@ -344,7 +370,7 @@ public class NinePatchDrawable extends Drawable {
     public Region getTransparentRegion() {
         return mNinePatch.getTransparentRegion(getBounds());
     }
-    
+
     @Override
     public ConstantState getConstantState() {
         mNinePatchState.mChangingConfigurations = getChangingConfigurations();
@@ -361,27 +387,36 @@ public class NinePatchDrawable extends Drawable {
         return this;
     }
 
-    final static class NinePatchState extends ConstantState {
+    private final static class NinePatchState extends ConstantState {
         final NinePatch mNinePatch;
         final Rect mPadding;
+        final Rect mLayoutInsets;
         final boolean mDither;
         int mChangingConfigurations;
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
         NinePatchState(NinePatch ninePatch, Rect padding) {
-            this(ninePatch, padding, DEFAULT_DITHER);
+            this(ninePatch, padding, new Rect(), DEFAULT_DITHER);
         }
 
-        NinePatchState(NinePatch ninePatch, Rect rect, boolean dither) {
+        NinePatchState(NinePatch ninePatch, Rect padding, Rect layoutInsets) {
+            this(ninePatch, padding, layoutInsets, DEFAULT_DITHER);
+        }
+
+        NinePatchState(NinePatch ninePatch, Rect rect, Rect layoutInsets, boolean dither) {
             mNinePatch = ninePatch;
             mPadding = rect;
+            mLayoutInsets = layoutInsets;
             mDither = dither;
         }
+
+        // Copy constructor
 
         NinePatchState(NinePatchState state) {
             mNinePatch = new NinePatch(state.mNinePatch);
             // Note we don't copy the padding because it is immutable.
             mPadding = state.mPadding;
+            mLayoutInsets = state.mLayoutInsets;
             mDither = state.mDither;
             mChangingConfigurations = state.mChangingConfigurations;
             mTargetDensity = state.mTargetDensity;
@@ -391,12 +426,12 @@ public class NinePatchDrawable extends Drawable {
         public Drawable newDrawable() {
             return new NinePatchDrawable(this, null);
         }
-        
+
         @Override
         public Drawable newDrawable(Resources res) {
             return new NinePatchDrawable(this, res);
         }
-        
+
         @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
