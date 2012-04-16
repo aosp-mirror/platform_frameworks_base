@@ -1007,11 +1007,27 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Skriv den påkrævede pinkode:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Pinkode:"</string>
     <string name="select_character" msgid="3365550120617701745">"Indsæt tegn"</string>
-    <string name="sms_control_default_app_name" msgid="3058577482636640465">"Ukendt app"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sender sms-beskeder"</string>
-    <string name="sms_control_message" msgid="4073755190243093924">"Der sendes et stort antal sms-beskeder. Vælg \"OK\" for at fortsætte eller \"Annuller\" for at stoppe afsendelsen."</string>
-    <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
-    <string name="sms_control_no" msgid="1715320703137199869">"Annuller"</string>
+    <!-- no translation found for sms_control_message (3867899169651496433) -->
+    <skip />
+    <!-- no translation found for sms_control_yes (3663725993855816807) -->
+    <skip />
+    <!-- no translation found for sms_control_no (625438561395534982) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
+    <skip />
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort blev fjernet"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Det mobile netværk er utilgængeligt, indtil du genstarter med et gyldigt SIM-kort."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Udfør"</string>

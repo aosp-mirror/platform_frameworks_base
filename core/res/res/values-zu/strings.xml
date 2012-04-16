@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Ivumela insiza ukuthi iguqule ukujikeleza kweskrini nganoma isiphi isikhathi. Akudingakeli izinsiza ezejwayelekile."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"guqula isivinini sesikhombi"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Ivumela insiza ukuthi iguqule ijubane legundane noma lendawo yokukhomba ngomunwe. Akufanele kudingakele izinsiza ezijwayelekile."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"shintsha isendlalelo sekhibhodi"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Ivumela uhlelo lokusebenza ukushintsha isendlalelo sekhibhodi. Kufanele ingadingi izinhlelo zokusebenzia ezivamile."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Thumela imifanekiso ye-Linu ezinsizeni"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Ivumela insiza ukuthi icele ukuthi isiginali ethunyelwe idluliselwe kuzo zonke izinqubeko ezisalelayo."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"yenza insiza ukuthi ihlale isebenza"</string>
@@ -1009,11 +1007,17 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Faka i-PIN edingekayo:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Faka uhlamvu"</string>
-    <string name="sms_control_default_app_name" msgid="3058577482636640465">"insiza engaziwa"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Ithumela imiyalezo ye-SMS"</string>
-    <string name="sms_control_message" msgid="4073755190243093924">"Inani eliphezulu lwama-SMS liyathunyelwa. Khetha \"KULUNGILE\" ukuqhubeka, noma \"Khansela\" ukumisa ukuthumela."</string>
-    <string name="sms_control_yes" msgid="2532062172402615953">"KULUNGILE"</string>
-    <string name="sms_control_no" msgid="1715320703137199869">"Khansela"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"I-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ithumela inombolo enkulu yemilayezo ye-SMS. Ufuna ukuvumela lolu hlelo lokusebenza ukuqhubeka ukuthumela imilayezo?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Vumela"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Nqaba"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Thumela ikhodi efushane?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Ukuthumela i-SMS ye-premium?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"I-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ithanda ukuthumela umlayezo wombhalo ku-&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, okubonakala sengathi ikhodi ye-SMS efushane.&lt;p&gt;Ukuthumela umlayezo wombhalo kungabangela i-akhawunti yeselula yakho ukuthi ikhokheliswe amasevisi e-premium.&lt;p&gt;Ufuna ukuvumela uhlelo lokusebenza ukuthumela umlayezo?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"I-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ithanda ukuthumela umlayezo wombhalo ku-&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, okuyikhodi efushane ye-SMS ye-premium.&lt;p&gt;&lt;b&gt;Ukuthumela umlayezo kule ndawo kuzobangela i-akhawunti yeselula yakho ukuthi ikhokheliswe amasevisi e-premium.&lt;/b&gt;&lt;p&gt;Ufuna ukuvumela lolu hlelo lokusebenza ukuthumela umlayezo?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Thumela umlayezo?"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Ungathumeli"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Bika uhlelo lokusebenza olungalungile"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Ikhadi le-SIM likhishiwe"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Inethiwekhi yeselula ngeke itholakale kuwena kuze kube uqala kabusha ufake ikhadi le-SIM elifanele."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kwenziwe"</string>
@@ -1063,10 +1067,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Thinta ukwenza ukuthi ukudibhaga kwe-USB kungasebenzi."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Khetha indlela yokufaka"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Izilungiselelo zezindlela zokufakwayo"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Ukwakheka kwekhibhodi"</string>
+    <string name="hardware" msgid="7517821086888990278">"I-Hardware"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"abahlanganyeli"</u></string>

@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"앱이 언제든지 화면 회전을 변경할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"포인터 속도 변경"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"앱이 언제든지 마우스 또는 트랙패드 포인터의 속도를 변경할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"키보드 레이아웃 변경"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"앱이 키보드 레이아웃을 변경할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"앱에 Linux 시그널 보내기"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"제공된 시그널을 모든 영구 프로세스로 전송하는 것을 앱이 요청할 수 있도록 허용합니다."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"앱이 항상 실행되도록 설정"</string>
@@ -1009,11 +1007,27 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"필수 PIN 입력:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"문자 삽입"</string>
-    <string name="sms_control_default_app_name" msgid="3058577482636640465">"알 수 없는 앱"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS 메시지를 보내는 중"</string>
-    <string name="sms_control_message" msgid="4073755190243093924">"SMS 메시지를 대량 전송 중입니다. 계속하려면 \'확인\'을 터치하고 전송을 중지하려면 \'취소\'를 터치하세요."</string>
-    <string name="sms_control_yes" msgid="2532062172402615953">"확인"</string>
-    <string name="sms_control_no" msgid="1715320703137199869">"취소"</string>
+    <!-- no translation found for sms_control_message (3867899169651496433) -->
+    <skip />
+    <!-- no translation found for sms_control_yes (3663725993855816807) -->
+    <skip />
+    <!-- no translation found for sms_control_no (625438561395534982) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
+    <skip />
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM 카드 제거됨"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"유효한 SIM 카드를 삽입하여 다시 시작할 때까지 모바일 네트워크를 사용할 수 없습니다."</string>
     <string name="sim_done_button" msgid="827949989369963775">"완료"</string>
@@ -1063,10 +1077,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB 디버깅을 사용하지 않으려면 터치하세요."</string>
     <string name="select_input_method" msgid="4653387336791222978">"입력 방법 선택"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"입력 방법 설정"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"물리적 키보드"</string>
+    <string name="hardware" msgid="7517821086888990278">"하드웨어"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>

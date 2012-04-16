@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Inaruhusu programu kubadilisha mzunguko wa skrini wakati wowote. Kamwe hazihitajiki kwa programu za kawaida."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"Badilisha kasi ya pointa"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Inaruhusu programu kubadilisha kasi ya kielekezi cha kipanya au pedi ya kufuatilia wakati wowote. Kamwe haitahitajika kwa programu za kawaida."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"badilisha mpangilio wa kibodi"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Inaruhusu programu kubadilisha mpangilio wa kibodi. Haipaswi kamwe kuhitajika kwa rogramu za kawaida."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Tuma ishara za Linux kwa programu"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Inaruhusu programu kuomba ishara iliyotolewa kutumwa kwa michakato inyoendelea."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"Fanya programu kuendeshwa kila mara"</string>
@@ -1009,11 +1007,27 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Charaza PIN inayohitajika:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Ingiza kibambo"</string>
-    <string name="sms_control_default_app_name" msgid="3058577482636640465">"Programu isiyojulikana"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Inatuma ujumbe wa SMS"</string>
-    <string name="sms_control_message" msgid="4073755190243093924">"Idadi kubwa ya jumbe za SMS inatumwa. Gusa SAWA kuendelea, au Ghairi kuwacha kutuma."</string>
-    <string name="sms_control_yes" msgid="2532062172402615953">"Sawa"</string>
-    <string name="sms_control_no" msgid="1715320703137199869">"Ghairi"</string>
+    <!-- no translation found for sms_control_message (3867899169651496433) -->
+    <skip />
+    <!-- no translation found for sms_control_yes (3663725993855816807) -->
+    <skip />
+    <!-- no translation found for sms_control_no (625438561395534982) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
+    <skip />
+    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
+    <skip />
     <string name="sim_removed_title" msgid="6227712319223226185">"Kadi ya SIM imeondolewa"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"mtandao wa simu hutapatika hadi uanzishe upya na SIM kadi halali iliyoingizwa."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kwisha"</string>
@@ -1063,10 +1077,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Gusa ili kulemaza utatuaji wa USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Chagua njia ya ingizo"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Weka mbinu za ingizo"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Kibodi halisi"</string>
+    <string name="hardware" msgid="7517821086888990278">"Maunzi"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"wagombeaji"</u></string>
