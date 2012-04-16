@@ -37,6 +37,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.SystemSensorManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -2946,7 +2947,7 @@ public class PowerManagerService extends IPowerManager.Stub
     }
 
     void systemReady() {
-        mSensorManager = new SensorManager(mHandlerThread.getLooper());
+        mSensorManager = new SystemSensorManager(mHandlerThread.getLooper());
         mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         // don't bother with the light sensor if auto brightness is handled in hardware
         if (mUseSoftwareAutoBrightness) {

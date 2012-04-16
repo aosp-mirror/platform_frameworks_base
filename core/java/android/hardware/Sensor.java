@@ -131,7 +131,6 @@ public class Sensor {
     private float   mResolution;
     private float   mPower;
     private int     mMinDelay;
-    private int     mLegacyType;
 
 
     Sensor() {
@@ -202,13 +201,5 @@ public class Sensor {
     void setRange(float max, float res) {
         mMaxRange = max;
         mResolution = res;
-    }
-
-    void setLegacyType(int legacyType) {
-        mLegacyType = legacyType;
-    }
-
-    int getLegacyType() {
-        return mLegacyType;
     }
 }

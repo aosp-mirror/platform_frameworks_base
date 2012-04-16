@@ -45,6 +45,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
 import android.hardware.SerialManager;
+import android.hardware.SystemSensorManager;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
 import android.hardware.usb.IUsbManager;
@@ -407,7 +408,7 @@ class ContextImpl extends Context {
 
         registerService(SENSOR_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
-                    return new SensorManager(ctx.mMainThread.getHandler().getLooper());
+                    return new SystemSensorManager(ctx.mMainThread.getHandler().getLooper());
                 }});
 
         registerService(STATUS_BAR_SERVICE, new ServiceFetcher() {
