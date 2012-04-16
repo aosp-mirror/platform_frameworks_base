@@ -1441,23 +1441,6 @@ public class WifiStateMachine extends StateMachine {
         mScanResults = scanList;
     }
 
-    private String fetchSSID() {
-        String status = mWifiNative.status();
-        if (status == null) {
-            return null;
-        }
-        // extract ssid from a series of "name=value"
-        String[] lines = status.split("\n");
-        for (String line : lines) {
-            String[] prop = line.split(" *= *");
-            if (prop.length < 2) continue;
-            String name = prop[0];
-            String value = prop[1];
-            if (name.equalsIgnoreCase("ssid")) return value;
-        }
-        return null;
-    }
-
     /*
      * Fetch RSSI and linkspeed on current connection
      */
@@ -1618,6 +1601,7 @@ public class WifiStateMachine extends StateMachine {
             /* BSSID is valid only in ASSOCIATING state */
             mWifiInfo.setBSSID(stateChangeResult.BSSID);
         }
+        mWifiInfo.setSSID(stateChangeResult.SSID);
 
         mSupplicantStateTracker.sendMessage(Message.obtain(message));
 
@@ -2935,8 +2919,6 @@ public class WifiStateMachine extends StateMachine {
                     mLastNetworkId = message.arg1;
                     mLastBssid = (String) message.obj;
 
-                    //TODO: make supplicant modification to push this in events
-                    mWifiInfo.setSSID(fetchSSID());
                     mWifiInfo.setBSSID(mLastBssid);
                     mWifiInfo.setNetworkId(mLastNetworkId);
                     /* send event to CM & network change broadcast */
