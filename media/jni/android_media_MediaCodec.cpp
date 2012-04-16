@@ -20,7 +20,7 @@
 
 #include "android_media_MediaCodec.h"
 
-#include "android_media_Crypto.h"
+#include "android_media_MediaCrypto.h"
 #include "android_media_Utils.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
@@ -656,7 +656,7 @@ static JNINativeMethod gMethods[] = {
 
     { "native_configure",
       "([Ljava/lang/String;[Ljava/lang/Object;Landroid/view/Surface;"
-      "Landroid/media/Crypto;I)V",
+      "Landroid/media/MediaCrypto;I)V",
       (void *)android_media_MediaCodec_native_configure },
 
     { "start", "()V", (void *)android_media_MediaCodec_start },
