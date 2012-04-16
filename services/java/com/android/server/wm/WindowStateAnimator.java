@@ -6,6 +6,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.server.wm.WindowManagerService.LayoutFields.CLEAR_ORIENTATION_CHANGE_COMPLETE;
+import static com.android.server.wm.WindowManagerService.LayoutFields.SET_TURN_ON_SCREEN;
 
 import android.content.Context;
 import android.graphics.Matrix;
@@ -84,9 +85,9 @@ class WindowStateAnimator {
      */
     boolean mSurfaceDestroyDeferred;
 
-    float mShownAlpha = 1;
-    float mAlpha = 1;
-    float mLastAlpha = 1;
+    float mShownAlpha = 0;
+    float mAlpha = 0;
+    float mLastAlpha = 0;
 
     // Used to save animation distances between the time they are calculated and when they are
     // used.
@@ -403,50 +404,55 @@ class WindowStateAnimator {
         return true;
     }
 
-    static class MySurface extends Surface {
-        final static ArrayList<MySurface> sSurfaces = new ArrayList<MySurface>();
+    static class SurfaceTrace extends Surface {
+        private final static String SURFACE_TAG = "SurfaceTrace";
+        final static ArrayList<SurfaceTrace> sSurfaces = new ArrayList<SurfaceTrace>();
 
-        private float mMySurfaceAlpha = 0xff;
+        private float mSurfaceTraceAlpha = 0;
         private int mLayer;
         private PointF mPosition = new PointF();
-        private Point mSize = new Point();
+        private Point mSize;
         private boolean mShown = false;
         private String mName = "Not named";
 
-        public MySurface(SurfaceSession s,
+        public SurfaceTrace(SurfaceSession s,
                        int pid, int display, int w, int h, int format, int flags) throws
                        OutOfResourcesException {
             super(s, pid, display, w, h, format, flags);
             mSize = new Point(w, h);
-            Slog.v("SurfaceTrace", "ctor: " + this);
+            Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
         }
 
-        public MySurface(SurfaceSession s,
+        public SurfaceTrace(SurfaceSession s,
                        int pid, String name, int display, int w, int h, int format, int flags)
                    throws OutOfResourcesException {
             super(s, pid, name, display, w, h, format, flags);
             mName = name;
             mSize = new Point(w, h);
-            Slog.v("SurfaceTrace", "ctor: " + this);
+            Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
         }
 
         @Override
         public void setAlpha(float alpha) {
             super.setAlpha(alpha);
-            mMySurfaceAlpha = alpha;
-            Slog.v("SurfaceTrace", "setAlpha: " + this);
+            mSurfaceTraceAlpha = alpha;
+            Slog.v(SURFACE_TAG, "setAlpha: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
         }
 
         @Override
         public void setLayer(int zorder) {
             super.setLayer(zorder);
             mLayer = zorder;
-            Slog.v("SurfaceTrace", "setLayer: " + this);
+            Slog.v(SURFACE_TAG, "setLayer: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
 
             sSurfaces.remove(this);
             int i;
             for (i = sSurfaces.size() - 1; i >= 0; i--) {
-                MySurface s = sSurfaces.get(i);
+                SurfaceTrace s = sSurfaces.get(i);
                 if (s.mLayer < zorder) {
                     break;
                 }
@@ -458,32 +464,38 @@ class WindowStateAnimator {
         public void setPosition(float x, float y) {
             super.setPosition(x, y);
             mPosition = new PointF(x, y);
+            Slog.v(SURFACE_TAG, "setPosition: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
         }
 
         @Override
         public void setSize(int w, int h) {
             super.setSize(w, h);
             mSize = new Point(w, h);
+            Slog.v(SURFACE_TAG, "setSize: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
         }
 
         @Override
         public void hide() {
             super.hide();
             mShown = false;
-            Slog.v("SurfaceTrace", "hide: " + this);
+            Slog.v(SURFACE_TAG, "hide: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
         }
         @Override
         public void show() {
             super.show();
             mShown = true;
-            Slog.v("SurfaceTrace", "show: " + this);
+            Slog.v(SURFACE_TAG, "show: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
         }
 
         @Override
         public void destroy() {
             super.destroy();
-            Slog.v("SurfaceTrace", "destroy: " + this + ". Called by "
-                    + WindowManagerService.getCaller());
+            Slog.v(SURFACE_TAG, "destroy: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
             sSurfaces.remove(this);
         }
 
@@ -497,7 +509,7 @@ class WindowStateAnimator {
         @Override
         public String toString() {
             return "Surface " + mName + ": shown=" + mShown + " layer=" + mLayer
-                    + " alpha=" + mMySurfaceAlpha + " " + mPosition.x + "," + mPosition.y
+                    + " alpha=" + mSurfaceTraceAlpha + " " + mPosition.x + "," + mPosition.y
                     + " " + mSize.x + "x" + mSize.y;
         }
     }
@@ -544,7 +556,7 @@ class WindowStateAnimator {
 
             mSurfaceShown = false;
             mSurfaceLayer = 0;
-            mSurfaceAlpha = 1;
+            mSurfaceAlpha = 0;
             mSurfaceX = 0;
             mSurfaceY = 0;
             mSurfaceW = w;
@@ -557,7 +569,7 @@ class WindowStateAnimator {
                     flags |= Surface.OPAQUE;
                 }
                 if (DEBUG_SURFACE_TRACE) {
-                    mSurface = new MySurface(
+                    mSurface = new SurfaceTrace(
                             mSession.mSurfaceSession, mSession.mPid,
                             attrs.getTitle().toString(),
                             0, w, h, format, flags);
@@ -608,6 +620,7 @@ class WindowStateAnimator {
                     mSurface.setPosition(mSurfaceX, mSurfaceY);
                     mSurfaceLayer = mAnimLayer;
                     mSurface.setLayer(mAnimLayer);
+                    mSurface.setAlpha(0);
                     mSurfaceShown = false;
                     mSurface.hide();
                     if ((mWin.mAttrs.flags&WindowManager.LayoutParams.FLAG_DITHER) != 0) {
@@ -1185,7 +1198,7 @@ class WindowStateAnimator {
                     if (DEBUG_VISIBILITY) Slog.v(TAG,
                             "Show surface turning screen on: " + mWin);
                     mWin.mTurnOnScreen = false;
-                    mService.mTurnOnScreen = true;
+                    mAnimator.mBulkUpdateParams |= SET_TURN_ON_SCREEN;
                 }
             }
             return true;
