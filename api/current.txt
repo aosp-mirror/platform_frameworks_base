@@ -2311,6 +2311,8 @@ package android.animation {
     ctor public LayoutTransition();
     method public void addChild(android.view.ViewGroup, android.view.View);
     method public void addTransitionListener(android.animation.LayoutTransition.TransitionListener);
+    method public void disableTransitionType(int);
+    method public void enableTransitionType(int);
     method public android.animation.Animator getAnimator(int);
     method public long getDuration(int);
     method public android.animation.TimeInterpolator getInterpolator(int);
@@ -2321,6 +2323,7 @@ package android.animation {
     method public void hideChild(android.view.ViewGroup, android.view.View, int);
     method public boolean isChangingLayout();
     method public boolean isRunning();
+    method public boolean isTransitionTypeEnabled(int);
     method public void removeChild(android.view.ViewGroup, android.view.View);
     method public void removeTransitionListener(android.animation.LayoutTransition.TransitionListener);
     method public void setAnimateParentHierarchy(boolean);
@@ -2335,6 +2338,7 @@ package android.animation {
     field public static final int APPEARING = 2; // 0x2
     field public static final int CHANGE_APPEARING = 0; // 0x0
     field public static final int CHANGE_DISAPPEARING = 1; // 0x1
+    field public static final int CHANGING = 4; // 0x4
     field public static final int DISAPPEARING = 3; // 0x3
   }
 
