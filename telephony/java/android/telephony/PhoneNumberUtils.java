@@ -1502,6 +1502,27 @@ public class PhoneNumberUtils
         return sb.toString();
     }
 
+    /**
+     * Replace arabic/unicode digits with decimal digits.
+     * @param number
+     *            the number to be normalized.
+     * @return the replaced number.
+     *
+     * @hide
+     */
+    public static String replaceUnicodeDigits(String number) {
+        StringBuilder normalizedDigits = new StringBuilder(number.length());
+        for (char c : number.toCharArray()) {
+            int digit = Character.digit(c, 10);
+            if (digit != -1) {
+                normalizedDigits.append(digit);
+            } else {
+                normalizedDigits.append(c);
+            }
+        }
+        return normalizedDigits.toString();
+    }
+
     // Three and four digit phone numbers for either special services,
     // or 3-6 digit addresses from the network (eg carrier-originated SMS messages) should
     // not match.
