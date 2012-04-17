@@ -9798,8 +9798,8 @@ package android.hardware {
     method public boolean registerListener(android.hardware.SensorEventListener, android.hardware.Sensor, int);
     method public boolean registerListener(android.hardware.SensorEventListener, android.hardware.Sensor, int, android.os.Handler);
     method public static boolean remapCoordinateSystem(float[], int, int, float[]);
-    method public deprecated void unregisterListener(android.hardware.SensorListener, int);
     method public deprecated void unregisterListener(android.hardware.SensorListener);
+    method public deprecated void unregisterListener(android.hardware.SensorListener, int);
     method public void unregisterListener(android.hardware.SensorEventListener, android.hardware.Sensor);
     method public void unregisterListener(android.hardware.SensorEventListener);
     field public static final int AXIS_MINUS_X = 129; // 0x81
@@ -12411,6 +12411,22 @@ package android.net.nsd {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
+  public class DnsSdTxtRecord implements android.os.Parcelable {
+    ctor public DnsSdTxtRecord();
+    ctor public DnsSdTxtRecord(byte[]);
+    ctor public DnsSdTxtRecord(android.net.nsd.DnsSdTxtRecord);
+    method public boolean contains(java.lang.String);
+    method public int describeContents();
+    method public java.lang.String get(java.lang.String);
+    method public byte[] getRawData();
+    method public int keyCount();
+    method public int remove(java.lang.String);
+    method public void set(java.lang.String, java.lang.String);
+    method public int size();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public class NsdManager {
     method public void deinitialize(android.net.nsd.NsdManager.Channel);
     method public void discoverServices(android.net.nsd.NsdManager.Channel, java.lang.String, android.net.nsd.NsdManager.DnsSdDiscoveryListener);
@@ -12454,26 +12470,6 @@ package android.net.nsd {
   public static abstract interface NsdManager.DnsSdResolveListener {
     method public abstract void onFailure(int);
     method public abstract void onServiceResolved(android.net.nsd.DnsSdServiceInfo);
-  }
-
-}
-
-package android.net.nsd {
-
-  public class DnsSdTxtRecord implements android.os.Parcelable {
-    ctor public DnsSdTxtRecord();
-    ctor public DnsSdTxtRecord(byte[]);
-    ctor public DnsSdTxtRecord(android.net.nsd.DnsSdTxtRecord);
-    method public boolean contains(java.lang.String);
-    method public int describeContents();
-    method public java.lang.String get(java.lang.String);
-    method public byte[] getRawData();
-    method public int keyCount();
-    method public int remove(java.lang.String);
-    method public void set(java.lang.String, java.lang.String);
-    method public int size();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
 }
