@@ -1004,14 +1004,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mNotificationTimeout = info.notificationTimeout;
             mIsDefault = (info.flags & DEFAULT) != 0;
 
-            final int targetSdkVersion =
-                info.getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion;
-            // TODO: Uncomment this line and remove the line below when JellyBean
-            // SDK version is finalized.
-            // if (targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN) {
-            if (targetSdkVersion > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                mIncludeNotImportantViews =
-                    (info.flags & INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
+            if (!mIsAutomation) {
+                final int targetSdkVersion =
+                    info.getResolveInfo().serviceInfo.applicationInfo.targetSdkVersion;
+                // TODO: Uncomment this line and remove the line below when JellyBean
+                // SDK version is finalized.
+                // if (targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+                if (targetSdkVersion > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                    mIncludeNotImportantViews =
+                        (info.flags & INCLUDE_NOT_IMPORTANT_VIEWS) != 0;
+                }
             }
 
             synchronized (mLock) {
