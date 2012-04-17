@@ -1711,7 +1711,7 @@ class CallbackProxy extends Handler {
 
     void onIsSupportedCallback(boolean isSupported) {
         Message msg = obtainMessage(SEARCHBOX_IS_SUPPORTED_CALLBACK);
-        msg.obj = new Boolean(isSupported);
+        msg.obj = Boolean.valueOf(isSupported);
         sendMessage(msg);
     }
 
