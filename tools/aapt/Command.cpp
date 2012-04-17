@@ -1192,10 +1192,14 @@ int doDump(Bundle* bundle)
             if (targetSdk < 4) {
                 if (!hasWriteExternalStoragePermission) {
                     printf("uses-permission:'android.permission.WRITE_EXTERNAL_STORAGE'\n");
+                    printf("uses-implied-permission:'android.permission.WRITE_EXTERNAL_STORAGE'," \
+                            "'targetSdkVersion < 4'\n");
                     hasWriteExternalStoragePermission = true;
                 }
                 if (!hasReadPhoneStatePermission) {
                     printf("uses-permission:'android.permission.READ_PHONE_STATE'\n");
+                    printf("uses-implied-permission:'android.permission.READ_PHONE_STATE'," \
+                            "'targetSdkVersion < 4'\n");
                 }
             }
 
@@ -1203,15 +1207,21 @@ int doDump(Bundle* bundle)
             // force them to always take READ_EXTERNAL_STORAGE as well.
             if (!hasReadExternalStoragePermission && hasWriteExternalStoragePermission) {
                 printf("uses-permission:'android.permission.READ_EXTERNAL_STORAGE'\n");
+                printf("uses-implied-permission:'android.permission.READ_EXTERNAL_STORAGE'," \
+                        "'requested WRITE_EXTERNAL_STORAGE'\n");
             }
 
             // Pre-JellyBean call log permission compatibility.
             if (targetSdk < 16) {
                 if (!hasReadCallLogPermission && hasReadContactsPermission) {
                     printf("uses-permission:'android.permission.READ_CALL_LOG'\n");
+                    printf("uses-implied-permission:'android.permission.READ_CALL_LOG'," \
+                            "'targetSdkVersion < 16 and requested READ_CONTACTS'\n");
                 }
                 if (!hasWriteCallLogPermission && hasWriteContactsPermission) {
                     printf("uses-permission:'android.permission.WRITE_CALL_LOG'\n");
+                    printf("uses-implied-permission:'android.permission.WRITE_CALL_LOG'," \
+                            "'targetSdkVersion < 16 and requested WRITE_CONTACTS'\n");
                 }
             }
 
@@ -1223,10 +1233,18 @@ int doDump(Bundle* bundle)
              */
             // Camera-related back-compatibility logic
             if (!specCameraFeature) {
-                if (reqCameraFlashFeature || reqCameraAutofocusFeature) {
+                if (reqCameraFlashFeature) {
                     // if app requested a sub-feature (autofocus or flash) and didn't
                     // request the base camera feature, we infer that it meant to
                     printf("uses-feature:'android.hardware.camera'\n");
+                    printf("uses-implied-feature:'android.hardware.camera'," \
+                            "'requested android.hardware.camera.flash feature'\n");
+                } else if (reqCameraAutofocusFeature) {
+                    // if app requested a sub-feature (autofocus or flash) and didn't
+                    // request the base camera feature, we infer that it meant to
+                    printf("uses-feature:'android.hardware.camera'\n");
+                    printf("uses-implied-feature:'android.hardware.camera'," \
+                            "'requested android.hardware.camera.autofocus feature'\n");
                 } else if (hasCameraPermission) {
                     // if app wants to use camera but didn't request the feature, we infer 
                     // that it meant to, and further that it wants autofocus
@@ -1234,6 +1252,8 @@ int doDump(Bundle* bundle)
                     printf("uses-feature:'android.hardware.camera'\n");
                     if (!specCameraAutofocusFeature) {
                         printf("uses-feature:'android.hardware.camera.autofocus'\n");
+                        printf("uses-implied-feature:'android.hardware.camera.autofocus'," \
+                                "'requested android.permission.CAMERA permission'\n");
                     }
                 }
             }
@@ -1245,16 +1265,22 @@ int doDump(Bundle* bundle)
                 // if app either takes a location-related permission or requests one of the
                 // sub-features, we infer that it also meant to request the base location feature
                 printf("uses-feature:'android.hardware.location'\n");
+                printf("uses-implied-feature:'android.hardware.location'," \
+                        "'requested a location access permission'\n");
             }
             if (!specGpsFeature && hasGpsPermission) {
                 // if app takes GPS (FINE location) perm but does not request the GPS
                 // feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.location.gps'\n");
+                printf("uses-implied-feature:'android.hardware.location.gps'," \
+                        "'requested android.permission.ACCESS_FINE_LOCATION permission'\n");
             }
             if (!specNetworkLocFeature && hasCoarseLocPermission) {
                 // if app takes Network location (COARSE location) perm but does not request the
                 // network location feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.location.network'\n");
+                printf("uses-implied-feature:'android.hardware.location.network'," \
+                        "'requested android.permission.ACCESS_COURSE_LOCATION permission'\n");
             }
 
             // Bluetooth-related compatibility logic
@@ -1262,6 +1288,9 @@ int doDump(Bundle* bundle)
                 // if app takes a Bluetooth permission but does not request the Bluetooth
                 // feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.bluetooth'\n");
+                printf("uses-implied-feature:'android.hardware.bluetooth'," \
+                        "'requested android.permission.BLUETOOTH or android.permission.BLUETOOTH_ADMIN " \
+                        "permission and targetSdkVersion > 4'\n");
             }
 
             // Microphone-related compatibility logic
@@ -1269,6 +1298,8 @@ int doDump(Bundle* bundle)
                 // if app takes the record-audio permission but does not request the microphone
                 // feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.microphone'\n");
+                printf("uses-implied-feature:'android.hardware.microphone'," \
+                        "'requested android.permission.RECORD_AUDIO permission'\n");
             }
 
             // WiFi-related compatibility logic
@@ -1276,6 +1307,10 @@ int doDump(Bundle* bundle)
                 // if app takes one of the WiFi permissions but does not request the WiFi
                 // feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.wifi'\n");
+                printf("uses-implied-feature:'android.hardware.wifi'," \
+                        "'requested android.permission.ACCESS_WIFI_STATE, " \
+                        "android.permission.CHANGE_WIFI_STATE, or " \
+                        "android.permission.CHANGE_WIFI_MULTICAST_STATE permission'\n");
             }
 
             // Telephony-related compatibility logic
@@ -1283,6 +1318,8 @@ int doDump(Bundle* bundle)
                 // if app takes one of the telephony permissions or requests a sub-feature but
                 // does not request the base telephony feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.telephony'\n");
+                printf("uses-implied-feature:'android.hardware.telephony'," \
+                        "'requested a telephony-related permission or feature'\n");
             }
 
             // Touchscreen-related back-compatibility logic
@@ -1292,11 +1329,15 @@ int doDump(Bundle* bundle)
                 // Note that specTouchscreenFeature is true if the tag is present, regardless
                 // of whether its value is true or false, so this is safe
                 printf("uses-feature:'android.hardware.touchscreen'\n");
+                printf("uses-implied-feature:'android.hardware.touchscreen'," \
+                        "'assumed you require a touch screen unless explicitly made optional'\n");
             }
             if (!specMultitouchFeature && reqDistinctMultitouchFeature) {
                 // if app takes one of the telephony permissions or requests a sub-feature but
                 // does not request the base telephony feature, we infer that it meant to
                 printf("uses-feature:'android.hardware.touchscreen.multitouch'\n");
+                printf("uses-implied-feature:'android.hardware.touchscreen.multitouch'," \
+                        "'requested android.hardware.touchscreen.multitouch.distinct feature'\n");
             }
 
             // Landscape/portrait-related compatibility logic
@@ -1306,9 +1347,13 @@ int doDump(Bundle* bundle)
                 // orientation is required.
                 if (reqScreenLandscapeFeature) {
                     printf("uses-feature:'android.hardware.screen.landscape'\n");
+                    printf("uses-implied-feature:'android.hardware.screen.landscape'," \
+                            "'one or more activities have specified a landscape orientation'\n");
                 }
                 if (reqScreenPortraitFeature) {
                     printf("uses-feature:'android.hardware.screen.portrait'\n");
+                    printf("uses-implied-feature:'android.hardware.screen.portrait'," \
+                            "'one or more activities have specified a portrait orientation'\n");
                 }
             }
 
