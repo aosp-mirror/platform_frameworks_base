@@ -2977,7 +2977,10 @@ public final class ViewRootImpl implements ViewParent,
                 // be when the window is first being added, and mFocused isn't
                 // set yet.
                 final View focused = mView.findFocus();
-                if (focused != null && !focused.isFocusableInTouchMode()) {
+                if (focused != null) {
+                    if (focused.isFocusableInTouchMode()) {
+                        return true;
+                    }
                     final ViewGroup ancestorToTakeFocus =
                             findAncestorToTakeFocusInTouchMode(focused);
                     if (ancestorToTakeFocus != null) {
