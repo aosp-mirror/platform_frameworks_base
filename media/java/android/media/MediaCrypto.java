@@ -37,7 +37,7 @@ public final class MediaCrypto {
       * @param uuid The UUID of the crypto scheme.
       * @param initData Opaque initialization data specific to the crypto scheme.
     */
-    public MediaCrypto(byte[] uuid, byte[] initData) {
+    public MediaCrypto(byte[] uuid, byte[] initData) throws RuntimeException {
         native_setup(uuid, initData);
     }
 
