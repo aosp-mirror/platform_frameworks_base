@@ -638,8 +638,8 @@ public class WifiMonitor {
          */
         private void handleSupplicantStateChange(String dataString) {
             String SSID = null;
-            int index = dataString.indexOf("SSID=");
-            if (index != -1) SSID = dataString.substring(index);
+            int index = dataString.lastIndexOf("SSID=");
+            if (index != -1) SSID = dataString.substring(index + 5);
             String[] dataTokens = dataString.split(" ");
 
             String BSSID = null;
