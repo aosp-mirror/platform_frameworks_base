@@ -18,6 +18,7 @@ next.link=currentlocation.html
   <li><a href="locationmanager.html#TaskDeclarePermissions">Declare Proper Permissions in Android Manifest</a></li>
   <li><a href="locationmanager.html#TaskGetLocationManagerRef">Get a Reference to LocationManager</a></li>
   <li><a href="locationmanager.html#TaskPickLocationProvider">Pick a Location Provider</a></li>
+  <li><a href="locationmanager.html#TaskVerifyProvider">Verify the Location Provider is Enabled</a></li>
 </ol>
 
 <h2>You should also read</h2>
@@ -86,5 +87,34 @@ String providerName = locManager.getBestProvider(criteria, true);
 // If no suitable provider is found, null is returned.
 if (providerName != null) {
    ...
+}
+</pre>
+
+<h2 id="TaskVerifyProvider">Verify the Location Provider is Enabled</h2>
+
+<p>Some location providers such as the GPS can be disabled in Settings.  It is good practice to check whether the desired location provider is currently enabled by calling the {@link android.location.LocationManager#isProviderEnabled(java.lang.String) isProviderEnabled()} method.  If the location provider is disabled, you can offer the user an opportunity to enable it in Settings by firing an {@link android.content.Intent} with the {@link android.provider.Settings#ACTION_LOCATION_SOURCE_SETTINGS} action.</p>
+
+<pre>
+&#64;Override
+protected void onStart() {
+    super.onStart();
+
+    // This verification should be done during onStart() because the system calls
+    // this method when the user returns to the activity, which ensures the desired
+    // location provider is enabled each time the activity resumes from the stopped state.
+    LocationManager locationManager =
+            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    final boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+    if (!gpsEnabled) {
+        // Build an alert dialog here that requests that the user enable
+        // the location services, then when the user clicks the "OK" button,
+        // call enableLocationSettings()
+    }
+}
+
+private void enableLocationSettings() {
+    Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+    startActivity(settingsIntent);
 }
 </pre>
