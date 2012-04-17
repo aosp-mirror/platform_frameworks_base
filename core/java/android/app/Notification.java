@@ -1696,4 +1696,60 @@ public class Notification implements Parcelable
             return wip;
         }
     }
+
+    /**
+     * Helper class for generating large-format notifications that include a list of (up to 5) strings.
+     * 
+     * This class is a "rebuilder": It consumes a Builder object and modifies its behavior, like so:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.DigestStyle(
+     *      new Notification.Builder()
+     *         .setContentTitle(&quot;New mail from &quot; + sender.toString())
+     *         .setContentText(subject)
+     *         .setSmallIcon(R.drawable.new_mail)
+     *         .setLargeIcon(aBitmap))
+     *      .addLine(str1)
+     *      .addLine(str2)
+     *      .build();
+     * </pre>
+     * 
+     * @see Notification#bigContentView
+     */
+    public static class InboxStyle {
+        private Builder mBuilder;
+        private ArrayList<CharSequence> mTexts = new ArrayList<CharSequence>(5);
+
+        public InboxStyle(Builder builder) {
+            mBuilder = builder;
+        }
+
+        public InboxStyle addLine(CharSequence cs) {
+            mTexts.add(cs);
+            return this;
+        }
+
+        private RemoteViews makeBigContentView() {
+            RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(R.layout.notification_template_inbox);
+
+            int[] rowIds = {R.id.inbox_text0, R.id.inbox_text1, R.id.inbox_text2, R.id.inbox_text3, R.id.inbox_text4};
+            
+            int i=0;
+            while (i < mTexts.size() && i < rowIds.length) {
+                CharSequence str = mTexts.get(i);
+                if (str != null && !str.equals("")) {
+                    contentView.setViewVisibility(rowIds[i], View.VISIBLE);
+                    contentView.setTextViewText(rowIds[i], str);
+                }
+                i++;
+            }
+
+            return contentView;
+        }
+
+        public Notification build() {
+            Notification wip = mBuilder.getNotification();
+            wip.bigContentView = makeBigContentView();
+            return wip;
+        }
+    }
 }
