@@ -119,6 +119,24 @@ public class LayoutTransition {
     public static final int DISAPPEARING = 3;
 
     /**
+     * A flag indicating the animation that runs on those items that are changing
+     * due to a layout change not caused by items being added to or removed
+     * from the container. This transition type is not enabled by default; it can be
+     * enabled via {@link #enableTransitionType(int)}.
+     */
+    public static final int CHANGING = 4;
+
+    /**
+     * Private bit fields used to set the collection of enabled transition types for
+     * mTransitionTypes.
+     */
+    private static final int FLAG_APPEARING             = 0x01;
+    private static final int FLAG_DISAPPEARING          = 0x02;
+    private static final int FLAG_CHANGE_APPEARING      = 0x04;
+    private static final int FLAG_CHANGE_DISAPPEARING   = 0x08;
+    private static final int FLAG_CHANGING              = 0x10;
+
+    /**
      * These variables hold the animations that are currently used to run the transition effects.
      * These animations are set to defaults, but can be changed to custom animations by
      * calls to setAnimator().
@@ -127,11 +145,13 @@ public class LayoutTransition {
     private Animator mAppearingAnim = null;
     private Animator mChangingAppearingAnim = null;
     private Animator mChangingDisappearingAnim = null;
+    private Animator mChangingAnim = null;
 
     /**
      * These are the default animations, defined in the constructor, that will be used
      * unless the user specifies custom animations.
      */
+    private static ObjectAnimator defaultChange;
     private static ObjectAnimator defaultChangeIn;
     private static ObjectAnimator defaultChangeOut;
     private static ObjectAnimator defaultFadeIn;
@@ -143,15 +163,16 @@ public class LayoutTransition {
     private static long DEFAULT_DURATION = 300;
 
     /**
-     * The durations of the four different animations
+     * The durations of the different animations
      */
     private long mChangingAppearingDuration = DEFAULT_DURATION;
     private long mChangingDisappearingDuration = DEFAULT_DURATION;
+    private long mChangingDuration = DEFAULT_DURATION;
     private long mAppearingDuration = DEFAULT_DURATION;
     private long mDisappearingDuration = DEFAULT_DURATION;
 
     /**
-     * The start delays of the four different animations. Note that the default behavior of
+     * The start delays of the different animations. Note that the default behavior of
      * the appearing item is the default duration, since it should wait for the items to move
      * before fading it. Same for the changing animation when disappearing; it waits for the item
      * to fade out before moving the other items.
@@ -160,12 +181,14 @@ public class LayoutTransition {
     private long mDisappearingDelay = 0;
     private long mChangingAppearingDelay = 0;
     private long mChangingDisappearingDelay = DEFAULT_DURATION;
+    private long mChangingDelay = 0;
 
     /**
-     * The inter-animation delays used on the two changing animations
+     * The inter-animation delays used on the changing animations
      */
     private long mChangingAppearingStagger = 0;
     private long mChangingDisappearingStagger = 0;
+    private long mChangingStagger = 0;
 
     /**
      * The default interpolators used for the animations
@@ -174,6 +197,7 @@ public class LayoutTransition {
     private TimeInterpolator mDisappearingInterpolator = new AccelerateDecelerateInterpolator();
     private TimeInterpolator mChangingAppearingInterpolator = new DecelerateInterpolator();
     private TimeInterpolator mChangingDisappearingInterpolator = new DecelerateInterpolator();
+    private TimeInterpolator mChangingInterpolator = new DecelerateInterpolator();
 
     /**
      * These hashmaps are used to store the animations that are currently running as part of
@@ -212,6 +236,13 @@ public class LayoutTransition {
     private long staggerDelay;
 
     /**
+     * These are the types of transition animations that the LayoutTransition is reacting
+     * to. By default, appearing/disappearing and the change animations related to them are
+     * enabled (not CHANGING).
+     */
+    private int mTransitionTypes = FLAG_CHANGE_APPEARING | FLAG_CHANGE_DISAPPEARING |
+            FLAG_APPEARING | FLAG_DISAPPEARING;
+    /**
      * The set of listeners that should be notified when APPEARING/DISAPPEARING transitions
      * start and end.
      */
@@ -248,6 +279,9 @@ public class LayoutTransition {
             defaultChangeOut = defaultChangeIn.clone();
             defaultChangeOut.setStartDelay(mChangingDisappearingDelay);
             defaultChangeOut.setInterpolator(mChangingDisappearingInterpolator);
+            defaultChange = defaultChangeIn.clone();
+            defaultChange.setStartDelay(mChangingDelay);
+            defaultChange.setInterpolator(mChangingInterpolator);
 
             defaultFadeIn = ObjectAnimator.ofFloat(null, "alpha", 0f, 1f);
             defaultFadeIn.setDuration(DEFAULT_DURATION);
@@ -260,6 +294,7 @@ public class LayoutTransition {
         }
         mChangingAppearingAnim = defaultChangeIn;
         mChangingDisappearingAnim = defaultChangeOut;
+        mChangingAnim = defaultChange;
         mAppearingAnim = defaultFadeIn;
         mDisappearingAnim = defaultFadeOut;
     }
@@ -275,8 +310,91 @@ public class LayoutTransition {
     public void setDuration(long duration) {
         mChangingAppearingDuration = duration;
         mChangingDisappearingDuration = duration;
+        mChangingDuration = duration;
         mAppearingDuration = duration;
         mDisappearingDuration = duration;
+    }
+
+    /**
+     * Enables the specified transitionType for this LayoutTransition object.
+     * By default, a LayoutTransition listens for changes in children being
+     * added/remove/hidden/shown in the container, and runs the animations associated with
+     * those events. That is, all transition types besides {@link #CHANGING} are enabled by default.
+     * You can also enable {@link #CHANGING} animations by calling this method with the
+     * {@link #CHANGING} transitionType.
+     *
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}.
+     */
+    public void enableTransitionType(int transitionType) {
+        switch (transitionType) {
+            case APPEARING:
+                mTransitionTypes |= FLAG_APPEARING;
+                break;
+            case DISAPPEARING:
+                mTransitionTypes |= FLAG_DISAPPEARING;
+                break;
+            case CHANGE_APPEARING:
+                mTransitionTypes |= FLAG_CHANGE_APPEARING;
+                break;
+            case CHANGE_DISAPPEARING:
+                mTransitionTypes |= FLAG_CHANGE_DISAPPEARING;
+                break;
+            case CHANGING:
+                mTransitionTypes |= FLAG_CHANGING;
+                break;
+        }
+    }
+
+    /**
+     * Disables the specified transitionType for this LayoutTransition object.
+     * By default, all transition types except {@link #CHANGING} are enabled.
+     *
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}.
+     */
+    public void disableTransitionType(int transitionType) {
+        switch (transitionType) {
+            case APPEARING:
+                mTransitionTypes &= ~FLAG_APPEARING;
+                break;
+            case DISAPPEARING:
+                mTransitionTypes &= ~FLAG_DISAPPEARING;
+                break;
+            case CHANGE_APPEARING:
+                mTransitionTypes &= ~FLAG_CHANGE_APPEARING;
+                break;
+            case CHANGE_DISAPPEARING:
+                mTransitionTypes &= ~FLAG_CHANGE_DISAPPEARING;
+                break;
+            case CHANGING:
+                mTransitionTypes &= ~FLAG_CHANGING;
+                break;
+        }
+    }
+
+    /**
+     * Returns whether the specified transitionType is enabled for this LayoutTransition object.
+     * By default, all transition types except {@link #CHANGING} are enabled.
+     *
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}.
+     * @return true if the specified transitionType is currently enabled, false otherwise.
+     */
+    public boolean isTransitionTypeEnabled(int transitionType) {
+        switch (transitionType) {
+            case APPEARING:
+                return (mTransitionTypes & FLAG_APPEARING) == FLAG_APPEARING;
+            case DISAPPEARING:
+                return (mTransitionTypes & FLAG_DISAPPEARING) == FLAG_DISAPPEARING;
+            case CHANGE_APPEARING:
+                return (mTransitionTypes & FLAG_CHANGE_APPEARING) == FLAG_CHANGE_APPEARING;
+            case CHANGE_DISAPPEARING:
+                return (mTransitionTypes & FLAG_CHANGE_DISAPPEARING) == FLAG_CHANGE_DISAPPEARING;
+            case CHANGING:
+                return (mTransitionTypes & FLAG_CHANGING) == FLAG_CHANGING;
+        }
+        return false;
     }
 
     /**
@@ -284,9 +402,9 @@ public class LayoutTransition {
      * <code>transitionType</code> parameter determines the animation whose start delay
      * is being set.
      *
-     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
-     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose start
-     * delay is being set.
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}, which determines
+     * the animation whose start delay is being set.
      * @param delay The length of time, in milliseconds, to delay before starting the animation.
      * @see Animator#setStartDelay(long)
      */
@@ -297,6 +415,9 @@ public class LayoutTransition {
                 break;
             case CHANGE_DISAPPEARING:
                 mChangingDisappearingDelay = delay;
+                break;
+            case CHANGING:
+                mChangingDelay = delay;
                 break;
             case APPEARING:
                 mAppearingDelay = delay;
@@ -312,9 +433,9 @@ public class LayoutTransition {
      * <code>transitionType</code> parameter determines the animation whose start delay
      * is returned.
      *
-     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
-     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose start
-     * delay is returned.
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}, which determines
+     * the animation whose start delay is returned.
      * @return long The start delay of the specified animation.
      * @see Animator#getStartDelay()
      */
@@ -324,6 +445,8 @@ public class LayoutTransition {
                 return mChangingAppearingDelay;
             case CHANGE_DISAPPEARING:
                 return mChangingDisappearingDelay;
+            case CHANGING:
+                return mChangingDelay;
             case APPEARING:
                 return mAppearingDelay;
             case DISAPPEARING:
@@ -338,9 +461,9 @@ public class LayoutTransition {
      * <code>transitionType</code> parameter determines the animation whose duration
      * is being set.
      *
-     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
-     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
-     * duration is being set.
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}, which determines
+     * the animation whose duration is being set.
      * @param duration The length of time, in milliseconds, that the specified animation should run.
      * @see Animator#setDuration(long)
      */
@@ -351,6 +474,9 @@ public class LayoutTransition {
                 break;
             case CHANGE_DISAPPEARING:
                 mChangingDisappearingDuration = duration;
+                break;
+            case CHANGING:
+                mChangingDuration = duration;
                 break;
             case APPEARING:
                 mAppearingDuration = duration;
@@ -366,9 +492,9 @@ public class LayoutTransition {
      * <code>transitionType</code> parameter determines the animation whose duration
      * is returned.
      *
-     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
-     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
-     * duration is returned.
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}, which determines
+     * the animation whose duration is returned.
      * @return long The duration of the specified animation.
      * @see Animator#getDuration()
      */
@@ -378,6 +504,8 @@ public class LayoutTransition {
                 return mChangingAppearingDuration;
             case CHANGE_DISAPPEARING:
                 return mChangingDisappearingDuration;
+            case CHANGING:
+                return mChangingDuration;
             case APPEARING:
                 return mAppearingDuration;
             case DISAPPEARING:
@@ -389,9 +517,10 @@ public class LayoutTransition {
 
     /**
      * Sets the length of time to delay between starting each animation during one of the
-     * CHANGE animations.
+     * change animations.
      *
-     * @param transitionType A value of {@link #CHANGE_APPEARING} or @link #CHANGE_DISAPPEARING}.
+     * @param transitionType A value of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING}, or
+     * {@link #CHANGING}.
      * @param duration The length of time, in milliseconds, to delay before launching the next
      * animation in the sequence.
      */
@@ -403,15 +532,19 @@ public class LayoutTransition {
             case CHANGE_DISAPPEARING:
                 mChangingDisappearingStagger = duration;
                 break;
+            case CHANGING:
+                mChangingStagger = duration;
+                break;
             // noop other cases
         }
     }
 
     /**
-     * Tets the length of time to delay between starting each animation during one of the
-     * CHANGE animations.
+     * Gets the length of time to delay between starting each animation during one of the
+     * change animations.
      *
-     * @param transitionType A value of {@link #CHANGE_APPEARING} or @link #CHANGE_DISAPPEARING}.
+     * @param transitionType A value of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING}, or
+     * {@link #CHANGING}.
      * @return long The length of time, in milliseconds, to delay before launching the next
      * animation in the sequence.
      */
@@ -421,6 +554,8 @@ public class LayoutTransition {
                 return mChangingAppearingStagger;
             case CHANGE_DISAPPEARING:
                 return mChangingDisappearingStagger;
+            case CHANGING:
+                return mChangingStagger;
         }
         // shouldn't reach here
         return 0;
@@ -431,9 +566,9 @@ public class LayoutTransition {
      * <code>transitionType</code> parameter determines the animation whose interpolator
      * is being set.
      *
-     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
-     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
-     * duration is being set.
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}, which determines
+     * the animation whose interpolator is being set.
      * @param interpolator The interpolator that the specified animation should use.
      * @see Animator#setInterpolator(TimeInterpolator)
      */
@@ -444,6 +579,9 @@ public class LayoutTransition {
                 break;
             case CHANGE_DISAPPEARING:
                 mChangingDisappearingInterpolator = interpolator;
+                break;
+            case CHANGING:
+                mChangingInterpolator = interpolator;
                 break;
             case APPEARING:
                 mAppearingInterpolator = interpolator;
@@ -459,9 +597,9 @@ public class LayoutTransition {
      * <code>transitionType</code> parameter determines the animation whose interpolator
      * is returned.
      *
-     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
-     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
-     * duration is being set.
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}, which determines
+     * the animation whose interpolator is being returned.
      * @return TimeInterpolator The interpolator that the specified animation uses.
      * @see Animator#setInterpolator(TimeInterpolator)
      */
@@ -471,6 +609,8 @@ public class LayoutTransition {
                 return mChangingAppearingInterpolator;
             case CHANGE_DISAPPEARING:
                 return mChangingDisappearingInterpolator;
+            case CHANGING:
+                return mChangingInterpolator;
             case APPEARING:
                 return mAppearingInterpolator;
             case DISAPPEARING:
@@ -504,9 +644,9 @@ public class LayoutTransition {
      * values queried when the transition begins may need to use a different mechanism
      * than a standard ObjectAnimator object.</p>
      *
-     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
-     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
-     * duration is being set.
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the
+     * animation whose animator is being set.
      * @param animator The animation being assigned. A value of <code>null</code> means that no
      * animation will be run for the specified transitionType.
      */
@@ -517,6 +657,9 @@ public class LayoutTransition {
                 break;
             case CHANGE_DISAPPEARING:
                 mChangingDisappearingAnim = animator;
+                break;
+            case CHANGING:
+                mChangingAnim = animator;
                 break;
             case APPEARING:
                 mAppearingAnim = animator;
@@ -530,9 +673,9 @@ public class LayoutTransition {
     /**
      * Gets the animation used during one of the transition types that may run.
      *
-     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
-     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
-     * duration is being set.
+     * @param transitionType One of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #CHANGING}, {@link #APPEARING}, or {@link #DISAPPEARING}, which determines
+     * the animation whose animator is being returned.
      * @return Animator The animation being used for the given transition type.
      * @see #setAnimator(int, Animator)
      */
@@ -542,6 +685,8 @@ public class LayoutTransition {
                 return mChangingAppearingAnim;
             case CHANGE_DISAPPEARING:
                 return mChangingDisappearingAnim;
+            case CHANGING:
+                return mChangingAnim;
             case APPEARING:
                 return mAppearingAnim;
             case DISAPPEARING:
@@ -554,20 +699,44 @@ public class LayoutTransition {
     /**
      * This function sets up animations on all of the views that change during layout.
      * For every child in the parent, we create a change animation of the appropriate
-     * type (appearing or disappearing) and ask it to populate its start values from its
+     * type (appearing, disappearing, or changing) and ask it to populate its start values from its
      * target view. We add layout listeners to all child views and listen for changes. For
      * those views that change, we populate the end values for those animations and start them.
      * Animations are not run on unchanging views.
      *
-     * @param parent The container which is undergoing an appearing or disappearing change.
-     * @param newView The view being added to or removed from the parent.
-     * @param changeReason A value of APPEARING or DISAPPEARING, indicating whether the
-     * transition is occuring because an item is being added to or removed from the parent.
+     * @param parent The container which is undergoing a change.
+     * @param newView The view being added to or removed from the parent. May be null if the
+     * changeReason is CHANGING.
+     * @param changeReason A value of APPEARING, DISAPPEARING, or CHANGING, indicating whether the
+     * transition is occurring because an item is being added to or removed from the parent, or
+     * if it is running in response to a layout operation (that is, if the value is CHANGING).
      */
     private void runChangeTransition(final ViewGroup parent, View newView, final int changeReason) {
 
-        Animator baseAnimator = (changeReason == APPEARING) ?
-                mChangingAppearingAnim : mChangingDisappearingAnim;
+        Animator baseAnimator = null;
+        Animator parentAnimator = null;
+        final long duration;
+        switch (changeReason) {
+            case APPEARING:
+                baseAnimator = mChangingAppearingAnim;
+                duration = mChangingAppearingDuration;
+                parentAnimator = defaultChangeIn;
+                break;
+            case DISAPPEARING:
+                baseAnimator = mChangingDisappearingAnim;
+                duration = mChangingDisappearingDuration;
+                parentAnimator = defaultChangeOut;
+                break;
+            case CHANGING:
+                baseAnimator = mChangingAnim;
+                duration = mChangingDuration;
+                parentAnimator = defaultChange;
+                break;
+            default:
+                // Shouldn't reach here
+                duration = 0;
+                break;
+        }
         // If the animation is null, there's nothing to do
         if (baseAnimator == null) {
             return;
@@ -575,8 +744,6 @@ public class LayoutTransition {
 
         // reset the inter-animation delay, in case we use it later
         staggerDelay = 0;
-        final long duration = (changeReason == APPEARING) ?
-                mChangingAppearingDuration : mChangingDisappearingDuration;
 
         final ViewTreeObserver observer = parent.getViewTreeObserver(); // used for later cleanup
         if (!observer.isAlive()) {
@@ -594,8 +761,6 @@ public class LayoutTransition {
             }
         }
         if (mAnimateParentHierarchy) {
-            Animator parentAnimator = (changeReason == APPEARING) ?
-                    defaultChangeIn : defaultChangeOut;
             ViewGroup tempParent = parent;
             while (tempParent != null) {
                 ViewParent parentParent = tempParent.getParent();
@@ -727,13 +892,20 @@ public class LayoutTransition {
                     }
                 }
 
-                long startDelay;
-                if (changeReason == APPEARING) {
-                    startDelay = mChangingAppearingDelay + staggerDelay;
-                    staggerDelay += mChangingAppearingStagger;
-                } else {
-                    startDelay = mChangingDisappearingDelay + staggerDelay;
-                    staggerDelay += mChangingDisappearingStagger;
+                long startDelay = 0;
+                switch (changeReason) {
+                    case APPEARING:
+                        startDelay = mChangingAppearingDelay + staggerDelay;
+                        staggerDelay += mChangingAppearingStagger;
+                        break;
+                    case DISAPPEARING:
+                        startDelay = mChangingDisappearingDelay + staggerDelay;
+                        staggerDelay += mChangingDisappearingStagger;
+                        break;
+                    case CHANGING:
+                        startDelay = mChangingDelay + staggerDelay;
+                        staggerDelay += mChangingStagger;
+                        break;
                 }
                 anim.setStartDelay(startDelay);
                 anim.setDuration(duration);
@@ -766,7 +938,8 @@ public class LayoutTransition {
                     for (TransitionListener listener : mListeners) {
                         listener.startTransition(LayoutTransition.this, parent, child,
                                 changeReason == APPEARING ?
-                                        CHANGE_APPEARING : CHANGE_DISAPPEARING);
+                                        CHANGE_APPEARING : changeReason == DISAPPEARING ?
+                                        CHANGE_DISAPPEARING : CHANGING);
                     }
                 }
             }
@@ -784,7 +957,8 @@ public class LayoutTransition {
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child,
                                 changeReason == APPEARING ?
-                                        CHANGE_APPEARING : CHANGE_DISAPPEARING);
+                                        CHANGE_APPEARING : changeReason == DISAPPEARING ?
+                                        CHANGE_DISAPPEARING : CHANGING);
                     }
                 }
             }
@@ -902,6 +1076,7 @@ public class LayoutTransition {
         switch (transitionType) {
             case CHANGE_APPEARING:
             case CHANGE_DISAPPEARING:
+            case CHANGING:
                 if (currentChangingAnimations.size() > 0) {
                     LinkedHashMap<View, Animator> currentAnimCopy =
                             (LinkedHashMap<View, Animator>) currentChangingAnimations.clone();
@@ -1031,21 +1206,48 @@ public class LayoutTransition {
      * affect CHANGE_APPEARING or CHANGE_DISAPPEARING animations.
      */
     private void addChild(ViewGroup parent, View child, boolean changesLayout) {
-        // Want disappearing animations to finish up before proceeding
-        cancel(DISAPPEARING);
-        if (changesLayout) {
+        if ((mTransitionTypes & FLAG_APPEARING) == FLAG_APPEARING) {
+            // Want disappearing animations to finish up before proceeding
+            cancel(DISAPPEARING);
+        }
+        if (changesLayout && (mTransitionTypes & FLAG_CHANGE_APPEARING) == FLAG_CHANGE_APPEARING) {
             // Also, cancel changing animations so that we start fresh ones from current locations
             cancel(CHANGE_APPEARING);
+            cancel(CHANGING);
         }
-        if (mListeners != null) {
+        if (mListeners != null && (mTransitionTypes & FLAG_APPEARING) == FLAG_APPEARING) {
             for (TransitionListener listener : mListeners) {
                 listener.startTransition(this, parent, child, APPEARING);
             }
         }
-        if (changesLayout) {
+        if (changesLayout && (mTransitionTypes & FLAG_CHANGE_APPEARING) == FLAG_CHANGE_APPEARING) {
             runChangeTransition(parent, child, APPEARING);
         }
-        runAppearingTransition(parent, child);
+        if ((mTransitionTypes & FLAG_APPEARING) == FLAG_APPEARING) {
+            runAppearingTransition(parent, child);
+        }
+    }
+
+    /**
+     * This method is called by ViewGroup when there is a call to layout() on the container
+     * with this LayoutTransition. If the CHANGING transition is enabled and if there is no other
+     * transition currently running on the container, then this call runs a CHANGING transition.
+     * The transition does not start immediately; it just sets up the mechanism to run if any
+     * of the children of the container change their layout parameters (similar to
+     * the CHANGE_APPEARING and CHANGE_DISAPPEARING transitions).
+     *
+     * @param parent The ViewGroup whose layout() method has been called.
+     *
+     * @hide
+     */
+    public void layoutChange(ViewGroup parent) {
+        if ((mTransitionTypes & FLAG_CHANGING) == FLAG_CHANGING  && !isRunning()) {
+            // This method is called for all calls to layout() in the container, including
+            // those caused by add/remove/hide/show events, which will already have set up
+            // transition animations. Avoid setting up CHANGING animations in this case; only
+            // do so when there is not a transition already running on the container.
+            runChangeTransition(parent, null, CHANGING);
+        }
     }
 
     /**
@@ -1097,21 +1299,28 @@ public class LayoutTransition {
      * affect CHANGE_APPEARING or CHANGE_DISAPPEARING animations.
      */
     private void removeChild(ViewGroup parent, View child, boolean changesLayout) {
-        // Want appearing animations to finish up before proceeding
-        cancel(APPEARING);
-        if (changesLayout) {
+        if ((mTransitionTypes & FLAG_DISAPPEARING) == FLAG_DISAPPEARING) {
+            // Want appearing animations to finish up before proceeding
+            cancel(APPEARING);
+        }
+        if (changesLayout &&
+                (mTransitionTypes & FLAG_CHANGE_DISAPPEARING) == FLAG_CHANGE_DISAPPEARING) {
             // Also, cancel changing animations so that we start fresh ones from current locations
             cancel(CHANGE_DISAPPEARING);
+            cancel(CHANGING);
         }
-        if (mListeners != null) {
+        if (mListeners != null && (mTransitionTypes & FLAG_DISAPPEARING) == FLAG_DISAPPEARING) {
             for (TransitionListener listener : mListeners) {
                 listener.startTransition(this, parent, child, DISAPPEARING);
             }
         }
-        if (changesLayout) {
+        if (changesLayout &&
+                (mTransitionTypes & FLAG_CHANGE_DISAPPEARING) == FLAG_CHANGE_DISAPPEARING) {
             runChangeTransition(parent, child, DISAPPEARING);
         }
-        runDisappearingTransition(parent, child);
+        if ((mTransitionTypes & FLAG_DISAPPEARING) == FLAG_DISAPPEARING) {
+            runDisappearingTransition(parent, child);
+        }
     }
 
     /**

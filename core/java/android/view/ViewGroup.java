@@ -4207,6 +4207,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public final void layout(int l, int t, int r, int b) {
         if (mTransition == null || !mTransition.isChangingLayout()) {
+            if (mTransition != null) {
+                mTransition.layoutChange(this);
+            }
             super.layout(l, t, r, b);
         } else {
             // record the fact that we noop'd it; request layout when transition finishes
