@@ -210,7 +210,7 @@ static void android_media_MediaCrypto_native_setup(
     if (err != OK) {
         jniThrowException(
                 env,
-                "java/io/IOException",
+                "java/lang/RuntimeException",
                 "Failed to instantiate crypto object.");
         return;
     }

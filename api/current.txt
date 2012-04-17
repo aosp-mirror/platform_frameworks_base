@@ -10996,7 +10996,7 @@ package android.media {
   }
 
   public final class MediaCrypto {
-    ctor public MediaCrypto(byte[], byte[]);
+    ctor public MediaCrypto(byte[], byte[]) throws java.lang.RuntimeException;
     method public static final boolean isCryptoSchemeSupported(byte[]);
     method public final void release();
     method public final boolean requiresSecureDecoderComponent(java.lang.String);
