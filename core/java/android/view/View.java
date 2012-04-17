@@ -5814,17 +5814,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @see #FOCUSABLES_ALL
      * @see #FOCUSABLES_TOUCH_MODE
-     * @see #FOCUSABLES_ACCESSIBILITY
      */
     public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
         if (views == null) {
             return;
-        }
-        if ((focusableMode & FOCUSABLE_IN_TOUCH_MODE) == FOCUSABLE_IN_TOUCH_MODE) {
-            if (isFocusable() && (!isInTouchMode() || isFocusableInTouchMode())) {
-                views.add(this);
-                return;
-            }
         }
         if ((focusableMode & FOCUSABLES_ACCESSIBILITY) == FOCUSABLES_ACCESSIBILITY) {
             if (AccessibilityManager.getInstance(mContext).isEnabled()
@@ -5833,14 +5826,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 return;
             }
         }
-        if ((focusableMode & FOCUSABLES_ALL) == FOCUSABLES_ALL) {
-            if (isFocusable()) {
-                views.add(this);
-                return;
-            }
-        } else {
-            throw new IllegalArgumentException("Unknow focusable mode: " + focusableMode);
+        if (!isFocusable()) {
+            return;
         }
+        if ((focusableMode & FOCUSABLES_TOUCH_MODE) == FOCUSABLES_TOUCH_MODE
+                && isInTouchMode() && !isFocusableInTouchMode()) {
+            return;
+        }
+        views.add(this);
     }
 
     /**
