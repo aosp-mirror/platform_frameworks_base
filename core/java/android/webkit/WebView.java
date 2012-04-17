@@ -1530,17 +1530,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Returns a view containing zoom controls i.e. +/- buttons. The caller is
-     * in charge of installing this view to the view hierarchy. This view will
-     * become visible when the user starts scrolling via touch and fade away if
-     * the user does not interact with it.
+     * Gets the zoom controls for the WebView, as a separate View. The caller is
+     * responsible for inserting this View into the layout hierarchy.
      * <p/>
-     * API version 3 introduces a built-in zoom mechanism that is shown
-     * automatically by the MapView. This is the preferred approach for
-     * showing the zoom UI.
+     * API Level 3 introduced built-in zoom mechanisms for the WebView, as
+     * opposed to these separate zoom controls. The built-in mechanisms are
+     * preferred and can be enabled using
+     * {@link WebSettings#setBuiltInZoomControls}.
      *
-     * @deprecated The built-in zoom mechanism is preferred, see
-     *             {@link WebSettings#setBuiltInZoomControls(boolean)}.
+     * @deprecated The built-in zoom mechanisms are preferred.
      * @hide since API version 16.
      */
     @Deprecated
