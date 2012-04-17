@@ -5792,11 +5792,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 throw new IllegalStateException("Instance already recycled.");
             }
             clear();
-            if (sPoolSize < MAX_POOL_SIZE) {
-                mNext = sPool;
-                mIsPooled = true;
-                sPool = this;
-                sPoolSize++;
+            synchronized (sPoolLock) {
+                if (sPoolSize < MAX_POOL_SIZE) {
+                    mNext = sPool;
+                    mIsPooled = true;
+                    sPool = this;
+                    sPoolSize++;
+                }
             }
         }
 
@@ -5889,11 +5891,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 throw new IllegalStateException("Instance already recycled.");
             }
             clear();
-            if (sPoolSize < MAX_POOL_SIZE) {
-                mNext = sPool;
-                mIsPooled = true;
-                sPool = this;
-                sPoolSize++;
+            synchronized (sPoolLock) {
+                if (sPoolSize < MAX_POOL_SIZE) {
+                    mNext = sPool;
+                    mIsPooled = true;
+                    sPool = this;
+                    sPoolSize++;
+                }
             }
         }
 
@@ -5943,9 +5947,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (widthDiference != 0) {
                 return -widthDiference;
             }
-            // Return nondeterministically one of them since we do
-            // not want to ignore any views.
-            return 1;
+            // Just break the tie somehow. The accessibliity ids are unique
+            // and stable, hence this is deterministic tie breaking.
+            return mView.getAccessibilityViewId() - another.mView.getAccessibilityViewId();
         }
 
         private void init(ViewGroup root, View view) {

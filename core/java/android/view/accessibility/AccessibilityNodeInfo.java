@@ -84,7 +84,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Action that gives input focus to the node.
      */
-    public static final int ACTION_FOCUS = 0x00000001;
+    public static final int ACTION_FOCUS =  0x00000001;
 
     /**
      * Action that clears input focus of the node.
@@ -102,19 +102,24 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int ACTION_CLEAR_SELECTION = 0x00000008;
 
     /**
+     * Action that clicks on the node info.
+     */
+    public static final int ACTION_CLICK = 0x00000010;
+
+    /**
+     * Action that clicks on the node.
+     */
+    public static final int ACTION_LONG_CLICK = 0x00000020;
+
+    /**
      * Action that gives accessibility focus to the node.
      */
-    public static final int ACTION_ACCESSIBILITY_FOCUS = 0x00000010;
+    public static final int ACTION_ACCESSIBILITY_FOCUS = 0x00000040;
 
     /**
      * Action that clears accessibility focus of the node.
      */
-    public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 0x00000020;
-
-    /**
-     * Action that clicks on the node info./AccessibilityNodeInfoCache.java
-     */
-    public static final int ACTION_CLICK = 0x00000040;
+    public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 0x00000080;
 
     /**
      * The input focus.
@@ -278,9 +283,9 @@ public class AccessibilityNodeInfo implements Parcelable {
             (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         mSourceNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
     }
-    
+
     /**
-     * Find the view that has the input focus. The search starts from
+     * Find the view that has the specified focus type. The search starts from
      * the view represented by this node info.
      *
      * @param focus The focus to find. One of {@link #FOCUS_INPUT} or
