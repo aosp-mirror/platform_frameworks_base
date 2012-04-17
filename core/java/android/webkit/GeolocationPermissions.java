@@ -252,7 +252,7 @@ public class GeolocationPermissions {
         }
         if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
             boolean allowed = nativeGetAllowed(origin);
-            callback.onReceiveValue(new Boolean(allowed));
+            callback.onReceiveValue(Boolean.valueOf(allowed));
         } else {
             Map values = new HashMap<String, Object>();
             values.put(ORIGIN, origin);
