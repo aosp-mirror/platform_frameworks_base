@@ -51,6 +51,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.animation.AnimationUtils;
 import android.widget.SpinnerAdapter;
 
 import java.lang.ref.WeakReference;
@@ -596,19 +597,23 @@ public class ActionBarImpl extends ActionBar {
         if (mCurWindowVisibility == View.VISIBLE && (mShowHideAnimationEnabled
                 || alwaysAnimate)) {
             mTopVisibilityView.setAlpha(0);
+            mTopVisibilityView.setTranslationY(-mTopVisibilityView.getHeight());
             AnimatorSet anim = new AnimatorSet();
             AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView, "alpha", 1));
+            b.with(ObjectAnimator.ofFloat(mTopVisibilityView, "translationY", 0));
             if (mContentView != null) {
                 b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
                         -mTopVisibilityView.getHeight(), 0));
-                mTopVisibilityView.setTranslationY(-mTopVisibilityView.getHeight());
-                b.with(ObjectAnimator.ofFloat(mTopVisibilityView, "translationY", 0));
             }
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
                 mSplitView.setAlpha(0);
+                mSplitView.setTranslationY(mSplitView.getHeight());
                 mSplitView.setVisibility(View.VISIBLE);
                 b.with(ObjectAnimator.ofFloat(mSplitView, "alpha", 1));
+                b.with(ObjectAnimator.ofFloat(mSplitView, "translationY", 0));
             }
+            anim.setInterpolator(AnimationUtils.loadInterpolator(mContext,
+                    com.android.internal.R.interpolator.decelerate_quad));
             anim.addListener(mShowListener);
             mCurrentShowAnim = anim;
             anim.start();
@@ -638,16 +643,20 @@ public class ActionBarImpl extends ActionBar {
             mContainerView.setTransitioning(true);
             AnimatorSet anim = new AnimatorSet();
             AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mTopVisibilityView, "alpha", 0));
+            b.with(ObjectAnimator.ofFloat(mTopVisibilityView, "translationY",
+                    -mTopVisibilityView.getHeight()));
             if (mContentView != null) {
                 b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
                         0, -mTopVisibilityView.getHeight()));
-                b.with(ObjectAnimator.ofFloat(mTopVisibilityView, "translationY",
-                        -mTopVisibilityView.getHeight()));
             }
             if (mSplitView != null && mSplitView.getVisibility() == View.VISIBLE) {
                 mSplitView.setAlpha(1);
                 b.with(ObjectAnimator.ofFloat(mSplitView, "alpha", 0));
+                b.with(ObjectAnimator.ofFloat(mSplitView, "translationY",
+                        mSplitView.getHeight()));
             }
+            anim.setInterpolator(AnimationUtils.loadInterpolator(mContext,
+                    com.android.internal.R.interpolator.accelerate_quad));
             anim.addListener(mHideListener);
             mCurrentShowAnim = anim;
             anim.start();
