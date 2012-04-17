@@ -3458,9 +3458,9 @@ public class PackageParser {
             ai.disableCompatibilityMode();
         }
         if (stopped) {
-            p.applicationInfo.flags |= ApplicationInfo.FLAG_STOPPED;
+            ai.flags |= ApplicationInfo.FLAG_STOPPED;
         } else {
-            p.applicationInfo.flags &= ~ApplicationInfo.FLAG_STOPPED;
+            ai.flags &= ~ApplicationInfo.FLAG_STOPPED;
         }
         if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;

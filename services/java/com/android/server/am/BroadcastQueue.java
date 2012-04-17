@@ -719,8 +719,10 @@ public class BroadcastQueue {
                     info.activityInfo.applicationInfo.packageName,
                     info.activityInfo.name);
             if (r.callingUid != Process.SYSTEM_UID) {
-                info.activityInfo = mService.getActivityInfoForUser(info.activityInfo, UserId
-                        .getUserId(r.callingUid));
+                boolean isSingleton = mService.isSingleton(info.activityInfo.processName,
+                        info.activityInfo.applicationInfo);
+                int targetUserId = isSingleton ? 0 : UserId.getUserId(r.callingUid);
+                info.activityInfo = mService.getActivityInfoForUser(info.activityInfo,targetUserId);
             }
             r.curReceiver = info.activityInfo;
             if (DEBUG_MU && r.callingUid > UserId.PER_USER_RANGE) {

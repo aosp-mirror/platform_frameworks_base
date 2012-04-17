@@ -2345,8 +2345,9 @@ final class ActivityStack {
         }
 
         if (err == ActivityManager.START_SUCCESS) {
+            final int userId = aInfo != null ? UserId.getUserId(aInfo.applicationInfo.uid) : 0;
             Slog.i(TAG, "START {" + intent.toShortString(true, true, true, false)
-                    + "} from pid " + (callerApp != null ? callerApp.pid : callingPid));
+                    + " u=" + userId + "} from pid " + (callerApp != null ? callerApp.pid : callingPid));
         }
 
         ActivityRecord sourceRecord = null;
@@ -2943,6 +2944,9 @@ final class ActivityStack {
         // Collect information about the target of the Intent.
         ActivityInfo aInfo = resolveActivity(intent, resolvedType, startFlags,
                 profileFile, profileFd, userId);
+        if (mService.isSingleton(aInfo.processName, aInfo.applicationInfo)) {
+            userId = 0;
+        }
         aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
         synchronized (mService) {
