@@ -257,12 +257,7 @@ static void android_media_MediaExtractor_seekTo(
         return;
     }
 
-    status_t err = extractor->seekTo(timeUs);
-
-    if (err != OK) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
+    extractor->seekTo(timeUs);
 }
 
 static jboolean android_media_MediaExtractor_advance(
