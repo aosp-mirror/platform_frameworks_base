@@ -558,6 +558,11 @@ final class ActivityRecord {
                             pendingOptions.getCustomEnterResId(),
                             pendingOptions.getCustomExitResId());
                     break;
+                case ActivityOptions.ANIM_SCALE_UP:
+                    service.mWindowManager.overridePendingAppTransitionScaleUp(
+                            pendingOptions.getStartX(), pendingOptions.getStartY(),
+                            pendingOptions.getStartWidth(), pendingOptions.getStartHeight());
+                    break;
                 case ActivityOptions.ANIM_THUMBNAIL:
                     service.mWindowManager.overridePendingAppTransitionThumb(
                             pendingOptions.getThumbnail(),

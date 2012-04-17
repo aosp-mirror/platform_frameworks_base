@@ -73,6 +73,18 @@ public class ActivityOptions {
     public static final String KEY_ANIM_START_Y = "android:animStartY";
 
     /**
+     * Initial width of the animation.
+     * @hide
+     */
+    public static final String KEY_ANIM_START_WIDTH = "android:animStartWidth";
+
+    /**
+     * Initial height of the animation.
+     * @hide
+     */
+    public static final String KEY_ANIM_START_HEIGHT = "android:animStartHeight";
+
+    /**
      * Callback for when animation is started.
      * @hide
      */
@@ -83,7 +95,9 @@ public class ActivityOptions {
     /** @hide */
     public static final int ANIM_CUSTOM = 1;
     /** @hide */
-    public static final int ANIM_THUMBNAIL = 2;
+    public static final int ANIM_SCALE_UP = 2;
+    /** @hide */
+    public static final int ANIM_THUMBNAIL = 3;
 
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
@@ -92,6 +106,8 @@ public class ActivityOptions {
     private Bitmap mThumbnail;
     private int mStartX;
     private int mStartY;
+    private int mStartWidth;
+    private int mStartHeight;
     private IRemoteCallback mAnimationStartedListener;
 
     /**
@@ -127,6 +143,34 @@ public class ActivityOptions {
     }
 
     /**
+     * Create an ActivityOptions specifying an animation where the new
+     * activity is scaled from a small originating area of the screen to
+     * its final full representation.
+     *
+     * @param source The View that the new activity is animating from.  This
+     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
+     * @param startX The x starting location of the new activity, relative to <var>source</var>.
+     * @param startY The y starting location of the activity, relative to <var>source</var>.
+     * @param startWidth The initial width of the new activity.
+     * @param startWidth The initial height of the new activity.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     */
+    public static ActivityOptions makeScaleUpAnimation(View source,
+            int startX, int startY, int startWidth, int startHeight) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mPackageName = source.getContext().getPackageName();
+        opts.mAnimationType = ANIM_SCALE_UP;
+        int[] pts = new int[2];
+        source.getLocationOnScreen(pts);
+        opts.mStartX = pts[0] + startX;
+        opts.mStartY = pts[1] + startY;
+        opts.mStartWidth = startWidth;
+        opts.mStartHeight = startHeight;
+        return opts;
+    }
+
+    /**
      * Create an ActivityOptions specifying an animation where a thumbnail
      * is scaled from a given position to the new activity window that is
      * being started.
@@ -135,8 +179,8 @@ public class ActivityOptions {
      * defines the coordinate space for <var>startX</var> and <var>startY</var>.
      * @param thumbnail The bitmap that will be shown as the initial thumbnail
      * of the animation.
-     * @param startX The x starting location of the bitmap, in screen coordiantes.
-     * @param startY The y starting location of the bitmap, in screen coordinates.
+     * @param startX The x starting location of the bitmap, relative to <var>source</var>.
+     * @param startY The y starting location of the bitmap, relative to <var>source</var>.
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
      */
@@ -154,8 +198,8 @@ public class ActivityOptions {
      * defines the coordinate space for <var>startX</var> and <var>startY</var>.
      * @param thumbnail The bitmap that will be shown as the initial thumbnail
      * of the animation.
-     * @param startX The x starting location of the bitmap, in screen coordiantes.
-     * @param startY The y starting location of the bitmap, in screen coordinates.
+     * @param startX The x starting location of the bitmap, relative to <var>source</var>.
+     * @param startY The y starting location of the bitmap, relative to <var>source</var>.
      * @param listener Optional OnAnimationStartedListener to find out when the
      * requested animation has started running.  If for some reason the animation
      * is not executed, the callback will happen immediately.
@@ -199,6 +243,11 @@ public class ActivityOptions {
         if (mAnimationType == ANIM_CUSTOM) {
             mCustomEnterResId = opts.getInt(KEY_ANIM_ENTER_RES_ID, 0);
             mCustomExitResId = opts.getInt(KEY_ANIM_EXIT_RES_ID, 0);
+        } else if (mAnimationType == ANIM_SCALE_UP) {
+            mStartX = opts.getInt(KEY_ANIM_START_X, 0);
+            mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
+            mStartWidth = opts.getInt(KEY_ANIM_START_WIDTH, 0);
+            mStartHeight = opts.getInt(KEY_ANIM_START_HEIGHT, 0);
         } else if (mAnimationType == ANIM_THUMBNAIL) {
             mThumbnail = (Bitmap)opts.getParcelable(KEY_ANIM_THUMBNAIL);
             mStartX = opts.getInt(KEY_ANIM_START_X, 0);
@@ -244,6 +293,16 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public int getStartWidth() {
+        return mStartWidth;
+    }
+
+    /** @hide */
+    public int getStartHeight() {
+        return mStartHeight;
+    }
+
+    /** @hide */
     public IRemoteCallback getOnAnimationStartListener() {
         return mAnimationStartedListener;
     }
@@ -281,6 +340,13 @@ public class ActivityOptions {
                 mThumbnail = null;
                 mAnimationStartedListener = null;
                 break;
+            case ANIM_SCALE_UP:
+                mAnimationType = otherOptions.mAnimationType;
+                mStartX = otherOptions.mStartX;
+                mStartY = otherOptions.mStartY;
+                mStartWidth = otherOptions.mStartWidth;
+                mStartHeight = otherOptions.mStartHeight;
+                break;
             case ANIM_THUMBNAIL:
                 mAnimationType = otherOptions.mAnimationType;
                 mThumbnail = otherOptions.mThumbnail;
@@ -316,6 +382,13 @@ public class ActivityOptions {
                 b.putInt(KEY_ANIM_ENTER_RES_ID, mCustomEnterResId);
                 b.putInt(KEY_ANIM_EXIT_RES_ID, mCustomExitResId);
                 break;
+            case ANIM_SCALE_UP:
+                b.putInt(KEY_ANIM_TYPE, mAnimationType);
+                b.putInt(KEY_ANIM_START_X, mStartX);
+                b.putInt(KEY_ANIM_START_Y, mStartY);
+                b.putInt(KEY_ANIM_START_WIDTH, mStartWidth);
+                b.putInt(KEY_ANIM_START_HEIGHT, mStartHeight);
+                break;
             case ANIM_THUMBNAIL:
                 b.putInt(KEY_ANIM_TYPE, mAnimationType);
                 b.putParcelable(KEY_ANIM_THUMBNAIL, mThumbnail);
@@ -323,6 +396,7 @@ public class ActivityOptions {
                 b.putInt(KEY_ANIM_START_Y, mStartY);
                 b.putIBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
                         != null ? mAnimationStartedListener.asBinder() : null);
+                break;
         }
         return b;
     }
