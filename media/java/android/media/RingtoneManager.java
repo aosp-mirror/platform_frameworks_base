@@ -393,13 +393,13 @@ public class RingtoneManager {
      * @return A {@link Uri} pointing to the ringtone.
      */
     public Uri getRingtoneUri(int position) {
-        final Cursor cursor = getCursor();
-        
-        if (!cursor.moveToPosition(position)) {
+        // use cursor directly instead of requerying it, which could easily
+        // cause position to shuffle.
+        if (mCursor == null || !mCursor.moveToPosition(position)) {
             return null;
         }
         
-        return getUriFromCursor(cursor);
+        return getUriFromCursor(mCursor);
     }
     
     private static Uri getUriFromCursor(Cursor cursor) {
