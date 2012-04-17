@@ -4245,6 +4245,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (w.mHasSurface && !w.mOrientationChanging) {
                         if (DEBUG_ORIENTATION) Slog.v(TAG, "set mOrientationChanging of " + w);
                         w.mOrientationChanging = true;
+                        mInnerFields.mOrientationChangeComplete = false;
                     }
                     unfrozeWindows = true;
                 }
@@ -5550,6 +5551,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (w.mHasSurface) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG, "Set mOrientationChanging of " + w);
                 w.mOrientationChanging = true;
+                mInnerFields.mOrientationChangeComplete = false;
             }
         }
         for (int i=mRotationWatchers.size()-1; i>=0; i--) {
@@ -7654,6 +7656,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.v(TAG,
                     "Changing surface while display frozen: " + w);
             w.mOrientationChanging = true;
+            mInnerFields.mOrientationChangeComplete = false;
             if (!mWindowsFreezingScreen) {
                 mWindowsFreezingScreen = true;
                 // XXX should probably keep timeout from
@@ -8022,7 +8025,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.v(TAG, "Resize reasons: "
                             + " contentInsetsChanged=" + w.mContentInsetsChanged
                             + " visibleInsetsChanged=" + w.mVisibleInsetsChanged
-                            + " surfaceResized=" + w.mWinAnimator.mSurfaceResized
+                            + " surfaceResized=" + winAnimator.mSurfaceResized
                             + " configChanged=" + configChanged);
                 }
 
@@ -8037,7 +8040,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (w.mOrientationChanging) {
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation start waiting for draw in "
-                            + w + ", surface " + w.mWinAnimator.mSurface);
+                            + w + ", surface " + winAnimator.mSurface);
                     winAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
                     if (w.mAppToken != null) {
                         w.mAppToken.allDrawn = false;
@@ -8045,15 +8048,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (!mResizingWindows.contains(w)) {
                     if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
-                            "Resizing window " + w + " to " + w.mWinAnimator.mSurfaceW
-                            + "x" + w.mWinAnimator.mSurfaceH);
+                            "Resizing window " + w + " to " + winAnimator.mSurfaceW
+                            + "x" + winAnimator.mSurfaceH);
                     mResizingWindows.add(w);
                 }
             } else if (w.mOrientationChanging) {
                 if (w.isDrawnLw()) {
                     if (DEBUG_ORIENTATION) Slog.v(TAG,
                             "Orientation not waiting for draw in "
-                            + w + ", surface " + w.mWinAnimator.mSurface);
+                            + w + ", surface " + winAnimator.mSurface);
                     w.mOrientationChanging = false;
                 }
             }
@@ -8125,7 +8128,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private final void performLayoutAndPlaceSurfacesLockedInner(
             boolean recoveringMemory) {
         if (DEBUG_WINDOW_TRACE) {
-            Slog.v(TAG, "performLayoutAndPlaceSurfacesLockedInner: entry");
+            Slog.v(TAG, "performLayoutAndPlaceSurfacesLockedInner: entry. Called by "
+                    + getCallers(3));
         }
         if (mDisplay == null) {
             Slog.i(TAG, "skipping performLayoutAndPlaceSurfacesLockedInner with no mDisplay");
@@ -8145,7 +8149,7 @@ public class WindowManagerService extends IWindowManager.Stub
             updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                     false /*updateInputWindows*/);
         }
-        
+
         // Initialize state of exiting tokens.
         for (i=mExitingTokens.size()-1; i>=0; i--) {
             mExitingTokens.get(i).hasVisible = false;
@@ -8174,7 +8178,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         try {
             int repeats = 0;
-            
+
             do {
                 repeats++;
                 if (repeats > 6) {
@@ -8234,7 +8238,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mInnerFields.mObscured = false;
             mInnerFields.mDimming = false;
             mInnerFields.mSyswin = false;
-            
+
             boolean focusDisplayed = false;
             final int N = mWindows.size();
             for (i=N-1; i>=0; i--) {
@@ -8258,7 +8262,52 @@ public class WindowManagerService extends IWindowManager.Stub
                     // has been updated accordingly.
                     updateWallpaperVisibilityLocked();
                 }
+
+                final WindowStateAnimator winAnimator = w.mWinAnimator;
+
+                // If the window has moved due to its containing
+                // content frame changing, then we'd like to animate
+                // it.
+                if (w.mHasSurface && w.shouldAnimateMove()) {
+                    // Frame has moved, containing content frame
+                    // has also moved, and we're not currently animating...
+                    // let's do something.
+                    Animation a = AnimationUtils.loadAnimation(mContext,
+                            com.android.internal.R.anim.window_move_from_decor);
+                    winAnimator.setAnimation(a);
+                    winAnimator.mAnimDw = w.mLastFrame.left - w.mFrame.left;
+                    winAnimator.mAnimDh = w.mLastFrame.top - w.mFrame.top;
+                } else {
+                    winAnimator.mAnimDw = innerDw;
+                    winAnimator.mAnimDh = innerDh;
+                }
+
+                //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
+                w.mContentChanged = false;
+
+                // Moved from updateWindowsAndWallpaperLocked().
+                if (w.mHasSurface) {
+                    // Take care of the window being ready to display.
+                    if (winAnimator.commitFinishDrawingLocked(currentTime)) {
+                        if ((w.mAttrs.flags
+                                & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
+                            if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
+                                    "First draw done in potential wallpaper target " + w);
+                            mInnerFields.mWallpaperMayChange = true;
+                            mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+                            if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
+                                debugLayoutRepeats("updateWindowsAndWallpaperLocked 1",
+                                    mPendingLayoutChanges);
+                            }
+                        }
+                    }
+
+                    winAnimator.setSurfaceBoundaries(recoveringMemory);
+                }
+
+                updateResizingWindows(w);
             }
+
             if (focusDisplayed) {
                 mH.sendEmptyMessage(H.REPORT_LOSING_FOCUS);
             }
@@ -8340,68 +8389,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_LAYOUT_REPEATS) debugLayoutRepeats("mLayoutNeeded", mPendingLayoutChanges);
         }
 
-        final int N = mWindows.size();
-        for (i=N-1; i>=0; i--) {
-            final WindowState w = mWindows.get(i);
-            final WindowStateAnimator winAnimator = w.mWinAnimator; 
-            
-            // If the window has moved due to its containing
-            // content frame changing, then we'd like to animate
-            // it.
-            if (w.mHasSurface && w.shouldAnimateMove()) {
-                // Frame has moved, containing content frame
-                // has also moved, and we're not currently animating...
-                // let's do something.
-                Animation a = AnimationUtils.loadAnimation(mContext,
-                        com.android.internal.R.anim.window_move_from_decor);
-                winAnimator.setAnimation(a);
-                winAnimator.mAnimDw = w.mLastFrame.left - w.mFrame.left;
-                winAnimator.mAnimDh = w.mLastFrame.top - w.mFrame.top;
-            } else {
-                winAnimator.mAnimDw = innerDw;
-                winAnimator.mAnimDh = innerDh;
-            }
-
-            //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
-            w.mContentChanged = false;
-            
-            // TODO(cmautner): Can this move up to the loop at the end of try/catch above?
-            updateResizingWindows(w);
-
-            // Moved from updateWindowsAndWallpaperLocked().
-            if (w.mHasSurface) {
-                // Take care of the window being ready to display.
-                if (winAnimator.commitFinishDrawingLocked(currentTime)) {
-                    if ((w.mAttrs.flags
-                            & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
-                        if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
-                                "First draw done in potential wallpaper target " + w);
-                        mInnerFields.mWallpaperMayChange = true;
-                        mPendingLayoutChanges |= WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            debugLayoutRepeats("updateWindowsAndWallpaperLocked 1",
-                                mPendingLayoutChanges);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (DEBUG_ORIENTATION && mDisplayFrozen) Slog.v(TAG,
-                "With display frozen, orientationChangeComplete="
-                + mInnerFields.mOrientationChangeComplete);
-        if (mInnerFields.mOrientationChangeComplete) {
-            if (mWindowsFreezingScreen) {
-                mWindowsFreezingScreen = false;
-                mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-            }
-            stopFreezingDisplayLocked();
-        }
-
         if (!mResizingWindows.isEmpty()) {
             for (i = mResizingWindows.size() - 1; i >= 0; i--) {
                 WindowState win = mResizingWindows.get(i);
-                final WindowStateAnimator winAnimator = win.mWinAnimator; 
+                final WindowStateAnimator winAnimator = win.mWinAnimator;
                 try {
                     if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
                             "Reporting new frame to " + win + ": " + win.mCompatFrame);
@@ -8420,7 +8411,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.mConfiguration = mCurConfiguration;
                     if (DEBUG_ORIENTATION &&
                             winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
-                            TAG, "Resizing " + win + " WITH DRAW PENDING"); 
+                            TAG, "Resizing " + win + " WITH DRAW PENDING");
                     win.mClient.resized((int)winAnimator.mSurfaceW,
                             (int)winAnimator.mSurfaceH,
                             win.mLastContentInsets, win.mLastVisibleInsets,
@@ -8434,6 +8425,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             mResizingWindows.clear();
+        }
+
+        if (DEBUG_ORIENTATION && mDisplayFrozen) Slog.v(TAG,
+                "With display frozen, orientationChangeComplete="
+                + mInnerFields.mOrientationChangeComplete);
+        if (mInnerFields.mOrientationChangeComplete) {
+            if (mWindowsFreezingScreen) {
+                mWindowsFreezingScreen = false;
+                mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
+            }
+            stopFreezingDisplayLocked();
         }
 
         // Destroy the surface of any windows that are no longer visible.
