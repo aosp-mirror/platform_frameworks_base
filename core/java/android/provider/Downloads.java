@@ -329,6 +329,14 @@ public final class Downloads {
         public static final String COLUMN_IS_PUBLIC_API = "is_public_api";
 
         /**
+         * The name of the column holding a bitmask of allowed network types.  This is only used for
+         * public API downloads.
+         * <P>Type: INTEGER</P>
+         * <P>Owner can Init/Read</P>
+         */
+        public static final String COLUMN_ALLOWED_NETWORK_TYPES = "allowed_network_types";
+
+        /**
          * The name of the column indicating whether roaming connections can be used.  This is only
          * used for public API downloads.
          * <P>Type: BOOLEAN</P>
@@ -337,12 +345,12 @@ public final class Downloads {
         public static final String COLUMN_ALLOW_ROAMING = "allow_roaming";
 
         /**
-         * The name of the column holding a bitmask of allowed network types.  This is only used for
-         * public API downloads.
-         * <P>Type: INTEGER</P>
+         * The name of the column indicating whether metered connections can be used.  This is only
+         * used for public API downloads.
+         * <P>Type: BOOLEAN</P>
          * <P>Owner can Init/Read</P>
          */
-        public static final String COLUMN_ALLOWED_NETWORK_TYPES = "allowed_network_types";
+        public static final String COLUMN_ALLOW_METERED = "allow_metered";
 
         /**
          * Whether or not this download should be displayed in the system's Downloads UI.  Defaults
@@ -701,7 +709,10 @@ public final class Downloads {
          * blocked by {@link NetworkPolicyManager}.
          *
          * @hide
+         * @deprecated since behavior now uses
+         *             {@link #STATUS_WAITING_FOR_NETWORK}
          */
+        @Deprecated
         public static final int STATUS_BLOCKED = 498;
 
         /** {@hide} */

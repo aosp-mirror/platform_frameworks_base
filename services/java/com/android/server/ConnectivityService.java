@@ -865,27 +865,39 @@ private NetworkStateTracker makeWimaxStateTracker() {
     @Override
     public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
         enforceAccessPermission();
-        final NetworkState state = getNetworkStateUnchecked(mActiveDefaultNetwork);
-        if (state != null) {
-            try {
-                return mPolicyManager.getNetworkQuotaInfo(state);
-            } catch (RemoteException e) {
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final NetworkState state = getNetworkStateUnchecked(mActiveDefaultNetwork);
+            if (state != null) {
+                try {
+                    return mPolicyManager.getNetworkQuotaInfo(state);
+                } catch (RemoteException e) {
+                }
             }
+            return null;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        return null;
     }
 
     @Override
     public boolean isActiveNetworkMetered() {
         enforceAccessPermission();
-        final NetworkState state = getNetworkStateUnchecked(mActiveDefaultNetwork);
-        if (state != null) {
-            try {
-                return mPolicyManager.isNetworkMetered(state);
-            } catch (RemoteException e) {
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final NetworkState state = getNetworkStateUnchecked(mActiveDefaultNetwork);
+            if (state != null) {
+                try {
+                    return mPolicyManager.isNetworkMetered(state);
+                } catch (RemoteException e) {
+                }
             }
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        return false;
     }
 
     public boolean setRadios(boolean turnOn) {
