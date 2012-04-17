@@ -89,7 +89,8 @@ static bool validateFile(const char* filename) {
 
     case FILETYPE_KEYCHARACTERMAP: {
         sp<KeyCharacterMap> map;
-        status_t status = KeyCharacterMap::load(String8(filename), &map);
+        status_t status = KeyCharacterMap::load(String8(filename),
+                KeyCharacterMap::FORMAT_ANY, &map);
         if (status) {
             fprintf(stderr, "Error %d parsing key character map file.\n\n", status);
             return false;

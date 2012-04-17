@@ -89,6 +89,13 @@ KeyCharacterMap::KeyCharacterMap() :
     mType(KEYBOARD_TYPE_UNKNOWN) {
 }
 
+KeyCharacterMap::KeyCharacterMap(const KeyCharacterMap& other) :
+    RefBase(), mType(other.mType) {
+    for (size_t i = 0; i < other.mKeys.size(); i++) {
+        mKeys.add(other.mKeys.keyAt(i), new Key(*other.mKeys.valueAt(i)));
+    }
+}
+
 KeyCharacterMap::~KeyCharacterMap() {
     for (size_t i = 0; i < mKeys.size(); i++) {
         Key* key = mKeys.editValueAt(i);
@@ -96,7 +103,8 @@ KeyCharacterMap::~KeyCharacterMap() {
     }
 }
 
-status_t KeyCharacterMap::load(const String8& filename, sp<KeyCharacterMap>* outMap) {
+status_t KeyCharacterMap::load(const String8& filename,
+        Format format, sp<KeyCharacterMap>* outMap) {
     outMap->clear();
 
     Tokenizer* tokenizer;
@@ -104,29 +112,75 @@ status_t KeyCharacterMap::load(const String8& filename, sp<KeyCharacterMap>* out
     if (status) {
         ALOGE("Error %d opening key character map file %s.", status, filename.string());
     } else {
-        sp<KeyCharacterMap> map = new KeyCharacterMap();
-        if (!map.get()) {
-            ALOGE("Error allocating key character map.");
-            status = NO_MEMORY;
-        } else {
-#if DEBUG_PARSER_PERFORMANCE
-            nsecs_t startTime = systemTime(SYSTEM_TIME_MONOTONIC);
-#endif
-            Parser parser(map.get(), tokenizer);
-            status = parser.parse();
-#if DEBUG_PARSER_PERFORMANCE
-            nsecs_t elapsedTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
-            ALOGD("Parsed key character map file '%s' %d lines in %0.3fms.",
-                    tokenizer->getFilename().string(), tokenizer->getLineNumber(),
-                    elapsedTime / 1000000.0);
-#endif
-            if (!status) {
-                *outMap = map;
-            }
-        }
+        status = load(tokenizer, format, outMap);
         delete tokenizer;
     }
     return status;
+}
+
+status_t KeyCharacterMap::loadContents(const String8& filename, const char* contents,
+        Format format, sp<KeyCharacterMap>* outMap) {
+    outMap->clear();
+
+    Tokenizer* tokenizer;
+    status_t status = Tokenizer::fromContents(filename, contents, &tokenizer);
+    if (status) {
+        ALOGE("Error %d opening key character map.", status);
+    } else {
+        status = load(tokenizer, format, outMap);
+        delete tokenizer;
+    }
+    return status;
+}
+
+status_t KeyCharacterMap::load(Tokenizer* tokenizer,
+        Format format, sp<KeyCharacterMap>* outMap) {
+    status_t status = OK;
+    sp<KeyCharacterMap> map = new KeyCharacterMap();
+    if (!map.get()) {
+        ALOGE("Error allocating key character map.");
+        status = NO_MEMORY;
+    } else {
+#if DEBUG_PARSER_PERFORMANCE
+        nsecs_t startTime = systemTime(SYSTEM_TIME_MONOTONIC);
+#endif
+        Parser parser(map.get(), tokenizer, format);
+        status = parser.parse();
+#if DEBUG_PARSER_PERFORMANCE
+        nsecs_t elapsedTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
+        ALOGD("Parsed key character map file '%s' %d lines in %0.3fms.",
+                tokenizer->getFilename().string(), tokenizer->getLineNumber(),
+                elapsedTime / 1000000.0);
+#endif
+        if (!status) {
+            *outMap = map;
+        }
+    }
+    return status;
+}
+
+sp<KeyCharacterMap> KeyCharacterMap::combine(const sp<KeyCharacterMap>& base,
+        const sp<KeyCharacterMap>& overlay) {
+    if (overlay == NULL) {
+        return base;
+    }
+    if (base == NULL) {
+        return overlay;
+    }
+
+    sp<KeyCharacterMap> map = new KeyCharacterMap(*base.get());
+    for (size_t i = 0; i < overlay->mKeys.size(); i++) {
+        int32_t keyCode = overlay->mKeys.keyAt(i);
+        Key* key = overlay->mKeys.valueAt(i);
+        ssize_t oldIndex = map->mKeys.indexOfKey(keyCode);
+        if (oldIndex >= 0) {
+            delete map->mKeys.valueAt(oldIndex);
+            map->mKeys.editValueAt(oldIndex) = new Key(*key);
+        } else {
+            map->mKeys.add(keyCode, new Key(*key));
+        }
+    }
+    return map;
 }
 
 sp<KeyCharacterMap> KeyCharacterMap::empty() {
@@ -508,6 +562,11 @@ KeyCharacterMap::Key::Key() :
         label(0), number(0), firstBehavior(NULL) {
 }
 
+KeyCharacterMap::Key::Key(const Key& other) :
+        label(other.label), number(other.number),
+        firstBehavior(other.firstBehavior ? new Behavior(*other.firstBehavior) : NULL) {
+}
+
 KeyCharacterMap::Key::~Key() {
     Behavior* behavior = firstBehavior;
     while (behavior) {
@@ -524,11 +583,17 @@ KeyCharacterMap::Behavior::Behavior() :
         next(NULL), metaState(0), character(0), fallbackKeyCode(0) {
 }
 
+KeyCharacterMap::Behavior::Behavior(const Behavior& other) :
+        next(other.next ? new Behavior(*other.next) : NULL),
+        metaState(other.metaState), character(other.character),
+        fallbackKeyCode(other.fallbackKeyCode) {
+}
+
 
 // --- KeyCharacterMap::Parser ---
 
-KeyCharacterMap::Parser::Parser(KeyCharacterMap* map, Tokenizer* tokenizer) :
-        mMap(map), mTokenizer(tokenizer), mState(STATE_TOP) {
+KeyCharacterMap::Parser::Parser(KeyCharacterMap* map, Tokenizer* tokenizer, Format format) :
+        mMap(map), mTokenizer(tokenizer), mFormat(format), mState(STATE_TOP) {
 }
 
 KeyCharacterMap::Parser::~Parser() {
@@ -588,10 +653,24 @@ status_t KeyCharacterMap::Parser::parse() {
         return BAD_VALUE;
     }
 
-    if (mMap->mType == KEYBOARD_TYPE_UNKNOWN) {
-        ALOGE("%s: Missing required keyboard 'type' declaration.",
-                mTokenizer->getLocation().string());
-        return BAD_VALUE;
+    if (mFormat == FORMAT_BASE) {
+        if (mMap->mType == KEYBOARD_TYPE_UNKNOWN) {
+            ALOGE("%s: Base keyboard layout missing required keyboard 'type' declaration.",
+                    mTokenizer->getLocation().string());
+            return BAD_VALUE;
+        }
+        if (mMap->mType == KEYBOARD_TYPE_OVERLAY) {
+            ALOGE("%s: Base keyboard layout must specify a keyboard 'type' other than 'OVERLAY'.",
+                    mTokenizer->getLocation().string());
+            return BAD_VALUE;
+        }
+    } else if (mFormat == FORMAT_OVERLAY) {
+        if (mMap->mType != KEYBOARD_TYPE_OVERLAY) {
+            ALOGE("%s: Overlay keyboard layout missing required keyboard "
+                    "'type OVERLAY' declaration.",
+                    mTokenizer->getLocation().string());
+            return BAD_VALUE;
+        }
     }
 
     return NO_ERROR;
@@ -616,6 +695,8 @@ status_t KeyCharacterMap::Parser::parseType() {
         type = KEYBOARD_TYPE_FULL;
     } else if (typeToken == "SPECIAL_FUNCTION") {
         type = KEYBOARD_TYPE_SPECIAL_FUNCTION;
+    } else if (typeToken == "OVERLAY") {
+        type = KEYBOARD_TYPE_OVERLAY;
     } else {
         ALOGE("%s: Expected keyboard type label, got '%s'.", mTokenizer->getLocation().string(),
                 typeToken.string());

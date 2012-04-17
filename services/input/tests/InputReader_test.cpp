@@ -170,6 +170,10 @@ private:
     virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices) {
         mInputDevices = inputDevices;
     }
+
+    virtual sp<KeyCharacterMap> getKeyboardLayout(const String8& inputDeviceDescriptor) {
+        return NULL;
+    }
 };
 
 
@@ -644,6 +648,10 @@ private:
 
     virtual sp<KeyCharacterMap> getKeyCharacterMap(int32_t deviceId) const {
         return NULL;
+    }
+
+    virtual bool setKeyboardLayoutOverlay(int32_t deviceId, const sp<KeyCharacterMap>& map) {
+        return false;
     }
 
     virtual void vibrate(int32_t deviceId, nsecs_t duration) {

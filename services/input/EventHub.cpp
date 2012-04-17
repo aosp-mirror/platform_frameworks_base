@@ -531,9 +531,27 @@ sp<KeyCharacterMap> EventHub::getKeyCharacterMap(int32_t deviceId) const {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
     if (device) {
+        if (device->combinedKeyMap != NULL) {
+            return device->combinedKeyMap;
+        }
         return device->keyMap.keyCharacterMap;
     }
     return NULL;
+}
+
+bool EventHub::setKeyboardLayoutOverlay(int32_t deviceId,
+        const sp<KeyCharacterMap>& map) {
+    AutoMutex _l(mLock);
+    Device* device = getDeviceLocked(deviceId);
+    if (device) {
+        if (map != device->overlayKeyMap) {
+            device->overlayKeyMap = map;
+            device->combinedKeyMap = KeyCharacterMap::combine(
+                    device->keyMap.keyCharacterMap, map);
+            return true;
+        }
+    }
+    return false;
 }
 
 void EventHub::vibrate(int32_t deviceId, nsecs_t duration) {

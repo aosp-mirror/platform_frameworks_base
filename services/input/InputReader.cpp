@@ -962,6 +962,14 @@ void InputDevice::configure(nsecs_t when, const InputReaderConfiguration* config
             mContext->getEventHub()->getConfiguration(mId, &mConfiguration);
         }
 
+        if (!changes || (changes & InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS)) {
+            sp<KeyCharacterMap> keyboardLayout =
+                    mContext->getPolicy()->getKeyboardLayoutOverlay(mIdentifier.descriptor);
+            if (mContext->getEventHub()->setKeyboardLayoutOverlay(mId, keyboardLayout)) {
+                bumpGeneration();
+            }
+        }
+
         size_t numMappers = mMappers.size();
         for (size_t i = 0; i < numMappers; i++) {
             InputMapper* mapper = mMappers[i];
