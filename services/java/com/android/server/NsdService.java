@@ -167,6 +167,18 @@ public class NsdService extends INsdManager.Stub {
                                 NsdManager.ERROR);
                     }
                     break;
+                case NsdManager.UNREGISTER_SERVICE:
+                    if (DBG) Slog.d(TAG, "unregister service");
+                    clientInfo = mClients.get(msg.replyTo);
+                    int regId = msg.arg1;
+                    if (clientInfo.mRegisteredIds.remove(new Integer(regId)) &&
+                            unregisterService(regId)) {
+                        mReplyChannel.replyToMessage(msg, NsdManager.UNREGISTER_SERVICE_SUCCEEDED);
+                    } else {
+                        mReplyChannel.replyToMessage(msg, NsdManager.UNREGISTER_SERVICE_FAILED,
+                                NsdManager.ERROR);
+                    }
+                    break;
                 case NsdManager.UPDATE_SERVICE:
                     if (DBG) Slog.d(TAG, "Update service");
                     //TODO: implement
@@ -237,6 +249,8 @@ public class NsdService extends INsdManager.Stub {
     }
 
     public Messenger getMessenger() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INTERNET,
+            "NsdService");
         return new Messenger(mAsyncServiceHandler);
     }
 

@@ -12394,6 +12394,70 @@ package android.net.http {
 
 }
 
+package android.net.nsd {
+
+  public class DnsSdServiceInfo implements android.os.Parcelable {
+    ctor public DnsSdServiceInfo();
+    method public int describeContents();
+    method public java.net.InetAddress getHost();
+    method public int getPort();
+    method public java.lang.String getServiceName();
+    method public java.lang.String getServiceType();
+    method public void setHost(java.net.InetAddress);
+    method public void setPort(int);
+    method public void setServiceName(java.lang.String);
+    method public void setServiceType(java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public class NsdManager {
+    method public void deinitialize(android.net.nsd.NsdManager.Channel);
+    method public void discoverServices(android.net.nsd.NsdManager.Channel, java.lang.String, android.net.nsd.NsdManager.DnsSdDiscoveryListener);
+    method public void initialize(android.content.Context, android.os.Looper, android.net.nsd.NsdManager.ChannelListener);
+    method public void registerService(android.net.nsd.NsdManager.Channel, java.lang.String, java.lang.String, int, android.net.nsd.NsdManager.DnsSdRegisterListener);
+    method public void resolveService(android.net.nsd.NsdManager.Channel, java.lang.String, java.lang.String, android.net.nsd.NsdManager.DnsSdResolveListener);
+    method public void stopServiceDiscovery(android.net.nsd.NsdManager.Channel, android.net.nsd.NsdManager.ActionListener);
+    method public void unregisterService(android.net.nsd.NsdManager.Channel, int, android.net.nsd.NsdManager.ActionListener);
+    field public static final int ALREADY_ACTIVE = 3; // 0x3
+    field public static final int BUSY = 2; // 0x2
+    field public static final int ERROR = 0; // 0x0
+    field public static final int MAX_REGS_REACHED = 4; // 0x4
+    field public static final int UNSUPPORTED = 1; // 0x1
+  }
+
+  public static abstract interface NsdManager.ActionListener {
+    method public abstract void onFailure(int);
+    method public abstract void onSuccess();
+  }
+
+  public static class NsdManager.Channel {
+  }
+
+  public static abstract interface NsdManager.ChannelListener {
+    method public abstract void onChannelConnected(android.net.nsd.NsdManager.Channel);
+    method public abstract void onChannelDisconnected();
+  }
+
+  public static abstract interface NsdManager.DnsSdDiscoveryListener {
+    method public abstract void onFailure(int);
+    method public abstract void onServiceFound(android.net.nsd.DnsSdServiceInfo);
+    method public abstract void onServiceLost(android.net.nsd.DnsSdServiceInfo);
+    method public abstract void onStarted(java.lang.String);
+  }
+
+  public static abstract interface NsdManager.DnsSdRegisterListener {
+    method public abstract void onFailure(int);
+    method public abstract void onServiceRegistered(int, android.net.nsd.DnsSdServiceInfo);
+  }
+
+  public static abstract interface NsdManager.DnsSdResolveListener {
+    method public abstract void onFailure(int);
+    method public abstract void onServiceResolved(android.net.nsd.DnsSdServiceInfo);
+  }
+
+}
+
 package android.net.rtp {
 
   public class AudioCodec {
