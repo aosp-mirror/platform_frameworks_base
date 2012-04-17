@@ -1202,6 +1202,8 @@ public class WifiService extends IWifiManager.Stub {
         pw.println();
         pw.println("WifiWatchdogStateMachine dump");
         mWifiWatchdogStateMachine.dump(pw);
+        pw.println("WifiStateMachine dump");
+        mWifiStateMachine.dump(fd, pw, args);
     }
 
     private class WifiLock extends DeathRecipient {
