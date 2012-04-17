@@ -28,6 +28,10 @@ public abstract class Connection {
     public static int PRESENTATION_UNKNOWN = 3;    // no specified or unknown by network
     public static int PRESENTATION_PAYPHONE = 4;   // show pay phone info
 
+    //Caller Name Display
+    protected String cnapName;
+    protected int cnapNamePresentation  = PRESENTATION_ALLOWED;
+
     private static String LOG_TAG = "TelephonyConnection";
 
     public enum DisconnectCause {
@@ -84,11 +88,11 @@ public abstract class Connection {
     public abstract String getAddress();
 
     /**
-     * Gets CDMA CNAP name associated with connection.
+     * Gets CNAP name associated with connection.
      * @return cnap name or null if unavailable
      */
     public String getCnapName() {
-        return null;
+        return cnapName;
     }
 
     /**
@@ -100,12 +104,12 @@ public abstract class Connection {
     }
 
     /**
-     * Gets CDMA CNAP presentation associated with connection.
+     * Gets CNAP presentation associated with connection.
      * @return cnap name or null if unavailable
      */
 
     public int getCnapNamePresentation() {
-       return 0;
+       return cnapNamePresentation;
     };
 
     /**

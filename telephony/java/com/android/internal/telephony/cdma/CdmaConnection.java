@@ -50,7 +50,6 @@ public class CdmaConnection extends Connection {
     String postDialString;      // outgoing calls only
     boolean isIncoming;
     boolean disconnected;
-    String cnapName;
     int index;          // index in CdmaCallTracker.connections[], -1 if unassigned
 
     /*
@@ -76,7 +75,6 @@ public class CdmaConnection extends Connection {
     DisconnectCause cause = DisconnectCause.NOT_DISCONNECTED;
     PostDialState postDialState = PostDialState.NOT_STARTED;
     int numberPresentation = Connection.PRESENTATION_ALLOWED;
-    int cnapNamePresentation  = Connection.PRESENTATION_ALLOWED;
 
 
     Handler h;
@@ -227,14 +225,6 @@ public class CdmaConnection extends Connection {
 
     public String getAddress() {
         return address;
-    }
-
-    public String getCnapName() {
-        return cnapName;
-    }
-
-    public int getCnapNamePresentation() {
-        return cnapNamePresentation;
     }
 
     public CdmaCall getCall() {
