@@ -30,7 +30,7 @@ import java.util.Map;
  *
  * @hide
  */
-public class WifiP2pBonjourServiceResponse extends WifiP2pServiceResponse {
+public class WifiP2pDnsSdServiceResponse extends WifiP2pServiceResponse {
 
     /**
      * DNS query name.
@@ -46,27 +46,27 @@ public class WifiP2pBonjourServiceResponse extends WifiP2pServiceResponse {
      * Service instance name.
      * e.g) "MyPrinter"
      * This field is only used when the dns type equals to
-     * {@link WifiP2pBonjourServiceInfo#DNS_TYPE_PTR}.
+     * {@link WifiP2pDnsSdServiceInfo#DNS_TYPE_PTR}.
      */
     private String mInstanceName;
 
     /**
      * DNS Type.
-     * Should be {@link WifiP2pBonjourServiceInfo#DNS_TYPE_PTR} or
-     * {@link WifiP2pBonjourServiceInfo#DNS_TYPE_TXT}.
+     * Should be {@link WifiP2pDnsSdServiceInfo#DNS_TYPE_PTR} or
+     * {@link WifiP2pDnsSdServiceInfo#DNS_TYPE_TXT}.
      */
     private int mDnsType;
 
     /**
-     * Bonjour version number.
-     * Should be {@link WifiP2pBonjourServiceInfo#VERSION_1}.
+     * DnsSd version number.
+     * Should be {@link WifiP2pDnsSdServiceInfo#VERSION_1}.
      */
     private int mVersion;
 
     /**
      * Txt record.
      * This field is only used when the dns type equals to
-     * {@link WifiP2pBonjourServiceInfo#DNS_TYPE_TXT}.
+     * {@link WifiP2pDnsSdServiceInfo#DNS_TYPE_TXT}.
      */
     private DnsSdTxtRecord mTxtRecord;
 
@@ -128,7 +128,7 @@ public class WifiP2pBonjourServiceResponse extends WifiP2pServiceResponse {
     @Override
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
-        sbuf.append("serviceType:Bonjour(").append(mServiceType).append(")");
+        sbuf.append("serviceType:DnsSd(").append(mServiceType).append(")");
         sbuf.append(" status:").append(Status.toString(mStatus));
         sbuf.append(" srcAddr:").append(mDevice.deviceAddress);
         sbuf.append(" version:").append(String.format("%02x", mVersion));
@@ -149,7 +149,7 @@ public class WifiP2pBonjourServiceResponse extends WifiP2pServiceResponse {
      * @param data RDATA.
      * @hide
      */
-    protected WifiP2pBonjourServiceResponse(int status,
+    protected WifiP2pDnsSdServiceResponse(int status,
             int tranId, WifiP2pDevice dev, byte[] data) {
         super(WifiP2pServiceInfo.SERVICE_TYPE_BONJOUR,
                 status, tranId, dev, data);
@@ -159,7 +159,7 @@ public class WifiP2pBonjourServiceResponse extends WifiP2pServiceResponse {
     }
 
     /**
-     * Parse Bonjour service discovery response.
+     * Parse DnsSd service discovery response.
      *
      * @return {@code true} if the operation succeeded
      */
@@ -193,7 +193,7 @@ public class WifiP2pBonjourServiceResponse extends WifiP2pServiceResponse {
             return false;
         }
 
-        if (mDnsType == WifiP2pBonjourServiceInfo.DNS_TYPE_PTR) {
+        if (mDnsType == WifiP2pDnsSdServiceInfo.DNS_TYPE_PTR) {
             String rData = readDnsName(dis);
             if (rData == null) {
                 return false;
@@ -204,7 +204,7 @@ public class WifiP2pBonjourServiceResponse extends WifiP2pServiceResponse {
 
             mInstanceName = rData.substring(0,
                     rData.length() - mDnsQueryName.length() -1);
-        } else if (mDnsType == WifiP2pBonjourServiceInfo.DNS_TYPE_TXT) {
+        } else if (mDnsType == WifiP2pDnsSdServiceInfo.DNS_TYPE_TXT) {
             mTxtRecord = readTxtData(dis);
             if (mTxtRecord == null) {
                 return false;
@@ -287,23 +287,23 @@ public class WifiP2pBonjourServiceResponse extends WifiP2pServiceResponse {
     }
 
     /**
-     * Creates Bonjour service response.
+     * Creates DnsSd service response.
      *  This is only called from WifiP2pServiceResponse
      *
      * @param status status code.
      * @param dev source device.
-     * @param data Bonjour response data.
-     * @return Bonjour service response data.
+     * @param data DnsSd response data.
+     * @return DnsSd service response data.
      * @hide
      */
-    static WifiP2pBonjourServiceResponse newInstance(int status,
+    static WifiP2pDnsSdServiceResponse newInstance(int status,
             int transId, WifiP2pDevice dev, byte[] data) {
         if (status != WifiP2pServiceResponse.Status.SUCCESS) {
-            return new WifiP2pBonjourServiceResponse(status,
+            return new WifiP2pDnsSdServiceResponse(status,
                     transId, dev, null);
         }
         try {
-            return new WifiP2pBonjourServiceResponse(status,
+            return new WifiP2pDnsSdServiceResponse(status,
                     transId, dev, data);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();

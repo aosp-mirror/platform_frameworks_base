@@ -16,9 +16,15 @@
 
 package android.net.wifi.p2p.nsd;
 
+import android.net.wifi.p2p.WifiP2pManager;
+
 /**
- * The class for a request of upnp service discovery.
- * @hide
+ * A class for creating a Upnp service discovery request for use with
+ * {@link WifiP2pManager#addServiceRequest} and {@link WifiP2pManager#removeServiceRequest}
+ *
+ * {@see WifiP2pManager}
+ * {@see WifiP2pServiceRequest}
+ * {@see WifiP2pDnsSdServiceRequest}
  */
 public class WifiP2pUpnpServiceRequest extends WifiP2pServiceRequest {
 

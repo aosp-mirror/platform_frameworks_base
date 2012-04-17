@@ -23,13 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The class for service information.
- *
- * <p>Currently UPnP and Bonjour are only supported.
+ * A class for storing service information that is advertised
+ * over a Wi-Fi peer-to-peer setup
  *
  * @see WifiP2pUpnpServiceInfo
- * @see WifiP2pBonjourServiceInfo
- * @hide
+ * @see WifiP2pDnsSdServiceInfo
  */
 public class WifiP2pServiceInfo implements Parcelable {
 
@@ -39,7 +37,7 @@ public class WifiP2pServiceInfo implements Parcelable {
     public static final int SERVICE_TYPE_ALL             = 0;
 
     /**
-     * Bonjour protocol.
+     * DNS based service discovery protocol.
      */
     public static final int SERVICE_TYPE_BONJOUR         = 1;
 
@@ -50,6 +48,7 @@ public class WifiP2pServiceInfo implements Parcelable {
 
     /**
      * WS-Discovery protocol
+     * @hide
      */
     public static final int SERVICE_TYPE_WS_DISCOVERY    = 3;
 

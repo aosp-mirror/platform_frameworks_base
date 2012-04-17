@@ -12458,6 +12458,26 @@ package android.net.nsd {
 
 }
 
+package android.net.nsd {
+
+  public class DnsSdTxtRecord implements android.os.Parcelable {
+    ctor public DnsSdTxtRecord();
+    ctor public DnsSdTxtRecord(byte[]);
+    ctor public DnsSdTxtRecord(android.net.nsd.DnsSdTxtRecord);
+    method public boolean contains(java.lang.String);
+    method public int describeContents();
+    method public java.lang.String get(java.lang.String);
+    method public byte[] getRawData();
+    method public int keyCount();
+    method public int remove(java.lang.String);
+    method public void set(java.lang.String, java.lang.String);
+    method public int size();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+}
+
 package android.net.rtp {
 
   public class AudioCodec {
@@ -12964,15 +12984,26 @@ package android.net.wifi.p2p {
   }
 
   public class WifiP2pManager {
+    method public void addLocalService(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.nsd.WifiP2pServiceInfo, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void addServiceRequest(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.nsd.WifiP2pServiceRequest, android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method public void cancelConnect(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void clearLocalServices(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void clearServiceRequests(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method public void connect(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pConfig, android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method public void createGroup(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method public void discoverPeers(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void discoverServices(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method public android.net.wifi.p2p.WifiP2pManager.Channel initialize(android.content.Context, android.os.Looper, android.net.wifi.p2p.WifiP2pManager.ChannelListener);
     method public void removeGroup(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void removeLocalService(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.nsd.WifiP2pServiceInfo, android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method public void removeServiceRequest(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.nsd.WifiP2pServiceRequest, android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method public void requestConnectionInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener);
     method public void requestGroupInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.GroupInfoListener);
     method public void requestPeers(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.PeerListListener);
+    method public void setDnsSdResponseListeners(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener, android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener);
+    method public void setServiceResponseListener(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ServiceResponseListener);
+    method public void setUpnpServiceResponseListener(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.UpnpServiceResponseListener);
+    method public void stopPeerDiscovery(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
     field public static final int BUSY = 2; // 0x2
     field public static final int ERROR = 0; // 0x0
     field public static final java.lang.String EXTRA_DISCOVERY_STATE = "discoveryState";
@@ -13008,12 +13039,67 @@ package android.net.wifi.p2p {
     method public abstract void onConnectionInfoAvailable(android.net.wifi.p2p.WifiP2pInfo);
   }
 
+  public static abstract interface WifiP2pManager.DnsSdServiceResponseListener {
+    method public abstract void onDnsSdServiceAvailable(java.lang.String, java.lang.String, android.net.wifi.p2p.WifiP2pDevice);
+  }
+
+  public static abstract interface WifiP2pManager.DnsSdTxtRecordListener {
+    method public abstract void onDnsSdTxtRecordAvailable(java.lang.String, android.net.nsd.DnsSdTxtRecord, android.net.wifi.p2p.WifiP2pDevice);
+  }
+
   public static abstract interface WifiP2pManager.GroupInfoListener {
     method public abstract void onGroupInfoAvailable(android.net.wifi.p2p.WifiP2pGroup);
   }
 
   public static abstract interface WifiP2pManager.PeerListListener {
     method public abstract void onPeersAvailable(android.net.wifi.p2p.WifiP2pDeviceList);
+  }
+
+  public static abstract interface WifiP2pManager.ServiceResponseListener {
+    method public abstract void onServiceAvailable(int, byte[], android.net.wifi.p2p.WifiP2pDevice);
+  }
+
+  public static abstract interface WifiP2pManager.UpnpServiceResponseListener {
+    method public abstract void onUpnpServiceAvailable(java.util.List<java.lang.String>, android.net.wifi.p2p.WifiP2pDevice);
+  }
+
+}
+
+package android.net.wifi.p2p.nsd {
+
+  public class WifiP2pDnsSdServiceInfo extends android.net.wifi.p2p.nsd.WifiP2pServiceInfo {
+    method public static android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo newInstance(java.lang.String, java.lang.String, android.net.nsd.DnsSdTxtRecord);
+  }
+
+  public class WifiP2pDnsSdServiceRequest extends android.net.wifi.p2p.nsd.WifiP2pServiceRequest {
+    method public static android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest newInstance();
+    method public static android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest newInstance(java.lang.String);
+    method public static android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest newInstance(java.lang.String, java.lang.String);
+  }
+
+  public class WifiP2pServiceInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int SERVICE_TYPE_ALL = 0; // 0x0
+    field public static final int SERVICE_TYPE_BONJOUR = 1; // 0x1
+    field public static final int SERVICE_TYPE_UPNP = 2; // 0x2
+    field public static final int SERVICE_TYPE_VENDOR_SPECIFIC = 255; // 0xff
+  }
+
+  public class WifiP2pServiceRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public static android.net.wifi.p2p.nsd.WifiP2pServiceRequest newInstance(int, java.lang.String);
+    method public static android.net.wifi.p2p.nsd.WifiP2pServiceRequest newInstance(int);
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
+  public class WifiP2pUpnpServiceInfo extends android.net.wifi.p2p.nsd.WifiP2pServiceInfo {
+    method public static android.net.wifi.p2p.nsd.WifiP2pUpnpServiceInfo newInstance(java.lang.String, java.lang.String, java.util.List<java.lang.String>);
+  }
+
+  public class WifiP2pUpnpServiceRequest extends android.net.wifi.p2p.nsd.WifiP2pServiceRequest {
+    method public static android.net.wifi.p2p.nsd.WifiP2pUpnpServiceRequest newInstance();
+    method public static android.net.wifi.p2p.nsd.WifiP2pUpnpServiceRequest newInstance(java.lang.String);
   }
 
 }

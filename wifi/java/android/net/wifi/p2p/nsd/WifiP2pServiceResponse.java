@@ -246,7 +246,7 @@ public class WifiP2pServiceResponse implements Parcelable {
 
                 WifiP2pServiceResponse resp;
                 if (type ==  WifiP2pServiceInfo.SERVICE_TYPE_BONJOUR) {
-                    resp = WifiP2pBonjourServiceResponse.newInstance(status,
+                    resp = WifiP2pDnsSdServiceResponse.newInstance(status,
                             transId, dev, data);
                 } else if (type == WifiP2pServiceInfo.SERVICE_TYPE_UPNP) {
                     resp = WifiP2pUpnpServiceResponse.newInstance(status,
@@ -373,7 +373,7 @@ public class WifiP2pServiceResponse implements Parcelable {
                     in.readByteArray(data);
                 }
                 if (type ==  WifiP2pServiceInfo.SERVICE_TYPE_BONJOUR) {
-                    return WifiP2pBonjourServiceResponse.newInstance(status,
+                    return WifiP2pDnsSdServiceResponse.newInstance(status,
                             transId, dev, data);
                 } else if (type == WifiP2pServiceInfo.SERVICE_TYPE_UPNP) {
                     return WifiP2pUpnpServiceResponse.newInstance(status,

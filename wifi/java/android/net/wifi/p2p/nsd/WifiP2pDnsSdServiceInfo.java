@@ -25,10 +25,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A class for Bonjour service information.
- * @hide
+ * A class for storing Bonjour service information that is advertised
+ * over a Wi-Fi peer-to-peer setup.
+ *
+ * {@see android.net.wifi.p2p.WifiP2pManager#addLocalService}
+ * {@see android.net.wifi.p2p.WifiP2pManager#removeLocalService}
+ * {@see WifiP2pServiceInfo}
+ * {@see WifiP2pUpnpServiceInfo}
  */
-public class WifiP2pBonjourServiceInfo extends WifiP2pServiceInfo {
+public class WifiP2pDnsSdServiceInfo extends WifiP2pServiceInfo {
 
     /**
      * Bonjour version 1.
@@ -67,25 +72,26 @@ public class WifiP2pBonjourServiceInfo extends WifiP2pServiceInfo {
      *
      * @param queryList
      */
-    private WifiP2pBonjourServiceInfo(List<String> queryList) {
+    private WifiP2pDnsSdServiceInfo(List<String> queryList) {
         super(queryList);
     }
 
     /**
-     * Create Bonjour service information object.
+     * Create a Bonjour service information object.
      *
      * @param instanceName instance name.<br>
      *  e.g) "MyPrinter"
-     * @param registrationType registration type.<br>
-     *  e.g) "_ipp._tcp.local."
-     * @param txtRecord text record.
+     * @param serviceType service type.<br>
+     *  e.g) "_ipp._tcp"
+     * @param txtRecord TXT record as defined at
+     * http://files.dns-sd.org/draft-cheshire-dnsext-dns-sd.txt
      * @return Bonjour service information object
      */
-    public static WifiP2pBonjourServiceInfo newInstance(String instanceName,
-            String registrationType, DnsSdTxtRecord txtRecord) {
-        if (TextUtils.isEmpty(instanceName) || TextUtils.isEmpty(registrationType)) {
+    public static WifiP2pDnsSdServiceInfo newInstance(String instanceName,
+            String serviceType, DnsSdTxtRecord txtRecord) {
+        if (TextUtils.isEmpty(instanceName) || TextUtils.isEmpty(serviceType)) {
             throw new IllegalArgumentException(
-                    "instance name or registration type cannot be empty");
+                    "instance name or service type cannot be empty");
         }
 
         if (txtRecord == null) {
@@ -93,10 +99,10 @@ public class WifiP2pBonjourServiceInfo extends WifiP2pServiceInfo {
         }
 
         ArrayList<String> queries = new ArrayList<String>();
-        queries.add(createPtrServiceQuery(instanceName, registrationType));
-        queries.add(createTxtServiceQuery(instanceName, registrationType, txtRecord));
+        queries.add(createPtrServiceQuery(instanceName, serviceType));
+        queries.add(createTxtServiceQuery(instanceName, serviceType, txtRecord));
 
-        return new WifiP2pBonjourServiceInfo(queries);
+        return new WifiP2pDnsSdServiceInfo(queries);
     }
 
     /**
@@ -104,16 +110,16 @@ public class WifiP2pBonjourServiceInfo extends WifiP2pServiceInfo {
      *
      * @param instanceName instance name.<br>
      *  e.g) "MyPrinter"
-     * @param registrationType registration type.<br>
-     *  e.g) "_ipp._tcp.local."
+     * @param serviceType service type.<br>
+     *  e.g) "_ipp._tcp"
      * @return wpa_supplicant service query.
      */
     private static String createPtrServiceQuery(String instanceName,
-            String registrationType) {
+            String serviceType) {
 
         StringBuffer sb = new StringBuffer();
         sb.append("bonjour ");
-        sb.append(createRequest(registrationType, DNS_TYPE_PTR, VERSION_1));
+        sb.append(createRequest(serviceType + ".local.", DNS_TYPE_PTR, VERSION_1));
         sb.append(" ");
 
         byte[] data = instanceName.getBytes();
@@ -130,20 +136,20 @@ public class WifiP2pBonjourServiceInfo extends WifiP2pServiceInfo {
      *
      * @param instanceName instance name.<br>
      *  e.g) "MyPrinter"
-     * @param registrationType registration type.<br>
-     *  e.g) "_ipp._tcp.local."
+     * @param serviceType service type.<br>
+     *  e.g) "_ipp._tcp"
      * @param txtRecord TXT record.<br>
      * @return wpa_supplicant service query.
      */
-    public static String createTxtServiceQuery(String instanceName,
-            String registrationType,
+    private static String createTxtServiceQuery(String instanceName,
+            String serviceType,
             DnsSdTxtRecord txtRecord) {
 
 
         StringBuffer sb = new StringBuffer();
         sb.append("bonjour ");
 
-        sb.append(createRequest((instanceName + "." + registrationType),
+        sb.append(createRequest((instanceName + "." + serviceType + ".local."),
                 DNS_TYPE_TXT, VERSION_1));
         sb.append(" ");
         byte[] rawData = txtRecord.getRawData();
@@ -173,7 +179,7 @@ public class WifiP2pBonjourServiceInfo extends WifiP2pServiceInfo {
          * ________________________________________________
          * |   Type (2)           | Version (1) |
          */
-        if (dnsType == WifiP2pBonjourServiceInfo.DNS_TYPE_TXT) {
+        if (dnsType == WifiP2pDnsSdServiceInfo.DNS_TYPE_TXT) {
             dnsName = dnsName.toLowerCase();
         }
         sb.append(compressDnsName(dnsName));
