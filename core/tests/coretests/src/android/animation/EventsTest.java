@@ -173,8 +173,7 @@ public abstract class EventsTest
                 // This should only be called on an animation that has been started and not
                 // yet canceled or ended
                 assertFalse(mCanceled);
-                assertTrue(mRunning);
-                assertTrue(mStarted);
+                assertTrue(mRunning || mStarted);
                 mCanceled = true;
             }
 
@@ -182,8 +181,7 @@ public abstract class EventsTest
             public void onAnimationEnd(Animator animation) {
                 // This should only be called on an animation that has been started and not
                 // yet ended
-                assertTrue(mRunning);
-                assertTrue(mStarted);
+                assertTrue(mRunning || mStarted);
                 mRunning = false;
                 mStarted = false;
                 super.onAnimationEnd(animation);
@@ -210,11 +208,12 @@ public abstract class EventsTest
     }
 
     /**
-     * Verify that calling end on an unstarted animator does nothing.
+     * Verify that calling end on an unstarted animator starts/ends an animator.
      */
     @UiThreadTest
     @SmallTest
     public void testEnd() throws Exception {
+        mRunning = true; // end() implicitly starts an unstarted animator
         mAnimator.end();
     }
 
@@ -496,6 +495,7 @@ public abstract class EventsTest
                     mRunning = true;
                     mAnimator.start();
                     mAnimator.end();
+                    mRunning = true; // end() implicitly starts an unstarted animator
                     mAnimator.end();
                     mFuture.release();
                 } catch (junit.framework.AssertionFailedError e) {
@@ -544,6 +544,7 @@ public abstract class EventsTest
                     mRunning = true;
                     mAnimator.start();
                     mAnimator.end();
+                    mRunning = true; // end() implicitly starts an unstarted animator
                     mAnimator.end();
                     mFuture.release();
                 } catch (junit.framework.AssertionFailedError e) {
