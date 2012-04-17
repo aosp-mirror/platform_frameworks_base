@@ -499,6 +499,14 @@ class WindowStateAnimator {
             sSurfaces.remove(this);
         }
 
+        @Override
+        public void release() {
+            super.release();
+            Slog.v(SURFACE_TAG, "release: " + this + ". Called by "
+                    + WindowManagerService.getCallers(3));
+            sSurfaces.remove(this);
+        }
+
         static void dumpAllSurfaces() {
             final int N = sSurfaces.size();
             for (int i = 0; i < N; i++) {
@@ -886,22 +894,8 @@ class WindowStateAnimator {
         mDtDy = mWin.mGlobalScale;
     }
 
-    public void prepareSurfaceLocked(final boolean recoveringMemory) {
+    void setSurfaceBoundaries(final boolean recoveringMemory) {
         final WindowState w = mWin;
-        if (mSurface == null) {
-            if (w.mOrientationChanging) {
-                if (DEBUG_ORIENTATION) {
-                    Slog.v(TAG, "Orientation change skips hidden " + w);
-                }
-                w.mOrientationChanging = false;
-            }
-            return;
-        }
-
-        boolean displayed = false;
-
-        computeShownFrameLocked();
-
         int width, height;
         if ((w.mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
             // for a scaled surface, we just want to use
@@ -950,6 +944,8 @@ class WindowStateAnimator {
                         "SIZE " + width + "x" + height, null);
                 mSurfaceResized = true;
                 mSurface.setSize(width, height);
+                mAnimator.mPendingLayoutChanges |=
+                        WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
             } catch (RuntimeException e) {
                 // If something goes wrong with the surface (such
                 // as running out of memory), don't take down the
@@ -961,6 +957,25 @@ class WindowStateAnimator {
                 }
             }
         }
+    }
+
+    public void prepareSurfaceLocked(final boolean recoveringMemory) {
+        final WindowState w = mWin;
+        if (mSurface == null) {
+            if (w.mOrientationChanging) {
+                if (DEBUG_ORIENTATION) {
+                    Slog.v(TAG, "Orientation change skips hidden " + w);
+                }
+                w.mOrientationChanging = false;
+            }
+            return;
+        }
+
+        boolean displayed = false;
+
+        computeShownFrameLocked();
+
+        setSurfaceBoundaries(recoveringMemory);
 
         if (w.mAttachedHidden || !w.isReadyForDisplay()) {
             if (!mLastHidden) {
