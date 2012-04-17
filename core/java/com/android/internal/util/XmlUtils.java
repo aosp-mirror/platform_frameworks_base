@@ -888,4 +888,19 @@ public class XmlUtils
             ;
         }
     }
+
+    public static boolean nextElementWithin(XmlPullParser parser, int outerDepth)
+            throws IOException, XmlPullParserException {
+        for (;;) {
+            int type = parser.next();
+            if (type == XmlPullParser.END_DOCUMENT
+                    || (type == XmlPullParser.END_TAG && parser.getDepth() == outerDepth)) {
+                return false;
+            }
+            if (type == XmlPullParser.START_TAG
+                    && parser.getDepth() == outerDepth + 1) {
+                return true;
+            }
+        }
+    }
 }
