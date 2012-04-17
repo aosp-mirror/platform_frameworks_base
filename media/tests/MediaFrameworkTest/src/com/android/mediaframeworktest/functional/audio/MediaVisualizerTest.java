@@ -188,6 +188,37 @@ public class MediaVisualizerTest extends ActivityInstrumentationTestCase2<MediaF
         assertTrue(msg, result);
     }
 
+    //Test case 1.2: check scaling mode
+    @LargeTest
+    public void test1_2ScalingMode() throws Exception {
+        boolean result = false;
+        String msg = "test1_2ScalingMode()";
+        getVisualizer(0);
+        try {
+            int res = mVisualizer.setScalingMode(Visualizer.SCALING_MODE_AS_PLAYED);
+            assertEquals(msg + ": setting SCALING_MODE_AS_PLAYED failed",
+                    res, Visualizer.SUCCESS);
+            int mode = mVisualizer.getScalingMode();
+            assertEquals(msg + ": setting SCALING_MODE_AS_PLAYED didn't stick",
+                    mode, Visualizer.SCALING_MODE_AS_PLAYED);
+
+            res = mVisualizer.setScalingMode(Visualizer.SCALING_MODE_NORMALIZED);
+            assertEquals(msg + ": setting SCALING_MODE_NORMALIZED failed",
+                    res, Visualizer.SUCCESS);
+            mode = mVisualizer.getScalingMode();
+            assertEquals(msg + ": setting SCALING_MODE_NORMALIZED didn't stick",
+                    mode, Visualizer.SCALING_MODE_NORMALIZED);
+
+            result = true;
+        } catch (IllegalStateException e) {
+            msg = msg.concat("IllegalStateException");
+            loge(msg, "set/get parameter() called in wrong state: " + e);
+        } finally {
+            releaseVisualizer();
+        }
+        assertTrue(msg, result);
+    }
+
     //-----------------------------------------------------------------
     // 2 - check capture
     //----------------------------------
@@ -398,6 +429,91 @@ public class MediaVisualizerTest extends ActivityInstrumentationTestCase2<MediaF
                 vc.release();
             }
             am.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+            am.setRingerMode(ringerMode);
+        }
+        assertTrue(msg, result);
+    }
+
+    //Test case 2.2: test capture in polling mode with volume scaling
+    @LargeTest
+    public void test2_2PollingCaptureVolumeScaling() throws Exception {
+        // test that when playing a sound, the energy measured with Visualizer in
+        //   SCALING_MODE_AS_PLAYED mode decreases when lowering the volume
+        boolean result = false;
+        String msg = "test2_2PollingCaptureVolumeScaling()";
+        AudioEffect vc = null;
+        MediaPlayer mp = null;
+        AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+        int ringerMode = am.getRingerMode();
+        am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+        final int volMax = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, volMax, 0);
+
+        try {
+            // test setup not related to tested functionality:
+            // creating a volume controller on output mix ensures that ro.audio.silent mutes
+            // audio after the effects and not before
+            vc = new AudioEffect(
+                                AudioEffect.EFFECT_TYPE_NULL,
+                                VOLUME_EFFECT_UUID,
+                                0,
+                                0);
+            vc.setEnabled(true);
+
+            mp = new MediaPlayer();
+            mp.setDataSource(MediaNames.SINE_200_1000);
+            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            getVisualizer(mp.getAudioSessionId());
+
+            // verify we successfully set the Visualizer in SCALING_MODE_AS_PLAYED mode
+            mVisualizer.setScalingMode(Visualizer.SCALING_MODE_AS_PLAYED);
+            assertTrue(msg + " get volume scaling doesn't return SCALING_MODE_AS_PLAYED",
+                    mVisualizer.getScalingMode() == Visualizer.SCALING_MODE_AS_PLAYED);
+            mVisualizer.setEnabled(true);
+            mp.prepare();
+            mp.start();
+            Thread.sleep(500);
+
+            // check capture on sound with music volume at max
+            byte[] data = new byte[mVisualizer.getCaptureSize()];
+            mVisualizer.getWaveForm(data);
+            int energyAtVolMax = computeEnergy(data, true);
+            assertTrue(msg +": getWaveForm reads insufficient level",
+                    energyAtVolMax > 0);
+            log(msg, " engergy at max volume = "+energyAtVolMax);
+
+            // check capture on sound with music volume lowered from max
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, (volMax * 2) / 3, 0);
+            Thread.sleep(500);
+            mVisualizer.getWaveForm(data);
+            int energyAtLowerVol = computeEnergy(data, true);
+            assertTrue(msg +": getWaveForm at lower volume reads insufficient level",
+                    energyAtLowerVol > 0);
+            log(msg, "energy at lower volume = "+energyAtLowerVol);
+            assertTrue(msg +": getWaveForm didn't report lower energy when volume decreases",
+                    energyAtVolMax > energyAtLowerVol);
+
+            result = true;
+        } catch (IllegalArgumentException e) {
+            msg = msg.concat(": IllegalArgumentException");
+            loge(msg, " hit exception " + e);
+        } catch (UnsupportedOperationException e) {
+            msg = msg.concat(": UnsupportedOperationException");
+            loge(msg, " hit exception " + e);
+        } catch (IllegalStateException e) {
+            msg = msg.concat("IllegalStateException");
+            loge(msg, " hit exception " + e);
+        } catch (InterruptedException e) {
+            loge(msg, " sleep() interrupted");
+        }
+        finally {
+            releaseVisualizer();
+            if (mp != null) {
+                mp.release();
+            }
+            if (vc != null) {
+                vc.release();
+            }
             am.setRingerMode(ringerMode);
         }
         assertTrue(msg, result);
