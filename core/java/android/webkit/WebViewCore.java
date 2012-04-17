@@ -1772,6 +1772,9 @@ public final class WebViewCore {
 
         @Override
         public boolean dispatchWebKitEvent(MotionEvent event, int eventType, int flags) {
+            if (mNativeClass == 0) {
+                return false;
+            }
             switch (eventType) {
                 case WebViewInputDispatcher.EVENT_TYPE_CLICK:
                     return nativeMouseClick(mNativeClass);
