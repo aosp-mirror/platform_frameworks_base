@@ -33,6 +33,7 @@ public final class Trace {
     public static final long TRACE_TAG_GRAPHICS = 1L << 1;
     public static final long TRACE_TAG_INPUT = 1L << 2;
     public static final long TRACE_TAG_VIEW = 1L << 3;
+    public static final long TRACE_TAG_WEBVIEW = 1L << 4;
 
     private static final long sEnabledTags = nativeGetEnabledTags();
 
