@@ -36,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.graphics.Rect;
+import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -44,12 +45,16 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IWindow;
+import android.view.InputDevice;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -1301,11 +1306,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             }
-            final int flags = (mIncludeNotImportantViews) ?
-                    AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
-            final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
+                final int flags = (mIncludeNotImportantViews) ?
+                        AccessibilityNodeInfo.INCLUDE_NOT_IMPORTANT_VIEWS : 0;
+                final int interrogatingPid = Binder.getCallingPid();
                 connection.performAccessibilityAction(accessibilityNodeId, action, interactionId,
                         callback, flags, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
@@ -1316,6 +1321,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Binder.restoreCallingIdentity(identityToken);
             }
             return true;
+        }
+
+        public boolean perfromGlobalAction(int action) {
+            switch (action) {
+                case AccessibilityService.GLOBAL_ACTION_BACK: {
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_BACK);
+                } return true;
+                case AccessibilityService.GLOBAL_ACTION_HOME: {
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HOME);
+                } return true;
+                case AccessibilityService.GLOBAL_ACTION_RECENTS: {
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_APP_SWITCH);
+                } return true;
+                case AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS: {
+                    // TODO: Implement when 6346026 is fixed.
+                } return true;
+            }
+            return false;
         }
 
         public void onServiceDisconnected(ComponentName componentName) {
@@ -1356,6 +1379,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     sendStateToClientsLocked();
                 }
             }
+        }
+
+        private void sendDownAndUpKeyEvents(int keyCode) {
+            final long token = Binder.clearCallingIdentity();
+
+            // Inject down.
+            final long downTime = SystemClock.uptimeMillis();
+            KeyEvent down = KeyEvent.obtain(downTime, downTime, KeyEvent.ACTION_DOWN, keyCode, 0, 0,
+                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM,
+                    InputDevice.SOURCE_KEYBOARD, null);
+            InputManager.getInstance().injectInputEvent(down,
+                    InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+            down.recycle();
+
+            // Inject up.
+            final long upTime = SystemClock.uptimeMillis();
+            KeyEvent up = KeyEvent.obtain(downTime, upTime, KeyEvent.ACTION_UP, keyCode, 0, 0,
+                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM,
+                    InputDevice.SOURCE_KEYBOARD, null);
+            InputManager.getInstance().injectInputEvent(up,
+                    InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+            up.recycle();
+
+            Binder.restoreCallingIdentity(token);
         }
 
         private IAccessibilityInteractionConnection getConnectionLocked(int windowId) {

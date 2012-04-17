@@ -160,4 +160,12 @@ interface IAccessibilityServiceConnection {
      * @return The associated accessibility service info.
      */
     AccessibilityServiceInfo getServiceInfo();
+
+    /**
+     * Performs a global action, such as going home, going back, etc.
+     *
+     * @param action The action to perform.
+     * @return Whether the action was performed.
+     */
+    boolean perfromGlobalAction(int action);
 }

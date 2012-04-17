@@ -6352,16 +6352,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public boolean performAccessibilityAction(int action) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
-                final long now = SystemClock.uptimeMillis();
-                // Send down.
-                MotionEvent event = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN,
-                        getWidth() / 2, getHeight() / 2, 0);
-                onTouchEvent(event);
-                // Send up.
-                event.setAction(MotionEvent.ACTION_UP);
-                onTouchEvent(event);
-                // Clean up.
-                event.recycle();
+                if (isClickable()) {
+                    performClick();
+                }
+            } break;
+            case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
+                if (isLongClickable()) {
+                    performLongClick();
+                }
             } break;
             case AccessibilityNodeInfo.ACTION_FOCUS: {
                 if (!hasFocus()) {
