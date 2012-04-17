@@ -26,12 +26,18 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.text.TextUtils;
+import android.text.method.WordIterator;
 import android.util.Log;
 import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
+import android.widget.SpellChecker;
 
 import java.lang.ref.WeakReference;
+import java.text.BreakIterator;
+import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * SpellCheckerService provides an abstract base class for a spell checker.
@@ -92,6 +98,7 @@ public abstract class SpellCheckerService extends Service {
      */
     public static abstract class Session {
         private InternalISpellCheckerSession mInternalSession;
+        private volatile SentenceLevelAdapter mSentenceLevelAdapter;
 
         /**
          * @hide
@@ -142,8 +149,8 @@ public abstract class SpellCheckerService extends Service {
 
         /**
          * Get sentence suggestions for specified texts in an array of TextInfo.
-         * The default implementation returns an array of SentenceSuggestionsInfo by simply
-         * calling onGetSuggestions.
+         * The default implementation splits the input text to words and returns
+         * {@link SentenceSuggestionsInfo} which contains suggestions for each word.
          * This function will run on the incoming IPC thread.
          * So, this is not called on the main thread,
          * but will be called in series on another thread.
@@ -156,14 +163,41 @@ public abstract class SpellCheckerService extends Service {
          */
         public SentenceSuggestionsInfo[] onGetSentenceSuggestionsMultiple(TextInfo[] textInfos,
                 int suggestionsLimit) {
-            final int length = textInfos.length;
-            final SentenceSuggestionsInfo[] retval = new SentenceSuggestionsInfo[length];
-            for (int i = 0; i < length; ++i) {
-                final SuggestionsInfo si = onGetSuggestions(textInfos[i], suggestionsLimit);
-                si.setCookieAndSequence(textInfos[i].getCookie(), textInfos[i].getSequence());
-                final int N = textInfos[i].getText().length();
-                retval[i] = new SentenceSuggestionsInfo(
-                        new SuggestionsInfo[] {si}, new int[]{0}, new int[]{N});
+            if (textInfos == null || textInfos.length == 0) {
+                return SentenceLevelAdapter.EMPTY_SENTENCE_SUGGESTIONS_INFOS;
+            }
+            if (DBG) {
+                Log.d(TAG, "onGetSentenceSuggestionsMultiple: + " + textInfos.length + ", "
+                        + suggestionsLimit);
+            }
+            if (mSentenceLevelAdapter == null) {
+                synchronized(this) {
+                    if (mSentenceLevelAdapter == null) {
+                        final String localeStr = getLocale();
+                        if (!TextUtils.isEmpty(localeStr)) {
+                            mSentenceLevelAdapter = new SentenceLevelAdapter(new Locale(localeStr));
+                        }
+                    }
+                }
+            }
+            if (mSentenceLevelAdapter == null) {
+                return SentenceLevelAdapter.EMPTY_SENTENCE_SUGGESTIONS_INFOS;
+            }
+            final int infosSize = textInfos.length;
+            final SentenceSuggestionsInfo[] retval = new SentenceSuggestionsInfo[infosSize];
+            for (int i = 0; i < infosSize; ++i) {
+                final SentenceLevelAdapter.SentenceTextInfoParams textInfoParams =
+                        mSentenceLevelAdapter.getSplitWords(textInfos[i]);
+                final ArrayList<SentenceLevelAdapter.SentenceWordItem> mItems =
+                        textInfoParams.mItems;
+                final int itemsSize = mItems.size();
+                final TextInfo[] splitTextInfos = new TextInfo[itemsSize];
+                for (int j = 0; j < itemsSize; ++j) {
+                    splitTextInfos[j] = mItems.get(j).mTextInfo;
+                }
+                retval[i] = SentenceLevelAdapter.reconstructSuggestions(
+                        textInfoParams, onGetSuggestionsMultiple(
+                                splitTextInfos, suggestionsLimit, true));
             }
             return retval;
         }
@@ -288,6 +322,137 @@ public abstract class SpellCheckerService extends Service {
                     new InternalISpellCheckerSession(locale, listener, bundle, session);
             session.onCreate();
             return internalSession;
+        }
+    }
+
+    /**
+     * Adapter class to accommodate word level spell checking APIs to sentence level spell checking
+     * APIs used in
+     * {@link SpellCheckerService.Session#onGetSuggestionsMultiple(TextInfo[], int, boolean)}
+     */
+    private static class SentenceLevelAdapter {
+        public static final SentenceSuggestionsInfo[] EMPTY_SENTENCE_SUGGESTIONS_INFOS =
+                new SentenceSuggestionsInfo[] {};
+        private static final SuggestionsInfo EMPTY_SUGGESTIONS_INFO = new SuggestionsInfo(0, null);
+        /**
+         * Container for split TextInfo parameters
+         */
+        public static class SentenceWordItem {
+            public final TextInfo mTextInfo;
+            public final int mStart;
+            public final int mLength;
+            public SentenceWordItem(TextInfo ti, int start, int end) {
+                mTextInfo = ti;
+                mStart = start;
+                mLength = end - start;
+            }
+        }
+
+        /**
+         * Container for originally queried TextInfo and parameters
+         */
+        public static class SentenceTextInfoParams {
+            final TextInfo mOriginalTextInfo;
+            final ArrayList<SentenceWordItem> mItems;
+            final int mSize;
+            public SentenceTextInfoParams(TextInfo ti, ArrayList<SentenceWordItem> items) {
+                mOriginalTextInfo = ti;
+                mItems = items;
+                mSize = items.size();
+            }
+        }
+
+        private final WordIterator mWordIterator;
+        public SentenceLevelAdapter(Locale locale) {
+            mWordIterator = new WordIterator(locale);
+        }
+
+        private SentenceTextInfoParams getSplitWords(TextInfo originalTextInfo) {
+            final WordIterator wordIterator = mWordIterator;
+            final CharSequence originalText = originalTextInfo.getText();
+            final int cookie = originalTextInfo.getCookie();
+            final int start = 0;
+            final int end = originalText.length();
+            final ArrayList<SentenceWordItem> wordItems = new ArrayList<SentenceWordItem>();
+            wordIterator.setCharSequence(originalText, 0, originalText.length());
+            int wordEnd = wordIterator.following(start);
+            int wordStart = wordIterator.getBeginning(wordEnd);
+            if (DBG) {
+                Log.d(TAG, "iterator: break: ---- 1st word start = " + wordStart + ", end = "
+                        + wordEnd + "\n" + originalText);
+            }
+            while (wordStart <= end && wordEnd != BreakIterator.DONE
+                    && wordStart != BreakIterator.DONE) {
+                if (wordEnd >= start && wordEnd > wordStart) {
+                    final String query = originalText.subSequence(wordStart, wordEnd).toString();
+                    final TextInfo ti = new TextInfo(query, cookie, query.hashCode());
+                    wordItems.add(new SentenceWordItem(ti, wordStart, wordEnd));
+                    if (DBG) {
+                        Log.d(TAG, "Adapter: word (" + (wordItems.size() - 1) + ") " + query);
+                    }
+                }
+                wordEnd = wordIterator.following(wordEnd);
+                if (wordEnd == BreakIterator.DONE) {
+                    break;
+                }
+                wordStart = wordIterator.getBeginning(wordEnd);
+            }
+            if (originalText.length() >= SpellChecker.WORD_ITERATOR_INTERVAL
+                    && wordItems.size() >= 2) {
+                if (DBG) {
+                    Log.w(TAG, "Remove possibly divided word: "
+                            + wordItems.get(0).mTextInfo.getText());
+                }
+                wordItems.remove(0);
+            }
+            return new SentenceTextInfoParams(originalTextInfo, wordItems);
+        }
+
+        public static SentenceSuggestionsInfo reconstructSuggestions(
+                SentenceTextInfoParams originalTextInfoParams, SuggestionsInfo[] results) {
+            if (results == null || results.length == 0) {
+                return null;
+            }
+            if (DBG) {
+                Log.w(TAG, "Adapter: onGetSuggestions: got " + results.length);
+            }
+            if (originalTextInfoParams == null) {
+                if (DBG) {
+                    Log.w(TAG, "Adapter: originalTextInfoParams is null.");
+                }
+                return null;
+            }
+            final int originalCookie = originalTextInfoParams.mOriginalTextInfo.getCookie();
+            final int originalSequence =
+                    originalTextInfoParams.mOriginalTextInfo.getSequence();
+
+            final int querySize = originalTextInfoParams.mSize;
+            final int[] offsets = new int[querySize];
+            final int[] lengths = new int[querySize];
+            final SuggestionsInfo[] reconstructedSuggestions = new SuggestionsInfo[querySize];
+            for (int i = 0; i < querySize; ++i) {
+                final SentenceWordItem item = originalTextInfoParams.mItems.get(i);
+                SuggestionsInfo result = null;
+                for (int j = 0; j < results.length; ++j) {
+                    final SuggestionsInfo cur = results[j];
+                    if (cur != null && cur.getSequence() == item.mTextInfo.getSequence()) {
+                        result = cur;
+                        result.setCookieAndSequence(originalCookie, originalSequence);
+                        break;
+                    }
+                }
+                offsets[i] = item.mStart;
+                lengths[i] = item.mLength;
+                reconstructedSuggestions[i] = result != null ? result : EMPTY_SUGGESTIONS_INFO;
+                if (DBG) {
+                    final int size = reconstructedSuggestions[i].getSuggestionsCount();
+                    Log.w(TAG, "reconstructedSuggestions(" + i + ")" + size + ", first = "
+                            + (size > 0 ? reconstructedSuggestions[i].getSuggestionAt(0)
+                                    : "<none>") + ", offset = " + offsets[i] + ", length = "
+                            + lengths[i]);
+                }
+            }
+            return new SentenceSuggestionsInfo(reconstructedSuggestions, offsets, lengths);
         }
     }
 }

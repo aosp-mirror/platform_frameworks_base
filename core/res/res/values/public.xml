@@ -3588,8 +3588,6 @@
 
   <public type="attr" name="parentActivityName" />
 
-  <public type="attr" name="supportsSentenceSpellCheck" />
-
   <public type="attr" name="importantForAccessibility"/>
 
 </resources>

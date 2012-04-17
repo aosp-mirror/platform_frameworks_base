@@ -91,8 +91,6 @@ public class SpellCheckerSession {
      * This meta-data must reference an XML resource.
      **/
     public static final String SERVICE_META_DATA = "android.view.textservice.scs";
-    private static final String SUPPORT_SENTENCE_SPELL_CHECK = "SupportSentenceSpellCheck";
-
 
     private static final int MSG_ON_GET_SUGGESTION_MULTIPLE = 1;
     private static final int MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE = 2;
@@ -191,7 +189,9 @@ public class SpellCheckerSession {
      * Get candidate strings for a substring of the specified text.
      * @param textInfo text metadata for a spell checker
      * @param suggestionsLimit the maximum number of suggestions that will be returned
+     * @deprecated use {@link SpellCheckerSession#getSentenceSuggestions(TextInfo[], int)} instead
      */
+    @Deprecated
     public void getSuggestions(TextInfo textInfo, int suggestionsLimit) {
         getSuggestions(new TextInfo[] {textInfo}, suggestionsLimit, false);
     }
@@ -201,13 +201,14 @@ public class SpellCheckerSession {
      * @param textInfos an array of text metadata for a spell checker
      * @param suggestionsLimit the maximum number of suggestions that will be returned
      * @param sequentialWords true if textInfos can be treated as sequential words.
+     * @deprecated use {@link SpellCheckerSession#getSentenceSuggestions(TextInfo[], int)} instead
      */
+    @Deprecated
     public void getSuggestions(
             TextInfo[] textInfos, int suggestionsLimit, boolean sequentialWords) {
         if (DBG) {
             Log.w(TAG, "getSuggestions from " + mSpellCheckerInfo.getId());
         }
-        // TODO: Handle multiple words suggestions by using WordBreakIterator
         mSpellCheckerSessionListenerImpl.getSuggestionsMultiple(
                 textInfos, suggestionsLimit, sequentialWords);
     }
@@ -281,7 +282,7 @@ public class SpellCheckerSession {
                         break;
                     case TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE:
                         if (DBG) {
-                            Log.w(TAG, "Get suggestions from the spell checker.");
+                            Log.w(TAG, "Get sentence suggestions from the spell checker.");
                         }
                         try {
                             session.onGetSentenceSuggestionsMultiple(
@@ -491,12 +492,5 @@ public class SpellCheckerSession {
      */
     public ISpellCheckerSessionListener getSpellCheckerSessionListener() {
         return mSpellCheckerSessionListenerImpl;
-    }
-
-    /**
-     * @return true if the spell checker supports sentence level spell checking APIs
-     */
-    public boolean isSentenceSpellCheckSupported() {
-        return mSubtype.containsExtraValueKey(SUPPORT_SENTENCE_SPELL_CHECK);
     }
 }

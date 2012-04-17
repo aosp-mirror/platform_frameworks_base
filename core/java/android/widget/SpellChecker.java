@@ -116,7 +116,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     null /* Bundle not currently used by the textServicesManager */,
                     mCurrentLocale, this,
                     false /* means any available languages from current spell checker */);
-            mIsSentenceSpellCheckSupported = mSpellCheckerSession.isSentenceSpellCheckSupported();
+            mIsSentenceSpellCheckSupported = true;
         }
 
         // Restore SpellCheckSpans in pool
