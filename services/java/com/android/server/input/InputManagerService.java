@@ -16,11 +16,16 @@
 
 package com.android.server.input;
 
+import com.android.internal.os.AtomicFile;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.Watchdog;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -63,15 +68,23 @@ import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicy;
 import android.view.KeyCharacterMap.UnavailableException;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import libcore.io.IoUtils;
+import libcore.util.Objects;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -91,9 +104,8 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
     private final Callbacks mCallbacks;
     private final InputManagerHandler mHandler;
 
-    // Used to simulate a persistent data store for keyboard layouts.
-    // TODO: Replace with the real thing.
-    private final HashMap<String, String> mFakeRegistry = new HashMap<String, String>();
+    // Persistent data store.  Must be locked each time during use.
+    private final PersistentDataStore mDataStore = new PersistentDataStore();
 
     // List of currently registered input devices changed listeners by process id.
     private Object mInputDevicesLock = new Object();
@@ -635,7 +647,9 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }
 
-        return mFakeRegistry.get(inputDeviceDescriptor);
+        synchronized (mDataStore) {
+            return mDataStore.getKeyboardLayout(inputDeviceDescriptor);
+        }
     }
 
     @Override // Binder call
@@ -650,7 +664,13 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
         }
 
-        mFakeRegistry.put(inputDeviceDescriptor, keyboardLayoutDescriptor);
+        synchronized (mDataStore) {
+            try {
+                mDataStore.setKeyboardLayout(inputDeviceDescriptor, keyboardLayoutDescriptor);
+            } finally {
+                mDataStore.saveIfNeeded();
+            }
+        }
     }
 
     /**
@@ -862,7 +882,7 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission("android.permission.DUMP")
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump InputManager from from pid="
                     + Binder.getCallingPid()
@@ -1197,5 +1217,187 @@ public class InputManagerService extends IInputManager.Stub implements Watchdog.
             }
             onVibratorTokenDied(this);
         }
+    }
+
+    /**
+     * Manages persistent state recorded by the input manager service as an XML file.
+     * Caller must acquire lock on the data store before accessing it.
+     *
+     * File format:
+     * <code>
+     * &lt;input-mananger-state>
+     *   &lt;input-devices>
+     *     &lt;input-device descriptor="xxxxx" keyboard-layout="yyyyy" />
+     *   &gt;input-devices>
+     * &gt;/input-manager-state>
+     * </code>
+     */
+    private static final class PersistentDataStore {
+        // Input device state by descriptor.
+        private final HashMap<String, InputDeviceState> mInputDevices =
+                new HashMap<String, InputDeviceState>();
+        private final AtomicFile mAtomicFile;
+
+        // True if the data has been loaded.
+        private boolean mLoaded;
+
+        // True if there are changes to be saved.
+        private boolean mDirty;
+
+        public PersistentDataStore() {
+            mAtomicFile = new AtomicFile(new File("/data/system/input-manager-state.xml"));
+        }
+
+        public void saveIfNeeded() {
+            if (mDirty) {
+                save();
+                mDirty = false;
+            }
+        }
+
+        public String getKeyboardLayout(String inputDeviceDescriptor) {
+            InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, false);
+            return state != null ? state.keyboardLayoutDescriptor : null;
+        }
+
+        public boolean setKeyboardLayout(String inputDeviceDescriptor,
+                String keyboardLayoutDescriptor) {
+            InputDeviceState state = getInputDeviceState(inputDeviceDescriptor, true);
+            if (!Objects.equal(state.keyboardLayoutDescriptor, keyboardLayoutDescriptor)) {
+                state.keyboardLayoutDescriptor = keyboardLayoutDescriptor;
+                setDirty();
+                return true;
+            }
+            return false;
+        }
+
+        private InputDeviceState getInputDeviceState(String inputDeviceDescriptor,
+                boolean createIfAbsent) {
+            loadIfNeeded();
+            InputDeviceState state = mInputDevices.get(inputDeviceDescriptor);
+            if (state == null && createIfAbsent) {
+                state = new InputDeviceState();
+                mInputDevices.put(inputDeviceDescriptor, state);
+                setDirty();
+            }
+            return state;
+        }
+
+        private void loadIfNeeded() {
+            if (!mLoaded) {
+                load();
+                mLoaded = true;
+            }
+        }
+
+        private void setDirty() {
+            mDirty = true;
+        }
+
+        private void clearState() {
+            mInputDevices.clear();
+        }
+
+        private void load() {
+            clearState();
+
+            final InputStream is;
+            try {
+                is = mAtomicFile.openRead();
+            } catch (FileNotFoundException ex) {
+                return;
+            }
+
+            XmlPullParser parser;
+            try {
+                parser = Xml.newPullParser();
+                parser.setInput(new BufferedInputStream(is), null);
+                loadFromXml(parser);
+            } catch (IOException ex) {
+                Slog.w(TAG, "Failed to load input manager persistent store data.", ex);
+                clearState();
+            } catch (XmlPullParserException ex) {
+                Slog.w(TAG, "Failed to load input manager persistent store data.", ex);
+                clearState();
+            } finally {
+                IoUtils.closeQuietly(is);
+            }
+        }
+
+        private void save() {
+            final FileOutputStream os;
+            try {
+                os = mAtomicFile.startWrite();
+                boolean success = false;
+                try {
+                    XmlSerializer serializer = new FastXmlSerializer();
+                    serializer.setOutput(new BufferedOutputStream(os), "utf-8");
+                    saveToXml(serializer);
+                    serializer.flush();
+                    success = true;
+                } finally {
+                    if (success) {
+                        mAtomicFile.finishWrite(os);
+                    } else {
+                        mAtomicFile.failWrite(os);
+                    }
+                }
+            } catch (IOException ex) {
+                Slog.w(TAG, "Failed to save input manager persistent store data.", ex);
+            }
+        }
+
+        private void loadFromXml(XmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            XmlUtils.beginDocument(parser, "input-manager-state");
+            final int outerDepth = parser.getDepth();
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                if (parser.getName().equals("input-devices")) {
+                    loadInputDevicesFromXml(parser);
+                }
+            }
+        }
+
+        private void loadInputDevicesFromXml(XmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            final int outerDepth = parser.getDepth();
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                if (parser.getName().equals("input-device")) {
+                    String descriptor = parser.getAttributeValue(null, "descriptor");
+                    if (descriptor == null) {
+                        throw new XmlPullParserException(
+                                "Missing descriptor attribute on input-device");
+                    }
+                    InputDeviceState state = new InputDeviceState();
+                    state.keyboardLayoutDescriptor =
+                            parser.getAttributeValue(null, "keyboard-layout");
+                    mInputDevices.put(descriptor, state);
+                }
+            }
+        }
+
+        private void saveToXml(XmlSerializer serializer) throws IOException {
+            serializer.startDocument(null, true);
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+            serializer.startTag(null, "input-manager-state");
+            serializer.startTag(null, "input-devices");
+            for (Map.Entry<String, InputDeviceState> entry : mInputDevices.entrySet()) {
+                final String descriptor = entry.getKey();
+                final InputDeviceState state = entry.getValue();
+                serializer.startTag(null, "input-device");
+                serializer.attribute(null, "descriptor", descriptor);
+                if (state.keyboardLayoutDescriptor != null) {
+                    serializer.attribute(null, "keyboard-layout", state.keyboardLayoutDescriptor);
+                }
+                serializer.endTag(null, "input-device");
+            }
+            serializer.endTag(null, "input-devices");
+            serializer.endTag(null, "input-manager-state");
+            serializer.endDocument();
+        }
+    }
+
+    private static final class InputDeviceState {
+        public String keyboardLayoutDescriptor;
     }
 }
