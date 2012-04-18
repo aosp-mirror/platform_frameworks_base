@@ -335,6 +335,13 @@ private:
         void close();
 
         inline bool isVirtual() const { return fd < 0; }
+
+        const sp<KeyCharacterMap>& getKeyCharacterMap() const {
+            if (combinedKeyMap != NULL) {
+                return combinedKeyMap;
+            }
+            return keyMap.keyCharacterMap;
+        }
     };
 
     status_t openDeviceLocked(const char *devicePath);

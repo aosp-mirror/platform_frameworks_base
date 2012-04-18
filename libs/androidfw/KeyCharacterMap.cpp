@@ -90,7 +90,8 @@ KeyCharacterMap::KeyCharacterMap() :
 }
 
 KeyCharacterMap::KeyCharacterMap(const KeyCharacterMap& other) :
-    RefBase(), mType(other.mType) {
+    RefBase(), mType(other.mType), mKeysByScanCode(other.mKeysByScanCode),
+    mKeysByUsageCode(other.mKeysByUsageCode) {
     for (size_t i = 0; i < other.mKeys.size(); i++) {
         mKeys.add(other.mKeys.keyAt(i), new Key(*other.mKeys.valueAt(i)));
     }
@@ -179,6 +180,16 @@ sp<KeyCharacterMap> KeyCharacterMap::combine(const sp<KeyCharacterMap>& base,
         } else {
             map->mKeys.add(keyCode, new Key(*key));
         }
+    }
+
+    for (size_t i = 0; i < overlay->mKeysByScanCode.size(); i++) {
+        map->mKeysByScanCode.replaceValueFor(overlay->mKeysByScanCode.keyAt(i),
+                overlay->mKeysByScanCode.valueAt(i));
+    }
+
+    for (size_t i = 0; i < overlay->mKeysByUsageCode.size(); i++) {
+        map->mKeysByUsageCode.replaceValueFor(overlay->mKeysByUsageCode.keyAt(i),
+                overlay->mKeysByUsageCode.valueAt(i));
     }
     return map;
 }
@@ -313,6 +324,37 @@ bool KeyCharacterMap::getEvents(int32_t deviceId, const char16_t* chars, size_t 
     }
 #endif
     return true;
+}
+
+status_t KeyCharacterMap::mapKey(int32_t scanCode, int32_t usageCode, int32_t* outKeyCode) const {
+    if (usageCode) {
+        ssize_t index = mKeysByUsageCode.indexOfKey(usageCode);
+        if (index >= 0) {
+#if DEBUG_MAPPING
+    ALOGD("mapKey: scanCode=%d, usageCode=0x%08x ~ Result keyCode=%d.",
+            scanCode, usageCode, *outKeyCode);
+#endif
+            *outKeyCode = mKeysByUsageCode.valueAt(index);
+            return OK;
+        }
+    }
+    if (scanCode) {
+        ssize_t index = mKeysByScanCode.indexOfKey(scanCode);
+        if (index >= 0) {
+#if DEBUG_MAPPING
+    ALOGD("mapKey: scanCode=%d, usageCode=0x%08x ~ Result keyCode=%d.",
+            scanCode, usageCode, *outKeyCode);
+#endif
+            *outKeyCode = mKeysByScanCode.valueAt(index);
+            return OK;
+        }
+    }
+
+#if DEBUG_MAPPING
+        ALOGD("mapKey: scanCode=%d, usageCode=0x%08x ~ Failed.", scanCode, usageCode);
+#endif
+    *outKeyCode = AKEYCODE_UNKNOWN;
+    return NAME_NOT_FOUND;
 }
 
 bool KeyCharacterMap::getKey(int32_t keyCode, const Key** outKey) const {
@@ -616,6 +658,10 @@ status_t KeyCharacterMap::Parser::parse() {
                     mTokenizer->skipDelimiters(WHITESPACE);
                     status_t status = parseType();
                     if (status) return status;
+                } else if (keywordToken == "map") {
+                    mTokenizer->skipDelimiters(WHITESPACE);
+                    status_t status = parseMap();
+                    if (status) return status;
                 } else if (keywordToken == "key") {
                     mTokenizer->skipDelimiters(WHITESPACE);
                     status_t status = parseKey();
@@ -707,6 +753,58 @@ status_t KeyCharacterMap::Parser::parseType() {
     ALOGD("Parsed type: type=%d.", type);
 #endif
     mMap->mType = type;
+    return NO_ERROR;
+}
+
+status_t KeyCharacterMap::Parser::parseMap() {
+    String8 keywordToken = mTokenizer->nextToken(WHITESPACE);
+    if (keywordToken == "key") {
+        mTokenizer->skipDelimiters(WHITESPACE);
+        return parseMapKey();
+    }
+    ALOGE("%s: Expected keyword after 'map', got '%s'.", mTokenizer->getLocation().string(),
+            keywordToken.string());
+    return BAD_VALUE;
+}
+
+status_t KeyCharacterMap::Parser::parseMapKey() {
+    String8 codeToken = mTokenizer->nextToken(WHITESPACE);
+    bool mapUsage = false;
+    if (codeToken == "usage") {
+        mapUsage = true;
+        mTokenizer->skipDelimiters(WHITESPACE);
+        codeToken = mTokenizer->nextToken(WHITESPACE);
+    }
+
+    char* end;
+    int32_t code = int32_t(strtol(codeToken.string(), &end, 0));
+    if (*end) {
+        ALOGE("%s: Expected key %s number, got '%s'.", mTokenizer->getLocation().string(),
+                mapUsage ? "usage" : "scan code", codeToken.string());
+        return BAD_VALUE;
+    }
+    KeyedVector<int32_t, int32_t>& map =
+            mapUsage ? mMap->mKeysByUsageCode : mMap->mKeysByScanCode;
+    if (map.indexOfKey(code) >= 0) {
+        ALOGE("%s: Duplicate entry for key %s '%s'.", mTokenizer->getLocation().string(),
+                mapUsage ? "usage" : "scan code", codeToken.string());
+        return BAD_VALUE;
+    }
+
+    mTokenizer->skipDelimiters(WHITESPACE);
+    String8 keyCodeToken = mTokenizer->nextToken(WHITESPACE);
+    int32_t keyCode = getKeyCodeByLabel(keyCodeToken.string());
+    if (!keyCode) {
+        ALOGE("%s: Expected key code label, got '%s'.", mTokenizer->getLocation().string(),
+                keyCodeToken.string());
+        return BAD_VALUE;
+    }
+
+#if DEBUG_PARSER
+    ALOGD("Parsed map key %s: code=%d, keyCode=%d.",
+            mapUsage ? "usage" : "scan code", code, keyCode);
+#endif
+    map.add(code, keyCode);
     return NO_ERROR;
 }
 

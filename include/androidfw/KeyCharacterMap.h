@@ -120,6 +120,10 @@ public:
     bool getEvents(int32_t deviceId, const char16_t* chars, size_t numChars,
             Vector<KeyEvent>& outEvents) const;
 
+    /* Maps a scan code and usage code to a key code, in case this key map overrides
+     * the mapping in some way. */
+    status_t mapKey(int32_t scanCode, int32_t usageCode, int32_t* outKeyCode) const;
+
 #if HAVE_ANDROID_OS
     /* Reads a key map from a parcel. */
     static sp<KeyCharacterMap> readFromParcel(Parcel* parcel);
@@ -198,6 +202,8 @@ private:
 
     private:
         status_t parseType();
+        status_t parseMap();
+        status_t parseMapKey();
         status_t parseKey();
         status_t parseKeyProperty();
         status_t parseModifier(const String8& token, int32_t* outMetaState);
@@ -208,6 +214,9 @@ private:
 
     KeyedVector<int32_t, Key*> mKeys;
     int mType;
+
+    KeyedVector<int32_t, int32_t> mKeysByScanCode;
+    KeyedVector<int32_t, int32_t> mKeysByUsageCode;
 
     KeyCharacterMap();
     KeyCharacterMap(const KeyCharacterMap& other);

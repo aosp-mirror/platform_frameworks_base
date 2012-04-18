@@ -199,17 +199,26 @@ status_t KeyLayoutMap::Parser::parse() {
 }
 
 status_t KeyLayoutMap::Parser::parseKey() {
-    String8 scanCodeToken = mTokenizer->nextToken(WHITESPACE);
+    String8 codeToken = mTokenizer->nextToken(WHITESPACE);
+    bool mapUsage = false;
+    if (codeToken == "usage") {
+        mapUsage = true;
+        mTokenizer->skipDelimiters(WHITESPACE);
+        codeToken = mTokenizer->nextToken(WHITESPACE);
+    }
+
     char* end;
-    int32_t scanCode = int32_t(strtol(scanCodeToken.string(), &end, 0));
+    int32_t code = int32_t(strtol(codeToken.string(), &end, 0));
     if (*end) {
-        ALOGE("%s: Expected key scan code number, got '%s'.", mTokenizer->getLocation().string(),
-                scanCodeToken.string());
+        ALOGE("%s: Expected key %s number, got '%s'.", mTokenizer->getLocation().string(),
+                mapUsage ? "usage" : "scan code", codeToken.string());
         return BAD_VALUE;
     }
-    if (mMap->mKeysByScanCode.indexOfKey(scanCode) >= 0) {
-        ALOGE("%s: Duplicate entry for key scan code '%s'.", mTokenizer->getLocation().string(),
-                scanCodeToken.string());
+    KeyedVector<int32_t, Key>& map =
+            mapUsage ? mMap->mKeysByUsageCode : mMap->mKeysByScanCode;
+    if (map.indexOfKey(code) >= 0) {
+        ALOGE("%s: Duplicate entry for key %s '%s'.", mTokenizer->getLocation().string(),
+                mapUsage ? "usage" : "scan code", codeToken.string());
         return BAD_VALUE;
     }
 
@@ -243,12 +252,13 @@ status_t KeyLayoutMap::Parser::parseKey() {
     }
 
 #if DEBUG_PARSER
-    ALOGD("Parsed key: scanCode=%d, keyCode=%d, flags=0x%08x.", scanCode, keyCode, flags);
+    ALOGD("Parsed key %s: code=%d, keyCode=%d, flags=0x%08x.",
+            mapUsage ? "usage" : "scan code", code, keyCode, flags);
 #endif
     Key key;
     key.keyCode = keyCode;
     key.flags = flags;
-    mMap->mKeysByScanCode.add(scanCode, key);
+    map.add(code, key);
     return NO_ERROR;
 }
 
