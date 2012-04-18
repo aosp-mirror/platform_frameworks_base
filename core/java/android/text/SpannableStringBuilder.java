@@ -130,14 +130,15 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     private void resizeFor(int size) {
         final int oldLength = mText.length;
         final int newLength = ArrayUtils.idealCharArraySize(size + 1);
-        final int after = oldLength - (mGapStart + mGapLength);
+        final int delta = newLength - oldLength;
+        if (delta == 0) return;
 
         char[] newText = new char[newLength];
         System.arraycopy(mText, 0, newText, 0, mGapStart);
+        final int after = oldLength - (mGapStart + mGapLength);
         System.arraycopy(mText, oldLength - after, newText, newLength - after, after);
         mText = newText;
 
-        final int delta = newLength - oldLength;
         mGapLength += delta;
         if (mGapLength < 1)
             new Exception("mGapLength < 1").printStackTrace();
@@ -305,6 +306,26 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             resizeFor(mText.length + nbNewChars - mGapLength);
         }
 
+        // The removal pass needs to be done before the gap is updated in order to broadcast the
+        // correct previous positions to the correct intersecting SpanWatchers
+        if (end > start) { // no need for span fixup on pure insertion
+            // A for loop will not work because the array is being modified
+            // Do not iterate in reverse to keep the SpanWatchers notified in ordering
+            // Also, a removed SpanWatcher should not get notified of removed spans located
+            // further in the span array.
+            int i = 0;
+            while (i < mSpanCount) {
+                if ((mSpanFlags[i] & Spanned.SPAN_EXCLUSIVE_EXCLUSIVE) ==
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE &&
+                mSpanStarts[i] >= start && mSpanStarts[i] < mGapStart + mGapLength &&
+                mSpanEnds[i] >= start && mSpanEnds[i] < mGapStart + mGapLength) {
+                    removeSpan(i);
+                } else {
+                    i++;
+                }
+            }
+        }
+
         mGapStart += nbNewChars;
         mGapLength -= nbNewChars;
 
@@ -313,11 +334,10 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         TextUtils.getChars(cs, csStart, csEnd, mText, start);
 
-        if (end > start) {
-            // no need for span fixup on pure insertion
-            boolean atEnd = (mGapStart + mGapLength == mText.length);
+        if (end > start) { // no need for span fixup on pure insertion
+            final boolean atEnd = (mGapStart + mGapLength == mText.length);
 
-            for (int i = mSpanCount - 1; i >= 0; i--) {
+            for (int i = 0; i < mSpanCount; i++) {
                 if (mSpanStarts[i] >= start && mSpanStarts[i] < mGapStart + mGapLength) {
                     int flag = (mSpanFlags[i] & START_MASK) >> START_SHIFT;
 
@@ -331,16 +351,11 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 if (mSpanEnds[i] >= start && mSpanEnds[i] < mGapStart + mGapLength) {
                     int flag = (mSpanFlags[i] & END_MASK);
 
-                    if (flag == POINT || (flag == PARAGRAPH && atEnd))
+                    if (flag == POINT || (flag == PARAGRAPH && atEnd)) {
                         mSpanEnds[i] = mGapStart + mGapLength;
-                    else
+                    } else {
                         mSpanEnds[i] = start;
-                }
-
-                // remove 0-length SPAN_EXCLUSIVE_EXCLUSIVE, which are POINT_MARK and could
-                // get their boundaries swapped by the above code
-                if (mSpanEnds[i] < mSpanStarts[i]) {
-                    removeSpan(i);
+                    }
                 }
             }
         }
@@ -359,7 +374,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                 if (en > csEnd) en = csEnd;
 
                 // Add span only if this object is not yet used as a span in this string
-                if (getSpanStart(spans[i]) < 0 && !(spans[i] instanceof SpanWatcher)) {
+                if (getSpanStart(spans[i]) < 0) {
                     setSpan(false, spans[i], st - csStart + start, en - csStart + start,
                             sp.getSpanFlags(spans[i]));
                 }
@@ -465,6 +480,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
             int newReplaceEnd = replaceEnd + nbNewChars;
             boolean spanChanged = false;
+
             int previousSpanStart = spanStart;
             if (spanStart > newReplaceEnd) {
                 if (nbNewChars != 0) {
@@ -477,11 +493,13 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                         ((spanFlags & SPAN_START_AT_START) != SPAN_START_AT_START)) &&
                         (spanStart != newReplaceEnd ||
                         ((spanFlags & SPAN_START_AT_END) != SPAN_START_AT_END))) {
-                    // TODO previousSpanStart is incorrect, but we would need to save all the
-                    // previous spans' positions before replace to provide it
+                    // TODO A correct previousSpanStart cannot be computed at this point.
+                    // It would require to save all the previous spans' positions before the replace
+                    // Using an invalid -1 value to convey this would break the broacast range
                     spanChanged = true;
                 }
             }
+
             int previousSpanEnd = spanEnd;
             if (spanEnd > newReplaceEnd) {
                 if (nbNewChars != 0) {
