@@ -12,4 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# PLACEHOLDER CONTENT #
+#
+# English (US), Dvorak keyboard layout.
+# Assumes that the base keyboard layout is already English (US).
+#
+
+type OVERLAY
+
+# Test
+key A {
+    label:                              'X'
+    base:                               'x'
+    shift, capslock:                    'X'
+    ctrl, alt, meta:                    none
+}

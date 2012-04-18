@@ -22,7 +22,8 @@ LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
     frameworks/base/services \
     frameworks/base/core/jni \
-    external/skia/include/core
+    external/skia/include/core \
+    libcore/include
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \

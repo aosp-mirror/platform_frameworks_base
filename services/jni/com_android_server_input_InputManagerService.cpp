@@ -46,6 +46,9 @@
 #include <android_view_PointerIcon.h>
 #include <android/graphics/GraphicsJNI.h>
 
+#include <ScopedLocalRef.h>
+#include <ScopedUtfChars.h>
+
 #include "com_android_server_PowerManagerService.h"
 #include "com_android_server_input_InputApplicationHandle.h"
 #include "com_android_server_input_InputWindowHandle.h"
@@ -79,6 +82,7 @@ static struct {
     jmethodID getLongPressTimeout;
     jmethodID getPointerLayer;
     jmethodID getPointerIcon;
+    jmethodID getKeyboardLayoutOverlay;
 } gServiceClassInfo;
 
 static struct {
@@ -179,12 +183,14 @@ public:
     void setSystemUiVisibility(int32_t visibility);
     void setPointerSpeed(int32_t speed);
     void setShowTouches(bool enabled);
+    void reloadKeyboardLayouts();
 
     /* --- InputReaderPolicyInterface implementation --- */
 
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
     virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices);
+    virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const String8& inputDeviceDescriptor);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -522,6 +528,29 @@ void NativeInputManager::notifyInputDevicesChanged(const Vector<InputDeviceInfo>
     checkAndClearExceptionFromCallback(env, "notifyInputDevicesChanged");
 }
 
+sp<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
+        const String8& inputDeviceDescriptor) {
+    JNIEnv* env = jniEnv();
+
+    sp<KeyCharacterMap> result;
+    ScopedLocalRef<jstring> descriptorObj(env, env->NewStringUTF(inputDeviceDescriptor.string()));
+    ScopedLocalRef<jobjectArray> arrayObj(env, jobjectArray(env->CallObjectMethod(mServiceObj,
+                gServiceClassInfo.getKeyboardLayoutOverlay, descriptorObj.get())));
+    if (arrayObj.get()) {
+        ScopedLocalRef<jstring> filenameObj(env,
+                jstring(env->GetObjectArrayElement(arrayObj.get(), 0)));
+        ScopedLocalRef<jstring> contentsObj(env,
+                jstring(env->GetObjectArrayElement(arrayObj.get(), 1)));
+        ScopedUtfChars filenameChars(env, filenameObj.get());
+        ScopedUtfChars contentsChars(env, contentsObj.get());
+
+        KeyCharacterMap::loadContents(String8(filenameChars.c_str()),
+                String8(contentsChars.c_str()), KeyCharacterMap::FORMAT_OVERLAY, &result);
+    }
+    checkAndClearExceptionFromCallback(env, "getKeyboardLayoutOverlay");
+    return result;
+}
+
 void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
         int32_t switchValue, uint32_t policyFlags) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
@@ -726,6 +755,11 @@ void NativeInputManager::setShowTouches(bool enabled) {
 
     mInputManager->getReader()->requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
+}
+
+void NativeInputManager::reloadKeyboardLayouts() {
+    mInputManager->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS);
 }
 
 bool NativeInputManager::isScreenOn() {
@@ -1258,6 +1292,13 @@ static void nativeCancelVibrate(JNIEnv* env,
     im->getInputManager()->getReader()->cancelVibrate(deviceId, token);
 }
 
+static void nativeReloadKeyboardLayouts(JNIEnv* env,
+        jclass clazz, jint ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->reloadKeyboardLayouts();
+}
+
 static jstring nativeDump(JNIEnv* env, jclass clazz, jint ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
@@ -1323,6 +1364,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeVibrate },
     { "nativeCancelVibrate", "(III)V",
             (void*) nativeCancelVibrate },
+    { "nativeReloadKeyboardLayouts", "(I)V",
+            (void*) nativeReloadKeyboardLayouts },
     { "nativeDump", "(I)Ljava/lang/String;",
             (void*) nativeDump },
     { "nativeMonitor", "(I)V",
@@ -1417,6 +1460,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.getPointerIcon, clazz,
             "getPointerIcon", "()Landroid/view/PointerIcon;");
+
+    GET_METHOD_ID(gServiceClassInfo.getKeyboardLayoutOverlay, clazz,
+            "getKeyboardLayoutOverlay", "(Ljava/lang/String;)[Ljava/lang/String;");
 
     // InputDevice
 

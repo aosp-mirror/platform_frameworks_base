@@ -221,6 +221,7 @@ public:
             Vector<VirtualKeyDefinition>& outVirtualKeys) const = 0;
 
     virtual sp<KeyCharacterMap> getKeyCharacterMap(int32_t deviceId) const = 0;
+    virtual bool setKeyboardLayoutOverlay(int32_t deviceId, const sp<KeyCharacterMap>& map) = 0;
 
     /* Control the vibrator. */
     virtual void vibrate(int32_t deviceId, nsecs_t duration) = 0;
@@ -283,6 +284,7 @@ public:
             Vector<VirtualKeyDefinition>& outVirtualKeys) const;
 
     virtual sp<KeyCharacterMap> getKeyCharacterMap(int32_t deviceId) const;
+    virtual bool setKeyboardLayoutOverlay(int32_t deviceId, const sp<KeyCharacterMap>& map);
 
     virtual void vibrate(int32_t deviceId, nsecs_t duration);
     virtual void cancelVibrate(int32_t deviceId);
@@ -320,6 +322,9 @@ private:
         PropertyMap* configuration;
         VirtualKeyMap* virtualKeyMap;
         KeyMap keyMap;
+
+        sp<KeyCharacterMap> overlayKeyMap;
+        sp<KeyCharacterMap> combinedKeyMap;
 
         bool ffEffectPlaying;
         int16_t ffEffectId; // initially -1

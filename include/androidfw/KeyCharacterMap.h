@@ -49,6 +49,17 @@ public:
         KEYBOARD_TYPE_ALPHA = 3,
         KEYBOARD_TYPE_FULL = 4,
         KEYBOARD_TYPE_SPECIAL_FUNCTION = 5,
+        KEYBOARD_TYPE_OVERLAY = 6,
+    };
+
+    enum Format {
+        // Base keyboard layout, may contain device-specific options, such as "type" declaration.
+        FORMAT_BASE = 0,
+        // Overlay keyboard layout, more restrictive, may be published by applications,
+        // cannot override device-specific options.
+        FORMAT_OVERLAY = 1,
+        // Either base or overlay layout ok.
+        FORMAT_ANY = 2,
     };
 
     // Substitute key code and meta state for fallback action.
@@ -58,7 +69,15 @@ public:
     };
 
     /* Loads a key character map from a file. */
-    static status_t load(const String8& filename, sp<KeyCharacterMap>* outMap);
+    static status_t load(const String8& filename, Format format, sp<KeyCharacterMap>* outMap);
+
+    /* Loads a key character map from its string contents. */
+    static status_t loadContents(const String8& filename,
+            const char* contents, Format format, sp<KeyCharacterMap>* outMap);
+
+    /* Combines a base key character map and an overlay. */
+    static sp<KeyCharacterMap> combine(const sp<KeyCharacterMap>& base,
+            const sp<KeyCharacterMap>& overlay);
 
     /* Returns an empty key character map. */
     static sp<KeyCharacterMap> empty();
@@ -115,6 +134,7 @@ protected:
 private:
     struct Behavior {
         Behavior();
+        Behavior(const Behavior& other);
 
         /* The next behavior in the list, or NULL if none. */
         Behavior* next;
@@ -131,6 +151,7 @@ private:
 
     struct Key {
         Key();
+        Key(const Key& other);
         ~Key();
 
         /* The single character label printed on the key, or 0 if none. */
@@ -166,11 +187,12 @@ private:
 
         KeyCharacterMap* mMap;
         Tokenizer* mTokenizer;
+        Format mFormat;
         State mState;
         int32_t mKeyCode;
 
     public:
-        Parser(KeyCharacterMap* map, Tokenizer* tokenizer);
+        Parser(KeyCharacterMap* map, Tokenizer* tokenizer, Format format);
         ~Parser();
         status_t parse();
 
@@ -188,12 +210,15 @@ private:
     int mType;
 
     KeyCharacterMap();
+    KeyCharacterMap(const KeyCharacterMap& other);
 
     bool getKey(int32_t keyCode, const Key** outKey) const;
     bool getKeyBehavior(int32_t keyCode, int32_t metaState,
             const Key** outKey, const Behavior** outBehavior) const;
 
     bool findKey(char16_t ch, int32_t* outKeyCode, int32_t* outMetaState) const;
+
+    static status_t load(Tokenizer* tokenizer, Format format, sp<KeyCharacterMap>* outMap);
 
     static void addKey(Vector<KeyEvent>& outEvents,
             int32_t deviceId, int32_t keyCode, int32_t metaState, bool down, nsecs_t time);

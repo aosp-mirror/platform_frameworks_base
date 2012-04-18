@@ -51,6 +51,7 @@ import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.widget.LockSettingsService;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.input.InputManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.pm.PackageManagerService;
@@ -137,6 +138,7 @@ class ServerThread extends Thread {
         ThrottleService throttle = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
         CommonTimeManagementService commonTimeMgmtService = null;
+        InputManagerService inputManager = null;
 
         // Critical services...
         try {
@@ -224,7 +226,8 @@ class ServerThread extends Thread {
                     factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
                     !firstBoot);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
-            ServiceManager.addService(Context.INPUT_SERVICE, wm.getInputManagerService());
+            inputManager = wm.getInputManagerService();
+            ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
 
             ActivityManagerService.self().setWindowManager(wm);
 
@@ -722,6 +725,7 @@ class ServerThread extends Thread {
         final TextServicesManagerService textServiceManagerServiceF = tsms;
         final StatusBarManagerService statusBarF = statusBar;
         final DreamManagerService dreamyF = dreamy;
+        final InputManagerService inputManagerF = inputManager;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -832,6 +836,11 @@ class ServerThread extends Thread {
                     if (dreamyF != null) dreamyF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making DreamManagerService ready", e);
+                }
+                try {
+                    if (inputManagerF != null) inputManagerF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making InputManagerService ready", e);
                 }
             }
         });
