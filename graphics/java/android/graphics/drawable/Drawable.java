@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.graphics.Insets;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -706,16 +707,12 @@ public abstract class Drawable {
 
     /**
      * Return in insets the layout insets suggested by this Drawable for use with alignment
-     * operations during layout. Positive values move toward the
-     * center of the Drawable. Returns true if this drawable
-     * actually has a layout insets, else false. When false is returned, the padding
-     * is always set to 0.
+     * operations during layout.
      *
      * @hide
      */
-    public boolean getLayoutInsets(Rect insets) {
-        insets.set(0, 0, 0, 0);
-        return false;
+    public Insets getLayoutInsets() {
+        return Insets.NONE;
     }
 
     /**

@@ -36,6 +36,13 @@ public class LayoutInsetsTest extends Activity {
         {
             Button c = new Button(context);
             c.setBackgroundResource(R.drawable.btn_default);
+            c.setText("Test");
+            p.addView(c);
+        }
+
+        {
+            Button c = new Button(context);
+            c.setBackgroundResource(R.drawable.btn_default);
             c.setText("Manual setup");
             p.addView(c);
             c.setOnClickListener(new OnClickListener() {
