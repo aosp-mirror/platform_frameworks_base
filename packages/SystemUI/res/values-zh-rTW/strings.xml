@@ -48,8 +48,7 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"通知"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"藍牙網路共用已開"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"設定輸入法"</string>
-    <!-- no translation found for status_bar_use_physical_keyboard (7551903084416057810) -->
-    <skip />
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"實體鍵盤"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"允許 <xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式存取 USB 裝置嗎？"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"允許 <xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式存取 USB 配件嗎？"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"連接這個 USB 裝置時啟用 <xliff:g id="ACTIVITY">%1$s</xliff:g> 嗎？"</string>
