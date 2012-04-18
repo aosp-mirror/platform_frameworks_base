@@ -978,7 +978,7 @@ class WindowStateAnimator {
 
         setSurfaceBoundaries(recoveringMemory);
 
-        if (w.mAttachedHidden || !w.isReadyForDisplay()) {
+        if (w.mAttachedHidden || !w.isReadyForDisplay() || !w.isDrawnLw()) {
             if (!mLastHidden) {
                 //dump();
                 mLastHidden = true;
