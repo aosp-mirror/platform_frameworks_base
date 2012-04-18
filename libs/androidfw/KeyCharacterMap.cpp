@@ -372,13 +372,44 @@ bool KeyCharacterMap::getKeyBehavior(int32_t keyCode, int32_t metaState,
     if (getKey(keyCode, &key)) {
         const Behavior* behavior = key->firstBehavior;
         while (behavior) {
-            if ((behavior->metaState & metaState) == behavior->metaState) {
+            if (matchesMetaState(metaState, behavior->metaState)) {
                 *outKey = key;
                 *outBehavior = behavior;
                 return true;
             }
             behavior = behavior->next;
         }
+    }
+    return false;
+}
+
+bool KeyCharacterMap::matchesMetaState(int32_t eventMetaState, int32_t behaviorMetaState) {
+    // Behavior must have at least the set of meta states specified.
+    // And if the key event has CTRL, ALT or META then the behavior must exactly
+    // match those, taking into account that a behavior can specify that it handles
+    // one, both or either of a left/right modifier pair.
+    if ((eventMetaState & behaviorMetaState) == behaviorMetaState) {
+        const int32_t EXACT_META_STATES =
+                AMETA_CTRL_ON | AMETA_CTRL_LEFT_ON | AMETA_CTRL_RIGHT_ON
+                | AMETA_ALT_ON | AMETA_ALT_LEFT_ON | AMETA_ALT_RIGHT_ON
+                | AMETA_META_ON | AMETA_META_LEFT_ON | AMETA_META_RIGHT_ON;
+        int32_t unmatchedMetaState = eventMetaState & ~behaviorMetaState & EXACT_META_STATES;
+        if (behaviorMetaState & AMETA_CTRL_ON) {
+            unmatchedMetaState &= ~(AMETA_CTRL_LEFT_ON | AMETA_CTRL_RIGHT_ON);
+        } else if (behaviorMetaState & (AMETA_CTRL_LEFT_ON | AMETA_CTRL_RIGHT_ON)) {
+            unmatchedMetaState &= ~AMETA_CTRL_ON;
+        }
+        if (behaviorMetaState & AMETA_ALT_ON) {
+            unmatchedMetaState &= ~(AMETA_ALT_LEFT_ON | AMETA_ALT_RIGHT_ON);
+        } else if (behaviorMetaState & (AMETA_ALT_LEFT_ON | AMETA_ALT_RIGHT_ON)) {
+            unmatchedMetaState &= ~AMETA_ALT_ON;
+        }
+        if (behaviorMetaState & AMETA_META_ON) {
+            unmatchedMetaState &= ~(AMETA_META_LEFT_ON | AMETA_META_RIGHT_ON);
+        } else if (behaviorMetaState & (AMETA_META_LEFT_ON | AMETA_META_RIGHT_ON)) {
+            unmatchedMetaState &= ~AMETA_META_ON;
+        }
+        return !unmatchedMetaState;
     }
     return false;
 }
@@ -699,12 +730,13 @@ status_t KeyCharacterMap::Parser::parse() {
         return BAD_VALUE;
     }
 
+    if (mMap->mType == KEYBOARD_TYPE_UNKNOWN) {
+        ALOGE("%s: Keyboard layout missing required keyboard 'type' declaration.",
+                mTokenizer->getLocation().string());
+        return BAD_VALUE;
+    }
+
     if (mFormat == FORMAT_BASE) {
-        if (mMap->mType == KEYBOARD_TYPE_UNKNOWN) {
-            ALOGE("%s: Base keyboard layout missing required keyboard 'type' declaration.",
-                    mTokenizer->getLocation().string());
-            return BAD_VALUE;
-        }
         if (mMap->mType == KEYBOARD_TYPE_OVERLAY) {
             ALOGE("%s: Base keyboard layout must specify a keyboard 'type' other than 'OVERLAY'.",
                     mTokenizer->getLocation().string());
@@ -840,10 +872,11 @@ status_t KeyCharacterMap::Parser::parseKey() {
 }
 
 status_t KeyCharacterMap::Parser::parseKeyProperty() {
+    Key* key = mMap->mKeys.valueFor(mKeyCode);
     String8 token = mTokenizer->nextToken(WHITESPACE_OR_PROPERTY_DELIMITER);
     if (token == "}") {
         mState = STATE_TOP;
-        return NO_ERROR;
+        return finishKey(key);
     }
 
     Vector<Property> properties;
@@ -943,7 +976,6 @@ status_t KeyCharacterMap::Parser::parseKeyProperty() {
     } while (!mTokenizer->isEol());
 
     // Add the behavior.
-    Key* key = mMap->mKeys.valueFor(mKeyCode);
     for (size_t i = 0; i < properties.size(); i++) {
         const Property& property = properties.itemAt(i);
         switch (property.property) {
@@ -988,6 +1020,28 @@ status_t KeyCharacterMap::Parser::parseKeyProperty() {
             break;
         }
         }
+    }
+    return NO_ERROR;
+}
+
+status_t KeyCharacterMap::Parser::finishKey(Key* key) {
+    // Fill in default number property.
+    if (!key->number) {
+        char16_t digit = 0;
+        char16_t symbol = 0;
+        for (Behavior* b = key->firstBehavior; b; b = b->next) {
+            char16_t ch = b->character;
+            if (ch) {
+                if (ch >= '0' && ch <= '9') {
+                    digit = ch;
+                } else if (ch == '(' || ch == ')' || ch == '#' || ch == '*'
+                        || ch == '-' || ch == '+' || ch == ',' || ch == '.'
+                        || ch == '\'' || ch == ':' || ch == ';' || ch == '/') {
+                    symbol = ch;
+                }
+            }
+        }
+        key->number = digit ? digit : symbol;
     }
     return NO_ERROR;
 }
