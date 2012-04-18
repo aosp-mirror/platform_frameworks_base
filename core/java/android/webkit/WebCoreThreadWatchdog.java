@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -146,6 +147,7 @@ class WebCoreThreadWatchdog implements Runnable {
                         break;
 
                     case TIMED_OUT:
+                        if ((mContext == null) || !(mContext instanceof Activity)) return;
                         new AlertDialog.Builder(mContext)
                             .setMessage(com.android.internal.R.string.webpage_unresponsive)
                             .setPositiveButton(com.android.internal.R.string.force_close,
