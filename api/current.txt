@@ -10960,7 +10960,7 @@ package android.media {
     method public java.nio.ByteBuffer[] getOutputBuffers();
     method public final java.util.Map<java.lang.String, java.lang.Object> getOutputFormat();
     method public final void queueInputBuffer(int, int, int, long, int);
-    method public final void queueSecureInputBuffer(int, int, int[], int[], int, byte[], byte[], int, long, int);
+    method public final void queueSecureInputBuffer(int, int, android.media.MediaCodec.CryptoInfo, long, int);
     method public final void release();
     method public final void releaseOutputBuffer(int, boolean);
     method public final void start();
@@ -10983,6 +10983,17 @@ package android.media {
     field public int offset;
     field public long presentationTimeUs;
     field public int size;
+  }
+
+  public static final class MediaCodec.CryptoInfo {
+    ctor public MediaCodec.CryptoInfo();
+    method public void set(int, int[], int[], byte[], byte[], int);
+    field public byte[] iv;
+    field public byte[] key;
+    field public int mode;
+    field public int[] numBytesOfClearData;
+    field public int[] numBytesOfEncryptedData;
+    field public int numSubSamples;
   }
 
   public final class MediaCodecList {
@@ -11016,6 +11027,7 @@ package android.media {
     ctor public MediaExtractor();
     method public boolean advance();
     method public int countTracks();
+    method public boolean getSampleCryptoInfo(android.media.MediaCodec.CryptoInfo);
     method public int getSampleFlags();
     method public long getSampleTime();
     method public int getSampleTrackIndex();

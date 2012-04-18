@@ -19,6 +19,7 @@ package android.media;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.media.MediaCodec;
 import android.net.Uri;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -234,6 +235,15 @@ final public class MediaExtractor {
 
     /** Returns the current sample's flags. */
     public native int getSampleFlags();
+
+    /** If the sample flags indicate that the current sample is at least
+     *  partially encrypted, this call returns relevant information about
+     *  the structure of the sample data required for decryption.
+     *  @param info The android.media.MediaCodec.CryptoInfo structure
+     *              to be filled in.
+     *  @return true iff the sample flags contain {@link #SAMPLE_FLAG_ENCRYPTED}
+    */
+    public native boolean getSampleCryptoInfo(MediaCodec.CryptoInfo info);
 
     private static native final void native_init();
     private native final void native_setup();

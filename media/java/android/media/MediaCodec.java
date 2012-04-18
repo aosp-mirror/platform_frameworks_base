@@ -309,36 +309,57 @@ final public class MediaCodec {
             int index,
             int offset, int size, long presentationTimeUs, int flags);
 
+    /** Metadata describing the structure of a (at least partially) encrypted
+     *  input sample.
+     *  A buffer's data is considered to be partitioned into "subSamples",
+     *  each subSample starts with a (potentially empty) run of plain,
+     *  unencrypted bytes followed by a (also potentially empty) run of
+     *  encrypted bytes.
+     *  numBytesOfClearData can be null to indicate that all data is encrypted.
+    */
+    public final static class CryptoInfo {
+        public void set(
+                int newNumSubSamples,
+                int[] newNumBytesOfClearData,
+                int[] newNumBytesOfEncryptedData,
+                byte[] newKey,
+                byte[] newIV,
+                int newMode) {
+            numSubSamples = newNumSubSamples;
+            numBytesOfClearData = newNumBytesOfClearData;
+            numBytesOfEncryptedData = newNumBytesOfEncryptedData;
+            key = newKey;
+            iv = newIV;
+            mode = newMode;
+        }
+
+        /** The number of subSamples that make up the buffer's contents. */
+        public int numSubSamples;
+        /** The number of leading unencrypted bytes in each subSample. */
+        public int[] numBytesOfClearData;
+        /** The number of trailing encrypted bytes in each subSample. */
+        public int[] numBytesOfEncryptedData;
+        /** A 16-byte opaque key */
+        public byte[] key;
+        /** A 16-byte initialization vector */
+        public byte[] iv;
+        /** The type of encryption that has been applied */
+        public int mode;
+    };
+
     /** Similar to {@link #queueInputBuffer} but submits a buffer that is
-     *  potentially encrypted. The buffer's data is considered to be
-     *  partitioned into "subSamples", each subSample starts with a
-     *  (potentially empty) run of plain, unencrypted bytes followed
-     *  by a (also potentially empty) run of encrypted bytes.
+     *  potentially encrypted.
      *  @param index The index of a client-owned input buffer previously returned
      *               in a call to {@link #dequeueInputBuffer}.
      *  @param offset The byte offset into the input buffer at which the data starts.
-     *  @param numBytesOfClearData The number of leading unencrypted bytes in
-     *                             each subSample.
-     *  @param numBytesOfEncryptedData The number of trailing encrypted bytes
-     *                             in each subSample.
-     *  @param numSubSamples    The number of subSamples that make up the
-     *                          buffer's contents.
-     *  @param key              A 16-byte opaque key
-     *  @param iv               A 16-byte initialization vector
-     *  @param mode             The type of encryption that has been applied
-     *
-     *  Either numBytesOfClearData or numBytesOfEncryptedData (but not both)
-     *  can be null to indicate that all respective sizes are 0.
+     *  @param presentationTimeUs The time at which this buffer should be rendered.
+     *  @param flags A bitmask of flags {@link #FLAG_SYNCFRAME},
+     *               {@link #FLAG_CODECCONFIG} or {@link #FLAG_EOS}.
      */
     public native final void queueSecureInputBuffer(
             int index,
             int offset,
-            int[] numBytesOfClearData,
-            int[] numBytesOfEncryptedData,
-            int numSubSamples,
-            byte[] key,
-            byte[] iv,
-            int mode,
+            CryptoInfo info,
             long presentationTimeUs,
             int flags);
 

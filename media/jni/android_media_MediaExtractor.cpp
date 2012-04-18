@@ -30,12 +30,15 @@
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaErrors.h>
+#include <media/stagefright/MetaData.h>
 #include <media/stagefright/NuMediaExtractor.h>
 
 namespace android {
 
 struct fields_t {
     jfieldID context;
+
+    jmethodID cryptoInfoSetID;
 };
 
 static fields_t gFields;
@@ -166,7 +169,32 @@ status_t JMediaExtractor::getSampleTime(int64_t *sampleTimeUs) {
 }
 
 status_t JMediaExtractor::getSampleFlags(uint32_t *sampleFlags) {
-    return mImpl->getSampleFlags(sampleFlags);
+    *sampleFlags = 0;
+
+    sp<MetaData> meta;
+    status_t err = mImpl->getSampleMeta(&meta);
+
+    if (err != OK) {
+        return err;
+    }
+
+    int32_t val;
+    if (meta->findInt32(kKeyIsSyncFrame, &val) && val != 0) {
+        (*sampleFlags) |= NuMediaExtractor::SAMPLE_FLAG_SYNC;
+    }
+
+    uint32_t type;
+    const void *data;
+    size_t size;
+    if (meta->findData(kKeyEncryptedSizes, &type, &data, &size)) {
+        (*sampleFlags) |= NuMediaExtractor::SAMPLE_FLAG_ENCRYPTED;
+    }
+
+    return OK;
+}
+
+status_t JMediaExtractor::getSampleMeta(sp<MetaData> *sampleMeta) {
+    return mImpl->getSampleMeta(sampleMeta);
 }
 
 }  // namespace android
@@ -369,12 +397,122 @@ static jint android_media_MediaExtractor_getSampleFlags(
     return sampleFlags;
 }
 
+static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
+        JNIEnv *env, jobject thiz, jobject cryptoInfoObj) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return -1ll;
+    }
+
+    sp<MetaData> meta;
+    status_t err = extractor->getSampleMeta(&meta);
+
+    if (err != OK) {
+        return false;
+    }
+
+    uint32_t type;
+    const void *data;
+    size_t size;
+    if (!meta->findData(kKeyEncryptedSizes, &type, &data, &size)) {
+        return false;
+    }
+
+    size_t numSubSamples = size / sizeof(size_t);
+
+    if (numSubSamples == 0) {
+        return false;
+    }
+
+    jintArray numBytesOfEncryptedDataObj = env->NewIntArray(numSubSamples);
+    jboolean isCopy;
+    jint *dst = env->GetIntArrayElements(numBytesOfEncryptedDataObj, &isCopy);
+    for (size_t i = 0; i < numSubSamples; ++i) {
+        dst[i] = ((const size_t *)data)[i];
+    }
+    env->ReleaseIntArrayElements(numBytesOfEncryptedDataObj, dst, 0);
+    dst = NULL;
+
+    size_t encSize = size;
+    jintArray numBytesOfPlainDataObj = NULL;
+    if (meta->findData(kKeyEncryptedSizes, &type, &data, &size)) {
+        if (size != encSize) {
+            // The two must be of the same length.
+            return false;
+        }
+
+        numBytesOfPlainDataObj = env->NewIntArray(numSubSamples);
+        jboolean isCopy;
+        jint *dst = env->GetIntArrayElements(numBytesOfPlainDataObj, &isCopy);
+        for (size_t i = 0; i < numSubSamples; ++i) {
+            dst[i] = ((const size_t *)data)[i];
+        }
+        env->ReleaseIntArrayElements(numBytesOfPlainDataObj, dst, 0);
+        dst = NULL;
+    }
+
+    jbyteArray keyObj = NULL;
+    if (meta->findData(kKeyCryptoKey, &type, &data, &size)) {
+        if (size != 16) {
+            // Keys must be 16 bytes in length.
+            return false;
+        }
+
+        keyObj = env->NewByteArray(size);
+        jboolean isCopy;
+        jbyte *dst = env->GetByteArrayElements(keyObj, &isCopy);
+        memcpy(dst, data, size);
+        env->ReleaseByteArrayElements(keyObj, dst, 0);
+        dst = NULL;
+    }
+
+    jbyteArray ivObj = NULL;
+    if (meta->findData(kKeyCryptoIV, &type, &data, &size)) {
+        if (size != 16) {
+            // IVs must be 16 bytes in length.
+            return false;
+        }
+
+        ivObj = env->NewByteArray(size);
+        jboolean isCopy;
+        jbyte *dst = env->GetByteArrayElements(ivObj, &isCopy);
+        memcpy(dst, data, size);
+        env->ReleaseByteArrayElements(ivObj, dst, 0);
+        dst = NULL;
+    }
+
+    int32_t mode;
+    if (!meta->findInt32(kKeyCryptoMode, &mode)) {
+        mode = 0;
+    }
+
+    env->CallVoidMethod(
+            cryptoInfoObj,
+            gFields.cryptoInfoSetID,
+            numSubSamples,
+            numBytesOfPlainDataObj,
+            numBytesOfEncryptedDataObj,
+            keyObj,
+            ivObj,
+            mode);
+
+    return true;
+}
+
 static void android_media_MediaExtractor_native_init(JNIEnv *env) {
     jclass clazz = env->FindClass("android/media/MediaExtractor");
     CHECK(clazz != NULL);
 
     gFields.context = env->GetFieldID(clazz, "mNativeContext", "I");
     CHECK(gFields.context != NULL);
+
+    clazz = env->FindClass("android/media/MediaCodec$CryptoInfo");
+    CHECK(clazz != NULL);
+
+    gFields.cryptoInfoSetID =
+        env->GetMethodID(clazz, "set", "(I[I[I[B[BI)V");
 
     DataSource::RegisterDefaultSniffers();
 }
@@ -484,6 +622,9 @@ static JNINativeMethod gMethods[] = {
 
     { "getSampleFlags", "()I",
         (void *)android_media_MediaExtractor_getSampleFlags },
+
+    { "getSampleCryptoInfo", "(Landroid/media/MediaCodec$CryptoInfo;)Z",
+        (void *)android_media_MediaExtractor_getSampleCryptoInfo },
 
     { "native_init", "()V", (void *)android_media_MediaExtractor_native_init },
 
