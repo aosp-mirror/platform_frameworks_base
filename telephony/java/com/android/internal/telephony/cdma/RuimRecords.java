@@ -199,7 +199,7 @@ public final class RuimRecords extends IccRecords {
 
         boolean isRecordLoadResponse = false;
 
-        if (mDestroyed.get()) {
+        if (mDestroyed) {
             loge("Received message " + msg +
                     "[" + msg.what + "] while being destroyed. Ignoring.");
             return;
@@ -317,20 +317,18 @@ public final class RuimRecords extends IccRecords {
         // One record loaded successfully or failed, In either case
         // we need to update the recordsToLoad count
         recordsToLoad -= 1;
-        if (DBG) log("onRecordLoaded " + recordsToLoad + " requested: " + recordsRequested);
+        if (DBG) log("RuimRecords:onRecordLoaded " + recordsToLoad + " requested: " + recordsRequested);
 
         if (recordsToLoad == 0 && recordsRequested == true) {
             onAllRecordsLoaded();
         } else if (recordsToLoad < 0) {
-            loge("recordsToLoad <0, programmer error suspected");
+            loge("RuimRecords: recordsToLoad <0, programmer error suspected");
             recordsToLoad = 0;
         }
     }
 
     @Override
     protected void onAllRecordsLoaded() {
-        if (DBG) log("record load complete");
-
         // Further records that can be inserted are Operator/OEM dependent
 
         String operator = getRUIMOperatorNumeric();
@@ -350,6 +348,13 @@ public final class RuimRecords extends IccRecords {
 
     @Override
     public void onReady() {
+        /* broadcast intent ICC_READY here so that we can make sure
+          READY is sent before IMSI ready
+        */
+
+        mParentCard.broadcastIccStateChangedIntent(
+                IccCard.INTENT_VALUE_ICC_READY, null);
+
         fetchRuimRecords();
 
         mCi.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
@@ -359,7 +364,7 @@ public final class RuimRecords extends IccRecords {
     private void fetchRuimRecords() {
         recordsRequested = true;
 
-        if (DBG) log("fetchRuimRecords " + recordsToLoad);
+        Log.v(LOG_TAG, "RuimRecords:fetchRuimRecords " + recordsToLoad);
 
         mCi.getIMSI(obtainMessage(EVENT_GET_IMSI_DONE));
         recordsToLoad++;
@@ -368,7 +373,7 @@ public final class RuimRecords extends IccRecords {
                 obtainMessage(EVENT_GET_ICCID_DONE));
         recordsToLoad++;
 
-        if (DBG) log("fetchRuimRecords " + recordsToLoad + " requested: " + recordsRequested);
+        log("RuimRecords:fetchRuimRecords " + recordsToLoad + " requested: " + recordsRequested);
         // Further records that can be inserted are Operator/OEM dependent
     }
 
