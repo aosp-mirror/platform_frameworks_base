@@ -27,6 +27,7 @@
 
 namespace android {
 
+struct MetaData;
 struct NuMediaExtractor;
 
 struct JMediaExtractor : public RefBase {
@@ -50,6 +51,7 @@ struct JMediaExtractor : public RefBase {
     status_t getSampleTrackIndex(size_t *trackIndex);
     status_t getSampleTime(int64_t *sampleTimeUs);
     status_t getSampleFlags(uint32_t *sampleFlags);
+    status_t getSampleMeta(sp<MetaData> *sampleMeta);
 
 protected:
     virtual ~JMediaExtractor();

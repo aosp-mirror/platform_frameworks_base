@@ -49,6 +49,13 @@ enum {
 
 struct fields_t {
     jfieldID context;
+
+    jfieldID cryptoInfoNumSubSamplesID;
+    jfieldID cryptoInfoNumBytesOfClearDataID;
+    jfieldID cryptoInfoNumBytesOfEncryptedDataID;
+    jfieldID cryptoInfoKeyID;
+    jfieldID cryptoInfoIVID;
+    jfieldID cryptoInfoModeID;
 };
 
 static fields_t gFields;
@@ -387,12 +394,7 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
         jobject thiz,
         jint index,
         jint offset,
-        jintArray numBytesOfClearDataObj,
-        jintArray numBytesOfEncryptedDataObj,
-        jint numSubSamples,
-        jbyteArray keyObj,
-        jbyteArray ivObj,
-        jint mode,
+        jobject cryptoInfoObj,
         jlong timestampUs,
         jint flags) {
     ALOGV("android_media_MediaCodec_queueSecureInputBuffer");
@@ -403,6 +405,25 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
+
+    jint numSubSamples =
+        env->GetIntField(cryptoInfoObj, gFields.cryptoInfoNumSubSamplesID);
+
+    jintArray numBytesOfClearDataObj =
+        (jintArray)env->GetObjectField(
+                cryptoInfoObj, gFields.cryptoInfoNumBytesOfClearDataID);
+
+    jintArray numBytesOfEncryptedDataObj =
+        (jintArray)env->GetObjectField(
+                cryptoInfoObj, gFields.cryptoInfoNumBytesOfEncryptedDataID);
+
+    jbyteArray keyObj =
+        (jbyteArray)env->GetObjectField(cryptoInfoObj, gFields.cryptoInfoKeyID);
+
+    jbyteArray ivObj =
+        (jbyteArray)env->GetObjectField(cryptoInfoObj, gFields.cryptoInfoIVID);
+
+    jint mode = env->GetIntField(cryptoInfoObj, gFields.cryptoInfoModeID);
 
     status_t err = OK;
 
@@ -612,6 +633,30 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
 
     gFields.context = env->GetFieldID(clazz, "mNativeContext", "I");
     CHECK(gFields.context != NULL);
+
+    clazz = env->FindClass("android/media/MediaCodec$CryptoInfo");
+    CHECK(clazz != NULL);
+
+    gFields.cryptoInfoNumSubSamplesID =
+        env->GetFieldID(clazz, "numSubSamples", "I");
+    CHECK(gFields.cryptoInfoNumSubSamplesID != NULL);
+
+    gFields.cryptoInfoNumBytesOfClearDataID =
+        env->GetFieldID(clazz, "numBytesOfClearData", "[I");
+    CHECK(gFields.cryptoInfoNumBytesOfClearDataID != NULL);
+
+    gFields.cryptoInfoNumBytesOfEncryptedDataID =
+        env->GetFieldID(clazz, "numBytesOfEncryptedData", "[I");
+    CHECK(gFields.cryptoInfoNumBytesOfEncryptedDataID != NULL);
+
+    gFields.cryptoInfoKeyID = env->GetFieldID(clazz, "key", "[B");
+    CHECK(gFields.cryptoInfoKeyID != NULL);
+
+    gFields.cryptoInfoIVID = env->GetFieldID(clazz, "iv", "[B");
+    CHECK(gFields.cryptoInfoIVID != NULL);
+
+    gFields.cryptoInfoModeID = env->GetFieldID(clazz, "mode", "I");
+    CHECK(gFields.cryptoInfoModeID != NULL);
 }
 
 static void android_media_MediaCodec_native_setup(
@@ -666,7 +711,7 @@ static JNINativeMethod gMethods[] = {
     { "queueInputBuffer", "(IIIJI)V",
       (void *)android_media_MediaCodec_queueInputBuffer },
 
-    { "queueSecureInputBuffer", "(II[I[II[B[BIJI)V",
+    { "queueSecureInputBuffer", "(IILandroid/media/MediaCodec$CryptoInfo;JI)V",
       (void *)android_media_MediaCodec_queueSecureInputBuffer },
 
     { "dequeueInputBuffer", "(J)I",
