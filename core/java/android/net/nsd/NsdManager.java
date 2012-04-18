@@ -141,10 +141,9 @@ public class NsdManager {
      * information as int.
      *
      * @see #EXTRA_NSD_STATE
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String NSD_STATE_CHANGED_ACTION =
+    public static final String ACTION_NSD_STATE_CHANGED =
         "android.net.nsd.STATE_CHANGED";
 
     /**
@@ -153,7 +152,6 @@ public class NsdManager {
      *
      * @see #NSD_STATE_DISABLED
      * @see #NSD_STATE_ENABLED
-     * @hide
      */
     public static final String EXTRA_NSD_STATE = "nsd_state";
 
@@ -161,7 +159,6 @@ public class NsdManager {
      * Network service discovery is disabled
      *
      * @see #NSD_STATE_CHANGED_ACTION
-     * @hide
      */
     public static final int NSD_STATE_DISABLED = 1;
 
@@ -169,7 +166,6 @@ public class NsdManager {
      * Network service discovery is enabled
      *
      * @see #NSD_STATE_CHANGED_ACTION
-     * @hide
      */
     public static final int NSD_STATE_ENABLED = 2;
 
