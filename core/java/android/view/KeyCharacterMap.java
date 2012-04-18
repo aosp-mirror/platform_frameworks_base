@@ -135,6 +135,163 @@ public class KeyCharacterMap implements Parcelable {
      */
     public static final int MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED = 1;
 
+    /*
+     * This bit will be set in the return value of {@link #get(int, int)} if the
+     * key is a "dead key."
+     */
+    public static final int COMBINING_ACCENT = 0x80000000;
+
+    /**
+     * Mask the return value from {@link #get(int, int)} with this value to get
+     * a printable representation of the accent character of a "dead key."
+     */
+    public static final int COMBINING_ACCENT_MASK = 0x7FFFFFFF;
+
+    /* Characters used to display placeholders for dead keys. */
+    private static final int ACCENT_ACUTE = '\u00B4';
+    private static final int ACCENT_GRAVE = '\u02CB';
+    private static final int ACCENT_CIRCUMFLEX = '\u02C6';
+    private static final int ACCENT_TILDE = '\u02DC';
+    private static final int ACCENT_UMLAUT = '\u00A8';
+
+    /* Legacy dead key display characters used in previous versions of the API.
+     * We still support these characters by mapping them to their non-legacy version. */
+    private static final int ACCENT_GRAVE_LEGACY = '`';
+    private static final int ACCENT_CIRCUMFLEX_LEGACY = '^';
+    private static final int ACCENT_TILDE_LEGACY = '~';
+
+    /**
+     * Maps Unicode combining diacritical to display-form dead key
+     * (display character shifted left 16 bits).
+     */
+    private static final SparseIntArray COMBINING = new SparseIntArray();
+    static {
+        COMBINING.put('\u0300', ACCENT_GRAVE);
+        COMBINING.put('\u0301', ACCENT_ACUTE);
+        COMBINING.put('\u0302', ACCENT_CIRCUMFLEX);
+        COMBINING.put('\u0303', ACCENT_TILDE);
+        COMBINING.put('\u0308', ACCENT_UMLAUT);
+    }
+
+    /**
+     * Maps combinations of (display-form) dead key and second character
+     * to combined output character.
+     */
+    private static final SparseIntArray DEAD = new SparseIntArray();
+    static {
+        addDeadChar(ACCENT_ACUTE, 'A', '\u00C1');
+        addDeadChar(ACCENT_ACUTE, 'C', '\u0106');
+        addDeadChar(ACCENT_ACUTE, 'E', '\u00C9');
+        addDeadChar(ACCENT_ACUTE, 'G', '\u01F4');
+        addDeadChar(ACCENT_ACUTE, 'I', '\u00CD');
+        addDeadChar(ACCENT_ACUTE, 'K', '\u1E30');
+        addDeadChar(ACCENT_ACUTE, 'L', '\u0139');
+        addDeadChar(ACCENT_ACUTE, 'M', '\u1E3E');
+        addDeadChar(ACCENT_ACUTE, 'N', '\u0143');
+        addDeadChar(ACCENT_ACUTE, 'O', '\u00D3');
+        addDeadChar(ACCENT_ACUTE, 'P', '\u1E54');
+        addDeadChar(ACCENT_ACUTE, 'R', '\u0154');
+        addDeadChar(ACCENT_ACUTE, 'S', '\u015A');
+        addDeadChar(ACCENT_ACUTE, 'U', '\u00DA');
+        addDeadChar(ACCENT_ACUTE, 'W', '\u1E82');
+        addDeadChar(ACCENT_ACUTE, 'Y', '\u00DD');
+        addDeadChar(ACCENT_ACUTE, 'Z', '\u0179');
+        addDeadChar(ACCENT_ACUTE, 'a', '\u00E1');
+        addDeadChar(ACCENT_ACUTE, 'c', '\u0107');
+        addDeadChar(ACCENT_ACUTE, 'e', '\u00E9');
+        addDeadChar(ACCENT_ACUTE, 'g', '\u01F5');
+        addDeadChar(ACCENT_ACUTE, 'i', '\u00ED');
+        addDeadChar(ACCENT_ACUTE, 'k', '\u1E31');
+        addDeadChar(ACCENT_ACUTE, 'l', '\u013A');
+        addDeadChar(ACCENT_ACUTE, 'm', '\u1E3F');
+        addDeadChar(ACCENT_ACUTE, 'n', '\u0144');
+        addDeadChar(ACCENT_ACUTE, 'o', '\u00F3');
+        addDeadChar(ACCENT_ACUTE, 'p', '\u1E55');
+        addDeadChar(ACCENT_ACUTE, 'r', '\u0155');
+        addDeadChar(ACCENT_ACUTE, 's', '\u015B');
+        addDeadChar(ACCENT_ACUTE, 'u', '\u00FA');
+        addDeadChar(ACCENT_ACUTE, 'w', '\u1E83');
+        addDeadChar(ACCENT_ACUTE, 'y', '\u00FD');
+        addDeadChar(ACCENT_ACUTE, 'z', '\u017A');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'A', '\u00C2');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'C', '\u0108');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'E', '\u00CA');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'G', '\u011C');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'H', '\u0124');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'I', '\u00CE');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'J', '\u0134');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'O', '\u00D4');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'S', '\u015C');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'U', '\u00DB');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'W', '\u0174');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'Y', '\u0176');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'Z', '\u1E90');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'a', '\u00E2');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'c', '\u0109');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'e', '\u00EA');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'g', '\u011D');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'h', '\u0125');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'i', '\u00EE');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'j', '\u0135');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'o', '\u00F4');
+        addDeadChar(ACCENT_CIRCUMFLEX, 's', '\u015D');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'u', '\u00FB');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'w', '\u0175');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'y', '\u0177');
+        addDeadChar(ACCENT_CIRCUMFLEX, 'z', '\u1E91');
+        addDeadChar(ACCENT_GRAVE, 'A', '\u00C0');
+        addDeadChar(ACCENT_GRAVE, 'E', '\u00C8');
+        addDeadChar(ACCENT_GRAVE, 'I', '\u00CC');
+        addDeadChar(ACCENT_GRAVE, 'N', '\u01F8');
+        addDeadChar(ACCENT_GRAVE, 'O', '\u00D2');
+        addDeadChar(ACCENT_GRAVE, 'U', '\u00D9');
+        addDeadChar(ACCENT_GRAVE, 'W', '\u1E80');
+        addDeadChar(ACCENT_GRAVE, 'Y', '\u1EF2');
+        addDeadChar(ACCENT_GRAVE, 'a', '\u00E0');
+        addDeadChar(ACCENT_GRAVE, 'e', '\u00E8');
+        addDeadChar(ACCENT_GRAVE, 'i', '\u00EC');
+        addDeadChar(ACCENT_GRAVE, 'n', '\u01F9');
+        addDeadChar(ACCENT_GRAVE, 'o', '\u00F2');
+        addDeadChar(ACCENT_GRAVE, 'u', '\u00F9');
+        addDeadChar(ACCENT_GRAVE, 'w', '\u1E81');
+        addDeadChar(ACCENT_GRAVE, 'y', '\u1EF3');
+        addDeadChar(ACCENT_TILDE, 'A', '\u00C3');
+        addDeadChar(ACCENT_TILDE, 'E', '\u1EBC');
+        addDeadChar(ACCENT_TILDE, 'I', '\u0128');
+        addDeadChar(ACCENT_TILDE, 'N', '\u00D1');
+        addDeadChar(ACCENT_TILDE, 'O', '\u00D5');
+        addDeadChar(ACCENT_TILDE, 'U', '\u0168');
+        addDeadChar(ACCENT_TILDE, 'V', '\u1E7C');
+        addDeadChar(ACCENT_TILDE, 'Y', '\u1EF8');
+        addDeadChar(ACCENT_TILDE, 'a', '\u00E3');
+        addDeadChar(ACCENT_TILDE, 'e', '\u1EBD');
+        addDeadChar(ACCENT_TILDE, 'i', '\u0129');
+        addDeadChar(ACCENT_TILDE, 'n', '\u00F1');
+        addDeadChar(ACCENT_TILDE, 'o', '\u00F5');
+        addDeadChar(ACCENT_TILDE, 'u', '\u0169');
+        addDeadChar(ACCENT_TILDE, 'v', '\u1E7D');
+        addDeadChar(ACCENT_TILDE, 'y', '\u1EF9');
+        addDeadChar(ACCENT_UMLAUT, 'A', '\u00C4');
+        addDeadChar(ACCENT_UMLAUT, 'E', '\u00CB');
+        addDeadChar(ACCENT_UMLAUT, 'H', '\u1E26');
+        addDeadChar(ACCENT_UMLAUT, 'I', '\u00CF');
+        addDeadChar(ACCENT_UMLAUT, 'O', '\u00D6');
+        addDeadChar(ACCENT_UMLAUT, 'U', '\u00DC');
+        addDeadChar(ACCENT_UMLAUT, 'W', '\u1E84');
+        addDeadChar(ACCENT_UMLAUT, 'X', '\u1E8C');
+        addDeadChar(ACCENT_UMLAUT, 'Y', '\u0178');
+        addDeadChar(ACCENT_UMLAUT, 'a', '\u00E4');
+        addDeadChar(ACCENT_UMLAUT, 'e', '\u00EB');
+        addDeadChar(ACCENT_UMLAUT, 'h', '\u1E27');
+        addDeadChar(ACCENT_UMLAUT, 'i', '\u00EF');
+        addDeadChar(ACCENT_UMLAUT, 'o', '\u00F6');
+        addDeadChar(ACCENT_UMLAUT, 't', '\u1E97');
+        addDeadChar(ACCENT_UMLAUT, 'u', '\u00FC');
+        addDeadChar(ACCENT_UMLAUT, 'w', '\u1E85');
+        addDeadChar(ACCENT_UMLAUT, 'x', '\u1E8D');
+        addDeadChar(ACCENT_UMLAUT, 'y', '\u00FF');
+    }
+
     public static final Parcelable.Creator<KeyCharacterMap> CREATOR =
             new Parcelable.Creator<KeyCharacterMap>() {
         public KeyCharacterMap createFromParcel(Parcel in) {
@@ -232,7 +389,7 @@ public class KeyCharacterMap implements Parcelable {
 
         int map = COMBINING.get(ch);
         if (map != 0) {
-            return map;
+            return map | COMBINING_ACCENT;
         } else {
             return ch;
         }
@@ -346,6 +503,13 @@ public class KeyCharacterMap implements Parcelable {
      * @return The combined character, or 0 if the characters cannot be combined.
      */
     public static int getDeadChar(int accent, int c) {
+        if (accent == ACCENT_CIRCUMFLEX_LEGACY) {
+            accent = ACCENT_CIRCUMFLEX;
+        } else if (accent == ACCENT_GRAVE_LEGACY) {
+            accent = ACCENT_GRAVE;
+        } else if (accent == ACCENT_TILDE_LEGACY) {
+            accent = ACCENT_TILDE;
+        }
         return DEAD.get((accent << 16) | c);
     }
 
@@ -559,157 +723,8 @@ public class KeyCharacterMap implements Parcelable {
         return 0;
     }
 
-    /**
-     * Maps Unicode combining diacritical to display-form dead key
-     * (display character shifted left 16 bits).
-     */
-    private static SparseIntArray COMBINING = new SparseIntArray();
-
-    /**
-     * Maps combinations of (display-form) dead key and second character
-     * to combined output character.
-     */
-    private static SparseIntArray DEAD = new SparseIntArray();
-
-    /*
-     * TODO: Change the table format to support full 21-bit-wide
-     * accent characters and combined characters if ever necessary.
-     */
-    private static final int ACUTE = '\u00B4' << 16;
-    private static final int GRAVE = '`' << 16;
-    private static final int CIRCUMFLEX = '^' << 16;
-    private static final int TILDE = '~' << 16;
-    private static final int UMLAUT = '\u00A8' << 16;
-
-    /*
-     * This bit will be set in the return value of {@link #get(int, int)} if the
-     * key is a "dead key."
-     */
-    public static final int COMBINING_ACCENT = 0x80000000;
-    /**
-     * Mask the return value from {@link #get(int, int)} with this value to get
-     * a printable representation of the accent character of a "dead key."
-     */
-    public static final int COMBINING_ACCENT_MASK = 0x7FFFFFFF;
-
-    static {
-        COMBINING.put('\u0300', (GRAVE >> 16) | COMBINING_ACCENT);
-        COMBINING.put('\u0301', (ACUTE >> 16) | COMBINING_ACCENT);
-        COMBINING.put('\u0302', (CIRCUMFLEX >> 16) | COMBINING_ACCENT);
-        COMBINING.put('\u0303', (TILDE >> 16) | COMBINING_ACCENT);
-        COMBINING.put('\u0308', (UMLAUT >> 16) | COMBINING_ACCENT);
-
-        DEAD.put(ACUTE | 'A', '\u00C1');
-        DEAD.put(ACUTE | 'C', '\u0106');
-        DEAD.put(ACUTE | 'E', '\u00C9');
-        DEAD.put(ACUTE | 'G', '\u01F4');
-        DEAD.put(ACUTE | 'I', '\u00CD');
-        DEAD.put(ACUTE | 'K', '\u1E30');
-        DEAD.put(ACUTE | 'L', '\u0139');
-        DEAD.put(ACUTE | 'M', '\u1E3E');
-        DEAD.put(ACUTE | 'N', '\u0143');
-        DEAD.put(ACUTE | 'O', '\u00D3');
-        DEAD.put(ACUTE | 'P', '\u1E54');
-        DEAD.put(ACUTE | 'R', '\u0154');
-        DEAD.put(ACUTE | 'S', '\u015A');
-        DEAD.put(ACUTE | 'U', '\u00DA');
-        DEAD.put(ACUTE | 'W', '\u1E82');
-        DEAD.put(ACUTE | 'Y', '\u00DD');
-        DEAD.put(ACUTE | 'Z', '\u0179');
-        DEAD.put(ACUTE | 'a', '\u00E1');
-        DEAD.put(ACUTE | 'c', '\u0107');
-        DEAD.put(ACUTE | 'e', '\u00E9');
-        DEAD.put(ACUTE | 'g', '\u01F5');
-        DEAD.put(ACUTE | 'i', '\u00ED');
-        DEAD.put(ACUTE | 'k', '\u1E31');
-        DEAD.put(ACUTE | 'l', '\u013A');
-        DEAD.put(ACUTE | 'm', '\u1E3F');
-        DEAD.put(ACUTE | 'n', '\u0144');
-        DEAD.put(ACUTE | 'o', '\u00F3');
-        DEAD.put(ACUTE | 'p', '\u1E55');
-        DEAD.put(ACUTE | 'r', '\u0155');
-        DEAD.put(ACUTE | 's', '\u015B');
-        DEAD.put(ACUTE | 'u', '\u00FA');
-        DEAD.put(ACUTE | 'w', '\u1E83');
-        DEAD.put(ACUTE | 'y', '\u00FD');
-        DEAD.put(ACUTE | 'z', '\u017A');
-        DEAD.put(CIRCUMFLEX | 'A', '\u00C2');
-        DEAD.put(CIRCUMFLEX | 'C', '\u0108');
-        DEAD.put(CIRCUMFLEX | 'E', '\u00CA');
-        DEAD.put(CIRCUMFLEX | 'G', '\u011C');
-        DEAD.put(CIRCUMFLEX | 'H', '\u0124');
-        DEAD.put(CIRCUMFLEX | 'I', '\u00CE');
-        DEAD.put(CIRCUMFLEX | 'J', '\u0134');
-        DEAD.put(CIRCUMFLEX | 'O', '\u00D4');
-        DEAD.put(CIRCUMFLEX | 'S', '\u015C');
-        DEAD.put(CIRCUMFLEX | 'U', '\u00DB');
-        DEAD.put(CIRCUMFLEX | 'W', '\u0174');
-        DEAD.put(CIRCUMFLEX | 'Y', '\u0176');
-        DEAD.put(CIRCUMFLEX | 'Z', '\u1E90');
-        DEAD.put(CIRCUMFLEX | 'a', '\u00E2');
-        DEAD.put(CIRCUMFLEX | 'c', '\u0109');
-        DEAD.put(CIRCUMFLEX | 'e', '\u00EA');
-        DEAD.put(CIRCUMFLEX | 'g', '\u011D');
-        DEAD.put(CIRCUMFLEX | 'h', '\u0125');
-        DEAD.put(CIRCUMFLEX | 'i', '\u00EE');
-        DEAD.put(CIRCUMFLEX | 'j', '\u0135');
-        DEAD.put(CIRCUMFLEX | 'o', '\u00F4');
-        DEAD.put(CIRCUMFLEX | 's', '\u015D');
-        DEAD.put(CIRCUMFLEX | 'u', '\u00FB');
-        DEAD.put(CIRCUMFLEX | 'w', '\u0175');
-        DEAD.put(CIRCUMFLEX | 'y', '\u0177');
-        DEAD.put(CIRCUMFLEX | 'z', '\u1E91');
-        DEAD.put(GRAVE | 'A', '\u00C0');
-        DEAD.put(GRAVE | 'E', '\u00C8');
-        DEAD.put(GRAVE | 'I', '\u00CC');
-        DEAD.put(GRAVE | 'N', '\u01F8');
-        DEAD.put(GRAVE | 'O', '\u00D2');
-        DEAD.put(GRAVE | 'U', '\u00D9');
-        DEAD.put(GRAVE | 'W', '\u1E80');
-        DEAD.put(GRAVE | 'Y', '\u1EF2');
-        DEAD.put(GRAVE | 'a', '\u00E0');
-        DEAD.put(GRAVE | 'e', '\u00E8');
-        DEAD.put(GRAVE | 'i', '\u00EC');
-        DEAD.put(GRAVE | 'n', '\u01F9');
-        DEAD.put(GRAVE | 'o', '\u00F2');
-        DEAD.put(GRAVE | 'u', '\u00F9');
-        DEAD.put(GRAVE | 'w', '\u1E81');
-        DEAD.put(GRAVE | 'y', '\u1EF3');
-        DEAD.put(TILDE | 'A', '\u00C3');
-        DEAD.put(TILDE | 'E', '\u1EBC');
-        DEAD.put(TILDE | 'I', '\u0128');
-        DEAD.put(TILDE | 'N', '\u00D1');
-        DEAD.put(TILDE | 'O', '\u00D5');
-        DEAD.put(TILDE | 'U', '\u0168');
-        DEAD.put(TILDE | 'V', '\u1E7C');
-        DEAD.put(TILDE | 'Y', '\u1EF8');
-        DEAD.put(TILDE | 'a', '\u00E3');
-        DEAD.put(TILDE | 'e', '\u1EBD');
-        DEAD.put(TILDE | 'i', '\u0129');
-        DEAD.put(TILDE | 'n', '\u00F1');
-        DEAD.put(TILDE | 'o', '\u00F5');
-        DEAD.put(TILDE | 'u', '\u0169');
-        DEAD.put(TILDE | 'v', '\u1E7D');
-        DEAD.put(TILDE | 'y', '\u1EF9');
-        DEAD.put(UMLAUT | 'A', '\u00C4');
-        DEAD.put(UMLAUT | 'E', '\u00CB');
-        DEAD.put(UMLAUT | 'H', '\u1E26');
-        DEAD.put(UMLAUT | 'I', '\u00CF');
-        DEAD.put(UMLAUT | 'O', '\u00D6');
-        DEAD.put(UMLAUT | 'U', '\u00DC');
-        DEAD.put(UMLAUT | 'W', '\u1E84');
-        DEAD.put(UMLAUT | 'X', '\u1E8C');
-        DEAD.put(UMLAUT | 'Y', '\u0178');
-        DEAD.put(UMLAUT | 'a', '\u00E4');
-        DEAD.put(UMLAUT | 'e', '\u00EB');
-        DEAD.put(UMLAUT | 'h', '\u1E27');
-        DEAD.put(UMLAUT | 'i', '\u00EF');
-        DEAD.put(UMLAUT | 'o', '\u00F6');
-        DEAD.put(UMLAUT | 't', '\u1E97');
-        DEAD.put(UMLAUT | 'u', '\u00FC');
-        DEAD.put(UMLAUT | 'w', '\u1E85');
-        DEAD.put(UMLAUT | 'x', '\u1E8D');
-        DEAD.put(UMLAUT | 'y', '\u00FF');
+    private static void addDeadChar(int accent, int c, char combinedResult) {
+        DEAD.put((accent << 16) | c, combinedResult);
     }
 
     /**
