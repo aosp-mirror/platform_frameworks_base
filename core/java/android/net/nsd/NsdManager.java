@@ -16,6 +16,8 @@
 
 package android.net.nsd;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -133,6 +135,44 @@ public class NsdManager {
     private static final String TAG = "NsdManager";
     INsdManager mService;
 
+    /**
+     * Broadcast intent action to indicate whether network service discovery is
+     * enabled or disabled. An extra {@link #EXTRA_NSD_STATE} provides the state
+     * information as int.
+     *
+     * @see #EXTRA_NSD_STATE
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String NSD_STATE_CHANGED_ACTION =
+        "android.net.nsd.STATE_CHANGED";
+
+    /**
+     * The lookup key for an int that indicates whether network service discovery is enabled
+     * or disabled. Retrieve it with {@link android.content.Intent#getIntExtra(String,int)}.
+     *
+     * @see #NSD_STATE_DISABLED
+     * @see #NSD_STATE_ENABLED
+     * @hide
+     */
+    public static final String EXTRA_NSD_STATE = "nsd_state";
+
+    /**
+     * Network service discovery is disabled
+     *
+     * @see #NSD_STATE_CHANGED_ACTION
+     * @hide
+     */
+    public static final int NSD_STATE_DISABLED = 1;
+
+    /**
+     * Network service discovery is enabled
+     *
+     * @see #NSD_STATE_CHANGED_ACTION
+     * @hide
+     */
+    public static final int NSD_STATE_ENABLED = 2;
+
     private static final int BASE = Protocol.BASE_NSD_MANAGER;
 
     /** @hide */
@@ -187,6 +227,12 @@ public class NsdManager {
     public static final int STOP_RESOLVE_FAILED                     = BASE + 22;
     /** @hide */
     public static final int STOP_RESOLVE_SUCCEEDED                  = BASE + 23;
+
+    /** @hide */
+    public static final int ENABLE                                  = BASE + 24;
+    /** @hide */
+    public static final int DISABLE                                 = BASE + 25;
+
 
     /**
      * Create a new Nsd instance. Applications use
@@ -312,8 +358,8 @@ public class NsdManager {
         private DnsSdResolveListener mDnsSdResolveListener;
         private ActionListener mDnsSdStopResolveListener;
 
-        AsyncChannel mAsyncChannel;
-        ServiceHandler mHandler;
+        private AsyncChannel mAsyncChannel;
+        private ServiceHandler mHandler;
         class ServiceHandler extends Handler {
             ServiceHandler(Looper looper) {
                 super(looper);
@@ -592,6 +638,13 @@ public class NsdManager {
         if (c.mDnsSdResolveListener == null) throw new
                 IllegalStateException("Resolve listener needs to be set first");
         c.mAsyncChannel.sendMessage(STOP_RESOLVE);
+    }
+
+    /** Internal use only @hide */
+    public void setEnabled(boolean enabled) {
+        try {
+            mService.setEnabled(enabled);
+        } catch (RemoteException e) { }
     }
 
     /**

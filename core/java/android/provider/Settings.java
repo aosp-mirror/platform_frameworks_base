@@ -3277,6 +3277,12 @@ public final class Settings {
             "wifi_mobile_data_transition_wakelock_timeout_ms";
 
         /**
+         * Whether network service discovery is enabled.
+         * @hide
+         */
+        public static final String NSD_ON = "nsd_on";
+
+        /**
          * Whether background data usage is allowed by the user. See
          * ConnectivityManager for more info.
          */
