@@ -25,6 +25,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 
+#include <media/hardware/CryptoAPI.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -437,7 +438,7 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
 
     size_t encSize = size;
     jintArray numBytesOfPlainDataObj = NULL;
-    if (meta->findData(kKeyEncryptedSizes, &type, &data, &size)) {
+    if (meta->findData(kKeyPlainSizes, &type, &data, &size)) {
         if (size != encSize) {
             // The two must be of the same length.
             return false;
@@ -485,7 +486,7 @@ static jboolean android_media_MediaExtractor_getSampleCryptoInfo(
 
     int32_t mode;
     if (!meta->findInt32(kKeyCryptoMode, &mode)) {
-        mode = 0;
+        mode = CryptoPlugin::kMode_AES_CTR;
     }
 
     env->CallVoidMethod(
