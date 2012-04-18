@@ -584,7 +584,7 @@ public final class BluetoothAdapter {
      */
     public String getName() {
         try {
-            return mManagerService.getName();
+            return mService.getName();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
