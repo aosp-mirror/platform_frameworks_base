@@ -602,6 +602,7 @@ final class AccessibilityInteractionController {
         // tree traversal.
         return (view.mAttachInfo != null
                 && view.mAttachInfo.mWindowVisibility == View.VISIBLE
+                && view.getAlpha() > 0
                 && view.isShown()
                 && view.getGlobalVisibleRect(mViewRootImpl.mTempRect));
     }
