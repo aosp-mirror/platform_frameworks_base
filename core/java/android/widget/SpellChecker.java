@@ -24,6 +24,7 @@ import android.text.Spanned;
 import android.text.method.WordIterator;
 import android.text.style.SpellCheckSpan;
 import android.text.style.SuggestionSpan;
+import android.util.Log;
 import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SpellCheckerSession;
 import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
@@ -43,6 +44,8 @@ import java.util.Locale;
  * @hide
  */
 public class SpellChecker implements SpellCheckerSessionListener {
+    private static final String TAG = SpellChecker.class.getSimpleName();
+    private static final boolean DBG = false;
 
     // No more than this number of words will be parsed on each iteration to ensure a minimum
     // lock of the UI thread
@@ -266,6 +269,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
                         editable.subSequence(start, end).toString();
                 spellCheckSpan.setSpellCheckInProgress(true);
                 textInfos[textInfosCount++] = new TextInfo(word, mCookie, mIds[i]);
+                if (DBG) {
+                    Log.d(TAG, "create TextInfo: (" + i + "/" + mLength + ")" + word
+                            + ", cookie = " + mCookie + ", seq = "
+                            + mIds[i] + ", sel start = " + selectionStart + ", sel end = "
+                            + selectionEnd + ", start = " + start + ", end = " + end);
+                }
             }
         }
 
@@ -507,7 +516,20 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 if (regionEnd <= spellCheckStart) {
                     return;
                 }
-                addSpellCheckSpan(editable, spellCheckStart, regionEnd);
+                final int selectionStart = Selection.getSelectionStart(editable);
+                final int selectionEnd = Selection.getSelectionEnd(editable);
+                if (DBG) {
+                    Log.d(TAG, "addSpellCheckSpan: "
+                            + editable.subSequence(spellCheckStart, regionEnd)
+                            + ", regionEnd = " + regionEnd + ", spellCheckStart = "
+                            + spellCheckStart + ", sel start = " + selectionStart + ", sel end ="
+                            + selectionEnd);
+                }
+                // Do not check this word if the user is currently editing it
+                if (spellCheckStart >= 0 && regionEnd > spellCheckStart
+                        && (selectionEnd < spellCheckStart || selectionStart > regionEnd)) {
+                    addSpellCheckSpan(editable, spellCheckStart, regionEnd);
+                }
             } else {
                 while (wordStart <= end) {
                     if (wordEnd >= start && wordEnd > wordStart) {
