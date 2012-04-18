@@ -326,7 +326,6 @@ public class ExpandableListView extends ListView {
                     indicator.draw(canvas);
                 }
             }
-            
             pos.recycle();
         }
 
@@ -613,8 +612,10 @@ public class ExpandableListView extends ListView {
      *         was already expanded, this will return false)
      */
     public boolean expandGroup(int groupPos, boolean animate) {
-        PositionMetadata pm = mConnector.getFlattenedPos(ExpandableListPosition.obtain(
-                ExpandableListPosition.GROUP, groupPos, -1, -1));
+        ExpandableListPosition elGroupPos = ExpandableListPosition.obtain(
+                ExpandableListPosition.GROUP, groupPos, -1, -1);
+        PositionMetadata pm = mConnector.getFlattenedPos(elGroupPos);
+        elGroupPos.recycle();
         boolean retValue = mConnector.expandGroup(pm);
 
         if (mOnGroupExpandListener != null) {
@@ -776,8 +777,10 @@ public class ExpandableListView extends ListView {
      * @return The flat list position for the given child or group.
      */
     public int getFlatListPosition(long packedPosition) {
-        PositionMetadata pm = mConnector.getFlattenedPos(ExpandableListPosition
-                .obtainPosition(packedPosition));
+        ExpandableListPosition elPackedPos = ExpandableListPosition
+                .obtainPosition(packedPosition);
+        PositionMetadata pm = mConnector.getFlattenedPos(elPackedPos);
+        elPackedPos.recycle();
         final int flatListPosition = pm.position.flatListPos;
         pm.recycle();
         return getAbsoluteFlatPosition(flatListPosition);
@@ -988,11 +991,11 @@ public class ExpandableListView extends ListView {
         final int adjustedPosition = getFlatPositionForConnector(flatListPosition);
         PositionMetadata pm = mConnector.getUnflattenedPos(adjustedPosition);
         ExpandableListPosition pos = pm.position;
-        pm.recycle();
         
         id = getChildOrGroupId(pos);
         long packedPosition = pos.getPackedPosition();
-        pos.recycle();
+
+        pm.recycle();
         
         return new ExpandableListContextMenuInfo(view, packedPosition, id);
     }

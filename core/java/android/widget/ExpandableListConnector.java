@@ -372,7 +372,8 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
 
     @Override
     public boolean isEnabled(int flatListPos) {
-        final ExpandableListPosition pos = getUnflattenedPos(flatListPos).position;
+        final PositionMetadata metadata = getUnflattenedPos(flatListPos);
+        final ExpandableListPosition pos = metadata.position;
         
         boolean retValue;
         if (pos.type == ExpandableListPosition.CHILD) {
@@ -382,7 +383,7 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
             retValue = true;
         }
         
-        pos.recycle();
+        metadata.recycle();
         
         return retValue;
     }
@@ -461,7 +462,8 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
 
     @Override
     public int getItemViewType(int flatListPos) {
-        final ExpandableListPosition pos = getUnflattenedPos(flatListPos).position;
+        final PositionMetadata metadata = getUnflattenedPos(flatListPos);
+        final ExpandableListPosition pos = metadata.position;
 
         int retValue;
         if (mExpandableListAdapter instanceof HeterogeneousExpandableList) {
@@ -481,7 +483,7 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
             }
         }
         
-        pos.recycle();
+        metadata.recycle();
         
         return retValue;
     }
@@ -590,8 +592,10 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
      * @param groupPos position of the group to collapse
      */
     boolean collapseGroup(int groupPos) {
-        PositionMetadata pm = getFlattenedPos(ExpandableListPosition.obtain(
-                ExpandableListPosition.GROUP, groupPos, -1, -1)); 
+        ExpandableListPosition elGroupPos = ExpandableListPosition.obtain(
+                ExpandableListPosition.GROUP, groupPos, -1, -1);
+        PositionMetadata pm = getFlattenedPos(elGroupPos);
+        elGroupPos.recycle();
         if (pm == null) return false;
         
         boolean retValue = collapseGroup(pm);
@@ -631,8 +635,10 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
      * @param groupPos the group to be expanded
      */
     boolean expandGroup(int groupPos) {
-        PositionMetadata pm = getFlattenedPos(ExpandableListPosition.obtain(
-                ExpandableListPosition.GROUP, groupPos, -1, -1));
+        ExpandableListPosition elGroupPos = ExpandableListPosition.obtain(
+                ExpandableListPosition.GROUP, groupPos, -1, -1);
+        PositionMetadata pm = getFlattenedPos(elGroupPos);
+        elGroupPos.recycle();
         boolean retValue = expandGroup(pm);
         pm.recycle();
         return retValue;
@@ -971,7 +977,10 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
         public int groupInsertIndex;
         
         private void resetState() {
-            position = null;
+            if (position != null) {
+                position.recycle();
+                position = null;
+            }
             groupMetadata = null;
             groupInsertIndex = 0;
         }
@@ -1005,6 +1014,7 @@ class ExpandableListConnector extends BaseAdapter implements Filterable {
         }
         
         public void recycle() {
+            resetState();
             synchronized (sPool) {
                 if (sPool.size() < MAX_POOL_SIZE) {
                     sPool.add(this);
