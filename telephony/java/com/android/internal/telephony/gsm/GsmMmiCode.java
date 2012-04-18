@@ -885,10 +885,7 @@ public final class GsmMmiCode extends Handler implements MmiCode {
                 */
                 if ((ar.exception == null) && (msg.arg1 == 1)) {
                     boolean cffEnabled = (msg.arg2 == 1);
-                    IccRecords r = phone.mIccRecords.get();
-                    if (r != null) {
-                        r.setVoiceCallForwardingFlag(1, cffEnabled);
-                    }
+                    phone.mIccRecords.setVoiceCallForwardingFlag(1, cffEnabled);
                 }
 
                 onSetComplete(ar);
@@ -1206,10 +1203,7 @@ public final class GsmMmiCode extends Handler implements MmiCode {
                 (info.serviceClass & serviceClassMask)
                         == CommandsInterface.SERVICE_CLASS_VOICE) {
             boolean cffEnabled = (info.status == 1);
-            IccRecords r = phone.mIccRecords.get();
-            if (r != null) {
-                r.setVoiceCallForwardingFlag(1, cffEnabled);
-            }
+            phone.mIccRecords.setVoiceCallForwardingFlag(1, cffEnabled);
         }
 
         return TextUtils.replace(template, sources, destinations);
@@ -1234,10 +1228,7 @@ public final class GsmMmiCode extends Handler implements MmiCode {
                 sb.append(context.getText(com.android.internal.R.string.serviceDisabled));
 
                 // Set unconditional CFF in SIM to false
-                IccRecords r = phone.mIccRecords.get();
-                if (r != null) {
-                    r.setVoiceCallForwardingFlag(1, false);
-                }
+                phone.mIccRecords.setVoiceCallForwardingFlag(1, false);
             } else {
 
                 SpannableStringBuilder tb = new SpannableStringBuilder();

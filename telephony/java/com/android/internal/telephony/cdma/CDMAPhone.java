@@ -50,7 +50,6 @@ import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccException;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccPhoneBookInterfaceManager;
-import com.android.internal.telephony.IccRecords;
 import com.android.internal.telephony.IccSmsInterfaceManager;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.MmiCode;
@@ -153,6 +152,10 @@ public class CDMAPhone extends PhoneBase {
     }
 
     protected void initSstIcc() {
+        mIccCard.set(UiccController.getInstance(this).getIccCard());
+        mIccRecords = mIccCard.get().getIccRecords();
+        // CdmaServiceStateTracker registers with IccCard to know
+        // when the Ruim card is ready. So create mIccCard before the ServiceStateTracker
         mSST = new CdmaServiceStateTracker(this);
     }
 
@@ -169,6 +172,7 @@ public class CDMAPhone extends PhoneBase {
         mEriManager = new EriManager(this, context, EriManager.ERI_FROM_XML);
 
         mCM.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
+        registerForRuimRecordEvents();
         mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mCM.registerForOn(this, EVENT_RADIO_ON, null);
         mCM.setOnSuppServiceNotification(this, EVENT_SSN, null);
@@ -723,10 +727,7 @@ public class CDMAPhone extends PhoneBase {
         Message resp;
         mVmNumber = voiceMailNumber;
         resp = obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
-        IccRecords r = mIccRecords.get();
-        if (r != null) {
-            r.setVoiceMailNumber(alphaTag, mVmNumber, resp);
-        }
+        mIccRecords.setVoiceMailNumber(alphaTag, mVmNumber, resp);
     }
 
     public String getVoiceMailNumber() {
@@ -748,8 +749,7 @@ public class CDMAPhone extends PhoneBase {
      * @hide
      */
     public int getVoiceMessageCount() {
-        IccRecords r = mIccRecords.get();
-        int voicemailCount =  (r != null) ? r.getVoiceMessageCount() : 0;
+        int voicemailCount =  mIccRecords.getVoiceMessageCount();
         // If mRuimRecords.getVoiceMessageCount returns zero, then there is possibility
         // that phone was power cycled and would have lost the voicemail count.
         // So get the count from preferences.
@@ -1060,39 +1060,6 @@ public class CDMAPhone extends PhoneBase {
 
             default:{
                 super.handleMessage(msg);
-            }
-        }
-    }
-
-    @Override
-    protected void onUpdateIccAvailability() {
-        if (mUiccController == null ) {
-            return;
-        }
-
-        IccCard newIccCard = mUiccController.getIccCard();
-
-        IccCard c = mIccCard.get();
-        if (c != newIccCard) {
-            if (c != null) {
-                log("Removing stale icc objects.");
-                if (mIccRecords.get() != null) {
-                    unregisterForRuimRecordEvents();
-                    if (mRuimPhoneBookInterfaceManager != null) {
-                        mRuimPhoneBookInterfaceManager.updateIccRecords(null);
-                    }
-                }
-                mIccRecords.set(null);
-                mIccCard.set(null);
-            }
-            if (newIccCard != null) {
-                log("New card found");
-                mIccCard.set(newIccCard);
-                mIccRecords.set(newIccCard.getIccRecords());
-                registerForRuimRecordEvents();
-                if (mRuimPhoneBookInterfaceManager != null) {
-                    mRuimPhoneBookInterfaceManager.updateIccRecords(mIccRecords.get());
-                }
             }
         }
     }
@@ -1495,22 +1462,14 @@ public class CDMAPhone extends PhoneBase {
         return mEriManager.isEriFileLoaded();
     }
 
-    protected void registerForRuimRecordEvents() {
-        IccRecords r = mIccRecords.get();
-        if (r == null) {
-            return;
-        }
-        r.registerForRecordsEvents(this, EVENT_ICC_RECORD_EVENTS, null);
-        r.registerForRecordsLoaded(this, EVENT_RUIM_RECORDS_LOADED, null);
+    private void registerForRuimRecordEvents() {
+        mIccRecords.registerForRecordsEvents(this, EVENT_ICC_RECORD_EVENTS, null);
+        mIccRecords.registerForRecordsLoaded(this, EVENT_RUIM_RECORDS_LOADED, null);
     }
 
-    protected void unregisterForRuimRecordEvents() {
-        IccRecords r = mIccRecords.get();
-        if (r == null) {
-            return;
-        }
-        r.unregisterForRecordsEvents(this);
-        r.unregisterForRecordsLoaded(this);
+    private void unregisterForRuimRecordEvents() {
+        mIccRecords.unregisterForRecordsEvents(this);
+        mIccRecords.unregisterForRecordsLoaded(this);
     }
 
     protected void log(String s) {
