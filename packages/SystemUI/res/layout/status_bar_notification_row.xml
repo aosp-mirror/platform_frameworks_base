@@ -4,6 +4,15 @@
     android:background="@*android:drawable/notification_bg"
     >
 
+    <View
+        android:id="@+id/top_glow"
+        android:alpha="0"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/notification_divider_height"
+        android:layout_gravity="top|center_horizontal"
+        android:background="@drawable/top_divider_glow"
+        />
+
     <Button
         android:id="@+id/veto"
         android:layout_width="48dp"
@@ -19,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/notification_divider_height"
+        android:layout_marginTop="@dimen/notification_divider_height"
         android:focusable="true"
         android:clickable="true"
         >
@@ -31,10 +41,12 @@
     </com.android.systemui.statusbar.LatestItemView>
 
     <View
+        android:id="@+id/bottom_glow"
+        android:alpha="0"
         android:layout_width="match_parent"
         android:layout_height="@dimen/notification_divider_height"
-        android:gravity="bottom"
-        android:background="@*android:drawable/notification_bg"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@drawable/bottom_divider_glow"
         />
 
 </FrameLayout>

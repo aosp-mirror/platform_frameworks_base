@@ -165,6 +165,12 @@ public class NotificationRowLayout
         return (veto != null && veto.getVisibility() != View.GONE);
     }
 
+    public boolean canChildBeExpanded(View v) {
+        Object isExpandable = v.getTag(R.id.expandable_tag);
+        return isExpandable != null && isExpandable instanceof Boolean &&
+                ((Boolean)isExpandable).booleanValue();
+    }
+
     public void onChildDismissed(View v) {
         final View veto = v.findViewById(R.id.veto);
         if (veto != null && veto.getVisibility() != View.GONE && mRemoveViews) {

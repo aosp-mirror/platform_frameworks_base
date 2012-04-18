@@ -32,17 +32,28 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
     public interface Callback {
         View getChildAtPosition(MotionEvent ev);
         View getChildAtPosition(float x, float y);
+        boolean canChildBeExpanded(View v);
     }
 
     private static final String TAG = "ExpandHelper";
     protected static final boolean DEBUG = false;
     private static final long EXPAND_DURATION = 250;
 
+    // amount of overstretch for maximum brightness expressed in U
+    // 2f: maximum brightness is stretching a 1U to 3U, or a 4U to 6U
+    private static final float STRETCH_INTERVAL = 2f;
+
+    // level of glow for a touch, without overstretch
+    // overstretch fills the range (GLOW_BASE, 1.0]
+    private static final float GLOW_BASE = 0.5f;
+
     @SuppressWarnings("unused")
     private Context mContext;
 
     private boolean mStretching;
     private View mCurrView;
+    private View mCurrViewTopGlow;
+    private View mCurrViewBottomGlow;
     private float mOldHeight;
     private float mNaturalHeight;
     private float mInitialTouchSpan;
@@ -53,7 +64,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     private int mSmallSize;
     private int mLargeSize;
-
+    private float mMaximumStretch;
 
     private class ViewScaler {
         View mView;
@@ -62,7 +73,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             mView = v;
         }
         public void setHeight(float h) {
-            Log.v(TAG, "SetHeight: setting to " + h);
+            if (DEBUG) Log.v(TAG, "SetHeight: setting to " + h);
             ViewGroup.LayoutParams lp = mView.getLayoutParams();
             lp.height = (int)h;
             mView.setLayoutParams(lp);
@@ -94,6 +105,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     public ExpandHelper(Context context, Callback callback, int small, int large) {
         mSmallSize = small;
+        mMaximumStretch = mSmallSize * STRETCH_INTERVAL;
         mLargeSize = large;
         mContext = context;
         mCallback = callback;
@@ -120,10 +132,16 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                 float h = Math.abs(detector.getCurrentSpanY());
                 if (DEBUG) Log.d(TAG, "current span is: " + h);
                 h = h + mOldHeight - mInitialTouchSpan;
+                float target = h;
+                if (DEBUG) Log.d(TAG, "target is: " + target);
                 h = h<mSmallSize?mSmallSize:(h>mLargeSize?mLargeSize:h);
                 h = h>mNaturalHeight?mNaturalHeight:h;
                 if (DEBUG) Log.d(TAG, "scale continues: h=" + h);
                 mScaler.setHeight(h);
+                float stretch = (float) Math.abs((target - h) / mMaximumStretch);
+                float strength = 1f / (1f + (float) Math.pow(Math.E, -1 * ((8f * stretch) - 5f)));
+                if (DEBUG) Log.d(TAG, "stretch: " + stretch + " strength: " + strength);
+                setGlow(GLOW_BASE + strength * (1f - GLOW_BASE));
                 return true;
             }
 
@@ -135,6 +153,14 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
                 finishScale(false);
             }
         });
+    }
+    public void setGlow(float glow) {
+        if (mCurrViewTopGlow != null) {
+            mCurrViewTopGlow.setAlpha(glow);
+        }
+        if (mCurrViewBottomGlow != null) {
+            mCurrViewBottomGlow.setAlpha(glow);
+        }
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -154,7 +180,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mStretching = false;
-                mCurrView = null;
+                clearView();
                 break;
         }
         return true;
@@ -163,14 +189,20 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         if (v != null) {
             if (DEBUG) Log.d(TAG, "scale begins on view: " + v);
             mStretching = true;
-            mCurrView = v;
+            setView(v);
+            setGlow(GLOW_BASE);
             mScaler.setView(v);
             mOldHeight = mScaler.getHeight();
-            mNaturalHeight = mScaler.getNaturalHeight(mLargeSize);
+            if (mCallback.canChildBeExpanded(v)) {
+                if (DEBUG) Log.d(TAG, "working on an expandable child");
+                mNaturalHeight = mScaler.getNaturalHeight(mLargeSize);
+            } else {
+                if (DEBUG) Log.d(TAG, "working on a non-expandable child");
+                mNaturalHeight = mOldHeight;
+            }
             if (DEBUG) Log.d(TAG, "got mOldHeight: " + mOldHeight +
                         " mNaturalHeight: " + mNaturalHeight);
             v.getParent().requestDisallowInterceptTouchEvent(true);
-            if (DEBUG) v.setBackgroundColor(0xFFFFFF00);
         }
         return mStretching;
     }
@@ -183,11 +215,33 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         } else {
             h = (force || h < mNaturalHeight) ? mSmallSize : mNaturalHeight;
         }
-        if (DEBUG) mCurrView.setBackgroundColor(0);
+        if (DEBUG && mCurrView != null) mCurrView.setBackgroundColor(0);
         mAnimation = ObjectAnimator.ofFloat(mScaler, "height", h).setDuration(EXPAND_DURATION);
         mAnimation.start();
         mStretching = false;
+        setGlow(0f);
+        clearView();
+    }
+
+    private void clearView() {
         mCurrView = null;
+        mCurrViewTopGlow = null;
+        mCurrViewBottomGlow = null;
+    }
+
+    private void setView(View v) {
+        mCurrView = null;
+        if (v instanceof ViewGroup) {
+            ViewGroup g = (ViewGroup) v;
+            mCurrViewTopGlow = g.findViewById(R.id.top_glow);
+            mCurrViewBottomGlow = g.findViewById(R.id.bottom_glow);
+	    if (DEBUG) {
+                String debugLog = "Looking for glows: " + 
+                        (mCurrViewTopGlow != null ? "found top " : "didn't find top") +
+                        (mCurrViewBottomGlow != null ? "found bottom " : "didn't find bottom");
+                Log.v(TAG,  debugLog);
+            }
+        }
     }
 
     @Override

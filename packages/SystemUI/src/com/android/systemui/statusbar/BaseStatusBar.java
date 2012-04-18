@@ -397,12 +397,15 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // XXX: temporary: while testing big notifications, auto-expand all of them
         ViewGroup.LayoutParams lp = row.getLayoutParams();
+        Boolean expandable = Boolean.FALSE;
         if (large != null) {
             lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            expandable = Boolean.TRUE;
         } else {
             lp.height = minHeight;
         }
         row.setLayoutParams(lp);
+        row.setTag(R.id.expandable_tag, expandable);
         workAroundBadLayerDrawableOpacity(row);
         View vetoButton = updateNotificationVetoButton(row, sbn);
         vetoButton.setContentDescription(mContext.getString(

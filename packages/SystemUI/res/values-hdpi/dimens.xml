@@ -18,9 +18,9 @@
 <resources>
     <!-- thickness (height) of each notification row, including any separators or padding -->
     <!-- Note: this is 64dip + 1px divider = 97px. -->
-    <dimen name="notification_height">97px</dimen>
+    <dimen name="notification_height">99px</dimen>
 
     <!-- thickness (height) of dividers between each notification row; see math for
          notification_height above -->
-    <dimen name="notification_divider_height">1px</dimen>
+    <dimen name="notification_divider_height">4px</dimen>
 </resources>

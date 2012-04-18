@@ -19,9 +19,9 @@
     <!-- thickness (height) of each notification row, including any separators or padding -->
     <!-- note: this is the same value as in values/dimens.xml; the value is overridden in
          values-hdpi/dimens.xml and so we need to re-assert the general value here -->
-    <dimen name="notification_height">65dp</dimen>
+    <dimen name="notification_height">68dp</dimen>
 
     <!-- thickness (height) of dividers between each notification row -->
     <!-- same as in values/dimens.xml; see note at notification_height -->
-    <dimen name="notification_divider_height">1dp</dimen>
+    <dimen name="notification_divider_height">2dp</dimen>
 </resources>
