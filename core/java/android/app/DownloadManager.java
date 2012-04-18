@@ -347,9 +347,9 @@ public class DownloadManager {
         private CharSequence mTitle;
         private CharSequence mDescription;
         private String mMimeType;
-        private boolean mRoamingAllowed = true;
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
-        private boolean mAllowedOverMetered = true;
+        private boolean mRoamingAllowed = true;
+        private boolean mMeteredAllowed = true;
         private boolean mIsVisibleInDownloadsUi = true;
         private boolean mScannable = false;
         private boolean mUseSystemCache = false;
@@ -624,17 +624,6 @@ public class DownloadManager {
         }
 
         /**
-         * Set whether this download may proceed over a metered network
-         * connection. By default, metered networks are allowed.
-         *
-         * @see ConnectivityManager#isActiveNetworkMetered()
-         */
-        public Request setAllowedOverMetered(boolean allow) {
-            mAllowedOverMetered = allow;
-            return this;
-        }
-
-        /**
          * Set whether this download may proceed over a roaming connection.  By default, roaming is
          * allowed.
          * @param allowed whether to allow a roaming connection to be used
@@ -642,6 +631,17 @@ public class DownloadManager {
          */
         public Request setAllowedOverRoaming(boolean allowed) {
             mRoamingAllowed = allowed;
+            return this;
+        }
+
+        /**
+         * Set whether this download may proceed over a metered network
+         * connection. By default, metered networks are allowed.
+         *
+         * @see ConnectivityManager#isActiveNetworkMetered()
+         */
+        public Request setAllowedOverMetered(boolean allow) {
+            mMeteredAllowed = allow;
             return this;
         }
 
@@ -687,10 +687,10 @@ public class DownloadManager {
             putIfNonNull(values, Downloads.Impl.COLUMN_DESCRIPTION, mDescription);
             putIfNonNull(values, Downloads.Impl.COLUMN_MIME_TYPE, mMimeType);
 
-            // TODO: add COLUMN_ALLOW_METERED and persist
             values.put(Downloads.Impl.COLUMN_VISIBILITY, mNotificationVisibility);
             values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
             values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
+            values.put(Downloads.Impl.COLUMN_ALLOW_METERED, mMeteredAllowed);
             values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
 
             return values;
@@ -1339,9 +1339,6 @@ public class DownloadManager {
 
                 case Downloads.Impl.STATUS_FILE_ALREADY_EXISTS_ERROR:
                     return ERROR_FILE_ALREADY_EXISTS;
-
-                case Downloads.Impl.STATUS_BLOCKED:
-                    return ERROR_BLOCKED;
 
                 default:
                     return ERROR_UNKNOWN;
