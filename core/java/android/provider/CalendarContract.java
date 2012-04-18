@@ -756,6 +756,24 @@ public final class CalendarContract {
         public static final int ATTENDEE_STATUS_DECLINED = 2;
         public static final int ATTENDEE_STATUS_INVITED = 3;
         public static final int ATTENDEE_STATUS_TENTATIVE = 4;
+
+        /**
+         * The identity of the attendee as referenced in
+         * {@link ContactsContract.CommonDataKinds.Identity#IDENTITY}.
+         * This is required only if {@link #ATTENDEE_ID_NAMESPACE} is present. Column name.
+         * <P>Type: STRING</P>
+         * @hide
+         */
+        public static final String ATTENDEE_IDENTITY = "attendeeIdentity";
+
+        /**
+         * The identity name space of the attendee as referenced in
+         * {@link ContactsContract.CommonDataKinds.Identity#NAMESPACE}.
+         * This is required only if {@link #ATTENDEE_IDENTITY} is present. Column name.
+         * <P>Type: STRING</P>
+         * @hide
+         */
+        public static final String ATTENDEE_ID_NAMESPACE = "attendeeIdNamespace";
     }
 
     /**
@@ -773,6 +791,8 @@ public final class CalendarContract {
      * <li>{@link #ATTENDEE_RELATIONSHIP}</li>
      * <li>{@link #ATTENDEE_TYPE}</li>
      * <li>{@link #ATTENDEE_STATUS}</li>
+     * <li>{@link #ATTENDEE_IDENTITY}</li>
+     * <li>{@link #ATTENDEE_ID_NAMESPACE}</li>
      * </ul>
      */
     public static final class Attendees implements BaseColumns, AttendeesColumns, EventsColumns {
@@ -1221,12 +1241,17 @@ public final class CalendarContract {
                     Attendees.ATTENDEE_RELATIONSHIP,
                     Attendees.ATTENDEE_TYPE,
                     Attendees.ATTENDEE_STATUS,
+                    Attendees.ATTENDEE_IDENTITY,
+                    Attendees.ATTENDEE_ID_NAMESPACE
             };
             private static final int COLUMN_ATTENDEE_NAME = 0;
             private static final int COLUMN_ATTENDEE_EMAIL = 1;
             private static final int COLUMN_ATTENDEE_RELATIONSHIP = 2;
             private static final int COLUMN_ATTENDEE_TYPE = 3;
             private static final int COLUMN_ATTENDEE_STATUS = 4;
+            private static final int COLUMN_ATTENDEE_IDENTITY = 5;
+            private static final int COLUMN_ATTENDEE_ID_NAMESPACE = 6;
+
             private static final String[] EXTENDED_PROJECTION = new String[] {
                     ExtendedProperties._ID,
                     ExtendedProperties.NAME,
@@ -1362,6 +1387,10 @@ public final class CalendarContract {
                                 subCursor.getInt(COLUMN_ATTENDEE_TYPE));
                         attendeeValues.put(Attendees.ATTENDEE_STATUS,
                                 subCursor.getInt(COLUMN_ATTENDEE_STATUS));
+                        attendeeValues.put(Attendees.ATTENDEE_IDENTITY,
+                                subCursor.getInt(COLUMN_ATTENDEE_IDENTITY));
+                        attendeeValues.put(Attendees.ATTENDEE_ID_NAMESPACE,
+                                subCursor.getInt(COLUMN_ATTENDEE_ID_NAMESPACE));
                         entity.addSubValue(Attendees.CONTENT_URI, attendeeValues);
                     }
                 } finally {
