@@ -1324,4 +1324,42 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
             return false;
         }
     }
+
+    /**
+     * Return a String describing the calling method and location at a particular stack depth.
+     * @param callStack the Thread stack 
+     * @param depth the depth of stack to return information for.
+     * @return the String describing the caller at that depth.
+     */
+    private static String getCaller(StackTraceElement callStack[], int depth) {
+        // callStack[4] is the caller of the method that called getCallers()
+        if (4 + depth >= callStack.length) {
+            return "<bottom of call stack>";
+        }
+        StackTraceElement caller = callStack[4 + depth];
+        return caller.getClassName() + "." + caller.getMethodName() + ":" + caller.getLineNumber();
+    }
+
+    /**
+     * Return a string consisting of methods and locations at multiple call stack levels.
+     * @param depth the number of levels to return, starting with the immediate caller.
+     * @return a string describing the call stack.
+     * {@hide}
+     */
+    public static String getCallers(final int depth) {
+        final StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < depth; i++) {
+            sb.append(getCaller(callStack, i)).append(" ");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * @return a String describing the immediate caller of the calling function.
+     * {@hide}
+     */
+    public static String getCaller() {
+        return getCaller(Thread.currentThread().getStackTrace(), 0);
+    }
 }

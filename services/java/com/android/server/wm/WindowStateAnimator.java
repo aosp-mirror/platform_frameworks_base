@@ -15,6 +15,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Debug;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Surface;
@@ -421,7 +422,7 @@ class WindowStateAnimator {
             super(s, pid, display, w, h, format, flags);
             mSize = new Point(w, h);
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
         }
 
         public SurfaceTrace(SurfaceSession s,
@@ -431,7 +432,7 @@ class WindowStateAnimator {
             mName = name;
             mSize = new Point(w, h);
             Slog.v(SURFACE_TAG, "ctor: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
         }
 
         @Override
@@ -439,7 +440,7 @@ class WindowStateAnimator {
             super.setAlpha(alpha);
             mSurfaceTraceAlpha = alpha;
             Slog.v(SURFACE_TAG, "setAlpha: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
         }
 
         @Override
@@ -447,7 +448,7 @@ class WindowStateAnimator {
             super.setLayer(zorder);
             mLayer = zorder;
             Slog.v(SURFACE_TAG, "setLayer: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
 
             sSurfaces.remove(this);
             int i;
@@ -465,7 +466,7 @@ class WindowStateAnimator {
             super.setPosition(x, y);
             mPosition = new PointF(x, y);
             Slog.v(SURFACE_TAG, "setPosition: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
         }
 
         @Override
@@ -473,7 +474,7 @@ class WindowStateAnimator {
             super.setSize(w, h);
             mSize = new Point(w, h);
             Slog.v(SURFACE_TAG, "setSize: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
         }
 
         @Override
@@ -481,21 +482,21 @@ class WindowStateAnimator {
             super.hide();
             mShown = false;
             Slog.v(SURFACE_TAG, "hide: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
         }
         @Override
         public void show() {
             super.show();
             mShown = true;
             Slog.v(SURFACE_TAG, "show: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
         }
 
         @Override
         public void destroy() {
             super.destroy();
             Slog.v(SURFACE_TAG, "destroy: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
             sSurfaces.remove(this);
         }
 
@@ -503,7 +504,7 @@ class WindowStateAnimator {
         public void release() {
             super.release();
             Slog.v(SURFACE_TAG, "release: " + this + ". Called by "
-                    + WindowManagerService.getCallers(3));
+                    + Debug.getCallers(3));
             sSurfaces.remove(this);
         }
 
