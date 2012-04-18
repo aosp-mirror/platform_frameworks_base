@@ -151,7 +151,7 @@
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r18</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r19</a></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a></li>
       <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Support Package, r7</a></li>
     </ul>

@@ -68,6 +68,40 @@ padding: .25em 1em;
   <a href="#" onclick="return toggleDiv(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
     width="9px" />
+    SDK Tools, Revision 19</a> <em>(April 2012)</em>
+
+  <div class="toggleme">
+    <p class="note"><strong>Note:</strong> This update of SDK Tools is only available through
+the <a href="{@docRoot}sdk/adding-components.html">Android SDK Manager</a>. Use this tool to
+download and install this update.</p>
+
+    <dl>
+    <dt>Dependencies:</dt>
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 9 or later.</li>
+        <li>If you are developing in Eclipse with ADT, note that the SDK Tools r19 is designed for
+        use with ADT 18.0.0 and later. If you haven't already, we highly recommend updating your
+        <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 18.0.0.</li>
+        <li>If you are developing outside Eclipse, you must have
+          <a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later.</li>
+    </ul>
+    </dd>
+    <dt>Bug fixes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed an issue that prevented some developers from running the emulator with GPU
+acceleration.</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+    width="9px" />
     SDK Tools, Revision 18</a> <em>(April 2012)</em>
 
   <div class="toggleme">
