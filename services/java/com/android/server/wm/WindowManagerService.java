@@ -8129,7 +8129,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean recoveringMemory) {
         if (DEBUG_WINDOW_TRACE) {
             Slog.v(TAG, "performLayoutAndPlaceSurfacesLockedInner: entry. Called by "
-                    + getCallers(3));
+                    + Debug.getCallers(3));
         }
         if (mDisplay == null) {
             Slog.i(TAG, "skipping performLayoutAndPlaceSurfacesLockedInner with no mDisplay");
@@ -9620,28 +9620,5 @@ public class WindowManagerService extends IWindowManager.Stub
     void bulkSetParameters(final int bulkUpdateParams, int pendingLayoutChanges) {
         mH.sendMessage(mH.obtainMessage(H.BULK_UPDATE_PARAMETERS, bulkUpdateParams,
                 pendingLayoutChanges));
-    }
-
-    /**
-     * Never call directly. Only call through getCallers(int) or getCaller(). Otherwise
-     * the depth will be off.
-     * @param depth What level stack to return.
-     * @return A String indicating who the caller of the method that calls this is.
-     */
-    static String getCaller(int depth) {
-        StackTraceElement caller = Thread.currentThread().getStackTrace()[5 + depth];
-        return caller.getClassName() + "." + caller.getMethodName() + ":" + caller.getLineNumber();
-    }
-
-    static String getCallers(final int depth) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < depth; i++) {
-            sb.append(getCaller(i)).append(" ");
-        }
-        return sb.toString();
-    }
-
-    static String getCaller() {
-        return getCallers(1);
     }
 }
