@@ -65,7 +65,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             handlePollStateResult(msg.what, ar);
             break;
         case EVENT_RUIM_RECORDS_LOADED:
-            CdmaLteUiccRecords sim = (CdmaLteUiccRecords)mIccRecords;
+            CdmaLteUiccRecords sim = (CdmaLteUiccRecords)phone.mIccRecords;
             if ((sim != null) && sim.isProvisioned()) {
                 mMdn = sim.getMdn();
                 mMin = sim.getMin();
@@ -353,18 +353,16 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 ss.setOperatorAlphaLong(eriText);
             }
 
-            if (mIccCard != null && mIccCard.getState() == IccCard.State.READY &&
-                    mIccRecords != null) {
+            if (phone.getIccCard().getState() == IccCard.State.READY) {
                 // SIM is found on the device. If ERI roaming is OFF, and SID/NID matches
                 // one configfured in SIM, use operator name  from CSIM record.
                 boolean showSpn =
-                    ((CdmaLteUiccRecords)mIccRecords).getCsimSpnDisplayCondition();
+                    ((CdmaLteUiccRecords)phone.mIccRecords).getCsimSpnDisplayCondition();
                 int iconIndex = ss.getCdmaEriIconIndex();
 
                 if (showSpn && (iconIndex == EriInfo.ROAMING_INDICATOR_OFF) &&
-                    isInHomeSidNid(ss.getSystemId(), ss.getNetworkId()) &&
-                    mIccRecords != null) {
-                    ss.setOperatorAlphaLong(mIccRecords.getServiceProviderName());
+                    isInHomeSidNid(ss.getSystemId(), ss.getNetworkId())) {
+                    ss.setOperatorAlphaLong(phone.mIccRecords.getServiceProviderName());
                 }
             }
 

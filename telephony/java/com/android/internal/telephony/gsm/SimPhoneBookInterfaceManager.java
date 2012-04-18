@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import android.os.Message;
 import android.util.Log;
 
-import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccPhoneBookInterfaceManager;
 
 /**
@@ -35,6 +34,7 @@ public class SimPhoneBookInterfaceManager extends IccPhoneBookInterfaceManager {
 
     public SimPhoneBookInterfaceManager(GSMPhone phone) {
         super(phone);
+        adnCache = phone.mIccRecords.getAdnCache();
         //NOTE service "simphonebook" added by IccSmsInterfaceManagerProxy
     }
 
@@ -61,11 +61,8 @@ public class SimPhoneBookInterfaceManager extends IccPhoneBookInterfaceManager {
             AtomicBoolean status = new AtomicBoolean(false);
             Message response = mBaseHandler.obtainMessage(EVENT_GET_SIZE_DONE, status);
 
-            IccFileHandler fh = phone.getIccFileHandler();
-            if (fh != null) {
-                fh.getEFLinearRecordSize(efid, response);
-                waitForResult(status);
-            }
+            phone.getIccFileHandler().getEFLinearRecordSize(efid, response);
+            waitForResult(status);
         }
 
         return recordSize;

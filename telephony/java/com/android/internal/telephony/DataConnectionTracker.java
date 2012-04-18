@@ -46,7 +46,6 @@ import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.telephony.DataConnection.FailCause;
-import com.android.internal.telephony.uicc.UiccController;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
@@ -58,7 +57,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@hide}
@@ -140,7 +138,6 @@ public abstract class DataConnectionTracker extends Handler {
     public static final int EVENT_CLEAN_UP_ALL_CONNECTIONS = BASE + 30;
     public static final int CMD_SET_DEPENDENCY_MET = BASE + 31;
     public static final int CMD_SET_POLICY_DATA_ENABLE = BASE + 32;
-    protected static final int EVENT_ICC_CHANGED = BASE + 33;
 
     /***** Constants *****/
 
@@ -253,8 +250,6 @@ public abstract class DataConnectionTracker extends Handler {
 
     // member variables
     protected PhoneBase mPhone;
-    protected UiccController mUiccController;
-    protected AtomicReference<IccRecords> mIccRecords = new AtomicReference<IccRecords>();
     protected Activity mActivity = Activity.NONE;
     protected State mState = State.IDLE;
     protected Handler mDataConnectionTracker = null;
@@ -505,8 +500,6 @@ public abstract class DataConnectionTracker extends Handler {
     protected DataConnectionTracker(PhoneBase phone) {
         super();
         mPhone = phone;
-        mUiccController = UiccController.getInstance();
-        mUiccController.registerForIccChanged(this, EVENT_ICC_CHANGED, null);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(getActionIntentReconnectAlarm());
@@ -548,7 +541,6 @@ public abstract class DataConnectionTracker extends Handler {
         mIsDisposed = true;
         mPhone.getContext().unregisterReceiver(this.mIntentReceiver);
         mDataRoamingSettingObserver.unregister(mPhone.getContext());
-        mUiccController.unregisterForIccChanged(this);
     }
 
     protected void broadcastMessenger() {
@@ -671,7 +663,6 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onCleanUpConnection(boolean tearDown, int apnId, String reason);
     protected abstract void onCleanUpAllConnections(String cause);
     protected abstract boolean isDataPossible(String apnType);
-    protected abstract void onUpdateIcc();
 
     protected void onDataStallAlarm(int tag) {
         loge("onDataStallAlarm: not impleted tag=" + tag);
@@ -782,10 +773,6 @@ public abstract class DataConnectionTracker extends Handler {
                 onSetPolicyDataEnabled(enabled);
                 break;
             }
-            case EVENT_ICC_CHANGED:
-                onUpdateIcc();
-                break;
-
             default:
                 Log.e("DATA", "Unidentified event msg=" + msg);
                 break;
