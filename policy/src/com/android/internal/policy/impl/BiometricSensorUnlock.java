@@ -29,6 +29,7 @@ interface BiometricSensorUnlock {
     // Show the interface, but don't start the unlock procedure.  The interface should disappear
     // after the specified timeout.  If the timeout is 0, the interface shows until another event,
     // such as calling hide(), causes it to disappear.
+    // Called on the UI Thread
     public void show(long timeoutMilliseconds);
 
     // Hide the interface, if any, exposing the lockscreen.
@@ -39,6 +40,7 @@ interface BiometricSensorUnlock {
 
     // Start the unlock procedure.  Returns ‘false’ if it can’t be started or if the backup should
     // be used.
+    // Called on the UI thread.
     public boolean start(boolean suppressBiometricUnlock);
 
     // Provide a view to work within.
