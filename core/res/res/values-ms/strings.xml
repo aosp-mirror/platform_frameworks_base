@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Masukkan aksara"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Menghantar mesej SMS"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sedang menghantar banyak mesej SMS. Adakah anda mahu membenarkan apl ini terus menghantar mesej?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Benarkan"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Nafikan"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Hantar SMS ke kod pendek?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Hantar SMS premium?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ingin menghantar mesej teks kepada &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, yang merupakan kod pendek SMS.&lt;p&gt;Menghantar mesej teks ke sesetengah kod pendek boleh menyebabkan akaun mudah alih anda dikenakan bayaran perkhidmatan premium.&lt;p&gt;Adakah anda mahu membenarkan apl ini menghantar mesej itu?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ingin menghantar mesej teks ke &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, yang merupakan kod pendek SMS premium.&lt;p&gt;&lt;b&gt;Menghantar mesej ke destinasi ini akan menyebabkan akaun mudah alih anda dikenakan bayaran untuk perkhidmatan premium.&lt;/b&gt;&lt;p&gt;Adakah anda mahu membenarkan apl ini menghantar mesej itu?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Hantar mesej"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Jangan hantar"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Laporkan aplikasi hasad"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kad SIM dikeluarkan"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Rangkaian mudah alih tidak akan tersedia sehingga anda mula semula dengan kad SIM yang sah dimasukkan."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Selesai"</string>

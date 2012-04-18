@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Mã PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Chèn ký tự"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Đang gửi tin nhắn SMS"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; đang gửi rất nhiều tin nhắn SMS. Bạn có muốn cho phép ứng dụng này tiếp tục gửi tin nhắn không?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Cho phép"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Từ chối"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Gửi SMS cho mã ngắn?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Gửi tin nhắn SMS trả phí?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; muốn gửi tin nhắn văn bản cho &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, dường như là một mã ngắn SMS.&lt;p&gt;Việc gửi tin nhắn văn bản cho một số mã ngắn có thể khiến cho tài khoản di động của bạn bị lập hóa đơn cho dịch vụ trả phí.&lt;p&gt;Bạn có muốn cho phép ứng dụng này gửi tin nhắn không?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; muốn gửi tin nhắn văn bản cho &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, là một mã ngắn SMS trả phí.&lt;p&gt;&lt;b&gt;Gửi tin nhắn tới địa chỉ này sẽ khiến cho tài khoản di động của bạn bị lập hóa đơn cho dịch vụ trả phí.&lt;/b&gt;&lt;p&gt;Bạn có muốn cho phép ứng dụng này gửi tin nhắn không?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Gửi tin nhắn"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Không gửi"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Báo cáo ứng dụng độc hại"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Đã xóa thẻ SIM"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Mạng di động sẽ không khả dụng cho đến khi bạn khởi động lại với thẻ SIM hợp lệ được lắp."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Xong"</string>

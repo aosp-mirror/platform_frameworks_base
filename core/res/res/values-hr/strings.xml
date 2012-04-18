@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Omogućuje aplikaciji promjenu rotacije zaslona u bilo kojem trenutku. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"promjena brzine pokazivača"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Omogućuje aplikaciji promjenu brzine miša ili dodirne pločice. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"promjena rasporeda tipkovnice"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Omogućuje da aplikacija promijeni raspored tipkovnice. Nikada ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"slanje Linux signala aplikacijama"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Aplikaciji omogućuje zahtijevanje da isporučeni signal bude poslan na sve trajne procese."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"trajni rad aplikacije"</string>
@@ -1010,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Umetni znak"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Slanje SMS poruka"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"Aplikacija &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; šalje veliki broj SMS poruka. Želite li dopustiti ovoj aplikaciji da nastavi slati poruke?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Dopusti"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Odbij"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Poslati SMS na skraćeni broj?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Poslati premium SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Aplikacija &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; želi poslati tekstnu poruku na &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, a čini se da je to skraćeni SMS broj.&lt;p&gt;Slanje tekstnih poruka na neke skraćene interne brojeve može dovesti do naplate premium usluga na vašem računu mobilnog uređaja.&lt;p&gt;Želite li dopustiti aplikaciji da pošalje poruku?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Aplikacija &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; želi poslati tekstnu poruku na &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, a to je skraćeni premium SMS broj.&lt;p&gt;&lt;b&gt;Slanje poruke na taj broj dovest će do naplate premium usluga na vašem računu mobilnog uređaja.&lt;/b&gt;&lt;p&gt;Želite li dopustiti toj aplikaciji da pošalje poruku?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Pošalji poruku"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Ne šalji"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Prijavi zlonamjerne aplikacije"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM kartica uklonjena"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Mobilna mreža bit će nedostupna do ponovnog pokretanja s umetnutom važećom SIM karticom."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Gotovo"</string>
@@ -1079,10 +1067,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dodirnite da biste onemogućili rješavanje programske pogreške na USB-u."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Odabir načina unosa"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Postavljanje načina unosa"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Fizička tipkovnica"</string>
+    <string name="hardware" msgid="7517821086888990278">"Hardver"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidati"</u></string>

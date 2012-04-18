@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Mengizinkan apl mengubah rotasi layar kapan saja. Tidak pernah dibutuhkan oleh apl normal."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ubah kecepatan penunjuk"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Mengizinkan apl mengubah kecepatan mouse atau pointer trackpad kapan saja. Tidak pernah diperlukan oleh apl normal."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"Ubah tata letak keyboard"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Memungkinkan aplikasi untuk mengubah tata letak keyboard. Tidak pernah dibutuhkan oleh aplikasi normal."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"mengirim sinyal Linux ke apl"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Mengizinkan apl meminta agar sinyal yang disediakan dikirim ke semua proses yang ada."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"membuat apl selalu berjalan"</string>
@@ -1010,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Sisipkan huruf"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Mengirim pesan SMS"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sedang mengirim pesan SMS dalam jumlah besar. Izinkan aplikasi ini untuk melanjutkan pengiriman pesan?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Izinkan"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Tolak"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Kirim SMS ke kode singkat?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Kirim SMS premium?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; akan mengirim pesan teks ke &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, yang akan muncul sebagai kode singkat SMS.&lt;p&gt;Mengirim pesan teks ke beberapa kode singkat menyebabkan Anda dikenakan biaya layanan premium pada akun seluler Anda.&lt;p&gt;Izinkan aplikasi ini mengirim pesan?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; akan mengirim pesan teks ke &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, yang merupakan kode singkat SMS premium.&lt;p&gt;&lt;b&gt;Mengirim pesan ke tujuan ini menyebabkan Anda dikenakan biaya layanan premium pada akun seluler Anda.&lt;/b&gt;&lt;p&gt;Izinkan aplikasi ini mengirim pesan?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Kirim pesan"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Jangan kirim"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Laporkan aplikasi berbahaya"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kartu SIM dihapus"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Jaringan seluler tidak akan tersedia sampai Anda memulai lagi dengan memasukkan kartu SIM yang valid."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Selesai"</string>
@@ -1079,10 +1067,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Sentuh untuk menonaktifkan debugging USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Pilih metode masukan"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Menyiapkan metode masukan"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Keyboard fisik"</string>
+    <string name="hardware" msgid="7517821086888990278">"Perangkat Keras"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"calon"</u></string>

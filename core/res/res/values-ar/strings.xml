@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"رقم التعريف الشخصي:"</string>
     <string name="select_character" msgid="3365550120617701745">"إدراج حرف"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"إرسال رسائل قصيرة SMS"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; يرسل عددًا كبيرًا من الرسائل القصيرة SMS. هل تريد السماح لهذا التطبيق بالاستمرار في إرسال الرسائل؟"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"السماح"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"رفض"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"إرسال رسالة SMS إلى رمز قصير؟"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"هل تريد إرسال رسالة قصيرة SMS مميزة؟"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; يريد إرسال رسالة نصية إلى &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;، والذي يُعد رمزًا قصيرًا لرسالة قصيرة SMS.&lt;p&gt;قد يؤدي إرسال رسائل نصية إلى بعض الرموز القصيرة إلى تحصيل رسوم من حساب جوالك للخدمات المميزة.&lt;p&gt;هل تريد السماح لهذا التطبيق بإرسال الرسالة؟"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; يريد إرسال رسالة نصية إلى &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;، والذي يُعد رمزًا قصيرًا لرسالة قصيرة SMS مميزة.&lt;p&gt;&lt;b&gt;سيؤدي إرسال رسالة إلى هذه الوجهة إلى تحصيل رسوم من حساب جوالك للخدمات المميزة.&lt;/b&gt;&lt;p&gt;هل تريد السماح لهذا التطبيق بإرسال الرسالة؟"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"إرسال رسالة"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"عدم الإرسال"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"الإبلاغ عن تطبيق ضار"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"تمت إزالة بطاقة SIM"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"لن تكون شبكة الجوال متاحة حتى تتم إعادة التشغيل وإدخال بطاقة SIM صالحة."</string>
     <string name="sim_done_button" msgid="827949989369963775">"تم"</string>

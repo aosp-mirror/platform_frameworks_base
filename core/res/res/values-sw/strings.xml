@@ -287,7 +287,7 @@
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"Badilisha kasi ya pointa"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Inaruhusu programu kubadilisha kasi ya kielekezi cha kipanya au pedi ya kufuatilia wakati wowote. Kamwe haitahitajika kwa programu za kawaida."</string>
     <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"badilisha mpangilio wa kibodi"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Inaruhusu programu kubadilisha mpangilio wa kibodi. Haipaswi kamwe kuhitajika kwa rogramu za kawaida."</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Inaruhusu programu kubadilisha mpangilio wa kibodi. Haipaswi kamwe kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Tuma ishara za Linux kwa programu"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Inaruhusu programu kuomba ishara iliyotolewa kutumwa kwa michakato inyoendelea."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"Fanya programu kuendeshwa kila mara"</string>
@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Ingiza kibambo"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Inatuma ujumbe wa SMS"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; inatuma idadi kubwa ya ujumbe wa SMS. Je, unataka kuruhusu programu hii kuendelea kutuma ujumbe?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Ruhusu"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Kataa"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Tuma ujumbe mfupi kwa msimbo mfupi?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Tuma ujumbe mfupi wa ada?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ingependa kutuma ujumbe kwa  &lt;b&gt;i<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ambayo inaonekana kama msimbo mfupi wa ujumbe mfupi.&lt;p&gt;Kutuma ujumbe mfupi kwa baadhi ya misimbo mifupi kunaweza kusababisha akaunti yako ya simu kulipishwa huduma ya ada.&lt;p&gt;Je, unataka kuruhusu programu hii kutuma ujumbe?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ingetaka kutuma ujumbe wa maandishi kwa &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ambayo ni msimbo mfupi wa SMS ya ada.&lt;p&gt;&lt;b&gt;Kutuma ujumbe kwa mwisho huu kutasababisha akaunti yako ya simu kulipishwa kwa huduma ya ada.&lt;/b&gt;&lt;p&gt;Je, unataka kuruhusu programu hii kutuma ujumbe?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Tuma ujumbe"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Usitume"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Ripoti programu mbaya"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Kadi ya SIM imeondolewa"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"mtandao wa simu hutapatika hadi uanzishe upya na SIM kadi halali iliyoingizwa."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kwisha"</string>

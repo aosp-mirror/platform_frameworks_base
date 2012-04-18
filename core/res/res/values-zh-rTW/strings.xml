@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"允許應用程式隨時變更螢幕旋轉狀態 (一般應用程式不需使用)。"</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"變更指標速度"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"允許應用程式隨時變更滑鼠或觸控板游標的移動速度 (一般應用程式不需使用)。"</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"變更鍵盤配置"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"允許應用程式變更鍵盤配置 (一般應用程式不需使用)。"</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"將 Linux 訊號傳送給應用程式"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"允許應用程式要求將提供的訊號傳送給所有持續運作中的處理程序。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"一律執行應用程式"</string>
@@ -1010,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN："</string>
     <string name="select_character" msgid="3365550120617701745">"插入字元"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"傳送 SMS 簡訊"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;&lt;/b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在傳送大量簡訊。您要允許這個應用程式繼續傳送簡訊嗎？"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"允許"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"拒絕"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"傳送簡訊給短碼？"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"傳送付費簡訊？"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;&lt;/b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」想要傳送簡訊給簡訊短碼 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;。&lt;p&gt;傳送簡訊給簡訊短碼之後，系統即會從您的行動帳戶扣除付費服務的費用。&lt;p&gt;您要允許這個應用程式傳送簡訊嗎？"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;&lt;/b&gt;「<xliff:g id="APP_NAME">%1$s</xliff:g>」想要傳送簡訊給付費簡訊短碼 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;。&lt;p&gt;&lt;b&gt;傳送簡訊給這個對象之後，系統即會從您的行動帳戶扣除付費服務的費用。&lt;/b&gt;&lt;p&gt;您要允許這個應用程式傳送簡訊嗎？"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"傳送簡訊"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"不要傳送"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"檢舉惡意應用程式"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM 卡已移除"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"您必須先插入有效的 SIM 卡再重新啟動手機，才能使用行動網路。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完成"</string>
@@ -1079,10 +1067,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"輕觸即可停用 USB 偵錯。"</string>
     <string name="select_input_method" msgid="4653387336791222978">"選擇輸入法"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"設定輸入法"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"實體鍵盤"</string>
+    <string name="hardware" msgid="7517821086888990278">"硬體"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"待選項目"</u></string>

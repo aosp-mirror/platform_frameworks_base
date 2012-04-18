@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permite aplicaţiei să modifice rotaţia ecranului în orice moment. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"modifică viteza indicatorului"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Permite aplicaţiei să modifice oricând viteza indicatorului mouse-ului sau al trackpadului. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"modificaţi aspectul tastaturii"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Permite aplicaţiei să modifice aspectul tastaturii. Nu ar trebui să fie niciodată necesară pentru aplicaţii obişnuite."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"trimitere semnale Linux către aplicaţii"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Permite aplicaţiei să solicite trimiterea semnalului furnizat către toate procesele persistente."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"rulare continuă a aplicaţiei"</string>
@@ -1010,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Cod PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Introduceţi caracterul"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Se trimit mesaje SMS"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; trimite un număr mare de mesaje SMS. Permiteţi acestei aplicaţii să trimită în continuare mesaje?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Permiteţi"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Refuzaţi"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Trimiteţi SMS la codul scurt?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Trimiteţi SMS premium?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; intenţionează să trimită un mesaj text la &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, care pare a fi un cod scurt SMS.&lt;p&gt;Trimiterea de mesaje text la unele coduri scurte poate determina taxarea contului dvs. mobil pentru servicii premium.&lt;p&gt;Permiteţi acestei aplicaţii să trimită mesajul?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; intenţionează să trimită un mesaj text la &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, care este un cod scurt SMS premium.&lt;p&gt;&lt;b&gt;Trimiterea unui mesaj la această destinaţie va determina taxarea contului dvs. mobil pentru servicii premium.&lt;/b&gt;&lt;p&gt;Permiteţi acestei aplicaţii să trimită mesajul?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Trimiteţi mesajul"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Nu trimiteţi"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Raport. aplic.rău intenţionată"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Card SIM eliminat"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Reţeaua mobilă va fi indisponibilă până când reporniţi cu o cartelă SIM validă introdusă."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Terminat"</string>
@@ -1079,10 +1067,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Atingeţi pentru a dezactiva depanarea USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Alegeţi metoda de introducere"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Configurare metode introducere"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Tastatură fizică"</string>
+    <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidaţi"</u></string>

@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Разрешава на приложението да променя ориентацията на екрана по всяко време. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"промяна на скоростта на курсор"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Разрешава на приложението да променя скоростта на курсора на мишката или на тракпада по всяко време. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"промяна на клавиат. подредба"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Разрешава на приложението да променя клавиатурната подредба. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"изпращане на сигнали от Linux до приложенията"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Разрешава на приложението да подаде заявка предоставеният сигнал да се изпрати до всички постоянни процеси."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"задаване на постоянно изпълнение на приложението"</string>
@@ -1010,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ПИН:"</string>
     <string name="select_character" msgid="3365550120617701745">"Вмъкване на знак"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Изпращане на SMS съобщения"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; изпраща голям брой SMS съобщения. Искате ли да разрешите на това приложение да продължи да го прави?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Разрешаване"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Отказване"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Да се изпрати ли SMS до кратък код?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Да се изпрати ли импулсен SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; иска да изпрати текстово съобщение до &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, което изглежда е кратък код на SMS.&lt;p&gt;Изпращането на съобщения до някои такива кодове може да доведе до таксуване на мобилната ви сметка за услуги, които се плащат допълнително.&lt;p&gt;Искате ли да разрешите на това приложение да изпрати съобщението?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; иска да изпрати текстово съобщение до &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, което е кратък код за импулсен SMS.&lt;p&gt;&lt;b&gt;Изпращането до тази точка ще доведе до таксуване на мобилната ви сметка за услуги, които се плащат допълнително.&lt;/b&gt;&lt;p&gt;Искате ли да разрешите на това приложение да изпрати съобщението?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Изпращане на съобщението"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Да не се изпраща"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Сигнал за злонам. приложение"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM картата е премахната"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Няма да имате достъп до мобилната мрежа, докато не рестартирате с поставена валидна SIM карта."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
@@ -1079,10 +1067,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Докоснете, за да деактивирате отстраняването на грешки през USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Избор на метод на въвеждане"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Методи на въвеждане: Настройка"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Физическа клавиатура"</string>
+    <string name="hardware" msgid="7517821086888990278">"Хардуер"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"кандидати"</u></string>

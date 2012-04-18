@@ -286,7 +286,7 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Lehetővé teszi az alkalmazás számára a képernyő elforgatásának bármikori módosítását. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"mutató sebességének módosítása"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Lehetővé teszi az alkalmazás számára, hogy bármikor módosítsa az egér vagy az érintőpad mutatójának sebességét. Normál alkalmazásoknak soha nem lehet rá szükségük."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"billentyűzetkiosztás módosítása"</string>
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"billentyűkiosztás módosítása"</string>
     <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Lehetővé teszi az alkalmazás számára, hogy módosítsa a billentyűzetkiosztást. Normál alkalmazásoknak alapesetben nem lehet szükségük rá."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Linux-jelek küldése az alkalmazásoknak"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Lehetővé teszi az alkalmazás számára, hogy a megadott jelet elküldje az összes állandó folyamatnak."</string>
@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN kód:"</string>
     <string name="select_character" msgid="3365550120617701745">"Karakter beszúrása"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-ek küldése"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/ b&gt; nagyszámú SMS üzenetet küld. Engedélyezi, hogy ez az alkalmazás továbbra is üzeneteket küldjön?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Engedélyezés"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Elutasítás"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"SMS küldése a rövid kódra?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Elküldi a prémium SMS-t?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"A(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; szöveges üzenetet szeretne küldeni a(z) &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; címre, ami egy SMS rövid kódja.&lt;p&gt;Az egyes rövid kódokra küldött üzenetek miatt mobilszámláján prémiumszolgáltatások lesznek kiszámlázva.&lt;/b&gt;&lt;p&gt;Engedélyezi, hogy az alkalmazás elküldje az üzenetet?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"A(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; szöveges üzenetet szeretne küldeni a(z) &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; címre, ami egy prémium SMS rövid kódja.&lt;p&gt;Az ide küldött üzenet miatt mobilszámláján prémiumszolgáltatások lesznek kiszámlázva.&lt;/b&gt;&lt;p&gt;Engedélyezi, hogy az alkalmazás elküldje az üzenetet?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Üzenet küldése"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Nincs küldés"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Rosszindulatú alk. bejelentése"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kártya eltávolítva"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"A mobilhálózat nem lesz elérhető, amíg újra nem indítja egy érvényes SIM kártya behelyezése után."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kész"</string>

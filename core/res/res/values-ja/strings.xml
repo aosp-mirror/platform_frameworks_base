@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"文字を挿入"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMSメッセージの送信中"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;が大量のSMSメッセージを送信しています。このアプリにこのままメッセージの送信を許可しますか？"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"許可する"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"許可しない"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"ショートコードへのSMSの送信"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"プレミアムSMSを送信しますか？"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;が、SMSショートコードと思われる&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;にテキストメッセージを送信しようとしています。&lt;p&gt;一部のショートコードにテキストメッセージを送信すると、プレミアムサービスの料金がモバイルアカウントが請求される場合があります。&lt;p&gt;このアプリにメッセージの送信を許可しますか？"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;が、プレミアムSMSショートコード&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;にテキストメッセージを送信しようとしています。&lt;p&gt;&lt;b&gt;この宛先にメッセージを送信すると、プレミアムサービスの料金がモバイルアカウントに請求されます。&lt;/b&gt;&lt;p&gt;このアプリにメッセージの送信を許可しますか？"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"メッセージを送信"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"送信しない"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"悪意のあるアプリを報告"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIMカードが取り外されました"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"有効なSIMカードを挿入して再起動するまでは、モバイルネットワークは利用できません。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完了"</string>

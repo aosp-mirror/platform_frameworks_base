@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Umožňuje aplikaci kdykoli změnit otočení obrazovky. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"změna rychlosti kurzoru"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Umožňuje aplikaci kdykoli změnit rychlost ukazatele myši nebo touchpadu. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"změnit rozložení klávesnice"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Umožňuje aplikaci změnit rozložení klávesnice. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"odeslání signálů systému Linux aplikacím"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Umožňuje aplikaci vyžádat zaslání poskytnutého signálu všem trvalým procesům."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"trvalé spuštění aplikace"</string>
@@ -1010,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Vkládání znaků"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Odesílání zpráv SMS"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"Aplikace &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;odesílá velký počet SMS zpráv. Chcete aplikaci povolit, aby zprávy odesílala i nadále?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Povolit"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Odmítnout"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Odeslat SMS na prémiové číslo?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Odeslat zprávu Premium SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Aplikace&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odeslat zprávu na číslo &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, což je zřejmě číslo služby Premium SMS.&lt;p&gt;Za odesílání zpráv na určitá prémiová čísla mohou být na mobilní účet naúčtovány poplatky za prémiové služby.&lt;p&gt;Chcete aplikaci povolit odeslání zprávy?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Aplikace &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce poslat zprávu na číslo &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, což je číslo služby Premium SMS.&lt;p&gt;&lt;b&gt;Pokud zprávu odešlete na toto číslo, budou vám na mobilní účet naúčtovány poplatky za prémiové služby.&lt;/b&gt;&lt;p&gt;Chcete aplikaci povolit odeslání zprávy?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Odeslat zprávu"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Neodesílat"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Nahlásit škodlivou aplikaci"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Karta SIM odebrána"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Mobilní síť bude dostupná až poté, co vložíte platnou kartu SIM a restartujete zařízení."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Hotovo"</string>
@@ -1079,10 +1067,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotykem zakážete ladění USB."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Vybrat metodu vstupu"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Nastavit metody vstupu"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Fyzická klávesnice"</string>
+    <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidáti"</u></string>
