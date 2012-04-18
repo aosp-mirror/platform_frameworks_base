@@ -714,6 +714,7 @@ public class ViewPropertyAnimator {
      * value accordingly.
      */
     private void startAnimation() {
+        mView.setHasTransientState(true);
         ValueAnimator animator = ValueAnimator.ofFloat(1.0f);
         ArrayList<NameValuesHolder> nameValueList =
                 (ArrayList<NameValuesHolder>) mPendingAnimations.clone();
@@ -960,6 +961,7 @@ public class ViewPropertyAnimator {
 
         @Override
         public void onAnimationEnd(Animator animation) {
+            mView.setHasTransientState(false);
             if (mListener != null) {
                 mListener.onAnimationEnd(animation);
             }
