@@ -16265,6 +16265,8 @@ package android.provider {
 
   protected static abstract interface CalendarContract.AttendeesColumns {
     field public static final java.lang.String ATTENDEE_EMAIL = "attendeeEmail";
+    field public static final java.lang.String ATTENDEE_IDENTITY = "attendeeIdentity";
+    field public static final java.lang.String ATTENDEE_ID_NAMESPACE = "attendeeIdNamespace";
     field public static final java.lang.String ATTENDEE_NAME = "attendeeName";
     field public static final java.lang.String ATTENDEE_RELATIONSHIP = "attendeeRelationship";
     field public static final java.lang.String ATTENDEE_STATUS = "attendeeStatus";
