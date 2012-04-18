@@ -760,18 +760,16 @@ public final class CalendarContract {
         /**
          * The identity of the attendee as referenced in
          * {@link ContactsContract.CommonDataKinds.Identity#IDENTITY}.
-         * This is required only if ATTENDEE_ID_NAMESPACE is present. Column name.
+         * This is required only if {@link #ATTENDEE_ID_NAMESPACE} is present. Column name.
          * <P>Type: STRING</P>
-         * @hide
          */
         public static final String ATTENDEE_IDENTITY = "attendeeIdentity";
 
         /**
          * The identity name space of the attendee as referenced in
          * {@link ContactsContract.CommonDataKinds.Identity#NAMESPACE}.
-         * This is required only if ATTENDEE_IDENTITY is present. Column name.
+         * This is required only if {@link #ATTENDEE_IDENTITY} is present. Column name.
          * <P>Type: STRING</P>
-         * @hide
          */
         public static final String ATTENDEE_ID_NAMESPACE = "attendeeIdNamespace";
     }
