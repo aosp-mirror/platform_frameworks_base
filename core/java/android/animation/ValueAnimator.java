@@ -150,6 +150,13 @@ public class ValueAnimator extends Animator {
     private boolean mStarted = false;
 
     /**
+     * Tracks whether we've notified listeners of the onAnimationSTart() event. This can be
+     * complex to keep track of since we notify listeners at different times depending on
+     * startDelay and whether start() was called before end().
+     */
+    private boolean mStartListenersCalled = false;
+
+    /**
      * Flag that denotes whether the animation is set up and ready to go. Used to
      * set up animation that has not yet been started.
      */
@@ -885,6 +892,18 @@ public class ValueAnimator extends Animator {
         }
     }
 
+    private void notifyStartListeners() {
+        if (mListeners != null && !mStartListenersCalled) {
+            ArrayList<AnimatorListener> tmpListeners =
+                    (ArrayList<AnimatorListener>) mListeners.clone();
+            int numListeners = tmpListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                tmpListeners.get(i).onAnimationStart(this);
+            }
+        }
+        mStartListenersCalled = true;
+    }
+
     /**
      * Start the animation playing. This version of start() takes a boolean flag that indicates
      * whether the animation should play in reverse. The flag is usually false, but may be set
@@ -914,15 +933,7 @@ public class ValueAnimator extends Animator {
             setCurrentPlayTime(getCurrentPlayTime());
             mPlayingState = STOPPED;
             mRunning = true;
-
-            if (mListeners != null) {
-                ArrayList<AnimatorListener> tmpListeners =
-                        (ArrayList<AnimatorListener>) mListeners.clone();
-                int numListeners = tmpListeners.size();
-                for (int i = 0; i < numListeners; ++i) {
-                    tmpListeners.get(i).onAnimationStart(this);
-                }
-            }
+            notifyStartListeners();
         }
         animationHandler.sendEmptyMessage(ANIMATION_START);
     }
@@ -941,7 +952,11 @@ public class ValueAnimator extends Animator {
                 || handler.mPendingAnimations.contains(this)
                 || handler.mDelayedAnims.contains(this)) {
             // Only notify listeners if the animator has actually started
-            if (mRunning && mListeners != null) {
+            if ((mStarted || mRunning) && mListeners != null) {
+                if (!mRunning) {
+                    // If it's not yet running, then start listeners weren't called. Call them now.
+                    notifyStartListeners();
+                }
                 ArrayList<AnimatorListener> tmpListeners =
                         (ArrayList<AnimatorListener>) mListeners.clone();
                 for (AnimatorListener listener : tmpListeners) {
@@ -959,6 +974,7 @@ public class ValueAnimator extends Animator {
             // Special case if the animation has not yet started; get it ready for ending
             mStartedDelay = false;
             startAnimation(handler);
+            mStarted = true;
         } else if (!mInitialized) {
             initAnimation();
         }
@@ -1010,7 +1026,11 @@ public class ValueAnimator extends Animator {
         handler.mPendingAnimations.remove(this);
         handler.mDelayedAnims.remove(this);
         mPlayingState = STOPPED;
-        if (mRunning && mListeners != null) {
+        if ((mStarted || mRunning) && mListeners != null) {
+            if (!mRunning) {
+                // If it's not yet running, then start listeners weren't called. Call them now.
+                notifyStartListeners();
+             }
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
             int numListeners = tmpListeners.size();
@@ -1020,6 +1040,7 @@ public class ValueAnimator extends Animator {
         }
         mRunning = false;
         mStarted = false;
+        mStartListenersCalled = false;
     }
 
     /**
@@ -1032,12 +1053,7 @@ public class ValueAnimator extends Animator {
         if (mStartDelay > 0 && mListeners != null) {
             // Listeners were already notified in start() if startDelay is 0; this is
             // just for delayed animations
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationStart(this);
-            }
+            notifyStartListeners();
         }
     }
 

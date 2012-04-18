@@ -1005,6 +1005,8 @@ public class LayoutTransition {
             anim.start();
             anim.end();
         }
+        // listeners should clean up the currentChangingAnimations list, but just in case...
+        currentChangingAnimations.clear();
     }
 
     /**
