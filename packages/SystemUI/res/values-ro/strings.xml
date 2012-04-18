@@ -48,8 +48,7 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notificări"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Conectat prin tethering prin Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configuraţi metode de intrare"</string>
-    <!-- no translation found for status_bar_use_physical_keyboard (7551903084416057810) -->
-    <skip />
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Tastatură fizică"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"Permiteţi aplicaţiei <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze dispozitivul USB?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Permiteţi aplicaţiei <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze accesoriul USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Deschideţi <xliff:g id="ACTIVITY">%1$s</xliff:g> la conectarea acestui dispozitiv USB?"</string>

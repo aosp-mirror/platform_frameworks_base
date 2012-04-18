@@ -48,8 +48,7 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"การแจ้งเตือน"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"บลูทูธที่ปล่อยสัญญาณ"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ตั้งค่าวิธีการป้อนข้อมูล"</string>
-    <!-- no translation found for status_bar_use_physical_keyboard (7551903084416057810) -->
-    <skip />
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"แป้นพิมพ์บนเครื่อง"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"อนุญาตให้แอปพลิเคชัน <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึงอุปกรณ์ USB นี้หรือไม่"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"อนุญาตให้แอปพลิเคชัน <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึงอุปกรณ์เสริม USB นี้หรือไม่"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"เปิด <xliff:g id="ACTIVITY">%1$s</xliff:g> เมื่อมีการเชื่อมต่ออุปกรณ์ USB นี้หรือไม่"</string>
