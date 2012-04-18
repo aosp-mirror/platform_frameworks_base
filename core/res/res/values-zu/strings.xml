@@ -287,7 +287,7 @@
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"guqula isivinini sesikhombi"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Ivumela insiza ukuthi iguqule ijubane legundane noma lendawo yokukhomba ngomunwe. Akufanele kudingakele izinsiza ezijwayelekile."</string>
     <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"shintsha isendlalelo sekhibhodi"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Ivumela uhlelo lokusebenza ukushintsha isendlalelo sekhibhodi. Kufanele ingadingi izinhlelo zokusebenzia ezivamile."</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Ivumela uhlelo lokusebenza ukushintsha isendlalelo sekhibhodi. Kufanele ingadingi izinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Thumela imifanekiso ye-Linu ezinsizeni"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Ivumela insiza ukuthi icele ukuthi isiginali ethunyelwe idluliselwe kuzo zonke izinqubeko ezisalelayo."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"yenza insiza ukuthi ihlale isebenza"</string>
@@ -1011,11 +1011,11 @@
     <string name="sms_control_message" msgid="3867899169651496433">"I-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ithumela inombolo enkulu yemilayezo ye-SMS. Ufuna ukuvumela lolu hlelo lokusebenza ukuqhubeka ukuthumela imilayezo?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Vumela"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Nqaba"</string>
-    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Thumela ikhodi efushane?"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Thumela i-SMS kukhodi emfushane?"</string>
     <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Ukuthumela i-SMS ye-premium?"</string>
-    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"I-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ithanda ukuthumela umlayezo wombhalo ku-&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, okubonakala sengathi ikhodi ye-SMS efushane.&lt;p&gt;Ukuthumela umlayezo wombhalo kungabangela i-akhawunti yeselula yakho ukuthi ikhokheliswe amasevisi e-premium.&lt;p&gt;Ufuna ukuvumela uhlelo lokusebenza ukuthumela umlayezo?"</string>
-    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"I-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ithanda ukuthumela umlayezo wombhalo ku-&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, okuyikhodi efushane ye-SMS ye-premium.&lt;p&gt;&lt;b&gt;Ukuthumela umlayezo kule ndawo kuzobangela i-akhawunti yeselula yakho ukuthi ikhokheliswe amasevisi e-premium.&lt;/b&gt;&lt;p&gt;Ufuna ukuvumela lolu hlelo lokusebenza ukuthumela umlayezo?"</string>
-    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Thumela umlayezo?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"I-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ithanda ukuthumela umlayezo wombhalo ku-&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, okubonakala sengathi ikhodi ye-SMS emfushane.&lt;p&gt;Ukuthumela umlayezo wombhalo kungabangela i-akhawunti yeselula yakho ukuthi ikhokheliswe amasevisi e-premium.&lt;p&gt;Ufuna ukuvumela uhlelo lokusebenza ukuthumela umlayezo?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"I-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ithanda ukuthumela umlayezo wombhalo ku-&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, okuyikhodi emfushane ye-SMS ye-premium.&lt;p&gt;&lt;b&gt;Ukuthumela umlayezo kule ndawo kuzobangela i-akhawunti yeselula yakho ukuthi ikhokheliswe amasevisi e-premium.&lt;/b&gt;&lt;p&gt;Ufuna ukuvumela lolu hlelo lokusebenza ukuthumela umlayezo?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Thumela umlayezo"</string>
     <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Ungathumeli"</string>
     <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Bika uhlelo lokusebenza olungalungile"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Ikhadi le-SIM likhishiwe"</string>

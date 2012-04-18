@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Vkladanie znakov"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Odosielanie správ SMS"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"Aplikácia &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; posiela veľký počet správ SMS. Chcete tejto aplikácií povoliť, aby aj naďalej posielala správy?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Povoliť"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Odmietnuť"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Odoslať SMS na skrátené číslo?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Odoslať prémiovú správu SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Aplikácia &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odoslať textovú správu na číslo &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ktoré sa zdá byť skráteným číslom SMS.&lt;p&gt;Odoslanie správy na skrátené číslo môže spôsobiť, že na účet vášho mobilného zariadenia budú účtované poplatky za prémiové služby.&lt;p&gt;Chcete aplikácií povoliť túto správu odoslať?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Aplikácia &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odoslať textovú správu na číslo &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ktoré je prémiovým skráteným číslom SMS.&lt;p&gt;&lt;b&gt;Odoslanie správy na toto číslo spôsobí, že na účet vášho mobilného zariadenia budú účtované poplatky za prémiové služby.&lt;/b&gt;&lt;p&gt;Chcete aplikácii povoliť túto správu odoslať?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Odoslať správu"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Neodoslať"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Nahlásiť škodlivú aplikáciu"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Karta SIM bola odobraná"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Mobilná sieť nebude k dispozícii, kým nevložíte platnú kartu SIM a zariadenie nereštartujete."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Hotovo"</string>

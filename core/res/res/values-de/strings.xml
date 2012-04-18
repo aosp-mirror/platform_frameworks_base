@@ -929,7 +929,7 @@
     <string name="chooseUsbActivity" msgid="6894748416073583509">"App für USB-Gerät auswählen"</string>
     <string name="noApplications" msgid="2991814273936504689">"Diese Aktion kann von keiner App ausgeführt werden."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Leider wurde <xliff:g id="APPLICATION">%1$s</xliff:g> beendet."</string>
+    <string name="aerr_application" msgid="932628488013092776">"Leider wurde \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" beendet."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Leider wurde der Prozess <xliff:g id="PROCESS">%1$s</xliff:g> beendet."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> reagiert nicht."\n\n"Möchten Sie die App schließen?"</string>
@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Zeichen einfügen"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Kurznachrichten werden gesendet"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sendet eine große Anzahl SMS. Möchten Sie zulassen, dass die App weiterhin Nachrichten sendet?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Zulassen"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Nicht zulassen"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"SMS an Kurzwahl senden?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Premium-SMS senden?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; versucht, eine SMS an &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; zu senden. Dabei scheint es sich um eine SMS-Kurzwahl zu handeln.&lt;p&gt;Wenn Sie SMS an eine Kurzwahl senden, werden Ihnen für Ihr Mobilfunkkonto möglicherweise Premiumdienste in Rechnung gestellt.&lt;p&gt;Möchten Sie zulassen, dass die App die Nachricht sendet?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; versucht, eine SMS an die Premium-SMS-Kurzwahl &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; zu senden.&lt;p&gt;&lt;b&gt;Wenn Sie eine Nachricht an diese Zieladresse senden, werden Ihnen für Ihr Mobilfunkkonto Premiumdienste in Rechnung gestellt.&lt;/b&gt;&lt;p&gt;Möchten Sie zulassen, dass die App die Nachricht sendet?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Nachricht senden"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Nicht senden"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Schädliche App melden"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-Karte entfernt"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Das Mobilfunknetz ist erst wieder verfügbar, wenn Sie einen Neustart mit einer gültigen SIM-Karte durchführen."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Fertig"</string>

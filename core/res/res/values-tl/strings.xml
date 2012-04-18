@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Magpasok ng character"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Nagpapadala ng mga SMS na mensahe"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"Ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ay nagpapadala ng maraming mensaheng SMS. Gusto mo bang payagan ang app na ito na magpatuloy sa pagpapadala ng mga mensahe?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Payagan"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Tanggihan"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Magpadala SMS sa short code?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Ipadala ang premium na SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"Ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ay gustong magpadala ng text message sa &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, na lumilitaw na isang SMS na short code.&lt;p&gt;Ang pagpapadala ng mga text message sa ilang short code ay maaaring magdulot ng pagsingil sa iyong mobile account para sa mga premium na serbisyo.&lt;p&gt;Gusto mo bang payagan ang app na ito na ipadala ang mensahe?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"Ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ay gustong magpadala ng text message sa &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, na isang premium na SMS na short code.&lt;p&gt;&lt;b&gt;Ang pagpapadala ng mensahe sa patutunguhang ito ay magdudulot ng pagsingil sa iyong mobile account para sa mga premium na serbisyo.&lt;/b&gt;&lt;p&gt;Gusto mo bang payagan ang app na ito na ipadala ang mensahe?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Ipadala ang mensahe"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Huwag ipadala"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Mag-ulat ng nakakapahamak na app"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Naalis ang SIM card"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Hindi magiging available ang mobile network hanggang mag-restart ka gamit ang isang may-bisang SIM card"</string>
     <string name="sim_done_button" msgid="827949989369963775">"Tapos na"</string>

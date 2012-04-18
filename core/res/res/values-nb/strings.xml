@@ -286,10 +286,8 @@
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Gir appen tillatelse til når som helst å endre rotasjonen av skjermen. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"endre pekerhastighet"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Lar appen når som helst endre markørhastigheten til musen eller styreflaten. Skal aldri være nødvendig for vanlige apper."</string>
-    <!-- no translation found for permlab_setKeyboardLayout (4778731703600909340) -->
-    <skip />
-    <!-- no translation found for permdesc_setKeyboardLayout (8480016771134175879) -->
-    <skip />
+    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"endre tastaturutformingen"</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Lar appen endre tastaturutformingen. Skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"sende Linux-signaler til apper"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Lar appen be om at det leverte signalet sendes til alle vedvarende prosesser."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"angi at appen alltid skal kjøre"</string>
@@ -1010,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="select_character" msgid="3365550120617701745">"Sett inn tegn"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sender SMS-meldinger"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sender et stort antall SMS. Vil du la appen fortsette å sende ut meldinger?"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"Tillat"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Sperr"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"Vil du sende SMS til kortkoden?"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"Vil du sende premium-SMS?"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vil sende en tekstmelding til &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, som ser ut ti å være en SMS-kortkode.&lt;p&gt;Hvis du sender en melding til denne destinasjonen, kan mobilkontoen din komme til å belastes for premium-tjenester.&lt;p&gt;Vil du la denne meldingen sendes av appen?"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vil sende en tekstmelding til &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, som er en premium SMS-kortkode.&lt;p&gt;&lt;b&gt;Hvis du sender en melding til denne destinasjonen, belastes mobilkontoen din for premium-tjenester.&lt;/b&gt;&lt;p&gt;Vil du la denne meldingen sendes av appen?"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"Send melding"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"Ikke send"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"Rapportér skadelig app"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort er fjernet"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Det mobile nettverket forblir utilgjengelig inntil du starter på nytt med et gyldig SIM-kort."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Fullført"</string>
@@ -1079,10 +1067,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Trykk for å deaktivere USB-feilsøking."</string>
     <string name="select_input_method" msgid="4653387336791222978">"Velg inndatametode"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"Konfigurer inndatametoder"</string>
-    <!-- no translation found for use_physical_keyboard (6203112478095117625) -->
-    <skip />
-    <!-- no translation found for hardware (7517821086888990278) -->
-    <skip />
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Fysisk tastatur"</string>
+    <string name="hardware" msgid="7517821086888990278">"Maskinvare"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="candidates_style" msgid="4333913089637062257">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>

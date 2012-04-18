@@ -287,7 +287,7 @@
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"تغییر سرعت اشاره گر"</string>
     <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"به برنامه اجازه می‎دهد تا سرعت ماوس و پد کنترل را هر وقت خواست تغییر دهد. برای برنامه‎های عادی نیاز نیست."</string>
     <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"تغییر چیدمان صفحه کلید"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"به برنامه اجازه می‌دهد تا چیدمان صفحه کلید را تغییر دهد. این کار هیچ گاه برای برنامه‌های عادی نیاز نیست."</string>
+    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"به برنامه اجازه می‌دهد تا چیدمان صفحه کلید را تغییر دهد. این کار هیچ‌گاه برای برنامه‌های عادی نیاز نیست."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"ارسال سیگنالهای Linux به برنامه‎ها"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"به برنامه اجازه می‎دهد تا درخواست کند سیگنال ارائه شده به همه مراحل دائم ارسال شود."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"همیشه برنامه اجرا شود"</string>
@@ -1008,26 +1008,16 @@
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"پین:"</string>
     <string name="select_character" msgid="3365550120617701745">"درج نویسه"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"ارسال پیامک ها"</string>
-    <!-- no translation found for sms_control_message (3867899169651496433) -->
-    <skip />
-    <!-- no translation found for sms_control_yes (3663725993855816807) -->
-    <skip />
-    <!-- no translation found for sms_control_no (625438561395534982) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_title (1666863092640877318) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_title (3811263856304367838) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_message (5616409294907295407) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_confirm_message (6214083016284738667) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_allow (8957573662645722940) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_deny (6374609298084435887) -->
-    <skip />
-    <!-- no translation found for sms_short_code_confirm_report (2588793956061677070) -->
-    <skip />
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; در حال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
+    <string name="sms_control_yes" msgid="3663725993855816807">"اجازه دادن"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"ردکردن"</string>
+    <string name="sms_short_code_confirm_title" msgid="1666863092640877318">"پیامک به کد کوتاه ارسال شود؟"</string>
+    <string name="sms_premium_short_code_confirm_title" msgid="3811263856304367838">"پیامک ممتاز ارسال شود؟"</string>
+    <string name="sms_short_code_confirm_message" msgid="5616409294907295407">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; می‌خواهد یک پیام نوشتاری را به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ارسال کند که به نظر می‌رسد یک کد کوتاه پیامک است.&lt;p&gt;ارسال پیام‌های نوشتاری به برخی از کدهای کوتاه ممکن است باعث شود برای حساب تلفن همراه شما بابت استفاده از سرویس‌های ممتاز صورتحساب ارسال شود.&lt;p&gt;آیا به این برنامه اجازه می‌دهید پیام ارسال کند؟"</string>
+    <string name="sms_premium_short_code_confirm_message" msgid="6214083016284738667">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; می‌خواهد یک پیام نوشتاری را به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;, ارسال کند که یک کد کوتاه پیامک ممتاز است.&lt;p&gt;&lt;b&gt;ارسال پیام به این مقصد ممکن است باعث شود برای حساب تلفن همراه شما بابت استفاده از سرویس‌های ممتاز صورتحساب ارسال شود.&lt;/b&gt;&lt;p&gt;آیا به این برنامه اجازه می‌دهید پیامک ارسال کند؟"</string>
+    <string name="sms_short_code_confirm_allow" msgid="8957573662645722940">"ارسال پیام"</string>
+    <string name="sms_short_code_confirm_deny" msgid="6374609298084435887">"ارسال نشود"</string>
+    <string name="sms_short_code_confirm_report" msgid="2588793956061677070">"گزارش برنامه مخرب"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"سیم کارت برداشته شد"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"تا وقتی که با یک سیم‌کارت معتبر راه‌اندازی مجدد نکنید شبکه تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
     <string name="sim_done_button" msgid="827949989369963775">"انجام شد"</string>
