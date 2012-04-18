@@ -3775,6 +3775,12 @@ package android.app {
     method public android.app.Notification.Builder setWhen(long);
   }
 
+  public static class Notification.InboxStyle {
+    ctor public Notification.InboxStyle(android.app.Notification.Builder);
+    method public android.app.Notification.InboxStyle addLine(java.lang.CharSequence);
+    method public android.app.Notification build();
+  }
+
   public class NotificationManager {
     method public void cancel(int);
     method public void cancel(java.lang.String, int);

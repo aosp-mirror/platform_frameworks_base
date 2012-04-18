@@ -205,6 +205,11 @@
   <java-symbol type="id" name="big_picture" />
   <java-symbol type="id" name="big_text" />
   <java-symbol type="id" name="chronometer" />
+  <java-symbol type="id" name="inbox_text0" />
+  <java-symbol type="id" name="inbox_text1" />
+  <java-symbol type="id" name="inbox_text2" />
+  <java-symbol type="id" name="inbox_text3" />
+  <java-symbol type="id" name="inbox_text4" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -1085,6 +1090,7 @@
   <java-symbol type="layout" name="notification_template_big_picture" />
   <java-symbol type="layout" name="notification_template_part_time" />
   <java-symbol type="layout" name="notification_template_part_chronometer" />
+  <java-symbol type="layout" name="notification_template_inbox" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
