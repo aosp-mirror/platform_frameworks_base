@@ -2665,6 +2665,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_PROCESS_INPUT_EVENTS = 19;
     private final static int MSG_DISPATCH_SCREEN_STATE = 20;
     private final static int MSG_INVALIDATE_DISPLAY_LIST = 21;
+    private final static int MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST = 22;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -2712,6 +2713,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_DISPATCH_SCREEN_STATE";
                 case MSG_INVALIDATE_DISPLAY_LIST:
                     return "MSG_INVALIDATE_DISPLAY_LIST";
+                case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST:
+                    return "MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST";
             }
             return super.getMessageName(message);
         }
@@ -2920,6 +2923,9 @@ public final class ViewRootImpl implements ViewParent,
             } break;
             case MSG_INVALIDATE_DISPLAY_LIST: {
                 invalidateDisplayLists();
+            } break;
+            case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
+                setAccessibilityFocusedHost(null);
             } break;
             }
         }
@@ -5066,7 +5072,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
             } else {
                 ensureNoConnection();
-                setAccessibilityFocusedHost(null);
+                mHandler.obtainMessage(MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST).sendToTarget();
             }
         }
 

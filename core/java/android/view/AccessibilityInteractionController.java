@@ -52,13 +52,16 @@ final class AccessibilityInteractionController {
     private ArrayList<AccessibilityNodeInfo> mTempAccessibilityNodeInfoList =
         new ArrayList<AccessibilityNodeInfo>();
 
-    private final Handler mHandler = new PrivateHandler();
+    private final Handler mHandler;
 
     private final ViewRootImpl mViewRootImpl;
 
     private final AccessibilityNodePrefetcher mPrefetcher;
 
     public AccessibilityInteractionController(ViewRootImpl viewRootImpl) {
+        // mView is never null - the caller has already checked.
+        Looper looper = viewRootImpl.mView.mContext.getMainLooper();
+        mHandler = new PrivateHandler(looper);
         mViewRootImpl = viewRootImpl;
         mPrefetcher = new AccessibilityNodePrefetcher();
     }
@@ -846,8 +849,8 @@ final class AccessibilityInteractionController {
         private final static int MSG_FIND_FOCUS = 5;
         private final static int MSG_FOCUS_SEARCH = 6;
 
-        public PrivateHandler() {
-            super(Looper.getMainLooper());
+        public PrivateHandler(Looper looper) {
+            super(looper);
         }
 
         @Override

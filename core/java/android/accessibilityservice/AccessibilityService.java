@@ -259,12 +259,50 @@ public abstract class AccessibilityService extends Service {
     public static final int GESTURE_COUNTER_CLOCKWISE_CIRCLE = 10;
 
     /**
+     * The user has performed a left and up gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_LEFT_AND_UP = 11;
+
+    /**
+     * The user has performed a left and down gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_LEFT_AND_DOWN = 12;
+
+    /**
+     * The user has performed a right and up gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_RIGHT_AND_UP = 13;
+
+    /**
+     * The user has performed a right and down gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_RIGHT_AND_DOWN = 14;
+
+    /**
+     * The user has performed an up and left gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_UP_AND_LEFT = 15;
+
+    /**
+     * The user has performed an up and right gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_UP_AND_RIGHT = 16;
+
+    /**
+     * The user has performed an down and left gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_DOWN_AND_LEFT = 17;
+
+    /**
+     * The user has performed an down and right gesture on the touch screen.
+     */
+    public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 18;
+
+    /**
      * The {@link Intent} that must be declared as handled by the service.
      */
     public static final String SERVICE_INTERFACE =
         "android.accessibilityservice.AccessibilityService";
-
-    private static final int UNDEFINED = -1;
 
     /**
      * Name under which an AccessibilityService component publishes information
@@ -283,6 +321,28 @@ public abstract class AccessibilityService extends Service {
      * /&gt;</pre>
      */
     public static final String SERVICE_META_DATA = "android.accessibilityservice";
+
+    /**
+     * Action to go back.
+     */
+    public static final int GLOBAL_ACTION_BACK = 1;
+
+    /**
+     * Action to go home.
+     */
+    public static final int GLOBAL_ACTION_HOME = 2;
+
+    /**
+     * Action to open the recents.
+     */
+    public static final int GLOBAL_ACTION_RECENTS = 3;
+
+    /**
+     * Action to open the notifications.
+     */
+    public static final int GLOBAL_ACTION_NOTIFICATIONS = 4;
+
+    private static final int UNDEFINED = -1;
 
     private static final String LOG_TAG = "AccessibilityService";
 
@@ -344,6 +404,22 @@ public abstract class AccessibilityService extends Service {
     protected void onGesture(int gestureId) {
         // TODO: Describe the default gesture processing in the javaDoc once it is finalized.
 
+        // Global actions.
+        switch (gestureId) {
+            case GESTURE_SWIPE_DOWN_AND_LEFT: {
+                performGlobalAction(GLOBAL_ACTION_BACK);
+            } return;
+            case GESTURE_SWIPE_DOWN_AND_RIGHT: {
+                performGlobalAction(GLOBAL_ACTION_HOME);
+            } return;
+            case GESTURE_SWIPE_UP_AND_LEFT: {
+                performGlobalAction(GLOBAL_ACTION_RECENTS);
+            } return;
+            case GESTURE_SWIPE_UP_AND_RIGHT: {
+                performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS);
+            } return;
+        }
+
         // Cache the id to avoid locking
         final int connectionId = mConnectionId;
         if (connectionId == UNDEFINED) {
@@ -357,10 +433,12 @@ public abstract class AccessibilityService extends Service {
         if (root == null) {
             return;
         }
-        AccessibilityNodeInfo current = root.findFocus(View.FOCUS_ACCESSIBILITY);
+        AccessibilityNodeInfo current = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
         if (current == null) {
             current = root;
         }
+
+        // Local actions.
         AccessibilityNodeInfo next = null;
         switch (gestureId) {
             case GESTURE_SWIPE_UP: {
@@ -399,6 +477,33 @@ public abstract class AccessibilityService extends Service {
         if (next != null && !next.equals(current)) {
             next.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
         }
+    }
+
+    /**
+     * Performs a global action. Such an action can be performed
+     * at any moment regardless of the current application or user
+     * location in that application. For example going back, going
+     * home, opening recents, etc.
+     *
+     * @param action The action to perform.
+     * @return Whether the action was successfully performed.
+     *
+     * @see #GLOBAL_ACTION_BACK
+     * @see #GLOBAL_ACTION_HOME
+     * @see #GLOBAL_ACTION_NOTIFICATIONS
+     * @see #GLOBAL_ACTION_RECENTS
+     */
+    public final boolean performGlobalAction(int action) {
+        IAccessibilityServiceConnection connection =
+            AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (connection != null) {
+            try {
+                return connection.perfromGlobalAction(action);
+            } catch (RemoteException re) {
+                Log.w(LOG_TAG, "Error while calling performGlobalAction", re);
+            }
+        }
+        return false;
     }
 
     /**
