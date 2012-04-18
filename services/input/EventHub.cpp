@@ -443,11 +443,22 @@ status_t EventHub::mapKey(int32_t deviceId, int32_t scanCode, int32_t usageCode,
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
 
-    if (device && device->keyMap.haveKeyLayout()) {
-        status_t err = device->keyMap.keyLayoutMap->mapKey(
-                scanCode, usageCode, outKeycode, outFlags);
-        if (err == NO_ERROR) {
-            return NO_ERROR;
+    if (device) {
+        // Check the key character map first.
+        sp<KeyCharacterMap> kcm = device->getKeyCharacterMap();
+        if (kcm != NULL) {
+            if (!kcm->mapKey(scanCode, usageCode, outKeycode)) {
+                *outFlags = 0;
+                return NO_ERROR;
+            }
+        }
+
+        // Check the key layout next.
+        if (device->keyMap.haveKeyLayout()) {
+            if (!device->keyMap.keyLayoutMap->mapKey(
+                    scanCode, usageCode, outKeycode, outFlags)) {
+                return NO_ERROR;
+            }
         }
     }
 
@@ -531,10 +542,7 @@ sp<KeyCharacterMap> EventHub::getKeyCharacterMap(int32_t deviceId) const {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
     if (device) {
-        if (device->combinedKeyMap != NULL) {
-            return device->combinedKeyMap;
-        }
-        return device->keyMap.keyCharacterMap;
+        return device->getKeyCharacterMap();
     }
     return NULL;
 }

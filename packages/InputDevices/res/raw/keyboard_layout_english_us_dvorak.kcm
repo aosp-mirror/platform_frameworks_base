@@ -19,10 +19,38 @@
 
 type OVERLAY
 
-# Test
-key A {
-    label:                              'X'
-    base:                               'x'
-    shift, capslock:                    'X'
-    ctrl, alt, meta:                    none
-}
+map key 12 LEFT_BRACKET
+map key 13 RIGHT_BRACKET
+map key 16 APOSTROPHE
+map key 17 COMMA
+map key 18 PERIOD
+map key 19 P
+map key 20 Y
+map key 21 F
+map key 22 G
+map key 23 C
+map key 24 R
+map key 25 L
+map key 26 SLASH
+map key 27 EQUALS
+map key 30 A
+map key 31 O
+map key 32 E
+map key 33 U
+map key 34 I
+map key 35 D
+map key 36 H
+map key 37 T
+map key 38 N
+map key 39 S
+map key 40 MINUS
+map key 44 SEMICOLON
+map key 45 Q
+map key 46 J
+map key 47 K
+map key 48 X
+map key 49 B
+map key 50 M
+map key 51 W
+map key 52 V
+map key 53 Z
