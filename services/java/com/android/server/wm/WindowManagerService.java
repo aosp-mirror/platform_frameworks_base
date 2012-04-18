@@ -3076,6 +3076,43 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
+    private Animation createExitAnimationLocked(int transit, int duration) {
+        if (transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN ||
+                transit == WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE) {
+            // If we are on top of the wallpaper, we need an animation that
+            // correctly handles the wallpaper staying static behind all of
+            // the animated elements.  To do this, will just have the existing
+            // element fade out.
+            Animation a = new AlphaAnimation(1, 0);
+            a.setDetachWallpaper(true);
+            a.setDuration(duration);
+            return a;
+        } else {
+            // For normal animations, the exiting element just holds in place.
+            Animation a = new AlphaAnimation(1, 1);
+            a.setDuration(duration);
+            return a;
+        }
+    }
+
+    /**
+     * Compute the pivot point for an animation that is scaling from a small
+     * rect on screen to a larger rect.  The pivot point varies depending on
+     * the distance between the inner and outer edges on both sides.  This
+     * function computes the pivot point for one dimension.
+     * @param startPos  Offset from left/top edge of outer rectangle to
+     * left/top edge of inner rectangle.
+     * @param finalScale The scaling factor between the size of the outer
+     * and inner rectangles.
+     */
+    private static float computePivot(int startPos, float finalScale) {
+        final float denom = finalScale-1;
+        if (Math.abs(denom) < .0001f) {
+            return startPos;
+        }
+        return -startPos / denom;
+    }
+
     private Animation createScaleUpAnimationLocked(int transit, boolean enter) {
         Animation a;
         // Pick the desired duration.  If this is an inter-activity transition,
@@ -3094,11 +3131,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (enter) {
             // Entering app zooms out from the center of the initial rect.
-            Animation scale = new ScaleAnimation(
-                    mNextAppTransitionStartWidth/mAppDisplayWidth, 1,
-                    mNextAppTransitionStartHeight/mAppDisplayHeight, 1,
-                    mNextAppTransitionStartX + mNextAppTransitionStartWidth/2,
-                    mNextAppTransitionStartY + mNextAppTransitionStartHeight/2);
+            float scaleW = mNextAppTransitionStartWidth/(float)mAppDisplayWidth;
+            float scaleH = mNextAppTransitionStartHeight/(float)mAppDisplayHeight;
+            Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
+                    computePivot(mNextAppTransitionStartX, scaleW),
+                    computePivot(mNextAppTransitionStartY, scaleH));
+            scale.setDuration(duration);
             AnimationSet set = new AnimationSet(true);
             Animation alpha = new AlphaAnimation(0, 1);
             scale.setDuration(duration);
@@ -3107,13 +3145,11 @@ public class WindowManagerService extends IWindowManager.Stub
             set.addAnimation(alpha);
             a = set;
         } else {
-            // Exiting app just holds in place.
-            a = new AlphaAnimation(1, 1);
-            a.setDuration(duration);
+            a = createExitAnimationLocked(transit, duration);
         }
         a.setFillAfter(true);
         final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
-                com.android.internal.R.interpolator.decelerate_quint);
+                com.android.internal.R.interpolator.decelerate_quad);
         a.setInterpolator(interpolator);
         a.initialize(mAppDisplayWidth, mAppDisplayHeight,
                 mAppDisplayWidth, mAppDisplayHeight);
@@ -3123,8 +3159,10 @@ public class WindowManagerService extends IWindowManager.Stub
     private Animation createThumbnailAnimationLocked(int transit,
             boolean enter, boolean thumb) {
         Animation a;
-        final float thumbWidth = mNextAppTransitionThumbnail.getWidth();
-        final float thumbHeight = mNextAppTransitionThumbnail.getHeight();
+        final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
+        final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
+        final int thumbHeightI = mNextAppTransitionThumbnail.getHeight();
+        final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
         // Pick the desired duration.  If this is an inter-activity transition,
         // it  is the standard duration for that.  Otherwise we use the longer
         // task transition duration.
@@ -3142,11 +3180,11 @@ public class WindowManagerService extends IWindowManager.Stub
         if (thumb) {
             // Animation for zooming thumbnail from its initial size to
             // filling the screen.
-            Animation scale = new ScaleAnimation(
-                    1, mAppDisplayWidth/thumbWidth,
-                    1, mAppDisplayHeight/thumbHeight,
-                    mNextAppTransitionStartX + thumbWidth/2,
-                    mNextAppTransitionStartY + thumbHeight/2);
+            float scaleW = mAppDisplayWidth/thumbWidth;
+            float scaleH = mAppDisplayHeight/thumbHeight;
+            Animation scale = new ScaleAnimation(1, scaleW, 1, scaleH,
+                    computePivot(mNextAppTransitionStartX, 1/scaleW),
+                    computePivot(mNextAppTransitionStartY, 1/scaleH));
             AnimationSet set = new AnimationSet(true);
             Animation alpha = new AlphaAnimation(1, 0);
             scale.setDuration(duration);
@@ -3156,20 +3194,18 @@ public class WindowManagerService extends IWindowManager.Stub
             a = set;
         } else if (enter) {
             // Entering app zooms out from the center of the thumbnail.
-            a = new ScaleAnimation(
-                    thumbWidth/mAppDisplayWidth, 1,
-                    thumbHeight/mAppDisplayHeight, 1,
-                    mNextAppTransitionStartX + thumbWidth/2,
-                    mNextAppTransitionStartY + thumbHeight/2);
+            float scaleW = thumbWidth/mAppDisplayWidth;
+            float scaleH = thumbHeight/mAppDisplayHeight;
+            a = new ScaleAnimation(scaleW, 1, scaleH, 1,
+                    computePivot(mNextAppTransitionStartX, scaleW),
+                    computePivot(mNextAppTransitionStartY, scaleH));
             a.setDuration(duration);
         } else {
-            // Exiting app just holds in place.
-            a = new AlphaAnimation(1, 1);
-            a.setDuration(duration);
+            a = createExitAnimationLocked(transit, duration);
         }
         a.setFillAfter(true);
         final Interpolator interpolator = AnimationUtils.loadInterpolator(mContext,
-                com.android.internal.R.interpolator.decelerate_quint);
+                com.android.internal.R.interpolator.decelerate_quad);
         a.setInterpolator(interpolator);
         a.initialize(mAppDisplayWidth, mAppDisplayHeight,
                 mAppDisplayWidth, mAppDisplayHeight);

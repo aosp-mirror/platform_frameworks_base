@@ -3946,6 +3946,17 @@ final class ActivityStack {
         }
     }
 
+    final void updateTransitLocked(int transit, Bundle options) {
+        if (options != null) {
+            ActivityRecord r = topRunningActivityLocked(null);
+            if (r != null && r.state != ActivityState.RESUMED) {
+                r.updateOptionsLocked(options);
+            } else {
+                ActivityOptions.abort(options);
+            }
+        }
+        mService.mWindowManager.prepareAppTransition(transit, false);
+    }
 
     final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord reason, Bundle options) {
         if (DEBUG_SWITCH) Slog.v(TAG, "moveTaskToFront: " + tr);
@@ -3955,7 +3966,12 @@ final class ActivityStack {
 
         if (top < 0 || (mHistory.get(top)).task.taskId == task) {
             // nothing to do!
-            ActivityOptions.abort(options);
+            if (reason != null &&
+                    (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
+                ActivityOptions.abort(options);
+            } else {
+                updateTransitLocked(WindowManagerPolicy.TRANSIT_TASK_TO_FRONT, options);
+            }
             return;
         }
 
@@ -3999,16 +4015,7 @@ final class ActivityStack {
             }
             ActivityOptions.abort(options);
         } else {
-            if (options != null) {
-                ActivityRecord r = topRunningActivityLocked(null);
-                if (r != null && r.state != ActivityState.RESUMED) {
-                    r.updateOptionsLocked(options);
-                } else {
-                    ActivityOptions.abort(options);
-                }
-            }
-            mService.mWindowManager.prepareAppTransition(
-                    WindowManagerPolicy.TRANSIT_TASK_TO_FRONT, false);
+            updateTransitLocked(WindowManagerPolicy.TRANSIT_TASK_TO_FRONT, options);
         }
         
         mService.mWindowManager.moveAppTokensToTop(moved);

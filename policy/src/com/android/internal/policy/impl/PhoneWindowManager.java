@@ -306,7 +306,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mStatusBar = null;
     boolean mHasSystemNavBar;
     int mStatusBarHeight;
-    final ArrayList<WindowState> mStatusBarPanels = new ArrayList<WindowState>();
+    final ArrayList<WindowState> mStatusBarSubPanels = new ArrayList<WindowState>();
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
     boolean mCanHideNavigationBar = false;
@@ -1560,13 +1560,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE,
                         "PhoneWindowManager");
-                mStatusBarPanels.add(win);
                 break;
             case TYPE_STATUS_BAR_SUB_PANEL:
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE,
                         "PhoneWindowManager");
-                mStatusBarPanels.add(win);
+                mStatusBarSubPanels.add(win);
                 break;
             case TYPE_KEYGUARD:
                 if (mKeyguard != null) {
@@ -1587,7 +1586,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (mNavigationBar == win) {
             mNavigationBar = null;
         } else {
-            mStatusBarPanels.remove(win);
+            mStatusBarSubPanels.remove(win);
         }
     }
 
@@ -2760,8 +2759,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (mStatusBar != null && mStatusBar.isVisibleLw()) {
             RectF rect = new RectF(mStatusBar.getShownFrameLw());
-            for (int i=mStatusBarPanels.size()-1; i>=0; i--) {
-                WindowState w = mStatusBarPanels.get(i);
+            for (int i=mStatusBarSubPanels.size()-1; i>=0; i--) {
+                WindowState w = mStatusBarSubPanels.get(i);
                 if (w.isVisibleLw()) {
                     rect.union(w.getShownFrameLw());
                 }
