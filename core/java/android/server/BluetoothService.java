@@ -165,6 +165,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private static String mDockAddress;
     private String mDockPin;
 
+    private boolean mAllowConnect = true;
+
     private int mAdapterConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
     private BluetoothPanProfileHandler mBluetoothPanProfileHandler;
     private BluetoothInputProfileHandler mBluetoothInputProfileHandler;
@@ -472,7 +474,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     /** Bring up BT and persist BT on in settings */
     public boolean enable() {
-        return enable(true);
+        return enable(true, true);
     }
 
     /**
@@ -480,9 +482,11 @@ public class BluetoothService extends IBluetooth.Stub {
      * This turns on/off the underlying hardware.
      *
      * @param saveSetting If true, persist the new state of BT in settings
+     * @param allowConnect If true, auto-connects device when BT is turned on
+     *                     and allows incoming A2DP/HSP connections
      * @return True on success (so far)
      */
-    public synchronized boolean enable(boolean saveSetting) {
+    public synchronized boolean enable(boolean saveSetting, boolean allowConnect) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
 
@@ -490,8 +494,26 @@ public class BluetoothService extends IBluetooth.Stub {
         if (mIsAirplaneSensitive && isAirplaneModeOn() && !mIsAirplaneToggleable) {
             return false;
         }
+        mAllowConnect = allowConnect;
         mBluetoothState.sendMessage(BluetoothAdapterStateMachine.USER_TURN_ON, saveSetting);
         return true;
+    }
+
+    /**
+     * Enable this Bluetooth device, asynchronously, but does not
+     * auto-connect devices. In this state the Bluetooth adapter
+     * also does not allow incoming A2DP/HSP connections (that
+     * must go through this service), but does allow communication
+     * on RFCOMM sockets implemented outside of this service (ie BTOPP).
+     * This method is used to temporarily enable Bluetooth
+     * for data transfer, without changing
+     *
+     * This turns on/off the underlying hardware.
+     *
+     * @return True on success (so far)
+     */
+    public boolean enableNoAutoConnect() {
+        return enable(false, false);
     }
 
     /**
@@ -2441,6 +2463,13 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     private void autoConnect() {
+        synchronized (this) {
+            if (!mAllowConnect) {
+                Log.d(TAG, "Not auto-connecting devices because of temporary BT on state.");
+                return;
+            }
+        }
+
         String[] bonds = getKnownDevices();
         if (bonds == null) {
             return;
@@ -2457,6 +2486,12 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public boolean notifyIncomingConnection(String address, boolean rejected) {
+        synchronized (this) {
+            if (!mAllowConnect) {
+                Log.d(TAG, "Not allowing incoming connection because of temporary BT on state.");
+                return false;
+            }
+        }
         BluetoothDeviceProfileState state = mDeviceProfileState.get(address);
         if (state != null) {
             Message msg = new Message();
@@ -2478,6 +2513,13 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ boolean notifyIncomingA2dpConnection(String address, boolean rejected) {
+        synchronized (this) {
+            if (!mAllowConnect) {
+                Log.d(TAG, "Not allowing a2dp connection because of temporary BT on state.");
+                return false;
+            }
+        }
+
        BluetoothDeviceProfileState state = mDeviceProfileState.get(address);
        if (state != null) {
            Message msg = new Message();

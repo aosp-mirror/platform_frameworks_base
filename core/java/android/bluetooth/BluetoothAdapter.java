@@ -1232,6 +1232,18 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Enable the Bluetooth Adapter, but don't auto-connect devices
+     * and don't persist state. Only for use by system applications.
+     * @hide
+     */
+    public boolean enableNoAutoConnect() {
+        try {
+            return mService.enableNoAutoConnect();
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
      * Enable control of the Bluetooth Adapter for a single application.
      *
      * <p>Some applications need to use Bluetooth for short periods of time to
