@@ -2944,7 +2944,7 @@ final class ActivityStack {
         // Collect information about the target of the Intent.
         ActivityInfo aInfo = resolveActivity(intent, resolvedType, startFlags,
                 profileFile, profileFd, userId);
-        if (mService.isSingleton(aInfo.processName, aInfo.applicationInfo)) {
+        if (aInfo != null && mService.isSingleton(aInfo.processName, aInfo.applicationInfo)) {
             userId = 0;
         }
         aInfo = mService.getActivityInfoForUser(aInfo, userId);
