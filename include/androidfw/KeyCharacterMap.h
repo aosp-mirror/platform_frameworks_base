@@ -206,6 +206,7 @@ private:
         status_t parseMapKey();
         status_t parseKey();
         status_t parseKeyProperty();
+        status_t finishKey(Key* key);
         status_t parseModifier(const String8& token, int32_t* outMetaState);
         status_t parseCharacterLiteral(char16_t* outCharacter);
     };
@@ -224,6 +225,7 @@ private:
     bool getKey(int32_t keyCode, const Key** outKey) const;
     bool getKeyBehavior(int32_t keyCode, int32_t metaState,
             const Key** outKey, const Behavior** outBehavior) const;
+    static bool matchesMetaState(int32_t eventMetaState, int32_t behaviorMetaState);
 
     bool findKey(char16_t ch, int32_t* outKeyCode, int32_t* outMetaState) const;
 
