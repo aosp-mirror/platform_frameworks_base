@@ -279,7 +279,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             format,// word length, PCM
             nativeChannelMask,
             frameCount,
-            AUDIO_POLICY_OUTPUT_FLAG_NONE,
+            AUDIO_OUTPUT_FLAG_NONE,
             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
             0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
             0,// shared mem
@@ -300,7 +300,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             format,// word length, PCM
             nativeChannelMask,
             frameCount,
-            AUDIO_POLICY_OUTPUT_FLAG_NONE,
+            AUDIO_OUTPUT_FLAG_NONE,
             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user));
             0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
             lpJniStorage->mMemBase,// shared mem
