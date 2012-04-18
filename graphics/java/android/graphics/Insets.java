@@ -67,7 +67,7 @@ public class Insets {
      * @return an Insets instance with the appropriate values
      */
     public static Insets of(Rect r) {
-        return of(r.left, r.top, r.right, r.bottom);
+        return (r == null) ? NONE : of(r.left, r.top, r.right, r.bottom);
     }
 
     /**

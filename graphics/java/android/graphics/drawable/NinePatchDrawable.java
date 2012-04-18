@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Insets;
 import android.graphics.NinePatch;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -224,13 +225,8 @@ public class NinePatchDrawable extends Drawable {
      * @hide
      */
     @Override
-    public boolean getLayoutInsets(Rect insets) {
-        Rect layoutInsets = mNinePatchState.mLayoutInsets;
-        if (layoutInsets == null) {
-            return super.getLayoutInsets(insets);
-        }
-        insets.set(layoutInsets);
-        return true;
+    public Insets getLayoutInsets() {
+        return mNinePatchState.mLayoutInsets;
     }
 
     @Override
@@ -390,7 +386,7 @@ public class NinePatchDrawable extends Drawable {
     private final static class NinePatchState extends ConstantState {
         final NinePatch mNinePatch;
         final Rect mPadding;
-        final Rect mLayoutInsets;
+        final Insets mLayoutInsets;
         final boolean mDither;
         int mChangingConfigurations;
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
@@ -406,7 +402,7 @@ public class NinePatchDrawable extends Drawable {
         NinePatchState(NinePatch ninePatch, Rect rect, Rect layoutInsets, boolean dither) {
             mNinePatch = ninePatch;
             mPadding = rect;
-            mLayoutInsets = layoutInsets;
+            mLayoutInsets = Insets.of(layoutInsets);
             mDither = dither;
         }
 
