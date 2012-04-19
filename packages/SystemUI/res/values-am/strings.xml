@@ -118,7 +118,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ብሉቱዝ ማያያዝ።"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"የአውሮፕላን ሁነታ።"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"የባትሪ <xliff:g id="NUMBER">%d</xliff:g> መቶኛ።"</string>
-    <string name="accessibility_settings_button" msgid="799583911231893380">"የስርዓት ቅንጅቶች"</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"የስርዓት ቅንብሮች"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ማሳወቂያዎች"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"ማሳወቂያ አጥራ"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS ነቅቷል።"</string>
@@ -139,4 +139,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"በ GPS የተዘጋጀ ሥፍራ"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ሁሉንም ማሳወቂያዎች አጽዳ"</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">" ገፁማያ ማቆያ አንቃ"</string>
+    <!-- no translation found for status_bar_notification_inspect_item_title (1163547729015390250) -->
+    <skip />
 </resources>
