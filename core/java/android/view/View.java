@@ -2472,6 +2472,12 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     int mSystemUiVisibility;
 
     /**
+     * Reference count for transient state.
+     * @see #setHasTransientState(boolean)
+     */
+    int mTransientStateCount = 0;
+
+    /**
      * Count of how many windows this view has been attached to.
      */
     int mWindowAttachCount;
@@ -5400,21 +5406,32 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Set whether this view is currently tracking transient state that the
-     * framework should attempt to preserve when possible.
+     * framework should attempt to preserve when possible. This flag is reference counted,
+     * so every call to setHasTransientState(true) should be paired with a later call
+     * to setHasTransientState(false).
      *
      * @param hasTransientState true if this view has transient state
      */
     public void setHasTransientState(boolean hasTransientState) {
-        if (hasTransientState() == hasTransientState) return;
-
-        mPrivateFlags2 = (mPrivateFlags2 & ~HAS_TRANSIENT_STATE) |
-                (hasTransientState ? HAS_TRANSIENT_STATE : 0);
-        if (mParent != null) {
-            try {
-                mParent.childHasTransientStateChanged(this, hasTransientState);
-            } catch (AbstractMethodError e) {
-                Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
-                        " does not fully implement ViewParent", e);
+        mTransientStateCount = hasTransientState ? mTransientStateCount + 1 :
+                mTransientStateCount - 1;
+        if (mTransientStateCount < 0) {
+            mTransientStateCount = 0;
+            Log.e(VIEW_LOG_TAG, "hasTransientState decremented below 0: " +
+                    "unmatched pair of setHasTransientState calls");
+        }
+        if ((hasTransientState && mTransientStateCount == 1) ||
+                (hasTransientState && mTransientStateCount == 0)) {
+            // update flag if we've just incremented up from 0 or decremented down to 0
+            mPrivateFlags2 = (mPrivateFlags2 & ~HAS_TRANSIENT_STATE) |
+                    (hasTransientState ? HAS_TRANSIENT_STATE : 0);
+            if (mParent != null) {
+                try {
+                    mParent.childHasTransientStateChanged(this, hasTransientState);
+                } catch (AbstractMethodError e) {
+                    Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                            " does not fully implement ViewParent", e);
+                }
             }
         }
     }
