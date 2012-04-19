@@ -198,6 +198,10 @@ status_t JMediaExtractor::getSampleMeta(sp<MetaData> *sampleMeta) {
     return mImpl->getSampleMeta(sampleMeta);
 }
 
+bool JMediaExtractor::getCachedDuration(int64_t *durationUs, bool *eos) const {
+    return mImpl->getCachedDuration(durationUs, eos);
+}
+
 }  // namespace android
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -593,6 +597,42 @@ static void android_media_MediaExtractor_setDataSourceFd(
     }
 }
 
+static jlong android_media_MediaExtractor_getCachedDurationUs(
+        JNIEnv *env, jobject thiz) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return -1ll;
+    }
+
+    int64_t cachedDurationUs;
+    bool eos;
+    if (!extractor->getCachedDuration(&cachedDurationUs, &eos)) {
+        return -1ll;
+    }
+
+    return cachedDurationUs;
+}
+
+static jboolean android_media_MediaExtractor_hasCacheReachedEOS(
+        JNIEnv *env, jobject thiz) {
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+
+    if (extractor == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return true;
+    }
+
+    int64_t cachedDurationUs;
+    bool eos;
+    if (!extractor->getCachedDuration(&cachedDurationUs, &eos)) {
+        return true;
+    }
+
+    return eos;
+}
+
 static void android_media_MediaExtractor_native_finalize(
         JNIEnv *env, jobject thiz) {
     android_media_MediaExtractor_release(env, thiz);
@@ -641,6 +681,12 @@ static JNINativeMethod gMethods[] = {
 
     { "setDataSource", "(Ljava/io/FileDescriptor;JJ)V",
       (void *)android_media_MediaExtractor_setDataSourceFd },
+
+    { "getCachedDuration", "()J",
+      (void *)android_media_MediaExtractor_getCachedDurationUs },
+
+    { "hasCacheReachedEndOfStream", "()Z",
+      (void *)android_media_MediaExtractor_hasCacheReachedEOS },
 };
 
 int register_android_media_MediaExtractor(JNIEnv *env) {

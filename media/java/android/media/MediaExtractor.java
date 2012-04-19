@@ -245,6 +245,20 @@ final public class MediaExtractor {
     */
     public native boolean getSampleCryptoInfo(MediaCodec.CryptoInfo info);
 
+    /** Returns an estimate of how much data is presently cached in memory
+        expressed in microseconds. Returns -1 if that information is unavailable
+        or not applicable (no cache).
+     */
+    public native long getCachedDuration();
+
+    /** Returns true iff we are caching data and the cache has reached the
+     *  end of the data stream (for now, a future seek may of course restart
+     *  the fetching of data).
+     *  This API only returns a meaningful result if {link #getCachedDuration}
+     *  indicates the presence of a cache, i.e. does NOT return -1.
+    */
+    public native boolean hasCacheReachedEndOfStream();
+
     private static native final void native_init();
     private native final void native_setup();
     private native final void native_finalize();
