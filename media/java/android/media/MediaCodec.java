@@ -280,6 +280,19 @@ final public class MediaCodec {
     */
     public native final void flush();
 
+    public final static class CryptoException extends RuntimeException {
+        public CryptoException(int errorCode, String detailMessage) {
+            super(detailMessage);
+            mErrorCode = errorCode;
+        }
+
+        public int getErrorCode() {
+            return mErrorCode;
+        }
+
+        private int mErrorCode;
+    }
+
     /** After filling a range of the input buffer at the specified index
      *  submit it to the component.
      *
@@ -304,10 +317,13 @@ final public class MediaCodec {
      *  @param presentationTimeUs The time at which this buffer should be rendered.
      *  @param flags A bitmask of flags {@link #FLAG_SYNCFRAME},
      *               {@link #FLAG_CODECCONFIG} or {@link #FLAG_EOS}.
+     *  @throws CryptoException if a crypto object has been specified in
+     *          {@link #configure}
     */
     public native final void queueInputBuffer(
             int index,
-            int offset, int size, long presentationTimeUs, int flags);
+            int offset, int size, long presentationTimeUs, int flags)
+        throws CryptoException;
 
     /** Metadata describing the structure of a (at least partially) encrypted
      *  input sample.
@@ -361,7 +377,7 @@ final public class MediaCodec {
             int offset,
             CryptoInfo info,
             long presentationTimeUs,
-            int flags);
+            int flags) throws CryptoException;
 
     /** Returns the index of an input buffer to be filled with valid data
      *  or -1 if no such buffer is currently available.
