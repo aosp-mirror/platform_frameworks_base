@@ -70,7 +70,7 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"የደዋይ  ID  ወደ አልተከለከለም ነባሪዎች።ቀጥሎ ጥሪ፡ ተከልክሏል"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"የደዋይ ID ነባሪዎች ወደአልተከለከለም። ቀጥሎ ጥሪ፡አልተከለከለም"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"አገልግሎት አልቀረበም።"</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"የደዋይ መታወቂያ ቅንጅቶች መለወጥ አትችልም፡፡"</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"የደዋይ መታወቂያ ቅንብሮች  መለወጥ አትችልም፡፡"</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"ክልክል ድረስተለውጧል"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"የውሂብ አገልግሎት የታገደ ነው።"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"የአደጋ ጊዜአገልግሎት የታገደ ነው።"</string>
@@ -375,7 +375,7 @@
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"የንዑስ ክፈፍ ቋት አንብብ"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"የክፈፍ ቋት ይዘት ለማንበብ ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"የድምፅ ቅንብሮችን ለውጥ"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="7343951185408396919">"የዓለም አቀፍ ኦዲዮ ቅንጅቶች እንደ ድምፅ እና ፈለግ ለመቀየር ለመተግበሪያው ይፈቅዳሉ ።"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="7343951185408396919">"የዓለም አቀፍ ኦዲዮ ቅንብሮች  እንደ ድምፅ እና ፈለግ ለመቀየር ለመተግበሪያው ይፈቅዳሉ ።"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ኦዲዮ ቅዳ"</string>
     <string name="permdesc_recordAudio" msgid="2387462233976248635">"መተግበሪያ የድምፅ መዝገብ ዱካን ለመድረስ ይፈቅዳል።"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ፎቶዎች እና ቪዲዮዎች አንሳ"</string>
@@ -445,7 +445,7 @@
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"የልጣፍአዘጋጅ መጠን ፍንጮች"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"የስርዓቱን ልጥፍ መጠንለማዘጋጀት ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"ስርዓትን ወደ ፋብሪካ ነባሪዎች ዳግም አስጀምር"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"ወደ ፋብሪካው ቅንጅቶች ሙሉ በሙሉ ስርዓቱን ዳግም ለማስጀመር ለመተግበሪያው ይፈቅዳሉ ፤ ሁሉንም ውሂብ፣ አወቃቀር፣ እና የተጫኑ መተግበሪያዎችን በማጥፈት፡፡"</string>
+    <string name="permdesc_masterClear" msgid="3665380492633910226">"ወደ ፋብሪካው ቅንብሮች  ሙሉ በሙሉ ስርዓቱን ዳግም ለማስጀመር ለመተግበሪያው ይፈቅዳሉ ፤ ሁሉንም ውሂብ፣ አወቃቀር፣ እና የተጫኑ መተግበሪያዎችን በማጥፈት፡፡"</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"ሰዓት ሙላ"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"መተግበሪያውን የጡባዊ ተኮን ሰዓት ለመለወጥ ይፈቅዳሉ።"</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"መተግበሪያውን የስልኩን ሰዓት ለመለወጥ ይፈቅዳሉ።"</string>
@@ -474,7 +474,7 @@
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"የተያያዘ ግንኙነት ለውጥ"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"መተግበሪያ የእውታረ መረቡን ግንኙነት ትይይዝ ሁኔታ ለመለወጥ ይፈቅዳል።"</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"የዳራ ውሂብ አጠቃቀም ቅንብር ለውጥ"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"የዳራ ውሂብ አጠቃቀም ቅንጅቶች ለመለወጥ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"የዳራ ውሂብ አጠቃቀም ቅንብሮች  ለመለወጥ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"የWi-Fi ሁኔታ እይ"</string>
     <string name="permdesc_accessWifiState" msgid="7770452658226256831">"ስለWi-Fi ሁኔታ መረጃን ለማየት ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"የWi-Fi  ሁኔታን ለውጥ"</string>
@@ -924,7 +924,7 @@
     <string name="capital_off" msgid="6815870386972805832">"ውጪ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"... በመጠቀም ድርጊቱን አጠናቅ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ለዕርምጃ ነባሪ ተጠቀም።"</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ነባሪ አጽዳ በስርዓት ቅንጅቶች ውስጥ  &gt; Apps &amp;gt፤ወርዷል፡፡"</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ነባሪ አጽዳ በስርዓት ቅንብሮች  ውስጥ  &gt; Apps &amp;gt፤ወርዷል፡፡"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ድርጊት ምረጥ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"ለUSB መሳሪያ መተግበሪያ ምረጥ"</string>
     <string name="noApplications" msgid="2991814273936504689">"ምንም ትግበራዎች ይህን ድርጊት ማከናወን አይችሉም።"</string>
@@ -945,7 +945,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> በዋናነት የተነሳው።"</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"የልኬት ለውጥ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"ሁልጊዜ አሳይ"</string>
-    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"በስርዓት ቅንጅቶች ውስጥ ይሄንን ዳግም አንቃ&gt; Apps &amp;gt፤ወርዷል፡፡"</string>
+    <string name="screen_compat_mode_hint" msgid="1064524084543304459">"በስርዓት ቅንብሮች  ውስጥ ይሄንን ዳግም አንቃ&gt; Apps &amp;gt፤ወርዷል፡፡"</string>
     <string name="smv_application" msgid="3307209192155442829">"መተግበሪያው <xliff:g id="APPLICATION">%1$s</xliff:g>( ሂደት<xliff:g id="PROCESS">%2$s</xliff:g>) በራስ ተነሳሺ StrictMode ደንብን ይተላለፋል።"</string>
     <string name="smv_process" msgid="5120397012047462446">"ሂደቱ <xliff:g id="PROCESS">%1$s</xliff:g> በራስ ተነሳሺ StrictMode ፖሊሲን ይተላለፋል።"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android እያሻሻለ ነው..."</string>
