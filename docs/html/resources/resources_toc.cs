@@ -124,6 +124,23 @@ class="new">&nbsp;new!</span></span>
       </li>
 
       <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/cloudsync/index.html">
+            <span class="en">Syncing to the Cloud<span class="new">&nbsp;new!</span></span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/cloudsync/aesync.html">
+            <span class="en">Syncing with App Engine</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/cloudsync/backupapi.html">
+            <span class="en">Using the Backup API</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+
+
+      <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/search/index.html">
             <span class="en">Adding Search Functionality<span class="new">&nbsp;new!</span></span>
           </a>
@@ -369,10 +386,10 @@ class="new">&nbsp;new!</span></span>
           </li>
           <li><a href="<?cs var:toroot ?>training/displaying-bitmaps/display-bitmap.html">
             <span class="en">Displaying Bitmaps in Your UI</span>
-          </a>
           </li>
-        </ul>
+        <ul>
       </li>
+
 
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/accessibility/index.html">
@@ -391,9 +408,11 @@ class="new">&nbsp;new!</span></span>
       </li>
 
     </ul>
-  </li>    
-      
-      
+  </li>
+
+
+
+
   <li>
     <span class="heading">
       <span class="en">Technical Resources</span>
