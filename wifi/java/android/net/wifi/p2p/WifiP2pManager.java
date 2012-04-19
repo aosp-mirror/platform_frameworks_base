@@ -415,8 +415,8 @@ public class WifiP2pManager {
     /**
      * Passed with {@link ActionListener#onFailure}.
      * Indicates that the {@link #discoverServices} failed because no service
-     * requests are set.
-     * @hide
+     * requests are added. Use {@link #addServiceRequest} to add a service
+     * request.
      */
     public static final int NO_SERVICE_REQUESTS = 3;
 
