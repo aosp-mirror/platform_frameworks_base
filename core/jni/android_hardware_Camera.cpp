@@ -457,9 +457,9 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
 
 // connect to camera service
 static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
-    jobject weak_this, jint cameraId, jboolean force, jboolean keep)
+    jobject weak_this, jint cameraId)
 {
-    sp<Camera> camera = Camera::connect(cameraId, force, keep);
+    sp<Camera> camera = Camera::connect(cameraId);
 
     if (camera == NULL) {
         jniThrowRuntimeException(env, "Fail to connect to camera service");
@@ -821,15 +821,6 @@ static void android_hardware_Camera_enableFocusMoveCallback(JNIEnv *env, jobject
     }
 }
 
-static bool android_hardware_Camera_isReleased(JNIEnv *env, jobject thiz)
-{
-    ALOGV("isReleased");
-    sp<Camera> camera = get_native_camera(env, thiz, NULL);
-    if (camera == 0) return true;
-
-    return (camera->sendCommand(CAMERA_CMD_PING, 0, 0) != NO_ERROR);
-}
-
 //-------------------------------------------------
 
 static JNINativeMethod camMethods[] = {
@@ -840,7 +831,7 @@ static JNINativeMethod camMethods[] = {
     "(ILandroid/hardware/Camera$CameraInfo;)V",
     (void*)android_hardware_Camera_getCameraInfo },
   { "native_setup",
-    "(Ljava/lang/Object;IZZ)V",
+    "(Ljava/lang/Object;I)V",
     (void*)android_hardware_Camera_native_setup },
   { "native_release",
     "()V",
@@ -908,9 +899,6 @@ static JNINativeMethod camMethods[] = {
   { "enableFocusMoveCallback",
     "(I)V",
     (void *)android_hardware_Camera_enableFocusMoveCallback},
-  { "isReleased",
-    "()Z",
-    (void *)android_hardware_Camera_isReleased},
 };
 
 struct field {
