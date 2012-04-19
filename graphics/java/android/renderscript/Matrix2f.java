@@ -20,13 +20,13 @@ import java.lang.Math;
 import android.util.Log;
 
 
-/**
+/** @deprecated renderscript is deprecated in J
  * Class for exposing the native Renderscript rs_matrix2x2 type back to the Android system.
  *
  **/
 public class Matrix2f {
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a new identity 2x2 matrix
     */
     public Matrix2f() {
@@ -34,7 +34,7 @@ public class Matrix2f {
         loadIdentity();
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a new matrix and sets its values from the given
     * parameter
     *
@@ -46,7 +46,7 @@ public class Matrix2f {
         System.arraycopy(dataArray, 0, mMat, 0, mMat.length);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Return a reference to the internal array representing matrix
     * values. Modifying this array will also change the matrix
     *
@@ -56,7 +56,7 @@ public class Matrix2f {
         return mMat;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Returns the value for a given row and column
     *
     * @param i row of the value to return
@@ -68,7 +68,7 @@ public class Matrix2f {
         return mMat[i*2 + j];
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the value for a given row and column
     *
     * @param i row of the value to set
@@ -78,7 +78,7 @@ public class Matrix2f {
         mMat[i*2 + j] = v;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the matrix values to identity
     */
     public void loadIdentity() {
@@ -89,7 +89,7 @@ public class Matrix2f {
         mMat[3] = 1;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the values of the matrix to those of the parameter
     *
     * @param src matrix to load the values from
@@ -98,7 +98,7 @@ public class Matrix2f {
         System.arraycopy(src.getArray(), 0, mMat, 0, mMat.length);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a rotation matrix of given angle
     *
     * @param rot rotation angle
@@ -114,7 +114,7 @@ public class Matrix2f {
         mMat[3] = c;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a scale matrix of given dimensions
     *
     * @param x scale component x
@@ -126,7 +126,7 @@ public class Matrix2f {
         mMat[3] = y;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be the result of multiplying two given
     * matrices
     *
@@ -147,7 +147,7 @@ public class Matrix2f {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Post-multiplies the current matrix by a given parameter
     *
     * @param rhs right hand side to multiply by
@@ -157,7 +157,7 @@ public class Matrix2f {
         tmp.loadMultiply(this, rhs);
         load(tmp);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the current matrix by post-multiplying it with a
     * rotation matrix of given angle
     *
@@ -168,7 +168,7 @@ public class Matrix2f {
         tmp.loadRotate(rot);
         multiply(tmp);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the current matrix by post-multiplying it with a
     * scale matrix of given dimensions
     *
@@ -180,7 +180,7 @@ public class Matrix2f {
         tmp.loadScale(x, y);
         multiply(tmp);
     }
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the current matrix to its transpose
     */
     public void transpose() {

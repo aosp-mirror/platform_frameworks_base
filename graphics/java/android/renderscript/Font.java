@@ -29,8 +29,8 @@ import android.content.res.Resources;
 import android.util.Log;
 import android.util.TypedValue;
 
-/**
- * <p>This class gives users a simple way to draw hardware accelerated text. 
+/** @deprecated renderscript is deprecated in J
+ * <p>This class gives users a simple way to draw hardware accelerated text.
  * Internally, the glyphs are rendered using the Freetype library and an internal cache of
  * rendered glyph bitmaps is maintained. Each font object represents a combination of a typeface,
  * and point size. You can create multiple font objects to represent styles such as bold or italic text,
@@ -42,7 +42,7 @@ import android.util.TypedValue;
  * render large batches of text in sequence. It is also more efficient to render multiple
  * characters at once instead of one by one to improve draw call batching.</p>
  * <p>Font color and transparency are not part of the font object and you can freely modify
- * them in the script to suit the user's rendering needs. Font colors work as a state machine. 
+ * them in the script to suit the user's rendering needs. Font colors work as a state machine.
  * Every new call to draw text uses the last color set in the script.</p>
  **/
 public class Font extends BaseObj {
@@ -71,10 +71,20 @@ public class Font extends BaseObj {
 
     private static Map<String, FontFamily> sFontFamilyMap;
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public enum Style {
+        /** @deprecated renderscript is deprecated in J
+        */
         NORMAL,
+        /** @deprecated renderscript is deprecated in J
+        */
         BOLD,
+        /** @deprecated renderscript is deprecated in J
+        */
         ITALIC,
+        /** @deprecated renderscript is deprecated in J
+        */
         BOLD_ITALIC;
     }
 
@@ -138,7 +148,7 @@ public class Font extends BaseObj {
         super(id, rs);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Takes a specific file name as an argument
      */
     static public Font createFromFile(RenderScript rs, Resources res, String path, float pointSize) {
@@ -154,10 +164,14 @@ public class Font extends BaseObj {
         return rsFont;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     static public Font createFromFile(RenderScript rs, Resources res, File path, float pointSize) {
         return createFromFile(rs, res, path.getAbsolutePath(), pointSize);
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     static public Font createFromAsset(RenderScript rs, Resources res, String path, float pointSize) {
         rs.validate();
         AssetManager mgr = res.getAssets();
@@ -171,6 +185,8 @@ public class Font extends BaseObj {
         return rsFont;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     static public Font createFromResource(RenderScript rs, Resources res, int id, float pointSize) {
         String name = "R." + Integer.toString(id);
 
@@ -199,7 +215,7 @@ public class Font extends BaseObj {
         return rsFont;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Accepts one of the following family names as an argument
      * and will attempt to produce the best match with a system font:
      *

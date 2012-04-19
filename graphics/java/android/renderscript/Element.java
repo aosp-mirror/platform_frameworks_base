@@ -19,7 +19,7 @@ package android.renderscript;
 import java.lang.reflect.Field;
 import android.util.Log;
 
-/**
+/** @deprecated renderscript is deprecated in J
  * <p>The most basic data type. An element represents one cell of a memory allocation.
  * Element is the basic data type of Renderscript. An element can be of two forms: Basic elements or Complex forms.
  * Examples of basic elements are:</p>
@@ -84,12 +84,12 @@ public class Element extends BaseObj {
         }
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
     * @return element size in bytes
     */
     public int getBytesSize() {return mSize;}
 
-    /**
+    /** @hide renderscript is deprecated in J
     * Returns the number of vector components. 2 for float2, 4 for
     * float4, etc.
     * @return element vector size
@@ -97,7 +97,7 @@ public class Element extends BaseObj {
     public int getVectorSize() {return mVectorSize;}
 
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * DataType represents the basic type information for a basic element.  The
      * naming convention follows.  For numeric types it is FLOAT,
      * SIGNED, or UNSIGNED followed by the _BITS where BITS is the
@@ -114,6 +114,8 @@ public class Element extends BaseObj {
      * RS_* objects.  32 bit opaque handles.
      */
     public enum DataType {
+        /** @hide
+        */
         NONE (0, 0),
         //FLOAT_16 (1, 2),
         FLOAT_32 (2, 4),
@@ -147,6 +149,8 @@ public class Element extends BaseObj {
         RS_PROGRAM_VERTEX (1007, 4),
         RS_PROGRAM_RASTER (1008, 4),
         RS_PROGRAM_STORE (1009, 4),
+        /** @hide
+        */
         RS_FONT (1010, 4);
 
         int mID;
@@ -157,7 +161,7 @@ public class Element extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * The special interpretation of the data if required.  This is primarly
      * useful for graphical data.  USER indicates no special interpretation is
      * expected.  PIXEL is used in conjunction with the standard data types for
@@ -179,7 +183,7 @@ public class Element extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Return if a element is too complex for use as a data source for a Mesh or
      * a Program.
      *
@@ -197,7 +201,7 @@ public class Element extends BaseObj {
         return false;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
     * Elements could be simple, such as an int or a float, or a
     * structure with multiple sub elements, such as a collection of
     * floats, float2, float4. This function returns zero for simple
@@ -211,7 +215,7 @@ public class Element extends BaseObj {
         return mVisibleElementMap.length;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
     * For complex elements, this function will return the
     * sub-element at index
     * @param index index of the sub-element to return
@@ -227,7 +231,7 @@ public class Element extends BaseObj {
         return mElements[mVisibleElementMap[index]];
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
     * For complex elements, this function will return the
     * sub-element name at index
     * @param index index of the sub-element
@@ -243,7 +247,7 @@ public class Element extends BaseObj {
         return mElementNames[mVisibleElementMap[index]];
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
     * For complex elements, some sub-elements could be statically
     * sized arrays. This function will return the array size for
     * sub-element at index
@@ -260,7 +264,7 @@ public class Element extends BaseObj {
         return mArraySizes[mVisibleElementMap[index]];
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
     * This function specifies the location of a sub-element within
     * the element
     * @param index index of the sub-element
@@ -276,21 +280,21 @@ public class Element extends BaseObj {
         return mOffsetInBytes[mVisibleElementMap[index]];
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
     * @return element data type
     */
     public DataType getDataType() {
         return mType;
     }
 
-    /**
+    /** @hide renderscript is deprecated in J
     * @return element data kind
     */
     public DataKind getDataKind() {
         return mKind;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Utility function for returning an Element containing a single Boolean.
      *
      * @param rs Context to which the element will belong.
@@ -304,7 +308,7 @@ public class Element extends BaseObj {
         return rs.mElement_BOOLEAN;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Utility function for returning an Element containing a single UNSIGNED_8.
      *
      * @param rs Context to which the element will belong.
@@ -318,7 +322,7 @@ public class Element extends BaseObj {
         return rs.mElement_U8;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Utility function for returning an Element containing a single SIGNED_8.
      *
      * @param rs Context to which the element will belong.
@@ -332,6 +336,8 @@ public class Element extends BaseObj {
         return rs.mElement_I8;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U16(RenderScript rs) {
         if(rs.mElement_U16 == null) {
             rs.mElement_U16 = createUser(rs, DataType.UNSIGNED_16);
@@ -339,6 +345,8 @@ public class Element extends BaseObj {
         return rs.mElement_U16;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I16(RenderScript rs) {
         if(rs.mElement_I16 == null) {
             rs.mElement_I16 = createUser(rs, DataType.SIGNED_16);
@@ -346,6 +354,8 @@ public class Element extends BaseObj {
         return rs.mElement_I16;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U32(RenderScript rs) {
         if(rs.mElement_U32 == null) {
             rs.mElement_U32 = createUser(rs, DataType.UNSIGNED_32);
@@ -353,6 +363,8 @@ public class Element extends BaseObj {
         return rs.mElement_U32;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I32(RenderScript rs) {
         if(rs.mElement_I32 == null) {
             rs.mElement_I32 = createUser(rs, DataType.SIGNED_32);
@@ -360,6 +372,8 @@ public class Element extends BaseObj {
         return rs.mElement_I32;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U64(RenderScript rs) {
         if(rs.mElement_U64 == null) {
             rs.mElement_U64 = createUser(rs, DataType.UNSIGNED_64);
@@ -367,6 +381,8 @@ public class Element extends BaseObj {
         return rs.mElement_U64;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I64(RenderScript rs) {
         if(rs.mElement_I64 == null) {
             rs.mElement_I64 = createUser(rs, DataType.SIGNED_64);
@@ -374,6 +390,8 @@ public class Element extends BaseObj {
         return rs.mElement_I64;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element F32(RenderScript rs) {
         if(rs.mElement_F32 == null) {
             rs.mElement_F32 = createUser(rs, DataType.FLOAT_32);
@@ -381,6 +399,8 @@ public class Element extends BaseObj {
         return rs.mElement_F32;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element F64(RenderScript rs) {
         if(rs.mElement_F64 == null) {
             rs.mElement_F64 = createUser(rs, DataType.FLOAT_64);
@@ -388,6 +408,8 @@ public class Element extends BaseObj {
         return rs.mElement_F64;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element ELEMENT(RenderScript rs) {
         if(rs.mElement_ELEMENT == null) {
             rs.mElement_ELEMENT = createUser(rs, DataType.RS_ELEMENT);
@@ -395,6 +417,8 @@ public class Element extends BaseObj {
         return rs.mElement_ELEMENT;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element TYPE(RenderScript rs) {
         if(rs.mElement_TYPE == null) {
             rs.mElement_TYPE = createUser(rs, DataType.RS_TYPE);
@@ -402,6 +426,8 @@ public class Element extends BaseObj {
         return rs.mElement_TYPE;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element ALLOCATION(RenderScript rs) {
         if(rs.mElement_ALLOCATION == null) {
             rs.mElement_ALLOCATION = createUser(rs, DataType.RS_ALLOCATION);
@@ -409,6 +435,8 @@ public class Element extends BaseObj {
         return rs.mElement_ALLOCATION;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element SAMPLER(RenderScript rs) {
         if(rs.mElement_SAMPLER == null) {
             rs.mElement_SAMPLER = createUser(rs, DataType.RS_SAMPLER);
@@ -416,6 +444,8 @@ public class Element extends BaseObj {
         return rs.mElement_SAMPLER;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element SCRIPT(RenderScript rs) {
         if(rs.mElement_SCRIPT == null) {
             rs.mElement_SCRIPT = createUser(rs, DataType.RS_SCRIPT);
@@ -423,6 +453,8 @@ public class Element extends BaseObj {
         return rs.mElement_SCRIPT;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element MESH(RenderScript rs) {
         if(rs.mElement_MESH == null) {
             rs.mElement_MESH = createUser(rs, DataType.RS_MESH);
@@ -430,6 +462,8 @@ public class Element extends BaseObj {
         return rs.mElement_MESH;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element PROGRAM_FRAGMENT(RenderScript rs) {
         if(rs.mElement_PROGRAM_FRAGMENT == null) {
             rs.mElement_PROGRAM_FRAGMENT = createUser(rs, DataType.RS_PROGRAM_FRAGMENT);
@@ -437,6 +471,8 @@ public class Element extends BaseObj {
         return rs.mElement_PROGRAM_FRAGMENT;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element PROGRAM_VERTEX(RenderScript rs) {
         if(rs.mElement_PROGRAM_VERTEX == null) {
             rs.mElement_PROGRAM_VERTEX = createUser(rs, DataType.RS_PROGRAM_VERTEX);
@@ -444,6 +480,8 @@ public class Element extends BaseObj {
         return rs.mElement_PROGRAM_VERTEX;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element PROGRAM_RASTER(RenderScript rs) {
         if(rs.mElement_PROGRAM_RASTER == null) {
             rs.mElement_PROGRAM_RASTER = createUser(rs, DataType.RS_PROGRAM_RASTER);
@@ -451,6 +489,8 @@ public class Element extends BaseObj {
         return rs.mElement_PROGRAM_RASTER;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element PROGRAM_STORE(RenderScript rs) {
         if(rs.mElement_PROGRAM_STORE == null) {
             rs.mElement_PROGRAM_STORE = createUser(rs, DataType.RS_PROGRAM_STORE);
@@ -458,6 +498,8 @@ public class Element extends BaseObj {
         return rs.mElement_PROGRAM_STORE;
     }
 
+    /** @hide
+        */
     public static Element FONT(RenderScript rs) {
         if(rs.mElement_FONT == null) {
             rs.mElement_FONT = createUser(rs, DataType.RS_FONT);
@@ -465,7 +507,8 @@ public class Element extends BaseObj {
         return rs.mElement_FONT;
     }
 
-
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element A_8(RenderScript rs) {
         if(rs.mElement_A_8 == null) {
             rs.mElement_A_8 = createPixel(rs, DataType.UNSIGNED_8, DataKind.PIXEL_A);
@@ -473,6 +516,8 @@ public class Element extends BaseObj {
         return rs.mElement_A_8;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element RGB_565(RenderScript rs) {
         if(rs.mElement_RGB_565 == null) {
             rs.mElement_RGB_565 = createPixel(rs, DataType.UNSIGNED_5_6_5, DataKind.PIXEL_RGB);
@@ -480,6 +525,8 @@ public class Element extends BaseObj {
         return rs.mElement_RGB_565;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element RGB_888(RenderScript rs) {
         if(rs.mElement_RGB_888 == null) {
             rs.mElement_RGB_888 = createPixel(rs, DataType.UNSIGNED_8, DataKind.PIXEL_RGB);
@@ -487,6 +534,8 @@ public class Element extends BaseObj {
         return rs.mElement_RGB_888;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element RGBA_5551(RenderScript rs) {
         if(rs.mElement_RGBA_5551 == null) {
             rs.mElement_RGBA_5551 = createPixel(rs, DataType.UNSIGNED_5_5_5_1, DataKind.PIXEL_RGBA);
@@ -494,6 +543,8 @@ public class Element extends BaseObj {
         return rs.mElement_RGBA_5551;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element RGBA_4444(RenderScript rs) {
         if(rs.mElement_RGBA_4444 == null) {
             rs.mElement_RGBA_4444 = createPixel(rs, DataType.UNSIGNED_4_4_4_4, DataKind.PIXEL_RGBA);
@@ -501,6 +552,8 @@ public class Element extends BaseObj {
         return rs.mElement_RGBA_4444;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element RGBA_8888(RenderScript rs) {
         if(rs.mElement_RGBA_8888 == null) {
             rs.mElement_RGBA_8888 = createPixel(rs, DataType.UNSIGNED_8, DataKind.PIXEL_RGBA);
@@ -508,6 +561,8 @@ public class Element extends BaseObj {
         return rs.mElement_RGBA_8888;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element F32_2(RenderScript rs) {
         if(rs.mElement_FLOAT_2 == null) {
             rs.mElement_FLOAT_2 = createVector(rs, DataType.FLOAT_32, 2);
@@ -515,6 +570,8 @@ public class Element extends BaseObj {
         return rs.mElement_FLOAT_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element F32_3(RenderScript rs) {
         if(rs.mElement_FLOAT_3 == null) {
             rs.mElement_FLOAT_3 = createVector(rs, DataType.FLOAT_32, 3);
@@ -522,6 +579,8 @@ public class Element extends BaseObj {
         return rs.mElement_FLOAT_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element F32_4(RenderScript rs) {
         if(rs.mElement_FLOAT_4 == null) {
             rs.mElement_FLOAT_4 = createVector(rs, DataType.FLOAT_32, 4);
@@ -529,6 +588,8 @@ public class Element extends BaseObj {
         return rs.mElement_FLOAT_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element F64_2(RenderScript rs) {
         if(rs.mElement_DOUBLE_2 == null) {
             rs.mElement_DOUBLE_2 = createVector(rs, DataType.FLOAT_64, 2);
@@ -536,6 +597,8 @@ public class Element extends BaseObj {
         return rs.mElement_DOUBLE_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element F64_3(RenderScript rs) {
         if(rs.mElement_DOUBLE_3 == null) {
             rs.mElement_DOUBLE_3 = createVector(rs, DataType.FLOAT_64, 3);
@@ -543,6 +606,8 @@ public class Element extends BaseObj {
         return rs.mElement_DOUBLE_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element F64_4(RenderScript rs) {
         if(rs.mElement_DOUBLE_4 == null) {
             rs.mElement_DOUBLE_4 = createVector(rs, DataType.FLOAT_64, 4);
@@ -550,6 +615,8 @@ public class Element extends BaseObj {
         return rs.mElement_DOUBLE_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U8_2(RenderScript rs) {
         if(rs.mElement_UCHAR_2 == null) {
             rs.mElement_UCHAR_2 = createVector(rs, DataType.UNSIGNED_8, 2);
@@ -557,6 +624,8 @@ public class Element extends BaseObj {
         return rs.mElement_UCHAR_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U8_3(RenderScript rs) {
         if(rs.mElement_UCHAR_3 == null) {
             rs.mElement_UCHAR_3 = createVector(rs, DataType.UNSIGNED_8, 3);
@@ -564,6 +633,8 @@ public class Element extends BaseObj {
         return rs.mElement_UCHAR_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U8_4(RenderScript rs) {
         if(rs.mElement_UCHAR_4 == null) {
             rs.mElement_UCHAR_4 = createVector(rs, DataType.UNSIGNED_8, 4);
@@ -571,6 +642,8 @@ public class Element extends BaseObj {
         return rs.mElement_UCHAR_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I8_2(RenderScript rs) {
         if(rs.mElement_CHAR_2 == null) {
             rs.mElement_CHAR_2 = createVector(rs, DataType.SIGNED_8, 2);
@@ -578,6 +651,8 @@ public class Element extends BaseObj {
         return rs.mElement_CHAR_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I8_3(RenderScript rs) {
         if(rs.mElement_CHAR_3 == null) {
             rs.mElement_CHAR_3 = createVector(rs, DataType.SIGNED_8, 3);
@@ -585,6 +660,8 @@ public class Element extends BaseObj {
         return rs.mElement_CHAR_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I8_4(RenderScript rs) {
         if(rs.mElement_CHAR_4 == null) {
             rs.mElement_CHAR_4 = createVector(rs, DataType.SIGNED_8, 4);
@@ -592,6 +669,8 @@ public class Element extends BaseObj {
         return rs.mElement_CHAR_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U16_2(RenderScript rs) {
         if(rs.mElement_USHORT_2 == null) {
             rs.mElement_USHORT_2 = createVector(rs, DataType.UNSIGNED_16, 2);
@@ -599,6 +678,8 @@ public class Element extends BaseObj {
         return rs.mElement_USHORT_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U16_3(RenderScript rs) {
         if(rs.mElement_USHORT_3 == null) {
             rs.mElement_USHORT_3 = createVector(rs, DataType.UNSIGNED_16, 3);
@@ -606,6 +687,8 @@ public class Element extends BaseObj {
         return rs.mElement_USHORT_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U16_4(RenderScript rs) {
         if(rs.mElement_USHORT_4 == null) {
             rs.mElement_USHORT_4 = createVector(rs, DataType.UNSIGNED_16, 4);
@@ -613,6 +696,8 @@ public class Element extends BaseObj {
         return rs.mElement_USHORT_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I16_2(RenderScript rs) {
         if(rs.mElement_SHORT_2 == null) {
             rs.mElement_SHORT_2 = createVector(rs, DataType.SIGNED_16, 2);
@@ -620,6 +705,8 @@ public class Element extends BaseObj {
         return rs.mElement_SHORT_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I16_3(RenderScript rs) {
         if(rs.mElement_SHORT_3 == null) {
             rs.mElement_SHORT_3 = createVector(rs, DataType.SIGNED_16, 3);
@@ -627,6 +714,8 @@ public class Element extends BaseObj {
         return rs.mElement_SHORT_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I16_4(RenderScript rs) {
         if(rs.mElement_SHORT_4 == null) {
             rs.mElement_SHORT_4 = createVector(rs, DataType.SIGNED_16, 4);
@@ -634,6 +723,8 @@ public class Element extends BaseObj {
         return rs.mElement_SHORT_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U32_2(RenderScript rs) {
         if(rs.mElement_UINT_2 == null) {
             rs.mElement_UINT_2 = createVector(rs, DataType.UNSIGNED_32, 2);
@@ -641,6 +732,8 @@ public class Element extends BaseObj {
         return rs.mElement_UINT_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U32_3(RenderScript rs) {
         if(rs.mElement_UINT_3 == null) {
             rs.mElement_UINT_3 = createVector(rs, DataType.UNSIGNED_32, 3);
@@ -648,6 +741,8 @@ public class Element extends BaseObj {
         return rs.mElement_UINT_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U32_4(RenderScript rs) {
         if(rs.mElement_UINT_4 == null) {
             rs.mElement_UINT_4 = createVector(rs, DataType.UNSIGNED_32, 4);
@@ -655,6 +750,8 @@ public class Element extends BaseObj {
         return rs.mElement_UINT_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I32_2(RenderScript rs) {
         if(rs.mElement_INT_2 == null) {
             rs.mElement_INT_2 = createVector(rs, DataType.SIGNED_32, 2);
@@ -662,6 +759,8 @@ public class Element extends BaseObj {
         return rs.mElement_INT_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I32_3(RenderScript rs) {
         if(rs.mElement_INT_3 == null) {
             rs.mElement_INT_3 = createVector(rs, DataType.SIGNED_32, 3);
@@ -669,6 +768,8 @@ public class Element extends BaseObj {
         return rs.mElement_INT_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I32_4(RenderScript rs) {
         if(rs.mElement_INT_4 == null) {
             rs.mElement_INT_4 = createVector(rs, DataType.SIGNED_32, 4);
@@ -676,6 +777,8 @@ public class Element extends BaseObj {
         return rs.mElement_INT_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U64_2(RenderScript rs) {
         if(rs.mElement_ULONG_2 == null) {
             rs.mElement_ULONG_2 = createVector(rs, DataType.UNSIGNED_64, 2);
@@ -683,6 +786,8 @@ public class Element extends BaseObj {
         return rs.mElement_ULONG_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U64_3(RenderScript rs) {
         if(rs.mElement_ULONG_3 == null) {
             rs.mElement_ULONG_3 = createVector(rs, DataType.UNSIGNED_64, 3);
@@ -690,6 +795,8 @@ public class Element extends BaseObj {
         return rs.mElement_ULONG_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element U64_4(RenderScript rs) {
         if(rs.mElement_ULONG_4 == null) {
             rs.mElement_ULONG_4 = createVector(rs, DataType.UNSIGNED_64, 4);
@@ -697,6 +804,8 @@ public class Element extends BaseObj {
         return rs.mElement_ULONG_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I64_2(RenderScript rs) {
         if(rs.mElement_LONG_2 == null) {
             rs.mElement_LONG_2 = createVector(rs, DataType.SIGNED_64, 2);
@@ -704,6 +813,8 @@ public class Element extends BaseObj {
         return rs.mElement_LONG_2;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I64_3(RenderScript rs) {
         if(rs.mElement_LONG_3 == null) {
             rs.mElement_LONG_3 = createVector(rs, DataType.SIGNED_64, 3);
@@ -711,6 +822,8 @@ public class Element extends BaseObj {
         return rs.mElement_LONG_3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element I64_4(RenderScript rs) {
         if(rs.mElement_LONG_4 == null) {
             rs.mElement_LONG_4 = createVector(rs, DataType.SIGNED_64, 4);
@@ -718,16 +831,22 @@ public class Element extends BaseObj {
         return rs.mElement_LONG_4;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element MATRIX_4X4(RenderScript rs) {
         if(rs.mElement_MATRIX_4X4 == null) {
             rs.mElement_MATRIX_4X4 = createUser(rs, DataType.MATRIX_4X4);
         }
         return rs.mElement_MATRIX_4X4;
     }
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element MATRIX4X4(RenderScript rs) {
         return MATRIX_4X4(rs);
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element MATRIX_3X3(RenderScript rs) {
         if(rs.mElement_MATRIX_3X3 == null) {
             rs.mElement_MATRIX_3X3 = createUser(rs, DataType.MATRIX_3X3);
@@ -735,6 +854,8 @@ public class Element extends BaseObj {
         return rs.mElement_MATRIX_3X3;
     }
 
+    /** @deprecated renderscript is deprecated in J
+     */
     public static Element MATRIX_2X2(RenderScript rs) {
         if(rs.mElement_MATRIX_2X2 == null) {
             rs.mElement_MATRIX_2X2 = createUser(rs, DataType.MATRIX_2X2);
@@ -824,7 +945,7 @@ public class Element extends BaseObj {
         updateVisibleSubElements();
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Create a custom Element of the specified DataType.  The DataKind will be
      * set to USER and the vector size to 1 indicating non-vector.
      *
@@ -840,7 +961,7 @@ public class Element extends BaseObj {
         return new Element(id, rs, dt, dk, norm, vecSize);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Create a custom vector element of the specified DataType and vector size.
      * DataKind will be set to USER. Only primitive types (FLOAT_32, FLOAT_64,
      * SIGNED_8, SIGNED_16, SIGNED_32, SIGNED_64, UNSIGNED_8, UNSIGNED_16,
@@ -884,7 +1005,7 @@ public class Element extends BaseObj {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Create a new pixel Element type.  A matching DataType and DataKind must
      * be provided.  The DataType and DataKind must contain the same number of
      * components.  Vector size will be set to 1.
@@ -947,7 +1068,7 @@ public class Element extends BaseObj {
         return new Element(id, rs, dt, dk, norm, size);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Check if the current Element is compatible with another Element.
      * Primitive Elements are compatible if they share the same underlying
      * size and type (i.e. U8 is compatible with A_8). User-defined Elements
@@ -974,7 +1095,7 @@ public class Element extends BaseObj {
                 (mVectorSize == e.mVectorSize));
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Builder class for producing complex elements with matching field and name
      * pairs.  The builder starts empty.  The order in which elements are added
      * is retained for the layout in memory.
@@ -988,7 +1109,7 @@ public class Element extends BaseObj {
         int mCount;
         int mSkipPadding;
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Create a builder object.
          *
          * @param rs
@@ -1001,7 +1122,7 @@ public class Element extends BaseObj {
             mArraySizes = new int[8];
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Add an array of elements to this element.
          *
          * @param element
@@ -1045,7 +1166,7 @@ public class Element extends BaseObj {
             return this;
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Add a single element to this Element.
          *
          * @param element
@@ -1055,7 +1176,7 @@ public class Element extends BaseObj {
             return add(element, name, 1);
         }
 
-        /**
+        /** @deprecated renderscript is deprecated in J
          * Create the element from this builder.
          *
          *

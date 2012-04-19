@@ -29,13 +29,13 @@ import java.util.HashMap;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-/**
+/** @deprecated renderscript is deprecated in J
  *
  **/
 public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by the generated derived classes.
      *
      * @param id
@@ -45,7 +45,7 @@ public class ScriptC extends Script {
         super(id, rs);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Only intended for use by the generated derived classes.
      *
      *

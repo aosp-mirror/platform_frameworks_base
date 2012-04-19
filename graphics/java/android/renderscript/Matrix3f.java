@@ -20,13 +20,13 @@ import java.lang.Math;
 import android.util.Log;
 
 
-/**
+/** @deprecated renderscript is deprecated in J
  * Class for exposing the native Renderscript rs_matrix3x3 type back to the Android system.
  *
  **/
 public class Matrix3f {
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a new identity 3x3 matrix
     */
     public Matrix3f() {
@@ -34,7 +34,7 @@ public class Matrix3f {
         loadIdentity();
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Creates a new matrix and sets its values from the given
     * parameter
     *
@@ -46,7 +46,7 @@ public class Matrix3f {
         System.arraycopy(dataArray, 0, mMat, 0, mMat.length);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Return a reference to the internal array representing matrix
     * values. Modifying this array will also change the matrix
     *
@@ -56,7 +56,7 @@ public class Matrix3f {
         return mMat;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Returns the value for a given row and column
     *
     * @param i row of the value to return
@@ -68,7 +68,7 @@ public class Matrix3f {
         return mMat[i*3 + j];
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the value for a given row and column
     *
     * @param i row of the value to set
@@ -78,7 +78,7 @@ public class Matrix3f {
         mMat[i*3 + j] = v;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the matrix values to identity
     */
     public void loadIdentity() {
@@ -95,7 +95,7 @@ public class Matrix3f {
         mMat[8] = 1;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the values of the matrix to those of the parameter
     *
     * @param src matrix to load the values from
@@ -104,7 +104,7 @@ public class Matrix3f {
         System.arraycopy(src.getArray(), 0, mMat, 0, mMat.length);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a rotation matrix of certain angle
     * about a given axis
     *
@@ -144,7 +144,7 @@ public class Matrix3f {
         mMat[8] = z*z*nc +  c;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Makes the upper 2x2 a rotation matrix of the given angle
     *
     * @param rot rotation angle
@@ -161,7 +161,7 @@ public class Matrix3f {
         mMat[4] = c;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Makes the upper 2x2 a scale matrix of given dimensions
     *
     * @param x scale component x
@@ -173,7 +173,7 @@ public class Matrix3f {
         mMat[4] = y;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a scale matrix of given dimensions
     *
     * @param x scale component x
@@ -187,7 +187,7 @@ public class Matrix3f {
         mMat[8] = z;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be a translation matrix of given
     * dimensions
     *
@@ -200,7 +200,7 @@ public class Matrix3f {
         mMat[7] = y;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets current values to be the result of multiplying two given
     * matrices
     *
@@ -224,7 +224,7 @@ public class Matrix3f {
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Post-multiplies the current matrix by a given parameter
     *
     * @param rhs right hand side to multiply by
@@ -235,7 +235,7 @@ public class Matrix3f {
         load(tmp);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the current matrix by post-multiplying it with a
     * rotation matrix of certain angle about a given axis
     *
@@ -250,7 +250,7 @@ public class Matrix3f {
         multiply(tmp);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the upper 2x2 of the current matrix by
     * post-multiplying it with a rotation matrix of given angle
     *
@@ -262,7 +262,7 @@ public class Matrix3f {
         multiply(tmp);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the upper 2x2 of the current matrix by
     * post-multiplying it with a scale matrix of given dimensions
     *
@@ -275,7 +275,7 @@ public class Matrix3f {
         multiply(tmp);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the current matrix by post-multiplying it with a
     * scale matrix of given dimensions
     *
@@ -289,7 +289,7 @@ public class Matrix3f {
         multiply(tmp);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Modifies the current matrix by post-multiplying it with a
     * translation matrix of given dimensions
     *
@@ -302,7 +302,7 @@ public class Matrix3f {
         multiply(tmp);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
     * Sets the current matrix to its transpose
     */
     public void transpose() {

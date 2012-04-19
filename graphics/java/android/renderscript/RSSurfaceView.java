@@ -29,7 +29,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-/**
+/** @deprecated renderscript is deprecated in J
  * The Surface View for a graphics renderscript (RenderScriptGL) to draw on.
  *
  * <div class="special reference">
@@ -42,7 +42,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private SurfaceHolder mSurfaceHolder;
     private RenderScriptGL mRS;
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Standard View constructor. In order to render something, you
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
@@ -53,7 +53,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         //Log.v(RenderScript.LOG_TAG, "RSSurfaceView");
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Standard View constructor. In order to render something, you
      * must call {@link android.opengl.GLSurfaceView#setRenderer} to
      * register a renderer.
@@ -71,7 +71,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         holder.addCallback(this);
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * This method is part of the SurfaceHolder.Callback interface, and is
      * not normally called or subclassed by clients of RSSurfaceView.
      */
@@ -79,7 +79,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         mSurfaceHolder = holder;
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * This method is part of the SurfaceHolder.Callback interface, and is
      * not normally called or subclassed by clients of RSSurfaceView.
      */
@@ -92,7 +92,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * This method is part of the SurfaceHolder.Callback interface, and is
      * not normally called or subclassed by clients of RSSurfaceView.
      */
@@ -104,7 +104,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-   /**
+   /** @deprecated renderscript is deprecated in J
      * Inform the view that the activity is paused. The owner of this view must
      * call this method when the activity is paused. Calling this method will
      * pause the rendering thread.
@@ -116,7 +116,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-    /**
+    /** @deprecated renderscript is deprecated in J
      * Inform the view that the activity is resumed. The owner of this view must
      * call this method when the activity is resumed. Calling this method will
      * recreate the OpenGL display and resume the rendering

@@ -19,7 +19,7 @@ package android.renderscript;
 import java.util.Vector;
 import android.util.Log;
 
-/**
+/** @deprecated renderscript is deprecated in J
  * @hide
  *
  */
