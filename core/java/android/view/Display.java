@@ -143,6 +143,49 @@ public class Display {
     }
 
     /**
+     * Return the range of display sizes an application can expect to encounter
+     * under normal operation, as long as there is no physical change in screen
+     * size.  This is basically the sizes you will see as the orientation
+     * changes, taking into account whatever screen decoration there is in
+     * each rotation.  For example, the status bar is always at the top of the
+     * screen, so it will reduce the height both in landscape and portrait, and
+     * the smallest height returned here will be the smaller of the two.
+     *
+     * This is intended for applications to get an idea of the range of sizes
+     * they will encounter while going through device rotations, to provide a
+     * stable UI through rotation.  The sizes here take into account all standard
+     * system decorations that reduce the size actually available to the
+     * application: the status bar, navigation bar, system bar, etc.  It does
+     * <em>not</em> take into account more transient elements like an IME
+     * soft keyboard.
+     *
+     * @param outSmallestSize Filled in with the smallest width and height
+     * that the application will encounter, in pixels (not dp units).  The x
+     * (width) dimension here directly corresponds to
+     * {@link android.content.res.Configuration#smallestScreenWidthDp
+     * Configuration.smallestScreenWidthDp}, except the value here is in raw
+     * screen pixels rather than dp units.  Your application may of course
+     * still get smaller space yet if, for example, a soft keyboard is
+     * being displayed.
+     * @param outLargestSize Filled in with the largest width and height
+     * that the application will encounter, in pixels (not dp units).  Your
+     * application may of course still get larger space than this if,
+     * for example, screen decorations like the status bar are being hidden.
+     */
+    public void getCurrentSizeRange(Point outSmallestSize, Point outLargestSize) {
+        try {
+            IWindowManager wm = getWindowManager();
+            wm.getCurrentSizeRange(outSmallestSize, outLargestSize);
+        } catch (RemoteException e) {
+            Slog.w("Display", "Unable to get display size range", e);
+            outSmallestSize.x = 0;
+            outSmallestSize.y = 0;
+            outLargestSize.x = 0;
+            outLargestSize.y = 0;
+        }
+    }
+
+    /**
      * Return the maximum screen size dimension that will happen.  This is
      * mostly for wallpapers.
      * @hide
