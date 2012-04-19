@@ -1292,12 +1292,17 @@ void CursorScrollAccumulator::finishSync() {
 // --- TouchButtonAccumulator ---
 
 TouchButtonAccumulator::TouchButtonAccumulator() :
-        mHaveBtnTouch(false) {
+        mHaveBtnTouch(false), mHaveStylus(false) {
     clearButtons();
 }
 
 void TouchButtonAccumulator::configure(InputDevice* device) {
     mHaveBtnTouch = device->hasKey(BTN_TOUCH);
+    mHaveStylus = device->hasKey(BTN_TOOL_PEN)
+            || device->hasKey(BTN_TOOL_RUBBER)
+            || device->hasKey(BTN_TOOL_BRUSH)
+            || device->hasKey(BTN_TOOL_PENCIL)
+            || device->hasKey(BTN_TOOL_AIRBRUSH);
 }
 
 void TouchButtonAccumulator::reset(InputDevice* device) {
@@ -1419,6 +1424,10 @@ bool TouchButtonAccumulator::isToolActive() const {
 
 bool TouchButtonAccumulator::isHovering() const {
     return mHaveBtnTouch && !mBtnTouch;
+}
+
+bool TouchButtonAccumulator::hasStylus() const {
+    return mHaveStylus;
 }
 
 
@@ -1572,16 +1581,19 @@ void SingleTouchMotionAccumulator::process(const RawEvent* rawEvent) {
 // --- MultiTouchMotionAccumulator ---
 
 MultiTouchMotionAccumulator::MultiTouchMotionAccumulator() :
-        mCurrentSlot(-1), mSlots(NULL), mSlotCount(0), mUsingSlotsProtocol(false) {
+        mCurrentSlot(-1), mSlots(NULL), mSlotCount(0), mUsingSlotsProtocol(false),
+        mHaveStylus(false) {
 }
 
 MultiTouchMotionAccumulator::~MultiTouchMotionAccumulator() {
     delete[] mSlots;
 }
 
-void MultiTouchMotionAccumulator::configure(size_t slotCount, bool usingSlotsProtocol) {
+void MultiTouchMotionAccumulator::configure(InputDevice* device,
+        size_t slotCount, bool usingSlotsProtocol) {
     mSlotCount = slotCount;
     mUsingSlotsProtocol = usingSlotsProtocol;
+    mHaveStylus = device->hasAbsoluteAxis(ABS_MT_TOOL_TYPE);
 
     delete[] mSlots;
     mSlots = new Slot[slotCount];
@@ -1711,6 +1723,10 @@ void MultiTouchMotionAccumulator::finishSync() {
     if (!mUsingSlotsProtocol) {
         clearSlots(-1);
     }
+}
+
+bool MultiTouchMotionAccumulator::hasStylus() const {
+    return mHaveStylus;
 }
 
 
@@ -2872,10 +2888,16 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
             && mConfig.pointerGesturesEnabled) {
         mSource = AINPUT_SOURCE_MOUSE;
         mDeviceMode = DEVICE_MODE_POINTER;
+        if (hasStylus()) {
+            mSource |= AINPUT_SOURCE_STYLUS;
+        }
     } else if (mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN
             && mParameters.associatedDisplayId >= 0) {
         mSource = AINPUT_SOURCE_TOUCHSCREEN;
         mDeviceMode = DEVICE_MODE_DIRECT;
+        if (hasStylus()) {
+            mSource |= AINPUT_SOURCE_STYLUS;
+        }
     } else {
         mSource = AINPUT_SOURCE_TOUCHPAD;
         mDeviceMode = DEVICE_MODE_UNSCALED;
@@ -5786,6 +5808,10 @@ void SingleTouchInputMapper::configureRawPointerAxes() {
     getAbsoluteAxisInfo(ABS_TILT_Y, &mRawPointerAxes.tiltY);
 }
 
+bool SingleTouchInputMapper::hasStylus() const {
+    return mTouchButtonAccumulator.hasStylus();
+}
+
 
 // --- MultiTouchInputMapper ---
 
@@ -5920,10 +5946,17 @@ void MultiTouchInputMapper::configureRawPointerAxes() {
                     getDeviceName().string(), slotCount, MAX_SLOTS);
             slotCount = MAX_SLOTS;
         }
-        mMultiTouchMotionAccumulator.configure(slotCount, true /*usingSlotsProtocol*/);
+        mMultiTouchMotionAccumulator.configure(getDevice(),
+                slotCount, true /*usingSlotsProtocol*/);
     } else {
-        mMultiTouchMotionAccumulator.configure(MAX_POINTERS, false /*usingSlotsProtocol*/);
+        mMultiTouchMotionAccumulator.configure(getDevice(),
+                MAX_POINTERS, false /*usingSlotsProtocol*/);
     }
+}
+
+bool MultiTouchInputMapper::hasStylus() const {
+    return mMultiTouchMotionAccumulator.hasStylus()
+            || mTouchButtonAccumulator.hasStylus();
 }
 
 

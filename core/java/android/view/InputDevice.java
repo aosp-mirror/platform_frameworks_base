@@ -167,6 +167,19 @@ public final class InputDevice implements Parcelable {
 
     /**
      * The input source is a stylus pointing device.
+     * <p>
+     * Note that this bit merely indicates that an input device is capable of obtaining
+     * input from a stylus.  To determine whether a given touch event was produced
+     * by a stylus, examine the tool type returned by {@link MotionEvent#getToolType(int)}
+     * for each individual pointer.
+     * </p><p>
+     * A single touch event may multiple pointers with different tool types,
+     * such as an event that has one pointer with tool type
+     * {@link MotionEvent#TOOL_TYPE_FINGER} and another pointer with tool type
+     * {@link MotionEvent#TOOL_TYPE_STYLUS}.  So it is important to examine
+     * the tool type of each pointer, regardless of the source reported
+     * by {@link MotionEvent#getSource()}.
+     * </p>
      *
      * @see #SOURCE_CLASS_POINTER
      */
