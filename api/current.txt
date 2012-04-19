@@ -17843,9 +17843,11 @@ package android.provider {
     field public static final java.lang.String DATE_ADDED = "date_added";
     field public static final java.lang.String DATE_MODIFIED = "date_modified";
     field public static final java.lang.String DISPLAY_NAME = "_display_name";
+    field public static final java.lang.String HEIGHT = "height";
     field public static final java.lang.String MIME_TYPE = "mime_type";
     field public static final java.lang.String SIZE = "_size";
     field public static final java.lang.String TITLE = "title";
+    field public static final java.lang.String WIDTH = "width";
   }
 
   public static final class MediaStore.Video {
