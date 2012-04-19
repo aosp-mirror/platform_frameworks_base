@@ -16281,12 +16281,14 @@ package android.provider {
   public final class CalendarContract {
     field public static final java.lang.String ACCOUNT_TYPE_LOCAL = "LOCAL";
     field public static final java.lang.String ACTION_EVENT_REMINDER = "android.intent.action.EVENT_REMINDER";
+    field public static final java.lang.String ACTION_HANDLE_CUSTOM_EVENT = "android.intent.action.HANDLE_CUSTOM_EVENT";
     field public static final java.lang.String AUTHORITY = "com.android.calendar";
     field public static final java.lang.String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String EXTRA_EVENT_ALL_DAY = "allDay";
     field public static final java.lang.String EXTRA_EVENT_BEGIN_TIME = "beginTime";
     field public static final java.lang.String EXTRA_EVENT_END_TIME = "endTime";
+    field public static final java.lang.String EXTRA_EVENT_URI = "eventUri";
   }
 
   public static final class CalendarContract.Attendees implements android.provider.BaseColumns android.provider.CalendarContract.AttendeesColumns android.provider.CalendarContract.EventsColumns {
@@ -16445,6 +16447,8 @@ package android.provider {
     field public static final int AVAILABILITY_TENTATIVE = 2; // 0x2
     field public static final java.lang.String CALENDAR_ID = "calendar_id";
     field public static final java.lang.String CAN_INVITE_OTHERS = "canInviteOthers";
+    field public static final java.lang.String CUSTOM_APP_PACKAGE = "customAppPackage";
+    field public static final java.lang.String CUSTOM_APP_URI = "customAppUri";
     field public static final java.lang.String DESCRIPTION = "description";
     field public static final java.lang.String DISPLAY_COLOR = "displayColor";
     field public static final java.lang.String DTEND = "dtend";
