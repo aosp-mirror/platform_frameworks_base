@@ -218,11 +218,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private int mNavigationIconHints = 0;
 
-    // TODO(dsandler): codify this stuff in NotificationManager's header somewhere
-    private int mDisplayMinScore             = Notification.PRIORITY_LOW * 10;
-    private int mIntruderMinScore            = Notification.PRIORITY_HIGH * 10;
-    private int mIntruderInImmersiveMinScore = Notification.PRIORITY_HIGH * 10 + 5;
-    
     private class ExpandedDialog extends Dialog {
         ExpandedDialog(Context context) {
             super(context, com.android.internal.R.style.Theme_Translucent_NoTitleBar);
@@ -2130,30 +2125,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         android.os.Vibrator vib = (android.os.Vibrator)mContext.getSystemService(
                 Context.VIBRATOR_SERVICE);
         vib.vibrate(250);
-    }
-
-    public int getScoreThreshold() {
-        return mDisplayMinScore;
-    }
-
-    public void setScoreThreshold(int score) {
-        // XXX HAX
-        if (mDisplayMinScore != score) {
-            this.mDisplayMinScore = score;
-            applyScoreThreshold();
-        }
-    }
-    
-    private void applyScoreThreshold() {
-        int N = mNotificationData.size();
-        for (int i=0; i<N; i++) {
-            NotificationData.Entry entry = mNotificationData.get(i);
-            int vis = (entry.notification.score < mDisplayMinScore)
-                ? View.GONE
-                : View.VISIBLE;
-            entry.row.setVisibility(vis);
-            entry.icon.setVisibility(vis);
-        }
     }
 
     Runnable mStartTracing = new Runnable() {

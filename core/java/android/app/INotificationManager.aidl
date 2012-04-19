@@ -34,5 +34,8 @@ interface INotificationManager
     void cancelToast(String pkg, ITransientNotification callback);
     void enqueueNotificationWithTag(String pkg, String tag, int id, in Notification notification, inout int[] idReceived);
     void cancelNotificationWithTag(String pkg, String tag, int id);
+
+    void setNotificationsEnabledForPackage(String pkg, boolean enabled);
+    boolean areNotificationsEnabledForPackage(String pkg);
 }
 
