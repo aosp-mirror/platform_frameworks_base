@@ -491,6 +491,27 @@ android_media_visualizer_native_getCaptureSize(JNIEnv *env, jobject thiz)
 }
 
 static jint
+android_media_visualizer_native_setScalingMode(JNIEnv *env, jobject thiz, jint mode)
+{
+    Visualizer* lpVisualizer = getVisualizer(env, thiz);
+    if (lpVisualizer == NULL) {
+        return VISUALIZER_ERROR_NO_INIT;
+    }
+
+    return translateError(lpVisualizer->setScalingMode(mode));
+}
+
+static jint
+android_media_visualizer_native_getScalingMode(JNIEnv *env, jobject thiz)
+{
+    Visualizer* lpVisualizer = getVisualizer(env, thiz);
+    if (lpVisualizer == NULL) {
+        return -1;
+    }
+    return lpVisualizer->getScalingMode();
+}
+
+static jint
 android_media_visualizer_native_getSamplingRate(JNIEnv *env, jobject thiz)
 {
     Visualizer* lpVisualizer = getVisualizer(env, thiz);
@@ -582,6 +603,8 @@ static JNINativeMethod gMethods[] = {
     {"getMaxCaptureRate",        "()I",   (void *)android_media_visualizer_native_getMaxCaptureRate},
     {"native_setCaptureSize",    "(I)I",  (void *)android_media_visualizer_native_setCaptureSize},
     {"native_getCaptureSize",    "()I",   (void *)android_media_visualizer_native_getCaptureSize},
+    {"native_setScalingMode",    "(I)I",  (void *)android_media_visualizer_native_setScalingMode},
+    {"native_getScalingMode",    "()I",   (void *)android_media_visualizer_native_getScalingMode},
     {"native_getSamplingRate",   "()I",   (void *)android_media_visualizer_native_getSamplingRate},
     {"native_getWaveForm",       "([B)I", (void *)android_media_visualizer_native_getWaveForm},
     {"native_getFft",            "([B)I", (void *)android_media_visualizer_native_getFft},
