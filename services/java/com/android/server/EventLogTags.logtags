@@ -36,7 +36,7 @@ option java_package com.android.server
 
 
 # ---------------------------
-# DeviceStorageMonitoryService.java
+# DeviceStorageMonitorService.java
 # ---------------------------
 # The disk space free on the /data partition, in bytes
 2744 free_storage_changed (data|2|2)
@@ -44,6 +44,8 @@ option java_package com.android.server
 2745 low_storage (data|2|2)
 # disk space free on the /data, /system, and /cache partitions in bytes
 2746 free_storage_left (data|2|2),(system|2|2),(cache|2|2)
+# file on cache partition was deleted
+2748 cache_file_deleted (path|3)
 
 
 # ---------------------------
