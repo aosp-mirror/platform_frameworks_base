@@ -1569,6 +1569,43 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return handled;
     }
 
+    private void exitHoverTargets() {
+        if (mHoveredSelf || mFirstHoverTarget != null) {
+            final long now = SystemClock.uptimeMillis();
+            MotionEvent event = MotionEvent.obtain(now, now,
+                    MotionEvent.ACTION_HOVER_EXIT, 0.0f, 0.0f, 0);
+            event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+            dispatchHoverEvent(event);
+            event.recycle();
+        }
+    }
+
+    private void cancelHoverTarget(View view) {
+        HoverTarget predecessor = null;
+        HoverTarget target = mFirstHoverTarget;
+        while (target != null) {
+            final HoverTarget next = target.next;
+            if (target.child == view) {
+                if (predecessor == null) {
+                    mFirstHoverTarget = next;
+                } else {
+                    predecessor.next = next;
+                }
+                target.recycle();
+
+                final long now = SystemClock.uptimeMillis();
+                MotionEvent event = MotionEvent.obtain(now, now,
+                        MotionEvent.ACTION_HOVER_EXIT, 0.0f, 0.0f, 0);
+                event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+                view.dispatchHoverEvent(event);
+                event.recycle();
+                return;
+            }
+            predecessor = target;
+            target = next;
+        }
+    }
+
     /** @hide */
     @Override
     protected boolean hasHoveredChild() {
@@ -1997,6 +2034,32 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    private void cancelTouchTarget(View view) {
+        TouchTarget predecessor = null;
+        TouchTarget target = mFirstTouchTarget;
+        while (target != null) {
+            final TouchTarget next = target.next;
+            if (target.child == view) {
+                if (predecessor == null) {
+                    mFirstTouchTarget = next;
+                } else {
+                    predecessor.next = next;
+                }
+                target.recycle();
+
+                final long now = SystemClock.uptimeMillis();
+                MotionEvent event = MotionEvent.obtain(now, now,
+                        MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
+                event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+                view.dispatchTouchEvent(event);
+                event.recycle();
+                return;
+            }
+            predecessor = target;
+            target = next;
+        }
+    }
+
     /**
      * Returns true if a child view can receive pointer events.
      * @hide
@@ -2415,6 +2478,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // down. To make sure we keep the child in a consistent state, we
         // first send it an ACTION_CANCEL motion event.
         cancelAndClearTouchTargets(null);
+
+        // Similarly, set ACTION_EXIT to all hover targets and clear them.
+        exitHoverTargets();
 
         // In case view is detached while transition is running
         mLayoutSuppressed = false;
@@ -3453,6 +3519,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             clearChildFocus = true;
         }
 
+        cancelTouchTarget(view);
+        cancelHoverTarget(view);
+
         if (view.getAnimation() != null ||
                 (mTransitioningViews != null && mTransitioningViews.contains(view))) {
             addDisappearingView(view);
@@ -3533,6 +3602,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 clearChildFocus = view;
             }
 
+            cancelTouchTarget(view);
+            cancelHoverTarget(view);
+
             if (view.getAnimation() != null ||
                 (mTransitioningViews != null && mTransitioningViews.contains(view))) {
                 addDisappearingView(view);
@@ -3603,6 +3675,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 clearChildFocus = view;
             }
 
+            cancelTouchTarget(view);
+            cancelHoverTarget(view);
+
             if (view.getAnimation() != null ||
                     (mTransitioningViews != null && mTransitioningViews.contains(view))) {
                 addDisappearingView(view);
@@ -3647,6 +3722,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (child == mFocused) {
             child.clearFocus();
         }
+
+        cancelTouchTarget(child);
+        cancelHoverTarget(child);
 
         if ((animate && child.getAnimation() != null) ||
                 (mTransitioningViews != null && mTransitioningViews.contains(child))) {
