@@ -399,7 +399,7 @@ public class NsdService extends INsdManager.Stub {
     }
 
     private void sendNsdStateChangeBroadcast(boolean enabled) {
-        final Intent intent = new Intent(NsdManager.NSD_STATE_CHANGED_ACTION);
+        final Intent intent = new Intent(NsdManager.ACTION_NSD_STATE_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         if (enabled) {
             intent.putExtra(NsdManager.EXTRA_NSD_STATE, NsdManager.NSD_STATE_ENABLED);

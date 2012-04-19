@@ -158,14 +158,14 @@ public class NsdManager {
     /**
      * Network service discovery is disabled
      *
-     * @see #NSD_STATE_CHANGED_ACTION
+     * @see #ACTION_NSD_STATE_CHANGED
      */
     public static final int NSD_STATE_DISABLED = 1;
 
     /**
      * Network service discovery is enabled
      *
-     * @see #NSD_STATE_CHANGED_ACTION
+     * @see #ACTION_NSD_STATE_CHANGED
      */
     public static final int NSD_STATE_ENABLED = 2;
 
