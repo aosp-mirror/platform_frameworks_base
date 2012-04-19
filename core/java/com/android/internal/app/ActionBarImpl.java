@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.SubMenuBuilder;
@@ -183,18 +184,13 @@ public class ActionBarImpl extends ActionBar {
         mContextDisplayMode = mActionView.isSplitActionBar() ?
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
 
-        // Older apps get the home button interaction enabled by default.
-        // Newer apps need to enable it explicitly.
-        setHomeButtonEnabled(mContext.getApplicationInfo().targetSdkVersion <
-                Build.VERSION_CODES.ICE_CREAM_SANDWICH);
-
-        setHasEmbeddedTabs(mContext.getResources().getBoolean(
-                com.android.internal.R.bool.action_bar_embed_tabs));
+        ActionBarPolicy abp = ActionBarPolicy.get(mContext);
+        setHomeButtonEnabled(abp.enableHomeButtonByDefault());
+        setHasEmbeddedTabs(abp.hasEmbeddedTabs());
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
-        setHasEmbeddedTabs(mContext.getResources().getBoolean(
-                com.android.internal.R.bool.action_bar_embed_tabs));
+        setHasEmbeddedTabs(ActionBarPolicy.get(mContext).hasEmbeddedTabs());
     }
 
     private void setHasEmbeddedTabs(boolean hasEmbeddedTabs) {

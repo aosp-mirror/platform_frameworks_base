@@ -213,4 +213,13 @@
 
     <!-- Minimum width for an action button in the menu area of an action bar -->
     <dimen name="action_button_min_width">56dip</dimen>
+
+    <!-- Maximum height for a stacked tab bar as part of an action bar -->
+    <dimen name="action_bar_stacked_max_height">48dp</dimen>
+
+    <!-- Maximum width for a stacked action bar tab. This prevents
+         action bar tabs from becoming too wide on a wide screen when only
+         a few are present. -->
+    <dimen name="action_bar_stacked_tab_max_width">180dp</dimen>
+
 </resources>

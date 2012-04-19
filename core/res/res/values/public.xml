@@ -234,6 +234,7 @@
   <java-symbol type="attr" name="accessibilityFocusedDrawable"/>
 
   <java-symbol type="bool" name="action_bar_embed_tabs" />
+  <java-symbol type="bool" name="action_bar_embed_tabs_pre_jb" />
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
   <java-symbol type="bool" name="config_allowActionMenuItemTextWithIcon" />
   <java-symbol type="bool" name="config_bluetooth_adapter_quick_switch" />
@@ -292,6 +293,8 @@
   <java-symbol type="dimen" name="textview_error_popup_default_width" />
   <java-symbol type="dimen" name="toast_y_offset" />
   <java-symbol type="dimen" name="volume_panel_top" />
+  <java-symbol type="dimen" name="action_bar_stacked_max_height" />
+  <java-symbol type="dimen" name="action_bar_stacked_tab_max_width" />
 
   <java-symbol type="string" name="addToDictionary" />
   <java-symbol type="string" name="action_bar_home_description" />
