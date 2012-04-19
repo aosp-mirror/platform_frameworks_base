@@ -202,6 +202,23 @@
         android:label="@string/permlab_receiveEmergencyBroadcast"
         android:description="@string/permdesc_receiveEmergencyBroadcast" />
 
+    <!-- Allows an application to read previously received cell broadcast
+         messages and to register a content observer to get notifications when
+         a cell broadcast has been received and added to the database. For
+         emergency alerts, the database is updated immediately after the
+         alert dialog and notification sound/vibration/speech are presented.
+         The "read" column is then updated after the user dismisses the alert.
+         This enables supplementary emergency assistance apps to start loading
+         additional emergency information (if Internet access is available)
+         when the alert is first received, and to delay presenting the info
+         to the user until after the initial alert dialog is dismissed.
+         @hide Pending API council approval -->
+    <permission android:name="android.permission.READ_CELL_BROADCASTS"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_readCellBroadcasts"
+        android:description="@string/permdesc_readCellBroadcasts" />
+
     <!-- Allows an application to read SMS messages. -->
     <permission android:name="android.permission.READ_SMS"
         android:permissionGroup="android.permission-group.MESSAGES"
