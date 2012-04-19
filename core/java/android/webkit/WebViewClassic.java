@@ -1486,8 +1486,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         switch (eventType) {
         case WebViewInputDispatcher.EVENT_TYPE_LONG_PRESS:
             HitTestResult hitTest = getHitTestResult();
-            if (hitTest != null
-                    && hitTest.getType() != HitTestResult.UNKNOWN_TYPE) {
+            if (hitTest != null) {
                 performLongClick();
             }
             break;
