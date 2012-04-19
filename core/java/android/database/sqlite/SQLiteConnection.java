@@ -390,6 +390,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
     // Called by SQLiteConnectionPool only.
     void reconfigure(SQLiteDatabaseConfiguration configuration) {
+        mOnlyAllowReadOnlyOperations = false;
+
         // Register custom functions.
         final int functionCount = configuration.customFunctions.size();
         for (int i = 0; i < functionCount; i++) {
