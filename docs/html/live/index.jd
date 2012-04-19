@@ -1,0 +1,64 @@
+page.title=Live
+@jd:body
+
+<div id="mainBodyFixed" style="padding-left:2em;">
+  
+<h1>Android Developers Live</h1>
+  
+<p>Meet the developers behind successful apps and games on Android. Check back for upcoming
+livecasts on YouTube and videos of past sessions or follow us on 
+<a href="https://plus.google.com/108967384991768947849/posts">+Android Developers</a> for updates.</p>
+  
+  <div id="interviewBlock" style="border-top:1px solid #ddd;margin-top:2em;padding-top:1em;clear:both;">
+
+    <div id="mainBodyLeft" class="videoPlayer">
+
+          <h3>Developer Interview: Pocket Gems</h3>
+          
+          <p>19 April 2012<br />2PM PST</p>       
+          <p><span itemprop="description">Pocket Gems, a top game developer on Android, joins
+          <a href="https://plus.google.com/108967384991768947849/posts">+Android Developers</a>
+          to give a short talk on "Defragging Your Android Development." The talk highlights some
+          of the techniques they've used to ensure quality while distributing their apps to hundreds
+          of devices worldwide. </p>
+
+          <p>After the talk, they'll take a few questions from developers in the hangout or from
+          developers joining on air via the moderator queue. </p>
+          
+          <div id="objectWrapper">
+            <img width="560" height="315" src="{@docRoot}images/LivePocketGemsTitleCard.png" frameborder="0" allowfullscreen></iframe>
+          </div>
+
+    </div><!-- end mainBodyLeft -->
+
+    <div id="mainBodyRight" class="videoPlayer">
+
+      <div style="padding-left:1.5em;font-size:12px;">
+        <div style="padding-bottom:1em;"><img itemprop="image" src="http://pocketgems.com/images/pocket-gems-logo-blue.png"></div>
+
+        <h3 style="color:#000;font-size:12px;">About Pocket Gems</h3>
+          <p>
+            Web: <a style="text-decoration:none" href="http://www.pocketgems.com">www.pocketgems.com</a><br />
+            Google+: <a style="text-decoration:none" href="https://plus.google.com/b/102436156807338888308/">+Pocket Gems</a><br />
+            Twitter: <a style="text-decoration:none" href="https://twitter.com/#!/PocketGems">@PocketGems</a><br />
+          </p>
+     
+        <h3 style="color:#000;font-size:12px;">Published on Google Play</h3>
+          <p style="line-height:1.5em;">
+            <a style="text-decoration:none" href="https://play.google.com/store/apps/developer?id=Pocket+Gems">Apps by Pocket Gems</a>
+          </p>
+
+        <h3 style="color:#000;font-size:12px;">Join</h3>
+          <p style="line-height:1.5em;">
+            <a style="text-decoration:none" href="http://www.youtube.com/user/androiddevelopers">Watch live on YouTube</a><br />
+            <a style="text-decoration:none" href="http://www.google.com/moderator/#15/e=1fd27e&t=1fd27e.40">Submit a question</a><br />
+            <a style="text-decoration:none" href="https://www.google.com/calendar/ical/g2ilcr0iki4olp10aluid7gl70%40group.calendar.google.com/public/basic.ics">Add to calendar</a> (iCal)
+          </p>
+
+      </li></ul>
+      
+</div>
+    </div><!-- end mainBodyRight -->
+</div><!-- interviewBlock -->
+
+  </div><!-- end mainBodyFixed -->
