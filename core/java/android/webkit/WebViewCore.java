@@ -46,6 +46,8 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -1182,7 +1184,7 @@ public final class WebViewCore {
         private Handler mHandler;
         // Message queue for containing messages before the WebCore thread is
         // ready.
-        private ArrayList<Message> mMessages = new ArrayList<Message>();
+        private LinkedList<Message> mMessages = new LinkedList<Message>();
         // Flag for blocking messages. This is used during DESTROY to avoid
         // posting more messages to the EventHub or to WebView's event handler.
         private boolean mBlockMessages;
@@ -1822,10 +1824,13 @@ public final class WebViewCore {
                 mDrawIsScheduled = false;
             }
             if (mMessages != null) {
-                Throwable throwable = new Throwable(
-                        "EventHub.removeMessages(int what = " + what + ") is not supported " +
-                        "before the WebViewCore is set up.");
-                Log.w(LOGTAG, Log.getStackTraceString(throwable));
+                Iterator<Message> iter = mMessages.iterator();
+                while (iter.hasNext()) {
+                    Message m = iter.next();
+                    if (m.what == what) {
+                        iter.remove();
+                    }
+                }
             } else {
                 mHandler.removeMessages(what);
             }
