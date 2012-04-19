@@ -44,6 +44,7 @@ import android.webkit.WebViewInputDispatcher.WebKitCallbacks;
 
 import junit.framework.Assert;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -1048,6 +1049,15 @@ public final class WebViewCore {
         public int mMatchIndex;
     }
 
+    static class SaveViewStateRequest {
+        SaveViewStateRequest(OutputStream s, ValueCallback<Boolean> cb) {
+            mStream = s;
+            mCallback = cb;
+        }
+        public OutputStream mStream;
+        public ValueCallback<Boolean> mCallback;
+    }
+
     /**
      * @hide
      */
@@ -1179,6 +1189,8 @@ public final class WebViewCore {
         // key was pressed (down and up)
         static final int KEY_PRESS = 223;
         static final int SET_INITIAL_FOCUS = 224;
+
+        static final int SAVE_VIEW_STATE = 225;
 
         // Private handler for WebCore messages.
         private Handler mHandler;
@@ -1754,8 +1766,13 @@ public final class WebViewCore {
                         case SET_INITIAL_FOCUS:
                             nativeSetInitialFocus(mNativeClass, msg.arg1);
                             break;
+                        case SAVE_VIEW_STATE:
+                            SaveViewStateRequest request = (SaveViewStateRequest) msg.obj;
+                            saveViewState(request.mStream, request.mCallback);
+                            break;
                     }
                 }
+
             };
             // Take all queued messages and resend them to the new handler.
             synchronized (this) {
@@ -2251,6 +2268,31 @@ public final class WebViewCore {
             pauseWebKitDraw();
             Message.obtain(mWebViewClassic.mPrivateHandler,
                     WebViewClassic.NEW_PICTURE_MSG_ID, draw).sendToTarget();
+        }
+    }
+
+    private void saveViewState(OutputStream stream,
+            ValueCallback<Boolean> callback) {
+        // TODO: Create a native method to do this better without overloading
+        // the draw path (and fix saving <canvas>)
+        DrawData draw = new DrawData();
+        if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "saveViewState start");
+        draw.mBaseLayer = nativeRecordContent(mNativeClass, draw.mInvalRegion,
+                draw.mContentSize);
+        boolean result = false;
+        try {
+            result = ViewStateSerializer.serializeViewState(stream, draw);
+        } catch (Throwable t) {
+            Log.w(LOGTAG, "Failed to save view state", t);
+        }
+        callback.onReceiveValue(result);
+        if (draw.mBaseLayer != 0) {
+            if (mDrawIsScheduled) {
+                mDrawIsScheduled = false;
+                mEventHub.removeMessages(EventHub.WEBKIT_DRAW);
+            }
+            mLastDrawData = draw;
+            webkitDraw(draw);
         }
     }
 
