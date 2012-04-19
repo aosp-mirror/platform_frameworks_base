@@ -16,6 +16,7 @@
 
 package com.android.internal.view.menu;
 
+import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
 
 import android.content.Context;
@@ -29,7 +30,6 @@ import android.view.MenuItem;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.View.MeasureSpec;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
@@ -79,17 +79,18 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
         final Resources res = context.getResources();
 
+        final ActionBarPolicy abp = ActionBarPolicy.get(context);
         if (!mReserveOverflowSet) {
-            mReserveOverflow = !ViewConfiguration.get(context).hasPermanentMenuKey();
+            mReserveOverflow = abp.showsOverflowMenuButton();
         }
 
         if (!mWidthLimitSet) {
-            mWidthLimit = res.getDisplayMetrics().widthPixels / 2;
+            mWidthLimit = abp.getEmbeddedMenuWidthLimit();
         }
 
         // Measure for initial configuration
         if (!mMaxItemsSet) {
-            mMaxItems = res.getInteger(com.android.internal.R.integer.max_action_buttons);
+            mMaxItems = abp.getMaxActionButtons();
         }
 
         int width = mWidthLimit;
