@@ -426,13 +426,11 @@ public abstract class AccessibilityService extends Service {
             throw new IllegalStateException("AccessibilityService not connected."
                     + " Did you receive a call of onServiceConnected()?");
         }
-        AccessibilityNodeInfo root = AccessibilityInteractionClient.getInstance()
-                .findAccessibilityNodeInfoByAccessibilityId(connectionId,
-                        AccessibilityNodeInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
-                        AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
+        AccessibilityNodeInfo root = getRootInActiveWindow();
         if (root == null) {
             return;
         }
+
         AccessibilityNodeInfo current = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
         if (current == null) {
             current = root;
@@ -477,6 +475,19 @@ public abstract class AccessibilityService extends Service {
         if (next != null && !next.equals(current)) {
             next.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
         }
+    }
+
+    /**
+     * Gets the root node in the currently active window if this service
+     * can retrieve window content.
+     *
+     * @return The root node if this service can retrieve window content.
+     */
+    public AccessibilityNodeInfo getRootInActiveWindow() {
+        return AccessibilityInteractionClient.getInstance()
+            .findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
+                AccessibilityNodeInfo.ACTIVE_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
+                AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS);
     }
 
     /**
