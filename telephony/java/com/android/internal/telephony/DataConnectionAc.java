@@ -82,7 +82,7 @@ public class DataConnectionAc extends AsyncChannel {
     public static final int REQ_GET_RECONNECT_INTENT = BASE + 26;
     public static final int RSP_GET_RECONNECT_INTENT = BASE + 27;
 
-    private static final int CMD_TO_STRING_COUNT = RSP_GET_RECONNECT_INTENT + 1;
+    private static final int CMD_TO_STRING_COUNT = RSP_GET_RECONNECT_INTENT - BASE + 1;
     private static String[] sCmdToString = new String[CMD_TO_STRING_COUNT];
     static {
         sCmdToString[REQ_IS_INACTIVE - BASE] = "REQ_IS_INACTIVE";
