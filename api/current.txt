@@ -13081,6 +13081,7 @@ package android.net.wifi.p2p {
     field public static final java.lang.String EXTRA_WIFI_P2P_DEVICE = "wifiP2pDevice";
     field public static final java.lang.String EXTRA_WIFI_P2P_INFO = "wifiP2pInfo";
     field public static final java.lang.String EXTRA_WIFI_STATE = "wifi_p2p_state";
+    field public static final int NO_SERVICE_REQUESTS = 3; // 0x3
     field public static final int P2P_UNSUPPORTED = 1; // 0x1
     field public static final java.lang.String WIFI_P2P_CONNECTION_CHANGED_ACTION = "android.net.wifi.p2p.CONNECTION_STATE_CHANGE";
     field public static final java.lang.String WIFI_P2P_DISCOVERY_CHANGED_ACTION = "android.net.wifi.p2p.DISCOVERY_STATE_CHANGE";
