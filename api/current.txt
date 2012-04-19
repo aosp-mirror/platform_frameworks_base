@@ -10724,6 +10724,7 @@ package android.media {
   public class AudioRecord {
     ctor public AudioRecord(int, int, int, int, int) throws java.lang.IllegalArgumentException;
     method public int getAudioFormat();
+    method public int getAudioSessionId();
     method public int getAudioSource();
     method public int getChannelConfiguration();
     method public int getChannelCount();
@@ -11515,6 +11516,11 @@ package android.media {
 
 package android.media.audiofx {
 
+  public class AcousticEchoCanceler extends android.media.audiofx.AudioEffect {
+    method public static android.media.audiofx.AcousticEchoCanceler create(int);
+    method public static boolean isAvailable();
+  }
+
   public class AudioEffect {
     method public android.media.audiofx.AudioEffect.Descriptor getDescriptor() throws java.lang.IllegalStateException;
     method public boolean getEnabled() throws java.lang.IllegalStateException;
@@ -11563,6 +11569,11 @@ package android.media.audiofx {
 
   public static abstract interface AudioEffect.OnEnableStatusChangeListener {
     method public abstract void onEnableStatusChange(android.media.audiofx.AudioEffect, boolean);
+  }
+
+  public class AutomaticGainControl extends android.media.audiofx.AudioEffect {
+    method public static android.media.audiofx.AutomaticGainControl create(int);
+    method public static boolean isAvailable();
   }
 
   public class BassBoost extends android.media.audiofx.AudioEffect {
@@ -11681,6 +11692,11 @@ package android.media.audiofx {
     field public short[] bandLevels;
     field public short curPreset;
     field public short numBands;
+  }
+
+  public class NoiseSuppressor extends android.media.audiofx.AudioEffect {
+    method public static android.media.audiofx.NoiseSuppressor create(int);
+    method public static boolean isAvailable();
   }
 
   public class PresetReverb extends android.media.audiofx.AudioEffect {

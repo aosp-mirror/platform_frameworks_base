@@ -497,7 +497,6 @@ public class AudioRecord
      * Returns the audio session ID.
      *
      * @return the ID of the audio session this AudioRecord belongs to.
-     * @hide
      */
     public int getAudioSessionId() {
         return mSessionId;
